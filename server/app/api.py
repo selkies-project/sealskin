@@ -476,6 +476,7 @@ async def lifespan(app: FastAPI):
     os.makedirs(settings.upload_dir, exist_ok=True, mode=0o700)
     os.makedirs(settings.autostart_cache_path, exist_ok=True, mode=0o700)
     os.makedirs(settings.storage_path, exist_ok=True, mode=0o755)
+    os.makedirs(os.path.join(settings.storage_path, "sealskin_ephemeral"), exist_ok=True, mode=0o700)
     await _detect_docker_path_prefixes()
     _get_cpu_model()
     user_manager.load_users_and_groups()
@@ -710,7 +711,8 @@ async def _stop_session(session_id: str):
             await provider.stop(session_data["instance_id"])
 
         host_mount_path = session_data.get("host_mount_path")
-        if host_mount_path and settings.upload_dir in host_mount_path:
+        ephemeral_base_path = os.path.join(settings.storage_path, "sealskin_ephemeral")
+        if host_mount_path and host_mount_path.startswith(ephemeral_base_path):
             if os.path.exists(host_mount_path):
                 await asyncio.to_thread(
                     shutil.rmtree, host_mount_path, ignore_errors=True
@@ -821,7 +823,7 @@ async def _launch_common(
                 status_code=404, detail=f"Home directory '{home_name}' not found."
             )
     elif file_bytes and filename:
-        host_mount_path = os.path.join(settings.upload_dir, str(uuid.uuid4()))
+        host_mount_path = os.path.join(settings.storage_path, "sealskin_ephemeral", str(uuid.uuid4()))
 
     if app_config.provider_config.autostart:
         autostart_cache_path = _get_autostart_cache_path(app_config)
@@ -831,7 +833,7 @@ async def _launch_common(
             and os.path.getsize(autostart_cache_path) > 0
         ):
             if not host_mount_path:
-                host_mount_path = os.path.join(settings.upload_dir, str(uuid.uuid4()))
+                host_mount_path = os.path.join(settings.storage_path, "sealskin_ephemeral", str(uuid.uuid4()))
                 logger.info(
                     f"[{session_id}] Created ephemeral storage for autostart script."
                 )
