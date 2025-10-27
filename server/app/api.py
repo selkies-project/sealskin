@@ -15,6 +15,8 @@ import asyncio
 from contextlib import asynccontextmanager
 import httpx
 from collections import defaultdict
+import docker
+from docker.errors import DockerException
 
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -43,7 +45,7 @@ IMAGE_METADATA: Dict[str, Dict] = {}
 PULL_STATUS: Dict[str, str] = {}
 SYSTEM_STATS_CACHE: Dict[str, any] = {"data": None, "timestamp": 0}
 CPU_MODEL: str = "Unknown"
-
+PATH_PREFIX_MAP: Dict[str, str] = {}
 
 try:
     with open(settings.server_private_key_path, "rb") as f:
@@ -64,6 +66,74 @@ except FileNotFoundError as e:
 
 ALGORITHM = "RS256"
 
+
+async def _detect_docker_path_prefixes():
+    """If running in Docker, inspects self to find host mount paths."""
+    global PATH_PREFIX_MAP
+    if not os.path.exists("/var/run/docker.sock"):
+        logger.info("Docker socket not found. Assuming running on host.")
+        return
+
+    try:
+        client = await asyncio.to_thread(docker.from_env)
+        containers = await asyncio.to_thread(client.containers.list, filters={'name': 'sealskin'})
+        
+        if not containers:
+            hostname = os.uname()[1]
+            logger.info(f"No container named 'sealskin' found. Trying with hostname '{hostname}'.")
+            try:
+                container = await asyncio.to_thread(client.containers.get, hostname)
+                containers = [container]
+            except docker.errors.NotFound:
+                logger.warning("Could not find self-container by name 'sealskin' or hostname. Path remapping will be disabled.")
+                return
+        
+        container = containers[0]
+        logger.info(f"Found self-container '{container.name}'. Inspecting mounts.")
+        
+        mounts = container.attrs.get("Mounts", [])
+        if not mounts:
+            logger.info(f"Container '{container.name}' has no volume mounts to map.")
+            return
+
+        for mount in mounts:
+            host_path = mount.get("Source")
+            container_path = mount.get("Destination")
+            if host_path and container_path:
+                PATH_PREFIX_MAP[container_path] = host_path
+        
+        if PATH_PREFIX_MAP:
+            logger.info(f"Detected container mount prefixes: {PATH_PREFIX_MAP}")
+        else:
+            logger.warning("Could not find any usable mount points on the current container.")
+
+    except DockerException as e:
+        logger.warning(f"Could not inspect self in Docker. Path mapping disabled. Error: {e}")
+    except Exception as e:
+        logger.error(f"An unexpected error occurred during Docker self-inspection: {e}")
+
+
+def _translate_path_to_host(internal_path: str) -> str:
+    """Translates a path inside this container to the corresponding host path."""
+    if not PATH_PREFIX_MAP or not internal_path:
+        return internal_path
+
+    sorted_prefixes = sorted(PATH_PREFIX_MAP.keys(), key=len, reverse=True)
+
+    for container_prefix in sorted_prefixes:
+        if internal_path == container_prefix or internal_path.startswith(container_prefix + '/'):
+            host_prefix = PATH_PREFIX_MAP[container_prefix]
+            
+            relative_path = os.path.relpath(internal_path, container_prefix)
+            
+            if relative_path == ".":
+                return host_prefix
+            
+            translated_path = os.path.join(host_prefix, relative_path)
+            logger.debug(f"Translated path '{internal_path}' -> '{translated_path}'")
+            return translated_path
+
+    return internal_path
 
 def _get_cpu_model():
     """Reads the CPU model from /proc/cpuinfo and stores it."""
@@ -406,6 +476,7 @@ async def lifespan(app: FastAPI):
     os.makedirs(settings.upload_dir, exist_ok=True, mode=0o700)
     os.makedirs(settings.autostart_cache_path, exist_ok=True, mode=0o700)
     os.makedirs(settings.storage_path, exist_ok=True, mode=0o755)
+    await _detect_docker_path_prefixes()
     _get_cpu_model()
     user_manager.load_users_and_groups()
     load_app_configs()
@@ -778,7 +849,8 @@ async def _launch_common(
                 logger.error(f"[{session_id}] Failed to write autostart script: {e}")
 
     if host_mount_path:
-        volumes[host_mount_path] = {
+        translated_host_mount_path = _translate_path_to_host(host_mount_path)
+        volumes[translated_host_mount_path] = {
             "bind": settings.container_config_path,
             "mode": "rw",
         }
