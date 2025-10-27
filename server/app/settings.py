@@ -59,7 +59,7 @@ SETTING_DEFINITIONS = [
     {
         "name": "upload_dir",
         "type": "str",
-        "default": "/tmp/sealskin_uploads",
+        "default": "/storage/sealskin_uploads",
         "help": "Directory for temporary file uploads.",
     },
     {
