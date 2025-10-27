@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"> 
+    <title>SealSkin Launcher</title>
+    <link rel="stylesheet" href="options.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="popup-container">
+        <div class="popup-tabs">
+            <button id="launch-tab-btn" class="popup-tab-btn" data-i18n="popup.tabs.launch">Launch New</button>
+            <button id="sessions-tab-btn" class="popup-tab-btn" data-i18n="popup.tabs.sessions">Active Sessions</button>
+            <button id="upload-storage-tab-btn" class="popup-tab-btn" style="display: none;" data-i18n="popup.tabs.uploadStorage">Upload to Storage</button>
+            <button id="upload-files-tab-btn" class="popup-tab-btn" data-i18n-title="popup.tabs.uploadFilesTitle" title="Open dedicated file upload page">
+                <span data-i18n="popup.tabs.uploadFiles">Upload Files</span> <i class="fas fa-external-link-alt"></i>
+            </button>
+            <button id="options-gear-btn" class="popup-tab-btn">
+                <i class="fas fa-cog"></i>
+            </button>
+        </div>
+
+        <div id="sessions-view" class="popup-view">
+            <main class="popup-main">
+                <div id="sessions-list-container">
+                </div>
+            </main>
+        </div>
+
+        <div id="launch-view" class="popup-view">
+            <main class="popup-main">
+                <div id="app-search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="app-search" data-i18n-placeholder="popup.launchView.searchPlaceholder" placeholder="Search applications...">
+                </div>
+                <div id="app-grid-container">
+                </div>
+            </main>
+
+            <div id="upload-progress-container" style="display: none; padding: 1rem; border-top: 1px solid var(--border-color);">
+                <label id="progress-label" for="upload-progress" style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--text-muted);" data-i18n="popup.launchView.uploadingFile">Uploading file...</label>
+                <progress id="upload-progress" value="0" max="100" style="width: 100%;"></progress>
+            </div>
+
+            <div class="popup-options-area">
+                <div id="gpu-form-group" class="form-group hidden">
+                    <label for="gpuSelect" data-i18n="common.gpu">GPU</label>
+                    <select id="gpuSelect"></select>
+                </div>
+                <div id="homedir-form-group" class="form-group hidden">
+                    <label for="homeDirectory" data-i18n="common.storage">Storage</label>
+                    <select id="homeDirectory"></select>
+                </div>
+                <div class="form-group">
+                    <label for="language" data-i18n="common.language">Language</label>
+                    <select id="language"></select>
+                </div>
+            </div>
+
+            <footer class="popup-footer">
+                <div id="save-options-container">
+                    <div>
+                        <input type="checkbox" id="saveOptions">
+                        <label for="saveOptions" id="saveOptionsLabel" data-i18n="popup.launchView.saveOptions">Save these launch options</label>
+                    </div>
+                    <div id="open-file-container" style="display: none;">
+                        <input type="checkbox" id="openFileOnLaunch" checked>
+                        <label for="openFileOnLaunch" data-i18n="popup.launchView.openFile">Open file on launch</label>
+                    </div>
+                </div>
+                <div class="button-group-popup">
+                    <button id="launch-btn" class="primary" disabled>
+                        <span id="launch-btn-text" data-i18n="popup.launchView.launchButton">Launch</span>
+                        <div id="spinner"></div>
+                    </button>
+                </div>
+            </footer>
+        </div>
+
+        <div id="upload-storage-view" class="popup-view">
+            <main class="popup-main">
+                <div class="form-group">
+                    <label for="upload-storage-homedir-select" data-i18n="popup.uploadStorageView.selectHome">Select Home Directory</label>
+                    <select id="upload-storage-homedir-select">
+                    </select>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted);" id="upload-storage-description">
+                </p>
+            </main>
+
+            <div id="upload-storage-progress-container" style="display: none; padding: 1rem; border-top: 1px solid var(--border-color);">
+                <label id="upload-storage-progress-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--text-muted);" data-i18n="popup.launchView.uploadingFile">Uploading file...</label>
+                <progress id="upload-storage-progress" value="0" max="100" style="width: 100%;"></progress>
+            </div>
+            
+            <div id="upload-storage-success-container" style="display: none; padding: 2rem 1rem; text-align: center; border-top: 1px solid var(--border-color);">
+                <i class="fas fa-check-circle" style="color: var(--color-success); font-size: 3rem;"></i>
+                <p style="margin-top: 1rem; font-weight: 500;" data-i18n="popup.uploadStorageView.uploadComplete">Upload Complete!</p>
+            </div>
+
+            <footer class="popup-footer" id="upload-storage-footer">
+                <div class="button-group-popup">
+                    <button id="upload-storage-btn" class="primary" disabled>
+                        <span id="upload-storage-btn-text" data-i18n="popup.uploadStorageView.uploadButton">Upload File</span>
+                        <div id="upload-storage-spinner" class="spinner" style="display: none;"></div>
+                    </button>
+                </div>
+            </footer>
+        </div>
+
+        <div id="status"></div>
+    </div>
+
+    <script src="crypto-utils.js"></script>
+    <script src="languages.js"></script>
+    <script src="translations.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>

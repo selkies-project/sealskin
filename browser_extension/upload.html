@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SealSkin File Upload</title>
+    <link rel="stylesheet" href="options.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="upload-page">
+    <div class="upload-page-container">
+        <header style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+            <img src="icons/icon128.png" alt="SealSkin Logo" style="width: 48px;">
+            <div>
+                <h1 style="margin: 0;" data-i18n="upload.title">File Upload</h1>
+                <p style="margin: 0; color: var(--text-muted);" data-i18n="upload.description">Select a file from your computer to open it in a secure, isolated session.</p>
+            </div>
+        </header>
+
+        <div class="card">
+            <div id="file-drop-zone">
+                <div id="upload-prompt">
+                    <i class="fas fa-file-arrow-up"></i>
+                    <h3 data-i18n="upload.dropzone.title">Drag & drop a file here</h3>
+                    <p data-i18n="upload.dropzone.or">or</p>
+                    <button id="select-file-btn" class="secondary" data-i18n="upload.dropzone.button">Select File</button>
+                    <input type="file" id="file-input" style="display:none;">
+                </div>
+
+                <div id="upload-confirm" style="display: none;">
+                    <i class="fas fa-file-circle-check" style="color: var(--color-success); font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h3 id="selected-filename" style="margin-top: 0; word-break: break-all;"></h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;" data-i18n="upload.confirm.ready">File is ready to be opened securely.</p>
+                    <button id="confirm-upload-btn" class="primary">
+                        <i class="fas fa-arrow-right"></i> <span data-i18n="upload.confirm.button">Continue to Launch</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="translations.js"></script>
+    <script src="upload.js"></script>
+</body>
+</html>

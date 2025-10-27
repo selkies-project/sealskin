@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+python-jose[cryptography]
+pydantic
+cryptography
+httpx
+websockets
+docker
+PyYAML
