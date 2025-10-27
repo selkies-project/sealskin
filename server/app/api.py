@@ -56,9 +56,11 @@ try:
         )
         .decode("utf-8")
     )
+    user_manager.set_server_public_key(SERVER_PUBLIC_KEY_PEM)
 except FileNotFoundError as e:
     logger.error(f"Key file not found: {e.filename}. Exiting.")
     exit(1)
+
 
 ALGORITHM = "RS256"
 
@@ -189,9 +191,9 @@ def load_app_templates():
         default_template = {"name": "Default", "settings": {}}
         APP_TEMPLATES["Default"] = default_template
         try:
-            os.makedirs(settings.default_app_templates_path, exist_ok=True)
+            os.makedirs(settings.app_templates_path, exist_ok=True)
             with open(
-                os.path.join(settings.default_app_templates_path, "default.yml"), "w"
+                os.path.join(settings.app_templates_path, "default.yml"), "w"
             ) as f:
                 yaml.dump(default_template, f)
         except Exception as e:

@@ -25,6 +25,12 @@ DEFAULT_USER_SETTINGS = {
     "session_limit": -1,
 }
 
+SERVER_PUBLIC_KEY_PEM: Optional[str] = None
+
+def set_server_public_key(key: str):
+    """Sets the server's public key for use in log messages."""
+    global SERVER_PUBLIC_KEY_PEM
+    SERVER_PUBLIC_KEY_PEM = key
 
 def parse_key_file(path: str) -> Tuple[Optional[Dict], Optional[str]]:
     try:
@@ -99,6 +105,8 @@ def _generate_default_admin():
     logger.critical("DEFAULT ADMIN CREDENTIALS (SAVE THIS PRIVATE KEY!)")
     logger.critical(f"Username: admin")
     logger.critical("Private Key:\n" + private_pem)
+    if SERVER_PUBLIC_KEY_PEM:
+        logger.critical("Server Public Key:\n" + SERVER_PUBLIC_KEY_PEM)
     logger.critical("=" * 80 + "\n")
 
 
