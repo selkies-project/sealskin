@@ -1102,7 +1102,9 @@ function renderAppStoreSelect() {
 async function fetchAndRenderAvailableApps(storeUrl) {
   try {
     displayStatus(t('options.status.fetchingApps'));
-    const apps = await secureFetch(`/api/admin/apps/available?url=${encodeURIComponent(storeUrl)}`, {
+    const selectedStoreName = appStoreSelect.options[appStoreSelect.selectedIndex].text;
+    const apiUrl = `/api/admin/apps/available?url=${encodeURIComponent(storeUrl)}&store_name=${encodeURIComponent(selectedStoreName)}`;
+    const apps = await secureFetch(apiUrl, {
       method: 'GET'
     });
     adminData.availableApps = apps;
@@ -1183,6 +1185,27 @@ function showInstallModal(appData, existingInstall = null) {
     const defaultTemplate = adminData.appTemplates.find(t => t.name === 'Default');
     templateSelect.value = defaultTemplate ? defaultTemplate.name : adminData.appTemplates[0].name;
   }
+
+  const autostartTextArea = document.getElementById('install-autostart-script');
+  autostartTextArea.placeholder = `program \${SEALSKIN_FILE:+"$SEALSKIN_FILE"} \${SEALSKIN_URL:+"$SEALSKIN_URL"}`;
+
+  let autostartScript = '';
+  if (isEditing && existingInstall.provider_config.custom_autostart_script_b64) {
+    try {
+      autostartScript = atob(existingInstall.provider_config.custom_autostart_script_b64);
+    } catch (e) {
+      console.error("Failed to decode autostart script:", e);
+      autostartScript = '';
+    }
+  } else if (!isEditing && appData.provider_config.custom_autostart_script_b64) {
+    try {
+      autostartScript = atob(appData.provider_config.custom_autostart_script_b64);
+    } catch (e) {
+      console.error("Failed to decode default autostart script:", e);
+      autostartScript = '';
+    }
+  }
+  autostartTextArea.value = autostartScript;
 
   appInstallModal.style.display = 'block';
 }
@@ -2036,6 +2059,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const gpu = document.getElementById('install-gpu-support').checked;
     const sourceAppId = document.getElementById('install-source-app-id').value;
     const sourceApp = adminData.availableApps.find(a => a.id === sourceAppId);
+    const autostartValue = document.getElementById('install-autostart-script').value;
 
     const payload = {
       id: app_id,
@@ -2063,6 +2087,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         env: []
       }
     };
+
+    if (autostartValue) {
+      payload.provider_config.custom_autostart_script_b64 = btoa(autostartValue);
+    } else if (isEditing) {
+      payload.provider_config.custom_autostart_script_b64 = "";
+    }
 
     try {
       const method = isEditing ? 'PUT' : 'POST';

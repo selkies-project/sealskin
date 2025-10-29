@@ -66,6 +66,83 @@ except FileNotFoundError as e:
 
 ALGORITHM = "RS256"
 
+async def _fetch_and_cache_single_script(store_name: str, base_url: str, app_id: str):
+    """Fetches and caches a single autostart script, respecting ETags."""
+    cache_dir = os.path.join(settings.autostart_cache_path, store_name)
+    os.makedirs(cache_dir, exist_ok=True)
+    cache_file_path = os.path.join(cache_dir, app_id)
+    meta_file_path = cache_file_path + ".meta"
+    headers = {}
+
+    if os.path.exists(meta_file_path):
+        try:
+            with open(meta_file_path, "r") as f:
+                meta = json.load(f)
+                if "etag" in meta:
+                    headers["If-None-Match"] = meta["etag"]
+        except (json.JSONDecodeError, IOError):
+            logger.warning(f"Could not read meta file for {app_id}")
+
+    autostart_url = f"{base_url}/autostart/{app_id}"
+
+    try:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
+            response = await client.get(autostart_url, timeout=10, headers=headers)
+
+            if response.status_code == 304:
+                logger.debug(f"Autostart script for '{app_id}' in store '{store_name}' is up to date.")
+                return
+
+            if response.status_code == 404:
+                with open(cache_file_path, "w") as f: f.write("")
+                if os.path.exists(meta_file_path): os.remove(meta_file_path)
+                return
+
+            response.raise_for_status()
+            script_content = response.text
+
+            def write_cache_and_meta():
+                with open(cache_file_path, "w") as f: f.write(script_content)
+                if "etag" in response.headers:
+                    with open(meta_file_path, "w") as f: json.dump({"etag": response.headers["etag"]}, f)
+
+            await asyncio.to_thread(write_cache_and_meta)
+            logger.info(f"Successfully cached autostart script for '{app_id}' from store '{store_name}'.")
+
+    except httpx.RequestError as e:
+        logger.warning(f"Failed to fetch autostart script for '{app_id}': {e}")
+    except Exception as e:
+        logger.error(f"Unexpected error updating autostart script for '{app_id}': {e}")
+
+
+async def _update_all_autostart_caches():
+    """Iterates all app stores and updates the autostart script cache for every available app."""
+    logger.info("Starting autostart script cache refresh for all app stores...")
+    tasks = []
+    async with httpx.AsyncClient(follow_redirects=True) as client:
+        for store in APP_STORES:
+            try:
+                response = await client.get(store.url, timeout=15)
+                response.raise_for_status()
+                data = yaml.safe_load(response.text)
+                
+                apps_list = data['apps'] if isinstance(data, dict) and 'apps' in data else data
+                if not isinstance(apps_list, list):
+                    logger.error(f"Could not find a list of apps in store '{store.name}'")
+                    continue
+
+                base_url = store.url.rsplit("/", 1)[0]
+                for app in apps_list:
+                    if app.get("provider_config", {}).get("autostart"):
+                        tasks.append(
+                            _fetch_and_cache_single_script(store.name, base_url, app["id"])
+                        )
+            except Exception as e:
+                logger.error(f"Failed to process app store '{store.name}' for autostart cache: {e}")
+    
+    if tasks:
+        await asyncio.gather(*tasks)
+    logger.info("Autostart script cache refresh complete.")
 
 async def _detect_docker_path_prefixes():
     """If running in Docker, inspects self to find host mount paths."""
@@ -439,18 +516,6 @@ async def _pull_and_cache_image(image_name: str):
         if image_name in IMAGE_METADATA:
             IMAGE_METADATA[image_name]["last_checked_at"] = time.time()
 
-        apps_using_image = [
-            app
-            for app in INSTALLED_APPS.values()
-            if app.provider_config.image == image_name
-        ]
-        if apps_using_image:
-            logger.info(
-                f"Image '{image_name}' updated, checking autostart scripts for {len(apps_using_image)} app(s)."
-            )
-            for app in apps_using_image:
-                await _update_autostart_cache(app)
-
         logger.info(f"Background pull for '{image_name}' completed successfully.")
     except Exception as e:
         logger.error(f"Background pull for image '{image_name}' failed: {e}")
@@ -458,9 +523,12 @@ async def _pull_and_cache_image(image_name: str):
         PULL_STATUS.pop(image_name, None)
 
 
-async def auto_update_app_images():
+async def background_update_job():
     while True:
         await asyncio.sleep(settings.auto_update_interval_seconds)
+        
+        await _update_all_autostart_caches()
+
         logger.info("Starting scheduled app image update check...")
         apps_to_update = [app for app in INSTALLED_APPS.values() if app.auto_update]
         images_to_pull = {app.provider_config.image for app in apps_to_update}
@@ -468,7 +536,6 @@ async def auto_update_app_images():
         for image_name in images_to_pull:
             await _pull_and_cache_image(image_name)
             await asyncio.sleep(2)
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -484,6 +551,11 @@ async def lifespan(app: FastAPI):
     load_app_templates()
     detect_gpus()
 
+    # NEW: Perform initial population of the entire autostart script cache
+    logger.info("Performing initial population of autostart script cache...")
+    await _update_all_autostart_caches()
+    logger.info("Initial autostart script cache population complete.")
+
     logger.info("Populating initial image metadata cache...")
     all_images = {app.provider_config.image for app in INSTALLED_APPS.values()}
     for image_name in all_images:
@@ -492,7 +564,8 @@ async def lifespan(app: FastAPI):
 
     update_task = None
     if settings.auto_update_apps:
-        update_task = asyncio.create_task(auto_update_app_images())
+        # MODIFIED: Call the renamed background job
+        update_task = asyncio.create_task(background_update_job())
     yield
     logger.info("API server shutting down...")
     if update_task:
@@ -502,7 +575,6 @@ async def lifespan(app: FastAPI):
             await update_task
     except asyncio.CancelledError:
         logger.info("Background tasks successfully cancelled.")
-
 
 api_app = FastAPI(title="SealSkin API", lifespan=lifespan)
 
@@ -828,30 +900,44 @@ async def _launch_common(
     elif file_bytes and filename:
         host_mount_path = os.path.join(settings.storage_path, "sealskin_ephemeral", str(uuid.uuid4()))
 
-    if app_config.provider_config.autostart:
+    autostart_content = None
+    if app_config.provider_config.custom_autostart_script_b64:
+        try:
+            autostart_content = base64.b64decode(
+                app_config.provider_config.custom_autostart_script_b64
+            ).decode("utf-8")
+            logger.info(f"[{session_id}] Using custom autostart script for '{app_config.name}'.")
+        except Exception as e:
+            logger.error(f"[{session_id}] Failed to decode custom autostart script: {e}")
+    elif app_config.provider_config.autostart:
         autostart_cache_path = _get_autostart_cache_path(app_config)
         if (
             autostart_cache_path
             and os.path.exists(autostart_cache_path)
             and os.path.getsize(autostart_cache_path) > 0
         ):
-            if not host_mount_path:
-                host_mount_path = os.path.join(settings.storage_path, "sealskin_ephemeral", str(uuid.uuid4()))
-                logger.info(
-                    f"[{session_id}] Created ephemeral storage for autostart script."
-                )
-
-            autostart_dir = os.path.join(host_mount_path, ".config", "openbox")
-            autostart_path = os.path.join(autostart_dir, "autostart")
             try:
-                os.makedirs(autostart_dir, exist_ok=True, mode=0o755)
-                shutil.copy(autostart_cache_path, autostart_path)
-                os.chmod(autostart_path, 0o755)
-                logger.info(
-                    f"[{session_id}] Successfully wrote autostart script for '{app_config.name}'"
-                )
+                with open(autostart_cache_path, "r") as f:
+                    autostart_content = f.read()
+                logger.info(f"[{session_id}] Using cached repository autostart script for '{app_config.name}'.")
             except Exception as e:
-                logger.error(f"[{session_id}] Failed to write autostart script: {e}")
+                logger.error(f"[{session_id}] Failed to read cached autostart script: {e}")
+
+    if autostart_content:
+        if not host_mount_path:
+            host_mount_path = os.path.join(settings.storage_path, "sealskin_ephemeral", str(uuid.uuid4()))
+            logger.info(f"[{session_id}] Created ephemeral storage for autostart script.")
+        
+        autostart_dir = os.path.join(host_mount_path, ".config", "openbox")
+        autostart_path = os.path.join(autostart_dir, "autostart")
+        try:
+            os.makedirs(autostart_dir, exist_ok=True, mode=0o755)
+            with open(autostart_path, "w") as f:
+                f.write(autostart_content)
+            os.chmod(autostart_path, 0o755)
+            logger.info(f"[{session_id}] Successfully wrote autostart script to session storage.")
+        except Exception as e:
+            logger.error(f"[{session_id}] Failed to write autostart script: {e}")
 
     if host_mount_path:
         translated_host_mount_path = _translate_path_to_host(host_mount_path)
@@ -892,7 +978,7 @@ async def _launch_common(
         )
         return {"session_url": f"/{session_id}/?access_token={access_token}"}
     except Exception as e:
-        if host_mount_path and settings.upload_dir in host_mount_path:
+        if host_mount_path and host_mount_path.startswith(os.path.join(settings.storage_path, "sealskin_ephemeral")):
             shutil.rmtree(host_mount_path, ignore_errors=True)
         logger.error(
             f"[{session_id}] Unhandled exception during launch for app '{application_id}': {e}",
@@ -1175,10 +1261,9 @@ async def delete_app_store(store_name: str):
     save_app_stores()
     return Response(status_code=204)
 
-
 @admin_router.get("/apps/available", response_model=List[AvailableApp])
-async def get_available_apps(url: str):
-    async def fetch_and_process_store(content: str):
+async def get_available_apps(url: str, store_name: str): # <-- ADD store_name parameter
+    async def fetch_and_process_store(content: str, store_name_for_cache: str):
         """Loads, flattens, and returns the list of apps from YAML content."""
         try:
 
@@ -1195,19 +1280,35 @@ async def get_available_apps(url: str):
             loaded_data = yaml.safe_load(content)
             apps_list = extract_apps_from_data(loaded_data)
             for app in apps_list:
+                provider_config = app.get("provider_config", {})
+                
+                if provider_config.get("autostart"):
+                    app_id = app.get("id")
+                    if app_id:
+                        cache_dir = os.path.join(settings.autostart_cache_path, store_name_for_cache)
+                        cache_file_path = os.path.join(cache_dir, app_id)
+                        script_content_b64 = None
+                        if os.path.exists(cache_file_path) and os.path.getsize(cache_file_path) > 0:
+                            try:
+                                with open(cache_file_path, "rb") as f:
+                                    script_content = f.read()
+                                script_content_b64 = base64.b64encode(script_content).decode("utf-8")
+                            except Exception as e:
+                                logger.error(f"Failed to read/encode autostart cache for {app_id}: {e}")
+                        provider_config["custom_autostart_script_b64"] = script_content_b64
+
                 if (
-                    "provider_config" in app
-                    and "extensions" in app["provider_config"]
-                    and app["provider_config"]["extensions"]
+                    "extensions" in provider_config
+                    and provider_config["extensions"]
                 ):
-                    original_extensions = app["provider_config"]["extensions"]
+                    original_extensions = provider_config["extensions"]
                     flattened_extensions = []
                     for item in original_extensions:
                         if isinstance(item, list):
                             flattened_extensions.extend(item)
                         else:
                             flattened_extensions.append(item)
-                    app["provider_config"]["extensions"] = flattened_extensions
+                    provider_config["extensions"] = flattened_extensions
 
             return apps_list
 
@@ -1225,12 +1326,11 @@ async def get_available_apps(url: str):
         async with httpx.AsyncClient() as client:
             response = await client.get(url, follow_redirects=True, timeout=15)
             response.raise_for_status()
-            return await fetch_and_process_store(response.text)
+            return await fetch_and_process_store(response.text, store_name)
     except httpx.RequestError as e:
         raise HTTPException(
             status_code=400, detail=f"Failed to fetch app store from URL '{url}': {e}"
         )
-
 
 @admin_router.get("/apps/installed", response_model=List[InstalledAppWithStatus])
 async def list_installed_apps():
@@ -1269,6 +1369,9 @@ async def update_installed_app(
             status_code=400, detail="App ID in path does not match body."
         )
 
+    if app_update.provider_config.custom_autostart_script_b64 == "":
+        app_update.provider_config.custom_autostart_script_b64 = None
+
     old_image_name = INSTALLED_APPS[app_id].provider_config.image
 
     INSTALLED_APPS[app_id] = app_update
@@ -1286,16 +1389,6 @@ async def delete_installed_app(app_id: str):
         raise HTTPException(status_code=404, detail="Installed app not found.")
 
     app_to_delete = INSTALLED_APPS[app_id]
-
-    cache_path = _get_autostart_cache_path(app_to_delete)
-    if cache_path and os.path.exists(cache_path):
-        try:
-            os.remove(cache_path)
-            logger.info(
-                f"Deleted autostart cache file for app '{app_to_delete.name}' at {cache_path}"
-            )
-        except OSError as e:
-            logger.error(f"Failed to delete autostart cache file {cache_path}: {e}")
 
     del INSTALLED_APPS[app_id]
     save_installed_apps()

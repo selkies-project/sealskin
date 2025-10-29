@@ -71,6 +71,7 @@ class AvailableAppProviderConfig(BaseModel):
     open_support: bool
     extensions: List[str]
     autostart: Optional[bool] = False
+    custom_autostart_script_b64: Optional[str] = None
 
 class AvailableApp(BaseModel):
     id: str
