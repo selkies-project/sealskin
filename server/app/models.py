@@ -193,6 +193,7 @@ class ActiveSessionInfo(BaseModel):
     app_logo: str
     created_at: float
     session_url: str
+    launch_context: Optional[dict] = None
 
 class SendFileToSessionRequest(BaseModel):
     filename: str

@@ -746,6 +746,7 @@ async def _launch_common(
     session_id = str(uuid.uuid4())
     access_token = secrets.token_urlsafe(32)
     subfolder = f"/{session_id}/"
+    launch_context = None
 
     final_env = {
         "SUBFOLDER": subfolder,
@@ -764,6 +765,8 @@ async def _launch_common(
         )
 
     final_env.update(env_vars)
+    if "SEALSKIN_URL" in final_env:
+        launch_context = {"type": "url", "value": final_env["SEALSKIN_URL"]}
     if language and language.lower() != "en_us.utf-8":
         final_env["LC_ALL"] = language
     if app_config.provider_config.env:
@@ -865,6 +868,7 @@ async def _launch_common(
             os.chmod(file_location, 0o644)
             if open_file_on_launch:
                 final_env["SEALSKIN_FILE"] = container_file_path
+                launch_context = {"type": "file", "value": filename}
 
     try:
         instance_details = await provider.launch(
@@ -881,6 +885,7 @@ async def _launch_common(
             "app_name": app_config.name,
             "app_logo": app_config.logo,
             "host_mount_path": host_mount_path,
+            "launch_context": launch_context,
         }
         logger.info(
             f"[{session_id}] Session ready for {username}. Proxying to {instance_details['ip']}:{instance_details['port']}"
@@ -996,6 +1001,7 @@ async def get_my_sessions(user: dict = Depends(verify_token)):
                     app_logo=s_data["app_logo"],
                     created_at=s_data["created_at"],
                     session_url=f"/{sid}/?access_token={s_data['access_token']}",
+                    launch_context=s_data.get("launch_context"),
                 )
             )
     return sorted(user_sessions, key=lambda s: s.created_at, reverse=True)
@@ -1417,6 +1423,7 @@ async def get_all_sessions():
                 app_logo=s_data["app_logo"],
                 created_at=s_data["created_at"],
                 session_url=f"/{sid}/?access_token={s_data['access_token']}",
+                launch_context=s_data.get("launch_context"),
             )
         )
 

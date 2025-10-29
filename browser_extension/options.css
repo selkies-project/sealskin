@@ -1038,9 +1038,23 @@ body:has(.popup-container) {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    max-width: 180px;
     margin-top: 2px;
 }
 
+.session-context {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 250px;
+    margin-top: 0.25rem;
+}
+
+.session-context i {
+    margin-right: 0.3rem;
+}
 
 body.upload-page {
   display: flex;

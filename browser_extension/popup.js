@@ -183,11 +183,18 @@ function renderActiveSessions(isFileContext) {
     const actionButtonText = isFileContext ? t('common.sendFile') : t('common.reopen');
     const actionButtonClass = isFileContext ? 'secondary' : 'primary';
 
+    let contextHtml = '';
+    if (session.launch_context) {
+        const icon = session.launch_context.type === 'url' ? 'fa-link' : 'fa-file-alt';
+        contextHtml = `<div class="session-card-info-action" title="${session.launch_context.value}"><i class="fas ${icon}"></i> ${session.launch_context.value}</div>`;
+    }
+
     card.innerHTML = `
             <img src="${session.app_logo}" class="session-card-logo" onerror="this.onerror=null; this.src='icons/icon128.png';">
             <div class="session-card-info">
                 <div class="session-card-info-name">${session.app_name}</div>
                 <div class="session-card-info-time">Started ${timeAgo(session.created_at)}</div>
+                ${contextHtml}
             </div>
             <div class="session-card-actions">
                 <button class="${actionButtonClass} reopen-btn-text" data-action="reopen">${actionButtonText}</button>

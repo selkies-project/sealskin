@@ -955,12 +955,21 @@ function renderUserSessions(sessions) {
                     </tr>
                 </thead>
                 <tbody>
-                    ${sessions.map(s => `
+                    ${sessions.map(s => {
+                        let contextHtml = '';
+                        if (s.launch_context) {
+                            const icon = s.launch_context.type === 'url' ? 'fa-link' : 'fa-file-alt';
+                            contextHtml = `<div class="session-context" title="${s.launch_context.value}"><i class="fas ${icon}"></i> ${s.launch_context.value}</div>`;
+                        }
+                        return `
                         <tr>
                             <td>
                                 <div style="display: flex; align-items: center; gap: 1rem;">
                                     <img src="${s.app_logo}" alt="${s.app_name}" style="width: 32px; height: 32px; object-fit: contain;">
-                                    <span>${s.app_name}</span>
+                                    <div>
+                                        <span>${s.app_name}</span>
+                                        ${contextHtml}
+                                    </div>
                                 </div>
                             </td>
                             <td>${timeAgo(s.created_at)}</td>
@@ -968,7 +977,7 @@ function renderUserSessions(sessions) {
                                 <button class="danger stop-session-btn" data-session-id="${s.session_id}">${t('common.stop')}</button>
                             </td>
                         </tr>
-                    `).join('')}
+                    `}).join('')}
                 </tbody>
             </table>
         </div>
@@ -995,12 +1004,21 @@ function renderAdminSessions(usersWithSessions) {
                             </tr>
                         </thead>
                         <tbody>
-                            ${userData.sessions.map(s => `
+                            ${userData.sessions.map(s => {
+                                let contextHtml = '';
+                                if (s.launch_context) {
+                                    const icon = s.launch_context.type === 'url' ? 'fa-link' : 'fa-file-alt';
+                                    contextHtml = `<div class="session-context" title="${s.launch_context.value}"><i class="fas ${icon}"></i> ${s.launch_context.value}</div>`;
+                                }
+                                return `
                                 <tr>
                                     <td>
                                         <div style="display: flex; align-items: center; gap: 1rem;">
                                             <img src="${s.app_logo}" alt="${s.app_name}" style="width: 32px; height: 32px; object-fit: contain;">
-                                            <span>${s.app_name}</span>
+                                            <div>
+                                                <span>${s.app_name}</span>
+                                                ${contextHtml}
+                                            </div>
                                         </div>
                                     </td>
                                     <td>${timeAgo(s.created_at)}</td>
@@ -1008,7 +1026,7 @@ function renderAdminSessions(usersWithSessions) {
                                         <button class="danger stop-session-btn" data-session-id="${s.session_id}">${t('common.stop')}</button>
                                     </td>
                                 </tr>
-                            `).join('')}
+                            `}).join('')}
                         </tbody>
                     </table>
                 </div>
