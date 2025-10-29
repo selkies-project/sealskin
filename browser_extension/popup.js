@@ -65,6 +65,15 @@ let isSimpleLaunch = false;
 let selectedAppId = null;
 let launchProfileKey = 'workflow_profile_simple';
 
+async function getSessionTabMap() {
+  const result = await chrome.storage.local.get('sessionTabMap');
+  return result.sessionTabMap || {};
+}
+
+async function saveSessionTabMap(map) {
+  await chrome.storage.local.set({ sessionTabMap: map });
+}
+
 function getSessionUrlBase(config) {
   if (!config.serverIp || !config.sessionPort) return null;
   return `https://${config.serverIp}:${config.sessionPort}`;
@@ -405,33 +414,38 @@ function populateHomeDirDropdown() {
   });
 }
 
-function reopenSession(sessionUrl) {
-  const fullUrl = `${getSessionUrlBase(sealskinConfig)}${sessionUrl}`;
-  chrome.tabs.create({
-    url: fullUrl
-  });
+async function reopenOrFocusSession(session) {
+  chrome.runtime.sendMessage({ type: 'focusOrCreateTab', payload: { session } });
   window.close();
 }
 
 async function closeSession(sessionId) {
-  try {
-    await secureFetch(`/api/sessions/${sessionId}`, {
-      method: 'DELETE'
-    });
-    activeSessions = activeSessions.filter(s => s.session_id !== sessionId);
-    const isFileContext = sealskinContext.action === 'file';
-    renderActiveSessions(isFileContext);
-  } catch (error) {
-    setStatus(t('popup.status.errorClosingSession', {
-      message: error.message
-    }), true);
-    const card = sessionsListContainer.querySelector(`[data-session-id="${sessionId}"]`);
-    if (card) {
-      const btn = card.querySelector('[data-action="close"]');
-      btn.disabled = false;
-      btn.innerHTML = `<i class="fas fa-times"></i>`;
+  const card = sessionsListContainer.querySelector(`[data-session-id="${sessionId}"]`);
+  if (!card) return;
+
+  const closeButton = card.querySelector('[data-action="close"]');
+  
+  closeButton.disabled = true;
+  closeButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+
+  chrome.runtime.sendMessage({ type: 'closeSession', payload: { sessionId } }, (response) => {
+    
+    if (chrome.runtime.lastError || !response || !response.success) {
+      console.error('Failed to close session in background:', chrome.runtime.lastError || response.error);
+      setStatus(t('popup.status.errorClosingSession', { message: chrome.runtime.lastError?.message || response?.error || 'Unknown error' }), true);
+      
+      closeButton.disabled = false;
+      closeButton.innerHTML = `<i class="fas fa-times"></i>`;
+
+    } else {
+      card.remove();
+      activeSessions = activeSessions.filter(s => s.session_id !== sessionId);
+      
+      if (activeSessions.length === 0) {
+        renderActiveSessions(sealskinContext.action === 'file');
+      }
     }
-  }
+  });
 }
 
 const CHUNK_SIZE = 1 * 1024 * 1024;
@@ -517,7 +531,7 @@ async function handleSendFileToSession(sessionId) {
     });
 
     const session = activeSessions.find(s => s.session_id === sessionId);
-    reopenSession(session.session_url);
+    reopenOrFocusSession(session);
 
   } catch (error) {
     setStatus(t('popup.status.errorSendingFile', {
@@ -695,7 +709,13 @@ async function handleLaunch() {
       body: JSON.stringify(payload),
     });
 
-    reopenSession(data.session_url);
+    const sessionId = data.session_url.substring(1).split('/?')[0];
+    chrome.runtime.sendMessage({
+      type: 'createTabAndTrack',
+      payload: { sessionId, session_url: data.session_url }
+    });
+    
+    window.close();
 
   } catch (error) {
     spinner.style.display = 'none';
@@ -789,6 +809,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     availableGpus = statusData.gpus || [];
     availableApps = appsData;
     activeSessions = sessionsData;
+    const sessionTabMap = await getSessionTabMap();
+    const activeSessionIds = new Set(activeSessions.map(s => s.session_id));
+    let mapWasChanged = false;
+    for (const storedSessionId in sessionTabMap) {
+      if (!activeSessionIds.has(storedSessionId)) {
+        delete sessionTabMap[storedSessionId];
+        mapWasChanged = true;
+      }
+    }
+    if (mapWasChanged) await saveSessionTabMap(sessionTabMap);
 
     if (activeSessions.length === 0) {
       sessionsTabBtn.style.display = 'none';
@@ -901,7 +931,7 @@ sessionsListContainer.addEventListener('click', (e) => {
       handleSendFileToSession(sessionId);
     } else {
       const session = activeSessions.find(s => s.session_id === sessionId);
-      if (session) reopenSession(session.session_url);
+      if (session) reopenOrFocusSession(session);
     }
   } else if (action === 'close') {
     button.disabled = true;

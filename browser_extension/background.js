@@ -13,6 +13,16 @@ function arrayBufferToBase64(buffer) {
   return btoa(binary);
 }
 
+async function getSessionTabMap() {
+  const result = await chrome.storage.local.get('sessionTabMap');
+  return result.sessionTabMap || {};
+}
+
+async function saveSessionTabMap(map) {
+  await chrome.storage.local.set({ sessionTabMap: map });
+}
+
+
 async function importRsaPublicKey(pem) {
   const buffer = pemToArrayBuffer(pem);
   return crypto.subtle.importKey('spki', buffer, {
@@ -129,87 +139,81 @@ async function ensureSession() {
   return session;
 }
 
+async function secureFetchInBackground(url, options = {}) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const { sealskinConfig } = await chrome.storage.local.get('sealskinConfig');
+      if (!sealskinConfig || !sealskinConfig.serverIp || !sealskinConfig.apiPort) {
+        throw new Error('Extension is not configured.');
+      }
+
+      if (url.startsWith('/api/admin') || url.startsWith('/api/homedirs') || url.startsWith('/api/sessions')) {
+          const jwt = await generateJwtNative(sealskinConfig.clientPrivateKey, sealskinConfig.username);
+          options.headers = {
+              ...options.headers,
+              'Authorization': `Bearer ${jwt}`
+          };
+      }
+
+      const apiUrl = `http://${sealskinConfig.serverIp}:${sealskinConfig.apiPort}`;
+      const fullUrl = `${apiUrl}${url}`;
+
+      const currentSession = await ensureSession();
+      const headers = { ...options.headers, 'X-Session-ID': currentSession.id };
+      let body = options.body;
+
+      if (body) {
+        const encryptedPayload = await encryptAesGcm(currentSession.key, body);
+        body = JSON.stringify(encryptedPayload);
+        headers['Content-Type'] = 'application/json';
+      }
+
+      const response = await fetch(fullUrl, { ...options, headers, body });
+
+      if (response.status === 204 || response.status === 200 && response.headers.get('Content-Length') === '0') {
+        return null;
+      }
+
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status} - ${responseText}`);
+      }
+
+      const encryptedResponse = JSON.parse(responseText);
+      const decryptedData = await decryptAesGcm(currentSession.key, encryptedResponse.iv, encryptedResponse.ciphertext);
+
+      return JSON.parse(decryptedData);
+
+    } catch (error) {
+      console.log(`[SealSkin SecureFetchInBackground Attempt ${attempt + 1}]`, error);
+      const isSessionError = error.message.includes('atob') ||
+        error.message.includes('decryption') ||
+        error.message.includes('HTTP error! status: 400');
+
+      if (isSessionError && attempt === 0) {
+        console.log('[SealSkin] Detected session error, resetting session and retrying...');
+        session = { key: null, id: null };
+      } else {
+        throw error;
+      }
+    }
+  }
+}
+
+function getSessionUrlBase(config) {
+    if (!config.serverIp || !config.sessionPort) return null;
+    return `https://${config.serverIp}:${config.sessionPort}`;
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === 'secureFetch') {
     (async () => {
-      for (let attempt = 0; attempt < 2; attempt++) {
-        try {
-          const {
-            sealskinConfig
-          } = await chrome.storage.local.get('sealskinConfig');
-          if (!sealskinConfig || !sealskinConfig.serverIp || !sealskinConfig.apiPort) {
-            throw new Error('Extension is not configured.');
-          }
-
-          const apiUrl = `http://${sealskinConfig.serverIp}:${sealskinConfig.apiPort}`;
-          const {
-            url,
-            options
-          } = request.payload;
-          const fullUrl = `${apiUrl}${url}`;
-
-          const currentSession = await ensureSession();
-          const headers = {
-            ...options.headers,
-            'X-Session-ID': currentSession.id
-          };
-          let body = options.body;
-
-          if (body) {
-            const encryptedPayload = await encryptAesGcm(currentSession.key, body);
-            body = JSON.stringify(encryptedPayload);
-            headers['Content-Type'] = 'application/json';
-          }
-
-          const response = await fetch(fullUrl, {
-            ...options,
-            headers,
-            body
-          });
-
-          if (response.status === 204) {
-            sendResponse({
-              success: true,
-              data: null
-            });
-            return;
-          }
-
-          const responseText = await response.text();
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status} - ${responseText}`);
-          }
-
-          const encryptedResponse = JSON.parse(responseText);
-          const decryptedData = await decryptAesGcm(currentSession.key, encryptedResponse.iv, encryptedResponse.ciphertext);
-
-          sendResponse({
-            success: true,
-            data: JSON.parse(decryptedData)
-          });
-          return;
-
-        } catch (error) {
-          console.log(`[SealSkin SecureFetch Attempt ${attempt + 1}]`, error);
-          const isSessionError = error.message.includes('atob') ||
-            error.message.includes('decryption') ||
-            error.message.includes('HTTP error! status: 400');
-
-          if (isSessionError && attempt === 0) {
-            console.log('[SealSkin] Detected session error, resetting session and retrying...');
-            session = {
-              key: null,
-              id: null
-            };
-          } else {
-            sendResponse({
-              success: false,
-              error: error.message
-            });
-            return;
-          }
-        }
+      try {
+        const data = await secureFetchInBackground(request.payload.url, request.payload.options);
+        sendResponse({ success: true, data });
+      } catch (error) {
+        sendResponse({ success: false, error: error.message });
       }
     })();
     return true;
@@ -219,8 +223,69 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.action.openPopup();
     return false;
   }
-});
 
+  if (request.type === 'createTabAndTrack') {
+    (async () => {
+      const { sessionId, session_url } = request.payload;
+      const { sealskinConfig } = await chrome.storage.local.get('sealskinConfig');
+      const fullUrl = `${getSessionUrlBase(sealskinConfig)}${session_url}`;
+      const newTab = await chrome.tabs.create({ url: fullUrl });
+      const map = await getSessionTabMap();
+      map[sessionId] = newTab.id;
+      await saveSessionTabMap(map);
+    })();
+    return false;
+  }
+
+  if (request.type === 'focusOrCreateTab') {
+    (async () => {
+      const { session } = request.payload;
+      const map = await getSessionTabMap();
+      const tabId = map[session.session_id];
+
+      if (tabId) {
+        try {
+          const tab = await chrome.tabs.get(tabId);
+          await chrome.tabs.update(tab.id, { active: true });
+          await chrome.windows.update(tab.windowId, { focused: true });
+          return;
+        } catch (e) {
+          console.log(`Tab ${tabId} not found, will create a new one.`);
+        }
+      }
+
+      const { sealskinConfig } = await chrome.storage.local.get('sealskinConfig');
+      const fullUrl = `${getSessionUrlBase(sealskinConfig)}${session.session_url}`;
+      const newTab = await chrome.tabs.create({ url: fullUrl });
+      map[session.session_id] = newTab.id;
+      await saveSessionTabMap(map);
+    })();
+    return false;
+  }
+
+  if (request.type === 'closeSession') {
+    (async () => {
+      const { sessionId } = request.payload;
+      try {
+        const map = await getSessionTabMap();
+        const tabId = map[sessionId];
+        if (tabId) {
+          try {
+            await chrome.tabs.remove(tabId);
+          } catch (e) { /* Tab already closed */ }
+        }
+        await secureFetchInBackground(`/api/sessions/${sessionId}`, { method: 'DELETE' });
+        delete map[sessionId];
+        await saveSessionTabMap(map);
+        sendResponse({ success: true });
+      } catch (error) {
+        console.error(`[BG] FAILED to close session ${sessionId}. Error:`, error);
+        sendResponse({ success: false, error: error.message });
+      }
+    })();
+    return true;
+  }
+});
 
 // --- Context Menu and Download Logic ---
 chrome.runtime.onInstalled.addListener(() => {

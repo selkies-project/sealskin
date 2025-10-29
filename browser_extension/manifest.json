@@ -7,7 +7,8 @@
   "permissions": [
     "contextMenus",
     "storage",
-    "downloads"
+    "downloads",
+    "tabs"
   ],
   "host_permissions": [
     "<all_urls>"
