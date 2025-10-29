@@ -63,7 +63,6 @@ const sessionPortInput = document.getElementById('sessionPort');
 const usernameInput = document.getElementById('username');
 const clientPrivateKeyInput = document.getElementById('clientPrivateKey');
 const serverPublicKeyInput = document.getElementById('serverPublicKey');
-const searchEngineSelect = document.getElementById('searchEngine');
 const saveButton = document.getElementById('save');
 const loginButton = document.getElementById('login');
 const logoutButton = document.getElementById('logout-button');
@@ -75,6 +74,7 @@ const dashboardCpuModel = document.getElementById('dashboard-cpu-model');
 const dashboardDiskInfo = document.getElementById('dashboard-disk-info');
 const dashboardDiskUsageText = document.getElementById('dashboard-disk-usage-text');
 const dashboardDiskUsageBar = document.getElementById('dashboard-disk-usage-bar');
+const searchEngineDashboardSelect = document.getElementById('searchEngineDashboard');
 const exportConfigButton = document.getElementById('export-config-button');
 const adminNavLinks = document.querySelectorAll('.admin-nav-link');
 const adminNavSeparator = document.getElementById('admin-nav-separator');
@@ -645,35 +645,24 @@ function populateGroupDropdowns() {
   });
 }
 
-function saveConfig() {
-  const config = {
-    serverIp: serverIpInput.value.trim(),
-    apiPort: apiPortInput.value.trim(),
-    sessionPort: sessionPortInput.value.trim(),
-    username: usernameInput.value.trim(),
-    clientPrivateKey: clientPrivateKeyInput.value.trim(),
-    serverPublicKey: serverPublicKeyInput.value.trim(),
-    searchEngineUrl: searchEngineSelect.value,
-  };
-  chrome.storage.local.set({
-    sealskinConfig: config
-  }, () => {
-    displayStatus(t('options.status.configSaved'), false);
-  });
-}
-
 async function loadConfig() {
   const {
-    sealskinConfig
-  } = await chrome.storage.local.get('sealskinConfig');
+    sealskinConfig,
+    sealskinPendingConfig
+  } = await chrome.storage.local.get(['sealskinConfig', 'sealskinPendingConfig']);
+  const configToLoad = sealskinPendingConfig || sealskinConfig;
+
   if (sealskinConfig) {
-    serverIpInput.value = sealskinConfig.serverIp || '';
-    apiPortInput.value = sealskinConfig.apiPort || '8000';
-    sessionPortInput.value = sealskinConfig.sessionPort || '8443';
-    usernameInput.value = sealskinConfig.username || '';
-    clientPrivateKeyInput.value = sealskinConfig.clientPrivateKey || '';
-    serverPublicKeyInput.value = sealskinConfig.serverPublicKey || '';
-    searchEngineSelect.value = sealskinConfig.searchEngineUrl || 'https://google.com/search?q=';
+    searchEngineDashboardSelect.value = sealskinConfig.searchEngineUrl || 'https://google.com/search?q=';
+  }
+
+  if (configToLoad) {
+    serverIpInput.value = configToLoad.serverIp || '';
+    apiPortInput.value = configToLoad.apiPort || '8000';
+    sessionPortInput.value = configToLoad.sessionPort || '8443';
+    usernameInput.value = configToLoad.username || '';
+    clientPrivateKeyInput.value = configToLoad.clientPrivateKey || '';
+    serverPublicKeyInput.value = configToLoad.serverPublicKey || '';
   }
 }
 
@@ -694,7 +683,6 @@ function parseAndApplyConfig(configText) {
     clientPrivateKeyInput.value = config.private_key;
     serverPublicKeyInput.value = config.server_public_key;
 
-    saveConfig();
     displayStatus(t('options.status.configApplied'), false);
 
     simpleConfigView.style.display = 'none';
@@ -702,11 +690,14 @@ function parseAndApplyConfig(configText) {
 
     configFileUpload.value = '';
     configTextArea.value = '';
+    document.getElementById('config-file-name').textContent = '';
 
+    return true;
   } catch (error) {
     displayStatus(t('options.status.configApplyFailed', {
       error: error.message
     }), true);
+    return false;
   }
 }
 
@@ -777,11 +768,22 @@ function setAdminNavVisibility(visible) {
 async function handleLogin() {
   displayStatus(t('options.status.loggingIn'));
   try {
+    const { sealskinConfig: oldConfig } = await chrome.storage.local.get('sealskinConfig');
+    const config = {
+      serverIp: serverIpInput.value.trim(),
+      apiPort: apiPortInput.value.trim(),
+      sessionPort: sessionPortInput.value.trim(),
+      username: usernameInput.value.trim(),
+      clientPrivateKey: clientPrivateKeyInput.value.trim(),
+      serverPublicKey: serverPublicKeyInput.value.trim(),
+      searchEngineUrl: oldConfig?.searchEngineUrl || 'https://google.com/search?q=',
+    };
+    await chrome.storage.local.set({ sealskinConfig: config });
+    await chrome.storage.local.remove('sealskinPendingConfig');
     const statusData = await secureFetch('/api/admin/status', {
       method: 'POST',
       body: JSON.stringify({})
     });
-
     simpleConfigView.style.display = 'none';
     advancedConfigView.style.display = 'none';
     dashboardView.style.display = 'block';
@@ -1370,12 +1372,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   await openTab('Config');
 
   if (usernameInput.value && clientPrivateKeyInput.value) {
-    if (await handleLogin()) {
-      const statusData = await secureFetch('/api/admin/status', {
-        method: 'POST',
-        body: JSON.stringify({})
-      });
-      if (statusData.is_admin) await refreshAppData();
+    const {
+      sealskinPendingConfig
+    } = await chrome.storage.local.get('sealskinPendingConfig');
+    if (!sealskinPendingConfig) {
+      if (await handleLogin()) {
+        const statusData = await secureFetch('/api/admin/status', {
+          method: 'POST',
+          body: JSON.stringify({})
+        });
+        if (statusData.is_admin) await refreshAppData();
+      }
+    } else {
+      dashboardView.style.display = 'none';
+      simpleConfigView.style.display = 'none';
+      advancedConfigView.style.display = 'block';
     }
   } else {
     dashboardView.style.display = 'none';
@@ -1394,18 +1405,61 @@ document.addEventListener('DOMContentLoaded', async () => {
     advancedConfigView.style.display = 'none';
   });
 
-  applyConfigBtn.addEventListener('click', () => {
-    const text = configTextArea.value.trim();
-    if (text) parseAndApplyConfig(text);
-    else if (configFileUpload.files.length > 0) {
-      const reader = new FileReader();
-      reader.onload = (event) => parseAndApplyConfig(event.target.result);
-      reader.onerror = () => displayStatus(t('options.status.fileReadError'), true);
-      reader.readAsText(configFileUpload.files[0]);
-    } else displayStatus(t('options.status.noConfig'), true);
+  configFileUpload.addEventListener('change', () => {
+    const fileNameSpan = document.getElementById('config-file-name');
+    if (configFileUpload.files.length > 0) {
+      fileNameSpan.textContent = configFileUpload.files[0].name;
+    } else {
+      fileNameSpan.textContent = '';
+    }
   });
 
-  saveButton.addEventListener('click', saveConfig);
+  function readFileAsText(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = event => resolve(event.target.result);
+      reader.onerror = error => reject(error);
+      reader.readAsText(file);
+    });
+  }
+
+  applyConfigBtn.addEventListener('click', async () => {
+    try {
+      const text = configTextArea.value.trim();
+      let configText;
+      if (text) {
+        configText = text;
+      } else if (configFileUpload.files.length > 0) {
+        configText = await readFileAsText(configFileUpload.files[0]);
+      } else {
+        displayStatus(t('options.status.noConfig'), true);
+        return;
+      }
+
+      if (parseAndApplyConfig(configText)) {
+        await handleLogin();
+      }
+    } catch (e) {
+      displayStatus(t('options.status.fileReadError'), true);
+    }
+  });
+
+  saveButton.addEventListener('click', () => {
+    const pendingConfig = {
+      serverIp: serverIpInput.value.trim(),
+      apiPort: apiPortInput.value.trim(),
+      sessionPort: sessionPortInput.value.trim(),
+      username: usernameInput.value.trim(),
+      clientPrivateKey: clientPrivateKeyInput.value.trim(),
+      serverPublicKey: serverPublicKeyInput.value.trim(),
+    };
+    chrome.storage.local.set({
+      sealskinPendingConfig: pendingConfig
+    }, () => {
+      displayStatus(t('options.status.pendingConfigSaved'), false);
+    });
+  });
+
   loginButton.addEventListener('click', handleLogin);
   logoutButton.addEventListener('click', () => {
     if (confirm(t('options.dashboard.confirmLogout'))) {
@@ -1434,6 +1488,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     const privateKey = clientPrivateKeyInput.value.trim();
     if (user.username && privateKey) showUserConfigModal(user, privateKey, false);
     else displayStatus(t('options.status.generateConfigFailed'), true);
+  });
+
+  searchEngineDashboardSelect.addEventListener('change', async () => {
+    const {
+      sealskinConfig
+    } = await chrome.storage.local.get('sealskinConfig');
+    if (sealskinConfig) {
+      sealskinConfig.searchEngineUrl = searchEngineDashboardSelect.value;
+      chrome.storage.local.set({
+        sealskinConfig
+      }, () => {
+        displayStatus(t('options.status.settingsSaved'), false);
+      });
+    }
+  });
+
+  const generateKeyBtn = document.getElementById('generateKeyBtn');
+  const pubKeyDisplay = document.getElementById('pubKeyDisplay');
+  const generatedPubKey = document.getElementById('generatedPubKey');
+  const copyPubKeyBtn = document.getElementById('copyPubKeyBtn');
+  generateKeyBtn.addEventListener('click', async () => {
+    try {
+      const keyPair = await generateRsaKeyPair();
+      clientPrivateKeyInput.value = keyPair.privateKey;
+      generatedPubKey.value = keyPair.publicKey;
+      pubKeyDisplay.style.display = 'block';
+      displayStatus(t('options.status.keyGenerated'));
+    } catch (error) {
+      displayStatus(t('options.status.keyGenFailed', {
+        error: error.message
+      }), true);
+    }
+  });
+  copyPubKeyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(generatedPubKey.value).then(() => {
+      displayStatus(t('options.status.publicKeyCopied'));
+    }, () => {
+      displayStatus(t('options.status.keyCopyFailed'), true);
+    });
   });
 
   document.querySelectorAll('.close-button').forEach(btn => btn.addEventListener('click', () => document.getElementById(btn.dataset.modalId).style.display = 'none'));

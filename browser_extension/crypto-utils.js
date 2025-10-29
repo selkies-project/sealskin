@@ -12,6 +12,38 @@ function pemToArrayBuffer(pem) {
   return bytes.buffer;
 }
 
+function arrayBufferToBase64(buffer) {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+function arrayBufferToPem(buffer, type) {
+  const b64 = arrayBufferToBase64(buffer);
+  const lines = b64.match(/.{1,64}/g).join('\n');
+  return `-----BEGIN ${type} KEY-----\n${lines}\n-----END ${type} KEY-----\n`;
+}
+
+async function generateRsaKeyPair() {
+  const keyPair = await crypto.subtle.generateKey({
+    name: 'RSASSA-PKCS1-v1_5',
+    modulusLength: 2048,
+    publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+    hash: 'SHA-256',
+  }, true, ['sign', 'verify']);
+
+  const privateKeyBuffer = await crypto.subtle.exportKey('pkcs8', keyPair.privateKey);
+  const publicKeyBuffer = await crypto.subtle.exportKey('spki', keyPair.publicKey);
+
+  return {
+    privateKey: arrayBufferToPem(privateKeyBuffer, 'PRIVATE'),
+    publicKey: arrayBufferToPem(publicKeyBuffer, 'PUBLIC'),
+  };
+}
+
 function base64UrlEncode(str) {
   return btoa(str)
     .replace(/\+/g, '-')

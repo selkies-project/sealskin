@@ -230,13 +230,14 @@ textarea {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-input[type="file"].file-input {
-  padding: 0.5rem;
-  cursor: pointer;
+input[type="file"] {
+  display: none;
 }
 
-input[type="file"].file-input:hover {
-  border-color: var(--accent-primary);
+label.button[for="configFileUpload"] {
+  cursor: pointer;
+  display: inline-flex;
+  width: fit-content;
 }
 
 
@@ -318,6 +319,7 @@ button:disabled, label.button.disabled {
   display: flex;
   gap: 1rem;
   margin-top: 1rem;
+  justify-content: flex-end;
 }
 
 button.primary, label.button.primary {

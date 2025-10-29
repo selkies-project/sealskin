@@ -99,6 +99,20 @@
                                     <ul id="dashboard-gpu-list" style="margin: 0.5rem 0 0 1rem; padding-left: 1rem; list-style-type: square;"></ul>
                                 </div>
                             </div>
+                            <div>
+                                <h4 data-i18n="options.dashboard.clientSettings"><i class="fas fa-sliders-h"></i> Client Settings</h4>
+                                <div class="form-group" style="padding-left: 1.5rem;">
+                                    <label for="searchEngineDashboard" data-i18n="options.config.searchEngineLabel">Default Search Engine for Selected Text</label>
+                                    <select id="searchEngineDashboard">
+                                        <option value="https://google.com/search?q=">Google</option>
+                                        <option value="https://bing.com/search?q=">Bing</option>
+                                        <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
+                                        <option value="https://baidu.com/s?wd=">Baidu</option>
+                                        <option value="https://search.brave.com/search?q=">Brave</option>
+                                        <option value="https://startpage.com/do/dsearch?query=">Startpage</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         <div class="button-group">
                             <button id="logout-button" class="danger"><i class="fas fa-sign-out-alt"></i> <span data-i18n="options.dashboard.logout">Logout & Clear Config</span></button>
@@ -121,13 +135,17 @@
                     <p data-i18n="options.config.quickSetupDescription">Upload the configuration file (.json) provided by your administrator, or paste its contents below to automatically set up the extension.</p>
                     <div class="form-group">
                         <label for="configFileUpload" data-i18n="options.config.uploadLabel">Upload Config File</label>
-                        <input type="file" id="configFileUpload" class="file-input" accept=".json,application/json">
+                        <div>
+                            <input type="file" id="configFileUpload" accept=".json,application/json">
+                            <label for="configFileUpload" class="button secondary"><i class="fas fa-upload"></i> <span data-i18n="options.config.chooseFile">Choose File</span></label>
+                            <span id="config-file-name" style="margin-left: 1rem; color: var(--text-muted);"></span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="configTextArea" data-i18n="options.config.pasteLabel">Or Paste Config Text</label>
                         <textarea id="configTextArea" rows="10" data-i18n-placeholder="options.config.pastePlaceholder" placeholder="Paste your JSON configuration here..."></textarea>
                     </div>
-                    <div class="button-group">
+                    <div class="button-group" style="justify-content: flex-end;">
                         <button id="applyConfig" class="primary"><i class="fas fa-check"></i> <span data-i18n="options.config.applyButton">Apply Configuration</span></button>
                     </div>
                     <div class="config-view-toggle">
@@ -138,6 +156,7 @@
                 <div class="card" id="advanced-config-view" style="display:none;">
                     <div class="card-header">
                         <h3 data-i18n="options.config.advancedTitle">Client Configuration (Advanced)</h3>
+                        <button id="save" class="primary" style="margin-left: auto;"><i class="fas fa-save"></i> <span data-i18n="options.config.saveButton">Save Configuration</span></button>
                     </div>
                     <div class="form-grid">
                         <div class="form-group">
@@ -165,18 +184,19 @@
                         <label for="serverPublicKey" data-i18n="options.config.serverKeyLabel">Server Public Key (PEM Format)</label>
                         <textarea id="serverPublicKey" data-i18n-placeholder="options.config.serverKeyPlaceholder" placeholder="Paste the server_public.pem content here"></textarea>
                     </div>
-                    <div class="form-group">
-                        <label for="searchEngine" data-i18n="options.config.searchEngineLabel">Default Search Engine for Selected Text</label>
-                        <select id="searchEngine">
-                            <option value="https://google.com/search?q=">Google</option>
-                            <option value="https://bing.com/search?q=">Bing</option>
-                            <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
-                            <option value="https://search.brave.com/search?q=">Brave</option>
-                            <option value="https://startpage.com/do/dsearch?query=">Startpage</option>
-                        </select>
+                    <div class="card" style="background-color: var(--bg-secondary);">
+                        <h4 style="margin-top: 0;" data-i18n="options.config.keyGeneration">Key Generation</h4>
+                        <p class="description" data-i18n="options.config.keyGenDescription">If you don't have a key pair, you can generate one here. The private key will be filled in above. Provide the public key to your administrator.</p>
+                        <button id="generateKeyBtn" type="button" class="secondary" style="width: fit-content;"><i class="fas fa-key"></i> <span data-i18n="options.config.generateKeyButton">Generate New Key Pair</span></button>
+                        <div id="pubKeyDisplay" class="form-group" style="margin-top: 1.5rem; display: none;">
+                            <label for="generatedPubKey" data-i18n="options.config.publicKeyForAdminLabel">Your Public Key (for admin)</label>
+                            <div style="display: flex; gap: 1rem;">
+                                <textarea id="generatedPubKey" readonly rows="4" style="flex-grow: 1;"></textarea>
+                                <button id="copyPubKeyBtn" type="button" class="secondary" style="height: fit-content;"><i class="fas fa-copy"></i></button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="button-group">
-                        <button id="save" class="primary"><i class="fas fa-save"></i> <span data-i18n="options.config.saveButton">Save Configuration</span></button>
+                    <div class="button-group" style="margin-top: 2rem;">
                         <button id="login" class="secondary"><i class="fas fa-sign-in-alt"></i> <span data-i18n="options.config.loginButton">Login & Test</span></button>
                     </div>
                      <div class="config-view-toggle">
