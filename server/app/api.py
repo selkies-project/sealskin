@@ -7,6 +7,7 @@ import time
 import secrets
 import yaml
 import logging
+import pathlib
 import subprocess
 import tempfile
 import re
@@ -21,8 +22,8 @@ from docker.errors import DockerException
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from fastapi import FastAPI, Depends, HTTPException, Request, Response, APIRouter
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, Depends, HTTPException, Request, Response, APIRouter, Query
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.routing import APIRoute
 from jose import JWTError, jwt
 from pydantic import ValidationError
@@ -42,6 +43,7 @@ APP_TEMPLATES: Dict[str, Dict] = {}
 PROVIDER_CACHE: Dict[str, DockerProvider] = {}
 AVAILABLE_GPUS: List[Dict] = []
 IMAGE_METADATA: Dict[str, Dict] = {}
+DELETION_TASKS: Dict[str, Dict] = {}
 PULL_STATUS: Dict[str, str] = {}
 SYSTEM_STATS_CACHE: Dict[str, any] = {"data": None, "timestamp": 0}
 CPU_MODEL: str = "Unknown"
@@ -1885,9 +1887,212 @@ async def upload_to_storage(
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
 
+def _get_validated_path(username: str, home_dir: str, sub_path: str, check_existence: bool = True) -> pathlib.Path:
+    if not re.match(r"^[a-zA-Z0-9_-]+$", home_dir):
+        raise HTTPException(status_code=400, detail="Invalid home directory name.")
+
+    if home_dir not in user_manager.get_home_dirs(username):
+        raise HTTPException(status_code=403, detail=f"Access to home directory '{home_dir}' denied.")
+
+    base_dir = (pathlib.Path(settings.storage_path) / username / home_dir).resolve()
+
+    if not base_dir.is_dir():
+        raise HTTPException(status_code=404, detail="Home directory not found.")
+
+    # Normalize the sub_path to prevent traversal tricks like '.../'
+    normalized_sub_path = os.path.normpath(sub_path).lstrip('/')
+    if '..' in normalized_sub_path.split(os.path.sep):
+        raise HTTPException(status_code=403, detail="Directory traversal attempt detected.")
+
+    full_path = (base_dir / normalized_sub_path).resolve()
+
+    if base_dir not in full_path.parents and full_path != base_dir:
+        raise HTTPException(status_code=403, detail="Directory traversal attempt detected.")
+
+    if check_existence and not full_path.exists():
+        raise HTTPException(status_code=404, detail="Path not found.")
+
+    return full_path
+
+async def _perform_deletion(task_id: str, username: str, home_dir: str, paths_to_delete: List[str]):
+    DELETION_TASKS[task_id]["status"] = "processing"
+    deleted_count = 0
+    try:
+        for p in paths_to_delete:
+            validated_path = _get_validated_path(username, home_dir, p)
+            if validated_path.is_dir():
+                await asyncio.to_thread(shutil.rmtree, validated_path)
+            elif validated_path.is_file():
+                await asyncio.to_thread(os.remove, validated_path)
+            deleted_count += 1
+        DELETION_TASKS[task_id].update({
+            "status": "completed",
+            "message": f"Successfully deleted {deleted_count} items."
+        })
+    except Exception as e:
+        logger.error(f"Deletion task {task_id} failed: {e}")
+        DELETION_TASKS[task_id].update({
+            "status": "error",
+            "message": "An error occurred during deletion."
+        })
+
+files_router = APIRouter(
+    prefix="/api/files",
+    dependencies=[Depends(verify_persistent_storage_enabled)],
+    route_class=EncryptedRoute,
+)
+
+CHUNK_SIZE = 2 * 1024 * 1024
+
+@files_router.get("/download/chunk/{home_dir}", response_model=FileChunkResponse)
+async def download_file_chunk(
+     home_dir: str,
+    path: str = Query(...),
+    chunk_index: int = Query(...),
+    user: dict = Depends(verify_persistent_storage_enabled),
+):
+    validated_path = _get_validated_path(user["username"], home_dir, path)
+    if not validated_path.is_file():
+        raise HTTPException(status_code=404, detail="File not found or is a directory.")
+ 
+    try:
+        with open(validated_path, "rb") as f:
+            f.seek(chunk_index * CHUNK_SIZE)
+            chunk_data = f.read(CHUNK_SIZE)
+            is_last_chunk = len(chunk_data) < CHUNK_SIZE
+ 
+        return {
+            "chunk_data_b64": base64.b64encode(chunk_data).decode('utf-8'),
+            "is_last_chunk": is_last_chunk
+        }
+    except Exception as e:
+        logger.error(f"Error reading chunk for file {path}: {e}")
+        raise HTTPException(status_code=500, detail="Error reading file chunk.")
+
+@files_router.post("/create_folder/{home_dir}", response_model=GenericSuccessMessage)
+async def create_folder(
+    home_dir: str,
+    decrypted_body: dict = Depends(get_decrypted_request_body),
+    user: dict = Depends(verify_persistent_storage_enabled),
+):
+    req = CreateFolderRequest(**decrypted_body)
+    validated_path = _get_validated_path(user["username"], home_dir, req.path)
+    new_folder_path = validated_path / req.folder_name
+    if new_folder_path.exists():
+        raise HTTPException(status_code=409, detail=f"Folder '{req.folder_name}' already exists.")
+    try:
+        new_folder_path.mkdir()
+        return {"message": f"Folder '{req.folder_name}' created successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Could not create folder: {e}")
+
+@files_router.post("/delete/{home_dir}", response_model=DeleteTaskResponse)
+async def initiate_deletion(
+    home_dir: str,
+    decrypted_body: dict = Depends(get_decrypted_request_body),
+    user: dict = Depends(verify_persistent_storage_enabled),
+):
+    req = DeleteItemsRequest(**decrypted_body)
+    task_id = str(uuid.uuid4())
+    DELETION_TASKS[task_id] = {"status": "pending"}
+    asyncio.create_task(_perform_deletion(task_id, user["username"], home_dir, req.paths))
+    return {"message": "Deletion task started.", "task_id": task_id}
+
+@files_router.get("/delete_status/{task_id}", response_model=DeleteStatusResponse)
+async def check_deletion_status(task_id: str, user: dict = Depends(verify_token)):
+    task = DELETION_TASKS.get(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found.")
+    return task
+
+@files_router.get("/list/{home_dir}", response_model=FileListResponse)
+async def list_files(
+    home_dir: str,
+    path: str = Query("/"),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(50, ge=1, le=200),
+    user: dict = Depends(verify_persistent_storage_enabled),
+):
+    validated_path = _get_validated_path(user["username"], home_dir, path)
+    if not validated_path.is_dir():
+        raise HTTPException(status_code=400, detail="Path is not a valid directory.")
+
+    try:
+        all_items = sorted(
+            validated_path.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower())
+        )
+    except OSError as e:
+        raise HTTPException(status_code=500, detail=f"Error reading directory: {e}")
+
+    start = (page - 1) * per_page
+    end = start + per_page
+    paginated_items = all_items[start:end]
+
+    home_dir_root = (pathlib.Path(settings.storage_path) / user["username"] / home_dir)
+
+    response_items = []
+    for item in paginated_items:
+        stat = item.stat()
+        item_path = f"/{item.relative_to(home_dir_root)}".replace("\\", "/")
+        if str(item.relative_to(home_dir_root)) == ".":
+            item_path = "/"
+        
+        response_items.append(
+            {
+                "name": item.name,
+                "path": item_path,
+                "is_dir": item.is_dir(),
+                "size": stat.st_size,
+                "mtime": stat.st_mtime,
+            }
+        )
+
+    return {
+        "items": response_items,
+        "total": len(all_items),
+        "page": page,
+        "per_page": per_page,
+        "path": path,
+    }
+
+@files_router.post("/upload_to_dir/{home_dir}", response_model=GenericSuccessMessage)
+async def finalize_upload_to_dir(
+    home_dir: str,
+    decrypted_body: dict = Depends(get_decrypted_request_body),
+    user: dict = Depends(verify_persistent_storage_enabled),
+):
+    try:
+        req = FinalizeUploadToDirRequest(**decrypted_body)
+
+        dest_dir_path = _get_validated_path(user["username"], home_dir, req.path, check_existence=True)
+        if not dest_dir_path.is_dir():
+            raise HTTPException(status_code=400, detail="Destination path is not a valid directory.")
+
+        reassembled_file_path = await _reassemble_file(
+            req.upload_id, req.total_chunks, req.filename
+        )
+
+        safe_filename = os.path.basename(req.filename)
+        actual_filename = await asyncio.to_thread(_get_unique_filename, str(dest_dir_path), safe_filename)
+        final_location = dest_dir_path / actual_filename
+
+        try:
+            await asyncio.to_thread(shutil.move, reassembled_file_path, str(final_location))
+            await asyncio.to_thread(os.chmod, str(final_location), 0o644)
+            logger.info(f"User '{user['username']}' uploaded '{actual_filename}' to '{home_dir}{req.path}'")
+            return {"message": "File uploaded successfully."}
+        except Exception as e:
+            if os.path.exists(reassembled_file_path):
+                os.remove(reassembled_file_path)
+            logger.error(f"Failed to move finalized upload for user '{user['username']}': {e}")
+            raise HTTPException(status_code=500, detail="Could not place file in destination.")
+
+    except ValidationError as e:
+        raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
 
 encrypted_router.include_router(admin_router)
 encrypted_router.include_router(homedir_router)
 encrypted_router.include_router(session_router)
 encrypted_router.include_router(upload_router)
+encrypted_router.include_router(files_router)
 api_app.include_router(encrypted_router)

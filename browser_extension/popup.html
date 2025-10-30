@@ -11,6 +11,9 @@
         <div class="popup-tabs">
             <button id="launch-tab-btn" class="popup-tab-btn" data-i18n="popup.tabs.launch">Launch New</button>
             <button id="sessions-tab-btn" class="popup-tab-btn" data-i18n="popup.tabs.sessions">Active Sessions</button>
+            <button id="manage-files-btn" class="popup-tab-btn" style="display: none;" data-i18n-title="popup.tabs.manageFiles" title="Open file manager in a new tab">
+                <span data-i18n="popup.tabs.manageFiles">Manage Files</span> <i class="fas fa-external-link-alt"></i>
+            </button>
             <button id="upload-storage-tab-btn" class="popup-tab-btn" style="display: none;" data-i18n="popup.tabs.uploadStorage">Upload to Storage</button>
             <button id="upload-files-tab-btn" class="popup-tab-btn" data-i18n-title="popup.tabs.uploadFilesTitle" title="Open dedicated file upload page">
                 <span data-i18n="popup.tabs.uploadFiles">Upload Files</span> <i class="fas fa-external-link-alt"></i>
@@ -80,9 +83,6 @@
         <div id="upload-storage-view" class="popup-view">
             <main class="popup-main">
                 <div class="form-group">
-                    <label for="upload-storage-homedir-select" data-i18n="popup.uploadStorageView.selectHome">Select Home Directory</label>
-                    <select id="upload-storage-homedir-select">
-                    </select>
                 </div>
                 <p style="font-size: 0.85rem; color: var(--text-muted);" id="upload-storage-description">
                 </p>

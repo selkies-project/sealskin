@@ -19,6 +19,8 @@ const en = {
     common: {
         actions: 'Actions',
         active: 'Active',
+        cancel: 'Cancel',
+        manage: 'Manage',
         delete: 'Delete',
         edit: 'Edit',
         save: 'Save',
@@ -441,6 +443,7 @@ const en = {
         tabs: {
             launch: 'Launch New',
             sessions: 'Active Sessions',
+            manageFiles: 'Manage Files',
             uploadStorage: 'Upload to Storage',
             uploadFiles: 'Upload Files',
             uploadFilesTitle: 'Open dedicated file upload page'
@@ -467,8 +470,8 @@ const en = {
         },
         uploadStorageView: {
             selectHome: 'Select Home Directory',
-            description: 'This will upload the file <strong>{filename}</strong> directly to the \'Desktop/files\' folder inside the chosen home directory for future use.',
-            descriptionFallback: 'This will upload <strong>the selected file</strong> directly to the \'Desktop/files\' folder inside the chosen home directory for future use.',
+            description: 'This will upload the file <strong>{filename}</strong> directly to your Files storage for future use.',
+            descriptionFallback: 'This will upload the file <strong>{filename}</strong> directly to your Files storage for future use.',
             uploadButton: 'Upload File',
             uploadingButton: 'Uploading...',
             preparing: 'Preparing file...',
@@ -510,6 +513,74 @@ const en = {
             ready: 'File is ready to be opened securely.',
             button: 'Continue to Launch',
         }
+    },
+    files: {
+        title: 'SealSkin Files',
+        header: {
+            title: 'Files',
+            newFolder: 'New Folder',
+            uploadFiles: 'Upload Files',
+            uploadFolder: 'Upload Folder'
+        },
+        sidebar: {
+            sharedFiles: 'SealSkin Files'
+        },
+        table: {
+            name: 'Name',
+            size: 'Size',
+            lastModified: 'Last Modified'
+        },
+        dropzone: {
+            title: 'Drop files to upload'
+        },
+        pagination: {
+            previous: '« Previous',
+            next: 'Next »',
+            pageOf: 'Page {page} of {totalPages}'
+        },
+        modals: {
+            newFolder: {
+                title: 'Create New Folder',
+                folderNameLabel: 'Folder Name',
+                nameTitle: 'Use only letters, numbers, underscore, hyphen, or period.',
+                createButton: 'Create'
+            },
+            confirmDelete: {
+                title: 'Confirm Deletion',
+                message: 'Are you sure you want to delete {count, plural, one {1 selected item} other {{count} selected items}}? This action cannot be undone.',
+                messageDefault: 'Are you sure you want to delete the selected items? This action cannot be undone.'
+            },
+            uploadProgress: {
+                title: 'Upload Progress',
+                doneButton: 'Done'
+            }
+        },
+        status: {
+            homeDirLoadFailed: 'Failed to load home directories: {error}',
+            filesLoadFailed: 'Error loading files: {error}',
+            deleteProtectedError: 'Cannot delete protected system folders.',
+            deletingItems: 'Deleting {count, plural, one {1 item} other {{count} items}}...',
+            deleteSuccess: 'Deletion successful.',
+            deleteFailed: 'Deletion failed: {error}',
+            preparingUpload: 'Preparing to upload {count, plural, one {1 file} other {{count} files}}...',
+            uploadPrepFailed: 'Error during folder upload preparation: {error}',
+            notConfigured: 'Error: SealSkin not configured. Please set up in options.',
+            folderCreated: 'Folder \'{folderName}\' created.',
+            folderCreateFailed: 'Error creating folder: {error}'
+        },
+        placeholders: {
+            errorLoading: 'Error loading files.',
+            folderEmpty: 'This folder is empty.',
+            noHomeDirs: 'No home directories available.'
+        },
+        uploadStatus: {
+            pending: 'pending',
+            initiating: 'initiating',
+            uploading: 'uploading',
+            finalizing: 'finalizing',
+            completed: 'completed',
+            error: 'error'
+        }
     }
 };
 
@@ -527,6 +598,8 @@ const es = {
     common: {
         actions: 'Acciones',
         active: 'Activo',
+        cancel: 'Cancelar',
+        manage: 'Gestionar',
         delete: 'Eliminar',
         edit: 'Editar',
         save: 'Guardar',
@@ -949,6 +1022,7 @@ const es = {
         tabs: {
             launch: 'Iniciar Nuevo',
             sessions: 'Sesiones Activas',
+            manageFiles: 'Gestionar Archivos',
             uploadStorage: 'Subir a Almacenamiento',
             uploadFiles: 'Subir Archivos',
             uploadFilesTitle: 'Abrir página dedicada para subir archivos'
@@ -975,8 +1049,8 @@ const es = {
         },
         uploadStorageView: {
             selectHome: 'Seleccionar Directorio Personal',
-            description: 'Esto subirá el archivo <strong>{filename}</strong> directamente a la carpeta \'Desktop/files\' dentro del directorio personal elegido para uso futuro.',
-            descriptionFallback: 'Esto subirá <strong>el archivo seleccionado</strong> directamente a la carpeta \'Desktop/files\' dentro del directorio personal elegido para uso futuro.',
+            description: 'Esto subirá el archivo <strong>{filename}</strong> directamente a tu almacenamiento de Archivos para uso futuro.',
+            descriptionFallback: 'Esto subirá el archivo <strong>{filename}</strong> directamente a tu almacenamiento de Archivos para uso futuro.',
             uploadButton: 'Subir Archivo',
             uploadingButton: 'Subiendo...',
             preparing: 'Preparando archivo...',
@@ -1018,6 +1092,74 @@ const es = {
             ready: 'El archivo está listo para ser abierto de forma segura.',
             button: 'Continuar para Iniciar',
         }
+    },
+    files: {
+        title: 'Archivos de SealSkin',
+        header: {
+            title: 'Archivos',
+            newFolder: 'Nueva Carpeta',
+            uploadFiles: 'Subir Archivos',
+            uploadFolder: 'Subir Carpeta'
+        },
+        sidebar: {
+            sharedFiles: 'Archivos de SealSkin'
+        },
+        table: {
+            name: 'Nombre',
+            size: 'Tamaño',
+            lastModified: 'Última Modificación'
+        },
+        dropzone: {
+            title: 'Suelta los archivos para subirlos'
+        },
+        pagination: {
+            previous: '« Anterior',
+            next: 'Siguiente »',
+            pageOf: 'Página {page} de {totalPages}'
+        },
+        modals: {
+            newFolder: {
+                title: 'Crear Nueva Carpeta',
+                folderNameLabel: 'Nombre de la Carpeta',
+                nameTitle: 'Usa solo letras, números, guion bajo, guion o punto.',
+                createButton: 'Crear'
+            },
+            confirmDelete: {
+                title: 'Confirmar Eliminación',
+                message: '¿Estás seguro de que quieres eliminar {count, plural, one {1 elemento seleccionado} other {{count} elementos seleccionados}}? Esta acción no se puede deshacer.',
+                messageDefault: '¿Estás seguro de que quieres eliminar los elementos seleccionados? Esta acción no se puede deshacer.'
+            },
+            uploadProgress: {
+                title: 'Progreso de la Subida',
+                doneButton: 'Hecho'
+            }
+        },
+        status: {
+            homeDirLoadFailed: 'Error al cargar los directorios de inicio: {error}',
+            filesLoadFailed: 'Error al cargar los archivos: {error}',
+            deleteProtectedError: 'No se pueden eliminar las carpetas protegidas del sistema.',
+            deletingItems: 'Eliminando {count, plural, one {1 elemento} other {{count} elementos}}...',
+            deleteSuccess: 'Eliminación exitosa.',
+            deleteFailed: 'Error en la eliminación: {error}',
+            preparingUpload: 'Preparando para subir {count, plural, one {1 archivo} other {{count} archivos}}...',
+            uploadPrepFailed: 'Error durante la preparación de la subida de la carpeta: {error}',
+            notConfigured: 'Error: SealSkin no está configurado. Por favor, configúralo en las opciones.',
+            folderCreated: 'Carpeta \'{folderName}\' creada.',
+            folderCreateFailed: 'Error al crear la carpeta: {error}'
+        },
+        placeholders: {
+            errorLoading: 'Error al cargar los archivos.',
+            folderEmpty: 'Esta carpeta está vacía.',
+            noHomeDirs: 'No hay directorios de inicio disponibles.'
+        },
+        uploadStatus: {
+            pending: 'pendiente',
+            initiating: 'iniciando',
+            uploading: 'subiendo',
+            finalizing: 'finalizando',
+            completed: 'completado',
+            error: 'error'
+        }
     }
 };
 
@@ -1035,6 +1177,8 @@ const zh = {
     common: {
         actions: '操作',
         active: '启用',
+        cancel: '取消',
+        manage: '管理',
         delete: '删除',
         edit: '编辑',
         save: '保存',
@@ -1457,6 +1601,7 @@ const zh = {
         tabs: {
             launch: '启动新的',
             sessions: '活跃会话',
+            manageFiles: '管理文件',
             uploadStorage: '上传到存储',
             uploadFiles: '上传文件',
             uploadFilesTitle: '打开专用的文件上传页面'
@@ -1483,8 +1628,8 @@ const zh = {
         },
         uploadStorageView: {
             selectHome: '选择主目录',
-            description: '这将把文件<strong>{filename}</strong>直接上传到所选主目录内的“Desktop/files”文件夹中，以备将来使用。',
-            descriptionFallback: '这将把<strong>所选文件</strong>直接上传到所选主目录内的“Desktop/files”文件夹中，以备将来使用。',
+            description: '这将上传文件 <strong>{filename}</strong> 直接到您的“文件”存储中，以备将来使用。',
+            descriptionFallback: '这将上传文件 <strong>{filename}</strong> 直接到您的“文件”存储中，以备将来使用。',
             uploadButton: '上传文件',
             uploadingButton: '上传中...',
             preparing: '准备文件中...',
@@ -1526,6 +1671,74 @@ const zh = {
             ready: '文件已准备好，可以安全打开。',
             button: '继续启动',
         }
+    },
+    files: {
+        title: 'SealSkin 文件',
+        header: {
+            title: '文件',
+            newFolder: '新建文件夹',
+            uploadFiles: '上传文件',
+            uploadFolder: '上传文件夹'
+        },
+        sidebar: {
+            sharedFiles: 'SealSkin 文件'
+        },
+        table: {
+            name: '名称',
+            size: '大小',
+            lastModified: '最后修改'
+        },
+        dropzone: {
+            title: '拖放文件以上传'
+        },
+        pagination: {
+            previous: '« 上一页',
+            next: '下一页 »',
+            pageOf: '第 {page} 页 / 共 {totalPages} 页'
+        },
+        modals: {
+            newFolder: {
+                title: '创建新文件夹',
+                folderNameLabel: '文件夹名称',
+                nameTitle: '只能使用字母、数字、下划线、连字符或句点。',
+                createButton: '创建'
+            },
+            confirmDelete: {
+                title: '确认删除',
+                message: '您确定要删除{count, plural, one {1 个选定项目} other {{count} 个选定项目}}吗？此操作无法撤销。',
+                messageDefault: '您确定要删除所选项目吗？此操作无法撤销。'
+            },
+            uploadProgress: {
+                title: '上传进度',
+                doneButton: '完成'
+            }
+        },
+        status: {
+            homeDirLoadFailed: '加载主目录失败：{error}',
+            filesLoadFailed: '加载文件时出错：{error}',
+            deleteProtectedError: '无法删除受保护的系统文件夹。',
+            deletingItems: '正在删除 {count, plural, one {1 个项目} other {{count} 个项目}}...',
+            deleteSuccess: '删除成功。',
+            deleteFailed: '删除失败：{error}',
+            preparingUpload: '准备上传 {count, plural, one {1 个文件} other {{count} 个文件}}...',
+            uploadPrepFailed: '文件夹上传准备过程中出错：{error}',
+            notConfigured: '错误：SealSkin 未配置。请在选项中进行设置。',
+            folderCreated: '文件夹“{folderName}”已创建。',
+            folderCreateFailed: '创建文件夹时出错：{error}'
+        },
+        placeholders: {
+            errorLoading: '加载文件时出错。',
+            folderEmpty: '此文件夹为空。',
+            noHomeDirs: '没有可用的主目录。'
+        },
+        uploadStatus: {
+            pending: '待处理',
+            initiating: '正在开始',
+            uploading: '上传中',
+            finalizing: '正在完成',
+            completed: '已完成',
+            error: '错误'
+        }
     }
 };
 
@@ -1543,6 +1756,8 @@ const hi = {
     common: {
         actions: 'कार्रवाइयाँ',
         active: 'सक्रिय',
+        cancel: 'रद्द करें',
+        manage: 'प्रबंधित करें',
         delete: 'हटाएं',
         edit: 'संपादित करें',
         save: 'सहेजें',
@@ -1965,6 +2180,7 @@ const hi = {
         tabs: {
             launch: 'नया लॉन्च करें',
             sessions: 'सक्रिय सत्र',
+            manageFiles: 'फ़ाइलें प्रबंधित करें',
             uploadStorage: 'भंडारण में अपलोड करें',
             uploadFiles: 'फ़ाइलें अपलोड करें',
             uploadFilesTitle: 'समर्पित फ़ाइल अपलोड पृष्ठ खोलें'
@@ -1991,8 +2207,8 @@ const hi = {
         },
         uploadStorageView: {
             selectHome: 'होम डायरेक्टरी चुनें',
-            description: 'यह फ़ाइल <strong>{filename}</strong> को सीधे चुने हुए होम डायरेक्टरी के \'Desktop/files\' फ़ोल्डर में भविष्य के उपयोग के लिए अपलोड करेगा।',
-            descriptionFallback: 'यह <strong>चयनित फ़ाइल</strong> को सीधे चुने हुए होम डायरेक्टरी के \'Desktop/files\' फ़ोल्डर में भविष्य के उपयोग के लिए अपलोड करेगा।',
+            description: 'यह फ़ाइल <strong>{filename}</strong> को भविष्य में उपयोग के लिए सीधे आपके फ़ाइल स्टोरेज में अपलोड करेगा।',
+            descriptionFallback: 'यह फ़ाइल <strong>{filename}</strong> को भविष्य में उपयोग के लिए सीधे आपके फ़ाइल स्टोरेज में अपलोड करेगा।',
             uploadButton: 'फ़ाइल अपलोड करें',
             uploadingButton: 'अपलोड हो रहा है...',
             preparing: 'फ़ाइल तैयार हो रही है...',
@@ -2034,6 +2250,74 @@ const hi = {
             ready: 'फ़ाइल सुरक्षित रूप से खोले जाने के लिए तैयार है।',
             button: 'लॉन्च करने के लिए जारी रखें',
         }
+    },
+    files: {
+        title: 'SealSkin फ़ाइलें',
+        header: {
+            title: 'फ़ाइलें',
+            newFolder: 'नया फ़ोल्डर',
+            uploadFiles: 'फ़ाइलें अपलोड करें',
+            uploadFolder: 'फ़ोल्डर अपलोड करें'
+        },
+        sidebar: {
+            sharedFiles: 'SealSkin फ़ाइलें'
+        },
+        table: {
+            name: 'नाम',
+            size: 'आकार',
+            lastModified: 'अंतिम संशोधित'
+        },
+        dropzone: {
+            title: 'अपलोड करने के लिए फ़ाइलें यहाँ छोड़ें'
+        },
+        pagination: {
+            previous: '« पिछला',
+            next: 'अगला »',
+            pageOf: 'पेज {page} / {totalPages}'
+        },
+        modals: {
+            newFolder: {
+                title: 'नया फ़ोल्डर बनाएँ',
+                folderNameLabel: 'फ़ोल्डर का नाम',
+                nameTitle: 'केवल अक्षर, संख्या, अंडरस्कोर, हाइफ़न, या अवधि का उपयोग करें।',
+                createButton: 'बनाएँ'
+            },
+            confirmDelete: {
+                title: 'हटाने की पुष्टि करें',
+                message: 'क्या आप वाकई {count, plural, one {1 चयनित आइटम} other {{count} चयनित आइटम}} हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती।',
+                messageDefault: 'क्या आप वाकई चयनित आइटम हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती।'
+            },
+            uploadProgress: {
+                title: 'अपलोड प्रगति',
+                doneButton: 'हो गया'
+            }
+        },
+        status: {
+            homeDirLoadFailed: 'होम निर्देशिका लोड करने में विफल: {error}',
+            filesLoadFailed: 'फ़ाइलें लोड करने में त्रुटि: {error}',
+            deleteProtectedError: 'संरक्षित सिस्टम फ़ोल्डर नहीं हटा सकते।',
+            deletingItems: '{count, plural, one {1 आइटम} other {{count} आइटम}} हटा रहा है...',
+            deleteSuccess: 'सफलतापूर्वक हटाया गया।',
+            deleteFailed: 'हटाने में विफल: {error}',
+            preparingUpload: '{count, plural, one {1 फ़ाइल} other {{count} फ़ाइलें}} अपलोड करने की तैयारी कर रहा है...',
+            uploadPrepFailed: 'फ़ोल्डर अपलोड की तैयारी के दौरान त्रुटि: {error}',
+            notConfigured: 'त्रुटि: SealSkin कॉन्फ़िगर नहीं है। कृपया विकल्पों में सेटअप करें।',
+            folderCreated: 'फ़ोल्डर \'{folderName}\' बनाया गया।',
+            folderCreateFailed: 'फ़ोल्डर बनाने में त्रुटि: {error}'
+        },
+        placeholders: {
+            errorLoading: 'फ़ाइलें लोड करने में त्रुटि।',
+            folderEmpty: 'यह फ़ोल्डर खाली है।',
+            noHomeDirs: 'कोई होम निर्देशिका उपलब्ध नहीं है।'
+        },
+        uploadStatus: {
+            pending: 'लंबित',
+            initiating: 'शुरू हो रहा है',
+            uploading: 'अपलोड हो रहा है',
+            finalizing: 'अंतिम रूप दिया जा रहा है',
+            completed: 'पूरा हुआ',
+            error: 'त्रुटि'
+        }
     }
 };
 
@@ -2051,6 +2335,8 @@ const pt = {
     common: {
         actions: 'Ações',
         active: 'Ativo',
+        cancel: 'Cancelar',
+        manage: 'Gerenciar',
         delete: 'Excluir',
         edit: 'Editar',
         save: 'Salvar',
@@ -2473,6 +2759,7 @@ const pt = {
         tabs: {
             launch: 'Iniciar Novo',
             sessions: 'Sessões Ativas',
+            manageFiles: 'Gerenciar Arquivos',
             uploadStorage: 'Enviar para Armazenamento',
             uploadFiles: 'Enviar Arquivos',
             uploadFilesTitle: 'Abrir página dedicada para envio de arquivos'
@@ -2499,8 +2786,8 @@ const pt = {
         },
         uploadStorageView: {
             selectHome: 'Selecionar Diretório Home',
-            description: 'Isso enviará o arquivo <strong>{filename}</strong> diretamente para a pasta \'Desktop/files\' dentro do diretório home escolhido para uso futuro.',
-            descriptionFallback: 'Isso enviará <strong>o arquivo selecionado</strong> diretamente para a pasta \'Desktop/files\' dentro do diretório home escolhido para uso futuro.',
+            description: 'Isso enviará o arquivo <strong>{filename}</strong> diretamente para o seu armazenamento de Arquivos para uso futuro.',
+            descriptionFallback: 'Isso enviará o arquivo <strong>{filename}</strong> diretamente para o seu armazenamento de Arquivos para uso futuro.',
             uploadButton: 'Enviar Arquivo',
             uploadingButton: 'Enviando...',
             preparing: 'Preparando arquivo...',
@@ -2542,6 +2829,74 @@ const pt = {
             ready: 'O arquivo está pronto para ser aberto com segurança.',
             button: 'Continuar para Iniciar',
         }
+    },
+    files: {
+        title: 'Arquivos SealSkin',
+        header: {
+            title: 'Arquivos',
+            newFolder: 'Nova Pasta',
+            uploadFiles: 'Carregar Arquivos',
+            uploadFolder: 'Carregar Pasta'
+        },
+        sidebar: {
+            sharedFiles: 'Arquivos SealSkin'
+        },
+        table: {
+            name: 'Nome',
+            size: 'Tamanho',
+            lastModified: 'Última Modificação'
+        },
+        dropzone: {
+            title: 'Arraste arquivos para carregar'
+        },
+        pagination: {
+            previous: '« Anterior',
+            next: 'Próximo »',
+            pageOf: 'Página {page} de {totalPages}'
+        },
+        modals: {
+            newFolder: {
+                title: 'Criar Nova Pasta',
+                folderNameLabel: 'Nome da Pasta',
+                nameTitle: 'Use apenas letras, números, sublinhado, hífen ou ponto.',
+                createButton: 'Criar'
+            },
+            confirmDelete: {
+                title: 'Confirmar Exclusão',
+                message: 'Tem certeza de que deseja excluir {count, plural, one {1 item selecionado} other {{count} itens selecionados}}? Esta ação não pode ser desfeita.',
+                messageDefault: 'Tem certeza de que deseja excluir os itens selecionados? Esta ação não pode ser desfeita.'
+            },
+            uploadProgress: {
+                title: 'Progresso do Upload',
+                doneButton: 'Concluído'
+            }
+        },
+        status: {
+            homeDirLoadFailed: 'Falha ao carregar diretórios home: {error}',
+            filesLoadFailed: 'Erro ao carregar arquivos: {error}',
+            deleteProtectedError: 'Não é possível excluir pastas de sistema protegidas.',
+            deletingItems: 'Excluindo {count, plural, one {1 item} other {{count} itens}}...',
+            deleteSuccess: 'Exclusão bem-sucedida.',
+            deleteFailed: 'Falha na exclusão: {error}',
+            preparingUpload: 'Preparando para carregar {count, plural, one {1 arquivo} other {{count} arquivos}}...',
+            uploadPrepFailed: 'Erro durante a preparação do upload da pasta: {error}',
+            notConfigured: 'Erro: SealSkin não configurado. Por favor, configure nas opções.',
+            folderCreated: 'Pasta \'{folderName}\' criada.',
+            folderCreateFailed: 'Erro ao criar pasta: {error}'
+        },
+        placeholders: {
+            errorLoading: 'Erro ao carregar arquivos.',
+            folderEmpty: 'Esta pasta está vazia.',
+            noHomeDirs: 'Nenhum diretório home disponível.'
+        },
+        uploadStatus: {
+            pending: 'pendente',
+            initiating: 'iniciando',
+            uploading: 'carregando',
+            finalizing: 'finalizando',
+            completed: 'concluído',
+            error: 'erro'
+        }
     }
 };
 
@@ -2559,6 +2914,8 @@ const fr = {
     common: {
         actions: 'Actions',
         active: 'Actif',
+        cancel: 'Annuler',
+        manage: 'Gérer',
         delete: 'Supprimer',
         edit: 'Modifier',
         save: 'Enregistrer',
@@ -2981,6 +3338,7 @@ const fr = {
         tabs: {
             launch: 'Lancer Nouveau',
             sessions: 'Sessions Actives',
+            manageFiles: 'Gérer les fichiers',
             uploadStorage: 'Téléverser vers Stockage',
             uploadFiles: 'Téléverser Fichiers',
             uploadFilesTitle: 'Ouvrir la page dédiée au téléversement de fichiers'
@@ -3007,8 +3365,8 @@ const fr = {
         },
         uploadStorageView: {
             selectHome: 'Sélectionner un Dossier Personnel',
-            description: 'Ceci téléversera le fichier <strong>{filename}</strong> directement dans le dossier \'Desktop/files\' du dossier personnel choisi pour une utilisation future.',
-            descriptionFallback: 'Ceci téléversera <strong>le fichier sélectionné</strong> directement dans le dossier \'Desktop/files\' du dossier personnel choisi pour une utilisation future.',
+            description: 'Ceci téléversera le fichier <strong>{filename}</strong> directement dans votre espace de stockage Fichiers pour une utilisation future.',
+            descriptionFallback: 'Ceci téléversera le fichier <strong>{filename}</strong> directement dans votre espace de stockage Fichiers pour une utilisation future.',
             uploadButton: 'Téléverser le Fichier',
             uploadingButton: 'Téléversement...',
             preparing: 'Préparation du fichier...',
@@ -3050,6 +3408,74 @@ const fr = {
             ready: 'Le fichier est prêt à être ouvert de manière sécurisée.',
             button: 'Continuer pour Lancer',
         }
+    },
+    files: {
+        title: 'Fichiers SealSkin',
+        header: {
+            title: 'Fichiers',
+            newFolder: 'Nouveau Dossier',
+            uploadFiles: 'Téléverser des Fichiers',
+            uploadFolder: 'Téléverser un Dossier'
+        },
+        sidebar: {
+            sharedFiles: 'Fichiers SealSkin'
+        },
+        table: {
+            name: 'Nom',
+            size: 'Taille',
+            lastModified: 'Dernière Modification'
+        },
+        dropzone: {
+            title: 'Déposez des fichiers pour les téléverser'
+        },
+        pagination: {
+            previous: '« Précédent',
+            next: 'Suivant »',
+            pageOf: 'Page {page} sur {totalPages}'
+        },
+        modals: {
+            newFolder: {
+                title: 'Créer un Nouveau Dossier',
+                folderNameLabel: 'Nom du Dossier',
+                nameTitle: 'Utilisez uniquement des lettres, des chiffres, des traits de soulignement, des tirets ou des points.',
+                createButton: 'Créer'
+            },
+            confirmDelete: {
+                title: 'Confirmer la Suppression',
+                message: 'Êtes-vous sûr de vouloir supprimer {count, plural, one {1 élément sélectionné} other {{count} éléments sélectionnés}} ? Cette action est irréversible.',
+                messageDefault: 'Êtes-vous sûr de vouloir supprimer les éléments sélectionnés ? Cette action est irréversible.'
+            },
+            uploadProgress: {
+                title: 'Progression du Téléversement',
+                doneButton: 'Terminé'
+            }
+        },
+        status: {
+            homeDirLoadFailed: 'Échec du chargement des répertoires personnels : {error}',
+            filesLoadFailed: 'Erreur lors du chargement des fichiers : {error}',
+            deleteProtectedError: 'Impossible de supprimer les dossiers système protégés.',
+            deletingItems: 'Suppression de {count, plural, one {1 élément} other {{count} éléments}}...',
+            deleteSuccess: 'Suppression réussie.',
+            deleteFailed: 'Échec de la suppression : {error}',
+            preparingUpload: 'Préparation du téléversement de {count, plural, one {1 fichier} other {{count} fichiers}}...',
+            uploadPrepFailed: 'Erreur lors de la préparation du téléversement du dossier : {error}',
+            notConfigured: 'Erreur : SealSkin non configuré. Veuillez le configurer dans les options.',
+            folderCreated: 'Dossier \'{folderName}\' créé.',
+            folderCreateFailed: 'Erreur lors de la création du dossier : {error}'
+        },
+        placeholders: {
+            errorLoading: 'Erreur lors du chargement des fichiers.',
+            folderEmpty: 'Ce dossier est vide.',
+            noHomeDirs: 'Aucun répertoire personnel disponible.'
+        },
+        uploadStatus: {
+            pending: 'en attente',
+            initiating: 'initialisation',
+            uploading: 'téléversement',
+            finalizing: 'finalisation',
+            completed: 'terminé',
+            error: 'erreur'
+        }
     }
 };
 
@@ -3067,6 +3493,8 @@ const ru = {
     common: {
         actions: 'Действия',
         active: 'Активен',
+        cancel: 'Отмена',
+        manage: 'Управлять',
         delete: 'Удалить',
         edit: 'Изменить',
         save: 'Сохранить',
@@ -3489,6 +3917,7 @@ const ru = {
         tabs: {
             launch: 'Запустить',
             sessions: 'Активные сессии',
+            manageFiles: 'Управлять файлами',
             uploadStorage: 'Загрузить в хранилище',
             uploadFiles: 'Загрузить файлы',
             uploadFilesTitle: 'Открыть отдельную страницу загрузки файлов'
@@ -3515,8 +3944,8 @@ const ru = {
         },
         uploadStorageView: {
             selectHome: 'Выберите домашний каталог',
-            description: 'Файл <strong>{filename}</strong> будет загружен непосредственно в папку \'Desktop/files\' в выбранном домашнем каталоге для дальнейшего использования.',
-            descriptionFallback: '<strong>Выбранный файл</strong> будет загружен непосредственно в папку \'Desktop/files\' в выбранном домашнем каталоге для дальнейшего использования.',
+            description: 'Это загрузит файл <strong>{filename}</strong> напрямую в ваше хранилище файлов для будущего использования.',
+            descriptionFallback: 'Это загрузит файл <strong>{filename}</strong> напрямую в ваше хранилище файлов для будущего использования.',
             uploadButton: 'Загрузить файл',
             uploadingButton: 'Загрузка...',
             preparing: 'Подготовка файла...',
@@ -3558,6 +3987,74 @@ const ru = {
             ready: 'Файл готов к безопасному открытию.',
             button: 'Продолжить к запуску',
         }
+    },
+    files: {
+        title: 'Файлы SealSkin',
+        header: {
+            title: 'Файлы',
+            newFolder: 'Новая папка',
+            uploadFiles: 'Загрузить файлы',
+            uploadFolder: 'Загрузить папку'
+        },
+        sidebar: {
+            sharedFiles: 'Файлы SealSkin'
+        },
+        table: {
+            name: 'Имя',
+            size: 'Размер',
+            lastModified: 'Последнее изменение'
+        },
+        dropzone: {
+            title: 'Перетащите файлы для загрузки'
+        },
+        pagination: {
+            previous: '« Назад',
+            next: 'Вперед »',
+            pageOf: 'Страница {page} из {totalPages}'
+        },
+        modals: {
+            newFolder: {
+                title: 'Создать новую папку',
+                folderNameLabel: 'Имя папки',
+                nameTitle: 'Используйте только буквы, цифры, подчеркивание, дефис или точку.',
+                createButton: 'Создать'
+            },
+            confirmDelete: {
+                title: 'Подтвердить удаление',
+                message: 'Вы уверены, что хотите удалить {count, plural, one {1 выбранный элемент} other {{count} выбранных элементов}}? Это действие нельзя отменить.',
+                messageDefault: 'Вы уверены, что хотите удалить выбранные элементы? Это действие нельзя отменить.'
+            },
+            uploadProgress: {
+                title: 'Прогресс загрузки',
+                doneButton: 'Готово'
+            }
+        },
+        status: {
+            homeDirLoadFailed: 'Не удалось загрузить домашние каталоги: {error}',
+            filesLoadFailed: 'Ошибка загрузки файлов: {error}',
+            deleteProtectedError: 'Невозможно удалить защищенные системные папки.',
+            deletingItems: 'Удаление {count, plural, one {1 элемента} few {{count} элементов} many {{count} элементов} other {{count} элементов}}...',
+            deleteSuccess: 'Удаление успешно.',
+            deleteFailed: 'Ошибка удаления: {error}',
+            preparingUpload: 'Подготовка к загрузке {count, plural, one {1 файла} few {{count} файлов} many {{count} файлов} other {{count} файлов}}...',
+            uploadPrepFailed: 'Ошибка при подготовке к загрузке папки: {error}',
+            notConfigured: 'Ошибка: SealSkin не настроен. Пожалуйста, настройте в опциях.',
+            folderCreated: 'Папка \'{folderName}\' создана.',
+            folderCreateFailed: 'Ошибка при создании папки: {error}'
+        },
+        placeholders: {
+            errorLoading: 'Ошибка загрузки файлов.',
+            folderEmpty: 'Эта папка пуста.',
+            noHomeDirs: 'Нет доступных домашних каталогов.'
+        },
+        uploadStatus: {
+            pending: 'ожидание',
+            initiating: 'инициализация',
+            uploading: 'загрузка',
+            finalizing: 'завершение',
+            completed: 'завершено',
+            error: 'ошибка'
+        }
     }
 };
 
@@ -3575,6 +4072,8 @@ const de = {
     common: {
         actions: 'Aktionen',
         active: 'Aktiv',
+        cancel: 'Abbrechen',
+        manage: 'Verwalten',
         delete: 'Löschen',
         edit: 'Bearbeiten',
         save: 'Speichern',
@@ -3997,6 +4496,7 @@ const de = {
         tabs: {
             launch: 'Neu starten',
             sessions: 'Aktive Sitzungen',
+            manageFiles: 'Dateien verwalten',
             uploadStorage: 'In Speicher hochladen',
             uploadFiles: 'Dateien hochladen',
             uploadFilesTitle: 'Dedizierte Seite zum Hochladen von Dateien öffnen'
@@ -4023,8 +4523,8 @@ const de = {
         },
         uploadStorageView: {
             selectHome: 'Home-Verzeichnis auswählen',
-            description: 'Dies lädt die Datei <strong>{filename}</strong> direkt in den Ordner \'Desktop/files\' im ausgewählten Home-Verzeichnis zur zukünftigen Verwendung hoch.',
-            descriptionFallback: 'Dies lädt <strong>die ausgewählte Datei</strong> direkt in den Ordner \'Desktop/files\' im ausgewählten Home-Verzeichnis zur zukünftigen Verwendung hoch.',
+            description: 'Dies lädt die Datei <strong>{filename}</strong> zur zukünftigen Verwendung direkt in Ihren Dateispeicher hoch.',
+            descriptionFallback: 'Dies lädt die Datei <strong>{filename}</strong> zur zukünftigen Verwendung direkt in Ihren Dateispeicher hoch.',
             uploadButton: 'Datei hochladen',
             uploadingButton: 'Wird hochgeladen...',
             preparing: 'Datei wird vorbereitet...',
@@ -4066,6 +4566,74 @@ const de = {
             ready: 'Die Datei ist bereit, sicher geöffnet zu werden.',
             button: 'Weiter zum Starten',
         }
+    },
+    files: {
+        title: 'SealSkin-Dateien',
+        header: {
+            title: 'Dateien',
+            newFolder: 'Neuer Ordner',
+            uploadFiles: 'Dateien hochladen',
+            uploadFolder: 'Ordner hochladen'
+        },
+        sidebar: {
+            sharedFiles: 'SealSkin-Dateien'
+        },
+        table: {
+            name: 'Name',
+            size: 'Größe',
+            lastModified: 'Zuletzt geändert'
+        },
+        dropzone: {
+            title: 'Dateien zum Hochladen hier ablegen'
+        },
+        pagination: {
+            previous: '« Zurück',
+            next: 'Weiter »',
+            pageOf: 'Seite {page} von {totalPages}'
+        },
+        modals: {
+            newFolder: {
+                title: 'Neuen Ordner erstellen',
+                folderNameLabel: 'Ordnername',
+                nameTitle: 'Verwenden Sie nur Buchstaben, Zahlen, Unterstrich, Bindestrich oder Punkt.',
+                createButton: 'Erstellen'
+            },
+            confirmDelete: {
+                title: 'Löschen bestätigen',
+                message: 'Möchten Sie {count, plural, one {1 ausgewähltes Element} other {{count} ausgewählte Elemente}} wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.',
+                messageDefault: 'Möchten Sie die ausgewählten Elemente wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.'
+            },
+            uploadProgress: {
+                title: 'Upload-Fortschritt',
+                doneButton: 'Fertig'
+            }
+        },
+        status: {
+            homeDirLoadFailed: 'Fehler beim Laden der Home-Verzeichnisse: {error}',
+            filesLoadFailed: 'Fehler beim Laden der Dateien: {error}',
+            deleteProtectedError: 'Geschützte Systemordner können nicht gelöscht werden.',
+            deletingItems: 'Lösche {count, plural, one {1 Element} other {{count} Elemente}}...',
+            deleteSuccess: 'Löschen erfolgreich.',
+            deleteFailed: 'Löschen fehlgeschlagen: {error}',
+            preparingUpload: 'Vorbereitung zum Hochladen von {count, plural, one {1 Datei} other {{count} Dateien}}...',
+            uploadPrepFailed: 'Fehler bei der Vorbereitung des Ordner-Uploads: {error}',
+            notConfigured: 'Fehler: SealSkin nicht konfiguriert. Bitte in den Optionen einrichten.',
+            folderCreated: 'Ordner \'{folderName}\' erstellt.',
+            folderCreateFailed: 'Fehler beim Erstellen des Ordners: {error}'
+        },
+        placeholders: {
+            errorLoading: 'Fehler beim Laden der Dateien.',
+            folderEmpty: 'Dieser Ordner ist leer.',
+            noHomeDirs: 'Keine Home-Verzeichnisse verfügbar.'
+        },
+        uploadStatus: {
+            pending: 'ausstehend',
+            initiating: 'wird gestartet',
+            uploading: 'wird hochgeladen',
+            finalizing: 'wird abgeschlossen',
+            completed: 'abgeschlossen',
+            error: 'fehler'
+        }
     }
 };
 
@@ -4083,6 +4651,8 @@ const tr = {
     common: {
         actions: 'Eylemler',
         active: 'Aktif',
+        cancel: 'İptal',
+        manage: 'Yönet',
         delete: 'Sil',
         edit: 'Düzenle',
         save: 'Kaydet',
@@ -4505,6 +5075,7 @@ const tr = {
         tabs: {
             launch: 'Yeni Başlat',
             sessions: 'Aktif Oturumlar',
+            manageFiles: 'Dosyaları Yönet',
             uploadStorage: 'Depolamaya Yükle',
             uploadFiles: 'Dosya Yükle',
             uploadFilesTitle: 'Ayrı dosya yükleme sayfasını aç'
@@ -4531,8 +5102,8 @@ const tr = {
         },
         uploadStorageView: {
             selectHome: 'Ana Dizin Seç',
-            description: 'Bu, <strong>{filename}</strong> dosyasını ileride kullanmak üzere seçilen ana dizinin içindeki \'Desktop/files\' klasörüne doğrudan yükleyecektir.',
-            descriptionFallback: 'Bu, <strong>seçilen dosyayı</strong> ileride kullanmak üzere seçilen ana dizinin içindeki \'Desktop/files\' klasörüne doğrudan yükleyecektir.',
+            description: 'Bu, <strong>{filename}</strong> dosyasını ileride kullanmak üzere doğrudan Dosyalar depolama alanınıza yükleyecektir.',
+            descriptionFallback: 'Bu, <strong>{filename}</strong> dosyasını ileride kullanmak üzere doğrudan Dosyalar depolama alanınıza yükleyecektir.',
             uploadButton: 'Dosya Yükle',
             uploadingButton: 'Yükleniyor...',
             preparing: 'Dosya hazırlanıyor...',
@@ -4574,6 +5145,74 @@ const tr = {
             ready: 'Dosya güvenli bir şekilde açılmaya hazır.',
             button: 'Başlatmaya Devam Et',
         }
+    },
+    files: {
+        title: 'SealSkin Dosyaları',
+        header: {
+            title: 'Dosyalar',
+            newFolder: 'Yeni Klasör',
+            uploadFiles: 'Dosya Yükle',
+            uploadFolder: 'Klasör Yükle'
+        },
+        sidebar: {
+            sharedFiles: 'SealSkin Dosyaları'
+        },
+        table: {
+            name: 'Ad',
+            size: 'Boyut',
+            lastModified: 'Son Değiştirme'
+        },
+        dropzone: {
+            title: 'Yüklemek için dosyaları buraya bırakın'
+        },
+        pagination: {
+            previous: '« Önceki',
+            next: 'Sonraki »',
+            pageOf: 'Sayfa {page} / {totalPages}'
+        },
+        modals: {
+            newFolder: {
+                title: 'Yeni Klasör Oluştur',
+                folderNameLabel: 'Klasör Adı',
+                nameTitle: 'Yalnızca harf, sayı, alt çizgi, tire veya nokta kullanın.',
+                createButton: 'Oluştur'
+            },
+            confirmDelete: {
+                title: 'Silmeyi Onayla',
+                message: '{count, plural, one {1 seçili öğeyi} other {{count} seçili öğeyi}} silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+                messageDefault: 'Seçili öğeleri silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'
+            },
+            uploadProgress: {
+                title: 'Yükleme İlerlemesi',
+                doneButton: 'Bitti'
+            }
+        },
+        status: {
+            homeDirLoadFailed: 'Ana dizinler yüklenemedi: {error}',
+            filesLoadFailed: 'Dosyalar yüklenirken hata oluştu: {error}',
+            deleteProtectedError: 'Korunan sistem klasörleri silinemez.',
+            deletingItems: '{count, plural, one {1 öğe} other {{count} öğe}} siliniyor...',
+            deleteSuccess: 'Silme başarılı.',
+            deleteFailed: 'Silme başarısız: {error}',
+            preparingUpload: '{count, plural, one {1 dosya} other {{count} dosya}} yüklemeye hazırlanıyor...',
+            uploadPrepFailed: 'Klasör yükleme hazırlığı sırasında hata: {error}',
+            notConfigured: 'Hata: SealSkin yapılandırılmamış. Lütfen seçeneklerden ayarlayın.',
+            folderCreated: '\'{folderName}\' klasörü oluşturuldu.',
+            folderCreateFailed: 'Klasör oluşturulurken hata: {error}'
+        },
+        placeholders: {
+            errorLoading: 'Dosyalar yüklenirken hata oluştu.',
+            folderEmpty: 'Bu klasör boş.',
+            noHomeDirs: 'Kullanılabilir ana dizin yok.'
+        },
+        uploadStatus: {
+            pending: 'beklemede',
+            initiating: 'başlatılıyor',
+            uploading: 'yükleniyor',
+            finalizing: 'tamamlanıyor',
+            completed: 'tamamlandı',
+            error: 'hata'
+        }
     }
 };
 
@@ -4591,6 +5230,8 @@ const it = {
     common: {
         actions: 'Azioni',
         active: 'Attivo',
+        cancel: 'Annulla',
+        manage: 'Gestisci',
         delete: 'Elimina',
         edit: 'Modifica',
         save: 'Salva',
@@ -5013,6 +5654,7 @@ const it = {
         tabs: {
             launch: 'Avvia Nuovo',
             sessions: 'Sessioni Attive',
+            manageFiles: 'Gestisci File',
             uploadStorage: 'Carica su Archiviazione',
             uploadFiles: 'Carica File',
             uploadFilesTitle: 'Apri pagina dedicata al caricamento file'
@@ -5039,8 +5681,8 @@ const it = {
         },
         uploadStorageView: {
             selectHome: 'Seleziona Cartella Home',
-            description: 'Questo caricherà il file <strong>{filename}</strong> direttamente nella cartella \'Desktop/files\' all\'interno della cartella home scelta per uso futuro.',
-            descriptionFallback: 'Questo caricherà <strong>il file selezionato</strong> direttamente nella cartella \'Desktop/files\' all\'interno della cartella home scelta per uso futuro.',
+            description: 'Questo caricherà il file <strong>{filename}</strong> direttamente nel tuo archivio File per uso futuro.',
+            descriptionFallback: 'Questo caricherà il file <strong>{filename}</strong> direttamente nel tuo archivio File per uso futuro.',
             uploadButton: 'Carica File',
             uploadingButton: 'Caricamento...',
             preparing: 'Preparazione file...',
@@ -5082,6 +5724,74 @@ const it = {
             ready: 'Il file è pronto per essere aperto in modo sicuro.',
             button: 'Continua per Avviare',
         }
+    },
+    files: {
+        title: 'File di SealSkin',
+        header: {
+            title: 'File',
+            newFolder: 'Nuova Cartella',
+            uploadFiles: 'Carica File',
+            uploadFolder: 'Carica Cartella'
+        },
+        sidebar: {
+            sharedFiles: 'File di SealSkin'
+        },
+        table: {
+            name: 'Nome',
+            size: 'Dimensione',
+            lastModified: 'Ultima Modifica'
+        },
+        dropzone: {
+            title: 'Trascina i file per caricarli'
+        },
+        pagination: {
+            previous: '« Precedente',
+            next: 'Successivo »',
+            pageOf: 'Pagina {page} di {totalPages}'
+        },
+        modals: {
+            newFolder: {
+                title: 'Crea Nuova Cartella',
+                folderNameLabel: 'Nome Cartella',
+                nameTitle: 'Usa solo lettere, numeri, trattino basso, trattino o punto.',
+                createButton: 'Crea'
+            },
+            confirmDelete: {
+                title: 'Conferma Eliminazione',
+                message: 'Sei sicuro di voler eliminare {count, plural, one {1 elemento selezionato} other {{count} elementi selezionati}}? Questa azione non può essere annullata.',
+                messageDefault: 'Sei sicuro di voler eliminare gli elementi selezionati? Questa azione non può essere annullata.'
+            },
+            uploadProgress: {
+                title: 'Avanzamento Caricamento',
+                doneButton: 'Fatto'
+            }
+        },
+        status: {
+            homeDirLoadFailed: 'Impossibile caricare le directory home: {error}',
+            filesLoadFailed: 'Errore nel caricamento dei file: {error}',
+            deleteProtectedError: 'Impossibile eliminare le cartelle di sistema protette.',
+            deletingItems: 'Eliminazione di {count, plural, one {1 elemento} other {{count} elementi}}...',
+            deleteSuccess: 'Eliminazione riuscita.',
+            deleteFailed: 'Eliminazione fallita: {error}',
+            preparingUpload: 'Preparazione al caricamento di {count, plural, one {1 file} other {{count} file}}...',
+            uploadPrepFailed: 'Errore durante la preparazione del caricamento della cartella: {error}',
+            notConfigured: 'Errore: SealSkin non configurato. Si prega di impostarlo nelle opzioni.',
+            folderCreated: 'Cartella \'{folderName}\' creata.',
+            folderCreateFailed: 'Errore nella creazione della cartella: {error}'
+        },
+        placeholders: {
+            errorLoading: 'Errore nel caricamento dei file.',
+            folderEmpty: 'Questa cartella è vuota.',
+            noHomeDirs: 'Nessuna directory home disponibile.'
+        },
+        uploadStatus: {
+            pending: 'in attesa',
+            initiating: 'avvio',
+            uploading: 'caricamento',
+            finalizing: 'finalizzazione',
+            completed: 'completato',
+            error: 'errore'
+        }
     }
 };
 
@@ -5099,6 +5809,8 @@ const nl = {
     common: {
         actions: 'Acties',
         active: 'Actief',
+        cancel: 'Annuleren',
+        manage: 'Beheren',
         delete: 'Verwijderen',
         edit: 'Bewerken',
         save: 'Opslaan',
@@ -5521,6 +6233,7 @@ const nl = {
         tabs: {
             launch: 'Nieuwe Starten',
             sessions: 'Actieve Sessies',
+            manageFiles: 'Bestanden beheren',
             uploadStorage: 'Uploaden naar Opslag',
             uploadFiles: 'Bestanden Uploaden',
             uploadFilesTitle: 'Open speciale pagina voor het uploaden van bestanden'
@@ -5547,8 +6260,8 @@ const nl = {
         },
         uploadStorageView: {
             selectHome: 'Selecteer Home Directory',
-            description: 'Dit uploadt het bestand <strong>{filename}</strong> rechtstreeks naar de map \'Desktop/files\' in de gekozen home directory voor toekomstig gebruik.',
-            descriptionFallback: 'Dit uploadt <strong>het geselecteerde bestand</strong> rechtstreeks naar de map \'Desktop/files\' in de gekozen home directory voor toekomstig gebruik.',
+            description: 'Hiermee wordt het bestand <strong>{filename}</strong> voor toekomstig gebruik rechtstreeks naar uw Bestanden-opslag geüpload.',
+            descriptionFallback: 'Hiermee wordt het bestand <strong>{filename}</strong> voor toekomstig gebruik rechtstreeks naar uw Bestanden-opslag geüpload.',
             uploadButton: 'Bestand Uploaden',
             uploadingButton: 'Uploaden...',
             preparing: 'Bestand voorbereiden...',
@@ -5590,6 +6303,74 @@ const nl = {
             ready: 'Het bestand is klaar om veilig te worden geopend.',
             button: 'Doorgaan naar Starten',
         }
+    },
+    files: {
+        title: 'SealSkin-bestanden',
+        header: {
+            title: 'Bestanden',
+            newFolder: 'Nieuwe map',
+            uploadFiles: 'Bestanden uploaden',
+            uploadFolder: 'Map uploaden'
+        },
+        sidebar: {
+            sharedFiles: 'SealSkin-bestanden'
+        },
+        table: {
+            name: 'Naam',
+            size: 'Grootte',
+            lastModified: 'Laatst gewijzigd'
+        },
+        dropzone: {
+            title: 'Sleep bestanden hierheen om te uploaden'
+        },
+        pagination: {
+            previous: '« Vorige',
+            next: 'Volgende »',
+            pageOf: 'Pagina {page} van {totalPages}'
+        },
+        modals: {
+            newFolder: {
+                title: 'Nieuwe map maken',
+                folderNameLabel: 'Mapnaam',
+                nameTitle: 'Gebruik alleen letters, cijfers, underscore, koppelteken of punt.',
+                createButton: 'Maken'
+            },
+            confirmDelete: {
+                title: 'Verwijdering bevestigen',
+                message: 'Weet u zeker dat u {count, plural, one {1 geselecteerd item} other {{count} geselecteerde items}} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.',
+                messageDefault: 'Weet u zeker dat u de geselecteerde items wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.'
+            },
+            uploadProgress: {
+                title: 'Uploadvoortgang',
+                doneButton: 'Klaar'
+            }
+        },
+        status: {
+            homeDirLoadFailed: 'Laden van thuismap mislukt: {error}',
+            filesLoadFailed: 'Fout bij het laden van bestanden: {error}',
+            deleteProtectedError: 'Kan beveiligde systeemmappen niet verwijderen.',
+            deletingItems: '{count, plural, one {1 item} other {{count} items}} aan het verwijderen...',
+            deleteSuccess: 'Verwijderen gelukt.',
+            deleteFailed: 'Verwijderen mislukt: {error}',
+            preparingUpload: 'Voorbereiden om {count, plural, one {1 bestand} other {{count} bestanden}} te uploaden...',
+            uploadPrepFailed: 'Fout tijdens voorbereiding van mapupload: {error}',
+            notConfigured: 'Fout: SealSkin niet geconfigureerd. Stel dit in bij de opties.',
+            folderCreated: 'Map \'{folderName}\' gemaakt.',
+            folderCreateFailed: 'Fout bij het maken van de map: {error}'
+        },
+        placeholders: {
+            errorLoading: 'Fout bij het laden van bestanden.',
+            folderEmpty: 'Deze map is leeg.',
+            noHomeDirs: 'Geen thuismap beschikbaar.'
+        },
+        uploadStatus: {
+            pending: 'in afwachting',
+            initiating: 'starten',
+            uploading: 'uploaden',
+            finalizing: 'afronden',
+            completed: 'voltooid',
+            error: 'fout'
+        }
     }
 };
 
@@ -5607,6 +6388,8 @@ const ar = {
     common: {
         actions: 'الإجراءات',
         active: 'نشط',
+        cancel: 'إلغاء',
+        manage: 'إدارة',
         delete: 'حذف',
         edit: 'تعديل',
         save: 'حفظ',
@@ -6029,6 +6812,7 @@ const ar = {
         tabs: {
             launch: 'تشغيل جديد',
             sessions: 'الجلسات النشطة',
+            manageFiles: 'إدارة الملفات',
             uploadStorage: 'تحميل إلى التخزين',
             uploadFiles: 'تحميل ملفات',
             uploadFilesTitle: 'فتح صفحة تحميل الملفات المخصصة'
@@ -6055,8 +6839,8 @@ const ar = {
         },
         uploadStorageView: {
             selectHome: 'تحديد المجلد الرئيسي',
-            description: 'سيتم تحميل الملف <strong>{filename}</strong> مباشرة إلى مجلد \'Desktop/files\' داخل المجلد الرئيسي المختار للاستخدام المستقبلي.',
-            descriptionFallback: 'سيتم تحميل <strong>الملف المحدد</strong> مباشرة إلى مجلد \'Desktop/files\' داخل المجلد الرئيسي المختار للاستخدام المستقبلي.',
+            description: 'سيؤدي هذا إلى تحميل الملف <strong>{filename}</strong> مباشرة إلى مساحة تخزين الملفات الخاصة بك لاستخدامه في المستقبل.',
+            descriptionFallback: 'سيؤدي هذا إلى تحميل الملف <strong>{filename}</strong> مباشرة إلى مساحة تخزين الملفات الخاصة بك لاستخدامه في المستقبل.',
             uploadButton: 'تحميل الملف',
             uploadingButton: 'جاري التحميل...',
             preparing: 'جاري تحضير الملف...',
@@ -6098,6 +6882,74 @@ const ar = {
             ready: 'الملف جاهز للفتح بأمان.',
             button: 'متابعة للتشغيل',
         }
+    },
+    files: {
+        title: 'ملفات SealSkin',
+        header: {
+            title: 'الملفات',
+            newFolder: 'مجلد جديد',
+            uploadFiles: 'رفع الملفات',
+            uploadFolder: 'رفع مجلد'
+        },
+        sidebar: {
+            sharedFiles: 'ملفات SealSkin'
+        },
+        table: {
+            name: 'الاسم',
+            size: 'الحجم',
+            lastModified: 'آخر تعديل'
+        },
+        dropzone: {
+            title: 'أسقط الملفات هنا للرفع'
+        },
+        pagination: {
+            previous: '« السابق',
+            next: 'التالي »',
+            pageOf: 'صفحة {page} من {totalPages}'
+        },
+        modals: {
+            newFolder: {
+                title: 'إنشاء مجلد جديد',
+                folderNameLabel: 'اسم المجلد',
+                nameTitle: 'استخدم فقط الحروف أو الأرقام أو الشرطة السفلية أو الواصلة أو النقطة.',
+                createButton: 'إنشاء'
+            },
+            confirmDelete: {
+                title: 'تأكيد الحذف',
+                message: 'هل أنت متأكد أنك تريد حذف {count, plural, one {عنصر واحد محدد} other {{count} عناصر محددة}}؟ لا يمكن التراجع عن هذا الإجراء.',
+                messageDefault: 'هل أنت متأكد أنك تريد حذف العناصر المحددة؟ لا يمكن التراجع عن هذا الإجراء.'
+            },
+            uploadProgress: {
+                title: 'تقدم الرفع',
+                doneButton: 'تم'
+            }
+        },
+        status: {
+            homeDirLoadFailed: 'فشل تحميل الدلائل الرئيسية: {error}',
+            filesLoadFailed: 'خطأ في تحميل الملفات: {error}',
+            deleteProtectedError: 'لا يمكن حذف مجلدات النظام المحمية.',
+            deletingItems: 'جارٍ حذف {count, plural, one {عنصر واحد} other {{count} عناصر}}...',
+            deleteSuccess: 'تم الحذف بنجاح.',
+            deleteFailed: 'فشل الحذف: {error}',
+            preparingUpload: 'جارٍ التحضير لرفع {count, plural, one {ملف واحد} other {{count} ملفات}}...',
+            uploadPrepFailed: 'خطأ أثناء التحضير لرفع المجلد: {error}',
+            notConfigured: 'خطأ: SealSkin غير مهيأ. يرجى الإعداد في الخيارات.',
+            folderCreated: 'تم إنشاء المجلد \'{folderName}\'.',
+            folderCreateFailed: 'خطأ في إنشاء المجلد: {error}'
+        },
+        placeholders: {
+            errorLoading: 'خطأ في تحميل الملفات.',
+            folderEmpty: 'هذا المجلد فارغ.',
+            noHomeDirs: 'لا توجد دلائل رئيسية متاحة.'
+        },
+        uploadStatus: {
+            pending: 'قيد الانتظار',
+            initiating: 'جارٍ البدء',
+            uploading: 'جارٍ الرفع',
+            finalizing: 'جارٍ الإنهاء',
+            completed: 'مكتمل',
+            error: 'خطأ'
+        }
     }
 };
 
@@ -6115,6 +6967,8 @@ const ko = {
     common: {
         actions: '작업',
         active: '활성',
+        cancel: '취소',
+        manage: '관리',
         delete: '삭제',
         edit: '편집',
         save: '저장',
@@ -6537,6 +7391,7 @@ const ko = {
         tabs: {
             launch: '새로 시작',
             sessions: '활성 세션',
+            manageFiles: '파일 관리',
             uploadStorage: '스토리지에 업로드',
             uploadFiles: '파일 업로드',
             uploadFilesTitle: '전용 파일 업로드 페이지 열기'
@@ -6563,8 +7418,8 @@ const ko = {
         },
         uploadStorageView: {
             selectHome: '홈 디렉터리 선택',
-            description: '이 파일 <strong>{filename}</strong>을(를) 선택한 홈 디렉터리 내의 \'Desktop/files\' 폴더에 직접 업로드하여 나중에 사용할 수 있습니다.',
-            descriptionFallback: '<strong>선택한 파일</strong>을(를) 선택한 홈 디렉터리 내의 \'Desktop/files\' 폴더에 직접 업로드하여 나중에 사용할 수 있습니다.',
+            description: '이 작업은 파일 <strong>{filename}</strong>을(를) 나중에 사용할 수 있도록 파일 저장소에 직접 업로드합니다.',
+            descriptionFallback: '이 작업은 파일 <strong>{filename}</strong>을(를) 나중에 사용할 수 있도록 파일 저장소에 직접 업로드합니다.',
             uploadButton: '파일 업로드',
             uploadingButton: '업로드 중...',
             preparing: '파일 준비 중...',
@@ -6606,6 +7461,74 @@ const ko = {
             ready: '파일을 안전하게 열 준비가 되었습니다.',
             button: '계속해서 시작',
         }
+    },
+    files: {
+        title: 'SealSkin 파일',
+        header: {
+            title: '파일',
+            newFolder: '새 폴더',
+            uploadFiles: '파일 업로드',
+            uploadFolder: '폴더 업로드'
+        },
+        sidebar: {
+            sharedFiles: 'SealSkin 파일'
+        },
+        table: {
+            name: '이름',
+            size: '크기',
+            lastModified: '마지막 수정'
+        },
+        dropzone: {
+            title: '업로드할 파일을 여기에 놓으세요'
+        },
+        pagination: {
+            previous: '« 이전',
+            next: '다음 »',
+            pageOf: '페이지 {page} / {totalPages}'
+        },
+        modals: {
+            newFolder: {
+                title: '새 폴더 만들기',
+                folderNameLabel: '폴더 이름',
+                nameTitle: '문자, 숫자, 밑줄, 하이픈 또는 마침표만 사용하세요.',
+                createButton: '만들기'
+            },
+            confirmDelete: {
+                title: '삭제 확인',
+                message: '선택한 {count, plural, one {1개 항목을} other {{count}개 항목을}} 정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
+                messageDefault: '선택한 항목을 정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'
+            },
+            uploadProgress: {
+                title: '업로드 진행률',
+                doneButton: '완료'
+            }
+        },
+        status: {
+            homeDirLoadFailed: '홈 디렉터리 로드 실패: {error}',
+            filesLoadFailed: '파일 로드 오류: {error}',
+            deleteProtectedError: '보호된 시스템 폴더는 삭제할 수 없습니다.',
+            deletingItems: '{count, plural, one {1개 항목} other {{count}개 항목}} 삭제 중...',
+            deleteSuccess: '삭제 성공.',
+            deleteFailed: '삭제 실패: {error}',
+            preparingUpload: '{count, plural, one {1개 파일} other {{count}개 파일}} 업로드 준비 중...',
+            uploadPrepFailed: '폴더 업로드 준비 중 오류 발생: {error}',
+            notConfigured: '오류: SealSkin이 구성되지 않았습니다. 옵션에서 설정하십시오.',
+            folderCreated: '\'{folderName}\' 폴더가 생성되었습니다.',
+            folderCreateFailed: '폴더 생성 오류: {error}'
+        },
+        placeholders: {
+            errorLoading: '파일 로드 오류.',
+            folderEmpty: '이 폴더는 비어 있습니다.',
+            noHomeDirs: '사용 가능한 홈 디렉터리가 없습니다.'
+        },
+        uploadStatus: {
+            pending: '대기 중',
+            initiating: '시작 중',
+            uploading: '업로드 중',
+            finalizing: '마무리 중',
+            completed: '완료됨',
+            error: '오류'
+        }
     }
 };
 
@@ -6623,6 +7546,8 @@ const ja = {
     common: {
         actions: 'アクション',
         active: 'アクティブ',
+        cancel: 'キャンセル',
+        manage: '管理',
         delete: '削除',
         edit: '編集',
         save: '保存',
@@ -7045,6 +7970,7 @@ const ja = {
         tabs: {
             launch: '新規起動',
             sessions: 'アクティブなセッション',
+            manageFiles: 'ファイル管理',
             uploadStorage: 'ストレージにアップロード',
             uploadFiles: 'ファイルをアップロード',
             uploadFilesTitle: '専用のファイルアップロードページを開く'
@@ -7071,8 +7997,8 @@ const ja = {
         },
         uploadStorageView: {
             selectHome: 'ホームディレクトリを選択',
-            description: 'ファイル <strong>{filename}</strong> を、選択したホームディレクトリ内の \'Desktop/files\' フォルダに直接アップロードし、将来の使用に備えます。',
-            descriptionFallback: '<strong>選択したファイル</strong>を、選択したホームディレクトリ内の \'Desktop/files\' フォルダに直接アップロードし、将来の使用に備えます。',
+            description: 'これにより、ファイル <strong>{filename}</strong> がファイルストレージに直接アップロードされ、後で使用できるようになります。',
+            descriptionFallback: 'これにより、ファイル <strong>{filename}</strong> がファイルストレージに直接アップロードされ、後で使用できるようになります。',
             uploadButton: 'ファイルをアップロード',
             uploadingButton: 'アップロード中...',
             preparing: 'ファイルを準備中...',
@@ -7114,6 +8040,74 @@ const ja = {
             ready: 'ファイルは安全に開く準備ができました。',
             button: '起動に進む',
         }
+    },
+    files: {
+        title: 'SealSkin ファイル',
+        header: {
+            title: 'ファイル',
+            newFolder: '新しいフォルダー',
+            uploadFiles: 'ファイルをアップロード',
+            uploadFolder: 'フォルダーをアップロード'
+        },
+        sidebar: {
+            sharedFiles: 'SealSkin ファイル'
+        },
+        table: {
+            name: '名前',
+            size: 'サイズ',
+            lastModified: '最終更新日'
+        },
+        dropzone: {
+            title: 'ファイルをドロップしてアップロード'
+        },
+        pagination: {
+            previous: '« 前へ',
+            next: '次へ »',
+            pageOf: 'ページ {page} / {totalPages}'
+        },
+        modals: {
+            newFolder: {
+                title: '新しいフォルダーを作成',
+                folderNameLabel: 'フォルダー名',
+                nameTitle: '文字、数字、アンダースコア、ハイフン、またはピリオドのみを使用してください。',
+                createButton: '作成'
+            },
+            confirmDelete: {
+                title: '削除の確認',
+                message: '選択した{count, plural, one {1個のアイテム} other {{count}個のアイテム}}を本当に削除しますか？この操作は元に戻せません。',
+                messageDefault: '選択したアイテムを本当に削除しますか？この操作は元に戻せません。'
+            },
+            uploadProgress: {
+                title: 'アップロードの進捗',
+                doneButton: '完了'
+            }
+        },
+        status: {
+            homeDirLoadFailed: 'ホームディレクトリの読み込みに失敗しました：{error}',
+            filesLoadFailed: 'ファイルの読み込み中にエラーが発生しました：{error}',
+            deleteProtectedError: '保護されたシステムフォルダーは削除できません。',
+            deletingItems: '{count, plural, one {1個のアイテム} other {{count}個のアイテム}}を削除しています...',
+            deleteSuccess: '削除に成功しました。',
+            deleteFailed: '削除に失敗しました：{error}',
+            preparingUpload: '{count, plural, one {1個のファイル} other {{count}個のファイル}}のアップロードを準備しています...',
+            uploadPrepFailed: 'フォルダーのアップロード準備中にエラーが発生しました：{error}',
+            notConfigured: 'エラー：SealSkinが設定されていません。オプションで設定してください。',
+            folderCreated: 'フォルダー「{folderName}」が作成されました。',
+            folderCreateFailed: 'フォルダーの作成中にエラーが発生しました：{error}'
+        },
+        placeholders: {
+            errorLoading: 'ファイルの読み込み中にエラーが発生しました。',
+            folderEmpty: 'このフォルダーは空です。',
+            noHomeDirs: '利用可能なホームディレクトリがありません。'
+        },
+        uploadStatus: {
+            pending: '保留中',
+            initiating: '開始中',
+            uploading: 'アップロード中',
+            finalizing: '最終処理中',
+            completed: '完了',
+            error: 'エラー'
+        }
     }
 };
 
@@ -7131,6 +8125,8 @@ const vi = {
     common: {
         actions: 'Hành động',
         active: 'Hoạt động',
+        cancel: 'Hủy',
+        manage: 'Quản lý',
         delete: 'Xóa',
         edit: 'Chỉnh sửa',
         save: 'Lưu',
@@ -7553,6 +8549,7 @@ const vi = {
         tabs: {
             launch: 'Khởi chạy mới',
             sessions: 'Phiên hoạt động',
+            manageFiles: 'Quản lý tệp',
             uploadStorage: 'Tải lên bộ nhớ',
             uploadFiles: 'Tải lên tệp',
             uploadFilesTitle: 'Mở trang tải lên tệp chuyên dụng'
@@ -7579,8 +8576,8 @@ const vi = {
         },
         uploadStorageView: {
             selectHome: 'Chọn thư mục chính',
-            description: 'Thao tác này sẽ tải tệp <strong>{filename}</strong> trực tiếp lên thư mục \'Desktop/files\' bên trong thư mục chính đã chọn để sử dụng trong tương lai.',
-            descriptionFallback: 'Thao tác này sẽ tải <strong>tệp đã chọn</strong> trực tiếp lên thư mục \'Desktop/files\' bên trong thư mục chính đã chọn để sử dụng trong tương lai.',
+            description: 'Thao tác này sẽ tải tệp <strong>{filename}</strong> trực tiếp lên bộ nhớ Tệp của bạn để sử dụng trong tương lai.',
+            descriptionFallback: 'Thao tác này sẽ tải tệp <strong>{filename}</strong> trực tiếp lên bộ nhớ Tệp của bạn để sử dụng trong tương lai.',
             uploadButton: 'Tải lên tệp',
             uploadingButton: 'Đang tải lên...',
             preparing: 'Đang chuẩn bị tệp...',
@@ -7622,6 +8619,74 @@ const vi = {
             ready: 'Tệp đã sẵn sàng để được mở một cách an toàn.',
             button: 'Tiếp tục để khởi chạy',
         }
+    },
+    files: {
+        title: 'Tệp SealSkin',
+        header: {
+            title: 'Tệp',
+            newFolder: 'Thư mục mới',
+            uploadFiles: 'Tải lên tệp',
+            uploadFolder: 'Tải lên thư mục'
+        },
+        sidebar: {
+            sharedFiles: 'Tệp SealSkin'
+        },
+        table: {
+            name: 'Tên',
+            size: 'Kích thước',
+            lastModified: 'Sửa đổi lần cuối'
+        },
+        dropzone: {
+            title: 'Thả tệp vào đây để tải lên'
+        },
+        pagination: {
+            previous: '« Trước',
+            next: 'Tiếp »',
+            pageOf: 'Trang {page} của {totalPages}'
+        },
+        modals: {
+            newFolder: {
+                title: 'Tạo thư mục mới',
+                folderNameLabel: 'Tên thư mục',
+                nameTitle: 'Chỉ sử dụng chữ cái, số, dấu gạch dưới, dấu gạch ngang hoặc dấu chấm.',
+                createButton: 'Tạo'
+            },
+            confirmDelete: {
+                title: 'Xác nhận xóa',
+                message: 'Bạn có chắc chắn muốn xóa {count, plural, one {1 mục đã chọn} other {{count} mục đã chọn}} không? Hành động này không thể hoàn tác.',
+                messageDefault: 'Bạn có chắc chắn muốn xóa các mục đã chọn không? Hành động này không thể hoàn tác.'
+            },
+            uploadProgress: {
+                title: 'Tiến trình tải lên',
+                doneButton: 'Xong'
+            }
+        },
+        status: {
+            homeDirLoadFailed: 'Không thể tải thư mục chính: {error}',
+            filesLoadFailed: 'Lỗi khi tải tệp: {error}',
+            deleteProtectedError: 'Không thể xóa các thư mục hệ thống được bảo vệ.',
+            deletingItems: 'Đang xóa {count, plural, one {1 mục} other {{count} mục}}...',
+            deleteSuccess: 'Xóa thành công.',
+            deleteFailed: 'Xóa thất bại: {error}',
+            preparingUpload: 'Đang chuẩn bị tải lên {count, plural, one {1 tệp} other {{count} tệp}}...',
+            uploadPrepFailed: 'Lỗi trong quá trình chuẩn bị tải lên thư mục: {error}',
+            notConfigured: 'Lỗi: SealSkin chưa được cấu hình. Vui lòng thiết lập trong tùy chọn.',
+            folderCreated: 'Đã tạo thư mục \'{folderName}\'.',
+            folderCreateFailed: 'Lỗi khi tạo thư mục: {error}'
+        },
+        placeholders: {
+            errorLoading: 'Lỗi khi tải tệp.',
+            folderEmpty: 'Thư mục này trống.',
+            noHomeDirs: 'Không có thư mục chính nào.'
+        },
+        uploadStatus: {
+            pending: 'đang chờ',
+            initiating: 'đang bắt đầu',
+            uploading: 'đang tải lên',
+            finalizing: 'đang hoàn tất',
+            completed: 'hoàn thành',
+            error: 'lỗi'
+        }
     }
 };
 
@@ -7639,6 +8704,8 @@ const th = {
     common: {
         actions: 'การดำเนินการ',
         active: 'ใช้งานอยู่',
+        cancel: 'ยกเลิก',
+        manage: 'จัดการ',
         delete: 'ลบ',
         edit: 'แก้ไข',
         save: 'บันทึก',
@@ -8061,6 +9128,7 @@ const th = {
         tabs: {
             launch: 'เปิดใหม่',
             sessions: 'เซสชันที่ใช้งานอยู่',
+            manageFiles: 'จัดการไฟล์',
             uploadStorage: 'อัปโหลดไปยังที่เก็บข้อมูล',
             uploadFiles: 'อัปโหลดไฟล์',
             uploadFilesTitle: 'เปิดหน้าอัปโหลดไฟล์โดยเฉพาะ'
@@ -8087,8 +9155,8 @@ const th = {
         },
         uploadStorageView: {
             selectHome: 'เลือกโฮมไดเรกทอรี',
-            description: 'การดำเนินการนี้จะอัปโหลดไฟล์ <strong>{filename}</strong> โดยตรงไปยังโฟลเดอร์ \'Desktop/files\' ภายในโฮมไดเรกทอรีที่เลือกเพื่อใช้ในอนาคต',
-            descriptionFallback: 'การดำเนินการนี้จะอัปโหลด <strong>ไฟล์ที่เลือก</strong> โดยตรงไปยังโฟลเดอร์ \'Desktop/files\' ภายในโฮมไดเรกทอรีที่เลือกเพื่อใช้ในอนาคต',
+            description: 'การดำเนินการนี้จะอัปโหลดไฟล์ <strong>{filename}</strong> ไปยังที่เก็บไฟล์ของคุณโดยตรงเพื่อใช้ในอนาคต',
+            descriptionFallback: 'การดำเนินการนี้จะอัปโหลดไฟล์ <strong>{filename}</strong> ไปยังที่เก็บไฟล์ของคุณโดยตรงเพื่อใช้ในอนาคต',
             uploadButton: 'อัปโหลดไฟล์',
             uploadingButton: 'กำลังอัปโหลด...',
             preparing: 'กำลังเตรียมไฟล์...',
@@ -8130,6 +9198,74 @@ const th = {
             ready: 'ไฟล์พร้อมที่จะเปิดอย่างปลอดภัยแล้ว',
             button: 'ดำเนินการต่อเพื่อเปิด',
         }
+    },
+    files: {
+        title: 'ไฟล์ SealSkin',
+        header: {
+            title: 'ไฟล์',
+            newFolder: 'โฟลเดอร์ใหม่',
+            uploadFiles: 'อัปโหลดไฟล์',
+            uploadFolder: 'อัปโหลดโฟลเดอร์'
+        },
+        sidebar: {
+            sharedFiles: 'ไฟล์ SealSkin'
+        },
+        table: {
+            name: 'ชื่อ',
+            size: 'ขนาด',
+            lastModified: 'แก้ไขล่าสุด'
+        },
+        dropzone: {
+            title: 'วางไฟล์เพื่ออัปโหลด'
+        },
+        pagination: {
+            previous: '« ก่อนหน้า',
+            next: 'ถัดไป »',
+            pageOf: 'หน้า {page} จาก {totalPages}'
+        },
+        modals: {
+            newFolder: {
+                title: 'สร้างโฟลเดอร์ใหม่',
+                folderNameLabel: 'ชื่อโฟลเดอร์',
+                nameTitle: 'ใช้เฉพาะตัวอักษร, ตัวเลข, ขีดล่าง, ยัติภังค์, หรือจุดเท่านั้น',
+                createButton: 'สร้าง'
+            },
+            confirmDelete: {
+                title: 'ยืนยันการลบ',
+                message: 'คุณแน่ใจหรือไม่ว่าต้องการลบ {count, plural, one {1 รายการที่เลือก} other {{count} รายการที่เลือก}}? การกระทำนี้ไม่สามารถยกเลิกได้',
+                messageDefault: 'คุณแน่ใจหรือไม่ว่าต้องการลบรายการที่เลือก? การกระทำนี้ไม่สามารถยกเลิกได้'
+            },
+            uploadProgress: {
+                title: 'ความคืบหน้าการอัปโหลด',
+                doneButton: 'เสร็จสิ้น'
+            }
+        },
+        status: {
+            homeDirLoadFailed: 'ไม่สามารถโหลดโฮมไดเรกทอรี: {error}',
+            filesLoadFailed: 'เกิดข้อผิดพลาดในการโหลดไฟล์: {error}',
+            deleteProtectedError: 'ไม่สามารถลบโฟลเดอร์ระบบที่ได้รับการป้องกัน',
+            deletingItems: 'กำลังลบ {count, plural, one {1 รายการ} other {{count} รายการ}}...',
+            deleteSuccess: 'ลบสำเร็จ',
+            deleteFailed: 'การลบล้มเหลว: {error}',
+            preparingUpload: 'กำลังเตรียมอัปโหลด {count, plural, one {1 ไฟล์} other {{count} ไฟล์}}...',
+            uploadPrepFailed: 'เกิดข้อผิดพลาดระหว่างการเตรียมอัปโหลดโฟลเดอร์: {error}',
+            notConfigured: 'ข้อผิดพลาด: SealSkin ยังไม่ได้กำหนดค่า โปรดตั้งค่าในตัวเลือก',
+            folderCreated: 'สร้างโฟลเดอร์ \'{folderName}\' แล้ว',
+            folderCreateFailed: 'เกิดข้อผิดพลาดในการสร้างโฟลเดอร์: {error}'
+        },
+        placeholders: {
+            errorLoading: 'เกิดข้อผิดพลาดในการโหลดไฟล์',
+            folderEmpty: 'โฟลเดอร์นี้ว่างเปล่า',
+            noHomeDirs: 'ไม่มีโฮมไดเรกทอรีที่ใช้ได้'
+        },
+        uploadStatus: {
+            pending: 'รอดำเนินการ',
+            initiating: 'กำลังเริ่มต้น',
+            uploading: 'กำลังอัปโหลด',
+            finalizing: 'กำลังสิ้นสุด',
+            completed: 'เสร็จสมบูรณ์',
+            error: 'ข้อผิดพลาด'
+        }
     }
 };
 
@@ -8147,6 +9283,8 @@ const fil = {
     common: {
         actions: 'Mga Aksyon',
         active: 'Aktibo',
+        cancel: 'Kanselahin',
+        manage: 'Pamahalaan',
         delete: 'Burahin',
         edit: 'I-edit',
         save: 'I-save',
@@ -8569,6 +9707,7 @@ const fil = {
         tabs: {
             launch: 'Ilunsad ang Bago',
             sessions: 'Mga Aktibong Sesyon',
+            manageFiles: 'Pamahalaan ang mga File',
             uploadStorage: 'I-upload sa Imbakan',
             uploadFiles: 'Mag-upload ng mga File',
             uploadFilesTitle: 'Buksan ang dedikadong pahina para sa pag-upload ng file'
@@ -8595,8 +9734,8 @@ const fil = {
         },
         uploadStorageView: {
             selectHome: 'Pumili ng Home Directory',
-            description: 'I-a-upload nito ang file na <strong>{filename}</strong> direkta sa folder na \'Desktop/files\' sa loob ng napiling home directory para sa paggamit sa hinaharap.',
-            descriptionFallback: 'I-a-upload nito ang <strong>napiling file</strong> direkta sa folder na \'Desktop/files\' sa loob ng napiling home directory para sa paggamit sa hinaharap.',
+            description: 'Ia-upload nito ang file na <strong>{filename}</strong> direkta sa iyong imbakan ng mga File para sa paggamit sa hinaharap.',
+            descriptionFallback: 'Ia-upload nito ang file na <strong>{filename}</strong> direkta sa iyong imbakan ng mga File para sa paggamit sa hinaharap.',
             uploadButton: 'I-upload ang File',
             uploadingButton: 'Nag-a-upload...',
             preparing: 'Inihahanda ang file...',
@@ -8638,6 +9777,74 @@ const fil = {
             ready: 'Handa nang buksan nang ligtas ang file.',
             button: 'Magpatuloy sa Paglunsad',
         }
+    },
+    files: {
+        title: 'Mga File ng SealSkin',
+        header: {
+            title: 'Mga File',
+            newFolder: 'Bagong Folder',
+            uploadFiles: 'Mag-upload ng mga File',
+            uploadFolder: 'Mag-upload ng Folder'
+        },
+        sidebar: {
+            sharedFiles: 'Mga File ng SealSkin'
+        },
+        table: {
+            name: 'Pangalan',
+            size: 'Sukat',
+            lastModified: 'Huling Binago'
+        },
+        dropzone: {
+            title: 'I-drop ang mga file para i-upload'
+        },
+        pagination: {
+            previous: '« Nakaraan',
+            next: 'Susunod »',
+            pageOf: 'Pahina {page} ng {totalPages}'
+        },
+        modals: {
+            newFolder: {
+                title: 'Gumawa ng Bagong Folder',
+                folderNameLabel: 'Pangalan ng Folder',
+                nameTitle: 'Gumamit lamang ng mga letra, numero, underscore, hyphen, o tuldok.',
+                createButton: 'Gawin'
+            },
+            confirmDelete: {
+                title: 'Kumpirmahin ang Pagbura',
+                message: 'Sigurado ka bang gusto mong burahin ang {count, plural, one {1 napiling item} other {{count} napiling item}}? Hindi na maibabalik ang aksyon na ito.',
+                messageDefault: 'Sigurado ka bang gusto mong burahin ang mga napiling item? Hindi na maibabalik ang aksyon na ito.'
+            },
+            uploadProgress: {
+                title: 'Progreso ng Pag-upload',
+                doneButton: 'Tapos na'
+            }
+        },
+        status: {
+            homeDirLoadFailed: 'Nabigo ang pag-load ng mga home directory: {error}',
+            filesLoadFailed: 'Error sa pag-load ng mga file: {error}',
+            deleteProtectedError: 'Hindi maaaring burahin ang mga protektadong system folder.',
+            deletingItems: 'Binubura ang {count, plural, one {1 item} other {{count} item}}...',
+            deleteSuccess: 'Matagumpay ang pagbura.',
+            deleteFailed: 'Nabigo ang pagbura: {error}',
+            preparingUpload: 'Naghahanda para i-upload ang {count, plural, one {1 file} other {{count} file}}...',
+            uploadPrepFailed: 'Error sa paghahanda ng pag-upload ng folder: {error}',
+            notConfigured: 'Error: Hindi naka-configure ang SealSkin. Paki-set up sa mga opsyon.',
+            folderCreated: 'Nagawa ang folder na \'{folderName}\'.',
+            folderCreateFailed: 'Error sa paggawa ng folder: {error}'
+        },
+        placeholders: {
+            errorLoading: 'Error sa pag-load ng mga file.',
+            folderEmpty: 'Walang laman ang folder na ito.',
+            noHomeDirs: 'Walang available na home directory.'
+        },
+        uploadStatus: {
+            pending: 'nakabinbin',
+            initiating: 'sinisimulan',
+            uploading: 'nag-a-upload',
+            finalizing: 'tinatapos',
+            completed: 'kumpleto',
+            error: 'error'
+        }
     }
 };
 
@@ -8655,6 +9862,8 @@ const da = {
     common: {
         actions: 'Handlinger',
         active: 'Aktiv',
+        cancel: 'Annuller',
+        manage: 'Administrer',
         delete: 'Slet',
         edit: 'Rediger',
         save: 'Gem',
@@ -9077,6 +10286,7 @@ const da = {
         tabs: {
             launch: 'Start Ny',
             sessions: 'Aktive Sessioner',
+            manageFiles: 'Administrer filer',
             uploadStorage: 'Upload til Lager',
             uploadFiles: 'Upload Filer',
             uploadFilesTitle: 'Åbn dedikeret side for filupload'
@@ -9103,8 +10313,8 @@ const da = {
         },
         uploadStorageView: {
             selectHome: 'Vælg Hjemmemappe',
-            description: 'Dette vil uploade filen <strong>{filename}</strong> direkte til mappen \'Desktop/files\' i den valgte hjemmemappe til fremtidig brug.',
-            descriptionFallback: 'Dette vil uploade <strong>den valgte fil</strong> direkte til mappen \'Desktop/files\' i den valgte hjemmemappe til fremtidig brug.',
+            description: 'Dette vil uploade filen <strong>{filename}</strong> direkte til dit Fillager til fremtidig brug.',
+            descriptionFallback: 'Dette vil uploade filen <strong>{filename}</strong> direkte til dit Fillager til fremtidig brug.',
             uploadButton: 'Upload Fil',
             uploadingButton: 'Uploader...',
             preparing: 'Forbereder fil...',
@@ -9146,21 +10356,89 @@ const da = {
             ready: 'Filen er klar til at blive åbnet sikkert.',
             button: 'Fortsæt til Start',
         }
+    },
+    files: {
+        title: 'SealSkin-filer',
+        header: {
+            title: 'Filer',
+            newFolder: 'Ny mappe',
+            uploadFiles: 'Upload filer',
+            uploadFolder: 'Upload mappe'
+        },
+        sidebar: {
+            sharedFiles: 'SealSkin-filer'
+        },
+        table: {
+            name: 'Navn',
+            size: 'Størrelse',
+            lastModified: 'Sidst ændret'
+        },
+        dropzone: {
+            title: 'Træk filer hertil for at uploade'
+        },
+        pagination: {
+            previous: '« Forrige',
+            next: 'Næste »',
+            pageOf: 'Side {page} af {totalPages}'
+        },
+        modals: {
+            newFolder: {
+                title: 'Opret ny mappe',
+                folderNameLabel: 'Mappenavn',
+                nameTitle: 'Brug kun bogstaver, tal, understregning, bindestreg eller punktum.',
+                createButton: 'Opret'
+            },
+            confirmDelete: {
+                title: 'Bekræft sletning',
+                message: 'Er du sikker på, at du vil slette {count, plural, one {1 valgt element} other {{count} valgte elementer}}? Handlingen kan ikke fortrydes.',
+                messageDefault: 'Er du sikker på, at du vil slette de valgte elementer? Handlingen kan ikke fortrydes.'
+            },
+            uploadProgress: {
+                title: 'Upload-status',
+                doneButton: 'Færdig'
+            }
+        },
+        status: {
+            homeDirLoadFailed: 'Kunne ikke indlæse hjemmebiblioteker: {error}',
+            filesLoadFailed: 'Fejl ved indlæsning af filer: {error}',
+            deleteProtectedError: 'Kan ikke slette beskyttede systemmapper.',
+            deletingItems: 'Sletter {count, plural, one {1 element} other {{count} elementer}}...',
+            deleteSuccess: 'Sletning lykkedes.',
+            deleteFailed: 'Sletning mislykkedes: {error}',
+            preparingUpload: 'Forbereder upload af {count, plural, one {1 fil} other {{count} filer}}...',
+            uploadPrepFailed: 'Fejl under forberedelse af mappe-upload: {error}',
+            notConfigured: 'Fejl: SealSkin er ikke konfigureret. Konfigurer venligst i indstillinger.',
+            folderCreated: 'Mappen \'{folderName}\' blev oprettet.',
+            folderCreateFailed: 'Fejl ved oprettelse af mappe: {error}'
+        },
+        placeholders: {
+            errorLoading: 'Fejl ved indlæsning af filer.',
+            folderEmpty: 'Denne mappe er tom.',
+            noHomeDirs: 'Ingen hjemmebiblioteker tilgængelige.'
+        },
+        uploadStatus: {
+            pending: 'afventer',
+            initiating: 'starter',
+            uploading: 'uploader',
+            finalizing: 'afslutter',
+            completed: 'fuldført',
+            error: 'fejl'
+        }
     }
 };
 
-const translations = { 
+const translations = {
     en,             
     es,
     zh,
-    hi, 
-    pt, 
-    fr, 
-    ru, 
+    hi,
+    pt,
+    fr,
+    ru,
     de,         
-    tr, 
-    it, 
-    nl,     
+    tr,
+    it,
+    nl,
     ar,
     ko,     
     ja,         

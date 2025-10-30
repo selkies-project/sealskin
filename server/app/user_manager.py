@@ -354,7 +354,6 @@ def get_home_dirs(username: str) -> List[str]:
                 d
                 for d in os.listdir(user_storage_path)
                 if os.path.isdir(os.path.join(user_storage_path, d))
-                and not d.startswith("_sealskin_")
             ]
         )
     except OSError as e:

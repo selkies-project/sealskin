@@ -223,3 +223,45 @@ class UploadToStorageRequest(BaseModel):
     upload_id: str
     total_chunks: int
     home_name: str
+
+class FileListItem(BaseModel):
+    name: str
+    path: str
+    is_dir: bool
+    size: int
+    mtime: float
+
+class FileListResponse(BaseModel):
+    items: List[FileListItem]
+    path: str
+    page: int
+    per_page: int
+    total: int
+
+class CreateFolderRequest(BaseModel):
+    path: str
+    folder_name: str = Field(..., pattern=r"^[a-zA-Z0-9_.-]+$")
+
+class DeleteItemsRequest(BaseModel):
+    paths: List[str]
+
+class DeleteTaskResponse(BaseModel):
+    message: str
+    task_id: str
+
+class DeleteStatusResponse(BaseModel):
+    status: str
+    message: Optional[str] = None
+
+class FinalizeUploadToDirRequest(BaseModel):
+    path: str
+    filename: str
+    upload_id: str
+    total_chunks: int
+
+class FileChunkResponse(BaseModel):
+    chunk_data_b64: str
+    is_last_chunk: bool
+
+class GenericSuccessMessage(BaseModel):
+    message: str

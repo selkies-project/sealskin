@@ -863,12 +863,16 @@ async function refreshHomeDirs() {
 }
 
 function renderHomeDirsTable(dirs) {
-  if (dirs && dirs.length > 0) {
-    homeDirsTbody.innerHTML = dirs.map(dir => `
+  const filteredDirs = dirs ? dirs.filter(dir => dir !== '_sealskin_shared_files') : [];
+  if (filteredDirs.length > 0) {
+    homeDirsTbody.innerHTML = filteredDirs.map(dir => `
             <tr>
                 <td>${dir}</td>
                 <td class="actions-cell">
-                    <button class="danger" data-homedir-name="${dir}">${t('common.delete')}</button>
+                    <div class="cell-wrapper">
+                        <button class="secondary manage-btn" data-homedir-name="${dir}">${t('common.manage')}</button>
++                        <button class="danger" data-homedir-name="${dir}" ${dir === '_sealskin_shared_files' ? 'disabled' : ''}>${t('common.delete')}</button>
+                    </div>
                 </td>
             </tr>
         `).join('');
@@ -1897,25 +1901,29 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   homeDirsTbody.addEventListener('click', async (e) => {
-    const button = e.target.closest('button.danger');
+    const button = e.target.closest('button');
     if (!button) return;
     const homeName = button.dataset.homedirName;
-    if (confirm(t('options.home.confirmDelete', {
-        homeName
-      }))) {
-      try {
-        await secureFetch(`/api/homedirs/${homeName}`, {
-          method: 'DELETE'
-        });
-        displayStatus(t('options.status.homedirDeleted', {
+    
+    if (button.classList.contains('manage-btn')) {
+        chrome.tabs.create({ url: `files.html?home=${encodeURIComponent(homeName)}` });
+    } else if (button.classList.contains('danger')) {
+        if (confirm(t('options.home.confirmDelete', {
           homeName
-        }));
-        await refreshHomeDirs();
-      } catch (error) {
-        displayStatus(t('options.status.homedirDeleteFailed', {
-          error: error.message
-        }), true);
-      }
+        }))
+        ) {
+            try {
+                await secureFetch(`/api/homedirs/${homeName}`, {
+                    method: 'DELETE'
+                });
+                displayStatus(t('options.status.homedirDeleted', {
+                    homeName
+                }));
+                await refreshHomeDirs();
+            } catch (error) {
+                displayStatus(t('options.status.homedirDeleteFailed', { error: error.message }), true);
+            }
+        }
     }
   });
 

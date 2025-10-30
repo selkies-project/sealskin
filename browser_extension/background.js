@@ -147,7 +147,7 @@ async function secureFetchInBackground(url, options = {}) {
         throw new Error('Extension is not configured.');
       }
 
-      if (url.startsWith('/api/admin') || url.startsWith('/api/homedirs') || url.startsWith('/api/sessions')) {
+      if (url.startsWith('/api/admin') || url.startsWith('/api/homedirs') || url.startsWith('/api/sessions') || url.startsWith('/api/files')) {
           const jwt = await generateJwtNative(sealskinConfig.clientPrivateKey, sealskinConfig.username);
           options.headers = {
               ...options.headers,
@@ -217,6 +217,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       }
     })();
     return true;
+  }
+
+  if (request.type === 'downloadFile') {
+    const { url, jwt, filename } = request.payload;
+    chrome.downloads.download({
+      url: url,
+      filename: filename,
+      headers: [{
+        name: 'Authorization',
+        value: 'Bearer ' + jwt
+      }]
+    }, (downloadId) => {
+      if (chrome.runtime.lastError) {
+        console.error(`[SealSkin BG] Download failed: ${chrome.runtime.lastError.message}`);
+      }
+    });
+    return false;
   }
 
   if (request.type === 'openPopup') {
@@ -407,3 +424,56 @@ chrome.downloads.onDeterminingFilename.addListener((downloadItem, suggest) => {
   })();
   return true;
 });
+
+self.addEventListener('fetch', (event) => {
+    const url = new URL(event.request.url);
+    if (url.protocol === 'chrome-extension:' && url.pathname === '/download-stream') {
+        event.respondWith(handleStreamingDownload(event.request));
+    }
+});
+
+async function handleStreamingDownload(request) {
+    const url = new URL(request.url);
+    const home = url.searchParams.get('home');
+    const path = url.searchParams.get('path');
+    const filename = url.searchParams.get('filename') || path.split('/').pop();
+
+    try {
+        const stream = new ReadableStream({
+            async start(controller) {
+                let chunkIndex = 0;
+                let isLastChunk = false;
+                try {
+                    while (!isLastChunk) {
+                        const params = new URLSearchParams({ path, chunk_index: chunkIndex });
+                        const apiUrl = `/api/files/download/chunk/${home}?${params.toString()}`;
+                        const response = await secureFetchInBackground(apiUrl, { method: 'GET' });
+                        
+                        if (response.chunk_data_b64) {
+                            const binaryString = atob(response.chunk_data_b64);
+                            const len = binaryString.length;
+                            const bytes = new Uint8Array(len);
+                            for (let i = 0; i < len; i++) {
+                                bytes[i] = binaryString.charCodeAt(i);
+                            }
+                            controller.enqueue(bytes);
+                        }
+                        isLastChunk = response.is_last_chunk;
+                        chunkIndex++;
+                    }
+                    controller.close();
+                } catch (error) {
+                    console.error('[SealSkin BG] Streaming download failed:', error);
+                    controller.error(error);
+                }
+            }
+        });
+
+        return new Response(stream, {
+            headers: { 'Content-Disposition': `attachment; filename="${filename}"`, 'Content-Type': 'application/octet-stream' }
+        });
+    } catch (error) {
+        console.error('[SealSkin BG] Failed to create download stream response:', error);
+        return new Response(`Streaming download failed: ${error.message}`, { status: 500 });
+    }
+}

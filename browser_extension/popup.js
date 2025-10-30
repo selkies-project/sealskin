@@ -32,6 +32,7 @@ const openFileCheckbox = document.getElementById('openFileOnLaunch');
 const optionsArea = document.querySelector('.popup-options-area');
 const sessionsTabBtn = document.getElementById('sessions-tab-btn');
 const launchTabBtn = document.getElementById('launch-tab-btn');
+const manageFilesBtn = document.getElementById('manage-files-btn');
 const uploadFilesTabBtn = document.getElementById('upload-files-tab-btn');
 const uploadStorageTabBtn = document.getElementById('upload-storage-tab-btn');
 const sessionsView = document.getElementById('sessions-view');
@@ -411,7 +412,6 @@ function populateLanguageDropdown() {
   `;
   const optionsHtml = homeDirs.map(dir => `<option value="${dir}">${dir}</option>`).join('');
   homeDirSelect.insertAdjacentHTML('beforeend', optionsHtml);
-  uploadStorageHomeDirSelect.innerHTML = optionsHtml;
 }
 
 async function reopenOrFocusSession(session) {
@@ -559,9 +559,7 @@ async function handleUploadToStorage() {
     }));
     const fileBlob = await fileResponse.blob();
     const filename = sealskinContext.filename || 'uploaded.file';
-    const homeName = uploadStorageHomeDirSelect.value;
-
-    if (!homeName) throw new Error("No home directory selected.");
+    const homeName = '_sealskin_shared_files';
 
     const {
       upload_id
@@ -859,6 +857,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       populateHomeDirDropdown();
     }
 
+    if (userSettings.persistent_storage && isSimpleLaunch) {
+        manageFilesBtn.style.display = 'flex';
+    }
+
     renderAppCards(availableApps, savedProfile?.appId);
 
     if (savedProfile) {
@@ -885,7 +887,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (isFileContext) {
       uploadFilesTabBtn.style.display = 'none';
-      if (userSettings.persistent_storage && homeDirs.length > 0) {
+      if (userSettings.persistent_storage) {
         uploadStorageTabBtn.style.display = 'flex';
         const filename = sealskinContext.filename;
         if (filename) {
@@ -895,10 +897,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
           uploadStorageDescription.innerHTML = t('popup.uploadStorageView.descriptionFallback');
         }
-
-        if (homeDirs.length > 0) {
-          uploadStorageBtn.disabled = false;
-        }
+        uploadStorageBtn.disabled = false;
       }
     } else {
       uploadStorageTabBtn.style.display = 'none';
@@ -925,6 +924,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 sessionsTabBtn.addEventListener('click', () => showView('sessions'));
 launchTabBtn.addEventListener('click', () => showView('launch'));
+manageFilesBtn.addEventListener('click', () => {
+    chrome.tabs.create({ url: 'files.html' });
+    window.close();
+});
+
 uploadFilesTabBtn.addEventListener('click', () => {
   chrome.tabs.create({
     url: 'upload.html'

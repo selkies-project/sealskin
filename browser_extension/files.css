@@ -1,0 +1,212 @@
+.file-manager-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    background-color: var(--bg-secondary);
+}
+
+.main-panel {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.file-manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background-color: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+#breadcrumb-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.breadcrumb-item {
+    color: var(--text-muted);
+    text-decoration: none;
+}
+
+.breadcrumb-item:hover {
+    color: var(--accent-primary);
+    text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.breadcrumb-separator {
+    color: var(--text-muted);
+}
+
+.file-content-area {
+    flex-grow: 1;
+    overflow-y: auto;
+    position: relative;
+}
+
+.file-content-area .table-container {
+    padding: 1rem;
+}
+
+#file-list-table {
+    width: 100%;
+}
+
+#file-list-table th, #file-list-table td {
+    padding: 0.75rem 1rem;
+}
+
+#file-list-table tbody tr {
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+#file-list-table tbody tr.selected {
+    background-color: var(--bg-tertiary);
+}
+
+#file-list-table tbody tr:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.col-check { width: 40px; text-align: center; }
+.col-name { width: 60%; }
+.col-size { width: 15%; text-align: right; }
+.col-modified { width: 25%; }
+
+.file-item-name {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.file-item-name i {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+}
+.file-item-name i.fa-folder { color: var(--accent-primary); }
+
+.file-manager-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--bg-primary);
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+#selection-count {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+}
+
+#file-list-body.empty td {
+    text-align: center;
+    padding: 4rem;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+}
+
+/* Drag and Drop Overlay */
+.drop-zone-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 10;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+}
+
+.drop-zone-overlay.visible {
+    display: flex;
+}
+
+.drop-zone-content {
+    color: white;
+    text-align: center;
+    border: 3px dashed white;
+    border-radius: var(--border-radius);
+    padding: 4rem;
+}
+
+.drop-zone-content i {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+}
+
+/* Upload Progress Modal */
+.upload-progress-list {
+    max-height: 40vh;
+    overflow-y: auto;
+    padding-right: 1rem;
+}
+
+#upload-progress-list .upload-item {
+    margin-bottom: 1rem;
+}
+#upload-progress-list .upload-item:last-child {
+    margin-bottom: 0;
+}
+#upload-progress-list .upload-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+#upload-progress-list .filename {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px;
+}
+#upload-progress-list .status {
+    color: var(--text-muted);
+}
+#upload-progress-list .status.success { color: var(--color-success); }
+#upload-progress-list .status.error { color: var(--color-danger); }
+
+.sidebar-nav .nav-link.special-homedir {
+    color: var(--color-warning);
+    font-weight: 600;
+}
+
+.sidebar-nav .nav-link.special-homedir.active {
+    background-color: var(--color-warning);
+    color: #1a202c;
+}
+
+.sidebar-nav .nav-link.special-homedir:hover:not(.active) {
+    background-color: var(--bg-tertiary);
+    color: var(--color-warning-hover);
+}

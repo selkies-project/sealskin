@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="files.title">SealSkin Files</title>
+    <link rel="stylesheet" href="options.css">
+    <link rel="stylesheet" href="files.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="file-manager-container">
+        <aside class="sidebar" id="homedir-sidebar">
+            <div class="sidebar-header">
+                <img src="icons/icon128.png" alt="SealSkin Logo" class="logo">
+                <h1 data-i18n="files.header.title">Files</h1>
+            </div>
+            <nav id="homedir-nav" class="sidebar-nav">
+                <!-- Home directories will be loaded here -->
+                <div class="spinner-container"><div class="spinner-small"></div></div>
+            </nav>
+        </aside>
+
+        <div class="main-panel">
+            <header class="file-manager-header">
+                <nav id="breadcrumb-nav" aria-label="breadcrumb"></nav>
+                <div class="header-actions">
+                    <button id="delete-selected-btn" class="danger" style="display: none;"><i class="fas fa-trash"></i> <span data-i18n="common.delete">Delete</span> (<span id="selection-count">0</span>)</button>
+                    <div id="default-actions" style="display: flex; gap: 1rem;">
+                        <button id="new-folder-btn" class="secondary"><i class="fas fa-folder-plus"></i> <span data-i18n="files.header.newFolder">New Folder</span></button>
+                        <button id="upload-file-btn" class="secondary"><i class="fas fa-upload"></i> <span data-i18n="files.header.uploadFiles">Upload Files</span></button>
+                        <button id="upload-folder-btn" class="primary"><i class="fas fa-folder-open"></i> <span data-i18n="files.header.uploadFolder">Upload Folder</span></button>
+                    </div>
+                    <input type="file" id="file-upload-input" multiple style="display: none;" /><input type="file" id="folder-upload-input" webkitdirectory style="display: none;" />
+                </div>
+            </header>
+
+            <main class="file-content-area">
+                <div class="table-container">
+                    <table id="file-list-table">
+                        <thead>
+                            <tr>
+                                <th class="col-check"><input type="checkbox" id="select-all-check"></th>
+                                <th class="col-name" data-i18n="files.table.name">Name</th>
+                                <th class="col-size" data-i18n="files.table.size">Size</th>
+                                <th class="col-modified" data-i18n="files.table.lastModified">Last Modified</th>
+                            </tr>
+                        </thead>
+                        <tbody id="file-list-body">
+                           <!-- File items will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="drop-zone-overlay" class="drop-zone-overlay">
+                    <div class="drop-zone-content">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3 data-i18n="files.dropzone.title">Drop files to upload</h3>
+                    </div>
+                </div>
+            </main>
+
+            <footer id="file-manager-footer" class="file-manager-footer">
+                <nav id="pagination-controls" class="pagination-controls" aria-label="pagination"></nav>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="new-folder-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 data-i18n="files.modals.newFolder.title">Create New Folder</h3>
+                <span class="close-button" data-modal-id="new-folder-modal">&times;</span>
+            </div>
+            <form id="new-folder-form">
+                <div class="form-group">
+                    <label for="new-folder-name" data-i18n="files.modals.newFolder.folderNameLabel">Folder Name</label>
+                    <input type="text" id="new-folder-name" required pattern="^[a-zA-Z0-9_.-]+$">
+                </div>
+                <div class="button-group">
+                    <button type="button" class="secondary close-button" data-modal-id="new-folder-modal" data-i18n="common.cancel">Cancel</button>
+                    <button type="submit" class="primary" data-i18n="files.modals.newFolder.createButton">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="confirm-delete-modal" class="modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3 data-i18n="files.modals.confirmDelete.title">Confirm Deletion</h3>
+                <span class="close-button" data-modal-id="confirm-delete-modal">&times;</span>
+            </div>
+            <p id="confirm-delete-message" data-i18n="files.modals.confirmDelete.messageDefault">Are you sure you want to delete the selected items? This action cannot be undone.</p>
+            <div class="button-group">
+                <button type="button" class="secondary close-button" data-modal-id="confirm-delete-modal" data-i18n="common.cancel">Cancel</button>
+                <button id="confirm-delete-btn" type="button" class="danger" data-i18n="common.delete">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="upload-progress-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 data-i18n="files.modals.uploadProgress.title">Upload Progress</h3>
+            </div>
+            <div id="upload-progress-list" class="upload-progress-list"></div>
+            <div class="button-group" style="margin-top: 1.5rem; display: none;" id="upload-modal-footer">
+                <button id="close-upload-modal-btn" class="primary" data-i18n="files.modals.uploadProgress.doneButton">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="translations.js"></script>
+    <script src="crypto-utils.js"></script>
+    <script src="files.js"></script>
+</body>
+</html>

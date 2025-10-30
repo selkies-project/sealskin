@@ -517,10 +517,15 @@ tbody tr.empty-row:hover {
 
 .close-button {
   color: var(--text-muted);
-  font-size: 2rem;
   font-weight: bold;
   cursor: pointer;
   transition: color 0.2s;
+}
+span.close-button {
+  font-size: 2rem;
+}
+.modal-content button.close-button {
+    font-size: 1rem;
 }
 .close-button:hover, .close-button:focus { color: var(--text-primary); }
 
