@@ -740,6 +740,22 @@ async def _reassemble_file(upload_id: str, total_chunks: int, filename: str) -> 
         logger.error(f"Failed to reassemble file for upload {upload_id}: {e}")
         raise HTTPException(status_code=500, detail="Failed to reassemble file.")
 
+def _get_unique_filename(directory: str, filename: str) -> str:
+    """
+    Checks if a filename exists in a directory. If so, appends '-1', '-2', etc.
+    until a unique name is found. Returns the unique, non-conflicting filename.
+    """
+    if not os.path.exists(os.path.join(directory, filename)):
+        return filename
+
+    name, ext = os.path.splitext(filename)
+    counter = 1
+    while True:
+        new_filename = f"{name}-{counter}{ext}"
+        if not os.path.exists(os.path.join(directory, new_filename)):
+            return new_filename
+        counter += 1
+
 
 @encrypted_router.post("/api/applications", response_model=List[Application])
 async def get_applications(user: dict = Depends(verify_token)):
@@ -848,11 +864,6 @@ async def _launch_common(
     provider = DockerProvider(app_config.dict())
     volumes = {}
     host_mount_path = None
-    container_file_path = (
-        os.path.join(settings.container_config_path, "Desktop", "files", filename)
-        if filename
-        else None
-    )
 
     gpu_config = None
     if selected_gpu and effective_settings.get("gpu", False):
@@ -897,6 +908,10 @@ async def _launch_common(
             raise HTTPException(
                 status_code=404, detail=f"Home directory '{home_name}' not found."
             )
+        shared_files_path = os.path.abspath(
+            os.path.join(settings.storage_path, username, "_sealskin_shared_files")
+        )
+        os.makedirs(shared_files_path, exist_ok=True, mode=0o755)
     elif file_bytes and filename:
         host_mount_path = os.path.join(settings.storage_path, "sealskin_ephemeral", str(uuid.uuid4()))
 
@@ -945,14 +960,30 @@ async def _launch_common(
             "bind": settings.container_config_path,
             "mode": "rw",
         }
+        if home_name and home_name.lower() != "cleanroom":
+            translated_shared_files_path = _translate_path_to_host(shared_files_path)
+            volumes[translated_shared_files_path] = {
+                "bind": os.path.join(settings.container_config_path, "Desktop", "files"),
+                "mode": "rw",
+            }
+
         if file_bytes and filename:
-            file_dest_dir = os.path.join(host_mount_path, "Desktop", "files")
+            if home_name and home_name.lower() != "cleanroom":
+                file_dest_dir = shared_files_path
+            else:
+                file_dest_dir = os.path.join(host_mount_path, "Desktop", "files")
+
             os.makedirs(file_dest_dir, exist_ok=True, mode=0o755)
-            file_location = os.path.join(file_dest_dir, filename)
+            actual_filename = _get_unique_filename(file_dest_dir, filename)
+            file_location = os.path.join(file_dest_dir, actual_filename)
+
             with open(file_location, "wb") as f:
                 f.write(file_bytes)
             os.chmod(file_location, 0o644)
             if open_file_on_launch:
+                container_file_path = os.path.join(
+                    settings.container_config_path, "Desktop", "files", actual_filename
+                )
                 final_env["SEALSKIN_FILE"] = container_file_path
                 launch_context = {"type": "file", "value": filename}
 
@@ -1129,9 +1160,22 @@ async def send_file_to_session(
             req.upload_id, req.total_chunks, req.filename
         )
         safe_filename = os.path.basename(req.filename)
-        file_dest_dir = os.path.join(host_mount_path, "Desktop", "files")
+
+        is_persistent = host_mount_path and not host_mount_path.startswith(
+            os.path.join(settings.storage_path, "sealskin_ephemeral")
+        )
+
+        if is_persistent:
+            file_dest_dir = os.path.abspath(
+                os.path.join(settings.storage_path, user["username"], "_sealskin_shared_files")
+            )
+        else:
+            file_dest_dir = os.path.join(host_mount_path, "Desktop", "files")
+
         os.makedirs(file_dest_dir, exist_ok=True, mode=0o755)
-        file_location = os.path.join(file_dest_dir, safe_filename)
+
+        actual_filename = await asyncio.to_thread(_get_unique_filename, file_dest_dir, safe_filename)
+        file_location = os.path.join(file_dest_dir, actual_filename)
 
         try:
             await asyncio.to_thread(shutil.move, reassembled_file_path, file_location)
@@ -1145,11 +1189,11 @@ async def send_file_to_session(
             )
 
         logger.info(
-            f"[{session_id}] User '{user['username']}' wrote file '{safe_filename}' to session via chunked upload."
+            f"[{session_id}] User '{user['username']}' wrote file '{actual_filename}' (as '{safe_filename}') to session."
         )
         return {
             "status": "success",
-            "message": f"File '{safe_filename}' written to session.",
+            "message": f"File '{safe_filename}' sent to session.",
         }
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
@@ -1807,12 +1851,15 @@ async def upload_to_storage(
 
         safe_filename = os.path.basename(req.filename)
         file_dest_dir = os.path.join(
-            settings.storage_path, username, req.home_name, "Desktop", "files"
+            settings.storage_path, username, "_sealskin_shared_files"
         )
 
         await asyncio.to_thread(os.makedirs, file_dest_dir, exist_ok=True, mode=0o755)
 
-        file_location = os.path.join(file_dest_dir, safe_filename)
+        actual_filename = await asyncio.to_thread(
+            _get_unique_filename, file_dest_dir, safe_filename
+        )
+        file_location = os.path.join(file_dest_dir, actual_filename)
 
         try:
             await asyncio.to_thread(shutil.move, reassembled_file_path, file_location)
@@ -1828,11 +1875,11 @@ async def upload_to_storage(
             )
 
         logger.info(
-            f"User '{username}' uploaded file '{safe_filename}' to home directory '{req.home_name}'."
+            f"User '{username}' uploaded file '{actual_filename}' (as '{safe_filename}') to shared storage."
         )
         return {
             "status": "success",
-            "message": f"File '{safe_filename}' uploaded successfully to '{req.home_name}'.",
+            "message": f"File '{safe_filename}' uploaded successfully.",
         }
 
     except ValidationError as e:
