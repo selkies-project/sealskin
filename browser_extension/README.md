@@ -26,7 +26,7 @@ This component provides the primary, quick-access user interface when the extens
 *   **Application Launcher:** Fetches and displays a list of applications available to the user.
 *   **Context-Aware UI:** The UI adapts based on the context. For a simple launch, it shows all apps. If triggered from a file or URL, it may recommend specific applications and present relevant options (e.g., "Open file on launch").
 *   **Session Management:** Displays a list of the user's active sessions, allowing them to be reopened or terminated.
-*   **Launch Configuration:** Allows the user to select launch parameters such as a persistent home directory, language, or a specific GPU (if permitted).
+*   **Launch Configuration:** Allows the user to select launch parameters such as a persistent home directory, language, or a specific GPU (if permitted). Includes an "auto" option for home directories that automatically creates and manages a separate persistent space for each application (`auto-appname`). For standard launches (from the popup), these options are automatically cached.
 
 ### Options Page (options.js)
 

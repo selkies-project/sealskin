@@ -460,6 +460,7 @@ const en = {
             launchButton: 'Launch',
             launchingButton: 'Launching...',
             uploadingButton: 'Uploading...',
+            autoHome: 'Auto (per-app persistence)',
         },
         sessionsView: {
             noSessions: 'No active sessions found.',
@@ -491,6 +492,7 @@ const en = {
             noAppSelected: 'Please select an application.',
             noAppsAvailable: 'No applications are available for your account.',
             uploadSuccess: 'File uploaded successfully!',
+            creatingAutoHome: 'Creating automatic home directory...',
         },
         languages: {
             default: 'Default ({locale})'
@@ -966,6 +968,7 @@ const es = {
             launchButton: 'Iniciar',
             launchingButton: 'Iniciando...',
             uploadingButton: 'Subiendo...',
+            autoHome: 'Automático (persistencia por aplicación)',
         },
         sessionsView: {
             noSessions: 'No se encontraron sesiones activas.',
@@ -997,6 +1000,7 @@ const es = {
             noAppSelected: 'Por favor, seleccione una aplicación.',
             noAppsAvailable: 'No hay aplicaciones disponibles para su cuenta.',
             uploadSuccess: '¡Archivo subido con éxito!',
+            creatingAutoHome: 'Creando directorio personal automático...',
         },
         languages: {
             default: 'Por defecto ({locale})'
@@ -1472,6 +1476,7 @@ const zh = {
             launchButton: '启动',
             launchingButton: '启动中...',
             uploadingButton: '上传中...',
+            autoHome: '自动 (按应用持久化)',
         },
         sessionsView: {
             noSessions: '未找到活跃会话。',
@@ -1503,6 +1508,7 @@ const zh = {
             noAppSelected: '请选择一个应用程序。',
             noAppsAvailable: '您的账户没有可用的应用程序。',
             uploadSuccess: '文件上传成功！',
+            creatingAutoHome: '正在创建自动主目录...',
         },
         languages: {
             default: '默认 ({locale})'
@@ -1978,6 +1984,7 @@ const hi = {
             launchButton: 'लॉन्च करें',
             launchingButton: 'लॉन्च हो रहा है...',
             uploadingButton: 'अपलोड हो रहा है...',
+            autoHome: 'ऑटो (प्रति-ऐप दृढ़ता)',
         },
         sessionsView: {
             noSessions: 'कोई सक्रिय सत्र नहीं मिला।',
@@ -2009,6 +2016,7 @@ const hi = {
             noAppSelected: 'कृपया एक एप्लिकेशन चुनें।',
             noAppsAvailable: 'आपके खाते के लिए कोई एप्लिकेशन उपलब्ध नहीं है।',
             uploadSuccess: 'फ़ाइल सफलतापूर्वक अपलोड हुई!',
+            creatingAutoHome: 'स्वचालित होम डायरेक्टरी बना रहा है...',
         },
         languages: {
             default: 'डिफ़ॉल्ट ({locale})'
@@ -2484,6 +2492,7 @@ const pt = {
             launchButton: 'Iniciar',
             launchingButton: 'Iniciando...',
             uploadingButton: 'Enviando...',
+            autoHome: 'Automático (persistência por aplicativo)',
         },
         sessionsView: {
             noSessions: 'Nenhuma sessão ativa encontrada.',
@@ -2515,6 +2524,7 @@ const pt = {
             noAppSelected: 'Por favor, selecione um aplicativo.',
             noAppsAvailable: 'Nenhum aplicativo está disponível para sua conta.',
             uploadSuccess: 'Arquivo enviado com sucesso!',
+            creatingAutoHome: 'Criando diretório home automático...',
         },
         languages: {
             default: 'Padrão ({locale})'
@@ -2990,6 +3000,7 @@ const fr = {
             launchButton: 'Lancer',
             launchingButton: 'Lancement...',
             uploadingButton: 'Téléversement...',
+            autoHome: 'Auto (persistance par application)',
         },
         sessionsView: {
             noSessions: 'Aucune session active trouvée.',
@@ -3021,6 +3032,7 @@ const fr = {
             noAppSelected: 'Veuillez sélectionner une application.',
             noAppsAvailable: 'Aucune application n\'est disponible pour votre compte.',
             uploadSuccess: 'Fichier téléversé avec succès !',
+            creatingAutoHome: 'Création du répertoire personnel automatique...',
         },
         languages: {
             default: 'Défaut ({locale})'
@@ -3496,6 +3508,7 @@ const ru = {
             launchButton: 'Запустить',
             launchingButton: 'Запуск...',
             uploadingButton: 'Загрузка...',
+            autoHome: 'Авто (постоянство для каждого приложения)',
         },
         sessionsView: {
             noSessions: 'Активных сессий не найдено.',
@@ -3527,6 +3540,7 @@ const ru = {
             noAppSelected: 'Пожалуйста, выберите приложение.',
             noAppsAvailable: 'Для вашей учётной записи нет доступных приложений.',
             uploadSuccess: 'Файл успешно загружен!',
+            creatingAutoHome: 'Создание автоматического домашнего каталога...',
         },
         languages: {
             default: 'По умолчанию ({locale})'
@@ -4002,6 +4016,7 @@ const de = {
             launchButton: 'Starten',
             launchingButton: 'Wird gestartet...',
             uploadingButton: 'Wird hochgeladen...',
+            autoHome: 'Automatisch (pro-App-Persistenz)',
         },
         sessionsView: {
             noSessions: 'Keine aktiven Sitzungen gefunden.',
@@ -4033,6 +4048,7 @@ const de = {
             noAppSelected: 'Bitte wählen Sie eine Anwendung aus.',
             noAppsAvailable: 'Für Ihr Konto sind keine Anwendungen verfügbar.',
             uploadSuccess: 'Datei erfolgreich hochgeladen!',
+            creatingAutoHome: 'Automatisches Home-Verzeichnis wird erstellt...',
         },
         languages: {
             default: 'Standard ({locale})'
@@ -4508,6 +4524,7 @@ const tr = {
             launchButton: 'Başlat',
             launchingButton: 'Başlatılıyor...',
             uploadingButton: 'Yükleniyor...',
+            autoHome: 'Otomatik (uygulama başına kalıcılık)',
         },
         sessionsView: {
             noSessions: 'Aktif oturum bulunamadı.',
@@ -4539,6 +4556,7 @@ const tr = {
             noAppSelected: 'Lütfen bir uygulama seçin.',
             noAppsAvailable: 'Hesabınız için uygun uygulama yok.',
             uploadSuccess: 'Dosya başarıyla yüklendi!',
+            creatingAutoHome: 'Otomatik ana dizin oluşturuluyor...',
         },
         languages: {
             default: 'Varsayılan ({locale})'
@@ -5014,6 +5032,7 @@ const it = {
             launchButton: 'Avvia',
             launchingButton: 'Avvio in corso...',
             uploadingButton: 'Caricamento...',
+            autoHome: 'Automatico (persistenza per app)',
         },
         sessionsView: {
             noSessions: 'Nessuna sessione attiva trovata.',
@@ -5045,6 +5064,7 @@ const it = {
             noAppSelected: 'Seleziona un\'applicazione.',
             noAppsAvailable: 'Nessuna applicazione disponibile per il tuo account.',
             uploadSuccess: 'File caricato con successo!',
+            creatingAutoHome: 'Creazione della directory home automatica in corso...',
         },
         languages: {
             default: 'Predefinito ({locale})'
@@ -5520,6 +5540,7 @@ const nl = {
             launchButton: 'Starten',
             launchingButton: 'Starten...',
             uploadingButton: 'Uploaden...',
+            autoHome: 'Automatisch (persistentie per app)',
         },
         sessionsView: {
             noSessions: 'Geen actieve sessies gevonden.',
@@ -5551,6 +5572,7 @@ const nl = {
             noAppSelected: 'Selecteer een applicatie.',
             noAppsAvailable: 'Er zijn geen applicaties beschikbaar voor uw account.',
             uploadSuccess: 'Bestand succesvol geüpload!',
+            creatingAutoHome: 'Automatische home directory aanmaken...',
         },
         languages: {
             default: 'Standaard ({locale})'
@@ -6026,6 +6048,7 @@ const ar = {
             launchButton: 'تشغيل',
             launchingButton: 'جاري التشغيل...',
             uploadingButton: 'جاري التحميل...',
+            autoHome: 'تلقائي (استمرارية لكل تطبيق)',
         },
         sessionsView: {
             noSessions: 'لم يتم العثور على جلسات نشطة.',
@@ -6057,6 +6080,7 @@ const ar = {
             noAppSelected: 'الرجاء تحديد تطبيق.',
             noAppsAvailable: 'لا توجد تطبيقات متاحة لحسابك.',
             uploadSuccess: 'تم تحميل الملف بنجاح!',
+            creatingAutoHome: 'جاري إنشاء المجلد الرئيسي التلقائي...',
         },
         languages: {
             default: 'افتراضي ({locale})'
@@ -6532,6 +6556,7 @@ const ko = {
             launchButton: '시작',
             launchingButton: '시작 중...',
             uploadingButton: '업로드 중...',
+            autoHome: '자동 (앱별 영속성)',
         },
         sessionsView: {
             noSessions: '활성 세션이 없습니다.',
@@ -6563,6 +6588,7 @@ const ko = {
             noAppSelected: '애플리케이션을 선택하세요.',
             noAppsAvailable: '계정에서 사용할 수 있는 애플리케이션이 없습니다.',
             uploadSuccess: '파일이 성공적으로 업로드되었습니다!',
+            creatingAutoHome: '자동 홈 디렉터리 생성 중...',
         },
         languages: {
             default: '기본값 ({locale})'
@@ -7038,6 +7064,7 @@ const ja = {
             launchButton: '起動',
             launchingButton: '起動中...',
             uploadingButton: 'アップロード中...',
+            autoHome: '自動 (アプリごとの永続化)',
         },
         sessionsView: {
             noSessions: 'アクティブなセッションが見つかりません。',
@@ -7069,6 +7096,7 @@ const ja = {
             noAppSelected: 'アプリケーションを選択してください。',
             noAppsAvailable: 'あなたのアカウントで利用可能なアプリケーションはありません。',
             uploadSuccess: 'ファイルが正常にアップロードされました！',
+            creatingAutoHome: '自動ホームディレクトリを作成中...',
         },
         languages: {
             default: 'デフォルト ({locale})'
@@ -7544,6 +7572,7 @@ const vi = {
             launchButton: 'Khởi chạy',
             launchingButton: 'Đang khởi chạy...',
             uploadingButton: 'Đang tải lên...',
+            autoHome: 'Tự động (lưu trữ theo ứng dụng)',
         },
         sessionsView: {
             noSessions: 'Không tìm thấy phiên hoạt động nào.',
@@ -7575,6 +7604,7 @@ const vi = {
             noAppSelected: 'Vui lòng chọn một ứng dụng.',
             noAppsAvailable: 'Không có ứng dụng nào có sẵn cho tài khoản của bạn.',
             uploadSuccess: 'Tệp đã được tải lên thành công!',
+            creatingAutoHome: 'Đang tạo thư mục chính tự động...',
         },
         languages: {
             default: 'Mặc định ({locale})'
@@ -8050,6 +8080,7 @@ const th = {
             launchButton: 'เปิด',
             launchingButton: 'กำลังเปิด...',
             uploadingButton: 'กำลังอัปโหลด...',
+            autoHome: 'อัตโนมัติ (คงอยู่ตามแอป)',
         },
         sessionsView: {
             noSessions: 'ไม่พบเซสชันที่ใช้งานอยู่',
@@ -8081,6 +8112,7 @@ const th = {
             noAppSelected: 'กรุณาเลือกแอปพลิเคชัน',
             noAppsAvailable: 'ไม่มีแอปพลิเคชันสำหรับบัญชีของคุณ',
             uploadSuccess: 'อัปโหลดไฟล์สำเร็จ!',
+            creatingAutoHome: 'กำลังสร้างโฮมไดเรกทอรีอัตโนมัติ...',
         },
         languages: {
             default: 'ค่าเริ่มต้น ({locale})'
@@ -8556,6 +8588,7 @@ const fil = {
             launchButton: 'Ilunsad',
             launchingButton: 'Inilulunsad...',
             uploadingButton: 'Nag-a-upload...',
+            autoHome: 'Awtomatiko (pananatili bawat app)',
         },
         sessionsView: {
             noSessions: 'Walang nahanap na aktibong sesyon.',
@@ -8587,6 +8620,7 @@ const fil = {
             noAppSelected: 'Mangyaring pumili ng isang aplikasyon.',
             noAppsAvailable: 'Walang magagamit na aplikasyon para sa iyong account.',
             uploadSuccess: 'Matagumpay na na-upload ang file!',
+            creatingAutoHome: 'Gumagawa ng awtomatikong home directory...',
         },
         languages: {
             default: 'Default ({locale})'
@@ -9062,6 +9096,7 @@ const da = {
             launchButton: 'Start',
             launchingButton: 'Starter...',
             uploadingButton: 'Uploader...',
+            autoHome: 'Automatisk (vedvarende pr. app)',
         },
         sessionsView: {
             noSessions: 'Ingen aktive sessioner fundet.',
@@ -9093,6 +9128,7 @@ const da = {
             noAppSelected: 'Vælg venligst en applikation.',
             noAppsAvailable: 'Ingen applikationer er tilgængelige for din konto.',
             uploadSuccess: 'Fil uploadet med succes!',
+            creatingAutoHome: 'Opretter automatisk hjemmemappe...',
         },
         languages: {
             default: 'Standard ({locale})'

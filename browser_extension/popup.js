@@ -404,14 +404,14 @@ function populateLanguageDropdown() {
   languageSelect.value = "en_US.UTF-8";
 }
 
-function populateHomeDirDropdown() {
-  homeDirSelect.innerHTML = `<option value="cleanroom">${t('popup.launchView.cleanroom')}</option>`;
-  homeDirs.forEach(dir => {
-    const option = document.createElement('option');
-    option.value = dir;
-    option.textContent = dir;
-    homeDirSelect.appendChild(option);
-  });
+ function populateHomeDirDropdown() {
+  homeDirSelect.innerHTML = `
+    <option value="auto">${t('popup.launchView.autoHome')}</option>
+    <option value="cleanroom">${t('popup.launchView.cleanroom')}</option>
+  `;
+  const optionsHtml = homeDirs.map(dir => `<option value="${dir}">${dir}</option>`).join('');
+  homeDirSelect.insertAdjacentHTML('beforeend', optionsHtml);
+  uploadStorageHomeDirSelect.innerHTML = optionsHtml;
 }
 
 async function reopenOrFocusSession(session) {
@@ -647,24 +647,44 @@ async function handleLaunch() {
     null :
     (gpuSelect.value === 'none' ? null : gpuSelect.value);
 
-  if (saveOptionsCheckbox.checked) {
-    const profile = {
+  if (isSimpleLaunch) {
+    const simpleLaunchOptions = {
       appId: selectedAppId,
       homeDir: selectedHomeDirValue,
       language: languageSelect.value,
       gpu: selectedGpuValue,
-      openFileOnLaunch: openFileCheckbox.checked
     };
-    await chrome.storage.local.set({
-      [launchProfileKey]: profile
-    });
+    await chrome.storage.local.set({ 'simple_launch_profile': simpleLaunchOptions });
+  } else if (saveOptionsCheckbox.checked) {
+    const pinnedProfile = {
+      appId: selectedAppId,
+      homeDir: selectedHomeDirValue,
+      language: languageSelect.value,
+      gpu: selectedGpuValue,
+      openFileOnLaunch: openFileCheckbox.checked,
+    };
+    await chrome.storage.local.set({ [launchProfileKey]: pinnedProfile });
   }
 
   try {
+    let finalHomeName = selectedHomeDirValue;
+    if (selectedHomeDirValue === 'auto' && !homeDirFormGroup.classList.contains('hidden')) {
+        const selectedApp = availableApps.find(app => app.id === selectedAppId);
+        if (!selectedApp) throw new Error("Selected app not found for auto home generation.");
+        const appNameSanitized = selectedApp.name.toLowerCase().replace(/[\s_]+/g, '-').replace(/[^a-z0-9-]/g, '');
+        const autoHomeName = `auto-${appNameSanitized}`;
+        if (!homeDirs.includes(autoHomeName)) {
+            setStatus(t('popup.status.creatingAutoHome'));
+            await secureFetch('/api/homedirs', { method: 'POST', body: JSON.stringify({ home_name: autoHomeName }) });
+            homeDirs.push(autoHomeName);
+        }
+        finalHomeName = autoHomeName;
+    }
+
     let endpoint;
     let payload = {
       application_id: selectedAppId,
-      home_name: selectedHomeDirValue,
+      home_name: finalHomeName,
       language: languageSelect.value,
       selected_gpu: selectedGpuValue,
     };
@@ -764,9 +784,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const saveOptionsContainer = document.getElementById('save-options-container');
+    let savedProfile = null;
 
     if (isSimpleLaunch) {
-      launchProfileKey = 'workflow_profile_simple';
+      const data = await chrome.storage.local.get('simple_launch_profile');
+      savedProfile = data.simple_launch_profile;
       saveOptionsContainer.style.display = 'none';
     } else if (sealskinContext.action === 'url') {
       launchProfileKey = 'workflow_profile_url';
@@ -790,6 +812,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       saveOptionsContainer.style.display = 'none';
     }
 
+    if (!isSimpleLaunch && saveOptionsContainer.style.display === 'block') {
+        const data = await chrome.storage.local.get(launchProfileKey);
+        savedProfile = data[launchProfileKey];
+    }
 
     const [statusData, appsData, sessionsData] = await Promise.all([
       secureFetch('/api/admin/status', {
@@ -833,8 +859,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       populateHomeDirDropdown();
     }
 
-    const profileData = await chrome.storage.local.get(launchProfileKey);
-    const savedProfile = profileData[launchProfileKey];
     renderAppCards(availableApps, savedProfile?.appId);
 
     if (savedProfile) {
@@ -845,8 +869,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           if ([...gpuSelect.options].some(o => o.value === savedProfile.gpu)) gpuSelect.value = savedProfile.gpu;
         }, 50);
       }
-      openFileCheckbox.checked = savedProfile.openFileOnLaunch !== false;
-      saveOptionsCheckbox.checked = true;
+      if (!isSimpleLaunch) {
+        openFileCheckbox.checked = savedProfile.openFileOnLaunch !== false;
+        saveOptionsCheckbox.checked = true;
+      }
     }
 
     if (availableApps.length > 0) {
@@ -869,14 +895,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
           uploadStorageDescription.innerHTML = t('popup.uploadStorageView.descriptionFallback');
         }
-
-        uploadStorageHomeDirSelect.innerHTML = '';
-        homeDirs.forEach(dir => {
-          const option = document.createElement('option');
-          option.value = dir;
-          option.textContent = dir;
-          uploadStorageHomeDirSelect.appendChild(option);
-        });
 
         if (homeDirs.length > 0) {
           uploadStorageBtn.disabled = false;
