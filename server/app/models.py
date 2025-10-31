@@ -240,7 +240,7 @@ class FileListResponse(BaseModel):
 
 class CreateFolderRequest(BaseModel):
     path: str
-    folder_name: str = Field(..., pattern=r"^[^/\\0]+$")
+    folder_name: str = Field(..., pattern=r"^[^/\\]+$")
 
 class DeleteItemsRequest(BaseModel):
     paths: List[str]

@@ -871,7 +871,7 @@ function renderHomeDirsTable(dirs) {
                 <td class="actions-cell">
                     <div class="cell-wrapper">
                         <button class="secondary manage-btn" data-homedir-name="${dir}">${t('common.manage')}</button>
-+                        <button class="danger" data-homedir-name="${dir}" ${dir === '_sealskin_shared_files' ? 'disabled' : ''}>${t('common.delete')}</button>
+                        <button class="danger" data-homedir-name="${dir}" ${dir === '_sealskin_shared_files' ? 'disabled' : ''}>${t('common.delete')}</button>
                     </div>
                 </td>
             </tr>
