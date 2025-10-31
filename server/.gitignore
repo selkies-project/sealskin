@@ -1,5 +1,6 @@
 */
 !app/
 !app/providers
+!app/static
 __pycache__/
 *.pyc

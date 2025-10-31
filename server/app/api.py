@@ -23,7 +23,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from fastapi import FastAPI, Depends, HTTPException, Request, Response, APIRouter, Query
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse, FileResponse, HTMLResponse
 from fastapi.routing import APIRoute
 from jose import JWTError, jwt
 from pydantic import ValidationError
@@ -2096,3 +2096,18 @@ encrypted_router.include_router(session_router)
 encrypted_router.include_router(upload_router)
 encrypted_router.include_router(files_router)
 api_app.include_router(encrypted_router)
+
+@api_app.get("/", response_class=HTMLResponse, include_in_schema=False)
+async def read_root():
+    html_file_path = os.path.join(os.path.dirname(__file__), "static", "index.html")
+    if os.path.exists(html_file_path):
+        with open(html_file_path, 'r') as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>SealSkin Server</h1>", status_code=404)
+
+@api_app.get("/sealskin.zip", include_in_schema=False)
+async def download_zip():
+    zip_file_path = "/sealskin.zip"
+    if not os.path.exists(zip_file_path):
+        raise HTTPException(status_code=404, detail="File not found at /sealskin.zip on the server filesystem.")
+    return FileResponse(path=zip_file_path, media_type='application/zip', filename='sealskin.zip')
