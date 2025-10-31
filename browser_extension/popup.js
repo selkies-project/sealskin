@@ -405,12 +405,15 @@ function populateLanguageDropdown() {
   languageSelect.value = "en_US.UTF-8";
 }
 
- function populateHomeDirDropdown() {
+function populateHomeDirDropdown() {
   homeDirSelect.innerHTML = `
     <option value="auto">${t('popup.launchView.autoHome')}</option>
     <option value="cleanroom">${t('popup.launchView.cleanroom')}</option>
   `;
-  const optionsHtml = homeDirs.map(dir => `<option value="${dir}">${dir}</option>`).join('');
+  const optionsHtml = homeDirs
+    .filter(dir => dir !== '_sealskin_shared_files' && !dir.startsWith('auto-'))
+    .map(dir => `<option value="${dir}">${dir}</option>`)
+    .join('');
   homeDirSelect.insertAdjacentHTML('beforeend', optionsHtml);
 }
 

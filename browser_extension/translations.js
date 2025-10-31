@@ -10453,20 +10453,45 @@ const getTranslator = (langCode = 'en') => {
     const langDict = translations[baseLang] || translations.en;
     const fallbackDict = translations.en;
 
-    const t = (key, variables) => {
+    const t = (key, variables = {}) => {
         const keys = key.split('.');
-        let text = keys.reduce((obj, k) => (obj && obj[k] !== 'undefined') ? obj[k] : undefined, langDict);
+        let value = keys.reduce((obj, k) => (obj && obj[k] !== undefined) ? obj[k] : undefined, langDict);
 
-        if (text === undefined) {
-            text = keys.reduce((obj, k) => (obj && obj[k] !== 'undefined') ? obj[k] : undefined, fallbackDict);
+        if (value === undefined) {
+            value = keys.reduce((obj, k) => (obj && obj[k] !== undefined) ? obj[k] : undefined, fallbackDict);
         }
 
-        if (text === undefined) {
+        if (value === undefined) {
             console.warn(`Translation key not found: ${key}`);
             return key;
         }
 
-        return simpleInterpolate(text, variables);
+        if (typeof value !== 'string') {
+            return value;
+        }
+        
+        let processedText = value.replace(/\{(\w+),\s*plural,\s*(.*)\}/g, (match, varName, rulesStr) => {
+            if (!variables.hasOwnProperty(varName)) return match;
+            const count = variables[varName];
+            const rules = {};
+            const ruleRegex = /(\w+)\s*\{((?:[^{}]|{[^{}]*})*)\}/g;
+            let ruleMatch;
+            while ((ruleMatch = ruleRegex.exec(rulesStr)) !== null) {
+                rules[ruleMatch[1]] = ruleMatch[2];
+            }
+            let resultText;
+            if (count === 1 && rules.one) resultText = rules.one;
+            else if (rules.other) resultText = rules.other;
+            else return match;
+            return resultText;
+        });
+
+        for (const placeholder in variables) {
+            const regex = new RegExp(`\\{${placeholder}\\}`, 'g');
+            processedText = processedText.replace(regex, variables[placeholder]);
+        }
+        
+        return processedText;
     };
 
     return { t };
