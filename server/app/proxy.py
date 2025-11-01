@@ -1,19 +1,45 @@
 import secrets
 import logging
 import asyncio
+import os
+import hashlib
 import time
+import yaml
 
 import httpx
 import websockets
 from contextlib import asynccontextmanager
 from starlette.websockets import WebSocket, WebSocketDisconnect
-from fastapi import FastAPI, Depends, HTTPException, Request, Response
-from fastapi.responses import RedirectResponse, StreamingResponse
+from fastapi import FastAPI, Depends, HTTPException, Request, Response, Form
+
+from fastapi.responses import RedirectResponse, StreamingResponse, FileResponse, HTMLResponse
 
 from .api import SESSIONS_DB
+from .models import PublicShareMetadata
 from .settings import settings
 
 logger = logging.getLogger(__name__)
+from pydantic import ValidationError
+DOWNLOAD_TOKENS: dict = {}
+
+def _load_shares_from_file() -> dict:
+    metadata_path = settings.public_shares_metadata_path
+    if not os.path.exists(metadata_path):
+        logger.warning(f"[PROXY_LOAD] Metadata file not found at '{metadata_path}'.")
+        return {}
+
+    try:
+        with open(metadata_path, "r") as f:
+            data = yaml.safe_load(f) or {}
+            
+        parsed_shares = {
+            share_id: PublicShareMetadata(**metadata)
+            for share_id, metadata in data.items()
+        }
+        return parsed_shares
+    except (IOError, yaml.YAMLError, ValidationError) as e:
+        logger.error(f"[PROXY_LOAD] Error reading or parsing shares metadata file: {e}")
+        return {}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -25,6 +51,82 @@ async def lifespan(app: FastAPI):
 
 
 proxy_app = FastAPI(title="SealSkin Session Proxy", lifespan=lifespan)
+
+@proxy_app.get("/public/download/{token}")
+async def download_shared_file(token: str):
+    token_data = DOWNLOAD_TOKENS.pop(token, None)
+    if not token_data or token_data.get("expires_at", 0) < time.time():
+        raise HTTPException(status_code=403, detail="Invalid or expired download token.")
+    
+    share_id = token_data.get("share_id")
+    all_shares = _load_shares_from_file()
+    metadata = all_shares.get(share_id)
+    if not metadata:
+        raise HTTPException(status_code=404, detail="Shared file not found.")
+
+    file_path = os.path.join(settings.public_storage_path, share_id)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Shared file not found on disk.")
+
+    return FileResponse(
+        path=file_path,
+        filename=metadata.original_filename,
+        media_type="application/octet-stream"
+    )
+
+@proxy_app.get("/public/{share_id}")
+async def access_public_share_get(share_id: str, request: Request):
+    all_shares = _load_shares_from_file()
+    metadata = all_shares.get(share_id)
+    if not metadata:
+        raise HTTPException(status_code=404, detail="Share not found.")
+
+    if metadata.expiry_timestamp and metadata.expiry_timestamp < time.time():
+        return HTMLResponse(content="<h1>This link has expired.</h1>", status_code=410)
+
+    if metadata.password_hash:
+        password_page_path = os.path.join(os.path.dirname(__file__), "static", "public_password.html")
+        if os.path.exists(password_page_path):
+            with open(password_page_path, "r") as f:
+                html_content = f.read()
+            html_content = html_content.replace("{{SHARE_ID}}", share_id).replace("{{ERROR_MESSAGE}}", "")
+            return HTMLResponse(content=html_content)
+        else:
+            return HTMLResponse(content="<h1>Password protected</h1><p>Error: Password page template not found.</p>", status_code=500)
+
+    file_path = os.path.join(settings.public_storage_path, share_id)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Shared file not found on disk.")
+
+    return FileResponse(
+        path=file_path,
+        filename=metadata.original_filename,
+        media_type="application/octet-stream"
+    )
+
+@proxy_app.post("/public/{share_id}")
+async def access_public_share_post(share_id: str, password: str = Form(...)):
+    all_shares = _load_shares_from_file()
+    metadata = all_shares.get(share_id)
+    if not metadata: raise HTTPException(status_code=404, detail="Share not found.")
+    if metadata.expiry_timestamp and metadata.expiry_timestamp < time.time():
+        return HTMLResponse(content="<h1>This link has expired.</h1>", status_code=410)
+    if not metadata.password_hash: raise HTTPException(status_code=400, detail="This share is not password protected.")
+
+    submitted_hash = hashlib.sha256(password.encode()).hexdigest()
+    if secrets.compare_digest(submitted_hash, metadata.password_hash):
+        token = secrets.token_urlsafe(32)
+        DOWNLOAD_TOKENS[token] = {"share_id": share_id, "expires_at": time.time() + 60}
+        return RedirectResponse(url=f"/public/download/{token}", status_code=303)
+    else:
+        password_page_path = os.path.join(os.path.dirname(__file__), "static", "public_password.html")
+        if os.path.exists(password_page_path):
+            with open(password_page_path, "r") as f:
+                html_content = f.read()
+            html_content = html_content.replace("{{SHARE_ID}}", share_id).replace("{{ERROR_MESSAGE}}", "Incorrect password. Please try again.")
+            return HTMLResponse(content=html_content, status_code=401)
+        else:
+            return HTMLResponse(content="<h1>Incorrect Password</h1>", status_code=401)
 
 async def get_http_session(session_id: str, request: Request) -> dict:
     token = request.query_params.get("access_token") or request.cookies.get(

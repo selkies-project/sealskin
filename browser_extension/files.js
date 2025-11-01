@@ -15,8 +15,14 @@ let state = {
   currentPage: 1,
   perPage: 100,
   selectedItems: new Set(),
+  selectedShares: new Set(),
   homeDirs: [],
+  currentFileList: [],
+  publicShares: [],
+  fileToShare: null,
+  sharingAllowed: false,
   isLoading: false,
+  currentView: 'files',
   uploadQueue: new Map()
 };
 
@@ -24,6 +30,11 @@ let state = {
 const homeDirNav = document.getElementById('homedir-nav');
 const breadcrumbNav = document.getElementById('breadcrumb-nav');
 const fileListBody = document.getElementById('file-list-body');
+const filesView = document.getElementById('files-view');
+const sharesView = document.getElementById('shares-view');
+const sharesListBody = document.getElementById('shares-list-body');
+const filesSearchInput = document.getElementById('files-search-input');
+const sharesSearchInput = document.getElementById('shares-search-input');
 const newFolderBtn = document.getElementById('new-folder-btn');
 const uploadFileBtn = document.getElementById('upload-file-btn');
 const fileUploadInput = document.getElementById('file-upload-input');
@@ -31,6 +42,9 @@ const uploadFolderBtn = document.getElementById('upload-folder-btn');
 const folderUploadInput = document.getElementById('folder-upload-input');
 const selectAllCheckbox = document.getElementById('select-all-check');
 const deleteSelectedBtn = document.getElementById('delete-selected-btn');
+const deleteSelectedSharesBtn = document.getElementById('delete-selected-shares-btn');
+const selectionCountSharesSpan = document.getElementById('selection-count-shares');
+const selectAllSharesCheckbox = document.getElementById('select-all-shares-check');
 const selectionCountSpan = document.getElementById('selection-count');
 const paginationControls = document.getElementById('pagination-controls');
 const fileManagerFooter = document.getElementById('file-manager-footer');
@@ -39,6 +53,9 @@ const newFolderForm = document.getElementById('new-folder-form');
 const confirmDeleteModal = document.getElementById('confirm-delete-modal');
 const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
 const fileContentArea = document.querySelector('.file-content-area');
+const shareFileModal = document.getElementById('share-file-modal');
+const shareFileInfo = document.getElementById('share-file-info');
+const shareFileForm = document.getElementById('share-file-form');
 const dropZoneOverlay = document.getElementById('drop-zone-overlay');
 const uploadProgressModal = document.getElementById('upload-progress-modal');
 const uploadProgressList = document.getElementById('upload-progress-list');
@@ -74,6 +91,15 @@ async function secureFetch(url, options = {}) {
       }
     });
   });
+}
+
+function timeAgo(timestamp) {
+    if (!timestamp) return t('common.never');
+    const seconds = Math.floor((new Date(timestamp * 1000) - new Date()) / 1000);
+    const rtf = new Intl.RelativeTimeFormat(navigator.language, { numeric: 'auto' });
+    const days = Math.round(seconds / 86400);
+    if (Math.abs(days) > 0) return rtf.format(days, 'day');
+    return rtf.format(Math.round(seconds / 3600), 'hour');
 }
 
 function formatBytes(bytes, decimals = 2) {
@@ -134,7 +160,8 @@ async function fetchFiles() {
     const data = await secureFetch(`/api/files/list/${state.currentHome}?${params.toString()}`, {
       method: 'GET'
     });
-    renderFileList(data.items);
+    state.currentFileList = data.items;
+    renderFileList();
     renderPagination(data);
     updateSelectionUI();
   } catch (error) {
@@ -147,25 +174,50 @@ async function fetchFiles() {
   }
 }
 
+async function fetchPublicShares() {
+    if (state.isLoading) return;
+    setLoading(true, 'shares');
+    try {
+        const data = await secureFetch('/api/files/shares', { method: 'GET' });
+        state.publicShares = data || [];
+        renderPublicShares();
+    } catch (error) {
+        displayStatus(t('files.status.sharesLoadFailed', { error: error.message }), true);
+        sharesListBody.innerHTML = `<tr class="empty-row"><td colspan="7">${t('files.placeholders.errorLoading')}</td></tr>`;
+    } finally {
+        setLoading(false, 'shares');
+    }
+}
+
 // --- RENDER FUNCTIONS ---
 
 function renderSidebar() {
   homeDirNav.innerHTML = '';
 
   const specialHomeDir = '_sealskin_shared_files';
-  const sortedHomeDirs = [specialHomeDir, ...state.homeDirs.filter(d => d !== specialHomeDir).sort()];
+  const normalHomeDirs = state.homeDirs.filter(d => d !== specialHomeDir).sort();
 
-  sortedHomeDirs.forEach(dir => {
-    const isSpecial = dir === specialHomeDir;
-    const button = document.createElement('button');
-    button.className = `nav-link ${isSpecial ? 'special-homedir' : ''} ${dir === state.currentHome ? 'active' : ''}`;
-    button.dataset.homedir = dir;
-    button.innerHTML = `
-            <i class="fas ${isSpecial ? 'fa-star' : 'fa-hdd'} fa-fw"></i>
-            <span>${isSpecial ? t('files.sidebar.sharedFiles') : dir}</span>
-        `;
-    homeDirNav.appendChild(button);
+  const specialBtn = document.createElement('button');
+  specialBtn.className = `nav-link special-homedir ${state.currentView === 'files' && state.currentHome === specialHomeDir ? 'active' : ''}`;
+  specialBtn.dataset.homedir = specialHomeDir;
+  specialBtn.dataset.view = 'files';
+  specialBtn.innerHTML = `<i class="fas fa-star fa-fw"></i> <span>${t('files.sidebar.sharedFiles')}</span>`;
+  homeDirNav.appendChild(specialBtn);
+
+  normalHomeDirs.forEach(dir => {
+      const button = document.createElement('button');
+      button.className = `nav-link ${state.currentView === 'files' && state.currentHome === dir ? 'active' : ''}`;
+      button.dataset.homedir = dir;
+      button.dataset.view = 'files';
+      button.innerHTML = `<i class="fas fa-hdd fa-fw"></i> <span>${dir}</span>`;
+      homeDirNav.appendChild(button);
   });
+
+  const publicSharesLink = document.querySelector('.nav-link[data-view="shares"]');
+  if (publicSharesLink) {
+      publicSharesLink.classList.toggle('active', state.currentView === 'shares');
+  }
+
 }
 
 
@@ -186,17 +238,25 @@ function renderBreadcrumbs() {
   breadcrumbNav.innerHTML = breadcrumbHtml;
 }
 
-function renderFileList(items) {
+function renderFileList() {
+  const searchTerm = filesSearchInput.value.toLowerCase();
+  const items = searchTerm
+      ? state.currentFileList.filter(item => item.name.toLowerCase().includes(searchTerm))
+      : state.currentFileList;
+
+  const colSpan = state.sharingAllowed ? 5 : 4;
   if (items.length === 0) {
-    fileListBody.innerHTML = `<tr class="empty-row"><td colspan="4">${t('files.placeholders.folderEmpty')}</td></tr>`;
+    fileListBody.innerHTML = `<tr class="empty-row"><td colspan="${colSpan}">${t('files.placeholders.folderEmpty')}</td></tr>`;
     return;
   }
 
-  const specialSharedHome = '_sealskin_shared_files';
-
   fileListBody.innerHTML = items.map(item => {
-    const isProtectedPath = state.currentHome !== specialSharedHome &&
+    const shareButton = (item.is_dir || !state.sharingAllowed) ?
+      '' :
+      `<button class="secondary share-btn" data-path="${item.path}"><i class="fas fa-share-alt"></i> ${t('common.share')}</button>`;
+    const isProtectedPath = state.currentHome !== '_sealskin_shared_files' &&
       (item.path === '/Desktop' || item.path === '/Desktop/files');
+    const actionsCell = state.sharingAllowed ? `<td class="col-actions">${shareButton}</td>` : '';
     return `
         <tr data-path="${item.path}" data-is-dir="${item.is_dir}" class="${state.selectedItems.has(item.path) ? 'selected' : ''}">
             <td class="col-check"><input type="checkbox" data-path="${item.path}" ${state.selectedItems.has(item.path) ? 'checked' : ''} ${isProtectedPath ? 'disabled' : ''}></td>
@@ -208,9 +268,47 @@ function renderFileList(items) {
             </td>
             <td class="col-size">${item.is_dir ? '—' : formatBytes(item.size)}</td>
             <td class="col-modified">${formatDate(item.mtime)}</td>
+            ${actionsCell}
         </tr>
     `
   }).join('');
+}
+
+function renderPublicShares() {
+    const searchTerm = sharesSearchInput.value.toLowerCase();
+    const filteredShares = searchTerm
+        ? state.publicShares.filter(s => s.original_filename.toLowerCase().includes(searchTerm) || s.share_id.toLowerCase().includes(searchTerm))
+        : state.publicShares;
+
+    if (filteredShares.length === 0) {
+        sharesListBody.innerHTML = `<tr class="empty-row"><td colspan="7">${t('files.placeholders.noShares')}</td></tr>`;
+        return;
+    }
+
+    const baseUrl = `https://${state.config.serverIp}:${state.config.sessionPort}`;
+
+    sharesListBody.innerHTML = filteredShares.map(share => {
+        const fullUrl = baseUrl + share.url;
+        const expiryText = timeAgo(share.expiry_timestamp);
+        return `
+            <tr data-share-id="${share.share_id}" class="${state.selectedShares.has(share.share_id) ? 'selected' : ''}">
+                <td class="col-check"><input type="checkbox" data-share-id="${share.share_id}" ${state.selectedShares.has(share.share_id) ? 'checked' : ''}></td>
+                <td class="col-name">
+                    <div class="file-item-name">
+                        <i class="fas fa-file-alt"></i>
+                        <span>${share.original_filename}</span>
+                    </div>
+                </td>
+                <td class="col-size">${formatBytes(share.size_bytes)}</td>
+                <td class="col-date">${formatDate(share.created_at)}</td>
+                <td class="col-date">${expiryText}</td>
+                <td class="col-password">${share.has_password ? t('common.yes') : t('common.no')}</td>
+                <td class="col-url">
+                    <button class="secondary copy-url-btn" data-url="${fullUrl}" title="${t('common.copyUrl')}"><i class="fas fa-copy"></i></button>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
 function renderPagination(data) {
@@ -246,13 +344,48 @@ function updateSelectionUI() {
   selectAllCheckbox.indeterminate = count > 0 && count < totalRows;
 }
 
+function updateSelectionUIShares() {
+  const count = state.selectedShares.size;
+  if (count > 0) {
+    deleteSelectedSharesBtn.style.display = 'inline-flex';
+    selectionCountSharesSpan.textContent = count;
+  } else {
+    deleteSelectedSharesBtn.style.display = 'none';
+  }
+  const totalRows = sharesListBody.querySelectorAll('tr:not(.empty-row)').length;
+  selectAllSharesCheckbox.checked = count > 0 && count === totalRows;
+  selectAllSharesCheckbox.indeterminate = count > 0 && count < totalRows;
+}
+
 // --- LOGIC & EVENT HANDLERS ---
 
-function setLoading(isLoading) {
+function setLoading(isLoading, view = 'files') {
   state.isLoading = isLoading;
+  const body = view === 'files' ? fileListBody : sharesListBody;
+  const colSpan = view === 'files' ? 5 : 7;
   if (isLoading) {
-    fileListBody.innerHTML = `<tr><td colspan="4"><div class="spinner-container"><div class="spinner-small"></div></div></td></tr>`;
+    body.innerHTML = `<tr><td colspan="${colSpan}"><div class="spinner-container"><div class="spinner-small"></div></div></td></tr>`;
   }
+}
+
+function switchView(view, homeDir = null) {
+    state.currentView = view;
+
+    filesView.classList.remove('active');
+    sharesView.classList.remove('active');
+
+    if (view === 'files') {
+        state.currentHome = homeDir || state.currentHome;
+        filesView.classList.add('active');
+        if (sharesSearchInput.value) {
+            sharesSearchInput.value = '';
+        }
+        changeDirectory('/');
+    } else if (view === 'shares') {
+        sharesView.classList.add('active');
+        fetchPublicShares();
+    }
+    renderSidebar();
 }
 
 function changeDirectory(path) {
@@ -266,6 +399,9 @@ function changeDirectory(path) {
   }
   state.currentPage = 1;
   state.selectedItems.clear();
+  if (filesSearchInput.value) {
+    state.fileSearchTerm = '';
+  }
   renderBreadcrumbs();
   fetchFiles();
 }
@@ -277,6 +413,14 @@ function handleItemClick(e) {
   const path = row.dataset.path;
   const isDir = row.dataset.isDir === 'true';
   const checkbox = row.querySelector('input[type="checkbox"]');
+
+  if (e.target.closest('.share-btn')) {
+    const filename = row.querySelector('.file-item-name span').textContent;
+    state.fileToShare = { home: state.currentHome, path };
+    shareFileInfo.innerHTML = t('files.modals.share.sharingFile', { filename });
+    shareFileModal.style.display = 'block';
+    return;
+  }
 
   if (e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
     return;
@@ -351,6 +495,56 @@ async function handleDeleteSelected() {
       error: error.message
     }), true);
   }
+}
+
+async function handleShareFormSubmit(e) {
+    e.preventDefault();
+    if (!state.fileToShare) return;
+
+    const password = document.getElementById('share-password').value;
+    const expiry = document.getElementById('share-expiry').value;
+
+    const payload = {
+        home_dir: state.fileToShare.home,
+        path: state.fileToShare.path,
+    };
+    if (password) payload.password = password;
+    if (expiry) payload.expiry_hours = parseInt(expiry, 10);
+
+    try {
+        const response = await secureFetch('/api/files/share', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+        const fullUrl = `https://${state.config.serverIp}:${state.config.sessionPort}${response.url}`;
+        navigator.clipboard.writeText(fullUrl);
+        displayStatus(t('files.status.shareCreated'));
+        switchView('shares');
+        sharesSearchInput.value = response.share_id;
+        sharesSearchInput.dispatchEvent(new Event('input'));
+    } catch (error) {
+        displayStatus(t('files.status.shareCreateFailed', { error: error.message }), true);
+    } finally {
+        shareFileModal.style.display = 'none';
+        shareFileForm.reset();
+    }
+}
+
+async function handleDeleteSelectedShares() {
+    const shareIdsToDelete = Array.from(state.selectedShares);
+    displayStatus(t('files.status.deletingItems', { count: shareIdsToDelete.length }));
+    try {
+        const deletePromises = shareIdsToDelete.map(shareId =>
+            secureFetch(`/api/files/share/${shareId}`, { method: 'DELETE' })
+        );
+        await Promise.all(deletePromises);
+        displayStatus(t('files.status.deleteSuccess'));
+        state.selectedShares.clear();
+        updateSelectionUIShares();
+        await fetchPublicShares();
+    } catch (error) {
+        displayStatus(t('files.status.deleteFailed', { error: error.message }), true);
+    }
 }
 
 // --- UPLOAD LOGIC ---
@@ -568,28 +762,52 @@ async function init() {
   }
   state.config = sealskinConfig;
 
+  state.sharingAllowed = state.config?.userSettings?.is_admin || state.config?.userSettings?.public_sharing === true;
+
+  const actionsHeader = document.querySelector('#file-list-table .col-actions');
+  if (actionsHeader) {
+      actionsHeader.style.display = state.sharingAllowed ? 'table-cell' : 'none';
+  }
+
+  if (!state.sharingAllowed) { 
+    const sharesNavLink = document.querySelector('.nav-link[data-view="shares"]');
+    if (sharesNavLink) {
+        const navContainer = sharesNavLink.closest('.sidebar-nav');
+        if (navContainer) {
+            navContainer.style.display = 'none';
+            const separator = navContainer.previousElementSibling;
+            if (separator && separator.classList.contains('nav-separator')) {
+                separator.style.display = 'none';
+            }
+        }
+    }
+  }
+
   const homeDirs = await fetchHomeDirs();
   if (homeDirs.length > 0 || state.config.username === 'admin') {
     const urlParams = new URLSearchParams(window.location.search);
     const homeFromUrl = urlParams.get('home');
-    state.currentHome = homeDirs.includes(homeFromUrl) ? homeFromUrl : '_sealskin_shared_files';
-
-    renderSidebar();
-    changeDirectory('/');
+    state.currentHome = homeDirs.includes(homeFromUrl) ? homeFromUrl : (homeDirs.includes('Desktop') ? 'Desktop' : homeDirs[0]);
+    switchView('files', state.currentHome);
   } else {
     renderSidebar();
     fileListBody.innerHTML = `<tr class="empty-row"><td colspan="4">${t('files.placeholders.noHomeDirs')}</td></tr>`;
   }
 
   // Event Listeners
-  homeDirNav.addEventListener('click', e => {
+  document.getElementById('homedir-sidebar').addEventListener('click', e => {
     const button = e.target.closest('.nav-link');
-    if (button && button.dataset.homedir !== state.currentHome) {
-      state.currentHome = button.dataset.homedir;
-      renderSidebar();
-      changeDirectory('/');
+    if (!button) return;
+    if (button.dataset.view === 'files') {
+        if (button.dataset.homedir !== state.currentHome || state.currentView !== 'files') {
+            switchView('files', button.dataset.homedir);
+        }
+    } else if (button && button.dataset.view === 'shares') {
+        switchView('shares');
     }
   });
+
+  filesSearchInput.addEventListener('input', renderFileList);
 
   breadcrumbNav.addEventListener('click', e => {
     e.preventDefault();
@@ -627,6 +845,40 @@ async function init() {
       }
     });
   });
+
+  sharesListBody.addEventListener('change', e => {
+    if (e.target.type === 'checkbox') {
+        const shareId = e.target.dataset.shareId;
+        const row = e.target.closest('tr');
+        if (e.target.checked) {
+            state.selectedShares.add(shareId);
+            row.classList.add('selected');
+        } else {
+            state.selectedShares.delete(shareId);
+            row.classList.remove('selected');
+        }
+        updateSelectionUIShares();
+    }
+  });
+
+  sharesListBody.addEventListener('click', e => {
+      const row = e.target.closest('tr');
+      if (!row || row.classList.contains('empty-row')) return;
+      const checkbox = row.querySelector('input[type="checkbox"]');
+      if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+          checkbox.checked = !checkbox.checked;
+          checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+  });
+
+  selectAllSharesCheckbox.addEventListener('change', e => {
+    const isChecked = e.target.checked;
+    document.querySelectorAll('#shares-list-body input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = isChecked;
+        checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  });
+
 
   paginationControls.addEventListener('click', e => {
     const button = e.target.closest('button');
@@ -670,6 +922,12 @@ async function init() {
   });
   confirmDeleteBtn.addEventListener('click', handleDeleteSelected);
 
+  deleteSelectedSharesBtn.addEventListener('click', () => {
+    if (confirm(t('files.modals.confirmDelete.message', { count: state.selectedShares.size }))) {
+        handleDeleteSelectedShares();
+    }
+  });
+
   uploadFileBtn.addEventListener('click', () => fileUploadInput.click());
   fileUploadInput.addEventListener('change', e => {
     state.uploadQueue.clear();
@@ -683,6 +941,17 @@ async function init() {
   folderUploadInput.addEventListener('change', e => {
     handleFolderUpload(e.target.files);
     e.target.value = '';
+  });
+
+  shareFileForm.addEventListener('submit', handleShareFormSubmit);
+  
+  sharesListBody.addEventListener('click', async (e) => {
+      const copyBtn = e.target.closest('.copy-url-btn');
+      
+      if (copyBtn) {
+          navigator.clipboard.writeText(copyBtn.dataset.url);
+          displayStatus(t('files.status.urlCopied'));
+      }
   });
 
   ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -751,6 +1020,7 @@ async function init() {
     uploadProgressModal.style.display = 'none';
     state.uploadQueue.clear();
   });
+  sharesSearchInput.addEventListener('input', renderPublicShares);
 }
 
 document.addEventListener('DOMContentLoaded', init);

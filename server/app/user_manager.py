@@ -18,6 +18,7 @@ DEFAULT_USER_SETTINGS = {
     "active": True,
     "group": "none",
     "persistent_storage": True,
+    "public_sharing": False,
     "harden_container": False,
     "harden_openbox": False,
     "gpu": True,

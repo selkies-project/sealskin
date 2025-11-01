@@ -140,6 +140,24 @@ SETTING_DEFINITIONS = [
         "default": "/config/ssl/proxy_cert.pem",
         "help": "Path to the proxy SSL certificate file.",
     },
+    {
+        "name": "public_storage_path",
+        "type": "str",
+        "default": "/storage/sealskin_public",
+        "help": "Directory for storing publicly shared files.",
+    },
+    {
+        "name": "public_shares_metadata_path",
+        "type": "str",
+        "default": "/config/.config/sealskin/public_shares.yml",
+        "help": "Path to the YAML file for public share metadata.",
+    },
+    {
+        "name": "share_cleanup_interval_seconds",
+        "type": "int",
+        "default": 600,
+        "help": "How often to run the cleanup job for expired shares (in seconds).",
+    },
 ]
 
 

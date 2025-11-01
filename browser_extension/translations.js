@@ -41,14 +41,16 @@ const en = {
         gpu: 'GPU',
         version: 'Version',
         checked: 'Checked',
-        never: 'never',
+        never: 'Never',
         stop: 'Stop',
         reopen: 'Re-open',
         sendFile: 'Send File',
+        share: 'Share',
         search: 'Search',
         refresh: 'Refresh',
         close: 'Close',
         copy: 'Copy',
+        copyUrl: 'Copy URL',
         download: 'Download',
         next: 'Next',
         previous: 'Previous',
@@ -58,6 +60,8 @@ const en = {
         sessions: 'Sessions',
         users: 'Users',
         admins: 'Admins',
+        yes: 'Yes',
+        no: 'No',
         daysAgo: '{count, plural, one {1 day ago} other {{count} days ago}}',
         hoursAgo: '{count, plural, one {1 hour ago} other {{count} hours ago}}',
         minutesAgo: '{count, plural, one {1 minute ago} other {{count} minutes ago}}',
@@ -197,6 +201,7 @@ const en = {
             createButton: 'Create User',
             homesDisabledTooltip: 'Persistent storage disabled for this user',
             confirmDelete: 'Are you sure you want to delete user \'{username}\'? This will also delete all their persistent storage and cannot be undone.',
+            allowPublicSharing: 'Allow Public File Sharing',
         },
         groups: {
             title: 'Group Management',
@@ -523,12 +528,21 @@ const en = {
             uploadFolder: 'Upload Folder'
         },
         sidebar: {
-            sharedFiles: 'SealSkin Files'
+            sharedFiles: 'SealSkin Files',
+            publicShares: 'Public Shares'
+        },
+        shares: {
+            title: 'Publicly Shared Files',
+            searchPlaceholder: 'Search by filename or ID...'
         },
         table: {
             name: 'Name',
             size: 'Size',
-            lastModified: 'Last Modified'
+            lastModified: 'Last Modified',
+            created: 'Created',
+            expires: 'Expires',
+            url: 'Public URL',
+            passwordProtected: 'Password'
         },
         dropzone: {
             title: 'Drop files to upload'
@@ -553,6 +567,15 @@ const en = {
             uploadProgress: {
                 title: 'Upload Progress',
                 doneButton: 'Done'
+            },
+            share: {
+                title: 'Share File',
+                sharingFile: 'Sharing file: <strong>{filename}</strong>',
+                passwordLabel: 'Password (optional)',
+                passwordPlaceholder: 'Leave blank for no password',
+                expiryLabel: 'Expires in (hours, optional)',
+                expiryPlaceholder: 'e.g., 24 for one day',
+                shareButton: 'Create Share Link'
             }
         },
         status: {
@@ -566,20 +589,27 @@ const en = {
             uploadPrepFailed: 'Error during folder upload preparation: {error}',
             notConfigured: 'Error: SealSkin not configured. Please set up in options.',
             folderCreated: 'Folder \'{folderName}\' created.',
-            folderCreateFailed: 'Error creating folder: {error}'
+            folderCreateFailed: 'Error creating folder: {error}',
+            shareCreated: 'Share created successfully! The link has been copied to your clipboard.',
+            shareCreateFailed: 'Failed to create share: {error}',
+            sharesLoadFailed: 'Failed to load shared files: {error}',
+            shareDeleteFailed: 'Failed to delete share: {error}',
+            shareDeleted: 'Share successfully deleted.',
+            urlCopied: 'Public URL copied to clipboard.'
         },
         placeholders: {
             errorLoading: 'Error loading files.',
             folderEmpty: 'This folder is empty.',
-            noHomeDirs: 'No home directories available.'
+            noHomeDirs: 'No home directories available.',
+            noShares: 'You have not shared any files yet.'
         },
         uploadStatus: {
             pending: 'pending',
-            initiating: 'initiating',
-            uploading: 'uploading',
-            finalizing: 'finalizing',
-            completed: 'completed',
-            error: 'error'
+            initiating: 'Initiating...',
+            uploading: 'Uploading...',
+            finalizing: 'Finalizing...',
+            completed: 'Completed',
+            error: 'Error'
         }
     }
 };
@@ -620,14 +650,16 @@ const es = {
         gpu: 'GPU',
         version: 'Versión',
         checked: 'Verificado',
-        never: 'nunca',
+        never: 'Nunca',
         stop: 'Detener',
         reopen: 'Reabrir',
         sendFile: 'Enviar Archivo',
+        share: 'Compartir',
         search: 'Buscar',
         refresh: 'Actualizar',
         close: 'Cerrar',
         copy: 'Copiar',
+        copyUrl: 'Copiar URL',
         download: 'Descargar',
         next: 'Siguiente',
         previous: 'Anterior',
@@ -637,6 +669,8 @@ const es = {
         sessions: 'Sesiones',
         users: 'Usuarios',
         admins: 'Administradores',
+        yes: 'Sí',
+        no: 'No',
         daysAgo: '{count, plural, one {hace 1 día} other {hace {count} días}}',
         hoursAgo: '{count, plural, one {hace 1 hora} other {hace {count} horas}}',
         minutesAgo: '{count, plural, one {hace 1 minuto} other {hace {count} minutos}}',
@@ -776,6 +810,7 @@ const es = {
             createButton: 'Crear Usuario',
             homesDisabledTooltip: 'Almacenamiento persistente deshabilitado para este usuario',
             confirmDelete: '¿Está seguro de que quiere eliminar al usuario \'{username}\'? Esto también eliminará todo su almacenamiento persistente y no se puede deshacer.',
+            allowPublicSharing: 'Permitir compartir archivos públicamente',
         },
         groups: {
             title: 'Gestión de Grupos',
@@ -1102,12 +1137,21 @@ const es = {
             uploadFolder: 'Subir Carpeta'
         },
         sidebar: {
-            sharedFiles: 'Archivos de SealSkin'
+            sharedFiles: 'Archivos de SealSkin',
+            publicShares: 'Recursos Compartidos Públicos'
+        },
+        shares: {
+            title: 'Archivos Compartidos Públicamente',
+            searchPlaceholder: 'Buscar por nombre de archivo o ID...'
         },
         table: {
             name: 'Nombre',
             size: 'Tamaño',
-            lastModified: 'Última Modificación'
+            lastModified: 'Última Modificación',
+            created: 'Creado',
+            expires: 'Expira',
+            url: 'URL Pública',
+            passwordProtected: 'Contraseña'
         },
         dropzone: {
             title: 'Suelta los archivos para subirlos'
@@ -1132,6 +1176,15 @@ const es = {
             uploadProgress: {
                 title: 'Progreso de la Subida',
                 doneButton: 'Hecho'
+            },
+            share: {
+                title: 'Compartir Archivo',
+                sharingFile: 'Compartiendo archivo: <strong>{filename}</strong>',
+                passwordLabel: 'Contraseña (opcional)',
+                passwordPlaceholder: 'Dejar en blanco para no usar contraseña',
+                expiryLabel: 'Expira en (horas, opcional)',
+                expiryPlaceholder: 'ej., 24 para un día',
+                shareButton: 'Crear Enlace para Compartir'
             }
         },
         status: {
@@ -1145,20 +1198,27 @@ const es = {
             uploadPrepFailed: 'Error durante la preparación de la subida de la carpeta: {error}',
             notConfigured: 'Error: SealSkin no está configurado. Por favor, configúralo en las opciones.',
             folderCreated: 'Carpeta \'{folderName}\' creada.',
-            folderCreateFailed: 'Error al crear la carpeta: {error}'
+            folderCreateFailed: 'Error al crear la carpeta: {error}',
+            shareCreated: '¡Enlace creado con éxito! El enlace ha sido copiado a su portapapeles.',
+            shareCreateFailed: 'Error al crear el enlace: {error}',
+            sharesLoadFailed: 'Error al cargar los archivos compartidos: {error}',
+            shareDeleteFailed: 'Error al eliminar el enlace: {error}',
+            shareDeleted: 'Enlace eliminado con éxito.',
+            urlCopied: 'URL pública copiada al portapapeles.'
         },
         placeholders: {
             errorLoading: 'Error al cargar los archivos.',
             folderEmpty: 'Esta carpeta está vacía.',
-            noHomeDirs: 'No hay directorios de inicio disponibles.'
+            noHomeDirs: 'No hay directorios de inicio disponibles.',
+            noShares: 'Aún no has compartido ningún archivo.'
         },
         uploadStatus: {
             pending: 'pendiente',
-            initiating: 'iniciando',
-            uploading: 'subiendo',
-            finalizing: 'finalizando',
-            completed: 'completado',
-            error: 'error'
+            initiating: 'Iniciando...',
+            uploading: 'Subiendo...',
+            finalizing: 'Finalizando...',
+            completed: 'Completado',
+            error: 'Error'
         }
     }
 };
@@ -1199,14 +1259,16 @@ const zh = {
         gpu: 'GPU',
         version: '版本',
         checked: '已选中',
-        never: '从不',
+        never: '永不',
         stop: '停止',
         reopen: '重新打开',
         sendFile: '发送文件',
+        share: '分享',
         search: '搜索',
         refresh: '刷新',
         close: '关闭',
         copy: '复制',
+        copyUrl: '复制URL',
         download: '下载',
         next: '下一页',
         previous: '上一页',
@@ -1216,6 +1278,8 @@ const zh = {
         sessions: '会话',
         users: '用户',
         admins: '管理员',
+        yes: '是',
+        no: '否',
         daysAgo: '{count}天前',
         hoursAgo: '{count}小时前',
         minutesAgo: '{count}分钟前',
@@ -1355,6 +1419,7 @@ const zh = {
             createButton: '创建用户',
             homesDisabledTooltip: '此用户的持久性存储已禁用',
             confirmDelete: '您确定要删除用户“{username}”吗？此操作还将删除其所有持久性存储，且无法撤销。',
+            allowPublicSharing: '允许公开文件共享',
         },
         groups: {
             title: '群组管理',
@@ -1681,12 +1746,21 @@ const zh = {
             uploadFolder: '上传文件夹'
         },
         sidebar: {
-            sharedFiles: 'SealSkin 文件'
+            sharedFiles: 'SealSkin 文件',
+            publicShares: '公开分享'
+        },
+        shares: {
+            title: '公开分享的文件',
+            searchPlaceholder: '按文件名或ID搜索...'
         },
         table: {
             name: '名称',
             size: '大小',
-            lastModified: '最后修改'
+            lastModified: '最后修改',
+            created: '创建时间',
+            expires: '过期时间',
+            url: '公开URL',
+            passwordProtected: '密码'
         },
         dropzone: {
             title: '拖放文件以上传'
@@ -1711,6 +1785,15 @@ const zh = {
             uploadProgress: {
                 title: '上传进度',
                 doneButton: '完成'
+            },
+            share: {
+                title: '分享文件',
+                sharingFile: '正在分享文件: <strong>{filename}</strong>',
+                passwordLabel: '密码 (可选)',
+                passwordPlaceholder: '留空则无密码',
+                expiryLabel: '过期时间 (小时, 可选)',
+                expiryPlaceholder: '例如, 24代表一天',
+                shareButton: '创建分享链接'
             }
         },
         status: {
@@ -1724,18 +1807,25 @@ const zh = {
             uploadPrepFailed: '文件夹上传准备过程中出错：{error}',
             notConfigured: '错误：SealSkin 未配置。请在选项中进行设置。',
             folderCreated: '文件夹“{folderName}”已创建。',
-            folderCreateFailed: '创建文件夹时出错：{error}'
+            folderCreateFailed: '创建文件夹时出错：{error}',
+            shareCreated: '分享链接创建成功！链接已复制到剪贴板。',
+            shareCreateFailed: '创建分享失败: {error}',
+            sharesLoadFailed: '加载分享文件失败: {error}',
+            shareDeleteFailed: '删除分享失败: {error}',
+            shareDeleted: '分享已成功删除。',
+            urlCopied: '公开URL已复制到剪贴板。'
         },
         placeholders: {
             errorLoading: '加载文件时出错。',
             folderEmpty: '此文件夹为空。',
-            noHomeDirs: '没有可用的主目录。'
+            noHomeDirs: '没有可用的主目录。',
+            noShares: '您尚未分享任何文件。'
         },
         uploadStatus: {
             pending: '待处理',
-            initiating: '正在开始',
-            uploading: '上传中',
-            finalizing: '正在完成',
+            initiating: '正在开始...',
+            uploading: '上传中...',
+            finalizing: '正在完成...',
             completed: '已完成',
             error: '错误'
         }
@@ -1782,10 +1872,12 @@ const hi = {
         stop: 'रोकें',
         reopen: 'फिर से खोलें',
         sendFile: 'फ़ाइल भेजें',
+        share: 'साझा करें',
         search: 'खोजें',
         refresh: 'ताज़ा करें',
         close: 'बंद करें',
         copy: 'कॉपी करें',
+        copyUrl: 'URL कॉपी करें',
         download: 'डाउनलोड करें',
         next: 'अगला',
         previous: 'पिछला',
@@ -1795,6 +1887,8 @@ const hi = {
         sessions: 'सत्र',
         users: 'उपयोगकर्ता',
         admins: 'प्रशासक',
+        yes: 'हाँ',
+        no: 'नहीं',
         daysAgo: '{count, plural, one {1 दिन पहले} other {{count} दिन पहले}}',
         hoursAgo: '{count, plural, one {1 घंटा पहले} other {{count} घंटे पहले}}',
         minutesAgo: '{count, plural, one {1 मिनट पहले} other {{count} मिनट पहले}}',
@@ -1934,6 +2028,7 @@ const hi = {
             createButton: 'उपयोगकर्ता बनाएं',
             homesDisabledTooltip: 'इस उपयोगकर्ता के लिए स्थायी भंडारण अक्षम है',
             confirmDelete: 'क्या आप वाकई उपयोगकर्ता \'{username}\' को हटाना चाहते हैं? यह उनके सभी स्थायी भंडारण को भी हटा देगा और इसे पूर्ववत नहीं किया जा सकता है।',
+            allowPublicSharing: 'सार्वजनिक फ़ाइल साझाकरण की अनुमति दें',
         },
         groups: {
             title: 'समूह प्रबंधन',
@@ -2260,12 +2355,21 @@ const hi = {
             uploadFolder: 'फ़ोल्डर अपलोड करें'
         },
         sidebar: {
-            sharedFiles: 'SealSkin फ़ाइलें'
+            sharedFiles: 'SealSkin फ़ाइलें',
+            publicShares: 'सार्वजनिक शेयर'
+        },
+        shares: {
+            title: 'सार्वजनिक रूप से साझा की गई फ़ाइलें',
+            searchPlaceholder: 'फ़ाइल नाम या आईडी द्वारा खोजें...'
         },
         table: {
             name: 'नाम',
             size: 'आकार',
-            lastModified: 'अंतिम संशोधित'
+            lastModified: 'अंतिम संशोधित',
+            created: 'बनाया गया',
+            expires: 'समाप्त होता है',
+            url: 'सार्वजनिक URL',
+            passwordProtected: 'पासवर्ड'
         },
         dropzone: {
             title: 'अपलोड करने के लिए फ़ाइलें यहाँ छोड़ें'
@@ -2290,6 +2394,15 @@ const hi = {
             uploadProgress: {
                 title: 'अपलोड प्रगति',
                 doneButton: 'हो गया'
+            },
+            share: {
+                title: 'फ़ाइल साझा करें',
+                sharingFile: 'फ़ाइल साझा की जा रही है: <strong>{filename}</strong>',
+                passwordLabel: 'पासवर्ड (वैकल्पिक)',
+                passwordPlaceholder: 'बिना पासवर्ड के लिए खाली छोड़ दें',
+                expiryLabel: 'समाप्त होने में (घंटे, वैकल्पिक)',
+                expiryPlaceholder: 'उदा., एक दिन के लिए 24',
+                shareButton: 'शेयर लिंक बनाएं'
             }
         },
         status: {
@@ -2303,18 +2416,25 @@ const hi = {
             uploadPrepFailed: 'फ़ोल्डर अपलोड की तैयारी के दौरान त्रुटि: {error}',
             notConfigured: 'त्रुटि: SealSkin कॉन्फ़िगर नहीं है। कृपया विकल्पों में सेटअप करें।',
             folderCreated: 'फ़ोल्डर \'{folderName}\' बनाया गया।',
-            folderCreateFailed: 'फ़ोल्डर बनाने में त्रुटि: {error}'
+            folderCreateFailed: 'फ़ोल्डर बनाने में त्रुटि: {error}',
+            shareCreated: 'शेयर सफलतापूर्वक बनाया गया! लिंक आपके क्लिपबोर्ड पर कॉपी कर लिया गया है।',
+            shareCreateFailed: 'शेयर बनाने में विफल: {error}',
+            sharesLoadFailed: 'साझा की गई फ़ाइलों को लोड करने में विफल: {error}',
+            shareDeleteFailed: 'शेयर हटाने में विफल: {error}',
+            shareDeleted: 'शेयर सफलतापूर्वक हटा दिया गया।',
+            urlCopied: 'सार्वजनिक URL क्लिपबोर्ड पर कॉपी किया गया।'
         },
         placeholders: {
             errorLoading: 'फ़ाइलें लोड करने में त्रुटि।',
             folderEmpty: 'यह फ़ोल्डर खाली है।',
-            noHomeDirs: 'कोई होम निर्देशिका उपलब्ध नहीं है।'
+            noHomeDirs: 'कोई होम निर्देशिका उपलब्ध नहीं है।',
+            noShares: 'आपने अभी तक कोई फ़ाइल साझा नहीं की है।'
         },
         uploadStatus: {
             pending: 'लंबित',
-            initiating: 'शुरू हो रहा है',
-            uploading: 'अपलोड हो रहा है',
-            finalizing: 'अंतिम रूप दिया जा रहा है',
+            initiating: 'शुरू हो रहा है...',
+            uploading: 'अपलोड हो रहा है...',
+            finalizing: 'अंतिम रूप दिया जा रहा है...',
             completed: 'पूरा हुआ',
             error: 'त्रुटि'
         }
@@ -2357,14 +2477,16 @@ const pt = {
         gpu: 'GPU',
         version: 'Versão',
         checked: 'Verificado',
-        never: 'nunca',
+        never: 'Nunca',
         stop: 'Parar',
         reopen: 'Reabrir',
         sendFile: 'Enviar Arquivo',
+        share: 'Compartilhar',
         search: 'Pesquisar',
         refresh: 'Atualizar',
         close: 'Fechar',
         copy: 'Copiar',
+        copyUrl: 'Copiar URL',
         download: 'Baixar',
         next: 'Próximo',
         previous: 'Anterior',
@@ -2374,6 +2496,8 @@ const pt = {
         sessions: 'Sessões',
         users: 'Usuários',
         admins: 'Admins',
+        yes: 'Sim',
+        no: 'Não',
         daysAgo: '{count, plural, one {há 1 dia} other {há {count} dias}}',
         hoursAgo: '{count, plural, one {há 1 hora} other {há {count} horas}}',
         minutesAgo: '{count, plural, one {há 1 minuto} other {há {count} minutos}}',
@@ -2513,6 +2637,7 @@ const pt = {
             createButton: 'Criar Usuário',
             homesDisabledTooltip: 'Armazenamento persistente desativado para este usuário',
             confirmDelete: 'Tem certeza de que deseja excluir o usuário \'{username}\'? Isso também excluirá todo o seu armazenamento persistente e não pode ser desfeito.',
+            allowPublicSharing: 'Permitir Compartilhamento Público de Arquivos',
         },
         groups: {
             title: 'Gerenciamento de Grupos',
@@ -2839,12 +2964,21 @@ const pt = {
             uploadFolder: 'Carregar Pasta'
         },
         sidebar: {
-            sharedFiles: 'Arquivos SealSkin'
+            sharedFiles: 'Arquivos SealSkin',
+            publicShares: 'Compartilhamentos Públicos'
+        },
+        shares: {
+            title: 'Arquivos Compartilhados Publicamente',
+            searchPlaceholder: 'Pesquisar por nome de arquivo ou ID...'
         },
         table: {
             name: 'Nome',
             size: 'Tamanho',
-            lastModified: 'Última Modificação'
+            lastModified: 'Última Modificação',
+            created: 'Criado',
+            expires: 'Expira',
+            url: 'URL Pública',
+            passwordProtected: 'Senha'
         },
         dropzone: {
             title: 'Arraste arquivos para carregar'
@@ -2869,6 +3003,15 @@ const pt = {
             uploadProgress: {
                 title: 'Progresso do Upload',
                 doneButton: 'Concluído'
+            },
+            share: {
+                title: 'Compartilhar Arquivo',
+                sharingFile: 'Compartilhando arquivo: <strong>{filename}</strong>',
+                passwordLabel: 'Senha (opcional)',
+                passwordPlaceholder: 'Deixe em branco para não ter senha',
+                expiryLabel: 'Expira em (horas, opcional)',
+                expiryPlaceholder: 'ex., 24 para um dia',
+                shareButton: 'Criar Link de Compartilhamento'
             }
         },
         status: {
@@ -2882,20 +3025,27 @@ const pt = {
             uploadPrepFailed: 'Erro durante a preparação do upload da pasta: {error}',
             notConfigured: 'Erro: SealSkin não configurado. Por favor, configure nas opções.',
             folderCreated: 'Pasta \'{folderName}\' criada.',
-            folderCreateFailed: 'Erro ao criar pasta: {error}'
+            folderCreateFailed: 'Erro ao criar pasta: {error}',
+            shareCreated: 'Compartilhamento criado com sucesso! O link foi copiado para sua área de transferência.',
+            shareCreateFailed: 'Falha ao criar compartilhamento: {error}',
+            sharesLoadFailed: 'Falha ao carregar arquivos compartilhados: {error}',
+            shareDeleteFailed: 'Falha ao excluir compartilhamento: {error}',
+            shareDeleted: 'Compartilhamento excluído com sucesso.',
+            urlCopied: 'URL pública copiada para a área de transferência.'
         },
         placeholders: {
             errorLoading: 'Erro ao carregar arquivos.',
             folderEmpty: 'Esta pasta está vazia.',
-            noHomeDirs: 'Nenhum diretório home disponível.'
+            noHomeDirs: 'Nenhum diretório home disponível.',
+            noShares: 'Você ainda não compartilhou nenhum arquivo.'
         },
         uploadStatus: {
             pending: 'pendente',
-            initiating: 'iniciando',
-            uploading: 'carregando',
-            finalizing: 'finalizando',
-            completed: 'concluído',
-            error: 'erro'
+            initiating: 'Iniciando...',
+            uploading: 'Carregando...',
+            finalizing: 'Finalizando...',
+            completed: 'Concluído',
+            error: 'Erro'
         }
     }
 };
@@ -2936,14 +3086,16 @@ const fr = {
         gpu: 'GPU',
         version: 'Version',
         checked: 'Vérifié',
-        never: 'jamais',
+        never: 'Jamais',
         stop: 'Arrêter',
         reopen: 'Réouvrir',
         sendFile: 'Envoyer Fichier',
+        share: 'Partager',
         search: 'Rechercher',
         refresh: 'Actualiser',
         close: 'Fermer',
         copy: 'Copier',
+        copyUrl: 'Copier l\'URL',
         download: 'Télécharger',
         next: 'Suivant',
         previous: 'Précédent',
@@ -2953,6 +3105,8 @@ const fr = {
         sessions: 'Sessions',
         users: 'Utilisateurs',
         admins: 'Admins',
+        yes: 'Oui',
+        no: 'Non',
         daysAgo: '{count, plural, one {il y a 1 jour} other {il y a {count} jours}}',
         hoursAgo: '{count, plural, one {il y a 1 heure} other {il y a {count} heures}}',
         minutesAgo: '{count, plural, one {il y a 1 minute} other {il y a {count} minutes}}',
@@ -3092,6 +3246,7 @@ const fr = {
             createButton: 'Créer l\'Utilisateur',
             homesDisabledTooltip: 'Stockage persistant désactivé pour cet utilisateur',
             confirmDelete: 'Êtes-vous sûr de vouloir supprimer l\'utilisateur \'{username}\' ? Cela supprimera également tout son stockage persistant et ne pourra pas être annulé.',
+            allowPublicSharing: 'Autoriser le partage de fichiers public',
         },
         groups: {
             title: 'Gestion des Groupes',
@@ -3418,12 +3573,21 @@ const fr = {
             uploadFolder: 'Téléverser un Dossier'
         },
         sidebar: {
-            sharedFiles: 'Fichiers SealSkin'
+            sharedFiles: 'Fichiers SealSkin',
+            publicShares: 'Partages Publics'
+        },
+        shares: {
+            title: 'Fichiers Partagés Publiquement',
+            searchPlaceholder: 'Rechercher par nom de fichier ou ID...'
         },
         table: {
             name: 'Nom',
             size: 'Taille',
-            lastModified: 'Dernière Modification'
+            lastModified: 'Dernière Modification',
+            created: 'Créé le',
+            expires: 'Expire le',
+            url: 'URL Publique',
+            passwordProtected: 'Mot de passe'
         },
         dropzone: {
             title: 'Déposez des fichiers pour les téléverser'
@@ -3448,6 +3612,15 @@ const fr = {
             uploadProgress: {
                 title: 'Progression du Téléversement',
                 doneButton: 'Terminé'
+            },
+            share: {
+                title: 'Partager le Fichier',
+                sharingFile: 'Partage du fichier : <strong>{filename}</strong>',
+                passwordLabel: 'Mot de passe (optionnel)',
+                passwordPlaceholder: 'Laisser vide pour ne pas mettre de mot de passe',
+                expiryLabel: 'Expire dans (heures, optionnel)',
+                expiryPlaceholder: 'ex., 24 pour un jour',
+                shareButton: 'Créer un Lien de Partage'
             }
         },
         status: {
@@ -3461,20 +3634,27 @@ const fr = {
             uploadPrepFailed: 'Erreur lors de la préparation du téléversement du dossier : {error}',
             notConfigured: 'Erreur : SealSkin non configuré. Veuillez le configurer dans les options.',
             folderCreated: 'Dossier \'{folderName}\' créé.',
-            folderCreateFailed: 'Erreur lors de la création du dossier : {error}'
+            folderCreateFailed: 'Erreur lors de la création du dossier : {error}',
+            shareCreated: 'Partage créé avec succès ! Le lien a été copié dans votre presse-papiers.',
+            shareCreateFailed: 'Échec de la création du partage : {error}',
+            sharesLoadFailed: 'Échec du chargement des fichiers partagés : {error}',
+            shareDeleteFailed: 'Échec de la suppression du partage : {error}',
+            shareDeleted: 'Partage supprimé avec succès.',
+            urlCopied: 'URL publique copiée dans le presse-papiers.'
         },
         placeholders: {
             errorLoading: 'Erreur lors du chargement des fichiers.',
             folderEmpty: 'Ce dossier est vide.',
-            noHomeDirs: 'Aucun répertoire personnel disponible.'
+            noHomeDirs: 'Aucun répertoire personnel disponible.',
+            noShares: 'Vous n\'avez encore partagé aucun fichier.'
         },
         uploadStatus: {
             pending: 'en attente',
-            initiating: 'initialisation',
-            uploading: 'téléversement',
-            finalizing: 'finalisation',
-            completed: 'terminé',
-            error: 'erreur'
+            initiating: 'Initialisation...',
+            uploading: 'Téléversement...',
+            finalizing: 'Finalisation...',
+            completed: 'Terminé',
+            error: 'Erreur'
         }
     }
 };
@@ -3515,14 +3695,16 @@ const ru = {
         gpu: 'ГП',
         version: 'Версия',
         checked: 'Проверено',
-        never: 'никогда',
+        never: 'Никогда',
         stop: 'Остановить',
         reopen: 'Открыть снова',
         sendFile: 'Отправить файл',
+        share: 'Поделиться',
         search: 'Поиск',
         refresh: 'Обновить',
         close: 'Закрыть',
         copy: 'Копировать',
+        copyUrl: 'Копировать URL',
         download: 'Скачать',
         next: 'Далее',
         previous: 'Назад',
@@ -3532,6 +3714,8 @@ const ru = {
         sessions: 'Сессии',
         users: 'Пользователи',
         admins: 'Администраторы',
+        yes: 'Да',
+        no: 'Нет',
         daysAgo: '{count, plural, one {# день назад} few {# дня назад} many {# дней назад}}',
         hoursAgo: '{count, plural, one {# час назад} few {# часа назад} many {# часов назад}}',
         minutesAgo: '{count, plural, one {# минуту назад} few {# минуты назад} many {# минут назад}}',
@@ -3671,6 +3855,7 @@ const ru = {
             createButton: 'Создать пользователя',
             homesDisabledTooltip: 'Постоянное хранилище отключено для этого пользователя',
             confirmDelete: 'Вы уверены, что хотите удалить пользователя \'{username}\'? Это также удалит всё его постоянное хранилище и не может быть отменено.',
+            allowPublicSharing: 'Разрешить публичный обмен файлами',
         },
         groups: {
             title: 'Управление группами',
@@ -3997,12 +4182,21 @@ const ru = {
             uploadFolder: 'Загрузить папку'
         },
         sidebar: {
-            sharedFiles: 'Файлы SealSkin'
+            sharedFiles: 'Файлы SealSkin',
+            publicShares: 'Общие ресурсы'
+        },
+        shares: {
+            title: 'Общие файлы',
+            searchPlaceholder: 'Поиск по имени файла или ID...'
         },
         table: {
             name: 'Имя',
             size: 'Размер',
-            lastModified: 'Последнее изменение'
+            lastModified: 'Последнее изменение',
+            created: 'Создан',
+            expires: 'Истекает',
+            url: 'Публичный URL',
+            passwordProtected: 'Пароль'
         },
         dropzone: {
             title: 'Перетащите файлы для загрузки'
@@ -4027,6 +4221,15 @@ const ru = {
             uploadProgress: {
                 title: 'Прогресс загрузки',
                 doneButton: 'Готово'
+            },
+            share: {
+                title: 'Поделиться файлом',
+                sharingFile: 'Общий доступ к файлу: <strong>{filename}</strong>',
+                passwordLabel: 'Пароль (необязательно)',
+                passwordPlaceholder: 'Оставьте пустым для отсутствия пароля',
+                expiryLabel: 'Истекает через (часы, необязательно)',
+                expiryPlaceholder: 'например, 24 для одного дня',
+                shareButton: 'Создать ссылку для общего доступа'
             }
         },
         status: {
@@ -4040,20 +4243,27 @@ const ru = {
             uploadPrepFailed: 'Ошибка при подготовке к загрузке папки: {error}',
             notConfigured: 'Ошибка: SealSkin не настроен. Пожалуйста, настройте в опциях.',
             folderCreated: 'Папка \'{folderName}\' создана.',
-            folderCreateFailed: 'Ошибка при создании папки: {error}'
+            folderCreateFailed: 'Ошибка при создании папки: {error}',
+            shareCreated: 'Общий доступ успешно создан! Ссылка скопирована в буфер обмена.',
+            shareCreateFailed: 'Не удалось создать общий доступ: {error}',
+            sharesLoadFailed: 'Не удалось загрузить общие файлы: {error}',
+            shareDeleteFailed: 'Не удалось удалить общий доступ: {error}',
+            shareDeleted: 'Общий доступ успешно удален.',
+            urlCopied: 'Публичный URL скопирован в буфер обмена.'
         },
         placeholders: {
             errorLoading: 'Ошибка загрузки файлов.',
             folderEmpty: 'Эта папка пуста.',
-            noHomeDirs: 'Нет доступных домашних каталогов.'
+            noHomeDirs: 'Нет доступных домашних каталогов.',
+            noShares: 'Вы еще не делились никакими файлами.'
         },
         uploadStatus: {
             pending: 'ожидание',
-            initiating: 'инициализация',
-            uploading: 'загрузка',
-            finalizing: 'завершение',
-            completed: 'завершено',
-            error: 'ошибка'
+            initiating: 'Инициализация...',
+            uploading: 'Загрузка...',
+            finalizing: 'Завершение...',
+            completed: 'Завершено',
+            error: 'Ошибка'
         }
     }
 };
@@ -4094,14 +4304,16 @@ const de = {
         gpu: 'GPU',
         version: 'Version',
         checked: 'Geprüft',
-        never: 'nie',
+        never: 'Nie',
         stop: 'Stoppen',
         reopen: 'Erneut öffnen',
         sendFile: 'Datei senden',
+        share: 'Teilen',
         search: 'Suchen',
         refresh: 'Aktualisieren',
         close: 'Schließen',
         copy: 'Kopieren',
+        copyUrl: 'URL kopieren',
         download: 'Herunterladen',
         next: 'Weiter',
         previous: 'Zurück',
@@ -4111,6 +4323,8 @@ const de = {
         sessions: 'Sitzungen',
         users: 'Benutzer',
         admins: 'Admins',
+        yes: 'Ja',
+        no: 'Nein',
         daysAgo: '{count, plural, one {vor 1 Tag} other {vor {count} Tagen}}',
         hoursAgo: '{count, plural, one {vor 1 Stunde} other {vor {count} Stunden}}',
         minutesAgo: '{count, plural, one {vor 1 Minute} other {vor {count} Minuten}}',
@@ -4250,6 +4464,7 @@ const de = {
             createButton: 'Benutzer erstellen',
             homesDisabledTooltip: 'Persistenter Speicher für diesen Benutzer deaktiviert',
             confirmDelete: 'Sind Sie sicher, dass Sie den Benutzer \'{username}\' löschen möchten? Dadurch wird auch sein gesamter persistenter Speicher gelöscht und kann nicht rückgängig gemacht werden.',
+            allowPublicSharing: 'Öffentliche Dateifreigabe zulassen',
         },
         groups: {
             title: 'Gruppenverwaltung',
@@ -4576,12 +4791,21 @@ const de = {
             uploadFolder: 'Ordner hochladen'
         },
         sidebar: {
-            sharedFiles: 'SealSkin-Dateien'
+            sharedFiles: 'SealSkin-Dateien',
+            publicShares: 'Öffentliche Freigaben'
+        },
+        shares: {
+            title: 'Öffentlich freigegebene Dateien',
+            searchPlaceholder: 'Suche nach Dateiname oder ID...'
         },
         table: {
             name: 'Name',
             size: 'Größe',
-            lastModified: 'Zuletzt geändert'
+            lastModified: 'Zuletzt geändert',
+            created: 'Erstellt',
+            expires: 'Läuft ab',
+            url: 'Öffentliche URL',
+            passwordProtected: 'Passwort'
         },
         dropzone: {
             title: 'Dateien zum Hochladen hier ablegen'
@@ -4606,6 +4830,15 @@ const de = {
             uploadProgress: {
                 title: 'Upload-Fortschritt',
                 doneButton: 'Fertig'
+            },
+            share: {
+                title: 'Datei teilen',
+                sharingFile: 'Teile Datei: <strong>{filename}</strong>',
+                passwordLabel: 'Passwort (optional)',
+                passwordPlaceholder: 'Leer lassen für kein Passwort',
+                expiryLabel: 'Läuft ab in (Stunden, optional)',
+                expiryPlaceholder: 'z.B. 24 für einen Tag',
+                shareButton: 'Freigabe-Link erstellen'
             }
         },
         status: {
@@ -4619,20 +4852,27 @@ const de = {
             uploadPrepFailed: 'Fehler bei der Vorbereitung des Ordner-Uploads: {error}',
             notConfigured: 'Fehler: SealSkin nicht konfiguriert. Bitte in den Optionen einrichten.',
             folderCreated: 'Ordner \'{folderName}\' erstellt.',
-            folderCreateFailed: 'Fehler beim Erstellen des Ordners: {error}'
+            folderCreateFailed: 'Fehler beim Erstellen des Ordners: {error}',
+            shareCreated: 'Freigabe erfolgreich erstellt! Der Link wurde in Ihre Zwischenablage kopiert.',
+            shareCreateFailed: 'Fehler beim Erstellen der Freigabe: {error}',
+            sharesLoadFailed: 'Fehler beim Laden der freigegebenen Dateien: {error}',
+            shareDeleteFailed: 'Fehler beim Löschen der Freigabe: {error}',
+            shareDeleted: 'Freigabe erfolgreich gelöscht.',
+            urlCopied: 'Öffentliche URL in die Zwischenablage kopiert.'
         },
         placeholders: {
             errorLoading: 'Fehler beim Laden der Dateien.',
             folderEmpty: 'Dieser Ordner ist leer.',
-            noHomeDirs: 'Keine Home-Verzeichnisse verfügbar.'
+            noHomeDirs: 'Keine Home-Verzeichnisse verfügbar.',
+            noShares: 'Sie haben noch keine Dateien freigegeben.'
         },
         uploadStatus: {
             pending: 'ausstehend',
-            initiating: 'wird gestartet',
-            uploading: 'wird hochgeladen',
-            finalizing: 'wird abgeschlossen',
-            completed: 'abgeschlossen',
-            error: 'fehler'
+            initiating: 'Wird gestartet...',
+            uploading: 'Wird hochgeladen...',
+            finalizing: 'Wird abgeschlossen...',
+            completed: 'Abgeschlossen',
+            error: 'Fehler'
         }
     }
 };
@@ -4673,14 +4913,16 @@ const tr = {
         gpu: 'GPU',
         version: 'Versiyon',
         checked: 'İşaretli',
-        never: 'asla',
+        never: 'Asla',
         stop: 'Durdur',
         reopen: 'Yeniden Aç',
         sendFile: 'Dosya Gönder',
+        share: 'Paylaş',
         search: 'Ara',
         refresh: 'Yenile',
         close: 'Kapat',
         copy: 'Kopyala',
+        copyUrl: 'URL\'yi Kopyala',
         download: 'İndir',
         next: 'Sonraki',
         previous: 'Önceki',
@@ -4690,6 +4932,8 @@ const tr = {
         sessions: 'Oturumlar',
         users: 'Kullanıcılar',
         admins: 'Yöneticiler',
+        yes: 'Evet',
+        no: 'Hayır',
         daysAgo: '{count} gün önce',
         hoursAgo: '{count} saat önce',
         minutesAgo: '{count} dakika önce',
@@ -4829,6 +5073,7 @@ const tr = {
             createButton: 'Kullanıcı Oluştur',
             homesDisabledTooltip: 'Bu kullanıcı için kalıcı depolama devre dışı bırakıldı',
             confirmDelete: '\'{username}\' kullanıcısını silmek istediğinizden emin misiniz? Bu, tüm kalıcı depolamasını da silecek ve geri alınamaz.',
+            allowPublicSharing: 'Herkese Açık Dosya Paylaşımına İzin Ver',
         },
         groups: {
             title: 'Grup Yönetimi',
@@ -5155,12 +5400,21 @@ const tr = {
             uploadFolder: 'Klasör Yükle'
         },
         sidebar: {
-            sharedFiles: 'SealSkin Dosyaları'
+            sharedFiles: 'SealSkin Dosyaları',
+            publicShares: 'Genel Paylaşımlar'
+        },
+        shares: {
+            title: 'Genel Paylaşılan Dosyalar',
+            searchPlaceholder: 'Dosya adı veya ID ile ara...'
         },
         table: {
             name: 'Ad',
             size: 'Boyut',
-            lastModified: 'Son Değiştirme'
+            lastModified: 'Son Değiştirme',
+            created: 'Oluşturuldu',
+            expires: 'Sona Eriyor',
+            url: 'Genel URL',
+            passwordProtected: 'Şifre'
         },
         dropzone: {
             title: 'Yüklemek için dosyaları buraya bırakın'
@@ -5185,6 +5439,15 @@ const tr = {
             uploadProgress: {
                 title: 'Yükleme İlerlemesi',
                 doneButton: 'Bitti'
+            },
+            share: {
+                title: 'Dosya Paylaş',
+                sharingFile: 'Paylaşılan dosya: <strong>{filename}</strong>',
+                passwordLabel: 'Şifre (isteğe bağlı)',
+                passwordPlaceholder: 'Şifresiz bırakmak için boş bırakın',
+                expiryLabel: 'Sona erme süresi (saat, isteğe bağlı)',
+                expiryPlaceholder: 'örn. bir gün için 24',
+                shareButton: 'Paylaşım Bağlantısı Oluştur'
             }
         },
         status: {
@@ -5198,20 +5461,27 @@ const tr = {
             uploadPrepFailed: 'Klasör yükleme hazırlığı sırasında hata: {error}',
             notConfigured: 'Hata: SealSkin yapılandırılmamış. Lütfen seçeneklerden ayarlayın.',
             folderCreated: '\'{folderName}\' klasörü oluşturuldu.',
-            folderCreateFailed: 'Klasör oluşturulurken hata: {error}'
+            folderCreateFailed: 'Klasör oluşturulurken hata: {error}',
+            shareCreated: 'Paylaşım başarıyla oluşturuldu! Bağlantı panonuza kopyalandı.',
+            shareCreateFailed: 'Paylaşım oluşturulamadı: {error}',
+            sharesLoadFailed: 'Paylaşılan dosyalar yüklenemedi: {error}',
+            shareDeleteFailed: 'Paylaşım silinemedi: {error}',
+            shareDeleted: 'Paylaşım başarıyla silindi.',
+            urlCopied: 'Genel URL panoya kopyalandı.'
         },
         placeholders: {
             errorLoading: 'Dosyalar yüklenirken hata oluştu.',
             folderEmpty: 'Bu klasör boş.',
-            noHomeDirs: 'Kullanılabilir ana dizin yok.'
+            noHomeDirs: 'Kullanılabilir ana dizin yok.',
+            noShares: 'Henüz hiçbir dosya paylaşmadınız.'
         },
         uploadStatus: {
             pending: 'beklemede',
-            initiating: 'başlatılıyor',
-            uploading: 'yükleniyor',
-            finalizing: 'tamamlanıyor',
-            completed: 'tamamlandı',
-            error: 'hata'
+            initiating: 'Başlatılıyor...',
+            uploading: 'Yükleniyor...',
+            finalizing: 'Tamamlanıyor...',
+            completed: 'Tamamlandı',
+            error: 'Hata'
         }
     }
 };
@@ -5252,14 +5522,16 @@ const it = {
         gpu: 'GPU',
         version: 'Versione',
         checked: 'Verificato',
-        never: 'mai',
+        never: 'Mai',
         stop: 'Ferma',
         reopen: 'Riapri',
         sendFile: 'Invia File',
+        share: 'Condividi',
         search: 'Cerca',
         refresh: 'Aggiorna',
         close: 'Chiudi',
         copy: 'Copia',
+        copyUrl: 'Copia URL',
         download: 'Scarica',
         next: 'Successivo',
         previous: 'Precedente',
@@ -5269,6 +5541,8 @@ const it = {
         sessions: 'Sessioni',
         users: 'Utenti',
         admins: 'Amministratori',
+        yes: 'Sì',
+        no: 'No',
         daysAgo: '{count, plural, one {1 giorno fa} other {{count} giorni fa}}',
         hoursAgo: '{count, plural, one {1 ora fa} other {{count} ore fa}}',
         minutesAgo: '{count, plural, one {1 minuto fa} other {{count} minuti fa}}',
@@ -5408,6 +5682,7 @@ const it = {
             createButton: 'Crea Utente',
             homesDisabledTooltip: 'Archiviazione persistente disabilitata per questo utente',
             confirmDelete: 'Sei sicuro di voler eliminare l\'utente \'{username}\'? Questo eliminerà anche tutta la sua archiviazione persistente e non potrà essere annullato.',
+            allowPublicSharing: 'Consenti condivisione file pubblica',
         },
         groups: {
             title: 'Gestione Gruppi',
@@ -5734,12 +6009,21 @@ const it = {
             uploadFolder: 'Carica Cartella'
         },
         sidebar: {
-            sharedFiles: 'File di SealSkin'
+            sharedFiles: 'File di SealSkin',
+            publicShares: 'Condivisioni Pubbliche'
+        },
+        shares: {
+            title: 'File Condivisi Pubblicamente',
+            searchPlaceholder: 'Cerca per nome file o ID...'
         },
         table: {
             name: 'Nome',
             size: 'Dimensione',
-            lastModified: 'Ultima Modifica'
+            lastModified: 'Ultima Modifica',
+            created: 'Creato',
+            expires: 'Scade',
+            url: 'URL Pubblico',
+            passwordProtected: 'Password'
         },
         dropzone: {
             title: 'Trascina i file per caricarli'
@@ -5764,6 +6048,15 @@ const it = {
             uploadProgress: {
                 title: 'Avanzamento Caricamento',
                 doneButton: 'Fatto'
+            },
+            share: {
+                title: 'Condividi File',
+                sharingFile: 'Condivisione del file: <strong>{filename}</strong>',
+                passwordLabel: 'Password (opzionale)',
+                passwordPlaceholder: 'Lascia vuoto per nessuna password',
+                expiryLabel: 'Scade tra (ore, opzionale)',
+                expiryPlaceholder: 'es. 24 per un giorno',
+                shareButton: 'Crea Link di Condivisione'
             }
         },
         status: {
@@ -5777,20 +6070,27 @@ const it = {
             uploadPrepFailed: 'Errore durante la preparazione del caricamento della cartella: {error}',
             notConfigured: 'Errore: SealSkin non configurato. Si prega di impostarlo nelle opzioni.',
             folderCreated: 'Cartella \'{folderName}\' creata.',
-            folderCreateFailed: 'Errore nella creazione della cartella: {error}'
+            folderCreateFailed: 'Errore nella creazione della cartella: {error}',
+            shareCreated: 'Condivisione creata con successo! Il link è stato copiato negli appunti.',
+            shareCreateFailed: 'Creazione della condivisione fallita: {error}',
+            sharesLoadFailed: 'Caricamento dei file condivisi fallito: {error}',
+            shareDeleteFailed: 'Eliminazione della condivisione fallita: {error}',
+            shareDeleted: 'Condivisione eliminata con successo.',
+            urlCopied: 'URL pubblico copiato negli appunti.'
         },
         placeholders: {
             errorLoading: 'Errore nel caricamento dei file.',
             folderEmpty: 'Questa cartella è vuota.',
-            noHomeDirs: 'Nessuna directory home disponibile.'
+            noHomeDirs: 'Nessuna directory home disponibile.',
+            noShares: 'Non hai ancora condiviso nessun file.'
         },
         uploadStatus: {
             pending: 'in attesa',
-            initiating: 'avvio',
-            uploading: 'caricamento',
-            finalizing: 'finalizzazione',
-            completed: 'completato',
-            error: 'errore'
+            initiating: 'Avvio...',
+            uploading: 'Caricamento...',
+            finalizing: 'Finalizzazione...',
+            completed: 'Completato',
+            error: 'Errore'
         }
     }
 };
@@ -5831,14 +6131,16 @@ const nl = {
         gpu: 'GPU',
         version: 'Versie',
         checked: 'Gecontroleerd',
-        never: 'nooit',
+        never: 'Nooit',
         stop: 'Stoppen',
         reopen: 'Heropenen',
         sendFile: 'Bestand Verzenden',
+        share: 'Delen',
         search: 'Zoeken',
         refresh: 'Vernieuwen',
         close: 'Sluiten',
         copy: 'Kopiëren',
+        copyUrl: 'URL Kopiëren',
         download: 'Downloaden',
         next: 'Volgende',
         previous: 'Vorige',
@@ -5848,6 +6150,8 @@ const nl = {
         sessions: 'Sessies',
         users: 'Gebruikers',
         admins: 'Beheerders',
+        yes: 'Ja',
+        no: 'Nee',
         daysAgo: '{count, plural, one {1 dag geleden} other {{count} dagen geleden}}',
         hoursAgo: '{count, plural, one {1 uur geleden} other {{count} uur geleden}}',
         minutesAgo: '{count, plural, one {1 minuut geleden} other {{count} minuten geleden}}',
@@ -5987,6 +6291,7 @@ const nl = {
             createButton: 'Gebruiker Aanmaken',
             homesDisabledTooltip: 'Persistente opslag uitgeschakeld voor deze gebruiker',
             confirmDelete: 'Weet u zeker dat u gebruiker \'{username}\' wilt verwijderen? Dit verwijdert ook al hun persistente opslag en kan niet ongedaan worden gemaakt.',
+            allowPublicSharing: 'Openbaar delen van bestanden toestaan',
         },
         groups: {
             title: 'Groepsbeheer',
@@ -6313,12 +6618,21 @@ const nl = {
             uploadFolder: 'Map uploaden'
         },
         sidebar: {
-            sharedFiles: 'SealSkin-bestanden'
+            sharedFiles: 'SealSkin-bestanden',
+            publicShares: 'Openbare Delingen'
+        },
+        shares: {
+            title: 'Openbaar Gedeelde Bestanden',
+            searchPlaceholder: 'Zoek op bestandsnaam of ID...'
         },
         table: {
             name: 'Naam',
             size: 'Grootte',
-            lastModified: 'Laatst gewijzigd'
+            lastModified: 'Laatst gewijzigd',
+            created: 'Gemaakt',
+            expires: 'Vervalt',
+            url: 'Openbare URL',
+            passwordProtected: 'Wachtwoord'
         },
         dropzone: {
             title: 'Sleep bestanden hierheen om te uploaden'
@@ -6343,6 +6657,15 @@ const nl = {
             uploadProgress: {
                 title: 'Uploadvoortgang',
                 doneButton: 'Klaar'
+            },
+            share: {
+                title: 'Bestand Delen',
+                sharingFile: 'Bestand delen: <strong>{filename}</strong>',
+                passwordLabel: 'Wachtwoord (optioneel)',
+                passwordPlaceholder: 'Laat leeg voor geen wachtwoord',
+                expiryLabel: 'Vervalt over (uren, optioneel)',
+                expiryPlaceholder: 'bijv., 24 voor één dag',
+                shareButton: 'Deellink Maken'
             }
         },
         status: {
@@ -6356,20 +6679,27 @@ const nl = {
             uploadPrepFailed: 'Fout tijdens voorbereiding van mapupload: {error}',
             notConfigured: 'Fout: SealSkin niet geconfigureerd. Stel dit in bij de opties.',
             folderCreated: 'Map \'{folderName}\' gemaakt.',
-            folderCreateFailed: 'Fout bij het maken van de map: {error}'
+            folderCreateFailed: 'Fout bij het maken van de map: {error}',
+            shareCreated: 'Deellink succesvol aangemaakt! De link is naar je klembord gekopieerd.',
+            shareCreateFailed: 'Aanmaken van deellink mislukt: {error}',
+            sharesLoadFailed: 'Laden van gedeelde bestanden mislukt: {error}',
+            shareDeleteFailed: 'Verwijderen van deellink mislukt: {error}',
+            shareDeleted: 'Deellink succesvol verwijderd.',
+            urlCopied: 'Openbare URL naar klembord gekopieerd.'
         },
         placeholders: {
             errorLoading: 'Fout bij het laden van bestanden.',
             folderEmpty: 'Deze map is leeg.',
-            noHomeDirs: 'Geen thuismap beschikbaar.'
+            noHomeDirs: 'Geen thuismap beschikbaar.',
+            noShares: 'Je hebt nog geen bestanden gedeeld.'
         },
         uploadStatus: {
             pending: 'in afwachting',
-            initiating: 'starten',
-            uploading: 'uploaden',
-            finalizing: 'afronden',
-            completed: 'voltooid',
-            error: 'fout'
+            initiating: 'Starten...',
+            uploading: 'Uploaden...',
+            finalizing: 'Afronden...',
+            completed: 'Voltooid',
+            error: 'Fout'
         }
     }
 };
@@ -6414,10 +6744,12 @@ const ar = {
         stop: 'إيقاف',
         reopen: 'إعادة فتح',
         sendFile: 'إرسال ملف',
+        share: 'مشاركة',
         search: 'بحث',
         refresh: 'تحديث',
         close: 'إغلاق',
         copy: 'نسخ',
+        copyUrl: 'نسخ الرابط',
         download: 'تنزيل',
         next: 'التالي',
         previous: 'السابق',
@@ -6427,6 +6759,8 @@ const ar = {
         sessions: 'الجلسات',
         users: 'المستخدمون',
         admins: 'المسؤولون',
+        yes: 'نعم',
+        no: 'لا',
         daysAgo: '{count, plural, one {قبل يوم واحد} other {قبل {count} أيام}}',
         hoursAgo: '{count, plural, one {قبل ساعة واحدة} other {قبل {count} ساعات}}',
         minutesAgo: '{count, plural, one {قبل دقيقة واحدة} other {قبل {count} دقائق}}',
@@ -6566,6 +6900,7 @@ const ar = {
             createButton: 'إنشاء مستخدم',
             homesDisabledTooltip: 'تم تعطيل التخزين الدائم لهذا المستخدم',
             confirmDelete: 'هل أنت متأكد أنك تريد حذف المستخدم \'{username}\'؟ سيؤدي هذا أيضًا إلى حذف كل مساحة التخزين الدائمة الخاصة به ولا يمكن التراجع عن هذا الإجراء.',
+            allowPublicSharing: 'السماح بمشاركة الملفات العامة',
         },
         groups: {
             title: 'إدارة المجموعات',
@@ -6892,12 +7227,21 @@ const ar = {
             uploadFolder: 'رفع مجلد'
         },
         sidebar: {
-            sharedFiles: 'ملفات SealSkin'
+            sharedFiles: 'ملفات SealSkin',
+            publicShares: 'المشاركات العامة'
+        },
+        shares: {
+            title: 'الملفات المشاركة بشكل عام',
+            searchPlaceholder: 'البحث باسم الملف أو المعرف...'
         },
         table: {
             name: 'الاسم',
             size: 'الحجم',
-            lastModified: 'آخر تعديل'
+            lastModified: 'آخر تعديل',
+            created: 'تم الإنشاء',
+            expires: 'تنتهي الصلاحية',
+            url: 'الرابط العام',
+            passwordProtected: 'كلمة المرور'
         },
         dropzone: {
             title: 'أسقط الملفات هنا للرفع'
@@ -6922,6 +7266,15 @@ const ar = {
             uploadProgress: {
                 title: 'تقدم الرفع',
                 doneButton: 'تم'
+            },
+            share: {
+                title: 'مشاركة ملف',
+                sharingFile: 'مشاركة الملف: <strong>{filename}</strong>',
+                passwordLabel: 'كلمة المرور (اختياري)',
+                passwordPlaceholder: 'اتركه فارغًا لعدم استخدام كلمة مرور',
+                expiryLabel: 'تنتهي الصلاحية خلال (ساعات، اختياري)',
+                expiryPlaceholder: 'مثال: 24 ليوم واحد',
+                shareButton: 'إنشاء رابط مشاركة'
             }
         },
         status: {
@@ -6935,18 +7288,25 @@ const ar = {
             uploadPrepFailed: 'خطأ أثناء التحضير لرفع المجلد: {error}',
             notConfigured: 'خطأ: SealSkin غير مهيأ. يرجى الإعداد في الخيارات.',
             folderCreated: 'تم إنشاء المجلد \'{folderName}\'.',
-            folderCreateFailed: 'خطأ في إنشاء المجلد: {error}'
+            folderCreateFailed: 'خطأ في إنشاء المجلد: {error}',
+            shareCreated: 'تم إنشاء المشاركة بنجاح! تم نسخ الرابط إلى الحافظة الخاصة بك.',
+            shareCreateFailed: 'فشل في إنشاء المشاركة: {error}',
+            sharesLoadFailed: 'فشل في تحميل الملفات المشاركة: {error}',
+            shareDeleteFailed: 'فشل في حذف المشاركة: {error}',
+            shareDeleted: 'تم حذف المشاركة بنجاح.',
+            urlCopied: 'تم نسخ الرابط العام إلى الحافظة.'
         },
         placeholders: {
             errorLoading: 'خطأ في تحميل الملفات.',
             folderEmpty: 'هذا المجلد فارغ.',
-            noHomeDirs: 'لا توجد دلائل رئيسية متاحة.'
+            noHomeDirs: 'لا توجد دلائل رئيسية متاحة.',
+            noShares: 'لم تقم بمشاركة أي ملفات بعد.'
         },
         uploadStatus: {
             pending: 'قيد الانتظار',
-            initiating: 'جارٍ البدء',
-            uploading: 'جارٍ الرفع',
-            finalizing: 'جارٍ الإنهاء',
+            initiating: 'جارٍ البدء...',
+            uploading: 'جارٍ الرفع...',
+            finalizing: 'جارٍ الإنهاء...',
             completed: 'مكتمل',
             error: 'خطأ'
         }
@@ -6989,14 +7349,16 @@ const ko = {
         gpu: 'GPU',
         version: '버전',
         checked: '확인됨',
-        never: '없음',
+        never: '절대 안 함',
         stop: '중지',
         reopen: '다시 열기',
         sendFile: '파일 보내기',
+        share: '공유',
         search: '검색',
         refresh: '새로고침',
         close: '닫기',
         copy: '복사',
+        copyUrl: 'URL 복사',
         download: '다운로드',
         next: '다음',
         previous: '이전',
@@ -7006,6 +7368,8 @@ const ko = {
         sessions: '세션',
         users: '사용자',
         admins: '관리자',
+        yes: '예',
+        no: '아니요',
         daysAgo: '{count}일 전',
         hoursAgo: '{count}시간 전',
         minutesAgo: '{count}분 전',
@@ -7145,6 +7509,7 @@ const ko = {
             createButton: '사용자 만들기',
             homesDisabledTooltip: '이 사용자는 영구 스토리지가 비활성화되었습니다',
             confirmDelete: '사용자 \'{username}\'을(를) 삭제하시겠습니까? 모든 영구 스토리지도 함께 삭제되며 되돌릴 수 없습니다.',
+            allowPublicSharing: '공개 파일 공유 허용',
         },
         groups: {
             title: '그룹 관리',
@@ -7471,12 +7836,21 @@ const ko = {
             uploadFolder: '폴더 업로드'
         },
         sidebar: {
-            sharedFiles: 'SealSkin 파일'
+            sharedFiles: 'SealSkin 파일',
+            publicShares: '공개 공유'
+        },
+        shares: {
+            title: '공개적으로 공유된 파일',
+            searchPlaceholder: '파일 이름 또는 ID로 검색...'
         },
         table: {
             name: '이름',
             size: '크기',
-            lastModified: '마지막 수정'
+            lastModified: '마지막 수정',
+            created: '생성됨',
+            expires: '만료',
+            url: '공개 URL',
+            passwordProtected: '비밀번호'
         },
         dropzone: {
             title: '업로드할 파일을 여기에 놓으세요'
@@ -7501,6 +7875,15 @@ const ko = {
             uploadProgress: {
                 title: '업로드 진행률',
                 doneButton: '완료'
+            },
+            share: {
+                title: '파일 공유',
+                sharingFile: '파일 공유 중: <strong>{filename}</strong>',
+                passwordLabel: '비밀번호 (선택 사항)',
+                passwordPlaceholder: '비밀번호 없이 공유하려면 비워두세요',
+                expiryLabel: '만료 시간 (시간, 선택 사항)',
+                expiryPlaceholder: '예: 하루는 24',
+                shareButton: '공유 링크 만들기'
             }
         },
         status: {
@@ -7514,18 +7897,25 @@ const ko = {
             uploadPrepFailed: '폴더 업로드 준비 중 오류 발생: {error}',
             notConfigured: '오류: SealSkin이 구성되지 않았습니다. 옵션에서 설정하십시오.',
             folderCreated: '\'{folderName}\' 폴더가 생성되었습니다.',
-            folderCreateFailed: '폴더 생성 오류: {error}'
+            folderCreateFailed: '폴더 생성 오류: {error}',
+            shareCreated: '공유가 성공적으로 생성되었습니다! 링크가 클립보드에 복사되었습니다.',
+            shareCreateFailed: '공유 생성 실패: {error}',
+            sharesLoadFailed: '공유된 파일을 불러오지 못했습니다: {error}',
+            shareDeleteFailed: '공유 삭제 실패: {error}',
+            shareDeleted: '공유가 성공적으로 삭제되었습니다.',
+            urlCopied: '공개 URL이 클립보드에 복사되었습니다.'
         },
         placeholders: {
             errorLoading: '파일 로드 오류.',
             folderEmpty: '이 폴더는 비어 있습니다.',
-            noHomeDirs: '사용 가능한 홈 디렉터리가 없습니다.'
+            noHomeDirs: '사용 가능한 홈 디렉터리가 없습니다.',
+            noShares: '아직 공유한 파일이 없습니다.'
         },
         uploadStatus: {
             pending: '대기 중',
-            initiating: '시작 중',
-            uploading: '업로드 중',
-            finalizing: '마무리 중',
+            initiating: '시작 중...',
+            uploading: '업로드 중...',
+            finalizing: '마무리 중...',
             completed: '완료됨',
             error: '오류'
         }
@@ -7572,10 +7962,12 @@ const ja = {
         stop: '停止',
         reopen: '再開',
         sendFile: 'ファイルを送信',
+        share: '共有',
         search: '検索',
         refresh: '更新',
         close: '閉じる',
         copy: 'コピー',
+        copyUrl: 'URLをコピー',
         download: 'ダウンロード',
         next: '次へ',
         previous: '前へ',
@@ -7585,6 +7977,8 @@ const ja = {
         sessions: 'セッション',
         users: 'ユーザー',
         admins: '管理者',
+        yes: 'はい',
+        no: 'いいえ',
         daysAgo: '{count}日前',
         hoursAgo: '{count}時間前',
         minutesAgo: '{count}分前',
@@ -7724,6 +8118,7 @@ const ja = {
             createButton: 'ユーザーを作成',
             homesDisabledTooltip: 'このユーザーの永続ストレージは無効です',
             confirmDelete: 'ユーザー \'{username}\' を本当に削除しますか？これを行うと、そのユーザーの永続ストレージもすべて削除され、元に戻すことはできません。',
+            allowPublicSharing: '公開ファイル共有を許可する',
         },
         groups: {
             title: 'グループ管理',
@@ -8050,12 +8445,21 @@ const ja = {
             uploadFolder: 'フォルダーをアップロード'
         },
         sidebar: {
-            sharedFiles: 'SealSkin ファイル'
+            sharedFiles: 'SealSkin ファイル',
+            publicShares: '公開共有'
+        },
+        shares: {
+            title: '公開共有ファイル',
+            searchPlaceholder: 'ファイル名またはIDで検索...'
         },
         table: {
             name: '名前',
             size: 'サイズ',
-            lastModified: '最終更新日'
+            lastModified: '最終更新日',
+            created: '作成日時',
+            expires: '有効期限',
+            url: '公開URL',
+            passwordProtected: 'パスワード'
         },
         dropzone: {
             title: 'ファイルをドロップしてアップロード'
@@ -8080,6 +8484,15 @@ const ja = {
             uploadProgress: {
                 title: 'アップロードの進捗',
                 doneButton: '完了'
+            },
+            share: {
+                title: 'ファイルを共有',
+                sharingFile: 'ファイルを共有中: <strong>{filename}</strong>',
+                passwordLabel: 'パスワード（任意）',
+                passwordPlaceholder: 'パスワードなしの場合は空欄',
+                expiryLabel: '有効期限（時間、任意）',
+                expiryPlaceholder: '例：1日の場合は24',
+                shareButton: '共有リンクを作成'
             }
         },
         status: {
@@ -8093,18 +8506,25 @@ const ja = {
             uploadPrepFailed: 'フォルダーのアップロード準備中にエラーが発生しました：{error}',
             notConfigured: 'エラー：SealSkinが設定されていません。オプションで設定してください。',
             folderCreated: 'フォルダー「{folderName}」が作成されました。',
-            folderCreateFailed: 'フォルダーの作成中にエラーが発生しました：{error}'
+            folderCreateFailed: 'フォルダーの作成中にエラーが発生しました：{error}',
+            shareCreated: '共有が正常に作成されました！リンクがクリップボードにコピーされました。',
+            shareCreateFailed: '共有の作成に失敗しました: {error}',
+            sharesLoadFailed: '共有ファイルの読み込みに失敗しました: {error}',
+            shareDeleteFailed: '共有の削除に失敗しました: {error}',
+            shareDeleted: '共有が正常に削除されました。',
+            urlCopied: '公開URLがクリップボードにコピーされました。'
         },
         placeholders: {
             errorLoading: 'ファイルの読み込み中にエラーが発生しました。',
             folderEmpty: 'このフォルダーは空です。',
-            noHomeDirs: '利用可能なホームディレクトリがありません。'
+            noHomeDirs: '利用可能なホームディレクトリがありません。',
+            noShares: 'まだファイルを共有していません。'
         },
         uploadStatus: {
             pending: '保留中',
-            initiating: '開始中',
-            uploading: 'アップロード中',
-            finalizing: '最終処理中',
+            initiating: '開始中...',
+            uploading: 'アップロード中...',
+            finalizing: '最終処理中...',
             completed: '完了',
             error: 'エラー'
         }
@@ -8147,14 +8567,16 @@ const vi = {
         gpu: 'GPU',
         version: 'Phiên bản',
         checked: 'Đã kiểm tra',
-        never: 'không bao giờ',
+        never: 'Không bao giờ',
         stop: 'Dừng',
         reopen: 'Mở lại',
         sendFile: 'Gửi tệp',
+        share: 'Chia sẻ',
         search: 'Tìm kiếm',
         refresh: 'Làm mới',
         close: 'Đóng',
         copy: 'Sao chép',
+        copyUrl: 'Sao chép URL',
         download: 'Tải xuống',
         next: 'Tiếp theo',
         previous: 'Trước đó',
@@ -8164,6 +8586,8 @@ const vi = {
         sessions: 'Phiên hoạt động',
         users: 'Người dùng',
         admins: 'Quản trị viên',
+        yes: 'Có',
+        no: 'Không',
         daysAgo: '{count, plural, one {1 ngày trước} other {{count} ngày trước}}',
         hoursAgo: '{count, plural, one {1 giờ trước} other {{count} giờ trước}}',
         minutesAgo: '{count, plural, one {1 phút trước} other {{count} phút trước}}',
@@ -8303,6 +8727,7 @@ const vi = {
             createButton: 'Tạo người dùng',
             homesDisabledTooltip: 'Lưu trữ lâu dài bị vô hiệu hóa cho người dùng này',
             confirmDelete: 'Bạn có chắc chắn muốn xóa người dùng \'{username}\' không? Thao tác này cũng sẽ xóa tất cả bộ nhớ lâu dài của họ và không thể hoàn tác.',
+            allowPublicSharing: 'Cho phép chia sẻ tệp công khai',
         },
         groups: {
             title: 'Quản lý nhóm',
@@ -8629,12 +9054,21 @@ const vi = {
             uploadFolder: 'Tải lên thư mục'
         },
         sidebar: {
-            sharedFiles: 'Tệp SealSkin'
+            sharedFiles: 'Tệp SealSkin',
+            publicShares: 'Chia sẻ công khai'
+        },
+        shares: {
+            title: 'Các tệp được chia sẻ công khai',
+            searchPlaceholder: 'Tìm kiếm theo tên tệp hoặc ID...'
         },
         table: {
             name: 'Tên',
             size: 'Kích thước',
-            lastModified: 'Sửa đổi lần cuối'
+            lastModified: 'Sửa đổi lần cuối',
+            created: 'Đã tạo',
+            expires: 'Hết hạn',
+            url: 'URL công khai',
+            passwordProtected: 'Mật khẩu'
         },
         dropzone: {
             title: 'Thả tệp vào đây để tải lên'
@@ -8659,6 +9093,15 @@ const vi = {
             uploadProgress: {
                 title: 'Tiến trình tải lên',
                 doneButton: 'Xong'
+            },
+            share: {
+                title: 'Chia sẻ tệp',
+                sharingFile: 'Đang chia sẻ tệp: <strong>{filename}</strong>',
+                passwordLabel: 'Mật khẩu (tùy chọn)',
+                passwordPlaceholder: 'Để trống nếu không có mật khẩu',
+                expiryLabel: 'Hết hạn sau (giờ, tùy chọn)',
+                expiryPlaceholder: 'ví dụ: 24 cho một ngày',
+                shareButton: 'Tạo liên kết chia sẻ'
             }
         },
         status: {
@@ -8672,20 +9115,27 @@ const vi = {
             uploadPrepFailed: 'Lỗi trong quá trình chuẩn bị tải lên thư mục: {error}',
             notConfigured: 'Lỗi: SealSkin chưa được cấu hình. Vui lòng thiết lập trong tùy chọn.',
             folderCreated: 'Đã tạo thư mục \'{folderName}\'.',
-            folderCreateFailed: 'Lỗi khi tạo thư mục: {error}'
+            folderCreateFailed: 'Lỗi khi tạo thư mục: {error}',
+            shareCreated: 'Chia sẻ đã được tạo thành công! Liên kết đã được sao chép vào clipboard của bạn.',
+            shareCreateFailed: 'Không thể tạo chia sẻ: {error}',
+            sharesLoadFailed: 'Không thể tải các tệp đã chia sẻ: {error}',
+            shareDeleteFailed: 'Không thể xóa chia sẻ: {error}',
+            shareDeleted: 'Đã xóa chia sẻ thành công.',
+            urlCopied: 'Đã sao chép URL công khai vào clipboard.'
         },
         placeholders: {
             errorLoading: 'Lỗi khi tải tệp.',
             folderEmpty: 'Thư mục này trống.',
-            noHomeDirs: 'Không có thư mục chính nào.'
+            noHomeDirs: 'Không có thư mục chính nào.',
+            noShares: 'Bạn chưa chia sẻ tệp nào.'
         },
         uploadStatus: {
             pending: 'đang chờ',
-            initiating: 'đang bắt đầu',
-            uploading: 'đang tải lên',
-            finalizing: 'đang hoàn tất',
-            completed: 'hoàn thành',
-            error: 'lỗi'
+            initiating: 'Đang bắt đầu...',
+            uploading: 'Đang tải lên...',
+            finalizing: 'Đang hoàn tất...',
+            completed: 'Hoàn thành',
+            error: 'Lỗi'
         }
     }
 };
@@ -8730,10 +9180,12 @@ const th = {
         stop: 'หยุด',
         reopen: 'เปิดใหม่',
         sendFile: 'ส่งไฟล์',
+        share: 'แชร์',
         search: 'ค้นหา',
         refresh: 'รีเฟรช',
         close: 'ปิด',
         copy: 'คัดลอก',
+        copyUrl: 'คัดลอก URL',
         download: 'ดาวน์โหลด',
         next: 'ถัดไป',
         previous: 'ก่อนหน้า',
@@ -8743,6 +9195,8 @@ const th = {
         sessions: 'เซสชัน',
         users: 'ผู้ใช้',
         admins: 'ผู้ดูแลระบบ',
+        yes: 'ใช่',
+        no: 'ไม่',
         daysAgo: '{count, plural, one {1 วันที่แล้ว} other {{count} วันที่แล้ว}}',
         hoursAgo: '{count, plural, one {1 ชั่วโมงที่แล้ว} other {{count} ชั่วโมงที่แล้ว}}',
         minutesAgo: '{count, plural, one {1 นาทีที่แล้ว} other {{count} นาทีที่แล้ว}}',
@@ -8882,6 +9336,7 @@ const th = {
             createButton: 'สร้างผู้ใช้',
             homesDisabledTooltip: 'พื้นที่จัดเก็บถาวรถูกปิดใช้งานสำหรับผู้ใช้นี้',
             confirmDelete: 'คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้ \'{username}\'? การดำเนินการนี้จะลบพื้นที่จัดเก็บถาวรทั้งหมดของพวกเขาด้วยและไม่สามารถยกเลิกได้',
+            allowPublicSharing: 'อนุญาตให้แชร์ไฟล์สาธารณะ',
         },
         groups: {
             title: 'การจัดการกลุ่ม',
@@ -9208,12 +9663,21 @@ const th = {
             uploadFolder: 'อัปโหลดโฟลเดอร์'
         },
         sidebar: {
-            sharedFiles: 'ไฟล์ SealSkin'
+            sharedFiles: 'ไฟล์ SealSkin',
+            publicShares: 'การแชร์สาธารณะ'
+        },
+        shares: {
+            title: 'ไฟล์ที่แชร์สาธารณะ',
+            searchPlaceholder: 'ค้นหาตามชื่อไฟล์หรือ ID...'
         },
         table: {
             name: 'ชื่อ',
             size: 'ขนาด',
-            lastModified: 'แก้ไขล่าสุด'
+            lastModified: 'แก้ไขล่าสุด',
+            created: 'สร้างเมื่อ',
+            expires: 'หมดอายุ',
+            url: 'URL สาธารณะ',
+            passwordProtected: 'รหัสผ่าน'
         },
         dropzone: {
             title: 'วางไฟล์เพื่ออัปโหลด'
@@ -9238,6 +9702,15 @@ const th = {
             uploadProgress: {
                 title: 'ความคืบหน้าการอัปโหลด',
                 doneButton: 'เสร็จสิ้น'
+            },
+            share: {
+                title: 'แชร์ไฟล์',
+                sharingFile: 'กำลังแชร์ไฟล์: <strong>{filename}</strong>',
+                passwordLabel: 'รหัสผ่าน (ไม่บังคับ)',
+                passwordPlaceholder: 'เว้นว่างไว้หากไม่ต้องการรหัสผ่าน',
+                expiryLabel: 'หมดอายุใน (ชั่วโมง, ไม่บังคับ)',
+                expiryPlaceholder: 'เช่น 24 สำหรับหนึ่งวัน',
+                shareButton: 'สร้างลิงก์แชร์'
             }
         },
         status: {
@@ -9251,18 +9724,25 @@ const th = {
             uploadPrepFailed: 'เกิดข้อผิดพลาดระหว่างการเตรียมอัปโหลดโฟลเดอร์: {error}',
             notConfigured: 'ข้อผิดพลาด: SealSkin ยังไม่ได้กำหนดค่า โปรดตั้งค่าในตัวเลือก',
             folderCreated: 'สร้างโฟลเดอร์ \'{folderName}\' แล้ว',
-            folderCreateFailed: 'เกิดข้อผิดพลาดในการสร้างโฟลเดอร์: {error}'
+            folderCreateFailed: 'เกิดข้อผิดพลาดในการสร้างโฟลเดอร์: {error}',
+            shareCreated: 'สร้างการแชร์สำเร็จ! ลิงก์ถูกคัดลอกไปยังคลิปบอร์ดของคุณแล้ว',
+            shareCreateFailed: 'ไม่สามารถสร้างการแชร์ได้: {error}',
+            sharesLoadFailed: 'ไม่สามารถโหลดไฟล์ที่แชร์ได้: {error}',
+            shareDeleteFailed: 'ไม่สามารถลบการแชร์ได้: {error}',
+            shareDeleted: 'ลบการแชร์สำเร็จแล้ว',
+            urlCopied: 'คัดลอก URL สาธารณะไปยังคลิปบอร์ดแล้ว'
         },
         placeholders: {
             errorLoading: 'เกิดข้อผิดพลาดในการโหลดไฟล์',
             folderEmpty: 'โฟลเดอร์นี้ว่างเปล่า',
-            noHomeDirs: 'ไม่มีโฮมไดเรกทอรีที่ใช้ได้'
+            noHomeDirs: 'ไม่มีโฮมไดเรกทอรีที่ใช้ได้',
+            noShares: 'คุณยังไม่ได้แชร์ไฟล์ใดๆ'
         },
         uploadStatus: {
             pending: 'รอดำเนินการ',
-            initiating: 'กำลังเริ่มต้น',
-            uploading: 'กำลังอัปโหลด',
-            finalizing: 'กำลังสิ้นสุด',
+            initiating: 'กำลังเริ่มต้น...',
+            uploading: 'กำลังอัปโหลด...',
+            finalizing: 'กำลังสิ้นสุด...',
             completed: 'เสร็จสมบูรณ์',
             error: 'ข้อผิดพลาด'
         }
@@ -9305,14 +9785,16 @@ const fil = {
         gpu: 'GPU',
         version: 'Bersyon',
         checked: 'Nasuri',
-        never: 'hindi kailanman',
+        never: 'Hindi Kailanman',
         stop: 'Itigil',
         reopen: 'Buksan Muli',
         sendFile: 'Ipadala ang File',
+        share: 'Ibahagi',
         search: 'Maghanap',
         refresh: 'I-refresh',
         close: 'Isara',
         copy: 'Kopyahin',
+        copyUrl: 'Kopyahin ang URL',
         download: 'I-download',
         next: 'Susunod',
         previous: 'Nakaraan',
@@ -9322,6 +9804,8 @@ const fil = {
         sessions: 'Mga Sesyon',
         users: 'Mga User',
         admins: 'Mga Admin',
+        yes: 'Oo',
+        no: 'Hindi',
         daysAgo: '{count, plural, one {1 araw ang nakalipas} other {{count} na araw ang nakalipas}}',
         hoursAgo: '{count, plural, one {1 oras ang nakalipas} other {{count} na oras ang nakalipas}}',
         minutesAgo: '{count, plural, one {1 minuto ang nakalipas} other {{count} na minuto ang nakalipas}}',
@@ -9461,6 +9945,7 @@ const fil = {
             createButton: 'Gumawa ng User',
             homesDisabledTooltip: 'Ang persistenteng imbakan ay hindi pinagana para sa user na ito',
             confirmDelete: 'Sigurado ka bang gusto mong burahin ang user na si \'{username}\'? Mabubura rin nito ang lahat ng kanilang persistenteng imbakan at hindi na maibabalik.',
+            allowPublicSharing: 'Pahintulutan ang Pampublikong Pagbabahagi ng File',
         },
         groups: {
             title: 'Pamamahala ng Grupo',
@@ -9787,12 +10272,21 @@ const fil = {
             uploadFolder: 'Mag-upload ng Folder'
         },
         sidebar: {
-            sharedFiles: 'Mga File ng SealSkin'
+            sharedFiles: 'Mga File ng SealSkin',
+            publicShares: 'Mga Pampublikong Pagbabahagi'
+        },
+        shares: {
+            title: 'Mga File na Pampublikong Ibinahagi',
+            searchPlaceholder: 'Maghanap ayon sa pangalan ng file o ID...'
         },
         table: {
             name: 'Pangalan',
             size: 'Sukat',
-            lastModified: 'Huling Binago'
+            lastModified: 'Huling Binago',
+            created: 'Nilikha',
+            expires: 'Mag-e-expire',
+            url: 'Pampublikong URL',
+            passwordProtected: 'Password'
         },
         dropzone: {
             title: 'I-drop ang mga file para i-upload'
@@ -9817,6 +10311,15 @@ const fil = {
             uploadProgress: {
                 title: 'Progreso ng Pag-upload',
                 doneButton: 'Tapos na'
+            },
+            share: {
+                title: 'Ibahagi ang File',
+                sharingFile: 'Ibinabahagi ang file: <strong>{filename}</strong>',
+                passwordLabel: 'Password (opsyonal)',
+                passwordPlaceholder: 'Iwanang blangko para walang password',
+                expiryLabel: 'Mag-e-expire sa (oras, opsyonal)',
+                expiryPlaceholder: 'hal., 24 para sa isang araw',
+                shareButton: 'Gumawa ng Link ng Pagbabahagi'
             }
         },
         status: {
@@ -9830,20 +10333,27 @@ const fil = {
             uploadPrepFailed: 'Error sa paghahanda ng pag-upload ng folder: {error}',
             notConfigured: 'Error: Hindi naka-configure ang SealSkin. Paki-set up sa mga opsyon.',
             folderCreated: 'Nagawa ang folder na \'{folderName}\'.',
-            folderCreateFailed: 'Error sa paggawa ng folder: {error}'
+            folderCreateFailed: 'Error sa paggawa ng folder: {error}',
+            shareCreated: 'Matagumpay na nagawa ang pagbabahagi! Ang link ay nakopya sa iyong clipboard.',
+            shareCreateFailed: 'Nabigong gumawa ng pagbabahagi: {error}',
+            sharesLoadFailed: 'Nabigong i-load ang mga ibinahaging file: {error}',
+            shareDeleteFailed: 'Nabigong burahin ang pagbabahagi: {error}',
+            shareDeleted: 'Matagumpay na nabura ang pagbabahagi.',
+            urlCopied: 'Nakopya ang pampublikong URL sa clipboard.'
         },
         placeholders: {
             errorLoading: 'Error sa pag-load ng mga file.',
             folderEmpty: 'Walang laman ang folder na ito.',
-            noHomeDirs: 'Walang available na home directory.'
+            noHomeDirs: 'Walang available na home directory.',
+            noShares: 'Wala ka pang ibinabahaging anumang file.'
         },
         uploadStatus: {
             pending: 'nakabinbin',
-            initiating: 'sinisimulan',
-            uploading: 'nag-a-upload',
-            finalizing: 'tinatapos',
-            completed: 'kumpleto',
-            error: 'error'
+            initiating: 'Sinisimulan...',
+            uploading: 'Nag-a-upload...',
+            finalizing: 'Tinatapos...',
+            completed: 'Kumpleto',
+            error: 'Error'
         }
     }
 };
@@ -9884,14 +10394,16 @@ const da = {
         gpu: 'GPU',
         version: 'Version',
         checked: 'Afkrydset',
-        never: 'aldrig',
+        never: 'Aldrig',
         stop: 'Stop',
         reopen: 'Genåbn',
         sendFile: 'Send Fil',
+        share: 'Del',
         search: 'Søg',
         refresh: 'Opdater',
         close: 'Luk',
         copy: 'Kopier',
+        copyUrl: 'Kopier URL',
         download: 'Download',
         next: 'Næste',
         previous: 'Forrige',
@@ -9901,6 +10413,8 @@ const da = {
         sessions: 'Sessioner',
         users: 'Brugere',
         admins: 'Administratorer',
+        yes: 'Ja',
+        no: 'Nej',
         daysAgo: '{count, plural, one {for 1 dag siden} other {for {count} dage siden}}',
         hoursAgo: '{count, plural, one {for 1 time siden} other {for {count} timer siden}}',
         minutesAgo: '{count, plural, one {for 1 minut siden} other {for {count} minutter siden}}',
@@ -10040,6 +10554,7 @@ const da = {
             createButton: 'Opret Bruger',
             homesDisabledTooltip: 'Vedvarende lager deaktiveret for denne bruger',
             confirmDelete: 'Er du sikker på, at du vil slette brugeren \'{username}\'? Dette vil også slette alt deres vedvarende lager og kan ikke fortrydes.',
+            allowPublicSharing: 'Tillad offentlig fildeling',
         },
         groups: {
             title: 'Gruppeadministration',
@@ -10366,12 +10881,21 @@ const da = {
             uploadFolder: 'Upload mappe'
         },
         sidebar: {
-            sharedFiles: 'SealSkin-filer'
+            sharedFiles: 'SealSkin-filer',
+            publicShares: 'Offentlige Delinger'
+        },
+        shares: {
+            title: 'Offentligt Delte Filer',
+            searchPlaceholder: 'Søg efter filnavn eller ID...'
         },
         table: {
             name: 'Navn',
             size: 'Størrelse',
-            lastModified: 'Sidst ændret'
+            lastModified: 'Sidst ændret',
+            created: 'Oprettet',
+            expires: 'Udløber',
+            url: 'Offentlig URL',
+            passwordProtected: 'Adgangskode'
         },
         dropzone: {
             title: 'Træk filer hertil for at uploade'
@@ -10396,6 +10920,15 @@ const da = {
             uploadProgress: {
                 title: 'Upload-status',
                 doneButton: 'Færdig'
+            },
+            share: {
+                title: 'Del Fil',
+                sharingFile: 'Deler fil: <strong>{filename}</strong>',
+                passwordLabel: 'Adgangskode (valgfri)',
+                passwordPlaceholder: 'Lad være blank for ingen adgangskode',
+                expiryLabel: 'Udløber om (timer, valgfri)',
+                expiryPlaceholder: 'f.eks. 24 for en dag',
+                shareButton: 'Opret Delingslink'
             }
         },
         status: {
@@ -10409,20 +10942,27 @@ const da = {
             uploadPrepFailed: 'Fejl under forberedelse af mappe-upload: {error}',
             notConfigured: 'Fejl: SealSkin er ikke konfigureret. Konfigurer venligst i indstillinger.',
             folderCreated: 'Mappen \'{folderName}\' blev oprettet.',
-            folderCreateFailed: 'Fejl ved oprettelse af mappe: {error}'
+            folderCreateFailed: 'Fejl ved oprettelse af mappe: {error}',
+            shareCreated: 'Deling oprettet med succes! Linket er blevet kopieret til din udklipsholder.',
+            shareCreateFailed: 'Kunne ikke oprette deling: {error}',
+            sharesLoadFailed: 'Kunne ikke indlæse delte filer: {error}',
+            shareDeleteFailed: 'Kunne ikke slette deling: {error}',
+            shareDeleted: 'Deling slettet med succes.',
+            urlCopied: 'Offentlig URL kopieret til udklipsholder.'
         },
         placeholders: {
             errorLoading: 'Fejl ved indlæsning af filer.',
             folderEmpty: 'Denne mappe er tom.',
-            noHomeDirs: 'Ingen hjemmebiblioteker tilgængelige.'
+            noHomeDirs: 'Ingen hjemmebiblioteker tilgængelige.',
+            noShares: 'Du har endnu ikke delt nogen filer.'
         },
         uploadStatus: {
             pending: 'afventer',
-            initiating: 'starter',
-            uploading: 'uploader',
-            finalizing: 'afslutter',
-            completed: 'fuldført',
-            error: 'fejl'
+            initiating: 'Starter...',
+            uploading: 'Uploader...',
+            finalizing: 'Afslutter...',
+            completed: 'Fuldført',
+            error: 'Fejl'
         }
     }
 };

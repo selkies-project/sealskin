@@ -7,3 +7,4 @@ httpx
 websockets
 docker
 PyYAML
+python-multipart

@@ -124,6 +124,7 @@ class UserSettings(BaseModel):
     active: bool = True
     group: str = "none"
     persistent_storage: bool = True
+    public_sharing: bool = False
     harden_container: bool = False
     harden_openbox: bool = False
     gpu: bool = True
@@ -265,3 +266,26 @@ class FileChunkResponse(BaseModel):
 
 class GenericSuccessMessage(BaseModel):
     message: str
+
+class ShareFileRequest(BaseModel):
+    home_dir: str
+    path: str
+    password: Optional[str] = None
+    expiry_hours: Optional[int] = None
+
+class PublicShareInfo(BaseModel):
+    share_id: str
+    original_filename: str
+    size_bytes: int
+    created_at: float
+    expiry_timestamp: Optional[float] = None
+    has_password: bool
+    url: str
+
+class PublicShareMetadata(BaseModel):
+    owner_username: str
+    original_filename: str
+    created_at: float
+    size_bytes: int
+    password_hash: Optional[str] = None
+    expiry_timestamp: Optional[float] = None

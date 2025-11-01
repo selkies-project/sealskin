@@ -19,14 +19,22 @@
                 <!-- Home directories will be loaded here -->
                 <div class="spinner-container"><div class="spinner-small"></div></div>
             </nav>
+            <div class="nav-separator"></div>
+             <nav class="sidebar-nav">
+                <button class="nav-link" data-view="shares">
+                    <i class="fas fa-share-alt fa-fw"></i>
+                    <span data-i18n="files.sidebar.publicShares">Public Shares</span>
+                </button>
+            </nav>
         </aside>
 
-        <div class="main-panel">
+        <div id="files-view" class="main-panel view-panel active">
             <header class="file-manager-header">
                 <nav id="breadcrumb-nav" aria-label="breadcrumb"></nav>
                 <div class="header-actions">
+                    <input type="text" id="files-search-input" class="search-input" data-i18n-placeholder="files.files.searchPlaceholder" placeholder="Search current folder...">
                     <button id="delete-selected-btn" class="danger" style="display: none;"><i class="fas fa-trash"></i> <span data-i18n="common.delete">Delete</span> (<span id="selection-count">0</span>)</button>
-                    <div id="default-actions" style="display: flex; gap: 1rem;">
+                    <div id="default-actions" class="default-actions">
                         <button id="new-folder-btn" class="secondary"><i class="fas fa-folder-plus"></i> <span data-i18n="files.header.newFolder">New Folder</span></button>
                         <button id="upload-file-btn" class="secondary"><i class="fas fa-upload"></i> <span data-i18n="files.header.uploadFiles">Upload Files</span></button>
                         <button id="upload-folder-btn" class="primary"><i class="fas fa-folder-open"></i> <span data-i18n="files.header.uploadFolder">Upload Folder</span></button>
@@ -44,6 +52,7 @@
                                 <th class="col-name" data-i18n="files.table.name">Name</th>
                                 <th class="col-size" data-i18n="files.table.size">Size</th>
                                 <th class="col-modified" data-i18n="files.table.lastModified">Last Modified</th>
+                                <th class="col-actions" data-i18n="common.actions">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="file-list-body">
@@ -63,6 +72,35 @@
                 <nav id="pagination-controls" class="pagination-controls" aria-label="pagination"></nav>
             </footer>
         </div>
+
+        <div id="shares-view" class="main-panel view-panel">
+            <header class="file-manager-header">
+                <h3 data-i18n="files.shares.title">Publicly Shared Files</h3>
+                <div class="header-actions">
+                    <button id="delete-selected-shares-btn" class="danger" style="display: none;"><i class="fas fa-trash"></i> <span data-i18n="common.delete">Delete</span> (<span id="selection-count-shares">0</span>)</button>
+                    <input type="text" id="shares-search-input" class="search-input" data-i18n-placeholder="files.shares.searchPlaceholder" placeholder="Search by filename or ID...">
+                </div>
+            </header>
+            <main class="file-content-area">
+                <div class="table-container">
+                    <table id="shares-list-table">
+                        <thead>
+                            <tr>
+                                <th class="col-check"><input type="checkbox" id="select-all-shares-check"></th>
+                                <th class="col-name" data-i18n="files.table.name">Name</th>
+                                <th class="col-size" data-i18n="files.table.size">Size</th>
+                                <th class="col-date" data-i18n="files.table.created">Created</th>
+                                <th class="col-date" data-i18n="files.table.expires">Expires</th>
+                                <th class="col-password" data-i18n="files.table.passwordProtected">Password</th>
+                                <th class="col-url" data-i18n="files.table.url">Public URL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="shares-list-body"></tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+
     </div>
 
     <!-- Modals -->
@@ -108,6 +146,30 @@
             <div class="button-group" style="margin-top: 1.5rem; display: none;" id="upload-modal-footer">
                 <button id="close-upload-modal-btn" class="primary" data-i18n="files.modals.uploadProgress.doneButton">Done</button>
             </div>
+        </div>
+    </div>
+
+    <div id="share-file-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 data-i18n="files.modals.share.title">Share File</h3>
+                <span class="close-button" data-modal-id="share-file-modal">&times;</span>
+            </div>
+            <p id="share-file-info"></p>
+            <form id="share-file-form">
+                <div class="form-group">
+                    <label for="share-password" data-i18n="files.modals.share.passwordLabel">Password (optional)</label>
+                    <input type="password" id="share-password" data-i18n-placeholder="files.modals.share.passwordPlaceholder" placeholder="Leave blank for no password">
+                </div>
+                <div class="form-group">
+                    <label for="share-expiry" data-i18n="files.modals.share.expiryLabel">Expires in (hours, optional)</label>
+                    <input type="number" id="share-expiry" min="1" step="1" data-i18n-placeholder="files.modals.share.expiryPlaceholder" placeholder="e.g., 24 for one day">
+                </div>
+                <div class="button-group">
+                    <button type="button" class="secondary close-button" data-modal-id="share-file-modal" data-i18n="common.cancel">Cancel</button>
+                    <button type="submit" class="primary" data-i18n="files.modals.share.shareButton">Create Share Link</button>
+                </div>
+            </form>
         </div>
     </div>
 

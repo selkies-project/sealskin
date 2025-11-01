@@ -27,6 +27,8 @@ The server operates on two distinct network ports to create a clear separation b
 **How it Works:**
 When a user connects to a session, the proxy authenticates their connection, establishes a secure session cookie, and then transparently forwards all subsequent HTTP and WebSocket traffic to the isolated backend application container. This ensures that the internal application network is never exposed to the outside world.
 
+In addition to proxying live sessions, this port also handles the public file sharing feature. It serves shared files, provides a password prompt for protected links, and manages temporary download tokens, all without requiring user authentication.
+
 ## Core Functionality
 
 ### End-to-End Encrypted API

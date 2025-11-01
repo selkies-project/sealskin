@@ -3,6 +3,7 @@ import json
 import os
 import shutil
 import uuid
+import hashlib
 import time
 import secrets
 import yaml
@@ -42,12 +43,14 @@ APP_STORES: List[AppStore] = []
 APP_TEMPLATES: Dict[str, Dict] = {}
 PROVIDER_CACHE: Dict[str, DockerProvider] = {}
 AVAILABLE_GPUS: List[Dict] = []
+PUBLIC_SHARES_METADATA: Dict[str, PublicShareMetadata] = {}
 IMAGE_METADATA: Dict[str, Dict] = {}
 DELETION_TASKS: Dict[str, Dict] = {}
 PULL_STATUS: Dict[str, str] = {}
 SYSTEM_STATS_CACHE: Dict[str, any] = {"data": None, "timestamp": 0}
 CPU_MODEL: str = "Unknown"
 PATH_PREFIX_MAP: Dict[str, str] = {}
+METADATA_LOCK = asyncio.Lock()
 
 try:
     with open(settings.server_private_key_path, "rb") as f:
@@ -546,6 +549,8 @@ async def lifespan(app: FastAPI):
     os.makedirs(settings.autostart_cache_path, exist_ok=True, mode=0o700)
     os.makedirs(settings.storage_path, exist_ok=True, mode=0o755)
     os.makedirs(os.path.join(settings.storage_path, "sealskin_ephemeral"), exist_ok=True, mode=0o700)
+    os.makedirs(settings.public_storage_path, exist_ok=True, mode=0o700)
+    load_public_shares_metadata()
     await _detect_docker_path_prefixes()
     _get_cpu_model()
     user_manager.load_users_and_groups()
@@ -553,7 +558,6 @@ async def lifespan(app: FastAPI):
     load_app_templates()
     detect_gpus()
 
-    # NEW: Perform initial population of the entire autostart script cache
     logger.info("Performing initial population of autostart script cache...")
     await _update_all_autostart_caches()
     logger.info("Initial autostart script cache population complete.")
@@ -565,19 +569,76 @@ async def lifespan(app: FastAPI):
     logger.info("Image metadata cache populated.")
 
     update_task = None
+    cleanup_task = None
     if settings.auto_update_apps:
-        # MODIFIED: Call the renamed background job
         update_task = asyncio.create_task(background_update_job())
+    cleanup_task = asyncio.create_task(background_share_cleanup_job())
     yield
     logger.info("API server shutting down...")
     if update_task:
         update_task.cancel()
+    if cleanup_task:
+        cleanup_task.cancel()
     try:
+        tasks_to_await = []
         if update_task:
-            await update_task
+            tasks_to_await.append(update_task)
+        if cleanup_task:
+            tasks_to_await.append(cleanup_task)
+        if tasks_to_await:
+            await asyncio.gather(*tasks_to_await)
     except asyncio.CancelledError:
         logger.info("Background tasks successfully cancelled.")
 
+def load_public_shares_metadata():
+    """Loads public share metadata from the YAML file into memory."""
+    global PUBLIC_SHARES_METADATA
+    if not os.path.exists(settings.public_shares_metadata_path):
+        PUBLIC_SHARES_METADATA = {}
+        return
+    try:
+        with open(settings.public_shares_metadata_path, "r") as f:
+            data = yaml.safe_load(f) or {}
+            PUBLIC_SHARES_METADATA = {
+                share_id: PublicShareMetadata(**metadata)
+                for share_id, metadata in data.items()
+            }
+        logger.info(f"Loaded {len(PUBLIC_SHARES_METADATA)} public share(s) from metadata file.")
+    except (IOError, yaml.YAMLError, ValidationError) as e:
+        logger.error(f"Error loading public shares metadata: {e}")
+        PUBLIC_SHARES_METADATA = {}
+
+async def save_public_shares_metadata():
+    """Saves the in-memory public share metadata to the YAML file."""
+    async with METADATA_LOCK:
+        try:
+            data_to_dump = {
+                share_id: metadata.dict(exclude_none=True)
+                for share_id, metadata in PUBLIC_SHARES_METADATA.items()
+            }
+            with tempfile.NamedTemporaryFile('w', delete=False, dir=os.path.dirname(settings.public_shares_metadata_path)) as tf:
+                yaml.dump(data_to_dump, tf, sort_keys=False)
+                temp_path = tf.name
+            shutil.move(temp_path, settings.public_shares_metadata_path)
+        except IOError as e:
+            logger.error(f"Failed to save public shares metadata: {e}")
+
+async def background_share_cleanup_job():
+    """Periodically scans for and deletes expired public shares."""
+    while True:
+        await asyncio.sleep(settings.share_cleanup_interval_seconds)
+        now = time.time()
+        expired_ids = [share_id for share_id, meta in PUBLIC_SHARES_METADATA.items() if meta.expiry_timestamp and meta.expiry_timestamp < now]
+        if not expired_ids: continue
+        logger.info(f"Found {len(expired_ids)} expired share(s) to clean up.")
+        for share_id in expired_ids:
+            if public_file_path := os.path.join(settings.public_storage_path, share_id):
+                if os.path.exists(public_file_path):
+                    try: os.remove(public_file_path)
+                    except OSError as e: logger.error(f"Error deleting expired share file for {share_id}: {e}")
+            del PUBLIC_SHARES_METADATA[share_id]
+        await save_public_shares_metadata()
+        logger.info("Expired share cleanup complete.")
 api_app = FastAPI(title="SealSkin API", lifespan=lifespan)
 
 
@@ -671,6 +732,15 @@ async def verify_persistent_storage_enabled(user: dict = Depends(verify_token)) 
         )
     return user
 
+async def verify_public_sharing_enabled(user: dict = Depends(verify_persistent_storage_enabled)) -> dict:
+    """Verifies that the user is an admin or has public sharing enabled."""
+    if user.get("is_admin"):
+        return user
+    if user.get("effective_settings", {}).get("public_sharing", False):
+        return user
+    raise HTTPException(
+        status_code=403, detail="Public file sharing is disabled for this account."
+    )
 
 @api_app.post("/api/handshake/initiate", response_model=HandshakeInitiateResponse)
 async def handshake_initiate():
@@ -2089,6 +2159,78 @@ async def finalize_upload_to_dir(
 
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
+
+@files_router.post("/share", response_model=PublicShareInfo)
+async def create_public_share(
+    decrypted_body: dict = Depends(get_decrypted_request_body),
+    user: dict = Depends(verify_public_sharing_enabled),
+):
+    try:
+        req = ShareFileRequest(**decrypted_body)
+        username = user["username"]
+        
+        source_path = _get_validated_path(username, req.home_dir, req.path)
+        if not source_path.is_file():
+            raise HTTPException(status_code=400, detail="Path does not point to a file.")
+
+        share_id = str(uuid.uuid4())
+        dest_path = os.path.join(settings.public_storage_path, share_id)
+        
+        await asyncio.to_thread(shutil.copy, source_path, dest_path)
+        
+        stat_info = source_path.stat()
+        
+        password_hash = None
+        if req.password:
+            password_hash = hashlib.sha256(req.password.encode()).hexdigest()
+            
+        expiry_timestamp = None
+        if req.expiry_hours is not None and req.expiry_hours > 0:
+            expiry_timestamp = time.time() + (req.expiry_hours * 3600)
+
+        metadata = PublicShareMetadata(
+            owner_username=username,
+            original_filename=source_path.name,
+            created_at=time.time(),
+            size_bytes=stat_info.st_size,
+            password_hash=password_hash,
+            expiry_timestamp=expiry_timestamp,
+        )
+        
+        PUBLIC_SHARES_METADATA[share_id] = metadata
+        await save_public_shares_metadata()
+
+        return PublicShareInfo(
+            share_id=share_id,
+            original_filename=metadata.original_filename,
+            size_bytes=metadata.size_bytes,
+            created_at=metadata.created_at,
+            expiry_timestamp=metadata.expiry_timestamp,
+            has_password=bool(metadata.password_hash),
+            url=f"/public/{share_id}"
+        )
+
+    except ValidationError as e:
+        raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
+    except Exception as e:
+        logger.error(f"Failed to create share for user '{user['username']}': {e}")
+        raise HTTPException(status_code=500, detail="Failed to create share.")
+
+@files_router.get("/shares", response_model=List[PublicShareInfo])
+async def list_public_shares(user: dict = Depends(verify_public_sharing_enabled)):
+    user_shares = [PublicShareInfo(share_id=sid, url=f"/public/{sid}", has_password=bool(meta.password_hash), **meta.dict()) for sid, meta in PUBLIC_SHARES_METADATA.items() if meta.owner_username == user["username"]]
+    return sorted(user_shares, key=lambda s: s.created_at, reverse=True)
+
+@files_router.delete("/share/{share_id}", status_code=204)
+async def delete_public_share(share_id: str, user: dict = Depends(verify_public_sharing_enabled)):
+    if (metadata := PUBLIC_SHARES_METADATA.get(share_id)) and metadata.owner_username == user["username"]:
+        if os.path.exists(public_file_path := os.path.join(settings.public_storage_path, share_id)):
+            try: os.remove(public_file_path)
+            except OSError as e: logger.error(f"Error deleting share file for {share_id}: {e}")
+        del PUBLIC_SHARES_METADATA[share_id]
+        await save_public_shares_metadata()
+        return Response(status_code=204)
+    raise HTTPException(status_code=404 if not metadata else 403, detail="Share not found or permission denied.")
 
 encrypted_router.include_router(admin_router)
 encrypted_router.include_router(homedir_router)

@@ -13,6 +13,15 @@
     height: 100vh;
 }
 
+.view-panel {
+    display: none;
+    width: 100%;
+}
+
+.view-panel.active {
+    display: flex;
+}
+
 .file-manager-header {
     display: flex;
     justify-content: space-between;
@@ -24,6 +33,11 @@
 }
 
 .header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.header-actions .default-actions {
     display: flex;
     gap: 1rem;
 }
@@ -90,6 +104,10 @@
 .col-name { width: 60%; }
 .col-size { width: 15%; text-align: right; }
 .col-modified { width: 25%; }
+.col-date { width: 20%; }
+.col-password { width: 10%; text-align: center; }
+.col-url { width: 30%; }
+.col-actions { width: 1%; white-space: nowrap; text-align: right; }
 
 .file-item-name {
     display: flex;
@@ -102,6 +120,25 @@
     font-size: 1.2rem;
 }
 .file-item-name i.fa-folder { color: var(--accent-primary); }
+
+.col-actions button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+}
+
+.share-url-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.share-url-cell input {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    flex-grow: 1;
+}
 
 .file-manager-footer {
     display: flex;

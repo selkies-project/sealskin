@@ -597,6 +597,7 @@ function getSettingsFromForm(formPrefix) {
     active: document.getElementById(`${formPrefix}Active`).checked,
     group: document.getElementById(`${formPrefix}Group`)?.value || 'none',
     persistent_storage: document.getElementById(`${formPrefix}PersistentStorage`).checked,
+    public_sharing: document.getElementById(`${formPrefix}PublicSharing`).checked,
     harden_container: document.getElementById(`${formPrefix}HardenContainer`).checked,
     harden_openbox: document.getElementById(`${formPrefix}HardenOpenbox`).checked,
     gpu: document.getElementById(`${formPrefix}Gpu`).checked,
@@ -611,6 +612,7 @@ function populateSettingsForm(formPrefix, settings) {
     document.getElementById(`${formPrefix}Group`).value = settings.group;
   }
   document.getElementById(`${formPrefix}PersistentStorage`).checked = settings.persistent_storage;
+  document.getElementById(`${formPrefix}PublicSharing`).checked = settings.public_sharing;
   document.getElementById(`${formPrefix}HardenContainer`).checked = settings.harden_container;
   document.getElementById(`${formPrefix}HardenOpenbox`).checked = settings.harden_openbox;
   document.getElementById(`${formPrefix}Gpu`).checked = settings.gpu;
@@ -776,7 +778,7 @@ async function handleLogin() {
       username: usernameInput.value.trim(),
       clientPrivateKey: clientPrivateKeyInput.value.trim(),
       serverPublicKey: serverPublicKeyInput.value.trim(),
-      searchEngineUrl: oldConfig?.searchEngineUrl || 'https://google.com/search?q=',
+      searchEngineUrl: oldConfig?.searchEngineUrl || 'https://google.com/search?q='
     };
     await chrome.storage.local.set({ sealskinConfig: config });
     await chrome.storage.local.remove('sealskinPendingConfig');
@@ -784,6 +786,8 @@ async function handleLogin() {
       method: 'POST',
       body: JSON.stringify({})
     });
+    config.userSettings = { ...statusData.settings, is_admin: statusData.is_admin };
+    await chrome.storage.local.set({ sealskinConfig: config });
     simpleConfigView.style.display = 'none';
     advancedConfigView.style.display = 'none';
     dashboardView.style.display = 'block';
