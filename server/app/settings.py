@@ -158,6 +158,12 @@ SETTING_DEFINITIONS = [
         "default": 600,
         "help": "How often to run the cleanup job for expired shares (in seconds).",
     },
+    {
+        "name": "sessions_db_path",
+        "type": "str",
+        "default": "/config/.config/sealskin/sessions.yml",
+        "help": "Path to the YAML file for session persistence.",
+    },
 ]
 
 

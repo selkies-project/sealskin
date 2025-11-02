@@ -3,6 +3,7 @@ import logging
 import asyncio
 import os
 import hashlib
+import base64
 import time
 import yaml
 
@@ -183,8 +184,14 @@ async def websocket_proxy(
     if query_params:
         uri += f"?{'&'.join(query_params)}"
 
+    additional_headers = {}
+    if "custom_user" in session and "password" in session:
+        auth_str = f"{session['custom_user']}:{session['password']}"
+        auth_b64 = base64.b64encode(auth_str.encode()).decode()
+        additional_headers["Authorization"] = f"Basic {auth_b64}"
+
     try:
-        async with websockets.connect(uri) as target_ws:
+        async with websockets.connect(uri, additional_headers=additional_headers) as target_ws:
             logger.info(f"[{session_id}] WS connection opened to {uri}")
 
             async def client_to_target():
@@ -256,10 +263,19 @@ async def http_reverse_proxy(
         query=query_params_bytes,
     )
 
+    req_headers = request.headers.raw
+    if "custom_user" in session and "password" in session:
+        auth_str = f"{session['custom_user']}:{session['password']}"
+        auth_b64 = base64.b64encode(auth_str.encode()).decode()
+        req_headers = list(req_headers)
+        req_headers.append(
+            (b"Authorization", f"Basic {auth_b64}".encode())
+        )
+
     rp_req = http_client.build_request(
         method=request.method,
         url=target_url,
-        headers=request.headers.raw,
+        headers=req_headers,
         content=await request.body(),
     )
     logger.debug(f"[{session_id}] Forwarding {request.method} to {rp_req.url}")

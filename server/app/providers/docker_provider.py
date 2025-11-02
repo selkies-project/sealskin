@@ -159,7 +159,7 @@ class DockerProvider(BaseProvider):
             )
 
         ip_address = await self._wait_for_container_ready(
-            container, session_id, env_vars.get("SUBFOLDER")
+            container, session_id, env_vars.get("SUBFOLDER"), env_vars
         )
 
         return {"instance_id": container.id, "ip": ip_address, "port": config["port"]}
@@ -168,9 +168,17 @@ class DockerProvider(BaseProvider):
         """Stops a running Docker container."""
         try:
             container = await asyncio.to_thread(self.client.containers.get, instance_id)
-            logger.info(f"Stopping container {container.short_id}...")
-            await asyncio.to_thread(container.stop, timeout=5)
-            logger.info(f"Stopped container {container.short_id}.")
+            if container.status == 'running':
+                logger.info(f"Stopping container {container.short_id}...")
+                await asyncio.to_thread(container.stop, timeout=5)
+                logger.info(f"Stopped container {container.short_id}.")
+            else:
+                logger.info(f"Container {container.short_id} is not running, removing it.")
+                try:
+                    await asyncio.to_thread(container.remove)
+                except APIError as e:
+                     if e.response.status_code != 409:
+                         raise
         except NotFound:
             logger.warning(
                 f"Attempted to stop container {instance_id}, but it was not found."
@@ -179,9 +187,16 @@ class DockerProvider(BaseProvider):
             logger.error(f"Error stopping container {instance_id}: {e}")
 
     async def _wait_for_container_ready(
-        self, container, session_id, subfolder, timeout=60
+        self, container, session_id, subfolder, env_vars, timeout=60
     ):
         import httpx
+        import base64
+
+        auth_header = None
+        if "CUSTOM_USER" in env_vars and "PASSWORD" in env_vars:
+            auth_str = f"{env_vars['CUSTOM_USER']}:{env_vars['PASSWORD']}"
+            auth_b64 = base64.b64encode(auth_str.encode()).decode()
+            auth_header = {"Authorization": f"Basic {auth_b64}"}
 
         start_time = time.time()
         while time.time() - start_time < timeout:
@@ -194,7 +209,7 @@ class DockerProvider(BaseProvider):
 
                 health_check_url = f"http://{ip_address}:{self.app_config['provider_config']['port']}{subfolder}"
                 async with httpx.AsyncClient(
-                    timeout=2.0, follow_redirects=True
+                    timeout=2.0, follow_redirects=True, headers=auth_header
                 ) as client:
                     response = await client.get(health_check_url)
                     if response.status_code == 200:

@@ -18,7 +18,7 @@ from contextlib import asynccontextmanager
 import httpx
 from collections import defaultdict
 import docker
-from docker.errors import DockerException
+from docker.errors import DockerException, NotFound
 
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -36,6 +36,7 @@ from . import user_manager
 
 logger = logging.getLogger(__name__)
 
+SESSIONS_LOCK = asyncio.Lock()
 SESSIONS_DB: Dict[str, Dict] = {}
 CRYPTO_SESSIONS: Dict[str, bytes] = {}
 INSTALLED_APPS: Dict[str, InstalledApp] = {}
@@ -50,6 +51,8 @@ PULL_STATUS: Dict[str, str] = {}
 SYSTEM_STATS_CACHE: Dict[str, any] = {"data": None, "timestamp": 0}
 CPU_MODEL: str = "Unknown"
 PATH_PREFIX_MAP: Dict[str, str] = {}
+DISCOVERED_API_PORT: int = settings.api_port
+DISCOVERED_SESSION_PORT: int = settings.session_port
 METADATA_LOCK = asyncio.Lock()
 
 try:
@@ -70,6 +73,36 @@ except FileNotFoundError as e:
 
 
 ALGORITHM = "RS256"
+
+async def save_sessions_to_disk():
+    """Saves the current session database to a file."""
+    async with SESSIONS_LOCK:
+        try:
+            os.makedirs(os.path.dirname(settings.sessions_db_path), exist_ok=True)
+            with tempfile.NamedTemporaryFile('w', delete=False, dir=os.path.dirname(settings.sessions_db_path)) as tf:
+                yaml.dump(SESSIONS_DB, tf, sort_keys=False)
+                temp_path = tf.name
+            shutil.move(temp_path, settings.sessions_db_path)
+            logger.info(f"Successfully saved {len(SESSIONS_DB)} session(s) to disk.")
+        except Exception as e:
+            logger.error(f"Failed to save sessions to disk: {e}")
+
+async def load_sessions_from_disk():
+    """Loads the session database from a file if it exists."""
+    global SESSIONS_DB
+    if not os.path.exists(settings.sessions_db_path):
+        logger.info("Session persistence file not found. Starting with an empty session database.")
+        return
+
+    async with SESSIONS_LOCK:
+        try:
+            with open(settings.sessions_db_path, "r") as f:
+                loaded_sessions = yaml.safe_load(f) or {}
+                SESSIONS_DB.update(loaded_sessions)
+                logger.info(f"Loaded {len(loaded_sessions)} session(s) from disk.")
+        except Exception as e:
+            logger.error(f"Failed to load sessions from disk: {e}")
+
 
 async def _fetch_and_cache_single_script(store_name: str, base_url: str, app_id: str):
     """Fetches and caches a single autostart script, respecting ETags."""
@@ -149,9 +182,9 @@ async def _update_all_autostart_caches():
         await asyncio.gather(*tasks)
     logger.info("Autostart script cache refresh complete.")
 
-async def _detect_docker_path_prefixes():
-    """If running in Docker, inspects self to find host mount paths."""
-    global PATH_PREFIX_MAP
+async def _inspect_self_container():
+    """If running in Docker, inspects self to find host mount paths and published ports."""
+    global PATH_PREFIX_MAP, DISCOVERED_API_PORT, DISCOVERED_SESSION_PORT
     if not os.path.exists("/var/run/docker.sock"):
         logger.info("Docker socket not found. Assuming running on host.")
         return
@@ -194,6 +227,22 @@ async def _detect_docker_path_prefixes():
     except Exception as e:
         logger.error(f"An unexpected error occurred during Docker self-inspection: {e}")
 
+    ports = container.attrs.get("NetworkSettings", {}).get("Ports", {})
+    if not ports:
+        logger.info(f"Container '{container.name}' has no port mappings to inspect.")
+    else:
+        api_internal = f"{settings.api_port}/tcp"
+        session_internal = f"{settings.session_port}/tcp"
+
+        if api_internal in ports and ports[api_internal]:
+            if host_port := ports[api_internal][0].get("HostPort"):
+                DISCOVERED_API_PORT = int(host_port)
+                logger.info(f"Discovered external API port mapping: {settings.api_port} -> {DISCOVERED_API_PORT}")
+
+        if session_internal in ports and ports[session_internal]:
+            if host_port := ports[session_internal][0].get("HostPort"):
+                DISCOVERED_SESSION_PORT = int(host_port)
+                logger.info(f"Discovered external Session port mapping: {settings.session_port} -> {DISCOVERED_SESSION_PORT}")
 
 def _translate_path_to_host(internal_path: str) -> str:
     """Translates a path inside this container to the corresponding host path."""
@@ -551,7 +600,29 @@ async def lifespan(app: FastAPI):
     os.makedirs(os.path.join(settings.storage_path, "sealskin_ephemeral"), exist_ok=True, mode=0o700)
     os.makedirs(settings.public_storage_path, exist_ok=True, mode=0o700)
     load_public_shares_metadata()
-    await _detect_docker_path_prefixes()
+    await load_sessions_from_disk()
+
+    if SESSIONS_DB:
+        logger.info("Checking for stale sessions from persistence file...")
+        stale_sessions = []
+        try:
+            docker_client = await asyncio.to_thread(docker.from_env)
+            for session_id, session_data in SESSIONS_DB.items():
+                try:
+                    await asyncio.to_thread(docker_client.containers.get, session_data["instance_id"])
+                except NotFound:
+                    stale_sessions.append(session_id)
+
+            if stale_sessions:
+                logger.info(f"Found {len(stale_sessions)} stale session(s) to remove.")
+                async with SESSIONS_LOCK:
+                    for session_id in stale_sessions:
+                        del SESSIONS_DB[session_id]
+                await save_sessions_to_disk()
+        except DockerException as e:
+            logger.error(f"Could not connect to Docker to clean up stale sessions: {e}")
+
+    await _inspect_self_container()
     _get_cpu_model()
     user_manager.load_users_and_groups()
     load_app_configs()
@@ -871,6 +942,7 @@ async def _stop_session(session_id: str):
             await provider.stop(session_data["instance_id"])
 
         host_mount_path = session_data.get("host_mount_path")
+        await save_sessions_to_disk()
         ephemeral_base_path = os.path.join(settings.storage_path, "sealskin_ephemeral")
         if host_mount_path and host_mount_path.startswith(ephemeral_base_path):
             if os.path.exists(host_mount_path):
@@ -908,10 +980,15 @@ async def _launch_common(
     subfolder = f"/{session_id}/"
     launch_context = None
 
+    custom_user = str(uuid.uuid4())
+    password = str(uuid.uuid4())
+
     final_env = {
         "SUBFOLDER": subfolder,
         "PUID": str(settings.puid),
         "PGID": str(settings.pgid),
+        "CUSTOM_USER": custom_user,
+        "PASSWORD": password,
     }
 
     template_name = app_config.app_template
@@ -1075,6 +1152,8 @@ async def _launch_common(
             "app_logo": app_config.logo,
             "host_mount_path": host_mount_path,
             "launch_context": launch_context,
+            "custom_user": custom_user,
+            "password": password,
         }
         logger.info(
             f"[{session_id}] Session ready for {username}. Proxying to {instance_details['ip']}:{instance_details['port']}"
@@ -1341,8 +1420,8 @@ async def get_management_data():
         "users": user_manager.get_all_users(),
         "groups": user_manager.get_all_groups(),
         "server_public_key": SERVER_PUBLIC_KEY_PEM,
-        "api_port": settings.api_port,
-        "session_port": settings.session_port,
+        "api_port": DISCOVERED_API_PORT,
+        "session_port": DISCOVERED_SESSION_PORT,
         "gpus": [
             GPUInfo(device=gpu["device"], driver=gpu["driver"])
             for gpu in AVAILABLE_GPUS
