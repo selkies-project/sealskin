@@ -114,6 +114,7 @@ const imageUpdateModalBody = document.getElementById('image-update-modal-body');
 const imageUpdateModalFooter = document.getElementById('image-update-modal-footer');
 let APP_TEMPLATE_SETTINGS;
 let appTemplateTabInitialized = false;
+let appLaboratoryTabInitialized = false;
 
 let adminData = {
   users: [],
@@ -150,10 +151,36 @@ let tableStates = {
     searchTerm: ''
   },
 };
+let labState = {
+    isEditing: false,
+    currentApp: null,
+    currentSessionId: null,
+    base64Icon: '',
+    isDirty: false
+};
 let currentAdminManagedUser = null;
 let currentAppForUpdateCheck = null;
 let installedAppsPollingInterval = null;
 
+async function formatLogoSrc(logoData) {
+  if (!logoData) {
+    return 'icons/icon128.png';
+  }
+  if (logoData.startsWith('http')) {
+    return logoData;
+  }
+  if (logoData.startsWith('/api/app_icon/')) {
+    try {
+      const response = await secureFetch(logoData, { method: 'GET' });
+      if (response && response.icon_data_b64) {
+        return `data:image/png;base64,${response.icon_data_b64}`;
+      }
+    } catch (error) {
+      console.error(`Failed to fetch secure icon for ${logoData}:`, error);
+    }
+  }
+  return 'icons/icon128.png';
+}
 
 function displayStatus(message, isError = false) {
   document.querySelectorAll('.status-toast').forEach(t => t.remove());
@@ -450,6 +477,237 @@ function initializeAppTemplatesTab() {
   appTemplateTabInitialized = true;
 }
 
+function initializeAppLaboratoryTab() {
+  if (appLaboratoryTabInitialized) return;
+
+  const labAppSelect = document.getElementById('lab-app-select');
+  const baseAppSelect = document.getElementById('lab-base-app-select');
+  const appNameInput = document.getElementById('lab-app-name');
+  const iconUploadInput = document.getElementById('lab-icon-upload');
+  const iconPreview = document.getElementById('lab-icon-preview');
+  const autostartScriptTextarea = document.getElementById('lab-autostart-script');
+  const usersInput = document.getElementById('lab-app-users');
+  const groupsInput = document.getElementById('lab-app-groups');
+  const launchBtn = document.getElementById('lab-launch-btn');
+  const launchBtnText = document.getElementById('lab-launch-btn-text');
+  const spinner = document.getElementById('lab-spinner');
+  const sessionFrame = document.getElementById('lab-session-frame');
+  const mainPlaceholder = document.getElementById('lab-main-placeholder');
+
+  function resetLabForm() {
+    labState = { isEditing: false, currentApp: null, currentSessionId: null, base64Icon: '', isDirty: false };
+    appNameInput.value = '';
+    appNameInput.disabled = false;
+    baseAppSelect.value = '';
+    baseAppSelect.disabled = false;
+    iconPreview.src = 'icons/icon128.png';
+    autostartScriptTextarea.value = '';
+    usersInput.value = 'all';
+    groupsInput.value = 'all';
+    document.getElementById('lab-form').reset();
+    labAppSelect.value = 'new';
+  }
+
+  function loadLabData(app) {
+    labState.isEditing = true;
+    labState.currentApp = app;
+    labState.base64Icon = app.logo;
+
+    appNameInput.value = app.name;
+    appNameInput.disabled = true;
+    baseAppSelect.value = app.base_app_id;
+    baseAppSelect.disabled = true;
+    formatLogoSrc(app.logo).then(src => {
+        iconPreview.src = src;
+    });
+    usersInput.value = app.users.join(',');
+    groupsInput.value = app.groups.join(',');
+
+    let script = '';
+    if (app.provider_config && app.provider_config.custom_autostart_script_b64) {
+      try {
+        script = atob(app.provider_config.custom_autostart_script_b64);
+      } catch (e) {
+        console.error("Failed to decode autostart script:", e);
+      }
+    }
+    autostartScriptTextarea.value = script;
+  }
+
+  labAppSelect.addEventListener('change', (e) => {
+    const appId = e.target.value;
+    if (appId === 'new') {
+      resetLabForm();
+    } else {
+      const app = adminData.installedApps.find(a => a.id === appId);
+      if (app) loadLabData(app);
+    }
+  });
+
+  baseAppSelect.addEventListener('change', () => {
+    if (baseAppSelect.disabled) {
+      return;
+    }
+
+    const selectedBaseAppId = baseAppSelect.value;
+    const baseApp = selectedBaseAppId ? adminData.installedApps.find(app => app.id === selectedBaseAppId) : null;
+    let scriptContent = '';
+
+    if (baseApp) {
+      if (baseApp.provider_config && baseApp.provider_config.custom_autostart_script_b64) {
+        try {
+          scriptContent = atob(baseApp.provider_config.custom_autostart_script_b64);
+        } catch (e) {
+          console.error("Failed to decode base app autostart script:", e);
+        }
+      }
+      labState.base64Icon = baseApp.logo;
+      formatLogoSrc(baseApp.logo).then(src => {
+        iconPreview.src = src;
+      });
+    } else {
+      iconPreview.src = 'icons/icon128.png';
+      labState.base64Icon = '';
+    }
+
+    autostartScriptTextarea.value = scriptContent;
+  });
+
+  iconUploadInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === 'image/png') {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        labState.base64Icon = event.target.result;
+        iconPreview.src = labState.base64Icon;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  async function handleLabLaunch() {
+    if (labState.currentSessionId) {
+      try {
+        displayStatus(t('options.status.closingSession'));
+        await secureFetch(`/api/admin/sessions/${labState.currentSessionId}`, { method: 'DELETE' });
+        labState.currentSessionId = null;
+        sessionFrame.src = 'about:blank';
+        sessionFrame.style.display = 'none';
+        mainPlaceholder.style.display = 'block';
+        launchBtnText.textContent = t('options.appLaboratory.launchButton');
+        spinner.style.display = 'none';
+        launchBtn.disabled = false;
+        displayStatus(t('options.status.sessionClosed'));
+        await refreshAppData();
+        if (labState.currentApp) {
+            const appName = labState.currentApp.name;
+            await openTab('InstalledApps');
+            const searchInput = document.getElementById('installedApps-search');
+            searchInput.value = appName;
+            searchInput.dataset.transient = 'true';
+            searchInput.dispatchEvent(new Event('input'));
+        }
+        resetLabForm();
+      } catch (error) {
+        displayStatus(t('options.status.sessionCloseFailed', { error: error.message }), true);
+      }
+      return;
+    }
+
+    const isCreatingNew = labAppSelect.value === 'new';
+    if (!baseAppSelect.value || !appNameInput.value.trim()) {
+      displayStatus(t('options.appLaboratory.formInvalid'), true);
+      return;
+    }
+
+    launchBtn.disabled = true;
+    spinner.style.display = 'inline-block';
+    launchBtnText.textContent = t('options.appLaboratory.savingAndLaunching');
+
+    try {
+      let appToLaunch = labState.currentApp;
+
+      if (isCreatingNew) {
+        const payload = {
+          name: appNameInput.value,
+          base_app_id: baseAppSelect.value,
+          logo: labState.base64Icon.startsWith('data:image') 
+              ? labState.base64Icon.split(',')[1]
+              : labState.base64Icon,
+          custom_autostart_script_b64: btoa(autostartScriptTextarea.value),
+          users: usersInput.value.split(',').map(s => s.trim()).filter(Boolean),
+          groups: groupsInput.value.split(',').map(s => s.trim()).filter(Boolean),
+        };
+        appToLaunch = await secureFetch('/api/admin/apps/meta', { method: 'POST', body: JSON.stringify(payload) });
+        displayStatus(t('options.status.appCreated', { name: appToLaunch.name }));
+        populateLabDropdowns();
+        labAppSelect.value = appToLaunch.id;
+        labAppSelect.dispatchEvent(new Event('change'));
+      } else {
+        // TODO: Handle updating an existing meta-app if fields changed.
+        // For now, we assume settings are locked after creation for simplicity.
+      }
+
+      const launchPayload = { application_id: appToLaunch.id };
+      const { sealskinConfig } = await chrome.storage.local.get('sealskinConfig');
+      const launchResponse = await secureFetch('/api/admin/launch/meta_customize', { method: 'POST', body: JSON.stringify(launchPayload) });
+
+      const sessionUrlBase = `https://${sealskinConfig.serverIp}:${sealskinConfig.sessionPort}`;
+      const frameUrl = `${sessionUrlBase}${launchResponse.session_url}&embedded=true`;
+
+      labState.currentSessionId = launchResponse.session_url.substring(1).split('/?')[0];
+      sessionFrame.src = frameUrl;
+      sessionFrame.style.display = 'block';
+      mainPlaceholder.style.display = 'none';
+
+      launchBtnText.textContent = t('options.appLaboratory.closeButton');
+
+    } catch (error) {
+      displayStatus(t('options.status.launchFailed', { error: error.message }), true);
+      launchBtnText.textContent = t('options.appLaboratory.launchButton');
+    } finally {
+      spinner.style.display = 'none';
+      launchBtn.disabled = false;
+    }
+  }
+
+  launchBtn.addEventListener('click', handleLabLaunch);
+
+  populateLabDropdowns();
+  resetLabForm();
+  appLaboratoryTabInitialized = true;
+}
+
+function populateLabDropdowns() {
+  const labAppSelect = document.getElementById('lab-app-select');
+  const baseAppSelect = document.getElementById('lab-base-app-select');
+
+  if (!labAppSelect || !adminData.installedApps) return;
+
+  const currentLabApp = labAppSelect.value;
+  labAppSelect.innerHTML = `<option value="new">${t('options.appLaboratory.createNew')}</option>`;
+  adminData.installedApps.filter(app => app.is_meta_app).forEach(app => {
+    labAppSelect.add(new Option(app.name, app.id));
+  });
+  if ([...labAppSelect.options].some(o => o.value === currentLabApp)) {
+    labAppSelect.value = currentLabApp;
+  } else {
+    labAppSelect.value = 'new';
+    if (labState.isEditing) {
+        labAppSelect.dispatchEvent(new Event('change'));
+    }
+  }
+
+  const currentBaseApp = baseAppSelect.value;
+  baseAppSelect.innerHTML = `<option value="">${t('options.appLaboratory.selectBase')}</option>`;
+  adminData.installedApps.filter(app => !app.is_meta_app).forEach(app => {
+    baseAppSelect.add(new Option(app.name, app.id));
+  });
+  if ([...baseAppSelect.options].some(o => o.value === currentBaseApp)) {
+    baseAppSelect.value = currentBaseApp;
+  }
+}
+
 const tableRenderConfig = {
   admins: {
     tbody: document.querySelector('#admins-table tbody'),
@@ -535,15 +793,19 @@ const tableRenderConfig = {
         versionInfoHtml = `
                     <div class="sha-and-button">
                         <span>${sha}</span>
-                        <button class="secondary check-update-btn" data-appid="${item.id}" ${!item.image_sha ? `disabled title="${t('options.installedApps.notLocal')}"` : ''}>Check</button>
+                        ${!item.is_meta_app ?
+                            `<button class="secondary check-update-btn" data-appid="${item.id}" ${!item.image_sha ? `disabled title="${t('options.installedApps.notLocal')}"` : ''}>Check</button>`
+                            : ''}
                     </div>
                     <small>&nbsp;</small>
                 `;
       }
 
+      const labIcon = item.is_meta_app ? `<i class="fas fa-flask" style="color: var(--color-warning);" title="${t('options.installedApps.isLaboratory')}"></i>` : '';
+
       return `
             <tr>
-                <td>${item.name}</td>
+                <td><div style="display: flex; align-items: center; gap: 0.5rem;"><span>${item.name}</span>${labIcon}</div></td>
                 <td>${item.source}</td>
                 <td class="image-version-cell" title="${item.provider_config.image}">
                     ${versionInfoHtml}
@@ -973,7 +1235,7 @@ function renderUserSessions(sessions) {
                         <tr>
                             <td>
                                 <div style="display: flex; align-items: center; gap: 1rem;">
-                                    <img src="${s.app_logo}" alt="${s.app_name}" style="width: 32px; height: 32px; object-fit: contain;">
+                                    <img data-logo-src="${s.app_logo}" src="icons/icon128.png" alt="${s.app_name}" style="width: 32px; height: 32px; object-fit: contain;">
                                     <div>
                                         <span>${s.app_name}</span>
                                         ${contextHtml}
@@ -990,6 +1252,10 @@ function renderUserSessions(sessions) {
             </table>
         </div>
     `;
+    sessionsContainer.querySelectorAll('img[data-logo-src]').forEach(async (img) => {
+        const src = await formatLogoSrc(img.dataset.logoSrc);
+        if (src) img.src = src;
+    });
 }
 
 function renderAdminSessions(usersWithSessions) {
@@ -1022,7 +1288,7 @@ function renderAdminSessions(usersWithSessions) {
                                 <tr>
                                     <td>
                                         <div style="display: flex; align-items: center; gap: 1rem;">
-                                            <img src="${s.app_logo}" alt="${s.app_name}" style="width: 32px; height: 32px; object-fit: contain;">
+                                            <img data-logo-src="${s.app_logo}" src="icons/icon128.png" alt="${s.app_name}" style="width: 32px; height: 32px; object-fit: contain;">
                                             <div>
                                                 <span>${s.app_name}</span>
                                                 ${contextHtml}
@@ -1041,6 +1307,10 @@ function renderAdminSessions(usersWithSessions) {
             </div>
         </details>
     `).join('');
+    sessionsContainer.querySelectorAll('img[data-logo-src]').forEach(async (img) => {
+        const src = await formatLogoSrc(img.dataset.logoSrc);
+        if (src) img.src = src;
+    });
 }
 
 async function refreshAppData() {
@@ -1062,6 +1332,10 @@ async function refreshAppData() {
 
     renderAppStoreSelect();
     renderTable('installedApps');
+
+    if (appLaboratoryTabInitialized) {
+        populateLabDropdowns();
+    }
 
     const selectedStoreUrl = appStoreSelect.value;
     if (selectedStoreUrl) {
@@ -1139,7 +1413,7 @@ function renderAvailableAppsGrid() {
   if (filteredData.length > 0) {
     availableAppsContainer.innerHTML = filteredData.map(app => `
             <div class="app-card" data-appid="${app.id}" title="${t('options.modals.installAppTitle', { appName: app.name })}">
-                <img src="${app.logo}" alt="${app.name} logo" class="app-card-logo">
+                <img data-logo-src="${app.logo}" src="icons/icon128.png" alt="${app.name} logo" class="app-card-logo">
                 <div class="app-card-name">${app.name}</div>
             </div>
         `).join('');
@@ -1148,6 +1422,11 @@ function renderAvailableAppsGrid() {
   }
 
   paginationEl.innerHTML = '';
+
+  availableAppsContainer.querySelectorAll('img[data-logo-src]').forEach(async (img) => {
+      const src = await formatLogoSrc(img.dataset.logoSrc);
+      if (src) img.src = src;
+  });
 }
 
 function showInstallModal(appData, existingInstall = null) {
@@ -1355,6 +1634,16 @@ async function openTab(tabName) {
     installedAppsPollingInterval = null;
   }
 
+  const oldActiveTab = document.querySelector('.tab-content.active');
+  if (oldActiveTab && oldActiveTab.id === 'InstalledApps' && tabName !== 'InstalledApps') {
+      const searchInput = document.getElementById('installedApps-search');
+      if (searchInput.dataset.transient) {
+          searchInput.value = '';
+          searchInput.dispatchEvent(new Event('input'));
+          delete searchInput.dataset.transient;
+      }
+  }
+
   document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
   document.getElementById(tabName).classList.add('active');
@@ -1379,6 +1668,8 @@ async function openTab(tabName) {
     await renderPinnedBehaviorTable();
   } else if (tabName === 'AppTemplates') {
     initializeAppTemplatesTab();
+  } else if (tabName === 'AppLaboratory') {
+    initializeAppLaboratoryTab();
   }
 }
 
@@ -2154,16 +2445,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }
     } else if (button.classList.contains('warning')) {
-      const sourceApp = adminData.availableApps.find(a => a.id === app.source_app_id);
-      const appDataForModal = sourceApp || {
-        id: app.source_app_id,
-        name: app.name,
-        logo: app.logo,
-        url: app.url,
-        provider: app.provider,
-        provider_config: app.provider_config
-      };
-      showInstallModal(appDataForModal, app);
+      if (app.is_meta_app) {
+        await openTab('AppLaboratory');
+        const labAppSelect = document.getElementById('lab-app-select');
+        labAppSelect.value = app.id;
+        labAppSelect.dispatchEvent(new Event('change'));
+      } else {
+        const sourceApp = adminData.availableApps.find(a => a.id === app.source_app_id);
+        const appDataForModal = sourceApp || {
+          id: app.source_app_id,
+          name: app.name,
+          logo: app.logo,
+          url: app.url,
+          provider: app.provider,
+          provider_config: app.provider_config
+        };
+        showInstallModal(appDataForModal, app);
+      }
     } else if (button.classList.contains('check-update-btn')) {
       showImageUpdateModal(app);
     }

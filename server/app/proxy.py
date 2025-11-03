@@ -236,12 +236,13 @@ async def http_reverse_proxy(
     target_ip = session["ip"]
     target_port = session["port"]
     initial_auth_token = request.query_params.get("access_token")
+    is_embedded = request.query_params.get("embedded") == "true"
 
-    if initial_auth_token and request.method == "GET":
+    if initial_auth_token and request.method == "GET" and not is_embedded:
         redirect_url = request.url.remove_query_params("access_token")
         response = RedirectResponse(url=str(redirect_url))
         logger.info(
-            f"[{session_id}] Initial auth: setting cookie and redirecting to {redirect_url}"
+            f"[{session_id}] Direct access auth: setting 'Lax' cookie and redirecting to {redirect_url}"
         )
         response.set_cookie(
             key=settings.session_cookie_name,
@@ -282,12 +283,23 @@ async def http_reverse_proxy(
 
     try:
         rp_resp = await http_client.send(rp_req, stream=True)
-        return StreamingResponse(
+
+        response = StreamingResponse(
             rp_resp.aiter_raw(),
             status_code=rp_resp.status_code,
             headers=rp_resp.headers,
             background=rp_resp.aclose,
         )
+        if initial_auth_token and is_embedded:
+            logger.info(f"[{session_id}] Embedded access auth: setting 'None' cookie.")
+            response.set_cookie(
+                key=settings.session_cookie_name,
+                value=initial_auth_token,
+                httponly=True,
+                secure=True,
+                samesite="none",
+            )
+        return response
     except httpx.ConnectError as e:
         logger.error(f"[{session_id}] Cannot connect to backend: {e}")
         return Response(

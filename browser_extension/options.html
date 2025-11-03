@@ -38,6 +38,10 @@
                     <i class="fas fa-store fa-fw"></i>
                     <span data-i18n="options.sidebar.appStore">App Store</span>
                 </button>
+                <button class="nav-link admin-nav-link" style="display:none;" data-tabname="AppLaboratory">
+                    <i class="fas fa-flask fa-fw"></i>
+                    <span data-i18n="options.sidebar.appLaboratory">App Laboratory</span>
+                </button>
                 <button class="nav-link admin-nav-link" style="display:none;" data-tabname="AppTemplates">
                     <i class="fas fa-file-code fa-fw"></i>
                     <span data-i18n="options.sidebar.appTemplates">App Templates</span>
@@ -522,6 +526,63 @@
                         <div id="template-form-general" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
                     </div>
                 </form>
+            </div>
+
+            <div id="AppLaboratory" class="tab-content">
+                <div class="lab-container">
+                    <aside class="lab-sidebar">
+                        <h3 data-i18n="options.appLaboratory.title" style="margin-top:0;">App Laboratory</h3>
+                        <form id="lab-form">
+                            <div class="form-group">
+                                <label for="lab-app-select" data-i18n="options.appLaboratory.selectApp">Select App to Customize</label>
+                                <select id="lab-app-select">
+                                    <option value="new" data-i18n="options.appLaboratory.createNew">-- Create New --</option>
+                                </select>
+                            </div>
+                            <hr class="nav-separator">
+                            <div class="form-group">
+                                <label for="lab-base-app-select" data-i18n="options.appLaboratory.baseApp">Base Application</label>
+                                <select id="lab-base-app-select" required></select>
+                                <p class="description" data-i18n="options.appLaboratory.baseAppDescription">The new app will inherit the image and provider settings from this app.</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="lab-app-name" data-i18n="options.appLaboratory.appName">App Name</label>
+                                <input type="text" id="lab-app-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="options.appLaboratory.appIcon">App Icon (PNG, 192x192 recommended)</label>
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <img id="lab-icon-preview" src="icons/icon128.png" alt="Icon Preview" class="lab-icon-preview">
+                                    <label for="lab-icon-upload" class="button secondary"><i class="fas fa-upload"></i> <span data-i18n="options.appLaboratory.uploadIcon">Upload</span></label>
+                                    <input type="file" id="lab-icon-upload" accept="image/png" style="display: none;">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="lab-autostart-script" data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</label>
+                                <textarea id="lab-autostart-script" rows="4" placeholder="program ${SEALSKIN_FILE:+&quot;$SEALSKIN_FILE&quot;} ${SEALSKIN_URL:+&quot;$SEALSKIN_URL&quot;}"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="lab-app-users" data-i18n="options.modals.allowedUsersLabel">Allowed Users</label>
+                                <input type="text" id="lab-app-users" value="all">
+                            </div>
+                            <div class="form-group">
+                                <label for="lab-app-groups" data-i18n="options.modals.allowedGroupsLabel">Allowed Groups</label>
+                                <input type="text" id="lab-app-groups" value="all">
+                            </div>
+
+                            <div class="button-group" style="margin-top: auto;">
+                                <button type="button" id="lab-launch-btn" class="primary" style="width: 100%;">
+                                    <span id="lab-launch-btn-text" data-i18n="options.appLaboratory.launchButton">Launch & Modify Home Directory</span>
+                                    <div id="lab-spinner" class="spinner-small" style="border-top-color: white; display: none;"></div>
+                                </button>
+                            </div>
+                        </form>
+                    </aside>
+                    <main class="lab-main">
+                        <p id="lab-main-placeholder" style="text-align: center; margin: auto; color: var(--text-muted);" data-i18n="options.appLaboratory.placeholder">The customization session will appear here.</p>
+                        <iframe id="lab-session-frame" class="lab-session-frame" style="display: none;"></iframe>
+                    </main>
+                </div>
             </div>
 
         </main>

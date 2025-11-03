@@ -66,6 +66,26 @@ let isSimpleLaunch = false;
 let selectedAppId = null;
 let launchProfileKey = 'workflow_profile_simple';
 
+async function formatLogoSrc(logoData) {
+  if (!logoData) {
+    return 'icons/icon128.png';
+  }
+  if (logoData.startsWith('http')) {
+    return logoData;
+  }
+  if (logoData.startsWith('/api/app_icon/')) {
+    try {
+      const response = await secureFetch(logoData, { method: 'GET' });
+      if (response && response.icon_data_b64) {
+        return `data:image/png;base64,${response.icon_data_b64}`;
+      }
+    } catch (error) {
+      console.error(`Failed to fetch secure icon for ${logoData}:`, error);
+    }
+  }
+  return 'icons/icon128.png';
+}
+
 async function getSessionTabMap() {
   const result = await chrome.storage.local.get('sessionTabMap');
   return result.sessionTabMap || {};
@@ -200,7 +220,7 @@ function renderActiveSessions(isFileContext) {
     }
 
     card.innerHTML = `
-            <img src="${session.app_logo}" class="session-card-logo" onerror="this.onerror=null; this.src='icons/icon128.png';">
+            <img data-logo-src="${session.app_logo}" src="icons/icon128.png" class="session-card-logo">
             <div class="session-card-info">
                 <div class="session-card-info-name">${session.app_name}</div>
                 <div class="session-card-info-time">Started ${timeAgo(session.created_at)}</div>
@@ -212,6 +232,11 @@ function renderActiveSessions(isFileContext) {
             </div>
         `;
     sessionsListContainer.appendChild(card);
+  });
+
+  sessionsListContainer.querySelectorAll('img[data-logo-src]').forEach(async (img) => {
+      const src = await formatLogoSrc(img.dataset.logoSrc);
+      if (src) img.src = src;
   });
 }
 
@@ -257,10 +282,14 @@ function renderAppCards(apps, defaultAppId = null) {
     card.className = 'app-card-popup';
     card.dataset.appid = app.id;
     card.innerHTML = `
-            <img src="${app.logo}" alt="${app.name} logo" onerror="this.onerror=null; this.src='icons/icon128.png';">
+            <img data-logo-src="${app.logo}" src="icons/icon128.png" alt="${app.name} logo">
             <span>${app.name}</span>
         `;
     card.addEventListener('click', () => handleAppSelection(app.id));
+    formatLogoSrc(app.logo).then(src => {
+        const img = card.querySelector('img');
+        if (img) img.src = src;
+    });
     return card;
   };
 
@@ -342,6 +371,22 @@ function updateDynamicForms() {
   const appHasStorage = selectedApp.home_directories;
   if (userHasStorage && appHasStorage) {
     homeDirFormGroup.classList.remove('hidden');
+    if (selectedApp.is_meta_app) {
+      const currentVal = homeDirSelect.value;
+      homeDirSelect.innerHTML = `
+          <option value="auto">${t('popup.launchView.autoHome')}</option>
+          <option value="cleanroom">${t('popup.launchView.cleanroom')}</option>
+      `;
+      if (currentVal === 'auto' || currentVal === 'cleanroom') {
+        homeDirSelect.value = currentVal;
+      } else {
+        homeDirSelect.value = 'auto';
+      }
+    } else {
+      if (homeDirSelect.options.length < 3 && homeDirs.length > 0) {
+        populateHomeDirDropdown();
+      }
+    }
   } else {
     homeDirFormGroup.classList.add('hidden');
   }
@@ -674,7 +719,7 @@ async function handleLaunch() {
         if (!selectedApp) throw new Error("Selected app not found for auto home generation.");
         const appNameSanitized = selectedApp.name.toLowerCase().replace(/[\s_]+/g, '-').replace(/[^a-z0-9-]/g, '');
         const autoHomeName = `auto-${appNameSanitized}`;
-        if (!homeDirs.includes(autoHomeName)) {
+        if (!homeDirs.includes(autoHomeName) && !selectedApp.is_meta_app) {
             setStatus(t('popup.status.creatingAutoHome'));
             await secureFetch('/api/homedirs', { method: 'POST', body: JSON.stringify({ home_name: autoHomeName }) });
             homeDirs.push(autoHomeName);

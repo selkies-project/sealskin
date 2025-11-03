@@ -117,6 +117,18 @@ SETTING_DEFINITIONS = [
         "help": "Base directory for user home directories.",
     },
     {
+        "name": "app_icons_path",
+        "type": "str",
+        "default": "/storage/sealskin_app_icons",
+        "help": "Directory for storing custom-uploaded application icons.",
+    },
+    {
+        "name": "home_templates_path",
+        "type": "str",
+        "default": "/storage/sealskin_home_templates",
+        "help": "Base directory for meta-app home directory templates.",
+    },
+    {
         "name": "container_config_path",
         "type": "str",
         "default": "/config",

@@ -16,6 +16,7 @@ class Application(BaseModel):
     dri3_support: bool
     url_support: bool
     extensions: List[str]
+    is_meta_app: bool = False
 
 class LaunchRequestSimple(BaseModel):
     application_id: str
@@ -102,6 +103,9 @@ class InstalledApp(BaseModel):
     provider_config: InstalledAppProviderConfig
     auto_update: bool = True
     app_template: str
+    is_meta_app: bool = False
+    base_app_id: Optional[str] = None
+    home_template_name: Optional[str] = None
 
 class InstalledAppWithStatus(InstalledApp):
     image_sha: Optional[str] = None
@@ -177,6 +181,19 @@ class CreateGroupRequest(BaseModel):
 
 class UpdateGroupRequest(BaseModel):
     settings: UserSettings
+
+class CreateMetaAppRequest(BaseModel):
+    name: str
+    base_app_id: str
+    logo: str
+    custom_autostart_script_b64: Optional[str] = None
+    users: List[str]
+    groups: List[str]
+
+class LaunchMetaCustomizeRequest(BaseModel):
+    application_id: str
+    language: Optional[str] = None
+    selected_gpu: Optional[str] = None
 
 class CreateAdminRequest(BaseModel):
     username: str

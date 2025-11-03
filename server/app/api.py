@@ -595,8 +595,10 @@ async def background_update_job():
 async def lifespan(app: FastAPI):
     logger.info("API server starting up...")
     os.makedirs(settings.upload_dir, exist_ok=True, mode=0o700)
+    os.makedirs(settings.app_icons_path, exist_ok=True, mode=0o700)
     os.makedirs(settings.autostart_cache_path, exist_ok=True, mode=0o700)
     os.makedirs(settings.storage_path, exist_ok=True, mode=0o755)
+    os.makedirs(settings.home_templates_path, exist_ok=True, mode=0o700)
     os.makedirs(os.path.join(settings.storage_path, "sealskin_ephemeral"), exist_ok=True, mode=0o700)
     os.makedirs(settings.public_storage_path, exist_ok=True, mode=0o700)
     load_public_shares_metadata()
@@ -899,6 +901,13 @@ def _get_unique_filename(directory: str, filename: str) -> str:
             return new_filename
         counter += 1
 
+def _sanitize_for_filename(name: str) -> str:
+    if not name:
+        return "unnamed"
+    s = name.lower().strip()
+    s = re.sub(r'[\s_]+', '-', s)
+    s = re.sub(r'[^a-z0-9-]', '', s)
+    return s[:50]
 
 @encrypted_router.post("/api/applications", response_model=List[Application])
 async def get_applications(user: dict = Depends(verify_token)):
@@ -921,6 +930,7 @@ async def get_applications(user: dict = Depends(verify_token)):
                     name=app.name,
                     logo=app.logo,
                     home_directories=app.home_directories,
+                    is_meta_app=app.is_meta_app,
                     nvidia_support=app.provider_config.nvidia_support,
                     dri3_support=app.provider_config.dri3_support,
                     url_support=app.provider_config.url_support,
@@ -968,6 +978,7 @@ async def _launch_common(
     file_bytes: Optional[bytes] = None,
     filename: Optional[str] = None,
     open_file_on_launch: bool = True,
+    forced_rw_mount: Optional[str] = None,
 ) -> dict:
     app_config = INSTALLED_APPS.get(application_id)
     if not app_config:
@@ -1013,6 +1024,51 @@ async def _launch_common(
     provider = DockerProvider(app_config.dict())
     volumes = {}
     host_mount_path = None
+    shared_files_path = None
+
+    is_persistent_launch = effective_settings.get("persistent_storage", False) and (home_name is None or home_name.lower() != "cleanroom")
+
+    if forced_rw_mount:
+         host_mount_path = forced_rw_mount
+         os.makedirs(host_mount_path, exist_ok=True, mode=0o700)
+    elif app_config.is_meta_app:
+         template_path = os.path.join(settings.home_templates_path, app_config.home_template_name)
+         if not os.path.isdir(template_path):
+             raise HTTPException(status_code=500, detail=f"Home directory template for meta app '{app_config.name}' not found on server.")
+
+         if is_persistent_launch:
+            sanitized_app_name = _sanitize_for_filename(app_config.name)
+            user_facing_dir_name = f"auto-{sanitized_app_name}"
+            host_mount_path = os.path.join(settings.storage_path, username, user_facing_dir_name)
+            if not os.path.exists(host_mount_path):
+                logger.info(f"[{session_id}] First launch for meta-app. Copying template '{app_config.home_template_name}' for user '{username}'.")
+                await asyncio.to_thread(shutil.copytree, template_path, host_mount_path, symlinks=True)
+         else:
+            host_mount_path = os.path.join(settings.storage_path, "sealskin_ephemeral", str(uuid.uuid4()))
+            logger.info(f"[{session_id}] Launching meta-app in cleanroom mode. Copying template '{app_config.home_template_name}' to ephemeral storage.")
+            await asyncio.to_thread(shutil.copytree, template_path, host_mount_path, symlinks=True)
+    else:
+        use_persistent_storage = (
+            effective_settings.get("persistent_storage", False)
+            and app_config.home_directories
+        )
+        if not use_persistent_storage:
+            home_name = "cleanroom"
+
+        if home_name and home_name.lower() != "cleanroom":
+            host_mount_path = os.path.abspath(
+                os.path.join(settings.storage_path, username, home_name)
+            )
+            if not os.path.isdir(host_mount_path):
+                raise HTTPException(
+                    status_code=404, detail=f"Home directory '{home_name}' not found."
+                )
+            shared_files_path = os.path.abspath(
+                os.path.join(settings.storage_path, username, "_sealskin_shared_files")
+            )
+            os.makedirs(shared_files_path, exist_ok=True, mode=0o755)
+        elif file_bytes and filename:
+            host_mount_path = os.path.join(settings.storage_path, "sealskin_ephemeral", str(uuid.uuid4()))
 
     gpu_config = None
     if selected_gpu and effective_settings.get("gpu", False):
@@ -1041,28 +1097,6 @@ async def _launch_common(
         if gpu_config["type"] == "dri3":
             final_env["DRI_NODE"] = gpu_config["device"]
             final_env["DRINODE"] = gpu_config["device"]
-
-    use_persistent_storage = (
-        effective_settings.get("persistent_storage", False)
-        and app_config.home_directories
-    )
-    if not use_persistent_storage:
-        home_name = "cleanroom"
-
-    if home_name and home_name.lower() != "cleanroom":
-        host_mount_path = os.path.abspath(
-            os.path.join(settings.storage_path, username, home_name)
-        )
-        if not os.path.isdir(host_mount_path):
-            raise HTTPException(
-                status_code=404, detail=f"Home directory '{home_name}' not found."
-            )
-        shared_files_path = os.path.abspath(
-            os.path.join(settings.storage_path, username, "_sealskin_shared_files")
-        )
-        os.makedirs(shared_files_path, exist_ok=True, mode=0o755)
-    elif file_bytes and filename:
-        host_mount_path = os.path.join(settings.storage_path, "sealskin_ephemeral", str(uuid.uuid4()))
 
     autostart_content = None
     if app_config.provider_config.custom_autostart_script_b64:
@@ -1109,7 +1143,7 @@ async def _launch_common(
             "bind": settings.container_config_path,
             "mode": "rw",
         }
-        if home_name and home_name.lower() != "cleanroom":
+        if shared_files_path:
             translated_shared_files_path = _translate_path_to_host(shared_files_path)
             volumes[translated_shared_files_path] = {
                 "bind": os.path.join(settings.container_config_path, "Desktop", "files"),
@@ -1117,7 +1151,7 @@ async def _launch_common(
             }
 
         if file_bytes and filename:
-            if home_name and home_name.lower() != "cleanroom":
+            if shared_files_path:
                 file_dest_dir = shared_files_path
             else:
                 file_dest_dir = os.path.join(host_mount_path, "Desktop", "files")
@@ -1456,6 +1490,93 @@ async def delete_app_store(store_name: str):
     save_app_stores()
     return Response(status_code=204)
 
+@admin_router.post("/apps/meta", response_model=InstalledApp, status_code=201)
+async def create_meta_app(decrypted_body: dict = Depends(get_decrypted_request_body)):
+    try:
+        req = CreateMetaAppRequest(**decrypted_body)
+        base_app = INSTALLED_APPS.get(req.base_app_id)
+        if not base_app:
+            raise HTTPException(status_code=404, detail=f"Base application with ID '{req.base_app_id}' not found.")
+
+        new_app_id = str(uuid.uuid4())
+        home_template_name = f"meta_{new_app_id}"
+
+        logo_url = base_app.logo  # Default
+
+        if req.logo:
+            try:
+                icon_data = base64.b64decode(req.logo)
+                icon_path = os.path.join(settings.app_icons_path, f"{new_app_id}.png")
+                with open(icon_path, "wb") as f:
+                    f.write(icon_data)
+                logo_url = f"/api/app_icon/{new_app_id}"
+                logger.info(f"Saved custom icon for new meta app {new_app_id}")
+            except (ValueError, TypeError, base64.binascii.Error):
+                logo_url = req.logo
+ 
+        template_dir = os.path.join(settings.home_templates_path, home_template_name)
+        os.makedirs(template_dir, exist_ok=True, mode=0o700)
+        
+        os.makedirs(os.path.join(template_dir, "Desktop", "files"), exist_ok=True, mode=0o755)
+
+        meta_app = base_app.copy(deep=True)
+        meta_app.id = new_app_id
+        meta_app.name = req.name
+        meta_app.logo = logo_url
+        meta_app.provider_config.custom_autostart_script_b64 = req.custom_autostart_script_b64
+        meta_app.is_meta_app = True
+        meta_app.base_app_id = req.base_app_id
+        meta_app.home_template_name = home_template_name
+        meta_app.users = req.users
+        meta_app.groups = req.groups
+        meta_app.auto_update = False
+        meta_app.source = base_app.name
+        meta_app.source_app_id = base_app.source_app_id
+        
+        INSTALLED_APPS[new_app_id] = meta_app
+        save_installed_apps()
+        
+        return meta_app
+
+    except ValidationError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error creating meta app: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error while creating meta app.")
+
+@encrypted_router.get("/api/app_icon/{app_id}")
+async def get_app_icon(app_id: str):
+    """Serves a custom-uploaded app icon, base64-encoded within a JSON object."""
+    icon_path = os.path.join(settings.app_icons_path, f"{app_id}.png")
+
+    if not os.path.exists(icon_path):
+        raise HTTPException(status_code=404, detail="Icon not found.")
+
+    try:
+        with open(icon_path, "rb") as f:
+            icon_data = f.read()
+        icon_data_b64 = base64.b64encode(icon_data).decode('utf-8')
+        return {"icon_data_b64": icon_data_b64}
+    except Exception as e:
+        logger.error(f"Failed to read or encode icon for app {app_id}: {e}")
+        raise HTTPException(status_code=500, detail="Error retrieving icon.")
+
+@admin_router.post("/launch/meta_customize", response_model=LaunchResponse)
+async def launch_meta_for_customization(
+    decrypted_body: dict = Depends(get_decrypted_request_body),
+    auth_user: dict = Depends(verify_admin),
+):
+    try:
+        req = LaunchMetaCustomizeRequest(**decrypted_body)
+        app_config = INSTALLED_APPS.get(req.application_id)
+        if not app_config or not app_config.is_meta_app:
+            raise HTTPException(status_code=400, detail="This endpoint is only for customizing meta applications.")
+        
+        template_path = os.path.join(settings.home_templates_path, app_config.home_template_name)
+        return await _launch_common(application_id=req.application_id, username=auth_user["username"], effective_settings=auth_user["effective_settings"], home_name=None, env_vars={}, language=req.language, selected_gpu=req.selected_gpu, forced_rw_mount=template_path)
+    except ValidationError as e:
+        raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
+
 @admin_router.get("/apps/available", response_model=List[AvailableApp])
 async def get_available_apps(url: str, store_name: str): # <-- ADD store_name parameter
     async def fetch_and_process_store(content: str, store_name_for_cache: str):
@@ -1584,6 +1705,15 @@ async def delete_installed_app(app_id: str):
         raise HTTPException(status_code=404, detail="Installed app not found.")
 
     app_to_delete = INSTALLED_APPS[app_id]
+
+    if app_to_delete.is_meta_app:
+        icon_path = os.path.join(settings.app_icons_path, f"{app_id}.png")
+        if os.path.exists(icon_path):
+            try:
+                os.remove(icon_path)
+                logger.info(f"Deleted custom icon for meta-app {app_id}")
+            except OSError as e:
+                logger.error(f"Failed to delete icon for meta-app {app_id}: {e}")
 
     del INSTALLED_APPS[app_id]
     save_installed_apps()
