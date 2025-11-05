@@ -88,6 +88,9 @@ class DockerProvider(BaseProvider):
         env_vars: Dict,
         volumes: Optional[Dict] = None,
         gpu_config: Optional[Dict] = None,
+        is_collaboration: bool = False,
+        master_token: Optional[str] = None,
+        initial_tokens: Optional[Dict] = None,
     ) -> Dict:
         """Launches a Docker container for the application."""
         config = self.app_config["provider_config"]
@@ -159,7 +162,13 @@ class DockerProvider(BaseProvider):
             )
 
         ip_address = await self._wait_for_container_ready(
-            container, session_id, env_vars.get("SUBFOLDER"), env_vars
+            container,
+            session_id,
+            env_vars.get("SUBFOLDER"),
+            env_vars,
+            is_collaboration=is_collaboration,
+            master_token=master_token,
+            initial_tokens=initial_tokens,
         )
 
         return {"instance_id": container.id, "ip": ip_address, "port": config["port"]}
@@ -187,7 +196,15 @@ class DockerProvider(BaseProvider):
             logger.error(f"Error stopping container {instance_id}: {e}")
 
     async def _wait_for_container_ready(
-        self, container, session_id, subfolder, env_vars, timeout=60
+        self,
+        container,
+        session_id,
+        subfolder,
+        env_vars,
+        timeout=60,
+        is_collaboration: bool = False,
+        master_token: Optional[str] = None,
+        initial_tokens: Optional[Dict] = None,
     ):
         import httpx
         import base64
@@ -198,6 +215,7 @@ class DockerProvider(BaseProvider):
             auth_b64 = base64.b64encode(auth_str.encode()).decode()
             auth_header = {"Authorization": f"Basic {auth_b64}"}
 
+        health_check_passed = False
         start_time = time.time()
         while time.time() - start_time < timeout:
             try:
@@ -207,16 +225,41 @@ class DockerProvider(BaseProvider):
                     await asyncio.sleep(0.5)
                     continue
 
-                health_check_url = f"http://{ip_address}:{self.app_config['provider_config']['port']}{subfolder}"
-                async with httpx.AsyncClient(
-                    timeout=2.0, follow_redirects=True, headers=auth_header
-                ) as client:
-                    response = await client.get(health_check_url)
-                    if response.status_code == 200:
-                        logger.info(
-                            f"[{session_id}] Health check passed for {health_check_url}"
-                        )
-                        return ip_address
+                if not health_check_passed:
+                    health_check_url = f"http://{ip_address}:{self.app_config['provider_config']['port']}{subfolder}"
+                    async with httpx.AsyncClient(
+                        timeout=2.0, follow_redirects=True, headers=auth_header
+                    ) as client:
+                        response = await client.get(health_check_url)
+                        if response.status_code == 200:
+                            logger.info(
+                                f"[{session_id}] Basic health check passed for {health_check_url}"
+                            )
+                            health_check_passed = True
+                            if not is_collaboration:
+                                return ip_address
+                        else:
+                            await asyncio.sleep(2)
+                            continue
+                
+                if health_check_passed and is_collaboration:
+                    logger.info(f"[{session_id}] Performing collaboration health check...")
+                    control_plane_url = f"http://{ip_address}:8083/tokens"
+                    try:
+                        async with httpx.AsyncClient(timeout=5.0) as client:
+                            response = await client.post(
+                                control_plane_url,
+                                json=initial_tokens,
+                                headers={"Authorization": f"Bearer {master_token}"}
+                            )
+                            if response.status_code == 200:
+                                logger.info(f"[{session_id}] Collaboration health check passed. Initial tokens set.")
+                                return ip_address
+                            else:
+                                logger.warning(f"[{session_id}] Collaboration health check failed with status {response.status_code}: {response.text}")
+                    except httpx.RequestError as e:
+                        logger.warning(f"[{session_id}] Collaboration health check connection error: {e}")
+
             except httpx.ConnectError:
                 logger.debug(
                     f"[{session_id}] Health check pending for {container.short_id}..."

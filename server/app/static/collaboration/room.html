@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaboration Room</title>
+    <link rel="stylesheet" href="room.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="content" class="content">
+        <iframe id="session-frame" src="{{IFRAME_SRC}}"></iframe>
+    </div>
+    
+    <div id="sidebar-toggle-handle" class="sidebar-toggle-handle">
+        <div class="toggle-indicator"></div>
+    </div>
+
+    <div id="sidebar" class="sidebar">
+    </div>
+
+    <div id="settings-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button id="settings-modal-close" class="modal-close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Settings will be implemented here later.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CLIENT_DATA -->
+    <script src="room.js"></script>
+</body>
+</html>

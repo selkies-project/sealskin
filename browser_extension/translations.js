@@ -499,6 +499,7 @@ const en = {
             launchingButton: 'Launching...',
             uploadingButton: 'Uploading...',
             autoHome: 'Auto (per-app persistence)',
+            collaborationMode: 'Collaborative Session',
         },
         sessionsView: {
             noSessions: 'No active sessions found.',

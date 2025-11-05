@@ -979,6 +979,7 @@ async def _launch_common(
     filename: Optional[str] = None,
     open_file_on_launch: bool = True,
     forced_rw_mount: Optional[str] = None,
+    launch_in_room_mode: bool = False,
 ) -> dict:
     app_config = INSTALLED_APPS.get(application_id)
     if not app_config:
@@ -991,6 +992,14 @@ async def _launch_common(
     subfolder = f"/{session_id}/"
     launch_context = None
 
+    master_token = None
+    controller_token = None
+    viewer_token = None
+    if launch_in_room_mode:
+        master_token = secrets.token_urlsafe(32)
+        controller_token = secrets.token_urlsafe(16)
+        viewer_token = secrets.token_urlsafe(16)
+
     custom_user = str(uuid.uuid4())
     password = str(uuid.uuid4())
 
@@ -1001,6 +1010,9 @@ async def _launch_common(
         "CUSTOM_USER": custom_user,
         "PASSWORD": password,
     }
+
+    if master_token:
+        final_env["SELKIES_MASTER_TOKEN"] = master_token
 
     template_name = app_config.app_template
     template = APP_TEMPLATES.get(template_name)
@@ -1171,9 +1183,22 @@ async def _launch_common(
                 launch_context = {"type": "file", "value": filename}
 
     try:
-        instance_details = await provider.launch(
-            session_id, final_env, volumes, gpu_config
-        )
+        provider_launch_kwargs = {
+            "session_id": session_id,
+            "env_vars": final_env,
+            "volumes": volumes,
+            "gpu_config": gpu_config
+        }
+        if launch_in_room_mode:
+            provider_launch_kwargs.update({
+                "is_collaboration": True,
+                "master_token": master_token,
+                "initial_tokens": {
+                    controller_token: {"role": "controller", "slot": None},
+                }
+            })
+
+        instance_details = await provider.launch(**provider_launch_kwargs)
         SESSIONS_DB[session_id] = {
             "instance_id": instance_details["instance_id"],
             "ip": instance_details["ip"],
@@ -1189,10 +1214,24 @@ async def _launch_common(
             "custom_user": custom_user,
             "password": password,
         }
+        if launch_in_room_mode:
+            SESSIONS_DB[session_id].update({
+                "is_collaboration": True,
+                "master_token": master_token,
+                "controller_token": controller_token,
+                "viewer_token": viewer_token,
+                "viewers": []
+            })
+
         logger.info(
             f"[{session_id}] Session ready for {username}. Proxying to {instance_details['ip']}:{instance_details['port']}"
         )
-        return {"session_url": f"/{session_id}/?access_token={access_token}"}
+        if launch_in_room_mode:
+            session_url = f"/room/{session_id}?access_token={access_token}&token={controller_token}"
+        else:
+            session_url = f"/{session_id}/?access_token={access_token}"
+
+        return {"session_url": session_url, "session_id": session_id}
     except Exception as e:
         if host_mount_path and host_mount_path.startswith(os.path.join(settings.storage_path, "sealskin_ephemeral")):
             shutil.rmtree(host_mount_path, ignore_errors=True)
@@ -1223,6 +1262,7 @@ async def launch_simple(
             {},
             req.language,
             req.selected_gpu,
+            launch_in_room_mode=req.launch_in_room_mode,
         )
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
@@ -1243,6 +1283,7 @@ async def launch_url(
             {"SEALSKIN_URL": req.url},
             req.language,
             req.selected_gpu,
+            launch_in_room_mode=req.launch_in_room_mode,
         )
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
@@ -1278,6 +1319,7 @@ async def launch_file(
             file_bytes,
             os.path.basename(req.filename),
             req.open_file_on_launch,
+            launch_in_room_mode=req.launch_in_room_mode,
         )
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
@@ -1302,8 +1344,13 @@ async def get_my_sessions(user: dict = Depends(verify_token)):
                     app_name=s_data["app_name"],
                     app_logo=s_data["app_logo"],
                     created_at=s_data["created_at"],
-                    session_url=f"/{sid}/?access_token={s_data['access_token']}",
+                    session_url=(
+                        f"/room/{sid}?token={s_data['controller_token']}"
+                        if s_data.get("is_collaboration")
+                        else f"/{sid}/?access_token={s_data['access_token']}"
+                    ),
                     launch_context=s_data.get("launch_context"),
+                    is_collaboration=s_data.get("is_collaboration", False),
                 )
             )
     return sorted(user_sessions, key=lambda s: s.created_at, reverse=True)
@@ -1715,6 +1762,15 @@ async def delete_installed_app(app_id: str):
             except OSError as e:
                 logger.error(f"Failed to delete icon for meta-app {app_id}: {e}")
 
+        if app_to_delete.is_meta_app and app_to_delete.home_template_name:
+            template_dir_path = os.path.join(settings.home_templates_path, app_to_delete.home_template_name)
+            if os.path.isdir(template_dir_path):
+                try:
+                    shutil.rmtree(template_dir_path)
+                    logger.info(f"Purged home template directory for meta-app {app_id}: {template_dir_path}")
+                except OSError as e:
+                    logger.error(f"Failed to purge home template for meta-app {app_id}: {e}")
+
     del INSTALLED_APPS[app_id]
     save_installed_apps()
     return Response(status_code=204)
@@ -1842,6 +1898,7 @@ async def get_all_sessions():
                 created_at=s_data["created_at"],
                 session_url=f"/{sid}/?access_token={s_data['access_token']}",
                 launch_context=s_data.get("launch_context"),
+                is_collaboration=s_data.get("is_collaboration", False),
             )
         )
 

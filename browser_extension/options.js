@@ -493,6 +493,7 @@ function initializeAppLaboratoryTab() {
   const spinner = document.getElementById('lab-spinner');
   const sessionFrame = document.getElementById('lab-session-frame');
   const mainPlaceholder = document.getElementById('lab-main-placeholder');
+  const updateBtn = document.getElementById('lab-update-btn');
 
   function resetLabForm() {
     labState = { isEditing: false, currentApp: null, currentSessionId: null, base64Icon: '', isDirty: false };
@@ -506,6 +507,7 @@ function initializeAppLaboratoryTab() {
     groupsInput.value = 'all';
     document.getElementById('lab-form').reset();
     labAppSelect.value = 'new';
+    updateBtn.disabled = true;
   }
 
   function loadLabData(app) {
@@ -532,6 +534,8 @@ function initializeAppLaboratoryTab() {
       }
     }
     autostartScriptTextarea.value = script;
+    labState.isDirty = false;
+    updateBtn.disabled = true;
   }
 
   labAppSelect.addEventListener('change', (e) => {
@@ -573,6 +577,17 @@ function initializeAppLaboratoryTab() {
     autostartScriptTextarea.value = scriptContent;
   });
 
+  function setLabDirty() {
+    if (labState.isEditing) {
+        labState.isDirty = true;
+        updateBtn.disabled = false;
+    }
+  }
+
+  autostartScriptTextarea.addEventListener('input', setLabDirty);
+  usersInput.addEventListener('input', setLabDirty);
+  groupsInput.addEventListener('input', setLabDirty);
+
   iconUploadInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file && file.type === 'image/png') {
@@ -580,10 +595,45 @@ function initializeAppLaboratoryTab() {
       reader.onload = (event) => {
         labState.base64Icon = event.target.result;
         iconPreview.src = labState.base64Icon;
+        setLabDirty();
       };
       reader.readAsDataURL(file);
     }
   });
+
+  async function handleLabUpdate() {
+    if (!labState.isEditing || !labState.currentApp || !labState.isDirty) {
+        return false;
+    }
+
+    displayStatus('Updating application settings...');
+    updateBtn.disabled = true;
+
+    try {
+        const payload = { ...labState.currentApp };
+        payload.logo = labState.base64Icon.startsWith('data:image') ? labState.base64Icon.split(',')[1] : labState.base64Icon;
+        payload.users = usersInput.value.split(',').map(s => s.trim()).filter(Boolean);
+        payload.groups = groupsInput.value.split(',').map(s => s.trim()).filter(Boolean);
+        payload.provider_config.custom_autostart_script_b64 = btoa(autostartScriptTextarea.value);
+
+        const updatedApp = await secureFetch(`/api/admin/apps/installed/${labState.currentApp.id}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+        });
+
+        const appIndex = adminData.installedApps.findIndex(a => a.id === updatedApp.id);
+        if (appIndex > -1) adminData.installedApps[appIndex] = updatedApp;
+        labState.currentApp = updatedApp;
+        labState.isDirty = false;
+        displayStatus(t('options.status.appSaved', { name: updatedApp.name, action: t('options.status.appSaveActions.updated') }));
+        return true;
+    } catch (error) {
+        displayStatus(t('options.status.appSaveFailed', { error: error.message }), true);
+        return false;
+    } finally {
+        updateBtn.disabled = !labState.isDirty;
+    }
+  }
 
   async function handleLabLaunch() {
     if (labState.currentSessionId) {
@@ -625,7 +675,7 @@ function initializeAppLaboratoryTab() {
     launchBtnText.textContent = t('options.appLaboratory.savingAndLaunching');
 
     try {
-      let appToLaunch = labState.currentApp;
+      let appToLaunch;
 
       if (isCreatingNew) {
         const payload = {
@@ -644,8 +694,14 @@ function initializeAppLaboratoryTab() {
         labAppSelect.value = appToLaunch.id;
         labAppSelect.dispatchEvent(new Event('change'));
       } else {
-        // TODO: Handle updating an existing meta-app if fields changed.
-        // For now, we assume settings are locked after creation for simplicity.
+        if (labState.isDirty) {
+            displayStatus('Saving application settings before launch...');
+            const success = await handleLabUpdate();
+            if (!success) {
+                throw new Error("Failed to save app settings before launching.");
+            }
+        }
+        appToLaunch = labState.currentApp;
       }
 
       const launchPayload = { application_id: appToLaunch.id };
@@ -672,6 +728,7 @@ function initializeAppLaboratoryTab() {
   }
 
   launchBtn.addEventListener('click', handleLabLaunch);
+  updateBtn.addEventListener('click', handleLabUpdate);
 
   populateLabDropdowns();
   resetLabForm();

@@ -212,6 +212,7 @@ function renderActiveSessions(isFileContext) {
 
     const actionButtonText = isFileContext ? t('common.sendFile') : t('common.reopen');
     const actionButtonClass = isFileContext ? 'secondary' : 'primary';
+    const roomIcon = session.is_collaboration ? `<i class="fas fa-users"></i>` : '';
 
     let contextHtml = '';
     if (session.launch_context) {
@@ -222,7 +223,7 @@ function renderActiveSessions(isFileContext) {
     card.innerHTML = `
             <img data-logo-src="${session.app_logo}" src="icons/icon128.png" class="session-card-logo">
             <div class="session-card-info">
-                <div class="session-card-info-name">${session.app_name}</div>
+                <div class="session-card-info-name">${session.app_name} ${roomIcon}</div>
                 <div class="session-card-info-time">Started ${timeAgo(session.created_at)}</div>
                 ${contextHtml}
             </div>
@@ -693,6 +694,8 @@ async function handleLaunch() {
     null :
     (gpuSelect.value === 'none' ? null : gpuSelect.value);
 
+  const collaborationMode = document.getElementById('collaborationMode').checked;
+
   if (isSimpleLaunch) {
     const simpleLaunchOptions = {
       appId: selectedAppId,
@@ -733,6 +736,7 @@ async function handleLaunch() {
       home_name: finalHomeName,
       language: languageSelect.value,
       selected_gpu: selectedGpuValue,
+      launch_in_room_mode: collaborationMode,
     };
 
     if (isSimpleLaunch) {
@@ -775,10 +779,10 @@ async function handleLaunch() {
       body: JSON.stringify(payload),
     });
 
-    const sessionId = data.session_url.substring(1).split('/?')[0];
+    const sessionId = data.session_id;
     chrome.runtime.sendMessage({
       type: 'createTabAndTrack',
-      payload: { sessionId, session_url: data.session_url }
+      payload: { sessionId: sessionId, session_url: data.session_url }
     });
     
     window.close();

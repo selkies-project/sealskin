@@ -23,6 +23,7 @@ class LaunchRequestSimple(BaseModel):
     home_name: Optional[str] = None
     language: Optional[str] = None
     selected_gpu: Optional[str] = None
+    launch_in_room_mode: bool = False
 
 class LaunchRequestURL(BaseModel):
     url: str
@@ -30,6 +31,7 @@ class LaunchRequestURL(BaseModel):
     home_name: Optional[str] = None
     language: Optional[str] = None
     selected_gpu: Optional[str] = None
+    launch_in_room_mode: bool = False
 
 class LaunchRequestFile(BaseModel):
     application_id: str
@@ -40,9 +42,11 @@ class LaunchRequestFile(BaseModel):
     home_name: Optional[str] = None
     language: Optional[str] = None
     selected_gpu: Optional[str] = None
+    launch_in_room_mode: bool = False
 
 class LaunchResponse(BaseModel):
     session_url: str
+    session_id: str
 
 class HandshakeInitiateResponse(BaseModel):
     nonce: str
@@ -213,6 +217,7 @@ class ActiveSessionInfo(BaseModel):
     created_at: float
     session_url: str
     launch_context: Optional[dict] = None
+    is_collaboration: bool = False
 
 class SendFileToSessionRequest(BaseModel):
     filename: str

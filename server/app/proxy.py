@@ -3,24 +3,26 @@ import logging
 import asyncio
 import os
 import hashlib
+import random
 import base64
 import time
 import yaml
+from uuid import UUID
 
 import httpx
 import websockets
 from contextlib import asynccontextmanager
 from starlette.websockets import WebSocket, WebSocketDisconnect
-from fastapi import FastAPI, Depends, HTTPException, Request, Response, Form
-
+from fastapi import FastAPI, HTTPException, Request, Response, Form
 from fastapi.responses import RedirectResponse, StreamingResponse, FileResponse, HTMLResponse
+from pydantic import ValidationError
 
-from .api import SESSIONS_DB
+from .api import SESSIONS_DB, save_sessions_to_disk
 from .models import PublicShareMetadata
 from .settings import settings
+from . import collaboration
 
 logger = logging.getLogger(__name__)
-from pydantic import ValidationError
 DOWNLOAD_TOKENS: dict = {}
 
 def _load_shares_from_file() -> dict:
@@ -52,6 +54,7 @@ async def lifespan(app: FastAPI):
 
 
 proxy_app = FastAPI(title="SealSkin Session Proxy", lifespan=lifespan)
+proxy_app.include_router(collaboration.router)
 
 @proxy_app.get("/public/download/{token}")
 async def download_shared_file(token: str):
@@ -129,14 +132,14 @@ async def access_public_share_post(share_id: str, password: str = Form(...)):
         else:
             return HTMLResponse(content="<h1>Incorrect Password</h1>", status_code=401)
 
-async def get_http_session(session_id: str, request: Request) -> dict:
-    token = request.query_params.get("access_token") or request.cookies.get(
-        settings.session_cookie_name
-    )
+async def get_http_session(session_id: UUID, request: Request) -> dict:
+    session_id_str = str(session_id)
+
+    token = request.query_params.get("access_token") or request.cookies.get(settings.session_cookie_name) 
     if not token:
         raise HTTPException(status_code=401, detail="Authentication token missing.")
 
-    session = SESSIONS_DB.get(session_id)
+    session = SESSIONS_DB.get(session_id_str)
     if not session or not secrets.compare_digest(
         token, session.get("access_token", "")
     ):
@@ -146,16 +149,15 @@ async def get_http_session(session_id: str, request: Request) -> dict:
 
     return session
 
+async def get_websocket_session(session_id: UUID, websocket: WebSocket) -> dict:
+    session_id_str = str(session_id)
 
-async def get_websocket_session(session_id: str, websocket: WebSocket) -> dict:
-    token = websocket.query_params.get("access_token") or websocket.cookies.get(
-        settings.session_cookie_name
-    )
+    token = websocket.query_params.get("access_token") or websocket.cookies.get(settings.session_cookie_name)
     if not token:
         await websocket.close(code=1008, reason="Authentication token missing.")
         raise WebSocketDisconnect(code=1008)
 
-    session = SESSIONS_DB.get(session_id)
+    session = SESSIONS_DB.get(session_id_str)
     if not session or not secrets.compare_digest(
         token, session.get("access_token", "")
     ):
@@ -164,29 +166,48 @@ async def get_websocket_session(session_id: str, websocket: WebSocket) -> dict:
 
     return session
 
-
-@proxy_app.websocket("/{session_id:str}/{path:path}")
+@proxy_app.websocket("/{session_id:uuid}/{path:path}")
 async def websocket_proxy(
     websocket: WebSocket,
-    session_id: str,
+    session_id: UUID,
     path: str,
-    session: dict = Depends(get_websocket_session),
 ):
-    await websocket.accept()
-    target_ip = session["ip"]
-    target_port = session["port"]
 
-    query_params = [
-        f"{k}={v}" for k, v in websocket.query_params.items() if k != "access_token"
-    ]
+    session_id_str = str(session_id)
+    session_data = SESSIONS_DB.get(session_id_str)
+
+    if not session_data:
+        await websocket.close(code=1008, reason="Session not found")
+        return
+
+    collab_token = websocket.query_params.get("token")
+    if not collab_token:
+        collab_token = websocket.cookies.get(f"collab_token_{session_id_str}")
+    main_access_token = websocket.cookies.get(settings.session_cookie_name) or websocket.query_params.get("access_token")
+    is_standard_auth = main_access_token and secrets.compare_digest(main_access_token, session_data.get("access_token", ""))
+    
+    is_collab_controller = False
+    is_collab_viewer = False
+    if session_data.get("is_collaboration"):
+        is_collab_controller = collab_token and collab_token == session_data.get("controller_token")
+        is_collab_viewer = collab_token and any(v['token'] == collab_token for v in session_data.get("viewers", []))
+
+    if not (is_standard_auth or is_collab_controller or is_collab_viewer):
+        await websocket.close(code=1008, reason="Authentication token missing or invalid.")
+        return
+
+    await websocket.accept()
+    target_ip = session_data["ip"]
+    target_port = session_data["port"]
+    query_params = [f"{k}={v}" for k, v in websocket.query_params.items()]
     target_path = f"/{session_id}/{path}"
     uri = f"ws://{target_ip}:{target_port}{target_path}"
     if query_params:
         uri += f"?{'&'.join(query_params)}"
 
     additional_headers = {}
-    if "custom_user" in session and "password" in session:
-        auth_str = f"{session['custom_user']}:{session['password']}"
+    if "custom_user" in session_data and "password" in session_data:
+        auth_str = f"{session_data['custom_user']}:{session_data['password']}"
         auth_b64 = base64.b64encode(auth_str.encode()).decode()
         additional_headers["Authorization"] = f"Basic {auth_b64}"
 
@@ -224,17 +245,39 @@ async def websocket_proxy(
 
 
 @proxy_app.api_route(
-    "/{session_id:str}/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
+    "/{session_id:uuid}/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
 async def http_reverse_proxy(
     request: Request,
-    session_id: str,
+    session_id: UUID,
     path: str,
-    session: dict = Depends(get_http_session),
 ):
+    session_id_str = str(session_id)
+    session_data = SESSIONS_DB.get(session_id_str)
+
+    if not session_data:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    is_initial_collab_auth = "token" in request.query_params
+    collab_token = request.query_params.get("token")
+    if not collab_token:
+        collab_token = request.cookies.get(f"collab_token_{session_id_str}")
+    main_access_token = request.query_params.get("access_token") or request.cookies.get(settings.session_cookie_name)
+
+    is_standard_auth = main_access_token and secrets.compare_digest(main_access_token, session_data.get("access_token", ""))
+    
+    is_collab_controller = False
+    is_collab_viewer = False
+    if session_data.get("is_collaboration"):
+        is_collab_controller = collab_token and collab_token == session_data.get("controller_token")
+        is_collab_viewer = collab_token and any(v['token'] == collab_token for v in session_data.get("viewers", []))
+
+    if not (is_standard_auth or is_collab_controller or is_collab_viewer):
+        raise HTTPException(status_code=401, detail="Authentication token missing or invalid.")
+
     http_client = request.app.state.http_client
-    target_ip = session["ip"]
-    target_port = session["port"]
+    target_ip = session_data["ip"]
+    target_port = session_data["port"]
     initial_auth_token = request.query_params.get("access_token")
     is_embedded = request.query_params.get("embedded") == "true"
 
@@ -253,9 +296,7 @@ async def http_reverse_proxy(
         )
         return response
 
-    query_params_bytes = "&".join(
-        [f"{k}={v}" for k, v in request.query_params.items() if k != "access_token"]
-    ).encode("utf-8")
+    query_params_bytes = request.url.query.encode("utf-8")
     target_url = httpx.URL(
         scheme="http",
         host=target_ip,
@@ -265,8 +306,8 @@ async def http_reverse_proxy(
     )
 
     req_headers = request.headers.raw
-    if "custom_user" in session and "password" in session:
-        auth_str = f"{session['custom_user']}:{session['password']}"
+    if "custom_user" in session_data and "password" in session_data:
+        auth_str = f"{session_data['custom_user']}:{session_data['password']}"
         auth_b64 = base64.b64encode(auth_str.encode()).decode()
         req_headers = list(req_headers)
         req_headers.append(
@@ -290,6 +331,16 @@ async def http_reverse_proxy(
             headers=rp_resp.headers,
             background=rp_resp.aclose,
         )
+        if is_initial_collab_auth and (is_collab_controller or is_collab_viewer):
+            logger.info(f"[{session_id_str}] Setting collaboration cookie for token {collab_token[:6]}...")
+            response.set_cookie(
+                key=f"collab_token_{session_id_str}",
+                value=collab_token,
+                path=f"/{session_id_str}/",
+                httponly=True,
+                secure=True,
+                samesite="none",
+           )
         if initial_auth_token and is_embedded:
             logger.info(f"[{session_id}] Embedded access auth: setting 'None' cookie.")
             response.set_cookie(

@@ -2,5 +2,6 @@
 !app/
 !app/providers
 !app/static
+!app/static/collaboration
 __pycache__/
 *.pyc
