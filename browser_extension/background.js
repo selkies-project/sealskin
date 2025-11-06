@@ -256,24 +256,38 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.type === 'focusOrCreateTab') {
     (async () => {
-      const { session } = request.payload;
+      const {
+        session
+      } = request.payload;
       const map = await getSessionTabMap();
       const tabId = map[session.session_id];
 
       if (tabId) {
         try {
-          const tab = await chrome.tabs.get(tabId);
-          await chrome.tabs.update(tab.id, { active: true });
-          await chrome.windows.update(tab.windowId, { focused: true });
+          const updatedTab = await chrome.tabs.update(tabId, {
+            active: true
+          });
+
+          await chrome.windows.update(updatedTab.windowId, {
+            focused: true
+          });
+
           return;
         } catch (e) {
-          console.log(`Tab ${tabId} not found, will create a new one.`);
+          console.log(`Tab ${tabId} could not be focused, will create a new one. Error: ${e.message}`);
+
+          delete map[session.session_id];
+          await saveSessionTabMap(map);
         }
       }
 
-      const { sealskinConfig } = await chrome.storage.local.get('sealskinConfig');
+      const {
+        sealskinConfig
+      } = await chrome.storage.local.get('sealskinConfig');
       const fullUrl = `${getSessionUrlBase(sealskinConfig)}${session.session_url}`;
-      const newTab = await chrome.tabs.create({ url: fullUrl });
+      const newTab = await chrome.tabs.create({
+        url: fullUrl
+      });
       map[session.session_id] = newTab.id;
       await saveSessionTabMap(map);
     })();
