@@ -85,7 +85,7 @@ async def collaborative_room(
         session_data.setdefault("viewers", []).append({"token": new_viewer_token, "slot": None, "username": f"User-{random.randint(100, 999)}"})
         
         all_tokens = {
-            controller_token: {"role": "controller", "slot": None}
+            controller_token: {"role": "controller", "slot": session_data.get("controller_slot")}
         }
         for viewer in session_data["viewers"]:
             all_tokens[viewer["token"]] = {"role": "viewer", "slot": viewer["slot"]}
@@ -249,7 +249,7 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                 await save_sessions_to_disk()
 
                 all_tokens = {
-                    session_data["controller_token"]: {"role": "controller", "slot": None}
+                    session_data["controller_token"]: {"role": "controller", "slot": session_data.get("controller_slot")}
                 }
                 for v in session_data["viewers"]:
                     all_tokens[v["token"]] = {"role": "viewer", "slot": v["slot"]}
@@ -273,7 +273,7 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
             logger.info(f"[{session_id_str}] Collab room is now empty and has been cleaned up.")
 
 async def broadcast_state(session_id: str):
-    """Sends the current state of viewers to the controller."""
+    """Sends the current state of users to the controller."""
     connections = ROOM_CONNECTIONS.get(session_id)
     if not connections or not connections.get('controller'):
         return
@@ -283,16 +283,23 @@ async def broadcast_state(session_id: str):
     if not session_data or not controller_conn:
         return
 
+    controller_info = {
+        "token": session_data.get("controller_token"),
+        "username": "Controller",
+        "slot": session_data.get("controller_slot"),
+        "online": True 
+    }
+
     online_viewer_tokens = set(connections.get('viewers', {}).keys())
-    viewers_with_status = []
+    users_with_status = [controller_info]
     for v in session_data.get("viewers", []):
         viewer_info = v.copy()
         viewer_info['online'] = v['token'] in online_viewer_tokens
-        viewers_with_status.append(viewer_info)
+        users_with_status.append(viewer_info)
         
     state_payload = {
         "type": "state_update",
-        "viewers": viewers_with_status
+        "viewers": users_with_status
     }
     try:
         await controller_conn['websocket'].send_json(state_payload)
@@ -300,23 +307,27 @@ async def broadcast_state(session_id: str):
         logger.warning(f"[{session_id}] Failed to broadcast state to controller: {e}")
 
 async def handle_assign_slot(session_id: str, viewer_token: str, slot: Optional[int]):
-    """Updates a viewer's slot, pushes changes to downstream, and broadcasts state."""
+    """Updates a user's slot, pushes changes to downstream, and broadcasts state."""
     session_data = SESSIONS_DB.get(session_id)
     if not session_data: return
 
-    viewer_found = False
-    for viewer in session_data.get("viewers", []):
-        if viewer["token"] == viewer_token:
-            viewer["slot"] = slot
-            viewer_found = True
-            break
+    user_found = False
+    if viewer_token == session_data.get("controller_token"):
+        session_data["controller_slot"] = slot
+        user_found = True
+    else:
+        for viewer in session_data.get("viewers", []):
+            if viewer["token"] == viewer_token:
+                viewer["slot"] = slot
+                user_found = True
+                break
     
-    if not viewer_found:
-        logger.warning(f"[{session_id}] Attempted to assign slot to non-existent viewer token.")
+    if not user_found:
+        logger.warning(f"[{session_id}] Attempted to assign slot to non-existent user token.")
         return
 
     all_tokens = {
-        session_data["controller_token"]: {"role": "controller", "slot": None}
+        session_data["controller_token"]: {"role": "controller", "slot": session_data.get("controller_slot")}
     }
     for v in session_data["viewers"]:
         all_tokens[v["token"]] = {"role": "viewer", "slot": v["slot"]}
@@ -327,7 +338,7 @@ async def handle_assign_slot(session_id: str, viewer_token: str, slot: Optional[
             res.raise_for_status()
         SESSIONS_DB[session_id] = session_data
         await save_sessions_to_disk()
-        logger.info(f"[{session_id}] Successfully assigned slot {slot} to viewer {viewer_token[:6]} and pushed update.")
+        logger.info(f"[{session_id}] Successfully assigned slot {slot} to user {viewer_token[:6]} and pushed update.")
         await broadcast_state(session_id)
     except Exception as e:
         logger.error(f"[{session_id}] Failed to update downstream tokens for slot assignment: {e}")
