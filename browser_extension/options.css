@@ -994,11 +994,13 @@ body:has(.popup-container) {
     align-items: center;
     margin-bottom: 0.75rem;
 }
+
 #save-options-container > div {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
+
 #save-options-container label {
     margin: 0;
     font-weight: normal;
@@ -1006,6 +1008,18 @@ body:has(.popup-container) {
     color: var(--text-secondary);
     cursor: pointer;
 }
+
+.popup-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.popup-checkbox-item label {
+    font-size: 0.85rem;
+}
+
 #launch-btn, #upload-and-launch-btn {
     padding: 0.6rem 1.2rem;
 }

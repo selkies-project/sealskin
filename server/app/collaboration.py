@@ -38,6 +38,14 @@ async def get_room_js():
         return FileResponse(path, media_type="application/javascript")
     raise HTTPException(status_code=404)
 
+@router.get("/room/translation.js", include_in_schema=False)
+async def get_translation_js():
+    """Serves the JavaScript file for translations."""
+    path = os.path.join(os.path.dirname(__file__), "static", "collaboration", "translation.js")
+    if os.path.exists(path):
+        return FileResponse(path, media_type="application/javascript")
+    raise HTTPException(status_code=404)
+
 @router.get("/room/{session_id:uuid}", response_class=HTMLResponse)
 async def collaborative_room(
     request: Request,

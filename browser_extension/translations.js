@@ -1139,6 +1139,7 @@ const es = {
             launchingButton: 'Iniciando...',
             uploadingButton: 'Subiendo...',
             autoHome: 'Automático (persistencia por aplicación)',
+            collaborationMode: 'Sesión colaborativa',
         },
         sessionsView: {
             noSessions: 'No se encontraron sesiones activas.',
@@ -1778,6 +1779,7 @@ const zh = {
             launchingButton: '启动中...',
             uploadingButton: '上传中...',
             autoHome: '自动 (按应用持久化)',
+            collaborationMode: '协作会话',
         },
         sessionsView: {
             noSessions: '未找到活跃会话。',
@@ -2417,6 +2419,7 @@ const hi = {
             launchingButton: 'लॉन्च हो रहा है...',
             uploadingButton: 'अपलोड हो रहा है...',
             autoHome: 'ऑटो (प्रति-ऐप दृढ़ता)',
+            collaborationMode: 'सहयोगी सत्र',
         },
         sessionsView: {
             noSessions: 'कोई सक्रिय सत्र नहीं मिला।',
@@ -3056,6 +3059,7 @@ const pt = {
             launchingButton: 'Iniciando...',
             uploadingButton: 'Enviando...',
             autoHome: 'Automático (persistência por aplicativo)',
+            collaborationMode: 'Sessão Colaborativa',
         },
         sessionsView: {
             noSessions: 'Nenhuma sessão ativa encontrada.',
@@ -3695,6 +3699,7 @@ const fr = {
             launchingButton: 'Lancement...',
             uploadingButton: 'Téléversement...',
             autoHome: 'Auto (persistance par application)',
+            collaborationMode: 'Session collaborative',
         },
         sessionsView: {
             noSessions: 'Aucune session active trouvée.',
@@ -4334,6 +4339,7 @@ const ru = {
             launchingButton: 'Запуск...',
             uploadingButton: 'Загрузка...',
             autoHome: 'Авто (постоянство для каждого приложения)',
+            collaborationMode: 'Совместная сессия',
         },
         sessionsView: {
             noSessions: 'Активных сессий не найдено.',
@@ -4973,6 +4979,7 @@ const de = {
             launchingButton: 'Wird gestartet...',
             uploadingButton: 'Wird hochgeladen...',
             autoHome: 'Automatisch (pro-App-Persistenz)',
+            collaborationMode: 'Kollaborative Sitzung',
         },
         sessionsView: {
             noSessions: 'Keine aktiven Sitzungen gefunden.',
@@ -5612,6 +5619,7 @@ const tr = {
             launchingButton: 'Başlatılıyor...',
             uploadingButton: 'Yükleniyor...',
             autoHome: 'Otomatik (uygulama başına kalıcılık)',
+            collaborationMode: 'Ortak Oturum',
         },
         sessionsView: {
             noSessions: 'Aktif oturum bulunamadı.',
@@ -6251,6 +6259,7 @@ const it = {
             launchingButton: 'Avvio in corso...',
             uploadingButton: 'Caricamento...',
             autoHome: 'Automatico (persistenza per app)',
+            collaborationMode: 'Sessione collaborativa',
         },
         sessionsView: {
             noSessions: 'Nessuna sessione attiva trovata.',
@@ -6890,6 +6899,7 @@ const nl = {
             launchingButton: 'Starten...',
             uploadingButton: 'Uploaden...',
             autoHome: 'Automatisch (persistentie per app)',
+            collaborationMode: 'Collaboratieve sessie',
         },
         sessionsView: {
             noSessions: 'Geen actieve sessies gevonden.',
@@ -7529,6 +7539,7 @@ const ar = {
             launchingButton: 'جاري التشغيل...',
             uploadingButton: 'جاري التحميل...',
             autoHome: 'تلقائي (استمرارية لكل تطبيق)',
+            collaborationMode: 'جلسة تعاونية',
         },
         sessionsView: {
             noSessions: 'لم يتم العثور على جلسات نشطة.',
@@ -8168,6 +8179,7 @@ const ko = {
             launchingButton: '시작 중...',
             uploadingButton: '업로드 중...',
             autoHome: '자동 (앱별 영속성)',
+            collaborationMode: '공동 작업 세션',
         },
         sessionsView: {
             noSessions: '활성 세션이 없습니다.',
@@ -8807,6 +8819,7 @@ const ja = {
             launchingButton: '起動中...',
             uploadingButton: 'アップロード中...',
             autoHome: '自動 (アプリごとの永続化)',
+            collaborationMode: '共同セッション',
         },
         sessionsView: {
             noSessions: 'アクティブなセッションが見つかりません。',
@@ -9446,6 +9459,7 @@ const vi = {
             launchingButton: 'Đang khởi chạy...',
             uploadingButton: 'Đang tải lên...',
             autoHome: 'Tự động (lưu trữ theo ứng dụng)',
+            collaborationMode: 'Phiên cộng tác',
         },
         sessionsView: {
             noSessions: 'Không tìm thấy phiên hoạt động nào.',
@@ -10085,6 +10099,7 @@ const th = {
             launchingButton: 'กำลังเปิด...',
             uploadingButton: 'กำลังอัปโหลด...',
             autoHome: 'อัตโนมัติ (คงอยู่ตามแอป)',
+            collaborationMode: 'เซสชันการทำงานร่วมกัน',
         },
         sessionsView: {
             noSessions: 'ไม่พบเซสชันที่ใช้งานอยู่',
@@ -10724,6 +10739,7 @@ const fil = {
             launchingButton: 'Inilulunsad...',
             uploadingButton: 'Nag-a-upload...',
             autoHome: 'Awtomatiko (pananatili bawat app)',
+            collaborationMode: 'Sesyon ng Pakikipagtulungan',
         },
         sessionsView: {
             noSessions: 'Walang nahanap na aktibong sesyon.',
@@ -11363,6 +11379,7 @@ const da = {
             launchingButton: 'Starter...',
             uploadingButton: 'Uploader...',
             autoHome: 'Automatisk (vedvarende pr. app)',
+            collaborationMode: 'Samarbejdssession',
         },
         sessionsView: {
             noSessions: 'Ingen aktive sessioner fundet.',

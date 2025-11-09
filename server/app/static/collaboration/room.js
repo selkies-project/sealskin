@@ -1,4 +1,22 @@
+function applyTranslations(scope, t) {
+  scope.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.innerHTML = t(key);
+  });
+  scope.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    el.placeholder = t(key);
+  });
+  scope.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.getAttribute('data-i18n-title');
+    el.title = t(key);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    const translator = getTranslator(navigator.language);
+    const t = translator.t;
+
     const COLLAB_DATA = window.COLLAB_DATA;
     if (!COLLAB_DATA) {
         console.error("Collaboration data not found.");
@@ -141,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const startMedia = async () => {
         if (!('VideoEncoder' in window && 'AudioEncoder' in window)) {
-            alert("Your browser does not support WebCodecs, which is required for this feature.");
+            alert(t('alerts.webcodecsUnsupported'));
             return false;
         }
         if (mediaInitialized) {
@@ -187,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return true;
         } catch (err) {
             console.error("Error getting user media:", err);
-            alert(`Could not access your camera or microphone: ${err.message}`);
+            alert(t('alerts.mediaAccessError', { message: err.message }));
             mediaInitialized = false;
             return false;
         }
@@ -375,8 +393,8 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.innerHTML = `
             <span class="username">${username}</span>
             <div class="remote-controls">
-                <button class="remote-control-btn mute-audio" data-token="${token}" title="Mute/Unmute Audio"><i class="fas fa-microphone"></i></button>
-                <button class="remote-control-btn mute-video" data-token="${token}" title="Mute/Unmute Video"><i class="fas fa-video"></i></button>
+                <button class="remote-control-btn mute-audio" data-token="${token}" title="${t('tooltips.toggleRemoteAudio')}"><i class="fas fa-microphone"></i></button>
+                <button class="remote-control-btn mute-video" data-token="${token}" title="${t('tooltips.toggleRemoteVideo')}"><i class="fas fa-video"></i></button>
             </div>
         `;
         
@@ -457,7 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(device.deviceId === 'default' || device.deviceId === '' || device.kind === 'audiooutput') return;
                 const option = document.createElement('option');
                 option.value = device.deviceId;
-                option.textContent = device.label || `${device.kind} device ${audioInputSelect.length + 1}`;
+                option.textContent = device.label || t('devices.unlabeledDevice', { kind: device.kind, number: (device.kind === 'audioinput' ? audioInputSelect.length : videoInputSelect.length) + 1 });
                 if (device.kind === 'audioinput') {
                     audioInputSelect.appendChild(option);
                 } else if (device.kind === 'videoinput') {
@@ -624,11 +642,11 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebarEl.innerHTML = `
             <div class="sidebar-content">
                 <div class="username-prompt">
-                    <h3>Welcome!</h3>
-                    <p>Please choose a username to join the session.</p>
+                    <h3>${t('usernamePrompt.title')}</h3>
+                    <p>${t('usernamePrompt.description')}</p>
                     <form id="username-form">
-                        <input type="text" id="username-input" placeholder="Your Name" maxlength="25" required>
-                        <button type="submit">Join</button>
+                        <input type="text" id="username-input" placeholder="${t('usernamePrompt.placeholder')}" maxlength="25" required>
+                        <button type="submit">${t('usernamePrompt.joinButton')}</button>
                     </form>
                 </div>
             </div>`;
@@ -642,7 +660,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <input type="text" id="viewer-link-input" value="${COLLAB_DATA.viewerJoinUrl}" readonly>
                 <button id="copy-link-btn"><i class="fas fa-copy"></i></button>
             </div>
-        ` : `<h2>SealSkin</h2>`;
+        ` : `<h2>${t('sidebar.title')}</h2>`;
 
         sidebarEl.innerHTML = `
             <div class="sidebar-header">
@@ -656,24 +674,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
             <div class="sidebar-media-controls">
-                <button id="toggle-mic-btn" class="control-btn" title="Mute/Unmute Microphone">
+                <button id="toggle-mic-btn" class="control-btn" title="${t('tooltips.toggleLocalMic')}">
                     <i class="fas fa-microphone"></i>
                 </button>
-                <button id="toggle-video-btn" class="control-btn" title="Start/Stop Webcam">
+                <button id="toggle-video-btn" class="control-btn" title="${t('tooltips.toggleLocalWebcam')}">
                     <i class="fas fa-video"></i>
                 </button>
                 <div class="iframe-audio-controls">
-                    <button id="iframe-mute-btn" class="control-btn" title="Mute/Unmute Session Audio">
+                    <button id="iframe-mute-btn" class="control-btn" title="${t('tooltips.toggleSessionAudio')}">
                         <i class="fas fa-volume-up"></i>
                     </button>
-                    <input type="range" id="iframe-volume-slider" min="0" max="1" step="0.01" value="1" title="Session Volume">
+                    <input type="range" id="iframe-volume-slider" min="0" max="1" step="0.01" value="1" title="${t('tooltips.sessionVolume')}">
                 </div>
             </div>
             <div id="sidebar-main-content" class="sidebar-content"></div>
             <div id="chat-reply-banner"></div>
             <div id="chat-form-container">
                 <form id="chat-form">
-                    <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off" maxlength="500">
+                    <input type="text" id="chat-input" placeholder="${t('chat.inputPlaceholder')}" autocomplete="off" maxlength="500">
                     <button type="submit"><i class="fas fa-paper-plane"></i></button>
                 </form>
             </div>`;
@@ -771,7 +789,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const createMessageHTML = (data) => {
         const isSelf = data.sender === username || (COLLAB_DATA.userRole === 'controller' && data.sender === 'Controller');
-        const senderName = isSelf ? 'You' : escapeHTML(data.sender);
+        const senderName = isSelf ? t('chat.selfUsername') : escapeHTML(data.sender);
         
         let replyHTML = '';
         if (data.replyTo && messageStore[data.replyTo]) {
@@ -800,7 +818,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="bubble">${linkedMessage}</div>
                     <div class="message-actions">
-                        <button class="reply-btn" title="Reply"><i class="fas fa-reply"></i></button>
+                        <button class="reply-btn" title="${t('tooltips.reply')}"><i class="fas fa-reply"></i></button>
                     </div>
                 </div>
             </div>
@@ -825,9 +843,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             let content = '';
             switch (data.type) {
-                case 'user_joined': content = `<b>${escapeHTML(data.username)}</b> has joined the room.`; break;
-                case 'user_left': content = `<b>${escapeHTML(data.username)}</b> has left the room.`; break;
-                case 'username_changed': content = `<b>${escapeHTML(data.old_username)}</b> is now known as <b>${escapeHTML(data.new_username)}</b>.`; break;
+                case 'user_joined': content = t('systemMessages.userJoined', { username: escapeHTML(data.username) }); break;
+                case 'user_left': content = t('systemMessages.userLeft', { username: escapeHTML(data.username) }); break;
+                case 'username_changed': content = t('systemMessages.usernameChanged', { old_username: escapeHTML(data.old_username), new_username: escapeHTML(data.new_username) }); break;
                 case 'gamepad_change': content = data.message; break;
             }
             msgEl.className = 'system-message';
@@ -896,8 +914,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (replyingTo) {
             banner.style.display = 'flex';
             banner.innerHTML = `
-                <span class="reply-target-text">Replying to <b>${escapeHTML(replyingTo.sender)}</b></span>
-                <button id="cancel-reply-btn" title="Cancel Reply">&times;</button>
+                <span class="reply-target-text">${t('chat.replyingTo', { sender: escapeHTML(replyingTo.sender) })}</span>
+                <button id="cancel-reply-btn" title="${t('tooltips.cancelReply')}">&times;</button>
             `;
             document.getElementById('cancel-reply-btn').addEventListener('click', cancelReply);
         } else {
@@ -1189,6 +1207,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Initializations ---
+    applyTranslations(document, t);
     initTheme();
     connectWebSocket();
     updateSpeakingIndicators();

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SealSkin Collaboration</title>
+    <title data-i18n="pageTitle"></title>
     <link rel="stylesheet" href="room.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -18,7 +18,7 @@
             <div id="local-user-container" class="video-container pinned">
                 <video id="local-video" autoplay muted playsinline></video>
                 <div class="video-overlay">
-                    <span class="username">You</span>
+                    <span class="username" data-i18n="localUsername"></span>
                 </div>
             </div>
         </div>
@@ -36,16 +36,16 @@
     <div id="settings-modal-overlay" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Settings</h2>
+                <h2 data-i18n="settings.title"></h2>
                 <button id="settings-modal-close" class="modal-close-button">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="settings-group">
-                    <label for="audio-input-select">Microphone</label>
+                    <label for="audio-input-select" data-i18n="settings.microphoneLabel"></label>
                     <select id="audio-input-select"></select>
                 </div>
                 <div class="settings-group">
-                    <label for="video-input-select">Webcam</label>
+                    <label for="video-input-select" data-i18n="settings.webcamLabel"></label>
                     <select id="video-input-select"></select>
                 </div>
             </div>
@@ -53,6 +53,7 @@
     </div>
 
     <!-- CLIENT_DATA -->
+    <script src="translation.js"></script>
     <script src="room.js"></script>
 </body>
 </html>
