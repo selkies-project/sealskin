@@ -12,12 +12,23 @@
         <iframe id="session-frame" src="{{IFRAME_SRC}}"></iframe>
     </div>
     
+    <div id="video-grid">
+        <div id="local-user-container" class="video-container">
+            <video id="local-video" autoplay muted playsinline></video>
+            <div class="video-overlay">
+                <span class="username">You</span>
+            </div>
+        </div>
+    </div>
+
     <div id="sidebar-toggle-handle" class="sidebar-toggle-handle">
         <div class="toggle-indicator"></div>
     </div>
 
     <div id="sidebar" class="sidebar">
     </div>
+
+    <div id="toast-container"></div>
 
     <div id="settings-modal-overlay" class="modal-overlay hidden">
         <div class="modal-content">
@@ -26,7 +37,14 @@
                 <button id="settings-modal-close" class="modal-close-button">&times;</button>
             </div>
             <div class="modal-body">
-                <p>Settings will be implemented here later.</p>
+                <div class="settings-group">
+                    <label for="audio-input-select">Microphone</label>
+                    <select id="audio-input-select"></select>
+                </div>
+                <div class="settings-group">
+                    <label for="video-input-select">Webcam</label>
+                    <select id="video-input-select"></select>
+                </div>
             </div>
         </div>
     </div>

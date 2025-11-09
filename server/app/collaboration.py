@@ -11,7 +11,7 @@ from typing import Optional
 import httpx
 from fastapi import APIRouter, HTTPException, Request, Query
 from fastapi.responses import RedirectResponse, HTMLResponse, FileResponse
-from starlette.websockets import WebSocket, WebSocketDisconnect
+from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
 from .api import SESSIONS_DB, save_sessions_to_disk
 from .settings import settings
@@ -151,19 +151,44 @@ async def broadcast_to_room(session_id: str, payload: dict):
     for viewer_conn in connections.get('viewers', {}).values():
         all_ws.append(viewer_conn['websocket'])
 
-    send_tasks = [ws.send_json(payload) for ws in all_ws]
+    send_tasks = [ws.send_json(payload) for ws in all_ws if ws.client_state == WebSocketState.CONNECTED]
     results = await asyncio.gather(*send_tasks, return_exceptions=True)
     
     for i, result in enumerate(results):
         if isinstance(result, Exception):
             logger.warning(f"[{session_id}] Failed to send message to a client: {result}")
 
+async def broadcast_binary_to_room(session_id: str, payload: bytes, sender_ws: WebSocket):
+    """Broadcasts a binary message to all connected clients in a room, except the sender."""
+    connections = ROOM_CONNECTIONS.get(session_id)
+    if not connections:
+        return
+
+    all_ws = []
+    if connections.get('controller') and connections['controller']['websocket'] != sender_ws:
+        all_ws.append(connections['controller']['websocket'])
+    
+    for viewer_conn in connections.get('viewers', {}).values():
+        if viewer_conn['websocket'] != sender_ws:
+            all_ws.append(viewer_conn['websocket'])
+
+    send_tasks = []
+    for ws in all_ws:
+        if ws.client_state == WebSocketState.CONNECTED:
+            send_tasks.append(ws.send_bytes(payload))
+    
+    if send_tasks:
+        results = await asyncio.gather(*send_tasks, return_exceptions=True)
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                logger.warning(f"[{session_id}] Failed to send binary message to a client: {result}")
+
 @router.websocket("/ws/room/{session_id:uuid}")
 async def room_websocket(websocket: WebSocket, session_id: UUID):
     session_id_str = str(session_id)
     token = websocket.query_params.get("token")
+    
     session_data = SESSIONS_DB.get(session_id_str)
-
     if not session_data or not session_data.get("is_collaboration"):
         await websocket.close(code=1008)
         return
@@ -189,53 +214,100 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                 username = v.get("username", f"User-{token[:6]}")
                 break
 
-    connection_info = {'websocket': websocket, 'username': username}
+    connection_info = {'websocket': websocket, 'username': username, 'token': token, 'has_joined': False}
     if is_controller:
         ROOM_CONNECTIONS[session_id_str]['controller'] = connection_info
+        join_payload = {"type": "user_joined", "username": "Controller", "timestamp": int(time.time() * 1000)}
+        await broadcast_to_room(session_id_str, join_payload)
+        connection_info['has_joined'] = True
     else:
         ROOM_CONNECTIONS[session_id_str]['viewers'][token] = connection_info
 
     await broadcast_state(session_id_str)
+    
     try:
         while True:
-            data = await websocket.receive_json()
+            message = await websocket.receive()
+            if "text" in message:
+                data = json.loads(message["text"])
+                action = data.get("action")
+                
+                data['sender_token'] = token
 
-            action = data.get("action")
-            if action == "assign_slot" and is_controller:
-                viewer_token = data.get("viewer_token")
-                slot = data.get("slot")
-                await handle_assign_slot(session_id_str, viewer_token, slot)
-            elif action == "set_username" and is_viewer:
-                new_username = data.get("username", "").strip()
-                if new_username and viewer_data_ref and 1 <= len(new_username) <= 25:
-                    old_username = viewer_data_ref.get("username")
-                    viewer_data_ref["username"] = new_username
-                    connection_info["username"] = new_username 
-                    username = new_username
-                    SESSIONS_DB[session_id_str] = session_data
-                    await save_sessions_to_disk()
-                    logger.info(f"[{session_id_str}] Viewer {token[:6]} changed name from '{old_username}' to '{new_username}'.")
-                    await broadcast_state(session_id_str)
+                if action == "assign_slot" and is_controller:
+                    viewer_token = data.get("viewer_token")
+                    slot = data.get("slot")
+                    await handle_assign_slot(session_id_str, viewer_token, slot)
+                elif action == "set_username" and is_viewer:
+                    new_username = data.get("username", "").strip()
+                    if new_username and viewer_data_ref and 1 <= len(new_username) <= 25:
+                        old_username = viewer_data_ref.get("username")
+                        viewer_data_ref["username"] = new_username
+                        connection_info["username"] = new_username 
+                        username = new_username
+                        SESSIONS_DB[session_id_str] = session_data
+                        await save_sessions_to_disk()
+                        logger.info(f"[{session_id_str}] Viewer {token[:6]} changed name from '{old_username}' to '{new_username}'.")
+                        
+                        if not connection_info.get('has_joined'):
+                            join_payload = {"type": "user_joined", "username": new_username, "timestamp": int(time.time() * 1000)}
+                            await broadcast_to_room(session_id_str, join_payload)
+                            connection_info['has_joined'] = True
+                        elif old_username != new_username:
+                            change_payload = {"type": "username_changed", "old_username": old_username, "new_username": new_username, "timestamp": int(time.time() * 1000)}
+                            await broadcast_to_room(session_id_str, change_payload)
 
-            elif action == "send_chat_message":
-                message_text = data.get("message", "").strip()
-                if message_text and 1 <= len(message_text) <= 500:
-                    chat_payload = {
-                        "type": "chat_message",
-                        "sender": username,
-                        "message": message_text,
-                        "timestamp": int(time.time() * 1000)
-                    }
-                    await broadcast_to_room(session_id_str, chat_payload)
+                        await broadcast_state(session_id_str)
 
-    except WebSocketDisconnect:
+                elif action == "send_chat_message":
+                    message_text = data.get("message", "").strip()
+                    if message_text and 1 <= len(message_text) <= 500:
+                        chat_payload = {
+                            "type": "chat_message",
+                            "sender": username,
+                            "message": message_text,
+                            "timestamp": int(time.time() * 1000),
+                            "messageId": f"{int(time.time() * 1000)}-{secrets.token_hex(4)}",
+                            "replyTo": data.get("replyTo")
+                        }
+                        await broadcast_to_room(session_id_str, chat_payload)
+                
+                elif action in ["video_state", "audio_state"]:
+                    await broadcast_to_room(session_id_str, {"type": "control", "payload": data})
+
+            elif "bytes" in message:
+                binary_data = message["bytes"]
+                if len(binary_data) > (1024 * 1024): # 1MB limit
+                    logger.warning(f"[{session_id_str}] Received oversized binary packet from {token[:6]}, discarding.")
+                    continue
+                
+                sender_token_bytes = token.encode('utf-8')
+                token_len = len(sender_token_bytes)
+                if token_len > 255: continue
+                
+                header = bytes([token_len]) + sender_token_bytes
+                full_payload = header + binary_data
+                await broadcast_binary_to_room(session_id_str, full_payload, websocket)
+
+    except (WebSocketDisconnect, RuntimeError):
+        logger.info(f"[{session_id_str}] WebSocket disconnected for {username} ({token[:6]}).")
+    except Exception as e:
+        logger.error(f"[{session_id_str}] Unhandled exception in websocket handler for {username} ({token[:6]}): {e}", exc_info=True)
+    finally:
+        current_username = connection_info.get("username")
+        has_joined = connection_info.get("has_joined")
+
+        # --- Robust cleanup logic ---
         if is_controller:
-            ROOM_CONNECTIONS[session_id_str]['controller'] = None
+            if ROOM_CONNECTIONS.get(session_id_str):
+                ROOM_CONNECTIONS[session_id_str]['controller'] = None
             logger.info(f"[{session_id_str}] Controller disconnected from collab room.")
         else:
-            ROOM_CONNECTIONS[session_id_str]['viewers'].pop(token, None)
+            if ROOM_CONNECTIONS.get(session_id_str) and ROOM_CONNECTIONS[session_id_str].get('viewers'):
+                ROOM_CONNECTIONS[session_id_str]['viewers'].pop(token, None)
             logger.info(f"[{session_id_str}] Viewer {token[:6]} disconnected from collab room.")
             
+            session_data = SESSIONS_DB.get(session_id_str)
             viewer_removed = False
             if session_data and "viewers" in session_data:
                 initial_count = len(session_data["viewers"])
@@ -266,28 +338,30 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                 except Exception as e:
                     logger.error(f"[{session_id_str}] Failed to push token update after viewer disconnect: {e}")
 
-            await broadcast_state(session_id_str)
+        if has_joined:
+            leave_payload = {"type": "user_left", "username": current_username, "timestamp": int(time.time() * 1000)}
+            await broadcast_to_room(session_id_str, leave_payload)
 
-        if not ROOM_CONNECTIONS[session_id_str].get('controller') and not ROOM_CONNECTIONS[session_id_str].get('viewers'):
+        await broadcast_state(session_id_str)
+
+        if ROOM_CONNECTIONS.get(session_id_str) and \
+           not ROOM_CONNECTIONS[session_id_str].get('controller') and \
+           not ROOM_CONNECTIONS[session_id_str].get('viewers'):
             ROOM_CONNECTIONS.pop(session_id_str, None)
             logger.info(f"[{session_id_str}] Collab room is now empty and has been cleaned up.")
 
 async def broadcast_state(session_id: str):
-    """Sends the current state of users to the controller."""
+    """Sends the current state of users to all clients."""
     connections = ROOM_CONNECTIONS.get(session_id)
-    if not connections or not connections.get('controller'):
-        return
-    
     session_data = SESSIONS_DB.get(session_id)
-    controller_conn = connections['controller']
-    if not session_data or not controller_conn:
+    if not connections or not session_data:
         return
 
     controller_info = {
         "token": session_data.get("controller_token"),
         "username": "Controller",
         "slot": session_data.get("controller_slot"),
-        "online": True 
+        "online": connections.get('controller') is not None
     }
 
     online_viewer_tokens = set(connections.get('viewers', {}).keys())
@@ -301,10 +375,8 @@ async def broadcast_state(session_id: str):
         "type": "state_update",
         "viewers": users_with_status
     }
-    try:
-        await controller_conn['websocket'].send_json(state_payload)
-    except Exception as e:
-        logger.warning(f"[{session_id}] Failed to broadcast state to controller: {e}")
+    await broadcast_to_room(session_id, state_payload)
+
 
 async def handle_assign_slot(session_id: str, viewer_token: str, slot: Optional[int]):
     """Updates a user's slot, pushes changes to downstream, and broadcasts state."""
@@ -338,7 +410,7 @@ async def handle_assign_slot(session_id: str, viewer_token: str, slot: Optional[
             res.raise_for_status()
         SESSIONS_DB[session_id] = session_data
         await save_sessions_to_disk()
-        logger.info(f"[{session_id}] Successfully assigned slot {slot} to user {viewer_token[:6]} and pushed update.")
+        logger.info(f"[{session_id}] Successfully assigned slot {slot} to user {viewer_token[:6]} and- pushed update.")
         await broadcast_state(session_id)
     except Exception as e:
         logger.error(f"[{session_id}] Failed to update downstream tokens for slot assignment: {e}")
