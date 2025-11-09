@@ -297,7 +297,21 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
         current_username = connection_info.get("username")
         has_joined = connection_info.get("has_joined")
 
-        # --- Robust cleanup logic ---
+        if not is_controller:
+            session_data = SESSIONS_DB.get(session_id_str)
+            if session_data:
+                disconnected_viewer = next((v for v in session_data.get("viewers", []) if v.get("token") == token), None)
+                if disconnected_viewer:
+                    assigned_slot = disconnected_viewer.get("slot")
+                    if assigned_slot:
+                        username_for_msg = disconnected_viewer.get('username', 'A user')
+                        notification_payload = {
+                            "type": "gamepad_change", 
+                            "message": f"{username_for_msg} disconnected and was unassigned from Gamepad {assigned_slot}.",
+                            "timestamp": int(time.time() * 1000)
+                        }
+                        await broadcast_to_room(session_id_str, notification_payload)
+
         if is_controller:
             if ROOM_CONNECTIONS.get(session_id_str):
                 ROOM_CONNECTIONS[session_id_str]['controller'] = None
@@ -383,20 +397,51 @@ async def handle_assign_slot(session_id: str, viewer_token: str, slot: Optional[
     session_data = SESSIONS_DB.get(session_id)
     if not session_data: return
 
-    user_found = False
+    target_user = None
+    target_username = "Unknown"
+    old_slot_for_target = None
+
     if viewer_token == session_data.get("controller_token"):
-        session_data["controller_slot"] = slot
-        user_found = True
+        target_user = session_data
+        target_username = "Controller"
+        old_slot_for_target = session_data.get("controller_slot")
     else:
-        for viewer in session_data.get("viewers", []):
-            if viewer["token"] == viewer_token:
-                viewer["slot"] = slot
-                user_found = True
+        for v in session_data.get("viewers", []):
+            if v["token"] == viewer_token:
+                target_user = v
+                target_username = v.get("username", "Unnamed")
+                old_slot_for_target = v.get("slot")
                 break
     
-    if not user_found:
+    if not target_user:
         logger.warning(f"[{session_id}] Attempted to assign slot to non-existent user token.")
         return
+
+    notifications = []
+    
+    if slot is not None:
+        previous_owner_cleared = False
+        if session_data.get("controller_slot") == slot and session_data.get("controller_token") != viewer_token:
+            session_data["controller_slot"] = None
+            notifications.append(f"Controller was unassigned from Gamepad {slot}.")
+            previous_owner_cleared = True
+        
+        if not previous_owner_cleared:
+            for v in session_data.get("viewers", []):
+                if v.get("slot") == slot and v.get("token") != viewer_token:
+                    v["slot"] = None
+                    notifications.append(f"{v.get('username', 'Unnamed')} was unassigned from Gamepad {slot}.")
+                    break
+
+    if 'is_collaboration' in target_user:
+        target_user["controller_slot"] = slot
+    else:
+        target_user["slot"] = slot
+
+    if slot is not None and old_slot_for_target != slot:
+        notifications.append(f"Gamepad {slot} was assigned to {target_username}.")
+    elif slot is None and old_slot_for_target is not None:
+        notifications.append(f"{target_username} was unassigned from Gamepad {old_slot_for_target}.")
 
     all_tokens = {
         session_data["controller_token"]: {"role": "controller", "slot": session_data.get("controller_slot")}
@@ -410,7 +455,16 @@ async def handle_assign_slot(session_id: str, viewer_token: str, slot: Optional[
             res.raise_for_status()
         SESSIONS_DB[session_id] = session_data
         await save_sessions_to_disk()
-        logger.info(f"[{session_id}] Successfully assigned slot {slot} to user {viewer_token[:6]} and- pushed update.")
+        logger.info(f"[{session_id}] Successfully assigned slot {slot} to user {viewer_token[:6]} and pushed update.")
+        
+        for msg in notifications:
+            notification_payload = {
+                "type": "gamepad_change",
+                "message": msg,
+                "timestamp": int(time.time() * 1000)
+            }
+            await broadcast_to_room(session_id, notification_payload)
+
         await broadcast_state(session_id)
     except Exception as e:
         logger.error(f"[{session_id}] Failed to update downstream tokens for slot assignment: {e}")

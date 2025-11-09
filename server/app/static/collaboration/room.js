@@ -5,6 +5,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    if (COLLAB_DATA.userRole === 'viewer') {
+        const sourceBox = document.getElementById('gamepad-source-box');
+        if (sourceBox) {
+            sourceBox.style.display = 'none';
+        }
+    }
+
     // --- Media & WebCodecs State ---
     let localStream = null;
     let audioEncoder = null;
@@ -28,6 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let messageStore = {};
     let replyingTo = null;
     let notificationAudioCtx;
+    let gamepadIcons = {};
+    const GAMEPAD_COUNT = 4;
+    let currentUserState = [];
 
     // --- DOM Elements ---
     const sidebarEl = document.getElementById('sidebar');
@@ -37,11 +47,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioInputSelect = document.getElementById('audio-input-select');
     const videoInputSelect = document.getElementById('video-input-select');
     const videoGrid = document.getElementById('video-grid');
+    const videoGridContent = document.getElementById('video-grid-content');
     const localVideo = document.getElementById('local-video');
     const localContainer = document.getElementById('local-user-container');
     const toastContainer = document.getElementById('toast-container');
     let toggleMicBtn, toggleVideoBtn, iframeMuteBtn, iframeVolumeSlider; 
     
+    localContainer.dataset.userToken = COLLAB_DATA.userToken;
+
     const MSG_TYPE = {
         VIDEO_FRAME: 0x01,
         AUDIO_FRAME: 0x02,
@@ -63,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isAudioUnlocked) return;
         console.log("Attempting to unlock media stream audio contexts.");
         
-        // This function now only focuses on remote stream audio contexts
         Object.values(remoteStreams).forEach(stream => {
             if (stream.audioContext && stream.audioContext.state === 'suspended') {
                 stream.audioContext.resume().then(() => {
@@ -346,8 +358,10 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`[System] Adding remote stream for user ${username} (${token})`);
 
         const container = document.createElement('div');
-        container.className = 'video-container';
+        container.className = 'video-container reorderable';
         container.id = `container-${token}`;
+        container.dataset.userToken = token;
+        container.draggable = true;
         
         const canvas = document.createElement('canvas');
         canvas.width = 240;
@@ -368,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         container.appendChild(canvas);
         container.appendChild(overlay);
-        videoGrid.appendChild(container);
+        videoGridContent.appendChild(container);
 
         const videoDecoder = new VideoDecoder({
             output: (frame) => {
@@ -411,7 +425,6 @@ document.addEventListener('DOMContentLoaded', () => {
             isConfigured: false,
             hasReceivedKeyFrame: false
         };
-        updateVideoGridVisibility();
     };
 
     const removeRemoteStream = (token) => {
@@ -427,7 +440,6 @@ document.addEventListener('DOMContentLoaded', () => {
             stream.container.remove();
             delete remoteStreams[token];
         }
-        updateVideoGridVisibility();
     };
 
     const populateDeviceLists = async () => {
@@ -457,11 +469,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    const updateVideoGridVisibility = () => {
-        const visibleContainers = document.querySelectorAll('#video-grid .video-container:not([style*="display: none"])').length;
-        videoGrid.style.display = visibleContainers > 0 ? 'flex' : 'none';
-    };
-
     const updateSpeakingIndicators = () => {
         const speakingThreshold = 5; 
         
@@ -539,6 +546,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = JSON.parse(event.data);
             switch (data.type) {
                 case 'state_update':
+                    currentUserState = data.viewers;
                     const serverOnlineUsers = data.viewers.filter(u => u.online && u.token !== COLLAB_DATA.userToken);
                     const serverOnlineTokens = new Set(serverOnlineUsers.map(u => u.token));
                     const clientTokens = new Set(Object.keys(remoteStreams));
@@ -561,10 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         }
                     }
-
-                    if (COLLAB_DATA.userRole === 'controller') {
-                        renderControllerUsers(data.viewers);
-                    }
+                    updateGamepadIcons(data.viewers);
                     break;
                 case 'chat_message':
                     messageStore[data.messageId] = data;
@@ -573,6 +578,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'user_joined':
                 case 'user_left':
                 case 'username_changed':
+                case 'gamepad_change':
                     appendChatMessage(data, 'system');
                     break;
                 case 'control':
@@ -597,7 +603,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (action === 'video_state') {
             stream.container.style.display = state ? 'flex' : 'none';
         }
-        updateVideoGridVisibility();
     };
     
     const sendControlMessage = (action, state) => {
@@ -637,7 +642,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <input type="text" id="viewer-link-input" value="${COLLAB_DATA.viewerJoinUrl}" readonly>
                 <button id="copy-link-btn"><i class="fas fa-copy"></i></button>
             </div>
-        ` : `<h2>Collaboration</h2>`;
+        ` : `<h2>SealSkin</h2>`;
 
         sidebarEl.innerHTML = `
             <div class="sidebar-header">
@@ -684,10 +689,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => { btn.innerHTML = originalIcon; }, 2000);
                 });
             });
+            initGamepadControls();
         } else {
             renderViewerView();
+            initGamepadControls();
         }
-        
+
         toggleMicBtn = document.getElementById('toggle-mic-btn');
         toggleVideoBtn = document.getElementById('toggle-video-btn');
         iframeMuteBtn = document.getElementById('iframe-mute-btn');
@@ -696,7 +703,6 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleVideoBtn.addEventListener('click', () => handleMediaToggle('video'));
         updateMediaButtonUI();
 
-        // --- Iframe Audio Control Logic ---
         const gameIframe = document.getElementById('session-frame');
         let isIframeMuted = false;
         let lastKnownVolume = parseFloat(localStorage.getItem(`iframe_volume_${COLLAB_DATA.sessionId}`)) || 1.0;
@@ -749,62 +755,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderControllerView = () => {
         const mainContentEl = document.getElementById('sidebar-main-content');
         if (!mainContentEl) return;
-    
-        mainContentEl.style.padding = '0';
-        mainContentEl.style.display = 'flex';
-        mainContentEl.style.flexDirection = 'column';
-    
-        mainContentEl.innerHTML = `
-            <div class="controller-tabs">
-                <button class="tab-btn active" data-tab="chat">Chat</button>
-                <button class="tab-btn" data-tab="users">Users</button>
-            </div>
-            <div id="tabs-content-container" style="flex-grow: 1; overflow-y: auto; padding: 0 1rem;">
-                <div id="tab-chat" class="tab-content active"><div id="chat-messages"></div></div>
-                <div id="tab-users" class="tab-content"><div id="viewer-list-container"></div></div>
-            </div>`;
-    
-        const tabsEl = mainContentEl.querySelector('.controller-tabs');
-        tabsEl.style.margin = '0';
-        tabsEl.style.padding = '0 1rem';
-    
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', handleTabSwitch));
-    };
-
-    const renderControllerUsers = (viewers) => {
-        const container = document.getElementById('viewer-list-container');
-        if (!container) return;
-        
-        const viewerList = viewers.filter(v => v.token !== COLLAB_DATA.userToken);
-        if (viewerList.length === 0) {
-            container.innerHTML = '<p style="color: var(--text-muted); padding-top: 1rem;">No viewers have joined yet.</p>';
-            return;
-        }
-        
-        container.innerHTML = viewers.map(viewer => `
-            <div class="viewer-item" style="margin-top: 1rem;">
-                <div class="viewer-info">
-                    <div class="viewer-status ${viewer.online ? 'online' : ''}"></div>
-                    <span class="viewer-name">${escapeHTML(viewer.username || 'Unnamed')}</span>
-                </div>
-                <div class="slot-selector">
-                    <select data-viewer-token="${viewer.token}">
-                        <option value="null" ${viewer.slot === null ? 'selected' : ''}>No Gamepad</option>
-                        ${[1,2,3,4].map(i => `<option value="${i}" ${viewer.slot === i ? 'selected' : ''}>Player ${i}</option>`).join('')}
-                    </select>
-                </div>
-            </div>
-        `).join('');
-
-        document.querySelectorAll('.slot-selector select').forEach(select => {
-            select.addEventListener('change', (e) => {
-                ws.send(JSON.stringify({
-                    action: 'assign_slot',
-                    viewer_token: e.target.dataset.viewerToken,
-                    slot: e.target.value === 'null' ? null : parseInt(e.target.value, 10)
-                }));
-            });
-        });
+        mainContentEl.innerHTML = `<div id="chat-messages" style="flex-grow: 1;"></div>`;
     };
     
     const renderViewerView = () => {
@@ -860,7 +811,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const messagesContainer = document.getElementById('chat-messages');
         if (!messagesContainer) return;
 
-        const scrollContainer = document.getElementById('tabs-content-container') || document.getElementById('sidebar-main-content');
+        const scrollContainer = document.getElementById('sidebar-main-content');
         if (!scrollContainer) return;
 
         const isScrolledToBottom = scrollContainer.scrollHeight - scrollContainer.clientHeight <= scrollContainer.scrollTop + 50;
@@ -871,12 +822,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type === 'chat') {
             isOwnMessage = data.sender === username || (COLLAB_DATA.userRole === 'controller' && data.sender === 'Controller');
             msgEl.innerHTML = createMessageHTML(data);
-        } else { // system messages
+        } else {
             let content = '';
             switch (data.type) {
                 case 'user_joined': content = `<b>${escapeHTML(data.username)}</b> has joined the room.`; break;
                 case 'user_left': content = `<b>${escapeHTML(data.username)}</b> has left the room.`; break;
                 case 'username_changed': content = `<b>${escapeHTML(data.old_username)}</b> is now known as <b>${escapeHTML(data.new_username)}</b>.`; break;
+                case 'gamepad_change': content = data.message; break;
             }
             msgEl.className = 'system-message';
             msgEl.innerHTML = `<span>${content}</span>`;
@@ -959,14 +911,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderReplyBanner();
     };
     
-    const handleTabSwitch = (e) => {
-        const tabId = e.target.dataset.tab;
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-        e.target.classList.add('active');
-        document.getElementById(`tab-${tabId}`).classList.add('active');
-    };
-
     const closeModal = () => settingsModalOverlay.classList.add('hidden');
     
     const updateMediaButtonUI = () => {
@@ -999,7 +943,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         updateMediaButtonUI();
-        updateVideoGridVisibility();
     };
 
     const playNotificationSound = () => {
@@ -1032,6 +975,164 @@ document.addEventListener('DOMContentLoaded', () => {
             toast.addEventListener('animationend', () => toast.remove());
         }, 5000);
     };
+
+    const initGamepadControls = () => {
+        const sourceBox = document.getElementById('gamepad-source-box');
+        if (!sourceBox) return;
+
+        sourceBox.innerHTML = '';
+        gamepadIcons = {};
+
+        for (let i = 1; i <= GAMEPAD_COUNT; i++) {
+            const icon = document.createElement('div');
+            icon.id = `gamepad-icon-${i}`;
+            icon.className = 'gamepad-icon';
+            if (COLLAB_DATA.userRole === 'controller') {
+                icon.classList.add('draggable');
+                icon.draggable = true;
+            }
+            icon.dataset.gamepadId = i;
+            icon.innerHTML = `<i class="fas fa-gamepad"></i><span class="gamepad-number">${i}</span>`;
+            gamepadIcons[i] = icon;
+            sourceBox.appendChild(icon);
+        }
+    };
+
+    const updateGamepadIcons = (users) => {
+        const sourceBox = document.getElementById('gamepad-source-box');
+        if (!sourceBox || Object.keys(gamepadIcons).length === 0) return;
+
+        const assignedGamepadIds = new Set();
+        users.forEach(user => {
+            if (user.slot) {
+                assignedGamepadIds.add(user.slot);
+                const icon = gamepadIcons[user.slot];
+                const container = user.token === COLLAB_DATA.userToken
+                    ? document.getElementById('local-user-container')
+                    : document.getElementById(`container-${user.token}`);
+
+                if (icon && container && icon.parentElement !== container) {
+                    container.appendChild(icon);
+                }
+            }
+        });
+
+        for (let i = 1; i <= GAMEPAD_COUNT; i++) {
+            if (!assignedGamepadIds.has(i)) {
+                const icon = gamepadIcons[i];
+                if (icon && icon.parentElement !== sourceBox) {
+                    sourceBox.appendChild(icon);
+                }
+            }
+        }
+    };
+
+    // --- Drag and Drop Logic ---
+    let draggedElement = null;
+
+    videoGridContent.addEventListener('dragstart', (e) => {
+        const target = e.target.closest('.draggable, .reorderable');
+        if (!target) {
+            e.preventDefault();
+            return;
+        }
+        draggedElement = target;
+
+        if (target.classList.contains('gamepad-icon')) {
+            document.body.classList.add('dragging-gamepad');
+            e.dataTransfer.setData('text/plain', target.dataset.gamepadId);
+            e.dataTransfer.effectAllowed = 'move';
+            
+            setTimeout(() => target.classList.add('dragging'), 0);
+            
+            document.querySelectorAll('.video-container').forEach(container => {
+                const userToken = container.dataset.userToken;
+                const user = currentUserState.find(u => u.token === userToken);
+                if (container.id === 'gamepad-source-box' || (user && user.slot === null)) {
+                    container.classList.add('can-drop-gamepad');
+                }
+            });
+        } else if (target.classList.contains('reorderable')) {
+            document.body.classList.add('dragging-stream');
+            e.dataTransfer.setData('text/plain', target.id);
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => target.classList.add('reordering'), 0);
+        }
+    });
+
+    videoGridContent.addEventListener('dragend', (e) => {
+        document.body.className = '';
+        draggedElement?.classList.remove('dragging', 'reordering');
+        document.querySelectorAll('.can-drop-gamepad').forEach(el => el.classList.remove('can-drop-gamepad'));
+        draggedElement = null;
+    });
+
+    videoGridContent.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const dropTarget = e.target.closest('.video-container');
+
+        if (document.body.classList.contains('dragging-gamepad')) {
+            if (dropTarget && dropTarget.classList.contains('can-drop-gamepad')) {
+                e.dataTransfer.dropEffect = 'move';
+            } else {
+                e.dataTransfer.dropEffect = 'none';
+            }
+        } else if (document.body.classList.contains('dragging-stream')) {
+            if (dropTarget && !dropTarget.classList.contains('pinned') && dropTarget !== draggedElement) {
+                const rect = dropTarget.getBoundingClientRect();
+                const offsetX = e.clientX - rect.left;
+                if (offsetX < rect.width / 2) {
+                    dropTarget.parentNode.insertBefore(draggedElement, dropTarget);
+                } else {
+                    dropTarget.parentNode.insertBefore(draggedElement, dropTarget.nextSibling);
+                }
+            }
+        }
+    });
+
+    videoGridContent.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (!document.body.classList.contains('dragging-gamepad')) return;
+
+        const dropTarget = e.target.closest('.video-container.can-drop-gamepad');
+        if (!dropTarget) return;
+
+        const gamepadId = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        const draggedIcon = document.getElementById(`gamepad-icon-${gamepadId}`);
+        
+        if (dropTarget.id === 'gamepad-source-box') {
+            const parentContainer = draggedIcon.parentElement;
+            if (parentContainer && parentContainer.id !== 'gamepad-source-box') {
+                const userToken = parentContainer.dataset.userToken;
+                if (userToken) ws.send(JSON.stringify({ action: 'assign_slot', viewer_token: userToken, slot: null }));
+            }
+        } else {
+            const userToken = dropTarget.dataset.userToken;
+            if (userToken) ws.send(JSON.stringify({ action: 'assign_slot', viewer_token: userToken, slot: gamepadId }));
+        }
+    });
+
+    // --- Bottom Bar Scroll Logic ---
+    let isBouncing = false;
+    videoGrid.addEventListener('wheel', e => {
+        if (videoGrid.scrollWidth > videoGrid.clientWidth) {
+            e.preventDefault();
+            videoGrid.scrollLeft += e.deltaY;
+        } else {
+            if (isBouncing || Math.abs(e.deltaY) < 5) return;
+            e.preventDefault();
+            const bounceAmount = 20;
+            const direction = e.deltaY > 0 ? -1 : 1;
+
+            isBouncing = true;
+            videoGridContent.style.transform = `translateX(${bounceAmount * direction}px)`;
+            
+            setTimeout(() => {
+                videoGridContent.style.transform = 'translateX(0)';
+                setTimeout(() => { isBouncing = false; }, 150);
+            }, 150);
+        }
+    });
 
     // --- Event Listeners ---
     toggleHandle.addEventListener('click', toggleSidebar);

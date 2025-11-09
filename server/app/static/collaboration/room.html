@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collaboration Room</title>
+    <title>SealSkin Collaboration</title>
     <link rel="stylesheet" href="room.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -13,10 +13,13 @@
     </div>
     
     <div id="video-grid">
-        <div id="local-user-container" class="video-container">
-            <video id="local-video" autoplay muted playsinline></video>
-            <div class="video-overlay">
-                <span class="username">You</span>
+        <div id="video-grid-content">
+            <div id="gamepad-source-box" class="video-container pinned"></div>
+            <div id="local-user-container" class="video-container pinned">
+                <video id="local-video" autoplay muted playsinline></video>
+                <div class="video-overlay">
+                    <span class="username">You</span>
+                </div>
             </div>
         </div>
     </div>
