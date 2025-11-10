@@ -8,6 +8,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <div id="disconnection-overlay" class="hidden">
+        <div class="disconnection-message">
+            <h2 data-i18n="disconnect.title">Session Ended</h2>
+            <p data-i18n="disconnect.message">The controller has disconnected. This session is no longer active.</p>
+        </div>
+    </div>
+
     <div id="content" class="content">
         <iframe id="session-frame" src="{{IFRAME_SRC}}"></iframe>
     </div>

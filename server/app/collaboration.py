@@ -57,14 +57,21 @@ async def collaborative_room(
     if not session_data or not session_data.get("is_collaboration"):
         raise HTTPException(status_code=404, detail="Collaboration room not found.")
 
+    if "viewer_token" in session_data and "participant_invite_token" not in session_data:
+        session_data["participant_invite_token"] = session_data.pop("viewer_token")
+    if "readonly_invite_token" not in session_data:
+        session_data["readonly_invite_token"] = secrets.token_urlsafe(16)
+
+
     main_access_token = request.query_params.get("access_token") or request.cookies.get(settings.session_cookie_name)
     is_controller_by_session = main_access_token and secrets.compare_digest(main_access_token, session_data.get("access_token", ""))
 
     is_controller_by_collab = collab_token == session_data.get("controller_token")
     is_viewer_by_collab = any(v['token'] == collab_token for v in session_data.get("viewers", []))
-    is_new_viewer_by_collab = collab_token == session_data.get("viewer_token")
+    is_new_participant_by_collab = collab_token == session_data.get("participant_invite_token")
+    is_new_readonly_by_collab = collab_token == session_data.get("readonly_invite_token")
 
-    if not (is_controller_by_session or is_controller_by_collab or is_viewer_by_collab or is_new_viewer_by_collab):
+    if not (is_controller_by_session or is_controller_by_collab or is_viewer_by_collab or is_new_participant_by_collab or is_new_readonly_by_collab):
         raise HTTPException(status_code=401, detail="Invalid or missing authentication token.")
 
     try:
@@ -77,10 +84,10 @@ async def collaborative_room(
 
     master_token = session_data["master_token"]
     controller_token = session_data["controller_token"]
-    generic_viewer_token = session_data["viewer_token"]
     
     user_role = "none"
     user_token = None
+    user_permission = "participant"
 
     if is_controller_by_session or is_controller_by_collab:
         user_role = "controller"
@@ -88,9 +95,18 @@ async def collaborative_room(
     elif is_viewer_by_collab:
         user_role = "viewer"
         user_token = collab_token
-    elif is_new_viewer_by_collab:
+        viewer_data = next((v for v in session_data.get("viewers", []) if v['token'] == collab_token), None)
+        if viewer_data:
+            user_permission = viewer_data.get("permission", "participant")
+    elif is_new_participant_by_collab or is_new_readonly_by_collab:
+        permission = "participant" if is_new_participant_by_collab else "readonly"
         new_viewer_token = secrets.token_urlsafe(16)
-        session_data.setdefault("viewers", []).append({"token": new_viewer_token, "slot": None, "username": f"User-{random.randint(100, 999)}"})
+        session_data.setdefault("viewers", []).append({
+            "token": new_viewer_token, 
+            "slot": None, 
+            "username": f"User-{random.randint(100, 999)}",
+            "permission": permission
+        })
         
         all_tokens = {
             controller_token: {"role": "controller", "slot": session_data.get("controller_slot")}
@@ -107,7 +123,7 @@ async def collaborative_room(
                 )
             SESSIONS_DB[session_id_str] = session_data
             await save_sessions_to_disk()
-            logger.info(f"[{session_id_str}] New viewer joined. Token '{new_viewer_token}' created and pushed.")
+            logger.info(f"[{session_id_str}] New viewer ({permission}) joined. Token '{new_viewer_token}' created and pushed.")
         except Exception as e:
             logger.error(f"[{session_id_str}] Failed to update downstream tokens for new viewer: {e}")
             raise HTTPException(status_code=500, detail="Failed to register new viewer.")
@@ -118,14 +134,20 @@ async def collaborative_room(
         return HTMLResponse(content="<h1>Invalid or expired collaboration link.</h1>", status_code=403)
     
     iframe_src = f"/{session_id_str}/?token={user_token}&embedded=true"
-    viewer_join_url = str(request.url.replace_query_params(token=generic_viewer_token))
     
     client_data = {
         "sessionId": session_id_str,
         "userRole": user_role,
         "userToken": user_token,
-        "viewerJoinUrl": viewer_join_url,
+        "userPermission": user_permission,
     }
+
+    if user_role == "controller":
+        client_data["participantJoinUrl"] = str(request.url.replace_query_params(token=session_data["participant_invite_token"]))
+        client_data["readonlyJoinUrl"] = str(request.url.replace_query_params(token=session_data["readonly_invite_token"]))
+    elif user_role == "viewer" and user_permission == "participant":
+        client_data["readonlyJoinUrl"] = str(request.url.replace_query_params(token=session_data["readonly_invite_token"]))
+
 
     html_content = html_content.replace("{{IFRAME_SRC}}", iframe_src)
     html_content = html_content.replace(
@@ -202,7 +224,8 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
         return
 
     is_controller = token == session_data.get("controller_token")
-    is_viewer = any(v['token'] == token for v in session_data.get("viewers", []))
+    viewer_data_ref = next((v for v in session_data.get("viewers", []) if v['token'] == token), None)
+    is_viewer = viewer_data_ref is not None
 
     if not is_controller and not is_viewer:
         await websocket.close(code=1008)
@@ -213,14 +236,9 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
     if session_id_str not in ROOM_CONNECTIONS:
         ROOM_CONNECTIONS[session_id_str] = {'controller': None, 'viewers': {}}    
     
-    viewer_data_ref = None
     username = "Controller"
     if is_viewer:
-        for v in session_data.get("viewers", []):
-            if v['token'] == token:
-                viewer_data_ref = v
-                username = v.get("username", f"User-{token[:6]}")
-                break
+        username = viewer_data_ref.get("username", f"User-{token[:6]}")
 
     connection_info = {'websocket': websocket, 'username': username, 'token': token, 'has_joined': False}
     if is_controller:
@@ -228,11 +246,10 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
         join_payload = {"type": "user_joined", "username": "Controller", "timestamp": int(time.time() * 1000)}
         await broadcast_to_room(session_id_str, join_payload)
         connection_info['has_joined'] = True
+        await broadcast_state(session_id_str)
     else:
         ROOM_CONNECTIONS[session_id_str]['viewers'][token] = connection_info
 
-    await broadcast_state(session_id_str)
-    
     try:
         while True:
             message = await websocket.receive()
@@ -246,11 +263,23 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                     viewer_token = data.get("viewer_token")
                     slot = data.get("slot")
                     await handle_assign_slot(session_id_str, viewer_token, slot)
+                elif action == "set_designated_speaker" and is_controller:
+                    speaker_token = data.get("token")
+                    session_data["designated_speaker"] = speaker_token
+                    SESSIONS_DB[session_id_str] = session_data
+                    await save_sessions_to_disk()
+                    logger.info(f"[{session_id_str}] Designated speaker set to: {speaker_token}")
+                    await broadcast_state(session_id_str)
                 elif action == "set_username" and is_viewer:
+                    now = time.time()
+                    last_change = connection_info.get('last_username_change', 0)
+                    if now - last_change < 2.0:
+                        continue
                     new_username = data.get("username", "").strip()
                     if new_username and viewer_data_ref and 1 <= len(new_username) <= 25:
                         old_username = viewer_data_ref.get("username")
                         viewer_data_ref["username"] = new_username
+                        connection_info['last_username_change'] = now # Update the timestamp
                         connection_info["username"] = new_username 
                         username = new_username
                         SESSIONS_DB[session_id_str] = session_data
@@ -289,6 +318,11 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                     logger.warning(f"[{session_id_str}] Received oversized binary packet from {token[:6]}, discarding.")
                     continue
                 
+                designated_speaker = session_data.get("designated_speaker")
+                is_audio_packet = binary_data[0] == 0x02
+                if designated_speaker and is_audio_packet and token != designated_speaker:
+                    continue
+
                 sender_token_bytes = token.encode('utf-8')
                 token_len = len(sender_token_bytes)
                 if token_len > 255: continue
@@ -305,25 +339,11 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
         current_username = connection_info.get("username")
         has_joined = connection_info.get("has_joined")
 
-        if not is_controller:
-            session_data = SESSIONS_DB.get(session_id_str)
-            if session_data:
-                disconnected_viewer = next((v for v in session_data.get("viewers", []) if v.get("token") == token), None)
-                if disconnected_viewer:
-                    assigned_slot = disconnected_viewer.get("slot")
-                    if assigned_slot:
-                        username_for_msg = disconnected_viewer.get('username', 'A user')
-                        notification_payload = {
-                            "type": "gamepad_change", 
-                            "message": f"{username_for_msg} disconnected and was unassigned from Gamepad {assigned_slot}.",
-                            "timestamp": int(time.time() * 1000)
-                        }
-                        await broadcast_to_room(session_id_str, notification_payload)
-
         if is_controller:
             if ROOM_CONNECTIONS.get(session_id_str):
                 ROOM_CONNECTIONS[session_id_str]['controller'] = None
             logger.info(f"[{session_id_str}] Controller disconnected from collab room.")
+            await broadcast_to_room(session_id_str, {"type": "controller_disconnected"})
         else:
             if ROOM_CONNECTIONS.get(session_id_str) and ROOM_CONNECTIONS[session_id_str].get('viewers'):
                 ROOM_CONNECTIONS[session_id_str]['viewers'].pop(token, None)
@@ -331,34 +351,50 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
             
             session_data = SESSIONS_DB.get(session_id_str)
             viewer_removed = False
-            if session_data and "viewers" in session_data:
-                initial_count = len(session_data["viewers"])
-                session_data["viewers"] = [v for v in session_data["viewers"] if v.get("token") != token]
-                if len(session_data["viewers"]) < initial_count:
-                    viewer_removed = True
+            if session_data:
+                if session_data.get("designated_speaker") == token:
+                    session_data["designated_speaker"] = None
+                
+                if "viewers" in session_data:
+                    disconnected_viewer = next((v for v in session_data.get("viewers", []) if v.get("token") == token), None)
+                    if disconnected_viewer:
+                        assigned_slot = disconnected_viewer.get("slot")
+                        if assigned_slot:
+                            username_for_msg = disconnected_viewer.get('username', 'A user')
+                            notification_payload = {
+                                "type": "gamepad_change", 
+                                "message": f"{username_for_msg} disconnected and was unassigned from Gamepad {assigned_slot}.",
+                                "timestamp": int(time.time() * 1000)
+                            }
+                            await broadcast_to_room(session_id_str, notification_payload)
 
-            if viewer_removed:
-                logger.info(f"[{session_id_str}] Removed disconnected viewer {token[:6]} from session database.")
-                SESSIONS_DB[session_id_str] = session_data
-                await save_sessions_to_disk()
+                    initial_count = len(session_data["viewers"])
+                    session_data["viewers"] = [v for v in session_data["viewers"] if v.get("token") != token]
+                    if len(session_data["viewers"]) < initial_count:
+                        viewer_removed = True
 
-                all_tokens = {
-                    session_data["controller_token"]: {"role": "controller", "slot": session_data.get("controller_slot")}
-                }
-                for v in session_data["viewers"]:
-                    all_tokens[v["token"]] = {"role": "viewer", "slot": v["slot"]}
+                if viewer_removed:
+                    logger.info(f"[{session_id_str}] Removed disconnected viewer {token[:6]} from session database.")
+                    SESSIONS_DB[session_id_str] = session_data
+                    await save_sessions_to_disk()
 
-                try:
-                    async with httpx.AsyncClient() as client:
-                        res = await client.post(
-                            f"http://{session_data['ip']}:8083/tokens",
-                            json=all_tokens,
-                            headers={"Authorization": f"Bearer {session_data['master_token']}"}
-                        )
-                        res.raise_for_status()
-                    logger.info(f"[{session_id_str}] Pushed token update to downstream after viewer disconnect.")
-                except Exception as e:
-                    logger.error(f"[{session_id_str}] Failed to push token update after viewer disconnect: {e}")
+                    all_tokens = {
+                        session_data["controller_token"]: {"role": "controller", "slot": session_data.get("controller_slot")}
+                    }
+                    for v in session_data["viewers"]:
+                        all_tokens[v["token"]] = {"role": "viewer", "slot": v["slot"]}
+
+                    try:
+                        async with httpx.AsyncClient() as client:
+                            res = await client.post(
+                                f"http://{session_data['ip']}:8083/tokens",
+                                json=all_tokens,
+                                headers={"Authorization": f"Bearer {session_data['master_token']}"}
+                            )
+                            res.raise_for_status()
+                        logger.info(f"[{session_id_str}] Pushed token update to downstream after viewer disconnect.")
+                    except Exception as e:
+                        logger.error(f"[{session_id_str}] Failed to push token update after viewer disconnect: {e}")
 
         if has_joined:
             leave_payload = {"type": "user_left", "username": current_username, "timestamp": int(time.time() * 1000)}
@@ -383,7 +419,8 @@ async def broadcast_state(session_id: str):
         "token": session_data.get("controller_token"),
         "username": "Controller",
         "slot": session_data.get("controller_slot"),
-        "online": connections.get('controller') is not None
+        "online": connections.get('controller') is not None,
+        "permission": "controller"
     }
 
     online_viewer_tokens = set(connections.get('viewers', {}).keys())
@@ -395,7 +432,8 @@ async def broadcast_state(session_id: str):
         
     state_payload = {
         "type": "state_update",
-        "viewers": users_with_status
+        "viewers": users_with_status,
+        "designated_speaker": session_data.get("designated_speaker")
     }
     await broadcast_to_room(session_id, state_payload)
 

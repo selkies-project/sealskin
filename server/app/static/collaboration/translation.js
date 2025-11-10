@@ -22,6 +22,7 @@ const en = {
         sessionVolume: 'Session Volume',
         reply: 'Reply',
         cancelReply: 'Cancel Reply',
+        designateSpeaker: 'Designate as Speaker',
     },
     usernamePrompt: {
         title: 'Welcome!',
@@ -41,6 +42,15 @@ const en = {
         userJoined: '<b>{username}</b> has joined the room.',
         userLeft: '<b>{username}</b> has left the room.',
         usernameChanged: '<b>{old_username}</b> is now known as <b>{new_username}</b>.',
+    },
+    inviteLinks: {
+        participant: 'Collaboration User Invite',
+        readonly: 'Read Only User Invite',
+        readonlyParticipantView: 'Read Only Invite',
+    },
+    disconnect: {
+        title: 'Disconnected',
+        message: 'The session has ended.',
     },
 };
 
@@ -69,6 +79,7 @@ const es = {
         sessionVolume: 'Volumen de la sesión',
         reply: 'Responder',
         cancelReply: 'Cancelar respuesta',
+        designateSpeaker: 'Designar como Orador',
     },
     usernamePrompt: {
         title: '¡Bienvenido!',
@@ -88,6 +99,15 @@ const es = {
         userJoined: '<b>{username}</b> se ha unido a la sala.',
         userLeft: '<b>{username}</b> ha abandonado la sala.',
         usernameChanged: '<b>{old_username}</b> ahora es conocido como <b>{new_username}</b>.',
+    },
+    inviteLinks: {
+        participant: 'Invitación de Colaborador',
+        readonly: 'Invitación de Solo Lectura',
+        readonlyParticipantView: 'Invitación de Solo Lectura',
+    },
+    disconnect: {
+        title: 'Desconectado',
+        message: 'La sesión ha finalizado.',
     },
 };
 
@@ -116,6 +136,7 @@ const zh = {
         sessionVolume: '会话音量',
         reply: '回复',
         cancelReply: '取消回复',
+        designateSpeaker: '指定为发言人',
     },
     usernamePrompt: {
         title: '欢迎！',
@@ -135,6 +156,15 @@ const zh = {
         userJoined: '<b>{username}</b> 已加入房间。',
         userLeft: '<b>{username}</b> 已离开房间。',
         usernameChanged: '<b>{old_username}</b> 现已更名为 <b>{new_username}</b>。',
+    },
+    inviteLinks: {
+        participant: '协作用户邀请',
+        readonly: '只读用户邀请',
+        readonlyParticipantView: '只读邀请',
+    },
+    disconnect: {
+        title: '已断开连接',
+        message: '会话已结束。',
     },
 };
 
@@ -163,6 +193,7 @@ const hi = {
         sessionVolume: 'सत्र वॉल्यूम',
         reply: 'उत्तर दें',
         cancelReply: 'उत्तर रद्द करें',
+        designateSpeaker: 'वक्ता के रूप में नामित करें',
     },
     usernamePrompt: {
         title: 'स्वागत है!',
@@ -182,6 +213,15 @@ const hi = {
         userJoined: '<b>{username}</b> कमरे में शामिल हो गए हैं।',
         userLeft: '<b>{username}</b> ने कमरा छोड़ दिया है।',
         usernameChanged: '<b>{old_username}</b> को अब <b>{new_username}</b> के नाम से जाना जाता है।',
+    },
+    inviteLinks: {
+        participant: 'सहयोग उपयोगकर्ता आमंत्रण',
+        readonly: 'केवल पढ़ने के लिए उपयोगकर्ता आमंत्रण',
+        readonlyParticipantView: 'केवल पढ़ने के लिए आमंत्रण',
+    },
+    disconnect: {
+        title: 'डिस्कनेक्ट हो गया',
+        message: 'सत्र समाप्त हो गया है।',
     },
 };
 
@@ -210,6 +250,7 @@ const pt = {
         sessionVolume: 'Volume da sessão',
         reply: 'Responder',
         cancelReply: 'Cancelar resposta',
+        designateSpeaker: 'Designar como Orador',
     },
     usernamePrompt: {
         title: 'Bem-vindo(a)!',
@@ -229,6 +270,15 @@ const pt = {
         userJoined: '<b>{username}</b> entrou na sala.',
         userLeft: '<b>{username}</b> saiu da sala.',
         usernameChanged: '<b>{old_username}</b> agora é conhecido(a) como <b>{new_username}</b>.',
+    },
+    inviteLinks: {
+        participant: 'Convite de Colaborador',
+        readonly: 'Convite de Usuário Somente Leitura',
+        readonlyParticipantView: 'Convite Somente Leitura',
+    },
+    disconnect: {
+        title: 'Desconectado',
+        message: 'A sessão terminou.',
     },
 };
 
@@ -257,6 +307,7 @@ const fr = {
         sessionVolume: 'Volume de la session',
         reply: 'Répondre',
         cancelReply: 'Annuler la réponse',
+        designateSpeaker: 'Désigner comme Orateur',
     },
     usernamePrompt: {
         title: 'Bienvenue !',
@@ -276,6 +327,15 @@ const fr = {
         userJoined: '<b>{username}</b> a rejoint la salle.',
         userLeft: '<b>{username}</b> a quitté la salle.',
         usernameChanged: '<b>{old_username}</b> est maintenant connu(e) sous le nom de <b>{new_username}</b>.',
+    },
+    inviteLinks: {
+        participant: 'Invitation de Collaborateur',
+        readonly: 'Invitation d\'Utilisateur en Lecture Seule',
+        readonlyParticipantView: 'Invitation en Lecture Seule',
+    },
+    disconnect: {
+        title: 'Déconnecté',
+        message: 'La session est terminée.',
     },
 };
 
@@ -304,6 +364,7 @@ const ru = {
         sessionVolume: 'Громкость сеанса',
         reply: 'Ответить',
         cancelReply: 'Отменить ответ',
+        designateSpeaker: 'Назначить докладчиком',
     },
     usernamePrompt: {
         title: 'Добро пожаловать!',
@@ -323,6 +384,15 @@ const ru = {
         userJoined: '<b>{username}</b> присоединился(ась) к комнате.',
         userLeft: '<b>{username}</b> покинул(а) комнату.',
         usernameChanged: '<b>{old_username}</b> теперь известен(на) как <b>{new_username}</b>.',
+    },
+    inviteLinks: {
+        participant: 'Приглашение для участника совместной работы',
+        readonly: 'Приглашение для пользователя с правами только на чтение',
+        readonlyParticipantView: 'Приглашение только для чтения',
+    },
+    disconnect: {
+        title: 'Отключено',
+        message: 'Сеанс завершен.',
     },
 };
 
@@ -351,6 +421,7 @@ const de = {
         sessionVolume: 'Sitzungslautstärke',
         reply: 'Antworten',
         cancelReply: 'Antwort abbrechen',
+        designateSpeaker: 'Als Sprecher festlegen',
     },
     usernamePrompt: {
         title: 'Willkommen!',
@@ -370,6 +441,15 @@ const de = {
         userJoined: '<b>{username}</b> ist dem Raum beigetreten.',
         userLeft: '<b>{username}</b> hat den Raum verlassen.',
         usernameChanged: '<b>{old_username}</b> ist jetzt als <b>{new_username}</b> bekannt.',
+    },
+    inviteLinks: {
+        participant: 'Einladung für Kollaborationsbenutzer',
+        readonly: 'Einladung für Benutzer mit Leseberechtigung',
+        readonlyParticipantView: 'Einladung mit Leseberechtigung',
+    },
+    disconnect: {
+        title: 'Verbindung getrennt',
+        message: 'Die Sitzung wurde beendet.',
     },
 };
 
@@ -398,6 +478,7 @@ const tr = {
         sessionVolume: 'Oturum Sesi',
         reply: 'Yanıtla',
         cancelReply: 'Yanıtı İptal Et',
+        designateSpeaker: 'Konuşmacı Olarak Belirle',
     },
     usernamePrompt: {
         title: 'Hoş geldiniz!',
@@ -417,6 +498,15 @@ const tr = {
         userJoined: '<b>{username}</b> odaya katıldı.',
         userLeft: '<b>{username}</b> odadan ayrıldı.',
         usernameChanged: '<b>{old_username}</b> artık <b>{new_username}</b> olarak biliniyor.',
+    },
+    inviteLinks: {
+        participant: 'İşbirliği Kullanıcı Daveti',
+        readonly: 'Salt Okunur Kullanıcı Daveti',
+        readonlyParticipantView: 'Salt Okunur Davet',
+    },
+    disconnect: {
+        title: 'Bağlantı Kesildi',
+        message: 'Oturum sona erdi.',
     },
 };
 
@@ -445,6 +535,7 @@ const it = {
         sessionVolume: 'Volume della sessione',
         reply: 'Rispondi',
         cancelReply: 'Annulla risposta',
+        designateSpeaker: 'Designa come Relatore',
     },
     usernamePrompt: {
         title: 'Benvenuto!',
@@ -464,6 +555,15 @@ const it = {
         userJoined: '<b>{username}</b> è entrato/a nella stanza.',
         userLeft: '<b>{username}</b> ha lasciato la stanza.',
         usernameChanged: '<b>{old_username}</b> è ora conosciuto/a come <b>{new_username}</b>.',
+    },
+    inviteLinks: {
+        participant: 'Invito Utente Collaboratore',
+        readonly: 'Invito Utente Sola Lettura',
+        readonlyParticipantView: 'Invito Sola Lettura',
+    },
+    disconnect: {
+        title: 'Disconnesso',
+        message: 'La sessione è terminata.',
     },
 };
 
@@ -492,6 +592,7 @@ const nl = {
         sessionVolume: 'Sessievolume',
         reply: 'Beantwoorden',
         cancelReply: 'Antwoord annuleren',
+        designateSpeaker: 'Aanwijzen als spreker',
     },
     usernamePrompt: {
         title: 'Welkom!',
@@ -511,6 +612,15 @@ const nl = {
         userJoined: '<b>{username}</b> is de kamer binnengekomen.',
         userLeft: '<b>{username}</b> heeft de kamer verlaten.',
         usernameChanged: '<b>{old_username}</b> is nu bekend als <b>{new_username}</b>.',
+    },
+    inviteLinks: {
+        participant: 'Uitnodiging voor samenwerkingsgebruiker',
+        readonly: 'Uitnodiging voor alleen-lezen gebruiker',
+        readonlyParticipantView: 'Alleen-lezen uitnodiging',
+    },
+    disconnect: {
+        title: 'Verbinding verbroken',
+        message: 'De sessie is beëindigd.',
     },
 };
 
@@ -539,6 +649,7 @@ const ar = {
         sessionVolume: 'مستوى صوت الجلسة',
         reply: 'رد',
         cancelReply: 'إلغاء الرد',
+        designateSpeaker: 'تعيين كمتحدث',
     },
     usernamePrompt: {
         title: 'أهلاً بك!',
@@ -558,6 +669,15 @@ const ar = {
         userJoined: '<b>{username}</b> انضم إلى الغرفة.',
         userLeft: '<b>{username}</b> غادر الغرفة.',
         usernameChanged: '<b>{old_username}</b> يُعرف الآن باسم <b>{new_username}</b>.',
+    },
+    inviteLinks: {
+        participant: 'دعوة مستخدم متعاون',
+        readonly: 'دعوة مستخدم للقراءة فقط',
+        readonlyParticipantView: 'دعوة للقراءة فقط',
+    },
+    disconnect: {
+        title: 'انقطع الاتصال',
+        message: 'انتهت الجلسة.',
     },
 };
 
@@ -586,6 +706,7 @@ const ko = {
         sessionVolume: '세션 볼륨',
         reply: '답장',
         cancelReply: '답장 취소',
+        designateSpeaker: '발표자로 지정',
     },
     usernamePrompt: {
         title: '환영합니다!',
@@ -605,6 +726,15 @@ const ko = {
         userJoined: '<b>{username}</b>님이 방에 참여했습니다.',
         userLeft: '<b>{username}</b>님이 방을 나갔습니다.',
         usernameChanged: '<b>{old_username}</b>님의 이름이 <b>{new_username}</b>(으)로 변경되었습니다.',
+    },
+    inviteLinks: {
+        participant: '협업 사용자 초대',
+        readonly: '읽기 전용 사용자 초대',
+        readonlyParticipantView: '읽기 전용 초대',
+    },
+    disconnect: {
+        title: '연결 끊김',
+        message: '세션이 종료되었습니다.',
     },
 };
 
@@ -633,6 +763,7 @@ const ja = {
         sessionVolume: 'セッションの音量',
         reply: '返信',
         cancelReply: '返信をキャンセル',
+        designateSpeaker: 'スピーカーに指定',
     },
     usernamePrompt: {
         title: 'ようこそ！',
@@ -652,6 +783,15 @@ const ja = {
         userJoined: '<b>{username}</b>がルームに参加しました。',
         userLeft: '<b>{username}</b>がルームを退出しました。',
         usernameChanged: '<b>{old_username}</b>は<b>{new_username}</b>に名前を変更しました。',
+    },
+    inviteLinks: {
+        participant: 'コラボレーションユーザー招待',
+        readonly: '読み取り専用ユーザー招待',
+        readonlyParticipantView: '読み取り専用招待',
+    },
+    disconnect: {
+        title: '切断されました',
+        message: 'セッションは終了しました。',
     },
 };
 
@@ -680,6 +820,7 @@ const vi = {
         sessionVolume: 'Âm lượng phiên',
         reply: 'Trả lời',
         cancelReply: 'Hủy trả lời',
+        designateSpeaker: 'Chỉ định làm người phát biểu',
     },
     usernamePrompt: {
         title: 'Chào mừng!',
@@ -699,6 +840,15 @@ const vi = {
         userJoined: '<b>{username}</b> đã tham gia phòng.',
         userLeft: '<b>{username}</b> đã rời phòng.',
         usernameChanged: '<b>{old_username}</b> bây giờ được biết đến với tên <b>{new_username}</b>.',
+    },
+    inviteLinks: {
+        participant: 'Lời mời người dùng cộng tác',
+        readonly: 'Lời mời người dùng chỉ đọc',
+        readonlyParticipantView: 'Lời mời chỉ đọc',
+    },
+    disconnect: {
+        title: 'Đã ngắt kết nối',
+        message: 'Phiên đã kết thúc.',
     },
 };
 
@@ -727,6 +877,7 @@ const th = {
         sessionVolume: 'ระดับเสียงเซสชัน',
         reply: 'ตอบกลับ',
         cancelReply: 'ยกเลิกการตอบกลับ',
+        designateSpeaker: 'กำหนดเป็นผู้พูด',
     },
     usernamePrompt: {
         title: 'ยินดีต้อนรับ!',
@@ -746,6 +897,15 @@ const th = {
         userJoined: '<b>{username}</b> ได้เข้าร่วมห้องแล้ว',
         userLeft: '<b>{username}</b> ได้ออกจากห้องแล้ว',
         usernameChanged: '<b>{old_username}</b> ตอนนี้เป็นที่รู้จักในชื่อ <b>{new_username}</b>',
+    },
+    inviteLinks: {
+        participant: 'คำเชิญผู้ใช้ร่วมทำงาน',
+        readonly: 'คำเชิญผู้ใช้แบบอ่านอย่างเดียว',
+        readonlyParticipantView: 'คำเชิญแบบอ่านอย่างเดียว',
+    },
+    disconnect: {
+        title: 'ตัดการเชื่อมต่อแล้ว',
+        message: 'เซสชันสิ้นสุดลงแล้ว',
     },
 };
 
@@ -774,6 +934,7 @@ const fil = {
         sessionVolume: 'Volume ng Session',
         reply: 'Sumagot',
         cancelReply: 'Kanselahin ang Sagot',
+        designateSpeaker: 'Italaga bilang Tagapagsalita',
     },
     usernamePrompt: {
         title: 'Maligayang pagdating!',
@@ -793,6 +954,15 @@ const fil = {
         userJoined: 'Si <b>{username}</b> ay sumali sa room.',
         userLeft: 'Si <b>{username}</b> ay umalis sa room.',
         usernameChanged: 'Si <b>{old_username}</b> ay kilala na ngayon bilang <b>{new_username}</b>.',
+    },
+    inviteLinks: {
+        participant: 'Imbitasyon ng Gumagamit ng Kolaborasyon',
+        readonly: 'Imbitasyon ng Gumagamit na Read Only',
+        readonlyParticipantView: 'Imbitasyon na Read Only',
+    },
+    disconnect: {
+        title: 'Nadiskonekta',
+        message: 'Nagtapos na ang session.',
     },
 };
 
@@ -821,6 +991,7 @@ const da = {
         sessionVolume: 'Sessionslydstyrke',
         reply: 'Svar',
         cancelReply: 'Annuller svar',
+        designateSpeaker: 'Udpeg som taler',
     },
     usernamePrompt: {
         title: 'Velkommen!',
@@ -840,6 +1011,15 @@ const da = {
         userJoined: '<b>{username}</b> er kommet ind i rummet.',
         userLeft: '<b>{username}</b> har forladt rummet.',
         usernameChanged: '<b>{old_username}</b> er nu kendt som <b>{new_username}</b>.',
+    },
+    inviteLinks: {
+        participant: 'Invitation til samarbejdsbruger',
+        readonly: 'Invitation til skrivebeskyttet bruger',
+        readonlyParticipantView: 'Skrivebeskyttet invitation',
+    },
+    disconnect: {
+        title: 'Forbindelse afbrudt',
+        message: 'Sessionen er afsluttet.',
     },
 };
 
