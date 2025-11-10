@@ -240,7 +240,8 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
     if is_viewer:
         username = viewer_data_ref.get("username", f"User-{token[:6]}")
 
-    connection_info = {'websocket': websocket, 'username': username, 'token': token, 'has_joined': False}
+    public_id = secrets.token_hex(4)
+    connection_info = {'websocket': websocket, 'username': username, 'token': token, 'public_id': public_id, 'has_joined': False}
     if is_controller:
         ROOM_CONNECTIONS[session_id_str]['controller'] = connection_info
         join_payload = {"type": "user_joined", "username": "Controller", "timestamp": int(time.time() * 1000)}
@@ -314,8 +315,12 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
 
             elif "bytes" in message:
                 binary_data = message["bytes"]
-                if len(binary_data) > (1024 * 1024): # 1MB limit
-                    logger.warning(f"[{session_id_str}] Received oversized binary packet from {token[:6]}, discarding.")
+                if is_viewer and viewer_data_ref.get("permission") == "readonly":
+                    logger.warning(f"[{session_id_str}] Received binary packet from read-only user {token[:6]}, discarding.")
+                    continue
+                
+                if len(binary_data) > (1024 * 1024):
+                    logger.warning(f"[{session_id_str}] Received oversized binary packet ({len(binary_data)} bytes) from {token[:6]}, discarding.")
                     continue
                 
                 designated_speaker = session_data.get("designated_speaker")
@@ -323,12 +328,8 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                 if designated_speaker and is_audio_packet and token != designated_speaker:
                     continue
 
-                sender_token_bytes = token.encode('utf-8')
-                token_len = len(sender_token_bytes)
-                if token_len > 255: continue
-                
-                header = bytes([token_len]) + sender_token_bytes
-                full_payload = header + binary_data
+                public_id_bytes = public_id.encode('utf-8')
+                full_payload = public_id_bytes + binary_data
                 await broadcast_binary_to_room(session_id_str, full_payload, websocket)
 
     except (WebSocketDisconnect, RuntimeError):
@@ -420,14 +421,20 @@ async def broadcast_state(session_id: str):
         "username": "Controller",
         "slot": session_data.get("controller_slot"),
         "online": connections.get('controller') is not None,
-        "permission": "controller"
+        "permission": "controller",
+        "publicId": connections['controller']['public_id'] if connections.get('controller') else None
     }
 
     online_viewer_tokens = set(connections.get('viewers', {}).keys())
     users_with_status = [controller_info]
     for v in session_data.get("viewers", []):
         viewer_info = v.copy()
-        viewer_info['online'] = v['token'] in online_viewer_tokens
+        is_online = v['token'] in online_viewer_tokens
+        viewer_info['online'] = is_online
+        if is_online:
+            viewer_conn = connections['viewers'].get(v['token'])
+            if viewer_conn:
+                viewer_info['publicId'] = viewer_conn.get('public_id')
         users_with_status.append(viewer_info)
         
     state_payload = {

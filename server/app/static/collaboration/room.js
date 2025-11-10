@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let gamepadIcons = {};
     const GAMEPAD_COUNT = 4;
     let currentUserState = [];
+    let publicIdToTokenMap = {};
     let currentDesignatedSpeaker = null;
 
     const sidebarEl = document.getElementById('sidebar');
@@ -568,10 +569,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ws.onmessage = (event) => {
             if (event.data instanceof ArrayBuffer) {
-                const dataView = new DataView(event.data);
-                const tokenLen = dataView.getUint8(0);
-                const token = new TextDecoder().decode(event.data.slice(1, 1 + tokenLen));
-                const payload = event.data.slice(1 + tokenLen);
+                const publicId = new TextDecoder().decode(event.data.slice(0, 8));
+                const token = publicIdToTokenMap[publicId];
+                if (!token) return;
+                const payload = event.data.slice(8);
                 handleRemoteStream(token, payload);
                 return;
             }
@@ -586,6 +587,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     currentUserState = data.viewers;
                     currentDesignatedSpeaker = data.designated_speaker;
+
+                    publicIdToTokenMap = {};
+                    data.viewers.forEach(user => {
+                        if (user.publicId) publicIdToTokenMap[user.publicId] = user.token;
+                    });
 
                     document.querySelectorAll('.video-container').forEach(el => el.classList.remove('designated-speaker'));
                     document.querySelectorAll('.designate-speaker').forEach(el => el.classList.remove('active'));
