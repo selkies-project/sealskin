@@ -250,6 +250,10 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
         await broadcast_state(session_id_str)
     else:
         ROOM_CONNECTIONS[session_id_str]['viewers'][token] = connection_info
+        join_payload = {"type": "user_joined", "username": username, "timestamp": int(time.time() * 1000)}
+        await broadcast_to_room(session_id_str, join_payload)
+        connection_info['has_joined'] = True
+        await broadcast_state(session_id_str)
 
     try:
         while True:
@@ -280,20 +284,18 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                     if new_username and viewer_data_ref and 1 <= len(new_username) <= 25:
                         old_username = viewer_data_ref.get("username")
                         viewer_data_ref["username"] = new_username
-                        connection_info['last_username_change'] = now # Update the timestamp
-                        connection_info["username"] = new_username 
+                        if old_username == new_username:
+                            continue
+                        
+                        viewer_data_ref["username"] = new_username
+                        connection_info['last_username_change'] = now
                         username = new_username
                         SESSIONS_DB[session_id_str] = session_data
                         await save_sessions_to_disk()
                         logger.info(f"[{session_id_str}] Viewer {token[:6]} changed name from '{old_username}' to '{new_username}'.")
                         
-                        if not connection_info.get('has_joined'):
-                            join_payload = {"type": "user_joined", "username": new_username, "timestamp": int(time.time() * 1000)}
-                            await broadcast_to_room(session_id_str, join_payload)
-                            connection_info['has_joined'] = True
-                        elif old_username != new_username:
-                            change_payload = {"type": "username_changed", "old_username": old_username, "new_username": new_username, "timestamp": int(time.time() * 1000)}
-                            await broadcast_to_room(session_id_str, change_payload)
+                        change_payload = {"type": "username_changed", "old_username": old_username, "new_username": new_username, "timestamp": int(time.time() * 1000)}
+                        await broadcast_to_room(session_id_str, change_payload)
 
                         await broadcast_state(session_id_str)
 

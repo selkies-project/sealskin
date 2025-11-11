@@ -562,9 +562,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ws.onopen = () => {
             console.log('[WS] Collaboration WebSocket connected.');
-            if (username && COLLAB_DATA.userRole === 'viewer') {
-                ws.send(JSON.stringify({ action: 'set_username', username: username }));
-            }
         };
 
         ws.onmessage = (event) => {
