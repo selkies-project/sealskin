@@ -176,6 +176,12 @@ SETTING_DEFINITIONS = [
         "default": "/config/.config/sealskin/sessions.yml",
         "help": "Path to the YAML file for session persistence.",
     },
+    {
+        "name": "caddyfile_path",
+        "type": "str",
+        "default": "/config/.config/sealskin/Caddyfile",
+        "help": "Path to the generated Caddyfile for the proxy.",
+    },
 ]
 
 

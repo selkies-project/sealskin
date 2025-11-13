@@ -23,8 +23,23 @@ from docker.errors import DockerException, NotFound
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from fastapi import FastAPI, Depends, HTTPException, Request, Response, APIRouter, Query
-from fastapi.responses import JSONResponse, StreamingResponse, FileResponse, HTMLResponse
+from fastapi import (
+    FastAPI,
+    Depends,
+    HTTPException,
+    Request,
+    Response,
+    APIRouter,
+    Query,
+    Form,
+)
+from fastapi.responses import (
+    JSONResponse,
+    StreamingResponse,
+    FileResponse,
+    HTMLResponse,
+    RedirectResponse,
+)
 from fastapi.routing import APIRoute
 from jose import JWTError, jwt
 from pydantic import ValidationError
@@ -33,6 +48,7 @@ from .settings import settings
 from .models import *
 from .providers.docker_provider import DockerProvider
 from . import user_manager
+from . import collaboration
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +70,7 @@ PATH_PREFIX_MAP: Dict[str, str] = {}
 DISCOVERED_API_PORT: int = settings.api_port
 DISCOVERED_SESSION_PORT: int = settings.session_port
 METADATA_LOCK = asyncio.Lock()
+DOWNLOAD_TOKENS: dict = {}
 
 try:
     with open(settings.server_private_key_path, "rb") as f:
@@ -74,12 +91,14 @@ except FileNotFoundError as e:
 
 ALGORITHM = "RS256"
 
+
 async def save_sessions_to_disk():
-    """Saves the current session database to a file."""
     async with SESSIONS_LOCK:
         try:
             os.makedirs(os.path.dirname(settings.sessions_db_path), exist_ok=True)
-            with tempfile.NamedTemporaryFile('w', delete=False, dir=os.path.dirname(settings.sessions_db_path)) as tf:
+            with tempfile.NamedTemporaryFile(
+                "w", delete=False, dir=os.path.dirname(settings.sessions_db_path)
+            ) as tf:
                 yaml.dump(SESSIONS_DB, tf, sort_keys=False)
                 temp_path = tf.name
             shutil.move(temp_path, settings.sessions_db_path)
@@ -87,11 +106,13 @@ async def save_sessions_to_disk():
         except Exception as e:
             logger.error(f"Failed to save sessions to disk: {e}")
 
+
 async def load_sessions_from_disk():
-    """Loads the session database from a file if it exists."""
     global SESSIONS_DB
     if not os.path.exists(settings.sessions_db_path):
-        logger.info("Session persistence file not found. Starting with an empty session database.")
+        logger.info(
+            "Session persistence file not found. Starting with an empty session database."
+        )
         return
 
     async with SESSIONS_LOCK:
@@ -105,7 +126,6 @@ async def load_sessions_from_disk():
 
 
 async def _fetch_and_cache_single_script(store_name: str, base_url: str, app_id: str):
-    """Fetches and caches a single autostart script, respecting ETags."""
     cache_dir = os.path.join(settings.autostart_cache_path, store_name)
     os.makedirs(cache_dir, exist_ok=True)
     cache_file_path = os.path.join(cache_dir, app_id)
@@ -128,24 +148,32 @@ async def _fetch_and_cache_single_script(store_name: str, base_url: str, app_id:
             response = await client.get(autostart_url, timeout=10, headers=headers)
 
             if response.status_code == 304:
-                logger.debug(f"Autostart script for '{app_id}' in store '{store_name}' is up to date.")
+                logger.debug(
+                    f"Autostart script for '{app_id}' in store '{store_name}' is up to date."
+                )
                 return
 
             if response.status_code == 404:
-                with open(cache_file_path, "w") as f: f.write("")
-                if os.path.exists(meta_file_path): os.remove(meta_file_path)
+                with open(cache_file_path, "w") as f:
+                    f.write("")
+                if os.path.exists(meta_file_path):
+                    os.remove(meta_file_path)
                 return
 
             response.raise_for_status()
             script_content = response.text
 
             def write_cache_and_meta():
-                with open(cache_file_path, "w") as f: f.write(script_content)
+                with open(cache_file_path, "w") as f:
+                    f.write(script_content)
                 if "etag" in response.headers:
-                    with open(meta_file_path, "w") as f: json.dump({"etag": response.headers["etag"]}, f)
+                    with open(meta_file_path, "w") as f:
+                        json.dump({"etag": response.headers["etag"]}, f)
 
             await asyncio.to_thread(write_cache_and_meta)
-            logger.info(f"Successfully cached autostart script for '{app_id}' from store '{store_name}'.")
+            logger.info(
+                f"Successfully cached autostart script for '{app_id}' from store '{store_name}'."
+            )
 
     except httpx.RequestError as e:
         logger.warning(f"Failed to fetch autostart script for '{app_id}': {e}")
@@ -154,7 +182,6 @@ async def _fetch_and_cache_single_script(store_name: str, base_url: str, app_id:
 
 
 async def _update_all_autostart_caches():
-    """Iterates all app stores and updates the autostart script cache for every available app."""
     logger.info("Starting autostart script cache refresh for all app stores...")
     tasks = []
     async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -163,27 +190,35 @@ async def _update_all_autostart_caches():
                 response = await client.get(store.url, timeout=15)
                 response.raise_for_status()
                 data = yaml.safe_load(response.text)
-                
-                apps_list = data['apps'] if isinstance(data, dict) and 'apps' in data else data
+
+                apps_list = (
+                    data["apps"] if isinstance(data, dict) and "apps" in data else data
+                )
                 if not isinstance(apps_list, list):
-                    logger.error(f"Could not find a list of apps in store '{store.name}'")
+                    logger.error(
+                        f"Could not find a list of apps in store '{store.name}'"
+                    )
                     continue
 
                 base_url = store.url.rsplit("/", 1)[0]
                 for app in apps_list:
                     if app.get("provider_config", {}).get("autostart"):
                         tasks.append(
-                            _fetch_and_cache_single_script(store.name, base_url, app["id"])
+                            _fetch_and_cache_single_script(
+                                store.name, base_url, app["id"]
+                            )
                         )
             except Exception as e:
-                logger.error(f"Failed to process app store '{store.name}' for autostart cache: {e}")
-    
+                logger.error(
+                    f"Failed to process app store '{store.name}' for autostart cache: {e}"
+                )
+
     if tasks:
         await asyncio.gather(*tasks)
     logger.info("Autostart script cache refresh complete.")
 
+
 async def _inspect_self_container():
-    """If running in Docker, inspects self to find host mount paths and published ports."""
     global PATH_PREFIX_MAP, DISCOVERED_API_PORT, DISCOVERED_SESSION_PORT
     if not os.path.exists("/var/run/docker.sock"):
         logger.info("Docker socket not found. Assuming running on host.")
@@ -191,21 +226,27 @@ async def _inspect_self_container():
 
     try:
         client = await asyncio.to_thread(docker.from_env)
-        containers = await asyncio.to_thread(client.containers.list, filters={'name': 'sealskin'})
-        
+        containers = await asyncio.to_thread(
+            client.containers.list, filters={"name": "sealskin"}
+        )
+
         if not containers:
             hostname = os.uname()[1]
-            logger.info(f"No container named 'sealskin' found. Trying with hostname '{hostname}'.")
+            logger.info(
+                f"No container named 'sealskin' found. Trying with hostname '{hostname}'."
+            )
             try:
                 container = await asyncio.to_thread(client.containers.get, hostname)
                 containers = [container]
             except docker.errors.NotFound:
-                logger.warning("Could not find self-container by name 'sealskin' or hostname. Path remapping will be disabled.")
+                logger.warning(
+                    "Could not find self-container by name 'sealskin' or hostname. Path remapping will be disabled."
+                )
                 return
-        
+
         container = containers[0]
         logger.info(f"Found self-container '{container.name}'. Inspecting mounts.")
-        
+
         mounts = container.attrs.get("Mounts", [])
         if not mounts:
             logger.info(f"Container '{container.name}' has no volume mounts to map.")
@@ -216,14 +257,18 @@ async def _inspect_self_container():
             container_path = mount.get("Destination")
             if host_path and container_path:
                 PATH_PREFIX_MAP[container_path] = host_path
-        
+
         if PATH_PREFIX_MAP:
             logger.info(f"Detected container mount prefixes: {PATH_PREFIX_MAP}")
         else:
-            logger.warning("Could not find any usable mount points on the current container.")
+            logger.warning(
+                "Could not find any usable mount points on the current container."
+            )
 
     except DockerException as e:
-        logger.warning(f"Could not inspect self in Docker. Path mapping disabled. Error: {e}")
+        logger.warning(
+            f"Could not inspect self in Docker. Path mapping disabled. Error: {e}"
+        )
     except Exception as e:
         logger.error(f"An unexpected error occurred during Docker self-inspection: {e}")
 
@@ -237,37 +282,43 @@ async def _inspect_self_container():
         if api_internal in ports and ports[api_internal]:
             if host_port := ports[api_internal][0].get("HostPort"):
                 DISCOVERED_API_PORT = int(host_port)
-                logger.info(f"Discovered external API port mapping: {settings.api_port} -> {DISCOVERED_API_PORT}")
+                logger.info(
+                    f"Discovered external API port mapping: {settings.api_port} -> {DISCOVERED_API_PORT}"
+                )
 
         if session_internal in ports and ports[session_internal]:
             if host_port := ports[session_internal][0].get("HostPort"):
                 DISCOVERED_SESSION_PORT = int(host_port)
-                logger.info(f"Discovered external Session port mapping: {settings.session_port} -> {DISCOVERED_SESSION_PORT}")
+                logger.info(
+                    f"Discovered external Session port mapping: {settings.session_port} -> {DISCOVERED_SESSION_PORT}"
+                )
+
 
 def _translate_path_to_host(internal_path: str) -> str:
-    """Translates a path inside this container to the corresponding host path."""
     if not PATH_PREFIX_MAP or not internal_path:
         return internal_path
 
     sorted_prefixes = sorted(PATH_PREFIX_MAP.keys(), key=len, reverse=True)
 
     for container_prefix in sorted_prefixes:
-        if internal_path == container_prefix or internal_path.startswith(container_prefix + '/'):
+        if internal_path == container_prefix or internal_path.startswith(
+            container_prefix + "/"
+        ):
             host_prefix = PATH_PREFIX_MAP[container_prefix]
-            
+
             relative_path = os.path.relpath(internal_path, container_prefix)
-            
+
             if relative_path == ".":
                 return host_prefix
-            
+
             translated_path = os.path.join(host_prefix, relative_path)
             logger.debug(f"Translated path '{internal_path}' -> '{translated_path}'")
             return translated_path
 
     return internal_path
 
+
 def _get_cpu_model():
-    """Reads the CPU model from /proc/cpuinfo and stores it."""
     global CPU_MODEL
     try:
         with open("/proc/cpuinfo", "r") as f:
@@ -281,7 +332,6 @@ def _get_cpu_model():
 
 
 def _get_system_stats() -> Dict:
-    """Gets cached or fresh system stats (disk usage, CPU model)."""
     now = time.time()
     if SYSTEM_STATS_CACHE["data"] and (now - SYSTEM_STATS_CACHE["timestamp"] < 60):
         return SYSTEM_STATS_CACHE["data"]
@@ -302,7 +352,6 @@ def _get_system_stats() -> Dict:
 
 
 def detect_gpus():
-    """Detects available GPUs on the host and populates AVAILABLE_GPUS."""
     global AVAILABLE_GPUS
     AVAILABLE_GPUS.clear()
     cmd = "ls -la /sys/class/drm/renderD*/device/driver 2>/dev/null | awk '{print $11}' | awk -F/ '{print $NF}'"
@@ -456,7 +505,6 @@ def save_app_stores():
 
 
 async def _get_and_cache_image_metadata(image_name: str, force_refresh: bool = False):
-    """Retrieves local image metadata, caching it for performance."""
     if (
         not force_refresh
         and image_name in IMAGE_METADATA
@@ -479,7 +527,6 @@ async def _get_and_cache_image_metadata(image_name: str, force_refresh: bool = F
 
 
 def _get_autostart_cache_path(app_config: InstalledApp) -> Optional[str]:
-    """Determines the local cache path for an app's autostart script."""
     store = next((s for s in APP_STORES if s.name == app_config.source), None)
     if not store:
         return None
@@ -489,7 +536,6 @@ def _get_autostart_cache_path(app_config: InstalledApp) -> Optional[str]:
 
 
 async def _update_autostart_cache(app_config: InstalledApp):
-    """Fetches an autostart script from a remote URL and caches it locally."""
     if not app_config.provider_config.autostart:
         return
 
@@ -555,7 +601,6 @@ async def _update_autostart_cache(app_config: InstalledApp):
 
 
 async def _pull_and_cache_image(image_name: str):
-    """Pulls the latest version of an image and updates the metadata and autostart cache."""
     if PULL_STATUS.get(image_name) == "pulling":
         logger.info(f"Pull for image '{image_name}' is already in progress.")
         return
@@ -580,7 +625,7 @@ async def _pull_and_cache_image(image_name: str):
 async def background_update_job():
     while True:
         await asyncio.sleep(settings.auto_update_interval_seconds)
-        
+
         await _update_all_autostart_caches()
 
         logger.info("Starting scheduled app image update check...")
@@ -591,6 +636,7 @@ async def background_update_job():
             await _pull_and_cache_image(image_name)
             await asyncio.sleep(2)
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("API server starting up...")
@@ -599,7 +645,11 @@ async def lifespan(app: FastAPI):
     os.makedirs(settings.autostart_cache_path, exist_ok=True, mode=0o700)
     os.makedirs(settings.storage_path, exist_ok=True, mode=0o755)
     os.makedirs(settings.home_templates_path, exist_ok=True, mode=0o700)
-    os.makedirs(os.path.join(settings.storage_path, "sealskin_ephemeral"), exist_ok=True, mode=0o700)
+    os.makedirs(
+        os.path.join(settings.storage_path, "sealskin_ephemeral"),
+        exist_ok=True,
+        mode=0o700,
+    )
     os.makedirs(settings.public_storage_path, exist_ok=True, mode=0o700)
     load_public_shares_metadata()
     await load_sessions_from_disk()
@@ -611,7 +661,9 @@ async def lifespan(app: FastAPI):
             docker_client = await asyncio.to_thread(docker.from_env)
             for session_id, session_data in SESSIONS_DB.items():
                 try:
-                    await asyncio.to_thread(docker_client.containers.get, session_data["instance_id"])
+                    await asyncio.to_thread(
+                        docker_client.containers.get, session_data["instance_id"]
+                    )
                 except NotFound:
                     stale_sessions.append(session_id)
 
@@ -663,8 +715,8 @@ async def lifespan(app: FastAPI):
     except asyncio.CancelledError:
         logger.info("Background tasks successfully cancelled.")
 
+
 def load_public_shares_metadata():
-    """Loads public share metadata from the YAML file into memory."""
     global PUBLIC_SHARES_METADATA
     if not os.path.exists(settings.public_shares_metadata_path):
         PUBLIC_SHARES_METADATA = {}
@@ -676,42 +728,59 @@ def load_public_shares_metadata():
                 share_id: PublicShareMetadata(**metadata)
                 for share_id, metadata in data.items()
             }
-        logger.info(f"Loaded {len(PUBLIC_SHARES_METADATA)} public share(s) from metadata file.")
+        logger.info(
+            f"Loaded {len(PUBLIC_SHARES_METADATA)} public share(s) from metadata file."
+        )
     except (IOError, yaml.YAMLError, ValidationError) as e:
         logger.error(f"Error loading public shares metadata: {e}")
         PUBLIC_SHARES_METADATA = {}
 
+
 async def save_public_shares_metadata():
-    """Saves the in-memory public share metadata to the YAML file."""
     async with METADATA_LOCK:
         try:
             data_to_dump = {
                 share_id: metadata.dict(exclude_none=True)
                 for share_id, metadata in PUBLIC_SHARES_METADATA.items()
             }
-            with tempfile.NamedTemporaryFile('w', delete=False, dir=os.path.dirname(settings.public_shares_metadata_path)) as tf:
+            with tempfile.NamedTemporaryFile(
+                "w",
+                delete=False,
+                dir=os.path.dirname(settings.public_shares_metadata_path),
+            ) as tf:
                 yaml.dump(data_to_dump, tf, sort_keys=False)
                 temp_path = tf.name
             shutil.move(temp_path, settings.public_shares_metadata_path)
         except IOError as e:
             logger.error(f"Failed to save public shares metadata: {e}")
 
+
 async def background_share_cleanup_job():
-    """Periodically scans for and deletes expired public shares."""
     while True:
         await asyncio.sleep(settings.share_cleanup_interval_seconds)
         now = time.time()
-        expired_ids = [share_id for share_id, meta in PUBLIC_SHARES_METADATA.items() if meta.expiry_timestamp and meta.expiry_timestamp < now]
-        if not expired_ids: continue
+        expired_ids = [
+            share_id
+            for share_id, meta in PUBLIC_SHARES_METADATA.items()
+            if meta.expiry_timestamp and meta.expiry_timestamp < now
+        ]
+        if not expired_ids:
+            continue
         logger.info(f"Found {len(expired_ids)} expired share(s) to clean up.")
         for share_id in expired_ids:
             if public_file_path := os.path.join(settings.public_storage_path, share_id):
                 if os.path.exists(public_file_path):
-                    try: os.remove(public_file_path)
-                    except OSError as e: logger.error(f"Error deleting expired share file for {share_id}: {e}")
+                    try:
+                        os.remove(public_file_path)
+                    except OSError as e:
+                        logger.error(
+                            f"Error deleting expired share file for {share_id}: {e}"
+                        )
             del PUBLIC_SHARES_METADATA[share_id]
         await save_public_shares_metadata()
         logger.info("Expired share cleanup complete.")
+
+
 api_app = FastAPI(title="SealSkin API", lifespan=lifespan)
 
 
@@ -805,8 +874,10 @@ async def verify_persistent_storage_enabled(user: dict = Depends(verify_token)) 
         )
     return user
 
-async def verify_public_sharing_enabled(user: dict = Depends(verify_persistent_storage_enabled)) -> dict:
-    """Verifies that the user is an admin or has public sharing enabled."""
+
+async def verify_public_sharing_enabled(
+    user: dict = Depends(verify_persistent_storage_enabled),
+) -> dict:
     if user.get("is_admin"):
         return user
     if user.get("effective_settings", {}).get("public_sharing", False):
@@ -814,6 +885,7 @@ async def verify_public_sharing_enabled(user: dict = Depends(verify_persistent_s
     raise HTTPException(
         status_code=403, detail="Public file sharing is disabled for this account."
     )
+
 
 @api_app.post("/api/handshake/initiate", response_model=HandshakeInitiateResponse)
 async def handshake_initiate():
@@ -855,7 +927,6 @@ encrypted_router = APIRouter(route_class=EncryptedRoute)
 
 
 async def _reassemble_file(upload_id: str, total_chunks: int, filename: str) -> str:
-    """Reassembles chunks into a single file and returns its path."""
     upload_dir = os.path.join(settings.upload_dir, upload_id)
     if not os.path.isdir(upload_dir):
         raise HTTPException(status_code=404, detail="Upload session not found.")
@@ -885,11 +956,8 @@ async def _reassemble_file(upload_id: str, total_chunks: int, filename: str) -> 
         logger.error(f"Failed to reassemble file for upload {upload_id}: {e}")
         raise HTTPException(status_code=500, detail="Failed to reassemble file.")
 
+
 def _get_unique_filename(directory: str, filename: str) -> str:
-    """
-    Checks if a filename exists in a directory. If so, appends '-1', '-2', etc.
-    until a unique name is found. Returns the unique, non-conflicting filename.
-    """
     if not os.path.exists(os.path.join(directory, filename)):
         return filename
 
@@ -901,13 +969,15 @@ def _get_unique_filename(directory: str, filename: str) -> str:
             return new_filename
         counter += 1
 
+
 def _sanitize_for_filename(name: str) -> str:
     if not name:
         return "unnamed"
     s = name.lower().strip()
-    s = re.sub(r'[\s_]+', '-', s)
-    s = re.sub(r'[^a-z0-9-]', '', s)
+    s = re.sub(r"[\s_]+", "-", s)
+    s = re.sub(r"[^a-z0-9-]", "", s)
     return s[:50]
+
 
 @encrypted_router.post("/api/applications", response_model=List[Application])
 async def get_applications(user: dict = Depends(verify_token)):
@@ -942,7 +1012,6 @@ async def get_applications(user: dict = Depends(verify_token)):
 
 
 async def _stop_session(session_id: str):
-    """Helper function to stop a session and clean up its resources."""
     logger.info(f"[{session_id}] Stopping session...")
     if session_data := SESSIONS_DB.pop(session_id, None):
         app_id = session_data.get("provider_app_id")
@@ -1038,27 +1107,46 @@ async def _launch_common(
     host_mount_path = None
     shared_files_path = None
 
-    is_persistent_launch = effective_settings.get("persistent_storage", False) and (home_name is None or home_name.lower() != "cleanroom")
+    is_persistent_launch = effective_settings.get("persistent_storage", False) and (
+        home_name is None or home_name.lower() != "cleanroom"
+    )
 
     if forced_rw_mount:
-         host_mount_path = forced_rw_mount
-         os.makedirs(host_mount_path, exist_ok=True, mode=0o700)
+        host_mount_path = forced_rw_mount
+        os.makedirs(host_mount_path, exist_ok=True, mode=0o700)
     elif app_config.is_meta_app:
-         template_path = os.path.join(settings.home_templates_path, app_config.home_template_name)
-         if not os.path.isdir(template_path):
-             raise HTTPException(status_code=500, detail=f"Home directory template for meta app '{app_config.name}' not found on server.")
+        template_path = os.path.join(
+            settings.home_templates_path, app_config.home_template_name
+        )
+        if not os.path.isdir(template_path):
+            raise HTTPException(
+                status_code=500,
+                detail=f"Home directory template for meta app '{app_config.name}' not found on server.",
+            )
 
-         if is_persistent_launch:
+        if is_persistent_launch:
             sanitized_app_name = _sanitize_for_filename(app_config.name)
             user_facing_dir_name = f"auto-{sanitized_app_name}"
-            host_mount_path = os.path.join(settings.storage_path, username, user_facing_dir_name)
+            host_mount_path = os.path.join(
+                settings.storage_path, username, user_facing_dir_name
+            )
             if not os.path.exists(host_mount_path):
-                logger.info(f"[{session_id}] First launch for meta-app. Copying template '{app_config.home_template_name}' for user '{username}'.")
-                await asyncio.to_thread(shutil.copytree, template_path, host_mount_path, symlinks=True)
-         else:
-            host_mount_path = os.path.join(settings.storage_path, "sealskin_ephemeral", str(uuid.uuid4()))
-            logger.info(f"[{session_id}] Launching meta-app in cleanroom mode. Copying template '{app_config.home_template_name}' to ephemeral storage.")
-            await asyncio.to_thread(shutil.copytree, template_path, host_mount_path, symlinks=True)
+                logger.info(
+                    f"[{session_id}] First launch for meta-app. Copying template '{app_config.home_template_name}' for user '{username}'."
+                )
+                await asyncio.to_thread(
+                    shutil.copytree, template_path, host_mount_path, symlinks=True
+                )
+        else:
+            host_mount_path = os.path.join(
+                settings.storage_path, "sealskin_ephemeral", str(uuid.uuid4())
+            )
+            logger.info(
+                f"[{session_id}] Launching meta-app in cleanroom mode. Copying template '{app_config.home_template_name}' to ephemeral storage."
+            )
+            await asyncio.to_thread(
+                shutil.copytree, template_path, host_mount_path, symlinks=True
+            )
     else:
         use_persistent_storage = (
             effective_settings.get("persistent_storage", False)
@@ -1080,7 +1168,9 @@ async def _launch_common(
             )
             os.makedirs(shared_files_path, exist_ok=True, mode=0o755)
         elif file_bytes and filename:
-            host_mount_path = os.path.join(settings.storage_path, "sealskin_ephemeral", str(uuid.uuid4()))
+            host_mount_path = os.path.join(
+                settings.storage_path, "sealskin_ephemeral", str(uuid.uuid4())
+            )
 
     gpu_config = None
     if selected_gpu and effective_settings.get("gpu", False):
@@ -1116,9 +1206,13 @@ async def _launch_common(
             autostart_content = base64.b64decode(
                 app_config.provider_config.custom_autostart_script_b64
             ).decode("utf-8")
-            logger.info(f"[{session_id}] Using custom autostart script for '{app_config.name}'.")
+            logger.info(
+                f"[{session_id}] Using custom autostart script for '{app_config.name}'."
+            )
         except Exception as e:
-            logger.error(f"[{session_id}] Failed to decode custom autostart script: {e}")
+            logger.error(
+                f"[{session_id}] Failed to decode custom autostart script: {e}"
+            )
     elif app_config.provider_config.autostart:
         autostart_cache_path = _get_autostart_cache_path(app_config)
         if (
@@ -1129,15 +1223,23 @@ async def _launch_common(
             try:
                 with open(autostart_cache_path, "r") as f:
                     autostart_content = f.read()
-                logger.info(f"[{session_id}] Using cached repository autostart script for '{app_config.name}'.")
+                logger.info(
+                    f"[{session_id}] Using cached repository autostart script for '{app_config.name}'."
+                )
             except Exception as e:
-                logger.error(f"[{session_id}] Failed to read cached autostart script: {e}")
+                logger.error(
+                    f"[{session_id}] Failed to read cached autostart script: {e}"
+                )
 
     if autostart_content:
         if not host_mount_path:
-            host_mount_path = os.path.join(settings.storage_path, "sealskin_ephemeral", str(uuid.uuid4()))
-            logger.info(f"[{session_id}] Created ephemeral storage for autostart script.")
-        
+            host_mount_path = os.path.join(
+                settings.storage_path, "sealskin_ephemeral", str(uuid.uuid4())
+            )
+            logger.info(
+                f"[{session_id}] Created ephemeral storage for autostart script."
+            )
+
         autostart_dir = os.path.join(host_mount_path, ".config", "openbox")
         autostart_path = os.path.join(autostart_dir, "autostart")
         try:
@@ -1145,7 +1247,9 @@ async def _launch_common(
             with open(autostart_path, "w") as f:
                 f.write(autostart_content)
             os.chmod(autostart_path, 0o755)
-            logger.info(f"[{session_id}] Successfully wrote autostart script to session storage.")
+            logger.info(
+                f"[{session_id}] Successfully wrote autostart script to session storage."
+            )
         except Exception as e:
             logger.error(f"[{session_id}] Failed to write autostart script: {e}")
 
@@ -1158,7 +1262,9 @@ async def _launch_common(
         if shared_files_path:
             translated_shared_files_path = _translate_path_to_host(shared_files_path)
             volumes[translated_shared_files_path] = {
-                "bind": os.path.join(settings.container_config_path, "Desktop", "files"),
+                "bind": os.path.join(
+                    settings.container_config_path, "Desktop", "files"
+                ),
                 "mode": "rw",
             }
 
@@ -1187,16 +1293,18 @@ async def _launch_common(
             "session_id": session_id,
             "env_vars": final_env,
             "volumes": volumes,
-            "gpu_config": gpu_config
+            "gpu_config": gpu_config,
         }
         if launch_in_room_mode:
-            provider_launch_kwargs.update({
-                "is_collaboration": True,
-                "master_token": master_token,
-                "initial_tokens": {
-                    controller_token: {"role": "controller", "slot": None},
+            provider_launch_kwargs.update(
+                {
+                    "is_collaboration": True,
+                    "master_token": master_token,
+                    "initial_tokens": {
+                        controller_token: {"role": "controller", "slot": None},
+                    },
                 }
-            })
+            )
 
         instance_details = await provider.launch(**provider_launch_kwargs)
         SESSIONS_DB[session_id] = {
@@ -1215,13 +1323,15 @@ async def _launch_common(
             "password": password,
         }
         if launch_in_room_mode:
-            SESSIONS_DB[session_id].update({
-                "is_collaboration": True,
-                "master_token": master_token,
-                "controller_token": controller_token,
-                "viewer_token": viewer_token,
-                "viewers": []
-            })
+            SESSIONS_DB[session_id].update(
+                {
+                    "is_collaboration": True,
+                    "master_token": master_token,
+                    "controller_token": controller_token,
+                    "viewer_token": viewer_token,
+                    "viewers": [],
+                }
+            )
 
         logger.info(
             f"[{session_id}] Session ready for {username}. Proxying to {instance_details['ip']}:{instance_details['port']}"
@@ -1233,7 +1343,9 @@ async def _launch_common(
 
         return {"session_url": session_url, "session_id": session_id}
     except Exception as e:
-        if host_mount_path and host_mount_path.startswith(os.path.join(settings.storage_path, "sealskin_ephemeral")):
+        if host_mount_path and host_mount_path.startswith(
+            os.path.join(settings.storage_path, "sealskin_ephemeral")
+        ):
             shutil.rmtree(host_mount_path, ignore_errors=True)
         logger.error(
             f"[{session_id}] Unhandled exception during launch for app '{application_id}': {e}",
@@ -1399,14 +1511,18 @@ async def send_file_to_session(
 
         if is_persistent:
             file_dest_dir = os.path.abspath(
-                os.path.join(settings.storage_path, user["username"], "_sealskin_shared_files")
+                os.path.join(
+                    settings.storage_path, user["username"], "_sealskin_shared_files"
+                )
             )
         else:
             file_dest_dir = os.path.join(host_mount_path, "Desktop", "files")
 
         os.makedirs(file_dest_dir, exist_ok=True, mode=0o755)
 
-        actual_filename = await asyncio.to_thread(_get_unique_filename, file_dest_dir, safe_filename)
+        actual_filename = await asyncio.to_thread(
+            _get_unique_filename, file_dest_dir, safe_filename
+        )
         file_location = os.path.join(file_dest_dir, actual_filename)
 
         try:
@@ -1537,18 +1653,22 @@ async def delete_app_store(store_name: str):
     save_app_stores()
     return Response(status_code=204)
 
+
 @admin_router.post("/apps/meta", response_model=InstalledApp, status_code=201)
 async def create_meta_app(decrypted_body: dict = Depends(get_decrypted_request_body)):
     try:
         req = CreateMetaAppRequest(**decrypted_body)
         base_app = INSTALLED_APPS.get(req.base_app_id)
         if not base_app:
-            raise HTTPException(status_code=404, detail=f"Base application with ID '{req.base_app_id}' not found.")
+            raise HTTPException(
+                status_code=404,
+                detail=f"Base application with ID '{req.base_app_id}' not found.",
+            )
 
         new_app_id = str(uuid.uuid4())
         home_template_name = f"meta_{new_app_id}"
 
-        logo_url = base_app.logo  # Default
+        logo_url = base_app.logo
 
         if req.logo:
             try:
@@ -1560,17 +1680,21 @@ async def create_meta_app(decrypted_body: dict = Depends(get_decrypted_request_b
                 logger.info(f"Saved custom icon for new meta app {new_app_id}")
             except (ValueError, TypeError, base64.binascii.Error):
                 logo_url = req.logo
- 
+
         template_dir = os.path.join(settings.home_templates_path, home_template_name)
         os.makedirs(template_dir, exist_ok=True, mode=0o700)
-        
-        os.makedirs(os.path.join(template_dir, "Desktop", "files"), exist_ok=True, mode=0o755)
+
+        os.makedirs(
+            os.path.join(template_dir, "Desktop", "files"), exist_ok=True, mode=0o755
+        )
 
         meta_app = base_app.copy(deep=True)
         meta_app.id = new_app_id
         meta_app.name = req.name
         meta_app.logo = logo_url
-        meta_app.provider_config.custom_autostart_script_b64 = req.custom_autostart_script_b64
+        meta_app.provider_config.custom_autostart_script_b64 = (
+            req.custom_autostart_script_b64
+        )
         meta_app.is_meta_app = True
         meta_app.base_app_id = req.base_app_id
         meta_app.home_template_name = home_template_name
@@ -1579,17 +1703,20 @@ async def create_meta_app(decrypted_body: dict = Depends(get_decrypted_request_b
         meta_app.auto_update = False
         meta_app.source = base_app.name
         meta_app.source_app_id = base_app.source_app_id
-        
+
         INSTALLED_APPS[new_app_id] = meta_app
         save_installed_apps()
-        
+
         return meta_app
 
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         logger.error(f"Error creating meta app: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error while creating meta app.")
+        raise HTTPException(
+            status_code=500, detail="Internal server error while creating meta app."
+        )
+
 
 @encrypted_router.get("/api/app_icon/{app_id}")
 async def get_app_icon(app_id: str):
@@ -1602,11 +1729,12 @@ async def get_app_icon(app_id: str):
     try:
         with open(icon_path, "rb") as f:
             icon_data = f.read()
-        icon_data_b64 = base64.b64encode(icon_data).decode('utf-8')
+        icon_data_b64 = base64.b64encode(icon_data).decode("utf-8")
         return {"icon_data_b64": icon_data_b64}
     except Exception as e:
         logger.error(f"Failed to read or encode icon for app {app_id}: {e}")
         raise HTTPException(status_code=500, detail="Error retrieving icon.")
+
 
 @admin_router.post("/launch/meta_customize", response_model=LaunchResponse)
 async def launch_meta_for_customization(
@@ -1617,15 +1745,30 @@ async def launch_meta_for_customization(
         req = LaunchMetaCustomizeRequest(**decrypted_body)
         app_config = INSTALLED_APPS.get(req.application_id)
         if not app_config or not app_config.is_meta_app:
-            raise HTTPException(status_code=400, detail="This endpoint is only for customizing meta applications.")
-        
-        template_path = os.path.join(settings.home_templates_path, app_config.home_template_name)
-        return await _launch_common(application_id=req.application_id, username=auth_user["username"], effective_settings=auth_user["effective_settings"], home_name=None, env_vars={}, language=req.language, selected_gpu=req.selected_gpu, forced_rw_mount=template_path)
+            raise HTTPException(
+                status_code=400,
+                detail="This endpoint is only for customizing meta applications.",
+            )
+
+        template_path = os.path.join(
+            settings.home_templates_path, app_config.home_template_name
+        )
+        return await _launch_common(
+            application_id=req.application_id,
+            username=auth_user["username"],
+            effective_settings=auth_user["effective_settings"],
+            home_name=None,
+            env_vars={},
+            language=req.language,
+            selected_gpu=req.selected_gpu,
+            forced_rw_mount=template_path,
+        )
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
 
+
 @admin_router.get("/apps/available", response_model=List[AvailableApp])
-async def get_available_apps(url: str, store_name: str): # <-- ADD store_name parameter
+async def get_available_apps(url: str, store_name: str):  # <-- ADD store_name parameter
     async def fetch_and_process_store(content: str, store_name_for_cache: str):
         """Loads, flattens, and returns the list of apps from YAML content."""
         try:
@@ -1644,26 +1787,34 @@ async def get_available_apps(url: str, store_name: str): # <-- ADD store_name pa
             apps_list = extract_apps_from_data(loaded_data)
             for app in apps_list:
                 provider_config = app.get("provider_config", {})
-                
+
                 if provider_config.get("autostart"):
                     app_id = app.get("id")
                     if app_id:
-                        cache_dir = os.path.join(settings.autostart_cache_path, store_name_for_cache)
+                        cache_dir = os.path.join(
+                            settings.autostart_cache_path, store_name_for_cache
+                        )
                         cache_file_path = os.path.join(cache_dir, app_id)
                         script_content_b64 = None
-                        if os.path.exists(cache_file_path) and os.path.getsize(cache_file_path) > 0:
+                        if (
+                            os.path.exists(cache_file_path)
+                            and os.path.getsize(cache_file_path) > 0
+                        ):
                             try:
                                 with open(cache_file_path, "rb") as f:
                                     script_content = f.read()
-                                script_content_b64 = base64.b64encode(script_content).decode("utf-8")
+                                script_content_b64 = base64.b64encode(
+                                    script_content
+                                ).decode("utf-8")
                             except Exception as e:
-                                logger.error(f"Failed to read/encode autostart cache for {app_id}: {e}")
-                        provider_config["custom_autostart_script_b64"] = script_content_b64
+                                logger.error(
+                                    f"Failed to read/encode autostart cache for {app_id}: {e}"
+                                )
+                        provider_config[
+                            "custom_autostart_script_b64"
+                        ] = script_content_b64
 
-                if (
-                    "extensions" in provider_config
-                    and provider_config["extensions"]
-                ):
+                if "extensions" in provider_config and provider_config["extensions"]:
                     original_extensions = provider_config["extensions"]
                     flattened_extensions = []
                     for item in original_extensions:
@@ -1694,6 +1845,7 @@ async def get_available_apps(url: str, store_name: str): # <-- ADD store_name pa
         raise HTTPException(
             status_code=400, detail=f"Failed to fetch app store from URL '{url}': {e}"
         )
+
 
 @admin_router.get("/apps/installed", response_model=List[InstalledAppWithStatus])
 async def list_installed_apps():
@@ -1763,13 +1915,19 @@ async def delete_installed_app(app_id: str):
                 logger.error(f"Failed to delete icon for meta-app {app_id}: {e}")
 
         if app_to_delete.is_meta_app and app_to_delete.home_template_name:
-            template_dir_path = os.path.join(settings.home_templates_path, app_to_delete.home_template_name)
+            template_dir_path = os.path.join(
+                settings.home_templates_path, app_to_delete.home_template_name
+            )
             if os.path.isdir(template_dir_path):
                 try:
                     shutil.rmtree(template_dir_path)
-                    logger.info(f"Purged home template directory for meta-app {app_id}: {template_dir_path}")
+                    logger.info(
+                        f"Purged home template directory for meta-app {app_id}: {template_dir_path}"
+                    )
                 except OSError as e:
-                    logger.error(f"Failed to purge home template for meta-app {app_id}: {e}")
+                    logger.error(
+                        f"Failed to purge home template for meta-app {app_id}: {e}"
+                    )
 
     del INSTALLED_APPS[app_id]
     save_installed_apps()
@@ -2223,34 +2381,45 @@ async def upload_to_storage(
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
 
-def _get_validated_path(username: str, home_dir: str, sub_path: str, check_existence: bool = True) -> pathlib.Path:
+
+def _get_validated_path(
+    username: str, home_dir: str, sub_path: str, check_existence: bool = True
+) -> pathlib.Path:
     if not re.match(r"^[a-zA-Z0-9_-]+$", home_dir):
         raise HTTPException(status_code=400, detail="Invalid home directory name.")
 
     if home_dir not in user_manager.get_home_dirs(username):
-        raise HTTPException(status_code=403, detail=f"Access to home directory '{home_dir}' denied.")
+        raise HTTPException(
+            status_code=403, detail=f"Access to home directory '{home_dir}' denied."
+        )
 
     base_dir = (pathlib.Path(settings.storage_path) / username / home_dir).resolve()
 
     if not base_dir.is_dir():
         raise HTTPException(status_code=404, detail="Home directory not found.")
 
-    # Normalize the sub_path to prevent traversal tricks like '.../'
-    normalized_sub_path = os.path.normpath(sub_path).lstrip('/')
-    if '..' in normalized_sub_path.split(os.path.sep):
-        raise HTTPException(status_code=403, detail="Directory traversal attempt detected.")
+    normalized_sub_path = os.path.normpath(sub_path).lstrip("/")
+    if ".." in normalized_sub_path.split(os.path.sep):
+        raise HTTPException(
+            status_code=403, detail="Directory traversal attempt detected."
+        )
 
     full_path = (base_dir / normalized_sub_path).resolve()
 
     if base_dir not in full_path.parents and full_path != base_dir:
-        raise HTTPException(status_code=403, detail="Directory traversal attempt detected.")
+        raise HTTPException(
+            status_code=403, detail="Directory traversal attempt detected."
+        )
 
     if check_existence and not full_path.exists():
         raise HTTPException(status_code=404, detail="Path not found.")
 
     return full_path
 
-async def _perform_deletion(task_id: str, username: str, home_dir: str, paths_to_delete: List[str]):
+
+async def _perform_deletion(
+    task_id: str, username: str, home_dir: str, paths_to_delete: List[str]
+):
     DELETION_TASKS[task_id]["status"] = "processing"
     deleted_count = 0
     try:
@@ -2261,16 +2430,18 @@ async def _perform_deletion(task_id: str, username: str, home_dir: str, paths_to
             elif validated_path.is_file():
                 await asyncio.to_thread(os.remove, validated_path)
             deleted_count += 1
-        DELETION_TASKS[task_id].update({
-            "status": "completed",
-            "message": f"Successfully deleted {deleted_count} items."
-        })
+        DELETION_TASKS[task_id].update(
+            {
+                "status": "completed",
+                "message": f"Successfully deleted {deleted_count} items.",
+            }
+        )
     except Exception as e:
         logger.error(f"Deletion task {task_id} failed: {e}")
-        DELETION_TASKS[task_id].update({
-            "status": "error",
-            "message": "An error occurred during deletion."
-        })
+        DELETION_TASKS[task_id].update(
+            {"status": "error", "message": "An error occurred during deletion."}
+        )
+
 
 files_router = APIRouter(
     prefix="/api/files",
@@ -2280,9 +2451,10 @@ files_router = APIRouter(
 
 CHUNK_SIZE = 2 * 1024 * 1024
 
+
 @files_router.get("/download/chunk/{home_dir}", response_model=FileChunkResponse)
 async def download_file_chunk(
-     home_dir: str,
+    home_dir: str,
     path: str = Query(...),
     chunk_index: int = Query(...),
     user: dict = Depends(verify_persistent_storage_enabled),
@@ -2290,20 +2462,21 @@ async def download_file_chunk(
     validated_path = _get_validated_path(user["username"], home_dir, path)
     if not validated_path.is_file():
         raise HTTPException(status_code=404, detail="File not found or is a directory.")
- 
+
     try:
         with open(validated_path, "rb") as f:
             f.seek(chunk_index * CHUNK_SIZE)
             chunk_data = f.read(CHUNK_SIZE)
             is_last_chunk = len(chunk_data) < CHUNK_SIZE
- 
+
         return {
-            "chunk_data_b64": base64.b64encode(chunk_data).decode('utf-8'),
-            "is_last_chunk": is_last_chunk
+            "chunk_data_b64": base64.b64encode(chunk_data).decode("utf-8"),
+            "is_last_chunk": is_last_chunk,
         }
     except Exception as e:
         logger.error(f"Error reading chunk for file {path}: {e}")
         raise HTTPException(status_code=500, detail="Error reading file chunk.")
+
 
 @files_router.post("/create_folder/{home_dir}", response_model=GenericSuccessMessage)
 async def create_folder(
@@ -2315,12 +2488,15 @@ async def create_folder(
     validated_path = _get_validated_path(user["username"], home_dir, req.path)
     new_folder_path = validated_path / req.folder_name
     if new_folder_path.exists():
-        raise HTTPException(status_code=409, detail=f"Folder '{req.folder_name}' already exists.")
+        raise HTTPException(
+            status_code=409, detail=f"Folder '{req.folder_name}' already exists."
+        )
     try:
         new_folder_path.mkdir()
         return {"message": f"Folder '{req.folder_name}' created successfully."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Could not create folder: {e}")
+
 
 @files_router.post("/delete/{home_dir}", response_model=DeleteTaskResponse)
 async def initiate_deletion(
@@ -2331,8 +2507,11 @@ async def initiate_deletion(
     req = DeleteItemsRequest(**decrypted_body)
     task_id = str(uuid.uuid4())
     DELETION_TASKS[task_id] = {"status": "pending"}
-    asyncio.create_task(_perform_deletion(task_id, user["username"], home_dir, req.paths))
+    asyncio.create_task(
+        _perform_deletion(task_id, user["username"], home_dir, req.paths)
+    )
     return {"message": "Deletion task started.", "task_id": task_id}
+
 
 @files_router.get("/delete_status/{task_id}", response_model=DeleteStatusResponse)
 async def check_deletion_status(task_id: str, user: dict = Depends(verify_token)):
@@ -2340,6 +2519,7 @@ async def check_deletion_status(task_id: str, user: dict = Depends(verify_token)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found.")
     return task
+
 
 @files_router.get("/list/{home_dir}", response_model=FileListResponse)
 async def list_files(
@@ -2364,7 +2544,7 @@ async def list_files(
     end = start + per_page
     paginated_items = all_items[start:end]
 
-    home_dir_root = (pathlib.Path(settings.storage_path) / user["username"] / home_dir)
+    home_dir_root = pathlib.Path(settings.storage_path) / user["username"] / home_dir
 
     response_items = []
     for item in paginated_items:
@@ -2372,7 +2552,7 @@ async def list_files(
         item_path = f"/{item.relative_to(home_dir_root)}".replace("\\", "/")
         if str(item.relative_to(home_dir_root)) == ".":
             item_path = "/"
-        
+
         response_items.append(
             {
                 "name": item.name,
@@ -2391,6 +2571,7 @@ async def list_files(
         "path": path,
     }
 
+
 @files_router.post("/upload_to_dir/{home_dir}", response_model=GenericSuccessMessage)
 async def finalize_upload_to_dir(
     home_dir: str,
@@ -2400,31 +2581,46 @@ async def finalize_upload_to_dir(
     try:
         req = FinalizeUploadToDirRequest(**decrypted_body)
 
-        dest_dir_path = _get_validated_path(user["username"], home_dir, req.path, check_existence=True)
+        dest_dir_path = _get_validated_path(
+            user["username"], home_dir, req.path, check_existence=True
+        )
         if not dest_dir_path.is_dir():
-            raise HTTPException(status_code=400, detail="Destination path is not a valid directory.")
+            raise HTTPException(
+                status_code=400, detail="Destination path is not a valid directory."
+            )
 
         reassembled_file_path = await _reassemble_file(
             req.upload_id, req.total_chunks, req.filename
         )
 
         safe_filename = os.path.basename(req.filename)
-        actual_filename = await asyncio.to_thread(_get_unique_filename, str(dest_dir_path), safe_filename)
+        actual_filename = await asyncio.to_thread(
+            _get_unique_filename, str(dest_dir_path), safe_filename
+        )
         final_location = dest_dir_path / actual_filename
 
         try:
-            await asyncio.to_thread(shutil.move, reassembled_file_path, str(final_location))
+            await asyncio.to_thread(
+                shutil.move, reassembled_file_path, str(final_location)
+            )
             await asyncio.to_thread(os.chmod, str(final_location), 0o644)
-            logger.info(f"User '{user['username']}' uploaded '{actual_filename}' to '{home_dir}{req.path}'")
+            logger.info(
+                f"User '{user['username']}' uploaded '{actual_filename}' to '{home_dir}{req.path}'"
+            )
             return {"message": "File uploaded successfully."}
         except Exception as e:
             if os.path.exists(reassembled_file_path):
                 os.remove(reassembled_file_path)
-            logger.error(f"Failed to move finalized upload for user '{user['username']}': {e}")
-            raise HTTPException(status_code=500, detail="Could not place file in destination.")
+            logger.error(
+                f"Failed to move finalized upload for user '{user['username']}': {e}"
+            )
+            raise HTTPException(
+                status_code=500, detail="Could not place file in destination."
+            )
 
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
+
 
 @files_router.post("/share", response_model=PublicShareInfo)
 async def create_public_share(
@@ -2434,22 +2630,24 @@ async def create_public_share(
     try:
         req = ShareFileRequest(**decrypted_body)
         username = user["username"]
-        
+
         source_path = _get_validated_path(username, req.home_dir, req.path)
         if not source_path.is_file():
-            raise HTTPException(status_code=400, detail="Path does not point to a file.")
+            raise HTTPException(
+                status_code=400, detail="Path does not point to a file."
+            )
 
         share_id = str(uuid.uuid4())
         dest_path = os.path.join(settings.public_storage_path, share_id)
-        
+
         await asyncio.to_thread(shutil.copy, source_path, dest_path)
-        
+
         stat_info = source_path.stat()
-        
+
         password_hash = None
         if req.password:
             password_hash = hashlib.sha256(req.password.encode()).hexdigest()
-            
+
         expiry_timestamp = None
         if req.expiry_hours is not None and req.expiry_hours > 0:
             expiry_timestamp = time.time() + (req.expiry_hours * 3600)
@@ -2462,7 +2660,7 @@ async def create_public_share(
             password_hash=password_hash,
             expiry_timestamp=expiry_timestamp,
         )
-        
+
         PUBLIC_SHARES_METADATA[share_id] = metadata
         await save_public_shares_metadata()
 
@@ -2473,7 +2671,7 @@ async def create_public_share(
             created_at=metadata.created_at,
             expiry_timestamp=metadata.expiry_timestamp,
             has_password=bool(metadata.password_hash),
-            url=f"/public/{share_id}"
+            url=f"/public/{share_id}",
         )
 
     except ValidationError as e:
@@ -2482,21 +2680,44 @@ async def create_public_share(
         logger.error(f"Failed to create share for user '{user['username']}': {e}")
         raise HTTPException(status_code=500, detail="Failed to create share.")
 
+
 @files_router.get("/shares", response_model=List[PublicShareInfo])
 async def list_public_shares(user: dict = Depends(verify_public_sharing_enabled)):
-    user_shares = [PublicShareInfo(share_id=sid, url=f"/public/{sid}", has_password=bool(meta.password_hash), **meta.dict()) for sid, meta in PUBLIC_SHARES_METADATA.items() if meta.owner_username == user["username"]]
+    user_shares = [
+        PublicShareInfo(
+            share_id=sid,
+            url=f"/public/{sid}",
+            has_password=bool(meta.password_hash),
+            **meta.dict(),
+        )
+        for sid, meta in PUBLIC_SHARES_METADATA.items()
+        if meta.owner_username == user["username"]
+    ]
     return sorted(user_shares, key=lambda s: s.created_at, reverse=True)
 
+
 @files_router.delete("/share/{share_id}", status_code=204)
-async def delete_public_share(share_id: str, user: dict = Depends(verify_public_sharing_enabled)):
-    if (metadata := PUBLIC_SHARES_METADATA.get(share_id)) and metadata.owner_username == user["username"]:
-        if os.path.exists(public_file_path := os.path.join(settings.public_storage_path, share_id)):
-            try: os.remove(public_file_path)
-            except OSError as e: logger.error(f"Error deleting share file for {share_id}: {e}")
+async def delete_public_share(
+    share_id: str, user: dict = Depends(verify_public_sharing_enabled)
+):
+    if (
+        metadata := PUBLIC_SHARES_METADATA.get(share_id)
+    ) and metadata.owner_username == user["username"]:
+        if os.path.exists(
+            public_file_path := os.path.join(settings.public_storage_path, share_id)
+        ):
+            try:
+                os.remove(public_file_path)
+            except OSError as e:
+                logger.error(f"Error deleting share file for {share_id}: {e}")
         del PUBLIC_SHARES_METADATA[share_id]
         await save_public_shares_metadata()
         return Response(status_code=204)
-    raise HTTPException(status_code=404 if not metadata else 403, detail="Share not found or permission denied.")
+    raise HTTPException(
+        status_code=404 if not metadata else 403,
+        detail="Share not found or permission denied.",
+    )
+
 
 encrypted_router.include_router(admin_router)
 encrypted_router.include_router(homedir_router)
@@ -2504,18 +2725,246 @@ encrypted_router.include_router(session_router)
 encrypted_router.include_router(upload_router)
 encrypted_router.include_router(files_router)
 api_app.include_router(encrypted_router)
+api_app.include_router(collaboration.router)
+internal_router = APIRouter()
+
+
+@api_app.get("/internal/resolve_upstream/{session_id:uuid}")
+async def resolve_upstream_for_caddy(session_id: uuid.UUID):
+    session_id_str = str(session_id)
+    session = SESSIONS_DB.get(session_id_str)
+
+    if not session or "ip" not in session or "port" not in session:
+        raise HTTPException(status_code=404, detail="Session not found.")
+
+    # Prepare the single header Caddy needs
+    upstream_address = f"{session['ip']}:{session['port']}"
+    headers = {"X-Upstream-Host": upstream_address}
+
+    logger.info(
+        f"[{session_id_str}] Caddy is resolving upstream. Responding with headers for {upstream_address} (NO AUTH)"
+    )
+
+    # Return 200 OK with just the host header.
+    return Response(status_code=200, headers=headers)
+
+
+@internal_router.get("/internal/resolve_session/{session_id}")
+async def resolve_session(session_id: str, request: Request):
+    token = request.query_params.get("access_token") or request.cookies.get(
+        f"{settings.session_cookie_name}_{session_id}"
+    )
+    collab_token = request.query_params.get("token") or request.cookies.get(
+        f"collab_token_{session_id}"
+    )
+
+    session = SESSIONS_DB.get(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found.")
+
+    is_standard_auth = token and secrets.compare_digest(
+        token, session.get("access_token", "")
+    )
+    is_collab_controller = False
+    is_collab_viewer = False
+    if session.get("is_collaboration"):
+        is_collab_controller = collab_token and collab_token == session.get(
+            "controller_token"
+        )
+        is_collab_viewer = collab_token and any(
+            v["token"] == collab_token for v in session.get("viewers", [])
+        )
+
+    if not (is_standard_auth or is_collab_controller or is_collab_viewer):
+        raise HTTPException(
+            status_code=403, detail="Forbidden: Invalid session or token."
+        )
+
+    headers = {"X-Upstream-Host": f"{session['ip']}:{session['port']}"}
+    if "custom_user" in session and "password" in session:
+        auth_str = f"{session['custom_user']}:{session['password']}"
+        auth_b64 = base64.b64encode(auth_str.encode()).decode()
+        headers["X-Upstream-Auth"] = f"Basic {auth_b64}"
+
+    return Response(status_code=200, headers=headers)
+
+
+@api_app.get("/{session_id:uuid}/")
+async def initial_session_auth(session_id: uuid.UUID, request: Request):
+    session_id_str = str(session_id)
+    token = request.query_params.get("access_token")
+
+    session = SESSIONS_DB.get(session_id_str)
+    if (
+        not session
+        or not token
+        or not secrets.compare_digest(token, session.get("access_token", ""))
+    ):
+        raise HTTPException(
+            status_code=403, detail="Forbidden: Invalid session or token."
+        )
+
+    redirect_url = request.url.remove_query_params("access_token")
+    response = RedirectResponse(url=str(redirect_url), status_code=303)
+
+    logger.info(
+        f"[{session_id_str}] Initial auth successful. Setting session cookie and redirecting."
+    )
+
+    response.set_cookie(
+        key=f"{settings.session_cookie_name}_{session_id_str}",
+        value=token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        path=f"/{session_id_str}",
+    )
+
+    collab_token = request.query_params.get("token")
+    if collab_token and session.get("is_collaboration"):
+        response.set_cookie(
+            key=f"collab_token_{session_id_str}",
+            value=collab_token,
+            path=f"/{session_id_str}",
+            httponly=True,
+            secure=True,
+            samesite="none",
+        )
+
+    return response
+
+
+api_app.include_router(internal_router)
+
+
+def _load_shares_from_file_api() -> dict:
+    metadata_path = settings.public_shares_metadata_path
+    if not os.path.exists(metadata_path):
+        return {}
+    try:
+        with open(metadata_path, "r") as f:
+            data = yaml.safe_load(f) or {}
+        return {
+            share_id: PublicShareMetadata(**metadata)
+            for share_id, metadata in data.items()
+        }
+    except (IOError, yaml.YAMLError, ValidationError) as e:
+        logger.error(f"[API_LOAD] Error reading or parsing shares metadata file: {e}")
+        return {}
+
+
+@api_app.get("/public/download/{token}")
+async def download_shared_file(token: str):
+    token_data = DOWNLOAD_TOKENS.pop(token, None)
+    if not token_data or token_data.get("expires_at", 0) < time.time():
+        raise HTTPException(
+            status_code=403, detail="Invalid or expired download token."
+        )
+
+    share_id = token_data.get("share_id")
+    all_shares = _load_shares_from_file_api()
+    metadata = all_shares.get(share_id)
+    if not metadata:
+        raise HTTPException(status_code=404, detail="Shared file not found.")
+
+    file_path = os.path.join(settings.public_storage_path, share_id)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Shared file not found on disk.")
+
+    return FileResponse(
+        path=file_path,
+        filename=metadata.original_filename,
+        media_type="application/octet-stream",
+    )
+
+
+@api_app.get("/public/{share_id}")
+async def access_public_share_get(share_id: str):
+    all_shares = _load_shares_from_file_api()
+    metadata = all_shares.get(share_id)
+    if not metadata:
+        raise HTTPException(status_code=404, detail="Share not found.")
+
+    if metadata.expiry_timestamp and metadata.expiry_timestamp < time.time():
+        return HTMLResponse(content="<h1>This link has expired.</h1>", status_code=410)
+
+    if metadata.password_hash:
+        password_page_path = os.path.join(
+            os.path.dirname(__file__), "static", "public_password.html"
+        )
+        if os.path.exists(password_page_path):
+            with open(password_page_path, "r") as f:
+                html_content = (
+                    f.read()
+                    .replace("{{SHARE_ID}}", share_id)
+                    .replace("{{ERROR_MESSAGE}}", "")
+                )
+            return HTMLResponse(content=html_content)
+        return HTMLResponse(content="<h1>Password protected</h1>", status_code=500)
+
+    file_path = os.path.join(settings.public_storage_path, share_id)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Shared file not found on disk.")
+
+    return FileResponse(
+        path=file_path,
+        filename=metadata.original_filename,
+        media_type="application/octet-stream",
+    )
+
+
+@api_app.post("/public/{share_id}")
+async def access_public_share_post(share_id: str, password: str = Form(...)):
+    all_shares = _load_shares_from_file_api()
+    metadata = all_shares.get(share_id)
+    if not metadata:
+        raise HTTPException(status_code=404, detail="Share not found.")
+    if metadata.expiry_timestamp and metadata.expiry_timestamp < time.time():
+        return HTMLResponse(content="<h1>This link has expired.</h1>", status_code=410)
+    if not metadata.password_hash:
+        raise HTTPException(
+            status_code=400, detail="This share is not password protected."
+        )
+
+    submitted_hash = hashlib.sha256(password.encode()).hexdigest()
+    if secrets.compare_digest(submitted_hash, metadata.password_hash):
+        token = secrets.token_urlsafe(32)
+        DOWNLOAD_TOKENS[token] = {"share_id": share_id, "expires_at": time.time() + 60}
+        return RedirectResponse(url=f"/public/download/{token}", status_code=303)
+    else:
+        password_page_path = os.path.join(
+            os.path.dirname(__file__), "static", "public_password.html"
+        )
+        if os.path.exists(password_page_path):
+            with open(password_page_path, "r") as f:
+                html_content = (
+                    f.read()
+                    .replace("{{SHARE_ID}}", share_id)
+                    .replace(
+                        "{{ERROR_MESSAGE}}", "Incorrect password. Please try again."
+                    )
+                )
+            return HTMLResponse(content=html_content, status_code=401)
+        return HTMLResponse(content="<h1>Incorrect Password</h1>", status_code=401)
+
 
 @api_app.get("/", response_class=HTMLResponse, include_in_schema=False)
 async def read_root():
     html_file_path = os.path.join(os.path.dirname(__file__), "static", "index.html")
     if os.path.exists(html_file_path):
-        with open(html_file_path, 'r') as f:
+        with open(html_file_path, "r") as f:
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>SealSkin Server</h1>", status_code=404)
+
 
 @api_app.get("/sealskin.zip", include_in_schema=False)
 async def download_zip():
     zip_file_path = "/sealskin.zip"
     if not os.path.exists(zip_file_path):
-        raise HTTPException(status_code=404, detail="File not found at /sealskin.zip on the server filesystem.")
-    return FileResponse(path=zip_file_path, media_type='application/zip', filename='sealskin.zip')
+        raise HTTPException(
+            status_code=404,
+            detail="File not found at /sealskin.zip on the server filesystem.",
+        )
+    return FileResponse(
+        path=zip_file_path, media_type="application/zip", filename="sealskin.zip"
+    )

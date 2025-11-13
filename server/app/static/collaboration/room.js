@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let videoEncoder = null;
     let remoteStreams = {};
     let mediaInitialized = false;
+    let isInitializingMedia = false;
     let isMicOn = false;
     let isWebcamOn = false;
     let preferredMicId = localStorage.getItem('collab_preferredMicId') || null;
@@ -60,6 +61,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentUserState = [];
     let publicIdToTokenMap = {};
     let currentDesignatedSpeaker = null;
+    let localPublicId = null;
+    let localPublicIdBytes = null;
+    const textEncoder = new TextEncoder();
 
     const sidebarEl = document.getElementById('sidebar');
     const toggleHandle = document.getElementById('sidebar-toggle-handle');
@@ -161,7 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     const startMedia = async () => {
-        if (COLLAB_DATA.userPermission === 'readonly' || !('VideoEncoder' in window && 'AudioEncoder' in window)) {
+        const isStreamingSupported = 'VideoEncoder' in window && 'AudioEncoder' in window && 'MediaStreamTrackProcessor' in window;
+        if (COLLAB_DATA.userPermission === 'readonly' || !isStreamingSupported) {
             if (COLLAB_DATA.userPermission !== 'readonly') alert(t('alerts.webcodecsUnsupported'));
             return false;
         }
@@ -238,23 +243,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         videoEncoder = new VideoEncoder({
             output: (chunk, meta) => {
-                if (!ws || ws.readyState !== WebSocket.OPEN || !isWebcamOn) return;
+                if (!ws || ws.readyState !== WebSocket.OPEN || !isWebcamOn || !localPublicIdBytes) return;
 
                 if (meta && meta.decoderConfig && meta.decoderConfig.description) {
                     const description = meta.decoderConfig.description;
-                    const message = new Uint8Array(1 + description.byteLength);
-                    message[0] = MSG_TYPE.VIDEO_CONFIG;
-                    message.set(new Uint8Array(description), 1);
+                    const message = new Uint8Array(8 + 1 + description.byteLength);
+                    message.set(localPublicIdBytes, 0);
+                    message[8] = MSG_TYPE.VIDEO_CONFIG;
+                    message.set(new Uint8Array(description), 9);
                     ws.send(message.buffer);
                 }
                 
                 if (chunk.byteLength === 0) return;
 
                 const isKeyFrame = chunk.type === 'key';
-                const chunkData = new Uint8Array(chunk.byteLength + 2);
-                chunkData[0] = MSG_TYPE.VIDEO_FRAME;
-                chunkData[1] = isKeyFrame ? 0x01 : 0x00;
-                chunk.copyTo(chunkData.subarray(2));
+                const chunkData = new Uint8Array(8 + chunk.byteLength + 2);
+                chunkData.set(localPublicIdBytes, 0);
+                chunkData[8] = MSG_TYPE.VIDEO_FRAME;
+                chunkData[9] = isKeyFrame ? 0x01 : 0x00;
+                chunk.copyTo(chunkData.subarray(10));
                 ws.send(chunkData.buffer);
             },
             error: (e) => console.error('[Encoder] VideoEncoder error:', e),
@@ -293,11 +300,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         audioEncoder = new AudioEncoder({
             output: (chunk, meta) => {
-                if (ws && ws.readyState === WebSocket.OPEN && isMicOn) {
-                    const chunkData = new Uint8Array(chunk.byteLength + 2);
-                    chunkData[0] = MSG_TYPE.AUDIO_FRAME;
-                    chunkData[1] = 0x00;
-                    chunk.copyTo(chunkData.subarray(2));
+                if (ws && ws.readyState === WebSocket.OPEN && isMicOn && localPublicIdBytes) {
+                    const chunkData = new Uint8Array(8 + chunk.byteLength + 2);
+                    chunkData.set(localPublicIdBytes, 0);
+                    chunkData[8] = MSG_TYPE.AUDIO_FRAME;
+                    chunkData[9] = 0x00;
+                    chunk.copyTo(chunkData.subarray(10));
                     ws.send(chunkData.buffer);
                 }
             },
@@ -584,6 +592,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     currentUserState = data.viewers;
                     currentDesignatedSpeaker = data.designated_speaker;
+
+                    const self = data.viewers.find(u => u.token === COLLAB_DATA.userToken);
+                    if (self && self.publicId && self.publicId !== localPublicId) {
+                        localPublicId = self.publicId;
+                        localPublicIdBytes = textEncoder.encode(localPublicId);
+                    }
 
                     publicIdToTokenMap = {};
                     data.viewers.forEach(user => {
@@ -1038,12 +1052,24 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleMediaToggle = async (type) => {
+        if (isInitializingMedia) {
+            console.warn("Media initialization is already in progress. Please wait.");
+            return;
+        }
+
         if (COLLAB_DATA.userPermission === 'readonly') return;
         unlockAllAudio();
 
         if (!mediaInitialized) {
-            const success = await startMedia();
-            if (!success) return;
+            isInitializingMedia = true;
+            try {
+                const success = await startMedia();
+                if (!success) {
+                    return;
+                }
+            } finally {
+                isInitializingMedia = false;
+            }
         }
 
         if (type === 'mic') {

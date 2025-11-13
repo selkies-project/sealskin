@@ -1,5 +1,6 @@
 fastapi
 uvicorn[standard]
+uvloop
 python-jose[cryptography]
 pydantic
 cryptography
