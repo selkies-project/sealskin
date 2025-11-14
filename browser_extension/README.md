@@ -4,6 +4,8 @@
 
 The SealSkin Browser Extension is the client-side component of the platform, serving as the primary user entry point for interacting with the secure remote environment. It integrates directly into the Chrome browser to capture user intent—such as opening a link, file, or search query—and securely forwards these actions to the SealSkin server for processing within an isolated application. The extension is responsible for all client-side cryptographic operations, state management, and user interface rendering.
 
+Install the extension [HERE](https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk)
+
 ## Core Components and Architecture
 
 The extension is built using Chrome's Manifest V3 architecture and is divided into several key components, each with a distinct responsibility.
