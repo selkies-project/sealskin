@@ -2810,13 +2810,17 @@ async def initial_session_auth(session_id: uuid.UUID, request: Request):
     logger.info(
         f"[{session_id_str}] Initial auth successful. Setting session cookie and redirecting."
     )
+    
+    is_embedded = request.query_params.get("embedded") == "true"
+    samesite_policy = "none" if is_embedded else "lax"
+    logger.info(f"[{session_id_str}] Setting session cookie with SameSite='{samesite_policy}'.")
 
     response.set_cookie(
         key=f"{settings.session_cookie_name}_{session_id_str}",
         value=token,
         httponly=True,
         secure=True,
-        samesite="lax",
+        samesite=samesite_policy,
         path=f"/{session_id_str}",
     )
 
@@ -2832,7 +2836,6 @@ async def initial_session_auth(session_id: uuid.UUID, request: Request):
         )
 
     return response
-
 
 api_app.include_router(internal_router)
 
