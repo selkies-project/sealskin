@@ -243,20 +243,22 @@ function renderFileList() {
   const items = searchTerm
       ? state.currentFileList.filter(item => item.name.toLowerCase().includes(searchTerm))
       : state.currentFileList;
-
-  const colSpan = state.sharingAllowed ? 5 : 4;
+  const colSpan = 5;
   if (items.length === 0) {
     fileListBody.innerHTML = `<tr class="empty-row"><td colspan="${colSpan}">${t('files.placeholders.folderEmpty')}</td></tr>`;
     return;
   }
-
   fileListBody.innerHTML = items.map(item => {
-    const shareButton = (item.is_dir || !state.sharingAllowed) ?
-      '' :
-      `<button class="secondary share-btn" data-path="${item.path}"><i class="fas fa-share-alt"></i> ${t('common.share')}</button>`;
     const isProtectedPath = state.currentHome !== '_sealskin_shared_files' &&
       (item.path === '/Desktop' || item.path === '/Desktop/files');
-    const actionsCell = state.sharingAllowed ? `<td class="col-actions">${shareButton}</td>` : '';
+    let actionButtons = '';
+    if (state.currentHome === '_sealskin_shared_files' && !item.is_dir) {
+        actionButtons += `<button class="secondary open-btn" data-filename="${item.name}"><i class="fas fa-play"></i> ${t('common.open')}</button>`;
+    }
+    if (!item.is_dir && state.sharingAllowed) {
+        actionButtons += `<button class="secondary share-btn" data-path="${item.path}"><i class="fas fa-share-alt"></i> ${t('common.share')}</button>`;
+    } 
+    
     return `
         <tr data-path="${item.path}" data-is-dir="${item.is_dir}" class="${state.selectedItems.has(item.path) ? 'selected' : ''}">
             <td class="col-check"><input type="checkbox" data-path="${item.path}" ${state.selectedItems.has(item.path) ? 'checked' : ''} ${isProtectedPath ? 'disabled' : ''}></td>
@@ -268,9 +270,13 @@ function renderFileList() {
             </td>
             <td class="col-size">${item.is_dir ? '—' : formatBytes(item.size)}</td>
             <td class="col-modified">${formatDate(item.mtime)}</td>
-            ${actionsCell}
+            <td class="col-actions">
+                <div class="cell-wrapper">
+                    ${actionButtons}
+                </div>
+            </td>
         </tr>
-    `
+    `;
   }).join('');
 }
 
@@ -413,6 +419,14 @@ function handleItemClick(e) {
   const path = row.dataset.path;
   const isDir = row.dataset.isDir === 'true';
   const checkbox = row.querySelector('input[type="checkbox"]');
+
+  if (e.target.closest('.open-btn')) {
+      const filename = e.target.closest('.open-btn').dataset.filename;
+      chrome.storage.local.set({
+          'sealskinContext': { action: 'server-file', filename: filename }
+      }, () => chrome.runtime.sendMessage({ type: 'openPopup' }));
+      return;
+  }
 
   if (e.target.closest('.share-btn')) {
     const filename = row.querySelector('.file-item-name span').textContent;

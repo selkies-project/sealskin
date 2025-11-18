@@ -6,6 +6,12 @@
     background-color: var(--bg-secondary);
 }
 
+#homedir-nav {
+    overflow-y: auto;
+    flex-grow: 1;
+    min-height: 0;
+}
+
 .main-panel {
     flex-grow: 1;
     display: flex;
@@ -120,6 +126,10 @@
     font-size: 1.2rem;
 }
 .file-item-name i.fa-folder { color: var(--accent-primary); }
+
+.col-actions .cell-wrapper {
+    justify-content: flex-end;
+}
 
 .col-actions button {
     padding: 0.4rem 0.8rem;

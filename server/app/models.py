@@ -311,3 +311,13 @@ class PublicShareMetadata(BaseModel):
     size_bytes: int
     password_hash: Optional[str] = None
     expiry_timestamp: Optional[float] = None
+
+class LaunchRequestFilePath(BaseModel):
+    application_id: str
+    home_name: Optional[str] = None
+    filename: str
+    language: Optional[str] = None
+    selected_gpu: Optional[str] = None
+
+class LaunchFromStorageRequest(BaseModel):
+    filename: str

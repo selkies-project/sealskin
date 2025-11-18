@@ -1436,6 +1436,44 @@ async def launch_file(
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
 
+@encrypted_router.post("/api/launch/file_path", response_model=LaunchResponse)
+async def launch_file_path(
+    decrypted_body: dict = Depends(get_decrypted_request_body),
+    auth_user: dict = Depends(verify_persistent_storage_enabled),
+):
+    try:
+        req = LaunchRequestFilePath(**decrypted_body)
+
+        if req.home_name and req.home_name.lower() == "cleanroom":
+            raise HTTPException(
+                status_code=400,
+                detail="Cannot open a server-side file in 'Cleanroom' mode.",
+            )
+
+        username = auth_user["username"]
+        shared_files_path = os.path.abspath(
+            os.path.join(settings.storage_path, username, "_sealskin_shared_files")
+        )
+
+        safe_filename = os.path.basename(req.filename)
+        file_location = os.path.join(shared_files_path, safe_filename)
+
+        if not os.path.exists(file_location):
+            raise HTTPException(
+                status_code=404, detail=f"File '{safe_filename}' not found."
+            )
+
+        container_file_path = os.path.join(
+            settings.container_config_path, "Desktop", "files", safe_filename
+        )
+
+        env_vars = {"SEALSKIN_FILE": container_file_path}
+
+        return await _launch_common(
+            req.application_id, username, auth_user["effective_settings"], req.home_name, env_vars, req.language, req.selected_gpu,
+        )
+    except ValidationError as e:
+        raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
 
 session_router = APIRouter(
     prefix="/api/sessions",
@@ -1883,6 +1921,17 @@ async def update_installed_app(
         raise HTTPException(
             status_code=400, detail="App ID in path does not match body."
         )
+
+    if app_update.logo and not app_update.logo.startswith('/api/app_icon/'):
+        try:
+            icon_data = base64.b64decode(app_update.logo)
+            icon_path = os.path.join(settings.app_icons_path, f"{app_id}.png")
+            with open(icon_path, "wb") as f:
+                f.write(icon_data)
+            app_update.logo = f"/api/app_icon/{app_id}"
+            logger.info(f"Updated and saved custom icon for app {app_id}")
+        except (ValueError, TypeError, base64.binascii.Error):
+            logger.warning(f"Could not decode logo for app {app_id}. Assuming it's a URL and leaving as is.")
 
     if app_update.provider_config.custom_autostart_script_b64 == "":
         app_update.provider_config.custom_autostart_script_b64 = None
@@ -2718,6 +2767,19 @@ async def delete_public_share(
         detail="Share not found or permission denied.",
     )
 
+@files_router.post("/launch_from_storage", response_model=dict)
+async def launch_from_storage(
+    decrypted_body: dict = Depends(get_decrypted_request_body),
+    user: dict = Depends(verify_persistent_storage_enabled),
+):
+    try:
+        req = LaunchFromStorageRequest(**decrypted_body)
+        return {
+            "action": "launch",
+            "context": {"action": "server-file", "filename": req.filename},
+        }
+    except ValidationError as e:
+        raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
 
 encrypted_router.include_router(admin_router)
 encrypted_router.include_router(homedir_router)
@@ -2737,7 +2799,6 @@ async def resolve_upstream_for_caddy(session_id: uuid.UUID):
     if not session or "ip" not in session or "port" not in session:
         raise HTTPException(status_code=404, detail="Session not found.")
 
-    # Prepare the single header Caddy needs
     upstream_address = f"{session['ip']}:{session['port']}"
     headers = {"X-Upstream-Host": upstream_address}
 
@@ -2745,7 +2806,6 @@ async def resolve_upstream_for_caddy(session_id: uuid.UUID):
         f"[{session_id_str}] Caddy is resolving upstream. Responding with headers for {upstream_address} (NO AUTH)"
     )
 
-    # Return 200 OK with just the host header.
     return Response(status_code=200, headers=headers)
 
 

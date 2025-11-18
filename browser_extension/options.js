@@ -106,6 +106,7 @@ const appInstallForm = document.getElementById('app-install-form');
 const appStoreSelect = document.getElementById('app-store-select');
 const refreshAppStoreBtn = document.getElementById('refresh-app-store-btn');
 const addAppStoreForm = document.getElementById('add-app-store-form');
+const addManualAppBtn = document.getElementById('add-manual-app-btn');
 const availableAppsContainer = document.getElementById('available-apps-container');
 const installedAppsTbody = document.querySelector('#installed-apps-table tbody');
 const imageUpdateModal = document.getElementById('image-update-modal');
@@ -510,18 +511,17 @@ function initializeAppLaboratoryTab() {
     updateBtn.disabled = true;
   }
 
-  function loadLabData(app) {
+  async function loadLabData(app) {
     labState.isEditing = true;
     labState.currentApp = app;
-    labState.base64Icon = app.logo;
 
     appNameInput.value = app.name;
     appNameInput.disabled = true;
     baseAppSelect.value = app.base_app_id;
     baseAppSelect.disabled = true;
-    formatLogoSrc(app.logo).then(src => {
-        iconPreview.src = src;
-    });
+    const iconSrc = await formatLogoSrc(app.logo);
+    iconPreview.src = iconSrc;
+    labState.base64Icon = iconSrc;
     usersInput.value = app.users.join(',');
     groupsInput.value = app.groups.join(',');
 
@@ -538,7 +538,7 @@ function initializeAppLaboratoryTab() {
     updateBtn.disabled = true;
   }
 
-  labAppSelect.addEventListener('change', (e) => {
+  labAppSelect.addEventListener('change', async (e) => {
     const appId = e.target.value;
     if (appId === 'new') {
       resetLabForm();
@@ -548,7 +548,7 @@ function initializeAppLaboratoryTab() {
     }
   });
 
-  baseAppSelect.addEventListener('change', () => {
+  baseAppSelect.addEventListener('change', async () => {
     if (baseAppSelect.disabled) {
       return;
     }
@@ -565,10 +565,9 @@ function initializeAppLaboratoryTab() {
           console.error("Failed to decode base app autostart script:", e);
         }
       }
-      labState.base64Icon = baseApp.logo;
-      formatLogoSrc(baseApp.logo).then(src => {
-        iconPreview.src = src;
-      });
+      const iconSrc = await formatLogoSrc(baseApp.logo);
+      iconPreview.src = iconSrc;
+      labState.base64Icon = iconSrc;
     } else {
       iconPreview.src = 'icons/icon128.png';
       labState.base64Icon = '';
@@ -610,8 +609,12 @@ function initializeAppLaboratoryTab() {
     updateBtn.disabled = true;
 
     try {
-        const payload = { ...labState.currentApp };
-        payload.logo = labState.base64Icon.startsWith('data:image') ? labState.base64Icon.split(',')[1] : labState.base64Icon;
+        let payload = { ...labState.currentApp };
+        if (labState.base64Icon.startsWith('data:image')) {
+            payload.logo = labState.base64Icon.split(',')[1];
+        } else {
+            delete payload.logo;
+        }
         payload.users = usersInput.value.split(',').map(s => s.trim()).filter(Boolean);
         payload.groups = groupsInput.value.split(',').map(s => s.trim()).filter(Boolean);
         payload.provider_config.custom_autostart_script_b64 = btoa(autostartScriptTextarea.value);
@@ -624,6 +627,9 @@ function initializeAppLaboratoryTab() {
         const appIndex = adminData.installedApps.findIndex(a => a.id === updatedApp.id);
         if (appIndex > -1) adminData.installedApps[appIndex] = updatedApp;
         labState.currentApp = updatedApp;
+        const iconSrc = await formatLogoSrc(updatedApp.logo);
+        iconPreview.src = iconSrc;
+        labState.base64Icon = iconSrc;
         labState.isDirty = false;
         displayStatus(t('options.status.appSaved', { name: updatedApp.name, action: t('options.status.appSaveActions.updated') }));
         return true;
@@ -638,6 +644,12 @@ function initializeAppLaboratoryTab() {
   async function handleLabLaunch() {
     if (labState.currentSessionId) {
       try {
+        if (labState.isDirty) {
+            const success = await handleLabUpdate();
+            if (!success) {
+                if (!confirm("Failed to save changes. Close anyway?")) return;
+            }
+        }
         displayStatus(t('options.status.closingSession'));
         await secureFetch(`/api/admin/sessions/${labState.currentSessionId}`, { method: 'DELETE' });
         labState.currentSessionId = null;
@@ -1486,8 +1498,15 @@ function renderAvailableAppsGrid() {
   });
 }
 
-function showInstallModal(appData, existingInstall = null) {
+function showInstallModal(appData, existingInstall = null, isManual = false) {
   const isEditing = !!existingInstall;
+  const manualInstallNote = document.getElementById('manual-install-note');
+
+  if (isManual) {
+    manualInstallNote.style.display = 'block';
+  } else {
+    manualInstallNote.style.display = 'none';
+  }
   document.getElementById('app-install-modal-title').textContent = isEditing ? t('options.modals.editAppTitle', {
     appName: existingInstall.name
   }) : t('options.modals.installAppTitle', {
@@ -1496,7 +1515,7 @@ function showInstallModal(appData, existingInstall = null) {
 
   document.getElementById('install-app-id').value = isEditing ? existingInstall.id : '';
   document.getElementById('install-source-app-id').value = isEditing ? existingInstall.source_app_id : appData.id;
-  document.getElementById('install-source-name').value = appStoreSelect.options[appStoreSelect.selectedIndex].text;
+  document.getElementById('install-source-name').value = isManual ? 'manual' : appStoreSelect.options[appStoreSelect.selectedIndex].text;
   document.getElementById('install-app-name').value = isEditing ? existingInstall.name : appData.name;
   document.getElementById('install-app-image').value = isEditing ? existingInstall.provider_config.image : appData.provider_config.image;
 
@@ -2403,6 +2422,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  addManualAppBtn.addEventListener('click', () => {
+    const manualAppData = {
+        id: '',
+        name: 'My Custom App',
+        logo: '',
+        provider_config: {
+            image: 'image/name:tag',
+            nvidia_support: true,
+            dri3_support: true,
+            url_support: true,
+            open_support: true,
+            autostart: false,
+            custom_autostart_script_b64: null,
+            extensions: [],
+        }
+    };
+    showInstallModal(manualAppData, null, true);
+  });
+
   availableAppsContainer.addEventListener('click', (e) => {
     const card = e.target.closest('.app-card[data-appid]');
     if (!card) return;
@@ -2469,6 +2507,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       appInstallModal.style.display = 'none';
       await refreshAppData();
       await openTab('InstalledApps');
+      const searchInput = document.getElementById('installedApps-search');
+      searchInput.value = payload.name;
+      searchInput.dataset.transient = 'true';
+      searchInput.dispatchEvent(new Event('input'));
     } catch (error) {
       displayStatus(t('options.status.appSaveFailed', {
         error: error.message

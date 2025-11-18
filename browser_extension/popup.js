@@ -152,6 +152,12 @@ function setContextualStatus() {
     });
     setStatus(message);
     statusDiv.title = message;
+  } else if (sealskinContext.action === 'server-file' && sealskinContext.filename) {
+    const message = t('popup.status.openingServerFile', {
+        filename: sealskinContext.filename
+    });
+    setStatus(message);
+    statusDiv.title = message;
   }
 }
 
@@ -473,23 +479,23 @@ async function closeSession(sessionId) {
   if (!card) return;
 
   const closeButton = card.querySelector('[data-action="close"]');
-  
+
   closeButton.disabled = true;
   closeButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
 
   chrome.runtime.sendMessage({ type: 'closeSession', payload: { sessionId } }, (response) => {
-    
+
     if (chrome.runtime.lastError || !response || !response.success) {
       console.error('Failed to close session in background:', chrome.runtime.lastError || response.error);
       setStatus(t('popup.status.errorClosingSession', { message: chrome.runtime.lastError?.message || response?.error || 'Unknown error' }), true);
-      
+
       closeButton.disabled = false;
       closeButton.innerHTML = `<i class="fas fa-times"></i>`;
 
     } else {
       card.remove();
       activeSessions = activeSessions.filter(s => s.session_id !== sessionId);
-      
+
       if (activeSessions.length === 0) {
         renderActiveSessions(sealskinContext.action === 'file');
       }
@@ -770,6 +776,13 @@ async function handleLaunch() {
 
       setStatus(t('popup.uploadStorageView.finalizing'));
       launchBtnText.textContent = t('popup.launchView.launchingButton');
+    } else if (sealskinContext.action === 'server-file') {
+        setStatus(t('popup.status.preparingSession'));
+        endpoint = '/api/launch/file_path';
+        payload.filename = sealskinContext.filename;
+        if (finalHomeName === 'cleanroom') {
+            throw new Error("Cannot open a server-side file in 'Cleanroom' mode. Please select a persistent storage directory.");
+        }
     } else {
       throw new Error(t('popup.status.unknownAction'));
     }
@@ -784,7 +797,7 @@ async function handleLaunch() {
       type: 'createTabAndTrack',
       payload: { sessionId: sessionId, session_url: data.session_url }
     });
-    
+
     window.close();
 
   } catch (error) {
@@ -844,7 +857,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       launchProfileKey = 'workflow_profile_url';
       saveOptionsLabel.textContent = t('popup.launchView.saveOptionsForUrl');
       saveOptionsContainer.style.display = 'block';
-    } else if (sealskinContext.action === 'file') {
+    } else if (sealskinContext.action === 'file' || sealskinContext.action === 'server-file') {
       const filename = sealskinContext.filename || '';
       if (hasValidExtension(filename)) {
         const extension = filename.split('.').pop().toLowerCase();

@@ -322,7 +322,7 @@
                     <form id="add-user-form">
                         <div class="form-group"><label for="newUsername"><span data-i18n="common.username">Username</span>:</label><input type="text" id="newUsername" required></div>
                         <div class="form-group"><label for="newUserPublicKey" data-i18n="options.users.publicKeyOptionalLabel">Public Key (Optional):</label><textarea id="newUserPublicKey" rows="4" data-i18n-placeholder="options.users.publicKeyPlaceholder" placeholder="Paste user's public key here, or leave blank to generate one."></textarea></div>
-                        
+
                         <h4 data-i18n="options.users.settingsTitle">User Settings</h4>
                         <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem 2rem;">
                             <div class="form-group">
@@ -368,7 +368,7 @@
                     <form id="add-group-form">
                         <div class="form-group"><label for="newGroupName" data-i18n="options.groups.nameLabel">Group Name:</label><input type="text" id="newGroupName" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen."></div>
                         <h4 data-i18n="options.groups.overrideTitle">Group Override Settings</h4>
-                        
+
                         <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem 2rem; margin-bottom: 1.5rem;">
                              <div class="form-group">
                                 <label for="newGroupSessionLimit" data-i18n="options.users.sessionLimitLabel">Sessions limit</label>
@@ -417,7 +417,10 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 data-i18n="options.appStore.title">App Stores</h3>
-                        <button id="refresh-app-store-btn" class="secondary" data-i18n-title="options.appStore.refreshTitle" title="Refresh selected store"><i class="fas fa-sync-alt"></i> <span data-i18n="common.refresh">Refresh</span></button>
+                        <div class="button-group">
+                            <button id="add-manual-app-btn" class="secondary"><i class="fas fa-plus"></i> <span data-i18n="options.appStore.addManual">Add Manual App</span></button>
+                            <button id="refresh-app-store-btn" class="secondary" data-i18n-title="options.appStore.refreshTitle" title="Refresh selected store"><i class="fas fa-sync-alt"></i> <span data-i18n="common.refresh">Refresh</span></button>
+                        </div>
                     </div>
                     <div class="form-grid">
                         <div class="form-group">
@@ -511,7 +514,7 @@
                     <div class="card">
                         <h4 class="form-section-header" data-i18n="options.modals.features">UI Settings</h4>
                         <div id="template-form-ui" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
-                        
+
                         <h4 class="form-section-header" data-i18n="options.modals.advancedSettings">App Settings</h4>
                         <div id="template-form-app" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
                     </div>
@@ -722,6 +725,7 @@
                 <input type="hidden" id="install-app-id">
                 <input type="hidden" id="install-source-app-id">
                 <input type="hidden" id="install-source-name">
+                <p id="manual-install-note" class="description" style="display: none; color: var(--color-warning); border-left: 3px solid var(--color-warning); padding-left: 1rem; margin-bottom: 1.5rem;" data-i18n="options.modals.manualInstallNote">Note: Manually added images should be based on a selkies-baseimage compatible image.</p>
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="install-app-name" data-i18n="options.modals.customNameLabel">Custom Name</label>
@@ -751,7 +755,7 @@
                     <div class="form-group"><label><input type="checkbox" id="install-open-support"> <span data-i18n="options.modals.fileSupport">File Opening Support</span></label></div>
                     <div class="form-group"><label><input type="checkbox" id="install-auto-update"> <span data-i18n="options.modals.autoUpdate">Auto Update Image</span></label></div>
                 </div>
-                
+
                 <h4 style="margin-top: 2rem;" data-i18n="options.modals.advancedSettings">Advanced Settings</h4>
                 <div class="form-group">
                     <label for="install-app-template" data-i18n="options.modals.appTemplateLabel">Application Template</label>
