@@ -133,19 +133,27 @@ async def collaborative_room(
             {
                 "token": new_viewer_token,
                 "slot": None,
+                "mk_control": False,
                 "username": f"User-{random.randint(100, 999)}",
                 "permission": permission,
             }
         )
 
+        mk_owner = session_data.get("mk_owner_token")
+
         all_tokens = {
             controller_token: {
                 "role": "controller",
                 "slot": session_data.get("controller_slot"),
+                "mk_control": (mk_owner == controller_token) if mk_owner else False,
             }
         }
         for viewer in session_data["viewers"]:
-            all_tokens[viewer["token"]] = {"role": "viewer", "slot": viewer["slot"]}
+            all_tokens[viewer["token"]] = {
+                "role": "viewer",
+                "slot": viewer["slot"],
+                "mk_control": viewer["token"] == mk_owner,
+            }
 
         try:
             async with httpx.AsyncClient() as client:
@@ -367,6 +375,9 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                     viewer_token = data.get("viewer_token")
                     slot = data.get("slot")
                     await handle_assign_slot(session_id_str, viewer_token, slot)
+                elif action == "assign_mk" and is_controller:
+                    target_token = data.get("token")
+                    await handle_assign_mk(session_id_str, target_token)
                 elif action == "set_designated_speaker" and is_controller:
                     speaker_token = data.get("token")
                     session_data["designated_speaker"] = speaker_token
@@ -483,6 +494,7 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
 
             session_data = api.SESSIONS_DB.get(session_id_str)
             viewer_removed = False
+            mk_reverted = False
             if session_data:
                 if session_data.get("designated_speaker") == token:
                     session_data["designated_speaker"] = None
@@ -511,6 +523,18 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                                 session_id_str, notification_payload
                             )
 
+                    if session_data.get("mk_owner_token") == token:
+                        session_data["mk_owner_token"] = None
+                        mk_reverted = True
+                        await broadcast_to_room(
+                            session_id_str,
+                            {
+                                "type": "mk_change",
+                                "message": f"{disconnected_viewer.get('username', 'User')} disconnected. MK control reverted to Controller.",
+                                "timestamp": int(time.time() * 1000),
+                            },
+                        )
+
                     initial_count = len(session_data["viewers"])
                     session_data["viewers"] = [
                         v for v in session_data["viewers"] if v.get("token") != token
@@ -524,15 +548,22 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                     )
                     api.SESSIONS_DB[session_id_str] = session_data
                     await api.save_sessions_to_disk()
+                    mk_owner = session_data.get("mk_owner_token")
+                    controller_token = session_data["controller_token"]
 
                     all_tokens = {
-                        session_data["controller_token"]: {
+                        controller_token: {
                             "role": "controller",
                             "slot": session_data.get("controller_slot"),
+                            "mk_control": (mk_owner == controller_token) if mk_owner else True,
                         }
                     }
                     for v in session_data["viewers"]:
-                        all_tokens[v["token"]] = {"role": "viewer", "slot": v["slot"]}
+                        all_tokens[v["token"]] = {
+                            "role": "viewer",
+                            "slot": v["slot"],
+                            "mk_control": v["token"] == mk_owner,
+                        }
 
                     try:
                         async with httpx.AsyncClient() as client:
@@ -584,6 +615,7 @@ async def broadcast_state(session_id: str):
         "username": "Controller",
         "slot": session_data.get("controller_slot"),
         "online": connections.get("controller") is not None,
+        "has_mk": (session_data.get("mk_owner_token") == session_data.get("controller_token")) or (session_data.get("mk_owner_token") is None),
         "permission": "controller",
         "publicId": connections["controller"]["public_id"]
         if connections.get("controller")
@@ -595,6 +627,7 @@ async def broadcast_state(session_id: str):
     for v in session_data.get("viewers", []):
         viewer_info = v.copy()
         is_online = v["token"] in online_viewer_tokens
+        viewer_info["has_mk"] = session_data.get("mk_owner_token") == v["token"]
         viewer_info["online"] = is_online
         if is_online:
             viewer_conn = connections["viewers"].get(v["token"])
@@ -670,14 +703,21 @@ async def handle_assign_slot(session_id: str, viewer_token: str, slot: Optional[
             f"{target_username} was unassigned from Gamepad {old_slot_for_target}."
         )
 
+    mk_owner = session_data.get("mk_owner_token")
+    controller_token = session_data["controller_token"]
     all_tokens = {
-        session_data["controller_token"]: {
+        controller_token: {
             "role": "controller",
             "slot": session_data.get("controller_slot"),
+            "mk_control": (mk_owner == controller_token) if mk_owner else True,
         }
     }
     for v in session_data["viewers"]:
-        all_tokens[v["token"]] = {"role": "viewer", "slot": v["slot"]}
+        all_tokens[v["token"]] = {
+            "role": "viewer",
+            "slot": v["slot"],
+            "mk_control": v["token"] == mk_owner,
+        }
 
     try:
         async with httpx.AsyncClient() as client:
@@ -706,3 +746,66 @@ async def handle_assign_slot(session_id: str, viewer_token: str, slot: Optional[
         logger.error(
             f"[{session_id}] Failed to update downstream tokens for slot assignment: {e}"
         )
+
+
+async def handle_assign_mk(session_id: str, target_token: Optional[str]):
+    session_data = api.SESSIONS_DB.get(session_id)
+    if not session_data:
+        return
+
+    if target_token == session_data.get("controller_token"):
+        target_token = None
+
+    current_owner = session_data.get("mk_owner_token")
+    if current_owner == target_token:
+        return
+
+    session_data["mk_owner_token"] = target_token
+
+    username = "Controller"
+    if target_token:
+        for v in session_data.get("viewers", []):
+            if v["token"] == target_token:
+                username = v.get("username", "User")
+                break
+
+    mk_owner = session_data.get("mk_owner_token")
+    controller_token = session_data["controller_token"]
+    all_tokens = {
+        controller_token: {
+            "role": "controller",
+            "slot": session_data.get("controller_slot"),
+            "mk_control": (mk_owner == controller_token) if mk_owner else True,
+        }
+    }
+    for v in session_data["viewers"]:
+        all_tokens[v["token"]] = {
+            "role": "viewer",
+            "slot": v["slot"],
+            "mk_control": v["token"] == mk_owner,
+        }
+
+    try:
+        async with httpx.AsyncClient() as client:
+            res = await client.post(
+                f"http://{session_data['ip']}:8083/tokens",
+                json=all_tokens,
+                headers={"Authorization": f"Bearer {session_data['master_token']}"},
+            )
+            res.raise_for_status()
+
+        api.SESSIONS_DB[session_id] = session_data
+        await api.save_sessions_to_disk()
+
+        msg = f"Mouse & Keyboard control assigned to {username}."
+        await broadcast_to_room(
+            session_id,
+            {
+                "type": "mk_change",
+                "message": msg,
+                "timestamp": int(time.time() * 1000),
+            },
+        )
+        await broadcast_state(session_id)
+    except Exception as e:
+        logger.error(f"[{session_id}] Failed to assign MK control: {e}")

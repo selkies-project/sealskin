@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let replyingTo = null;
     let notificationAudioCtx;
     let gamepadIcons = {};
+    let mkIcon = null;
     const GAMEPAD_COUNT = 4;
     let currentUserState = [];
     let publicIdToTokenMap = {};
@@ -652,6 +653,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'user_left':
                 case 'username_changed':
                 case 'gamepad_change':
+                case 'mk_change':
                     appendChatMessage(data, 'system');
                     break;
                 case 'control':
@@ -956,6 +958,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'user_left': content = t('systemMessages.userLeft', { username: escapeHTML(data.username) }); break;
                 case 'username_changed': content = t('systemMessages.usernameChanged', { old_username: escapeHTML(data.old_username), new_username: escapeHTML(data.new_username) }); break;
                 case 'gamepad_change': content = data.message; break;
+                case 'mk_change': content = data.message; break;
             }
             msgEl.className = 'system-message';
             msgEl.innerHTML = `<span>${content}</span>`;
@@ -1130,6 +1133,21 @@ document.addEventListener('DOMContentLoaded', () => {
         sourceBox.innerHTML = '';
         gamepadIcons = {};
 
+        mkIcon = document.createElement('div');
+        mkIcon.id = 'mk-icon';
+        mkIcon.className = 'gamepad-icon mk-icon';
+        if (COLLAB_DATA.userRole === 'controller') {
+            mkIcon.classList.add('draggable');
+            mkIcon.draggable = true;
+        }
+        mkIcon.innerHTML = `<i class="fas fa-keyboard"></i><i class="fas fa-mouse" style="margin-left: 3px; font-size: 0.8em;"></i>`;
+
+        if (COLLAB_DATA.userRole === 'controller') {
+            document.getElementById('local-user-container').appendChild(mkIcon);
+        } else {
+            sourceBox.appendChild(mkIcon);
+        }
+
         for (let i = 1; i <= GAMEPAD_COUNT; i++) {
             const icon = document.createElement('div');
             icon.id = `gamepad-icon-${i}`;
@@ -1150,6 +1168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!sourceBox || Object.keys(gamepadIcons).length === 0) return;
 
         const assignedGamepadIds = new Set();
+        let mkAssigned = false;
         users.forEach(user => {
             if (user.slot) {
                 assignedGamepadIds.add(user.slot);
@@ -1162,6 +1181,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     container.appendChild(icon);
                 }
             }
+
+            if (user.has_mk) {
+                mkAssigned = true;
+                const container = user.token === COLLAB_DATA.userToken
+                    ? document.getElementById('local-user-container')
+                    : document.getElementById(`container-${user.token}`);
+
+                if (mkIcon && container && mkIcon.parentElement !== container) {
+                    container.appendChild(mkIcon);
+                }
+            }
         });
 
         for (let i = 1; i <= GAMEPAD_COUNT; i++) {
@@ -1170,6 +1200,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (icon && icon.parentElement !== sourceBox) {
                     sourceBox.appendChild(icon);
                 }
+            }
+        }
+
+        if (!mkAssigned && mkIcon && mkIcon.parentElement !== sourceBox) {
+            if (COLLAB_DATA.userRole === 'controller') {
+                const localContainer = document.getElementById('local-user-container');
+                if (localContainer) localContainer.appendChild(mkIcon);
+            } else {
+                sourceBox.appendChild(mkIcon);
             }
         }
     };
@@ -1185,8 +1224,14 @@ document.addEventListener('DOMContentLoaded', () => {
         draggedElement = target;
 
         if (target.classList.contains('gamepad-icon')) {
-            document.body.classList.add('dragging-gamepad');
-            e.dataTransfer.setData('text/plain', target.dataset.gamepadId);
+            if (target.classList.contains('mk-icon')) {
+                document.body.classList.add('dragging-mk');
+                e.dataTransfer.setData('type', 'mk');
+            } else {
+                document.body.classList.add('dragging-gamepad');
+                e.dataTransfer.setData('type', 'gamepad');
+                e.dataTransfer.setData('text/plain', target.dataset.gamepadId);
+            }
             e.dataTransfer.effectAllowed = 'move';
             
             setTimeout(() => target.classList.add('dragging'), 0);
@@ -1194,7 +1239,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.video-container').forEach(container => {
                 const userToken = container.dataset.userToken;
                 const user = currentUserState.find(u => u.token === userToken);
-                if (container.id === 'gamepad-source-box' || (user && user.slot === null)) {
+                if (container.id === 'gamepad-source-box' || user) {
                     container.classList.add('can-drop-gamepad');
                 }
             });
@@ -1217,7 +1262,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const dropTarget = e.target.closest('.video-container');
 
-        if (document.body.classList.contains('dragging-gamepad')) {
+        if (document.body.classList.contains('dragging-gamepad') || document.body.classList.contains('dragging-mk')) {
             if (dropTarget && dropTarget.classList.contains('can-drop-gamepad')) {
                 e.dataTransfer.dropEffect = 'move';
             } else {
@@ -1238,23 +1283,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     videoGrid.addEventListener('drop', (e) => {
         e.preventDefault();
-        if (!document.body.classList.contains('dragging-gamepad')) return;
+        const isGamepad = document.body.classList.contains('dragging-gamepad');
+        const isMk = document.body.classList.contains('dragging-mk');
+
+        if (!isGamepad && !isMk) return;
 
         const dropTarget = e.target.closest('.video-container.can-drop-gamepad');
         if (!dropTarget) return;
 
-        const gamepadId = parseInt(e.dataTransfer.getData('text/plain'), 10);
-        const draggedIcon = document.getElementById(`gamepad-icon-${gamepadId}`);
-        
-        if (dropTarget.id === 'gamepad-source-box') {
-            const parentContainer = draggedIcon.parentElement;
-            if (parentContainer && parentContainer.id !== 'gamepad-source-box') {
-                const userToken = parentContainer.dataset.userToken;
-                if (userToken) ws.send(JSON.stringify({ action: 'assign_slot', viewer_token: userToken, slot: null }));
-            }
-        } else {
+        if (isMk) {
             const userToken = dropTarget.dataset.userToken;
-            if (userToken) ws.send(JSON.stringify({ action: 'assign_slot', viewer_token: userToken, slot: gamepadId }));
+            const tokenToAssign = (dropTarget.id === 'gamepad-source-box') ? COLLAB_DATA.userToken : userToken;
+            ws.send(JSON.stringify({ action: 'assign_mk', token: tokenToAssign }));
+        } else {
+            const gamepadId = parseInt(e.dataTransfer.getData('text/plain'), 10);
+            const draggedIcon = document.getElementById(`gamepad-icon-${gamepadId}`);
+            if (dropTarget.id === 'gamepad-source-box') {
+                const parentContainer = draggedIcon.parentElement;
+                if (parentContainer && parentContainer.id !== 'gamepad-source-box') {
+                    const userToken = parentContainer.dataset.userToken;
+                    if (userToken) ws.send(JSON.stringify({ action: 'assign_slot', viewer_token: userToken, slot: null }));
+                }
+            } else {
+                const userToken = dropTarget.dataset.userToken;
+                if (userToken) ws.send(JSON.stringify({ action: 'assign_slot', viewer_token: userToken, slot: gamepadId }));
+            }
         }
     });
 

@@ -1035,6 +1035,10 @@ iframe {
     color: var(--text-muted);
 }
 
+.mk-icon .gamepad-number {
+    display: none;
+}
+
 .video-container:not(#gamepad-source-box) .gamepad-icon {
     position: absolute;
     top: 5px;
@@ -1044,6 +1048,11 @@ iframe {
     font-size: 1rem;
     z-index: 10;
     box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.video-container:not(#gamepad-source-box) .mk-icon {
+    left: auto;
+    right: 5px;
 }
 
 .video-container:not(#gamepad-source-box) .gamepad-icon .gamepad-number {
