@@ -49,6 +49,24 @@ document.addEventListener('DOMContentLoaded', () => {
     let preferredCamId = localStorage.getItem('collab_preferredCamId') || null;
     let localAudioAnalyser = null;
     let animationFrameId = null;
+    let lastKnownVolume = parseFloat(localStorage.getItem('collab_iframe_volume')) || 1.0;
+    let isIframeMuted = false;
+
+    const sendVolumeToIframe = () => {
+        const iframe = document.getElementById('session-frame');
+        if (iframe && iframe.contentWindow) {
+            const vol = isIframeMuted ? 0 : lastKnownVolume;
+            iframe.contentWindow.postMessage({ type: 'setVolume', value: vol }, '*');
+            if (isIframeMuted) iframe.contentWindow.postMessage({ type: 'setMute', value: true }, '*');
+        }
+    };
+
+    const handlePageInteraction = () => {
+        setTimeout(sendVolumeToIframe, 500);
+        ['click', 'keydown', 'touchstart'].forEach(e => document.removeEventListener(e, handlePageInteraction));
+    };
+    ['click', 'keydown', 'touchstart'].forEach(e => document.addEventListener(e, handlePageInteraction));
+    window.addEventListener('blur', handlePageInteraction);
 
     let ws;
     let username = localStorage.getItem('collab_username');
@@ -848,26 +866,22 @@ document.addEventListener('DOMContentLoaded', () => {
         updateMediaButtonUI();
 
         const gameIframe = document.getElementById('session-frame');
-        let isIframeMuted = false;
-        let lastKnownVolume = parseFloat(localStorage.getItem(`collab_iframe_volume`)) || 1.0;
-        iframeVolumeSlider.value = lastKnownVolume;
+        iframeVolumeSlider.value = isIframeMuted ? 0 : lastKnownVolume;
+        if (isIframeMuted) iframeMuteBtn.querySelector('i').className = 'fas fa-volume-mute';
 
         if (gameIframe) {
-            gameIframe.addEventListener('load', () => {
-                gameIframe.contentWindow.postMessage({ type: 'setVolume', value: lastKnownVolume }, '*');
-            });
+            gameIframe.addEventListener('load', sendVolumeToIframe);
         }
 
         iframeMuteBtn.addEventListener('click', () => {
             isIframeMuted = !isIframeMuted;
-            if (gameIframe) gameIframe.contentWindow.postMessage({ type: 'setMute', value: isIframeMuted }, '*');
+            sendVolumeToIframe();
             iframeMuteBtn.querySelector('i').className = isIframeMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
             iframeVolumeSlider.value = isIframeMuted ? 0 : lastKnownVolume;
         });
 
         iframeVolumeSlider.addEventListener('input', (e) => {
             const newVolume = parseFloat(e.target.value);
-            if (gameIframe) gameIframe.contentWindow.postMessage({ type: 'setVolume', value: newVolume }, '*');
 
             if (newVolume > 0) {
                 lastKnownVolume = newVolume;
@@ -878,6 +892,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 isIframeMuted = true;
                 iframeMuteBtn.querySelector('i').className = 'fas fa-volume-mute';
             }
+            sendVolumeToIframe();
         });
 
         sidebarEl.querySelector('.theme-toggle').addEventListener('click', toggleTheme);
