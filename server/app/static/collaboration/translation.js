@@ -23,6 +23,10 @@ const en = {
         reply: 'Reply',
         cancelReply: 'Cancel Reply',
         designateSpeaker: 'Designate as Speaker',
+        stopApp: 'Stop',
+        restartApp: 'Restart',
+        swapApp: 'Swap to this app',
+        cannotStopActive: 'Cannot stop active app',
     },
     usernamePrompt: {
         title: 'Welcome!',
@@ -42,6 +46,8 @@ const en = {
         userJoined: '<b>{username}</b> has joined the room.',
         userLeft: '<b>{username}</b> has left the room.',
         usernameChanged: '<b>{old_username}</b> is now known as <b>{new_username}</b>.',
+        swappedApp: 'Swapped to application: {app_name}',
+        systemSender: 'System',
     },
     inviteLinks: {
         participant: 'Collaboration User Invite',
@@ -51,6 +57,16 @@ const en = {
     disconnect: {
         title: 'Disconnected',
         message: 'The session has ended.',
+    },
+    startMenu: {
+        launchTab: 'Launch New',
+        activeTab: 'Active Sessions',
+        searchPlaceholder: 'Search apps...',
+        appsButton: 'APPS',
+        appsTitle: 'Applications',
+        loading: 'Loading...',
+        activeVisible: 'Active (Visible)',
+        runningBackground: 'Running (Background)',
     },
 };
 
@@ -80,6 +96,10 @@ const es = {
         reply: 'Responder',
         cancelReply: 'Cancelar respuesta',
         designateSpeaker: 'Designar como Orador',
+        stopApp: 'Detener',
+        restartApp: 'Reiniciar',
+        swapApp: 'Cambiar a esta app',
+        cannotStopActive: 'No se puede detener la app activa',
     },
     usernamePrompt: {
         title: '¡Bienvenido!',
@@ -99,6 +119,8 @@ const es = {
         userJoined: '<b>{username}</b> se ha unido a la sala.',
         userLeft: '<b>{username}</b> ha abandonado la sala.',
         usernameChanged: '<b>{old_username}</b> ahora es conocido como <b>{new_username}</b>.',
+        swappedApp: 'Cambiado a la aplicación: {app_name}',
+        systemSender: 'Sistema',
     },
     inviteLinks: {
         participant: 'Invitación de Colaborador',
@@ -108,6 +130,16 @@ const es = {
     disconnect: {
         title: 'Desconectado',
         message: 'La sesión ha finalizado.',
+    },
+    startMenu: {
+        launchTab: 'Iniciar Nueva',
+        activeTab: 'Sesiones Activas',
+        searchPlaceholder: 'Buscar apps...',
+        appsButton: 'APPS',
+        appsTitle: 'Aplicaciones',
+        loading: 'Cargando...',
+        activeVisible: 'Activo (Visible)',
+        runningBackground: 'Ejecutando (Segundo plano)',
     },
 };
 
@@ -137,6 +169,10 @@ const zh = {
         reply: '回复',
         cancelReply: '取消回复',
         designateSpeaker: '指定为发言人',
+        stopApp: '停止',
+        restartApp: '重启',
+        swapApp: '切换到此应用',
+        cannotStopActive: '无法停止活动应用',
     },
     usernamePrompt: {
         title: '欢迎！',
@@ -156,6 +192,8 @@ const zh = {
         userJoined: '<b>{username}</b> 已加入房间。',
         userLeft: '<b>{username}</b> 已离开房间。',
         usernameChanged: '<b>{old_username}</b> 现已更名为 <b>{new_username}</b>。',
+        swappedApp: '已切换到应用程序：{app_name}',
+        systemSender: '系统',
     },
     inviteLinks: {
         participant: '协作用户邀请',
@@ -165,6 +203,16 @@ const zh = {
     disconnect: {
         title: '已断开连接',
         message: '会话已结束。',
+    },
+    startMenu: {
+        launchTab: '启动新应用',
+        activeTab: '活动会话',
+        searchPlaceholder: '搜索应用...',
+        appsButton: '应用',
+        appsTitle: '应用程序',
+        loading: '加载中...',
+        activeVisible: '活动 (可见)',
+        runningBackground: '运行中 (后台)',
     },
 };
 
@@ -194,6 +242,10 @@ const hi = {
         reply: 'उत्तर दें',
         cancelReply: 'उत्तर रद्द करें',
         designateSpeaker: 'वक्ता के रूप में नामित करें',
+        stopApp: 'रोकें',
+        restartApp: 'पुनरारंभ करें',
+        swapApp: 'इस ऐप पर स्वैप करें',
+        cannotStopActive: 'सक्रिय ऐप को रोक नहीं सकते',
     },
     usernamePrompt: {
         title: 'स्वागत है!',
@@ -213,6 +265,8 @@ const hi = {
         userJoined: '<b>{username}</b> कमरे में शामिल हो गए हैं।',
         userLeft: '<b>{username}</b> ने कमरा छोड़ दिया है।',
         usernameChanged: '<b>{old_username}</b> को अब <b>{new_username}</b> के नाम से जाना जाता है।',
+        swappedApp: 'एप्लिकेशन पर स्वैप किया गया: {app_name}',
+        systemSender: 'सिस्टम',
     },
     inviteLinks: {
         participant: 'सहयोग उपयोगकर्ता आमंत्रण',
@@ -222,6 +276,16 @@ const hi = {
     disconnect: {
         title: 'डिस्कनेक्ट हो गया',
         message: 'सत्र समाप्त हो गया है।',
+    },
+    startMenu: {
+        launchTab: 'नया लॉन्च करें',
+        activeTab: 'सक्रिय सत्र',
+        searchPlaceholder: 'ऐप्स खोजें...',
+        appsButton: 'ऐप्स',
+        appsTitle: 'अनुप्रयोग',
+        loading: 'लोड हो रहा है...',
+        activeVisible: 'सक्रिय (दृश्यमान)',
+        runningBackground: 'चल रहा है (पृष्ठभूमि)',
     },
 };
 
@@ -251,6 +315,10 @@ const pt = {
         reply: 'Responder',
         cancelReply: 'Cancelar resposta',
         designateSpeaker: 'Designar como Orador',
+        stopApp: 'Parar',
+        restartApp: 'Reiniciar',
+        swapApp: 'Trocar para este app',
+        cannotStopActive: 'Não é possível parar app ativo',
     },
     usernamePrompt: {
         title: 'Bem-vindo(a)!',
@@ -270,6 +338,8 @@ const pt = {
         userJoined: '<b>{username}</b> entrou na sala.',
         userLeft: '<b>{username}</b> saiu da sala.',
         usernameChanged: '<b>{old_username}</b> agora é conhecido(a) como <b>{new_username}</b>.',
+        swappedApp: 'Trocado para o aplicativo: {app_name}',
+        systemSender: 'Sistema',
     },
     inviteLinks: {
         participant: 'Convite de Colaborador',
@@ -279,6 +349,16 @@ const pt = {
     disconnect: {
         title: 'Desconectado',
         message: 'A sessão terminou.',
+    },
+    startMenu: {
+        launchTab: 'Iniciar Novo',
+        activeTab: 'Sessões Ativas',
+        searchPlaceholder: 'Pesquisar apps...',
+        appsButton: 'APPS',
+        appsTitle: 'Aplicativos',
+        loading: 'Carregando...',
+        activeVisible: 'Ativo (Visível)',
+        runningBackground: 'Executando (Segundo Plano)',
     },
 };
 
@@ -308,6 +388,10 @@ const fr = {
         reply: 'Répondre',
         cancelReply: 'Annuler la réponse',
         designateSpeaker: 'Désigner comme Orateur',
+        stopApp: 'Arrêter',
+        restartApp: 'Redémarrer',
+        swapApp: 'Basculer vers cette app',
+        cannotStopActive: 'Impossible d\'arrêter l\'app active',
     },
     usernamePrompt: {
         title: 'Bienvenue !',
@@ -327,6 +411,8 @@ const fr = {
         userJoined: '<b>{username}</b> a rejoint la salle.',
         userLeft: '<b>{username}</b> a quitté la salle.',
         usernameChanged: '<b>{old_username}</b> est maintenant connu(e) sous le nom de <b>{new_username}</b>.',
+        swappedApp: 'Basculé vers l\'application : {app_name}',
+        systemSender: 'Système',
     },
     inviteLinks: {
         participant: 'Invitation de Collaborateur',
@@ -336,6 +422,16 @@ const fr = {
     disconnect: {
         title: 'Déconnecté',
         message: 'La session est terminée.',
+    },
+    startMenu: {
+        launchTab: 'Lancer nouveau',
+        activeTab: 'Sessions actives',
+        searchPlaceholder: 'Rechercher des apps...',
+        appsButton: 'APPS',
+        appsTitle: 'Applications',
+        loading: 'Chargement...',
+        activeVisible: 'Actif (Visible)',
+        runningBackground: 'En cours (Arrière-plan)',
     },
 };
 
@@ -365,6 +461,10 @@ const ru = {
         reply: 'Ответить',
         cancelReply: 'Отменить ответ',
         designateSpeaker: 'Назначить докладчиком',
+        stopApp: 'Остановить',
+        restartApp: 'Перезапустить',
+        swapApp: 'Переключиться на это приложение',
+        cannotStopActive: 'Нельзя остановить активное приложение',
     },
     usernamePrompt: {
         title: 'Добро пожаловать!',
@@ -384,6 +484,8 @@ const ru = {
         userJoined: '<b>{username}</b> присоединился(ась) к комнате.',
         userLeft: '<b>{username}</b> покинул(а) комнату.',
         usernameChanged: '<b>{old_username}</b> теперь известен(на) как <b>{new_username}</b>.',
+        swappedApp: 'Переключено на приложение: {app_name}',
+        systemSender: 'Система',
     },
     inviteLinks: {
         participant: 'Приглашение для участника совместной работы',
@@ -393,6 +495,16 @@ const ru = {
     disconnect: {
         title: 'Отключено',
         message: 'Сеанс завершен.',
+    },
+    startMenu: {
+        launchTab: 'Запустить новое',
+        activeTab: 'Активные сеансы',
+        searchPlaceholder: 'Поиск приложений...',
+        appsButton: 'ПРИЛОЖЕНИЯ',
+        appsTitle: 'Приложения',
+        loading: 'Загрузка...',
+        activeVisible: 'Активно (Видимо)',
+        runningBackground: 'Работает (Фон)',
     },
 };
 
@@ -422,6 +534,10 @@ const de = {
         reply: 'Antworten',
         cancelReply: 'Antwort abbrechen',
         designateSpeaker: 'Als Sprecher festlegen',
+        stopApp: 'Stopp',
+        restartApp: 'Neustart',
+        swapApp: 'Zu dieser App wechseln',
+        cannotStopActive: 'Aktive App kann nicht gestoppt werden',
     },
     usernamePrompt: {
         title: 'Willkommen!',
@@ -441,6 +557,8 @@ const de = {
         userJoined: '<b>{username}</b> ist dem Raum beigetreten.',
         userLeft: '<b>{username}</b> hat den Raum verlassen.',
         usernameChanged: '<b>{old_username}</b> ist jetzt als <b>{new_username}</b> bekannt.',
+        swappedApp: 'Zu Anwendung gewechselt: {app_name}',
+        systemSender: 'System',
     },
     inviteLinks: {
         participant: 'Einladung für Kollaborationsbenutzer',
@@ -450,6 +568,16 @@ const de = {
     disconnect: {
         title: 'Verbindung getrennt',
         message: 'Die Sitzung wurde beendet.',
+    },
+    startMenu: {
+        launchTab: 'Neu starten',
+        activeTab: 'Aktive Sitzungen',
+        searchPlaceholder: 'Apps suchen...',
+        appsButton: 'APPS',
+        appsTitle: 'Anwendungen',
+        loading: 'Laden...',
+        activeVisible: 'Aktiv (Sichtbar)',
+        runningBackground: 'Läuft (Hintergrund)',
     },
 };
 
@@ -479,6 +607,10 @@ const tr = {
         reply: 'Yanıtla',
         cancelReply: 'Yanıtı İptal Et',
         designateSpeaker: 'Konuşmacı Olarak Belirle',
+        stopApp: 'Durdur',
+        restartApp: 'Yeniden Başlat',
+        swapApp: 'Bu uygulamaya geç',
+        cannotStopActive: 'Aktif uygulama durdurulamaz',
     },
     usernamePrompt: {
         title: 'Hoş geldiniz!',
@@ -498,6 +630,8 @@ const tr = {
         userJoined: '<b>{username}</b> odaya katıldı.',
         userLeft: '<b>{username}</b> odadan ayrıldı.',
         usernameChanged: '<b>{old_username}</b> artık <b>{new_username}</b> olarak biliniyor.',
+        swappedApp: 'Uygulamaya geçildi: {app_name}',
+        systemSender: 'Sistem',
     },
     inviteLinks: {
         participant: 'İşbirliği Kullanıcı Daveti',
@@ -507,6 +641,16 @@ const tr = {
     disconnect: {
         title: 'Bağlantı Kesildi',
         message: 'Oturum sona erdi.',
+    },
+    startMenu: {
+        launchTab: 'Yeni Başlat',
+        activeTab: 'Aktif Oturumlar',
+        searchPlaceholder: 'Uygulamaları ara...',
+        appsButton: 'UYGULAMALAR',
+        appsTitle: 'Uygulamalar',
+        loading: 'Yükleniyor...',
+        activeVisible: 'Aktif (Görünür)',
+        runningBackground: 'Çalışıyor (Arka Plan)',
     },
 };
 
@@ -536,6 +680,10 @@ const it = {
         reply: 'Rispondi',
         cancelReply: 'Annulla risposta',
         designateSpeaker: 'Designa come Relatore',
+        stopApp: 'Stop',
+        restartApp: 'Riavvia',
+        swapApp: 'Passa a questa app',
+        cannotStopActive: 'Impossibile fermare app attiva',
     },
     usernamePrompt: {
         title: 'Benvenuto!',
@@ -555,6 +703,8 @@ const it = {
         userJoined: '<b>{username}</b> è entrato/a nella stanza.',
         userLeft: '<b>{username}</b> ha lasciato la stanza.',
         usernameChanged: '<b>{old_username}</b> è ora conosciuto/a come <b>{new_username}</b>.',
+        swappedApp: 'Passato all\'applicazione: {app_name}',
+        systemSender: 'Sistema',
     },
     inviteLinks: {
         participant: 'Invito Utente Collaboratore',
@@ -564,6 +714,16 @@ const it = {
     disconnect: {
         title: 'Disconnesso',
         message: 'La sessione è terminata.',
+    },
+    startMenu: {
+        launchTab: 'Avvia Nuovo',
+        activeTab: 'Sessioni Attive',
+        searchPlaceholder: 'Cerca app...',
+        appsButton: 'APP',
+        appsTitle: 'Applicazioni',
+        loading: 'Caricamento...',
+        activeVisible: 'Attivo (Visibile)',
+        runningBackground: 'In esecuzione (Background)',
     },
 };
 
@@ -593,6 +753,10 @@ const nl = {
         reply: 'Beantwoorden',
         cancelReply: 'Antwoord annuleren',
         designateSpeaker: 'Aanwijzen als spreker',
+        stopApp: 'Stoppen',
+        restartApp: 'Herstarten',
+        swapApp: 'Wissel naar deze app',
+        cannotStopActive: 'Kan actieve app niet stoppen',
     },
     usernamePrompt: {
         title: 'Welkom!',
@@ -612,6 +776,8 @@ const nl = {
         userJoined: '<b>{username}</b> is de kamer binnengekomen.',
         userLeft: '<b>{username}</b> heeft de kamer verlaten.',
         usernameChanged: '<b>{old_username}</b> is nu bekend als <b>{new_username}</b>.',
+        swappedApp: 'Gewisseld naar applicatie: {app_name}',
+        systemSender: 'Systeem',
     },
     inviteLinks: {
         participant: 'Uitnodiging voor samenwerkingsgebruiker',
@@ -621,6 +787,16 @@ const nl = {
     disconnect: {
         title: 'Verbinding verbroken',
         message: 'De sessie is beëindigd.',
+    },
+    startMenu: {
+        launchTab: 'Nieuwe starten',
+        activeTab: 'Actieve sessies',
+        searchPlaceholder: 'Apps zoeken...',
+        appsButton: 'APPS',
+        appsTitle: 'Applicaties',
+        loading: 'Laden...',
+        activeVisible: 'Actief (Zichtbaar)',
+        runningBackground: 'Draait (Achtergrond)',
     },
 };
 
@@ -650,6 +826,10 @@ const ar = {
         reply: 'رد',
         cancelReply: 'إلغاء الرد',
         designateSpeaker: 'تعيين كمتحدث',
+        stopApp: 'إيقاف',
+        restartApp: 'إعادة تشغيل',
+        swapApp: 'التبديل إلى هذا التطبيق',
+        cannotStopActive: 'لا يمكن إيقاف التطبيق النشط',
     },
     usernamePrompt: {
         title: 'أهلاً بك!',
@@ -669,6 +849,8 @@ const ar = {
         userJoined: '<b>{username}</b> انضم إلى الغرفة.',
         userLeft: '<b>{username}</b> غادر الغرفة.',
         usernameChanged: '<b>{old_username}</b> يُعرف الآن باسم <b>{new_username}</b>.',
+        swappedApp: 'تم التبديل إلى التطبيق: {app_name}',
+        systemSender: 'النظام',
     },
     inviteLinks: {
         participant: 'دعوة مستخدم متعاون',
@@ -678,6 +860,16 @@ const ar = {
     disconnect: {
         title: 'انقطع الاتصال',
         message: 'انتهت الجلسة.',
+    },
+    startMenu: {
+        launchTab: 'تشغيل جديد',
+        activeTab: 'الجلسات النشطة',
+        searchPlaceholder: 'البحث عن تطبيقات...',
+        appsButton: 'تطبيقات',
+        appsTitle: 'التطبيقات',
+        loading: 'جاري التحميل...',
+        activeVisible: 'نشط (مرئي)',
+        runningBackground: 'قيد التشغيل (في الخلفية)',
     },
 };
 
@@ -707,6 +899,10 @@ const ko = {
         reply: '답장',
         cancelReply: '답장 취소',
         designateSpeaker: '발표자로 지정',
+        stopApp: '중지',
+        restartApp: '재시작',
+        swapApp: '이 앱으로 전환',
+        cannotStopActive: '활성 앱을 중지할 수 없음',
     },
     usernamePrompt: {
         title: '환영합니다!',
@@ -726,6 +922,8 @@ const ko = {
         userJoined: '<b>{username}</b>님이 방에 참여했습니다.',
         userLeft: '<b>{username}</b>님이 방을 나갔습니다.',
         usernameChanged: '<b>{old_username}</b>님의 이름이 <b>{new_username}</b>(으)로 변경되었습니다.',
+        swappedApp: '애플리케이션으로 전환됨: {app_name}',
+        systemSender: '시스템',
     },
     inviteLinks: {
         participant: '협업 사용자 초대',
@@ -735,6 +933,16 @@ const ko = {
     disconnect: {
         title: '연결 끊김',
         message: '세션이 종료되었습니다.',
+    },
+    startMenu: {
+        launchTab: '새로 시작',
+        activeTab: '활성 세션',
+        searchPlaceholder: '앱 검색...',
+        appsButton: '앱',
+        appsTitle: '애플리케이션',
+        loading: '로딩 중...',
+        activeVisible: '활성 (표시됨)',
+        runningBackground: '실행 중 (백그라운드)',
     },
 };
 
@@ -764,6 +972,10 @@ const ja = {
         reply: '返信',
         cancelReply: '返信をキャンセル',
         designateSpeaker: 'スピーカーに指定',
+        stopApp: '停止',
+        restartApp: '再起動',
+        swapApp: 'このアプリに切り替え',
+        cannotStopActive: 'アクティブなアプリは停止できません',
     },
     usernamePrompt: {
         title: 'ようこそ！',
@@ -783,6 +995,8 @@ const ja = {
         userJoined: '<b>{username}</b>がルームに参加しました。',
         userLeft: '<b>{username}</b>がルームを退出しました。',
         usernameChanged: '<b>{old_username}</b>は<b>{new_username}</b>に名前を変更しました。',
+        swappedApp: 'アプリケーションに切り替えました: {app_name}',
+        systemSender: 'システム',
     },
     inviteLinks: {
         participant: 'コラボレーションユーザー招待',
@@ -792,6 +1006,16 @@ const ja = {
     disconnect: {
         title: '切断されました',
         message: 'セッションは終了しました。',
+    },
+    startMenu: {
+        launchTab: '新規起動',
+        activeTab: 'アクティブなセッション',
+        searchPlaceholder: 'アプリを検索...',
+        appsButton: 'アプリ',
+        appsTitle: 'アプリケーション',
+        loading: '読み込み中...',
+        activeVisible: 'アクティブ (表示)',
+        runningBackground: '実行中 (バックグラウンド)',
     },
 };
 
@@ -821,6 +1045,10 @@ const vi = {
         reply: 'Trả lời',
         cancelReply: 'Hủy trả lời',
         designateSpeaker: 'Chỉ định làm người phát biểu',
+        stopApp: 'Dừng',
+        restartApp: 'Khởi động lại',
+        swapApp: 'Chuyển sang ứng dụng này',
+        cannotStopActive: 'Không thể dừng ứng dụng đang hoạt động',
     },
     usernamePrompt: {
         title: 'Chào mừng!',
@@ -840,6 +1068,8 @@ const vi = {
         userJoined: '<b>{username}</b> đã tham gia phòng.',
         userLeft: '<b>{username}</b> đã rời phòng.',
         usernameChanged: '<b>{old_username}</b> bây giờ được biết đến với tên <b>{new_username}</b>.',
+        swappedApp: 'Đã chuyển sang ứng dụng: {app_name}',
+        systemSender: 'Hệ thống',
     },
     inviteLinks: {
         participant: 'Lời mời người dùng cộng tác',
@@ -849,6 +1079,16 @@ const vi = {
     disconnect: {
         title: 'Đã ngắt kết nối',
         message: 'Phiên đã kết thúc.',
+    },
+    startMenu: {
+        launchTab: 'Khởi chạy mới',
+        activeTab: 'Các phiên đang hoạt động',
+        searchPlaceholder: 'Tìm kiếm ứng dụng...',
+        appsButton: 'ỨNG DỤNG',
+        appsTitle: 'Ứng dụng',
+        loading: 'Đang tải...',
+        activeVisible: 'Đang hoạt động (Hiển thị)',
+        runningBackground: 'Đang chạy (Nền)',
     },
 };
 
@@ -878,6 +1118,10 @@ const th = {
         reply: 'ตอบกลับ',
         cancelReply: 'ยกเลิกการตอบกลับ',
         designateSpeaker: 'กำหนดเป็นผู้พูด',
+        stopApp: 'หยุด',
+        restartApp: 'รีสตาร์ท',
+        swapApp: 'สลับไปแอปนี้',
+        cannotStopActive: 'ไม่สามารถหยุดแอปที่ใช้งานอยู่',
     },
     usernamePrompt: {
         title: 'ยินดีต้อนรับ!',
@@ -897,6 +1141,8 @@ const th = {
         userJoined: '<b>{username}</b> ได้เข้าร่วมห้องแล้ว',
         userLeft: '<b>{username}</b> ได้ออกจากห้องแล้ว',
         usernameChanged: '<b>{old_username}</b> ตอนนี้เป็นที่รู้จักในชื่อ <b>{new_username}</b>',
+        swappedApp: 'สลับไปที่แอปพลิเคชัน: {app_name}',
+        systemSender: 'ระบบ',
     },
     inviteLinks: {
         participant: 'คำเชิญผู้ใช้ร่วมทำงาน',
@@ -906,6 +1152,16 @@ const th = {
     disconnect: {
         title: 'ตัดการเชื่อมต่อแล้ว',
         message: 'เซสชันสิ้นสุดลงแล้ว',
+    },
+    startMenu: {
+        launchTab: 'เปิดใหม่',
+        activeTab: 'เซสชันที่ใช้งานอยู่',
+        searchPlaceholder: 'ค้นหาแอป...',
+        appsButton: 'แอป',
+        appsTitle: 'แอปพลิเคชัน',
+        loading: 'กำลังโหลด...',
+        activeVisible: 'ใช้งานอยู่ (มองเห็น)',
+        runningBackground: 'กำลังทำงาน (พื้นหลัง)',
     },
 };
 
@@ -935,6 +1191,10 @@ const fil = {
         reply: 'Sumagot',
         cancelReply: 'Kanselahin ang Sagot',
         designateSpeaker: 'Italaga bilang Tagapagsalita',
+        stopApp: 'Itigil',
+        restartApp: 'I-restart',
+        swapApp: 'Lumipat sa app na ito',
+        cannotStopActive: 'Hindi mapatigil ang aktibong app',
     },
     usernamePrompt: {
         title: 'Maligayang pagdating!',
@@ -954,6 +1214,8 @@ const fil = {
         userJoined: 'Si <b>{username}</b> ay sumali sa room.',
         userLeft: 'Si <b>{username}</b> ay umalis sa room.',
         usernameChanged: 'Si <b>{old_username}</b> ay kilala na ngayon bilang <b>{new_username}</b>.',
+        swappedApp: 'Lumipat sa aplikasyon: {app_name}',
+        systemSender: 'Sistema',
     },
     inviteLinks: {
         participant: 'Imbitasyon ng Gumagamit ng Kolaborasyon',
@@ -963,6 +1225,16 @@ const fil = {
     disconnect: {
         title: 'Nadiskonekta',
         message: 'Nagtapos na ang session.',
+    },
+    startMenu: {
+        launchTab: 'Ilunsad ang Bago',
+        activeTab: 'Mga Aktibong Session',
+        searchPlaceholder: 'Maghanap ng mga app...',
+        appsButton: 'APPS',
+        appsTitle: 'Mga Aplikasyon',
+        loading: 'Naglo-load...',
+        activeVisible: 'Aktibo (Nakikita)',
+        runningBackground: 'Tumatakbo (Background)',
     },
 };
 
@@ -992,6 +1264,10 @@ const da = {
         reply: 'Svar',
         cancelReply: 'Annuller svar',
         designateSpeaker: 'Udpeg som taler',
+        stopApp: 'Stop',
+        restartApp: 'Genstart',
+        swapApp: 'Skift til denne app',
+        cannotStopActive: 'Kan ikke stoppe aktiv app',
     },
     usernamePrompt: {
         title: 'Velkommen!',
@@ -1011,6 +1287,8 @@ const da = {
         userJoined: '<b>{username}</b> er kommet ind i rummet.',
         userLeft: '<b>{username}</b> har forladt rummet.',
         usernameChanged: '<b>{old_username}</b> er nu kendt som <b>{new_username}</b>.',
+        swappedApp: 'Skiftede til applikation: {app_name}',
+        systemSender: 'System',
     },
     inviteLinks: {
         participant: 'Invitation til samarbejdsbruger',
@@ -1020,6 +1298,16 @@ const da = {
     disconnect: {
         title: 'Forbindelse afbrudt',
         message: 'Sessionen er afsluttet.',
+    },
+    startMenu: {
+        launchTab: 'Start ny',
+        activeTab: 'Aktive sessioner',
+        searchPlaceholder: 'Søg apps...',
+        appsButton: 'APPS',
+        appsTitle: 'Applikationer',
+        loading: 'Indlæser...',
+        activeVisible: 'Aktiv (Synlig)',
+        runningBackground: 'Kører (Baggrund)',
     },
 };
 

@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="pageTitle"></title>
     <link rel="stylesheet" href="room.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -17,10 +16,31 @@
 
     <div id="content" class="content">
         <iframe id="session-frame" src="{{IFRAME_SRC}}"></iframe>
+        <div id="sidebar-toggle-handle" class="sidebar-toggle-handle" title="Toggle Sidebar">
+            <div class="toggle-indicator"></div>
+        </div>
+    </div>
+
+    <div id="start-menu-modal" class="hidden">
+        <div class="start-menu-tabs">
+            <button class="sm-tab-btn active" data-tab="launch" data-i18n="startMenu.launchTab"></button>
+            <button class="sm-tab-btn" data-tab="active" data-i18n="startMenu.activeTab"></button>
+        </div>
+        <div id="sm-view-launch" class="sm-view active">
+            <div class="sm-search-box"><i class="fas fa-search"></i><input type="text" id="sm-app-search" data-i18n-placeholder="startMenu.searchPlaceholder"></div>
+            <div id="sm-app-grid" class="sm-grid"></div>
+        </div>
+        <div id="sm-view-active" class="sm-view"><div id="sm-active-list"></div></div>
     </div>
     
     <div id="video-grid">
         <div id="video-grid-content">
+            <div id="start-menu-btn" class="video-container pinned start-menu-trigger" data-i18n-title="startMenu.appsTitle">
+                <div class="start-btn-inner">
+                    <i class="fas fa-th"></i>
+                    <span data-i18n="startMenu.appsButton"></span>
+                </div>
+            </div>
             <div id="gamepad-source-box" class="video-container pinned"></div>
             <div id="local-user-container" class="video-container pinned">
                 <video id="local-video" autoplay muted playsinline></video>
@@ -31,8 +51,8 @@
         </div>
     </div>
 
-    <div id="sidebar-toggle-handle" class="sidebar-toggle-handle">
-        <div class="toggle-indicator"></div>
+    <div id="video-toggle-handle" class="video-toggle-handle" title="Toggle Video Bar">
+        <div class="toggle-indicator-horizontal"></div>
     </div>
 
     <div id="sidebar" class="sidebar">

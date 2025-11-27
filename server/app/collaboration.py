@@ -5,6 +5,7 @@ import os
 import random
 import json
 import time
+import base64
 from uuid import UUID
 from typing import Optional
 
@@ -141,27 +142,8 @@ async def collaborative_room(
 
         mk_owner = session_data.get("mk_owner_token")
 
-        all_tokens = {
-            controller_token: {
-                "role": "controller",
-                "slot": session_data.get("controller_slot"),
-                "mk_control": (mk_owner == controller_token) if mk_owner else False,
-            }
-        }
-        for viewer in session_data["viewers"]:
-            all_tokens[viewer["token"]] = {
-                "role": "viewer",
-                "slot": viewer["slot"],
-                "mk_control": viewer["token"] == mk_owner,
-            }
-
         try:
-            async with httpx.AsyncClient() as client:
-                await client.post(
-                    f"http://{session_data['ip']}:8083/tokens",
-                    json=all_tokens,
-                    headers={"Authorization": f"Bearer {master_token}"},
-                )
+            await broadcast_token_state(session_data)
             api.SESSIONS_DB[session_id_str] = session_data
             await api.save_sessions_to_disk()
             logger.info(
@@ -244,6 +226,41 @@ async def collaborative_room(
         )
 
     return response
+
+
+async def broadcast_token_state(session_data: dict):
+    mk_owner = session_data.get("mk_owner_token")
+    controller_token = session_data.get("controller_token")
+
+    all_tokens = {
+        controller_token: {
+            "role": "controller",
+            "slot": session_data.get("controller_slot"),
+            "mk_control": (mk_owner == controller_token) if mk_owner else True,
+        }
+    }
+    for v in session_data.get("viewers", []):
+        all_tokens[v["token"]] = {
+            "role": "viewer",
+            "slot": v["slot"],
+            "mk_control": v["token"] == mk_owner,
+        }
+
+    target_ips = set()
+    if session_data.get("ip"): target_ips.add(session_data["ip"])
+    for c in session_data.get("container_registry", {}).values():
+        if c.get("ip"): target_ips.add(c["ip"])
+
+    async with httpx.AsyncClient(timeout=1.0) as client:
+        for ip in target_ips:
+            try:
+                await client.post(
+                    f"http://{ip}:8083/tokens",
+                    json=all_tokens,
+                    headers={"Authorization": f"Bearer {session_data['master_token']}"},
+                )
+            except Exception:
+                pass
 
 
 async def broadcast_to_room(session_id: str, payload: dict):
@@ -362,6 +379,84 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
         connection_info["has_joined"] = True
         await broadcast_state(session_id_str)
 
+    async def send_app_list():
+        user_apps = []
+        session_registry = session_data.get("container_registry", {})
+        
+        for app in api.INSTALLED_APPS.values():
+            if "all" in app.users or session_data.get("username") in app.users:
+                    logo_src = app.logo
+                    if logo_src and logo_src.startswith("/api/app_icon/"):
+                        try:
+                            icon_path = os.path.join(settings.app_icons_path, f"{app.id}.png")
+                            if os.path.exists(icon_path):
+                                with open(icon_path, "rb") as f:
+                                    b64_data = base64.b64encode(f.read()).decode('utf-8')
+                                    logo_src = f"data:image/png;base64,{b64_data}"
+                        except Exception as e:
+                            logger.warning(f"Failed to load icon for app {app.id}: {e}")
+
+                    user_apps.append({
+                        "id": app.id,
+                        "name": app.name,
+                        "running": app.id in session_registry,
+                        "active": app.id == session_data.get("provider_app_id"),
+                        "logo": logo_src
+                    })
+        
+        await websocket.send_json({
+            "type": "app_list",
+            "apps": sorted(user_apps, key=lambda x: x['name'])
+        })
+
+    async def handle_restart_app(target_app_id):
+        try:
+            await api.stop_container_in_session(session_id_str, target_app_id)
+            container_info = await api.ensure_container_for_session(session_id_str, target_app_id)
+            
+            if target_app_id == session_data.get("provider_app_id"):
+                session_data["instance_id"] = container_info["instance_id"]
+                session_data["ip"] = container_info["ip"]
+                session_data["port"] = container_info["port"]
+                api.SESSIONS_DB[session_id_str] = session_data
+                await api.save_sessions_to_disk()
+                
+                await broadcast_to_room(session_id_str, {
+                    "type": "app_swapped",
+                    "app_name": session_data.get("app_name"),
+                    "timestamp": int(time.time() * 1000)
+                })
+        except Exception as e:
+            logger.error(f"Restart failed: {e}")
+            if websocket.client_state == WebSocketState.CONNECTED:
+                await websocket.send_json({"type": "error", "message": "Failed to restart application."})
+
+    async def handle_swap_app(target_app_id):
+        try:
+            container_info = await api.ensure_container_for_session(session_id_str, target_app_id)
+            app_config = api.INSTALLED_APPS.get(target_app_id)
+            
+            session_data["instance_id"] = container_info["instance_id"]
+            session_data["ip"] = container_info["ip"]
+            session_data["port"] = container_info["port"]
+            session_data["provider_app_id"] = target_app_id
+            session_data["app_name"] = app_config.name
+            session_data["app_logo"] = app_config.logo
+
+            await broadcast_token_state(session_data)                            
+            api.SESSIONS_DB[session_id_str] = session_data
+            await api.save_sessions_to_disk()
+            
+            await broadcast_to_room(session_id_str, {
+                "type": "app_swapped",
+                "app_name": app_config.name,
+                "timestamp": int(time.time() * 1000)
+            })
+        except Exception as e:
+            logger.error(f"Swap failed: {e}")
+            if websocket.client_state == WebSocketState.CONNECTED:
+                await websocket.send_json({"type": "error", "message": "Failed to swap application."})
+
     try:
         while True:
             message = await websocket.receive()
@@ -439,6 +534,25 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                     await broadcast_to_room(
                         session_id_str, {"type": "control", "payload": data}
                     )
+
+                elif action == "get_apps" and is_controller:
+                    await send_app_list()
+
+                elif action == "stop_app" and is_controller:
+                    target_app_id = data.get("app_id")
+                    if target_app_id and target_app_id != session_data.get("provider_app_id"):
+                        await api.stop_container_in_session(session_id_str, target_app_id)
+                        await send_app_list()
+
+                elif action == "restart_app" and is_controller:
+                    target_app_id = data.get("app_id")
+                    if target_app_id:
+                        asyncio.create_task(handle_restart_app(target_app_id))
+
+                elif action == "swap_app" and is_controller:
+                    target_app_id = data.get("app_id")
+                    if target_app_id:
+                        asyncio.create_task(handle_swap_app(target_app_id))
 
             elif "bytes" in message:
                 binary_data = message["bytes"]
@@ -548,33 +662,9 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                     )
                     api.SESSIONS_DB[session_id_str] = session_data
                     await api.save_sessions_to_disk()
-                    mk_owner = session_data.get("mk_owner_token")
-                    controller_token = session_data["controller_token"]
-
-                    all_tokens = {
-                        controller_token: {
-                            "role": "controller",
-                            "slot": session_data.get("controller_slot"),
-                            "mk_control": (mk_owner == controller_token) if mk_owner else True,
-                        }
-                    }
-                    for v in session_data["viewers"]:
-                        all_tokens[v["token"]] = {
-                            "role": "viewer",
-                            "slot": v["slot"],
-                            "mk_control": v["token"] == mk_owner,
-                        }
 
                     try:
-                        async with httpx.AsyncClient() as client:
-                            res = await client.post(
-                                f"http://{session_data['ip']}:8083/tokens",
-                                json=all_tokens,
-                                headers={
-                                    "Authorization": f"Bearer {session_data['master_token']}"
-                                },
-                            )
-                            res.raise_for_status()
+                        await broadcast_token_state(session_data)
                         logger.info(
                             f"[{session_id_str}] Pushed token update to downstream after viewer disconnect."
                         )
@@ -703,30 +793,8 @@ async def handle_assign_slot(session_id: str, viewer_token: str, slot: Optional[
             f"{target_username} was unassigned from Gamepad {old_slot_for_target}."
         )
 
-    mk_owner = session_data.get("mk_owner_token")
-    controller_token = session_data["controller_token"]
-    all_tokens = {
-        controller_token: {
-            "role": "controller",
-            "slot": session_data.get("controller_slot"),
-            "mk_control": (mk_owner == controller_token) if mk_owner else True,
-        }
-    }
-    for v in session_data["viewers"]:
-        all_tokens[v["token"]] = {
-            "role": "viewer",
-            "slot": v["slot"],
-            "mk_control": v["token"] == mk_owner,
-        }
-
     try:
-        async with httpx.AsyncClient() as client:
-            res = await client.post(
-                f"http://{session_data['ip']}:8083/tokens",
-                json=all_tokens,
-                headers={"Authorization": f"Bearer {session_data['master_token']}"},
-            )
-            res.raise_for_status()
+        await broadcast_token_state(session_data)
         api.SESSIONS_DB[session_id] = session_data
         await api.save_sessions_to_disk()
         logger.info(
@@ -769,31 +837,8 @@ async def handle_assign_mk(session_id: str, target_token: Optional[str]):
                 username = v.get("username", "User")
                 break
 
-    mk_owner = session_data.get("mk_owner_token")
-    controller_token = session_data["controller_token"]
-    all_tokens = {
-        controller_token: {
-            "role": "controller",
-            "slot": session_data.get("controller_slot"),
-            "mk_control": (mk_owner == controller_token) if mk_owner else True,
-        }
-    }
-    for v in session_data["viewers"]:
-        all_tokens[v["token"]] = {
-            "role": "viewer",
-            "slot": v["slot"],
-            "mk_control": v["token"] == mk_owner,
-        }
-
     try:
-        async with httpx.AsyncClient() as client:
-            res = await client.post(
-                f"http://{session_data['ip']}:8083/tokens",
-                json=all_tokens,
-                headers={"Authorization": f"Bearer {session_data['master_token']}"},
-            )
-            res.raise_for_status()
-
+        await broadcast_token_state(session_data)
         api.SESSIONS_DB[session_id] = session_data
         await api.save_sessions_to_disk()
 

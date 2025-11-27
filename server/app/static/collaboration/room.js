@@ -16,6 +16,7 @@ function applyTranslations(scope, t) {
 document.addEventListener('DOMContentLoaded', () => {
     const translator = getTranslator(navigator.language);
     const t = translator.t;
+    document.title = t('pageTitle');
 
     const COLLAB_DATA = window.COLLAB_DATA;
     if (!COLLAB_DATA) {
@@ -34,6 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const sourceBox = document.getElementById('gamepad-source-box');
         if (sourceBox) {
             sourceBox.style.display = 'none';
+        }
+        const startBtn = document.getElementById('start-menu-btn');
+        if (startBtn) {
+            startBtn.style.display = 'none';
         }
     }
 
@@ -82,10 +87,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentDesignatedSpeaker = null;
     let localPublicId = null;
     let localPublicIdBytes = null;
+    let availableAppsList = [];
+    let pendingActions = new Set();
     const textEncoder = new TextEncoder();
 
     const sidebarEl = document.getElementById('sidebar');
     const toggleHandle = document.getElementById('sidebar-toggle-handle');
+    const videoToggleHandle = document.getElementById('video-toggle-handle');
+    let isVideoGridVisible = true;
     const settingsModalOverlay = document.getElementById('settings-modal-overlay');
     const settingsModalCloseBtn = document.getElementById('settings-modal-close');
     const audioInputSelect = document.getElementById('audio-input-select');
@@ -532,13 +541,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     const updateSpeakingIndicators = () => {
-        const speakingThreshold = 5; 
+        const speakingThreshold = 5;
+        let isAnyoneSpeaking = false; 
         
         if (localAudioAnalyser && isMicOn) {
             const dataArray = new Uint8Array(localAudioAnalyser.frequencyBinCount);
             localAudioAnalyser.getByteFrequencyData(dataArray);
             const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
             localContainer.classList.toggle('speaking', avg > speakingThreshold);
+            if (avg > speakingThreshold) isAnyoneSpeaking = true;
         } else {
             localContainer.classList.remove('speaking');
         }
@@ -549,10 +560,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 stream.analyser.getByteFrequencyData(dataArray);
                 const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
                 stream.container.classList.toggle('speaking', avg > speakingThreshold);
+                if (avg > speakingThreshold) isAnyoneSpeaking = true;
             } else if (stream.container) {
                 stream.container.classList.remove('speaking');
             }
         });
+
+        if (videoToggleHandle) {
+            videoToggleHandle.classList.toggle('speaking-glow', isAnyoneSpeaking);
+        }
 
         animationFrameId = requestAnimationFrame(updateSpeakingIndicators);
     };
@@ -578,7 +594,16 @@ document.addEventListener('DOMContentLoaded', () => {
         isSidebarVisible = !isSidebarVisible;
         sidebarEl.classList.toggle('visible', isSidebarVisible);
         document.querySelector('.content').classList.toggle('sidebar-visible', isSidebarVisible);
-        toggleHandle.classList.toggle('is-open', isSidebarVisible);
+    };
+
+    const toggleVideoGrid = () => {
+        isVideoGridVisible = !isVideoGridVisible;
+
+        if (isVideoGridVisible) {
+            videoGrid.classList.remove('hidden');
+        } else {
+            videoGrid.classList.add('hidden');
+        }
     };
 
     const connectWebSocket = () => {
@@ -589,6 +614,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ws.onopen = () => {
             console.log('[WS] Collaboration WebSocket connected.');
+            if (COLLAB_DATA.userRole === 'controller') {
+                ws.send(JSON.stringify({ action: 'get_apps' }));
+            }
         };
 
         ws.onmessage = (event) => {
@@ -680,6 +708,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'controller_disconnected':
                     handleControllerDisconnect();
                     break;
+                case 'app_list':
+                    availableAppsList = data.apps;
+                    if (document.getElementById('start-menu-modal') && !document.getElementById('start-menu-modal').classList.contains('hidden')) {
+                        renderStartMenu();
+                    }
+                    const activeApp = availableAppsList.find(app => app.active);
+                    if (activeApp) {
+                        const titleEl = document.getElementById('sidebar-app-title');
+                        if (titleEl) titleEl.textContent = activeApp.name;
+                        document.title = activeApp.name;
+                    }
+                    break;
+                case 'app_swapped':
+                    pendingActions.clear();
+                    const iframe = document.getElementById('session-frame');
+                    const currentSrc = new URL(iframe.src);
+                    currentSrc.searchParams.set('t', Date.now());
+                    iframe.src = currentSrc.toString();
+                    const titleEl = document.getElementById('sidebar-app-title');
+                    if (titleEl) titleEl.textContent = data.app_name;
+                    document.title = data.app_name;
+                    ws.send(JSON.stringify({ action: 'get_apps' }));
+                    showToast({ sender: t('systemMessages.systemSender'), message: t('systemMessages.swappedApp', { app_name: data.app_name }) });
+                    break;
+                case 'error':
+                     pendingActions.clear();
+                     if (document.getElementById('start-menu-modal')) renderStartMenu();
+                     alert(data.message);
+                     break;
             }
         };
 
@@ -747,6 +804,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isParticipant = COLLAB_DATA.userRole === 'viewer' && COLLAB_DATA.userPermission === 'participant';
 
         let inviteLinksHtml = '';
+
         if (isController) {
             inviteLinksHtml = `
             <div class="sidebar-invite-section">
@@ -789,7 +847,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         sidebarEl.innerHTML = `
             <div class="sidebar-header">
-                <h2>${t('sidebar.title')}</h2>
+                <h2 id="sidebar-app-title">${t('sidebar.title')}</h2>
                 <div class="header-controls">
                     <div class="theme-toggle">
                         <div class="icon sun-icon"><svg viewBox="0 0 24 24"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.106a.75.75 0 010 1.06l-1.591 1.59a.75.75 0 11-1.06-1.06l1.59-1.59a.75.75 0 011.06 0zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zM17.836 17.836a.75.75 0 01-1.06 0l-1.59-1.591a.75.75 0 111.06-1.06l1.59 1.59a.75.75 0 010 1.061zM12 21.75a.75.75 0 01-.75-.75v-2.25a.75.75 0 011.5 0v2.25a.75.75 0 01-.75-.75zM5.636 17.836a.75.75 0 010-1.06l1.591-1.59a.75.75 0 111.06 1.06l-1.59 1.59a.75.75 0 01-1.06 0zM3.75 12a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5H4.5a.75.75 0 01-.75-.75zM6.106 6.106a.75.75 0 011.06 0l1.59 1.591a.75.75 0 11-1.06 1.06l-1.59-1.59a.75.75 0 010-1.06z"/></svg></div>
@@ -837,7 +895,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
         }
-        
+
+        if (isController) initStartMenu();
+ 
         if (isController) {
             initGamepadControls();
         } else if (isParticipant) {
@@ -905,7 +965,138 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('sidebar-main-content').innerHTML = '<div id="chat-messages"></div>';
         document.getElementById('sidebar-main-content').addEventListener('click', handleChatAreaClick);
     };
-    
+   
+    const initStartMenu = () => {
+        const btn = document.getElementById('start-menu-btn');
+        const modal = document.getElementById('start-menu-modal');
+        if(!btn || !modal) return;
+
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                ws.send(JSON.stringify({ action: 'get_apps' }));
+            } else {
+                modal.classList.add('hidden');
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!modal.classList.contains('hidden') && !modal.contains(e.target) && !btn.contains(e.target)) {
+                modal.classList.add('hidden');
+            }
+        });
+
+        const tabs = modal.querySelectorAll('.sm-tab-btn');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                modal.querySelectorAll('.sm-view').forEach(v => v.classList.remove('active'));
+                document.getElementById(`sm-view-${tab.dataset.tab}`).classList.add('active');
+            });
+        });
+
+        document.getElementById('sm-app-search').addEventListener('input', (e) => {
+            renderStartMenu(e.target.value);
+        });
+    };
+
+    const renderStartMenu = (filter = '') => {
+        const searchInput = document.getElementById('sm-app-search');
+        const currentFilter = filter || (searchInput ? searchInput.value : '');
+        const launchGrid = document.getElementById('sm-app-grid');
+        const activeList = document.getElementById('sm-active-list');
+        
+        if (launchGrid) launchGrid.innerHTML = '';
+        if (activeList) activeList.innerHTML = '';
+
+        const filteredApps = availableAppsList.filter(app => app.name.toLowerCase().includes(currentFilter.toLowerCase()));
+
+        filteredApps.forEach(app => {
+            const card = document.createElement('div');
+            card.className = 'sm-app-card';
+            
+            if (app.running) card.classList.add('running');
+            if (app.active) card.classList.add('active');
+
+            if (pendingActions.has(`swap_${app.id}`)) {
+                card.classList.add('pending');
+                card.innerHTML = `<div class="spinner"></div><span>${t('startMenu.loading')}</span>`;
+            } else {
+                const showOverlay = app.running && !app.active;
+                const overlay = showOverlay ? `<div class="running-overlay"><i class="fas fa-exchange-alt"></i></div>` : '';
+                
+                const iconHtml = app.logo ? `<img src="${app.logo}" alt="${app.name}">` : `<div class="app-icon-fallback"><i class="fas fa-image"></i></div>`;
+
+                card.innerHTML = `${overlay}${iconHtml}<span>${app.name}</span>`; 
+                if (!app.active) {
+                    card.onclick = (e) => {
+                        e.stopPropagation();
+                        pendingActions.add(`swap_${app.id}`);
+                        renderStartMenu(currentFilter);
+                        ws.send(JSON.stringify({ action: 'swap_app', app_id: app.id }));
+                    };
+                }
+            }
+            if (launchGrid) launchGrid.appendChild(card);
+        });
+
+        const runningApps = availableAppsList.filter(app => app.running);
+        runningApps.forEach(app => {
+            const item = document.createElement('div');
+            item.className = 'sm-session-item';
+            
+            const stopBtn = app.active 
+                ? `<button class="sm-btn-action sm-btn-stop" disabled title="${t('tooltips.cannotStopActive')}"><i class="fas fa-ban"></i></button>`
+                : `<button class="sm-btn-action sm-btn-stop" data-action="stop" data-id="${app.id}" title="${t('tooltips.stopApp')}"><i class="fas fa-stop"></i></button>`;
+            
+            const swapBtn = !app.active
+                ? `<button class="sm-btn-action sm-btn-swap" data-action="swap" data-id="${app.id}" title="${t('tooltips.swapApp')}"><i class="fas fa-exchange-alt"></i></button>`
+                : '';
+
+            let actionButtons = '';
+            if (pendingActions.has(`app_${app.id}`)) {
+                actionButtons = `<div class="spinner"></div>`;
+            } else {
+                actionButtons = `${swapBtn} <button class="sm-btn-action sm-btn-restart" data-action="restart" data-id="${app.id}" title="${t('tooltips.restartApp')}"><i class="fas fa-redo"></i></button> ${stopBtn}`;
+            }
+
+            const iconHtml = app.logo ? `<img src="${app.logo}">` : `<div class="app-icon-fallback"><i class="fas fa-image"></i></div>`; 
+            item.innerHTML = `
+                ${iconHtml}
+                <div class="sm-session-info">
+                    <div class="sm-session-name">${app.name}</div>
+                    <div class="sm-session-status">${app.active ? t('startMenu.activeVisible') : t('startMenu.runningBackground')}</div>
+                </div>
+                <div class="sm-session-actions">
+                    ${actionButtons}
+                </div>
+            `;
+            item.querySelectorAll('button').forEach(b => b.onclick = (e) => {
+                e.stopPropagation();
+                handleSessionAction(e.currentTarget.dataset.action, app.id, app.name);
+            });
+            if (activeList) activeList.appendChild(item);
+        });
+    };
+
+    const handleSessionAction = (action, appId, appName) => {
+        if (action === 'swap') {
+            pendingActions.add(`swap_${appId}`);
+            renderStartMenu();
+            ws.send(JSON.stringify({ action: 'swap_app', app_id: appId }));
+        } else if (action === 'stop') {
+            pendingActions.add(`app_${appId}`);
+            renderStartMenu();
+            ws.send(JSON.stringify({ action: 'stop_app', app_id: appId }));
+        } else if (action === 'restart') {
+            pendingActions.add(`app_${appId}`);
+            renderStartMenu();
+            ws.send(JSON.stringify({ action: 'restart_app', app_id: appId }));
+        }
+    };
+ 
     const escapeHTML = (str) => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 
     const linkify = (text) => {
@@ -1348,6 +1539,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     toggleHandle.addEventListener('click', toggleSidebar);
+
+    if (videoToggleHandle) {
+        videoToggleHandle.addEventListener('click', toggleVideoGrid);
+    }
+
     settingsModalCloseBtn.addEventListener('click', closeModal);
     settingsModalOverlay.addEventListener('click', (e) => {
         if (e.target === settingsModalOverlay) closeModal();

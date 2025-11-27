@@ -1014,12 +1014,17 @@ async def get_applications(user: dict = Depends(verify_token)):
 async def _stop_session(session_id: str):
     logger.info(f"[{session_id}] Stopping session...")
     if session_data := SESSIONS_DB.pop(session_id, None):
-        app_id = session_data.get("provider_app_id")
-        app_config = INSTALLED_APPS.get(app_id)
-        if app_config:
-            provider = DockerProvider(app_config.dict())
-            await provider.stop(session_data["instance_id"])
-
+        registry = session_data.get("container_registry", {})
+        if not registry and "provider_app_id" in session_data:
+            registry = {session_data["provider_app_id"]: {"instance_id": session_data["instance_id"]}}
+        for app_id, container_info in registry.items():
+            try:
+                app_config = INSTALLED_APPS.get(app_id)
+                if app_config:
+                    provider = DockerProvider(app_config.dict())
+                    await provider.stop(container_info["instance_id"])
+            except Exception as e:
+                logger.error(f"[{session_id}] Failed to stop container for app {app_id}: {e}")
         host_mount_path = session_data.get("host_mount_path")
         await save_sessions_to_disk()
         ephemeral_base_path = os.path.join(settings.storage_path, "sealskin_ephemeral")
@@ -1028,13 +1033,165 @@ async def _stop_session(session_id: str):
                 await asyncio.to_thread(
                     shutil.rmtree, host_mount_path, ignore_errors=True
                 )
-                logger.info(f"[{session_id}] Removed ephemeral storage directory.")
+        shared_files_path = session_data.get("shared_files_path")
+        if shared_files_path and shared_files_path.startswith(ephemeral_base_path) and os.path.exists(shared_files_path):
+            await asyncio.to_thread(shutil.rmtree, shared_files_path, ignore_errors=True)
+            logger.info(f"[{session_id}] Removed ephemeral shared files directory.")
         logger.info(f"[{session_id}] Session stopped and cleaned up successfully.")
     else:
         logger.warning(
             f"Attempted to stop session {session_id}, but it was not found in the database."
         )
 
+async def ensure_container_for_session(session_id: str, target_app_id: str) -> dict:
+    session = SESSIONS_DB.get(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found.")
+    if "container_registry" not in session:
+        session["container_registry"] = {}
+    if target_app_id in session["container_registry"]:
+        return session["container_registry"][target_app_id]
+    app_config = INSTALLED_APPS.get(target_app_id)
+    if not app_config:
+        raise HTTPException(status_code=404, detail=f"App {target_app_id} not found.")
+    env_vars = {
+        "SUBFOLDER": f"/{session_id}/",
+        "PUID": str(settings.puid),
+        "PGID": str(settings.pgid),
+        "CUSTOM_USER": session.get("custom_user", "abc"),
+        "PASSWORD": session.get("password", "abc"),
+    }
+    if session.get("is_collaboration"):
+        env_vars["SELKIES_MASTER_TOKEN"] = session.get("master_token")
+    template = APP_TEMPLATES.get(app_config.app_template)
+    if template and template.get("settings"):
+        env_vars.update({k: str(v) for k, v in template["settings"].items()})
+    if app_config.provider_config.env:
+        for env_override in app_config.provider_config.env:
+            env_vars[env_override.name] = env_override.value
+    gpu_config = session.get("gpu_config")
+    if gpu_config:
+        if gpu_config["type"] == "nvidia" and not app_config.provider_config.nvidia_support:
+            gpu_config = None
+        elif gpu_config["type"] == "dri3":
+            if not app_config.provider_config.dri3_support:
+                gpu_config = None
+            else:
+                env_vars["DRI_NODE"] = gpu_config["device"]
+                env_vars["DRINODE"] = gpu_config["device"]
+    volumes = {}
+    current_home_path = session.get("host_mount_path")
+    ephemeral_base = os.path.join(settings.storage_path, "sealskin_ephemeral")
+    is_ephemeral = current_home_path and current_home_path.startswith(ephemeral_base)
+    new_home_path = None
+    if is_ephemeral:
+        new_home_path = os.path.join(ephemeral_base, str(uuid.uuid4()))
+        os.makedirs(new_home_path, exist_ok=True, mode=0o700)
+    else:
+        username = session.get("username")
+        if username:
+            sanitized_app_name = _sanitize_for_filename(app_config.name)
+            new_home_path = os.path.join(settings.storage_path, username, f"auto-{sanitized_app_name}")
+            if app_config.is_meta_app and not os.path.exists(new_home_path):
+                template_path = os.path.join(settings.home_templates_path, app_config.home_template_name)
+                if os.path.isdir(template_path):
+                     await asyncio.to_thread(shutil.copytree, template_path, new_home_path, symlinks=True)
+            os.makedirs(new_home_path, exist_ok=True, mode=0o700)
+    session["host_mount_path"] = new_home_path
+    if new_home_path:
+        translated_home = _translate_path_to_host(new_home_path)
+        volumes[translated_home] = {
+            "bind": settings.container_config_path,
+            "mode": "rw",
+        }
+    shared_files_path = session.get("shared_files_path")
+    if shared_files_path and os.path.exists(shared_files_path):
+        translated_shared = _translate_path_to_host(shared_files_path)
+        volumes[translated_shared] = {
+            "bind": os.path.join(settings.container_config_path, "Desktop", "files"),
+            "mode": "rw"
+        }
+    autostart_content = None
+    if app_config.provider_config.custom_autostart_script_b64:
+        try:
+            autostart_content = base64.b64decode(app_config.provider_config.custom_autostart_script_b64).decode("utf-8")
+        except Exception:
+            pass
+    elif app_config.provider_config.autostart:
+        cache_path = _get_autostart_cache_path(app_config)
+        if cache_path and os.path.exists(cache_path):
+            try:
+                with open(cache_path, "r") as f:
+                    autostart_content = f.read()
+            except Exception:
+                pass
+    if autostart_content and new_home_path:
+        autostart_dir = os.path.join(new_home_path, ".config", "openbox")
+        autostart_file = os.path.join(autostart_dir, "autostart")
+        try:
+            os.makedirs(autostart_dir, exist_ok=True, mode=0o755)
+            with open(autostart_file, "w") as f:
+                f.write(autostart_content)
+            os.chmod(autostart_file, 0o755)
+        except Exception as e:
+            logger.error(f"Failed to inject autostart on swap: {e}")
+    provider = DockerProvider(app_config.dict())
+    launch_kwargs = {
+        "session_id": session_id,
+        "env_vars": env_vars,
+        "volumes": volumes,
+        "gpu_config": gpu_config,
+    }
+    if session.get("is_collaboration"):
+        mk_owner = session.get("mk_owner_token")
+        controller_token = session.get("controller_token")
+        
+        initial_tokens = {
+            controller_token: {
+                "role": "controller", 
+                "slot": session.get("controller_slot"),
+                "mk_control": (mk_owner == controller_token) if mk_owner else True
+            }
+        }
+        
+        for v in session.get("viewers", []):
+            initial_tokens[v["token"]] = {
+                "role": "viewer", 
+                "slot": v.get("slot"),
+                "mk_control": v["token"] == mk_owner
+            }
+        launch_kwargs.update({
+            "is_collaboration": True,
+            "master_token": session.get("master_token"),
+            "initial_tokens": initial_tokens
+        })
+        for v in session.get("viewers", []):
+            launch_kwargs["initial_tokens"][v["token"]] = {"role": "viewer", "slot": v.get("slot")}
+    instance_details = await provider.launch(**launch_kwargs)
+    container_info = {
+        "instance_id": instance_details["instance_id"],
+        "ip": instance_details["ip"],
+        "port": instance_details["port"],
+        "app_id": target_app_id,
+        "created_at": time.time()
+    }
+    session["container_registry"][target_app_id] = container_info
+    await save_sessions_to_disk()
+    return container_info
+
+async def stop_container_in_session(session_id: str, target_app_id: str):
+    session = SESSIONS_DB.get(session_id)
+    if not session or "container_registry" not in session:
+        return
+
+    if target_app_id in session["container_registry"]:
+        container_info = session["container_registry"][target_app_id]
+        app_config = INSTALLED_APPS.get(target_app_id)
+        if app_config:
+            provider = DockerProvider(app_config.dict())
+            await provider.stop(container_info["instance_id"])
+        del session["container_registry"][target_app_id]
+        await save_sessions_to_disk()
 
 async def _launch_common(
     application_id: str,
@@ -1106,6 +1263,7 @@ async def _launch_common(
     volumes = {}
     host_mount_path = None
     shared_files_path = None
+    is_ephemeral_storage = False
 
     is_persistent_launch = effective_settings.get("persistent_storage", False) and (
         home_name is None or home_name.lower() != "cleanroom"
@@ -1137,7 +1295,9 @@ async def _launch_common(
                 await asyncio.to_thread(
                     shutil.copytree, template_path, host_mount_path, symlinks=True
                 )
+            shared_files_path = os.path.join(settings.storage_path, username, "_sealskin_shared_files")
         else:
+            is_ephemeral_storage = True
             host_mount_path = os.path.join(
                 settings.storage_path, "sealskin_ephemeral", str(uuid.uuid4())
             )
@@ -1147,6 +1307,8 @@ async def _launch_common(
             await asyncio.to_thread(
                 shutil.copytree, template_path, host_mount_path, symlinks=True
             )
+            shared_files_path = os.path.join(settings.storage_path, "sealskin_ephemeral", f"{session_id}_shared")
+            os.makedirs(shared_files_path, exist_ok=True, mode=0o755)
     else:
         use_persistent_storage = (
             effective_settings.get("persistent_storage", False)
@@ -1166,11 +1328,13 @@ async def _launch_common(
             shared_files_path = os.path.abspath(
                 os.path.join(settings.storage_path, username, "_sealskin_shared_files")
             )
-            os.makedirs(shared_files_path, exist_ok=True, mode=0o755)
-        elif file_bytes and filename:
+        else:
+            is_ephemeral_storage = True
             host_mount_path = os.path.join(
                 settings.storage_path, "sealskin_ephemeral", str(uuid.uuid4())
             )
+            shared_files_path = os.path.join(settings.storage_path, "sealskin_ephemeral", f"{session_id}_shared")
+            os.makedirs(shared_files_path, exist_ok=True, mode=0o755)
 
     gpu_config = None
     if selected_gpu and effective_settings.get("gpu", False):
@@ -1259,15 +1423,14 @@ async def _launch_common(
             "bind": settings.container_config_path,
             "mode": "rw",
         }
-        if shared_files_path:
-            translated_shared_files_path = _translate_path_to_host(shared_files_path)
-            volumes[translated_shared_files_path] = {
-                "bind": os.path.join(
-                    settings.container_config_path, "Desktop", "files"
-                ),
-                "mode": "rw",
-            }
 
+    if shared_files_path:
+        os.makedirs(shared_files_path, exist_ok=True, mode=0o755)
+        translated_shared_files_path = _translate_path_to_host(shared_files_path)
+        volumes[translated_shared_files_path] = {
+            "bind": os.path.join(settings.container_config_path, "Desktop", "files"),
+            "mode": "rw",
+        }
         if file_bytes and filename:
             if shared_files_path:
                 file_dest_dir = shared_files_path
@@ -1318,9 +1481,20 @@ async def _launch_common(
             "app_name": app_config.name,
             "app_logo": app_config.logo,
             "host_mount_path": host_mount_path,
+            "shared_files_path": shared_files_path,
             "launch_context": launch_context,
             "custom_user": custom_user,
             "password": password,
+            "gpu_config": gpu_config,
+            "container_registry": {
+                application_id: {
+                    "instance_id": instance_details["instance_id"],
+                    "ip": instance_details["ip"],
+                    "port": instance_details["port"],
+                    "app_id": application_id,
+                    "created_at": time.time()
+                }
+            }
         }
         if launch_in_room_mode:
             SESSIONS_DB[session_id].update(
