@@ -1106,6 +1106,8 @@ async def ensure_container_for_session(session_id: str, target_app_id: str) -> d
         }
     shared_files_path = session.get("shared_files_path")
     if shared_files_path and os.path.exists(shared_files_path):
+        if new_home_path:
+            os.makedirs(os.path.join(new_home_path, "Desktop", "files"), exist_ok=True, mode=0o755)
         translated_shared = _translate_path_to_host(shared_files_path)
         volumes[translated_shared] = {
             "bind": os.path.join(settings.container_config_path, "Desktop", "files"),
