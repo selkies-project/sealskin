@@ -503,6 +503,7 @@ const en = {
             uploadingButton: 'Uploading...',
             autoHome: 'Auto (per-app persistence)',
             collaborationMode: 'Collaborative Session',
+            waylandMode: 'Wayland Mode',
         },
         sessionsView: {
             noSessions: 'No active sessions found.',
@@ -1147,6 +1148,7 @@ const es = {
             uploadingButton: 'Subiendo...',
             autoHome: 'Automático (persistencia por aplicación)',
             collaborationMode: 'Sesión colaborativa',
+            waylandMode: 'Modo Wayland',
         },
         sessionsView: {
             noSessions: 'No se encontraron sesiones activas.',
@@ -1791,6 +1793,7 @@ const zh = {
             uploadingButton: '上传中...',
             autoHome: '自动 (按应用持久化)',
             collaborationMode: '协作会话',
+            waylandMode: 'Wayland 模式',
         },
         sessionsView: {
             noSessions: '未找到活跃会话。',
@@ -2435,6 +2438,7 @@ const hi = {
             uploadingButton: 'अपलोड हो रहा है...',
             autoHome: 'ऑटो (प्रति-ऐप दृढ़ता)',
             collaborationMode: 'सहयोगी सत्र',
+            waylandMode: 'Wayland मोड',
         },
         sessionsView: {
             noSessions: 'कोई सक्रिय सत्र नहीं मिला।',
@@ -3079,6 +3083,7 @@ const pt = {
             uploadingButton: 'Enviando...',
             autoHome: 'Automático (persistência por aplicativo)',
             collaborationMode: 'Sessão Colaborativa',
+            waylandMode: 'Modo Wayland',
         },
         sessionsView: {
             noSessions: 'Nenhuma sessão ativa encontrada.',
@@ -3723,6 +3728,7 @@ const fr = {
             uploadingButton: 'Téléversement...',
             autoHome: 'Auto (persistance par application)',
             collaborationMode: 'Session collaborative',
+            waylandMode: 'Mode Wayland',
         },
         sessionsView: {
             noSessions: 'Aucune session active trouvée.',
@@ -4367,6 +4373,7 @@ const ru = {
             uploadingButton: 'Загрузка...',
             autoHome: 'Авто (постоянство для каждого приложения)',
             collaborationMode: 'Совместная сессия',
+            waylandMode: 'Режим Wayland',
         },
         sessionsView: {
             noSessions: 'Активных сессий не найдено.',
@@ -5011,6 +5018,7 @@ const de = {
             uploadingButton: 'Wird hochgeladen...',
             autoHome: 'Automatisch (pro-App-Persistenz)',
             collaborationMode: 'Kollaborative Sitzung',
+            waylandMode: 'Wayland-Modus',
         },
         sessionsView: {
             noSessions: 'Keine aktiven Sitzungen gefunden.',
@@ -5655,6 +5663,7 @@ const tr = {
             uploadingButton: 'Yükleniyor...',
             autoHome: 'Otomatik (uygulama başına kalıcılık)',
             collaborationMode: 'Ortak Oturum',
+            waylandMode: 'Wayland Modu',
         },
         sessionsView: {
             noSessions: 'Aktif oturum bulunamadı.',
@@ -6299,6 +6308,7 @@ const it = {
             uploadingButton: 'Caricamento...',
             autoHome: 'Automatico (persistenza per app)',
             collaborationMode: 'Sessione collaborativa',
+            waylandMode: 'Modalità Wayland',
         },
         sessionsView: {
             noSessions: 'Nessuna sessione attiva trovata.',
@@ -6943,6 +6953,7 @@ const nl = {
             uploadingButton: 'Uploaden...',
             autoHome: 'Automatisch (persistentie per app)',
             collaborationMode: 'Collaboratieve sessie',
+            waylandMode: 'Wayland-modus',
         },
         sessionsView: {
             noSessions: 'Geen actieve sessies gevonden.',
@@ -7587,6 +7598,7 @@ const ar = {
             uploadingButton: 'جاري التحميل...',
             autoHome: 'تلقائي (استمرارية لكل تطبيق)',
             collaborationMode: 'جلسة تعاونية',
+            waylandMode: 'وضع Wayland',
         },
         sessionsView: {
             noSessions: 'لم يتم العثور على جلسات نشطة.',
@@ -8231,6 +8243,7 @@ const ko = {
             uploadingButton: '업로드 중...',
             autoHome: '자동 (앱별 영속성)',
             collaborationMode: '공동 작업 세션',
+            waylandMode: 'Wayland 모드',
         },
         sessionsView: {
             noSessions: '활성 세션이 없습니다.',
@@ -8875,6 +8888,7 @@ const ja = {
             uploadingButton: 'アップロード中...',
             autoHome: '自動 (アプリごとの永続化)',
             collaborationMode: '共同セッション',
+            waylandMode: 'Waylandモード',
         },
         sessionsView: {
             noSessions: 'アクティブなセッションが見つかりません。',
@@ -9519,6 +9533,7 @@ const vi = {
             uploadingButton: 'Đang tải lên...',
             autoHome: 'Tự động (lưu trữ theo ứng dụng)',
             collaborationMode: 'Phiên cộng tác',
+            waylandMode: 'Chế độ Wayland',
         },
         sessionsView: {
             noSessions: 'Không tìm thấy phiên hoạt động nào.',
@@ -10163,6 +10178,7 @@ const th = {
             uploadingButton: 'กำลังอัปโหลด...',
             autoHome: 'อัตโนมัติ (คงอยู่ตามแอป)',
             collaborationMode: 'เซสชันการทำงานร่วมกัน',
+            waylandMode: 'โหมด Wayland',
         },
         sessionsView: {
             noSessions: 'ไม่พบเซสชันที่ใช้งานอยู่',
@@ -10807,6 +10823,7 @@ const fil = {
             uploadingButton: 'Nag-a-upload...',
             autoHome: 'Awtomatiko (pananatili bawat app)',
             collaborationMode: 'Sesyon ng Pakikipagtulungan',
+            waylandMode: 'Wayland Mode',
         },
         sessionsView: {
             noSessions: 'Walang nahanap na aktibong sesyon.',
@@ -11451,6 +11468,7 @@ const da = {
             uploadingButton: 'Uploader...',
             autoHome: 'Automatisk (vedvarende pr. app)',
             collaborationMode: 'Samarbejdssession',
+            waylandMode: 'Wayland-tilstand',
         },
         sessionsView: {
             noSessions: 'Ingen aktive sessioner fundet.',

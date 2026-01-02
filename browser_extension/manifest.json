@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SealSkin Isolation",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Open files and URLs in an isolated environment with E2E encryption.",
   "options_page": "options.html",
   "permissions": [

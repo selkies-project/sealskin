@@ -29,6 +29,7 @@ const saveOptionsCheckbox = document.getElementById('saveOptions');
 const saveOptionsLabel = document.getElementById('saveOptionsLabel');
 const openFileContainer = document.getElementById('open-file-container');
 const openFileCheckbox = document.getElementById('openFileOnLaunch');
+const waylandModeCheckbox = document.getElementById('waylandMode');
 const optionsArea = document.querySelector('.popup-options-area');
 const sessionsTabBtn = document.getElementById('sessions-tab-btn');
 const launchTabBtn = document.getElementById('launch-tab-btn');
@@ -701,6 +702,7 @@ async function handleLaunch() {
     (gpuSelect.value === 'none' ? null : gpuSelect.value);
 
   const collaborationMode = document.getElementById('collaborationMode').checked;
+  const waylandMode = waylandModeCheckbox.checked;
 
   if (isSimpleLaunch) {
     const simpleLaunchOptions = {
@@ -708,6 +710,7 @@ async function handleLaunch() {
       homeDir: selectedHomeDirValue,
       language: languageSelect.value,
       gpu: selectedGpuValue,
+      waylandMode: waylandMode,
     };
     await chrome.storage.local.set({ 'simple_launch_profile': simpleLaunchOptions });
   } else if (saveOptionsCheckbox.checked) {
@@ -717,6 +720,7 @@ async function handleLaunch() {
       language: languageSelect.value,
       gpu: selectedGpuValue,
       openFileOnLaunch: openFileCheckbox.checked,
+      waylandMode: waylandMode,
     };
     await chrome.storage.local.set({ [launchProfileKey]: pinnedProfile });
   }
@@ -743,6 +747,7 @@ async function handleLaunch() {
       language: languageSelect.value,
       selected_gpu: selectedGpuValue,
       launch_in_room_mode: collaborationMode,
+      wayland_mode: waylandMode,
     };
 
     if (isSimpleLaunch) {
@@ -935,6 +940,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTimeout(() => {
           if ([...gpuSelect.options].some(o => o.value === savedProfile.gpu)) gpuSelect.value = savedProfile.gpu;
         }, 50);
+      }
+      if (savedProfile.waylandMode !== undefined) {
+        waylandModeCheckbox.checked = savedProfile.waylandMode;
       }
       if (!isSimpleLaunch) {
         openFileCheckbox.checked = savedProfile.openFileOnLaunch !== false;

@@ -1061,6 +1061,8 @@ async def ensure_container_for_session(session_id: str, target_app_id: str) -> d
         "CUSTOM_USER": session.get("custom_user", "abc"),
         "PASSWORD": session.get("password", "abc"),
     }
+    if session.get("wayland_mode", True):
+        env_vars["PIXELFLUX_WAYLAND"] = "true"
     if session.get("is_collaboration"):
         env_vars["SELKIES_MASTER_TOKEN"] = session.get("master_token")
     template = APP_TEMPLATES.get(app_config.app_template)
@@ -1079,6 +1081,10 @@ async def ensure_container_for_session(session_id: str, target_app_id: str) -> d
             else:
                 env_vars["DRI_NODE"] = gpu_config["device"]
                 env_vars["DRINODE"] = gpu_config["device"]
+
+        if gpu_config and gpu_config["type"] == "nvidia" and session.get("wayland_mode", True):
+            env_vars["DRI_NODE"] = gpu_config["device"]
+            env_vars["DRINODE"] = gpu_config["device"]
     volumes = {}
     current_home_path = session.get("host_mount_path")
     ephemeral_base = os.path.join(settings.storage_path, "sealskin_ephemeral")
@@ -1208,6 +1214,7 @@ async def _launch_common(
     open_file_on_launch: bool = True,
     forced_rw_mount: Optional[str] = None,
     launch_in_room_mode: bool = False,
+    wayland_mode: bool = True,
 ) -> dict:
     app_config = INSTALLED_APPS.get(application_id)
     if not app_config:
@@ -1238,6 +1245,9 @@ async def _launch_common(
         "CUSTOM_USER": custom_user,
         "PASSWORD": password,
     }
+
+    if wayland_mode:
+        final_env["PIXELFLUX_WAYLAND"] = "true"
 
     if master_token:
         final_env["SELKIES_MASTER_TOKEN"] = master_token
@@ -1362,7 +1372,7 @@ async def _launch_common(
                 detail=f"App '{app_config.name}' does not support DRI3 GPUs.",
             )
         gpu_config = gpu_info
-        if gpu_config["type"] == "dri3":
+        if gpu_config["type"] == "dri3" or (gpu_config["type"] == "nvidia" and wayland_mode):
             final_env["DRI_NODE"] = gpu_config["device"]
             final_env["DRINODE"] = gpu_config["device"]
 
@@ -1488,6 +1498,7 @@ async def _launch_common(
             "custom_user": custom_user,
             "password": password,
             "gpu_config": gpu_config,
+            "wayland_mode": wayland_mode,
             "container_registry": {
                 application_id: {
                     "instance_id": instance_details["instance_id"],
@@ -1551,6 +1562,7 @@ async def launch_simple(
             req.language,
             req.selected_gpu,
             launch_in_room_mode=req.launch_in_room_mode,
+            wayland_mode=req.wayland_mode,
         )
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
@@ -1572,6 +1584,7 @@ async def launch_url(
             req.language,
             req.selected_gpu,
             launch_in_room_mode=req.launch_in_room_mode,
+            wayland_mode=req.wayland_mode,
         )
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
@@ -1608,6 +1621,7 @@ async def launch_file(
             os.path.basename(req.filename),
             req.open_file_on_launch,
             launch_in_room_mode=req.launch_in_room_mode,
+            wayland_mode=req.wayland_mode,
         )
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
@@ -1646,7 +1660,7 @@ async def launch_file_path(
         env_vars = {"SEALSKIN_FILE": container_file_path}
 
         return await _launch_common(
-            req.application_id, username, auth_user["effective_settings"], req.home_name, env_vars, req.language, req.selected_gpu,
+            req.application_id, username, auth_user["effective_settings"], req.home_name, env_vars, req.language, req.selected_gpu, wayland_mode=req.wayland_mode,
         )
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
@@ -1976,6 +1990,7 @@ async def launch_meta_for_customization(
             language=req.language,
             selected_gpu=req.selected_gpu,
             forced_rw_mount=template_path,
+            wayland_mode=req.wayland_mode,
         )
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")

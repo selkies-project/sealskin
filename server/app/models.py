@@ -24,6 +24,7 @@ class LaunchRequestSimple(BaseModel):
     language: Optional[str] = None
     selected_gpu: Optional[str] = None
     launch_in_room_mode: bool = False
+    wayland_mode: bool = True
 
 class LaunchRequestURL(BaseModel):
     url: str
@@ -32,6 +33,7 @@ class LaunchRequestURL(BaseModel):
     language: Optional[str] = None
     selected_gpu: Optional[str] = None
     launch_in_room_mode: bool = False
+    wayland_mode: bool = True
 
 class LaunchRequestFile(BaseModel):
     application_id: str
@@ -43,6 +45,7 @@ class LaunchRequestFile(BaseModel):
     language: Optional[str] = None
     selected_gpu: Optional[str] = None
     launch_in_room_mode: bool = False
+    wayland_mode: bool = True
 
 class LaunchResponse(BaseModel):
     session_url: str
@@ -198,6 +201,7 @@ class LaunchMetaCustomizeRequest(BaseModel):
     application_id: str
     language: Optional[str] = None
     selected_gpu: Optional[str] = None
+    wayland_mode: bool = True
 
 class CreateAdminRequest(BaseModel):
     username: str
@@ -318,6 +322,7 @@ class LaunchRequestFilePath(BaseModel):
     filename: str
     language: Optional[str] = None
     selected_gpu: Optional[str] = None
+    wayland_mode: bool = True
 
 class LaunchFromStorageRequest(BaseModel):
     filename: str
