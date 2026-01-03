@@ -191,7 +191,6 @@ document.addEventListener('DOMContentLoaded', () => {
       registerProcessor('audio-player-processor', AudioPlayerProcessor);
     `;
 
-
     const startMedia = async () => {
         const isStreamingSupported = 'VideoEncoder' in window && 'AudioEncoder' in window && 'MediaStreamTrackProcessor' in window;
         if (COLLAB_DATA.userPermission === 'readonly' || !isStreamingSupported) {
@@ -199,32 +198,44 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
         if (mediaInitialized) {
-            stopMedia(); 
+            stopMedia();
         }
 
         try {
-            const constraints = {
-                audio: { 
-                    deviceId: preferredMicId ? { exact: preferredMicId } : undefined, 
-                    echoCancellation: true, 
-                    noiseSuppression: true,
-                    autoGainControl: true,
-                    sampleRate: 48000,
-                    channelCount: 1,
-                },
-                video: { 
-                    deviceId: preferredCamId ? { exact: preferredCamId } : undefined, 
-                    width: 320, 
-                    height: 240, 
-                    frameRate: 30 
-                }
+            const audioConstraints = {
+                deviceId: preferredMicId ? { exact: preferredMicId } : undefined,
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true,
+                sampleRate: 48000,
+                channelCount: 1,
             };
-            localStream = await navigator.mediaDevices.getUserMedia(constraints);
-            localVideo.srcObject = localStream;
-            
-            localVideo.onloadedmetadata = () => {
-                localVideo.play().catch(e => console.warn("Local video autoplay was blocked.", e));
+
+            const videoConstraints = {
+                deviceId: preferredCamId ? { exact: preferredCamId } : undefined,
+                width: 320,
+                height: 240,
+                frameRate: 30
             };
+
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    audio: audioConstraints,
+                    video: videoConstraints
+                });
+            } catch (err) {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    audio: audioConstraints,
+                    video: false
+                });
+            }
+
+            if (localStream.getVideoTracks().length > 0) {
+                localVideo.srcObject = localStream;
+                localVideo.onloadedmetadata = () => {
+                    localVideo.play().catch(e => console.warn("Local video autoplay was blocked.", e));
+                };
+            }
 
             const audioCtx = new AudioContext();
             const source = audioCtx.createMediaStreamSource(localStream);
@@ -236,7 +247,11 @@ document.addEventListener('DOMContentLoaded', () => {
             localStream.getVideoTracks().forEach(t => t.enabled = isWebcamOn);
 
             setupAudioEncoder();
-            setupVideoEncoder();
+
+            if (localStream.getVideoTracks().length > 0) {
+                setupVideoEncoder();
+            }
+
             mediaInitialized = true;
             return true;
         } catch (err) {
@@ -246,7 +261,46 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
     };
-    
+
+    const handleMediaToggle = async (type) => {
+        if (isInitializingMedia) {
+            console.warn("Media initialization is already in progress. Please wait.");
+            return;
+        }
+
+        if (COLLAB_DATA.userPermission === 'readonly') return;
+        unlockAllAudio();
+
+        if (!mediaInitialized) {
+            isInitializingMedia = true;
+            try {
+                const success = await startMedia();
+                if (!success) {
+                    return;
+                }
+            } finally {
+                isInitializingMedia = false;
+            }
+        }
+
+        if (type === 'mic') {
+            isMicOn = !isMicOn;
+            if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = isMicOn);
+            sendControlMessage('audio_state', isMicOn);
+        } else if (type === 'video') {
+            if (localStream && localStream.getVideoTracks().length > 0) {
+                isWebcamOn = !isWebcamOn;
+                localStream.getVideoTracks().forEach(t => t.enabled = isWebcamOn);
+                localContainer.style.display = isWebcamOn ? 'flex' : 'none';
+                sendControlMessage('video_state', isWebcamOn);
+            } else {
+                isWebcamOn = false;
+            }
+        }
+
+        updateMediaButtonUI();
+    };
+
     const stopMedia = () => {
         if (localStream) {
             localStream.getTracks().forEach(track => track.stop());
@@ -1258,41 +1312,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         toggleVideoBtn.classList.toggle('inactive', !isWebcamOn);
         toggleVideoBtn.querySelector('i').className = isWebcamOn ? 'fas fa-video' : 'fas fa-video-slash';
-    };
-
-    const handleMediaToggle = async (type) => {
-        if (isInitializingMedia) {
-            console.warn("Media initialization is already in progress. Please wait.");
-            return;
-        }
-
-        if (COLLAB_DATA.userPermission === 'readonly') return;
-        unlockAllAudio();
-
-        if (!mediaInitialized) {
-            isInitializingMedia = true;
-            try {
-                const success = await startMedia();
-                if (!success) {
-                    return;
-                }
-            } finally {
-                isInitializingMedia = false;
-            }
-        }
-
-        if (type === 'mic') {
-            isMicOn = !isMicOn;
-            if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = isMicOn);
-            sendControlMessage('audio_state', isMicOn);
-        } else if (type === 'video') {
-            isWebcamOn = !isWebcamOn;
-            if (localStream) localStream.getVideoTracks().forEach(t => t.enabled = isWebcamOn);
-            localContainer.style.display = isWebcamOn ? 'flex' : 'none';
-            sendControlMessage('video_state', isWebcamOn);
-        }
-
-        updateMediaButtonUI();
     };
 
     const playNotificationSound = () => {
