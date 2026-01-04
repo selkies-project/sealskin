@@ -125,10 +125,12 @@ async def load_sessions_from_disk():
             logger.error(f"Failed to load sessions from disk: {e}")
 
 
-async def _fetch_and_cache_single_script(store_name: str, base_url: str, app_id: str):
+async def _fetch_and_cache_single_script(
+    store_name: str, base_url: str, app_id: str, suffix: str = ""
+):
     cache_dir = os.path.join(settings.autostart_cache_path, store_name)
     os.makedirs(cache_dir, exist_ok=True)
-    cache_file_path = os.path.join(cache_dir, app_id)
+    cache_file_path = os.path.join(cache_dir, f"{app_id}{suffix}")
     meta_file_path = cache_file_path + ".meta"
     headers = {}
 
@@ -139,9 +141,9 @@ async def _fetch_and_cache_single_script(store_name: str, base_url: str, app_id:
                 if "etag" in meta:
                     headers["If-None-Match"] = meta["etag"]
         except (json.JSONDecodeError, IOError):
-            logger.warning(f"Could not read meta file for {app_id}")
+            logger.warning(f"Could not read meta file for {app_id}{suffix}")
 
-    autostart_url = f"{base_url}/autostart/{app_id}"
+    autostart_url = f"{base_url}/autostart/{app_id}{suffix}"
 
     try:
         async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -149,7 +151,7 @@ async def _fetch_and_cache_single_script(store_name: str, base_url: str, app_id:
 
             if response.status_code == 304:
                 logger.debug(
-                    f"Autostart script for '{app_id}' in store '{store_name}' is up to date."
+                    f"Autostart script for '{app_id}{suffix}' in store '{store_name}' is up to date."
                 )
                 return
 
@@ -172,13 +174,15 @@ async def _fetch_and_cache_single_script(store_name: str, base_url: str, app_id:
 
             await asyncio.to_thread(write_cache_and_meta)
             logger.info(
-                f"Successfully cached autostart script for '{app_id}' from store '{store_name}'."
+                f"Successfully cached autostart script for '{app_id}{suffix}' from store '{store_name}'."
             )
 
     except httpx.RequestError as e:
-        logger.warning(f"Failed to fetch autostart script for '{app_id}': {e}")
+        logger.warning(f"Failed to fetch autostart script for '{app_id}{suffix}': {e}")
     except Exception as e:
-        logger.error(f"Unexpected error updating autostart script for '{app_id}': {e}")
+        logger.error(
+            f"Unexpected error updating autostart script for '{app_id}{suffix}': {e}"
+        )
 
 
 async def _update_all_autostart_caches():
@@ -205,7 +209,12 @@ async def _update_all_autostart_caches():
                     if app.get("provider_config", {}).get("autostart"):
                         tasks.append(
                             _fetch_and_cache_single_script(
-                                store.name, base_url, app["id"]
+                                store.name, base_url, app["id"], suffix=""
+                            )
+                        )
+                        tasks.append(
+                            _fetch_and_cache_single_script(
+                                store.name, base_url, app["id"], suffix="-wayland"
                             )
                         )
             except Exception as e:
@@ -526,13 +535,15 @@ async def _get_and_cache_image_metadata(image_name: str, force_refresh: bool = F
         IMAGE_METADATA[image_name]["digests"] = []
 
 
-def _get_autostart_cache_path(app_config: InstalledApp) -> Optional[str]:
+def _get_autostart_cache_path(
+    app_config: InstalledApp, suffix: str = ""
+) -> Optional[str]:
     store = next((s for s in APP_STORES if s.name == app_config.source), None)
     if not store:
         return None
 
     cache_dir = os.path.join(settings.autostart_cache_path, store.name)
-    return os.path.join(cache_dir, app_config.source_app_id)
+    return os.path.join(cache_dir, f"{app_config.source_app_id}{suffix}")
 
 
 async def _update_autostart_cache(app_config: InstalledApp):
@@ -546,12 +557,6 @@ async def _update_autostart_cache(app_config: InstalledApp):
         )
         return
 
-    cache_file_path = _get_autostart_cache_path(app_config)
-    if not cache_file_path:
-        return
-
-    os.makedirs(os.path.dirname(cache_file_path), exist_ok=True)
-
     app_source_url = store.url
     if not (app_source_url.endswith(".yml") or app_source_url.endswith(".yaml")):
         logger.error(
@@ -560,44 +565,54 @@ async def _update_autostart_cache(app_config: InstalledApp):
         return
 
     base_url = app_source_url.rsplit("/", 1)[0]
-    autostart_url = f"{base_url}/autostart/{app_config.source_app_id}"
 
-    logger.info(
-        f"Checking for autostart script for '{app_config.source_app_id}' from {autostart_url}"
-    )
+    async def fetch_one(suffix: str):
+        cache_file_path = _get_autostart_cache_path(app_config, suffix)
+        if not cache_file_path:
+            return
 
-    try:
-        async with httpx.AsyncClient(follow_redirects=True) as client:
-            response = await client.get(autostart_url, timeout=10)
+        os.makedirs(os.path.dirname(cache_file_path), exist_ok=True)
+        autostart_url = f"{base_url}/autostart/{app_config.source_app_id}{suffix}"
 
-            if response.status_code == 404:
-                logger.warning(
-                    f"No autostart script found for '{app_config.source_app_id}' (404 Not Found). Caching empty response."
+        logger.info(
+            f"Checking for autostart script for '{app_config.source_app_id}{suffix}' from {autostart_url}"
+        )
+
+        try:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
+                response = await client.get(autostart_url, timeout=10)
+
+                if response.status_code == 404:
+                    logger.warning(
+                        f"No autostart script found for '{app_config.source_app_id}{suffix}' (404 Not Found). Caching empty response."
+                    )
+                    with open(cache_file_path, "w") as f:
+                        f.write("")
+                    return
+
+                response.raise_for_status()
+                script_content = response.text
+
+                def write_cache():
+                    with open(cache_file_path, "w") as f:
+                        f.write(script_content)
+
+                await asyncio.to_thread(write_cache)
+                logger.info(
+                    f"Successfully cached autostart script for '{app_config.source_app_id}{suffix}'."
                 )
-                with open(cache_file_path, "w") as f:
-                    f.write("")
-                return
 
-            response.raise_for_status()
-            script_content = response.text
-
-            def write_cache():
-                with open(cache_file_path, "w") as f:
-                    f.write(script_content)
-
-            await asyncio.to_thread(write_cache)
-            logger.info(
-                f"Successfully cached autostart script for '{app_config.source_app_id}'."
+        except httpx.RequestError as e:
+            logger.error(
+                f"Failed to fetch autostart script for '{app_config.source_app_id}{suffix}': {e}"
+            )
+        except Exception as e:
+            logger.error(
+                f"Unexpected error updating autostart script for '{app_config.source_app_id}{suffix}': {e}"
             )
 
-    except httpx.RequestError as e:
-        logger.error(
-            f"Failed to fetch autostart script for '{app_config.source_app_id}': {e}"
-        )
-    except Exception as e:
-        logger.error(
-            f"Unexpected error updating autostart script for '{app_config.source_app_id}': {e}"
-        )
+    await fetch_one("")
+    await fetch_one("-wayland")
 
 
 async def _pull_and_cache_image(image_name: str):
@@ -1120,22 +1135,47 @@ async def ensure_container_for_session(session_id: str, target_app_id: str) -> d
             "mode": "rw"
         }
     autostart_content = None
-    if app_config.provider_config.custom_autostart_script_b64:
-        try:
-            autostart_content = base64.b64decode(app_config.provider_config.custom_autostart_script_b64).decode("utf-8")
-        except Exception:
-            pass
-    elif app_config.provider_config.autostart:
-        cache_path = _get_autostart_cache_path(app_config)
-        if cache_path and os.path.exists(cache_path):
+    autostart_subpath = None
+    wayland_mode = session.get("wayland_mode", True)
+
+    if wayland_mode:
+        autostart_subpath = os.path.join(".config", "labwc", "autostart")
+        if app_config.provider_config.custom_autostart_wayland_script_b64:
             try:
-                with open(cache_path, "r") as f:
-                    autostart_content = f.read()
+                autostart_content = base64.b64decode(
+                    app_config.provider_config.custom_autostart_wayland_script_b64
+                ).decode("utf-8")
             except Exception:
                 pass
-    if autostart_content and new_home_path:
-        autostart_dir = os.path.join(new_home_path, ".config", "openbox")
-        autostart_file = os.path.join(autostart_dir, "autostart")
+        elif app_config.provider_config.autostart:
+            cache_path = _get_autostart_cache_path(app_config, suffix="-wayland")
+            if cache_path and os.path.exists(cache_path):
+                try:
+                    with open(cache_path, "r") as f:
+                        autostart_content = f.read()
+                except Exception:
+                    pass
+    else:
+        autostart_subpath = os.path.join(".config", "openbox", "autostart")
+        if app_config.provider_config.custom_autostart_script_b64:
+            try:
+                autostart_content = base64.b64decode(
+                    app_config.provider_config.custom_autostart_script_b64
+                ).decode("utf-8")
+            except Exception:
+                pass
+        elif app_config.provider_config.autostart:
+            cache_path = _get_autostart_cache_path(app_config)
+            if cache_path and os.path.exists(cache_path):
+                try:
+                    with open(cache_path, "r") as f:
+                        autostart_content = f.read()
+                except Exception:
+                    pass
+
+    if autostart_content and new_home_path and autostart_subpath:
+        autostart_file = os.path.join(new_home_path, autostart_subpath)
+        autostart_dir = os.path.dirname(autostart_file)
         try:
             os.makedirs(autostart_dir, exist_ok=True, mode=0o755)
             with open(autostart_file, "w") as f:
@@ -1377,37 +1417,74 @@ async def _launch_common(
             final_env["DRINODE"] = gpu_config["device"]
 
     autostart_content = None
-    if app_config.provider_config.custom_autostart_script_b64:
-        try:
-            autostart_content = base64.b64decode(
-                app_config.provider_config.custom_autostart_script_b64
-            ).decode("utf-8")
-            logger.info(
-                f"[{session_id}] Using custom autostart script for '{app_config.name}'."
-            )
-        except Exception as e:
-            logger.error(
-                f"[{session_id}] Failed to decode custom autostart script: {e}"
-            )
-    elif app_config.provider_config.autostart:
-        autostart_cache_path = _get_autostart_cache_path(app_config)
-        if (
-            autostart_cache_path
-            and os.path.exists(autostart_cache_path)
-            and os.path.getsize(autostart_cache_path) > 0
-        ):
+    autostart_subpath = None
+
+    if wayland_mode:
+        autostart_subpath = os.path.join(".config", "labwc", "autostart")
+        if app_config.provider_config.custom_autostart_wayland_script_b64:
             try:
-                with open(autostart_cache_path, "r") as f:
-                    autostart_content = f.read()
+                autostart_content = base64.b64decode(
+                    app_config.provider_config.custom_autostart_wayland_script_b64
+                ).decode("utf-8")
                 logger.info(
-                    f"[{session_id}] Using cached repository autostart script for '{app_config.name}'."
+                    f"[{session_id}] Using custom Wayland autostart script for '{app_config.name}'."
                 )
             except Exception as e:
                 logger.error(
-                    f"[{session_id}] Failed to read cached autostart script: {e}"
+                    f"[{session_id}] Failed to decode custom Wayland autostart script: {e}"
                 )
+        elif app_config.provider_config.autostart:
+            autostart_cache_path = _get_autostart_cache_path(
+                app_config, suffix="-wayland"
+            )
+            if (
+                autostart_cache_path
+                and os.path.exists(autostart_cache_path)
+                and os.path.getsize(autostart_cache_path) > 0
+            ):
+                try:
+                    with open(autostart_cache_path, "r") as f:
+                        autostart_content = f.read()
+                    logger.info(
+                        f"[{session_id}] Using cached repository Wayland autostart script for '{app_config.name}'."
+                    )
+                except Exception as e:
+                    logger.error(
+                        f"[{session_id}] Failed to read cached Wayland autostart script: {e}"
+                    )
+    else:
+        autostart_subpath = os.path.join(".config", "openbox", "autostart")
+        if app_config.provider_config.custom_autostart_script_b64:
+            try:
+                autostart_content = base64.b64decode(
+                    app_config.provider_config.custom_autostart_script_b64
+                ).decode("utf-8")
+                logger.info(
+                    f"[{session_id}] Using custom autostart script for '{app_config.name}'."
+                )
+            except Exception as e:
+                logger.error(
+                    f"[{session_id}] Failed to decode custom autostart script: {e}"
+                )
+        elif app_config.provider_config.autostart:
+            autostart_cache_path = _get_autostart_cache_path(app_config)
+            if (
+                autostart_cache_path
+                and os.path.exists(autostart_cache_path)
+                and os.path.getsize(autostart_cache_path) > 0
+            ):
+                try:
+                    with open(autostart_cache_path, "r") as f:
+                        autostart_content = f.read()
+                    logger.info(
+                        f"[{session_id}] Using cached repository autostart script for '{app_config.name}'."
+                    )
+                except Exception as e:
+                    logger.error(
+                        f"[{session_id}] Failed to read cached autostart script: {e}"
+                    )
 
-    if autostart_content:
+    if autostart_content and autostart_subpath:
         if not host_mount_path:
             host_mount_path = os.path.join(
                 settings.storage_path, "sealskin_ephemeral", str(uuid.uuid4())
@@ -1416,13 +1493,13 @@ async def _launch_common(
                 f"[{session_id}] Created ephemeral storage for autostart script."
             )
 
-        autostart_dir = os.path.join(host_mount_path, ".config", "openbox")
-        autostart_path = os.path.join(autostart_dir, "autostart")
+        autostart_file = os.path.join(host_mount_path, autostart_subpath)
+        autostart_dir = os.path.dirname(autostart_file)
         try:
             os.makedirs(autostart_dir, exist_ok=True, mode=0o755)
-            with open(autostart_path, "w") as f:
+            with open(autostart_file, "w") as f:
                 f.write(autostart_content)
-            os.chmod(autostart_path, 0o755)
+            os.chmod(autostart_file, 0o755)
             logger.info(
                 f"[{session_id}] Successfully wrote autostart script to session storage."
             )
@@ -1923,6 +2000,9 @@ async def create_meta_app(decrypted_body: dict = Depends(get_decrypted_request_b
         meta_app.provider_config.custom_autostart_script_b64 = (
             req.custom_autostart_script_b64
         )
+        meta_app.provider_config.custom_autostart_wayland_script_b64 = (
+            req.custom_autostart_wayland_script_b64
+        )
         meta_app.is_meta_app = True
         meta_app.base_app_id = req.base_app_id
         meta_app.home_template_name = home_template_name
@@ -2023,6 +2103,8 @@ async def get_available_apps(url: str, store_name: str):  # <-- ADD store_name p
                         cache_dir = os.path.join(
                             settings.autostart_cache_path, store_name_for_cache
                         )
+
+                        # Standard script
                         cache_file_path = os.path.join(cache_dir, app_id)
                         script_content_b64 = None
                         if (
@@ -2042,6 +2124,29 @@ async def get_available_apps(url: str, store_name: str):  # <-- ADD store_name p
                         provider_config[
                             "custom_autostart_script_b64"
                         ] = script_content_b64
+
+                        # Wayland script
+                        cache_file_path_wayland = os.path.join(
+                            cache_dir, f"{app_id}-wayland"
+                        )
+                        wayland_script_content_b64 = None
+                        if (
+                            os.path.exists(cache_file_path_wayland)
+                            and os.path.getsize(cache_file_path_wayland) > 0
+                        ):
+                            try:
+                                with open(cache_file_path_wayland, "rb") as f:
+                                    script_content = f.read()
+                                wayland_script_content_b64 = base64.b64encode(
+                                    script_content
+                                ).decode("utf-8")
+                            except Exception as e:
+                                logger.error(
+                                    f"Failed to read/encode wayland autostart cache for {app_id}: {e}"
+                                )
+                        provider_config[
+                            "custom_autostart_wayland_script_b64"
+                        ] = wayland_script_content_b64
 
                 if "extensions" in provider_config and provider_config["extensions"]:
                     original_extensions = provider_config["extensions"]
@@ -2126,6 +2231,8 @@ async def update_installed_app(
 
     if app_update.provider_config.custom_autostart_script_b64 == "":
         app_update.provider_config.custom_autostart_script_b64 = None
+    if app_update.provider_config.custom_autostart_wayland_script_b64 == "":
+        app_update.provider_config.custom_autostart_wayland_script_b64 = None
 
     old_image_name = INSTALLED_APPS[app_id].provider_config.image
 

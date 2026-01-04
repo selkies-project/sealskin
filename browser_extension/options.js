@@ -487,8 +487,10 @@ function initializeAppLaboratoryTab() {
   const iconUploadInput = document.getElementById('lab-icon-upload');
   const iconPreview = document.getElementById('lab-icon-preview');
   const autostartScriptTextarea = document.getElementById('lab-autostart-script');
+  const autostartWaylandScriptTextarea = document.getElementById('lab-autostart-wayland-script');
   const usersInput = document.getElementById('lab-app-users');
   const groupsInput = document.getElementById('lab-app-groups');
+  const launchWaylandCheckbox = document.getElementById('lab-launch-wayland');
   const launchBtn = document.getElementById('lab-launch-btn');
   const launchBtnText = document.getElementById('lab-launch-btn-text');
   const spinner = document.getElementById('lab-spinner');
@@ -504,8 +506,10 @@ function initializeAppLaboratoryTab() {
     baseAppSelect.disabled = false;
     iconPreview.src = 'icons/icon128.png';
     autostartScriptTextarea.value = '';
+    autostartWaylandScriptTextarea.value = '';
     usersInput.value = 'all';
     groupsInput.value = 'all';
+    launchWaylandCheckbox.checked = true;
     document.getElementById('lab-form').reset();
     labAppSelect.value = 'new';
     updateBtn.disabled = true;
@@ -534,6 +538,17 @@ function initializeAppLaboratoryTab() {
       }
     }
     autostartScriptTextarea.value = script;
+
+    let waylandScript = '';
+    if (app.provider_config && app.provider_config.custom_autostart_wayland_script_b64) {
+      try {
+        waylandScript = atob(app.provider_config.custom_autostart_wayland_script_b64);
+      } catch (e) {
+        console.error("Failed to decode wayland autostart script:", e);
+      }
+    }
+    autostartWaylandScriptTextarea.value = waylandScript;
+
     labState.isDirty = false;
     updateBtn.disabled = true;
   }
@@ -556,6 +571,7 @@ function initializeAppLaboratoryTab() {
     const selectedBaseAppId = baseAppSelect.value;
     const baseApp = selectedBaseAppId ? adminData.installedApps.find(app => app.id === selectedBaseAppId) : null;
     let scriptContent = '';
+    let waylandScriptContent = '';
 
     if (baseApp) {
       if (baseApp.provider_config && baseApp.provider_config.custom_autostart_script_b64) {
@@ -563,6 +579,13 @@ function initializeAppLaboratoryTab() {
           scriptContent = atob(baseApp.provider_config.custom_autostart_script_b64);
         } catch (e) {
           console.error("Failed to decode base app autostart script:", e);
+        }
+      }
+      if (baseApp.provider_config && baseApp.provider_config.custom_autostart_wayland_script_b64) {
+        try {
+          waylandScriptContent = atob(baseApp.provider_config.custom_autostart_wayland_script_b64);
+        } catch (e) {
+          console.error("Failed to decode base app wayland autostart script:", e);
         }
       }
       const iconSrc = await formatLogoSrc(baseApp.logo);
@@ -574,6 +597,7 @@ function initializeAppLaboratoryTab() {
     }
 
     autostartScriptTextarea.value = scriptContent;
+    autostartWaylandScriptTextarea.value = waylandScriptContent;
   });
 
   function setLabDirty() {
@@ -584,6 +608,7 @@ function initializeAppLaboratoryTab() {
   }
 
   autostartScriptTextarea.addEventListener('input', setLabDirty);
+  autostartWaylandScriptTextarea.addEventListener('input', setLabDirty);
   usersInput.addEventListener('input', setLabDirty);
   groupsInput.addEventListener('input', setLabDirty);
 
@@ -618,6 +643,7 @@ function initializeAppLaboratoryTab() {
         payload.users = usersInput.value.split(',').map(s => s.trim()).filter(Boolean);
         payload.groups = groupsInput.value.split(',').map(s => s.trim()).filter(Boolean);
         payload.provider_config.custom_autostart_script_b64 = btoa(autostartScriptTextarea.value);
+        payload.provider_config.custom_autostart_wayland_script_b64 = btoa(autostartWaylandScriptTextarea.value);
 
         const updatedApp = await secureFetch(`/api/admin/apps/installed/${labState.currentApp.id}`, {
             method: 'PUT',
@@ -697,6 +723,7 @@ function initializeAppLaboratoryTab() {
               ? labState.base64Icon.split(',')[1]
               : labState.base64Icon,
           custom_autostart_script_b64: btoa(autostartScriptTextarea.value),
+          custom_autostart_wayland_script_b64: btoa(autostartWaylandScriptTextarea.value),
           users: usersInput.value.split(',').map(s => s.trim()).filter(Boolean),
           groups: groupsInput.value.split(',').map(s => s.trim()).filter(Boolean),
         };
@@ -716,7 +743,10 @@ function initializeAppLaboratoryTab() {
         appToLaunch = labState.currentApp;
       }
 
-      const launchPayload = { application_id: appToLaunch.id };
+      const launchPayload = {
+        application_id: appToLaunch.id,
+        wayland_mode: launchWaylandCheckbox.checked
+      };
       const { sealskinConfig } = await chrome.storage.local.get('sealskinConfig');
       const launchResponse = await secureFetch('/api/admin/launch/meta_customize', { method: 'POST', body: JSON.stringify(launchPayload) });
 
@@ -1550,25 +1580,46 @@ function showInstallModal(appData, existingInstall = null, isManual = false) {
   }
 
   const autostartTextArea = document.getElementById('install-autostart-script');
+  const autostartWaylandTextArea = document.getElementById('install-autostart-wayland-script');
   autostartTextArea.placeholder = `program \${SEALSKIN_FILE:+"$SEALSKIN_FILE"} \${SEALSKIN_URL:+"$SEALSKIN_URL"}`;
+  autostartWaylandTextArea.placeholder = `program \${SEALSKIN_FILE:+"$SEALSKIN_FILE"} \${SEALSKIN_URL:+"$SEALSKIN_URL"}`;
 
   let autostartScript = '';
-  if (isEditing && existingInstall.provider_config.custom_autostart_script_b64) {
-    try {
-      autostartScript = atob(existingInstall.provider_config.custom_autostart_script_b64);
-    } catch (e) {
-      console.error("Failed to decode autostart script:", e);
-      autostartScript = '';
+  let autostartWaylandScript = '';
+
+  if (isEditing) {
+    if (existingInstall.provider_config.custom_autostart_script_b64) {
+      try {
+        autostartScript = atob(existingInstall.provider_config.custom_autostart_script_b64);
+      } catch (e) {
+        console.error("Failed to decode autostart script:", e);
+      }
     }
-  } else if (!isEditing && appData.provider_config.custom_autostart_script_b64) {
-    try {
-      autostartScript = atob(appData.provider_config.custom_autostart_script_b64);
-    } catch (e) {
-      console.error("Failed to decode default autostart script:", e);
-      autostartScript = '';
+    if (existingInstall.provider_config.custom_autostart_wayland_script_b64) {
+      try {
+        autostartWaylandScript = atob(existingInstall.provider_config.custom_autostart_wayland_script_b64);
+      } catch (e) {
+        console.error("Failed to decode wayland autostart script:", e);
+      }
+    }
+  } else {
+    if (appData.provider_config.custom_autostart_script_b64) {
+      try {
+        autostartScript = atob(appData.provider_config.custom_autostart_script_b64);
+      } catch (e) {
+        console.error("Failed to decode default autostart script:", e);
+      }
+    }
+    if (appData.provider_config.custom_autostart_wayland_script_b64) {
+      try {
+        autostartWaylandScript = atob(appData.provider_config.custom_autostart_wayland_script_b64);
+      } catch (e) {
+        console.error("Failed to decode default wayland autostart script:", e);
+      }
     }
   }
   autostartTextArea.value = autostartScript;
+  autostartWaylandTextArea.value = autostartWaylandScript;
 
   appInstallModal.style.display = 'block';
 }
@@ -2458,6 +2509,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sourceAppId = document.getElementById('install-source-app-id').value;
     const sourceApp = adminData.availableApps.find(a => a.id === sourceAppId);
     const autostartValue = document.getElementById('install-autostart-script').value;
+    const autostartWaylandValue = document.getElementById('install-autostart-wayland-script').value;
 
     const payload = {
       id: app_id,
@@ -2490,6 +2542,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       payload.provider_config.custom_autostart_script_b64 = btoa(autostartValue);
     } else if (isEditing) {
       payload.provider_config.custom_autostart_script_b64 = "";
+    }
+
+    if (autostartWaylandValue) {
+      payload.provider_config.custom_autostart_wayland_script_b64 = btoa(autostartWaylandValue);
+    } else if (isEditing) {
+      payload.provider_config.custom_autostart_wayland_script_b64 = "";
     }
 
     try {

@@ -565,12 +565,21 @@
                                 <textarea id="lab-autostart-script" rows="4" placeholder="program ${SEALSKIN_FILE:+&quot;$SEALSKIN_FILE&quot;} ${SEALSKIN_URL:+&quot;$SEALSKIN_URL&quot;}"></textarea>
                             </div>
                             <div class="form-group">
+                                <label for="lab-autostart-wayland-script">
+                                    <span data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</span> (Wayland)
+                                </label>
+                                <textarea id="lab-autostart-wayland-script" rows="4" placeholder="program ${SEALSKIN_FILE:+&quot;$SEALSKIN_FILE&quot;} ${SEALSKIN_URL:+&quot;$SEALSKIN_URL&quot;}"></textarea>
+                            </div>
+                            <div class="form-group">
                                 <label for="lab-app-users" data-i18n="options.modals.allowedUsersLabel">Allowed Users</label>
                                 <input type="text" id="lab-app-users" value="all">
                             </div>
                             <div class="form-group">
                                 <label for="lab-app-groups" data-i18n="options.modals.allowedGroupsLabel">Allowed Groups</label>
                                 <input type="text" id="lab-app-groups" value="all">
+                            </div>
+                            <div class="form-group">
+                                <label><input type="checkbox" id="lab-launch-wayland" checked> <span data-i18n="popup.launchView.waylandMode">Wayland Mode</span></label>
                             </div>
 
                             <div class="button-group" style="margin-top: auto; width: 100%;">
@@ -767,6 +776,14 @@
                 <div class="form-group">
                     <label for="install-autostart-script" data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</label>
                     <textarea id="install-autostart-script" rows="4"></textarea>
+                    <p class="description" data-i18n="options.modals.customAutostartScriptDescription">Customize autostart logic, leave blank to use default from application provider.</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="install-autostart-wayland-script">
+                        <span data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</span> (Wayland)
+                    </label>
+                    <textarea id="install-autostart-wayland-script" rows="4"></textarea>
                     <p class="description" data-i18n="options.modals.customAutostartScriptDescription">Customize autostart logic, leave blank to use default from application provider.</p>
                 </div>
 

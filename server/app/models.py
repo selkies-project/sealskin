@@ -80,6 +80,7 @@ class AvailableAppProviderConfig(BaseModel):
     extensions: List[str]
     autostart: Optional[bool] = False
     custom_autostart_script_b64: Optional[str] = None
+    custom_autostart_wayland_script_b64: Optional[str] = None
 
 class AvailableApp(BaseModel):
     id: str
@@ -194,6 +195,7 @@ class CreateMetaAppRequest(BaseModel):
     base_app_id: str
     logo: str
     custom_autostart_script_b64: Optional[str] = None
+    custom_autostart_wayland_script_b64: Optional[str] = None
     users: List[str]
     groups: List[str]
 
