@@ -327,6 +327,13 @@ def _translate_path_to_host(internal_path: str) -> str:
     return internal_path
 
 
+def _safe_copytree(src: str, dst: str, symlinks: bool = True):
+    try:
+        shutil.copytree(src, dst, symlinks=symlinks, ignore_dangling_symlinks=True)
+    except shutil.Error as e:
+        logger.warning(f"Ignored errors during directory copy from {src} to {dst}: {e}")
+
+
 def _get_cpu_model():
     global CPU_MODEL
     try:
@@ -1116,7 +1123,7 @@ async def ensure_container_for_session(session_id: str, target_app_id: str) -> d
             if app_config.is_meta_app and not os.path.exists(new_home_path):
                 template_path = os.path.join(settings.home_templates_path, app_config.home_template_name)
                 if os.path.isdir(template_path):
-                     await asyncio.to_thread(shutil.copytree, template_path, new_home_path, symlinks=True)
+                     await asyncio.to_thread(_safe_copytree, template_path, new_home_path, symlinks=True)
             os.makedirs(new_home_path, exist_ok=True, mode=0o700)
     session["host_mount_path"] = new_home_path
     if new_home_path:
@@ -1345,7 +1352,7 @@ async def _launch_common(
                     f"[{session_id}] First launch for meta-app. Copying template '{app_config.home_template_name}' for user '{username}'."
                 )
                 await asyncio.to_thread(
-                    shutil.copytree, template_path, host_mount_path, symlinks=True
+                    _safe_copytree, template_path, host_mount_path, symlinks=True
                 )
             shared_files_path = os.path.join(settings.storage_path, username, "_sealskin_shared_files")
         else:
@@ -1357,7 +1364,7 @@ async def _launch_common(
                 f"[{session_id}] Launching meta-app in cleanroom mode. Copying template '{app_config.home_template_name}' to ephemeral storage."
             )
             await asyncio.to_thread(
-                shutil.copytree, template_path, host_mount_path, symlinks=True
+                _safe_copytree, template_path, host_mount_path, symlinks=True
             )
             shared_files_path = os.path.join(settings.storage_path, "sealskin_ephemeral", f"{session_id}_shared")
             os.makedirs(shared_files_path, exist_ok=True, mode=0o755)
