@@ -1082,6 +1082,7 @@ async def ensure_container_for_session(session_id: str, target_app_id: str) -> d
         "PGID": str(settings.pgid),
         "CUSTOM_USER": session.get("custom_user", "abc"),
         "PASSWORD": session.get("password", "abc"),
+        "TZ": "Etc/UTC",
     }
     if session.get("wayland_mode", True):
         env_vars["PIXELFLUX_WAYLAND"] = "true"
@@ -1291,6 +1292,7 @@ async def _launch_common(
         "PGID": str(settings.pgid),
         "CUSTOM_USER": custom_user,
         "PASSWORD": password,
+        "TZ": "Etc/UTC",
     }
 
     if wayland_mode:
