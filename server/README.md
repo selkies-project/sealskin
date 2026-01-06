@@ -85,6 +85,7 @@ The SealSkin server is configured entirely through environment variables. The ta
 
 | Environment Variable | CLI Setting | Description | Default Value |
 | --- | --- | --- | --- |
+| `HOST_URL` | `NA` | When generating the default admin the host to use in this file. | `HOST_URL` |
 | `SEALSKIN_LOG_LEVEL` | `--log-level` | Logging level (e.g., DEBUG, INFO, WARNING). | `INFO` |
 | `SEALSKIN_API_PORT` | `--api-port` | Port for the main API server. | `8000` |
 | `SEALSKIN_SESSION_PORT` | `--session-port` | Port for the session proxy server. | `8443` |
