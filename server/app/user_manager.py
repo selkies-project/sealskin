@@ -3,6 +3,7 @@ import logging
 import yaml
 import re
 import shutil
+import json
 from typing import Dict, Tuple, Optional, List
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
@@ -102,14 +103,24 @@ def _generate_default_admin():
         f.write(public_pem)
     os.chmod(admin_file_path, 0o600)
 
-    logger.critical("\n" + "=" * 80)
-    logger.critical("DEFAULT ADMIN CREDENTIALS (SAVE THIS PRIVATE KEY!)")
-    logger.critical(f"Username: admin")
-    logger.critical("Private Key:\n" + private_pem)
-    if SERVER_PUBLIC_KEY_PEM:
-        logger.critical("Server Public Key:\n" + SERVER_PUBLIC_KEY_PEM)
-    logger.critical("=" * 80 + "\n")
+    config_path = os.path.abspath(os.path.join(settings.keys_base_path, "..", "..", "..", "admin.json"))
 
+    admin_config = {
+        "server_endpoint": os.environ.get("HOST_URL", "HOST_URL"),
+        "api_port": getattr(settings, "api_port", 8000),
+        "session_port": getattr(settings, "session_port", 8443),
+        "username": "admin",
+        "private_key": private_pem,
+        "server_public_key": SERVER_PUBLIC_KEY_PEM or ""
+    }
+
+    try:
+        with open(config_path, "w") as f:
+            json.dump(admin_config, f, indent=2)
+        os.chmod(config_path, 0o600)
+        logger.info(f"Generated default admin config at {config_path}")
+    except Exception as e:
+        logger.error(f"Failed to write admin config: {e}")
 
 def load_users_and_groups():
     """Scans key and group directories and populates in-memory dictionaries."""
