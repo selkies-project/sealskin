@@ -334,6 +334,17 @@ def _safe_copytree(src: str, dst: str, symlinks: bool = True):
         logger.warning(f"Ignored errors during directory copy from {src} to {dst}: {e}")
 
 
+def _safe_rmtree(path: str):
+    try:
+        shutil.rmtree(path)
+    except OSError as e:
+        if e.errno == 13:
+            raise HTTPException(
+                status_code=403,
+                detail="Directory cannot be deleted because of perms: there are non PUID and PGID user owned files in those directories and we are not able to remove them",
+            )
+        raise e
+
 def _get_cpu_model():
     global CPU_MODEL
     try:
@@ -2276,11 +2287,11 @@ async def delete_installed_app(app_id: str):
             )
             if os.path.isdir(template_dir_path):
                 try:
-                    shutil.rmtree(template_dir_path)
+                    _safe_rmtree(template_dir_path)
                     logger.info(
                         f"Purged home template directory for meta-app {app_id}: {template_dir_path}"
                     )
-                except OSError as e:
+                except (OSError, HTTPException) as e:
                     logger.error(
                         f"Failed to purge home template for meta-app {app_id}: {e}"
                     )
@@ -2782,7 +2793,7 @@ async def _perform_deletion(
         for p in paths_to_delete:
             validated_path = _get_validated_path(username, home_dir, p)
             if validated_path.is_dir():
-                await asyncio.to_thread(shutil.rmtree, validated_path)
+                await asyncio.to_thread(_safe_rmtree, str(validated_path))
             elif validated_path.is_file():
                 await asyncio.to_thread(os.remove, validated_path)
             deleted_count += 1
@@ -2792,6 +2803,8 @@ async def _perform_deletion(
                 "message": f"Successfully deleted {deleted_count} items.",
             }
         )
+    except HTTPException as e:
+        DELETION_TASKS[task_id].update({"status": "error", "message": e.detail})
     except Exception as e:
         logger.error(f"Deletion task {task_id} failed: {e}")
         DELETION_TASKS[task_id].update(
