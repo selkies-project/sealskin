@@ -98,6 +98,7 @@ The SealSkin server is configured entirely through environment variables. The ta
 | `SEALSKIN_UPLOAD_DIR` | `--upload-dir` | Directory for temporary file uploads. | `/storage/sealskin_uploads` |
 | `SEALSKIN_SESSION_COOKIE_NAME` | `--session-cookie-name` | Name of the session cookie. | `sealskin_session_token` |
 | `SEALSKIN_AUTOSTART_CACHE_PATH` | `--autostart-cache-path` | Path to cache autostart scripts. | `/config/.config/sealskin/autostart_cache` |
+| `SEALSKIN_APP_STORE_CACHE_PATH` | `--app-store-cache-path` | Path to cache app store YAML files. | `/config/.config/sealskin/app_stores_cache` |
 | `SEALSKIN_AUTO_UPDATE_APPS` | `--auto-update-apps` | Enable automatic pulling of the latest app images in the background. | `True` |
 | `SEALSKIN_AUTO_UPDATE_INTERVAL_SECONDS` | `--auto-update-interval-seconds` | How often to check for app image updates (in seconds). | `3600` |
 | `SEALSKIN_PUID` | `--puid` | Default User ID to run containers as. | `1000` |

@@ -81,6 +81,7 @@ class AvailableAppProviderConfig(BaseModel):
     autostart: Optional[bool] = False
     custom_autostart_script_b64: Optional[str] = None
     custom_autostart_wayland_script_b64: Optional[str] = None
+    docker_overrides: Optional[dict] = None
 
 class AvailableApp(BaseModel):
     id: str

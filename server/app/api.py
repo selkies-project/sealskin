@@ -91,7 +91,6 @@ except FileNotFoundError as e:
 
 ALGORITHM = "RS256"
 
-
 async def save_sessions_to_disk():
     async with SESSIONS_LOCK:
         try:
@@ -185,46 +184,156 @@ async def _fetch_and_cache_single_script(
         )
 
 
+async def _fetch_and_cache_app_store(store: AppStore):
+    cache_file_path = os.path.join(settings.app_store_cache_path, f"{store.name}.yml")
+    meta_file_path = cache_file_path + ".meta"
+    headers = {}
+
+    if os.path.exists(meta_file_path):
+        try:
+            with open(meta_file_path, "r") as f:
+                meta = json.load(f)
+                if "etag" in meta:
+                    headers["If-None-Match"] = meta["etag"]
+        except (json.JSONDecodeError, IOError):
+            pass
+
+    try:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
+            response = await client.get(store.url, timeout=15, headers=headers)
+
+            if response.status_code == 304:
+                logger.debug(f"App store '{store.name}' is up to date.")
+                return
+
+            response.raise_for_status()
+
+            try:
+                yaml.safe_load(response.text)
+            except yaml.YAMLError:
+                logger.error(
+                    f"Invalid YAML content for store '{store.name}'. Skipping cache."
+                )
+                return
+
+            def write_cache_and_meta():
+                with open(cache_file_path, "w") as f:
+                    f.write(response.text)
+                if "etag" in response.headers:
+                    with open(meta_file_path, "w") as f:
+                        json.dump({"etag": response.headers["etag"]}, f)
+
+            await asyncio.to_thread(write_cache_and_meta)
+            logger.info(f"Successfully cached app store '{store.name}'.")
+
+    except Exception as e:
+        logger.error(f"Failed to update cache for app store '{store.name}': {e}")
+
+
+async def _update_all_app_store_caches():
+    logger.info("Starting app store cache refresh...")
+    os.makedirs(settings.app_store_cache_path, exist_ok=True)
+    tasks = [_fetch_and_cache_app_store(store) for store in APP_STORES]
+    if tasks:
+        await asyncio.gather(*tasks)
+    logger.info("App store cache refresh complete.")
+
+
 async def _update_all_autostart_caches():
     logger.info("Starting autostart script cache refresh for all app stores...")
     tasks = []
     async with httpx.AsyncClient(follow_redirects=True) as client:
         for store in APP_STORES:
-            try:
-                response = await client.get(store.url, timeout=15)
-                response.raise_for_status()
-                data = yaml.safe_load(response.text)
+            apps_list = []
+            base_url = store.url.rsplit("/", 1)[0]
 
-                apps_list = (
-                    data["apps"] if isinstance(data, dict) and "apps" in data else data
-                )
-                if not isinstance(apps_list, list):
+            cache_file = os.path.join(
+                settings.app_store_cache_path, f"{store.name}.yml"
+            )
+            if os.path.exists(cache_file):
+                try:
+                    with open(cache_file, "r") as f:
+                        data = yaml.safe_load(f)
+                    apps_list = (
+                        data["apps"]
+                        if isinstance(data, dict) and "apps" in data
+                        else data
+                    )
+                except Exception as e:
+                    logger.error(f"Error reading cached store '{store.name}': {e}")
+
+            if not apps_list:
+                try:
+                    response = await client.get(store.url, timeout=15)
+                    response.raise_for_status()
+                    data = yaml.safe_load(response.text)
+                    apps_list = (
+                        data["apps"]
+                        if isinstance(data, dict) and "apps" in data
+                        else data
+                    )
+                except Exception as e:
                     logger.error(
-                        f"Could not find a list of apps in store '{store.name}'"
+                        f"Failed to fetch app store '{store.name}' for autostart: {e}"
                     )
                     continue
 
-                base_url = store.url.rsplit("/", 1)[0]
-                for app in apps_list:
-                    if app.get("provider_config", {}).get("autostart"):
-                        tasks.append(
-                            _fetch_and_cache_single_script(
-                                store.name, base_url, app["id"], suffix=""
-                            )
+            if not isinstance(apps_list, list):
+                logger.error(f"Could not find a list of apps in store '{store.name}'")
+                continue
+
+            for app in apps_list:
+                if app.get("provider_config", {}).get("autostart"):
+                    tasks.append(
+                        _fetch_and_cache_single_script(
+                            store.name, base_url, app["id"], suffix=""
                         )
-                        tasks.append(
-                            _fetch_and_cache_single_script(
-                                store.name, base_url, app["id"], suffix="-wayland"
-                            )
+                    )
+                    tasks.append(
+                        _fetch_and_cache_single_script(
+                            store.name, base_url, app["id"], suffix="-wayland"
                         )
-            except Exception as e:
-                logger.error(
-                    f"Failed to process app store '{store.name}' for autostart cache: {e}"
-                )
+                    )
 
     if tasks:
         await asyncio.gather(*tasks)
     logger.info("Autostart script cache refresh complete.")
+
+
+def _get_app_config_with_overrides(app: InstalledApp) -> dict:
+    config_dict = app.dict()
+    if not app.source or not app.source_app_id:
+        return config_dict
+
+    store_cache_file = os.path.join(settings.app_store_cache_path, f"{app.source}.yml")
+    if not os.path.exists(store_cache_file):
+        return config_dict
+
+    try:
+        with open(store_cache_file, "r") as f:
+            store_data = yaml.safe_load(f)
+
+        apps_list = (
+            store_data.get("apps", [])
+            if isinstance(store_data, dict) and "apps" in store_data
+            else store_data
+        )
+        if isinstance(apps_list, list):
+            source_app = next(
+                (a for a in apps_list if a.get("id") == app.source_app_id), None
+            )
+            if source_app:
+                overrides = (
+                    source_app.get("provider_config", {}).get("docker_overrides")
+                )
+                if overrides:
+                    if "provider_config" not in config_dict:
+                        config_dict["provider_config"] = {}
+                    config_dict["provider_config"]["docker_overrides"] = overrides
+    except Exception as e:
+        logger.warning(f"Failed to apply overrides for app {app.name}: {e}")
+
+    return config_dict
 
 
 async def _inspect_self_container():
@@ -659,6 +768,7 @@ async def background_update_job():
     while True:
         await asyncio.sleep(settings.auto_update_interval_seconds)
 
+        await _update_all_app_store_caches()
         await _update_all_autostart_caches()
 
         logger.info("Starting scheduled app image update check...")
@@ -676,6 +786,7 @@ async def lifespan(app: FastAPI):
     os.makedirs(settings.upload_dir, exist_ok=True, mode=0o700)
     os.makedirs(settings.app_icons_path, exist_ok=True, mode=0o700)
     os.makedirs(settings.autostart_cache_path, exist_ok=True, mode=0o700)
+    os.makedirs(settings.app_store_cache_path, exist_ok=True, mode=0o700)
     os.makedirs(settings.storage_path, exist_ok=True, mode=0o755)
     os.makedirs(settings.home_templates_path, exist_ok=True, mode=0o700)
     os.makedirs(
@@ -715,6 +826,9 @@ async def lifespan(app: FastAPI):
     load_app_configs()
     load_app_templates()
     detect_gpus()
+
+    logger.info("Populating app store cache...")
+    await _update_all_app_store_caches()
 
     logger.info("Performing initial population of autostart script cache...")
     await _update_all_autostart_caches()
@@ -1202,7 +1316,10 @@ async def ensure_container_for_session(session_id: str, target_app_id: str) -> d
             os.chmod(autostart_file, 0o755)
         except Exception as e:
             logger.error(f"Failed to inject autostart on swap: {e}")
-    provider = DockerProvider(app_config.dict())
+
+    app_config_dict = _get_app_config_with_overrides(app_config)
+    provider = DockerProvider(app_config_dict)
+
     launch_kwargs = {
         "session_id": session_id,
         "env_vars": env_vars,
@@ -1331,7 +1448,9 @@ async def _launch_common(
         for env_override in app_config.provider_config.env:
             final_env[env_override.name] = env_override.value
 
-    provider = DockerProvider(app_config.dict())
+    app_config_dict = _get_app_config_with_overrides(app_config)
+    provider = DockerProvider(app_config_dict)
+
     volumes = {}
     host_mount_path = None
     shared_files_path = None
@@ -1641,7 +1760,6 @@ async def _launch_common(
             status_code=500,
             detail="An internal error occurred during application launch.",
         )
-
 
 @encrypted_router.post("/api/launch/simple", response_model=LaunchResponse)
 async def launch_simple(
@@ -2097,11 +2215,9 @@ async def launch_meta_for_customization(
 
 
 @admin_router.get("/apps/available", response_model=List[AvailableApp])
-async def get_available_apps(url: str, store_name: str):  # <-- ADD store_name parameter
-    async def fetch_and_process_store(content: str, store_name_for_cache: str):
-        """Loads, flattens, and returns the list of apps from YAML content."""
+async def get_available_apps(url: str, store_name: str, refresh: bool = False):
+    def process_content(content: str, store_name_for_cache: str):
         try:
-
             def extract_apps_from_data(data):
                 if isinstance(data, dict) and "apps" in data:
                     return data["apps"]
@@ -2124,7 +2240,6 @@ async def get_available_apps(url: str, store_name: str):  # <-- ADD store_name p
                             settings.autostart_cache_path, store_name_for_cache
                         )
 
-                        # Standard script
                         cache_file_path = os.path.join(cache_dir, app_id)
                         script_content_b64 = None
                         if (
@@ -2145,7 +2260,6 @@ async def get_available_apps(url: str, store_name: str):  # <-- ADD store_name p
                             "custom_autostart_script_b64"
                         ] = script_content_b64
 
-                        # Wayland script
                         cache_file_path_wayland = os.path.join(
                             cache_dir, f"{app_id}-wayland"
                         )
@@ -2190,11 +2304,25 @@ async def get_available_apps(url: str, store_name: str):  # <-- ADD store_name p
                 detail=f"An error occurred while processing the app store: {e}",
             )
 
+    cache_file = os.path.join(settings.app_store_cache_path, f"{store_name}.yml")
+
+    if not refresh and os.path.exists(cache_file):
+        try:
+            with open(cache_file, "r") as f:
+                return process_content(f.read(), store_name)
+        except Exception as e:
+            logger.warning(f"Cache read failed for {store_name}: {e}")
+
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(url, follow_redirects=True, timeout=15)
             response.raise_for_status()
-            return await fetch_and_process_store(response.text, store_name)
+            
+            os.makedirs(settings.app_store_cache_path, exist_ok=True)
+            with open(cache_file, "w") as f:
+                f.write(response.text)
+
+            return process_content(response.text, store_name)
     except httpx.RequestError as e:
         raise HTTPException(
             status_code=400, detail=f"Failed to fetch app store from URL '{url}': {e}"

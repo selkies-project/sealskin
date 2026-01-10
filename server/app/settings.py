@@ -75,6 +75,12 @@ SETTING_DEFINITIONS = [
         "help": "Path to cache autostart scripts.",
     },
     {
+        "name": "app_store_cache_path",
+        "type": "str",
+        "default": "/config/.config/sealskin/app_stores_cache",
+        "help": "Path to cache app store YAML files.",
+    },
+    {
         "name": "auto_update_apps",
         "type": "bool",
         "default": True,

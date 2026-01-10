@@ -112,6 +112,9 @@ class DockerProvider(BaseProvider):
             "remove": True,
         }
 
+        if config.get("docker_overrides"):
+            run_kwargs.update(config["docker_overrides"])
+
         if gpu_config:
             if gpu_config["type"] == "nvidia":
                 run_kwargs["runtime"] = "nvidia"
