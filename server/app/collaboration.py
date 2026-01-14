@@ -569,7 +569,7 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                     continue
 
                 designated_speaker = session_data.get("designated_speaker")
-                is_audio_packet = binary_data[0] == 0x02
+                is_audio_packet = (len(binary_data) > 8 and binary_data[8] == 0x02)
                 if (
                     designated_speaker
                     and is_audio_packet
