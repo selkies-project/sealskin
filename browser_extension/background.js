@@ -1,9 +1,19 @@
-importScripts('crypto-utils.js');
-importScripts('translations.js');
+const isServiceWorker = typeof ServiceWorkerGlobalScope !== 'undefined' && self instanceof ServiceWorkerGlobalScope;
+self.tempFirefoxContext = null; 
+
+if (isServiceWorker) {
+  try {
+    importScripts('crypto-utils.js');
+    importScripts('translations.js');
+  } catch (e) {
+    console.error("Failed to import scripts in Service Worker:", e);
+  }
+} 
 
 let session = {
   key: null,
-  id: null
+  id: null,
+  baseUrl: null
 };
 
 function arrayBufferToBase64(buffer) {
@@ -21,7 +31,6 @@ async function getSessionTabMap() {
 async function saveSessionTabMap(map) {
   await chrome.storage.local.set({ sessionTabMap: map });
 }
-
 
 async function importRsaPublicKey(pem) {
   const buffer = pemToArrayBuffer(pem);
@@ -67,65 +76,56 @@ async function decryptAesGcm(key, iv, ciphertext) {
 
 async function performHandshake(config) {
   console.log('[SealSkin E2EE] Performing handshake...');
-  const {
-    serverIp,
-    apiPort,
-    serverPublicKey
-  } = config;
-  if (!serverIp || !apiPort || !serverPublicKey) throw new Error('Server IP, API Port, or Server Public Key is not configured.');
+  const { serverIp, apiPort, sessionPort, serverPublicKey } = config;
+  
+  if (!serverIp || !apiPort || !serverPublicKey) {
+    throw new Error('Server IP, API Port, or Server Public Key is not configured.');
+  }
 
-  const apiUrl = `http://${serverIp}:${apiPort}`;
-  const initResponse = await fetch(`${apiUrl}/api/handshake/initiate`, {
-    method: 'POST'
-  });
-  if (!initResponse.ok) throw new Error(`Handshake initiation failed: ${await initResponse.text()}`);
-  const {
-    nonce,
-    signature
-  } = await initResponse.json();
+  const tryHandshake = async (baseUrl) => {
+    const initResponse = await fetch(`${baseUrl}/api/handshake/initiate`, { method: 'POST' });
+    if (!initResponse.ok) throw new Error(`Handshake initiation failed: ${await initResponse.text()}`);
+    const { nonce, signature } = await initResponse.json();
 
-  const serverPubKey = await importRsaPublicKey(serverPublicKey);
-  const nonceBuffer = Uint8Array.from(atob(nonce), c => c.charCodeAt(0));
-  const signatureBuffer = Uint8Array.from(atob(signature), c => c.charCodeAt(0));
-  const isValid = await crypto.subtle.verify({
-    name: 'RSA-PSS',
-    saltLength: 32
-  }, serverPubKey, signatureBuffer, nonceBuffer);
+    const serverPubKey = await importRsaPublicKey(serverPublicKey);
+    const nonceBuffer = Uint8Array.from(atob(nonce), c => c.charCodeAt(0));
+    const signatureBuffer = Uint8Array.from(atob(signature), c => c.charCodeAt(0));
+    const isValid = await crypto.subtle.verify({ name: 'RSA-PSS', saltLength: 32 }, serverPubKey, signatureBuffer, nonceBuffer);
 
-  if (!isValid) throw new Error('Handshake failed: Server signature verification failed.');
+    if (!isValid) throw new Error('Handshake failed: Server signature verification failed.');
 
-  const aesKey = await crypto.subtle.generateKey({
-    name: 'AES-GCM',
-    length: 256
-  }, true, ['encrypt', 'decrypt']);
-  const exportedKey = await crypto.subtle.exportKey('raw', aesKey);
-  const serverEncryptKey = await crypto.subtle.importKey('spki', pemToArrayBuffer(serverPublicKey), {
-    name: 'RSA-OAEP',
-    hash: 'SHA-256'
-  }, false, ['encrypt']);
-  const encryptedSessionKey = await crypto.subtle.encrypt({
-    name: 'RSA-OAEP'
-  }, serverEncryptKey, exportedKey);
+    const aesKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+    const exportedKey = await crypto.subtle.exportKey('raw', aesKey);
+    const serverEncryptKey = await crypto.subtle.importKey('spki', pemToArrayBuffer(serverPublicKey), { name: 'RSA-OAEP', hash: 'SHA-256' }, false, ['encrypt']);
+    const encryptedSessionKey = await crypto.subtle.encrypt({ name: 'RSA-OAEP' }, serverEncryptKey, exportedKey);
 
-  const exchangeResponse = await fetch(`${apiUrl}/api/handshake/exchange`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      encrypted_session_key: arrayBufferToBase64(encryptedSessionKey)
-    }),
-  });
+    const exchangeResponse = await fetch(`${baseUrl}/api/handshake/exchange`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ encrypted_session_key: arrayBufferToBase64(encryptedSessionKey) }),
+    });
 
-  if (!exchangeResponse.ok) throw new Error(`Handshake key exchange failed: ${await exchangeResponse.text()}`);
-  const {
-    session_id
-  } = await exchangeResponse.json();
-  session = {
-    key: aesKey,
-    id: session_id
+    if (!exchangeResponse.ok) throw new Error(`Handshake key exchange failed: ${await exchangeResponse.text()}`);
+    const { session_id } = await exchangeResponse.json();
+    return { key: aesKey, id: session_id, baseUrl };
   };
-  console.log(`[SealSkin E2EE] Handshake successful. Session: ${session_id}`);
+
+  const endpoints = [];
+  if (sessionPort) endpoints.push(`https://${serverIp}:${sessionPort}`);
+  endpoints.push(`http://${serverIp}:${apiPort}`);
+
+  let lastError;
+  for (const url of endpoints) {
+    try {
+      session = await tryHandshake(url);
+      console.log(`[SealSkin E2EE] Handshake successful using ${url}`);
+      return;
+    } catch (e) {
+      console.warn(`[SealSkin E2EE] Handshake failed on ${url}:`, e);
+      lastError = e;
+    }
+  }
+  throw lastError || new Error('Handshake failed on all attempted ports.');
 }
 
 async function ensureSession() {
@@ -155,10 +155,8 @@ async function secureFetchInBackground(url, options = {}) {
           };
       }
 
-      const apiUrl = `http://${sealskinConfig.serverIp}:${sealskinConfig.apiPort}`;
-      const fullUrl = `${apiUrl}${url}`;
-
       const currentSession = await ensureSession();
+      const fullUrl = `${currentSession.baseUrl}${url}`;
       const headers = { ...options.headers, 'X-Session-ID': currentSession.id };
       let body = options.body;
 
@@ -182,7 +180,6 @@ async function secureFetchInBackground(url, options = {}) {
 
       const encryptedResponse = JSON.parse(responseText);
       const decryptedData = await decryptAesGcm(currentSession.key, encryptedResponse.iv, encryptedResponse.ciphertext);
-
       return JSON.parse(decryptedData);
 
     } catch (error) {
@@ -193,7 +190,7 @@ async function secureFetchInBackground(url, options = {}) {
 
       if (isSessionError && attempt === 0) {
         console.log('[SealSkin] Detected session error, resetting session and retrying...');
-        session = { key: null, id: null };
+        session = { key: null, id: null, baseUrl: null };
       } else {
         throw error;
       }
@@ -217,6 +214,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       }
     })();
     return true;
+  }
+
+  if (request.type === 'getFirefoxContext') {
+    sendResponse(self.tempFirefoxContext);
+    self.tempFirefoxContext = null;
+    return false;
+  }
+
+  if (request.type === 'setFirefoxContext') {
+    self.tempFirefoxContext = request.payload;
+    sendResponse({ success: true });
+    return false;
   }
 
   if (request.type === 'downloadFile') {
@@ -344,11 +353,13 @@ chrome.runtime.onInstalled.addListener(() => {
     title: t('background.contextMenu.searchText'),
     contexts: ['selection']
   });
-  chrome.contextMenus.create({
-    id: 'sealskin-intercept-next-download',
-    title: t('background.contextMenu.sendDownload'),
-    contexts: ['page', 'selection']
-  });
+  if (isServiceWorker) {
+    chrome.contextMenus.create({
+      id: 'sealskin-intercept-next-download',
+      title: t('background.contextMenu.sendDownload'),
+      contexts: ['page', 'selection']
+    });
+  }
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -410,41 +421,50 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   }
 
   if (context) {
-    chrome.storage.local.set({
-      'sealskinContext': context
-    }, () => chrome.action.openPopup());
+    if (isServiceWorker) {
+      chrome.storage.local.set({
+        'sealskinContext': context
+      }, () => chrome.action.openPopup());
+    } else {
+      self.tempFirefoxContext = context;
+      chrome.action.openPopup();
+    }
   }
 });
 
-chrome.downloads.onDeterminingFilename.addListener((downloadItem, suggest) => {
-  (async () => {
-    const data = await chrome.storage.local.get('interceptNextDownload');
-    const interceptConfig = data.interceptNextDownload;
-    if (interceptConfig && interceptConfig.active && (Date.now() - interceptConfig.timestamp < 60000)) {
-      await chrome.storage.local.remove('interceptNextDownload');
-      chrome.action.setBadgeText({
-        text: ''
-      });
-      await chrome.downloads.cancel(downloadItem.id);
-      await chrome.storage.local.set({
-        'sealskinContext': {
-          action: 'file',
-          targetUrl: downloadItem.url,
-          filename: downloadItem.filename
-        }
-      });
-      chrome.action.openPopup();
-    } else suggest();
-  })();
-  return true;
-});
+if (chrome.downloads && chrome.downloads.onDeterminingFilename) {
+  chrome.downloads.onDeterminingFilename.addListener((downloadItem, suggest) => {
+    (async () => {
+      const data = await chrome.storage.local.get('interceptNextDownload');
+      const interceptConfig = data.interceptNextDownload;
+      if (interceptConfig && interceptConfig.active && (Date.now() - interceptConfig.timestamp < 60000)) {
+        await chrome.storage.local.remove('interceptNextDownload');
+        chrome.action.setBadgeText({
+          text: ''
+        });
+        await chrome.downloads.cancel(downloadItem.id);
+        await chrome.storage.local.set({
+          'sealskinContext': {
+            action: 'file',
+            targetUrl: downloadItem.url,
+            filename: downloadItem.filename
+          }
+        });
+        chrome.action.openPopup();
+      } else suggest();
+    })();
+    return true;
+  });
+}
 
-self.addEventListener('fetch', (event) => {
-    const url = new URL(event.request.url);
-    if (url.protocol === 'chrome-extension:' && url.pathname === '/download-stream') {
-        event.respondWith(handleStreamingDownload(event.request));
-    }
-});
+if (isServiceWorker) {
+    self.addEventListener('fetch', (event) => {
+        const url = new URL(event.request.url);
+        if (url.protocol === 'chrome-extension:' && url.pathname === '/download-stream') {
+            event.respondWith(handleStreamingDownload(event.request));
+        }
+    });
+}
 
 async function handleStreamingDownload(request) {
     const url = new URL(request.url);

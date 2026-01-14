@@ -1,3 +1,113 @@
+if (typeof MediaStreamTrackProcessor === 'undefined') {
+    window.MediaStreamTrackProcessor = class MediaStreamTrackProcessor {
+        constructor({ track }) {
+            if (track.kind === 'video') {
+                this.readable = new ReadableStream({
+                    start: async (controller) => {
+                        const video = document.createElement('video');
+                        video.muted = true;
+                        video.playsInline = true;
+                        video.width = 640; 
+                        video.height = 480;
+                        video.style.cssText = 'position:fixed; top:-9999px; left:-9999px;';
+                        document.body.appendChild(video);
+
+                        video.srcObject = new MediaStream([track]);
+                        try { await video.play(); } catch (e) { return; }
+
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d', { desynchronized: true });
+                        
+                        const process = () => {
+                            if (track.readyState === 'ended') {
+                                video.remove();
+                                controller.close();
+                                return;
+                            }
+                            if (video.readyState >= 2) {
+                                if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+                                    canvas.width = video.videoWidth;
+                                    canvas.height = video.videoHeight;
+                                }
+                                ctx.drawImage(video, 0, 0);
+                                const frame = new VideoFrame(canvas, { timestamp: performance.now() * 1000 });
+                                controller.enqueue(frame);
+                            }
+                            if (video.requestVideoFrameCallback) {
+                                video.requestVideoFrameCallback(process);
+                            } else {
+                                requestAnimationFrame(process);
+                            }
+                        };
+                        process();
+                    }
+                });
+            } else if (track.kind === 'audio') {
+                this.readable = new ReadableStream({
+                    async start(controller) {
+                        const ctx = new AudioContext();
+                        // Worklet to pass raw audio data to main thread
+                        const workletCode = `registerProcessor("mstp-shim",class extends AudioWorkletProcessor{process(i){if(i[0].length>0)this.port.postMessage(i[0]);return true}})`
+                        await ctx.audioWorklet.addModule(`data:text/javascript,${workletCode}`).catch(e => console.error(e));
+                        
+                        const src = ctx.createMediaStreamSource(new MediaStream([track]));
+                        const node = new AudioWorkletNode(ctx, "mstp-shim");
+                        src.connect(node);
+                        
+                        node.port.onmessage = ({data: channels}) => {
+                             if (!channels || channels.length === 0) return;
+                             
+                             // Flatten planar data (array of Float32Arrays) to interleaved Float32Array
+                             const length = channels[0].length;
+                             const numChannels = channels.length;
+                             const flattened = new Float32Array(length * numChannels);
+                             
+                             for (let i = 0; i < length; i++) {
+                                 for (let ch = 0; ch < numChannels; ch++) {
+                                     flattened[i * numChannels + ch] = channels[ch][i];
+                                 }
+                             }
+
+                             controller.enqueue(new AudioData({
+                                 format: "f32",
+                                 sampleRate: ctx.sampleRate,
+                                 numberOfFrames: length,
+                                 numberOfChannels: numChannels,
+                                 timestamp: ctx.currentTime * 1e6,
+                                 data: flattened
+                             }));
+                        };
+                    }
+                });
+            }
+        }
+    };
+}
+
+if (typeof MediaStreamTrackGenerator === 'undefined') {
+    window.MediaStreamTrackGenerator = class MediaStreamTrackGenerator {
+        constructor({ kind }) {
+            if (kind === 'video') {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d', { desynchronized: true });
+                const stream = canvas.captureStream(0);
+                const track = stream.getVideoTracks()[0];
+                track.writable = new WritableStream({
+                    write(frame) {
+                        if (canvas.width !== frame.displayWidth || canvas.height !== frame.displayHeight) {
+                            canvas.width = frame.displayWidth;
+                            canvas.height = frame.displayHeight;
+                        }
+                        ctx.drawImage(frame, 0, 0);
+                        frame.close(); 
+                    }
+                });
+                return track;
+            }
+        }
+    };
+}
+
 function applyTranslations(scope, t) {
   scope.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
@@ -192,7 +302,8 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     const startMedia = async () => {
-        const isStreamingSupported = 'VideoEncoder' in window && 'AudioEncoder' in window && 'MediaStreamTrackProcessor' in window;
+        const isStreamingSupported = 'VideoEncoder' in window && 'AudioEncoder' in window;
+        
         if (COLLAB_DATA.userPermission === 'readonly' || !isStreamingSupported) {
             if (COLLAB_DATA.userPermission !== 'readonly') alert(t('alerts.webcodecsUnsupported'));
             return false;
@@ -325,7 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         videoEncoder = new VideoEncoder({
             output: (chunk, meta) => {
-                if (!ws || ws.readyState !== WebSocket.OPEN || !isWebcamOn || !localPublicIdBytes) return;
+                if (!ws || ws.readyState !== WebSocket.OPEN || !localPublicIdBytes) return;
 
                 if (meta && meta.decoderConfig && meta.decoderConfig.description) {
                     const description = meta.decoderConfig.description;
@@ -350,7 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         videoEncoder.configure({
-            codec: 'avc1.42001E',
+            codec: 'vp8',
             width: 320,
             height: 240,
             bitrate: 1_000_000,
@@ -361,11 +472,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const readFrame = () => {
             videoReader.read().then(({ done, value: frame }) => {
                 if (done || !localStream) return;
+                
                 if (videoEncoder.state === 'configured' && isWebcamOn) {
-                    const needsKeyFrame = (frameCounter % 90 === 0);
+                    const needsKeyFrame = (frameCounter % 120 === 0);
                     videoEncoder.encode(frame, { keyFrame: needsKeyFrame });
                     frameCounter++;
                 }
+                
                 frame.close();
                 readFrame();
             }).catch(e => console.error("[Encoder] Video reader error", e));
@@ -424,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
             switch (mediaType) {
                 case MSG_TYPE.VIDEO_CONFIG:
                     const description = data.slice(1);
-                    const config = { codec: 'avc1.42001E', description: description };
+                    const config = { codec: 'vp8', description: description };
                     if (stream.videoDecoder.state !== 'closed') {
                         stream.videoDecoder.configure(config);
                         stream.isConfigured = true;
@@ -432,13 +545,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
 
                 case MSG_TYPE.VIDEO_FRAME:
-                    if (!stream.isConfigured || stream.videoDecoder.state !== 'configured' || stream.videoMuted) return;
+                    if (stream.videoDecoder.state !== 'configured' || stream.videoMuted) return;
+                    
                     const frameType = new Uint8Array(data, 1, 1)[0];
                     const isKeyFrame = frameType === 0x01;
+                    
                     if (!stream.hasReceivedKeyFrame) {
-                        if (isKeyFrame) { stream.hasReceivedKeyFrame = true; } 
-                        else { return; }
+                        if (isKeyFrame) { 
+                            stream.hasReceivedKeyFrame = true; 
+                        } else { 
+                            return; 
+                        }
                     }
+                    
                     const chunkData = data.slice(2);
                     const chunk = new EncodedVideoChunk({
                         type: isKeyFrame ? 'key' : 'delta',
@@ -466,8 +585,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const addRemoteStream = async (token, username) => {
         if (remoteStreams[token]) return;
-        console.log(`[System] Adding remote stream for user ${username} (${token})`);
-
+        
         const container = document.createElement('div');
         container.className = 'video-container reorderable';
         container.id = `container-${token}`;
@@ -508,7 +626,8 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             error: (e) => console.error(`[Decoder:${token}] VideoDecoder error:`, e)
         });
-        videoDecoder.configure({ codec: 'avc1.42001E' });
+        
+        videoDecoder.configure({ codec: 'vp8' });
 
         const audioContext = new AudioContext({ sampleRate: 48000 });
         if (isAudioUnlocked && audioContext.state === 'suspended') {
@@ -539,7 +658,7 @@ document.addEventListener('DOMContentLoaded', () => {
         remoteStreams[token] = {
             username, videoDecoder, audioDecoder, audioContext, workletNode, container, analyser,
             videoMuted: false, audioMuted: false,
-            isConfigured: false,
+            isConfigured: true,
             hasReceivedKeyFrame: false
         };
     };
@@ -547,14 +666,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const removeRemoteStream = (token) => {
         const stream = remoteStreams[token];
         if (stream) {
-            console.log(`[System] Removing remote stream for user ${stream.username} (${token})`);
-            if (stream.videoDecoder.state !== 'closed') stream.videoDecoder.close();
-            if (stream.audioDecoder.state !== 'closed') stream.audioDecoder.close();
-            if (stream.audioContext.state !== 'closed') {
-                stream.audioContext.close();
+            if (stream.videoDecoder && stream.videoDecoder.state !== 'closed') {
+                stream.videoDecoder.close();
             }
-            stream.workletNode.disconnect();
-            stream.container.remove();
+
+            if (stream.audioDecoder && stream.audioDecoder.state !== 'closed') {
+                stream.audioDecoder.close();
+            }
+
+            if (stream.audioContext) {
+                if (stream.audioContext.state !== 'closed') {
+                    stream.audioContext.close();
+                }
+            }
+            if (stream.workletNode) {
+                stream.workletNode.disconnect();
+            }
+
+            if (stream.container) {
+                stream.container.remove();
+            }
+
             delete remoteStreams[token];
         }
     };

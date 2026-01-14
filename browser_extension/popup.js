@@ -834,9 +834,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       setStatus(t('popup.status.unconfigured'), true);
       return;
     }
-    sealskinConfig = configData.sealskinConfig;
 
-    const contextData = await chrome.storage.local.get('sealskinContext');
+    sealskinConfig = configData.sealskinConfig;
+    let contextData = await chrome.storage.local.get('sealskinContext');
+
+    const isFirefox = navigator.userAgent.includes("Firefox");
+    
+    if (!contextData.sealskinContext && isFirefox) {
+      const firefoxContext = await new Promise(resolve => {
+        chrome.runtime.sendMessage({ type: 'getFirefoxContext' }, (response) => {
+             if (chrome.runtime.lastError) {
+                 resolve(null);
+             } else {
+                 resolve(response || null);
+             }
+        });
+      });
+      if (firefoxContext) {
+        contextData = { sealskinContext: firefoxContext };
+      }
+    }
+
     if (contextData.sealskinContext) {
       sealskinContext = contextData.sealskinContext;
       chrome.storage.local.remove('sealskinContext');

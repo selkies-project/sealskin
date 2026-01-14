@@ -40,7 +40,6 @@ function triggerUpload() {
   if (!selectedFile) return;
 
   const objectUrl = URL.createObjectURL(selectedFile);
-
   const context = {
     action: 'file',
     targetUrl: objectUrl,
@@ -49,14 +48,30 @@ function triggerUpload() {
 
   confirmUploadBtn.disabled = true;
 
-  chrome.storage.local.set({
-    'sealskinContext': context
-  }, () => {
-    chrome.runtime.sendMessage({
-      type: 'openPopup'
-    });
+  let bgPage = null;
+  try {
+    bgPage = chrome.extension.getBackgroundPage();
+  } catch (e) {}
+
+  if (bgPage) {
+    bgPage.tempFirefoxContext = context;
+    
+    try {
+        chrome.action.openPopup();
+    } catch(e) {
+        chrome.runtime.sendMessage({ type: 'openPopup' });
+    }
     resetForm();
-  });
+  } else {
+    chrome.storage.local.set({
+      'sealskinContext': context
+    }, () => {
+      chrome.runtime.sendMessage({
+        type: 'openPopup'
+      });
+      resetForm();
+    });
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

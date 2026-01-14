@@ -100,7 +100,9 @@ async def main():
         "app.api:api_app",
         host="0.0.0.0",
         port=settings.api_port,
-        log_config=None
+        log_config=None,
+        proxy_headers=True,
+        forwarded_allow_ips="127.0.0.1"
     )
     api_server = uvicorn.Server(api_config)
     

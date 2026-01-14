@@ -458,17 +458,60 @@ function handleItemClick(e) {
 
 async function downloadFile(home, path) {
   const filename = path.split('/').pop();
-  const params = new URLSearchParams({
-    home: home,
-    path: path,
-    filename: filename
-  });
-  const downloadUrl = chrome.runtime.getURL(`/download-stream?${params.toString()}`);
-  const a = document.createElement('a');
-  a.href = downloadUrl;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+  const isFirefox = navigator.userAgent.includes("Firefox");
+
+  if (isFirefox) {
+    displayStatus(t('files.status.downloading', { filename: filename }) || `Downloading ${filename}...`);
+    
+    try {
+      let chunkIndex = 0;
+      let isLastChunk = false;
+      const chunks = [];
+      
+      while (!isLastChunk) {
+        const params = new URLSearchParams({ path, chunk_index: chunkIndex });
+        const response = await secureFetch(`/api/files/download/chunk/${home}?${params.toString()}`, { method: 'GET' });
+        
+        if (response.chunk_data_b64) {
+          const binaryString = atob(response.chunk_data_b64);
+          const len = binaryString.length;
+          const bytes = new Uint8Array(len);
+          for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          chunks.push(bytes);
+        }
+        isLastChunk = response.is_last_chunk;
+        chunkIndex++;
+      }
+      
+      const blob = new Blob(chunks, { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      displayStatus(t('files.status.downloadSuccess') || 'Download complete');
+    } catch (error) {
+       console.error("Download failed:", error);
+       displayStatus(t('files.status.downloadFailed', { error: error.message }), true);
+    }
+  } else {
+    const params = new URLSearchParams({
+      home: home,
+      path: path,
+      filename: filename
+    });
+    const downloadUrl = chrome.runtime.getURL(`/download-stream?${params.toString()}`);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
 }
 
 async function handleDeleteSelected() {

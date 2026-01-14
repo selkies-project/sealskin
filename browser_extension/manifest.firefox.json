@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SealSkin Isolation",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Open files and URLs in an isolated environment with E2E encryption.",
   "options_page": "options.html",
   "permissions": [
@@ -12,8 +12,18 @@
   "host_permissions": [
     "<all_urls>"
   ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "sealskin@example.com",
+      "strict_min_version": "109.0"
+    }
+  },
   "background": {
-    "service_worker": "background.js"
+    "scripts": [
+      "crypto-utils.js",
+      "translations.js",
+      "background.js"
+    ]
   },
   "action": {
     "default_popup": "popup.html",
