@@ -69,6 +69,7 @@ CPU_MODEL: str = "Unknown"
 PATH_PREFIX_MAP: Dict[str, str] = {}
 DISCOVERED_API_PORT: int = settings.api_port
 DISCOVERED_SESSION_PORT: int = settings.session_port
+DISCOVERED_NETWORK: Optional[str] = None
 METADATA_LOCK = asyncio.Lock()
 DOWNLOAD_TOKENS: dict = {}
 
@@ -337,7 +338,7 @@ def _get_app_config_with_overrides(app: InstalledApp) -> dict:
 
 
 async def _inspect_self_container():
-    global PATH_PREFIX_MAP, DISCOVERED_API_PORT, DISCOVERED_SESSION_PORT
+    global PATH_PREFIX_MAP, DISCOVERED_API_PORT, DISCOVERED_SESSION_PORT, DISCOVERED_NETWORK
     if not os.path.exists("/var/run/docker.sock"):
         logger.info("Docker socket not found. Assuming running on host.")
         return
@@ -389,6 +390,11 @@ async def _inspect_self_container():
         )
     except Exception as e:
         logger.error(f"An unexpected error occurred during Docker self-inspection: {e}")
+
+    networks = container.attrs.get("NetworkSettings", {}).get("Networks", {})
+    if networks:
+        DISCOVERED_NETWORK = list(networks.keys())[0]
+        logger.info(f"Discovered self-container network: {DISCOVERED_NETWORK}")
 
     ports = container.attrs.get("NetworkSettings", {}).get("Ports", {})
     if not ports:
@@ -1325,6 +1331,7 @@ async def ensure_container_for_session(session_id: str, target_app_id: str) -> d
         "env_vars": env_vars,
         "volumes": volumes,
         "gpu_config": gpu_config,
+        "network": DISCOVERED_NETWORK,
     }
     if session.get("is_collaboration"):
         mk_owner = session.get("mk_owner_token")
@@ -1685,6 +1692,7 @@ async def _launch_common(
             "env_vars": final_env,
             "volumes": volumes,
             "gpu_config": gpu_config,
+            "network": DISCOVERED_NETWORK,
         }
         if launch_in_room_mode:
             provider_launch_kwargs.update(

@@ -88,6 +88,7 @@ class DockerProvider(BaseProvider):
         env_vars: Dict,
         volumes: Optional[Dict] = None,
         gpu_config: Optional[Dict] = None,
+        network: Optional[str] = None,
         is_collaboration: bool = False,
         master_token: Optional[str] = None,
         initial_tokens: Optional[Dict] = None,
@@ -110,6 +111,7 @@ class DockerProvider(BaseProvider):
             "volumes": volumes,
             "devices": config.get("devices", []),
             "remove": True,
+            "network": network,
         }
 
         if config.get("docker_overrides"):
