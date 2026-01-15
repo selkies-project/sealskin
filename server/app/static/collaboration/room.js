@@ -222,6 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         VIDEO_FRAME: 0x01,
         AUDIO_FRAME: 0x02,
         VIDEO_CONFIG: 0x03,
+        PCM_FRAME: 0x04,
     };
     
     const initNotificationAudio = () => {
@@ -487,44 +488,82 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const setupAudioEncoder = () => {
-        const [audioTrack] = localStream.getAudioTracks();
-        if (!audioTrack) return;
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-        const audioProcessor = new MediaStreamTrackProcessor({ track: audioTrack });
-        const audioReader = audioProcessor.readable.getReader();
+        if (isIOS) {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+            const source = ctx.createMediaStreamSource(localStream);
+            const processor = ctx.createScriptProcessor(4096, 1, 1);
 
-        audioEncoder = new AudioEncoder({
-            output: (chunk, meta) => {
-                if (ws && ws.readyState === WebSocket.OPEN && isMicOn && localPublicIdBytes) {
-                    const chunkData = new Uint8Array(8 + chunk.byteLength + 2);
-                    chunkData.set(localPublicIdBytes, 0);
-                    chunkData[8] = MSG_TYPE.AUDIO_FRAME;
-                    chunkData[9] = 0x00;
-                    chunk.copyTo(chunkData.subarray(10));
-                    ws.send(chunkData.buffer);
+            source.connect(processor);
+            processor.connect(ctx.destination);
+
+            processor.onaudioprocess = (e) => {
+                if (!ws || ws.readyState !== WebSocket.OPEN || !isMicOn || !localPublicIdBytes) return;
+
+                const inputData = e.inputBuffer.getChannelData(0);
+                const pcm16 = new Int16Array(inputData.length);
+
+                for (let i = 0; i < inputData.length; i++) {
+                    const s = Math.max(-1, Math.min(1, inputData[i]));
+                    pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
                 }
-            },
-            error: (e) => console.error('[Encoder] AudioEncoder error:', e),
-        });
 
-        audioEncoder.configure({
-            codec: 'opus',
-            sampleRate: 48000,
-            numberOfChannels: 1,
-            bitrate: 128000,
-        });
+                const chunkData = new Uint8Array(9 + pcm16.byteLength);
+                chunkData.set(localPublicIdBytes, 0);
+                chunkData[8] = MSG_TYPE.PCM_FRAME;
+                chunkData.set(new Uint8Array(pcm16.buffer), 9);
+                ws.send(chunkData.buffer);
+            };
 
-        const readFrame = () => {
-            audioReader.read().then(({ done, value: frame }) => {
-                if (done || !localStream) return;
-                if (frame && isMicOn && audioEncoder.state === 'configured') {
-                    audioEncoder.encode(frame);
+            audioEncoder = {
+                state: 'configured',
+                close: () => {
+                    source.disconnect();
+                    processor.disconnect();
+                    ctx.close();
                 }
-                if(frame) frame.close();
-                readFrame();
-            }).catch(e => console.error("[Encoder] Audio reader error", e));
-        };
-        readFrame();
+            };
+        } else {
+            const [audioTrack] = localStream.getAudioTracks();
+            if (!audioTrack) return;
+
+            const audioProcessor = new MediaStreamTrackProcessor({ track: audioTrack });
+            const audioReader = audioProcessor.readable.getReader();
+
+            audioEncoder = new AudioEncoder({
+                output: (chunk, meta) => {
+                    if (ws && ws.readyState === WebSocket.OPEN && isMicOn && localPublicIdBytes) {
+                        const chunkData = new Uint8Array(8 + chunk.byteLength + 2);
+                        chunkData.set(localPublicIdBytes, 0);
+                        chunkData[8] = MSG_TYPE.AUDIO_FRAME;
+                        chunkData[9] = 0x00;
+                        chunk.copyTo(chunkData.subarray(10));
+                        ws.send(chunkData.buffer);
+                    }
+                },
+                error: (e) => console.error('[Encoder] AudioEncoder error:', e),
+            });
+
+            audioEncoder.configure({
+                codec: 'opus',
+                sampleRate: 48000,
+                numberOfChannels: 1,
+                bitrate: 128000,
+            });
+
+            const readFrame = () => {
+                audioReader.read().then(({ done, value: frame }) => {
+                    if (done || !localStream) return;
+                    if (frame && isMicOn && audioEncoder.state === 'configured') {
+                        audioEncoder.encode(frame);
+                    }
+                    if (frame) frame.close();
+                    readFrame();
+                }).catch(e => console.error("[Encoder] Audio reader error", e));
+            };
+            readFrame();
+        }
     };
 
     const handleRemoteStream = (token, data) => {
@@ -546,18 +585,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 case MSG_TYPE.VIDEO_FRAME:
                     if (stream.videoDecoder.state !== 'configured' || stream.videoMuted) return;
-                    
+
                     const frameType = new Uint8Array(data, 1, 1)[0];
                     const isKeyFrame = frameType === 0x01;
-                    
+
                     if (!stream.hasReceivedKeyFrame) {
-                        if (isKeyFrame) { 
-                            stream.hasReceivedKeyFrame = true; 
-                        } else { 
-                            return; 
+                        if (isKeyFrame) {
+                            stream.hasReceivedKeyFrame = true;
+                        } else {
+                            return;
                         }
                     }
-                    
+
                     const chunkData = data.slice(2);
                     const chunk = new EncodedVideoChunk({
                         type: isKeyFrame ? 'key' : 'delta',
@@ -576,6 +615,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         data: audioChunkData
                     });
                     stream.audioDecoder.decode(audioChunk);
+                    break;
+
+                case MSG_TYPE.PCM_FRAME:
+                    if (stream.audioMuted || !stream.workletNode) return;
+
+                    const rawBytes = data.slice(1);
+                    const int16Data = new Int16Array(rawBytes);
+                    const float32Data = new Float32Array(int16Data.length * 3);
+
+                    for (let i = 0; i < int16Data.length; i++) {
+                        const sample = int16Data[i] < 0 ? int16Data[i] / 0x8000 : int16Data[i] / 0x7FFF;
+                        const idx = i * 3;
+                        float32Data[idx] = sample;
+                        float32Data[idx + 1] = sample;
+                        float32Data[idx + 2] = sample;
+                    }
+
+                    stream.workletNode.port.postMessage(float32Data, [float32Data.buffer]);
                     break;
             }
         } catch (e) {
