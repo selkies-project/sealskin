@@ -2165,9 +2165,15 @@ async def create_meta_app(decrypted_body: dict = Depends(get_decrypted_request_b
 
 
 @encrypted_router.get("/api/app_icon/{app_id}")
-async def get_app_icon(app_id: str):
+async def get_app_icon(app_id: str, user: dict = Depends(verify_token)):
     """Serves a custom-uploaded app icon, base64-encoded within a JSON object."""
-    icon_path = os.path.join(settings.app_icons_path, f"{app_id}.png")
+    if not re.match(r"^[a-zA-Z0-9_-]+$", app_id):
+        raise HTTPException(status_code=400, detail="Invalid application ID.")
+
+    icon_path = os.path.abspath(os.path.join(settings.app_icons_path, f"{app_id}.png"))
+
+    if not icon_path.startswith(os.path.abspath(settings.app_icons_path)):
+        raise HTTPException(status_code=403, detail="Access denied.")
 
     if not os.path.exists(icon_path):
         raise HTTPException(status_code=404, detail="Icon not found.")
@@ -2180,7 +2186,6 @@ async def get_app_icon(app_id: str):
     except Exception as e:
         logger.error(f"Failed to read or encode icon for app {app_id}: {e}")
         raise HTTPException(status_code=500, detail="Error retrieving icon.")
-
 
 @admin_router.post("/launch/meta_customize", response_model=LaunchResponse)
 async def launch_meta_for_customization(
