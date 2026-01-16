@@ -8,6 +8,21 @@
 https://:{{SESSION_PORT}} {
         tls {{PROXY_CERT_PATH}} {{PROXY_KEY_PATH}}
 
+        header {
+                Access-Control-Allow-Origin "{header.Origin}"
+                Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+                Access-Control-Allow-Headers "Origin, Accept, Content-Type, X-Requested-With, X-Session-ID, Authorization"
+                Access-Control-Allow-Credentials "true"
+                defer 
+        }
+
+        @options {
+                method OPTIONS
+        }
+        handle @options {
+                respond "" 204
+        }
+
         handle /public/* {
                 reverse_proxy 127.0.0.1:{{API_PORT}}
         }
