@@ -3479,16 +3479,3 @@ async def read_root():
         with open(html_file_path, "r") as f:
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>SealSkin Server</h1>", status_code=404)
-
-
-@api_app.get("/sealskin.zip", include_in_schema=False)
-async def download_zip():
-    zip_file_path = "/sealskin.zip"
-    if not os.path.exists(zip_file_path):
-        raise HTTPException(
-            status_code=404,
-            detail="File not found at /sealskin.zip on the server filesystem.",
-        )
-    return FileResponse(
-        path=zip_file_path, media_type="application/zip", filename="sealskin.zip"
-    )
