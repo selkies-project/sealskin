@@ -1,0 +1,24 @@
+{
+  "name": "sealskin",
+  "version": "0.1.0",
+  "description": "SealSkin mobile",
+  "main": "index.html",
+  "scripts": {
+    "build": "rm -rf www && mkdir www && npx @capacitor/assets generate --iconBackgroundColor '#434c5d' --splashBackgroundColor '#434c5d' && npx esbuild index.js --bundle --minify --format=esm --outfile=www/bundle.js && cp index.html mobile-polyfill.js mobile-overrides.css www/ && cp ../browser_extension/*.js ../browser_extension/*.html ../browser_extension/*.css www/ && cp -r ../browser_extension/icons www/",
+    "android": "npm run build && npx cap sync && npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/filesystem": "^8.0.0",
+    "@capacitor/ios": "^8.0.0",
+    "@capawesome-team/capacitor-file-opener": "^8.0.0",
+    "capacitor-blob-writer": "^1.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.0",
+    "@capacitor/assets": "^3.0.0",
+    "esbuild": "^0.27.2"
+  }
+}

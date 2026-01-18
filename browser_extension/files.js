@@ -64,6 +64,23 @@ const closeUploadModalBtn = document.getElementById('close-upload-modal-btn');
 
 // --- UTILS & HELPERS ---
 
+function getMimeType(filename) {
+  const ext = filename.split('.').pop().toLowerCase();
+  const types = {
+    'pdf': 'application/pdf',
+    'png': 'image/png',
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'doc': 'application/msword',
+    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'xls': 'application/vnd.ms-excel',
+    'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'zip': 'application/zip',
+    'mp4': 'video/mp4'
+  };
+  return types[ext] || '*/*';
+}
+
 async function secureFetch(url, options = {}) {
   if (!state.config) throw new Error("Configuration not loaded.");
   const jwt = await generateJwtNative(state.config.clientPrivateKey, state.config.username);
@@ -459,19 +476,20 @@ function handleItemClick(e) {
 async function downloadFile(home, path) {
   const filename = path.split('/').pop();
   const isFirefox = navigator.userAgent.includes("Firefox");
+  const isMobile = window.parent && typeof window.parent.handleMobileDownload === 'function';
 
-  if (isFirefox) {
+  if (isFirefox || isMobile) {
     displayStatus(t('files.status.downloading', { filename: filename }) || `Downloading ${filename}...`);
-    
+
     try {
       let chunkIndex = 0;
       let isLastChunk = false;
       const chunks = [];
-      
+
       while (!isLastChunk) {
         const params = new URLSearchParams({ path, chunk_index: chunkIndex });
         const response = await secureFetch(`/api/files/download/chunk/${home}?${params.toString()}`, { method: 'GET' });
-        
+
         if (response.chunk_data_b64) {
           const binaryString = atob(response.chunk_data_b64);
           const len = binaryString.length;
@@ -484,8 +502,19 @@ async function downloadFile(home, path) {
         isLastChunk = response.is_last_chunk;
         chunkIndex++;
       }
-      
+
       const blob = new Blob(chunks, { type: 'application/octet-stream' });
+
+      if (isMobile) {
+          try {
+              await window.parent.handleMobileDownload(blob, filename);
+              displayStatus(t('files.status.downloadSuccess') || 'File opened');
+          } catch (err) {
+              displayStatus(`Error: ${err.message}`, true);
+          }
+          return;
+      }
+
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -495,8 +524,8 @@ async function downloadFile(home, path) {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       displayStatus(t('files.status.downloadSuccess') || 'Download complete');
+
     } catch (error) {
-       console.error("Download failed:", error);
        displayStatus(t('files.status.downloadFailed', { error: error.message }), true);
     }
   } else {
@@ -802,6 +831,24 @@ async function handleFolderUpload(files) {
 async function init() {
   const translator = getTranslator(navigator.language);
   t = translator.t;
+
+  if (window.Capacitor) {
+    const header = document.querySelector('.sidebar-header');
+    if (header) {
+      header.style.display = 'flex';
+      header.style.alignItems = 'center';
+
+      const backBtn = document.createElement('button');
+      backBtn.className = 'mobile-back-btn';
+      backBtn.innerHTML = '<i class="fas fa-arrow-left"></i>';
+      backBtn.onclick = (e) => {
+          e.preventDefault();
+          window.history.back();
+      };
+      header.insertBefore(backBtn, header.firstChild);
+    }
+  }
+
   applyTranslations(document.body, t);
   document.title = t('files.title');
   document.getElementById('new-folder-name').title = t('files.modals.newFolder.nameTitle');

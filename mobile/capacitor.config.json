@@ -1,0 +1,15 @@
+{
+  "appId": "io.linuxserver.sealskin",
+  "appName": "SealSkin",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "Keyboard": {
+      "resize": "body",
+      "style": "dark",
+      "resizeOnFullScreen": true
+    }
+  }
+}

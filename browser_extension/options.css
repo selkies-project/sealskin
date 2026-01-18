@@ -96,6 +96,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  overflow-y: auto;
+  flex-grow: 1;
+  min-height: 0;
 }
 
 .nav-link {
@@ -1410,4 +1413,60 @@ progress::-moz-progress-bar {
 }
 .form-section-header:first-of-type {
     margin-top: 0;
+}
+
+@media (max-width: 600px) {
+    .options-container {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        height: auto;
+        max-height: 30vh;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem;
+    }
+    .sidebar-header {
+        margin-bottom: 1rem;
+    }
+    .sidebar-nav {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+    .nav-link {
+        white-space: nowrap;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    .nav-link i {
+        display: none;
+    }
+    .sidebar-footer {
+        display: none;
+    }
+    .main-content {
+        padding: 1rem;
+    }
+    .lab-container {
+        flex-direction: column;
+        height: auto;
+    }
+    .lab-sidebar {
+        width: 100%;
+        max-width: none;
+        height: auto;
+        max-height: 400px;
+    }
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    th, td {
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+    .actions-cell button {
+        padding: 0.3rem 0.5rem;
+    }
 }

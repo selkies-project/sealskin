@@ -1835,6 +1835,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
+  if (window.Capacitor) {
+    const header = document.querySelector('.sidebar-header');
+    if (header) {
+      header.style.display = 'flex';
+      header.style.alignItems = 'center';
+      
+      const backBtn = document.createElement('button');
+      backBtn.className = 'mobile-back-btn';
+      backBtn.innerHTML = '<i class="fas fa-arrow-left"></i>';
+      backBtn.onclick = (e) => {
+        e.preventDefault();
+        window.history.back();
+      };
+      header.insertBefore(backBtn, header.firstChild);
+    }
+
+    const howToList = document.getElementById('how-to-list');
+    if (howToList) {
+        const card = howToList.closest('.card');
+        if (card) {
+            card.style.display = 'none';
+        }
+    }
+  }
+
   await loadConfig();
   await openTab('Config');
 

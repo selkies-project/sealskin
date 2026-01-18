@@ -203,7 +203,7 @@ function getSessionUrlBase(config) {
     return `https://${config.serverIp}:${config.sessionPort}`;
 }
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+const handleMessage = (request, sender, sendResponse) => {
   if (request.type === 'secureFetch') {
     (async () => {
       try {
@@ -230,23 +230,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.type === 'downloadFile') {
     const { url, jwt, filename } = request.payload;
-    chrome.downloads.download({
-      url: url,
-      filename: filename,
-      headers: [{
-        name: 'Authorization',
-        value: 'Bearer ' + jwt
-      }]
-    }, (downloadId) => {
-      if (chrome.runtime.lastError) {
-        console.error(`[SealSkin BG] Download failed: ${chrome.runtime.lastError.message}`);
-      }
-    });
+    if (chrome.downloads && chrome.downloads.download) {
+        chrome.downloads.download({
+          url: url,
+          filename: filename,
+          headers: [{
+            name: 'Authorization',
+            value: 'Bearer ' + jwt
+          }]
+        }, (downloadId) => {
+          if (chrome.runtime.lastError) {
+            console.error(`[SealSkin BG] Download failed: ${chrome.runtime.lastError.message}`);
+          }
+        });
+    }
     return false;
   }
 
   if (request.type === 'openPopup') {
-    chrome.action.openPopup();
+    if (chrome.action) chrome.action.openPopup();
     return false;
   }
 
@@ -257,8 +259,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       const fullUrl = `${getSessionUrlBase(sealskinConfig)}${session_url}`;
       const newTab = await chrome.tabs.create({ url: fullUrl });
       const map = await getSessionTabMap();
-      map[sessionId] = newTab.id;
-      await saveSessionTabMap(map);
+      if (newTab && newTab.id) {
+          map[sessionId] = newTab.id;
+          await saveSessionTabMap(map);
+      }
     })();
     return false;
   }
@@ -277,9 +281,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             active: true
           });
 
-          await chrome.windows.update(updatedTab.windowId, {
-            focused: true
-          });
+          if (updatedTab && chrome.windows) {
+              await chrome.windows.update(updatedTab.windowId, {
+                focused: true
+              });
+          }
 
           return;
         } catch (e) {
@@ -297,8 +303,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       const newTab = await chrome.tabs.create({
         url: fullUrl
       });
-      map[session.session_id] = newTab.id;
-      await saveSessionTabMap(map);
+      if (newTab && newTab.id) {
+          map[session.session_id] = newTab.id;
+          await saveSessionTabMap(map);
+      }
     })();
     return false;
   }
@@ -312,7 +320,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (tabId) {
           try {
             await chrome.tabs.remove(tabId);
-          } catch (e) { /* Tab already closed */ }
+          } catch (e) { }
         }
         await secureFetchInBackground(`/api/sessions/${sessionId}`, { method: 'DELETE' });
         delete map[sessionId];
@@ -325,7 +333,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     })();
     return true;
   }
-});
+};
+
+if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+    chrome.runtime.onMessage.addListener(handleMessage);
+}
+
+if (typeof window !== 'undefined') {
+    window.handleMessage = handleMessage;
+}
 
 // --- Context Menu and Download Logic ---
 chrome.runtime.onInstalled.addListener(() => {

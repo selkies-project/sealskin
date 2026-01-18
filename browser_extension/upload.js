@@ -2,7 +2,7 @@ let t;
 function applyTranslations(scope, translator) {
   scope.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
-    el.innerHTML = translator(key); // Use innerHTML to support simple tags
+    el.innerHTML = translator(key);
   });
 }
 
@@ -39,14 +39,30 @@ function processFile(file) {
 function triggerUpload() {
   if (!selectedFile) return;
 
-  const objectUrl = URL.createObjectURL(selectedFile);
+  const isMobile = window.Capacitor || (window.parent && window.parent.Capacitor);
+  
   const context = {
     action: 'file',
-    targetUrl: objectUrl,
     filename: selectedFile.name
   };
 
+  if (isMobile) {
+    context.file = selectedFile;
+  } else {
+    const objectUrl = URL.createObjectURL(selectedFile);
+    context.targetUrl = objectUrl;
+  }
+
   confirmUploadBtn.disabled = true;
+
+  if (isMobile) {
+    if (window.parent) {
+        window.parent.tempFirefoxContext = context;
+        chrome.runtime.sendMessage({ type: 'openPopup' });
+        resetForm();
+    }
+    return;
+  }
 
   let bgPage = null;
   try {
@@ -77,8 +93,33 @@ function triggerUpload() {
 document.addEventListener('DOMContentLoaded', () => {
   const translator = getTranslator(navigator.language);
   t = translator.t;
-  applyTranslations(document.body, t);
 
+  if (window.Capacitor) {
+    document.body.classList.add('mobile-scroll-layout');
+
+    const header = document.querySelector('header');
+    if (header) {
+      header.style.display = 'flex';
+      header.style.alignItems = 'center';
+      
+      const backBtn = document.createElement('button');
+      backBtn.className = 'mobile-back-btn';
+      backBtn.style.fontSize = '1.5rem'; 
+      backBtn.innerHTML = '<i class="fas fa-arrow-left"></i>';
+      backBtn.onclick = (e) => {
+          e.preventDefault();
+          window.history.back();
+      };
+      header.insertBefore(backBtn, header.firstChild);
+
+      const desc = header.querySelector('[data-i18n="upload.description"]');
+      if (desc) {
+          desc.style.display = 'none';
+      }
+    }
+  }
+
+  applyTranslations(document.body, t);
   const currentTheme = localStorage.getItem('theme');
   if (currentTheme) {
     document.documentElement.setAttribute('data-theme', currentTheme);

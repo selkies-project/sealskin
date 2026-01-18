@@ -564,18 +564,22 @@ async function uploadFileInChunks(fileBlob, filename) {
 async function handleSendFileToSession(sessionId) {
   setStatus(t('popup.status.preparingFile'));
   try {
-    const fileResponse = await fetch(sealskinContext.targetUrl);
-    if (!fileResponse.ok) throw new Error(t('popup.status.fetchDataFailed', {
-      statusText: fileResponse.statusText
-    }));
-    const fileBlob = await fileResponse.blob();
+    let fileBlob;
+    if (window.Capacitor && sealskinContext.file) {
+      fileBlob = sealskinContext.file;
+    } else {
+      const fileResponse = await fetch(sealskinContext.targetUrl);
+      if (!fileResponse.ok) throw new Error(t('popup.status.fetchDataFailed', {
+        statusText: fileResponse.statusText
+      }));
+      fileBlob = await fileResponse.blob();
+    }
     const filename = sealskinContext.filename || 'uploaded.file';
 
     const {
       uploadId,
       totalChunks
     } = await uploadFileInChunks(fileBlob, filename);
-
     setStatus(t('popup.status.sendingFile'));
     await secureFetch(`/api/sessions/${sessionId}/send_file`, {
       method: 'POST',
@@ -609,14 +613,18 @@ async function handleUploadToStorage() {
   uploadStorageProgressLabel.textContent = t('popup.uploadStorageView.preparing');
 
   try {
-    const fileResponse = await fetch(sealskinContext.targetUrl);
-    if (!fileResponse.ok) throw new Error(t('popup.status.fetchDataFailed', {
-      statusText: fileResponse.statusText
-    }));
-    const fileBlob = await fileResponse.blob();
+    let fileBlob;
+    if (window.Capacitor && sealskinContext.file) {
+      fileBlob = sealskinContext.file;
+    } else {
+      const fileResponse = await fetch(sealskinContext.targetUrl);
+      if (!fileResponse.ok) throw new Error(t('popup.status.fetchDataFailed', {
+        statusText: fileResponse.statusText
+      }));
+      fileBlob = await fileResponse.blob();
+    }
     const filename = sealskinContext.filename || 'uploaded.file';
     const homeName = '_sealskin_shared_files';
-
     const {
       upload_id
     } = await secureFetch('/api/upload/initiate', {
@@ -750,7 +758,7 @@ async function handleLaunch() {
       wayland_mode: waylandMode,
     };
 
-    if (isSimpleLaunch) {
+    if (isSimpleLaunch || !sealskinContext.action) {
       setStatus(t('popup.status.preparingSession'));
       endpoint = '/api/launch/simple';
     } else if (sealskinContext.action === 'url') {
@@ -761,11 +769,16 @@ async function handleLaunch() {
       setStatus(t('popup.status.fetchingData'));
       launchBtnText.textContent = t('popup.launchView.uploadingButton');
 
-      const fileResponse = await fetch(sealskinContext.targetUrl);
-      if (!fileResponse.ok) throw new Error(t('popup.status.fetchDataFailed', {
-        statusText: fileResponse.statusText
-      }));
-      const fileBlob = await fileResponse.blob();
+      let fileBlob;
+      if (window.Capacitor && sealskinContext.file) {
+        fileBlob = sealskinContext.file;
+      } else {
+        const fileResponse = await fetch(sealskinContext.targetUrl);
+        if (!fileResponse.ok) throw new Error(t('popup.status.fetchDataFailed', {
+          statusText: fileResponse.statusText
+        }));
+        fileBlob = await fileResponse.blob();
+      }
       const filename = sealskinContext.filename || 'uploaded.file';
 
       const {
@@ -803,7 +816,11 @@ async function handleLaunch() {
       payload: { sessionId: sessionId, session_url: data.session_url }
     });
 
-    window.close();
+    if (window.Capacitor || (window.parent && window.parent.Capacitor)) {
+      window.location.reload();
+    } else {
+      window.close();
+    }
 
   } catch (error) {
     spinner.style.display = 'none';
@@ -819,10 +836,53 @@ async function handleLaunch() {
 document.addEventListener('DOMContentLoaded', async () => {
   const translator = getTranslator(navigator.language);
   t = translator.t;
-  applyTranslations(document.body, t);
 
+  if (window.Capacitor) {
+    const container = document.querySelector('.popup-container');
+    const tabs = document.querySelector('.popup-tabs');
+    if (container && tabs) {
+        const header = document.createElement('div');
+        header.className = 'mobile-app-header';
+        header.style.display = 'flex';
+        header.style.justifyContent = 'space-between';
+        header.style.alignItems = 'center';
+        header.innerHTML = `
+            <div style="display: flex; align-items: center;">
+                <img src="icons/icon128.png" alt="SealSkin" style="height: 32px; margin-right: 10px;">
+                <h1>SealSkin</h1>
+            </div>
+            <button id="mobile-refresh-btn" style="background: none; border: none; color: inherit; font-size: 1.2rem; cursor: pointer; padding: 0 10px;">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        `;
+        container.insertBefore(header, tabs);
+        document.getElementById('mobile-refresh-btn').addEventListener('click', () => {
+            window.location.reload();
+        });
+    }
+
+    const footer = document.querySelector('.popup-footer');
+    if (footer) {
+        const optionsContainer = document.createElement('div');
+        optionsContainer.className = 'mobile-footer-options-container';
+        const saveOptions = document.getElementById('save-options-container');
+        const checkboxes = document.querySelectorAll('.popup-checkbox-item');
+        if (saveOptions) optionsContainer.appendChild(saveOptions);
+        checkboxes.forEach(cb => optionsContainer.appendChild(cb));
+        const btnGroup = document.querySelector('.button-group-popup');
+        if (btnGroup) {
+            footer.insertBefore(optionsContainer, btnGroup);
+        }
+    }
+  }
+
+  applyTranslations(document.body, t);
   document.getElementById('options-gear-btn').addEventListener('click', () => {
-      chrome.runtime.openOptionsPage();
+      if (chrome.runtime.openOptionsPage) {
+          chrome.runtime.openOptionsPage();
+      } else {
+          window.location.href = 'options.html';
+      }
   });
 
   const themeData = await chrome.storage.local.get('theme');
@@ -831,6 +891,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     const configData = await chrome.storage.local.get('sealskinConfig');
     if (!configData.sealskinConfig?.serverIp || !configData.sealskinConfig?.username || !configData.sealskinConfig?.clientPrivateKey) {
+      if (window.location.protocol !== 'chrome-extension:') {
+          window.location.href = 'options.html';
+          return;
+      }
       setStatus(t('popup.status.unconfigured'), true);
       return;
     }
@@ -839,8 +903,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     let contextData = await chrome.storage.local.get('sealskinContext');
 
     const isFirefox = navigator.userAgent.includes("Firefox");
+    const isMobile = window.Capacitor !== undefined;
     
-    if (!contextData.sealskinContext && isFirefox) {
+    if (!contextData.sealskinContext && (isFirefox || isMobile)) {
       const firefoxContext = await new Promise(resolve => {
         chrome.runtime.sendMessage({ type: 'getFirefoxContext' }, (response) => {
              if (chrome.runtime.lastError) {
@@ -855,12 +920,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
 
-    if (contextData.sealskinContext) {
+    if (contextData.sealskinContext && contextData.sealskinContext.action) {
       sealskinContext = contextData.sealskinContext;
       chrome.storage.local.remove('sealskinContext');
       isSimpleLaunch = false;
     } else {
       isSimpleLaunch = true;
+      if (contextData.sealskinContext) chrome.storage.local.remove('sealskinContext');
     }
 
     const hasValidExtension = (filename = '') => {
@@ -932,7 +998,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     if (mapWasChanged) await saveSessionTabMap(sessionTabMap);
 
-    if (activeSessions.length === 0) {
+    if (activeSessions.length === 0 && !window.Capacitor) {
       sessionsTabBtn.style.display = 'none';
     }
 
@@ -945,7 +1011,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       populateHomeDirDropdown();
     }
 
-    if (userSettings.persistent_storage && isSimpleLaunch) {
+    if (userSettings.persistent_storage && (isSimpleLaunch || window.Capacitor)) {
         manageFilesBtn.style.display = 'flex';
     }
 
@@ -977,7 +1043,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const isFileContext = sealskinContext.action === 'file';
 
     if (isFileContext) {
-      uploadFilesTabBtn.style.display = 'none';
+      if (!window.Capacitor) uploadFilesTabBtn.style.display = 'none';
       if (userSettings.persistent_storage) {
         uploadStorageTabBtn.style.display = 'flex';
         const filename = sealskinContext.filename;

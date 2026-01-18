@@ -1,0 +1,6 @@
+node_modules/
+www/
+android/
+ios/
+icons/
+package-lock.json

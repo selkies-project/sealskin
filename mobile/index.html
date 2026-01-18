@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SealSkin Mobile</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #1a202c; }
+        iframe { width: 100%; height: 100%; border: none; display: block; }
+    </style>
+    
+    <script src="mobile-polyfill.js"></script>
+    <script src="crypto-utils.js"></script>
+    <script src="translations.js"></script>
+    <script src="languages.js"></script>
+    <script src="background.js"></script>
+</head>
+<body>
+    <iframe id="app-frame" src="popup.html"></iframe>
+    <script type="module" src="bundle.js"></script>
+</body>
+</html>
