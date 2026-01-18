@@ -46,7 +46,6 @@ if (typeof MediaStreamTrackProcessor === 'undefined') {
                 this.readable = new ReadableStream({
                     async start(controller) {
                         const ctx = new AudioContext();
-                        // Worklet to pass raw audio data to main thread
                         const workletCode = `registerProcessor("mstp-shim",class extends AudioWorkletProcessor{process(i){if(i[0].length>0)this.port.postMessage(i[0]);return true}})`
                         await ctx.audioWorklet.addModule(`data:text/javascript,${workletCode}`).catch(e => console.error(e));
                         
@@ -57,7 +56,6 @@ if (typeof MediaStreamTrackProcessor === 'undefined') {
                         node.port.onmessage = ({data: channels}) => {
                              if (!channels || channels.length === 0) return;
                              
-                             // Flatten planar data (array of Float32Arrays) to interleaved Float32Array
                              const length = channels[0].length;
                              const numChannels = channels.length;
                              const flattened = new Float32Array(length * numChannels);
@@ -1427,7 +1425,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const handleUsernameSubmit = (e) => {
+    const handleUsernameSubmit = async (e) => {
         e.preventDefault();
         const input = document.getElementById('username-input');
         const newUsername = input.value.trim();
@@ -1438,6 +1436,27 @@ document.addEventListener('DOMContentLoaded', () => {
             sessionStorage.setItem('collab_hasJoined_' + COLLAB_DATA.sessionId, 'true');
             ws.send(JSON.stringify({ action: 'set_username', username: username }));
             renderSidebar();
+
+            if (!mediaInitialized) {
+                await startMedia();
+            }
+            
+            isMicOn = true;
+            if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = true);
+            sendControlMessage('audio_state', true);
+            updateMediaButtonUI();
+
+            await new Promise(r => setTimeout(r, 1000));
+
+            isWebcamOn = true;
+            if (localStream && localStream.getVideoTracks().length > 0) {
+                localStream.getVideoTracks().forEach(t => t.enabled = true);
+                localContainer.style.display = 'flex';
+                sendControlMessage('video_state', true);
+            }
+            updateMediaButtonUI();
+
+            toggleSidebar();
         }
     };
 
