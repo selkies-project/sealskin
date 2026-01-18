@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
           this.audioBufferQueue = [];
           this.currentAudioData = null;
           this.currentDataOffset = 0;
-          this.MAX_BUFFER_PACKETS = 10; 
+          this.MAX_BUFFER_PACKETS = 5; 
 
           this.port.onmessage = (event) => {
             const pcmData = event.data;
@@ -491,7 +491,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isIOS) {
             const ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
             const source = ctx.createMediaStreamSource(localStream);
-            const processor = ctx.createScriptProcessor(4096, 1, 1);
+            const processor = ctx.createScriptProcessor(1024, 1, 1);
 
             source.connect(processor);
             processor.connect(ctx.destination);
