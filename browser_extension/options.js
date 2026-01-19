@@ -1846,7 +1846,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       backBtn.innerHTML = '<i class="fas fa-arrow-left"></i>';
       backBtn.onclick = (e) => {
         e.preventDefault();
-        window.history.back();
+        window.location.href = 'popup.html';
       };
       header.insertBefore(backBtn, header.firstChild);
     }

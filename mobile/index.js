@@ -14,7 +14,7 @@ App.addListener('backButton', () => {
         if (href.includes('popup.html')) {
             App.exitApp();
         } else {
-            iframe.contentWindow.history.back();
+            iframe.contentWindow.location.href = 'popup.html';
         }
     } else {
         App.exitApp();
