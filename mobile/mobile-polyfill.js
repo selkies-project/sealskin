@@ -94,11 +94,26 @@ if (window.Capacitor) {
   window.chrome.action = actionMock;
   window.chrome.browserAction = actionMock;
 
+  const storageListeners = new Set();
+  window.addEventListener('storage', (e) => {
+    if (e.storageArea === localStorage && e.key) {
+      const changes = {
+        [e.key]: {
+          oldValue: e.oldValue ? JSON.parse(e.oldValue) : undefined,
+          newValue: e.newValue ? JSON.parse(e.newValue) : undefined
+        }
+      };
+      storageListeners.forEach(cb => cb(changes, 'local'));
+    }
+  });
   const storageArea = {
     get: (keys, cb) => {
       let res = {};
       if (keys === null) {
         res = {...localStorage};
+        Object.keys(res).forEach(k => {
+            try { res[k] = JSON.parse(res[k]); } catch(e) {}
+        });
       } else {
         const k = Array.isArray(keys) ? keys : [keys];
         k.forEach(key => {
@@ -110,13 +125,30 @@ if (window.Capacitor) {
       return Promise.resolve(res);
     },
     set: (items, cb) => {
-      for (const k in items) localStorage.setItem(k, JSON.stringify(items[k]));
+      const changes = {};
+      for (const k in items) {
+        const oldValueStr = localStorage.getItem(k);
+        const oldValue = oldValueStr ? JSON.parse(oldValueStr) : undefined;
+        localStorage.setItem(k, JSON.stringify(items[k]));
+        changes[k] = { oldValue, newValue: items[k] };
+      }
+      storageListeners.forEach(listener => listener(changes, 'local'));
       if (cb) cb();
       return Promise.resolve();
     },
     remove: (keys, cb) => {
       const k = Array.isArray(keys) ? keys : [keys];
-      k.forEach(key => localStorage.removeItem(key));
+      const changes = {};
+      k.forEach(key => {
+        const oldValueStr = localStorage.getItem(key);
+        if(oldValueStr) {
+            changes[key] = { oldValue: JSON.parse(oldValueStr), newValue: undefined };
+        }
+        localStorage.removeItem(key);
+      });
+      if (Object.keys(changes).length > 0) {
+          storageListeners.forEach(listener => listener(changes, 'local'));
+      }
       if (cb) cb();
       return Promise.resolve();
     },
@@ -130,7 +162,11 @@ if (window.Capacitor) {
     local: storageArea,
     sync: storageArea,
     managed: storageArea,
-    onChanged: mockListener
+    onChanged: {
+      addListener: (cb) => storageListeners.add(cb),
+      removeListener: (cb) => storageListeners.delete(cb),
+      hasListener: (cb) => storageListeners.has(cb)
+    }
   };
 
   window.chrome.tabs = {

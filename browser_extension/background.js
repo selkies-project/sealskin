@@ -343,6 +343,16 @@ if (typeof window !== 'undefined') {
     window.handleMessage = handleMessage;
 }
 
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  if (namespace === 'local' && changes.sealskinConfig) {
+    session = {
+      key: null,
+      id: null,
+      baseUrl: null
+    };
+  }
+});
+
 // --- Context Menu and Download Logic ---
 chrome.runtime.onInstalled.addListener(() => {
   const baseLang = chrome.i18n.getUILanguage().split('-')[0];
