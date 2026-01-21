@@ -596,7 +596,6 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
             if ROOM_CONNECTIONS.get(session_id_str):
                 ROOM_CONNECTIONS[session_id_str]["controller"] = None
             logger.info(f"[{session_id_str}] Controller disconnected from collab room.")
-            await broadcast_to_room(session_id_str, {"type": "controller_disconnected"})
         else:
             if ROOM_CONNECTIONS.get(session_id_str) and ROOM_CONNECTIONS[
                 session_id_str
@@ -854,3 +853,9 @@ async def handle_assign_mk(session_id: str, target_token: Optional[str]):
         await broadcast_state(session_id)
     except Exception as e:
         logger.error(f"[{session_id}] Failed to assign MK control: {e}")
+
+async def notify_session_ended(session_id: str):
+    if session_id in ROOM_CONNECTIONS:
+        logger.info(f"[{session_id}] Broadcasting session termination to room.")
+        await broadcast_to_room(session_id, {"type": "session_ended"})
+        ROOM_CONNECTIONS.pop(session_id, None)

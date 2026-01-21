@@ -27,6 +27,7 @@ const en = {
         restartApp: 'Restart',
         swapApp: 'Swap to this app',
         cannotStopActive: 'Cannot stop active app',
+        reloadStream: 'Reload Stream',
     },
     usernamePrompt: {
         title: 'Welcome!',
@@ -57,6 +58,10 @@ const en = {
     disconnect: {
         title: 'Disconnected',
         message: 'The session has ended.',
+    },
+    waiting: {
+        title: 'Controller is Away',
+        message: 'The session is active. Waiting for the controller to resume the stream.',
     },
     startMenu: {
         launchTab: 'Launch New',
@@ -100,6 +105,7 @@ const es = {
         restartApp: 'Reiniciar',
         swapApp: 'Cambiar a esta app',
         cannotStopActive: 'No se puede detener la app activa',
+        reloadStream: 'Recargar transmisión',
     },
     usernamePrompt: {
         title: '¡Bienvenido!',
@@ -130,6 +136,10 @@ const es = {
     disconnect: {
         title: 'Desconectado',
         message: 'La sesión ha finalizado.',
+    },
+    waiting: {
+        title: 'El controlador está ausente',
+        message: 'La sesión está activa. Esperando a que el controlador reanude la transmisión.',
     },
     startMenu: {
         launchTab: 'Iniciar Nueva',
@@ -173,6 +183,7 @@ const zh = {
         restartApp: '重启',
         swapApp: '切换到此应用',
         cannotStopActive: '无法停止活动应用',
+        reloadStream: '重新加载流',
     },
     usernamePrompt: {
         title: '欢迎！',
@@ -203,6 +214,10 @@ const zh = {
     disconnect: {
         title: '已断开连接',
         message: '会话已结束。',
+    },
+    waiting: {
+        title: '控制者已离开',
+        message: '会话处于活动状态。正在等待控制者恢复流。',
     },
     startMenu: {
         launchTab: '启动新应用',
@@ -246,6 +261,7 @@ const hi = {
         restartApp: 'पुनरारंभ करें',
         swapApp: 'इस ऐप पर स्वैप करें',
         cannotStopActive: 'सक्रिय ऐप को रोक नहीं सकते',
+        reloadStream: 'स्ट्रीम पुनः लोड करें',
     },
     usernamePrompt: {
         title: 'स्वागत है!',
@@ -276,6 +292,10 @@ const hi = {
     disconnect: {
         title: 'डिस्कनेक्ट हो गया',
         message: 'सत्र समाप्त हो गया है।',
+    },
+    waiting: {
+        title: 'नियंत्रक अनुपस्थित है',
+        message: 'सत्र सक्रिय है। नियंत्रक द्वारा स्ट्रीम फिर से शुरू करने की प्रतीक्षा की जा रही है।',
     },
     startMenu: {
         launchTab: 'नया लॉन्च करें',
@@ -319,6 +339,7 @@ const pt = {
         restartApp: 'Reiniciar',
         swapApp: 'Trocar para este app',
         cannotStopActive: 'Não é possível parar app ativo',
+        reloadStream: 'Recarregar Transmissão',
     },
     usernamePrompt: {
         title: 'Bem-vindo(a)!',
@@ -349,6 +370,10 @@ const pt = {
     disconnect: {
         title: 'Desconectado',
         message: 'A sessão terminou.',
+    },
+    waiting: {
+        title: 'O controlador está ausente',
+        message: 'A sessão está ativa. Aguardando o controlador retomar a transmissão.',
     },
     startMenu: {
         launchTab: 'Iniciar Novo',
@@ -392,6 +417,7 @@ const fr = {
         restartApp: 'Redémarrer',
         swapApp: 'Basculer vers cette app',
         cannotStopActive: 'Impossible d\'arrêter l\'app active',
+        reloadStream: 'Recharger le flux',
     },
     usernamePrompt: {
         title: 'Bienvenue !',
@@ -422,6 +448,10 @@ const fr = {
     disconnect: {
         title: 'Déconnecté',
         message: 'La session est terminée.',
+    },
+    waiting: {
+        title: 'Le contrôleur est absent',
+        message: 'La session est active. En attente de la reprise du flux par le contrôleur.',
     },
     startMenu: {
         launchTab: 'Lancer nouveau',
@@ -465,6 +495,7 @@ const ru = {
         restartApp: 'Перезапустить',
         swapApp: 'Переключиться на это приложение',
         cannotStopActive: 'Нельзя остановить активное приложение',
+        reloadStream: 'Перезагрузить поток',
     },
     usernamePrompt: {
         title: 'Добро пожаловать!',
@@ -495,6 +526,10 @@ const ru = {
     disconnect: {
         title: 'Отключено',
         message: 'Сеанс завершен.',
+    },
+    waiting: {
+        title: 'Контроллер отошел',
+        message: 'Сеанс активен. Ожидание возобновления трансляции контроллером.',
     },
     startMenu: {
         launchTab: 'Запустить новое',
@@ -538,6 +573,7 @@ const de = {
         restartApp: 'Neustart',
         swapApp: 'Zu dieser App wechseln',
         cannotStopActive: 'Aktive App kann nicht gestoppt werden',
+        reloadStream: 'Stream neu laden',
     },
     usernamePrompt: {
         title: 'Willkommen!',
@@ -568,6 +604,10 @@ const de = {
     disconnect: {
         title: 'Verbindung getrennt',
         message: 'Die Sitzung wurde beendet.',
+    },
+    waiting: {
+        title: 'Controller ist abwesend',
+        message: 'Die Sitzung ist aktiv. Warten auf Wiederaufnahme des Streams durch den Controller.',
     },
     startMenu: {
         launchTab: 'Neu starten',
@@ -611,6 +651,7 @@ const tr = {
         restartApp: 'Yeniden Başlat',
         swapApp: 'Bu uygulamaya geç',
         cannotStopActive: 'Aktif uygulama durdurulamaz',
+        reloadStream: 'Yayını Yenile',
     },
     usernamePrompt: {
         title: 'Hoş geldiniz!',
@@ -641,6 +682,10 @@ const tr = {
     disconnect: {
         title: 'Bağlantı Kesildi',
         message: 'Oturum sona erdi.',
+    },
+    waiting: {
+        title: 'Kontrolcü Uzakta',
+        message: 'Oturum aktif. Kontrolcünün yayını sürdürmesi bekleniyor.',
     },
     startMenu: {
         launchTab: 'Yeni Başlat',
@@ -684,6 +729,7 @@ const it = {
         restartApp: 'Riavvia',
         swapApp: 'Passa a questa app',
         cannotStopActive: 'Impossibile fermare app attiva',
+        reloadStream: 'Ricarica Stream',
     },
     usernamePrompt: {
         title: 'Benvenuto!',
@@ -714,6 +760,10 @@ const it = {
     disconnect: {
         title: 'Disconnesso',
         message: 'La sessione è terminata.',
+    },
+    waiting: {
+        title: 'Il controllore è assente',
+        message: 'La sessione è attiva. In attesa che il controllore riprenda lo stream.',
     },
     startMenu: {
         launchTab: 'Avvia Nuovo',
@@ -757,6 +807,7 @@ const nl = {
         restartApp: 'Herstarten',
         swapApp: 'Wissel naar deze app',
         cannotStopActive: 'Kan actieve app niet stoppen',
+        reloadStream: 'Stream herladen',
     },
     usernamePrompt: {
         title: 'Welkom!',
@@ -787,6 +838,10 @@ const nl = {
     disconnect: {
         title: 'Verbinding verbroken',
         message: 'De sessie is beëindigd.',
+    },
+    waiting: {
+        title: 'Controller is afwezig',
+        message: 'De sessie is actief. Wachten tot de controller de stream hervat.',
     },
     startMenu: {
         launchTab: 'Nieuwe starten',
@@ -830,6 +885,7 @@ const ar = {
         restartApp: 'إعادة تشغيل',
         swapApp: 'التبديل إلى هذا التطبيق',
         cannotStopActive: 'لا يمكن إيقاف التطبيق النشط',
+        reloadStream: 'إعادة تحميل البث',
     },
     usernamePrompt: {
         title: 'أهلاً بك!',
@@ -860,6 +916,10 @@ const ar = {
     disconnect: {
         title: 'انقطع الاتصال',
         message: 'انتهت الجلسة.',
+    },
+    waiting: {
+        title: 'المتحكم غائب',
+        message: 'الجلسة نشطة. في انتظار استئناف البث من قبل المتحكم.',
     },
     startMenu: {
         launchTab: 'تشغيل جديد',
@@ -903,6 +963,7 @@ const ko = {
         restartApp: '재시작',
         swapApp: '이 앱으로 전환',
         cannotStopActive: '활성 앱을 중지할 수 없음',
+        reloadStream: '스트림 새로 고침',
     },
     usernamePrompt: {
         title: '환영합니다!',
@@ -933,6 +994,10 @@ const ko = {
     disconnect: {
         title: '연결 끊김',
         message: '세션이 종료되었습니다.',
+    },
+    waiting: {
+        title: '컨트롤러 부재 중',
+        message: '세션이 활성 상태입니다. 컨트롤러가 스트림을 재개하기를 기다리는 중입니다.',
     },
     startMenu: {
         launchTab: '새로 시작',
@@ -976,6 +1041,7 @@ const ja = {
         restartApp: '再起動',
         swapApp: 'このアプリに切り替え',
         cannotStopActive: 'アクティブなアプリは停止できません',
+        reloadStream: 'ストリームを再読み込み',
     },
     usernamePrompt: {
         title: 'ようこそ！',
@@ -1006,6 +1072,10 @@ const ja = {
     disconnect: {
         title: '切断されました',
         message: 'セッションは終了しました。',
+    },
+    waiting: {
+        title: 'コントローラーが離席中',
+        message: 'セッションはアクティブです。コントローラーがストリームを再開するのを待機しています。',
     },
     startMenu: {
         launchTab: '新規起動',
@@ -1049,6 +1119,7 @@ const vi = {
         restartApp: 'Khởi động lại',
         swapApp: 'Chuyển sang ứng dụng này',
         cannotStopActive: 'Không thể dừng ứng dụng đang hoạt động',
+        reloadStream: 'Tải lại luồng',
     },
     usernamePrompt: {
         title: 'Chào mừng!',
@@ -1079,6 +1150,10 @@ const vi = {
     disconnect: {
         title: 'Đã ngắt kết nối',
         message: 'Phiên đã kết thúc.',
+    },
+    waiting: {
+        title: 'Người điều khiển vắng mặt',
+        message: 'Phiên đang hoạt động. Đang chờ người điều khiển tiếp tục luồng.',
     },
     startMenu: {
         launchTab: 'Khởi chạy mới',
@@ -1122,6 +1197,7 @@ const th = {
         restartApp: 'รีสตาร์ท',
         swapApp: 'สลับไปแอปนี้',
         cannotStopActive: 'ไม่สามารถหยุดแอปที่ใช้งานอยู่',
+        reloadStream: 'โหลดสตรีมใหม่',
     },
     usernamePrompt: {
         title: 'ยินดีต้อนรับ!',
@@ -1152,6 +1228,10 @@ const th = {
     disconnect: {
         title: 'ตัดการเชื่อมต่อแล้ว',
         message: 'เซสชันสิ้นสุดลงแล้ว',
+    },
+    waiting: {
+        title: 'ผู้ควบคุมไม่อยู่',
+        message: 'เซสชันกำลังทำงาน กำลังรอให้ผู้ควบคุมดำเนินการสตรีมต่อ',
     },
     startMenu: {
         launchTab: 'เปิดใหม่',
@@ -1195,6 +1275,7 @@ const fil = {
         restartApp: 'I-restart',
         swapApp: 'Lumipat sa app na ito',
         cannotStopActive: 'Hindi mapatigil ang aktibong app',
+        reloadStream: 'I-reload ang Stream',
     },
     usernamePrompt: {
         title: 'Maligayang pagdating!',
@@ -1225,6 +1306,10 @@ const fil = {
     disconnect: {
         title: 'Nadiskonekta',
         message: 'Nagtapos na ang session.',
+    },
+    waiting: {
+        title: 'Wala ang Controller',
+        message: 'Aktibo ang session. Hinihintay ang controller na ipagpatuloy ang stream.',
     },
     startMenu: {
         launchTab: 'Ilunsad ang Bago',
@@ -1268,6 +1353,7 @@ const da = {
         restartApp: 'Genstart',
         swapApp: 'Skift til denne app',
         cannotStopActive: 'Kan ikke stoppe aktiv app',
+        reloadStream: 'Genindlæs stream',
     },
     usernamePrompt: {
         title: 'Velkommen!',
@@ -1298,6 +1384,10 @@ const da = {
     disconnect: {
         title: 'Forbindelse afbrudt',
         message: 'Sessionen er afsluttet.',
+    },
+    waiting: {
+        title: 'Controlleren er væk',
+        message: 'Sessionen er aktiv. Venter på at controlleren genoptager streamen.',
     },
     startMenu: {
         launchTab: 'Start ny',

@@ -10,12 +10,19 @@
     <div id="disconnection-overlay" class="hidden">
         <div class="disconnection-message">
             <h2 data-i18n="disconnect.title">Session Ended</h2>
-            <p data-i18n="disconnect.message">The controller has disconnected. This session is no longer active.</p>
+            <p data-i18n="disconnect.message">The session has been terminated by the host.</p>
         </div>
     </div>
 
     <div id="content" class="content">
-        <iframe id="session-frame" src="{{IFRAME_SRC}}"></iframe>
+        <div id="waiting-overlay" class="hidden">
+            <div class="waiting-message">
+                <div class="spinner-large"></div>
+                <h2 data-i18n="waiting.title">Controller is Away</h2>
+                <p data-i18n="waiting.message">The session is active. Waiting for the controller to resume the stream.</p>
+            </div>
+        </div>
+        <iframe id="session-frame" src="about:blank" data-src="{{IFRAME_SRC}}"></iframe>
         <div id="sidebar-toggle-handle" class="sidebar-toggle-handle" title="Toggle Sidebar">
             <div class="toggle-indicator"></div>
         </div>

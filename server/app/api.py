@@ -1166,6 +1166,11 @@ async def get_applications(user: dict = Depends(verify_token)):
 
 async def _stop_session(session_id: str):
     logger.info(f"[{session_id}] Stopping session...")
+    try:
+        await collaboration.notify_session_ended(session_id)
+    except Exception as e:
+        logger.error(f"[{session_id}] Failed to broadcast session end: {e}")
+
     if session_data := SESSIONS_DB.pop(session_id, None):
         registry = session_data.get("container_registry", {})
         if not registry and "provider_app_id" in session_data:

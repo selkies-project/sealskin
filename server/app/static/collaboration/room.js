@@ -872,13 +872,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = JSON.parse(event.data);
             switch (data.type) {
+                case 'session_ended':
+                    handleControllerDisconnect();
+                    break;
                 case 'state_update':
                     const hasJoined = sessionStorage.getItem('collab_hasJoined_' + COLLAB_DATA.sessionId);
                     if (COLLAB_DATA.userRole === 'viewer' && !hasJoined) {
                         return;
                     }
-
                     currentUserState = data.viewers;
+                    const controllerUser = data.viewers.find(u => u.permission === 'controller');
+                    const waitingOverlay = document.getElementById('waiting-overlay');
+                    const iframe = document.getElementById('session-frame');
+                    if (controllerUser && controllerUser.online) {
+                        if (iframe && iframe.getAttribute('src') === 'about:blank' && iframe.dataset.src) {
+                            iframe.src = iframe.dataset.src;
+                        }
+                        if (waitingOverlay && COLLAB_DATA.userRole === 'viewer') {
+                            waitingOverlay.classList.add('hidden');
+                        }
+                    } else {
+                        if (waitingOverlay && COLLAB_DATA.userRole === 'viewer') {
+                            waitingOverlay.classList.remove('hidden');
+                        }
+                    }
+
                     currentDesignatedSpeaker = data.designated_speaker;
 
                     const self = data.viewers.find(u => u.token === COLLAB_DATA.userToken);
@@ -947,7 +965,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     handleControlMessage(data.payload);
                     break;
                 case 'controller_disconnected':
-                    handleControllerDisconnect();
                     break;
                 case 'app_list':
                     availableAppsList = data.apps;
@@ -961,18 +978,36 @@ document.addEventListener('DOMContentLoaded', () => {
                         document.title = activeApp.name;
                     }
                     break;
-                case 'app_swapped':
+                case 'app_swapped': {
                     pendingActions.clear();
                     const iframe = document.getElementById('session-frame');
-                    const currentSrc = new URL(iframe.src);
-                    currentSrc.searchParams.set('t', Date.now());
-                    iframe.src = currentSrc.toString();
+                    let urlStr = iframe.src;
+                    const isBlank = iframe.getAttribute('src') === 'about:blank';
+                    
+                    if (isBlank && iframe.dataset.src) {
+                        urlStr = iframe.dataset.src;
+                    }
+                    if (urlStr && urlStr !== 'about:blank') {
+                        try {
+                            const currentSrc = new URL(urlStr, window.location.href);
+                            currentSrc.searchParams.set('t', Date.now());
+                            
+                            if (isBlank) {
+                                iframe.dataset.src = currentSrc.toString();
+                            } else {
+                                iframe.src = currentSrc.toString();
+                            }
+                        } catch (e) {
+                            console.warn("Could not reload iframe on swap:", e);
+                        }
+                    }
                     const titleEl = document.getElementById('sidebar-app-title');
                     if (titleEl) titleEl.textContent = data.app_name;
                     document.title = data.app_name;
                     ws.send(JSON.stringify({ action: 'get_apps' }));
                     showToast({ sender: t('systemMessages.systemSender'), message: t('systemMessages.swappedApp', { app_name: data.app_name }) });
                     break;
+                }
                 case 'error':
                      pendingActions.clear();
                      if (document.getElementById('start-menu-modal')) renderStartMenu();
@@ -1094,6 +1129,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="icon sun-icon"><svg viewBox="0 0 24 24"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.106a.75.75 0 010 1.06l-1.591 1.59a.75.75 0 11-1.06-1.06l1.59-1.59a.75.75 0 011.06 0zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zM17.836 17.836a.75.75 0 01-1.06 0l-1.59-1.591a.75.75 0 111.06-1.06l1.59 1.59a.75.75 0 010 1.061zM12 21.75a.75.75 0 01-.75-.75v-2.25a.75.75 0 011.5 0v2.25a.75.75 0 01-.75-.75zM5.636 17.836a.75.75 0 010-1.06l1.591-1.59a.75.75 0 111.06 1.06l-1.59 1.59a.75.75 0 01-1.06 0zM3.75 12a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5H4.5a.75.75 0 01-.75-.75zM6.106 6.106a.75.75 0 011.06 0l1.59 1.591a.75.75 0 11-1.06 1.06l-1.59-1.59a.75.75 0 010-1.06z"/></svg></div>
                         <div class="icon moon-icon"><svg viewBox="0 0 24 24"><path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21c3.73 0 7.01-1.939 8.71-4.922.482-.97.74-2.053.742-3.176z"/></svg></div>
                     </div>
+                    <button id="reload-stream-btn" class="settings-button" title="${t('tooltips.reloadStream')}"><i class="fas fa-sync"></i></button>
                     <button id="settings-btn" class="settings-button"><i class="fas fa-cog"></i></button>
                 </div>
             </div>
@@ -1197,6 +1233,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         sidebarEl.querySelector('.theme-toggle').addEventListener('click', toggleTheme);
+        sidebarEl.querySelector('#reload-stream-btn').addEventListener('click', () => {
+            const iframe = document.getElementById('session-frame');
+            if (iframe) {
+                if (iframe.getAttribute('src') === 'about:blank' && iframe.dataset.src) {
+                    iframe.src = iframe.dataset.src;
+                } else {
+                    const currentSrc = new URL(iframe.src);
+                    currentSrc.searchParams.set('t', Date.now());
+                    iframe.src = currentSrc.toString();
+                }
+            }
+        });
         sidebarEl.querySelector('#settings-btn').addEventListener('click', () => {
             unlockAllAudio();
             populateDeviceLists();
