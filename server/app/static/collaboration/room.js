@@ -150,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+
     let localStream = null;
     let audioEncoder = null;
     let videoEncoder = null;
@@ -847,6 +848,89 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const updateGestureOverlay = () => {
+        const gestureOverlay = document.getElementById('gesture-overlay');
+        if (!gestureOverlay) return;
+
+        if (COLLAB_DATA.userRole === 'controller') {
+            gestureOverlay.classList.add('hidden');
+            return;
+        }
+
+        const self = currentUserState.find(u => u.token === COLLAB_DATA.userToken);
+        const hasInput = self && (self.slot || self.has_mk);
+
+        if (hasInput) {
+            gestureOverlay.classList.add('hidden');
+        } else {
+            gestureOverlay.classList.remove('hidden');
+        }
+    };
+
+    const initGestures = () => {
+        let sbTouchStartX = 0;
+        let sbTouchStartY = 0;
+        
+        sidebarEl.addEventListener('touchstart', (e) => {
+            sbTouchStartX = e.changedTouches[0].screenX;
+            sbTouchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        sidebarEl.addEventListener('touchend', (e) => {
+            const sbTouchEndX = e.changedTouches[0].screenX;
+            const sbTouchEndY = e.changedTouches[0].screenY;
+            
+            const deltaX = sbTouchEndX - sbTouchStartX;
+            const deltaY = Math.abs(sbTouchEndY - sbTouchStartY);
+
+            if (deltaX > 50 && deltaY < 50) { 
+                if (isSidebarVisible) toggleSidebar();
+            }
+        }, { passive: true });
+
+        let vbTouchStartX = 0;
+        let vbTouchStartY = 0;
+
+        videoGrid.addEventListener('touchstart', (e) => {
+            vbTouchStartX = e.changedTouches[0].screenX;
+            vbTouchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        videoGrid.addEventListener('touchend', (e) => {
+            const vbTouchEndX = e.changedTouches[0].screenX;
+            const vbTouchEndY = e.changedTouches[0].screenY;
+
+            const deltaY = vbTouchEndY - vbTouchStartY;
+            const deltaX = Math.abs(vbTouchEndX - vbTouchStartX);
+
+            if (deltaY > 50 && deltaX < 50) { 
+                if (isVideoGridVisible) toggleVideoGrid();
+            }
+        }, { passive: true });
+
+        const gestureOverlay = document.getElementById('gesture-overlay');
+        if (gestureOverlay) {
+            let lastTapTime = 0;
+            gestureOverlay.addEventListener('touchstart', (e) => {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTapTime;
+                if (tapLength < 300 && tapLength > 0) {
+                    e.preventDefault(); 
+                    
+                    const anyVisible = isSidebarVisible || isVideoGridVisible;
+                    if (anyVisible) {
+                        if (isSidebarVisible) toggleSidebar();
+                        if (isVideoGridVisible) toggleVideoGrid();
+                    } else {
+                        if (!isSidebarVisible) toggleSidebar();
+                        if (!isVideoGridVisible) toggleVideoGrid();
+                    }
+                }
+                lastTapTime = currentTime;
+            });
+        }
+    };
+
     const connectWebSocket = () => {
         const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const url = `${proto}//${window.location.host}/ws/room/${COLLAB_DATA.sessionId}?token=${COLLAB_DATA.userToken}`;
@@ -920,6 +1004,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (speakerButton) speakerButton.classList.add('active');
                         }
                     }
+
+                    updateGestureOverlay();
 
                     const participantsToShow = data.viewers.filter(u =>
                         u.permission !== 'readonly' &&
@@ -1818,6 +1904,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (videoToggleHandle) {
         videoToggleHandle.addEventListener('click', toggleVideoGrid);
     }
+    
+    initGestures();
 
     settingsModalCloseBtn.addEventListener('click', closeModal);
     settingsModalOverlay.addEventListener('click', (e) => {
