@@ -1836,6 +1836,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   if (window.Capacitor) {
+    const safeAreaPad = document.createElement('div');
+    safeAreaPad.style.paddingTop = 'max(50px, env(safe-area-inset-top))';
+    safeAreaPad.style.width = '100%';
+    safeAreaPad.style.backgroundColor = 'var(--bg-card)';
+    document.body.insertBefore(safeAreaPad, document.body.firstChild);
+
     const header = document.querySelector('.sidebar-header');
     if (header) {
       header.style.display = 'flex';

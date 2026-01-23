@@ -833,11 +833,17 @@ async function init() {
   t = translator.t;
 
   if (window.Capacitor) {
+    const safeAreaPad = document.createElement('div');
+    safeAreaPad.style.paddingTop = 'max(50px, env(safe-area-inset-top))';
+    safeAreaPad.style.width = '100%';
+    safeAreaPad.style.backgroundColor = 'var(--bg-card)';
+    document.body.insertBefore(safeAreaPad, document.body.firstChild);
+
     const header = document.querySelector('.sidebar-header');
     if (header) {
       header.style.display = 'flex';
       header.style.alignItems = 'center';
-
+      
       const backBtn = document.createElement('button');
       backBtn.className = 'mobile-back-btn';
       backBtn.innerHTML = '<i class="fas fa-arrow-left"></i>';
