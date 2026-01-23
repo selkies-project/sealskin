@@ -843,6 +843,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (container && tabs) {
         const header = document.createElement('div');
         header.className = 'mobile-app-header';
+        header.style.paddingTop = 'max(20px, env(safe-area-inset-top))'; 
+        header.style.paddingBottom = '10px';
         header.style.display = 'flex';
         header.style.justifyContent = 'space-between';
         header.style.alignItems = 'center';

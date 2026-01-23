@@ -1,4 +1,5 @@
-if (window.Capacitor) {
+if (window.Capacitor || /Apple/.test(navigator.userAgent)) {
+  if (!window.Capacitor) window.Capacitor = {};
   window.chrome = window.chrome || {};
 
   const getTabUrl = (id) => localStorage.getItem(`sealskin_tab_${id}`);
@@ -95,12 +96,21 @@ if (window.Capacitor) {
   window.chrome.browserAction = actionMock;
 
   const storageListeners = new Set();
+  
+  const safeParse = (val) => {
+    try {
+      return JSON.parse(val);
+    } catch (e) {
+      return val;
+    }
+  };
+
   window.addEventListener('storage', (e) => {
     if (e.storageArea === localStorage && e.key) {
       const changes = {
         [e.key]: {
-          oldValue: e.oldValue ? JSON.parse(e.oldValue) : undefined,
-          newValue: e.newValue ? JSON.parse(e.newValue) : undefined
+          oldValue: e.oldValue ? safeParse(e.oldValue) : undefined,
+          newValue: e.newValue ? safeParse(e.newValue) : undefined
         }
       };
       storageListeners.forEach(cb => cb(changes, 'local'));
@@ -171,38 +181,50 @@ if (window.Capacitor) {
 
   window.chrome.tabs = {
     query: mockAsync([{id: 1, url: window.location.href}]),
-    create: (props) => {
+    create: async (props) => {
       const url = props.url || '';
       const isExternal = url.match(/^[a-z]+:\/\//i) && !url.startsWith('file://') && !url.startsWith('capacitor://') && !url.startsWith('http://localhost');
-      
+
       if (!isExternal) {
           const appFrame = document.getElementById('app-frame') || (window.parent ? window.parent.document.getElementById('app-frame') : null);
           if (appFrame) {
               appFrame.src = url;
-              return Promise.resolve({id: 2});
+              return {id: 2};
           }
       }
-      
-      window.open(url, '_system');
-      
+
+      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
+          await window.Capacitor.Plugins.Browser.open({ url: url });
+      } else {
+          window.open(url, '_system');
+      }
+
       const tabId = Date.now();
       setTabUrl(tabId, url);
-      
-      return Promise.resolve({id: tabId});
+
+      return {id: tabId};
     },
-    update: (id, props) => {
+    update: async (id, props) => {
       if(props.url) {
-          window.open(props.url, '_system');
-          return Promise.resolve({});
+          if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
+              await window.Capacitor.Plugins.Browser.open({ url: props.url });
+          } else {
+              window.open(props.url, '_system');
+          }
+          return {};
       }
-      
+
       const url = getTabUrl(id);
       if (url) {
-          window.open(url, '_system');
-          return Promise.resolve({id: id, windowId: 1});
+          if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
+              await window.Capacitor.Plugins.Browser.open({ url: url });
+          } else {
+              window.open(url, '_system');
+          }
+          return {id: id, windowId: 1};
       }
-      
-      return Promise.reject(new Error("Tab URL not found in mobile storage"));
+
+      throw new Error("Tab URL not found in mobile storage");
     },
     remove: (id, cb) => {
       removeTabUrl(id);

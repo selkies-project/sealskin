@@ -13,6 +13,7 @@
     "@capacitor/core": "^8.0.0",
     "@capacitor/filesystem": "^8.0.0",
     "@capacitor/ios": "^8.0.0",
+    "@capacitor/browser": "^8.0.0",
     "@capawesome-team/capacitor-file-opener": "^8.0.0",
     "capacitor-blob-writer": "^1.0.0"
   },

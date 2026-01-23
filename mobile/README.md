@@ -4,8 +4,7 @@ The SealSkin Mobile Client is a hybrid application built using **Capacitor**. It
 
 ## Platform Support
 
-*   **Current Support:** Android
-*   **Status:** iOS support is currently experimental/untested, but it does build.
+*   **Current Support:** Android, iOS
 
 ## Operational Overview
 
@@ -25,9 +24,14 @@ The build process relies on copying the live assets from the `../browser_extensi
 
 ### Prerequisites
 
+#### Android
 *   Node.js and npm
 *   Android Studio (with Android SDK installed)
 *   Java Development Kit (JDK)
+
+#### iOS
+*   Node.js and npm
+*   Xcode and OSX 26.2^
 
 ### Installation and Deployment
 
@@ -37,9 +41,13 @@ The build process relies on copying the live assets from the `../browser_extensi
     ```
 
 2.  **Build and Run (Android):**
-    This command compiles the compatibility layer, copies the latest extension assets, syncs the native configuration, and opens the project in Android Studio (or launches the emulator if configured).
+    This command compiles the compatibility layer, copies the latest extension assets, syncs the native configuration, and opens the project in Android Studio or Xcode.  
     ```bash
     npm run android
+    ```
+    **Build and Run (iOS):**
+    ```bash
+    npm run ios
     ```
 
 ### Build Scripts
