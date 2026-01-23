@@ -5,7 +5,8 @@
   "main": "index.html",
   "scripts": {
     "build": "rm -rf www && mkdir www && npx @capacitor/assets generate --iconBackgroundColor '#434c5d' --splashBackgroundColor '#434c5d' && npx esbuild index.js --bundle --minify --format=esm --outfile=www/bundle.js && cp index.html mobile-polyfill.js mobile-overrides.css www/ && cp ../browser_extension/*.js ../browser_extension/*.html ../browser_extension/*.css www/ && cp -r ../browser_extension/icons www/",
-    "android": "npm run build && npx cap sync && npx cap open android"
+    "android": "npm run build && npx cap sync && npx cap open android",
+    "ios": "npm run build && npx cap sync && npx cap open ios"
   },
   "dependencies": {
     "@capacitor/android": "^8.0.0",
