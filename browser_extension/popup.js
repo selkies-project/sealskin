@@ -893,7 +893,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     const configData = await chrome.storage.local.get('sealskinConfig');
     if (!configData.sealskinConfig?.serverIp || !configData.sealskinConfig?.username || !configData.sealskinConfig?.clientPrivateKey) {
-      if (window.location.protocol !== 'chrome-extension:') {
+      if (window.Capacitor) {
           window.location.href = 'options.html';
           return;
       }
@@ -926,6 +926,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       sealskinContext = contextData.sealskinContext;
       chrome.storage.local.remove('sealskinContext');
       isSimpleLaunch = false;
+      if (sealskinContext.action === 'search') {
+        const searchEngineBaseUrl = sealskinConfig.searchEngineUrl || 'https://google.com/search?q=';
+        sealskinContext.action = 'url';
+        sealskinContext.targetUrl = `${searchEngineBaseUrl}${encodeURIComponent(sealskinContext.selectionText)}`;
+      }
     } else {
       isSimpleLaunch = true;
       if (contextData.sealskinContext) chrome.storage.local.remove('sealskinContext');

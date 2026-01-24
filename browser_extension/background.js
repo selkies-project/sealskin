@@ -388,7 +388,7 @@ chrome.runtime.onInstalled.addListener(() => {
   }
 });
 
-chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+chrome.contextMenus.onClicked.addListener((info, tab) => {
   const {
     menuItemId,
     linkUrl,
@@ -438,11 +438,9 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       filename: getFilenameFromUrl(srcUrl)
     };
   } else if (menuItemId === 'sealskin-search-selection') {
-    const data = await chrome.storage.local.get('sealskinConfig');
-    const searchEngineBaseUrl = data.sealskinConfig?.searchEngineUrl || 'https://google.com/search?q=';
     context = {
-      action: 'url',
-      targetUrl: `${searchEngineBaseUrl}${encodeURIComponent(selectionText)}`
+      action: 'search',
+      selectionText: selectionText
     };
   }
 
