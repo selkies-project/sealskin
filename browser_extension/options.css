@@ -1470,3 +1470,9 @@ progress::-moz-progress-bar {
         padding: 0.3rem 0.5rem;
     }
 }
+
+.mobile-back-btn {
+  padding: 0.5rem !important;
+  margin-right: 0.5rem;
+  justify-content: center;
+}

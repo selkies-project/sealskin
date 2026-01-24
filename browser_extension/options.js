@@ -1837,11 +1837,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (window.Capacitor) {
     const safeAreaPad = document.createElement('div');
-    safeAreaPad.style.paddingTop = 'max(50px, env(safe-area-inset-top))';
+    safeAreaPad.style.paddingTop = 'max(40px, env(safe-area-inset-top))';
     safeAreaPad.style.width = '100%';
     safeAreaPad.style.backgroundColor = 'var(--bg-card)';
     document.body.insertBefore(safeAreaPad, document.body.firstChild);
-
+    const optionsContainer = document.querySelector('.options-container');
+    if (optionsContainer) {
+        optionsContainer.style.height = `calc(100vh - ${safeAreaPad.style.paddingTop})`;
+    }
     const header = document.querySelector('.sidebar-header');
     if (header) {
       header.style.display = 'flex';
