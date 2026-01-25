@@ -785,6 +785,14 @@ async def background_update_job():
             await _pull_and_cache_image(image_name)
             await asyncio.sleep(2)
 
+        logger.info("Cleaning up dangling images...")
+        try:
+            client = await asyncio.to_thread(docker.from_env)
+            await asyncio.to_thread(client.images.prune, filters={"dangling": True})
+            logger.info("Successfully cleaned up dangling images.")
+        except Exception as e:
+            logger.error(f"Failed to prune dangling images: {e}")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
