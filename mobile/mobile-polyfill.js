@@ -287,4 +287,13 @@ if (window.Capacitor || /Apple/.test(navigator.userAgent)) {
   link.rel = 'stylesheet';
   link.href = 'mobile-overrides.css';
   document.head.appendChild(link);
+  if (/Apple/.test(navigator.userAgent)) {
+      const style = document.createElement('style');
+      style.textContent = `
+          .nav-link[data-tabname="AppLaboratory"] {
+              display: none !important;
+          }
+      `;
+      document.head.appendChild(style);
+  }
 }
