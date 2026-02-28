@@ -1085,6 +1085,7 @@ class EncryptedRoute(APIRoute):
 
         return custom_handler
 
+
 async def verify_token(req: Request) -> Dict:
     auth_header = req.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
