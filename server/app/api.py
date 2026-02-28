@@ -1050,24 +1050,40 @@ async def get_decrypted_request_body(request: Request) -> dict:
 class EncryptedRoute(APIRoute):
     def get_route_handler(self) -> Callable:
         original_handler = super().get_route_handler()
-
         async def custom_handler(request: Request) -> Response:
+            if request.url.path not in ["/api/handshake/initiate", "/api/handshake/exchange"]:
+                sid = request.headers.get("X-Session-ID")
+                if not sid or sid not in CRYPTO_SESSIONS:
+                    logger.warning(f"Security: Request to {request.url.path} has invalid/missing session key. Header: {sid}")
+
             response = await original_handler(request)
-            if isinstance(response, JSONResponse) and response.body:
+            is_json = isinstance(response, JSONResponse)
+            if not is_json and response.headers.get("content-type") == "application/json":
+                is_json = True
+            if is_json and response.body:
                 session_id = request.headers.get("X-Session-ID")
-                if session_id in CRYPTO_SESSIONS:
-                    aesgcm = AESGCM(CRYPTO_SESSIONS[session_id])
-                    iv = os.urandom(12)
-                    ciphertext = aesgcm.encrypt(iv, response.body, None)
-                    encrypted_payload = EncryptedPayload(
-                        iv=base64.b64encode(iv).decode("utf-8"),
-                        ciphertext=base64.b64encode(ciphertext).decode("utf-8"),
-                    )
-                    return JSONResponse(content=encrypted_payload.dict())
+                if session_id and session_id in CRYPTO_SESSIONS:
+                    try:
+                        aesgcm = AESGCM(CRYPTO_SESSIONS[session_id])
+                        iv = os.urandom(12)
+                        ciphertext = aesgcm.encrypt(iv, response.body, None)
+                        encrypted_payload = EncryptedPayload(
+                            iv=base64.b64encode(iv).decode("utf-8"),
+                            ciphertext=base64.b64encode(ciphertext).decode("utf-8"),
+                        )
+                        return JSONResponse(content=encrypted_payload.dict())
+                    except Exception as e:
+                        logger.error(f"Encryption Error for {request.url.path}: {str(e)}")
+                        return JSONResponse(status_code=500, content={"detail": "Encryption failed server-side."})
+                logger.error(f"Security Block: Prevented unencrypted JSON response for {request.url.path}. Session ID: {session_id}")
+                return JSONResponse(
+                    status_code=400,
+                    content={"detail": "Secure session required. Encryption key missing or invalid."}
+                )
+
             return response
 
         return custom_handler
-
 
 async def verify_token(req: Request) -> Dict:
     auth_header = req.headers.get("Authorization", "")
