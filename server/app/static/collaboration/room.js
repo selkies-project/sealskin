@@ -1416,6 +1416,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const iframe = document.getElementById('session-frame');
                     if (iframe && iframe.contentWindow) {
                         iframe.contentWindow.postMessage({ type: 'requestFullscreen' }, window.location.origin);
+                        iframe.focus(); 
                     }
                     if (COLLAB_DATA.userRole !== 'controller' && ws && ws.readyState === WebSocket.OPEN) {
                         ws.send(JSON.stringify({ action: 'force_cursor_render', state: 1 }));
