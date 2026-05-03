@@ -28,6 +28,9 @@ const en = {
         swapApp: 'Swap to this app',
         cannotStopActive: 'Cannot stop active app',
         reloadStream: 'Reload Stream',
+        gamingMode: 'Gaming Mode',
+        lockResolution: 'Lock/Unlock Resolution',
+        resizeClient: 'Resize to Client',
     },
     usernamePrompt: {
         title: 'Welcome!',
@@ -106,6 +109,9 @@ const es = {
         swapApp: 'Cambiar a esta app',
         cannotStopActive: 'No se puede detener la app activa',
         reloadStream: 'Recargar transmisión',
+        gamingMode: 'Modo Juego',
+        lockResolution: 'Bloquear/Desbloquear resolución',
+        resizeClient: 'Redimensionar al cliente',
     },
     usernamePrompt: {
         title: '¡Bienvenido!',
@@ -184,6 +190,9 @@ const zh = {
         swapApp: '切换到此应用',
         cannotStopActive: '无法停止活动应用',
         reloadStream: '重新加载流',
+        gamingMode: '游戏模式',
+        lockResolution: '锁定/解锁分辨率',
+        resizeClient: '调整为客户端大小',
     },
     usernamePrompt: {
         title: '欢迎！',
@@ -262,6 +271,9 @@ const hi = {
         swapApp: 'इस ऐप पर स्वैप करें',
         cannotStopActive: 'सक्रिय ऐप को रोक नहीं सकते',
         reloadStream: 'स्ट्रीम पुनः लोड करें',
+        gamingMode: 'गेमिंग मोड',
+        lockResolution: 'रिज़ॉल्यूशन लॉक/अनलॉक करें',
+        resizeClient: 'क्लाइंट के आकार में बदलें',
     },
     usernamePrompt: {
         title: 'स्वागत है!',
@@ -340,6 +352,9 @@ const pt = {
         swapApp: 'Trocar para este app',
         cannotStopActive: 'Não é possível parar app ativo',
         reloadStream: 'Recarregar Transmissão',
+        gamingMode: 'Modo Jogo',
+        lockResolution: 'Bloquear/Desbloquear Resolução',
+        resizeClient: 'Redimensionar para o Cliente',
     },
     usernamePrompt: {
         title: 'Bem-vindo(a)!',
@@ -418,6 +433,9 @@ const fr = {
         swapApp: 'Basculer vers cette app',
         cannotStopActive: 'Impossible d\'arrêter l\'app active',
         reloadStream: 'Recharger le flux',
+        gamingMode: 'Mode Jeu',
+        lockResolution: 'Verrouiller/Déverrouiller la résolution',
+        resizeClient: 'Redimensionner au client',
     },
     usernamePrompt: {
         title: 'Bienvenue !',
@@ -496,6 +514,9 @@ const ru = {
         swapApp: 'Переключиться на это приложение',
         cannotStopActive: 'Нельзя остановить активное приложение',
         reloadStream: 'Перезагрузить поток',
+        gamingMode: 'Игровой режим',
+        lockResolution: 'Заблокировать/Разблокировать разрешение',
+        resizeClient: 'Изменить размер под клиента',
     },
     usernamePrompt: {
         title: 'Добро пожаловать!',
@@ -574,6 +595,9 @@ const de = {
         swapApp: 'Zu dieser App wechseln',
         cannotStopActive: 'Aktive App kann nicht gestoppt werden',
         reloadStream: 'Stream neu laden',
+        gamingMode: 'Gaming-Modus',
+        lockResolution: 'Auflösung sperren/entsperren',
+        resizeClient: 'Größe an Client anpassen',
     },
     usernamePrompt: {
         title: 'Willkommen!',
@@ -652,6 +676,9 @@ const tr = {
         swapApp: 'Bu uygulamaya geç',
         cannotStopActive: 'Aktif uygulama durdurulamaz',
         reloadStream: 'Yayını Yenile',
+        gamingMode: 'Oyun Modu',
+        lockResolution: 'Çözünürlüğü Kilitle/Kilidini Aç',
+        resizeClient: 'İstemciye Göre Yeniden Boyutlandır',
     },
     usernamePrompt: {
         title: 'Hoş geldiniz!',
@@ -730,6 +757,9 @@ const it = {
         swapApp: 'Passa a questa app',
         cannotStopActive: 'Impossibile fermare app attiva',
         reloadStream: 'Ricarica Stream',
+        gamingMode: 'Modalità Gioco',
+        lockResolution: 'Blocca/Sblocca risoluzione',
+        resizeClient: 'Ridimensiona al client',
     },
     usernamePrompt: {
         title: 'Benvenuto!',
@@ -808,6 +838,9 @@ const nl = {
         swapApp: 'Wissel naar deze app',
         cannotStopActive: 'Kan actieve app niet stoppen',
         reloadStream: 'Stream herladen',
+        gamingMode: 'Gamingmodus',
+        lockResolution: 'Resolutie vergrendelen/ontgrendelen',
+        resizeClient: 'Formaat aanpassen aan client',
     },
     usernamePrompt: {
         title: 'Welkom!',
@@ -886,6 +919,9 @@ const ar = {
         swapApp: 'التبديل إلى هذا التطبيق',
         cannotStopActive: 'لا يمكن إيقاف التطبيق النشط',
         reloadStream: 'إعادة تحميل البث',
+        gamingMode: 'وضع الألعاب',
+        lockResolution: 'قفل/إلغاء قفل الدقة',
+        resizeClient: 'تغيير الحجم ليناسب العميل',
     },
     usernamePrompt: {
         title: 'أهلاً بك!',
@@ -964,6 +1000,9 @@ const ko = {
         swapApp: '이 앱으로 전환',
         cannotStopActive: '활성 앱을 중지할 수 없음',
         reloadStream: '스트림 새로 고침',
+        gamingMode: '게임 모드',
+        lockResolution: '해상도 잠금/잠금 해제',
+        resizeClient: '클라이언트에 맞게 크기 조정',
     },
     usernamePrompt: {
         title: '환영합니다!',
@@ -1042,6 +1081,9 @@ const ja = {
         swapApp: 'このアプリに切り替え',
         cannotStopActive: 'アクティブなアプリは停止できません',
         reloadStream: 'ストリームを再読み込み',
+        gamingMode: 'ゲーミングモード',
+        lockResolution: '解像度をロック/ロック解除',
+        resizeClient: 'クライアントに合わせてサイズ変更',
     },
     usernamePrompt: {
         title: 'ようこそ！',
@@ -1120,6 +1162,9 @@ const vi = {
         swapApp: 'Chuyển sang ứng dụng này',
         cannotStopActive: 'Không thể dừng ứng dụng đang hoạt động',
         reloadStream: 'Tải lại luồng',
+        gamingMode: 'Chế độ chơi game',
+        lockResolution: 'Khóa/Mở khóa độ phân giải',
+        resizeClient: 'Thay đổi kích thước theo máy khách',
     },
     usernamePrompt: {
         title: 'Chào mừng!',
@@ -1198,6 +1243,9 @@ const th = {
         swapApp: 'สลับไปแอปนี้',
         cannotStopActive: 'ไม่สามารถหยุดแอปที่ใช้งานอยู่',
         reloadStream: 'โหลดสตรีมใหม่',
+        gamingMode: 'โหมดเกม',
+        lockResolution: 'ล็อก/ปลดล็อกความละเอียด',
+        resizeClient: 'ปรับขนาดตามไคลเอนต์',
     },
     usernamePrompt: {
         title: 'ยินดีต้อนรับ!',
@@ -1276,6 +1324,9 @@ const fil = {
         swapApp: 'Lumipat sa app na ito',
         cannotStopActive: 'Hindi mapatigil ang aktibong app',
         reloadStream: 'I-reload ang Stream',
+        gamingMode: 'Gaming Mode',
+        lockResolution: 'I-lock/I-unlock ang Resolusyon',
+        resizeClient: 'I-resize sa Client',
     },
     usernamePrompt: {
         title: 'Maligayang pagdating!',
@@ -1354,6 +1405,9 @@ const da = {
         swapApp: 'Skift til denne app',
         cannotStopActive: 'Kan ikke stoppe aktiv app',
         reloadStream: 'Genindlæs stream',
+        gamingMode: 'Spiltilstand',
+        lockResolution: 'Lås/Lås op for opløsning',
+        resizeClient: 'Tilpas størrelse til klient',
     },
     usernamePrompt: {
         title: 'Velkommen!',

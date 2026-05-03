@@ -199,6 +199,29 @@ document.addEventListener('DOMContentLoaded', () => {
     let availableAppsList = [];
     let pendingActions = new Set();
     const textEncoder = new TextEncoder();
+    let clientResolutions = {};
+    let isResolutionLocked = false;
+    let currentMkOwner = null;
+
+    const applyAutoResolution = () => {
+        if (COLLAB_DATA.userRole !== 'controller') return;
+        const targetToken = currentMkOwner || COLLAB_DATA.userToken;
+        const iframe = document.getElementById('session-frame');
+        if (!iframe || !iframe.contentWindow) return;
+
+        if (isResolutionLocked) return;
+
+        if (targetToken === COLLAB_DATA.userToken) {
+            console.log("[Controller] MK owner is controller. Resetting resolution to window.");
+            iframe.contentWindow.postMessage({ type: 'resetResolutionToWindow' }, window.location.origin);
+        } else {
+            const res = clientResolutions[targetToken];
+            if (res) {
+                console.log(`[Controller] Auto-syncing resolution to MK owner (${targetToken}): ${res.width}x${res.height}`);
+                iframe.contentWindow.postMessage({ type: 'setManualResolution', width: res.width, height: res.height }, window.location.origin);
+            }
+        }
+    };
 
     const sidebarEl = document.getElementById('sidebar');
     const toggleHandle = document.getElementById('sidebar-toggle-handle');
@@ -657,9 +680,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let controllerControls = '';
         if (COLLAB_DATA.userRole === 'controller') {
-            controllerControls = `<button class="remote-control-btn designate-speaker" data-token="${token}" title="${t('tooltips.designateSpeaker')}"><i class="fas fa-star"></i></button>`;
+            controllerControls = `
+                <button class="remote-control-btn resize-to-client" data-token="${token}" title="${t('tooltips.resizeClient')}"><i class="fas fa-desktop"></i></button>
+                <button class="remote-control-btn designate-speaker" data-token="${token}" title="${t('tooltips.designateSpeaker')}"><i class="fas fa-star"></i></button>
+            `;
         }
-
         const overlay = document.createElement('div');
         overlay.className = 'video-overlay';
         overlay.innerHTML = `
@@ -941,6 +966,14 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('[WS] Collaboration WebSocket connected.');
             if (COLLAB_DATA.userRole === 'controller') {
                 ws.send(JSON.stringify({ action: 'get_apps' }));
+                ws.send(JSON.stringify({ action: 'request_resolutions' }));
+            }
+            const iframe = document.getElementById('session-frame')
+            if (iframe) {
+                ws.send(JSON.stringify({ action: 'client_resolution', width: iframe.clientWidth, height: iframe.clientHeight }));
+                if (COLLAB_DATA.userRole === 'controller') {
+                    clientResolutions[COLLAB_DATA.userToken] = { width: iframe.clientWidth, height: iframe.clientHeight };
+                }
             }
         };
 
@@ -958,6 +991,19 @@ document.addEventListener('DOMContentLoaded', () => {
             switch (data.type) {
                 case 'session_ended':
                     handleControllerDisconnect();
+                    break;
+                case 'request_resolutions': {
+                    const reqIframe = document.getElementById('session-frame');
+                    if (reqIframe && ws && ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({ action: 'client_resolution', width: reqIframe.clientWidth, height: reqIframe.clientHeight }));
+                    }
+                    break;
+                }
+                case 'resolution_update':
+                    clientResolutions[data.token] = { width: data.width, height: data.height };
+                    if (COLLAB_DATA.userRole === 'controller' && !isResolutionLocked && currentMkOwner === data.token) {
+                        applyAutoResolution();
+                    }
                     break;
                 case 'state_update':
                     const hasJoined = sessionStorage.getItem('collab_hasJoined_' + COLLAB_DATA.sessionId);
@@ -1006,6 +1052,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     updateGestureOverlay();
+
+                    const mkOwnerUser = data.viewers.find(u => u.has_mk);
+                    const newMkOwner = mkOwnerUser ? mkOwnerUser.token : COLLAB_DATA.userToken;
+                    
+                    const gamingModeBtn = document.getElementById('gaming-mode-btn');
+                    if (gamingModeBtn) {
+                        const isController = COLLAB_DATA.userRole === 'controller';
+                        const iHaveMk = (mkOwnerUser && mkOwnerUser.token === COLLAB_DATA.userToken) || (!mkOwnerUser && isController);
+                        if (iHaveMk) {
+                            gamingModeBtn.classList.remove('hidden');
+                        } else {
+                            gamingModeBtn.classList.add('hidden');
+                        }
+                    }
+
+                    if (COLLAB_DATA.userRole === 'controller' && currentMkOwner !== newMkOwner) {
+                        currentMkOwner = newMkOwner;
+                        if (!isResolutionLocked) {
+                            applyAutoResolution();
+                        }
+                    }
 
                     const participantsToShow = data.viewers.filter(u =>
                         u.permission !== 'readonly' &&
@@ -1118,6 +1185,17 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const handleControlMessage = (payload) => {
         const { action, sender_token, state } = payload;
+        
+        if (action === 'force_cursor_render') {
+            if (COLLAB_DATA.userRole === 'controller') {
+                const iframe = document.getElementById('session-frame');
+                if (iframe && iframe.contentWindow && iframe.contentWindow.webrtcInput) {
+                    iframe.contentWindow.webrtcInput.send(`SET_NATIVE_CURSOR_RENDERING,${state}`);
+                }
+            }
+            return;
+        }
+
         const stream = remoteStreams[sender_token];
         if (!stream) return;
 
@@ -1125,7 +1203,7 @@ document.addEventListener('DOMContentLoaded', () => {
             stream.container.style.display = state ? 'flex' : 'none';
         }
     };
-    
+ 
     const sendControlMessage = (action, state) => {
         if (ws && ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify({ action, state }));
@@ -1200,17 +1278,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let localControls = '';
         if (isController) {
-            localControls = `<button class="remote-control-btn designate-speaker" data-token="${COLLAB_DATA.userToken}" title="${t('tooltips.designateSpeaker')}"><i class="fas fa-star"></i></button>`;
+            localControls = `
+                <button class="remote-control-btn toggle-resolution-lock" title="${t('tooltips.lockResolution')}"><i class="fas fa-lock-open"></i></button>
+                <button class="remote-control-btn resize-to-client" data-token="${COLLAB_DATA.userToken}" title="${t('tooltips.resizeClient')}"><i class="fas fa-desktop"></i></button>
+                <button class="remote-control-btn designate-speaker" data-token="${COLLAB_DATA.userToken}" title="${t('tooltips.designateSpeaker')}"><i class="fas fa-star"></i></button>
+            `;
         }
         document.querySelector('#local-user-container .video-overlay').innerHTML = `
             <span class="username">${isController ? 'Controller' : (username || 'You')}</span>
             <div class="remote-controls">${localControls}</div>`;
 
-
         sidebarEl.innerHTML = `
             <div class="sidebar-header">
                 <h2 id="sidebar-app-title">${t('sidebar.title')}</h2>
                 <div class="header-controls">
+                    <button id="gaming-mode-btn" class="settings-button hidden" title="${t('tooltips.gamingMode')}">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" width="18" height="18">
+                            <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                            <path d="M12 5V9M12 15V19M5 12H9M15 12H19" stroke-linecap="round" />
+                        </svg>
+                    </button>
                     <div class="theme-toggle">
                         <div class="icon sun-icon"><svg viewBox="0 0 24 24"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.106a.75.75 0 010 1.06l-1.591 1.59a.75.75 0 11-1.06-1.06l1.59-1.59a.75.75 0 011.06 0zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zM17.836 17.836a.75.75 0 01-1.06 0l-1.59-1.591a.75.75 0 111.06-1.06l1.59 1.59a.75.75 0 010 1.061zM12 21.75a.75.75 0 01-.75-.75v-2.25a.75.75 0 011.5 0v2.25a.75.75 0 01-.75-.75zM5.636 17.836a.75.75 0 010-1.06l1.591-1.59a.75.75 0 111.06 1.06l-1.59 1.59a.75.75 0 01-1.06 0zM3.75 12a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5H4.5a.75.75 0 01-.75-.75zM6.106 6.106a.75.75 0 011.06 0l1.59 1.591a.75.75 0 11-1.06 1.06l-1.59-1.59a.75.75 0 010-1.06z"/></svg></div>
                         <div class="icon moon-icon"><svg viewBox="0 0 24 24"><path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21c3.73 0 7.01-1.939 8.71-4.922.482-.97.74-2.053.742-3.176z"/></svg></div>
@@ -1317,6 +1404,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             sendVolumeToIframe();
         });
+
+        const gamingModeBtn = sidebarEl.querySelector('#gaming-mode-btn');
+        if (gamingModeBtn) {
+            gamingModeBtn.addEventListener('click', () => {
+                if (document.fullscreenElement) {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen().catch(err => console.error(err));
+                    }
+                } else {
+                    const iframe = document.getElementById('session-frame');
+                    if (iframe && iframe.contentWindow) {
+                        iframe.contentWindow.postMessage({ type: 'requestFullscreen' }, window.location.origin);
+                    }
+                    if (COLLAB_DATA.userRole !== 'controller' && ws && ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({ action: 'force_cursor_render', state: 1 }));
+                    }
+                }
+            });
+        }
 
         sidebarEl.querySelector('.theme-toggle').addEventListener('click', toggleTheme);
         sidebarEl.querySelector('#reload-stream-btn').addEventListener('click', () => {
@@ -1959,6 +2065,24 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 stream.hasReceivedKeyFrame = false;
             }
+        } else if (btn.classList.contains('resize-to-client')) {
+            const res = clientResolutions[token];
+            if (!res) {
+                console.warn(`[Controller] No resolution data available for client ${token}`);
+                return;
+            }
+            console.log(`[Controller] Manually resizing to client ${token}: ${res.width}x${res.height}`);
+            const iframe = document.getElementById('session-frame');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({ type: 'setManualResolution', width: res.width, height: res.height }, window.location.origin);
+            }
+        } else if (btn.classList.contains('toggle-resolution-lock')) {
+            isResolutionLocked = !isResolutionLocked;
+            btn.querySelector('i').className = isResolutionLocked ? 'fas fa-lock' : 'fas fa-lock-open';
+            console.log(`[Controller] Resolution Lock is now ${isResolutionLocked}`);
+            if (!isResolutionLocked) {
+                applyAutoResolution();
+            }
         } else if (btn.classList.contains('designate-speaker')) {
             const tokenToSet = (currentDesignatedSpeaker === token) ? null : token;
             ws.send(JSON.stringify({ action: 'set_designated_speaker', token: tokenToSet }));
@@ -1973,13 +2097,36 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('click', initNotificationAudio, { once: true });
     document.body.addEventListener('keydown', initNotificationAudio, { once: true });
 
-
     if (window.history.replaceState) {
         const url = new URL(window.location);
         url.searchParams.delete('token');
         url.searchParams.delete('access_token');
         window.history.replaceState({ path: url.href }, '', url.href);
     }
+
+    const iframeEl = document.getElementById('session-frame');
+    if (iframeEl) {
+        const resizeObserver = new ResizeObserver(() => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const width = iframeEl.clientWidth;
+                const height = iframeEl.clientHeight;
+                ws.send(JSON.stringify({ action: 'client_resolution', width, height }));
+                if (COLLAB_DATA.userRole === 'controller') {
+                    clientResolutions[COLLAB_DATA.userToken] = { width, height };
+                    if (!isResolutionLocked && currentMkOwner === COLLAB_DATA.userToken) {
+                        applyAutoResolution();
+                    }
+                }
+            }
+        });
+        resizeObserver.observe(iframeEl);
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement && COLLAB_DATA.userRole !== 'controller' && ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ action: 'force_cursor_render', state: 0 }));
+        }
+    });
 
     setTimeout(toggleSidebar, 500);
 });

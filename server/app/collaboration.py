@@ -530,7 +530,7 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                         }
                         await broadcast_to_room(session_id_str, chat_payload)
 
-                elif action in ["video_state", "audio_state"]:
+                elif action in ["video_state", "audio_state", "force_cursor_render"]:
                     await broadcast_to_room(
                         session_id_str, {"type": "control", "payload": data}
                     )
@@ -553,6 +553,20 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                     target_app_id = data.get("app_id")
                     if target_app_id:
                         asyncio.create_task(handle_swap_app(target_app_id))
+
+                elif action == "request_resolutions" and is_controller:
+                    await broadcast_to_room(session_id_str, {"type": "request_resolutions"})
+
+                elif action == "client_resolution":
+                    width = data.get("width")
+                    height = data.get("height")
+                    if width and height:
+                        await broadcast_to_room(session_id_str, {
+                            "type": "resolution_update",
+                            "token": token,
+                            "width": width,
+                            "height": height
+                        })
 
             elif "bytes" in message:
                 binary_data = message["bytes"]

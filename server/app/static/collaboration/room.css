@@ -1527,9 +1527,9 @@ iframe {
 }
 
 .waiting-message h2 {
-    margin-top: 20px;
-    font-size: 1.5rem;
-    color: var(--sidebar-header-color);
+  margin-top: 20px;
+  font-size: 1.5rem;
+  color: var(--sidebar-header-color);
 }
 
 .spinner-large {
@@ -1551,4 +1551,8 @@ iframe {
   z-index: 50;
   background: transparent;
   touch-action: manipulation;
+}
+
+.remote-control-btn.toggle-resolution-lock .fa-lock {
+  color: #ff4444;
 }
