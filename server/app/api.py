@@ -1332,6 +1332,8 @@ async def ensure_container_for_session(session_id: str, target_app_id: str) -> d
     }
     if session.get("wayland_mode", True):
         env_vars["PIXELFLUX_WAYLAND"] = "true"
+    else:
+        env_vars["PIXELFLUX_WAYLAND"] = "false"
     if session.get("is_collaboration"):
         env_vars["SELKIES_MASTER_TOKEN"] = session.get("master_token")
     template = APP_TEMPLATES.get(app_config.app_template)

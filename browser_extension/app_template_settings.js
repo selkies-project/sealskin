@@ -282,6 +282,14 @@ const getAppTemplateSettings = (t) => [
     type: "boolean"
   },
   {
+    name: "SELKIES_FORCE_ALIGNED_RESOLUTION",
+    label: t('options.appTemplates.settings.SELKIES_FORCE_ALIGNED_RESOLUTION.label'),
+    default: "false",
+    description: t('options.appTemplates.settings.SELKIES_FORCE_ALIGNED_RESOLUTION.description'),
+    category: "app",
+    type: "boolean"
+  },
+  {
     name: "SELKIES_MANUAL_WIDTH",
     label: t('options.appTemplates.settings.SELKIES_MANUAL_WIDTH.label'),
     default: "0",
