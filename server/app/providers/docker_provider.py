@@ -109,7 +109,7 @@ class DockerProvider(BaseProvider):
             "shm_size": config.get("shm_size", "1g"),
             "environment": env_vars,
             "volumes": volumes,
-            "devices": config.get("devices", []),
+            "devices": list(config.get("devices", [])),
             "remove": True,
             "network": network,
         }
@@ -124,10 +124,11 @@ class DockerProvider(BaseProvider):
                     DeviceRequest(
                         device_ids=[str(gpu_config["index"])],
                         capabilities=[
-                            ["compute", "video", "graphics", "utility", "gpu"]
+                            ["compute", "video", "graphics", "utility", "gpu", "display"]
                         ],
                     )
                 ]
+                run_kwargs["devices"].append("/dev/nvidia-modeset:/dev/nvidia-modeset")
                 logger.info(
                     f"[{session_id}] Configuring container with Nvidia GPU index {gpu_config['index']}"
                 )
@@ -139,9 +140,20 @@ class DockerProvider(BaseProvider):
                 )
 
         try:
-            container = await asyncio.to_thread(
-                self.client.containers.run, **run_kwargs
-            )
+            try:
+                container = await asyncio.to_thread(
+                    self.client.containers.run, **run_kwargs
+                )
+            except APIError as e:
+                error_msg = str(e).lower()
+                if "/dev/nvidia-modeset" in error_msg and "no such file or directory" in error_msg:
+                    run_kwargs["devices"].remove("/dev/nvidia-modeset:/dev/nvidia-modeset")
+                    container = await asyncio.to_thread(
+                        self.client.containers.run, **run_kwargs
+                    )
+                else:
+                    raise e
+
             logger.info(
                 f"[{session_id}] Launched container {container.short_id} from image {image}."
             )
