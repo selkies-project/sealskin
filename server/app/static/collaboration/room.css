@@ -275,6 +275,13 @@ body {
   object-fit: cover;
 }
 
+/* Track-generator sink for a remote tile, stacked over the canvas it falls back to. */
+.video-container video.remote-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 .video-overlay {
   position: absolute;
   bottom: 0;

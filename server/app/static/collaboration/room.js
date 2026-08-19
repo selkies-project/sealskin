@@ -1,110 +1,704 @@
-if (typeof MediaStreamTrackProcessor === 'undefined') {
-    window.MediaStreamTrackProcessor = class MediaStreamTrackProcessor {
-        constructor({ track }) {
-            if (track.kind === 'video') {
-                this.readable = new ReadableStream({
-                    start: async (controller) => {
-                        const video = document.createElement('video');
-                        video.muted = true;
-                        video.playsInline = true;
-                        video.width = 640; 
-                        video.height = 480;
-                        video.style.cssText = 'position:fixed; top:-9999px; left:-9999px;';
-                        document.body.appendChild(video);
+// ---------------------------------------------------------------------------
+// WebCodecs track plumbing: capture (MediaStreamTrack -> VideoFrame/AudioData for
+// the encoders) and presentation (decoded VideoFrame -> MediaStreamTrack for a
+// <video> element). The same two capabilities ship in three different shapes:
+//
+//   * Chromium exposes MediaStreamTrackProcessor and MediaStreamTrackGenerator on
+//     Window only (non-standard), and both handle audio and video.
+//   * Safari 18+ implements the standard, where MediaStreamTrackProcessor and
+//     VideoTrackGenerator are exposed to a DedicatedWorker *only* and are
+//     video-only; a MediaStreamTrack is transferred into the worker to reach them.
+//   * Firefox has neither yet and intends to follow Safari, so it stays on the DOM
+//     shims at the bottom of this block (as does Safari's audio, which the standard
+//     processor does not cover).
+//
+// Note the shape difference: a VideoTrackGenerator *has* a .track, while a
+// MediaStreamTrackGenerator *is* a track. Everything below is written against a
+// { track, ... } pair so the paths stay interchangeable at the call sites.
+// ---------------------------------------------------------------------------
 
-                        video.srcObject = new MediaStream([track]);
-                        try { await video.play(); } catch (e) { return; }
+const hasWindowTrackProcessor = (typeof MediaStreamTrackProcessor !== 'undefined');
+const hasWindowTrackGenerator = (typeof MediaStreamTrackGenerator !== 'undefined');
 
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d', { desynchronized: true });
-                        
-                        const process = () => {
-                            if (track.readyState === 'ended') {
-                                video.remove();
-                                controller.close();
-                                return;
-                            }
-                            if (video.readyState >= 2) {
-                                if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
-                                    canvas.width = video.videoWidth;
-                                    canvas.height = video.videoHeight;
-                                }
-                                ctx.drawImage(video, 0, 0);
-                                const frame = new VideoFrame(canvas, { timestamp: performance.now() * 1000 });
-                                controller.enqueue(frame);
-                            }
-                            if (video.requestVideoFrameCallback) {
-                                video.requestVideoFrameCallback(process);
-                            } else {
-                                requestAnimationFrame(process);
-                            }
-                        };
-                        process();
-                    }
-                });
-            } else if (track.kind === 'audio') {
-                this.readable = new ReadableStream({
-                    async start(controller) {
-                        const ctx = new AudioContext();
-                        const workletCode = `registerProcessor("mstp-shim",class extends AudioWorkletProcessor{process(i){if(i[0].length>0)this.port.postMessage(i[0]);return true}})`
-                        await ctx.audioWorklet.addModule(`data:text/javascript,${workletCode}`).catch(e => console.error(e));
-                        
-                        const src = ctx.createMediaStreamSource(new MediaStream([track]));
-                        const node = new AudioWorkletNode(ctx, "mstp-shim");
-                        src.connect(node);
-                        
-                        node.port.onmessage = ({data: channels}) => {
-                             if (!channels || channels.length === 0) return;
-                             
-                             const length = channels[0].length;
-                             const numChannels = channels.length;
-                             const flattened = new Float32Array(length * numChannels);
-                             
-                             for (let i = 0; i < length; i++) {
-                                 for (let ch = 0; ch < numChannels; ch++) {
-                                     flattened[i * numChannels + ch] = channels[ch][i];
-                                 }
-                             }
+// Frames a worker-hosted generator may be behind before new ones are dropped, and
+// the consecutive-drop count after which a generator is considered stalled for good.
+const SINK_MAX_IN_FLIGHT = 3;
+const SINK_STALL_DROP_LIMIT = 30;
+// A worker that never reports its capabilities must not hang the media startup.
+const MEDIA_WORKER_PROBE_TIMEOUT_MS = 3000;
 
-                             controller.enqueue(new AudioData({
-                                 format: "f32",
-                                 sampleRate: ctx.sampleRate,
-                                 numberOfFrames: length,
-                                 numberOfChannels: numChannels,
-                                 timestamp: ctx.currentTime * 1e6,
-                                 data: flattened
-                             }));
-                        };
-                    }
-                });
-            }
+// Hosts the DedicatedWorker-only halves of mediacapture-transform. Multiplexed by
+// id so a single worker serves every capture source and every presentation sink.
+const MEDIA_WORKER_SRC = `
+const sources = new Map();
+const sinks = new Map();
+const MAX_IN_FLIGHT = ${SINK_MAX_IN_FLIGHT};
+const STALL_DROP_LIMIT = ${SINK_STALL_DROP_LIMIT};
+
+self.postMessage({
+    type: 'caps',
+    processor: (typeof MediaStreamTrackProcessor !== 'undefined'),
+    generator: (typeof VideoTrackGenerator !== 'undefined')
+});
+
+async function startSource(id, track) {
+    let reader;
+    try {
+        reader = new MediaStreamTrackProcessor({ track: track }).readable.getReader();
+    } catch (err) {
+        try { track.stop(); } catch (e) {}
+        self.postMessage({ type: 'sourceFailed', id: id });
+        return;
+    }
+    const state = { reader: reader, track: track, inFlight: 0 };
+    sources.set(id, state);
+    try {
+        for (;;) {
+            const result = await reader.read();
+            if (result.done) break;
+            const frame = result.value;
+            // Stopped while a read was outstanding.
+            if (sources.get(id) !== state) { frame.close(); return; }
+            // The page has not drained what it already has, so this frame would only
+            // add latency and pin GPU memory: drop it and keep reading fresher ones.
+            if (state.inFlight >= MAX_IN_FLIGHT) { frame.close(); continue; }
+            state.inFlight++;
+            self.postMessage({ type: 'frame', id: id, frame: frame }, [frame]);
         }
-    };
+    } catch (err) {}
+    if (sources.get(id) === state) {
+        sources.delete(id);
+        try { track.stop(); } catch (e) {}
+        self.postMessage({ type: 'sourceEnd', id: id });
+    }
 }
 
-if (typeof MediaStreamTrackGenerator === 'undefined') {
-    window.MediaStreamTrackGenerator = class MediaStreamTrackGenerator {
-        constructor({ kind }) {
-            if (kind === 'video') {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d', { desynchronized: true });
-                const stream = canvas.captureStream(0);
-                const track = stream.getVideoTracks()[0];
-                track.writable = new WritableStream({
-                    write(frame) {
-                        if (canvas.width !== frame.displayWidth || canvas.height !== frame.displayHeight) {
-                            canvas.width = frame.displayWidth;
-                            canvas.height = frame.displayHeight;
-                        }
-                        ctx.drawImage(frame, 0, 0);
-                        frame.close(); 
-                    }
-                });
-                return track;
+function stopSource(id) {
+    const state = sources.get(id);
+    if (!state) return;
+    sources.delete(id);
+    try { state.reader.cancel(); } catch (e) {}
+    try { state.track.stop(); } catch (e) {}
+}
+
+function startSink(id) {
+    let generator;
+    try {
+        generator = new VideoTrackGenerator();
+    } catch (err) {
+        self.postMessage({ type: 'sinkFailed', id: id });
+        return;
+    }
+    sinks.set(id, { writer: generator.writable.getWriter(), drops: 0 });
+    // The generator has a track rather than being one; the page needs it for
+    // <video>.srcObject, and it is only reachable from here by transfer.
+    self.postMessage({ type: 'sinkTrack', id: id, track: generator.track }, [generator.track]);
+}
+
+function presentToSink(id, frame) {
+    const state = sinks.get(id);
+    if (!state) { frame.close(); return; }
+    // A generator whose consumer stopped pulling stays backpressured forever, so
+    // drop rather than queue, and give the sink up once it is clearly stalled.
+    if (state.writer.desiredSize !== null && state.writer.desiredSize <= 0) {
+        frame.close();
+        self.postMessage({ type: 'sinkAck', id: id });
+        if (++state.drops >= STALL_DROP_LIMIT) {
+            closeSink(id);
+            self.postMessage({ type: 'sinkError', id: id });
+        }
+        return;
+    }
+    state.drops = 0;
+    // write() consumes the frame on success; on rejection it does not, so it is
+    // closed here to avoid leaking it.
+    state.writer.write(frame).then(function () {
+        self.postMessage({ type: 'sinkAck', id: id });
+    }, function () {
+        try { frame.close(); } catch (e) {}
+        self.postMessage({ type: 'sinkAck', id: id });
+        closeSink(id);
+        self.postMessage({ type: 'sinkError', id: id });
+    });
+}
+
+function closeSink(id) {
+    const state = sinks.get(id);
+    if (!state) return;
+    sinks.delete(id);
+    try { state.writer.close(); } catch (e) {}
+}
+
+self.onmessage = (e) => {
+    const m = e.data;
+    if (!m) return;
+    switch (m.type) {
+        case 'source': startSource(m.id, m.track); break;
+        case 'sourceAck': {
+            const state = sources.get(m.id);
+            if (state && state.inFlight > 0) state.inFlight--;
+            break;
+        }
+        case 'sourceStop': stopSource(m.id); break;
+        case 'sink': startSink(m.id); break;
+        case 'present': presentToSink(m.id, m.frame); break;
+        case 'sinkClose': closeSink(m.id); break;
+    }
+};
+`;
+
+// Worklet for the shim capture path: hands raw channel data to the page, which
+// packs it into AudioData. Kept tiny because it runs on the audio render thread.
+const SHIM_AUDIO_WORKLET_SRC = `
+registerProcessor('mstp-shim', class extends AudioWorkletProcessor {
+    process(inputs) {
+        const input = inputs[0];
+        if (input && input.length > 0 && input[0] && input[0].length > 0) {
+            this.port.postMessage(input);
+        }
+        return true;
+    }
+});
+`;
+
+let mediaWorker = null;
+let mediaWorkerProbe = null;
+let mediaWorkerSeq = 0;
+const mediaWorkerSources = new Map();
+const mediaWorkerSinks = new Map();
+
+// Which path a session settled on, said once: knowing that a client fell back to a
+// canvas readback is the difference between explaining its CPU cost and guessing.
+const loggedMediaPaths = new Set();
+const logMediaPath = (message) => {
+    if (loggedMediaPaths.has(message)) return;
+    loggedMediaPaths.add(message);
+    console.info(`[Media] ${message}`);
+};
+
+// Every client of the worker gives up when it dies; from then on callers fall back
+// to the DOM shims and the canvas rather than restarting a worker that just failed.
+const failMediaWorker = () => {
+    mediaWorker = null;
+    mediaWorkerProbe = Promise.resolve(null);
+    const sources = Array.from(mediaWorkerSources.values());
+    const sinks = Array.from(mediaWorkerSinks.values());
+    mediaWorkerSources.clear();
+    mediaWorkerSinks.clear();
+    sources.forEach(source => source.onEnd(true));
+    sinks.forEach(sink => sink.onFail());
+};
+
+// Create the shared media worker and resolve once it has reported which of the
+// worker-only interfaces it actually has. Resolves null when there is no worker or
+// it has neither, so callers can fall back without probing again.
+const ensureMediaWorker = () => {
+    if (mediaWorkerProbe) return mediaWorkerProbe;
+    mediaWorkerProbe = new Promise((resolve) => {
+        let worker;
+        try {
+            const workerURL = URL.createObjectURL(new Blob([MEDIA_WORKER_SRC], { type: 'text/javascript' }));
+            worker = new Worker(workerURL);
+            // The worker holds its own reference to the fetched script.
+            URL.revokeObjectURL(workerURL);
+        } catch (err) {
+            console.warn('[Media] media worker unavailable:', err);
+            resolve(null);
+            return;
+        }
+
+        let settled = false;
+        const settle = (caps) => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(probeTimer);
+            if (!caps) {
+                try { worker.terminate(); } catch (e) {}
+            } else {
+                mediaWorker = worker;
             }
+            resolve(caps);
+        };
+        const probeTimer = setTimeout(() => settle(null), MEDIA_WORKER_PROBE_TIMEOUT_MS);
+
+        worker.onerror = (event) => {
+            if (!settled) {
+                console.warn('[Media] media worker failed to start:', event.message || event);
+                settle(null);
+                return;
+            }
+            console.warn('[Media] media worker error:', event.message || event);
+            try { worker.terminate(); } catch (e) {}
+            failMediaWorker();
+        };
+
+        worker.onmessage = (e) => {
+            const m = e.data;
+            if (!m) return;
+            switch (m.type) {
+                case 'caps':
+                    // Nothing worker-only here: not worth keeping the worker alive.
+                    settle((m.processor || m.generator) ? m : null);
+                    return;
+                case 'frame': {
+                    const source = mediaWorkerSources.get(m.id);
+                    if (source) source.onFrame(m.frame);
+                    else m.frame.close();
+                    return;
+                }
+                case 'sourceEnd':
+                case 'sourceFailed': {
+                    const source = mediaWorkerSources.get(m.id);
+                    if (source) source.onEnd(m.type === 'sourceFailed');
+                    return;
+                }
+                case 'sinkTrack': {
+                    const sink = mediaWorkerSinks.get(m.id);
+                    if (sink) sink.onTrack(m.track);
+                    else { try { m.track.stop(); } catch (err) {} }
+                    return;
+                }
+                case 'sinkFailed':
+                case 'sinkError': {
+                    const sink = mediaWorkerSinks.get(m.id);
+                    if (sink) sink.onFail();
+                    return;
+                }
+                case 'sinkAck': {
+                    const sink = mediaWorkerSinks.get(m.id);
+                    if (sink) sink.onAck();
+                    return;
+                }
+            }
+        };
+    });
+    return mediaWorkerProbe;
+};
+
+// Standard capture path: the track is transferred into the worker, which reads it
+// with the real MediaStreamTrackProcessor and transfers frames back one at a time.
+const createWorkerTrackProcessor = (track) => {
+    if (!mediaWorker) return null;
+    // The page keeps the original track for the local preview and the enabled
+    // toggle -- transferring it would detach it -- so the worker gets a clone.
+    let clone;
+    try {
+        clone = track.clone();
+    } catch (err) {
+        console.warn('[Media] track clone failed:', err);
+        return null;
+    }
+
+    const id = ++mediaWorkerSeq;
+    let stopped = false;
+    const stop = () => {
+        if (stopped) return;
+        stopped = true;
+        mediaWorkerSources.delete(id);
+        if (mediaWorker) mediaWorker.postMessage({ type: 'sourceStop', id });
+        // A no-op once the clone has been transferred away; the worker stops its own.
+        try { clone.stop(); } catch (err) {}
+        // Lets a reader waiting on the next frame settle instead of hanging.
+        if (streamController) { try { streamController.close(); } catch (err) {} }
+    };
+
+    let streamController = null;
+    const readable = new ReadableStream({
+        start(controller) {
+            streamController = controller;
+            mediaWorkerSources.set(id, {
+                onFrame(frame) {
+                    if (stopped) { frame.close(); return; }
+                    // Enqueue only what the encoder is keeping up with.
+                    if (controller.desiredSize !== null && controller.desiredSize <= 0) frame.close();
+                    else controller.enqueue(frame);
+                    if (mediaWorker) mediaWorker.postMessage({ type: 'sourceAck', id });
+                },
+                onEnd(failed) {
+                    mediaWorkerSources.delete(id);
+                    if (stopped) return;
+                    stopped = true;
+                    try {
+                        if (failed) controller.error(new Error('worker MediaStreamTrackProcessor failed'));
+                        else controller.close();
+                    } catch (err) {}
+                }
+            });
+        },
+        cancel() { stop(); }
+    });
+
+    try {
+        mediaWorker.postMessage({ type: 'source', id, track: clone }, [clone]);
+    } catch (err) {
+        // No transferable MediaStreamTrack here after all.
+        console.warn('[Media] track transfer failed:', err);
+        mediaWorkerSources.delete(id);
+        stopped = true;
+        try { clone.stop(); } catch (e) {}
+        return null;
+    }
+
+    return { readable, close: stop };
+};
+
+// Shim capture path for engines with no processor at all (Firefox today).
+const createShimVideoSource = (track, controller) => {
+    const video = document.createElement('video');
+    video.muted = true;
+    video.playsInline = true;
+    video.autoplay = true;
+    video.disableRemotePlayback = true;
+    // Visually inert but still in the DOM and painted: a fully detached <video> is
+    // allowed to stop producing frames.
+    video.style.cssText = 'position:fixed; top:0; left:0; width:1px; height:1px; opacity:0; pointer-events:none;';
+    document.body.appendChild(video);
+    video.srcObject = new MediaStream([track]);
+
+    let closed = false;
+    let usesFrameCallback = false;
+    let handle = null;
+    let canvas = null;
+    let canvasCtx = null;
+    let needsReadback = false;
+
+    const teardown = () => {
+        if (closed) return;
+        closed = true;
+        if (handle !== null) {
+            if (usesFrameCallback) {
+                try { video.cancelVideoFrameCallback(handle); } catch (err) {}
+            } else {
+                cancelAnimationFrame(handle);
+            }
+            handle = null;
+        }
+        try { video.srcObject = null; } catch (err) {}
+        video.remove();
+    };
+
+    const schedule = () => {
+        if (closed) return;
+        usesFrameCallback = (typeof video.requestVideoFrameCallback === 'function');
+        handle = usesFrameCallback ? video.requestVideoFrameCallback(onFrame) : requestAnimationFrame(onFrame);
+    };
+
+    function onFrame(now, metadata) {
+        handle = null;
+        if (closed) return;
+        if (track.readyState === 'ended') {
+            teardown();
+            try { controller.close(); } catch (err) {}
+            return;
+        }
+        // Skip the work entirely while the encoder is behind.
+        const draining = (controller.desiredSize === null || controller.desiredSize > 0);
+        if (draining && video.readyState >= 2 && video.videoWidth > 0) {
+            const timestamp = Math.round(metadata && metadata.mediaTime != null
+                ? metadata.mediaTime * 1e6
+                : performance.now() * 1000);
+            let frame = null;
+            try {
+                // Zero-copy where the engine takes a video element: no CPU readback.
+                if (needsReadback) throw new Error('readback');
+                frame = new VideoFrame(video, { timestamp });
+            } catch (err) {
+                // Engines that reject HTMLVideoElement fall back to a canvas readback,
+                // latched so the rejection is not re-thrown on every single frame.
+                needsReadback = true;
+                if (!canvas) {
+                    canvas = document.createElement('canvas');
+                    canvasCtx = canvas.getContext('2d', { desynchronized: true, willReadFrequently: true });
+                }
+                if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                }
+                try {
+                    canvasCtx.drawImage(video, 0, 0);
+                    frame = new VideoFrame(canvas, { timestamp });
+                } catch (readbackErr) {
+                    frame = null;
+                }
+            }
+            if (frame) controller.enqueue(frame);
+        }
+        schedule();
+    }
+
+    const playback = video.play();
+    if (playback && playback.catch) playback.catch(() => {});
+    schedule();
+
+    return teardown;
+};
+
+const createShimAudioSource = (track, controller) => {
+    let closed = false;
+    let audioCtx = null;
+    let sourceNode = null;
+    let workletNode = null;
+
+    const teardown = () => {
+        closed = true;
+        if (workletNode) {
+            workletNode.port.onmessage = null;
+            try { workletNode.disconnect(); } catch (err) {}
+            workletNode = null;
+        }
+        if (sourceNode) {
+            try { sourceNode.disconnect(); } catch (err) {}
+            sourceNode = null;
+        }
+        if (audioCtx) {
+            const ctx = audioCtx;
+            audioCtx = null;
+            if (ctx.state !== 'closed') ctx.close().catch(() => {});
         }
     };
-}
+
+    (async () => {
+        let workletURL = null;
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            workletURL = URL.createObjectURL(new Blob([SHIM_AUDIO_WORKLET_SRC], { type: 'application/javascript' }));
+            await audioCtx.audioWorklet.addModule(workletURL);
+            if (closed) { teardown(); return; }
+
+            sourceNode = audioCtx.createMediaStreamSource(new MediaStream([track]));
+            workletNode = new AudioWorkletNode(audioCtx, 'mstp-shim');
+            sourceNode.connect(workletNode);
+
+            // AudioEncoder wants a gap-free, monotonic timeline, which a wall clock
+            // read at message-delivery time does not give.
+            let sampleCursor = 0;
+            workletNode.port.onmessage = ({ data: channels }) => {
+                if (closed || !channels || channels.length === 0) return;
+                const numberOfFrames = channels[0].length;
+                const numberOfChannels = channels.length;
+                const timestamp = Math.round(sampleCursor / audioCtx.sampleRate * 1e6);
+                sampleCursor += numberOfFrames;
+                if (controller.desiredSize !== null && controller.desiredSize <= 0) return;
+
+                // "f32" is the interleaved layout.
+                const interleaved = new Float32Array(numberOfFrames * numberOfChannels);
+                for (let i = 0; i < numberOfFrames; i++) {
+                    for (let ch = 0; ch < numberOfChannels; ch++) {
+                        interleaved[i * numberOfChannels + ch] = channels[ch][i];
+                    }
+                }
+                controller.enqueue(new AudioData({
+                    format: 'f32',
+                    sampleRate: audioCtx.sampleRate,
+                    numberOfFrames,
+                    numberOfChannels,
+                    timestamp,
+                    data: interleaved
+                }));
+            };
+        } catch (err) {
+            teardown();
+            try { controller.error(err); } catch (controllerErr) {}
+        } finally {
+            if (workletURL) URL.revokeObjectURL(workletURL);
+        }
+    })();
+
+    return teardown;
+};
+
+const createShimTrackProcessor = (track) => {
+    logMediaPath(`${track.kind} capture: DOM shim (no MediaStreamTrackProcessor in this browser).`);
+    let teardown = () => {};
+    let streamController = null;
+    const readable = new ReadableStream({
+        start(controller) {
+            streamController = controller;
+            teardown = (track.kind === 'video')
+                ? createShimVideoSource(track, controller)
+                : createShimAudioSource(track, controller);
+        },
+        cancel() { teardown(); }
+    });
+    return {
+        readable,
+        close: () => {
+            teardown();
+            // Lets a reader waiting on the next frame settle instead of hanging.
+            try { streamController.close(); } catch (err) {}
+        }
+    };
+};
+
+// Capture side. Returns a MediaStreamTrackProcessor-alike: { readable, close() }.
+const createTrackProcessor = async (track) => {
+    if (hasWindowTrackProcessor) {
+        try {
+            const processor = new MediaStreamTrackProcessor({ track });
+            logMediaPath(`${track.kind} capture: MediaStreamTrackProcessor on the page.`);
+            // The native processor's readable ends with its track, so there is
+            // nothing of our own to unwind.
+            return { readable: processor.readable, close: () => {} };
+        } catch (err) {
+            console.warn('[Media] page MediaStreamTrackProcessor failed:', err);
+        }
+    }
+    // The standard processor is worker-only, and video-only.
+    if (track.kind === 'video') {
+        const caps = await ensureMediaWorker();
+        if (caps && caps.processor) {
+            const processor = createWorkerTrackProcessor(track);
+            if (processor) {
+                logMediaPath('video capture: MediaStreamTrackProcessor in the media worker.');
+                return processor;
+            }
+        }
+    }
+    return createShimTrackProcessor(track);
+};
+
+// Chromium's generator, which is a track rather than having one.
+const createWindowVideoSink = (onFail) => {
+    let generator;
+    let writer;
+    try {
+        generator = new MediaStreamTrackGenerator({ kind: 'video' });
+        writer = generator.writable.getWriter();
+    } catch (err) {
+        console.warn('[Media] MediaStreamTrackGenerator unavailable:', err);
+        if (generator) { try { generator.stop(); } catch (e) {} }
+        return null;
+    }
+
+    let dead = false;
+    let drops = 0;
+    const die = () => {
+        if (dead) return;
+        dead = true;
+        try { writer.close(); } catch (err) {}
+        try { generator.stop(); } catch (err) {}
+        if (onFail) onFail();
+    };
+
+    return {
+        track: generator,
+        get alive() { return !dead; },
+        // Returns true when the sink took ownership of the frame.
+        write(frame) {
+            if (dead) return false;
+            if (writer.desiredSize !== null && writer.desiredSize <= 0) {
+                frame.close();
+                if (++drops >= SINK_STALL_DROP_LIMIT) {
+                    console.warn('[Media] video sink stalled; falling back to the canvas.');
+                    die();
+                }
+                return true;
+            }
+            drops = 0;
+            writer.write(frame).catch(() => {
+                try { frame.close(); } catch (err) {}
+                die();
+            });
+            return true;
+        },
+        close() {
+            if (dead) return;
+            dead = true;
+            try { writer.close(); } catch (err) {}
+            try { generator.stop(); } catch (err) {}
+        }
+    };
+};
+
+// Standard sink: the worker builds the generator and transfers its track back here
+// for <video>.srcObject; decoded frames are transferred the other way.
+const createWorkerVideoSink = async (onFail) => {
+    if (!mediaWorker) return null;
+    const id = ++mediaWorkerSeq;
+    let dead = false;
+    let inFlight = 0;
+
+    const track = await new Promise((resolve) => {
+        mediaWorkerSinks.set(id, {
+            onTrack: resolve,
+            onFail() {
+                mediaWorkerSinks.delete(id);
+                const wasLive = !dead;
+                dead = true;
+                resolve(null);
+                if (wasLive && onFail) onFail();
+            },
+            onAck() { if (inFlight > 0) inFlight--; }
+        });
+        try {
+            mediaWorker.postMessage({ type: 'sink', id });
+        } catch (err) {
+            console.warn('[Media] media worker sink request failed:', err);
+            mediaWorkerSinks.delete(id);
+            dead = true;
+            resolve(null);
+        }
+    });
+    if (!track) return null;
+
+    const close = () => {
+        if (dead) return;
+        dead = true;
+        mediaWorkerSinks.delete(id);
+        if (mediaWorker) mediaWorker.postMessage({ type: 'sinkClose', id });
+        try { track.stop(); } catch (err) {}
+    };
+
+    return {
+        track,
+        get alive() { return !dead; },
+        write(frame) {
+            if (dead) return false;
+            // Backpressure: the worker acks each frame it hands to the generator.
+            if (inFlight >= SINK_MAX_IN_FLIGHT) {
+                frame.close();
+                return true;
+            }
+            try {
+                mediaWorker.postMessage({ type: 'present', id, frame }, [frame]);
+                inFlight++;
+            } catch (err) {
+                try { frame.close(); } catch (e) {}
+                close();
+                if (onFail) onFail();
+            }
+            return true;
+        },
+        close
+    };
+};
+
+// Presentation side. Resolves to { track, write(frame), close() }, or null when the
+// browser has no generator at all and the caller should paint a canvas instead.
+// onFail is called if a live sink dies later, so the caller can go back to canvas.
+const createVideoSink = async (onFail) => {
+    // No shipping browser exposes both a page-side MediaStreamTrackGenerator and a
+    // worker-side VideoTrackGenerator, so taking this one directly skips starting a
+    // worker on Chromium; revisit the short-circuit if one ever exposes both.
+    if (hasWindowTrackGenerator) {
+        const sink = createWindowVideoSink(onFail);
+        if (sink) {
+            logMediaPath('video sink: MediaStreamTrackGenerator on the page.');
+            return sink;
+        }
+    }
+    const caps = await ensureMediaWorker();
+    if (caps && caps.generator) {
+        const sink = await createWorkerVideoSink(onFail);
+        if (sink) {
+            logMediaPath('video sink: VideoTrackGenerator in the media worker.');
+            return sink;
+        }
+    }
+    logMediaPath('video sink: 2D canvas - no track generator in this browser, so every '
+        + 'frame is drawn by hand instead of being handed to a <video> element.');
+    return null;
+};
 
 function applyTranslations(scope, t) {
   scope.querySelectorAll('[data-i18n]').forEach(el => {
@@ -154,6 +748,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let localStream = null;
     let audioEncoder = null;
     let videoEncoder = null;
+    let audioProcessor = null;
+    let videoProcessor = null;
     let remoteStreams = {};
     let mediaInitialized = false;
     let isInitializingMedia = false;
@@ -380,10 +976,10 @@ document.addEventListener('DOMContentLoaded', () => {
             localStream.getAudioTracks().forEach(t => t.enabled = isMicOn);
             localStream.getVideoTracks().forEach(t => t.enabled = isWebcamOn);
 
-            setupAudioEncoder();
+            await setupAudioEncoder();
 
             if (localStream.getVideoTracks().length > 0) {
-                setupVideoEncoder();
+                await setupVideoEncoder();
             }
 
             mediaInitialized = true;
@@ -440,6 +1036,12 @@ document.addEventListener('DOMContentLoaded', () => {
             localStream.getTracks().forEach(track => track.stop());
             localStream = null;
         }
+        // Unwinds whatever the processor owns beyond the track itself: the worker's
+        // cloned track, or the shim's hidden <video> / AudioContext.
+        if (videoProcessor) videoProcessor.close();
+        if (audioProcessor) audioProcessor.close();
+        videoProcessor = null;
+        audioProcessor = null;
         if (videoEncoder && videoEncoder.state !== 'closed') videoEncoder.close();
         if (audioEncoder && audioEncoder.state !== 'closed') audioEncoder.close();
         videoEncoder = null;
@@ -448,13 +1050,19 @@ document.addEventListener('DOMContentLoaded', () => {
         mediaInitialized = false;
     };
 
-    const setupVideoEncoder = () => {
+    const setupVideoEncoder = async () => {
         const [videoTrack] = localStream.getVideoTracks();
         if (!videoTrack) return;
 
-        const videoProcessor = new MediaStreamTrackProcessor({ track: videoTrack });
-        const videoReader = videoProcessor.readable.getReader();
-        
+        const processor = await createTrackProcessor(videoTrack);
+        // startMedia() may have been restarted while the processor was being set up.
+        if (!localStream || localStream.getVideoTracks()[0] !== videoTrack) {
+            processor.close();
+            return;
+        }
+        videoProcessor = processor;
+        const videoReader = processor.readable.getReader();
+
         let frameCounter = 0;
 
         videoEncoder = new VideoEncoder({
@@ -509,7 +1117,7 @@ document.addEventListener('DOMContentLoaded', () => {
         readFrame();
     };
 
-    const setupAudioEncoder = () => {
+    const setupAudioEncoder = async () => {
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
         if (isIOS) {
@@ -550,8 +1158,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const [audioTrack] = localStream.getAudioTracks();
             if (!audioTrack) return;
 
-            const audioProcessor = new MediaStreamTrackProcessor({ track: audioTrack });
-            const audioReader = audioProcessor.readable.getReader();
+            const processor = await createTrackProcessor(audioTrack);
+            // startMedia() may have been restarted while the processor was being set up.
+            if (!localStream || localStream.getAudioTracks()[0] !== audioTrack) {
+                processor.close();
+                return;
+            }
+            audioProcessor = processor;
+            const audioReader = processor.readable.getReader();
 
             audioEncoder = new AudioEncoder({
                 output: (chunk, meta) => {
@@ -662,9 +1276,68 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Decoded frames go to a track generator feeding a <video> element where the
+    // browser has one, and to the tile's canvas otherwise. The canvas stays behind
+    // the <video> as the fallback: it is what shows until the sink has actually
+    // painted a frame, and what takes over again if the sink dies.
+    const paintRemoteFrame = (stream, frame) => {
+        stream.ctx.drawImage(frame, 0, 0, stream.canvas.width, stream.canvas.height);
+    };
+
+    const revealRemoteSink = (stream) => {
+        stream.sinkShown = true;
+        stream.video.style.display = 'block';
+        const playback = stream.video.play();
+        if (playback && playback.catch) playback.catch(() => {});
+        if (typeof stream.video.requestVideoFrameCallback === 'function') {
+            // Hiding the canvas on the first write instead flashes black: the first
+            // track frame can arrive well before the <video> starts rendering.
+            const generation = ++stream.sinkGeneration;
+            stream.video.requestVideoFrameCallback(() => {
+                if (generation !== stream.sinkGeneration || !stream.sink) return;
+                stream.sinkRevealed = true;
+                stream.canvas.style.display = 'none';
+            });
+        } else {
+            // Rendering can't be observed here; assume the frame was presented.
+            stream.sinkRevealed = true;
+            stream.canvas.style.display = 'none';
+        }
+    };
+
+    const hideRemoteSink = (stream) => {
+        stream.sinkShown = false;
+        stream.sinkRevealed = false;
+        stream.sinkGeneration++;
+        stream.video.style.display = 'none';
+        stream.canvas.style.display = 'block';
+    };
+
+    const detachRemoteSink = (stream) => {
+        if (stream.sink) {
+            stream.sink.close();
+            stream.sink = null;
+        }
+        hideRemoteSink(stream);
+        try { stream.video.srcObject = null; } catch (err) {}
+    };
+
+    const presentRemoteFrame = (stream, frame) => {
+        if (stream.sink) {
+            if (stream.sink.alive) {
+                if (!stream.sinkShown) revealRemoteSink(stream);
+                if (!stream.sinkRevealed) paintRemoteFrame(stream, frame);
+                if (stream.sink.write(frame)) return;
+            }
+            detachRemoteSink(stream);
+        }
+        paintRemoteFrame(stream, frame);
+        frame.close();
+    };
+
     const addRemoteStream = async (token, username) => {
         if (remoteStreams[token]) return;
-        
+
         const container = document.createElement('div');
         container.className = 'video-container reorderable';
         container.id = `container-${token}`;
@@ -674,10 +1347,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const canvas = document.createElement('canvas');
         canvas.width = 240;
         canvas.height = 180;
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { desynchronized: true });
         ctx.fillStyle = '#222';
         ctx.fillRect(0, 0, 240, 180);
-        
+
+        // Overlays the canvas, and is only shown once a track generator is feeding it.
+        const video = document.createElement('video');
+        video.className = 'remote-video';
+        video.autoplay = true;
+        video.muted = true;
+        video.playsInline = true;
+        video.disableRemotePlayback = true;
+        video.style.display = 'none';
+
         let controllerControls = '';
         if (COLLAB_DATA.userRole === 'controller') {
             controllerControls = `
@@ -697,17 +1379,29 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         
         container.appendChild(canvas);
+        container.appendChild(video);
         container.appendChild(overlay);
         videoGridContent.appendChild(container);
 
+        const stream = {
+            username, container, canvas, ctx, video,
+            videoMuted: false, audioMuted: false,
+            isConfigured: true,
+            hasReceivedKeyFrame: false,
+            sink: null, sinkShown: false, sinkRevealed: false, sinkGeneration: 0
+        };
+
         const videoDecoder = new VideoDecoder({
             output: (frame) => {
-                ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
-                frame.close();
+                if (remoteStreams[token] !== stream) {
+                    frame.close();
+                    return;
+                }
+                presentRemoteFrame(stream, frame);
             },
             error: (e) => console.error(`[Decoder:${token}] VideoDecoder error:`, e)
         });
-        
+
         videoDecoder.configure({ codec: 'vp8' });
 
         const audioContext = new AudioContext({ sampleRate: 48000 });
@@ -736,17 +1430,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         audioDecoder.configure({ codec: 'opus', sampleRate: 48000, numberOfChannels: 1 });
 
-        remoteStreams[token] = {
-            username, videoDecoder, audioDecoder, audioContext, workletNode, container, analyser,
-            videoMuted: false, audioMuted: false,
-            isConfigured: true,
-            hasReceivedKeyFrame: false
-        };
+        Object.assign(stream, { videoDecoder, audioDecoder, audioContext, workletNode, analyser });
+        remoteStreams[token] = stream;
+
+        // The handshake can involve a worker round-trip, so the canvas renders until
+        // it lands -- and again from wherever the sink gives out.
+        createVideoSink(() => {
+            if (remoteStreams[token] === stream) detachRemoteSink(stream);
+        }).then((sink) => {
+            if (!sink) return;
+            // Removed, or the sink already gave out, while the handshake was in flight.
+            if (remoteStreams[token] !== stream || !sink.alive) {
+                sink.close();
+                return;
+            }
+            try {
+                video.srcObject = new MediaStream([sink.track]);
+            } catch (err) {
+                console.warn(`[Media] video sink attach failed for ${token}:`, err);
+                sink.close();
+                return;
+            }
+            stream.sink = sink;
+        });
     };
 
     const removeRemoteStream = (token) => {
         const stream = remoteStreams[token];
         if (stream) {
+            if (stream.sink) {
+                stream.sink.close();
+                stream.sink = null;
+            }
+
             if (stream.videoDecoder && stream.videoDecoder.state !== 'closed') {
                 stream.videoDecoder.close();
             }
@@ -2057,12 +2773,12 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.querySelector('i').className = stream.videoMuted ? 'fas fa-video-slash' : 'fas fa-video';
             
             if (stream.videoMuted) {
-                const canvas = stream.container.querySelector('canvas');
-                if (canvas) {
-                    const ctx = canvas.getContext('2d');
-                    ctx.fillStyle = '#222';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                }
+                // No further frames are decoded while muted, so the <video> would
+                // otherwise sit frozen on the last one: hide it and blank the canvas.
+                // The next frame after unmuting reveals the sink again.
+                hideRemoteSink(stream);
+                stream.ctx.fillStyle = '#222';
+                stream.ctx.fillRect(0, 0, stream.canvas.width, stream.canvas.height);
             } else {
                 stream.hasReceivedKeyFrame = false;
             }
