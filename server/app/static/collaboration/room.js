@@ -50,6 +50,9 @@ async function startSource(id, track) {
         self.postMessage({ type: 'sourceFailed', id: id });
         return;
     }
+    // Settles the page's rung choice before any frame: on failure it falls
+    // through to its own processor in the same call instead of erroring later.
+    self.postMessage({ type: 'sourceStarted', id: id });
     const state = { reader: reader, track: track, inFlight: 0 };
     sources.set(id, state);
     try {
@@ -151,10 +154,19 @@ self.onmessage = (e) => {
 // packs it into AudioData. Kept tiny because it runs on the audio render thread.
 const SHIM_AUDIO_WORKLET_SRC = `
 registerProcessor('mstp-shim', class extends AudioWorkletProcessor {
+    constructor() {
+        super();
+        // Handed a port, channel data goes straight to its holder (the socket
+        // worker) instead of through the page.
+        this.out = this.port;
+        this.port.onmessage = (e) => {
+            if (e.data && e.data.port) this.out = e.data.port;
+        };
+    }
     process(inputs) {
         const input = inputs[0];
         if (input && input.length > 0 && input[0] && input[0].length > 0) {
-            this.port.postMessage(input);
+            this.out.postMessage(input);
         }
         return true;
     }
@@ -164,6 +176,9 @@ registerProcessor('mstp-shim', class extends AudioWorkletProcessor {
 let mediaWorker = null;
 let mediaWorkerProbe = null;
 let mediaWorkerSeq = 0;
+// Set once the worker's processor failed to read a transferred track: a second
+// track would fail the same way, so the worker capture rung is not offered again.
+let mediaWorkerTrackUnsupported = false;
 const mediaWorkerSources = new Map();
 const mediaWorkerSinks = new Map();
 
@@ -246,8 +261,14 @@ const ensureMediaWorker = () => {
                     else m.frame.close();
                     return;
                 }
+                case 'sourceStarted': {
+                    const source = mediaWorkerSources.get(m.id);
+                    if (source) source.onStart();
+                    return;
+                }
                 case 'sourceEnd':
                 case 'sourceFailed': {
+                    if (m.type === 'sourceFailed') mediaWorkerTrackUnsupported = true;
                     const source = mediaWorkerSources.get(m.id);
                     if (source) source.onEnd(m.type === 'sourceFailed');
                     return;
@@ -277,7 +298,9 @@ const ensureMediaWorker = () => {
 
 // Standard capture path: the track is transferred into the worker, which reads it
 // with the real MediaStreamTrackProcessor and transfers frames back one at a time.
-const createWorkerTrackProcessor = (track) => {
+// Resolves null when the worker cannot read the track, so the caller can take a
+// page rung in the same call instead of erroring at the first read.
+const createWorkerTrackProcessor = async (track) => {
     if (!mediaWorker) return null;
     // The page keeps the original track for the local preview and the enabled
     // toggle -- transferring it would detach it -- so the worker gets a clone.
@@ -303,10 +326,13 @@ const createWorkerTrackProcessor = (track) => {
     };
 
     let streamController = null;
+    let settleStart = null;
+    const started = new Promise((resolve) => { settleStart = resolve; });
     const readable = new ReadableStream({
         start(controller) {
             streamController = controller;
             mediaWorkerSources.set(id, {
+                onStart() { settleStart(true); },
                 onFrame(frame) {
                     if (stopped) { frame.close(); return; }
                     // Enqueue only what the encoder is keeping up with.
@@ -315,6 +341,7 @@ const createWorkerTrackProcessor = (track) => {
                     if (mediaWorker) mediaWorker.postMessage({ type: 'sourceAck', id });
                 },
                 onEnd(failed) {
+                    settleStart(false);
                     mediaWorkerSources.delete(id);
                     if (stopped) return;
                     stopped = true;
@@ -339,6 +366,7 @@ const createWorkerTrackProcessor = (track) => {
         return null;
     }
 
+    if (!(await started)) return null;
     return { readable, close: stop };
 };
 
@@ -531,7 +559,20 @@ const createShimTrackProcessor = (track) => {
 };
 
 // Capture side. Returns a MediaStreamTrackProcessor-alike: { readable, close() }.
+// A worker reader keeps every frame off the page's thread, so it is asked first;
+// the page's own processor is the rung below it, not above. The standard
+// processor is worker-only and video-only, so audio starts at the page rung.
 const createTrackProcessor = async (track) => {
+    if (track.kind === 'video' && !mediaWorkerTrackUnsupported) {
+        const caps = await ensureMediaWorker();
+        if (caps && caps.processor) {
+            const processor = await createWorkerTrackProcessor(track);
+            if (processor) {
+                logMediaPath('video capture: MediaStreamTrackProcessor in the media worker.');
+                return processor;
+            }
+        }
+    }
     if (hasWindowTrackProcessor) {
         try {
             const processor = new MediaStreamTrackProcessor({ track });
@@ -541,17 +582,6 @@ const createTrackProcessor = async (track) => {
             return { readable: processor.readable, close: () => {} };
         } catch (err) {
             console.warn('[Media] page MediaStreamTrackProcessor failed:', err);
-        }
-    }
-    // The standard processor is worker-only, and video-only.
-    if (track.kind === 'video') {
-        const caps = await ensureMediaWorker();
-        if (caps && caps.processor) {
-            const processor = createWorkerTrackProcessor(track);
-            if (processor) {
-                logMediaPath('video capture: MediaStreamTrackProcessor in the media worker.');
-                return processor;
-            }
         }
     }
     return createShimTrackProcessor(track);
@@ -676,17 +706,10 @@ const createWorkerVideoSink = async (onFail) => {
 // Presentation side. Resolves to { track, write(frame), close() }, or null when the
 // browser has no generator at all and the caller should paint a canvas instead.
 // onFail is called if a live sink dies later, so the caller can go back to canvas.
+// The worker's VideoTrackGenerator outranks the page's MediaStreamTrackGenerator,
+// so the worker is asked first and the page generator is taken only once it has
+// reported it holds no generator of its own.
 const createVideoSink = async (onFail) => {
-    // No shipping browser exposes both a page-side MediaStreamTrackGenerator and a
-    // worker-side VideoTrackGenerator, so taking this one directly skips starting a
-    // worker on Chromium; revisit the short-circuit if one ever exposes both.
-    if (hasWindowTrackGenerator) {
-        const sink = createWindowVideoSink(onFail);
-        if (sink) {
-            logMediaPath('video sink: MediaStreamTrackGenerator on the page.');
-            return sink;
-        }
-    }
     const caps = await ensureMediaWorker();
     if (caps && caps.generator) {
         const sink = await createWorkerVideoSink(onFail);
@@ -695,10 +718,360 @@ const createVideoSink = async (onFail) => {
             return sink;
         }
     }
+    if (hasWindowTrackGenerator) {
+        const sink = createWindowVideoSink(onFail);
+        if (sink) {
+            logMediaPath('video sink: MediaStreamTrackGenerator on the page.');
+            return sink;
+        }
+    }
     logMediaPath('video sink: 2D canvas - no track generator in this browser, so every '
         + 'frame is drawn by hand instead of being handed to a <video> element.');
     return null;
 };
+
+const MSG_TYPE = {
+    VIDEO_FRAME: 0x01,
+    AUDIO_FRAME: 0x02,
+    VIDEO_CONFIG: 0x03,
+    PCM_FRAME: 0x04,
+};
+
+// ---------------------------------------------------------------------------
+// Room socket in a worker. The page's thread is otherwise between the socket
+// and every remote voice: anything occupying it -- a getUserMedia prompt, a
+// start-menu render -- stops audio being delivered for as long as it lasts.
+// Here the worker owns the WebSocket, decodes AUDIO_FRAME (Opus) itself, and
+// hands PCM straight down a port to the speaking tile's worklet; PCM_FRAME is
+// upsampled the same way. Everything else -- JSON control, video -- reaches
+// the page unchanged, and sends keep their order through the worker's port.
+// The microphone runs here too: capture frames arrive over a transferred
+// track-processor stream or the capture worklet's port, are encoded in this
+// worker, and leave framed -- so a stalled page delays outgoing voice no
+// more than incoming.
+// Gecko still routes a worker's WebSocket delivery through the page's main
+// thread, so there a page stall costs what the playback buffer cannot cover;
+// Chromium and WebKit deliver to the worker directly.
+// ---------------------------------------------------------------------------
+
+const ROOM_SOCKET_WORKER_SRC = `
+const AUDIO_FRAME = ${MSG_TYPE.AUDIO_FRAME};
+const PCM_FRAME = ${MSG_TYPE.PCM_FRAME};
+let ws = null;
+const ports = new Map();
+const muted = new Set();
+const decoders = new Map();
+const idDecoder = new TextDecoder();
+const hasAudioDecoder = (typeof AudioDecoder !== 'undefined');
+
+function portFor(publicId) {
+    const port = ports.get(publicId);
+    return (port && !muted.has(publicId)) ? port : null;
+}
+
+function decoderFor(publicId) {
+    let dec = decoders.get(publicId);
+    if (dec && dec.state === 'configured') return dec;
+    if (dec) { try { dec.close(); } catch (e) {} }
+    dec = new AudioDecoder({
+        output: (frame) => {
+            const port = portFor(publicId);
+            if (!port) { frame.close(); return; }
+            const pcm = new Float32Array(frame.allocationSize({ planeIndex: 0, format: 'f32' }) / 4);
+            frame.copyTo(pcm, { planeIndex: 0, format: 'f32' });
+            frame.close();
+            port.postMessage(pcm, [pcm.buffer]);
+        },
+        // A fresh decoder recovers on the next packet.
+        error: () => { decoders.delete(publicId); },
+    });
+    dec.configure({ codec: 'opus', sampleRate: 48000, numberOfChannels: 1 });
+    decoders.set(publicId, dec);
+    return dec;
+}
+
+// True when the frame was consumed here; anything else goes to the page.
+function divertAudio(data) {
+    if (data.byteLength < 10) return false;
+    const type = new Uint8Array(data, 8, 1)[0];
+    if (type !== AUDIO_FRAME && type !== PCM_FRAME) return false;
+    const publicId = idDecoder.decode(new Uint8Array(data, 0, 8));
+    if (!ports.has(publicId)) return false;
+    if (muted.has(publicId)) return true;
+    if (type === AUDIO_FRAME) {
+        if (!hasAudioDecoder) return false;
+        try {
+            decoderFor(publicId).decode(new EncodedAudioChunk({
+                type: 'key', timestamp: performance.now() * 1000, data: data.slice(10) }));
+        } catch (err) {
+            const dec = decoders.get(publicId);
+            if (dec) { decoders.delete(publicId); try { dec.close(); } catch (e) {} }
+        }
+        return true;
+    }
+    // 16 kHz mono int16 from an iOS sender, tripled to the 48 kHz context rate.
+    const int16 = new Int16Array(data.slice(9));
+    const pcm = new Float32Array(int16.length * 3);
+    for (let i = 0; i < int16.length; i++) {
+        const s = int16[i] < 0 ? int16[i] / 0x8000 : int16[i] / 0x7FFF;
+        const at = i * 3;
+        pcm[at] = s; pcm[at + 1] = s; pcm[at + 2] = s;
+    }
+    const port = portFor(publicId);
+    if (port) port.postMessage(pcm, [pcm.buffer]);
+    return true;
+}
+
+// Microphone uplink: capture frames reach this worker directly (a
+// transferred track-processor stream, or the capture worklet's port), are
+// encoded here, and go out framed -- a stalled page then delays outgoing
+// voice no more than incoming.
+let micEncoder = null, micActive = false, micId = null, micCursor = 0;
+const hasAudioEncoder = (typeof AudioEncoder !== 'undefined');
+
+function micEnsureEncoder() {
+    if (!hasAudioEncoder) return null;
+    if (micEncoder && micEncoder.state === 'configured') return micEncoder;
+    if (micEncoder) { try { micEncoder.close(); } catch (e) {} }
+    micEncoder = new AudioEncoder({
+        output: (chunk) => {
+            if (!micActive || !micId || !ws || ws.readyState !== 1) return;
+            const msg = new Uint8Array(10 + chunk.byteLength);
+            msg.set(micId, 0);
+            msg[8] = AUDIO_FRAME;
+            msg[9] = 0x00;
+            chunk.copyTo(msg.subarray(10));
+            try { ws.send(msg.buffer); } catch (err) {}
+        },
+        error: () => { micEncoder = null; },
+    });
+    micEncoder.configure({ codec: 'opus', sampleRate: 48000, numberOfChannels: 1, bitrate: 128000 });
+    return micEncoder;
+}
+
+function micEncode(frame) {
+    const enc = micActive ? micEnsureEncoder() : null;
+    if (enc) { try { enc.encode(frame); } catch (err) {} }
+    frame.close();
+}
+
+self.onmessage = (e) => {
+    const m = e.data;
+    if (m.type === 'micState') {
+        if (m.active !== undefined) micActive = !!m.active;
+        if (m.id !== undefined) micId = m.id;
+        return;
+    }
+    if (m.type === 'micStream') {
+        const reader = m.readable.getReader();
+        (async () => {
+            for (;;) {
+                let r;
+                try { r = await reader.read(); } catch (err) { break; }
+                if (r.done) break;
+                micEncode(r.value);
+            }
+        })();
+        return;
+    }
+    if (m.type === 'micPort') {
+        // Channel arrays from the capture worklet; mono, at its context rate.
+        const rate = m.sampleRate || 48000;
+        micCursor = 0;
+        m.port.onmessage = (ev) => {
+            const channels = ev.data;
+            if (!micActive || !channels || !channels[0]) return;
+            const n = channels[0].length;
+            const frame = new AudioData({
+                format: 'f32', sampleRate: rate, numberOfFrames: n,
+                numberOfChannels: 1,
+                timestamp: Math.round(micCursor / rate * 1e6), data: channels[0] });
+            micCursor += n;
+            micEncode(frame);
+        };
+        return;
+    }
+    if (m.type === 'micStop') {
+        micActive = false;
+        if (micEncoder) { try { micEncoder.close(); } catch (err) {} micEncoder = null; }
+        return;
+    }
+    if (m.type === 'audioPort') { ports.set(m.publicId, m.port); return; }
+    if (m.type === 'audioState') { m.active ? muted.delete(m.publicId) : muted.add(m.publicId); return; }
+    if (m.type === 'audioClose') {
+        ports.delete(m.publicId);
+        muted.delete(m.publicId);
+        const dec = decoders.get(m.publicId);
+        if (dec) { decoders.delete(m.publicId); try { dec.close(); } catch (err) {} }
+        return;
+    }
+    if (m.type === 'open') {
+        ws = new WebSocket(m.url);
+        ws.binaryType = 'arraybuffer';
+        ws.onopen = () => self.postMessage({ type: 'open' });
+        ws.onerror = () => self.postMessage({ type: 'error' });
+        ws.onclose = (ev) => {
+            self.postMessage({ type: 'close', code: ev.code, reason: ev.reason, wasClean: ev.wasClean });
+            ws = null;
+        };
+        ws.onmessage = (ev) => {
+            const d = ev.data;
+            if (d instanceof ArrayBuffer) {
+                if (divertAudio(d)) return;
+                self.postMessage({ type: 'message', data: d }, [d]);
+                return;
+            }
+            self.postMessage({ type: 'message', data: d });
+        };
+        return;
+    }
+    if (!ws) return;
+    if (m.type === 'send') {
+        try { ws.send(m.data); } catch (err) { /* a closing socket reports through onclose */ }
+        return;
+    }
+    if (m.type === 'close') { try { ws.close(m.code, m.reason); } catch (err) {} }
+};
+`;
+
+// A WebSocket-shaped handle onto the socket the worker owns. Call sites keep
+// the API they had; only the thread the bytes are read on changes.
+class RoomSocket {
+    constructor(url) {
+        this.readyState = WebSocket.CONNECTING;
+        this.binaryType = 'arraybuffer';
+        this.onopen = this.onmessage = this.onerror = this.onclose = null;
+        this._listeners = {};
+        // Called instead of onclose when the worker itself dies before it ever
+        // spoke: a policy that blocks blob workers reports there, not as a
+        // synchronous throw, and the caller retries on a page socket.
+        this.onworkerdead = null;
+        this._workerSpoke = false;
+        const workerURL = URL.createObjectURL(new Blob([ROOM_SOCKET_WORKER_SRC], { type: 'text/javascript' }));
+        try {
+            this._worker = new Worker(workerURL);
+        } finally {
+            URL.revokeObjectURL(workerURL);
+        }
+        this._worker.onmessage = (e) => {
+            const m = e.data;
+            this._workerSpoke = true;
+            if (m.type === 'message') {
+                const ev = { data: m.data };
+                if (this.onmessage) this.onmessage(ev);
+                this._emit('message', ev);
+                return;
+            }
+            if (m.type === 'open') {
+                this.readyState = WebSocket.OPEN;
+                if (this.onopen) this.onopen();
+                this._emit('open', {});
+                return;
+            }
+            if (m.type === 'error') { if (this.onerror) this.onerror(m); this._emit('error', m); return; }
+            if (m.type === 'close') {
+                this.readyState = WebSocket.CLOSED;
+                if (this.onclose) this.onclose(m);
+                this._emit('close', m);
+                this._retire();
+            }
+        };
+        // A worker that died reports like a failed socket, not a silent hang.
+        this._worker.onerror = (event) => {
+            if (this.readyState === WebSocket.CLOSED) return;
+            this.readyState = WebSocket.CLOSED;
+            this._retire();
+            if (!this._workerSpoke && this.onworkerdead) { this.onworkerdead(event); return; }
+            if (this.onerror) this.onerror(event);
+            if (this.onclose) this.onclose({ code: 1006, reason: '', wasClean: false });
+        };
+        this._worker.postMessage({ type: 'open', url });
+    }
+
+    send(data) {
+        if (this.readyState !== WebSocket.OPEN) return;
+        if (typeof data === 'string') {
+            this._worker.postMessage({ type: 'send', data });
+            return;
+        }
+        // An ArrayBuffer is transferred rather than copied, so a caller must
+        // not keep it; a view is copied.
+        const buf = data instanceof ArrayBuffer ? data
+            : ArrayBuffer.isView(data)
+                ? data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)
+                : data;
+        this._worker.postMessage({ type: 'send', data: buf }, [buf]);
+    }
+
+    close(code, reason) {
+        this.readyState = WebSocket.CLOSING;
+        try { this._worker.postMessage({ type: 'close', code, reason }); } catch (err) { /* already gone */ }
+        this._retire();
+    }
+
+    // Transfers a native track-processor stream for the worker to read,
+    // encode and send: the whole microphone chain then skips the page.
+    connectMicStream(readable) {
+        try { this._worker.postMessage({ type: 'micStream', readable }, [readable]); } catch (err) {}
+    }
+
+    // The capture worklet's line, for engines with no page processor.
+    connectMicPort(port, sampleRate) {
+        try { this._worker.postMessage({ type: 'micPort', port, sampleRate }, [port]); } catch (err) {}
+    }
+
+    setMicActive(active) {
+        try { this._worker.postMessage({ type: 'micState', active }); } catch (err) {}
+    }
+
+    setMicId(idBytes) {
+        try { this._worker.postMessage({ type: 'micState', id: idBytes }); } catch (err) {}
+    }
+
+    stopMic() {
+        try { this._worker.postMessage({ type: 'micStop' }); } catch (err) {}
+    }
+
+    addEventListener(type, fn) {
+        (this._listeners[type] || (this._listeners[type] = [])).push(fn);
+    }
+
+    removeEventListener(type, fn) {
+        const list = this._listeners[type];
+        if (!list) return;
+        const at = list.indexOf(fn);
+        if (at >= 0) list.splice(at, 1);
+    }
+
+    // Calls every listener for the type; one throwing does not stop the rest.
+    _emit(type, ev) {
+        const list = this._listeners[type];
+        if (!list) return;
+        for (const fn of list.slice()) {
+            try { fn(ev); } catch (err) {}
+        }
+    }
+
+    // Hands the worker a speaking tile's line into its playback worklet.
+    connectAudio(publicId, port) {
+        try { this._worker.postMessage({ type: 'audioPort', publicId, port }, [port]); } catch (err) {}
+    }
+
+    setAudioActive(publicId, active) {
+        try { this._worker.postMessage({ type: 'audioState', publicId, active }); } catch (err) {}
+    }
+
+    closeAudio(publicId) {
+        try { this._worker.postMessage({ type: 'audioClose', publicId }); } catch (err) {}
+    }
+
+    // Ends the worker once, whichever side closed the socket.
+    _retire() {
+        if (this._retiring) return;
+        this._retiring = true;
+        setTimeout(() => { try { this._worker.terminate(); } catch (err) {} }, 2000);
+    }
+}
 
 function applyTranslations(scope, t) {
   scope.querySelectorAll('[data-i18n]').forEach(el => {
@@ -836,13 +1209,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     localContainer.dataset.userToken = COLLAB_DATA.userToken;
 
-    const MSG_TYPE = {
-        VIDEO_FRAME: 0x01,
-        AUDIO_FRAME: 0x02,
-        VIDEO_CONFIG: 0x03,
-        PCM_FRAME: 0x04,
-    };
-    
     const initNotificationAudio = () => {
         if (notificationAudioCtx) return;
         try {
@@ -876,14 +1242,37 @@ document.addEventListener('DOMContentLoaded', () => {
           this.audioBufferQueue = [];
           this.currentAudioData = null;
           this.currentDataOffset = 0;
-          this.MAX_BUFFER_PACKETS = 5; 
+          // Adaptive jitter depth. Output starts once target packets are
+          // queued; each mid-stream underrun deepens the target by one, a
+          // clean stretch decays it back, and standing depth above it is
+          // trimmed a packet at a time -- so steady latency sits at the
+          // smallest depth the delivery path has recently proven to hold.
+          this.TARGET_MIN = 2;
+          this.TARGET_MAX = 4;
+          this.MAX_BUFFER_PACKETS = 5;
+          this.target = this.TARGET_MIN;
+          this.priming = true;
+          this.overCount = 0;
+          this.cleanCount = 0;
+          // Packets left at the moment one is pulled, tracked at its minimum:
+          // the slack that proves a shallower target safe.
+          this.shiftSlackMin = Infinity;
 
-          this.port.onmessage = (event) => {
-            const pcmData = event.data;
+          this.enqueue = (pcmData) => {
             if (this.audioBufferQueue.length >= this.MAX_BUFFER_PACKETS) {
                 this.audioBufferQueue.shift(); // Drop the oldest packet to reduce latency
             }
             this.audioBufferQueue.push(pcmData);
+          };
+          this.port.onmessage = (event) => {
+            const data = event.data;
+            // The socket worker's own line in: packets then reach this
+            // processor whatever the page's thread is doing.
+            if (data && data.port) {
+                data.port.onmessage = (m) => this.enqueue(m.data);
+                return;
+            }
+            this.enqueue(data);
           };
         }
 
@@ -891,27 +1280,61 @@ document.addEventListener('DOMContentLoaded', () => {
             const outputChannel = outputs[0][0];
             if (!outputChannel) return true;
 
+            if (this.priming) {
+                if (this.audioBufferQueue.length < this.target) {
+                    outputChannel.fill(0);
+                    return true;
+                }
+                this.priming = false;
+            }
+
             const samplesPerBuffer = outputChannel.length;
             let currentSampleIndex = 0;
 
             while (currentSampleIndex < samplesPerBuffer) {
                 if (!this.currentAudioData || this.currentDataOffset >= this.currentAudioData.length) {
                     if (this.audioBufferQueue.length > 0) {
+                        const slack = this.audioBufferQueue.length - 1;
+                        if (slack < this.shiftSlackMin) this.shiftSlackMin = slack;
                         this.currentAudioData = this.audioBufferQueue.shift();
                         this.currentDataOffset = 0;
                     } else {
                         outputChannel.fill(0, currentSampleIndex);
+                        this.priming = true;
+                        this.target = Math.min(this.target + 1, this.TARGET_MAX);
+                        this.overCount = 0;
+                        this.cleanCount = 0;
+                        this.shiftSlackMin = Infinity;
                         return true;
                     }
                 }
 
                 const samplesToCopy = Math.min(samplesPerBuffer - currentSampleIndex, this.currentAudioData.length - this.currentDataOffset);
                 const chunkToCopy = this.currentAudioData.subarray(this.currentDataOffset, this.currentDataOffset + samplesToCopy);
-                
+
                 outputChannel.set(chunkToCopy, currentSampleIndex);
 
                 this.currentDataOffset += samplesToCopy;
                 currentSampleIndex += samplesToCopy;
+            }
+
+            // Reclaims latency: depth held above target is a standing delay,
+            // dropped one packet per window; long clean runs shrink the target.
+            if (this.audioBufferQueue.length > this.target) {
+                if (++this.overCount >= 250) {
+                    this.audioBufferQueue.shift();
+                    this.overCount = 0;
+                }
+            } else {
+                this.overCount = 0;
+            }
+            if (++this.cleanCount >= 2000) {
+                this.cleanCount = 0;
+                // Decay only over proven slack: a whole packet must have
+                // stayed spare at every pull, else a shallower target is a
+                // periodic audible probe rather than a reclaim.
+                if (this.target > this.TARGET_MIN && this.shiftSlackMin >= 2) this.target--;
+                this.shiftSlackMin = Infinity;
             }
 
             return true;
@@ -921,10 +1344,7 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     const startMedia = async () => {
-        const isStreamingSupported = 'VideoEncoder' in window && 'AudioEncoder' in window;
-        
-        if (COLLAB_DATA.userPermission === 'readonly' || !isStreamingSupported) {
-            if (COLLAB_DATA.userPermission !== 'readonly') alert(t('alerts.webcodecsUnsupported'));
+        if (COLLAB_DATA.userPermission === 'readonly') {
             return false;
         }
         if (mediaInitialized) {
@@ -1016,6 +1436,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type === 'mic') {
             isMicOn = !isMicOn;
             if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = isMicOn);
+            if (ws && ws.setMicActive) ws.setMicActive(isMicOn);
             sendControlMessage('audio_state', isMicOn);
         } else if (type === 'video') {
             if (localStream && localStream.getVideoTracks().length > 0) {
@@ -1051,6 +1472,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const setupVideoEncoder = async () => {
+        // No VideoEncoder leaves the session audio-only; audio has a PCM floor.
+        if (typeof VideoEncoder === 'undefined') return;
         const [videoTrack] = localStream.getVideoTracks();
         if (!videoTrack) return;
 
@@ -1117,10 +1540,14 @@ document.addEventListener('DOMContentLoaded', () => {
         readFrame();
     };
 
+    // Encode in the socket worker, else on the page; a ScriptProcessorNode
+    // sending raw PCM is the floor, taken only where WebCodecs audio is
+    // missing altogether (older iOS Safari).
     const setupAudioEncoder = async () => {
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const hasAudioCodec = (typeof AudioEncoder !== 'undefined' && typeof AudioData !== 'undefined');
 
-        if (isIOS) {
+        if (!hasAudioCodec) {
+            logMediaPath('audio capture: ScriptProcessorNode PCM (no WebCodecs audio).');
             const ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
             const source = ctx.createMediaStreamSource(localStream);
             const processor = ctx.createScriptProcessor(1024, 1, 1);
@@ -1154,6 +1581,47 @@ document.addEventListener('DOMContentLoaded', () => {
                     ctx.close();
                 }
             };
+        } else if (ws && ws.connectMicStream) {
+            const [audioTrack] = localStream.getAudioTracks();
+            if (!audioTrack) return;
+            ws.setMicActive(isMicOn);
+            if (localPublicIdBytes) ws.setMicId(localPublicIdBytes);
+            let wired = false;
+            if (hasWindowTrackProcessor) {
+                try {
+                    const processor = new MediaStreamTrackProcessor({ track: audioTrack });
+                    ws.connectMicStream(processor.readable);
+                    logMediaPath('audio capture: MediaStreamTrackProcessor read in the socket worker.');
+                    // The native readable ends with the track; the worker side is
+                    // told to drop its encoder.
+                    audioProcessor = { close: () => { try { ws.stopMic(); } catch (err) {} } };
+                    wired = true;
+                } catch (err) {
+                    console.warn('[Media] mic stream transfer failed:', err);
+                }
+            }
+            if (!wired) {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const workletURL = URL.createObjectURL(new Blob([SHIM_AUDIO_WORKLET_SRC], { type: 'application/javascript' }));
+                try {
+                    await ctx.audioWorklet.addModule(workletURL);
+                } finally {
+                    URL.revokeObjectURL(workletURL);
+                }
+                const source = ctx.createMediaStreamSource(new MediaStream([audioTrack]));
+                const node = new AudioWorkletNode(ctx, 'mstp-shim');
+                const line = new MessageChannel();
+                node.port.postMessage({ port: line.port1 }, [line.port1]);
+                ws.connectMicPort(line.port2, ctx.sampleRate);
+                source.connect(node);
+                logMediaPath('audio capture: worklet feeding the socket worker.');
+                audioProcessor = { close: () => {
+                    try { ws.stopMic(); } catch (err) {}
+                    try { source.disconnect(); node.disconnect(); } catch (err) {}
+                    if (ctx.state !== 'closed') ctx.close().catch(() => {});
+                } };
+            }
+            audioEncoder = { state: 'configured', close: () => { try { ws.stopMic(); } catch (err) {} } };
         } else {
             const [audioTrack] = localStream.getAudioTracks();
             if (!audioTrack) return;
@@ -1335,7 +1803,7 @@ document.addEventListener('DOMContentLoaded', () => {
         frame.close();
     };
 
-    const addRemoteStream = async (token, username) => {
+    const addRemoteStream = async (token, username, publicId) => {
         if (remoteStreams[token]) return;
 
         const container = document.createElement('div');
@@ -1384,7 +1852,7 @@ document.addEventListener('DOMContentLoaded', () => {
         videoGridContent.appendChild(container);
 
         const stream = {
-            username, container, canvas, ctx, video,
+            username, container, canvas, ctx, video, publicId,
             videoMuted: false, audioMuted: false,
             isConfigured: true,
             hasReceivedKeyFrame: false,
@@ -1433,6 +1901,14 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.assign(stream, { videoDecoder, audioDecoder, audioContext, workletNode, analyser });
         remoteStreams[token] = stream;
 
+        // The socket worker decodes this speaker and feeds the worklet down its
+        // own line; the in-page decoder above is the path for a page-owned socket.
+        if (publicId && ws && ws.connectAudio) {
+            const line = new MessageChannel();
+            workletNode.port.postMessage({ port: line.port1 }, [line.port1]);
+            ws.connectAudio(publicId, line.port2);
+        }
+
         // The handshake can involve a worker round-trip, so the canvas renders until
         // it lands -- and again from wherever the sink gives out.
         createVideoSink(() => {
@@ -1457,6 +1933,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const removeRemoteStream = (token) => {
         const stream = remoteStreams[token];
+        if (stream && stream.publicId && ws && ws.closeAudio) ws.closeAudio(stream.publicId);
         if (stream) {
             if (stream.sink) {
                 stream.sink.close();
@@ -1675,221 +2152,238 @@ document.addEventListener('DOMContentLoaded', () => {
     const connectWebSocket = () => {
         const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const url = `${proto}//${window.location.host}/ws/room/${COLLAB_DATA.sessionId}?token=${COLLAB_DATA.userToken}`;
-        ws = new WebSocket(url);
-        ws.binaryType = 'arraybuffer';
-
-        ws.onopen = () => {
-            console.log('[WS] Collaboration WebSocket connected.');
-            if (COLLAB_DATA.userRole === 'controller') {
-                ws.send(JSON.stringify({ action: 'get_apps' }));
-                ws.send(JSON.stringify({ action: 'request_resolutions' }));
-            }
-            const iframe = document.getElementById('session-frame')
-            if (iframe) {
-                ws.send(JSON.stringify({ action: 'client_resolution', width: iframe.clientWidth, height: iframe.clientHeight }));
-                if (COLLAB_DATA.userRole === 'controller') {
-                    clientResolutions[COLLAB_DATA.userToken] = { width: iframe.clientWidth, height: iframe.clientHeight };
-                }
-            }
+        // No worker to be had (a policy forbidding blob workers, say -- reported
+        // as a throw or as the worker dying unspoken, depending on the engine).
+        // The socket then runs here and audio takes the in-page decode path.
+        const usePageSocket = () => {
+            console.warn('[WS] socket worker unavailable, reading on the page.');
+            ws = new WebSocket(url);
+            ws.binaryType = 'arraybuffer';
+            attachSocketHandlers();
         };
+        try {
+            ws = new RoomSocket(url);
+            ws.onworkerdead = usePageSocket;
+            attachSocketHandlers();
+        } catch (err) {
+            usePageSocket();
+        }
+        function attachSocketHandlers() {
 
-        ws.onmessage = (event) => {
-            if (event.data instanceof ArrayBuffer) {
-                const publicId = new TextDecoder().decode(event.data.slice(0, 8));
-                const token = publicIdToTokenMap[publicId];
-                if (!token) return;
-                const payload = event.data.slice(8);
-                handleRemoteStream(token, payload);
-                return;
-            }
-
-            const data = JSON.parse(event.data);
-            switch (data.type) {
-                case 'session_ended':
-                    handleControllerDisconnect();
-                    break;
-                case 'request_resolutions': {
-                    const reqIframe = document.getElementById('session-frame');
-                    if (reqIframe && ws && ws.readyState === WebSocket.OPEN) {
-                        ws.send(JSON.stringify({ action: 'client_resolution', width: reqIframe.clientWidth, height: reqIframe.clientHeight }));
-                    }
-                    break;
+            ws.onopen = () => {
+                console.log('[WS] Collaboration WebSocket connected.');
+                if (COLLAB_DATA.userRole === 'controller') {
+                    ws.send(JSON.stringify({ action: 'get_apps' }));
+                    ws.send(JSON.stringify({ action: 'request_resolutions' }));
                 }
-                case 'resolution_update':
-                    clientResolutions[data.token] = { width: data.width, height: data.height };
-                    if (COLLAB_DATA.userRole === 'controller' && !isResolutionLocked && currentMkOwner === data.token) {
-                        applyAutoResolution();
+                const iframe = document.getElementById('session-frame')
+                if (iframe) {
+                    ws.send(JSON.stringify({ action: 'client_resolution', width: iframe.clientWidth, height: iframe.clientHeight }));
+                    if (COLLAB_DATA.userRole === 'controller') {
+                        clientResolutions[COLLAB_DATA.userToken] = { width: iframe.clientWidth, height: iframe.clientHeight };
                     }
-                    break;
-                case 'state_update':
-                    const hasJoined = sessionStorage.getItem('collab_hasJoined_' + COLLAB_DATA.sessionId);
-                    if (COLLAB_DATA.userRole === 'viewer' && !hasJoined) {
-                        return;
-                    }
-                    currentUserState = data.viewers;
-                    const controllerUser = data.viewers.find(u => u.permission === 'controller');
-                    const waitingOverlay = document.getElementById('waiting-overlay');
-                    const iframe = document.getElementById('session-frame');
-                    if (controllerUser && controllerUser.online) {
-                        if (iframe && iframe.getAttribute('src') === 'about:blank' && iframe.dataset.src) {
-                            iframe.src = iframe.dataset.src;
+                }
+            };
+
+            ws.onmessage = (event) => {
+                if (event.data instanceof ArrayBuffer) {
+                    const publicId = new TextDecoder().decode(event.data.slice(0, 8));
+                    const token = publicIdToTokenMap[publicId];
+                    if (!token) return;
+                    const payload = event.data.slice(8);
+                    handleRemoteStream(token, payload);
+                    return;
+                }
+
+                const data = JSON.parse(event.data);
+                switch (data.type) {
+                    case 'session_ended':
+                        handleControllerDisconnect();
+                        break;
+                    case 'request_resolutions': {
+                        const reqIframe = document.getElementById('session-frame');
+                        if (reqIframe && ws && ws.readyState === WebSocket.OPEN) {
+                            ws.send(JSON.stringify({ action: 'client_resolution', width: reqIframe.clientWidth, height: reqIframe.clientHeight }));
                         }
-                        if (waitingOverlay && COLLAB_DATA.userRole === 'viewer') {
-                            waitingOverlay.classList.add('hidden');
-                        }
-                    } else {
-                        if (waitingOverlay && COLLAB_DATA.userRole === 'viewer') {
-                            waitingOverlay.classList.remove('hidden');
-                        }
+                        break;
                     }
-
-                    currentDesignatedSpeaker = data.designated_speaker;
-
-                    const self = data.viewers.find(u => u.token === COLLAB_DATA.userToken);
-                    if (self && self.publicId && self.publicId !== localPublicId) {
-                        localPublicId = self.publicId;
-                        localPublicIdBytes = textEncoder.encode(localPublicId);
-                    }
-
-                    publicIdToTokenMap = {};
-                    data.viewers.forEach(user => {
-                        if (user.publicId) publicIdToTokenMap[user.publicId] = user.token;
-                    });
-
-                    document.querySelectorAll('.video-container').forEach(el => el.classList.remove('designated-speaker'));
-                    document.querySelectorAll('.designate-speaker').forEach(el => el.classList.remove('active'));
-                    if (currentDesignatedSpeaker) {
-                        const speakerContainer = document.querySelector(`[data-user-token="${currentDesignatedSpeaker}"]`);
-                        if (speakerContainer) {
-                            speakerContainer.classList.add('designated-speaker');
-                            const speakerButton = speakerContainer.querySelector('.designate-speaker');
-                            if (speakerButton) speakerButton.classList.add('active');
-                        }
-                    }
-
-                    updateGestureOverlay();
-
-                    const mkOwnerUser = data.viewers.find(u => u.has_mk);
-                    const newMkOwner = mkOwnerUser ? mkOwnerUser.token : COLLAB_DATA.userToken;
-                    
-                    const gamingModeBtn = document.getElementById('gaming-mode-btn');
-                    if (gamingModeBtn) {
-                        const isController = COLLAB_DATA.userRole === 'controller';
-                        const iHaveMk = (mkOwnerUser && mkOwnerUser.token === COLLAB_DATA.userToken) || (!mkOwnerUser && isController);
-                        if (iHaveMk) {
-                            gamingModeBtn.classList.remove('hidden');
-                        } else {
-                            gamingModeBtn.classList.add('hidden');
-                        }
-                    }
-
-                    if (COLLAB_DATA.userRole === 'controller' && currentMkOwner !== newMkOwner) {
-                        currentMkOwner = newMkOwner;
-                        if (!isResolutionLocked) {
+                    case 'resolution_update':
+                        clientResolutions[data.token] = { width: data.width, height: data.height };
+                        if (COLLAB_DATA.userRole === 'controller' && !isResolutionLocked && currentMkOwner === data.token) {
                             applyAutoResolution();
                         }
-                    }
-
-                    const participantsToShow = data.viewers.filter(u =>
-                        u.permission !== 'readonly' &&
-                        u.online &&
-                        u.token !== COLLAB_DATA.userToken
-                    );
-                    const serverTokens = new Set(participantsToShow.map(u => u.token));
-                    const clientTokens = new Set(Object.keys(remoteStreams));
-
-                    for (const token of clientTokens) {
-                        if (!serverTokens.has(token)) {
-                            removeRemoteStream(token);
+                        break;
+                    case 'state_update':
+                        const hasJoined = sessionStorage.getItem('collab_hasJoined_' + COLLAB_DATA.sessionId);
+                        if (COLLAB_DATA.userRole === 'viewer' && !hasJoined) {
+                            return;
                         }
-                    }
-
-                    for (const user of participantsToShow) {
-                        const stream = remoteStreams[user.token];
-                        if (!stream) {
-                            addRemoteStream(user.token, user.username);
-                        } else if (stream.username !== user.username) {
-                            stream.username = user.username;
-                            const usernameEl = stream.container.querySelector('.username');
-                            if (usernameEl) {
-                                usernameEl.textContent = user.username;
+                        currentUserState = data.viewers;
+                        const controllerUser = data.viewers.find(u => u.permission === 'controller');
+                        const waitingOverlay = document.getElementById('waiting-overlay');
+                        const iframe = document.getElementById('session-frame');
+                        if (controllerUser && controllerUser.online) {
+                            if (iframe && iframe.getAttribute('src') === 'about:blank' && iframe.dataset.src) {
+                                iframe.src = iframe.dataset.src;
+                            }
+                            if (waitingOverlay && COLLAB_DATA.userRole === 'viewer') {
+                                waitingOverlay.classList.add('hidden');
+                            }
+                        } else {
+                            if (waitingOverlay && COLLAB_DATA.userRole === 'viewer') {
+                                waitingOverlay.classList.remove('hidden');
                             }
                         }
-                    }
+
+                        currentDesignatedSpeaker = data.designated_speaker;
+
+                        const self = data.viewers.find(u => u.token === COLLAB_DATA.userToken);
+                        if (self && self.publicId && self.publicId !== localPublicId) {
+                            localPublicId = self.publicId;
+                            localPublicIdBytes = textEncoder.encode(localPublicId);
+                            if (ws && ws.setMicId) ws.setMicId(localPublicIdBytes);
+                        }
+
+                        publicIdToTokenMap = {};
+                        data.viewers.forEach(user => {
+                            if (user.publicId) publicIdToTokenMap[user.publicId] = user.token;
+                        });
+
+                        document.querySelectorAll('.video-container').forEach(el => el.classList.remove('designated-speaker'));
+                        document.querySelectorAll('.designate-speaker').forEach(el => el.classList.remove('active'));
+                        if (currentDesignatedSpeaker) {
+                            const speakerContainer = document.querySelector(`[data-user-token="${currentDesignatedSpeaker}"]`);
+                            if (speakerContainer) {
+                                speakerContainer.classList.add('designated-speaker');
+                                const speakerButton = speakerContainer.querySelector('.designate-speaker');
+                                if (speakerButton) speakerButton.classList.add('active');
+                            }
+                        }
+
+                        updateGestureOverlay();
+
+                        const mkOwnerUser = data.viewers.find(u => u.has_mk);
+                        const newMkOwner = mkOwnerUser ? mkOwnerUser.token : COLLAB_DATA.userToken;
                     
-                    updateGamepadIcons(data.viewers);
-                    break;
-                case 'chat_message':
-                    messageStore[data.messageId] = data;
-                    appendChatMessage(data, 'chat');
-                    break;
-                case 'user_joined':
-                case 'user_left':
-                case 'username_changed':
-                case 'gamepad_change':
-                case 'mk_change':
-                    appendChatMessage(data, 'system');
-                    break;
-                case 'control':
-                    handleControlMessage(data.payload);
-                    break;
-                case 'controller_disconnected':
-                    break;
-                case 'app_list':
-                    availableAppsList = data.apps;
-                    if (document.getElementById('start-menu-modal') && !document.getElementById('start-menu-modal').classList.contains('hidden')) {
-                        renderStartMenu();
-                    }
-                    const activeApp = availableAppsList.find(app => app.active);
-                    if (activeApp) {
-                        const titleEl = document.getElementById('sidebar-app-title');
-                        if (titleEl) titleEl.textContent = activeApp.name;
-                        document.title = activeApp.name;
-                    }
-                    break;
-                case 'app_swapped': {
-                    pendingActions.clear();
-                    const iframe = document.getElementById('session-frame');
-                    let urlStr = iframe.src;
-                    const isBlank = iframe.getAttribute('src') === 'about:blank';
-                    
-                    if (isBlank && iframe.dataset.src) {
-                        urlStr = iframe.dataset.src;
-                    }
-                    if (urlStr && urlStr !== 'about:blank') {
-                        try {
-                            const currentSrc = new URL(urlStr, window.location.href);
-                            currentSrc.searchParams.set('t', Date.now());
-                            
-                            if (isBlank) {
-                                iframe.dataset.src = currentSrc.toString();
+                        const gamingModeBtn = document.getElementById('gaming-mode-btn');
+                        if (gamingModeBtn) {
+                            const isController = COLLAB_DATA.userRole === 'controller';
+                            const iHaveMk = (mkOwnerUser && mkOwnerUser.token === COLLAB_DATA.userToken) || (!mkOwnerUser && isController);
+                            if (iHaveMk) {
+                                gamingModeBtn.classList.remove('hidden');
                             } else {
-                                iframe.src = currentSrc.toString();
+                                gamingModeBtn.classList.add('hidden');
                             }
-                        } catch (e) {
-                            console.warn("Could not reload iframe on swap:", e);
                         }
-                    }
-                    const titleEl = document.getElementById('sidebar-app-title');
-                    if (titleEl) titleEl.textContent = data.app_name;
-                    document.title = data.app_name;
-                    ws.send(JSON.stringify({ action: 'get_apps' }));
-                    showToast({ sender: t('systemMessages.systemSender'), message: t('systemMessages.swappedApp', { app_name: data.app_name }) });
-                    break;
-                }
-                case 'error':
-                     pendingActions.clear();
-                     if (document.getElementById('start-menu-modal')) renderStartMenu();
-                     alert(data.message);
-                     break;
-            }
-        };
 
-        ws.onclose = () => {
-            console.log('[WS] WebSocket closed.');
-            handleControllerDisconnect();
-        };
-        ws.onerror = (err) => console.error('[WS] WebSocket error:', err);
+                        if (COLLAB_DATA.userRole === 'controller' && currentMkOwner !== newMkOwner) {
+                            currentMkOwner = newMkOwner;
+                            if (!isResolutionLocked) {
+                                applyAutoResolution();
+                            }
+                        }
+
+                        const participantsToShow = data.viewers.filter(u =>
+                            u.permission !== 'readonly' &&
+                            u.online &&
+                            u.token !== COLLAB_DATA.userToken
+                        );
+                        const serverTokens = new Set(participantsToShow.map(u => u.token));
+                        const clientTokens = new Set(Object.keys(remoteStreams));
+
+                        for (const token of clientTokens) {
+                            if (!serverTokens.has(token)) {
+                                removeRemoteStream(token);
+                            }
+                        }
+
+                        for (const user of participantsToShow) {
+                            const stream = remoteStreams[user.token];
+                            if (!stream) {
+                                addRemoteStream(user.token, user.username, user.publicId);
+                            } else if (stream.username !== user.username) {
+                                stream.username = user.username;
+                                const usernameEl = stream.container.querySelector('.username');
+                                if (usernameEl) {
+                                    usernameEl.textContent = user.username;
+                                }
+                            }
+                        }
+                    
+                        updateGamepadIcons(data.viewers);
+                        break;
+                    case 'chat_message':
+                        messageStore[data.messageId] = data;
+                        appendChatMessage(data, 'chat');
+                        break;
+                    case 'user_joined':
+                    case 'user_left':
+                    case 'username_changed':
+                    case 'gamepad_change':
+                    case 'mk_change':
+                        appendChatMessage(data, 'system');
+                        break;
+                    case 'control':
+                        handleControlMessage(data.payload);
+                        break;
+                    case 'controller_disconnected':
+                        break;
+                    case 'app_list':
+                        availableAppsList = data.apps;
+                        if (document.getElementById('start-menu-modal') && !document.getElementById('start-menu-modal').classList.contains('hidden')) {
+                            renderStartMenu();
+                        }
+                        const activeApp = availableAppsList.find(app => app.active);
+                        if (activeApp) {
+                            const titleEl = document.getElementById('sidebar-app-title');
+                            if (titleEl) titleEl.textContent = activeApp.name;
+                            document.title = activeApp.name;
+                        }
+                        break;
+                    case 'app_swapped': {
+                        pendingActions.clear();
+                        const iframe = document.getElementById('session-frame');
+                        let urlStr = iframe.src;
+                        const isBlank = iframe.getAttribute('src') === 'about:blank';
+                    
+                        if (isBlank && iframe.dataset.src) {
+                            urlStr = iframe.dataset.src;
+                        }
+                        if (urlStr && urlStr !== 'about:blank') {
+                            try {
+                                const currentSrc = new URL(urlStr, window.location.href);
+                                currentSrc.searchParams.set('t', Date.now());
+                            
+                                if (isBlank) {
+                                    iframe.dataset.src = currentSrc.toString();
+                                } else {
+                                    iframe.src = currentSrc.toString();
+                                }
+                            } catch (e) {
+                                console.warn("Could not reload iframe on swap:", e);
+                            }
+                        }
+                        const titleEl = document.getElementById('sidebar-app-title');
+                        if (titleEl) titleEl.textContent = data.app_name;
+                        document.title = data.app_name;
+                        ws.send(JSON.stringify({ action: 'get_apps' }));
+                        showToast({ sender: t('systemMessages.systemSender'), message: t('systemMessages.swappedApp', { app_name: data.app_name }) });
+                        break;
+                    }
+                    case 'error':
+                         pendingActions.clear();
+                         if (document.getElementById('start-menu-modal')) renderStartMenu();
+                         alert(data.message);
+                         break;
+                }
+            };
+
+            ws.onclose = () => {
+                console.log('[WS] WebSocket closed.');
+                handleControllerDisconnect();
+            };
+            ws.onerror = (err) => console.error('[WS] WebSocket error:', err);
+        }
     };
 
     const handleControllerDisconnect = () => {
@@ -2400,6 +2894,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             isMicOn = true;
             if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = true);
+            if (ws && ws.setMicActive) ws.setMicActive(true);
             sendControlMessage('audio_state', true);
             updateMediaButtonUI();
 
@@ -2757,6 +3252,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btn.classList.contains('mute-audio')) {
             if (!stream) return;
             stream.audioMuted = !stream.audioMuted;
+            if (stream.publicId && ws && ws.setAudioActive) ws.setAudioActive(stream.publicId, !stream.audioMuted);
             if (stream.audioContext) {
                 if (stream.audioMuted && stream.audioContext.state === 'running') {
                     stream.audioContext.suspend();
