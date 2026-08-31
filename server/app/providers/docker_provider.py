@@ -261,21 +261,28 @@ class DockerProvider(BaseProvider):
                 
                 if health_check_passed and is_collaboration:
                     logger.info(f"[{session_id}] Performing collaboration health check...")
-                    control_plane_url = f"http://{ip_address}:8083/tokens"
-                    try:
-                        async with httpx.AsyncClient(timeout=5.0) as client:
-                            response = await client.post(
-                                control_plane_url,
-                                json=initial_tokens,
-                                headers={"Authorization": f"Bearer {master_token}"}
-                            )
-                            if response.status_code == 200:
-                                logger.info(f"[{session_id}] Collaboration health check passed. Initial tokens set.")
-                                return ip_address
-                            else:
-                                logger.warning(f"[{session_id}] Collaboration health check failed with status {response.status_code}: {response.text}")
-                    except httpx.RequestError as e:
-                        logger.warning(f"[{session_id}] Collaboration health check connection error: {e}")
+                    control_plane_urls = [
+                        f"http://{ip_address}:{self.app_config['provider_config']['port']}{subfolder.rstrip('/')}/api/tokens",
+                        f"http://{ip_address}:8083/tokens",
+                    ]
+                    async with httpx.AsyncClient(timeout=5.0) as client:
+                        for control_plane_url in control_plane_urls:
+                            try:
+                                response = await client.post(
+                                    control_plane_url,
+                                    json=initial_tokens,
+                                    headers={"Authorization": f"Bearer {master_token}"}
+                                )
+                                if response.status_code == 200:
+                                    from ..collaboration import TOKEN_ENDPOINT_CACHE
+                                    TOKEN_ENDPOINT_CACHE[ip_address] = control_plane_url
+                                    logger.info(f"[{session_id}] Collaboration health check passed. Initial tokens set.")
+                                    return ip_address
+                                else:
+                                    logger.warning(f"[{session_id}] Collaboration health check failed with status {response.status_code} at {control_plane_url}: {response.text}")
+                            except httpx.RequestError as e:
+                                logger.debug(f"[{session_id}] Collaboration control plane not reachable at {control_plane_url}: {e}")
+                    logger.warning(f"[{session_id}] Collaboration health check failed on all endpoints.")
 
             except httpx.ConnectError:
                 logger.debug(

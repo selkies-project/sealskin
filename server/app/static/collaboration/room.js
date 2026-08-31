@@ -20,6 +20,27 @@
 const hasWindowTrackProcessor = (typeof MediaStreamTrackProcessor !== 'undefined');
 const hasWindowTrackGenerator = (typeof MediaStreamTrackGenerator !== 'undefined');
 
+// ---------------------------------------------------------------------------
+// Camera orientation. Nothing downstream re-orients a frame (the receiver
+// paints whatever arrives), so the sender has to hand the encoder upright
+// pixels. Chromium stamps each VideoFrame with rotation/flip and applies them
+// in drawImage. Mobile WebKit delivers sensor-fixed frames with no metadata
+// at all, and the only thing that says which way is up is the window
+// orientation relative to the one the sensor is upright in.
+// ---------------------------------------------------------------------------
+
+const hasFrameOrientation = typeof VideoFrame !== 'undefined'
+    && typeof VideoFrame.prototype === 'object'
+    && 'rotation' in VideoFrame.prototype;
+
+const SENSOR_UPRIGHT_ORIENTATION = -90;
+
+const canDeriveOrientation = () =>
+    !hasFrameOrientation && typeof window.orientation === 'number';
+
+const deriveRotation = () =>
+    ((window.orientation - SENSOR_UPRIGHT_ORIENTATION) % 360 + 360) % 360;
+
 // Frames a worker-hosted generator may be behind before new ones are dropped, and
 // the consecutive-drop count after which a generator is considered stalled for good.
 const SINK_MAX_IN_FLIGHT = 3;
@@ -1131,7 +1152,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let preferredMicId = localStorage.getItem('collab_preferredMicId') || null;
     let preferredCamId = localStorage.getItem('collab_preferredCamId') || null;
     let localAudioAnalyser = null;
+    let localAudioContext = null;
+    let localSpeakingData = null;
     let animationFrameId = null;
+    const WEBCAM_WIDTH = 240;
+    const WEBCAM_HEIGHT = 180;
     let lastKnownVolume = parseFloat(localStorage.getItem('collab_iframe_volume')) || 1.0;
     let isIframeMuted = false;
 
@@ -1139,10 +1164,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const iframe = document.getElementById('session-frame');
         if (iframe && iframe.contentWindow) {
             const vol = isIframeMuted ? 0 : lastKnownVolume;
-            iframe.contentWindow.postMessage({ type: 'setVolume', value: vol }, '*');
-            if (isIframeMuted) iframe.contentWindow.postMessage({ type: 'setMute', value: true }, '*');
+            iframe.contentWindow.postMessage({ type: 'setVolume', value: vol }, window.location.origin);
+            if (isIframeMuted) iframe.contentWindow.postMessage({ type: 'setMute', value: true }, window.location.origin);
         }
     };
+
+    const streamMuteBtn = document.getElementById('stream-mute-btn');
+    const streamVolumeSlider = document.getElementById('stream-volume-slider');
+    const syncStreamVolumeControls = () => {
+        streamMuteBtn.querySelector('i').className = isIframeMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+        streamMuteBtn.classList.toggle('inactive', isIframeMuted);
+        streamVolumeSlider.value = isIframeMuted ? 0 : lastKnownVolume;
+    };
+    syncStreamVolumeControls();
+    streamVolumeSlider.addEventListener('input', (e) => {
+        const value = parseFloat(e.target.value);
+        isIframeMuted = value === 0;
+        if (!isIframeMuted) {
+            lastKnownVolume = value;
+            localStorage.setItem('collab_iframe_volume', lastKnownVolume);
+        }
+        syncStreamVolumeControls();
+        sendVolumeToIframe();
+    });
+    streamMuteBtn.addEventListener('click', () => {
+        isIframeMuted = !isIframeMuted;
+        syncStreamVolumeControls();
+        sendVolumeToIframe();
+    });
 
     const handlePageInteraction = () => {
         setTimeout(sendVolumeToIframe, 500);
@@ -1152,10 +1201,18 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('blur', handlePageInteraction);
 
     let ws;
+    let reconnectTimer = null;
+    let reconnectAttempts = 0;
+    let sessionEnded = false;
+    const MAX_RECONNECT_ATTEMPTS = 8;
     let username = localStorage.getItem('collab_username');
-    let isSidebarVisible = false;
+    let isChatOpen = false;
     let messageStore = {};
+    const MAX_STORED_MESSAGES = 200;
     let replyingTo = null;
+    const PEEK_LIFETIME_MS = 6000;
+    const MAX_PEEK_BUBBLES = 3;
+    const INVITE_FLASH_MS = 1200;
     let notificationAudioCtx;
     let gamepadIcons = {};
     let mkIcon = null;
@@ -1192,22 +1249,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const sidebarEl = document.getElementById('sidebar');
-    const toggleHandle = document.getElementById('sidebar-toggle-handle');
     const videoToggleHandle = document.getElementById('video-toggle-handle');
     let isVideoGridVisible = true;
     const settingsModalOverlay = document.getElementById('settings-modal-overlay');
     const settingsModalCloseBtn = document.getElementById('settings-modal-close');
+    const usernameModalOverlay = document.getElementById('username-modal-overlay');
     const audioInputSelect = document.getElementById('audio-input-select');
     const videoInputSelect = document.getElementById('video-input-select');
+    const reloadStreamBtn = document.getElementById('reload-stream-btn');
+    const gamingModeBtn = document.getElementById('gaming-mode-btn');
     const videoGrid = document.getElementById('video-grid');
+    const videoStrip = document.getElementById('video-strip');
     const videoGridContent = document.getElementById('video-grid-content');
     const localVideo = document.getElementById('local-video');
     const localContainer = document.getElementById('local-user-container');
-    const toastContainer = document.getElementById('toast-container');
-    let toggleMicBtn, toggleVideoBtn, iframeMuteBtn, iframeVolumeSlider; 
-    
+    const toggleMicBtn = document.getElementById('toggle-mic-btn');
+    const toggleVideoBtn = document.getElementById('toggle-video-btn');
+    const settingsBtn = document.getElementById('settings-btn');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const chatDock = document.getElementById('chat-dock');
+    const chatTab = document.getElementById('chat-tab');
+    const chatScroll = document.getElementById('chat-messages-scroll');
+    const chatPeek = document.getElementById('chat-peek');
+    const inviteTile = document.getElementById('invite-tile');
+    const inviteBtn = document.getElementById('invite-btn');
+
     localContainer.dataset.userToken = COLLAB_DATA.userToken;
+    if (COLLAB_DATA.userRole !== 'controller') gamingModeBtn.classList.remove('hidden');
 
     const initNotificationAudio = () => {
         if (notificationAudioCtx) return;
@@ -1223,7 +1292,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const unlockAllAudio = () => {
         if (isAudioUnlocked) return;
         console.log("Attempting to unlock media stream audio contexts.");
-        
+
         Object.values(remoteStreams).forEach(stream => {
             if (stream.audioContext && stream.audioContext.state === 'suspended') {
                 stream.audioContext.resume().then(() => {
@@ -1343,6 +1412,14 @@ document.addEventListener('DOMContentLoaded', () => {
       registerProcessor('audio-player-processor', AudioPlayerProcessor);
     `;
 
+    const closeLocalAudioContext = () => {
+        if (!localAudioContext) return;
+        if (localAudioContext.state !== 'closed') {
+            localAudioContext.close().catch(err => console.warn('[Media] local analyser context close failed:', err));
+        }
+        localAudioContext = null;
+    };
+
     const startMedia = async () => {
         if (COLLAB_DATA.userPermission === 'readonly') {
             return false;
@@ -1363,8 +1440,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const videoConstraints = {
                 deviceId: preferredCamId ? { exact: preferredCamId } : undefined,
-                width: 320,
-                height: 240,
+                width: WEBCAM_WIDTH,
+                height: WEBCAM_HEIGHT,
                 frameRate: 30
             };
 
@@ -1387,10 +1464,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             }
 
-            const audioCtx = new AudioContext();
-            const source = audioCtx.createMediaStreamSource(localStream);
-            localAudioAnalyser = audioCtx.createAnalyser();
+            closeLocalAudioContext();
+            localAudioContext = new AudioContext();
+            const source = localAudioContext.createMediaStreamSource(localStream);
+            localAudioAnalyser = localAudioContext.createAnalyser();
             localAudioAnalyser.fftSize = 512;
+            localSpeakingData = null;
             source.connect(localAudioAnalyser);
 
             localStream.getAudioTracks().forEach(t => t.enabled = isMicOn);
@@ -1442,7 +1521,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (localStream && localStream.getVideoTracks().length > 0) {
                 isWebcamOn = !isWebcamOn;
                 localStream.getVideoTracks().forEach(t => t.enabled = isWebcamOn);
-                localContainer.style.display = isWebcamOn ? 'flex' : 'none';
                 sendControlMessage('video_state', isWebcamOn);
             } else {
                 isWebcamOn = false;
@@ -1468,7 +1546,47 @@ document.addEventListener('DOMContentLoaded', () => {
         videoEncoder = null;
         audioEncoder = null;
         localAudioAnalyser = null;
+        localSpeakingData = null;
+        closeLocalAudioContext();
         mediaInitialized = false;
+    };
+
+    const restartMediaForDeviceChange = async () => {
+        if (!mediaInitialized) return;
+        if (isInitializingMedia) {
+            console.warn('[Media] device switch ignored: media initialization is already in progress.');
+            return;
+        }
+        isInitializingMedia = true;
+        try {
+            await startMedia();
+        } finally {
+            isInitializingMedia = false;
+        }
+    };
+
+    const composeCanvas = typeof OffscreenCanvas !== 'undefined'
+        ? new OffscreenCanvas(WEBCAM_WIDTH, WEBCAM_HEIGHT)
+        : Object.assign(document.createElement('canvas'), { width: WEBCAM_WIDTH, height: WEBCAM_HEIGHT });
+    const composeCtx = composeCanvas.getContext('2d', { alpha: false, desynchronized: true });
+    let composeFailed = false;
+
+    const composeFrame = (frame) => {
+        const dw = frame.displayWidth || frame.codedWidth;
+        const dh = frame.displayHeight || frame.codedHeight;
+        const turn = canDeriveOrientation() ? deriveRotation() : 0;
+        const sideways = turn % 180 === 90;
+        const uprightW = sideways ? dh : dw;
+        const uprightH = sideways ? dw : dh;
+        const scale = Math.min(WEBCAM_WIDTH / uprightW, WEBCAM_HEIGHT / uprightH);
+        composeCtx.fillStyle = '#000';
+        composeCtx.fillRect(0, 0, WEBCAM_WIDTH, WEBCAM_HEIGHT);
+        composeCtx.save();
+        composeCtx.translate(WEBCAM_WIDTH / 2, WEBCAM_HEIGHT / 2);
+        if (turn) composeCtx.rotate((turn * Math.PI) / 180);
+        composeCtx.drawImage(frame, (-dw * scale) / 2, (-dh * scale) / 2, dw * scale, dh * scale);
+        composeCtx.restore();
+        return new VideoFrame(composeCanvas, { timestamp: frame.timestamp });
     };
 
     const setupVideoEncoder = async () => {
@@ -1500,7 +1618,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     message.set(new Uint8Array(description), 9);
                     ws.send(message.buffer);
                 }
-                
+
                 if (chunk.byteLength === 0) return;
 
                 const isKeyFrame = chunk.type === 'key';
@@ -1516,8 +1634,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         videoEncoder.configure({
             codec: 'vp8',
-            width: 320,
-            height: 240,
+            width: WEBCAM_WIDTH,
+            height: WEBCAM_HEIGHT,
             bitrate: 1_000_000,
             framerate: 30,
             latencyMode: 'realtime',
@@ -1526,13 +1644,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const readFrame = () => {
             videoReader.read().then(({ done, value: frame }) => {
                 if (done || !localStream) return;
-                
+
                 if (videoEncoder.state === 'configured' && isWebcamOn) {
                     const needsKeyFrame = (frameCounter % 120 === 0);
-                    videoEncoder.encode(frame, { keyFrame: needsKeyFrame });
+                    let upright = frame;
+                    if (!composeFailed) {
+                        try {
+                            upright = composeFrame(frame);
+                        } catch (e) {
+                            composeFailed = true;
+                            logMediaPath(`webcam compose: canvas path unavailable (${e.message}); encoding raw frames.`);
+                        }
+                    }
+                    videoEncoder.encode(upright, { keyFrame: needsKeyFrame });
+                    if (upright !== frame) upright.close();
                     frameCounter++;
                 }
-                
+
                 frame.close();
                 readFrame();
             }).catch(e => console.error("[Encoder] Video reader error", e));
@@ -1683,7 +1811,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const config = { codec: 'vp8', description: description };
                     if (stream.videoDecoder.state !== 'closed') {
                         stream.videoDecoder.configure(config);
-                        stream.isConfigured = true;
                     }
                     break;
 
@@ -1711,7 +1838,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
 
                 case MSG_TYPE.AUDIO_FRAME:
-                    if (stream.audioDecoder.state !== 'configured' || stream.audioMuted) return;
+                    if (!stream.audioDecoder || stream.audioDecoder.state !== 'configured' || stream.audioMuted) return;
                     const audioChunkData = data.slice(2);
                     const audioChunk = new EncodedAudioChunk({
                         type: 'key',
@@ -1810,14 +1937,13 @@ document.addEventListener('DOMContentLoaded', () => {
         container.className = 'video-container reorderable';
         container.id = `container-${token}`;
         container.dataset.userToken = token;
-        container.draggable = true;
-        
+
         const canvas = document.createElement('canvas');
-        canvas.width = 240;
-        canvas.height = 180;
+        canvas.width = WEBCAM_WIDTH;
+        canvas.height = WEBCAM_HEIGHT;
         const ctx = canvas.getContext('2d', { desynchronized: true });
         ctx.fillStyle = '#222';
-        ctx.fillRect(0, 0, 240, 180);
+        ctx.fillRect(0, 0, WEBCAM_WIDTH, WEBCAM_HEIGHT);
 
         // Overlays the canvas, and is only shown once a track generator is feeding it.
         const video = document.createElement('video');
@@ -1838,23 +1964,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const overlay = document.createElement('div');
         overlay.className = 'video-overlay';
         overlay.innerHTML = `
-            <span class="username">${username}</span>
+            <span class="username">${escapeHTML(username)}</span>
             <div class="remote-controls">
                 ${controllerControls}
                 <button class="remote-control-btn mute-audio" data-token="${token}" title="${t('tooltips.toggleRemoteAudio')}"><i class="fas fa-microphone"></i></button>
                 <button class="remote-control-btn mute-video" data-token="${token}" title="${t('tooltips.toggleRemoteVideo')}"><i class="fas fa-video"></i></button>
             </div>
         `;
-        
+
         container.appendChild(canvas);
         container.appendChild(video);
         container.appendChild(overlay);
-        videoGridContent.appendChild(container);
+        videoGridContent.insertBefore(container, inviteTile);
 
         const stream = {
             username, container, canvas, ctx, video, publicId,
             videoMuted: false, audioMuted: false,
-            isConfigured: true,
             hasReceivedKeyFrame: false,
             sink: null, sinkShown: false, sinkRevealed: false, sinkGeneration: 0
         };
@@ -1872,20 +1997,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
         videoDecoder.configure({ codec: 'vp8' });
 
-        const audioContext = new AudioContext({ sampleRate: 48000 });
-        if (isAudioUnlocked && audioContext.state === 'suspended') {
-            audioContext.resume();
+        stream.videoDecoder = videoDecoder;
+        remoteStreams[token] = stream;
+
+        let audioContext;
+        let workletNode;
+        let analyser;
+        try {
+            audioContext = new AudioContext({ sampleRate: 48000 });
+            if (isAudioUnlocked && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
+            const workletBlob = new Blob([audioWorkletCode], { type: 'application/javascript' });
+            const workletURL = URL.createObjectURL(workletBlob);
+            try {
+                await audioContext.audioWorklet.addModule(workletURL);
+            } finally {
+                URL.revokeObjectURL(workletURL);
+            }
+            workletNode = new AudioWorkletNode(audioContext, 'audio-player-processor');
+
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 512;
+            workletNode.connect(analyser);
+            analyser.connect(audioContext.destination);
+        } catch (err) {
+            console.error(`[Media] audio playback setup failed for ${token}:`, err);
+            if (audioContext && audioContext.state !== 'closed') {
+                audioContext.close().catch(e => console.warn(`[Media] audio context close failed for ${token}:`, e));
+            }
+            if (remoteStreams[token] === stream) removeRemoteStream(token);
+            return;
         }
-        
-        const workletBlob = new Blob([audioWorkletCode], { type: 'application/javascript' });
-        const workletURL = URL.createObjectURL(workletBlob);
-        await audioContext.audioWorklet.addModule(workletURL);
-        const workletNode = new AudioWorkletNode(audioContext, 'audio-player-processor');
-        
-        const analyser = audioContext.createAnalyser();
-        analyser.fftSize = 512;
-        workletNode.connect(analyser);
-        analyser.connect(audioContext.destination);
+
+        if (remoteStreams[token] !== stream) {
+            workletNode.disconnect();
+            if (audioContext.state !== 'closed') {
+                audioContext.close().catch(e => console.warn(`[Media] audio context close failed for ${token}:`, e));
+            }
+            return;
+        }
 
         const audioDecoder = new AudioDecoder({
             output: (frame) => {
@@ -1898,8 +2050,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         audioDecoder.configure({ codec: 'opus', sampleRate: 48000, numberOfChannels: 1 });
 
-        Object.assign(stream, { videoDecoder, audioDecoder, audioContext, workletNode, analyser });
-        remoteStreams[token] = stream;
+        Object.assign(stream, { audioDecoder, audioContext, workletNode, analyser });
 
         // The socket worker decodes this speaker and feeds the worklet down its
         // own line; the in-page decoder above is the path for a page-owned socket.
@@ -1971,7 +2122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
             console.warn("Could not get media stream for device enumeration:", err.message);
         }
-        
+
         try {
             const devices = await navigator.mediaDevices.enumerateDevices();
             audioInputSelect.innerHTML = '';
@@ -1999,13 +2150,20 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Could not enumerate devices:", err);
         }
     };
-    
+
     const updateSpeakingIndicators = () => {
+        if (sessionEnded) {
+            animationFrameId = null;
+            return;
+        }
         const speakingThreshold = 5;
-        let isAnyoneSpeaking = false; 
-        
+        let isAnyoneSpeaking = false;
+
         if (localAudioAnalyser && isMicOn) {
-            const dataArray = new Uint8Array(localAudioAnalyser.frequencyBinCount);
+            if (!localSpeakingData || localSpeakingData.length !== localAudioAnalyser.frequencyBinCount) {
+                localSpeakingData = new Uint8Array(localAudioAnalyser.frequencyBinCount);
+            }
+            const dataArray = localSpeakingData;
             localAudioAnalyser.getByteFrequencyData(dataArray);
             const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
             localContainer.classList.toggle('speaking', avg > speakingThreshold);
@@ -2016,7 +2174,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         Object.values(remoteStreams).forEach(stream => {
             if (stream.analyser && !stream.audioMuted && stream.container) {
-                const dataArray = new Uint8Array(stream.analyser.frequencyBinCount);
+                if (!stream.speakingData || stream.speakingData.length !== stream.analyser.frequencyBinCount) {
+                    stream.speakingData = new Uint8Array(stream.analyser.frequencyBinCount);
+                }
+                const dataArray = stream.speakingData;
                 stream.analyser.getByteFrequencyData(dataArray);
                 const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
                 stream.container.classList.toggle('speaking', avg > speakingThreshold);
@@ -2031,29 +2192,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         animationFrameId = requestAnimationFrame(updateSpeakingIndicators);
-    };
-
-    const initTheme = () => {
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        const themeToggle = sidebarEl.querySelector('.theme-toggle');
-        if (themeToggle) {
-            themeToggle.classList.toggle('light', savedTheme === 'light');
-        }
-    };
-
-    const toggleTheme = () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        initTheme();
-    };
-    
-    const toggleSidebar = () => {
-        isSidebarVisible = !isSidebarVisible;
-        sidebarEl.classList.toggle('visible', isSidebarVisible);
-        document.querySelector('.content').classList.toggle('sidebar-visible', isSidebarVisible);
     };
 
     const toggleVideoGrid = () => {
@@ -2086,42 +2224,22 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const initGestures = () => {
-        let sbTouchStartX = 0;
-        let sbTouchStartY = 0;
-        
-        sidebarEl.addEventListener('touchstart', (e) => {
-            sbTouchStartX = e.changedTouches[0].screenX;
-            sbTouchStartY = e.changedTouches[0].screenY;
-        }, { passive: true });
-
-        sidebarEl.addEventListener('touchend', (e) => {
-            const sbTouchEndX = e.changedTouches[0].screenX;
-            const sbTouchEndY = e.changedTouches[0].screenY;
-            
-            const deltaX = sbTouchEndX - sbTouchStartX;
-            const deltaY = Math.abs(sbTouchEndY - sbTouchStartY);
-
-            if (deltaX > 50 && deltaY < 50) { 
-                if (isSidebarVisible) toggleSidebar();
-            }
-        }, { passive: true });
-
         let vbTouchStartX = 0;
         let vbTouchStartY = 0;
 
-        videoGrid.addEventListener('touchstart', (e) => {
+        videoStrip.addEventListener('touchstart', (e) => {
             vbTouchStartX = e.changedTouches[0].screenX;
             vbTouchStartY = e.changedTouches[0].screenY;
         }, { passive: true });
 
-        videoGrid.addEventListener('touchend', (e) => {
+        videoStrip.addEventListener('touchend', (e) => {
             const vbTouchEndX = e.changedTouches[0].screenX;
             const vbTouchEndY = e.changedTouches[0].screenY;
 
             const deltaY = vbTouchEndY - vbTouchStartY;
             const deltaX = Math.abs(vbTouchEndX - vbTouchStartX);
 
-            if (deltaY > 50 && deltaX < 50) { 
+            if (deltaY > 50 && deltaX < 50) {
                 if (isVideoGridVisible) toggleVideoGrid();
             }
         }, { passive: true });
@@ -2133,25 +2251,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 const currentTime = new Date().getTime();
                 const tapLength = currentTime - lastTapTime;
                 if (tapLength < 300 && tapLength > 0) {
-                    e.preventDefault(); 
-                    
-                    const anyVisible = isSidebarVisible || isVideoGridVisible;
-                    if (anyVisible) {
-                        if (isSidebarVisible) toggleSidebar();
-                        if (isVideoGridVisible) toggleVideoGrid();
-                    } else {
-                        if (!isSidebarVisible) toggleSidebar();
-                        if (!isVideoGridVisible) toggleVideoGrid();
-                    }
+                    e.preventDefault();
+                    toggleVideoGrid();
                 }
                 lastTapTime = currentTime;
             });
         }
     };
 
+    const adoptSocketWorker = async () => {
+        if (!ws) return;
+        if (ws.connectAudio) {
+            for (const stream of Object.values(remoteStreams)) {
+                if (!stream.publicId || !stream.workletNode) continue;
+                const line = new MessageChannel();
+                stream.workletNode.port.postMessage({ port: line.port1 }, [line.port1]);
+                ws.connectAudio(stream.publicId, line.port2);
+                ws.setAudioActive(stream.publicId, !stream.audioMuted);
+            }
+        }
+        if (!mediaInitialized) return;
+        if (audioProcessor) {
+            try { audioProcessor.close(); } catch (err) { console.warn('[Media] mic teardown failed:', err); }
+            audioProcessor = null;
+        }
+        if (audioEncoder && audioEncoder.state !== 'closed') {
+            try { audioEncoder.close(); } catch (err) { console.warn('[Media] mic encoder teardown failed:', err); }
+        }
+        audioEncoder = null;
+        await setupAudioEncoder();
+    };
+
     const connectWebSocket = () => {
         const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const url = `${proto}//${window.location.host}/ws/room/${COLLAB_DATA.sessionId}?token=${COLLAB_DATA.userToken}`;
+        const url = `${proto}//${window.location.host}/ws/room/${COLLAB_DATA.sessionId}?token=${encodeURIComponent(COLLAB_DATA.userToken)}`;
         // No worker to be had (a policy forbidding blob workers, say -- reported
         // as a throw or as the worker dying unspoken, depending on the engine).
         // The socket then runs here and audio takes the in-page decode path.
@@ -2166,12 +2299,15 @@ document.addEventListener('DOMContentLoaded', () => {
             ws.onworkerdead = usePageSocket;
             attachSocketHandlers();
         } catch (err) {
+            console.warn('[WS] socket worker could not start:', err);
             usePageSocket();
         }
         function attachSocketHandlers() {
 
             ws.onopen = () => {
                 console.log('[WS] Collaboration WebSocket connected.');
+                reconnectAttempts = 0;
+                adoptSocketWorker();
                 if (COLLAB_DATA.userRole === 'controller') {
                     ws.send(JSON.stringify({ action: 'get_apps' }));
                     ws.send(JSON.stringify({ action: 'request_resolutions' }));
@@ -2185,7 +2321,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             };
 
-            ws.onmessage = (event) => {
+            const dispatchSocketMessage = (event) => {
                 if (event.data instanceof ArrayBuffer) {
                     const publicId = new TextDecoder().decode(event.data.slice(0, 8));
                     const token = publicIdToTokenMap[publicId];
@@ -2195,7 +2331,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                const data = JSON.parse(event.data);
+                let data;
+                try {
+                    data = JSON.parse(event.data);
+                } catch (err) {
+                    console.error('[WS] dropping an unparseable frame:', err);
+                    return;
+                }
+                if (!data || typeof data !== 'object') {
+                    console.warn('[WS] dropping a frame that is not a JSON object.');
+                    return;
+                }
                 switch (data.type) {
                     case 'session_ended':
                         handleControllerDisconnect();
@@ -2214,6 +2360,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         break;
                     case 'state_update':
+                        if (!Array.isArray(data.viewers)) {
+                            console.warn('[WS] dropping a state_update with no viewers list.');
+                            break;
+                        }
                         const hasJoined = sessionStorage.getItem('collab_hasJoined_' + COLLAB_DATA.sessionId);
                         if (COLLAB_DATA.userRole === 'viewer' && !hasJoined) {
                             return;
@@ -2264,17 +2414,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         const mkOwnerUser = data.viewers.find(u => u.has_mk);
                         const newMkOwner = mkOwnerUser ? mkOwnerUser.token : COLLAB_DATA.userToken;
-                    
-                        const gamingModeBtn = document.getElementById('gaming-mode-btn');
-                        if (gamingModeBtn) {
-                            const isController = COLLAB_DATA.userRole === 'controller';
-                            const iHaveMk = (mkOwnerUser && mkOwnerUser.token === COLLAB_DATA.userToken) || (!mkOwnerUser && isController);
-                            if (iHaveMk) {
-                                gamingModeBtn.classList.remove('hidden');
-                            } else {
-                                gamingModeBtn.classList.add('hidden');
-                            }
-                        }
+
+                        const iHaveMk = (mkOwnerUser && mkOwnerUser.token === COLLAB_DATA.userToken)
+                            || (!mkOwnerUser && COLLAB_DATA.userRole === 'controller');
+                        gamingModeBtn.classList.toggle('hidden', COLLAB_DATA.userRole === 'controller' && !iHaveMk);
 
                         if (COLLAB_DATA.userRole === 'controller' && currentMkOwner !== newMkOwner) {
                             currentMkOwner = newMkOwner;
@@ -2309,11 +2452,14 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }
                             }
                         }
-                    
+
                         updateGamepadIcons(data.viewers);
                         break;
                     case 'chat_message':
                         messageStore[data.messageId] = data;
+                        while (Object.keys(messageStore).length > MAX_STORED_MESSAGES) {
+                            delete messageStore[Object.keys(messageStore)[0]];
+                        }
                         appendChatMessage(data, 'chat');
                         break;
                     case 'user_joined':
@@ -2326,8 +2472,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     case 'control':
                         handleControlMessage(data.payload);
                         break;
-                    case 'controller_disconnected':
-                        break;
                     case 'app_list':
                         availableAppsList = data.apps;
                         if (document.getElementById('start-menu-modal') && !document.getElementById('start-menu-modal').classList.contains('hidden')) {
@@ -2335,67 +2479,87 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         const activeApp = availableAppsList.find(app => app.active);
                         if (activeApp) {
-                            const titleEl = document.getElementById('sidebar-app-title');
-                            if (titleEl) titleEl.textContent = activeApp.name;
                             document.title = activeApp.name;
                         }
                         break;
                     case 'app_swapped': {
                         pendingActions.clear();
-                        const iframe = document.getElementById('session-frame');
-                        let urlStr = iframe.src;
-                        const isBlank = iframe.getAttribute('src') === 'about:blank';
-                    
-                        if (isBlank && iframe.dataset.src) {
-                            urlStr = iframe.dataset.src;
+                        const swapIframe = document.getElementById('session-frame');
+                        let urlStr = swapIframe.src;
+                        const isBlank = swapIframe.getAttribute('src') === 'about:blank';
+
+                        if (isBlank && swapIframe.dataset.src) {
+                            urlStr = swapIframe.dataset.src;
                         }
                         if (urlStr && urlStr !== 'about:blank') {
                             try {
                                 const currentSrc = new URL(urlStr, window.location.href);
                                 currentSrc.searchParams.set('t', Date.now());
-                            
+
                                 if (isBlank) {
-                                    iframe.dataset.src = currentSrc.toString();
+                                    swapIframe.dataset.src = currentSrc.toString();
                                 } else {
-                                    iframe.src = currentSrc.toString();
+                                    swapIframe.src = currentSrc.toString();
                                 }
                             } catch (e) {
                                 console.warn("Could not reload iframe on swap:", e);
                             }
                         }
-                        const titleEl = document.getElementById('sidebar-app-title');
-                        if (titleEl) titleEl.textContent = data.app_name;
                         document.title = data.app_name;
                         ws.send(JSON.stringify({ action: 'get_apps' }));
-                        showToast({ sender: t('systemMessages.systemSender'), message: t('systemMessages.swappedApp', { app_name: data.app_name }) });
+                        showChatPeek({ sender: t('systemMessages.systemSender'), message: t('systemMessages.swappedApp', { app_name: data.app_name }) });
                         break;
                     }
                     case 'error':
-                         pendingActions.clear();
-                         if (document.getElementById('start-menu-modal')) renderStartMenu();
-                         alert(data.message);
-                         break;
+                        pendingActions.clear();
+                        if (document.getElementById('start-menu-modal')) renderStartMenu();
+                        alert(data.message);
+                        break;
                 }
             };
 
-            ws.onclose = () => {
-                console.log('[WS] WebSocket closed.');
-                handleControllerDisconnect();
+            ws.onmessage = (event) => {
+                try {
+                    dispatchSocketMessage(event);
+                } catch (err) {
+                    console.error('[WS] dropping a frame the handler could not process:', err);
+                }
+            };
+
+            ws.onclose = (event) => {
+                console.log('[WS] WebSocket closed.', event ? event.code : undefined);
+                if (sessionEnded || (event && event.code === 1008) || reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+                    handleControllerDisconnect();
+                    return;
+                }
+                reconnectAttempts += 1;
+                const delay = Math.min(1000 * 2 ** (reconnectAttempts - 1), 10000);
+                reconnectTimer = setTimeout(connectWebSocket, delay);
             };
             ws.onerror = (err) => console.error('[WS] WebSocket error:', err);
         }
     };
 
     const handleControllerDisconnect = () => {
+        sessionEnded = true;
+        if (reconnectTimer) {
+            clearTimeout(reconnectTimer);
+            reconnectTimer = null;
+        }
+        if (animationFrameId !== null) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
         document.getElementById('disconnection-overlay').classList.remove('hidden');
         const iframe = document.getElementById('session-frame');
         if (iframe) iframe.remove();
         if (ws && ws.readyState !== WebSocket.CLOSED) ws.close();
+        stopMedia();
     };
-    
+
     const handleControlMessage = (payload) => {
         const { action, sender_token, state } = payload;
-        
+
         if (action === 'force_cursor_render') {
             if (COLLAB_DATA.userRole === 'controller') {
                 const iframe = document.getElementById('session-frame');
@@ -2413,78 +2577,35 @@ document.addEventListener('DOMContentLoaded', () => {
             stream.container.style.display = state ? 'flex' : 'none';
         }
     };
- 
+
     const sendControlMessage = (action, state) => {
         if (ws && ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify({ action, state }));
         }
     };
 
-    const renderSidebar = () => {
+    const renderRoom = () => {
         const hasJoined = sessionStorage.getItem('collab_hasJoined_' + COLLAB_DATA.sessionId);
         if (COLLAB_DATA.userRole === 'viewer' && !hasJoined) {
-            renderUsernamePrompt();
+            showUsernamePrompt();
         } else {
-            renderMainSidebar();
+            renderMainRoom();
         }
-        initTheme();
     };
-    
-    const renderUsernamePrompt = () => {
-        sidebarEl.innerHTML = `
-            <div class="sidebar-content">
-                <div class="username-prompt">
-                    <h3>${t('usernamePrompt.title')}</h3>
-                    <p>${t('usernamePrompt.description')}</p>
-                    <form id="username-form">
-                        <input type="text" id="username-input" placeholder="${t('usernamePrompt.placeholder')}" maxlength="25" required>
-                        <button type="submit">${t('usernamePrompt.joinButton')}</button>
-                    </form>
-                </div>
-            </div>`;
+
+    const showUsernamePrompt = () => {
         const usernameInput = document.getElementById('username-input');
         if (username) {
             usernameInput.value = username;
         }
-        document.getElementById('username-form').addEventListener('submit', handleUsernameSubmit);
+        usernameModalOverlay.classList.remove('hidden');
+        usernameInput.focus();
     };
 
-    const renderMainSidebar = () => {
+    const renderMainRoom = () => {
+        usernameModalOverlay.classList.add('hidden');
         const isController = COLLAB_DATA.userRole === 'controller';
         const isParticipant = COLLAB_DATA.userRole === 'viewer' && COLLAB_DATA.userPermission === 'participant';
-
-        let inviteLinksHtml = '';
-
-        if (isController) {
-            inviteLinksHtml = `
-            <div class="sidebar-invite-section">
-                <div class="link-group">
-                    <label data-i18n="inviteLinks.participant">Collaboration User Invite</label>
-                    <div class="link-input-group">
-                        <input type="text" id="participant-link-input" value="${COLLAB_DATA.participantJoinUrl}" readonly>
-                        <button class="copy-link-btn" data-target="participant-link-input"><i class="fas fa-copy"></i></button>
-                    </div>
-                </div>
-                <div class="link-group">
-                    <label data-i18n="inviteLinks.readonly">Read Only User Invite</label>
-                    <div class="link-input-group">
-                        <input type="text" id="readonly-link-input" value="${COLLAB_DATA.readonlyJoinUrl}" readonly>
-                        <button class="copy-link-btn" data-target="readonly-link-input"><i class="fas fa-copy"></i></button>
-                    </div>
-                </div>
-            </div>`;
-        } else if (isParticipant && COLLAB_DATA.readonlyJoinUrl) {
-            inviteLinksHtml = `
-            <div class="sidebar-invite-section">
-                <div class="link-group">
-                    <label data-i18n="inviteLinks.readonlyParticipantView">Read Only Invite</label>
-                    <div class="link-input-group">
-                        <input type="text" id="readonly-link-input" value="${COLLAB_DATA.readonlyJoinUrl}" readonly>
-                        <button class="copy-link-btn" data-target="readonly-link-input"><i class="fas fa-copy"></i></button>
-                    </div>
-                </div>
-            </div>`;
-        }
 
         let localControls = '';
         if (isController) {
@@ -2494,149 +2615,102 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button class="remote-control-btn designate-speaker" data-token="${COLLAB_DATA.userToken}" title="${t('tooltips.designateSpeaker')}"><i class="fas fa-star"></i></button>
             `;
         }
-        document.querySelector('#local-user-container .video-overlay').innerHTML = `
-            <span class="username">${isController ? 'Controller' : (username || 'You')}</span>
+        localContainer.querySelector('.video-overlay').innerHTML = `
+            <span class="username">${escapeHTML(isController ? 'Controller' : (username || t('localUsername')))}</span>
             <div class="remote-controls">${localControls}</div>`;
 
-        sidebarEl.innerHTML = `
-            <div class="sidebar-header">
-                <h2 id="sidebar-app-title">${t('sidebar.title')}</h2>
-                <div class="header-controls">
-                    <button id="gaming-mode-btn" class="settings-button hidden" title="${t('tooltips.gamingMode')}">
-                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" width="18" height="18">
-                            <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-                            <path d="M12 5V9M12 15V19M5 12H9M15 12H19" stroke-linecap="round" />
-                        </svg>
-                    </button>
-                    <div class="theme-toggle">
-                        <div class="icon sun-icon"><svg viewBox="0 0 24 24"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.106a.75.75 0 010 1.06l-1.591 1.59a.75.75 0 11-1.06-1.06l1.59-1.59a.75.75 0 011.06 0zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zM17.836 17.836a.75.75 0 01-1.06 0l-1.59-1.591a.75.75 0 111.06-1.06l1.59 1.59a.75.75 0 010 1.061zM12 21.75a.75.75 0 01-.75-.75v-2.25a.75.75 0 011.5 0v2.25a.75.75 0 01-.75-.75zM5.636 17.836a.75.75 0 010-1.06l1.591-1.59a.75.75 0 111.06 1.06l-1.59 1.59a.75.75 0 01-1.06 0zM3.75 12a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5H4.5a.75.75 0 01-.75-.75zM6.106 6.106a.75.75 0 011.06 0l1.59 1.591a.75.75 0 11-1.06 1.06l-1.59-1.59a.75.75 0 010-1.06z"/></svg></div>
-                        <div class="icon moon-icon"><svg viewBox="0 0 24 24"><path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21c3.73 0 7.01-1.939 8.71-4.922.482-.97.74-2.053.742-3.176z"/></svg></div>
-                    </div>
-                    <button id="reload-stream-btn" class="settings-button" title="${t('tooltips.reloadStream')}"><i class="fas fa-sync"></i></button>
-                    <button id="settings-btn" class="settings-button"><i class="fas fa-cog"></i></button>
-                </div>
-            </div>
-            ${inviteLinksHtml}
-            <div class="sidebar-media-controls">
-                <button id="toggle-mic-btn" class="control-btn" title="${t('tooltips.toggleLocalMic')}">
-                    <i class="fas fa-microphone"></i>
-                </button>
-                <button id="toggle-video-btn" class="control-btn" title="${t('tooltips.toggleLocalWebcam')}">
-                    <i class="fas fa-video"></i>
-                </button>
-                <div class="iframe-audio-controls">
-                    <button id="iframe-mute-btn" class="control-btn" title="${t('tooltips.toggleSessionAudio')}">
-                        <i class="fas fa-volume-up"></i>
-                    </button>
-                    <input type="range" id="iframe-volume-slider" min="0" max="1" step="0.01" value="1" title="${t('tooltips.sessionVolume')}">
-                </div>
-            </div>
-            <div id="sidebar-main-content" class="sidebar-content"></div>
-            <div id="chat-reply-banner"></div>
-            <div id="chat-form-container">
-                <form id="chat-form">
-                    <input type="text" id="chat-input" placeholder="${t('chat.inputPlaceholder')}" autocomplete="off" maxlength="500">
-                    <button type="submit"><i class="fas fa-paper-plane"></i></button>
-                </form>
-            </div>`;
-        
-        applyTranslations(sidebarEl, t);
-
         if (isController || isParticipant) {
-            document.querySelectorAll('.copy-link-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const targetId = e.currentTarget.dataset.target;
-                    const input = document.getElementById(targetId);
-                    navigator.clipboard.writeText(input.value).then(() => {
-                        const originalIcon = btn.innerHTML;
-                        btn.innerHTML = '<i class="fas fa-check"></i>';
-                        setTimeout(() => { btn.innerHTML = originalIcon; }, 2000);
-                    });
-                });
-            });
-        }
-
-        if (isController) initStartMenu();
- 
-        if (isController) {
             initGamepadControls();
-        } else if (isParticipant) {
-             initGamepadControls();
         }
-
-        if (COLLAB_DATA.userPermission === 'readonly') {
-            const mediaControls = document.querySelector('.sidebar-media-controls');
-            if (mediaControls) {
-                mediaControls.classList.add('readonly-view');
-                mediaControls.querySelector('#toggle-mic-btn').style.display = 'none';
-                mediaControls.querySelector('#toggle-video-btn').style.display = 'none';
-            }
-            const settingsBtn = document.querySelector('#settings-btn');
-            if (settingsBtn) {
-                settingsBtn.style.display = 'none';
-            }
-        }
-
-        toggleMicBtn = document.getElementById('toggle-mic-btn');
-        toggleVideoBtn = document.getElementById('toggle-video-btn');
-        iframeMuteBtn = document.getElementById('iframe-mute-btn');
-        iframeVolumeSlider = document.getElementById('iframe-volume-slider');
-        toggleMicBtn.addEventListener('click', () => handleMediaToggle('mic'));
-        toggleVideoBtn.addEventListener('click', () => handleMediaToggle('video'));
+        const canInviteParticipant = isController && Boolean(COLLAB_DATA.participantJoinUrl);
+        const canInviteReadonly = (isController || isParticipant) && Boolean(COLLAB_DATA.readonlyJoinUrl);
+        inviteTile.querySelector('[data-permission="participant"]').classList.toggle('hidden', !canInviteParticipant);
+        inviteTile.querySelector('[data-permission="readonly"]').classList.toggle('hidden', !canInviteReadonly);
+        inviteTile.classList.toggle('hidden', !canInviteParticipant && !canInviteReadonly);
         updateMediaButtonUI();
+    };
 
-        const gameIframe = document.getElementById('session-frame');
-        iframeVolumeSlider.value = isIframeMuted ? 0 : lastKnownVolume;
-        if (isIframeMuted) iframeMuteBtn.querySelector('i').className = 'fas fa-volume-mute';
+    const scrollChatToBottom = () => {
+        chatScroll.scrollTop = chatScroll.scrollHeight;
+    };
 
-        if (gameIframe) {
-            gameIframe.addEventListener('load', sendVolumeToIframe);
-        }
+    const openChat = () => {
+        if (isChatOpen) return;
+        isChatOpen = true;
+        chatTab.classList.remove('unread');
+        chatDock.classList.add('open');
+        chatDock.addEventListener('transitionend', scrollChatToBottom, { once: true });
+        scrollChatToBottom();
+    };
 
-        iframeMuteBtn.addEventListener('click', () => {
-            isIframeMuted = !isIframeMuted;
-            sendVolumeToIframe();
-            iframeMuteBtn.querySelector('i').className = isIframeMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
-            iframeVolumeSlider.value = isIframeMuted ? 0 : lastKnownVolume;
-        });
+    const closeChat = () => {
+        if (!isChatOpen) return;
+        isChatOpen = false;
+        chatDock.classList.remove('open');
+        chatDock.addEventListener('transitionend', scrollChatToBottom, { once: true });
+        if (document.activeElement === chatInput) chatInput.blur();
+    };
 
-        iframeVolumeSlider.addEventListener('input', (e) => {
-            const newVolume = parseFloat(e.target.value);
+    const isInviteOpen = () => inviteTile.classList.contains('open');
+    const openInvite = () => inviteTile.classList.add('open');
+    const closeInvite = () => inviteTile.classList.remove('open');
 
-            if (newVolume > 0) {
-                lastKnownVolume = newVolume;
-                localStorage.setItem(`collab_iframe_volume`, lastKnownVolume);
-                isIframeMuted = false;
-                iframeMuteBtn.querySelector('i').className = 'fas fa-volume-up';
-            } else {
-                isIframeMuted = true;
-                iframeMuteBtn.querySelector('i').className = 'fas fa-volume-mute';
-            }
-            sendVolumeToIframe();
-        });
-
-        const gamingModeBtn = sidebarEl.querySelector('#gaming-mode-btn');
-        if (gamingModeBtn) {
-            gamingModeBtn.addEventListener('click', () => {
-                if (document.fullscreenElement) {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen().catch(err => console.error(err));
-                    }
-                } else {
-                    const iframe = document.getElementById('session-frame');
-                    if (iframe && iframe.contentWindow) {
-                        iframe.contentWindow.postMessage({ type: 'requestFullscreen' }, window.location.origin);
-                        iframe.focus(); 
-                    }
-                    if (COLLAB_DATA.userRole !== 'controller' && ws && ws.readyState === WebSocket.OPEN) {
-                        ws.send(JSON.stringify({ action: 'force_cursor_render', state: 1 }));
-                    }
+    const initInviteControls = () => {
+        inviteBtn.addEventListener('click', openInvite);
+        const inviteUrls = {
+            participant: COLLAB_DATA.participantJoinUrl,
+            readonly: COLLAB_DATA.readonlyJoinUrl,
+        };
+        inviteTile.querySelectorAll('.invite-copy').forEach((button) => {
+            let resetTimer = null;
+            const flash = (text) => {
+                const label = button.textContent;
+                button.textContent = text;
+                clearTimeout(resetTimer);
+                resetTimer = setTimeout(() => {
+                    button.textContent = label;
+                }, INVITE_FLASH_MS);
+            };
+            button.addEventListener('click', async () => {
+                const url = inviteUrls[button.dataset.permission];
+                if (!url) return;
+                try {
+                    await navigator.clipboard.writeText(url);
+                    flash(t('inviteLinks.copied'));
+                    setTimeout(closeInvite, INVITE_FLASH_MS);
+                } catch (err) {
+                    console.error('[Invite] copy failed:', err);
+                    flash(t('inviteLinks.failed'));
                 }
             });
-        }
+        });
+    };
 
-        sidebarEl.querySelector('.theme-toggle').addEventListener('click', toggleTheme);
-        sidebarEl.querySelector('#reload-stream-btn').addEventListener('click', () => {
+    const initDock = () => {
+        toggleMicBtn.addEventListener('click', () => handleMediaToggle('mic'));
+        toggleVideoBtn.addEventListener('click', () => handleMediaToggle('video'));
+        settingsBtn.addEventListener('click', () => {
+            unlockAllAudio();
+            populateDeviceLists();
+            settingsModalOverlay.classList.remove('hidden');
+        });
+        localContainer.addEventListener('click', (e) => {
+            if (e.target.closest('button, .gamepad-icon')) return;
+            localContainer.classList.toggle('controls-shown');
+        });
+
+        chatForm.addEventListener('submit', handleChatSubmit);
+        chatInput.addEventListener('focus', openChat);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeChat();
+        });
+        chatScroll.addEventListener('click', handleChatAreaClick);
+        document.getElementById('username-form').addEventListener('submit', handleUsernameSubmit);
+
+        initInviteControls();
+        if (COLLAB_DATA.userRole === 'controller') initStartMenu();
+
+        reloadStreamBtn.addEventListener('click', () => {
             const iframe = document.getElementById('session-frame');
             if (iframe) {
                 if (iframe.getAttribute('src') === 'about:blank' && iframe.dataset.src) {
@@ -2648,16 +2722,282 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-        sidebarEl.querySelector('#settings-btn').addEventListener('click', () => {
-            unlockAllAudio();
-            populateDeviceLists();
-            settingsModalOverlay.classList.remove('hidden')
+
+        gamingModeBtn.addEventListener('click', () => {
+            if (document.fullscreenElement) {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(err => console.error(err));
+                }
+            } else {
+                const iframe = document.getElementById('session-frame');
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage({ type: 'requestFullscreen' }, window.location.origin);
+                    iframe.focus();
+                }
+                if (COLLAB_DATA.userRole !== 'controller' && ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ action: 'force_cursor_render', state: 1 }));
+                }
+            }
         });
-        sidebarEl.querySelector('#chat-form').addEventListener('submit', handleChatSubmit);
-        document.getElementById('sidebar-main-content').innerHTML = '<div id="chat-messages"></div>';
-        document.getElementById('sidebar-main-content').addEventListener('click', handleChatAreaClick);
+
+        document.addEventListener('pointerdown', (e) => {
+            if (isChatOpen && !e.target.closest('#chat-dock')) closeChat();
+            if (isInviteOpen() && !e.target.closest('#invite-tile')) closeInvite();
+            if (!e.target.closest('#local-user-container')) localContainer.classList.remove('controls-shown');
+        }, true);
+        const updateBarLayout = () => {
+            document.documentElement.style.setProperty('--bar-height', `${videoGrid.offsetHeight}px`);
+            const styles = getComputedStyle(videoGrid);
+            const gap = parseFloat(styles.columnGap) || 0;
+            const padding = (parseFloat(styles.paddingLeft) || 0) + (parseFloat(styles.paddingRight) || 0);
+            const fullDock = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chat-dock-width')) || 0;
+            const needed = videoGridContent.scrollWidth + gap + fullDock + padding;
+            document.body.classList.toggle('chat-crowded', needed > videoGrid.clientWidth);
+        };
+        const barObserver = new ResizeObserver(updateBarLayout);
+        barObserver.observe(videoGrid);
+        barObserver.observe(videoGridContent);
+        chatTab.addEventListener('click', () => {
+            openChat();
+            chatInput.focus();
+        });
+        window.addEventListener('blur', () => {
+            closeChat();
+            closeInvite();
+        });
     };
-   
+
+    const escapeHTML = (str) => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+
+    const linkify = (text) => {
+        const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+        return text.replace(urlRegex, (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`);
+    };
+
+    const isOwnChatMessage = (data) =>
+        data.sender === username || (COLLAB_DATA.userRole === 'controller' && data.sender === 'Controller');
+
+    const createMessageHTML = (data) => {
+        const isSelf = isOwnChatMessage(data);
+        const senderName = isSelf ? t('chat.selfUsername') : escapeHTML(data.sender);
+
+        let replyHTML = '';
+        if (data.replyTo && messageStore[data.replyTo]) {
+            const originalMessage = messageStore[data.replyTo];
+            const originalSender = escapeHTML(originalMessage.sender);
+            const originalMessageSnippet = escapeHTML(originalMessage.message.substring(0, 70)) + (originalMessage.message.length > 70 ? '...' : '');
+            replyHTML = `
+                <div class="reply-quote">
+                    <span class="reply-sender">${originalSender}</span>
+                    <span class="reply-content">${originalMessageSnippet}</span>
+                </div>
+            `;
+        }
+
+        const sanitizedMessage = escapeHTML(data.message);
+        const linkedMessage = linkify(sanitizedMessage);
+        const timestamp = new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        return `
+            <div class="chat-message" data-message-id="${data.messageId}">
+                <div class="message-content">
+                    ${replyHTML}
+                    <div class="sender-info">
+                        <span class="sender">${senderName}</span>
+                        <span class="timestamp">${timestamp}</span>
+                    </div>
+                    <div class="bubble">${linkedMessage}</div>
+                    <div class="message-actions">
+                        <button class="reply-btn" title="${t('tooltips.reply')}"><i class="fas fa-reply"></i></button>
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    const appendChatMessage = (data, type) => {
+        const messagesContainer = document.getElementById('chat-messages');
+        if (!messagesContainer) return;
+
+        const isScrolledToBottom = chatScroll.scrollHeight - chatScroll.clientHeight <= chatScroll.scrollTop + 50;
+
+        const msgEl = document.createElement('div');
+        let isOwnMessage = false;
+
+        if (type === 'chat') {
+            isOwnMessage = isOwnChatMessage(data);
+            msgEl.innerHTML = createMessageHTML(data);
+        } else {
+            let content = '';
+            switch (data.type) {
+                case 'user_joined': content = t('systemMessages.userJoined', { username: escapeHTML(data.username) }); break;
+                case 'user_left': content = t('systemMessages.userLeft', { username: escapeHTML(data.username) }); break;
+                case 'username_changed': content = t('systemMessages.usernameChanged', { old_username: escapeHTML(data.old_username), new_username: escapeHTML(data.new_username) }); break;
+                case 'gamepad_change': content = escapeHTML(data.message); break;
+                case 'mk_change': content = escapeHTML(data.message); break;
+            }
+            msgEl.className = 'system-message';
+            msgEl.innerHTML = `<span>${content}</span>`;
+        }
+
+        messagesContainer.appendChild(msgEl);
+        while (messagesContainer.children.length > MAX_STORED_MESSAGES) {
+            messagesContainer.removeChild(messagesContainer.firstChild);
+        }
+
+        if (isScrolledToBottom) {
+            scrollChatToBottom();
+        }
+
+        if (type === 'chat' && !isOwnMessage) {
+            playNotificationSound();
+            if (!isChatOpen) {
+                showChatPeek(data);
+            }
+        }
+    };
+
+    const handleUsernameSubmit = async (e) => {
+        e.preventDefault();
+        const input = document.getElementById('username-input');
+        const newUsername = input.value.trim();
+        if (newUsername) {
+            unlockAllAudio();
+            username = newUsername;
+            localStorage.setItem('collab_username', username);
+            sessionStorage.setItem('collab_hasJoined_' + COLLAB_DATA.sessionId, 'true');
+            ws.send(JSON.stringify({ action: 'set_username', username: username }));
+            renderRoom();
+
+            if (!mediaInitialized) {
+                await startMedia();
+            }
+
+            isMicOn = true;
+            if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = true);
+            if (ws && ws.setMicActive) ws.setMicActive(true);
+            sendControlMessage('audio_state', true);
+            updateMediaButtonUI();
+
+            await new Promise(r => setTimeout(r, 1000));
+
+            isWebcamOn = true;
+            if (localStream && localStream.getVideoTracks().length > 0) {
+                localStream.getVideoTracks().forEach(t => t.enabled = true);
+                localContainer.style.display = 'flex';
+                sendControlMessage('video_state', true);
+            }
+            updateMediaButtonUI();
+        }
+    };
+
+    const handleChatSubmit = (e) => {
+        e.preventDefault();
+        const message = chatInput.value.trim();
+        if (!message) return;
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            console.warn('[Chat] message not sent: the room socket is not open.');
+            chatForm.classList.remove('send-failed');
+            requestAnimationFrame(() => chatForm.classList.add('send-failed'));
+            return;
+        }
+        const payload = {
+            action: 'send_chat_message',
+            message
+        };
+        if (replyingTo) {
+            payload.replyTo = replyingTo.messageId;
+        }
+        ws.send(JSON.stringify(payload));
+        chatInput.value = '';
+        cancelReply();
+    };
+
+    const handleChatAreaClick = (e) => {
+        const replyBtn = e.target.closest('.reply-btn');
+        if (replyBtn) {
+            const messageEl = e.target.closest('.chat-message');
+            const messageId = messageEl.dataset.messageId;
+            if (messageStore[messageId]) {
+                replyingTo = messageStore[messageId];
+                renderReplyBanner();
+                chatInput.focus();
+            }
+        }
+    };
+
+    const renderReplyBanner = () => {
+        const banner = document.getElementById('chat-reply-banner');
+        if (!banner) return;
+        if (replyingTo) {
+            banner.style.display = 'flex';
+            banner.innerHTML = `
+                <span class="reply-target-text">${t('chat.replyingTo', { sender: escapeHTML(replyingTo.sender) })}</span>
+                <button id="cancel-reply-btn" title="${t('tooltips.cancelReply')}">&times;</button>
+            `;
+            document.getElementById('cancel-reply-btn').addEventListener('click', cancelReply);
+        } else {
+            banner.style.display = 'none';
+            banner.innerHTML = '';
+        }
+    };
+
+    const cancelReply = () => {
+        replyingTo = null;
+        renderReplyBanner();
+    };
+
+    const closeModal = () => settingsModalOverlay.classList.add('hidden');
+
+    const updateMediaButtonUI = () => {
+        if (!toggleMicBtn || !toggleVideoBtn) return;
+
+        toggleMicBtn.classList.toggle('inactive', !isMicOn);
+        toggleMicBtn.querySelector('i').className = isMicOn ? 'fas fa-microphone' : 'fas fa-microphone-slash';
+
+        toggleVideoBtn.classList.toggle('inactive', !isWebcamOn);
+        toggleVideoBtn.querySelector('i').className = isWebcamOn ? 'fas fa-video' : 'fas fa-video-slash';
+    };
+
+    const playNotificationSound = () => {
+        if (!notificationAudioCtx || notificationAudioCtx.state !== 'running') return;
+        const oscillator = notificationAudioCtx.createOscillator();
+        const gainNode = notificationAudioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(notificationAudioCtx.destination);
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(880, notificationAudioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.1, notificationAudioCtx.currentTime);
+
+        gainNode.gain.exponentialRampToValueAtTime(0.00001, notificationAudioCtx.currentTime + 0.1);
+        oscillator.start(notificationAudioCtx.currentTime);
+        oscillator.stop(notificationAudioCtx.currentTime + 0.1);
+    };
+
+    const showChatPeek = (data) => {
+        const bubble = document.createElement('div');
+        bubble.className = 'chat-peek-bubble';
+        bubble.innerHTML = `
+            <div class="chat-peek-sender">${escapeHTML(data.sender)}</div>
+            <div class="chat-peek-message">${linkify(escapeHTML(data.message))}</div>
+        `;
+        bubble.addEventListener('click', () => {
+            openChat();
+            chatInput.focus();
+        });
+        chatTab.classList.add('unread');
+        chatPeek.appendChild(bubble);
+        while (chatPeek.children.length > MAX_PEEK_BUBBLES) {
+            chatPeek.removeChild(chatPeek.firstChild);
+        }
+
+        setTimeout(() => {
+            bubble.classList.add('closing');
+            bubble.addEventListener('animationend', () => bubble.remove());
+        }, PEEK_LIFETIME_MS);
+    };
+
     const initStartMenu = () => {
         const btn = document.getElementById('start-menu-btn');
         const modal = document.getElementById('start-menu-modal');
@@ -2699,7 +3039,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentFilter = filter || (searchInput ? searchInput.value : '');
         const launchGrid = document.getElementById('sm-app-grid');
         const activeList = document.getElementById('sm-active-list');
-        
+
         if (launchGrid) launchGrid.innerHTML = '';
         if (activeList) activeList.innerHTML = '';
 
@@ -2708,7 +3048,7 @@ document.addEventListener('DOMContentLoaded', () => {
         filteredApps.forEach(app => {
             const card = document.createElement('div');
             card.className = 'sm-app-card';
-            
+
             if (app.running) card.classList.add('running');
             if (app.active) card.classList.add('active');
 
@@ -2718,10 +3058,10 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 const showOverlay = app.running && !app.active;
                 const overlay = showOverlay ? `<div class="running-overlay"><i class="fas fa-exchange-alt"></i></div>` : '';
-                
+
                 const iconHtml = app.logo ? `<img src="${app.logo}" alt="${app.name}">` : `<div class="app-icon-fallback"><i class="fas fa-image"></i></div>`;
 
-                card.innerHTML = `${overlay}${iconHtml}<span>${app.name}</span>`; 
+                card.innerHTML = `${overlay}${iconHtml}<span>${app.name}</span>`;
                 if (!app.active) {
                     card.onclick = (e) => {
                         e.stopPropagation();
@@ -2738,11 +3078,11 @@ document.addEventListener('DOMContentLoaded', () => {
         runningApps.forEach(app => {
             const item = document.createElement('div');
             item.className = 'sm-session-item';
-            
-            const stopBtn = app.active 
+
+            const stopBtn = app.active
                 ? `<button class="sm-btn-action sm-btn-stop" disabled title="${t('tooltips.cannotStopActive')}"><i class="fas fa-ban"></i></button>`
                 : `<button class="sm-btn-action sm-btn-stop" data-action="stop" data-id="${app.id}" title="${t('tooltips.stopApp')}"><i class="fas fa-stop"></i></button>`;
-            
+
             const swapBtn = !app.active
                 ? `<button class="sm-btn-action sm-btn-swap" data-action="swap" data-id="${app.id}" title="${t('tooltips.swapApp')}"><i class="fas fa-exchange-alt"></i></button>`
                 : '';
@@ -2754,7 +3094,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 actionButtons = `${swapBtn} <button class="sm-btn-action sm-btn-restart" data-action="restart" data-id="${app.id}" title="${t('tooltips.restartApp')}"><i class="fas fa-redo"></i></button> ${stopBtn}`;
             }
 
-            const iconHtml = app.logo ? `<img src="${app.logo}">` : `<div class="app-icon-fallback"><i class="fas fa-image"></i></div>`; 
+            const iconHtml = app.logo ? `<img src="${app.logo}">` : `<div class="app-icon-fallback"><i class="fas fa-image"></i></div>`;
             item.innerHTML = `
                 ${iconHtml}
                 <div class="sm-session-info">
@@ -2788,228 +3128,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ws.send(JSON.stringify({ action: 'restart_app', app_id: appId }));
         }
     };
- 
-    const escapeHTML = (str) => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-
-    const linkify = (text) => {
-        const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-        return text.replace(urlRegex, (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`);
-    };
-
-    const createMessageHTML = (data) => {
-        const isSelf = data.sender === username || (COLLAB_DATA.userRole === 'controller' && data.sender === 'Controller');
-        const senderName = isSelf ? t('chat.selfUsername') : escapeHTML(data.sender);
-        
-        let replyHTML = '';
-        if (data.replyTo && messageStore[data.replyTo]) {
-            const originalMessage = messageStore[data.replyTo];
-            const originalSender = escapeHTML(originalMessage.sender);
-            const originalMessageSnippet = escapeHTML(originalMessage.message.substring(0, 70)) + (originalMessage.message.length > 70 ? '...' : '');
-            replyHTML = `
-                <div class="reply-quote">
-                    <span class="reply-sender">${originalSender}</span>
-                    <span class="reply-content">${originalMessageSnippet}</span>
-                </div>
-            `;
-        }
-        
-        const sanitizedMessage = escapeHTML(data.message);
-        const linkedMessage = linkify(sanitizedMessage);
-        const timestamp = new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-        return `
-            <div class="chat-message" data-message-id="${data.messageId}">
-                <div class="message-content">
-                    ${replyHTML}
-                    <div class="sender-info">
-                        <span class="sender">${senderName}</span>
-                        <span class="timestamp">${timestamp}</span>
-                    </div>
-                    <div class="bubble">${linkedMessage}</div>
-                    <div class="message-actions">
-                        <button class="reply-btn" title="${t('tooltips.reply')}"><i class="fas fa-reply"></i></button>
-                    </div>
-                </div>
-            </div>
-        `;
-    };
-
-    const appendChatMessage = (data, type) => {
-        const messagesContainer = document.getElementById('chat-messages');
-        if (!messagesContainer) return;
-
-        const scrollContainer = document.getElementById('sidebar-main-content');
-        if (!scrollContainer) return;
-
-        const isScrolledToBottom = scrollContainer.scrollHeight - scrollContainer.clientHeight <= scrollContainer.scrollTop + 50;
-
-        const msgEl = document.createElement('div');
-        let isOwnMessage = false;
-
-        if (type === 'chat') {
-            isOwnMessage = data.sender === username || (COLLAB_DATA.userRole === 'controller' && data.sender === 'Controller');
-            msgEl.innerHTML = createMessageHTML(data);
-        } else {
-            let content = '';
-            switch (data.type) {
-                case 'user_joined': content = t('systemMessages.userJoined', { username: escapeHTML(data.username) }); break;
-                case 'user_left': content = t('systemMessages.userLeft', { username: escapeHTML(data.username) }); break;
-                case 'username_changed': content = t('systemMessages.usernameChanged', { old_username: escapeHTML(data.old_username), new_username: escapeHTML(data.new_username) }); break;
-                case 'gamepad_change': content = data.message; break;
-                case 'mk_change': content = data.message; break;
-            }
-            msgEl.className = 'system-message';
-            msgEl.innerHTML = `<span>${content}</span>`;
-        }
-        
-        messagesContainer.appendChild(msgEl);
-
-        if (isScrolledToBottom) {
-            scrollContainer.scrollTop = scrollContainer.scrollHeight;
-        }
-
-        if (type === 'chat' && !isOwnMessage) {
-            playNotificationSound();
-            if (!isSidebarVisible) {
-                showToast(data);
-            }
-        }
-    };
-
-    const handleUsernameSubmit = async (e) => {
-        e.preventDefault();
-        const input = document.getElementById('username-input');
-        const newUsername = input.value.trim();
-        if (newUsername) {
-            unlockAllAudio();
-            username = newUsername;
-            localStorage.setItem('collab_username', username);
-            sessionStorage.setItem('collab_hasJoined_' + COLLAB_DATA.sessionId, 'true');
-            ws.send(JSON.stringify({ action: 'set_username', username: username }));
-            renderSidebar();
-
-            if (!mediaInitialized) {
-                await startMedia();
-            }
-            
-            isMicOn = true;
-            if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = true);
-            if (ws && ws.setMicActive) ws.setMicActive(true);
-            sendControlMessage('audio_state', true);
-            updateMediaButtonUI();
-
-            await new Promise(r => setTimeout(r, 1000));
-
-            isWebcamOn = true;
-            if (localStream && localStream.getVideoTracks().length > 0) {
-                localStream.getVideoTracks().forEach(t => t.enabled = true);
-                localContainer.style.display = 'flex';
-                sendControlMessage('video_state', true);
-            }
-            updateMediaButtonUI();
-
-            toggleSidebar();
-        }
-    };
-
-    const handleChatSubmit = (e) => {
-        e.preventDefault();
-        const input = document.getElementById('chat-input');
-        if (input.value.trim()) {
-            const payload = { 
-                action: 'send_chat_message', 
-                message: input.value.trim() 
-            };
-            if (replyingTo) {
-                payload.replyTo = replyingTo.messageId;
-            }
-            ws.send(JSON.stringify(payload));
-            input.value = '';
-            cancelReply();
-        }
-    };
-
-    const handleChatAreaClick = (e) => {
-        const replyBtn = e.target.closest('.reply-btn');
-        if (replyBtn) {
-            const messageEl = e.target.closest('.chat-message');
-            const messageId = messageEl.dataset.messageId;
-            if (messageStore[messageId]) {
-                replyingTo = messageStore[messageId];
-                renderReplyBanner();
-            }
-        }
-    };
-
-    const renderReplyBanner = () => {
-        const banner = document.getElementById('chat-reply-banner');
-        if (!banner) return;
-        if (replyingTo) {
-            banner.style.display = 'flex';
-            banner.innerHTML = `
-                <span class="reply-target-text">${t('chat.replyingTo', { sender: escapeHTML(replyingTo.sender) })}</span>
-                <button id="cancel-reply-btn" title="${t('tooltips.cancelReply')}">&times;</button>
-            `;
-            document.getElementById('cancel-reply-btn').addEventListener('click', cancelReply);
-        } else {
-            banner.style.display = 'none';
-            banner.innerHTML = '';
-        }
-    };
-
-    const cancelReply = () => {
-        replyingTo = null;
-        renderReplyBanner();
-    };
-    
-    const closeModal = () => settingsModalOverlay.classList.add('hidden');
-    
-    const updateMediaButtonUI = () => {
-        if (!toggleMicBtn || !toggleVideoBtn) return;
-
-        toggleMicBtn.classList.toggle('inactive', !isMicOn);
-        toggleMicBtn.querySelector('i').className = isMicOn ? 'fas fa-microphone' : 'fas fa-microphone-slash';
-
-        toggleVideoBtn.classList.toggle('inactive', !isWebcamOn);
-        toggleVideoBtn.querySelector('i').className = isWebcamOn ? 'fas fa-video' : 'fas fa-video-slash';
-    };
-
-    const playNotificationSound = () => {
-        if (!notificationAudioCtx || notificationAudioCtx.state !== 'running') return;
-        const oscillator = notificationAudioCtx.createOscillator();
-        const gainNode = notificationAudioCtx.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(notificationAudioCtx.destination);
-        
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(880, notificationAudioCtx.currentTime);
-        gainNode.gain.setValueAtTime(0.1, notificationAudioCtx.currentTime);
-        
-        gainNode.gain.exponentialRampToValueAtTime(0.00001, notificationAudioCtx.currentTime + 0.1);
-        oscillator.start(notificationAudioCtx.currentTime);
-        oscillator.stop(notificationAudioCtx.currentTime + 0.1);
-    };
-
-    const showToast = (data) => {
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.innerHTML = `
-            <div class="toast-sender">${escapeHTML(data.sender)}</div>
-            <div class="toast-message">${linkify(escapeHTML(data.message))}</div>
-        `;
-        toast.addEventListener('click', () => {
-            if (!isSidebarVisible) {
-                toggleSidebar();
-            }
-            toast.classList.add('closing');
-        });
-        toastContainer.appendChild(toast);
-
-        setTimeout(() => {
-            toast.classList.add('closing');
-            toast.addEventListener('animationend', () => toast.remove());
-        }, 5000);
-    };
 
     const initGamepadControls = () => {
         const sourceBox = document.getElementById('gamepad-source-box');
@@ -3023,12 +3141,11 @@ document.addEventListener('DOMContentLoaded', () => {
         mkIcon.className = 'gamepad-icon mk-icon';
         if (COLLAB_DATA.userRole === 'controller') {
             mkIcon.classList.add('draggable');
-            mkIcon.draggable = true;
         }
         mkIcon.innerHTML = `<i class="fas fa-keyboard"></i><i class="fas fa-mouse" style="margin-left: 3px; font-size: 0.8em;"></i>`;
 
         if (COLLAB_DATA.userRole === 'controller') {
-            document.getElementById('local-user-container').appendChild(mkIcon);
+            localContainer.appendChild(mkIcon);
         } else {
             sourceBox.appendChild(mkIcon);
         }
@@ -3039,7 +3156,6 @@ document.addEventListener('DOMContentLoaded', () => {
             icon.className = 'gamepad-icon';
             if (COLLAB_DATA.userRole === 'controller') {
                 icon.classList.add('draggable');
-                icon.draggable = true;
             }
             icon.dataset.gamepadId = i;
             icon.innerHTML = `<i class="fas fa-gamepad"></i><span class="gamepad-number">${i}</span>`;
@@ -3098,109 +3214,129 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    let draggedElement = null;
+    const DRAG_START_PX = 5;
+    let drag = null;
 
-    videoGrid.addEventListener('dragstart', (e) => {
-        const target = e.target.closest('.draggable, .reorderable');
-        if (!target) {
-            e.preventDefault();
+    const dragTargets = () => Array.from(document.querySelectorAll('.video-container')).filter((container) => {
+        const user = currentUserState.find(u => u.token === container.dataset.userToken);
+        return container.id === 'gamepad-source-box' || user;
+    });
+
+    const beginDrag = (pending) => {
+        const { source, pointerId } = pending;
+        const ghost = source.cloneNode(true);
+        ghost.classList.add('drag-ghost');
+        ghost.removeAttribute('id');
+        const rect = source.getBoundingClientRect();
+        ghost.style.width = `${rect.width}px`;
+        ghost.style.height = `${rect.height}px`;
+        document.body.appendChild(ghost);
+
+        drag = { ...pending, ghost, offsetX: pending.startX - rect.left, offsetY: pending.startY - rect.top, over: null };
+        source.setPointerCapture(pointerId);
+
+        if (drag.kind === 'stream') {
+            document.body.classList.add('dragging-stream');
+            source.classList.add('reordering');
+        } else {
+            document.body.classList.add(drag.kind === 'mk' ? 'dragging-mk' : 'dragging-gamepad');
+            source.classList.add('dragging');
+            dragTargets().forEach(c => c.classList.add('can-drop-gamepad'));
+        }
+    };
+
+    const moveGhost = (e) => {
+        drag.ghost.style.transform = `translate(${e.clientX - drag.offsetX}px, ${e.clientY - drag.offsetY}px)`;
+    };
+
+    const containerUnder = (e) => {
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        return el ? el.closest('.video-container') : null;
+    };
+
+    const endDrag = (dropped) => {
+        if (!drag) return;
+        const { source, kind, ghost, over } = drag;
+        drag = null;
+        ghost.remove();
+        document.body.classList.remove('dragging-gamepad', 'dragging-mk', 'dragging-stream');
+        source.classList.remove('dragging', 'reordering');
+        document.querySelectorAll('.can-drop-gamepad, .drop-target').forEach(el => el.classList.remove('can-drop-gamepad', 'drop-target'));
+        if (!dropped || kind === 'stream' || !over) return;
+
+        if (kind === 'mk') {
+            const tokenToAssign = (over.id === 'gamepad-source-box') ? COLLAB_DATA.userToken : over.dataset.userToken;
+            ws.send(JSON.stringify({ action: 'assign_mk', token: tokenToAssign }));
             return;
         }
-        draggedElement = target;
-
-        if (target.classList.contains('gamepad-icon')) {
-            if (target.classList.contains('mk-icon')) {
-                document.body.classList.add('dragging-mk');
-                e.dataTransfer.setData('type', 'mk');
-            } else {
-                document.body.classList.add('dragging-gamepad');
-                e.dataTransfer.setData('type', 'gamepad');
-                e.dataTransfer.setData('text/plain', target.dataset.gamepadId);
+        const gamepadId = parseInt(source.dataset.gamepadId, 10);
+        if (over.id === 'gamepad-source-box') {
+            const parentContainer = source.parentElement;
+            if (parentContainer && parentContainer.id !== 'gamepad-source-box') {
+                const userToken = parentContainer.dataset.userToken;
+                if (userToken) ws.send(JSON.stringify({ action: 'assign_slot', viewer_token: userToken, slot: null }));
             }
-            e.dataTransfer.effectAllowed = 'move';
-            
-            setTimeout(() => target.classList.add('dragging'), 0);
-            
-            document.querySelectorAll('.video-container').forEach(container => {
-                const userToken = container.dataset.userToken;
-                const user = currentUserState.find(u => u.token === userToken);
-                if (container.id === 'gamepad-source-box' || user) {
-                    container.classList.add('can-drop-gamepad');
-                }
-            });
-        } else if (target.classList.contains('reorderable')) {
-            document.body.classList.add('dragging-stream');
-            e.dataTransfer.setData('text/plain', target.id);
-            e.dataTransfer.effectAllowed = 'move';
-            setTimeout(() => target.classList.add('reordering'), 0);
-        }
-    });
-
-    videoGrid.addEventListener('dragend', (e) => {
-        document.body.className = '';
-        draggedElement?.classList.remove('dragging', 'reordering');
-        document.querySelectorAll('.can-drop-gamepad').forEach(el => el.classList.remove('can-drop-gamepad'));
-        draggedElement = null;
-    });
-
-    videoGrid.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        const dropTarget = e.target.closest('.video-container');
-
-        if (document.body.classList.contains('dragging-gamepad') || document.body.classList.contains('dragging-mk')) {
-            if (dropTarget && dropTarget.classList.contains('can-drop-gamepad')) {
-                e.dataTransfer.dropEffect = 'move';
-            } else {
-                e.dataTransfer.dropEffect = 'none';
-            }
-        } else if (document.body.classList.contains('dragging-stream')) {
-            if (dropTarget && !dropTarget.classList.contains('pinned') && dropTarget !== draggedElement) {
-                const rect = dropTarget.getBoundingClientRect();
-                const offsetX = e.clientX - rect.left;
-                if (offsetX < rect.width / 2) {
-                    dropTarget.parentNode.insertBefore(draggedElement, dropTarget);
-                } else {
-                    dropTarget.parentNode.insertBefore(draggedElement, dropTarget.nextSibling);
-                }
-            }
-        }
-    });
-
-    videoGrid.addEventListener('drop', (e) => {
-        e.preventDefault();
-        const isGamepad = document.body.classList.contains('dragging-gamepad');
-        const isMk = document.body.classList.contains('dragging-mk');
-
-        if (!isGamepad && !isMk) return;
-
-        const dropTarget = e.target.closest('.video-container.can-drop-gamepad');
-        if (!dropTarget) return;
-
-        if (isMk) {
-            const userToken = dropTarget.dataset.userToken;
-            const tokenToAssign = (dropTarget.id === 'gamepad-source-box') ? COLLAB_DATA.userToken : userToken;
-            ws.send(JSON.stringify({ action: 'assign_mk', token: tokenToAssign }));
         } else {
-            const gamepadId = parseInt(e.dataTransfer.getData('text/plain'), 10);
-            const draggedIcon = document.getElementById(`gamepad-icon-${gamepadId}`);
-            if (dropTarget.id === 'gamepad-source-box') {
-                const parentContainer = draggedIcon.parentElement;
-                if (parentContainer && parentContainer.id !== 'gamepad-source-box') {
-                    const userToken = parentContainer.dataset.userToken;
-                    if (userToken) ws.send(JSON.stringify({ action: 'assign_slot', viewer_token: userToken, slot: null }));
-                }
-            } else {
-                const userToken = dropTarget.dataset.userToken;
-                if (userToken) ws.send(JSON.stringify({ action: 'assign_slot', viewer_token: userToken, slot: gamepadId }));
-            }
+            const userToken = over.dataset.userToken;
+            if (userToken) ws.send(JSON.stringify({ action: 'assign_slot', viewer_token: userToken, slot: gamepadId }));
         }
+    };
+
+    videoStrip.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0 || drag) return;
+        const icon = e.target.closest('.gamepad-icon.draggable');
+        const tile = e.target.closest('.video-container.reorderable');
+        let source, kind;
+        if (icon) {
+            source = icon;
+            kind = icon.classList.contains('mk-icon') ? 'mk' : 'gamepad';
+        } else if (tile && e.pointerType === 'mouse' && !e.target.closest('button')) {
+            source = tile;
+            kind = 'stream';
+        } else {
+            return;
+        }
+        const pending = { source, kind, pointerId: e.pointerId, startX: e.clientX, startY: e.clientY };
+        const onMove = (ev) => {
+            if (ev.pointerId !== pending.pointerId) return;
+            if (!drag) {
+                if (Math.hypot(ev.clientX - pending.startX, ev.clientY - pending.startY) < DRAG_START_PX) return;
+                beginDrag(pending);
+            }
+            moveGhost(ev);
+            const over = containerUnder(ev);
+            if (drag.kind === 'stream') {
+                if (over && !over.classList.contains('pinned') && over !== drag.source) {
+                    const rect = over.getBoundingClientRect();
+                    const before = ev.clientX - rect.left < rect.width / 2;
+                    over.parentNode.insertBefore(drag.source, before ? over : over.nextSibling);
+                }
+                return;
+            }
+            const target = over && over.classList.contains('can-drop-gamepad') ? over : null;
+            if (target !== drag.over) {
+                drag.over?.classList.remove('drop-target');
+                target?.classList.add('drop-target');
+                drag.over = target;
+            }
+        };
+        const onEnd = (ev) => {
+            if (ev.pointerId !== pending.pointerId) return;
+            source.removeEventListener('pointermove', onMove);
+            source.removeEventListener('pointerup', onEnd);
+            source.removeEventListener('pointercancel', onEnd);
+            endDrag(ev.type === 'pointerup');
+        };
+        source.addEventListener('pointermove', onMove);
+        source.addEventListener('pointerup', onEnd);
+        source.addEventListener('pointercancel', onEnd);
     });
 
     let isBouncing = false;
-    videoGrid.addEventListener('wheel', e => {
-        if (videoGrid.scrollWidth > videoGrid.clientWidth) {
+    videoStrip.addEventListener('wheel', e => {
+        if (videoStrip.scrollWidth > videoStrip.clientWidth) {
             e.preventDefault();
-            videoGrid.scrollLeft += e.deltaY;
+            videoStrip.scrollLeft += e.deltaY;
         } else {
             if (isBouncing || Math.abs(e.deltaY) < 5) return;
             e.preventDefault();
@@ -3209,7 +3345,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             isBouncing = true;
             videoGridContent.style.transform = `translateX(${bounceAmount * direction}px)`;
-            
+
             setTimeout(() => {
                 videoGridContent.style.transform = 'translateX(0)';
                 setTimeout(() => { isBouncing = false; }, 150);
@@ -3217,12 +3353,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    toggleHandle.addEventListener('click', toggleSidebar);
-
     if (videoToggleHandle) {
         videoToggleHandle.addEventListener('click', toggleVideoGrid);
     }
-    
+
     initGestures();
 
     settingsModalCloseBtn.addEventListener('click', closeModal);
@@ -3233,22 +3367,22 @@ document.addEventListener('DOMContentLoaded', () => {
     audioInputSelect.addEventListener('change', (e) => {
         preferredMicId = e.target.value;
         localStorage.setItem('collab_preferredMicId', preferredMicId);
-        if(mediaInitialized) startMedia();
+        restartMediaForDeviceChange().catch(err => console.error('[Media] microphone switch failed:', err));
     });
     videoInputSelect.addEventListener('change', (e) => {
         preferredCamId = e.target.value;
         localStorage.setItem('collab_preferredCamId', preferredCamId);
-        if(mediaInitialized) startMedia();
+        restartMediaForDeviceChange().catch(err => console.error('[Media] webcam switch failed:', err));
     });
-    
-    videoGrid.addEventListener('click', (e) => {
+
+    videoStrip.addEventListener('click', (e) => {
         const btn = e.target.closest('.remote-control-btn');
         if (!btn) return;
-    
+
         unlockAllAudio();
         const token = btn.dataset.token;
         const stream = remoteStreams[token];
-    
+
         if (btn.classList.contains('mute-audio')) {
             if (!stream) return;
             stream.audioMuted = !stream.audioMuted;
@@ -3267,7 +3401,7 @@ document.addEventListener('DOMContentLoaded', () => {
             stream.videoMuted = !stream.videoMuted;
             btn.classList.toggle('inactive', stream.videoMuted);
             btn.querySelector('i').className = stream.videoMuted ? 'fas fa-video-slash' : 'fas fa-video';
-            
+
             if (stream.videoMuted) {
                 // No further frames are decoded while muted, so the <video> would
                 // otherwise sit frozen on the last one: hide it and blank the canvas.
@@ -3303,7 +3437,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     applyTranslations(document.body, t);
-    renderSidebar();
+    initDock();
+    renderRoom();
     connectWebSocket();
     updateSpeakingIndicators();
 
@@ -3312,7 +3447,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (window.history.replaceState) {
         const url = new URL(window.location);
-        url.searchParams.delete('token');
         url.searchParams.delete('access_token');
         window.history.replaceState({ path: url.href }, '', url.href);
     }
@@ -3333,6 +3467,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         resizeObserver.observe(iframeEl);
+        iframeEl.addEventListener('load', sendVolumeToIframe);
     }
 
     document.addEventListener('fullscreenchange', () => {
@@ -3340,6 +3475,4 @@ document.addEventListener('DOMContentLoaded', () => {
             ws.send(JSON.stringify({ action: 'force_cursor_render', state: 0 }));
         }
     });
-
-    setTimeout(toggleSidebar, 500);
 });

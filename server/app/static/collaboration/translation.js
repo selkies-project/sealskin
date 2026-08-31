@@ -31,15 +31,13 @@ const en = {
         gamingMode: 'Gaming Mode',
         lockResolution: 'Lock/Unlock Resolution',
         resizeClient: 'Resize to Client',
+        invite: 'Invite someone to this session',
     },
     usernamePrompt: {
         title: 'Welcome!',
         description: 'Please choose a username to join the session.',
         placeholder: 'Your Name',
         joinButton: 'Join',
-    },
-    sidebar: {
-        title: 'SealSkin',
     },
     chat: {
         inputPlaceholder: 'Type a message...',
@@ -54,9 +52,10 @@ const en = {
         systemSender: 'System',
     },
     inviteLinks: {
-        participant: 'Collaboration User Invite',
-        readonly: 'Read Only User Invite',
-        readonlyParticipantView: 'Read Only Invite',
+        participant: 'Collaborator Invite Link',
+        readonly: 'Viewer Invite Link',
+        copied: 'Link copied',
+        failed: 'Could not copy the link',
     },
     disconnect: {
         title: 'Disconnected',
@@ -112,15 +111,13 @@ const es = {
         gamingMode: 'Modo Juego',
         lockResolution: 'Bloquear/Desbloquear resolución',
         resizeClient: 'Redimensionar al cliente',
+        invite: 'Invitar a alguien a esta sesión',
     },
     usernamePrompt: {
         title: '¡Bienvenido!',
         description: 'Por favor, elige un nombre de usuario para unirte a la sesión.',
         placeholder: 'Tu nombre',
         joinButton: 'Unirse',
-    },
-    sidebar: {
-        title: 'SealSkin',
     },
     chat: {
         inputPlaceholder: 'Escribe un mensaje...',
@@ -135,9 +132,10 @@ const es = {
         systemSender: 'Sistema',
     },
     inviteLinks: {
-        participant: 'Invitación de Colaborador',
-        readonly: 'Invitación de Solo Lectura',
-        readonlyParticipantView: 'Invitación de Solo Lectura',
+        participant: 'Enlace de invitación de colaborador',
+        readonly: 'Enlace de invitación de espectador',
+        copied: 'Enlace copiado',
+        failed: 'No se pudo copiar el enlace',
     },
     disconnect: {
         title: 'Desconectado',
@@ -193,15 +191,13 @@ const zh = {
         gamingMode: '游戏模式',
         lockResolution: '锁定/解锁分辨率',
         resizeClient: '调整为客户端大小',
+        invite: '邀请他人加入此会话',
     },
     usernamePrompt: {
         title: '欢迎！',
         description: '请选择一个用户名以加入会话。',
         placeholder: '您的名字',
         joinButton: '加入',
-    },
-    sidebar: {
-        title: 'SealSkin',
     },
     chat: {
         inputPlaceholder: '输入消息...',
@@ -216,9 +212,10 @@ const zh = {
         systemSender: '系统',
     },
     inviteLinks: {
-        participant: '协作用户邀请',
-        readonly: '只读用户邀请',
-        readonlyParticipantView: '只读邀请',
+        participant: '协作者邀请链接',
+        readonly: '观众邀请链接',
+        copied: '链接已复制',
+        failed: '无法复制链接',
     },
     disconnect: {
         title: '已断开连接',
@@ -274,15 +271,13 @@ const hi = {
         gamingMode: 'गेमिंग मोड',
         lockResolution: 'रिज़ॉल्यूशन लॉक/अनलॉक करें',
         resizeClient: 'क्लाइंट के आकार में बदलें',
+        invite: 'किसी को इस सत्र में आमंत्रित करें',
     },
     usernamePrompt: {
         title: 'स्वागत है!',
         description: 'सत्र में शामिल होने के लिए कृपया एक उपयोगकर्ता नाम चुनें।',
         placeholder: 'आपका नाम',
         joinButton: 'शामिल हों',
-    },
-    sidebar: {
-        title: 'SealSkin',
     },
     chat: {
         inputPlaceholder: 'एक संदेश लिखें...',
@@ -297,9 +292,10 @@ const hi = {
         systemSender: 'सिस्टम',
     },
     inviteLinks: {
-        participant: 'सहयोग उपयोगकर्ता आमंत्रण',
-        readonly: 'केवल पढ़ने के लिए उपयोगकर्ता आमंत्रण',
-        readonlyParticipantView: 'केवल पढ़ने के लिए आमंत्रण',
+        participant: 'सहयोगी आमंत्रण लिंक',
+        readonly: 'दर्शक आमंत्रण लिंक',
+        copied: 'लिंक कॉपी हो गया',
+        failed: 'लिंक कॉपी नहीं हो सका',
     },
     disconnect: {
         title: 'डिस्कनेक्ट हो गया',
@@ -355,15 +351,13 @@ const pt = {
         gamingMode: 'Modo Jogo',
         lockResolution: 'Bloquear/Desbloquear Resolução',
         resizeClient: 'Redimensionar para o Cliente',
+        invite: 'Convidar alguém para esta sessão',
     },
     usernamePrompt: {
         title: 'Bem-vindo(a)!',
         description: 'Por favor, escolha um nome de usuário para entrar na sessão.',
         placeholder: 'Seu nome',
         joinButton: 'Entrar',
-    },
-    sidebar: {
-        title: 'SealSkin',
     },
     chat: {
         inputPlaceholder: 'Digite uma mensagem...',
@@ -378,9 +372,10 @@ const pt = {
         systemSender: 'Sistema',
     },
     inviteLinks: {
-        participant: 'Convite de Colaborador',
-        readonly: 'Convite de Usuário Somente Leitura',
-        readonlyParticipantView: 'Convite Somente Leitura',
+        participant: 'Link de convite de colaborador',
+        readonly: 'Link de convite de espectador',
+        copied: 'Link copiado',
+        failed: 'Não foi possível copiar o link',
     },
     disconnect: {
         title: 'Desconectado',
@@ -436,15 +431,13 @@ const fr = {
         gamingMode: 'Mode Jeu',
         lockResolution: 'Verrouiller/Déverrouiller la résolution',
         resizeClient: 'Redimensionner au client',
+        invite: 'Inviter quelqu\'un à cette session',
     },
     usernamePrompt: {
         title: 'Bienvenue !',
         description: 'Veuillez choisir un nom d\'utilisateur pour rejoindre la session.',
         placeholder: 'Votre nom',
         joinButton: 'Rejoindre',
-    },
-    sidebar: {
-        title: 'SealSkin',
     },
     chat: {
         inputPlaceholder: 'Saisissez un message...',
@@ -459,9 +452,10 @@ const fr = {
         systemSender: 'Système',
     },
     inviteLinks: {
-        participant: 'Invitation de Collaborateur',
-        readonly: 'Invitation d\'Utilisateur en Lecture Seule',
-        readonlyParticipantView: 'Invitation en Lecture Seule',
+        participant: 'Lien d\'invitation collaborateur',
+        readonly: 'Lien d\'invitation spectateur',
+        copied: 'Lien copié',
+        failed: 'Impossible de copier le lien',
     },
     disconnect: {
         title: 'Déconnecté',
@@ -517,15 +511,13 @@ const ru = {
         gamingMode: 'Игровой режим',
         lockResolution: 'Заблокировать/Разблокировать разрешение',
         resizeClient: 'Изменить размер под клиента',
+        invite: 'Пригласить кого-то в этот сеанс',
     },
     usernamePrompt: {
         title: 'Добро пожаловать!',
         description: 'Пожалуйста, выберите имя пользователя, чтобы присоединиться к сеансу.',
         placeholder: 'Ваше имя',
         joinButton: 'Присоединиться',
-    },
-    sidebar: {
-        title: 'SealSkin',
     },
     chat: {
         inputPlaceholder: 'Введите сообщение...',
@@ -540,9 +532,10 @@ const ru = {
         systemSender: 'Система',
     },
     inviteLinks: {
-        participant: 'Приглашение для участника совместной работы',
-        readonly: 'Приглашение для пользователя с правами только на чтение',
-        readonlyParticipantView: 'Приглашение только для чтения',
+        participant: 'Ссылка-приглашение для участника',
+        readonly: 'Ссылка-приглашение для зрителя',
+        copied: 'Ссылка скопирована',
+        failed: 'Не удалось скопировать ссылку',
     },
     disconnect: {
         title: 'Отключено',
@@ -598,15 +591,13 @@ const de = {
         gamingMode: 'Gaming-Modus',
         lockResolution: 'Auflösung sperren/entsperren',
         resizeClient: 'Größe an Client anpassen',
+        invite: 'Jemanden zu dieser Sitzung einladen',
     },
     usernamePrompt: {
         title: 'Willkommen!',
         description: 'Bitte wählen Sie einen Benutzernamen, um der Sitzung beizutreten.',
         placeholder: 'Ihr Name',
         joinButton: 'Beitreten',
-    },
-    sidebar: {
-        title: 'SealSkin',
     },
     chat: {
         inputPlaceholder: 'Nachricht eingeben...',
@@ -621,9 +612,10 @@ const de = {
         systemSender: 'System',
     },
     inviteLinks: {
-        participant: 'Einladung für Kollaborationsbenutzer',
-        readonly: 'Einladung für Benutzer mit Leseberechtigung',
-        readonlyParticipantView: 'Einladung mit Leseberechtigung',
+        participant: 'Einladungslink für Mitwirkende',
+        readonly: 'Zuschauer-Einladungslink',
+        copied: 'Link kopiert',
+        failed: 'Link konnte nicht kopiert werden',
     },
     disconnect: {
         title: 'Verbindung getrennt',
@@ -679,15 +671,13 @@ const tr = {
         gamingMode: 'Oyun Modu',
         lockResolution: 'Çözünürlüğü Kilitle/Kilidini Aç',
         resizeClient: 'İstemciye Göre Yeniden Boyutlandır',
+        invite: 'Birini bu oturuma davet et',
     },
     usernamePrompt: {
         title: 'Hoş geldiniz!',
         description: 'Oturuma katılmak için lütfen bir kullanıcı adı seçin.',
         placeholder: 'Adınız',
         joinButton: 'Katıl',
-    },
-    sidebar: {
-        title: 'SealSkin',
     },
     chat: {
         inputPlaceholder: 'Bir mesaj yazın...',
@@ -702,9 +692,10 @@ const tr = {
         systemSender: 'Sistem',
     },
     inviteLinks: {
-        participant: 'İşbirliği Kullanıcı Daveti',
-        readonly: 'Salt Okunur Kullanıcı Daveti',
-        readonlyParticipantView: 'Salt Okunur Davet',
+        participant: 'İşbirliği Davet Bağlantısı',
+        readonly: 'İzleyici Davet Bağlantısı',
+        copied: 'Bağlantı kopyalandı',
+        failed: 'Bağlantı kopyalanamadı',
     },
     disconnect: {
         title: 'Bağlantı Kesildi',
@@ -760,15 +751,13 @@ const it = {
         gamingMode: 'Modalità Gioco',
         lockResolution: 'Blocca/Sblocca risoluzione',
         resizeClient: 'Ridimensiona al client',
+        invite: 'Invita qualcuno a questa sessione',
     },
     usernamePrompt: {
         title: 'Benvenuto!',
         description: 'Scegli un nome utente per partecipare alla sessione.',
         placeholder: 'Il tuo nome',
         joinButton: 'Partecipa',
-    },
-    sidebar: {
-        title: 'SealSkin',
     },
     chat: {
         inputPlaceholder: 'Scrivi un messaggio...',
@@ -783,9 +772,10 @@ const it = {
         systemSender: 'Sistema',
     },
     inviteLinks: {
-        participant: 'Invito Utente Collaboratore',
-        readonly: 'Invito Utente Sola Lettura',
-        readonlyParticipantView: 'Invito Sola Lettura',
+        participant: 'Link di invito collaboratore',
+        readonly: 'Link di invito spettatore',
+        copied: 'Link copiato',
+        failed: 'Impossibile copiare il link',
     },
     disconnect: {
         title: 'Disconnesso',
@@ -841,15 +831,13 @@ const nl = {
         gamingMode: 'Gamingmodus',
         lockResolution: 'Resolutie vergrendelen/ontgrendelen',
         resizeClient: 'Formaat aanpassen aan client',
+        invite: 'Nodig iemand uit voor deze sessie',
     },
     usernamePrompt: {
         title: 'Welkom!',
         description: 'Kies een gebruikersnaam om deel te nemen aan de sessie.',
         placeholder: 'Jouw naam',
         joinButton: 'Deelnemen',
-    },
-    sidebar: {
-        title: 'SealSkin',
     },
     chat: {
         inputPlaceholder: 'Typ een bericht...',
@@ -864,9 +852,10 @@ const nl = {
         systemSender: 'Systeem',
     },
     inviteLinks: {
-        participant: 'Uitnodiging voor samenwerkingsgebruiker',
-        readonly: 'Uitnodiging voor alleen-lezen gebruiker',
-        readonlyParticipantView: 'Alleen-lezen uitnodiging',
+        participant: 'Uitnodigingslink voor deelnemer',
+        readonly: 'Uitnodigingslink voor kijker',
+        copied: 'Link gekopieerd',
+        failed: 'Kon de link niet kopiëren',
     },
     disconnect: {
         title: 'Verbinding verbroken',
@@ -922,15 +911,13 @@ const ar = {
         gamingMode: 'وضع الألعاب',
         lockResolution: 'قفل/إلغاء قفل الدقة',
         resizeClient: 'تغيير الحجم ليناسب العميل',
+        invite: 'دعوة شخص ما إلى هذه الجلسة',
     },
     usernamePrompt: {
         title: 'أهلاً بك!',
         description: 'الرجاء اختيار اسم مستخدم للانضمام إلى الجلسة.',
         placeholder: 'اسمك',
         joinButton: 'انضمام',
-    },
-    sidebar: {
-        title: 'SealSkin',
     },
     chat: {
         inputPlaceholder: 'اكتب رسالة...',
@@ -945,9 +932,10 @@ const ar = {
         systemSender: 'النظام',
     },
     inviteLinks: {
-        participant: 'دعوة مستخدم متعاون',
-        readonly: 'دعوة مستخدم للقراءة فقط',
-        readonlyParticipantView: 'دعوة للقراءة فقط',
+        participant: 'رابط دعوة متعاون',
+        readonly: 'رابط دعوة مشاهد',
+        copied: 'تم نسخ الرابط',
+        failed: 'تعذر نسخ الرابط',
     },
     disconnect: {
         title: 'انقطع الاتصال',
@@ -1003,15 +991,13 @@ const ko = {
         gamingMode: '게임 모드',
         lockResolution: '해상도 잠금/잠금 해제',
         resizeClient: '클라이언트에 맞게 크기 조정',
+        invite: '이 세션에 누군가를 초대',
     },
     usernamePrompt: {
         title: '환영합니다!',
         description: '세션에 참여하려면 사용자 이름을 선택하세요.',
         placeholder: '이름',
         joinButton: '참여',
-    },
-    sidebar: {
-        title: 'SealSkin',
     },
     chat: {
         inputPlaceholder: '메시지를 입력하세요...',
@@ -1026,9 +1012,10 @@ const ko = {
         systemSender: '시스템',
     },
     inviteLinks: {
-        participant: '협업 사용자 초대',
-        readonly: '읽기 전용 사용자 초대',
-        readonlyParticipantView: '읽기 전용 초대',
+        participant: '협업자 초대 링크',
+        readonly: '관전자 초대 링크',
+        copied: '링크가 복사되었습니다',
+        failed: '링크를 복사할 수 없습니다',
     },
     disconnect: {
         title: '연결 끊김',
@@ -1084,15 +1071,13 @@ const ja = {
         gamingMode: 'ゲーミングモード',
         lockResolution: '解像度をロック/ロック解除',
         resizeClient: 'クライアントに合わせてサイズ変更',
+        invite: 'このセッションに誰かを招待',
     },
     usernamePrompt: {
         title: 'ようこそ！',
         description: 'セッションに参加するためのユーザー名を選択してください。',
         placeholder: 'あなたの名前',
         joinButton: '参加',
-    },
-    sidebar: {
-        title: 'SealSkin',
     },
     chat: {
         inputPlaceholder: 'メッセージを入力...',
@@ -1107,9 +1092,10 @@ const ja = {
         systemSender: 'システム',
     },
     inviteLinks: {
-        participant: 'コラボレーションユーザー招待',
-        readonly: '読み取り専用ユーザー招待',
-        readonlyParticipantView: '読み取り専用招待',
+        participant: 'コラボレーター招待リンク',
+        readonly: '観戦者招待リンク',
+        copied: 'リンクをコピーしました',
+        failed: 'リンクをコピーできませんでした',
     },
     disconnect: {
         title: '切断されました',
@@ -1165,15 +1151,13 @@ const vi = {
         gamingMode: 'Chế độ chơi game',
         lockResolution: 'Khóa/Mở khóa độ phân giải',
         resizeClient: 'Thay đổi kích thước theo máy khách',
+        invite: 'Mời ai đó vào phiên này',
     },
     usernamePrompt: {
         title: 'Chào mừng!',
         description: 'Vui lòng chọn tên người dùng để tham gia phiên.',
         placeholder: 'Tên của bạn',
         joinButton: 'Tham gia',
-    },
-    sidebar: {
-        title: 'SealSkin',
     },
     chat: {
         inputPlaceholder: 'Nhập tin nhắn...',
@@ -1188,9 +1172,10 @@ const vi = {
         systemSender: 'Hệ thống',
     },
     inviteLinks: {
-        participant: 'Lời mời người dùng cộng tác',
-        readonly: 'Lời mời người dùng chỉ đọc',
-        readonlyParticipantView: 'Lời mời chỉ đọc',
+        participant: 'Liên kết mời cộng tác viên',
+        readonly: 'Liên kết mời người xem',
+        copied: 'Đã sao chép liên kết',
+        failed: 'Không thể sao chép liên kết',
     },
     disconnect: {
         title: 'Đã ngắt kết nối',
@@ -1246,15 +1231,13 @@ const th = {
         gamingMode: 'โหมดเกม',
         lockResolution: 'ล็อก/ปลดล็อกความละเอียด',
         resizeClient: 'ปรับขนาดตามไคลเอนต์',
+        invite: 'เชิญใครสักคนเข้าร่วมเซสชันนี้',
     },
     usernamePrompt: {
         title: 'ยินดีต้อนรับ!',
         description: 'โปรดเลือกชื่อผู้ใช้เพื่อเข้าร่วมเซสชัน',
         placeholder: 'ชื่อของคุณ',
         joinButton: 'เข้าร่วม',
-    },
-    sidebar: {
-        title: 'SealSkin',
     },
     chat: {
         inputPlaceholder: 'พิมพ์ข้อความ...',
@@ -1269,9 +1252,10 @@ const th = {
         systemSender: 'ระบบ',
     },
     inviteLinks: {
-        participant: 'คำเชิญผู้ใช้ร่วมทำงาน',
-        readonly: 'คำเชิญผู้ใช้แบบอ่านอย่างเดียว',
-        readonlyParticipantView: 'คำเชิญแบบอ่านอย่างเดียว',
+        participant: 'ลิงก์เชิญผู้ร่วมงาน',
+        readonly: 'ลิงก์เชิญผู้ชม',
+        copied: 'คัดลอกลิงก์แล้ว',
+        failed: 'ไม่สามารถคัดลอกลิงก์ได้',
     },
     disconnect: {
         title: 'ตัดการเชื่อมต่อแล้ว',
@@ -1327,15 +1311,13 @@ const fil = {
         gamingMode: 'Gaming Mode',
         lockResolution: 'I-lock/I-unlock ang Resolusyon',
         resizeClient: 'I-resize sa Client',
+        invite: 'Mag-imbita ng isang tao sa session na ito',
     },
     usernamePrompt: {
         title: 'Maligayang pagdating!',
         description: 'Mangyaring pumili ng username para sumali sa session.',
         placeholder: 'Iyong Pangalan',
         joinButton: 'Sumali',
-    },
-    sidebar: {
-        title: 'SealSkin',
     },
     chat: {
         inputPlaceholder: 'Mag-type ng mensahe...',
@@ -1350,9 +1332,10 @@ const fil = {
         systemSender: 'Sistema',
     },
     inviteLinks: {
-        participant: 'Imbitasyon ng Gumagamit ng Kolaborasyon',
-        readonly: 'Imbitasyon ng Gumagamit na Read Only',
-        readonlyParticipantView: 'Imbitasyon na Read Only',
+        participant: 'Link ng Imbitasyon para sa Katuwang',
+        readonly: 'Link ng Imbitasyon para sa Manonood',
+        copied: 'Nakopya ang link',
+        failed: 'Hindi makopya ang link',
     },
     disconnect: {
         title: 'Nadiskonekta',
@@ -1408,15 +1391,13 @@ const da = {
         gamingMode: 'Spiltilstand',
         lockResolution: 'Lås/Lås op for opløsning',
         resizeClient: 'Tilpas størrelse til klient',
+        invite: 'Inviter nogen til denne session',
     },
     usernamePrompt: {
         title: 'Velkommen!',
         description: 'Vælg venligst et brugernavn for at deltage i sessionen.',
         placeholder: 'Dit navn',
         joinButton: 'Deltag',
-    },
-    sidebar: {
-        title: 'SealSkin',
     },
     chat: {
         inputPlaceholder: 'Skriv en besked...',
@@ -1431,9 +1412,10 @@ const da = {
         systemSender: 'System',
     },
     inviteLinks: {
-        participant: 'Invitation til samarbejdsbruger',
-        readonly: 'Invitation til skrivebeskyttet bruger',
-        readonlyParticipantView: 'Skrivebeskyttet invitation',
+        participant: 'Invitationslink til samarbejdspartner',
+        readonly: 'Invitationslink til tilskuer',
+        copied: 'Link kopieret',
+        failed: 'Kunne ikke kopiere linket',
     },
     disconnect: {
         title: 'Forbindelse afbrudt',
@@ -1517,7 +1499,8 @@ function getTranslator(langCode = 'en') {
 
         for (const placeholder in variables) {
             const regex = new RegExp(`\\{${placeholder}\\}`, 'g');
-            processedText = processedText.replace(regex, variables[placeholder]);
+            const substitution = String(variables[placeholder]);
+            processedText = processedText.replace(regex, () => substitution);
         }
         
         return processedText;
