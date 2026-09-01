@@ -256,7 +256,15 @@ async def broadcast_token_state(session_id: str, session_data: dict):
         if c.get("ip"):
             targets[c["ip"]] = c.get("port")
 
-    headers = {"Authorization": f"Bearer {session_data['master_token']}"}
+    bearer_headers = {"Authorization": f"Bearer {session_data['master_token']}"}
+    stacked_headers = {
+        "Selkies-Authorization": f"Bearer {session_data['master_token']}"
+    }
+    if session_data.get("custom_user") and session_data.get("password"):
+        auth_b64 = base64.b64encode(
+            f"{session_data['custom_user']}:{session_data['password']}".encode()
+        ).decode()
+        stacked_headers["Authorization"] = f"Basic {auth_b64}"
 
     async with httpx.AsyncClient(timeout=1.0) as client:
         for ip, port in targets.items():
@@ -273,7 +281,9 @@ async def broadcast_token_state(session_id: str, session_data: dict):
                     resp = await client.post(
                         url,
                         json=all_tokens,
-                        headers=headers,
+                        headers=stacked_headers
+                        if url.endswith("/api/tokens")
+                        else bearer_headers,
                     )
                     resp.raise_for_status()
                     TOKEN_ENDPOINT_CACHE[ip] = url

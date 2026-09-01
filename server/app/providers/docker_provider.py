@@ -261,17 +261,26 @@ class DockerProvider(BaseProvider):
                 
                 if health_check_passed and is_collaboration:
                     logger.info(f"[{session_id}] Performing collaboration health check...")
-                    control_plane_urls = [
-                        f"http://{ip_address}:{self.app_config['provider_config']['port']}{subfolder.rstrip('/')}/api/tokens",
-                        f"http://{ip_address}:8083/tokens",
+                    stacked_headers = {"Selkies-Authorization": f"Bearer {master_token}"}
+                    if auth_header:
+                        stacked_headers.update(auth_header)
+                    control_plane_targets = [
+                        (
+                            f"http://{ip_address}:{self.app_config['provider_config']['port']}{subfolder.rstrip('/')}/api/tokens",
+                            stacked_headers,
+                        ),
+                        (
+                            f"http://{ip_address}:8083/tokens",
+                            {"Authorization": f"Bearer {master_token}"},
+                        ),
                     ]
                     async with httpx.AsyncClient(timeout=5.0) as client:
-                        for control_plane_url in control_plane_urls:
+                        for control_plane_url, control_plane_headers in control_plane_targets:
                             try:
                                 response = await client.post(
                                     control_plane_url,
                                     json=initial_tokens,
-                                    headers={"Authorization": f"Bearer {master_token}"}
+                                    headers=control_plane_headers
                                 )
                                 if response.status_code == 200:
                                     from ..collaboration import TOKEN_ENDPOINT_CACHE
