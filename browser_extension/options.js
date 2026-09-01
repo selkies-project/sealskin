@@ -747,7 +747,8 @@ function initializeAppLaboratoryTab() {
 
       const launchPayload = {
         application_id: appToLaunch.id,
-        wayland_mode: launchWaylandCheckbox.checked
+        wayland_mode: launchWaylandCheckbox.checked,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
       };
       const { sealskinConfig } = await chrome.storage.local.get('sealskinConfig');
       const launchResponse = await secureFetch('/api/admin/launch/meta_customize', { method: 'POST', body: JSON.stringify(launchPayload) });

@@ -753,6 +753,7 @@ async function handleLaunch() {
       application_id: selectedAppId,
       home_name: finalHomeName,
       language: languageSelect.value,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       selected_gpu: selectedGpuValue,
       launch_in_room_mode: collaborationMode,
       wayland_mode: waylandMode,

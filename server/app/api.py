@@ -1328,7 +1328,7 @@ async def ensure_container_for_session(session_id: str, target_app_id: str) -> d
         "PGID": str(settings.pgid),
         "CUSTOM_USER": session.get("custom_user", "abc"),
         "PASSWORD": session.get("password", "abc"),
-        "TZ": "Etc/UTC",
+        "TZ": session.get("timezone") or os.environ.get("TZ") or "Etc/UTC",
         "SELKIES_ALLOWED_ORIGINS": "*",
     }
     if session.get("wayland_mode", True):
@@ -1521,6 +1521,19 @@ async def stop_container_in_session(session_id: str, target_app_id: str):
         del session["container_registry"][target_app_id]
         await save_sessions_to_disk()
 
+_TZ_NAME_RE = re.compile(r"^[A-Za-z0-9_+-]+(/[A-Za-z0-9_+-]+){0,2}$")
+
+def _resolve_timezone(client_timezone: Optional[str]) -> str:
+    """Pick the container TZ: the client's zone when it looks like an
+    IANA name, otherwise the server's own TZ, otherwise the previous Etc/UTC."""
+    if (
+        client_timezone
+        and len(client_timezone) <= 64
+        and _TZ_NAME_RE.match(client_timezone)
+    ):
+        return client_timezone
+    return os.environ.get("TZ") or "Etc/UTC"
+
 async def _launch_common(
     application_id: str,
     username: str,
@@ -1535,6 +1548,7 @@ async def _launch_common(
     forced_rw_mount: Optional[str] = None,
     launch_in_room_mode: bool = False,
     wayland_mode: bool = True,
+    timezone: Optional[str] = None,
 ) -> dict:
     app_config = INSTALLED_APPS.get(application_id)
     if not app_config:
@@ -1564,7 +1578,7 @@ async def _launch_common(
         "PGID": str(settings.pgid),
         "CUSTOM_USER": custom_user,
         "PASSWORD": password,
-        "TZ": "Etc/UTC",
+        "TZ": _resolve_timezone(timezone),
         "SELKIES_ALLOWED_ORIGINS": "*",
     }
 
@@ -1889,6 +1903,7 @@ async def _launch_common(
             "password": password,
             "gpu_config": gpu_config,
             "wayland_mode": wayland_mode,
+            "timezone": _resolve_timezone(timezone),
             "container_registry": {
                 application_id: {
                     "instance_id": instance_details["instance_id"],
@@ -1952,6 +1967,7 @@ async def launch_simple(
             req.selected_gpu,
             launch_in_room_mode=req.launch_in_room_mode,
             wayland_mode=req.wayland_mode,
+            timezone=req.timezone,
         )
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
@@ -1974,6 +1990,7 @@ async def launch_url(
             req.selected_gpu,
             launch_in_room_mode=req.launch_in_room_mode,
             wayland_mode=req.wayland_mode,
+            timezone=req.timezone,
         )
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
@@ -2011,6 +2028,7 @@ async def launch_file(
             req.open_file_on_launch,
             launch_in_room_mode=req.launch_in_room_mode,
             wayland_mode=req.wayland_mode,
+            timezone=req.timezone,
         )
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
@@ -2049,7 +2067,7 @@ async def launch_file_path(
         env_vars = {"SEALSKIN_FILE": container_file_path}
 
         return await _launch_common(
-            req.application_id, username, auth_user["effective_settings"], req.home_name, env_vars, req.language, req.selected_gpu, wayland_mode=req.wayland_mode,
+            req.application_id, username, auth_user["effective_settings"], req.home_name, env_vars, req.language, req.selected_gpu, wayland_mode=req.wayland_mode, timezone=req.timezone,
         )
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")
@@ -2388,6 +2406,7 @@ async def launch_meta_for_customization(
             selected_gpu=req.selected_gpu,
             forced_rw_mount=template_path,
             wayland_mode=req.wayland_mode,
+            timezone=req.timezone,
         )
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {e}")

@@ -22,6 +22,7 @@ class LaunchRequestSimple(BaseModel):
     application_id: str
     home_name: Optional[str] = None
     language: Optional[str] = None
+    timezone: Optional[str] = None
     selected_gpu: Optional[str] = None
     launch_in_room_mode: bool = False
     wayland_mode: bool = True
@@ -31,6 +32,7 @@ class LaunchRequestURL(BaseModel):
     application_id: str
     home_name: Optional[str] = None
     language: Optional[str] = None
+    timezone: Optional[str] = None
     selected_gpu: Optional[str] = None
     launch_in_room_mode: bool = False
     wayland_mode: bool = True
@@ -43,6 +45,7 @@ class LaunchRequestFile(BaseModel):
     open_file_on_launch: bool = True
     home_name: Optional[str] = None
     language: Optional[str] = None
+    timezone: Optional[str] = None
     selected_gpu: Optional[str] = None
     launch_in_room_mode: bool = False
     wayland_mode: bool = True
@@ -203,6 +206,7 @@ class CreateMetaAppRequest(BaseModel):
 class LaunchMetaCustomizeRequest(BaseModel):
     application_id: str
     language: Optional[str] = None
+    timezone: Optional[str] = None
     selected_gpu: Optional[str] = None
     wayland_mode: bool = True
 
@@ -324,6 +328,7 @@ class LaunchRequestFilePath(BaseModel):
     home_name: Optional[str] = None
     filename: str
     language: Optional[str] = None
+    timezone: Optional[str] = None
     selected_gpu: Optional[str] = None
     wayland_mode: bool = True
 
