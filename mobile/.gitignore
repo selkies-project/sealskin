@@ -4,3 +4,4 @@ android/
 ios/
 icons/
 package-lock.json
+*.apk
