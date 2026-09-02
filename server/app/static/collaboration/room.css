@@ -6,36 +6,69 @@
   --chat-tab-width: 36px;
   --bar-height: 200px;
   --bar-pad: 10px;
-  --sidebar-bg: #282c34;
-  --sidebar-text: #abb2bf;
-  --sidebar-header-color: #61dafb;
-  --sidebar-border: #3a3f47;
-  --sidebar-shadow: rgba(0, 0, 0, 0.5);
-  --section-bg: #3a3f47;
-  --item-border: #5a606b;
-  --input-bg: #454b54;
-  --input-text: #abb2bf;
-  --input-border: #5a606b;
-  --button-bg: #61dafb;
-  --button-text: #282c34;
-  --button-hover-bg: #a4d9f5;
-  --text-muted: #a0aec0;
-  --color-success: #2ecc71;
-  --color-speaker: #f1c40f;
-  --control-btn-bg: #454b54;
-  --control-btn-color: #abb2bf;
-  --control-btn-hover-bg: #3a3f47;
-  --control-btn-inactive-bg: #e74c3c;
+
+  /* Dark palette shared with the Selkies dashboard. The room only ever runs
+     dark: it frames a video stream, and the bar under it reads as chrome. The
+     accent is drawn as text in a lighter tint than the fill, since the fill is
+     too dark to carry labels on these surfaces. */
+  --accent: #ec4899;
+  --accent-strong: #f472b6;
+  --accent-text: #f9a8d4;
+  --accent-text-strong: #fbc0de;
+  --accent-soft: rgba(236, 72, 153, 0.14);
+  --accent-border: rgba(236, 72, 153, 0.45);
+  --violet: #c3b1f7;
+  --violet-strong: #cdc0fa;
+  --wordmark-from: #f4a6cf;
+  --wordmark-to: #c3b1f7;
+  --bg: #12161d;
+  --surface: #181d26;
+  --surface-alt: #1f2530;
+  --surface-inset: #12161d;
+  --border-soft: #2b3441;
+  --border-strong: #6e7b94;
+  --text: #e6ebf3;
+  --text-muted: #aeb9c9;
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --focus-ring: 0 0 0 3px var(--accent-soft);
+
+  /* Aliases consumed by the rules below */
+  --sidebar-bg: var(--surface);
+  --sidebar-text: var(--text);
+  --sidebar-header-color: var(--accent-text);
+  --sidebar-border: var(--border-soft);
+  --sidebar-shadow: rgba(0, 0, 0, 0.55);
+  --section-bg: var(--surface-alt);
+  --item-border: var(--border-strong);
+  --item-bg-hover: #2a3240;
+  --input-bg: var(--surface-inset);
+  --input-text: var(--text);
+  --input-border: var(--border-strong);
+  /* A filled button carries near-black text, so its pink is lighter again
+     than the accent that only has to sit on a dark surface. */
+  --button-bg: #f795ca;
+  --button-text: #12161d;
+  --button-hover-bg: var(--accent-text);
+  --color-success: #5bd98a;
+  --color-speaker: #facc15;
+  --color-danger: #e5484d;
+  --control-btn-bg: var(--surface-alt);
+  --control-btn-color: var(--text-muted);
+  --control-btn-hover-bg: var(--item-bg-hover);
+  --control-btn-inactive-bg: var(--color-danger);
   --control-btn-inactive-color: #ffffff;
-  --chat-bubble-self-bg: #61dafb;
-  --chat-bubble-self-text: #282c34;
-  --chat-bubble-other-bg: #454b54;
-  --chat-bubble-other-text: #abb2bf;
-  --chat-hover-bg: #32353b;
-  --reply-quote-bg: #3a3f47;
-  --reply-quote-border: #5a606b;
-  --toast-bg: #5a606b;
-  --toast-text: #abb2bf;
+  --chat-bubble-self-bg: var(--accent-text);
+  --chat-bubble-self-text: #12161d;
+  --chat-bubble-other-bg: var(--surface-alt);
+  --chat-bubble-other-text: var(--text);
+  --chat-hover-bg: var(--surface-alt);
+  --reply-quote-bg: var(--surface-alt);
+  --reply-quote-border: var(--accent-border);
+  --toast-bg: #262e3a;
+  --toast-text: var(--text);
+  --glow-shadow: rgba(0, 0, 0, 0.4);
 }
 
 .hidden {
@@ -72,12 +105,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--section-bg);
+  background-color: var(--border-strong);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: var(--item-border);
+  background-color: var(--text-muted);
 }
 
 .content {
@@ -93,9 +126,9 @@ body {
   gap: 10px;
   padding: 10px;
   align-items: center;
-  background-color: #1a1a1a;
+  background-color: var(--bg);
   flex-shrink: 0;
-  border-top: 1px solid #444;
+  border-top: 1px solid var(--border-soft);
   min-height: 200px;
   overflow: hidden;
   flex-wrap: nowrap;
@@ -148,7 +181,7 @@ body {
   width: 8px;
   margin: 4px 0;
   background: var(--input-bg);
-  border: 1px solid var(--sidebar-border);
+  border: 1px solid var(--border-strong);
   border-radius: 4px;
   outline: none;
   cursor: pointer;
@@ -159,29 +192,31 @@ body {
   appearance: none;
   width: 18px;
   height: 18px;
-  background: var(--button-bg);
+  background: var(--accent);
   border-radius: 50%;
-  border: 2px solid #1a1a1a;
+  border: 2px solid var(--bg);
   transition: background-color 0.2s;
 }
 
 #stream-volume-slider::-moz-range-thumb {
   width: 14px;
   height: 14px;
-  background: var(--button-bg);
+  background: var(--accent);
   border-radius: 50%;
-  border: 2px solid #1a1a1a;
+  border: 2px solid var(--bg);
   transition: background-color 0.2s;
 }
 
 #stream-volume-slider:focus-visible::-webkit-slider-thumb,
 #stream-volume-slider:hover::-webkit-slider-thumb {
-  background: var(--button-hover-bg);
+  background: var(--accent-strong);
+  box-shadow: 0 0 0 4px var(--accent-soft);
 }
 
 #stream-volume-slider:focus-visible::-moz-range-thumb,
 #stream-volume-slider:hover::-moz-range-thumb {
-  background: var(--button-hover-bg);
+  background: var(--accent-strong);
+  box-shadow: 0 0 0 4px var(--accent-soft);
 }
 
 #chat-dock-slot {
@@ -211,9 +246,9 @@ body {
   min-width: 240px;
   height: 180px;
   background-color: #000;
-  border-radius: 8px;
+  border-radius: var(--radius);
   overflow: hidden;
-  border: 2px solid #333;
+  border: 2px solid var(--border-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -358,8 +393,8 @@ body {
 }
 
 .can-drop-gamepad {
-  border-color: var(--sidebar-header-color) !important;
-  box-shadow: 0 0 10px var(--sidebar-header-color) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 10px var(--accent-border) !important;
 }
 
 .video-container.speaking {
@@ -431,7 +466,7 @@ body {
 
 .remote-control-btn.active {
   background: var(--color-speaker);
-  color: #fff;
+  color: #12161d;
 }
 
 #session-frame {
@@ -472,8 +507,14 @@ iframe {
 .toggle-indicator-horizontal {
   width: 40px;
   height: 5px;
-  background-color: var(--sidebar-header-color);
-  border-radius: 2px;
+  background-color: var(--accent);
+  opacity: 0.85;
+  border-radius: 999px;
+  transition: opacity 0.15s ease;
+}
+
+.video-toggle-handle:hover .toggle-indicator-horizontal {
+  opacity: 1;
 }
 
 .control-btn {
@@ -494,6 +535,13 @@ iframe {
 
 .control-btn:hover {
   background-color: var(--control-btn-hover-bg);
+  border-color: var(--accent-border);
+  color: var(--text);
+}
+
+.control-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 #chat-messages {
@@ -544,7 +592,7 @@ iframe {
 }
 
 .bubble a {
-  color: var(--sidebar-header-color);
+  color: var(--violet);
   text-decoration: none;
 }
 
@@ -558,8 +606,8 @@ iframe {
   right: 0;
   background-color: var(--sidebar-bg);
   border: 1px solid var(--sidebar-border);
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 2px 4px var(--glow-shadow);
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
@@ -694,15 +742,16 @@ iframe {
   padding: 0.5rem 0.8rem;
   border: none;
   background-color: transparent;
-  color: var(--button-bg);
-  border-radius: 6px;
+  color: var(--accent-text);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 1.2rem;
   line-height: 1;
 }
 
 #chat-form button:hover {
-  color: var(--button-hover-bg);
+  color: var(--accent-text-strong);
+  background-color: var(--accent-soft);
 }
 
 .modal-overlay {
@@ -729,7 +778,8 @@ iframe {
 .modal-content {
   background-color: var(--sidebar-bg);
   color: var(--sidebar-text);
-  border-radius: 8px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
   box-shadow: 0 5px 15px var(--sidebar-shadow);
   width: 90%;
   max-width: 500px;
@@ -795,9 +845,14 @@ iframe {
   cursor: pointer;
 }
 
+.modal-body select:hover {
+  border-color: var(--accent-border);
+}
+
 .modal-body select:focus {
   outline: none;
-  border-color: var(--sidebar-header-color);
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
 }
 
 #gamepad-source-box {
@@ -855,7 +910,7 @@ iframe {
   pointer-events: none;
   opacity: 0.85;
   transform: translate(-9999px, -9999px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 6px 18px var(--sidebar-shadow);
 }
 
 .video-container.drop-target {
@@ -954,7 +1009,7 @@ iframe {
 
 #start-menu-btn:hover {
   background-color: var(--section-bg);
-  border-color: var(--sidebar-header-color);
+  border-color: var(--accent-border);
 }
 
 .start-btn-inner {
@@ -986,8 +1041,8 @@ iframe {
   height: 450px;
   background-color: var(--sidebar-bg);
   border: 1px solid var(--sidebar-border);
-  border-radius: 8px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 5px 20px var(--sidebar-shadow);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -1022,9 +1077,13 @@ iframe {
   border-bottom: 3px solid transparent;
 }
 
+.sm-tab-btn:hover {
+  color: var(--text);
+}
+
 .sm-tab-btn.active {
-  color: var(--sidebar-header-color);
-  border-bottom-color: var(--sidebar-header-color);
+  color: var(--accent-text);
+  border-bottom-color: var(--accent);
   background-color: var(--sidebar-bg);
 }
 
@@ -1053,10 +1112,21 @@ iframe {
 .sm-search-box input {
   width: 100%;
   padding: 8px 8px 8px 30px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   border: 1px solid var(--input-border);
   background-color: var(--input-bg);
   color: var(--input-text);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sm-search-box input:hover {
+  border-color: var(--accent-border);
+}
+
+.sm-search-box input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
 }
 
 .sm-grid {
@@ -1079,14 +1149,15 @@ iframe {
 }
 
 .sm-app-card.running {
-  box-shadow: 0 0 8px var(--color-success);
+  box-shadow: 0 0 8px rgba(91, 217, 138, 0.35);
   border-color: var(--color-success);
-  background-color: rgba(39, 174, 96, 0.05);
+  background-color: rgba(91, 217, 138, 0.06);
 }
 
 .sm-app-card.active {
-  box-shadow: 0 0 12px var(--sidebar-header-color);
-  border-color: var(--sidebar-header-color);
+  box-shadow: 0 0 12px var(--accent-border);
+  border-color: var(--accent);
+  background-color: var(--accent-soft);
   cursor: default;
 }
 
@@ -1156,6 +1227,7 @@ iframe {
 }
 .sm-btn-restart {
   background-color: var(--button-bg);
+  color: var(--button-text);
 }
 .sm-btn-action:disabled {
   opacity: 0.5;
@@ -1175,12 +1247,13 @@ iframe {
 
 .sm-btn-swap {
   background-color: var(--color-success);
+  color: #12161d;
 }
 
 .spinner {
-  border: 3px solid rgba(0, 0, 0, 0.1);
+  border: 3px solid var(--border-soft);
   border-radius: 50%;
-  border-top: 3px solid var(--sidebar-header-color);
+  border-top: 3px solid var(--accent);
   width: 20px;
   height: 20px;
   animation: spin 1s linear infinite;
@@ -1248,7 +1321,7 @@ iframe {
 .spinner-large {
   border: 4px solid rgba(255, 255, 255, 0.1);
   border-radius: 50%;
-  border-top: 4px solid var(--sidebar-header-color);
+  border-top: 4px solid var(--accent);
   width: 50px;
   height: 50px;
   animation: spin 1s linear infinite;
@@ -1267,7 +1340,7 @@ iframe {
 }
 
 .remote-control-btn.toggle-resolution-lock .fa-lock {
-  color: #ff4444;
+  color: #ff6b6b;
 }
 
 .self-controls {
@@ -1364,7 +1437,7 @@ iframe {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 8px var(--glow-shadow);
   transition: background-color 0.2s;
 }
 
@@ -1393,7 +1466,7 @@ iframe {
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 8px var(--glow-shadow);
   transition: background-color 0.2s;
 }
 
@@ -1413,13 +1486,13 @@ iframe {
   overflow: hidden;
   background-color: var(--sidebar-bg);
   border: 1px solid var(--sidebar-border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   transition: height 0.2s ease, width 0.2s ease, border-color 0.2s ease;
 }
 
 #chat-dock.open {
   height: calc(50vh + var(--bar-height) / 2 - var(--bar-pad));
-  border-color: var(--sidebar-header-color);
+  border-color: var(--accent-border);
   box-shadow: 0 -4px 16px var(--sidebar-shadow);
 }
 
@@ -1492,8 +1565,8 @@ body.chat-crowded #chat-dock:not(.open) #chat-form {
   color: var(--toast-text);
   padding: 8px 12px;
   border-radius: 12px 12px 4px 12px;
-  border: 1px solid var(--sidebar-border);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 4px 12px var(--glow-shadow);
   cursor: pointer;
   animation: peek-in 0.25s ease-out forwards;
   font-size: 0.85rem;
@@ -1514,7 +1587,7 @@ body.chat-crowded #chat-dock:not(.open) #chat-form {
 }
 
 .chat-peek-message a {
-  color: var(--sidebar-header-color);
+  color: var(--violet);
 }
 
 @keyframes peek-in {
@@ -1558,9 +1631,20 @@ body.chat-crowded #chat-dock:not(.open) #chat-form {
   font-size: 1rem;
   background-color: var(--input-bg);
   border: 1px solid var(--input-border);
-  border-radius: 6px;
+  border-radius: var(--radius);
   color: var(--input-text);
   margin-bottom: 1rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.username-prompt input:hover {
+  border-color: var(--accent-border);
+}
+
+.username-prompt input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
 }
 
 .username-prompt button {
@@ -1569,7 +1653,7 @@ body.chat-crowded #chat-dock:not(.open) #chat-form {
   font-size: 1rem;
   font-weight: 500;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius);
   cursor: pointer;
   background-color: var(--button-bg);
   color: var(--button-text);

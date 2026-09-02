@@ -902,7 +902,7 @@ const tableRenderConfig = {
                 `;
       }
 
-      const labIcon = item.is_meta_app ? `<i class="fas fa-flask" style="color: var(--color-warning);" title="${t('options.installedApps.isLaboratory')}"></i>` : '';
+      const labIcon = item.is_meta_app ? `<i class="fas fa-flask" style="color: var(--color-warning-text);" title="${t('options.installedApps.isLaboratory')}"></i>` : '';
 
       return `
             <tr>
@@ -1641,7 +1641,7 @@ function showImageUpdateModal(app) {
       const currentSha = data.current_sha ? data.current_sha.substring(0, 12) : t('common.na');
       if (data.update_available) {
         imageUpdateModalBody.innerHTML = `
-                    <p><i class="fas fa-arrow-alt-circle-up" style="color: var(--color-success);"></i> ${t('options.modals.updateAvailable')}</p>
+                    <p><i class="fas fa-arrow-alt-circle-up" style="color: var(--color-success-text);"></i> ${t('options.modals.updateAvailable')}</p>
                     <p>${t('options.modals.yourVersion', { sha: `<span class="sha-display">${currentSha}</span>` })}</p>
                     <p>${t('options.modals.latestAvailable')}</p>
                 `;
@@ -1650,14 +1650,14 @@ function showImageUpdateModal(app) {
                 `;
       } else {
         imageUpdateModalBody.innerHTML = `
-                    <p><i class="fas fa-check-circle" style="color: var(--color-success);"></i> ${t('options.modals.upToDate')}</p>
+                    <p><i class="fas fa-check-circle" style="color: var(--color-success-text);"></i> ${t('options.modals.upToDate')}</p>
                     <p>${t('options.modals.currentVersion', { sha: `<span class="sha-display">${currentSha}</span>` })}</p>
                 `;
       }
     })
     .catch(error => {
       imageUpdateModalBody.innerHTML = `
-                <p><i class="fas fa-exclamation-circle" style="color: var(--color-danger);"></i> ${t('options.modals.errorChecking')}</p>
+                <p><i class="fas fa-exclamation-circle" style="color: var(--color-danger-text);"></i> ${t('options.modals.errorChecking')}</p>
                 <p style="color: var(--text-muted); font-size: 0.9em;">${error.message}</p>
             `;
     });
@@ -1675,13 +1675,13 @@ async function handlePullLatestImage() {
     });
     const newSha = data.new_sha ? data.new_sha.substring(0, 12) : t('common.na');
     imageUpdateModalBody.innerHTML = `
-            <p><i class="fas fa-check-circle" style="color: var(--color-success);"></i> ${t('options.modals.pullComplete')}</p>
+            <p><i class="fas fa-check-circle" style="color: var(--color-success-text);"></i> ${t('options.modals.pullComplete')}</p>
             <p>${t('options.modals.newVersion', { sha: `<span class="sha-display">${newSha}</span>` })}</p>
         `;
     await refreshAppData();
   } catch (error) {
     imageUpdateModalBody.innerHTML = `
-            <p><i class="fas fa-exclamation-circle" style="color: var(--color-danger);"></i> ${t('options.modals.errorPulling')}</p>
+            <p><i class="fas fa-exclamation-circle" style="color: var(--color-danger-text);"></i> ${t('options.modals.errorPulling')}</p>
             <p style="color: var(--text-muted); font-size: 0.9em;">${error.message}</p>
         `;
   } finally {

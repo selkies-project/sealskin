@@ -592,7 +592,7 @@
                                 <button type="button" id="lab-update-btn" class="secondary" disabled><i class="fas fa-save"></i> <span data-i18n="options.modals.saveChanges">Save Changes</span></button>
                                 <button type="button" id="lab-launch-btn" class="primary" style="flex-grow: 1;">
                                     <span id="lab-launch-btn-text" data-i18n="options.appLaboratory.launchButton">Launch & Modify Home Directory</span>
-                                    <div id="lab-spinner" class="spinner-small" style="border-top-color: white; display: none;"></div>
+                                    <div id="lab-spinner" class="spinner-small" style="border-top-color: currentColor; display: none;"></div>
                                 </button>
                             </div>
                         </form>
@@ -682,7 +682,7 @@
                 <h3 data-i18n="options.modals.userConfigTitle"><i class="fas fa-file-export"></i> User Configuration</h3>
                 <span class="close-button" data-modal-id="user-config-modal">&times;</span>
             </div>
-            <p id="config-modal-warning" style="color: var(--color-warning); font-weight: 500; border-left: 3px solid var(--color-warning); padding-left: 1rem; margin-bottom: 1.5rem;">
+            <p id="config-modal-warning" style="color: var(--color-warning-text); font-weight: 500; border-left: 3px solid var(--color-warning); padding-left: 1rem; margin-bottom: 1.5rem;">
                 <i class="fas fa-exclamation-triangle"></i> <span data-i18n="options.modals.warning">This is the only time this configuration will be shown.
                 Provide it to the user securely.</span>
             </p>
@@ -740,7 +740,7 @@
                 <input type="hidden" id="install-app-id">
                 <input type="hidden" id="install-source-app-id">
                 <input type="hidden" id="install-source-name">
-                <p id="manual-install-note" class="description" style="display: none; color: var(--color-warning); border-left: 3px solid var(--color-warning); padding-left: 1rem; margin-bottom: 1.5rem;" data-i18n="options.modals.manualInstallNote">Note: Manually added images should be based on a selkies-baseimage compatible image.</p>
+                <p id="manual-install-note" class="description" style="display: none; color: var(--color-warning-text); border-left: 3px solid var(--color-warning); padding-left: 1rem; margin-bottom: 1.5rem;" data-i18n="options.modals.manualInstallNote">Note: Manually added images should be based on a selkies-baseimage compatible image.</p>
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="install-app-name" data-i18n="options.modals.customNameLabel">Custom Name</label>

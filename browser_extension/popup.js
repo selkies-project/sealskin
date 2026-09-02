@@ -132,7 +132,7 @@ async function secureFetch(url, options = {}) {
 
 function setStatus(message, isError = false) {
   statusDiv.textContent = message;
-  statusDiv.style.color = isError ? 'var(--color-danger)' : 'var(--text-muted)';
+  statusDiv.style.color = isError ? 'var(--color-danger-text)' : 'var(--text-muted)';
 }
 
 function setContextualStatus() {

@@ -62,7 +62,7 @@
 }
 
 .breadcrumb-item:hover {
-    color: var(--accent-primary);
+    color: var(--accent-text);
     text-decoration: underline;
 }
 
@@ -125,7 +125,7 @@
     color: var(--text-muted);
     font-size: 1.2rem;
 }
-.file-item-name i.fa-folder { color: var(--accent-primary); }
+.file-item-name i.fa-folder { color: var(--accent-text); }
 
 .col-actions .cell-wrapper {
     justify-content: flex-end;
@@ -240,20 +240,20 @@
 #upload-progress-list .status {
     color: var(--text-muted);
 }
-#upload-progress-list .status.success { color: var(--color-success); }
-#upload-progress-list .status.error { color: var(--color-danger); }
+#upload-progress-list .status.success { color: var(--color-success-text); }
+#upload-progress-list .status.error { color: var(--color-danger-text); }
 
 .sidebar-nav .nav-link.special-homedir {
-    color: var(--color-warning);
+    color: var(--color-warning-text);
     font-weight: 600;
 }
 
 .sidebar-nav .nav-link.special-homedir.active {
     background-color: var(--color-warning);
-    color: #1a202c;
+    color: var(--color-warning-contrast);
 }
 
 .sidebar-nav .nav-link.special-homedir:hover:not(.active) {
     background-color: var(--bg-tertiary);
-    color: var(--color-warning-hover);
+    color: var(--color-warning-text);
 }
