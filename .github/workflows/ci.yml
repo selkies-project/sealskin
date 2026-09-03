@@ -85,9 +85,9 @@ jobs:
       - name: Validate wheel contents
         run: |
           pip install twine
-          twine check dist/*.whl
+          twine check server/dist/*.whl
           python -c "import zipfile, sys; z=zipfile.ZipFile(sys.argv[1]); names=z.namelist(); \
             assert any('app/main.py' in n for n in names), 'missing app/main.py'; \
             assert any('app/ui/' in n for n in names), 'missing UI assets'; \
             assert any('VERSION' in n for n in names), 'missing VERSION'; \
-            print('Wheel contents OK')" dist/*.whl
+            print('Wheel contents OK')" server/dist/*.whl
