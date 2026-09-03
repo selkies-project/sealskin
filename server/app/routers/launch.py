@@ -50,6 +50,7 @@ async def launch_simple(
         req.selected_gpu,
         launch_in_room_mode=req.launch_in_room_mode,
         wayland_mode=req.wayland_mode,
+        timezone=req.timezone,
     )
 
 
@@ -73,6 +74,7 @@ async def launch_url(
         req.selected_gpu,
         launch_in_room_mode=req.launch_in_room_mode,
         wayland_mode=req.wayland_mode,
+        timezone=req.timezone,
     )
 
 
@@ -108,6 +110,7 @@ async def launch_file(
         req.open_file_on_launch,
         launch_in_room_mode=req.launch_in_room_mode,
         wayland_mode=req.wayland_mode,
+        timezone=req.timezone,
     )
 
 
@@ -149,4 +152,5 @@ async def launch_file_path(
         req.language,
         req.selected_gpu,
         wayland_mode=req.wayland_mode,
+        timezone=req.timezone,
     )

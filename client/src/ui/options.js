@@ -8,6 +8,7 @@
 import { bridge } from '../lib/bridge.js';
 import { secureFetch, fetchSchema, openPage } from '../lib/api.js';
 import { loadTranslator, applyTranslations } from '../lib/i18n.js';
+import { browserTimezone } from '../lib/timezone.js';
 import {
   announce, escapeHtml, formatBytes, timeAgo, formatLogoSrc, hydrateLogos, showToast, tOr,
   addMobileSafeArea, addMobileBackButton, downloadBlob,
@@ -588,7 +589,11 @@ function initializeAppLaboratoryTab() {
         appToLaunch = labState.currentApp;
       }
 
-      const launchPayload = { application_id: appToLaunch.id, wayland_mode: launchWaylandCheckbox.checked };
+      const launchPayload = {
+        application_id: appToLaunch.id,
+        wayland_mode: launchWaylandCheckbox.checked,
+        timezone: browserTimezone(),
+      };
       const launchResponse = await secureFetch('/api/admin/launch/meta_customize', { method: 'POST', body: JSON.stringify(launchPayload) });
 
       const sessionUrlBase = `https://${config.serverIp}:${config.sessionPort}`;

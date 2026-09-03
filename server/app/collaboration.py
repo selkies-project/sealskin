@@ -468,11 +468,13 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
             "apps": sorted(user_apps, key=lambda x: x['name'])
         })
 
-    async def handle_restart_app(target_app_id: str) -> None:
+    async def handle_restart_app(target_app_id: str, timezone: str | None) -> None:
         """Restart one app's container inside the session."""
         try:
             await launch.stop_container_in_session(session_id_str, target_app_id)
-            container_info = await launch.ensure_container_for_session(session_id_str, target_app_id)
+            container_info = await launch.ensure_container_for_session(
+                session_id_str, target_app_id, timezone
+            )
 
             if target_app_id == session_data.get("provider_app_id"):
                 session_data["instance_id"] = container_info["instance_id"]
@@ -491,10 +493,12 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
             if websocket.client_state == WebSocketState.CONNECTED:
                 await websocket.send_json({"type": "error", "message": "Failed to restart application."})
 
-    async def handle_swap_app(target_app_id: str) -> None:
+    async def handle_swap_app(target_app_id: str, timezone: str | None) -> None:
         """Make another app the active one, starting its container if needed."""
         try:
-            container_info = await launch.ensure_container_for_session(session_id_str, target_app_id)
+            container_info = await launch.ensure_container_for_session(
+                session_id_str, target_app_id, timezone
+            )
             app_config = state.installed_apps.get(target_app_id)
 
             session_data["instance_id"] = container_info["instance_id"]
@@ -608,12 +612,16 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
                 elif action == "restart_app" and is_controller:
                     target_app_id = data.get("app_id")
                     if target_app_id:
-                        asyncio.create_task(handle_restart_app(target_app_id))
+                        asyncio.create_task(
+                            handle_restart_app(target_app_id, data.get("timezone"))
+                        )
 
                 elif action == "swap_app" and is_controller:
                     target_app_id = data.get("app_id")
                     if target_app_id:
-                        asyncio.create_task(handle_swap_app(target_app_id))
+                        asyncio.create_task(
+                            handle_swap_app(target_app_id, data.get("timezone"))
+                        )
 
                 elif action == "request_resolutions" and is_controller:
                     await broadcast_to_room(session_id_str, {"type": "request_resolutions"})

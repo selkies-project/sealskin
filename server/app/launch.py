@@ -13,6 +13,7 @@ import asyncio
 import base64
 import logging
 import os
+import re
 import secrets
 import shutil
 import time
@@ -441,15 +442,53 @@ def build_launch_spec(
     )
 
 
-def session_base_env(session_id: str, custom_user: str, password: str, master_token: str | None) -> dict[str, str]:
-    """Return the session-level environment shared by every container of a session."""
+_TZ_NAME_RE = re.compile(r"^[A-Za-z0-9_+-]+(/[A-Za-z0-9_+-]+){0,2}$")
+DEFAULT_TIMEZONE = "Etc/UTC"
+
+
+def is_valid_timezone(name: Any) -> bool:
+    """Whether ``name`` looks like an IANA zone name (``Europe/Berlin``, ``UTC``)."""
+    return isinstance(name, str) and 0 < len(name) <= 64 and bool(_TZ_NAME_RE.match(name))
+
+
+def resolve_timezone(*candidates: Any) -> str:
+    """Pick the ``TZ`` for a container.
+
+    The first candidate that looks like an IANA zone name wins. Candidates are
+    the browser's reported zone and, for containers started inside an existing
+    session, the zone the session was created with. With no usable candidate
+    the server's own ``TZ`` applies, and failing that ``Etc/UTC``.
+    """
+    for candidate in candidates:
+        if is_valid_timezone(candidate):
+            return candidate
+    server_tz = os.environ.get("TZ")
+    return server_tz if is_valid_timezone(server_tz) else DEFAULT_TIMEZONE
+
+
+def session_base_env(
+    session_id: str,
+    custom_user: str,
+    password: str,
+    master_token: str | None,
+    timezone: str | None = None,
+) -> dict[str, str]:
+    """Return the session-level environment shared by every container of a session.
+
+    Args:
+        session_id: The session; sets ``SUBFOLDER``.
+        custom_user: Basic-auth user for the container.
+        password: Basic-auth password for the container.
+        master_token: Collaboration master token, or ``None`` outside a room.
+        timezone: IANA zone for ``TZ``; resolved via :func:`resolve_timezone`.
+    """
     env = {
         "SUBFOLDER": f"/{session_id}/",
         "PUID": str(settings.puid),
         "PGID": str(settings.pgid),
         "CUSTOM_USER": custom_user,
         "PASSWORD": password,
-        "TZ": "Etc/UTC",
+        "TZ": resolve_timezone(timezone),
         "SELKIES_ALLOWED_ORIGINS": "*",
     }
     if master_token:
@@ -534,6 +573,7 @@ async def launch_application(
     forced_rw_mount: str | None = None,
     launch_in_room_mode: bool = False,
     wayland_mode: bool = True,
+    timezone: str | None = None,
 ) -> dict[str, str]:
     """Start a new session for a user.
 
@@ -551,6 +591,8 @@ async def launch_application(
         forced_rw_mount: Mount this directory as the home (meta-app editing).
         launch_in_room_mode: Start a collaboration session.
         wayland_mode: Use the Wayland compositor.
+        timezone: The browser's IANA zone; the container's ``TZ`` (see
+            :func:`resolve_timezone`).
 
     Returns:
         ``{"session_url": str, "session_id": str}``.
@@ -571,6 +613,7 @@ async def launch_application(
         viewer_token = secrets.token_urlsafe(16)
     custom_user = str(uuid.uuid4())
     password = str(uuid.uuid4())
+    timezone = resolve_timezone(timezone)
 
     host_mount_path, shared_files_path = await _resolve_storage(
         app, session_id, username, effective_settings, home_name, forced_rw_mount
@@ -588,7 +631,7 @@ async def launch_application(
     spec = build_launch_spec(
         app,
         session_id,
-        base_env=session_base_env(session_id, custom_user, password, master_token),
+        base_env=session_base_env(session_id, custom_user, password, master_token, timezone),
         extra_env=env_vars,
         language=language,
         wayland_mode=wayland_mode,
@@ -632,6 +675,7 @@ async def launch_application(
             "password": password,
             "gpu_config": gpu_config,
             "wayland_mode": wayland_mode,
+            "timezone": timezone,
             "container_registry": {
                 application_id: {
                     "instance_id": instance["instance_id"],
@@ -686,7 +730,9 @@ async def launch_application(
         ) from exc
 
 
-async def ensure_container_for_session(session_id: str, target_app_id: str) -> dict[str, Any]:
+async def ensure_container_for_session(
+    session_id: str, target_app_id: str, timezone: str | None = None
+) -> dict[str, Any]:
     """Start (or reuse) a container for another app inside an existing session.
 
     Used by collaboration rooms to swap between applications.
@@ -694,6 +740,8 @@ async def ensure_container_for_session(session_id: str, target_app_id: str) -> d
     Args:
         session_id: The session.
         target_app_id: Installed app id to start.
+        timezone: IANA zone of the browser requesting the launch. Falls back
+            to the zone the session was created with.
 
     Returns:
         The container registry entry for the app.
@@ -749,6 +797,7 @@ async def ensure_container_for_session(session_id: str, target_app_id: str) -> d
             session.get("custom_user", "abc"),
             session.get("password", "abc"),
             session.get("master_token") if session.get("is_collaboration") else None,
+            resolve_timezone(timezone, session.get("timezone")),
         ),
         extra_env=None,
         language=None,

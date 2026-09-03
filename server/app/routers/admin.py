@@ -455,6 +455,7 @@ async def launch_meta_for_customization(
         selected_gpu=req.selected_gpu,
         forced_rw_mount=template_path,
         wayland_mode=req.wayland_mode,
+        timezone=req.timezone,
     )
 
 

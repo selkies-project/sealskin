@@ -117,3 +117,34 @@ def test_collaboration_initial_tokens():
     )
     assert tokens["c"] == {"role": "controller", "slot": 1, "mk_control": False}
     assert tokens["v1"]["mk_control"] is True and tokens["v2"]["mk_control"] is False
+
+
+def test_resolve_timezone_prefers_valid_client_zone(monkeypatch):
+    monkeypatch.setenv("TZ", "Europe/Berlin")
+    assert launch.resolve_timezone("America/New_York") == "America/New_York"
+    assert launch.resolve_timezone("UTC") == "UTC"
+    assert launch.resolve_timezone("America/Argentina/Buenos_Aires") == "America/Argentina/Buenos_Aires"
+    assert launch.resolve_timezone("Etc/GMT+5") == "Etc/GMT+5"
+
+
+def test_resolve_timezone_falls_back_through_candidates(monkeypatch):
+    monkeypatch.setenv("TZ", "Europe/Berlin")
+    assert launch.resolve_timezone(None, "Asia/Tokyo") == "Asia/Tokyo"
+    assert launch.resolve_timezone("not a zone", "Asia/Tokyo") == "Asia/Tokyo"
+    assert launch.resolve_timezone(None) == "Europe/Berlin"
+    assert launch.resolve_timezone("../etc/passwd") == "Europe/Berlin"
+    assert launch.resolve_timezone("A" * 65) == "Europe/Berlin"
+    assert launch.resolve_timezone(42) == "Europe/Berlin"
+    monkeypatch.setenv("TZ", ":/etc/localtime")
+    assert launch.resolve_timezone(None) == "Etc/UTC"
+    monkeypatch.delenv("TZ")
+    assert launch.resolve_timezone(None) == "Etc/UTC"
+    assert launch.resolve_timezone() == "Etc/UTC"
+
+
+def test_session_base_env_timezone(monkeypatch):
+    monkeypatch.delenv("TZ", raising=False)
+    assert launch.session_base_env("s", "u", "p", None)["TZ"] == "Etc/UTC"
+    env = launch.session_base_env("s", "u", "p", None, "Australia/Sydney")
+    assert env["TZ"] == "Australia/Sydney"
+    assert launch.session_base_env("s", "u", "p", None, "bogus zone")["TZ"] == "Etc/UTC"

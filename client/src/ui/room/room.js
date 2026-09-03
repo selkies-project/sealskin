@@ -1,4 +1,5 @@
 import { getTranslator } from './translation.js';
+import { browserTimezone } from '../../lib/timezone.js';
 
 // ---------------------------------------------------------------------------
 // WebCodecs track plumbing: capture (MediaStreamTrack -> VideoFrame/AudioData for
@@ -3069,7 +3070,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         e.stopPropagation();
                         pendingActions.add(`swap_${app.id}`);
                         renderStartMenu(currentFilter);
-                        ws.send(JSON.stringify({ action: 'swap_app', app_id: app.id }));
+                        ws.send(JSON.stringify({ action: 'swap_app', app_id: app.id, timezone: browserTimezone() }));
                     };
                 }
             }
@@ -3119,7 +3120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (action === 'swap') {
             pendingActions.add(`swap_${appId}`);
             renderStartMenu();
-            ws.send(JSON.stringify({ action: 'swap_app', app_id: appId }));
+            ws.send(JSON.stringify({ action: 'swap_app', app_id: appId, timezone: browserTimezone() }));
         } else if (action === 'stop') {
             pendingActions.add(`app_${appId}`);
             renderStartMenu();
@@ -3127,7 +3128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (action === 'restart') {
             pendingActions.add(`app_${appId}`);
             renderStartMenu();
-            ws.send(JSON.stringify({ action: 'restart_app', app_id: appId }));
+            ws.send(JSON.stringify({ action: 'restart_app', app_id: appId, timezone: browserTimezone() }));
         }
     };
 

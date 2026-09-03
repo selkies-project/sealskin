@@ -7,6 +7,7 @@ import { bridge } from '../lib/bridge.js';
 import { secureFetch, getContextBlob, uploadInChunks } from '../lib/api.js';
 import { loadTranslator, applyTranslations } from '../lib/i18n.js';
 import { supportedLangs } from '../lib/languages.js';
+import { browserTimezone } from '../lib/timezone.js';
 import { announce, escapeHtml, formatLogoSrc, hydrateLogos, timeAgo, currentLocale } from '../lib/dom.js';
 
 let t;
@@ -550,6 +551,7 @@ async function handleLaunch() {
       application_id: selectedAppId,
       home_name: finalHomeName,
       language: languageSelect.value,
+      timezone: browserTimezone(),
       selected_gpu: selectedGpuValue,
       launch_in_room_mode: collaborationMode,
       wayland_mode: waylandMode,
