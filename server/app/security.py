@@ -40,6 +40,7 @@ from .state import CryptoSession, state
 logger = logging.getLogger(__name__)
 
 ALGORITHM = "RS256"
+JWT_LEEWAY_SECONDS = 60
 HANDSHAKE_PATHS = ("/api/handshake/initiate", "/api/handshake/exchange")
 
 
@@ -340,6 +341,7 @@ async def verify_token(req: Request) -> dict[str, Any]:
             user["public_key"],
             algorithms=[ALGORITHM],
             options={"require": ["exp"]},
+            leeway=JWT_LEEWAY_SECONDS,
         )
     except KeyError as exc:
         raise HTTPException(
