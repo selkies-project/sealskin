@@ -12,6 +12,22 @@ from typing import Any
 
 from .version import repo_root
 
+_PKG_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+def _default_ui_path() -> str:
+    """Return the default UI directory.
+
+    Resolution order:
+    1. ``app/ui/`` inside the installed package (wheel layout).
+    2. ``<repo>/client/dist/ui`` (source / Docker layout).
+    """
+    pkg_ui = os.path.join(_PKG_DIR, "ui")
+    if os.path.isdir(pkg_ui):
+        return pkg_ui
+    return os.path.join(repo_root(), "client", "dist", "ui")
+
+
 SETTING_DEFINITIONS: list[dict[str, Any]] = [
     {
         "name": "log_level",
@@ -204,7 +220,7 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
     {
         "name": "ui_path",
         "type": "str",
-        "default": os.path.join(repo_root(), "client", "dist", "ui"),
+        "default": _default_ui_path(),
         "help": "Directory holding the built web UI served under /ui.",
     },
     {

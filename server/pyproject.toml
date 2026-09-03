@@ -1,3 +1,38 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sealskin-server"
+dynamic = ["version"]
+description = "SealSkin server: API, Caddy proxy, and embedded web UI"
+readme = "README.md"
+license = "AGPL-3.0-only"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi==0.141.1",
+    "uvicorn[standard]==0.52.4",
+    "uvloop==0.22.1",
+    "PyJWT[crypto]==2.13.0",
+    "pydantic==2.13.5",
+    "cryptography==50.0.1",
+    "httpx==0.28.1",
+    "websockets==17.1",
+    "docker==7.2.0",
+    "PyYAML==6.0.3",
+    "python-multipart==0.0.32",
+    "watchfiles==1.2.0",
+]
+
+[project.scripts]
+sealskin-server = "app.main:main"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.setuptools.package-data]
+app = ["ui/**", "VERSION", "template_schema.yml", "Caddyfile.tpl", "static/**"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"

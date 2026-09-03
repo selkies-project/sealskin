@@ -51,3 +51,43 @@ jobs:
             grep -q "\"version\": \"${VERSION}\"" "$f" || { echo "::error::$f does not carry version ${VERSION}"; exit 1; }
           done
           grep -q "\"version\": \"${VERSION}\"" client/dist/ui/manifest.json
+
+  wheel:
+    name: Build wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Build UI
+        working-directory: client
+        run: |
+          npm install
+          SEALSKIN_BUILD_STRICT=1 node build.mjs --target ui
+
+      - name: Copy UI and VERSION into package
+        run: |
+          cp -r client/dist/ui server/app/ui
+          cp VERSION server/app/VERSION
+
+      - name: Build wheel
+        run: |
+          pip install build
+          python -m build --wheel server/
+
+      - name: Validate wheel contents
+        run: |
+          pip install twine
+          twine check dist/*.whl
+          python -c "import zipfile, sys; z=zipfile.ZipFile(sys.argv[1]); names=z.namelist(); \
+            assert any('app/main.py' in n for n in names), 'missing app/main.py'; \
+            assert any('app/ui/' in n for n in names), 'missing UI assets'; \
+            assert any('VERSION' in n for n in names), 'missing VERSION'; \
+            print('Wheel contents OK')" dist/*.whl

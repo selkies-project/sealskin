@@ -65,6 +65,23 @@ The browser extension is the user's entry point into the SealSkin environment. I
 *   An SSL certificate and key for your server's domain.
 
 ### 1. Server Setup
+
+**From a wheel (recommended for production):**
+
+```bash
+pip3 install sealskin-server
+sealskin-server
+```
+
+Or install directly from a release asset:
+
+```bash
+pip3 install "https://github.com/selkies-project/sealskin/releases/download/v${SEALSKIN_VERSION}/sealskin_server-${SEALSKIN_VERSION}-py3-none-any.whl"
+sealskin-server
+```
+
+**From source (for development):**
+
 1.  Clone the repository to your server.
 2.  Navigate to the `server` directory.
 3.  Configure the server by setting the required environment variables. See the **Configuration** section below. At a minimum, you must provide paths to your SSL certificate and key (`SEALSKIN_PROXY_CERT_PATH` and `SEALSKIN_PROXY_KEY_PATH`).
@@ -119,7 +136,7 @@ changes on disk (`SEALSKIN_WATCH_CONFIG_FILES=false` disables this).
 | `SEALSKIN_SHARE_CLEANUP_INTERVAL_SECONDS` | How often to run the cleanup job for expired shares (in seconds). | `600` |
 | `SEALSKIN_SESSIONS_DB_PATH` | Path to the YAML file for session persistence. | `/config/.config/sealskin/sessions.yml` |
 | `SEALSKIN_CADDYFILE_PATH` | Path to the generated Caddyfile for the proxy. | `/config/.config/sealskin/Caddyfile` |
-| `SEALSKIN_UI_PATH` | Directory holding the built web UI served under `/ui`. | `<repo>/client/dist/ui` |
+| `SEALSKIN_UI_PATH` | Directory holding the built web UI served under `/ui`. | `app/ui/` (wheel) or `<repo>/client/dist/ui` (source) |
 | `SEALSKIN_TEMPLATE_SCHEMA_PATH` | YAML file describing the environment variables editable in app templates. | `server/app/template_schema.yml` |
 | `SEALSKIN_CRYPTO_SESSION_TTL_SECONDS` | Idle lifetime of an E2EE session key before it is discarded. | `86400` |
 | `SEALSKIN_WATCH_CONFIG_FILES` | Reload YAML configuration files automatically when they change on disk. | `True` |
@@ -171,10 +188,13 @@ collaboration room page is read from `<ui path>/room/room.html`.
 ## Module layout
 
 ```
-server/main.py                    entry point: renders the Caddyfile, starts Caddy and uvicorn
+server/main.py                    thin wrapper: ``from app.main import main; main()``
+server/setup.py                   PEP 517 build hook (reads ../VERSION for the wheel)
+server/app/__main__.py            enables ``python -m app``
+server/app/main.py                entry point: renders the Caddyfile, starts Caddy and uvicorn
 server/app/api.py                 FastAPI factory, lifespan, background jobs, file watcher
-server/app/settings.py            settings definitions (environment variables)
-server/app/version.py             reads the repository VERSION file
+server/app/settings.py            settings definitions (environment variables), UI path resolution
+server/app/version.py             reads VERSION from package dir (wheel) or repo root (source)
 server/app/state.py               single container for all in-memory state
 server/app/persistence.py         atomic YAML read/write, per-file locks, change watcher
 server/app/config_store.py        stores, installed app records + resolution, templates, sessions, shares
@@ -186,6 +206,7 @@ server/app/providers/             provider interface and the Docker provider
 server/app/routers/               one router per area (handshake, applications, launch, sessions,
                                   homedirs, admin, uploads, files, shares, internal, ui)
 server/app/collaboration.py       collaboration room page, WebSocket and token fan-out
+server/app/Caddyfile.tpl          Caddy configuration template
 server/app/template_schema.yml    template editor variable definitions
 server/tests/                     pytest suite (run with `pytest` from server/)
 ```
@@ -202,8 +223,20 @@ pytest
 
 ## Docker image note
 
-The image must build the client with Node in a build stage and copy `client/dist` next to
-`server/` (the default `SEALSKIN_UI_PATH` is `<repo>/client/dist/ui`):
+The recommended approach is to install the wheel from the release assets, which
+bundles the built UI, Caddyfile template and VERSION file:
+
+```Dockerfile
+ARG SEALSKIN_VERSION=0.3.0
+RUN pip install --no-cache-dir \
+      "https://github.com/selkies-project/sealskin/releases/download/v${SEALSKIN_VERSION}/sealskin_server-${SEALSKIN_VERSION}-py3-none-any.whl"
+```
+
+The `sealskin-server` console script starts the server. The UI is served from
+inside the installed package automatically.
+
+To build from source instead (for example when modifying the client), copy
+`client/dist` next to `server/`:
 
 ```Dockerfile
 FROM node:22-alpine AS ui
@@ -217,6 +250,9 @@ COPY server /opt/sealskin/server
 COPY VERSION /opt/sealskin/VERSION
 COPY --from=ui /src/client/dist /opt/sealskin/client/dist
 ```
+
+See `docs/docker-image.md` for more options including the release tarball
+download approach.
 
 ## Details
 

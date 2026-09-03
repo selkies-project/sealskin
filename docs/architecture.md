@@ -39,7 +39,8 @@ client/                      all web UI source and the build
 browser_extension/           manifests, icons, build.sh (zips client/dist/extension)
 mobile/                      Capacitor project; www/ is copied from client/dist/mobile
 server/                      Python API + Caddy
-  main.py
+  main.py                    thin wrapper (from app.main import main; main())
+  setup.py                   PEP 517 build hook (reads ../VERSION)
   app/ ...                   see section 6
   app/template_schema.yml    env var definitions for the template editor
 ```
@@ -223,9 +224,12 @@ All files stay YAML under `/config/.config/sealskin/`. Changes:
 ## 6. Server modules
 
 ```
-server/main.py                    entry: Caddy + uvicorn
-server/app/version.py             reads VERSION
-server/app/settings.py            unchanged shape, new settings: ui_path, template_schema_path
+server/main.py                    thin wrapper: ``from app.main import main; main()``
+server/setup.py                   PEP 517 build hook (reads ../VERSION for the wheel)
+server/app/__main__.py            enables ``python -m app``
+server/app/main.py                entry: Caddy + uvicorn
+server/app/version.py             reads VERSION from package dir (wheel) or repo root (source)
+server/app/settings.py            settings definitions; ui_path resolves from package (wheel) or repo (source)
 server/app/state.py               runtime state container (apps, stores, templates, sessions, crypto sessions, locks)
 server/app/persistence.py         atomic YAML + locks + watcher
 server/app/config_store.py        load/save/resolve apps, stores, templates, store cache, autostart cache

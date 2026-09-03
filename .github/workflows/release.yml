@@ -35,6 +35,10 @@ jobs:
         with:
           node-version: 22
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -64,6 +68,15 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: bash build.sh
 
+      - name: Build server wheel
+        run: |
+          cp -r client/dist/ui server/app/ui
+          cp VERSION server/app/VERSION
+          pip install build
+          python -m build --wheel server/
+          VERSION=$(cat VERSION)
+          mv dist/sealskin_server-${VERSION}-py3-none-any.whl "sealskin_server-${VERSION}-py3-none-any.whl"
+
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
@@ -76,3 +89,4 @@ jobs:
             browser_extension/sealskin-chrome-v*.zip
             browser_extension/sealskin-firefox-v*.zip
             mobile/sealskin-v*.apk
+            sealskin_server-*-py3-none-any.whl
