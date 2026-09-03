@@ -4,4 +4,5 @@ android/
 icons/
 package-lock.json
 *.apk
+*.aab
 ios/App/App/Assets.xcassets/**/*.png

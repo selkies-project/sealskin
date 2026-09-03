@@ -293,7 +293,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: ${{ env.PACKAGE_NAME }}
           releaseFiles: dist/sealskin-v*.aab
-          track: internal
+          tracks: internal
           status: completed
 
       - name: Summary
