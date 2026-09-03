@@ -67,16 +67,24 @@ export function installPolyfill(hooks) {
     },
   };
 
+  const tabUrls = new Map();
   const tabs = {
     async create(props) {
       await hooks.openExternal(props.url);
-      return { id: Date.now() };
+      const id = Date.now();
+      tabUrls.set(id, props.url);
+      return { id };
     },
     async update(id, props) {
-      if (props && props.url) await hooks.openExternal(props.url);
+      const url = (props && props.url) || tabUrls.get(id);
+      if (!url) throw new Error(`No tab with id ${id}.`);
+      if (props && props.url) tabUrls.set(id, props.url);
+      await hooks.openExternal(url);
       return { id, windowId: 1 };
     },
-    async remove() {},
+    async remove(id) {
+      tabUrls.delete(id);
+    },
     query: async () => [],
   };
 
