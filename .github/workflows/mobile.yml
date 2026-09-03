@@ -1,36 +1,121 @@
-name: iOS
+name: Mobile
 
-# Builds the Capacitor iOS app, signs it with the distribution certificate and
-# App Store provisioning profile held in repository secrets, and (optionally)
-# uploads the result to App Store Connect where it appears under TestFlight.
+# Builds the Capacitor apps for both stores. Every run produces the signed
+# artifacts (IPA for iOS, APK and AAB for Android). The two upload jobs run
+# only when `upload` is set: by hand from the Actions tab, or by the Release
+# workflow when a stable release is cut. The Pre-release workflow calls this
+# with `upload: false` so builds land in the pre-release but never in a store.
 
 on:
   workflow_dispatch:
     inputs:
       upload:
-        description: "Upload the build to App Store Connect (TestFlight)"
+        description: "Upload to TestFlight and the Google Play internal track"
         type: boolean
         default: false
-  push:
-    tags:
-      - '*'
+  workflow_call:
+    inputs:
+      upload:
+        description: "Upload to TestFlight and the Google Play internal track"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
 
 env:
   TEAM_ID: 3HWXQ6BR8S
   BUNDLE_ID: io.linuxserver.sealskinisolation
+  PACKAGE_NAME: io.linuxserver.sealskin
   XCODE: /Applications/Xcode_26.2.app
-  # The store version is deliberately independent of ../VERSION: App Store
-  # Connect only requires it to increase, and 2.<run number> always does.
-  IOS_VERSION: 2.${{ github.run_number }}
-  IOS_BUILD: ${{ github.run_number }}
 
 jobs:
+  version:
+    name: Version numbers
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.numbers.outputs.version }}
+      build: ${{ steps.numbers.outputs.build }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Derive the store build number
+        id: numbers
+        run: |
+          VERSION=$(tr -d '[:space:]' < VERSION)
+
+          # Both stores reject an upload whose build number is not higher than
+          # the last one they saw, and that rule spans every workflow in this
+          # repository. The commit count on the branch grows with every push,
+          # so it is used as the build number. The offset keeps it above the
+          # numbers uploaded by hand before this workflow existed (Play
+          # versionCode 300, TestFlight build 4). Never lower it.
+          BUILD=$(( 1000 + $(git rev-list --count HEAD) ))
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "build=$BUILD" >> "$GITHUB_OUTPUT"
+          echo "Version $VERSION, store build number $BUILD"
+
+  android:
+    name: Build Android
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Build signed APK and AAB
+        working-directory: mobile
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_VERSION_CODE: ${{ needs.version.outputs.build }}
+        run: bash build.sh
+
+      - name: Keep the APK and AAB as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sealskin-android-${{ needs.version.outputs.version }}
+          path: |
+            mobile/sealskin-v*.apk
+            mobile/sealskin-v*.aab
+          if-no-files-found: error
+
+      - name: Summary
+        run: |
+          {
+            echo "## Android build"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Version | \`${{ needs.version.outputs.version }}\` (versionCode \`${{ needs.version.outputs.build }}\`) |"
+            echo "| Package | \`$PACKAGE_NAME\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   ios:
-    name: Build and upload iOS
+    name: Build iOS
+    needs: version
     runs-on: macos-26
     defaults:
       run:
         shell: bash
+    env:
+      # The store version is deliberately independent of ../VERSION: App Store
+      # Connect only requires it to increase, and 2.<build number> always does.
+      IOS_VERSION: 2.${{ needs.version.outputs.build }}
+      IOS_BUILD: ${{ needs.version.outputs.build }}
     steps:
       - uses: actions/checkout@v4
 
@@ -162,32 +247,15 @@ jobs:
             -exportPath "$RUNNER_TEMP/export" \
             | xcbeautify --renderer github-actions
 
-          IPA="$RUNNER_TEMP/export/sealskin-ios-${IOS_VERSION}.ipa"
-          mv "$RUNNER_TEMP/export/App.ipa" "$IPA"
-          echo "IPA=$IPA" >> "$GITHUB_ENV"
+          # Named like the APK so the release assets line up.
+          mv "$RUNNER_TEMP/export/App.ipa" "$RUNNER_TEMP/export/sealskin-v${{ needs.version.outputs.version }}.ipa"
 
       - name: Keep the IPA as a workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sealskin-ios-${{ env.IOS_VERSION }}
-          path: ${{ env.IPA }}
+          name: sealskin-ios-${{ needs.version.outputs.version }}
+          path: ${{ runner.temp }}/export/sealskin-v*.ipa
           if-no-files-found: error
-
-      - name: Upload to App Store Connect
-        if: github.ref_type == 'tag' || inputs.upload
-        env:
-          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
-          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
-          APPSTORE_PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
-        run: |
-          # altool looks for the key at ~/private_keys/AuthKey_<KEY_ID>.p8
-          mkdir -p ~/private_keys
-          echo "$APPSTORE_PRIVATE_KEY" | base64 --decode > ~/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8
-
-          xcrun altool --upload-app -f "$IPA" -t ios \
-            --apiKey "$APPSTORE_KEY_ID" --apiIssuer "$APPSTORE_ISSUER_ID"
-
-          echo "Uploaded. The build appears under TestFlight in App Store Connect once Apple finishes processing it (usually 5-30 minutes)."
 
       - name: Summary
         if: always()
@@ -200,15 +268,69 @@ jobs:
             echo "| Version | \`$IOS_VERSION\` (build \`$IOS_BUILD\`) |"
             echo "| Bundle ID | \`$BUNDLE_ID\` |"
             echo "| Profile | ${PROFILE_NAME:-not installed} |"
-            if [ "${{ github.ref_type == 'tag' || inputs.upload }}" = "true" ]; then
-              echo "| Uploaded | yes, check TestFlight in App Store Connect |"
-            else
-              echo "| Uploaded | no (build only) |"
-            fi
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Remove signing material
         if: always()
         run: |
           [ -n "${KEYCHAIN:-}" ] && security delete-keychain "$KEYCHAIN" || true
-          rm -f ~/private_keys/AuthKey_*.p8 "$RUNNER_TEMP/profile.plist" "$RUNNER_TEMP/appstore.mobileprovision"
+          rm -f "$RUNNER_TEMP/profile.plist" "$RUNNER_TEMP/appstore.mobileprovision"
+
+  upload-android:
+    name: Upload to Google Play
+    needs: [version, android]
+    if: inputs.upload
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: sealskin-android-${{ needs.version.outputs.version }}
+          path: dist
+
+      - name: Upload the AAB to the internal testing track
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ env.PACKAGE_NAME }}
+          releaseFiles: dist/sealskin-v*.aab
+          track: internal
+          status: completed
+
+      - name: Summary
+        run: |
+          echo "Uploaded versionCode ${{ needs.version.outputs.build }} to the Google Play internal testing track." >> "$GITHUB_STEP_SUMMARY"
+
+  upload-ios:
+    name: Upload to TestFlight
+    needs: [version, ios]
+    if: inputs.upload
+    runs-on: macos-26
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: sealskin-ios-${{ needs.version.outputs.version }}
+          path: dist
+
+      - name: Upload to App Store Connect
+        env:
+          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          APPSTORE_PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+        run: |
+          sudo xcode-select -s "$XCODE"
+
+          # altool looks for the key at ~/private_keys/AuthKey_<KEY_ID>.p8
+          mkdir -p ~/private_keys
+          echo "$APPSTORE_PRIVATE_KEY" | base64 --decode > ~/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8
+
+          xcrun altool --upload-app -f dist/sealskin-v*.ipa -t ios \
+            --apiKey "$APPSTORE_KEY_ID" --apiIssuer "$APPSTORE_ISSUER_ID"
+
+          echo "Uploaded build ${{ needs.version.outputs.build }}. It appears under TestFlight in App Store Connect once Apple finishes processing it (usually 5-30 minutes)." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove the API key
+        if: always()
+        run: rm -f ~/private_keys/AuthKey_*.p8

@@ -10,8 +10,8 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 echo "Detected Version: $VERSION"
-# Android versionCode must be an increasing integer: 0.3.0 -> 300
-VERSION_CODE=$(echo "$VERSION" | awk -F. '{printf "%d", $1*10000 + $2*100 + $3}')
+# Android versionCode must be an increasing integer: 0.3.0 -> 300.
+VERSION_CODE="${ANDROID_VERSION_CODE:-$(echo "$VERSION" | awk -F. '{printf "%d", $1*10000 + $2*100 + $3}')}"
 
 [ -d node_modules ] || npm install --no-audit --no-fund
 
@@ -29,13 +29,14 @@ npx cap sync android
 sed -i "s/versionCode [0-9]*/versionCode ${VERSION_CODE}/; s/versionName \"[^\"]*\"/versionName \"${VERSION}\"/" android/app/build.gradle
 
 APK_FILENAME="sealskin-v${VERSION}.apk"
-rm -f "$APK_FILENAME"
+AAB_FILENAME="sealskin-v${VERSION}.aab"
+rm -f "$APK_FILENAME" "$AAB_FILENAME"
 
 if [ -n "${ANDROID_KEYSTORE_BASE64:-}" ]; then
     echo "Building release APK signed with provided keystore"
     KEYSTORE=$(mktemp)
     echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$KEYSTORE"
-    (cd android && ./gradlew assembleRelease)
+    (cd android && ./gradlew assembleRelease bundleRelease)
     SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
     BUILD_TOOLS=$(ls -d "${SDK_ROOT}"/build-tools/* | sort -V | tail -n 1)
     "${BUILD_TOOLS}/apksigner" sign \
@@ -45,6 +46,13 @@ if [ -n "${ANDROID_KEYSTORE_BASE64:-}" ]; then
         --key-pass "pass:${ANDROID_KEY_PASSWORD}" \
         --out "$APK_FILENAME" \
         android/app/build/outputs/apk/release/app-release-unsigned.apk
+    jarsigner -sigalg SHA256withRSA -digestalg SHA-256 \
+        -keystore "$KEYSTORE" \
+        -storepass "${ANDROID_KEYSTORE_PASSWORD}" \
+        -keypass "${ANDROID_KEY_PASSWORD}" \
+        -signedjar "$AAB_FILENAME" \
+        android/app/build/outputs/bundle/release/app-release.aab \
+        "${ANDROID_KEY_ALIAS}"
     rm -f "$KEYSTORE"
 else
     echo "ANDROID_KEYSTORE_BASE64 not set, building debug-signed APK"
@@ -52,4 +60,4 @@ else
     cp android/app/build/outputs/apk/debug/app-debug.apk "$APK_FILENAME"
 fi
 
-echo "Build Complete: $APK_FILENAME"
+echo "Build Complete: $APK_FILENAME${ANDROID_KEYSTORE_BASE64:+ and $AAB_FILENAME}"

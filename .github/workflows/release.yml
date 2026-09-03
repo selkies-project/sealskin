@@ -9,8 +9,12 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  check:
+    name: Check release notes
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.notes.outputs.version }}
+      path: ${{ steps.notes.outputs.path }}
     steps:
       - uses: actions/checkout@v4
 
@@ -31,6 +35,24 @@ jobs:
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "path=${NOTES}" >> "$GITHUB_OUTPUT"
 
+  # A stable release is the one automatic path to the stores: the mobile
+  # workflow builds both apps and pushes them to TestFlight and the Google
+  # Play internal track.
+  mobile:
+    name: Mobile apps
+    needs: check
+    uses: ./.github/workflows/mobile.yml
+    with:
+      upload: true
+    secrets: inherit
+
+  release:
+    name: Release
+    needs: [check, mobile]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -38,11 +60,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
 
       - name: Build served UI and shells
         working-directory: client
@@ -68,25 +85,24 @@ jobs:
         working-directory: browser_extension
         run: bash build.sh
 
-      - name: Build Android APK
-        working-directory: mobile
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: bash build.sh
+      - name: Fetch the mobile builds
+        uses: actions/download-artifact@v4
+        with:
+          pattern: sealskin-*
+          merge-multiple: true
+          path: mobile-dist
 
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
-          body_path: ${{ steps.notes.outputs.path }}
+          body_path: ${{ needs.check.outputs.path }}
           prerelease: false
           files: |
             sealskin-ui-v*.tar.gz
             browser_extension/sealskin-chrome-v*.zip
             browser_extension/sealskin-firefox-v*.zip
-            mobile/sealskin-v*.apk
+            mobile-dist/sealskin-v*.apk
+            mobile-dist/sealskin-v*.ipa
             sealskin_server-*-py3-none-any.whl
