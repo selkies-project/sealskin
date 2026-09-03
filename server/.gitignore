@@ -3,5 +3,6 @@
 !app/providers
 !app/static
 !app/static/collaboration
+!tests/
 __pycache__/
 *.pyc
