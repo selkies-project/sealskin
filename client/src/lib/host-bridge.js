@@ -29,7 +29,7 @@ const SHELL_VERSION = typeof __UI_VERSION__ !== 'undefined' ? __UI_VERSION__ : '
  *
  * @returns {'chrome'|'firefox'|'android'|'ios'|'web'}
  */
-export function detectPlatform() {
+function detectPlatform() {
   const cap = typeof window !== 'undefined' && window.Capacitor;
   if (cap && typeof cap.getPlatform === 'function') {
     const p = cap.getPlatform();

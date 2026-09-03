@@ -46,12 +46,6 @@ class DockerProvider(BaseProvider):
         super().__init__(app_config)
         self.client = get_docker_client()
 
-    async def initialize(self) -> None:
-        """Pull the application's image."""
-        image_name = self.app_config["provider_config"]["image"]
-        logger.info("[%s] Initializing Docker provider...", self.app_config.get("name", image_name))
-        await self.pull_image(image_name)
-
     async def get_local_image_info(self, image_name: str) -> dict[str, Any] | None:
         """Return id and digests of a locally available image.
 

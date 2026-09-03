@@ -22,7 +22,7 @@ const cache = new Map();
  * @param {string} locale e.g. 'pt-BR', 'en_US', 'fil'.
  * @returns {string} A key of the emitted language files, 'en' if unknown.
  */
-export function resolveLanguage(locale) {
+function resolveLanguage(locale) {
   const base = String(locale || 'en').split(/[-_]/)[0].toLowerCase();
   return Object.prototype.hasOwnProperty.call(FILES, base) ? base : 'en';
 }

@@ -1,6 +1,7 @@
 */
 !app/
 !app/providers
+!app/routers
 !app/static
 !app/static/collaboration
 !tests/

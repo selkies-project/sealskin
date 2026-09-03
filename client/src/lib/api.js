@@ -51,7 +51,7 @@ export async function getContextBlob(context) {
 }
 
 /** @param {Blob} blob @returns {Promise<string>} base64 without the data: prefix */
-export function readBlobAsBase64(blob) {
+function readBlobAsBase64(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result.split(',')[1]);

@@ -216,26 +216,6 @@ class InstalledAppRecord(BaseModel):
     overrides: dict[str, Any] = Field(default_factory=dict)
 
 
-class InstalledAppUpdate(BaseModel):
-    """Partial update of an installed application.
-
-    Any field of :class:`InstalledApp` may be supplied. Record fields are
-    applied directly; every other field is merged into ``overrides``.
-    """
-
-    model_config = ConfigDict(extra="allow")
-
-    name: str | None = None
-    logo: str | None = None
-    url: str | None = None
-    app_template: str | None = None
-    users: list[str] | None = None
-    groups: list[str] | None = None
-    auto_update: bool | None = None
-    home_directories: bool | None = None
-    provider_config: dict[str, Any] | None = None
-
-
 class InstalledAppWithStatus(InstalledApp):
     """Installed app plus image status for the admin UI."""
 

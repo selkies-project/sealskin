@@ -47,7 +47,3 @@ export async function takePendingFile() {
   }
   return file;
 }
-
-export function clearPendingFile() {
-  return run('readwrite', (store) => store.delete(KEY)).catch(() => {});
-}

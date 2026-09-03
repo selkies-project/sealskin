@@ -21,7 +21,7 @@ export function arrayBufferToBase64(buffer) {
   return btoa(binary);
 }
 
-export function arrayBufferToPem(buffer, type) {
+function arrayBufferToPem(buffer, type) {
   const b64 = arrayBufferToBase64(buffer);
   const lines = b64.match(/.{1,64}/g).join('\n');
   return `-----BEGIN ${type} KEY-----\n${lines}\n-----END ${type} KEY-----\n`;
@@ -44,14 +44,14 @@ export async function generateRsaKeyPair() {
   };
 }
 
-export function base64UrlEncode(str) {
+function base64UrlEncode(str) {
   return btoa(str)
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '');
 }
 
-export function arrayBufferToBase64Url(buffer) {
+function arrayBufferToBase64Url(buffer) {
   let binary = '';
   const bytes = new Uint8Array(buffer);
   for (let i = 0; i < bytes.byteLength; i++) {

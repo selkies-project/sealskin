@@ -19,10 +19,6 @@ class BaseProvider(ABC):
         self.app_config = app_config
 
     @abstractmethod
-    async def initialize(self) -> None:
-        """Perform one-time initialisation such as pulling the image."""
-
-    @abstractmethod
     async def launch(
         self,
         session_id: str,
