@@ -191,7 +191,6 @@ async function bundle({ entries, outdir, outbase, hashed, format, minify, define
     define,
     nodePaths,
   });
-  // map absolute input -> absolute output
   const map = new Map();
   for (const [out, meta] of Object.entries(result.metafile.outputs)) {
     if (!meta.entryPoint) continue;
@@ -226,9 +225,6 @@ async function buildTarget(name, { pages, outdir, outbase, hashed, minify, i18n,
   const vendorRefs = new Map(); // abs -> out abs
   for (const d of discovered) {
     for (const r of d.refs) {
-      // Vendored packages are referenced by their output-root-relative path
-      // (e.g. "vendor/fontawesome/css/all.min.css" or "../vendor/..." from a
-      // nested page). They are copied verbatim, never bundled.
       const vendorIdx = r.ref.replace(/\\/g, '/').indexOf('vendor/');
       if (vendorIdx >= 0) {
         const inside = r.ref.slice(vendorIdx + 'vendor/'.length);
@@ -334,8 +330,6 @@ async function buildMobile() {
     try { execSync('npm install --no-audit --no-fund', { cwd: path.join(REPO_DIR, 'mobile'), stdio: 'inherit' }); }
     catch (e) { warn('npm install in mobile/ failed; Capacitor imports will not resolve'); }
   }
-  // Shared shell pages are authored in src/shell; mobile pages in src/shell/mobile.
-  // Both land flat in dist/mobile, so outbase differs per page group.
   const { outMap } = await buildTarget('mobile', {
     pages: listHtml(path.join(SRC, 'shell', 'mobile')), outdir, outbase: path.join(SRC, 'shell', 'mobile'), hashed: false, minify: false,
     i18n: { hashed: false, namespaces: shellNamespaces() },
@@ -356,9 +350,13 @@ async function buildMobile() {
 async function buildAll() {
   strictFailures = 0;
   const started = Date.now();
-  rmrf(DIST);
-  mkdirp(DIST);
   const targets = { ui: buildUi, extension: buildExtension, mobile: buildMobile };
+  if (ONLY && !(ONLY in targets)) {
+    console.error(`unknown --target ${ONLY}; expected one of ${Object.keys(targets).join(', ')}`);
+    process.exit(2);
+  }
+  rmrf(ONLY ? path.join(DIST, ONLY) : DIST);
+  mkdirp(DIST);
   for (const [name, fn] of Object.entries(targets)) {
     if (ONLY && ONLY !== name) continue;
     await fn();

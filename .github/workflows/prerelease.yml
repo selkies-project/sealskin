@@ -38,6 +38,15 @@ jobs:
           VERSION=$(cat VERSION)
           tar -C client/dist -czf "sealskin-ui-v${VERSION}.tar.gz" ui
 
+      - name: Build server wheel
+        run: |
+          cp -r client/dist/ui server/app/ui
+          cp VERSION server/app/VERSION
+          pip install build
+          python -m build --wheel server/
+          VERSION=$(cat VERSION)
+          mv server/dist/sealskin_server-${VERSION}-py3-none-any.whl "sealskin_server-${VERSION}-py3-none-any.whl"
+
       - name: Build browser extensions
         working-directory: browser_extension
         run: bash build.sh
@@ -50,15 +59,6 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: bash build.sh
-
-      - name: Build server wheel
-        run: |
-          cp -r client/dist/ui server/app/ui
-          cp VERSION server/app/VERSION
-          pip install build
-          python -m build --wheel server/
-          VERSION=$(cat VERSION)
-          mv server/dist/sealskin_server-${VERSION}-py3-none-any.whl "sealskin_server-${VERSION}-py3-none-any.whl"
 
       - name: Short SHA
         id: sha
