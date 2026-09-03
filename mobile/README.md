@@ -40,3 +40,6 @@ npm run ios
 
 `build.sh` produces a signed APK in CI and stamps the version and Android
 `versionCode` from `../VERSION`.
+
+`ios/` is committed; the [iOS workflow](../.github/workflows/ios.yml) builds,
+signs and uploads it to App Store Connect.

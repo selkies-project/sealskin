@@ -1,7 +1,7 @@
 node_modules/
 www/
 android/
-ios/
 icons/
 package-lock.json
 *.apk
+ios/App/App/Assets.xcassets/**/*.png
