@@ -9,6 +9,6 @@
     "watch": "node build.mjs --watch"
   },
   "devDependencies": {
-    "esbuild": "^0.27.2"
+    "esbuild": "^0.28.1"
   }
 }
