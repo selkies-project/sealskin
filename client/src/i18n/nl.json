@@ -1,0 +1,961 @@
+{
+  "background": {
+    "contextMenu": {
+      "openUrl": "Link openen in SealSkin",
+      "openFile": "Linkdoel openen als bestand in SealSkin",
+      "sendMedia": "Media verzenden naar SealSkin",
+      "searchText": "Zoeken naar \"%s\" in SealSkin",
+      "sendDownload": "Volgende download naar SealSkin sturen"
+    }
+  },
+  "common": {
+    "actions": "Acties",
+    "active": "Actief",
+    "cancel": "Annuleren",
+    "manage": "Beheren",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "save": "Opslaan",
+    "none": "geen",
+    "error": "Fout",
+    "na": "N.v.t.",
+    "of": "van",
+    "status": "Status",
+    "username": "Gebruikersnaam",
+    "group": "Groep",
+    "groups": "Groepen",
+    "publicKey": "Publieke Sleutel",
+    "name": "Naam",
+    "source": "Bron",
+    "imageVersion": "Image Versie",
+    "language": "Taal",
+    "storage": "Opslag",
+    "gpu": "GPU",
+    "version": "Versie",
+    "checked": "Gecontroleerd",
+    "never": "Nooit",
+    "stop": "Stoppen",
+    "reopen": "Heropenen",
+    "sendFile": "Bestand Verzenden",
+    "share": "Delen",
+    "search": "Zoeken",
+    "refresh": "Vernieuwen",
+    "close": "Sluiten",
+    "copy": "Kopiëren",
+    "open": "Openen",
+    "copyUrl": "URL Kopiëren",
+    "download": "Downloaden",
+    "next": "Volgende",
+    "previous": "Vorige",
+    "page": "Pagina",
+    "home": "Home Directory",
+    "homes": "Home Directories",
+    "sessions": "Sessies",
+    "users": "Gebruikers",
+    "admins": "Beheerders",
+    "yes": "Ja",
+    "no": "Nee",
+    "daysAgo": "{count, plural, one {1 dag geleden} other {{count} dagen geleden}}",
+    "hoursAgo": "{count, plural, one {1 uur geleden} other {{count} uur geleden}}",
+    "minutesAgo": "{count, plural, one {1 minuut geleden} other {{count} minuten geleden}}",
+    "justNow": "zojuist",
+    "bytes": "Bytes",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB",
+    "pb": "PB"
+  },
+  "options": {
+    "sidebar": {
+      "config": "Configuratie",
+      "home": "Home Directories",
+      "sessions": "Actieve Sessies",
+      "pinned": "Vastgezet Gedrag",
+      "appStore": "App Store",
+      "appTemplates": "App Sjablonen",
+      "appLaboratory": "App Laboratorium",
+      "installedApps": "Geïnstalleerde Apps",
+      "users": "Gebruikers",
+      "groups": "Groepen",
+      "admins": "Beheerders"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "clientSettings": "Clientinstellingen",
+      "exportConfig": "Configuratie Exporteren",
+      "userStatus": "Gebruikersstatus",
+      "loggedInAs": "Ingelogd als:",
+      "role": "Rol",
+      "roleAdmin": "Beheerder",
+      "roleUser": "Standaard Gebruiker",
+      "serverInfo": "Serverinformatie",
+      "server": "Server:",
+      "cpuModel": "CPU-model:",
+      "storageUsage": "Opslaggebruik:",
+      "detectedGpus": "Gedetecteerde GPU's:",
+      "logout": "Uitloggen & Configuratie Wissen",
+      "howTo": "Hoe SealSkin te Gebruiken",
+      "howToDescription": "Deze sectie bevat basisdocumentatie over het gebruik van de extensie.",
+      "howToList": [
+        "<strong>Om inhoud geïsoleerd te openen:</strong> Klik met de rechtermuisknop op een link, afbeelding of geselecteerde tekst en kies een optie uit het \"SealSkin Isolation\" contextmenu.",
+        "<strong>Om een download naar isolatie te sturen:</strong> Klik met de rechtermuisknop op de pagina en selecteer \"Volgende Download naar Isolatie Sturen\". Het volgende bestand dat u downloadt, wordt onderschept en naar een veilige sessie gestuurd.",
+        "<strong>Om een schone applicatie te starten:</strong> Klik op het SealSkin-icoon in de werkbalk van uw browser.",
+        "<strong>Om persistente opslag te beheren:</strong> Gebruik het tabblad \"Home Directories\" op deze pagina om opslagvolumes te maken en te verwijderen die in meerdere sessies kunnen worden gebruikt.",
+        "<strong>Om startopties op te slaan:</strong> Vink het vakje \"Deze startopties opslaan\" aan in de pop-up voordat u een applicatie start voor een specifiek bestandstype (bijv. .pdf) of voor alle URL's. Beheer deze opgeslagen voorkeuren in het tabblad \"Vastgezet Gedrag\"."
+      ],
+      "confirmLogout": "Weet u zeker dat u wilt uitloggen? Dit wist uw opgeslagen configuratie uit deze browser."
+    },
+    "config": {
+      "quickSetup": "Snelle Installatie",
+      "quickSetupDescription": "Upload het configuratiebestand (.json) dat u van uw beheerder heeft ontvangen, of plak de inhoud hieronder om de extensie automatisch in te stellen.",
+      "uploadLabel": "Configuratiebestand Uploaden",
+      "pasteLabel": "Of Plak Configuratietekst",
+      "pastePlaceholder": "Plak hier uw JSON-configuratie...",
+      "applyButton": "Configuratie Toepassen",
+      "manualLink": "Handmatige Configuratie",
+      "advancedTitle": "Clientconfiguratie (Geavanceerd)",
+      "serverIpLabel": "Server IP of Domein",
+      "serverIpPlaceholder": "bijv., 192.168.1.100",
+      "apiPortLabel": "API Poort",
+      "apiPortPlaceholder": "bijv., 8000",
+      "sessionPortLabel": "Sessie Poort",
+      "sessionPortPlaceholder": "bijv., 8443",
+      "usernameLabel": "Gebruikersnaam",
+      "usernamePlaceholder": "Uw gebruikersnaam",
+      "privateKeyLabel": "Uw Privésleutel (PEM Formaat)",
+      "privateKeyPlaceholder": "Plak hier de inhoud van uw privésleutel",
+      "serverKeyLabel": "Publieke Sleutel van de Server (PEM Formaat)",
+      "serverKeyPlaceholder": "Plak hier de inhoud van server_public.pem",
+      "searchEngineLabel": "Standaard Zoekmachine voor Geselecteerde Tekst",
+      "saveButton": "Configuratie Opslaan",
+      "loginButton": "Inloggen & Testen",
+      "automaticLink": "Automatische Configuratie",
+      "chooseFile": "Bestand Kiezen",
+      "keyGeneration": "Sleutelgeneratie",
+      "keyGenDescription": "Als u geen sleutelpaar heeft, kunt u er hier een genereren. De privésleutel wordt hierboven ingevuld. Geef de publieke sleutel aan uw beheerder.",
+      "generateKeyButton": "Nieuw Sleutelpaar Genereren",
+      "publicKeyForAdminLabel": "Uw Publieke Sleutel (voor admin)"
+    },
+    "home": {
+      "title": "Uw Home Directories",
+      "description": "Maak persistente opslagmappen aan om te gebruiken in verschillende sessies. Deze worden in uw applicaties gemount als uw configuratiemap.",
+      "newTitle": "Nieuwe Home Directory Aanmaken",
+      "nameLabel": "Mapnaam:",
+      "namePlaceholder": "bijv., mijn-project-bestanden",
+      "nameTitle": "Gebruik alleen letters, cijfers, underscore of koppelteken.",
+      "createButton": "Map Aanmaken",
+      "isLaboratory": "Dit is een Laboratorium-app, gebouwd op basis van een basisimage met aangepaste instellingen.",
+      "laboratory": "Laboratorium",
+      "confirmDelete": "Weet u zeker dat u de geïnstalleerde app '{appName}' wilt verwijderen?"
+    },
+    "sessions": {
+      "title": "Actieve Sessies",
+      "application": "Applicatie",
+      "started": "Gestart",
+      "noSessionsUser": "Geen actieve sessies gevonden.",
+      "noSessionsAdmin": "Geen actieve sessies gevonden voor enige gebruiker.",
+      "sessionsFor": "Sessies voor {username} ({count})",
+      "confirmStop": "Weet u zeker dat u deze sessie wilt stoppen? De container wordt vernietigd."
+    },
+    "pinned": {
+      "title": "Vastgezet Extensiegedrag",
+      "description": "Deze tabel toont de startopties die u heeft opgeslagen voor specifieke bestandstypen of voor alle URL's. U kunt een vastgezet gedrag verwijderen om opnieuw om startopties gevraagd te worden.",
+      "trigger": "Trigger",
+      "savedApp": "Opgeslagen Applicatie",
+      "triggerSimple": "Simpele Start (Werkbalkknop)",
+      "triggerUrl": "Alle URL's (vanuit contextmenu)",
+      "triggerFile": "Bestandstype: <strong>{fileType}</strong>",
+      "unknownApp": "Onbekende App ({appId}...)"
+    },
+    "admins": {
+      "serverKeyTitle": "Publieke Sleutel van de Server",
+      "serverKeyDescription": "Dit is de publieke sleutel die gebruikersconfiguratiebestanden nodig hebben om verbinding te maken met deze server.",
+      "title": "Beheerdersbeheer",
+      "searchPlaceholder": "Zoek beheerders...",
+      "newTitle": "Nieuwe Beheerder Aanmaken",
+      "publicKeyOptionalLabel": "Publieke Sleutel (Optioneel):",
+      "publicKeyPlaceholder": "Plak hier de publieke sleutel, of laat leeg om er een te genereren.",
+      "createButton": "Beheerder Aanmaken",
+      "confirmDelete": "Weet u zeker dat u beheerder '{username}' wilt verwijderen? Dit verwijdert ook al hun persistente opslag en kan niet ongedaan worden gemaakt."
+    },
+    "users": {
+      "title": "Gebruikersbeheer",
+      "searchPlaceholder": "Zoek gebruikers op naam of groep...",
+      "newTitle": "Nieuwe Gebruiker Aanmaken",
+      "publicKeyOptionalLabel": "Publieke Sleutel (Optioneel):",
+      "publicKeyPlaceholder": "Plak hier de publieke sleutel van de gebruiker, of laat leeg om er een te genereren.",
+      "settingsTitle": "Gebruikersinstellingen",
+      "sessionLimitLabel": "Sessielimiet",
+      "sessionLimitTitle": "Aantal actieve sessies dat een gebruiker kan hebben. -1 voor onbeperkt.",
+      "permissionsTitle": "Permissies & Beveiliging",
+      "activeAccount": "Actief Account",
+      "allowStorage": "Persistente Opslag Toestaan",
+      "allowGpu": "GPU-toegang Toestaan",
+      "hardenContainer": "Container Beveiligen",
+      "hardenWm": "Window Manager Beveiligen",
+      "createButton": "Gebruiker Aanmaken",
+      "homesDisabledTooltip": "Persistente opslag uitgeschakeld voor deze gebruiker",
+      "confirmDelete": "Weet u zeker dat u gebruiker '{username}' wilt verwijderen? Dit verwijdert ook al hun persistente opslag en kan niet ongedaan worden gemaakt.",
+      "allowPublicSharing": "Openbaar delen van bestanden toestaan"
+    },
+    "groups": {
+      "title": "Groepsbeheer",
+      "searchPlaceholder": "Zoek groepen...",
+      "newTitle": "Nieuwe Groep Aanmaken",
+      "nameLabel": "Groepsnaam:",
+      "overrideTitle": "Groepsoverschrijvingsinstellingen",
+      "permissionsTitle": "Permissie & Beveiligingsoverschrijvingen",
+      "createButton": "Groep Aanmaken",
+      "confirmDelete": "Weet u zeker dat u groep '{groupName}' wilt verwijderen? Gebruikers in deze groep vallen terug op hun individuele instellingen."
+    },
+    "installedApps": {
+      "title": "Geïnstalleerde Applicaties",
+      "searchPlaceholder": "Zoek geïnstalleerde apps...",
+      "noAppsFound": "Geen geïnstalleerde apps gevonden.",
+      "pulling": "Nieuwe image wordt gedownload...",
+      "notLocal": "Image niet lokaal gevonden",
+      "confirmDelete": "Weet u zeker dat u de geïnstalleerde app '{appName}' wilt verwijderen?"
+    },
+    "appStore": {
+      "title": "App Stores",
+      "refreshTitle": "Geselecteerde store vernieuwen",
+      "selectLabel": "Selecteer App Store",
+      "addLabel": "Nieuwe App Store Toevoegen",
+      "namePlaceholder": "Store Naam",
+      "urlPlaceholder": "Store YAML URL",
+      "availableTitle": "Beschikbare Apps",
+      "addManual": "Handmatige App Toevoegen",
+      "searchPlaceholder": "Zoek beschikbare apps...",
+      "noAppsFound": "Geen applicaties gevonden.",
+      "availableFrom": "Beschikbare Apps van {storeName}",
+      "couldNotLoad": "Kon apps van deze store niet laden."
+    },
+    "appTemplates": {
+      "title": "Applicatie Sjabloon Editor",
+      "loadLabel": "Sjabloon Laden",
+      "createOption": "Nieuw Sjabloon Maken",
+      "nameLabel": "Sjabloonnaam",
+      "namePlaceholder": "Voer een naam in voor het nieuwe sjabloon",
+      "saveButton": "Profiel Opslaan",
+      "deleteButton": "Verwijderen",
+      "previewTitle": "UI Voorbeeld",
+      "contentArea": "Applicatie Inhoudsgebied",
+      "confirmDelete": "Weet u zeker dat u het sjabloon '{templateName}' wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+      "deleteDisabled": "Dit sjabloon kan niet worden verwijderd.",
+      "enterName": "Voer een naam in voor het nieuwe sjabloon.",
+      "settings": {
+        "TITLE": {
+          "label": "Paginatitel",
+          "description": "De paginatitel die in de webbrowser wordt weergegeven."
+        },
+        "SELKIES_UI_TITLE": {
+          "label": "Zijbalktitel",
+          "description": "Titel in de linkerbovenhoek van de zijbalk."
+        },
+        "SELKIES_UI_SHOW_SIDEBAR": {
+          "label": "Zijbalk Tonen",
+          "description": "Toon de hoofdgebruikersinterface van de zijbalk."
+        },
+        "SELKIES_UI_SHOW_LOGO": {
+          "label": "Logo Tonen",
+          "description": "Toon het Selkies-logo in de zijbalk."
+        },
+        "SELKIES_UI_SHOW_CORE_BUTTONS": {
+          "label": "Kernknoppen Tonen",
+          "description": "Toon de knoppen voor kerncomponenten (display, audio, etc)."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
+          "label": "Video-instellingen Tonen",
+          "description": "Toon de sectie video-instellingen in de zijbalk."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SCREEN_SETTINGS": {
+          "label": "Scherminstellingen Tonen",
+          "description": "Toon de sectie scherminstellingen in de zijbalk."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_AUDIO_SETTINGS": {
+          "label": "Audio-instellingen Tonen",
+          "description": "Toon de sectie audio-instellingen in de zijbalk."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_STATS": {
+          "label": "Statistieken Tonen",
+          "description": "Toon de sectie statistieken in de zijbalk."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
+          "label": "Klembord Tonen",
+          "description": "Toon de klembordsectie in de zijbalk."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FILES": {
+          "label": "Bestandssectie Tonen",
+          "description": "Toon de sectie voor bestandsoverdracht in de zijbalk."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_APPS": {
+          "label": "App-sectie Tonen",
+          "description": "Toon de applicatiesectie in de zijbalk."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SHARING": {
+          "label": "Deelsectie Tonen",
+          "description": "Toon de deelsectie in de zijbalk."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
+          "label": "Gamepad-sectie Tonen",
+          "description": "Toon de gamepadsectie in de zijbalk."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
+          "label": "Toetsenbordknop Tonen",
+          "description": "Toon de knop voor het schermtoetsenbord."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SOFT_BUTTONS": {
+          "label": "Soft Buttons Tonen",
+          "description": "Toon de sectie soft buttons (voor mobiel)."
+        },
+        "WATERMARK_PNG": {
+          "label": "Watermerk PNG Pad",
+          "description": "Volledig pad binnen de container naar een watermerk png."
+        },
+        "WATERMARK_LOCATION": {
+          "label": "Watermerk Locatie",
+          "description": "Waar de afbeelding over de stream moet worden getekend.",
+          "options": {
+            "disabled": "Uitgeschakeld",
+            "topLeft": "Links-Boven",
+            "topRight": "Rechts-Boven",
+            "bottomLeft": "Links-Onder",
+            "bottomRight": "Rechts-Onder",
+            "centered": "Gecentreerd",
+            "animated": "Geanimeerd"
+          }
+        },
+        "DASHBOARD": {
+          "label": "Dashboard Stijl",
+          "description": "Hiermee kan de gebruiker zijn dashboard instellen.",
+          "options": {
+            "default": "Standaard",
+            "selkiesDefault": "Selkies (Standaard)",
+            "zinc": "Zinc",
+            "wish": "Wish"
+          }
+        },
+        "SELKIES_AUDIO_ENABLED": {
+          "label": "Audio Inschakelen",
+          "description": "Schakel server-naar-client audiostreaming in."
+        },
+        "SELKIES_MICROPHONE_ENABLED": {
+          "label": "Microfoon Inschakelen",
+          "description": "Schakel client-naar-server microfoon doorsturen in."
+        },
+        "SELKIES_GAMEPAD_ENABLED": {
+          "label": "Gamepad Inschakelen",
+          "description": "Schakel gamepad-ondersteuning in."
+        },
+        "SELKIES_CLIPBOARD_ENABLED": {
+          "label": "Klembord Inschakelen",
+          "description": "Schakel klembordsynchronisatie in."
+        },
+        "SELKIES_CLIPBOARD_IN_ENABLED": {
+          "label": "Klembord van client naar server inschakelen",
+          "description": "Overdracht van klembordgegevens vanuit de browser toestaan."
+        },
+        "SELKIES_CLIPBOARD_OUT_ENABLED": {
+          "label": "Klembord van server naar client inschakelen",
+          "description": "Overdracht van klembordgegevens vanuit de server toestaan."
+        },
+        "SELKIES_ENABLE_BINARY_CLIPBOARD": {
+          "label": "Binair Klembord Inschakelen",
+          "description": "Sta binaire gegevens (afbeeldingen) toe op het klembord."
+        },
+        "SELKIES_COMMAND_ENABLED": {
+          "label": "Commando Websocket Inschakelen",
+          "description": "Schakel het parsen van commando websocket-berichten in."
+        },
+        "SELKIES_FILE_TRANSFERS": {
+          "label": "Bestandsoverdrachten",
+          "description": "Toegestane richtingen ('upload,download', 'upload', 'download', 'none')."
+        },
+        "SELKIES_ENABLE_SHARING": {
+          "label": "Alle Deling Inschakelen",
+          "description": "Hoofdschakelaar voor alle deelfuncties."
+        },
+        "SELKIES_SECOND_SCREEN": {
+          "label": "Tweede Scherm Inschakelen",
+          "description": "Schakel ondersteuning voor een tweede monitor/display in."
+        },
+        "SELKIES_USE_BROWSER_CURSORS": {
+          "label": "Browser Cursors Gebruiken",
+          "description": "Gebruik browser CSS-cursors in plaats van renderen naar canvas."
+        },
+        "SELKIES_USE_CSS_SCALING": {
+          "label": "CSS Schalen Gebruiken (LoDPI)",
+          "description": "Indien waar, wordt een lagere resolutie verzonden en wordt het canvas uitgerekt."
+        },
+        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+          "label": "Handmatige Resolutiemodus",
+          "description": "Vergrendel de resolutie op de handmatige breedte/hoogte waarden."
+        },
+        "SELKIES_FORCE_ALIGNED_RESOLUTION": {
+          "label": "Uitgelijnde resolutie afdwingen",
+          "description": "Dwingt de beeldschermresolutie af om een veelvoud van 16 pixels te zijn."
+        },
+        "SELKIES_MANUAL_WIDTH": {
+          "label": "Handmatige Breedte",
+          "description": "Vergrendel de breedte op een vaste waarde. Forceert handmatige modus."
+        },
+        "SELKIES_MANUAL_HEIGHT": {
+          "label": "Handmatige Hoogte",
+          "description": "Vergrendel de hoogte op een vaste waarde. Forceert handmatige modus."
+        },
+        "SELKIES_SCALING_DPI": {
+          "label": "UI Schaling DPI",
+          "description": "De standaard DPI voor UI-schaling."
+        },
+        "SELKIES_AUDIO_BITRATE": {
+          "label": "Audio Bitrate",
+          "description": "De standaard audio bitrate."
+        },
+        "SELKIES_ENCODER": {
+          "label": "Encoders",
+          "description": "Komma-gescheiden lijst van encoders. De eerste is standaard."
+        },
+        "SELKIES_USE_CPU": {
+          "label": "CPU-codering Forceren",
+          "description": "Forceer CPU-gebaseerde codering voor pixelflux."
+        },
+        "SELKIES_FRAMERATE": {
+          "label": "Framerate (Bereik of Vast)",
+          "description": "bijv., '8-120' voor een bereik of '60' voor vast."
+        },
+        "SELKIES_H264_CRF": {
+          "label": "H.264 CRF (Bereik of Vast)",
+          "description": "bijv., '5-50' voor een bereik of '25' voor vast."
+        },
+        "SELKIES_JPEG_QUALITY": {
+          "label": "JPEG Kwaliteit (Bereik of Vast)",
+          "description": "bijv., '1-100' voor een bereik of '60' voor vast."
+        },
+        "SELKIES_H264_FULLCOLOR": {
+          "label": "H.264 Volledige Kleur",
+          "description": "Schakel H.264 volledig kleurbereik in voor pixelflux-encoders."
+        },
+        "SELKIES_H264_STREAMING_MODE": {
+          "label": "H.264 Streaming (Turbo) Modus",
+          "description": "Schakel H.264 lage latentie streamingmodus in."
+        },
+        "SELKIES_USE_PAINT_OVER_QUALITY": {
+          "label": "Paint-Over Kwaliteit Gebruiken",
+          "description": "Schakel hoge kwaliteit paint-over in voor statische scènes."
+        },
+        "SELKIES_PAINT_OVER_JPEG_QUALITY": {
+          "label": "Paint-Over JPEG Kwaliteit",
+          "description": "bijv., '1-100' voor een bereik of '90' voor vast."
+        },
+        "SELKIES_H264_PAINTOVER_CRF": {
+          "label": "Paint-Over H.264 CRF",
+          "description": "bijv., '5-50' voor een bereik of '18' voor vast."
+        },
+        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
+          "label": "Paint-Over Burst Frames",
+          "description": "bijv., '1-30' voor een bereik of '5' voor vast."
+        },
+        "HARDEN_DESKTOP": {
+          "label": "Desktop Beveiligen (Preset)",
+          "description": "Schakelt DISABLE_OPEN_TOOLS, DISABLE_SUDO en DISABLE_TERMINALS in."
+        },
+        "HARDEN_OPENBOX": {
+          "label": "Window Manager Beveiligen (Preset)",
+          "description": "Schakelt DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS en HARDEN_KEYBINDS in. Schakelt ook RESTART_APP in."
+        },
+        "DISABLE_OPEN_TOOLS": {
+          "label": "Open Tools Uitschakelen",
+          "description": "Schakelt xdg-open en exo-open binaries uit."
+        },
+        "DISABLE_SUDO": {
+          "label": "Sudo Uitschakelen",
+          "description": "Schakelt het sudo-commando uit."
+        },
+        "DISABLE_TERMINALS": {
+          "label": "Terminals Uitschakelen",
+          "description": "Schakelt veelvoorkomende terminalemulators uit."
+        },
+        "DISABLE_CLOSE_BUTTON": {
+          "label": "Venster Sluitknop Uitschakelen",
+          "description": "Verwijdert de sluitknop uit de titelbalken van vensters."
+        },
+        "DISABLE_MOUSE_BUTTONS": {
+          "label": "Rechter-/Middenklik Uitschakelen",
+          "description": "Schakelt contextmenu's voor rechter- en middenklik uit."
+        },
+        "HARDEN_KEYBINDS": {
+          "label": "Sneltoetsen Beveiligen",
+          "description": "Schakelt standaard Openbox-sneltoetsen zoals Alt+F4 uit."
+        },
+        "RESTART_APP": {
+          "label": "App Herstarten bij Sluiten",
+          "description": "Herstart de hoofdapplicatie automatisch als deze wordt gesloten."
+        },
+        "MAX_RES": {
+          "label": "Maximale Resolutie",
+          "description": "Max resolutie voor de container, standaard is 16k."
+        },
+        "START_DOCKER": {
+          "label": "Start Docker-in-Docker",
+          "description": "Indien false, zal een geprivilegieerde container DinD niet starten."
+        },
+        "DISABLE_IPV6": {
+          "label": "IPv6 Uitschakelen",
+          "description": "Indien true, wordt IPv6 uitgeschakeld."
+        },
+        "DISABLE_ZINK": {
+          "label": "Zink Uitschakelen",
+          "description": "Stel geen Zink-omgevingsvariabelen in als een videokaart wordt gedetecteerd."
+        },
+        "DISABLE_DRI3": {
+          "label": "DRI3 Uitschakelen",
+          "description": "Gebruik geen DRI3-versnelling als een videokaart wordt gedetecteerd."
+        },
+        "NO_DECOR": {
+          "label": "Geen Vensterdecoraties",
+          "description": "Draai applicatie zonder vensterranden voor PWA-gebruik."
+        },
+        "NO_FULL": {
+          "label": "Geen Volledig Scherm",
+          "description": "Zet applicaties niet automatisch op volledig scherm."
+        },
+        "NO_GAMEPAD": {
+          "label": "Gamepad Injectie Uitschakelen",
+          "description": "Schakel userspace gamepad interposer injectie uit."
+        },
+        "SELKIES_DEBUG": {
+          "label": "Selkies Debugging Inschakelen",
+          "description": "Schakel debug-logging in voor streamingcomponenten."
+        },
+        "DOCKER_PRIVILEGED": {
+          "label": "Geprivilegieerde Modus",
+          "description": "Geef alle rechten aan container, hef cgroup-beperkingen op, mount alle host-apparaten. Dit zal dingen breken!"
+        },
+        "DOCKER_BIND_MOUNTS": {
+          "label": "Extra Bind Mounts",
+          "description": "Extra host binds (komma-gescheiden, bijv. /host/path:/container/path:ro)."
+        },
+        "DOCKER_ENV": {
+          "label": "Omgevingsvariabelen",
+          "description": "Extra omgevingsvariabelen (komma-gescheiden, bijv. KEY=VALUE,KEY2=VALUE2)."
+        },
+        "DOCKER_CAP_ADD": {
+          "label": "Cap Toevoegen",
+          "description": "Kernel-capaciteiten toevoegen (komma-gescheiden, bijv. SYS_ADMIN,MKNOD)."
+        },
+        "DOCKER_CAP_DROP": {
+          "label": "Cap Verwijderen",
+          "description": "Kernel-capaciteiten verwijderen (komma-gescheiden)."
+        },
+        "DOCKER_SECURITY_OPT": {
+          "label": "Beveiligingsopties",
+          "description": "Beveiligingsopties (komma-gescheiden, bijv. seccomp=unconfined,apparmor=unconfined)."
+        },
+        "DOCKER_DEVICES": {
+          "label": "Apparaten",
+          "description": "Host-apparaten blootstellen (komma-gescheiden, bijv. /dev/sda:/dev/xvda:rwm)."
+        },
+        "DOCKER_SHM_SIZE": {
+          "label": "SHM Grootte",
+          "description": "Grootte van /dev/shm (bijv. 1G, 2G)."
+        },
+        "DOCKER_MEM_LIMIT": {
+          "label": "Geheugenlimiet",
+          "description": "Geheugenlimiet (bijv. 1g, 512m)."
+        },
+        "DOCKER_CPU_SHARES": {
+          "label": "CPU Aandelen",
+          "description": "CPU aandelen (relatief gewicht geheel getal)."
+        },
+        "DOCKER_NANO_CPUS": {
+          "label": "Nano CPU's",
+          "description": "CPU-quotum in eenheden van 1e-9 CPU's."
+        },
+        "DOCKER_NETWORK_MODE": {
+          "label": "Netwerkmodus",
+          "description": "Netwerkmodus voor de container.",
+          "options": {
+            "default": "Standaard (Bridge)",
+            "host": "Host",
+            "none": "Geen",
+            "bridge": "Bridge"
+          }
+        },
+        "DOCKER_IPC_MODE": {
+          "label": "IPC Modus",
+          "description": "Stel de IPC-modus in voor de container.",
+          "options": {
+            "default": "Standaard",
+            "host": "Host",
+            "private": "Privé",
+            "shareable": "Deelbaar"
+          }
+        },
+        "DOCKER_PID_MODE": {
+          "label": "PID Modus",
+          "description": "Stel de PID-modus in voor de container.",
+          "options": {
+            "default": "Standaard",
+            "host": "Host"
+          }
+        },
+        "DOCKER_DNS": {
+          "label": "DNS Servers",
+          "description": "Aangepaste DNS-servers (komma-gescheiden)."
+        },
+        "DOCKER_EXTRA_HOSTS": {
+          "label": "Extra Hosts",
+          "description": "Host naar IP toewijzingen (komma-gescheiden, bijv. hostname:1.2.3.4)."
+        },
+        "DOCKER_SYSCTLS": {
+          "label": "Sysctls",
+          "description": "Kernelparameters (komma-gescheiden, bijv. net.ipv4.ip_forward=1)."
+        },
+        "DOCKER_ULIMITS": {
+          "label": "Ulimits",
+          "description": "Ulimits (komma-gescheiden, bijv. nofile=1024:1024)."
+        },
+        "DOCKER_TMPFS": {
+          "label": "Tmpfs Mounts",
+          "description": "Tijdelijke bestandssystemen (komma-gescheiden, bijv. /run:rw,noexec,nosuid,size=65536k)."
+        },
+        "DOCKER_GROUP_ADD": {
+          "label": "Groep Toevoegen",
+          "description": "Lijst met extra groepsnamen en/of ID's (komma-gescheiden)."
+        }
+      }
+    },
+    "appLaboratory": {
+      "title": "App Laboratorium",
+      "description": "Creëer en test aangepaste applicatieconfiguraties door wijzigingen bovenop een basis-app te leggen.",
+      "selectApp": "Selecteer App",
+      "createNew": "Nieuwe App Maken",
+      "baseApp": "Basis Applicatie",
+      "baseAppDescription": "De geïnstalleerde applicatie waarop uw nieuwe aangepaste app gebaseerd zal zijn.",
+      "selectBase": "Selecteer een Basis App",
+      "customizationTitle": "Aanpassing",
+      "appName": "App Naam",
+      "appIcon": "App Icoon",
+      "uploadIcon": "Icoon Uploaden",
+      "autostartScriptLabel": "Aangepast Autostart Script",
+      "permissionsTitle": "Permissies",
+      "usersLabel": "Toegestane Gebruikers",
+      "groupsLabel": "Toegestane Groepen",
+      "launchButton": "Opslaan & Aanpassingssessie Starten",
+      "closeButton": "Sessie Sluiten & Afronden",
+      "savingAndLaunching": "Opslaan & Starten...",
+      "placeholder": "Het App Laboratorium stelt u in staat om de basis home directory en het startscript voor een applicatie te configureren op basis van een bestaande geïnstalleerde applicatie. Deze home directory wordt bij de eerste initialisatie voor de gebruiker gekopieerd met alle bestanden en instellingen die u in deze sessie instelt. U kunt een bestaande Laboratorium App opnieuw starten om de inhoud verder aan te passen.",
+      "formInvalid": "Selecteer een basis-app en geef een naam op voor de nieuwe app."
+    },
+    "modals": {
+      "editUserTitle": "Bewerk Gebruiker: {username}",
+      "saveChanges": "Wijzigingen Opslaan",
+      "effectiveSettings": "Effectieve Instellingen (met groepsoverschrijvingen)",
+      "editGroupTitle": "Bewerk Groep: {groupName}",
+      "userConfigTitle": "Gebruikersconfiguratie",
+      "warning": "Dit is de enige keer dat deze configuratie wordt getoond. Geef deze veilig aan de gebruiker.",
+      "info": "U kunt dit configuratiebestand downloaden om SealSkin eenvoudig op een ander apparaat in te stellen. Bewaar dit bestand veilig, want het bevat uw privésleutel.",
+      "configDataLabel": "Configuratiegegevens (JSON)",
+      "copyButton": "Tekst Kopiëren",
+      "downloadButton": "Bestand Downloaden",
+      "manageHomeDirs": "Beheer Home Directories",
+      "dirsForUser": "Mappen voor gebruiker: {username}",
+      "dirsForAdmin": "Mappen voor beheerder: {username}",
+      "newDirForUser": "Nieuwe Map Maken voor Gebruiker",
+      "createDirButton": "Map Aanmaken",
+      "confirmDeleteDir": "Weet u zeker dat u '{homeName}' wilt verwijderen voor gebruiker '{username}'? Dit is permanent.",
+      "installAppTitle": "Installeer {appName}",
+      "editAppTitle": "Bewerk {appName}",
+      "customNameLabel": "Aangepaste Naam",
+      "imageLabel": "Container Image",
+      "permissions": "Permissies",
+      "allowedUsersLabel": "Toegestane Gebruikers (komma-gescheiden, 'all' voor iedereen)",
+      "allowedGroupsLabel": "Toegestane Groepen (komma-gescheiden, 'all' voor iedereen)",
+      "features": "Functies",
+      "gpuSupport": "GPU-ondersteuning",
+      "homeMounting": "Home Directory Mounting",
+      "urlSupport": "URL Openen Ondersteuning",
+      "fileSupport": "Bestand Openen Ondersteuning",
+      "autoUpdate": "Image Automatisch Updaten",
+      "advancedSettings": "Geavanceerde Instellingen",
+      "appTemplateLabel": "Applicatiesjabloon",
+      "appTemplateDescription": "Selecteer een voorgeconfigureerd sjabloon voor geavanceerde containerstartinstellingen.",
+      "customAutostartScriptLabel": "Aangepast Autostart Script",
+      "customAutostartScriptDescription": "Pas de logica voor automatisch starten aan, laat leeg om de standaard van de applicatieprovider te gebruiken.",
+      "saveInstallation": "Installatie Opslaan",
+      "updateStatusTitle": "Updatestatus voor {appName}",
+      "checkingUpdates": "Controleren op updates...",
+      "updateAvailable": "Er is een nieuwe imageversie beschikbaar!",
+      "yourVersion": "Uw versie: {sha}",
+      "latestAvailable": "De nieuwste versie is beschikbaar om te pullen uit de registry.",
+      "pullLatest": "Nieuwste Image Pullen",
+      "upToDate": "Uw image is up-to-date.",
+      "currentVersion": "Huidige versie: {sha}",
+      "errorChecking": "Fout bij het controleren op updates.",
+      "pullingLatest": "Nieuwste image wordt gepulled... Dit kan even duren.",
+      "pullComplete": "Pull voltooid!",
+      "newVersion": "Nieuwe versie: {sha}",
+      "errorPulling": "Fout bij het pullen van de image.",
+      "manualInstallNote": "Opmerking: Handmatig toegevoegde images moeten gebaseerd zijn op een selkies-baseimage compatibele image.",
+      "generalTitle": "Algemene & Prestatie-instellingen",
+      "dockerTitle": "Docker Geavanceerde Overschrijvingen",
+      "dockerDescription": "Deze instellingen overschrijven de standaard containerconfiguratie. Gebruik met voorzichtigheid en alleen als u weet wat u doet."
+    },
+    "status": {
+      "loggingIn": "Inloggen...",
+      "configSaved": "Configuratie succesvol opgeslagen!",
+      "configApplied": "Configuratie toegepast! Gelieve In te loggen & te Testen.",
+      "configApplyFailed": "Kon configuratie niet toepassen: {error}",
+      "fileReadError": "Fout bij het lezen van het bestand.",
+      "noConfig": "Geef een configuratiebestand of -tekst op.",
+      "loggedInAdmin": "Ingelogd als beheerder: {username}",
+      "loggedInUser": "Ingelogd als standaard gebruiker: {username}.",
+      "loginFailed": "Inloggen mislukt: {error}",
+      "adminDataRefreshFailed": "Kon beheerdersgegevens niet vernieuwen: {error}",
+      "logoutSuccess": "Uitgelogd en configuratie gewist.",
+      "generateConfigFailed": "Kon configuratie niet genereren, gebruikersdetails ontbreken.",
+      "copySuccess": "Configuratie naar klembord gekopieerd!",
+      "copyFailed": "Kon tekst niet kopiëren.",
+      "publicKeyCopied": "Publieke sleutel gekopieerd!",
+      "keyCopyFailed": "Kon sleutel niet kopiëren.",
+      "creatingAdmin": "Beheerder aanmaken...",
+      "adminCreated": "Beheerder '{username}' aangemaakt.",
+      "adminCreateFailed": "Fout bij aanmaken beheerder: {error}",
+      "adminDeleted": "Beheerder '{username}' succesvol verwijderd.",
+      "adminDeleteFailed": "Fout bij verwijderen beheerder: {error}",
+      "creatingUser": "Gebruiker aanmaken...",
+      "userCreated": "Gebruiker '{username}' aangemaakt.",
+      "userCreateFailed": "Fout bij aanmaken gebruiker: {error}",
+      "userDeleted": "Gebruiker '{username}' succesvol verwijderd.",
+      "userDeleteFailed": "Fout bij verwijderen gebruiker: {error}",
+      "userUpdated": "Gebruiker '{username}' succesvol bijgewerkt.",
+      "userUpdateFailed": "Fout bij bijwerken gebruiker: {error}",
+      "creatingGroup": "Groep aanmaken...",
+      "groupCreated": "Groep '{groupName}' aangemaakt.",
+      "groupCreateFailed": "Fout bij aanmaken groep: {error}",
+      "groupDeleted": "Groep '{groupName}' succesvol verwijderd.",
+      "groupDeleteFailed": "Fout bij verwijderen groep: {error}",
+      "groupUpdated": "Groep '{groupName}' succesvol bijgewerkt.",
+      "groupUpdateFailed": "Fout bij bijwerken groep: {error}",
+      "homedirLoadFailed": "Kon home directories niet laden: {error}",
+      "homedirCreateFailed": "Fout bij aanmaken map: {error}",
+      "homedirCreated": "Home directory '{homeName}' aangemaakt.",
+      "homedirDeleted": "Map '{homeName}' verwijderd.",
+      "homedirDeleteFailed": "Fout bij verwijderen map: {error}",
+      "homedirCreatedFor": "Map '{homeName}' aangemaakt voor {username}.",
+      "homedirDeletedFor": "Map '{homeName}' verwijderd voor {username}.",
+      "sessionsLoadFailed": "Kon sessies niet laden: {error}",
+      "sessionStopError": "Fout bij stoppen sessie: {error}",
+      "sessionStopped": "Sessie succesvol gestopt.",
+      "appDataRefreshFailed": "Kon app-gegevens niet vernieuwen: {error}",
+      "closingSession": "Aanpassingssessie wordt vastgelegd...",
+      "sessionClosed": "Aanpassingssessie gesloten.",
+      "sessionCloseFailed": "Kon aanpassingssessie niet sluiten: {error}",
+      "fetchingApps": "Apps ophalen uit store...",
+      "fetchAppsFailed": "Kon apps niet ophalen uit store: {error}",
+      "appStoreAddFailed": "Fout bij toevoegen store: {error}",
+      "appStoreAdded": "App store '{name}' toegevoegd.",
+      "appSaved": "App '{name}' succesvol {action}.",
+      "appSaveActions": {
+        "updated": "bijgewerkt",
+        "installed": "geïnstalleerd"
+      },
+      "appSaveFailed": "Fout bij opslaan app: {error}",
+      "appDeleted": "App '{name}' verwijderd.",
+      "appDeleteFailed": "Fout bij verwijderen app: {error}",
+      "templateSaved": "Sjabloon '{name}' succesvol opgeslagen.",
+      "templateSaveFailed": "Fout bij opslaan sjabloon: {error}",
+      "templateDeleted": "Sjabloon '{name}' succesvol verwijderd.",
+      "templateDeleteFailed": "Fout bij verwijderen sjabloon: {error}",
+      "pinRemoved": "Vastgezet gedrag verwijderd.",
+      "keyGenerated": "Nieuw sleutelpaar gegenereerd.",
+      "keyGenFailed": "Sleutelgeneratie mislukt: {error}",
+      "pendingConfigSaved": "Wachtende configuratie opgeslagen. U kunt nu uw publieke sleutel aan de beheerder verstrekken.",
+      "settingsSaved": "Instellingen opgeslagen.",
+      "appCreated": "App '{name}' succesvol aangemaakt.",
+      "launchFailed": "Starten mislukt: {error}"
+    },
+    "placeholders": {
+      "noAdmins": "Geen beheerders gevonden.",
+      "noUsers": "Geen gebruikers gevonden.",
+      "noGroups": "Geen groepen gevonden.",
+      "noHomeDirs": "Geen home directories gevonden.",
+      "noSessions": "Geen actieve sessies gevonden.",
+      "noPinned": "Geen vastgezet gedrag gevonden.",
+      "errorLoading": "Fout bij het laden van de mappen.",
+      "noInstalledApps": "Er zijn nog geen applicaties geïnstalleerd."
+    }
+  },
+  "popup": {
+    "tabs": {
+      "launch": "Nieuwe Starten",
+      "sessions": "Actieve Sessies",
+      "manageFiles": "Bestanden beheren",
+      "uploadStorage": "Uploaden naar Opslag",
+      "uploadFiles": "Bestanden Uploaden",
+      "uploadFilesTitle": "Open speciale pagina voor het uploaden van bestanden"
+    },
+    "launchView": {
+      "searchPlaceholder": "Zoek applicaties...",
+      "uploadingFile": "Bestand uploaden...",
+      "gpuLabel": "GPU",
+      "storageLabel": "Opslag",
+      "languageLabel": "Taal",
+      "cleanroom": "Cleanroom (Tijdelijk)",
+      "noGpu": "Geen",
+      "saveOptions": "Deze startopties opslaan",
+      "saveOptionsForUrl": "Opties opslaan voor alle URL's",
+      "saveOptionsForFile": "Opties opslaan voor .{extension} bestanden",
+      "openFile": "Bestand openen bij start",
+      "launchButton": "Starten",
+      "launchingButton": "Starten...",
+      "uploadingButton": "Uploaden...",
+      "autoHome": "Automatisch (persistentie per app)",
+      "collaborationMode": "Collaboratieve sessie",
+      "waylandMode": "Wayland-modus"
+    },
+    "sessionsView": {
+      "noSessions": "Geen actieve sessies gevonden."
+    },
+    "uploadStorageView": {
+      "selectHome": "Selecteer Home Directory",
+      "description": "Hiermee wordt het bestand <strong>{filename}</strong> voor toekomstig gebruik rechtstreeks naar uw Bestanden-opslag geüpload.",
+      "descriptionFallback": "Hiermee wordt het bestand <strong>{filename}</strong> voor toekomstig gebruik rechtstreeks naar uw Bestanden-opslag geüpload.",
+      "uploadButton": "Bestand Uploaden",
+      "uploadingButton": "Uploaden...",
+      "preparing": "Bestand voorbereiden...",
+      "uploadingChunk": "Chunk {current} van {total} uploaden...",
+      "finalizing": "Afronden...",
+      "uploadComplete": "Upload Voltooid!"
+    },
+    "status": {
+      "unconfigured": "Configureer de extensie via de optiespagina.",
+      "openingServerFile": "Server-side bestand openen: {filename}",
+      "openingFile": "Bestand openen: {filename}",
+      "openingUrl": "URL openen: {targetUrl}",
+      "error": "Fout: {message}",
+      "preparingFile": "Bestand voorbereiden...",
+      "sendingFile": "Bestand naar sessie sturen...",
+      "errorSendingFile": "Fout bij verzenden bestand: {message}",
+      "errorClosingSession": "Fout bij sluiten sessie: {message}",
+      "preparingSession": "Geïsoleerde sessie voorbereiden...",
+      "fetchingData": "Bestandsgegevens ophalen...",
+      "fetchDataFailed": "Kon bestandsgegevens niet ophalen: {statusText}",
+      "unknownAction": "Onbekende startactie.",
+      "noAppSelected": "Selecteer een applicatie.",
+      "noAppsAvailable": "Er zijn geen applicaties beschikbaar voor uw account.",
+      "uploadSuccess": "Bestand succesvol geüpload!",
+      "creatingAutoHome": "Automatische home directory aanmaken..."
+    },
+    "languages": {
+      "default": "Standaard ({locale})"
+    }
+  },
+  "upload": {
+    "title": "Bestand Uploaden",
+    "description": "Selecteer een bestand van uw computer om het te openen in een veilige, geïsoleerde sessie.",
+    "dropzone": {
+      "title": "Sleep hier een bestand naartoe",
+      "or": "of",
+      "button": "Selecteer Bestand"
+    },
+    "confirm": {
+      "ready": "Het bestand is klaar om veilig te worden geopend.",
+      "button": "Doorgaan naar Starten"
+    }
+  },
+  "files": {
+    "title": "SealSkin-bestanden",
+    "header": {
+      "title": "Bestanden",
+      "newFolder": "Nieuwe map",
+      "uploadFiles": "Bestanden uploaden",
+      "uploadFolder": "Map uploaden"
+    },
+    "sidebar": {
+      "sharedFiles": "SealSkin-bestanden",
+      "publicShares": "Openbare Delingen"
+    },
+    "shares": {
+      "title": "Openbaar Gedeelde Bestanden",
+      "searchPlaceholder": "Zoek op bestandsnaam of ID..."
+    },
+    "table": {
+      "name": "Naam",
+      "size": "Grootte",
+      "lastModified": "Laatst gewijzigd",
+      "created": "Gemaakt",
+      "expires": "Vervalt",
+      "url": "Openbare URL",
+      "passwordProtected": "Wachtwoord"
+    },
+    "dropzone": {
+      "title": "Sleep bestanden hierheen om te uploaden"
+    },
+    "pagination": {
+      "previous": "« Vorige",
+      "next": "Volgende »",
+      "pageOf": "Pagina {page} van {totalPages}"
+    },
+    "modals": {
+      "newFolder": {
+        "title": "Nieuwe map maken",
+        "folderNameLabel": "Mapnaam",
+        "nameTitle": "Gebruik alleen letters, cijfers, underscore, koppelteken of punt.",
+        "createButton": "Maken"
+      },
+      "confirmDelete": {
+        "title": "Verwijdering bevestigen",
+        "message": "Weet u zeker dat u {count, plural, one {1 geselecteerd item} other {{count} geselecteerde items}} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+        "messageDefault": "Weet u zeker dat u de geselecteerde items wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt."
+      },
+      "uploadProgress": {
+        "title": "Uploadvoortgang",
+        "doneButton": "Klaar"
+      },
+      "share": {
+        "title": "Bestand Delen",
+        "sharingFile": "Bestand delen: <strong>{filename}</strong>",
+        "passwordLabel": "Wachtwoord (optioneel)",
+        "passwordPlaceholder": "Laat leeg voor geen wachtwoord",
+        "expiryLabel": "Vervalt over (uren, optioneel)",
+        "expiryPlaceholder": "bijv., 24 voor één dag",
+        "shareButton": "Deellink Maken"
+      }
+    },
+    "status": {
+      "homeDirLoadFailed": "Laden van thuismap mislukt: {error}",
+      "filesLoadFailed": "Fout bij het laden van bestanden: {error}",
+      "deleteProtectedError": "Kan beveiligde systeemmappen niet verwijderen.",
+      "deletingItems": "{count, plural, one {1 item} other {{count} items}} aan het verwijderen...",
+      "deleteSuccess": "Verwijderen gelukt.",
+      "deleteFailed": "Verwijderen mislukt: {error}",
+      "preparingUpload": "Voorbereiden om {count, plural, one {1 bestand} other {{count} bestanden}} te uploaden...",
+      "uploadPrepFailed": "Fout tijdens voorbereiding van mapupload: {error}",
+      "notConfigured": "Fout: SealSkin niet geconfigureerd. Stel dit in bij de opties.",
+      "folderCreated": "Map '{folderName}' gemaakt.",
+      "folderCreateFailed": "Fout bij het maken van de map: {error}",
+      "shareCreated": "Deellink succesvol aangemaakt! De link is naar je klembord gekopieerd.",
+      "shareCreateFailed": "Aanmaken van deellink mislukt: {error}",
+      "sharesLoadFailed": "Laden van gedeelde bestanden mislukt: {error}",
+      "shareDeleteFailed": "Verwijderen van deellink mislukt: {error}",
+      "shareDeleted": "Deellink succesvol verwijderd.",
+      "urlCopied": "Openbare URL naar klembord gekopieerd."
+    },
+    "placeholders": {
+      "errorLoading": "Fout bij het laden van bestanden.",
+      "folderEmpty": "Deze map is leeg.",
+      "noHomeDirs": "Geen thuismap beschikbaar.",
+      "noShares": "Je hebt nog geen bestanden gedeeld."
+    },
+    "uploadStatus": {
+      "pending": "in afwachting",
+      "initiating": "Starten...",
+      "uploading": "Uploaden...",
+      "finalizing": "Afronden...",
+      "completed": "Voltooid",
+      "error": "Fout"
+    }
+  }
+}

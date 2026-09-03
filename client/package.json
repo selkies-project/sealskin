@@ -1,0 +1,14 @@
+{
+  "name": "sealskin-client",
+  "version": "0.0.0",
+  "private": true,
+  "description": "SealSkin web UI: served pages, extension/mobile shells, and the build that produces all three",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.2"
+  }
+}

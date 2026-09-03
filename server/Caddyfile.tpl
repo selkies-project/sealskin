@@ -23,6 +23,12 @@ https://:{{SESSION_PORT}} {
                 respond "" 204
         }
 
+        # forward_auth reaches /internal/* directly on the loopback API port;
+        # never expose it to clients.
+        handle /internal/* {
+                respond "Forbidden" 403
+        }
+
         handle /public/* {
                 reverse_proxy 127.0.0.1:{{API_PORT}}
         }

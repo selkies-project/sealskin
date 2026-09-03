@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Named here as well as from the script, which retitles it for the locale
+         and the running app: an untitled document shows the URL in the tab
+         until room.js has loaded. -->
+    <title>SealSkin Collaboration</title>
+    <link rel="icon" href="../icons/icon128.png">
+    <link rel="stylesheet" href="room.css">
+    <link rel="stylesheet" href="../vendor/fontawesome/css/all.min.css">
+</head>
+<body>
+    <div id="disconnection-overlay" class="hidden">
+        <div class="disconnection-message">
+            <h2 data-i18n="disconnect.title">Session Ended</h2>
+            <p data-i18n="disconnect.message">The session has been terminated by the host.</p>
+        </div>
+    </div>
+
+    <div id="content" class="content">
+        <div id="waiting-overlay" class="hidden">
+            <div class="waiting-message">
+                <div class="spinner-large"></div>
+                <h2 data-i18n="waiting.title">Controller is Away</h2>
+                <p data-i18n="waiting.message">The session is active. Waiting for the controller to resume the stream.</p>
+            </div>
+        </div>
+        <div id="gesture-overlay" class="hidden"></div>
+        <iframe id="session-frame" src="about:blank" data-src="{{IFRAME_SRC}}"></iframe>
+        <div id="chat-peek"></div>
+    </div>
+
+    <div id="start-menu-modal" class="hidden">
+        <div class="start-menu-tabs">
+            <button class="sm-tab-btn active" data-tab="launch" data-i18n="startMenu.launchTab"></button>
+            <button class="sm-tab-btn" data-tab="active" data-i18n="startMenu.activeTab"></button>
+        </div>
+        <div id="sm-view-launch" class="sm-view active">
+            <div class="sm-search-box"><i class="fas fa-search"></i><input type="text" id="sm-app-search" data-i18n-placeholder="startMenu.searchPlaceholder"></div>
+            <div id="sm-app-grid" class="sm-grid"></div>
+        </div>
+        <div id="sm-view-active" class="sm-view"><div id="sm-active-list"></div></div>
+    </div>
+
+    <div id="video-grid">
+        <div id="video-strip">
+            <div id="video-grid-content">
+                <div id="start-menu-btn" class="video-container pinned start-menu-trigger" data-i18n-title="startMenu.appsTitle">
+                    <div class="start-btn-inner">
+                        <i class="fas fa-th"></i>
+                        <span data-i18n="startMenu.appsButton"></span>
+                    </div>
+                </div>
+                <div id="stream-volume">
+                    <input type="range" id="stream-volume-slider" min="0" max="1" step="0.01" value="1" data-i18n-title="tooltips.sessionVolume">
+                    <div id="stream-buttons">
+                        <button id="stream-mute-btn" class="control-btn" data-i18n-title="tooltips.toggleSessionAudio"><i class="fas fa-volume-up"></i></button>
+                        <button id="reload-stream-btn" class="control-btn" data-i18n-title="tooltips.reloadStream"><i class="fas fa-sync"></i></button>
+                        <button id="gaming-mode-btn" class="control-btn hidden" data-i18n-title="tooltips.gamingMode">
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" width="16" height="16">
+                                <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                                <path d="M12 5V9M12 15V19M5 12H9M15 12H19" stroke-linecap="round" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="gamepad-source-box" class="video-container pinned"></div>
+                <div id="local-user-container" class="video-container pinned">
+                    <video id="local-video" autoplay muted playsinline></video>
+                    <div class="self-controls">
+                        <button id="toggle-mic-btn" class="control-btn" data-i18n-title="tooltips.toggleLocalMic"><i class="fas fa-microphone"></i></button>
+                        <button id="toggle-video-btn" class="control-btn" data-i18n-title="tooltips.toggleLocalWebcam"><i class="fas fa-video"></i></button>
+                        <button id="settings-btn" class="control-btn" data-i18n-title="settings.title"><i class="fas fa-cog"></i></button>
+                    </div>
+                    <div class="video-overlay">
+                        <span class="username" data-i18n="localUsername"></span>
+                    </div>
+                </div>
+                <div id="invite-tile" class="video-container pinned hidden">
+                    <div class="invite-card">
+                        <div class="invite-face invite-front">
+                            <button id="invite-btn" class="invite-btn" data-i18n-title="tooltips.invite"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <div class="invite-face invite-back invite-links">
+                            <button class="invite-copy" data-permission="participant" data-i18n="inviteLinks.participant"></button>
+                            <button class="invite-copy" data-permission="readonly" data-i18n="inviteLinks.readonly"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="chat-dock-slot"></div>
+    </div>
+
+    <div id="chat-dock">
+        <button id="chat-tab" type="button" data-i18n-title="chat.inputPlaceholder"><i class="fas fa-comment"></i></button>
+        <div id="chat-messages-scroll">
+            <div id="chat-messages"></div>
+        </div>
+        <div id="chat-reply-banner"></div>
+        <form id="chat-form">
+            <input type="text" id="chat-input" data-i18n-placeholder="chat.inputPlaceholder" autocomplete="off" maxlength="500">
+            <button type="submit"><i class="fas fa-paper-plane"></i></button>
+        </form>
+    </div>
+
+    <div id="video-toggle-handle" class="video-toggle-handle" title="Toggle Video Bar">
+        <div class="toggle-indicator-horizontal"></div>
+    </div>
+
+    <div id="username-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-content username-prompt">
+            <h3 data-i18n="usernamePrompt.title"></h3>
+            <p data-i18n="usernamePrompt.description"></p>
+            <form id="username-form">
+                <input type="text" id="username-input" data-i18n-placeholder="usernamePrompt.placeholder" maxlength="25" required>
+                <button type="submit" data-i18n="usernamePrompt.joinButton"></button>
+            </form>
+        </div>
+    </div>
+
+    <div id="settings-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-i18n="settings.title"></h2>
+                <button id="settings-modal-close" class="modal-close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-group">
+                    <label for="audio-input-select" data-i18n="settings.microphoneLabel"></label>
+                    <select id="audio-input-select"></select>
+                </div>
+                <div class="settings-group">
+                    <label for="video-input-select" data-i18n="settings.webcamLabel"></label>
+                    <select id="video-input-select"></select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CLIENT_DATA -->
+    <script src="room.js"></script>
+</body>
+</html>

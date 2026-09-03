@@ -1,0 +1,961 @@
+{
+  "background": {
+    "contextMenu": {
+      "openUrl": "Mở liên kết trong SealSkin",
+      "openFile": "Mở đích liên kết dưới dạng tệp trong SealSkin",
+      "sendMedia": "Gửi phương tiện đến SealSkin",
+      "searchText": "Tìm kiếm \"%s\" trong SealSkin",
+      "sendDownload": "Gửi lượt tải xuống tiếp theo đến SealSkin"
+    }
+  },
+  "common": {
+    "actions": "Hành động",
+    "active": "Hoạt động",
+    "cancel": "Hủy",
+    "manage": "Quản lý",
+    "delete": "Xóa",
+    "edit": "Chỉnh sửa",
+    "save": "Lưu",
+    "none": "không có",
+    "error": "Lỗi",
+    "na": "K/C",
+    "of": "của",
+    "status": "Trạng thái",
+    "username": "Tên người dùng",
+    "group": "Nhóm",
+    "groups": "Các nhóm",
+    "publicKey": "Khóa công khai",
+    "name": "Tên",
+    "source": "Nguồn",
+    "imageVersion": "Phiên bản Image",
+    "language": "Ngôn ngữ",
+    "storage": "Lưu trữ",
+    "gpu": "GPU",
+    "version": "Phiên bản",
+    "checked": "Đã kiểm tra",
+    "never": "Không bao giờ",
+    "stop": "Dừng",
+    "reopen": "Mở lại",
+    "sendFile": "Gửi tệp",
+    "share": "Chia sẻ",
+    "search": "Tìm kiếm",
+    "refresh": "Làm mới",
+    "close": "Đóng",
+    "copy": "Sao chép",
+    "open": "Mở",
+    "copyUrl": "Sao chép URL",
+    "download": "Tải xuống",
+    "next": "Tiếp theo",
+    "previous": "Trước đó",
+    "page": "Trang",
+    "home": "Thư mục chính",
+    "homes": "Các thư mục chính",
+    "sessions": "Phiên hoạt động",
+    "users": "Người dùng",
+    "admins": "Quản trị viên",
+    "yes": "Có",
+    "no": "Không",
+    "daysAgo": "{count, plural, one {1 ngày trước} other {{count} ngày trước}}",
+    "hoursAgo": "{count, plural, one {1 giờ trước} other {{count} giờ trước}}",
+    "minutesAgo": "{count, plural, one {1 phút trước} other {{count} phút trước}}",
+    "justNow": "vừa xong",
+    "bytes": "Bytes",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB",
+    "pb": "PB"
+  },
+  "options": {
+    "sidebar": {
+      "config": "Cấu hình",
+      "home": "Thư mục chính",
+      "sessions": "Phiên hoạt động",
+      "pinned": "Hành vi đã ghim",
+      "appStore": "Cửa hàng ứng dụng",
+      "appTemplates": "Mẫu ứng dụng",
+      "appLaboratory": "Phòng thí nghiệm ứng dụng",
+      "installedApps": "Ứng dụng đã cài đặt",
+      "users": "Người dùng",
+      "groups": "Nhóm",
+      "admins": "Quản trị viên"
+    },
+    "dashboard": {
+      "title": "Bảng điều khiển",
+      "clientSettings": "Cài đặt máy khách",
+      "exportConfig": "Xuất cấu hình",
+      "userStatus": "Trạng thái người dùng",
+      "loggedInAs": "Đăng nhập với tư cách:",
+      "role": "Vai trò",
+      "roleAdmin": "Quản trị viên",
+      "roleUser": "Người dùng tiêu chuẩn",
+      "serverInfo": "Thông tin máy chủ",
+      "server": "Máy chủ:",
+      "cpuModel": "Model CPU:",
+      "storageUsage": "Sử dụng lưu trữ:",
+      "detectedGpus": "GPU được phát hiện:",
+      "logout": "Đăng xuất & Xóa cấu hình",
+      "howTo": "Cách sử dụng SealSkin",
+      "howToDescription": "Phần này chứa tài liệu cơ bản về cách sử dụng tiện ích mở rộng.",
+      "howToList": [
+        "<strong>Để mở nội dung trong môi trường cách ly:</strong> Nhấp chuột phải vào bất kỳ liên kết, hình ảnh hoặc văn bản đã chọn nào và chọn một tùy chọn từ menu ngữ cảnh \"SealSkin Isolation\".",
+        "<strong>Để gửi một tệp tải xuống vào môi trường cách ly:</strong> Nhấp chuột phải vào trang và chọn \"Gửi tệp tải xuống tiếp theo vào môi trường cách ly\". Tệp tiếp theo bạn tải xuống sẽ được chặn và gửi đến một phiên an toàn.",
+        "<strong>Để khởi chạy một ứng dụng sạch:</strong> Nhấp vào biểu tượng SealSkin trên thanh công cụ của trình duyệt.",
+        "<strong>Để quản lý lưu trữ lâu dài:</strong> Sử dụng tab \"Thư mục chính\" trên trang này để tạo và xóa các ổ đĩa lưu trữ có thể được sử dụng trên nhiều phiên.",
+        "<strong>Để lưu các tùy chọn khởi chạy:</strong> Đánh dấu vào hộp \"Lưu các tùy chọn khởi chạy này\" trong cửa sổ bật lên trước khi khởi chạy ứng dụng cho một loại tệp cụ thể (ví dụ: .pdf) hoặc cho tất cả các URL. Quản lý các tùy chọn đã lưu này trong tab \"Hành vi đã ghim\"."
+      ],
+      "confirmLogout": "Bạn có chắc chắn muốn đăng xuất không? Thao tác này sẽ xóa cấu hình đã lưu của bạn khỏi trình duyệt này."
+    },
+    "config": {
+      "quickSetup": "Thiết lập nhanh",
+      "quickSetupDescription": "Tải lên tệp cấu hình (.json) do quản trị viên của bạn cung cấp hoặc dán nội dung của nó vào bên dưới để tự động thiết lập tiện ích mở rộng.",
+      "uploadLabel": "Tải lên tệp cấu hình",
+      "pasteLabel": "Hoặc dán văn bản cấu hình",
+      "pastePlaceholder": "Dán cấu hình JSON của bạn vào đây...",
+      "applyButton": "Áp dụng cấu hình",
+      "manualLink": "Cấu hình thủ công",
+      "advancedTitle": "Cấu hình máy khách (Nâng cao)",
+      "serverIpLabel": "IP hoặc tên miền máy chủ",
+      "serverIpPlaceholder": "ví dụ: 192.168.1.100",
+      "apiPortLabel": "Cổng API",
+      "apiPortPlaceholder": "ví dụ: 8000",
+      "sessionPortLabel": "Cổng phiên",
+      "sessionPortPlaceholder": "ví dụ: 8443",
+      "usernameLabel": "Tên người dùng",
+      "usernamePlaceholder": "Tên người dùng của bạn",
+      "privateKeyLabel": "Khóa riêng của bạn (Định dạng PEM)",
+      "privateKeyPlaceholder": "Dán nội dung khóa riêng của bạn vào đây",
+      "serverKeyLabel": "Khóa công khai của máy chủ (Định dạng PEM)",
+      "serverKeyPlaceholder": "Dán nội dung của server_public.pem vào đây",
+      "searchEngineLabel": "Công cụ tìm kiếm mặc định cho văn bản đã chọn",
+      "saveButton": "Lưu cấu hình",
+      "loginButton": "Đăng nhập & Kiểm tra",
+      "automaticLink": "Cấu hình tự động",
+      "chooseFile": "Chọn tập tin",
+      "keyGeneration": "Tạo khóa",
+      "keyGenDescription": "Nếu bạn không có cặp khóa, bạn có thể tạo một cặp ở đây. Khóa riêng sẽ được điền vào ở trên. Cung cấp khóa công khai cho quản trị viên của bạn.",
+      "generateKeyButton": "Tạo cặp khóa mới",
+      "publicKeyForAdminLabel": "Khóa công khai của bạn (cho quản trị viên)"
+    },
+    "home": {
+      "title": "Các thư mục chính của bạn",
+      "description": "Tạo các thư mục lưu trữ lâu dài để sử dụng trên các phiên. Chúng sẽ được gắn vào các ứng dụng của bạn dưới dạng thư mục cấu hình.",
+      "newTitle": "Tạo thư mục chính mới",
+      "nameLabel": "Tên thư mục:",
+      "namePlaceholder": "ví dụ: my-project-files",
+      "nameTitle": "Chỉ sử dụng chữ cái, số, dấu gạch dưới hoặc dấu gạch ngang.",
+      "createButton": "Tạo thư mục",
+      "isLaboratory": "Đây là một ứng dụng Phòng thí nghiệm, được xây dựng từ một image cơ sở với các cài đặt tùy chỉnh.",
+      "laboratory": "Phòng thí nghiệm",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa ứng dụng đã cài đặt '{appName}' không?"
+    },
+    "sessions": {
+      "title": "Phiên hoạt động",
+      "application": "Ứng dụng",
+      "started": "Đã bắt đầu",
+      "noSessionsUser": "Không tìm thấy phiên hoạt động nào.",
+      "noSessionsAdmin": "Không tìm thấy phiên hoạt động nào cho bất kỳ người dùng nào.",
+      "sessionsFor": "Phiên cho {username} ({count})",
+      "confirmStop": "Bạn có chắc chắn muốn dừng phiên này không? Container sẽ bị hủy."
+    },
+    "pinned": {
+      "title": "Hành vi tiện ích mở rộng đã ghim",
+      "description": "Bảng này hiển thị các tùy chọn khởi chạy bạn đã lưu cho các loại tệp cụ thể hoặc cho tất cả các URL. Bạn có thể xóa một hành vi đã ghim để được nhắc lại các tùy chọn khởi chạy.",
+      "trigger": "Kích hoạt",
+      "savedApp": "Ứng dụng đã lưu",
+      "triggerSimple": "Khởi chạy đơn giản (Nút thanh công cụ)",
+      "triggerUrl": "Tất cả các URL (từ menu ngữ cảnh)",
+      "triggerFile": "Loại tệp: <strong>{fileType}</strong>",
+      "unknownApp": "Ứng dụng không xác định ({appId}...)"
+    },
+    "admins": {
+      "serverKeyTitle": "Khóa công khai của máy chủ",
+      "serverKeyDescription": "Đây là khóa công khai mà các tệp cấu hình người dùng sẽ cần để kết nối với máy chủ này.",
+      "title": "Quản lý quản trị viên",
+      "searchPlaceholder": "Tìm kiếm quản trị viên...",
+      "newTitle": "Tạo quản trị viên mới",
+      "publicKeyOptionalLabel": "Khóa công khai (Tùy chọn):",
+      "publicKeyPlaceholder": "Dán khóa công khai vào đây, hoặc để trống để tạo một khóa mới.",
+      "createButton": "Tạo quản trị viên",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa quản trị viên '{username}' không? Thao tác này cũng sẽ xóa tất cả bộ nhớ lâu dài của họ và không thể hoàn tác."
+    },
+    "users": {
+      "title": "Quản lý người dùng",
+      "searchPlaceholder": "Tìm kiếm người dùng theo tên hoặc nhóm...",
+      "newTitle": "Tạo người dùng mới",
+      "publicKeyOptionalLabel": "Khóa công khai (Tùy chọn):",
+      "publicKeyPlaceholder": "Dán khóa công khai của người dùng vào đây, hoặc để trống để tạo một khóa mới.",
+      "settingsTitle": "Cài đặt người dùng",
+      "sessionLimitLabel": "Giới hạn phiên",
+      "sessionLimitTitle": "Số phiên hoạt động mà người dùng có thể có. -1 cho không giới hạn.",
+      "permissionsTitle": "Quyền & Tăng cường bảo mật",
+      "activeAccount": "Tài khoản hoạt động",
+      "allowStorage": "Cho phép lưu trữ lâu dài",
+      "allowGpu": "Cho phép truy cập GPU",
+      "hardenContainer": "Tăng cường bảo mật Container",
+      "hardenWm": "Tăng cường bảo mật trình quản lý cửa sổ",
+      "createButton": "Tạo người dùng",
+      "homesDisabledTooltip": "Lưu trữ lâu dài bị vô hiệu hóa cho người dùng này",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa người dùng '{username}' không? Thao tác này cũng sẽ xóa tất cả bộ nhớ lâu dài của họ và không thể hoàn tác.",
+      "allowPublicSharing": "Cho phép chia sẻ tệp công khai"
+    },
+    "groups": {
+      "title": "Quản lý nhóm",
+      "searchPlaceholder": "Tìm kiếm nhóm...",
+      "newTitle": "Tạo nhóm mới",
+      "nameLabel": "Tên nhóm:",
+      "overrideTitle": "Cài đặt ghi đè nhóm",
+      "permissionsTitle": "Ghi đè quyền & Tăng cường bảo mật",
+      "createButton": "Tạo nhóm",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa nhóm '{groupName}' không? Người dùng trong nhóm này sẽ trở về cài đặt cá nhân của họ."
+    },
+    "installedApps": {
+      "title": "Ứng dụng đã cài đặt",
+      "searchPlaceholder": "Tìm kiếm ứng dụng đã cài đặt...",
+      "noAppsFound": "Không tìm thấy ứng dụng đã cài đặt nào.",
+      "pulling": "Đang kéo image mới...",
+      "notLocal": "Không tìm thấy image cục bộ",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa ứng dụng đã cài đặt '{appName}' không?"
+    },
+    "appStore": {
+      "title": "Cửa hàng ứng dụng",
+      "refreshTitle": "Làm mới cửa hàng đã chọn",
+      "selectLabel": "Chọn cửa hàng ứng dụng",
+      "addLabel": "Thêm cửa hàng ứng dụng mới",
+      "namePlaceholder": "Tên cửa hàng",
+      "urlPlaceholder": "URL YAML của cửa hàng",
+      "availableTitle": "Ứng dụng có sẵn",
+      "addManual": "Thêm ứng dụng thủ công",
+      "searchPlaceholder": "Tìm kiếm ứng dụng có sẵn...",
+      "noAppsFound": "Không tìm thấy ứng dụng nào.",
+      "availableFrom": "Ứng dụng có sẵn từ {storeName}",
+      "couldNotLoad": "Không thể tải ứng dụng từ cửa hàng này."
+    },
+    "appTemplates": {
+      "title": "Trình chỉnh sửa mẫu ứng dụng",
+      "loadLabel": "Tải mẫu",
+      "createOption": "Tạo mẫu mới",
+      "nameLabel": "Tên mẫu",
+      "namePlaceholder": "Nhập tên cho mẫu mới",
+      "saveButton": "Lưu hồ sơ",
+      "deleteButton": "Xóa",
+      "previewTitle": "Xem trước giao diện người dùng",
+      "contentArea": "Khu vực nội dung ứng dụng",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa mẫu '{templateName}' không? Hành động này không thể được hoàn tác.",
+      "deleteDisabled": "Mẫu này không thể bị xóa.",
+      "enterName": "Vui lòng nhập tên cho mẫu mới.",
+      "settings": {
+        "TITLE": {
+          "label": "Tiêu đề trang",
+          "description": "Tiêu đề trang được hiển thị trên trình duyệt web."
+        },
+        "SELKIES_UI_TITLE": {
+          "label": "Tiêu đề thanh bên",
+          "description": "Tiêu đề ở góc trên cùng bên trái của thanh bên."
+        },
+        "SELKIES_UI_SHOW_SIDEBAR": {
+          "label": "Hiển thị thanh bên",
+          "description": "Hiển thị giao diện người dùng chính của thanh bên."
+        },
+        "SELKIES_UI_SHOW_LOGO": {
+          "label": "Hiển thị logo",
+          "description": "Hiển thị logo Selkies trong thanh bên."
+        },
+        "SELKIES_UI_SHOW_CORE_BUTTONS": {
+          "label": "Hiển thị các nút cốt lõi",
+          "description": "Hiển thị các nút thành phần cốt lõi (hiển thị, âm thanh, v.v.)."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
+          "label": "Hiển thị cài đặt video",
+          "description": "Hiển thị phần cài đặt video trong thanh bên."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SCREEN_SETTINGS": {
+          "label": "Hiển thị cài đặt màn hình",
+          "description": "Hiển thị phần cài đặt màn hình trong thanh bên."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_AUDIO_SETTINGS": {
+          "label": "Hiển thị cài đặt âm thanh",
+          "description": "Hiển thị phần cài đặt âm thanh trong thanh bên."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_STATS": {
+          "label": "Hiển thị thống kê",
+          "description": "Hiển thị phần thống kê trong thanh bên."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
+          "label": "Hiển thị clipboard",
+          "description": "Hiển thị phần clipboard trong thanh bên."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FILES": {
+          "label": "Hiển thị phần tệp",
+          "description": "Hiển thị phần truyền tệp trong thanh bên."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_APPS": {
+          "label": "Hiển thị phần ứng dụng",
+          "description": "Hiển thị phần ứng dụng trong thanh bên."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SHARING": {
+          "label": "Hiển thị phần chia sẻ",
+          "description": "Hiển thị phần chia sẻ trong thanh bên."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
+          "label": "Hiển thị phần Gamepads",
+          "description": "Hiển thị phần gamepads trong thanh bên."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
+          "label": "Hiển thị nút bàn phím",
+          "description": "Hiển thị nút bàn phím trên màn hình."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SOFT_BUTTONS": {
+          "label": "Hiển thị các nút mềm",
+          "description": "Hiển thị phần các nút mềm (dành cho thiết bị di động)."
+        },
+        "WATERMARK_PNG": {
+          "label": "Đường dẫn PNG Watermark",
+          "description": "Đường dẫn đầy đủ bên trong container đến một tệp png watermark."
+        },
+        "WATERMARK_LOCATION": {
+          "label": "Vị trí Watermark",
+          "description": "Nơi vẽ hình ảnh lên luồng.",
+          "options": {
+            "disabled": "Vô hiệu hóa",
+            "topLeft": "Trên-Trái",
+            "topRight": "Trên-Phải",
+            "bottomLeft": "Dưới-Trái",
+            "bottomRight": "Dưới-Phải",
+            "centered": "Chính giữa",
+            "animated": "Hoạt ảnh"
+          }
+        },
+        "DASHBOARD": {
+          "label": "Kiểu bảng điều khiển",
+          "description": "Cho phép người dùng thiết lập bảng điều khiển của họ.",
+          "options": {
+            "default": "Mặc định",
+            "selkiesDefault": "Selkies (Mặc định)",
+            "zinc": "Zinc",
+            "wish": "Wish"
+          }
+        },
+        "SELKIES_AUDIO_ENABLED": {
+          "label": "Bật âm thanh",
+          "description": "Bật truyền phát âm thanh từ máy chủ đến máy khách."
+        },
+        "SELKIES_MICROPHONE_ENABLED": {
+          "label": "Bật micro",
+          "description": "Bật chuyển tiếp micro từ máy khách đến máy chủ."
+        },
+        "SELKIES_GAMEPAD_ENABLED": {
+          "label": "Bật gamepad",
+          "description": "Bật hỗ trợ gamepad."
+        },
+        "SELKIES_CLIPBOARD_ENABLED": {
+          "label": "Bật clipboard",
+          "description": "Bật đồng bộ hóa clipboard."
+        },
+        "SELKIES_CLIPBOARD_IN_ENABLED": {
+          "label": "Bật khay nhớ tạm từ máy khách sang máy chủ",
+          "description": "Cho phép truyền dữ liệu khay nhớ tạm từ trình duyệt."
+        },
+        "SELKIES_CLIPBOARD_OUT_ENABLED": {
+          "label": "Bật khay nhớ tạm từ máy chủ sang máy khách",
+          "description": "Cho phép truyền dữ liệu khay nhớ tạm từ máy chủ."
+        },
+        "SELKIES_ENABLE_BINARY_CLIPBOARD": {
+          "label": "Bật clipboard nhị phân",
+          "description": "Cho phép dữ liệu nhị phân (hình ảnh) trên clipboard."
+        },
+        "SELKIES_COMMAND_ENABLED": {
+          "label": "Bật websocket lệnh",
+          "description": "Bật phân tích cú pháp các thông điệp websocket lệnh."
+        },
+        "SELKIES_FILE_TRANSFERS": {
+          "label": "Truyền tệp",
+          "description": "Các hướng được phép ('upload,download', 'upload', 'download', 'none')."
+        },
+        "SELKIES_ENABLE_SHARING": {
+          "label": "Bật tất cả chia sẻ",
+          "description": "Công tắc chính cho tất cả các tính năng chia sẻ."
+        },
+        "SELKIES_SECOND_SCREEN": {
+          "label": "Bật màn hình thứ hai",
+          "description": "Bật hỗ trợ cho một màn hình/hiển thị thứ hai."
+        },
+        "SELKIES_USE_BROWSER_CURSORS": {
+          "label": "Sử dụng con trỏ trình duyệt",
+          "description": "Sử dụng con trỏ CSS của trình duyệt thay vì hiển thị trên canvas."
+        },
+        "SELKIES_USE_CSS_SCALING": {
+          "label": "Sử dụng tỷ lệ CSS (LoDPI)",
+          "description": "Nếu đúng, một độ phân giải thấp hơn sẽ được gửi và canvas sẽ được kéo dài."
+        },
+        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+          "label": "Chế độ độ phân giải thủ công",
+          "description": "Khóa độ phân giải theo các giá trị chiều rộng/chiều cao thủ công."
+        },
+        "SELKIES_FORCE_ALIGNED_RESOLUTION": {
+          "label": "Bắt buộc độ phân giải căn chỉnh",
+          "description": "Bắt buộc độ phân giải màn hình phải là bội số của 16 pixel."
+        },
+        "SELKIES_MANUAL_WIDTH": {
+          "label": "Chiều rộng thủ công",
+          "description": "Khóa chiều rộng ở một giá trị cố định. Buộc chế độ thủ công."
+        },
+        "SELKIES_MANUAL_HEIGHT": {
+          "label": "Chiều cao thủ công",
+          "description": "Khóa chiều cao ở một giá trị cố định. Buộc chế độ thủ công."
+        },
+        "SELKIES_SCALING_DPI": {
+          "label": "DPI tỷ lệ giao diện người dùng",
+          "description": "DPI mặc định cho tỷ lệ giao diện người dùng."
+        },
+        "SELKIES_AUDIO_BITRATE": {
+          "label": "Bitrate âm thanh",
+          "description": "Bitrate âm thanh mặc định."
+        },
+        "SELKIES_ENCODER": {
+          "label": "Các bộ mã hóa",
+          "description": "Danh sách các bộ mã hóa được phân tách bằng dấu phẩy. Đầu tiên là mặc định."
+        },
+        "SELKIES_USE_CPU": {
+          "label": "Buộc mã hóa bằng CPU",
+          "description": "Buộc mã hóa dựa trên CPU cho pixelflux."
+        },
+        "SELKIES_FRAMERATE": {
+          "label": "Tốc độ khung hình (Phạm vi hoặc Cố định)",
+          "description": "ví dụ: '8-120' cho một phạm vi hoặc '60' cho cố định."
+        },
+        "SELKIES_H264_CRF": {
+          "label": "CRF H.264 (Phạm vi hoặc Cố định)",
+          "description": "ví dụ: '5-50' cho một phạm vi hoặc '25' cho cố định."
+        },
+        "SELKIES_JPEG_QUALITY": {
+          "label": "Chất lượng JPEG (Phạm vi hoặc Cố định)",
+          "description": "ví dụ: '1-100' cho một phạm vi hoặc '60' cho cố định."
+        },
+        "SELKIES_H264_FULLCOLOR": {
+          "label": "Màu đầy đủ H.264",
+          "description": "Bật dải màu đầy đủ H.264 cho các bộ mã hóa pixelflux."
+        },
+        "SELKIES_H264_STREAMING_MODE": {
+          "label": "Chế độ truyền phát H.264 (Turbo)",
+          "description": "Bật chế độ truyền phát độ trễ thấp H.264."
+        },
+        "SELKIES_USE_PAINT_OVER_QUALITY": {
+          "label": "Sử dụng chất lượng vẽ đè",
+          "description": "Bật vẽ đè chất lượng cao cho các cảnh tĩnh."
+        },
+        "SELKIES_PAINT_OVER_JPEG_QUALITY": {
+          "label": "Chất lượng JPEG vẽ đè",
+          "description": "ví dụ: '1-100' cho một phạm vi hoặc '90' cho cố định."
+        },
+        "SELKIES_H264_PAINTOVER_CRF": {
+          "label": "CRF H.264 vẽ đè",
+          "description": "ví dụ: '5-50' cho một phạm vi hoặc '18' cho cố định."
+        },
+        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
+          "label": "Khung hình Burst vẽ đè",
+          "description": "ví dụ: '1-30' cho một phạm vi hoặc '5' cho cố định."
+        },
+        "HARDEN_DESKTOP": {
+          "label": "Tăng cường bảo mật Desktop (Cài đặt sẵn)",
+          "description": "Bật DISABLE_OPEN_TOOLS, DISABLE_SUDO và DISABLE_TERMINALS."
+        },
+        "HARDEN_OPENBOX": {
+          "label": "Tăng cường bảo mật Trình quản lý cửa sổ (Cài đặt sẵn)",
+          "description": "Bật DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS và HARDEN_KEYBINDS. Cũng bật RESTART_APP."
+        },
+        "DISABLE_OPEN_TOOLS": {
+          "label": "Vô hiệu hóa các công cụ mở",
+          "description": "Vô hiệu hóa các tệp nhị phân xdg-open và exo-open."
+        },
+        "DISABLE_SUDO": {
+          "label": "Vô hiệu hóa Sudo",
+          "description": "Vô hiệu hóa lệnh sudo."
+        },
+        "DISABLE_TERMINALS": {
+          "label": "Vô hiệu hóa Terminals",
+          "description": "Vô hiệu hóa các trình giả lập terminal phổ biến."
+        },
+        "DISABLE_CLOSE_BUTTON": {
+          "label": "Vô hiệu hóa nút đóng cửa sổ",
+          "description": "Xóa nút đóng khỏi thanh tiêu đề cửa sổ."
+        },
+        "DISABLE_MOUSE_BUTTONS": {
+          "label": "Vô hiệu hóa nhấp chuột phải/giữa",
+          "description": "Vô hiệu hóa các menu ngữ cảnh nhấp chuột phải và giữa."
+        },
+        "HARDEN_KEYBINDS": {
+          "label": "Tăng cường bảo mật các phím tắt",
+          "description": "Vô hiệu hóa các phím tắt mặc định của Openbox như Alt+F4."
+        },
+        "RESTART_APP": {
+          "label": "Khởi động lại ứng dụng khi đóng",
+          "description": "Tự động khởi động lại ứng dụng chính nếu nó bị đóng."
+        },
+        "MAX_RES": {
+          "label": "Độ phân giải tối đa",
+          "description": "Độ phân giải tối đa cho container, mặc định là 16k."
+        },
+        "START_DOCKER": {
+          "label": "Khởi động Docker-in-Docker",
+          "description": "Nếu sai, một container đặc quyền sẽ không khởi động DinD."
+        },
+        "DISABLE_IPV6": {
+          "label": "Vô hiệu hóa IPv6",
+          "description": "Nếu đúng, điều này sẽ vô hiệu hóa IPv6."
+        },
+        "DISABLE_ZINK": {
+          "label": "Vô hiệu hóa Zink",
+          "description": "Không đặt các biến môi trường Zink nếu phát hiện có card màn hình."
+        },
+        "DISABLE_DRI3": {
+          "label": "Vô hiệu hóa DRI3",
+          "description": "Không sử dụng tăng tốc DRI3 nếu phát hiện có card màn hình."
+        },
+        "NO_DECOR": {
+          "label": "Không có trang trí cửa sổ",
+          "description": "Chạy ứng dụng không có viền cửa sổ để sử dụng PWA."
+        },
+        "NO_FULL": {
+          "label": "Không toàn màn hình",
+          "description": "Không tự động toàn màn hình các ứng dụng."
+        },
+        "NO_GAMEPAD": {
+          "label": "Vô hiệu hóa tiêm Gamepad",
+          "description": "Vô hiệu hóa tiêm trình xen kẽ gamepad không gian người dùng."
+        },
+        "SELKIES_DEBUG": {
+          "label": "Bật gỡ lỗi Selkies",
+          "description": "Bật ghi nhật ký gỡ lỗi cho các thành phần truyền phát."
+        },
+        "DOCKER_PRIVILEGED": {
+          "label": "Chế độ đặc quyền",
+          "description": "Cấp mọi quyền cho container, gỡ bỏ giới hạn cgroup, gắn kết tất cả thiết bị máy chủ. Điều này sẽ gây lỗi hệ thống!"
+        },
+        "DOCKER_BIND_MOUNTS": {
+          "label": "Gắn kết Bind bổ sung",
+          "description": "Các gắn kết máy chủ bổ sung (phân tách bằng dấu phẩy, ví dụ: /host/path:/container/path:ro)."
+        },
+        "DOCKER_ENV": {
+          "label": "Biến môi trường",
+          "description": "Các biến môi trường bổ sung (phân tách bằng dấu phẩy, ví dụ: KEY=VALUE,KEY2=VALUE2)."
+        },
+        "DOCKER_CAP_ADD": {
+          "label": "Thêm Cap",
+          "description": "Thêm khả năng kernel (phân tách bằng dấu phẩy, ví dụ: SYS_ADMIN,MKNOD)."
+        },
+        "DOCKER_CAP_DROP": {
+          "label": "Bỏ Cap",
+          "description": "Bỏ khả năng kernel (phân tách bằng dấu phẩy)."
+        },
+        "DOCKER_SECURITY_OPT": {
+          "label": "Tùy chọn bảo mật",
+          "description": "Các tùy chọn bảo mật (phân tách bằng dấu phẩy, ví dụ: seccomp=unconfined,apparmor=unconfined)."
+        },
+        "DOCKER_DEVICES": {
+          "label": "Thiết bị",
+          "description": "Hiển thị thiết bị máy chủ (phân tách bằng dấu phẩy, ví dụ: /dev/sda:/dev/xvda:rwm)."
+        },
+        "DOCKER_SHM_SIZE": {
+          "label": "Kích thước SHM",
+          "description": "Kích thước của /dev/shm (ví dụ: 1G, 2G)."
+        },
+        "DOCKER_MEM_LIMIT": {
+          "label": "Giới hạn bộ nhớ",
+          "description": "Giới hạn bộ nhớ (ví dụ: 1g, 512m)."
+        },
+        "DOCKER_CPU_SHARES": {
+          "label": "Chia sẻ CPU",
+          "description": "Chia sẻ CPU (số nguyên trọng số tương đối)."
+        },
+        "DOCKER_NANO_CPUS": {
+          "label": "Nano CPU",
+          "description": "Hạn ngạch CPU tính bằng đơn vị 1e-9 CPU."
+        },
+        "DOCKER_NETWORK_MODE": {
+          "label": "Chế độ mạng",
+          "description": "Chế độ mạng cho container.",
+          "options": {
+            "default": "Mặc định (Bridge)",
+            "host": "Host",
+            "none": "Không",
+            "bridge": "Bridge"
+          }
+        },
+        "DOCKER_IPC_MODE": {
+          "label": "Chế độ IPC",
+          "description": "Đặt chế độ IPC cho container.",
+          "options": {
+            "default": "Mặc định",
+            "host": "Host",
+            "private": "Riêng tư",
+            "shareable": "Có thể chia sẻ"
+          }
+        },
+        "DOCKER_PID_MODE": {
+          "label": "Chế độ PID",
+          "description": "Đặt chế độ PID cho container.",
+          "options": {
+            "default": "Mặc định",
+            "host": "Host"
+          }
+        },
+        "DOCKER_DNS": {
+          "label": "Máy chủ DNS",
+          "description": "Máy chủ DNS tùy chỉnh (phân tách bằng dấu phẩy)."
+        },
+        "DOCKER_EXTRA_HOSTS": {
+          "label": "Máy chủ bổ sung",
+          "description": "Ánh xạ máy chủ sang IP (phân tách bằng dấu phẩy, ví dụ: hostname:1.2.3.4)."
+        },
+        "DOCKER_SYSCTLS": {
+          "label": "Sysctls",
+          "description": "Tham số kernel (phân tách bằng dấu phẩy, ví dụ: net.ipv4.ip_forward=1)."
+        },
+        "DOCKER_ULIMITS": {
+          "label": "Ulimits",
+          "description": "Ulimits (phân tách bằng dấu phẩy, ví dụ: nofile=1024:1024)."
+        },
+        "DOCKER_TMPFS": {
+          "label": "Gắn kết Tmpfs",
+          "description": "Hệ thống tệp tạm thời (phân tách bằng dấu phẩy, ví dụ: /run:rw,noexec,nosuid,size=65536k)."
+        },
+        "DOCKER_GROUP_ADD": {
+          "label": "Thêm nhóm",
+          "description": "Danh sách tên nhóm và/hoặc ID bổ sung (phân tách bằng dấu phẩy)."
+        }
+      }
+    },
+    "appLaboratory": {
+      "title": "Phòng thí nghiệm ứng dụng",
+      "description": "Tạo và thử nghiệm các cấu hình ứng dụng tùy chỉnh bằng cách xếp lớp các thay đổi lên trên một ứng dụng cơ sở.",
+      "selectApp": "Chọn ứng dụng",
+      "createNew": "Tạo ứng dụng mới",
+      "baseApp": "Ứng dụng cơ sở",
+      "baseAppDescription": "Ứng dụng đã cài đặt mà ứng dụng tùy chỉnh mới của bạn sẽ dựa trên.",
+      "selectBase": "Chọn một ứng dụng cơ sở",
+      "customizationTitle": "Tùy chỉnh",
+      "appName": "Tên ứng dụng",
+      "appIcon": "Biểu tượng ứng dụng",
+      "uploadIcon": "Tải lên biểu tượng",
+      "autostartScriptLabel": "Tập lệnh Tự khởi động Tùy chỉnh",
+      "permissionsTitle": "Quyền",
+      "usersLabel": "Người dùng được phép",
+      "groupsLabel": "Nhóm được phép",
+      "launchButton": "Lưu & Khởi chạy Phiên tùy chỉnh",
+      "closeButton": "Đóng Phiên & Hoàn tất",
+      "savingAndLaunching": "Đang lưu & Khởi chạy...",
+      "placeholder": "Phòng thí nghiệm ứng dụng cho phép bạn cấu hình thư mục chính cơ sở và tập lệnh khởi chạy cho một ứng dụng dựa trên một ứng dụng đã cài đặt hiện có. Thư mục chính này sẽ được sao chép khi khởi tạo lần đầu cho người dùng với tất cả các tệp và cài đặt bạn đã thiết lập trong phiên này. Bạn có thể khởi chạy lại một ứng dụng Phòng thí nghiệm hiện có để sửa đổi thêm nội dung của nó.",
+      "formInvalid": "Vui lòng chọn một ứng dụng cơ sở và cung cấp tên cho ứng dụng mới."
+    },
+    "modals": {
+      "editUserTitle": "Chỉnh sửa Người dùng: {username}",
+      "saveChanges": "Lưu thay đổi",
+      "effectiveSettings": "Cài đặt hiệu quả (với ghi đè nhóm)",
+      "editGroupTitle": "Chỉnh sửa Nhóm: {groupName}",
+      "userConfigTitle": "Cấu hình người dùng",
+      "warning": "Đây là lần duy nhất cấu hình này sẽ được hiển thị. Cung cấp nó cho người dùng một cách an toàn.",
+      "info": "Bạn có thể tải xuống tệp cấu hình này để dễ dàng thiết lập SealSkin trên một thiết bị khác. Giữ tệp này an toàn vì nó chứa khóa riêng của bạn.",
+      "configDataLabel": "Dữ liệu cấu hình (JSON)",
+      "copyButton": "Sao chép văn bản",
+      "downloadButton": "Tải xuống tệp",
+      "manageHomeDirs": "Quản lý thư mục chính",
+      "dirsForUser": "Thư mục cho người dùng: {username}",
+      "dirsForAdmin": "Thư mục cho quản trị viên: {username}",
+      "newDirForUser": "Tạo thư mục mới cho người dùng",
+      "createDirButton": "Tạo thư mục",
+      "confirmDeleteDir": "Bạn có chắc chắn muốn xóa '{homeName}' cho người dùng '{username}' không? Thao tác này là vĩnh viễn.",
+      "installAppTitle": "Cài đặt {appName}",
+      "editAppTitle": "Chỉnh sửa {appName}",
+      "customNameLabel": "Tên tùy chỉnh",
+      "imageLabel": "Image Container",
+      "permissions": "Quyền",
+      "allowedUsersLabel": "Người dùng được phép (phân tách bằng dấu phẩy, 'all' cho tất cả mọi người)",
+      "allowedGroupsLabel": "Nhóm được phép (phân tách bằng dấu phẩy, 'all' cho tất cả mọi người)",
+      "features": "Tính năng",
+      "gpuSupport": "Hỗ trợ GPU",
+      "homeMounting": "Gắn thư mục chính",
+      "urlSupport": "Hỗ trợ mở URL",
+      "fileSupport": "Hỗ trợ mở tệp",
+      "autoUpdate": "Tự động cập nhật Image",
+      "advancedSettings": "Cài đặt nâng cao",
+      "appTemplateLabel": "Mẫu ứng dụng",
+      "appTemplateDescription": "Chọn một mẫu được cấu hình sẵn cho các cài đặt khởi chạy container nâng cao.",
+      "customAutostartScriptLabel": "Tập lệnh Tự khởi động Tùy chỉnh",
+      "customAutostartScriptDescription": "Tùy chỉnh logic tự khởi động, để trống để sử dụng mặc định từ nhà cung cấp ứng dụng.",
+      "saveInstallation": "Lưu cài đặt",
+      "updateStatusTitle": "Trạng thái cập nhật cho {appName}",
+      "checkingUpdates": "Đang kiểm tra cập nhật...",
+      "updateAvailable": "Một phiên bản image mới đã có sẵn!",
+      "yourVersion": "Phiên bản của bạn: {sha}",
+      "latestAvailable": "Phiên bản mới nhất có sẵn để kéo từ registry.",
+      "pullLatest": "Kéo Image mới nhất",
+      "upToDate": "Image của bạn đã được cập nhật.",
+      "currentVersion": "Phiên bản hiện tại: {sha}",
+      "errorChecking": "Lỗi khi kiểm tra cập nhật.",
+      "pullingLatest": "Đang kéo image mới nhất... Việc này có thể mất một chút thời gian.",
+      "pullComplete": "Kéo hoàn tất!",
+      "newVersion": "Phiên bản mới: {sha}",
+      "errorPulling": "Lỗi khi kéo image.",
+      "manualInstallNote": "Lưu ý: Các hình ảnh được thêm thủ công phải dựa trên một hình ảnh tương thích với selkies-baseimage.",
+      "generalTitle": "Cài đặt Chung & Hiệu suất",
+      "dockerTitle": "Ghi đè nâng cao Docker",
+      "dockerDescription": "Các cài đặt này ghi đè cấu hình container mặc định. Sử dụng thận trọng và chỉ khi bạn biết mình đang làm gì."
+    },
+    "status": {
+      "loggingIn": "Đang đăng nhập...",
+      "configSaved": "Đã lưu cấu hình thành công!",
+      "configApplied": "Đã áp dụng cấu hình! Vui lòng Đăng nhập & Kiểm tra.",
+      "configApplyFailed": "Không thể áp dụng cấu hình: {error}",
+      "fileReadError": "Lỗi khi đọc tệp.",
+      "noConfig": "Vui lòng cung cấp một tệp cấu hình hoặc văn bản.",
+      "loggedInAdmin": "Đã đăng nhập với tư cách quản trị viên: {username}",
+      "loggedInUser": "Đã đăng nhập với tư cách người dùng tiêu chuẩn: {username}.",
+      "loginFailed": "Đăng nhập thất bại: {error}",
+      "adminDataRefreshFailed": "Không thể làm mới dữ liệu quản trị viên: {error}",
+      "logoutSuccess": "Đã đăng xuất và xóa cấu hình.",
+      "generateConfigFailed": "Không thể tạo cấu hình, thiếu chi tiết người dùng.",
+      "copySuccess": "Đã sao chép cấu hình vào clipboard!",
+      "copyFailed": "Không thể sao chép văn bản.",
+      "publicKeyCopied": "Đã sao chép khóa công khai!",
+      "keyCopyFailed": "Không thể sao chép khóa.",
+      "creatingAdmin": "Đang tạo quản trị viên...",
+      "adminCreated": "Đã tạo quản trị viên '{username}'.",
+      "adminCreateFailed": "Lỗi khi tạo quản trị viên: {error}",
+      "adminDeleted": "Đã xóa quản trị viên '{username}' thành công.",
+      "adminDeleteFailed": "Lỗi khi xóa quản trị viên: {error}",
+      "creatingUser": "Đang tạo người dùng...",
+      "userCreated": "Đã tạo người dùng '{username}'.",
+      "userCreateFailed": "Lỗi khi tạo người dùng: {error}",
+      "userDeleted": "Đã xóa người dùng '{username}' thành công.",
+      "userDeleteFailed": "Lỗi khi xóa người dùng: {error}",
+      "userUpdated": "Đã cập nhật người dùng '{username}' thành công.",
+      "userUpdateFailed": "Lỗi khi cập nhật người dùng: {error}",
+      "creatingGroup": "Đang tạo nhóm...",
+      "groupCreated": "Đã tạo nhóm '{groupName}'.",
+      "groupCreateFailed": "Lỗi khi tạo nhóm: {error}",
+      "groupDeleted": "Đã xóa nhóm '{groupName}' thành công.",
+      "groupDeleteFailed": "Lỗi khi xóa nhóm: {error}",
+      "groupUpdated": "Đã cập nhật nhóm '{groupName}' thành công.",
+      "groupUpdateFailed": "Lỗi khi cập nhật nhóm: {error}",
+      "homedirLoadFailed": "Không thể tải thư mục chính: {error}",
+      "homedirCreateFailed": "Lỗi khi tạo thư mục: {error}",
+      "homedirCreated": "Đã tạo thư mục chính '{homeName}'.",
+      "homedirDeleted": "Đã xóa thư mục '{homeName}'.",
+      "homedirDeleteFailed": "Lỗi khi xóa thư mục: {error}",
+      "homedirCreatedFor": "Đã tạo thư mục '{homeName}' cho {username}.",
+      "homedirDeletedFor": "Đã xóa thư mục '{homeName}' cho {username}.",
+      "sessionsLoadFailed": "Không thể tải các phiên: {error}",
+      "sessionStopError": "Lỗi khi dừng phiên: {error}",
+      "sessionStopped": "Đã dừng phiên thành công.",
+      "appDataRefreshFailed": "Không thể làm mới dữ liệu ứng dụng: {error}",
+      "closingSession": "Đang cam kết phiên tùy chỉnh...",
+      "sessionClosed": "Đã đóng phiên tùy chỉnh.",
+      "sessionCloseFailed": "Không thể đóng phiên tùy chỉnh: {error}",
+      "fetchingApps": "Đang lấy ứng dụng từ cửa hàng...",
+      "fetchAppsFailed": "Không thể lấy ứng dụng từ cửa hàng: {error}",
+      "appStoreAddFailed": "Lỗi khi thêm cửa hàng: {error}",
+      "appStoreAdded": "Đã thêm cửa hàng ứng dụng '{name}'.",
+      "appSaved": "Ứng dụng '{name}' đã được {action} thành công.",
+      "appSaveActions": {
+        "updated": "cập nhật",
+        "installed": "cài đặt"
+      },
+      "appSaveFailed": "Lỗi khi lưu ứng dụng: {error}",
+      "appDeleted": "Đã xóa ứng dụng '{name}'.",
+      "appDeleteFailed": "Lỗi khi xóa ứng dụng: {error}",
+      "templateSaved": "Đã lưu mẫu '{name}' thành công.",
+      "templateSaveFailed": "Lỗi khi lưu mẫu: {error}",
+      "templateDeleted": "Đã xóa mẫu '{name}' thành công.",
+      "templateDeleteFailed": "Lỗi khi xóa mẫu: {error}",
+      "pinRemoved": "Đã xóa hành vi đã ghim.",
+      "keyGenerated": "Đã tạo cặp khóa mới.",
+      "keyGenFailed": "Tạo khóa thất bại: {error}",
+      "pendingConfigSaved": "Đã lưu cấu hình đang chờ xử lý. Bây giờ bạn có thể cung cấp khóa công khai của mình cho quản trị viên.",
+      "settingsSaved": "Đã lưu cài đặt.",
+      "appCreated": "Đã tạo ứng dụng '{name}' thành công.",
+      "launchFailed": "Khởi chạy thất bại: {error}"
+    },
+    "placeholders": {
+      "noAdmins": "Không tìm thấy quản trị viên nào.",
+      "noUsers": "Không tìm thấy người dùng nào.",
+      "noGroups": "Không tìm thấy nhóm nào.",
+      "noHomeDirs": "Không tìm thấy thư mục chính nào.",
+      "noSessions": "Không tìm thấy phiên hoạt động nào.",
+      "noPinned": "Không tìm thấy hành vi đã ghim nào.",
+      "errorLoading": "Lỗi khi tải thư mục.",
+      "noInstalledApps": "Chưa có ứng dụng nào được cài đặt."
+    }
+  },
+  "popup": {
+    "tabs": {
+      "launch": "Khởi chạy mới",
+      "sessions": "Phiên hoạt động",
+      "manageFiles": "Quản lý tệp",
+      "uploadStorage": "Tải lên bộ nhớ",
+      "uploadFiles": "Tải lên tệp",
+      "uploadFilesTitle": "Mở trang tải lên tệp chuyên dụng"
+    },
+    "launchView": {
+      "searchPlaceholder": "Tìm kiếm ứng dụng...",
+      "uploadingFile": "Đang tải lên tệp...",
+      "gpuLabel": "GPU",
+      "storageLabel": "Lưu trữ",
+      "languageLabel": "Ngôn ngữ",
+      "cleanroom": "Phòng sạch (Tạm thời)",
+      "noGpu": "Không có",
+      "saveOptions": "Lưu các tùy chọn khởi chạy này",
+      "saveOptionsForUrl": "Lưu tùy chọn cho tất cả các URL",
+      "saveOptionsForFile": "Lưu tùy chọn cho các tệp .{extension}",
+      "openFile": "Mở tệp khi khởi chạy",
+      "launchButton": "Khởi chạy",
+      "launchingButton": "Đang khởi chạy...",
+      "uploadingButton": "Đang tải lên...",
+      "autoHome": "Tự động (lưu trữ theo ứng dụng)",
+      "collaborationMode": "Phiên cộng tác",
+      "waylandMode": "Chế độ Wayland"
+    },
+    "sessionsView": {
+      "noSessions": "Không tìm thấy phiên hoạt động nào."
+    },
+    "uploadStorageView": {
+      "selectHome": "Chọn thư mục chính",
+      "description": "Thao tác này sẽ tải tệp <strong>{filename}</strong> trực tiếp lên bộ nhớ Tệp của bạn để sử dụng trong tương lai.",
+      "descriptionFallback": "Thao tác này sẽ tải tệp <strong>{filename}</strong> trực tiếp lên bộ nhớ Tệp của bạn để sử dụng trong tương lai.",
+      "uploadButton": "Tải lên tệp",
+      "uploadingButton": "Đang tải lên...",
+      "preparing": "Đang chuẩn bị tệp...",
+      "uploadingChunk": "Đang tải lên phần {current} của {total}...",
+      "finalizing": "Đang hoàn tất...",
+      "uploadComplete": "Tải lên hoàn tất!"
+    },
+    "status": {
+      "unconfigured": "Vui lòng cấu hình tiện ích mở rộng qua trang tùy chọn.",
+      "openingServerFile": "Đang mở tệp phía máy chủ: {filename}",
+      "openingFile": "Đang mở tệp: {filename}",
+      "openingUrl": "Đang mở URL: {targetUrl}",
+      "error": "Lỗi: {message}",
+      "preparingFile": "Đang chuẩn bị tệp...",
+      "sendingFile": "Đang gửi tệp đến phiên...",
+      "errorSendingFile": "Lỗi khi gửi tệp: {message}",
+      "errorClosingSession": "Lỗi khi đóng phiên: {message}",
+      "preparingSession": "Đang chuẩn bị phiên cách ly...",
+      "fetchingData": "Đang lấy dữ liệu tệp...",
+      "fetchDataFailed": "Không thể lấy dữ liệu tệp: {statusText}",
+      "unknownAction": "Hành động khởi chạy không xác định.",
+      "noAppSelected": "Vui lòng chọn một ứng dụng.",
+      "noAppsAvailable": "Không có ứng dụng nào có sẵn cho tài khoản của bạn.",
+      "uploadSuccess": "Tệp đã được tải lên thành công!",
+      "creatingAutoHome": "Đang tạo thư mục chính tự động..."
+    },
+    "languages": {
+      "default": "Mặc định ({locale})"
+    }
+  },
+  "upload": {
+    "title": "Tải lên tệp",
+    "description": "Chọn một tệp từ máy tính của bạn để mở nó trong một phiên an toàn, cách ly.",
+    "dropzone": {
+      "title": "Kéo và thả tệp vào đây",
+      "or": "hoặc",
+      "button": "Chọn tệp"
+    },
+    "confirm": {
+      "ready": "Tệp đã sẵn sàng để được mở một cách an toàn.",
+      "button": "Tiếp tục để khởi chạy"
+    }
+  },
+  "files": {
+    "title": "Tệp SealSkin",
+    "header": {
+      "title": "Tệp",
+      "newFolder": "Thư mục mới",
+      "uploadFiles": "Tải lên tệp",
+      "uploadFolder": "Tải lên thư mục"
+    },
+    "sidebar": {
+      "sharedFiles": "Tệp SealSkin",
+      "publicShares": "Chia sẻ công khai"
+    },
+    "shares": {
+      "title": "Các tệp được chia sẻ công khai",
+      "searchPlaceholder": "Tìm kiếm theo tên tệp hoặc ID..."
+    },
+    "table": {
+      "name": "Tên",
+      "size": "Kích thước",
+      "lastModified": "Sửa đổi lần cuối",
+      "created": "Đã tạo",
+      "expires": "Hết hạn",
+      "url": "URL công khai",
+      "passwordProtected": "Mật khẩu"
+    },
+    "dropzone": {
+      "title": "Thả tệp vào đây để tải lên"
+    },
+    "pagination": {
+      "previous": "« Trước",
+      "next": "Tiếp »",
+      "pageOf": "Trang {page} của {totalPages}"
+    },
+    "modals": {
+      "newFolder": {
+        "title": "Tạo thư mục mới",
+        "folderNameLabel": "Tên thư mục",
+        "nameTitle": "Chỉ sử dụng chữ cái, số, dấu gạch dưới, dấu gạch ngang hoặc dấu chấm.",
+        "createButton": "Tạo"
+      },
+      "confirmDelete": {
+        "title": "Xác nhận xóa",
+        "message": "Bạn có chắc chắn muốn xóa {count, plural, one {1 mục đã chọn} other {{count} mục đã chọn}} không? Hành động này không thể hoàn tác.",
+        "messageDefault": "Bạn có chắc chắn muốn xóa các mục đã chọn không? Hành động này không thể hoàn tác."
+      },
+      "uploadProgress": {
+        "title": "Tiến trình tải lên",
+        "doneButton": "Xong"
+      },
+      "share": {
+        "title": "Chia sẻ tệp",
+        "sharingFile": "Đang chia sẻ tệp: <strong>{filename}</strong>",
+        "passwordLabel": "Mật khẩu (tùy chọn)",
+        "passwordPlaceholder": "Để trống nếu không có mật khẩu",
+        "expiryLabel": "Hết hạn sau (giờ, tùy chọn)",
+        "expiryPlaceholder": "ví dụ: 24 cho một ngày",
+        "shareButton": "Tạo liên kết chia sẻ"
+      }
+    },
+    "status": {
+      "homeDirLoadFailed": "Không thể tải thư mục chính: {error}",
+      "filesLoadFailed": "Lỗi khi tải tệp: {error}",
+      "deleteProtectedError": "Không thể xóa các thư mục hệ thống được bảo vệ.",
+      "deletingItems": "Đang xóa {count, plural, one {1 mục} other {{count} mục}}...",
+      "deleteSuccess": "Xóa thành công.",
+      "deleteFailed": "Xóa thất bại: {error}",
+      "preparingUpload": "Đang chuẩn bị tải lên {count, plural, one {1 tệp} other {{count} tệp}}...",
+      "uploadPrepFailed": "Lỗi trong quá trình chuẩn bị tải lên thư mục: {error}",
+      "notConfigured": "Lỗi: SealSkin chưa được cấu hình. Vui lòng thiết lập trong tùy chọn.",
+      "folderCreated": "Đã tạo thư mục '{folderName}'.",
+      "folderCreateFailed": "Lỗi khi tạo thư mục: {error}",
+      "shareCreated": "Chia sẻ đã được tạo thành công! Liên kết đã được sao chép vào clipboard của bạn.",
+      "shareCreateFailed": "Không thể tạo chia sẻ: {error}",
+      "sharesLoadFailed": "Không thể tải các tệp đã chia sẻ: {error}",
+      "shareDeleteFailed": "Không thể xóa chia sẻ: {error}",
+      "shareDeleted": "Đã xóa chia sẻ thành công.",
+      "urlCopied": "Đã sao chép URL công khai vào clipboard."
+    },
+    "placeholders": {
+      "errorLoading": "Lỗi khi tải tệp.",
+      "folderEmpty": "Thư mục này trống.",
+      "noHomeDirs": "Không có thư mục chính nào.",
+      "noShares": "Bạn chưa chia sẻ tệp nào."
+    },
+    "uploadStatus": {
+      "pending": "đang chờ",
+      "initiating": "Đang bắt đầu...",
+      "uploading": "Đang tải lên...",
+      "finalizing": "Đang hoàn tất...",
+      "completed": "Hoàn thành",
+      "error": "Lỗi"
+    }
+  }
+}

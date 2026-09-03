@@ -1,7 +1,18 @@
-import os
-import logging
+"""Application settings.
 
-SETTING_DEFINITIONS = [
+Every setting is defined once in :data:`SETTING_DEFINITIONS` and can be
+overridden with an environment variable named ``SEALSKIN_<NAME>`` (upper case).
+"""
+
+from __future__ import annotations
+
+import logging
+import os
+from typing import Any
+
+from .version import repo_root
+
+SETTING_DEFINITIONS: list[dict[str, Any]] = [
     {
         "name": "log_level",
         "type": "str",
@@ -29,7 +40,9 @@ SETTING_DEFINITIONS = [
     {
         "name": "app_resource_path",
         "type": "str",
-        "default": "https://raw.githubusercontent.com/linuxserver/sealskin-apps/refs/heads/master/apps.yml",
+        "default": (
+            "https://raw.githubusercontent.com/linuxserver/sealskin-apps/refs/heads/master/apps.yml"
+        ),
         "help": "URL for the YAML file defining default available applications.",
     },
     {
@@ -60,7 +73,7 @@ SETTING_DEFINITIONS = [
         "name": "upload_dir",
         "type": "str",
         "default": "/storage/sealskin_uploads",
-        "help": "Directory for temporary file uploads.",
+        "help": "Directory for temporary file uploads (one sub-directory per user).",
     },
     {
         "name": "session_cookie_name",
@@ -188,20 +201,46 @@ SETTING_DEFINITIONS = [
         "default": "/config/.config/sealskin/Caddyfile",
         "help": "Path to the generated Caddyfile for the proxy.",
     },
+    {
+        "name": "ui_path",
+        "type": "str",
+        "default": os.path.join(repo_root(), "client", "dist", "ui"),
+        "help": "Directory holding the built web UI served under /ui.",
+    },
+    {
+        "name": "template_schema_path",
+        "type": "str",
+        "default": os.path.join(os.path.dirname(os.path.abspath(__file__)), "template_schema.yml"),
+        "help": "YAML file describing the environment variables editable in app templates.",
+    },
+    {
+        "name": "crypto_session_ttl_seconds",
+        "type": "int",
+        "default": 86400,
+        "help": "Idle lifetime of an E2EE session key before it is discarded.",
+    },
+    {
+        "name": "watch_config_files",
+        "type": "bool",
+        "default": True,
+        "help": "Reload YAML configuration files automatically when they change on disk.",
+    },
 ]
 
 
 class AppSettings:
-    """
-    Parses and stores application settings from environment variables,
-    with fallback to default values.
+    """Settings parsed from environment variables with fallback to defaults.
+
+    Each entry of :data:`SETTING_DEFINITIONS` becomes an attribute of the
+    instance (for example ``settings.api_port``).
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Populate attributes from the environment."""
         self._process_and_set_attributes()
 
-    def _process_and_set_attributes(self):
-        """Process definitions and set them as class attributes."""
+    def _process_and_set_attributes(self) -> None:
+        """Parse every definition and set it as an attribute."""
         for setting in SETTING_DEFINITIONS:
             name = setting["name"]
             stype = setting["type"]
@@ -211,7 +250,7 @@ class AppSettings:
             raw_value = os.environ.get(env_var_name)
 
             if raw_value is None:
-                processed_value = default_val
+                processed_value: Any = default_val
             else:
                 try:
                     if stype == "bool":
@@ -220,9 +259,12 @@ class AppSettings:
                         processed_value = int(raw_value)
                     else:
                         processed_value = str(raw_value)
-                except (ValueError, TypeError) as e:
+                except (ValueError, TypeError) as exc:
                     logging.error(
-                        f"Could not parse setting '{name}' with value '{raw_value}'. Using default. Error: {e}"
+                        "Could not parse setting '%s' with value '%s'. Using default. Error: %s",
+                        name,
+                        raw_value,
+                        exc,
                     )
                     processed_value = default_val
 

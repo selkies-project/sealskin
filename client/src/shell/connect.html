@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SealSkin Connection</title>
+    <link rel="stylesheet" href="connect.css">
+</head>
+<body>
+    <div class="connect-container">
+        <header class="connect-header">
+            <img src="icons/icon128.png" alt="SealSkin" class="logo">
+            <h1>SealSkin</h1>
+        </header>
+
+        <div id="status" class="status" hidden></div>
+
+        <section class="card" id="connected-view" hidden>
+            <div class="card-header">
+                <h3 data-i18n="options.dashboard.userStatus">User Status</h3>
+            </div>
+            <p><span data-i18n="options.dashboard.loggedInAs">Logged in as:</span> <strong id="connected-username"></strong></p>
+            <p><span data-i18n="options.dashboard.server">Server:</span> <strong id="connected-server"></strong></p>
+            <div class="button-group">
+                <button id="open-app" class="primary">Open SealSkin</button>
+                <button id="edit-connection" class="secondary">Edit connection</button>
+                <button id="export-config-button" class="secondary" data-i18n="options.dashboard.exportConfig">Export Config</button>
+                <button id="logout-button" class="danger" data-i18n="options.dashboard.logout">Logout &amp; Clear Config</button>
+            </div>
+        </section>
+
+        <section class="card" id="simple-config-view" hidden>
+            <div class="card-header">
+                <h3 data-i18n="options.config.quickSetup">Quick Setup</h3>
+            </div>
+            <p data-i18n="options.config.quickSetupDescription">Upload the configuration file (.json) provided by your administrator, or paste its contents below to automatically set up the extension.</p>
+            <div class="form-group">
+                <label for="configFileUpload" data-i18n="options.config.uploadLabel">Upload Config File</label>
+                <div class="file-row">
+                    <input type="file" id="configFileUpload" accept=".json,application/json">
+                    <label for="configFileUpload" class="button secondary" data-i18n="options.config.chooseFile">Choose File</label>
+                    <span id="config-file-name" class="muted"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="configTextArea" data-i18n="options.config.pasteLabel">Or Paste Config Text</label>
+                <textarea id="configTextArea" rows="8" data-i18n-placeholder="options.config.pastePlaceholder" placeholder="Paste your JSON configuration here..."></textarea>
+            </div>
+            <div class="button-group end">
+                <button id="applyConfig" class="primary" data-i18n="options.config.applyButton">Apply Configuration</button>
+            </div>
+            <div class="config-view-toggle">
+                <a href="#" id="show-advanced-link" data-i18n="options.config.manualLink">Manual Configuration</a>
+            </div>
+        </section>
+
+        <section class="card" id="advanced-config-view" hidden>
+            <div class="card-header">
+                <h3 data-i18n="options.config.advancedTitle">Client Configuration (Advanced)</h3>
+                <button id="save" class="primary" data-i18n="options.config.saveButton">Save Configuration</button>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="serverIp" data-i18n="options.config.serverIpLabel">Server IP or Domain</label>
+                    <input type="text" id="serverIp" autocomplete="off" data-i18n-placeholder="options.config.serverIpPlaceholder" placeholder="e.g., 192.168.1.100">
+                </div>
+                <div class="form-group">
+                    <label for="apiPort" data-i18n="options.config.apiPortLabel">API Port</label>
+                    <input type="text" id="apiPort" inputmode="numeric" data-i18n-placeholder="options.config.apiPortPlaceholder" placeholder="e.g., 8000">
+                </div>
+                <div class="form-group">
+                    <label for="sessionPort" data-i18n="options.config.sessionPortLabel">Session Port</label>
+                    <input type="text" id="sessionPort" inputmode="numeric" data-i18n-placeholder="options.config.sessionPortPlaceholder" placeholder="e.g., 8443">
+                </div>
+                <div class="form-group">
+                    <label for="username" data-i18n="options.config.usernameLabel">Username</label>
+                    <input type="text" id="username" autocomplete="username" data-i18n-placeholder="options.config.usernamePlaceholder" placeholder="Your username">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="clientPrivateKey" data-i18n="options.config.privateKeyLabel">Your Private Key (PEM Format)</label>
+                <textarea id="clientPrivateKey" rows="6" data-i18n-placeholder="options.config.privateKeyPlaceholder" placeholder="Paste your private key content here"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="serverPublicKey" data-i18n="options.config.serverKeyLabel">Server Public Key (PEM Format)</label>
+                <textarea id="serverPublicKey" rows="6" data-i18n-placeholder="options.config.serverKeyPlaceholder" placeholder="Paste the server_public.pem content here"></textarea>
+            </div>
+            <div class="card inner">
+                <h4 data-i18n="options.config.keyGeneration">Key Generation</h4>
+                <p class="muted" data-i18n="options.config.keyGenDescription">If you don't have a key pair, you can generate one here. The private key will be filled in above. Provide the public key to your administrator.</p>
+                <button id="generateKeyBtn" type="button" class="secondary" data-i18n="options.config.generateKeyButton">Generate New Key Pair</button>
+                <div id="pubKeyDisplay" class="form-group" hidden>
+                    <label for="generatedPubKey" data-i18n="options.config.publicKeyForAdminLabel">Your Public Key (for admin)</label>
+                    <div class="key-row">
+                        <textarea id="generatedPubKey" readonly rows="4"></textarea>
+                        <button id="copyPubKeyBtn" type="button" class="secondary">Copy</button>
+                    </div>
+                </div>
+            </div>
+            <div class="button-group">
+                <button id="login" class="primary" data-i18n="options.config.loginButton">Login &amp; Test</button>
+            </div>
+            <div class="config-view-toggle">
+                <a href="#" id="hide-advanced-link" data-i18n="options.config.automaticLink">Automatic Configuration</a>
+            </div>
+        </section>
+    </div>
+    <script type="module" src="connect.js"></script>
+</body>
+</html>

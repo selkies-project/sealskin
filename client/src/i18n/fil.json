@@ -1,0 +1,961 @@
+{
+  "background": {
+    "contextMenu": {
+      "openUrl": "Buksan ang Link sa SealSkin",
+      "openFile": "Buksan ang Target ng Link bilang File sa SealSkin",
+      "sendMedia": "Ipadala ang Media sa SealSkin",
+      "searchText": "Hanapin ang \"%s\" sa SealSkin",
+      "sendDownload": "Ipadala ang Susunod na Download sa SealSkin"
+    }
+  },
+  "common": {
+    "actions": "Mga Aksyon",
+    "active": "Aktibo",
+    "cancel": "Kanselahin",
+    "manage": "Pamahalaan",
+    "delete": "Burahin",
+    "edit": "I-edit",
+    "save": "I-save",
+    "none": "wala",
+    "error": "Error",
+    "na": "N/A",
+    "of": "ng",
+    "status": "Katayuan",
+    "username": "Username",
+    "group": "Grupo",
+    "groups": "Mga Grupo",
+    "publicKey": "Pampublikong Key",
+    "name": "Pangalan",
+    "source": "Pinagmulan",
+    "imageVersion": "Bersyon ng Imahe",
+    "language": "Wika",
+    "storage": "Imbakan",
+    "gpu": "GPU",
+    "version": "Bersyon",
+    "checked": "Nasuri",
+    "never": "Hindi Kailanman",
+    "stop": "Itigil",
+    "reopen": "Buksan Muli",
+    "sendFile": "Ipadala ang File",
+    "share": "Ibahagi",
+    "search": "Maghanap",
+    "refresh": "I-refresh",
+    "close": "Isara",
+    "copy": "Kopyahin",
+    "open": "Buksan",
+    "copyUrl": "Kopyahin ang URL",
+    "download": "I-download",
+    "next": "Susunod",
+    "previous": "Nakaraan",
+    "page": "Pahina",
+    "home": "Home",
+    "homes": "Mga Home",
+    "sessions": "Mga Sesyon",
+    "users": "Mga User",
+    "admins": "Mga Admin",
+    "yes": "Oo",
+    "no": "Hindi",
+    "daysAgo": "{count, plural, one {1 araw ang nakalipas} other {{count} na araw ang nakalipas}}",
+    "hoursAgo": "{count, plural, one {1 oras ang nakalipas} other {{count} na oras ang nakalipas}}",
+    "minutesAgo": "{count, plural, one {1 minuto ang nakalipas} other {{count} na minuto ang nakalipas}}",
+    "justNow": "ngayon lang",
+    "bytes": "Bytes",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB",
+    "pb": "PB"
+  },
+  "options": {
+    "sidebar": {
+      "config": "Konfigurasyon",
+      "home": "Mga Home Directory",
+      "sessions": "Mga Aktibong Sesyon",
+      "pinned": "Naka-pin na Gawi",
+      "appStore": "Tindahan ng App",
+      "appTemplates": "Mga Template ng App",
+      "appLaboratory": "Laboratoryo ng App",
+      "installedApps": "Mga Naka-install na App",
+      "users": "Mga User",
+      "groups": "Mga Grupo",
+      "admins": "Mga Admin"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "clientSettings": "Mga Setting ng Kliyente",
+      "exportConfig": "I-export ang Konfigurasyon",
+      "userStatus": "Katayuan ng User",
+      "loggedInAs": "Naka-log in bilang:",
+      "role": "Papel",
+      "roleAdmin": "Administrator",
+      "roleUser": "Standard na User",
+      "serverInfo": "Impormasyon ng Server",
+      "server": "Server:",
+      "cpuModel": "Modelo ng CPU:",
+      "storageUsage": "Paggamit ng Imbakan:",
+      "detectedGpus": "Mga Natukoy na GPU:",
+      "logout": "Mag-logout at Linisin ang Konfigurasyon",
+      "howTo": "Paano Gamitin ang SealSkin",
+      "howToDescription": "Ang seksyon na ito ay naglalaman ng pangunahing dokumentasyon kung paano gamitin ang extension.",
+      "howToList": [
+        "<strong>Upang buksan ang nilalaman sa isolation:</strong> Mag-right-click sa anumang link, imahe, o napiling teksto at pumili ng opsyon mula sa \"SealSkin Isolation\" context menu.",
+        "<strong>Upang magpadala ng download sa isolation:</strong> Mag-right-click sa pahina at piliin ang \"Ipadala ang Susunod na Download sa Isolation\". Ang susunod na file na iyong ida-download ay mahaharang at ipapadala sa isang ligtas na sesyon.",
+        "<strong>Upang maglunsad ng malinis na aplikasyon:</strong> I-click ang icon ng SealSkin sa toolbar ng iyong browser.",
+        "<strong>Upang pamahalaan ang persistenteng imbakan:</strong> Gamitin ang tab na \"Mga Home Directory\" sa pahinang ito upang lumikha at magbura ng mga volume ng imbakan na maaaring gamitin sa maraming sesyon.",
+        "<strong>Upang i-save ang mga opsyon sa paglunsad:</strong> Lagyan ng tsek ang kahon na \"I-save ang mga opsyon sa paglunsad na ito\" sa popup bago maglunsad ng aplikasyon para sa isang partikular na uri ng file (hal., .pdf) o para sa lahat ng URL. Pamahalaan ang mga naka-save na kagustuhan na ito sa tab na \"Naka-pin na Gawi\"."
+      ],
+      "confirmLogout": "Sigurado ka bang gusto mong mag-logout? Ito ay maglilinis ng iyong naka-save na konfigurasyon mula sa browser na ito."
+    },
+    "config": {
+      "quickSetup": "Mabilis na Setup",
+      "quickSetupDescription": "I-upload ang configuration file (.json) na ibinigay ng iyong administrator, o i-paste ang nilalaman nito sa ibaba upang awtomatikong i-set up ang extension.",
+      "uploadLabel": "I-upload ang Config File",
+      "pasteLabel": "O I-paste ang Config Text",
+      "pastePlaceholder": "I-paste ang iyong JSON configuration dito...",
+      "applyButton": "Ilapat ang Konfigurasyon",
+      "manualLink": "Manu-manong Konfigurasyon",
+      "advancedTitle": "Konfigurasyon ng Kliyente (Advanced)",
+      "serverIpLabel": "Server IP o Domain",
+      "serverIpPlaceholder": "hal., 192.168.1.100",
+      "apiPortLabel": "API Port",
+      "apiPortPlaceholder": "hal., 8000",
+      "sessionPortLabel": "Session Port",
+      "sessionPortPlaceholder": "hal., 8443",
+      "usernameLabel": "Username",
+      "usernamePlaceholder": "Iyong username",
+      "privateKeyLabel": "Iyong Pribadong Key (PEM Format)",
+      "privateKeyPlaceholder": "I-paste ang nilalaman ng iyong pribadong key dito",
+      "serverKeyLabel": "Pampublikong Key ng Server (PEM Format)",
+      "serverKeyPlaceholder": "I-paste ang nilalaman ng server_public.pem dito",
+      "searchEngineLabel": "Default na Search Engine para sa Napiling Teksto",
+      "saveButton": "I-save ang Konfigurasyon",
+      "loginButton": "Mag-login at Subukan",
+      "automaticLink": "Awtomatikong Konfigurasyon",
+      "chooseFile": "Pumili ng File",
+      "keyGeneration": "Pagbuo ng Key",
+      "keyGenDescription": "Kung wala kang key pair, maaari kang bumuo ng isa dito. Ang pribadong key ay pupunan sa itaas. Ibigay ang pampublikong key sa iyong administrator.",
+      "generateKeyButton": "Bumuo ng Bagong Key Pair",
+      "publicKeyForAdminLabel": "Iyong Pampublikong Key (para sa admin)"
+    },
+    "home": {
+      "title": "Iyong mga Home Directory",
+      "description": "Lumikha ng mga persistenteng direktoryo ng imbakan upang gamitin sa iba't ibang sesyon. Ang mga ito ay ikakabit sa iyong mga aplikasyon bilang iyong direktoryo ng konfigurasyon.",
+      "newTitle": "Gumawa ng Bagong Home Directory",
+      "nameLabel": "Pangalan ng Directory:",
+      "namePlaceholder": "hal., aking-mga-file-ng-proyekto",
+      "nameTitle": "Gumamit lamang ng mga letra, numero, underscore, o gitling.",
+      "createButton": "Gumawa ng Directory",
+      "isLaboratory": "Ito ay isang Laboratory app, na binuo mula sa isang base image na may mga custom na setting.",
+      "laboratory": "Laboratoryo",
+      "confirmDelete": "Sigurado ka bang gusto mong burahin ang naka-install na app na '{appName}'?"
+    },
+    "sessions": {
+      "title": "Mga Aktibong Sesyon",
+      "application": "Aplikasyon",
+      "started": "Sinimulan",
+      "noSessionsUser": "Walang nahanap na aktibong sesyon.",
+      "noSessionsAdmin": "Walang nahanap na aktibong sesyon para sa sinumang user.",
+      "sessionsFor": "Mga sesyon para kay {username} ({count})",
+      "confirmStop": "Sigurado ka bang gusto mong itigil ang sesyon na ito? Ang container ay masisira."
+    },
+    "pinned": {
+      "title": "Naka-pin na Gawi ng Extension",
+      "description": "Ipinapakita ng talahanayang ito ang mga opsyon sa paglunsad na iyong na-save para sa mga partikular na uri ng file o para sa lahat ng URL. Maaari mong alisin ang isang naka-pin na gawi upang muling hilingin sa iyo ang mga opsyon sa paglunsad.",
+      "trigger": "Trigger",
+      "savedApp": "Naka-save na Aplikasyon",
+      "triggerSimple": "Simpleng Paglunsad (Toolbar Button)",
+      "triggerUrl": "Lahat ng URL (mula sa context menu)",
+      "triggerFile": "Uri ng File: <strong>{fileType}</strong>",
+      "unknownApp": "Hindi Kilalang App ({appId}...)"
+    },
+    "admins": {
+      "serverKeyTitle": "Pampublikong Key ng Server",
+      "serverKeyDescription": "Ito ang pampublikong key na kakailanganin ng mga configuration file ng user upang kumonekta sa server na ito.",
+      "title": "Pamamahala ng Admin",
+      "searchPlaceholder": "Maghanap ng mga admin...",
+      "newTitle": "Gumawa ng Bagong Admin",
+      "publicKeyOptionalLabel": "Pampublikong Key (Opsyonal):",
+      "publicKeyPlaceholder": "I-paste ang pampublikong key dito, o iwanang blangko upang bumuo ng isa.",
+      "createButton": "Gumawa ng Admin",
+      "confirmDelete": "Sigurado ka bang gusto mong burahin ang admin na si '{username}'? Mabubura rin nito ang lahat ng kanilang persistenteng imbakan at hindi na maibabalik."
+    },
+    "users": {
+      "title": "Pamamahala ng User",
+      "searchPlaceholder": "Maghanap ng mga user ayon sa pangalan o grupo...",
+      "newTitle": "Gumawa ng Bagong User",
+      "publicKeyOptionalLabel": "Pampublikong Key (Opsyonal):",
+      "publicKeyPlaceholder": "I-paste ang pampublikong key ng user dito, o iwanang blangko upang bumuo ng isa.",
+      "settingsTitle": "Mga Setting ng User",
+      "sessionLimitLabel": "Limitasyon ng Sesyon",
+      "sessionLimitTitle": "Bilang ng aktibong sesyon na maaaring magkaroon ang isang user. -1 para sa walang limitasyon.",
+      "permissionsTitle": "Mga Pahintulot at Pagpapatibay",
+      "activeAccount": "Aktibong Account",
+      "allowStorage": "Pahintulutan ang Persistenteng Imbakan",
+      "allowGpu": "Pahintulutan ang Pag-access sa GPU",
+      "hardenContainer": "Patibayin ang Container",
+      "hardenWm": "Patibayin ang Window Manager",
+      "createButton": "Gumawa ng User",
+      "homesDisabledTooltip": "Ang persistenteng imbakan ay hindi pinagana para sa user na ito",
+      "confirmDelete": "Sigurado ka bang gusto mong burahin ang user na si '{username}'? Mabubura rin nito ang lahat ng kanilang persistenteng imbakan at hindi na maibabalik.",
+      "allowPublicSharing": "Pahintulutan ang Pampublikong Pagbabahagi ng File"
+    },
+    "groups": {
+      "title": "Pamamahala ng Grupo",
+      "searchPlaceholder": "Maghanap ng mga grupo...",
+      "newTitle": "Gumawa ng Bagong Grupo",
+      "nameLabel": "Pangalan ng Grupo:",
+      "overrideTitle": "Mga Setting ng Pag-override ng Grupo",
+      "permissionsTitle": "Mga Pag-override sa Pahintulot at Pagpapatibay",
+      "createButton": "Gumawa ng Grupo",
+      "confirmDelete": "Sigurado ka bang gusto mong burahin ang grupong '{groupName}'? Ang mga user sa grupong ito ay babalik sa kanilang indibidwal na mga setting."
+    },
+    "installedApps": {
+      "title": "Mga Naka-install na Aplikasyon",
+      "searchPlaceholder": "Maghanap ng mga naka-install na app...",
+      "noAppsFound": "Walang nahanap na naka-install na app.",
+      "pulling": "Hinihila ang bagong imahe...",
+      "notLocal": "Hindi nahanap ang imahe nang lokal",
+      "confirmDelete": "Sigurado ka bang gusto mong burahin ang naka-install na app na '{appName}'?"
+    },
+    "appStore": {
+      "title": "Mga Tindahan ng App",
+      "refreshTitle": "I-refresh ang napiling tindahan",
+      "selectLabel": "Pumili ng Tindahan ng App",
+      "addLabel": "Magdagdag ng Bagong Tindahan ng App",
+      "namePlaceholder": "Pangalan ng Tindahan",
+      "urlPlaceholder": "URL ng YAML ng Tindahan",
+      "availableTitle": "Mga Magagamit na App",
+      "addManual": "Magdagdag ng Manu-manong App",
+      "searchPlaceholder": "Maghanap ng mga magagamit na app...",
+      "noAppsFound": "Walang nahanap na aplikasyon.",
+      "availableFrom": "Mga Magagamit na App mula sa {storeName}",
+      "couldNotLoad": "Hindi ma-load ang mga app mula sa tindahang ito."
+    },
+    "appTemplates": {
+      "title": "Editor ng Template ng Aplikasyon",
+      "loadLabel": "I-load ang Template",
+      "createOption": "Gumawa ng Bagong Template",
+      "nameLabel": "Pangalan ng Template",
+      "namePlaceholder": "Maglagay ng pangalan para sa bagong template",
+      "saveButton": "I-save ang Profile",
+      "deleteButton": "Burahin",
+      "previewTitle": "Preview ng UI",
+      "contentArea": "Lugar ng Nilalaman ng Aplikasyon",
+      "confirmDelete": "Sigurado ka bang gusto mong burahin ang template na '{templateName}'? Hindi na maibabalik ang aksyon na ito.",
+      "deleteDisabled": "Hindi maaaring burahin ang template na ito.",
+      "enterName": "Mangyaring maglagay ng pangalan para sa bagong template.",
+      "settings": {
+        "TITLE": {
+          "label": "Pamagat ng Pahina",
+          "description": "Ang pamagat ng pahina na ipinapakita sa web browser."
+        },
+        "SELKIES_UI_TITLE": {
+          "label": "Pamagat ng Sidebar",
+          "description": "Pamagat sa itaas na kaliwang sulok ng sidebar."
+        },
+        "SELKIES_UI_SHOW_SIDEBAR": {
+          "label": "Ipakita ang Sidebar",
+          "description": "Ipakita ang pangunahing UI ng sidebar."
+        },
+        "SELKIES_UI_SHOW_LOGO": {
+          "label": "Ipakita ang Logo",
+          "description": "Ipakita ang logo ng Selkies sa sidebar."
+        },
+        "SELKIES_UI_SHOW_CORE_BUTTONS": {
+          "label": "Ipakita ang mga Pangunahing Pindutan",
+          "description": "Ipakita ang mga pindutan ng pangunahing bahagi (display, audio, atbp)."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
+          "label": "Ipakita ang Mga Setting ng Video",
+          "description": "Ipakita ang seksyon ng mga setting ng video sa sidebar."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SCREEN_SETTINGS": {
+          "label": "Ipakita ang Mga Setting ng Screen",
+          "description": "Ipakita ang seksyon ng mga setting ng screen sa sidebar."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_AUDIO_SETTINGS": {
+          "label": "Ipakita ang Mga Setting ng Audio",
+          "description": "Ipakita ang seksyon ng mga setting ng audio sa sidebar."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_STATS": {
+          "label": "Ipakita ang Stats",
+          "description": "Ipakita ang seksyon ng stats sa sidebar."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
+          "label": "Ipakita ang Clipboard",
+          "description": "Ipakita ang seksyon ng clipboard sa sidebar."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FILES": {
+          "label": "Ipakita ang Seksyon ng mga File",
+          "description": "Ipakita ang seksyon ng paglilipat ng file sa sidebar."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_APPS": {
+          "label": "Ipakita ang Seksyon ng mga App",
+          "description": "Ipakita ang seksyon ng mga aplikasyon sa sidebar."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SHARING": {
+          "label": "Ipakita ang Seksyon ng Pagbabahagi",
+          "description": "Ipakita ang seksyon ng pagbabahagi sa sidebar."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
+          "label": "Ipakita ang Seksyon ng mga Gamepad",
+          "description": "Ipakita ang seksyon ng mga gamepad sa sidebar."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
+          "label": "Ipakita ang Pindutan ng Keyboard",
+          "description": "Ipakita ang pindutan ng on-screen na keyboard."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SOFT_BUTTONS": {
+          "label": "Ipakita ang mga Soft Button",
+          "description": "Ipakita ang seksyon ng mga soft button (para sa mobile)."
+        },
+        "WATERMARK_PNG": {
+          "label": "Path ng Watermark PNG",
+          "description": "Buong path sa loob ng container patungo sa isang watermark png."
+        },
+        "WATERMARK_LOCATION": {
+          "label": "Lokasyon ng Watermark",
+          "description": "Saan ipipinta ang imahe sa ibabaw ng stream.",
+          "options": {
+            "disabled": "Hindi Pinagana",
+            "topLeft": "Itaas-Kaliwa",
+            "topRight": "Itaas-Kanan",
+            "bottomLeft": "Ibaba-Kaliwa",
+            "bottomRight": "Ibaba-Kanan",
+            "centered": "Nakagitna",
+            "animated": "Animado"
+          }
+        },
+        "DASHBOARD": {
+          "label": "Estilo ng Dashboard",
+          "description": "Pinapayagan ang user na itakda ang kanilang dashboard.",
+          "options": {
+            "default": "Default",
+            "selkiesDefault": "Selkies (Default)",
+            "zinc": "Zinc",
+            "wish": "Wish"
+          }
+        },
+        "SELKIES_AUDIO_ENABLED": {
+          "label": "Paganahin ang Audio",
+          "description": "Paganahin ang streaming ng audio mula sa server patungo sa kliyente."
+        },
+        "SELKIES_MICROPHONE_ENABLED": {
+          "label": "Paganahin ang Mikropono",
+          "description": "Paganahin ang pagpapasa ng mikropono mula sa kliyente patungo sa server."
+        },
+        "SELKIES_GAMEPAD_ENABLED": {
+          "label": "Paganahin ang Gamepad",
+          "description": "Paganahin ang suporta para sa gamepad."
+        },
+        "SELKIES_CLIPBOARD_ENABLED": {
+          "label": "Paganahin ang Clipboard",
+          "description": "Paganahin ang pag-synchronize ng clipboard."
+        },
+        "SELKIES_CLIPBOARD_IN_ENABLED": {
+          "label": "Paganahin ang Clipboard mula Client papuntang Server",
+          "description": "Payagan ang paglilipat ng data ng clipboard mula sa browser."
+        },
+        "SELKIES_CLIPBOARD_OUT_ENABLED": {
+          "label": "Paganahin ang Clipboard mula Server papuntang Client",
+          "description": "Payagan ang paglilipat ng data ng clipboard mula sa server."
+        },
+        "SELKIES_ENABLE_BINARY_CLIPBOARD": {
+          "label": "Paganahin ang Binary Clipboard",
+          "description": "Payagan ang binary data (mga imahe) sa clipboard."
+        },
+        "SELKIES_COMMAND_ENABLED": {
+          "label": "Paganahin ang Command Websocket",
+          "description": "Paganahin ang pag-parse ng mga mensahe ng command websocket."
+        },
+        "SELKIES_FILE_TRANSFERS": {
+          "label": "Paglilipat ng File",
+          "description": "Pinapayagang mga direksyon ('upload,download', 'upload', 'download', 'none')."
+        },
+        "SELKIES_ENABLE_SHARING": {
+          "label": "Paganahin ang Lahat ng Pagbabahagi",
+          "description": "Pangunahing toggle para sa lahat ng mga tampok ng pagbabahagi."
+        },
+        "SELKIES_SECOND_SCREEN": {
+          "label": "Paganahin ang Ikalawang Screen",
+          "description": "Paganahin ang suporta para sa isang pangalawang monitor/display."
+        },
+        "SELKIES_USE_BROWSER_CURSORS": {
+          "label": "Gamitin ang mga Cursor ng Browser",
+          "description": "Gamitin ang mga CSS cursor ng browser sa halip na i-render sa canvas."
+        },
+        "SELKIES_USE_CSS_SCALING": {
+          "label": "Gamitin ang CSS Scaling (LoDPI)",
+          "description": "Kung totoo, isang mas mababang resolusyon ang ipapadala at ang canvas ay i-uunat."
+        },
+        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+          "label": "Mode ng Manu-manong Resolusyon",
+          "description": "I-lock ang resolusyon sa mga manu-manong halaga ng lapad/taas."
+        },
+        "SELKIES_FORCE_ALIGNED_RESOLUTION": {
+          "label": "Ipilit ang Nakahanay na Resolusyon",
+          "description": "Ipinipilit na ang resolusyon ng display ay maging multiple ng 16 pixels."
+        },
+        "SELKIES_MANUAL_WIDTH": {
+          "label": "Manu-manong Lapad",
+          "description": "I-lock ang lapad sa isang nakapirming halaga. Pinipilit ang manu-manong mode."
+        },
+        "SELKIES_MANUAL_HEIGHT": {
+          "label": "Manu-manong Taas",
+          "description": "I-lock ang taas sa isang nakapirming halaga. Pinipilit ang manu-manong mode."
+        },
+        "SELKIES_SCALING_DPI": {
+          "label": "UI Scaling DPI",
+          "description": "Ang default na DPI para sa pag-scale ng UI."
+        },
+        "SELKIES_AUDIO_BITRATE": {
+          "label": "Bitrate ng Audio",
+          "description": "Ang default na bitrate ng audio."
+        },
+        "SELKIES_ENCODER": {
+          "label": "Mga Encoder",
+          "description": "Listahan ng mga encoder na pinaghihiwalay ng kuwit. Ang una ay default."
+        },
+        "SELKIES_USE_CPU": {
+          "label": "Pilitin ang CPU Encoding",
+          "description": "Pilitin ang encoding na nakabase sa CPU para sa pixelflux."
+        },
+        "SELKIES_FRAMERATE": {
+          "label": "Framerate (Saklaw o Nakapirmi)",
+          "description": "hal., '8-120' para sa isang saklaw o '60' para sa nakapirmi."
+        },
+        "SELKIES_H264_CRF": {
+          "label": "H.264 CRF (Saklaw o Nakapirmi)",
+          "description": "hal., '5-50' para sa isang saklaw o '25' para sa nakapirmi."
+        },
+        "SELKIES_JPEG_QUALITY": {
+          "label": "Kalidad ng JPEG (Saklaw o Nakapirmi)",
+          "description": "hal., '1-100' para sa isang saklaw o '60' para sa nakapirmi."
+        },
+        "SELKIES_H264_FULLCOLOR": {
+          "label": "H.264 Buong Kulay",
+          "description": "Paganahin ang buong saklaw ng kulay ng H.264 para sa mga pixelflux encoder."
+        },
+        "SELKIES_H264_STREAMING_MODE": {
+          "label": "H.264 Streaming (Turbo) Mode",
+          "description": "Paganahin ang H.264 low-latency streaming mode."
+        },
+        "SELKIES_USE_PAINT_OVER_QUALITY": {
+          "label": "Gamitin ang Kalidad ng Paint-Over",
+          "description": "Paganahin ang mataas na kalidad na paint-over para sa mga static na eksena."
+        },
+        "SELKIES_PAINT_OVER_JPEG_QUALITY": {
+          "label": "Kalidad ng JPEG ng Paint-Over",
+          "description": "hal., '1-100' para sa isang saklaw o '90' para sa nakapirmi."
+        },
+        "SELKIES_H264_PAINTOVER_CRF": {
+          "label": "CRF ng H.264 Paint-Over",
+          "description": "hal., '5-50' para sa isang saklaw o '18' para sa nakapirmi."
+        },
+        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
+          "label": "Mga Burst Frame ng Paint-Over",
+          "description": "hal., '1-30' para sa isang saklaw o '5' para sa nakapirmi."
+        },
+        "HARDEN_DESKTOP": {
+          "label": "Patibayin ang Desktop (Preset)",
+          "description": "Pinapagana ang DISABLE_OPEN_TOOLS, DISABLE_SUDO, at DISABLE_TERMINALS."
+        },
+        "HARDEN_OPENBOX": {
+          "label": "Patibayin ang Window Manager (Preset)",
+          "description": "Pinapagana ang DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS, at HARDEN_KEYBINDS. Pinapagana rin ang RESTART_APP."
+        },
+        "DISABLE_OPEN_TOOLS": {
+          "label": "Huwag Paganahin ang mga Open Tool",
+          "description": "Hindi pinapagana ang mga xdg-open at exo-open binary."
+        },
+        "DISABLE_SUDO": {
+          "label": "Huwag Paganahin ang Sudo",
+          "description": "Hindi pinapagana ang sudo command."
+        },
+        "DISABLE_TERMINALS": {
+          "label": "Huwag Paganahin ang mga Terminal",
+          "description": "Hindi pinapagana ang mga karaniwang terminal emulator."
+        },
+        "DISABLE_CLOSE_BUTTON": {
+          "label": "Huwag Paganahin ang Pindutan ng Pagsara ng Window",
+          "description": "Inaalis ang pindutan ng pagsara mula sa mga title bar ng window."
+        },
+        "DISABLE_MOUSE_BUTTONS": {
+          "label": "Huwag Paganahin ang Right/Middle Click",
+          "description": "Hindi pinapagana ang mga context menu ng right-click at middle-click."
+        },
+        "HARDEN_KEYBINDS": {
+          "label": "Patibayin ang mga Keybind",
+          "description": "Hindi pinapagana ang mga default na keybind ng Openbox tulad ng Alt+F4."
+        },
+        "RESTART_APP": {
+          "label": "I-restart ang App sa Pagsara",
+          "description": "Awtomatikong i-restart ang pangunahing aplikasyon kung ito ay isinara."
+        },
+        "MAX_RES": {
+          "label": "Pinakamataas na Resolusyon",
+          "description": "Pinakamataas na resolusyon para sa container, default ay 16k."
+        },
+        "START_DOCKER": {
+          "label": "Simulan ang Docker-in-Docker",
+          "description": "Kung false, hindi magsisimula ng DinD ang isang privileged container."
+        },
+        "DISABLE_IPV6": {
+          "label": "Huwag Paganahin ang IPv6",
+          "description": "Kung true, hindi nito papaganahin ang IPv6."
+        },
+        "DISABLE_ZINK": {
+          "label": "Huwag Paganahin ang Zink",
+          "description": "Huwag itakda ang mga Zink env var kung may natukoy na video card."
+        },
+        "DISABLE_DRI3": {
+          "label": "Huwag Paganahin ang DRI3",
+          "description": "Huwag gamitin ang DRI3 acceleration kung may natukoy na video card."
+        },
+        "NO_DECOR": {
+          "label": "Walang mga Dekorasyon ng Window",
+          "description": "Patakbuhin ang aplikasyon nang walang mga border ng window para sa paggamit ng PWA."
+        },
+        "NO_FULL": {
+          "label": "Walang Fullscreen",
+          "description": "Huwag awtomatikong i-fullscreen ang mga aplikasyon."
+        },
+        "NO_GAMEPAD": {
+          "label": "Huwag Paganahin ang Gamepad Injection",
+          "description": "Huwag paganahin ang userspace gamepad interposer injection."
+        },
+        "SELKIES_DEBUG": {
+          "label": "Paganahin ang Selkies Debugging",
+          "description": "Paganahin ang debug logging para sa mga streaming component."
+        },
+        "DOCKER_PRIVILEGED": {
+          "label": "Privileged Mode",
+          "description": "Ibigay ang lahat ng caps sa container, alisin ang mga paghihigpit sa cgroup, i-mount ang lahat ng host device. Masisira nito ang mga bagay!"
+        },
+        "DOCKER_BIND_MOUNTS": {
+          "label": "Karagdagang Bind Mounts",
+          "description": "Karagdagang host binds (pinaghihiwalay ng kuwit, hal., /host/path:/container/path:ro)."
+        },
+        "DOCKER_ENV": {
+          "label": "Mga Variable ng Kapaligiran",
+          "description": "Karagdagang environment variables (pinaghihiwalay ng kuwit, hal., KEY=VALUE,KEY2=VALUE2)."
+        },
+        "DOCKER_CAP_ADD": {
+          "label": "Magdagdag ng Cap",
+          "description": "Magdagdag ng kernel capabilities (pinaghihiwalay ng kuwit, hal., SYS_ADMIN,MKNOD)."
+        },
+        "DOCKER_CAP_DROP": {
+          "label": "Mag-drop ng Cap",
+          "description": "Mag-drop ng kernel capabilities (pinaghihiwalay ng kuwit)."
+        },
+        "DOCKER_SECURITY_OPT": {
+          "label": "Mga Opsyon sa Seguridad",
+          "description": "Mga opsyon sa seguridad (pinaghihiwalay ng kuwit, hal., seccomp=unconfined,apparmor=unconfined)."
+        },
+        "DOCKER_DEVICES": {
+          "label": "Mga Device",
+          "description": "I-expose ang mga host device (pinaghihiwalay ng kuwit, hal., /dev/sda:/dev/xvda:rwm)."
+        },
+        "DOCKER_SHM_SIZE": {
+          "label": "Laki ng SHM",
+          "description": "Laki ng /dev/shm (hal. 1G, 2G)."
+        },
+        "DOCKER_MEM_LIMIT": {
+          "label": "Limitasyon ng Memorya",
+          "description": "Limitasyon ng memorya (hal. 1g, 512m)."
+        },
+        "DOCKER_CPU_SHARES": {
+          "label": "Mga Bahagi ng CPU",
+          "description": "Mga bahagi ng CPU (relative weight integer)."
+        },
+        "DOCKER_NANO_CPUS": {
+          "label": "Nano CPUs",
+          "description": "CPU quota sa mga unit ng 1e-9 CPUs."
+        },
+        "DOCKER_NETWORK_MODE": {
+          "label": "Mode ng Network",
+          "description": "Networking mode para sa container.",
+          "options": {
+            "default": "Default (Bridge)",
+            "host": "Host",
+            "none": "Wala",
+            "bridge": "Bridge"
+          }
+        },
+        "DOCKER_IPC_MODE": {
+          "label": "Mode ng IPC",
+          "description": "Itakda ang IPC mode para sa container.",
+          "options": {
+            "default": "Default",
+            "host": "Host",
+            "private": "Pribado",
+            "shareable": "Maibabahagi"
+          }
+        },
+        "DOCKER_PID_MODE": {
+          "label": "Mode ng PID",
+          "description": "Itakda ang PID mode para sa container.",
+          "options": {
+            "default": "Default",
+            "host": "Host"
+          }
+        },
+        "DOCKER_DNS": {
+          "label": "Mga DNS Server",
+          "description": "Mga pasadyang DNS server (pinaghihiwalay ng kuwit)."
+        },
+        "DOCKER_EXTRA_HOSTS": {
+          "label": "Mga Karagdagang Host",
+          "description": "Host to IP mappings (pinaghihiwalay ng kuwit, hal., hostname:1.2.3.4)."
+        },
+        "DOCKER_SYSCTLS": {
+          "label": "Sysctls",
+          "description": "Kernel parameters (pinaghihiwalay ng kuwit, hal., net.ipv4.ip_forward=1)."
+        },
+        "DOCKER_ULIMITS": {
+          "label": "Ulimits",
+          "description": "Ulimits (pinaghihiwalay ng kuwit, hal., nofile=1024:1024)."
+        },
+        "DOCKER_TMPFS": {
+          "label": "Tmpfs Mounts",
+          "description": "Pansamantalang filesystems (pinaghihiwalay ng kuwit, hal., /run:rw,noexec,nosuid,size=65536k)."
+        },
+        "DOCKER_GROUP_ADD": {
+          "label": "Magdagdag ng Grupo",
+          "description": "Listahan ng karagdagang mga pangalan at/o ID ng grupo (pinaghihiwalay ng kuwit)."
+        }
+      }
+    },
+    "appLaboratory": {
+      "title": "Laboratoryo ng App",
+      "description": "Lumikha at subukan ang mga pasadyang configuration ng application sa pamamagitan ng pagpapatong ng mga pagbabago sa ibabaw ng isang base app.",
+      "selectApp": "Pumili ng App",
+      "createNew": "Gumawa ng Bagong App",
+      "baseApp": "Base na Aplikasyon",
+      "baseAppDescription": "Ang naka-install na aplikasyon kung saan ibabatay ang iyong bagong pasadyang app.",
+      "selectBase": "Pumili ng Base App",
+      "customizationTitle": "Pagpapasadya",
+      "appName": "Pangalan ng App",
+      "appIcon": "Icon ng App",
+      "uploadIcon": "Mag-upload ng Icon",
+      "autostartScriptLabel": "Pasadyang Autostart Script",
+      "permissionsTitle": "Mga Pahintulot",
+      "usersLabel": "Mga Pinapayagang User",
+      "groupsLabel": "Mga Pinapayagang Grupo",
+      "launchButton": "I-save at Ilunsad ang Sesyon ng Pagpapasadya",
+      "closeButton": "Isara ang Sesyon at I-finalize",
+      "savingAndLaunching": "Nagse-save at Naglulunsad...",
+      "placeholder": "Pinapayagan ka ng App Laboratory na i-configure ang base home directory at launch script para sa isang aplikasyon batay sa isang umiiral na naka-install na aplikasyon. Ang home directory na ito ay kokopyahin sa unang pag-init para sa user kasama ang lahat ng mga file at setting na iyong inayos sa sesyon na ito. Maaari mong muling ilunsad ang isang umiiral na Laboratory App upang higit pang baguhin ang mga nilalaman nito.",
+      "formInvalid": "Mangyaring pumili ng isang base app at magbigay ng pangalan para sa bagong app."
+    },
+    "modals": {
+      "editUserTitle": "I-edit ang User: {username}",
+      "saveChanges": "I-save ang mga Pagbabago",
+      "effectiveSettings": "Epektibong mga Setting (na may mga pag-override ng grupo)",
+      "editGroupTitle": "I-edit ang Grupo: {groupName}",
+      "userConfigTitle": "Konfigurasyon ng User",
+      "warning": "Ito lamang ang pagkakataon na ipapakita ang konfigurasyong ito. Ibigay ito sa user nang ligtas.",
+      "info": "Maaari mong i-download ang configuration file na ito upang madaling i-set up ang SealSkin sa ibang device. Itago ang file na ito nang ligtas dahil naglalaman ito ng iyong pribadong key.",
+      "configDataLabel": "Data ng Konfigurasyon (JSON)",
+      "copyButton": "Kopyahin ang Teksto",
+      "downloadButton": "I-download ang File",
+      "manageHomeDirs": "Pamahalaan ang mga Home Directory",
+      "dirsForUser": "Mga direktoryo para sa user: {username}",
+      "dirsForAdmin": "Mga direktoryo para sa admin: {username}",
+      "newDirForUser": "Gumawa ng Bagong Directory para sa User",
+      "createDirButton": "Gumawa ng Directory",
+      "confirmDeleteDir": "Sigurado ka bang gusto mong burahin ang '{homeName}' para sa user na si '{username}'? Ito ay permanente.",
+      "installAppTitle": "I-install ang {appName}",
+      "editAppTitle": "I-edit ang {appName}",
+      "customNameLabel": "Pasadyang Pangalan",
+      "imageLabel": "Imahe ng Container",
+      "permissions": "Mga Pahintulot",
+      "allowedUsersLabel": "Mga Pinapayagang User (pinaghihiwalay ng kuwit, 'all' para sa lahat)",
+      "allowedGroupsLabel": "Mga Pinapayagang Grupo (pinaghihiwalay ng kuwit, 'all' para sa lahat)",
+      "features": "Mga Tampok",
+      "gpuSupport": "Suporta sa GPU",
+      "homeMounting": "Pag-mount ng Home Directory",
+      "urlSupport": "Suporta sa Pagbubukas ng URL",
+      "fileSupport": "Suporta sa Pagbubukas ng File",
+      "autoUpdate": "Awtomatikong I-update ang Imahe",
+      "advancedSettings": "Mga Advanced na Setting",
+      "appTemplateLabel": "Template ng Aplikasyon",
+      "appTemplateDescription": "Pumili ng isang pre-configured na template para sa mga advanced na setting ng paglunsad ng container.",
+      "customAutostartScriptLabel": "Pasadyang Autostart Script",
+      "customAutostartScriptDescription": "I-customize ang lohika ng autostart, iwanang blangko upang gamitin ang default mula sa provider ng application.",
+      "saveInstallation": "I-save ang Pag-install",
+      "updateStatusTitle": "Katayuan ng Update para sa {appName}",
+      "checkingUpdates": "Sinusuri ang mga update...",
+      "updateAvailable": "May bagong bersyon ng imahe na magagamit!",
+      "yourVersion": "Iyong bersyon: {sha}",
+      "latestAvailable": "Ang pinakabagong bersyon ay magagamit upang hilahin mula sa registry.",
+      "pullLatest": "Hilahin ang Pinakabagong Imahe",
+      "upToDate": "Ang iyong imahe ay napapanahon.",
+      "currentVersion": "Kasalukuyang bersyon: {sha}",
+      "errorChecking": "Error sa pagsusuri ng mga update.",
+      "pullingLatest": "Hinihila ang pinakabagong imahe... Maaaring tumagal ito sandali.",
+      "pullComplete": "Kumpleto na ang paghila!",
+      "newVersion": "Bagong bersyon: {sha}",
+      "errorPulling": "Error sa paghila ng imahe.",
+      "manualInstallNote": "Tandaan: Ang mga imaheng idinagdag nang manu-mano ay dapat batay sa isang imaheng tugma sa selkies-baseimage.",
+      "generalTitle": "Pangkalahatan at Pagganap na mga Setting",
+      "dockerTitle": "Mga Advanced na Pag-override ng Docker",
+      "dockerDescription": "Ang mga setting na ito ay nag-o-override sa default na configuration ng container. Gamitin nang may pag-iingat at kung alam mo lang ang iyong ginagawa."
+    },
+    "status": {
+      "loggingIn": "Nagla-log in...",
+      "configSaved": "Matagumpay na na-save ang konfigurasyon!",
+      "configApplied": "Nailapat ang konfigurasyon! Mangyaring Mag-login at Subukan.",
+      "configApplyFailed": "Nabigong ilapat ang konfigurasyon: {error}",
+      "fileReadError": "Error sa pagbasa ng file.",
+      "noConfig": "Mangyaring magbigay ng isang config file o teksto.",
+      "loggedInAdmin": "Naka-log in bilang admin: {username}",
+      "loggedInUser": "Naka-log in bilang standard na user: {username}.",
+      "loginFailed": "Nabigo ang pag-login: {error}",
+      "adminDataRefreshFailed": "Nabigong i-refresh ang data ng admin: {error}",
+      "logoutSuccess": "Nag-logout at nalinis ang konfigurasyon.",
+      "generateConfigFailed": "Hindi makabuo ng config, nawawala ang mga detalye ng user.",
+      "copySuccess": "Nakopya ang konfigurasyon sa clipboard!",
+      "copyFailed": "Nabigong kopyahin ang teksto.",
+      "publicKeyCopied": "Nakopya ang pampublikong key!",
+      "keyCopyFailed": "Nabigong kopyahin ang key.",
+      "creatingAdmin": "Gumagawa ng admin...",
+      "adminCreated": "Nilikha ang admin na si '{username}'.",
+      "adminCreateFailed": "Error sa paggawa ng admin: {error}",
+      "adminDeleted": "Matagumpay na nabura ang admin na si '{username}'.",
+      "adminDeleteFailed": "Error sa pagbura ng admin: {error}",
+      "creatingUser": "Gumagawa ng user...",
+      "userCreated": "Nilikha ang user na si '{username}'.",
+      "userCreateFailed": "Error sa paggawa ng user: {error}",
+      "userDeleted": "Matagumpay na nabura ang user na si '{username}'.",
+      "userDeleteFailed": "Error sa pagbura ng user: {error}",
+      "userUpdated": "Matagumpay na na-update ang user na si '{username}'.",
+      "userUpdateFailed": "Error sa pag-update ng user: {error}",
+      "creatingGroup": "Gumagawa ng grupo...",
+      "groupCreated": "Nilikha ang grupong '{groupName}'.",
+      "groupCreateFailed": "Error sa paggawa ng grupo: {error}",
+      "groupDeleted": "Matagumpay na nabura ang grupong '{groupName}'.",
+      "groupDeleteFailed": "Error sa pagbura ng grupo: {error}",
+      "groupUpdated": "Matagumpay na na-update ang grupong '{groupName}'.",
+      "groupUpdateFailed": "Error sa pag-update ng grupo: {error}",
+      "homedirLoadFailed": "Nabigong i-load ang mga home directory: {error}",
+      "homedirCreateFailed": "Error sa paggawa ng directory: {error}",
+      "homedirCreated": "Nilikha ang home directory na '{homeName}'.",
+      "homedirDeleted": "Nabura ang directory na '{homeName}'.",
+      "homedirDeleteFailed": "Error sa pagbura ng directory: {error}",
+      "homedirCreatedFor": "Nilikha ang directory na '{homeName}' para kay {username}.",
+      "homedirDeletedFor": "Nabura ang directory na '{homeName}' para kay {username}.",
+      "sessionsLoadFailed": "Nabigong i-load ang mga sesyon: {error}",
+      "sessionStopError": "Error sa pagtigil ng sesyon: {error}",
+      "sessionStopped": "Matagumpay na natigil ang sesyon.",
+      "appDataRefreshFailed": "Nabigong i-refresh ang data ng app: {error}",
+      "closingSession": "Ikinokomit ang sesyon ng pagpapasadya...",
+      "sessionClosed": "Naisara ang sesyon ng pagpapasadya.",
+      "sessionCloseFailed": "Nabigong isara ang sesyon ng pagpapasadya: {error}",
+      "fetchingApps": "Kinukuha ang mga app mula sa tindahan...",
+      "fetchAppsFailed": "Nabigong kunin ang mga app mula sa tindahan: {error}",
+      "appStoreAddFailed": "Error sa pagdagdag ng tindahan: {error}",
+      "appStoreAdded": "Naidagdag ang tindahan ng app na '{name}'.",
+      "appSaved": "Matagumpay na {action} ang app na '{name}'.",
+      "appSaveActions": {
+        "updated": "na-update",
+        "installed": "na-install"
+      },
+      "appSaveFailed": "Error sa pag-save ng app: {error}",
+      "appDeleted": "Nabura ang app na '{name}'.",
+      "appDeleteFailed": "Error sa pagbura ng app: {error}",
+      "templateSaved": "Matagumpay na na-save ang template na '{name}'.",
+      "templateSaveFailed": "Error sa pag-save ng template: {error}",
+      "templateDeleted": "Matagumpay na nabura ang template na '{name}'.",
+      "templateDeleteFailed": "Error sa pagbura ng template: {error}",
+      "pinRemoved": "Inalis ang naka-pin na gawi.",
+      "keyGenerated": "Bagong key pair na binuo.",
+      "keyGenFailed": "Nabigo ang pagbuo ng key: {error}",
+      "pendingConfigSaved": "Nai-save ang nakabinbing konfigurasyon. Maaari mo nang ibigay ang iyong pampublikong key sa administrator.",
+      "settingsSaved": "Nai-save ang mga setting.",
+      "appCreated": "Matagumpay na nagawa ang app na '{name}'.",
+      "launchFailed": "Nabigo ang paglunsad: {error}"
+    },
+    "placeholders": {
+      "noAdmins": "Walang nahanap na admin.",
+      "noUsers": "Walang nahanap na user.",
+      "noGroups": "Walang nahanap na grupo.",
+      "noHomeDirs": "Walang nahanap na home directory.",
+      "noSessions": "Walang nahanap na aktibong sesyon.",
+      "noPinned": "Walang nahanap na naka-pin na gawi.",
+      "errorLoading": "Error sa pag-load ng mga directory.",
+      "noInstalledApps": "Wala pang naka-install na mga application."
+    }
+  },
+  "popup": {
+    "tabs": {
+      "launch": "Ilunsad ang Bago",
+      "sessions": "Mga Aktibong Sesyon",
+      "manageFiles": "Pamahalaan ang mga File",
+      "uploadStorage": "I-upload sa Imbakan",
+      "uploadFiles": "Mag-upload ng mga File",
+      "uploadFilesTitle": "Buksan ang dedikadong pahina para sa pag-upload ng file"
+    },
+    "launchView": {
+      "searchPlaceholder": "Maghanap ng mga aplikasyon...",
+      "uploadingFile": "Nag-a-upload ng file...",
+      "gpuLabel": "GPU",
+      "storageLabel": "Imbakan",
+      "languageLabel": "Wika",
+      "cleanroom": "Cleanroom (Ephemeral)",
+      "noGpu": "Wala",
+      "saveOptions": "I-save ang mga opsyon sa paglunsad na ito",
+      "saveOptionsForUrl": "I-save ang mga opsyon para sa lahat ng URL",
+      "saveOptionsForFile": "I-save ang mga opsyon para sa mga .{extension} file",
+      "openFile": "Buksan ang file sa paglunsad",
+      "launchButton": "Ilunsad",
+      "launchingButton": "Inilulunsad...",
+      "uploadingButton": "Nag-a-upload...",
+      "autoHome": "Awtomatiko (pananatili bawat app)",
+      "collaborationMode": "Sesyon ng Pakikipagtulungan",
+      "waylandMode": "Wayland Mode"
+    },
+    "sessionsView": {
+      "noSessions": "Walang nahanap na aktibong sesyon."
+    },
+    "uploadStorageView": {
+      "selectHome": "Pumili ng Home Directory",
+      "description": "Ia-upload nito ang file na <strong>{filename}</strong> direkta sa iyong imbakan ng mga File para sa paggamit sa hinaharap.",
+      "descriptionFallback": "Ia-upload nito ang file na <strong>{filename}</strong> direkta sa iyong imbakan ng mga File para sa paggamit sa hinaharap.",
+      "uploadButton": "I-upload ang File",
+      "uploadingButton": "Nag-a-upload...",
+      "preparing": "Inihahanda ang file...",
+      "uploadingChunk": "Nag-a-upload ng bahagi {current} ng {total}...",
+      "finalizing": "Tinutuloy...",
+      "uploadComplete": "Kumpleto na ang Pag-upload!"
+    },
+    "status": {
+      "unconfigured": "Mangyaring i-configure ang extension sa pamamagitan ng pahina ng mga opsyon.",
+      "openingServerFile": "Binubuksan ang file sa panig ng server: {filename}",
+      "openingFile": "Binubuksan ang file: {filename}",
+      "openingUrl": "Binubuksan ang URL: {targetUrl}",
+      "error": "Error: {message}",
+      "preparingFile": "Inihahanda ang file...",
+      "sendingFile": "Ipinapadala ang file sa sesyon...",
+      "errorSendingFile": "Error sa pagpapadala ng file: {message}",
+      "errorClosingSession": "Error sa pagsasara ng sesyon: {message}",
+      "preparingSession": "Inihahanda ang isolated na sesyon...",
+      "fetchingData": "Kinukuha ang data ng file...",
+      "fetchDataFailed": "Nabigong kunin ang data ng file: {statusText}",
+      "unknownAction": "Hindi kilalang aksyon sa paglunsad.",
+      "noAppSelected": "Mangyaring pumili ng isang aplikasyon.",
+      "noAppsAvailable": "Walang magagamit na aplikasyon para sa iyong account.",
+      "uploadSuccess": "Matagumpay na na-upload ang file!",
+      "creatingAutoHome": "Gumagawa ng awtomatikong home directory..."
+    },
+    "languages": {
+      "default": "Default ({locale})"
+    }
+  },
+  "upload": {
+    "title": "Pag-upload ng File",
+    "description": "Pumili ng isang file mula sa iyong computer upang buksan ito sa isang ligtas at isolated na sesyon.",
+    "dropzone": {
+      "title": "I-drag at i-drop ang isang file dito",
+      "or": "o",
+      "button": "Pumili ng File"
+    },
+    "confirm": {
+      "ready": "Handa nang buksan nang ligtas ang file.",
+      "button": "Magpatuloy sa Paglunsad"
+    }
+  },
+  "files": {
+    "title": "Mga File ng SealSkin",
+    "header": {
+      "title": "Mga File",
+      "newFolder": "Bagong Folder",
+      "uploadFiles": "Mag-upload ng mga File",
+      "uploadFolder": "Mag-upload ng Folder"
+    },
+    "sidebar": {
+      "sharedFiles": "Mga File ng SealSkin",
+      "publicShares": "Mga Pampublikong Pagbabahagi"
+    },
+    "shares": {
+      "title": "Mga File na Pampublikong Ibinahagi",
+      "searchPlaceholder": "Maghanap ayon sa pangalan ng file o ID..."
+    },
+    "table": {
+      "name": "Pangalan",
+      "size": "Sukat",
+      "lastModified": "Huling Binago",
+      "created": "Nilikha",
+      "expires": "Mag-e-expire",
+      "url": "Pampublikong URL",
+      "passwordProtected": "Password"
+    },
+    "dropzone": {
+      "title": "I-drop ang mga file para i-upload"
+    },
+    "pagination": {
+      "previous": "« Nakaraan",
+      "next": "Susunod »",
+      "pageOf": "Pahina {page} ng {totalPages}"
+    },
+    "modals": {
+      "newFolder": {
+        "title": "Gumawa ng Bagong Folder",
+        "folderNameLabel": "Pangalan ng Folder",
+        "nameTitle": "Gumamit lamang ng mga letra, numero, underscore, hyphen, o tuldok.",
+        "createButton": "Gawin"
+      },
+      "confirmDelete": {
+        "title": "Kumpirmahin ang Pagbura",
+        "message": "Sigurado ka bang gusto mong burahin ang {count, plural, one {1 napiling item} other {{count} napiling item}}? Hindi na maibabalik ang aksyon na ito.",
+        "messageDefault": "Sigurado ka bang gusto mong burahin ang mga napiling item? Hindi na maibabalik ang aksyon na ito."
+      },
+      "uploadProgress": {
+        "title": "Progreso ng Pag-upload",
+        "doneButton": "Tapos na"
+      },
+      "share": {
+        "title": "Ibahagi ang File",
+        "sharingFile": "Ibinabahagi ang file: <strong>{filename}</strong>",
+        "passwordLabel": "Password (opsyonal)",
+        "passwordPlaceholder": "Iwanang blangko para walang password",
+        "expiryLabel": "Mag-e-expire sa (oras, opsyonal)",
+        "expiryPlaceholder": "hal., 24 para sa isang araw",
+        "shareButton": "Gumawa ng Link ng Pagbabahagi"
+      }
+    },
+    "status": {
+      "homeDirLoadFailed": "Nabigo ang pag-load ng mga home directory: {error}",
+      "filesLoadFailed": "Error sa pag-load ng mga file: {error}",
+      "deleteProtectedError": "Hindi maaaring burahin ang mga protektadong system folder.",
+      "deletingItems": "Binubura ang {count, plural, one {1 item} other {{count} item}}...",
+      "deleteSuccess": "Matagumpay ang pagbura.",
+      "deleteFailed": "Nabigo ang pagbura: {error}",
+      "preparingUpload": "Naghahanda para i-upload ang {count, plural, one {1 file} other {{count} file}}...",
+      "uploadPrepFailed": "Error sa paghahanda ng pag-upload ng folder: {error}",
+      "notConfigured": "Error: Hindi naka-configure ang SealSkin. Paki-set up sa mga opsyon.",
+      "folderCreated": "Nagawa ang folder na '{folderName}'.",
+      "folderCreateFailed": "Error sa paggawa ng folder: {error}",
+      "shareCreated": "Matagumpay na nagawa ang pagbabahagi! Ang link ay nakopya sa iyong clipboard.",
+      "shareCreateFailed": "Nabigong gumawa ng pagbabahagi: {error}",
+      "sharesLoadFailed": "Nabigong i-load ang mga ibinahaging file: {error}",
+      "shareDeleteFailed": "Nabigong burahin ang pagbabahagi: {error}",
+      "shareDeleted": "Matagumpay na nabura ang pagbabahagi.",
+      "urlCopied": "Nakopya ang pampublikong URL sa clipboard."
+    },
+    "placeholders": {
+      "errorLoading": "Error sa pag-load ng mga file.",
+      "folderEmpty": "Walang laman ang folder na ito.",
+      "noHomeDirs": "Walang available na home directory.",
+      "noShares": "Wala ka pang ibinabahaging anumang file."
+    },
+    "uploadStatus": {
+      "pending": "nakabinbin",
+      "initiating": "Sinisimulan...",
+      "uploading": "Nag-a-upload...",
+      "finalizing": "Tinatapos...",
+      "completed": "Kumpleto",
+      "error": "Error"
+    }
+  }
+}

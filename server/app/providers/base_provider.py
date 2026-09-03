@@ -1,60 +1,59 @@
+"""Abstract provider interface."""
+
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Dict, Optional
+from typing import Any
 
 
 class BaseProvider(ABC):
     """Abstract base class for all application providers."""
 
-    def __init__(self, app_config: Dict):
-        """
-        Initialize the provider with its specific configuration.
+    def __init__(self, app_config: dict[str, Any]) -> None:
+        """Initialise the provider with an application configuration.
 
-        :param app_config: A dictionary containing the app's configuration
-                           from the main application definition file (e.g., apps.yml).
+        Args:
+            app_config: Resolved application dictionary (``InstalledApp`` shape)
+                including ``provider_config``.
         """
         self.app_config = app_config
 
     @abstractmethod
-    async def initialize(self):
-        """
-        Perform any one-time initialization for the provider, such as
-        pulling images or checking connectivity. This is called once at startup.
-        """
-        pass
+    async def initialize(self) -> None:
+        """Perform one-time initialisation such as pulling the image."""
 
     @abstractmethod
     async def launch(
         self,
         session_id: str,
-        env_vars: Dict,
-        volumes: Optional[Dict] = None,
-        gpu_config: Optional[Dict] = None,
-        network: Optional[str] = None,
+        env_vars: dict[str, str],
+        volumes: dict[str, Any] | None = None,
+        gpu_config: dict[str, Any] | None = None,
+        network: str | None = None,
         is_collaboration: bool = False,
-        master_token: Optional[str] = None,
-        initial_tokens: Optional[Dict] = None,
-    ) -> Dict:
-        """
-        Launch an instance of the application.
+        master_token: str | None = None,
+        initial_tokens: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Launch an instance of the application.
 
-        :param session_id: The unique ID for this session.
-        :param env_vars: Environment variables to pass to the instance.
-        :param volumes: A dictionary defining volume mounts.
-        :param gpu_config: A dictionary with GPU details if requested.
-        :param network: The docker network to attach the container to.
-        :param is_collaboration: Flag indicating if this is a collaboration session.
-        :param master_token: The master token for the downstream app's control plane.
-        :param initial_tokens: The initial set of tokens to post to the downstream app.
-        :return: A dictionary containing instance details, e.g.,
-                 {'instance_id': '...', 'ip': '...', 'port': ...}.
+        Args:
+            session_id: Unique id of the session.
+            env_vars: Environment variables for the instance.
+            volumes: Volume mounts in Docker SDK format.
+            gpu_config: GPU details when a GPU was requested.
+            network: Network to attach the instance to.
+            is_collaboration: Whether this is a collaboration session.
+            master_token: Master token of the downstream control plane.
+            initial_tokens: Initial token set for the downstream control plane.
+
+        Returns:
+            ``{"instance_id": str, "ip": str, "port": int}``.
         """
-        pass
 
     @abstractmethod
-    async def stop(self, instance_id: str):
-        """
-        Stop a running instance of the application.
+    async def stop(self, instance_id: str) -> None:
+        """Stop a running instance.
 
-        :param instance_id: The unique identifier of the instance to stop.
+        Args:
+            instance_id: Identifier returned by :meth:`launch`.
         """
-        pass

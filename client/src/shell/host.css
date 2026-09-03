@@ -1,0 +1,141 @@
+/* Shell host styling. Dark only, self-contained (no icon font in the shells). */
+:root {
+  --font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --bg-0: #0d1117;
+  --bg-1: #131822;
+  --bg-3: #222b3c;
+  --glass-strong: rgba(255, 255, 255, 0.06);
+  --text-primary: #eaf0f8;
+  --text-muted: #7d8a9f;
+  --border-color: rgba(148, 163, 184, 0.14);
+  --border-strong: rgba(148, 163, 184, 0.32);
+  --accent-primary: #8b7cf6;
+  --accent-soft: rgba(139, 124, 246, 0.14);
+  --accent-glow: rgba(139, 124, 246, 0.35);
+  --accent-gradient: linear-gradient(135deg, #8b7cf6 0%, #6d5cf5 100%);
+  --color-danger-text: #fca5a5;
+  --radius-sm: 8px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur: 220ms;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: var(--bg-0);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+}
+
+body[data-page="popup"] { width: 450px; height: 580px; overflow: hidden; }
+
+#app-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background-color: var(--bg-0);
+}
+#app-frame[hidden] { display: none; }
+
+#host-panel {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  background:
+    radial-gradient(600px 360px at 50% -10%, rgba(139, 124, 246, 0.16), transparent 65%),
+    var(--bg-0);
+}
+#host-panel[hidden] { display: none; }
+
+@keyframes host-rise {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.host-box {
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  animation: host-rise 420ms var(--ease-out);
+}
+
+.host-logo {
+  width: 64px;
+  height: 64px;
+  filter: drop-shadow(0 8px 20px rgba(224, 79, 176, 0.3));
+}
+
+.host-box h2 { margin: 0; font-size: 1.2rem; letter-spacing: -0.01em; }
+.host-box p { margin: 0; line-height: 1.5; font-size: 0.95rem; }
+.host-muted { color: var(--text-muted); }
+.host-small { font-size: 0.82rem; }
+.host-error { color: var(--color-danger-text); font-size: 0.82rem; word-break: break-word; }
+
+.host-server {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  background-color: var(--bg-1);
+  border: 1px solid var(--border-color);
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+}
+
+.host-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.host-actions button {
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--text-primary);
+  transition: background-color var(--dur), border-color var(--dur), transform 140ms var(--ease-out), filter var(--dur);
+}
+.host-actions button:hover { transform: translateY(-1px); }
+.host-actions button:active { transform: translateY(0) scale(0.98); }
+.host-actions button:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-soft), 0 0 0 1px var(--accent-primary); }
+
+.host-actions button.primary {
+  background: var(--accent-gradient);
+  color: #fff;
+  box-shadow: 0 6px 20px -4px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+.host-actions button.primary:hover { filter: brightness(1.08); }
+
+.host-actions button.secondary {
+  background-color: var(--glass-strong);
+  border-color: var(--border-color);
+}
+.host-actions button.secondary:hover { background-color: var(--bg-3); border-color: var(--border-strong); }
+
+.host-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: host-spin 0.8s linear infinite;
+}
+@keyframes host-spin { to { transform: rotate(360deg); } }
+
+html.shell-mobile #host-panel { padding-top: max(40px, env(safe-area-inset-top)); }

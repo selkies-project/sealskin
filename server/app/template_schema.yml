@@ -1,0 +1,531 @@
+# SealSkin application template schema.
+#
+# Each entry describes one environment variable that the template editor in the
+# admin UI exposes. The server serves this file at GET /api/ui/template_schema so
+# a new variable ships with the server image instead of a client release.
+#
+# Fields:
+#   name      Environment variable name passed to the session container.
+#   category  Editor grouping: ui, app, hardening, general, docker.
+#   type      text | boolean | select.
+#   default   Default value shown in the editor (always a string).
+#   docker    true when the variable is translated into a Docker run option
+#             instead of being passed to the container environment.
+#   options   For select types: list of {value, label_key} or {value, label}.
+#             label_key resolves to the translation key
+#             options.appTemplates.settings.<NAME>.options.<label_key>.
+#
+# Labels and descriptions are looked up by the client from its translations at
+# options.appTemplates.settings.<NAME>.label / .description and fall back to the
+# variable name when missing, so hand-added entries work without translations.
+settings:
+  - name: TITLE
+    category: ui
+    type: text
+    default: "Selkies"
+    docker: false
+  - name: SELKIES_UI_TITLE
+    category: ui
+    type: text
+    default: "Selkies"
+    docker: false
+  - name: SELKIES_UI_SHOW_SIDEBAR
+    category: ui
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_UI_SHOW_LOGO
+    category: ui
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_UI_SHOW_CORE_BUTTONS
+    category: ui
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS
+    category: ui
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_UI_SIDEBAR_SHOW_SCREEN_SETTINGS
+    category: ui
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_UI_SIDEBAR_SHOW_AUDIO_SETTINGS
+    category: ui
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_UI_SIDEBAR_SHOW_STATS
+    category: ui
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD
+    category: ui
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_UI_SIDEBAR_SHOW_FILES
+    category: ui
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_UI_SIDEBAR_SHOW_APPS
+    category: ui
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_UI_SIDEBAR_SHOW_SHARING
+    category: ui
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_UI_SIDEBAR_SHOW_GAMEPADS
+    category: ui
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON
+    category: ui
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_UI_SIDEBAR_SHOW_SOFT_BUTTONS
+    category: ui
+    type: boolean
+    default: "true"
+    docker: false
+  - name: WATERMARK_PNG
+    category: ui
+    type: text
+    default: ""
+    docker: false
+  - name: WATERMARK_LOCATION
+    category: ui
+    type: select
+    default: "-1"
+    docker: false
+    options:
+      - value: "-1"
+        label_key: disabled
+      - value: "1"
+        label_key: topLeft
+      - value: "2"
+        label_key: topRight
+      - value: "3"
+        label_key: bottomLeft
+      - value: "4"
+        label_key: bottomRight
+      - value: "5"
+        label_key: centered
+      - value: "6"
+        label_key: animated
+  - name: DASHBOARD
+    category: ui
+    type: select
+    default: ""
+    docker: false
+    options:
+      - value: ""
+        label_key: default
+      - value: "selkies-dashboard"
+        label_key: selkiesDefault
+      - value: "selkies-dashboard-zinc"
+        label_key: zinc
+      - value: "selkies-dashboard-wish"
+        label_key: wish
+  - name: SELKIES_AUDIO_ENABLED
+    category: app
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_MICROPHONE_ENABLED
+    category: app
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_GAMEPAD_ENABLED
+    category: app
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_CLIPBOARD_ENABLED
+    category: app
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_CLIPBOARD_OUT_ENABLED
+    category: app
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_CLIPBOARD_IN_ENABLED
+    category: app
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_ENABLE_BINARY_CLIPBOARD
+    category: app
+    type: boolean
+    default: "false"
+    docker: false
+  - name: SELKIES_COMMAND_ENABLED
+    category: app
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_FILE_TRANSFERS
+    category: app
+    type: text
+    default: "upload,download"
+    docker: false
+  - name: SELKIES_ENABLE_SHARING
+    category: app
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_SECOND_SCREEN
+    category: app
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_USE_BROWSER_CURSORS
+    category: app
+    type: boolean
+    default: "false"
+    docker: false
+  - name: SELKIES_USE_CSS_SCALING
+    category: app
+    type: boolean
+    default: "false"
+    docker: false
+  - name: SELKIES_IS_MANUAL_RESOLUTION_MODE
+    category: app
+    type: boolean
+    default: "false"
+    docker: false
+  - name: SELKIES_FORCE_ALIGNED_RESOLUTION
+    category: app
+    type: boolean
+    default: "false"
+    docker: false
+  - name: SELKIES_MANUAL_WIDTH
+    category: app
+    type: text
+    default: "0"
+    docker: false
+  - name: SELKIES_MANUAL_HEIGHT
+    category: app
+    type: text
+    default: "0"
+    docker: false
+  - name: SELKIES_SCALING_DPI
+    category: app
+    type: select
+    default: "96"
+    docker: false
+    options:
+      - value: "96"
+        label: "100%"
+      - value: "120"
+        label: "125%"
+      - value: "144"
+        label: "150%"
+      - value: "168"
+        label: "175%"
+      - value: "192"
+        label: "200%"
+      - value: "216"
+        label: "225%"
+      - value: "240"
+        label: "250%"
+      - value: "264"
+        label: "275%"
+      - value: "288"
+        label: "300%"
+  - name: SELKIES_AUDIO_BITRATE
+    category: app
+    type: select
+    default: "320000"
+    docker: false
+    options:
+      - value: "64000"
+        label: "64kbps"
+      - value: "128000"
+        label: "128kbps"
+      - value: "265000"
+        label: "265kbps"
+      - value: "320000"
+        label: "320kbps"
+  - name: SELKIES_ENCODER
+    category: app
+    type: text
+    default: "x264enc,x264enc-striped,jpeg"
+    docker: false
+  - name: SELKIES_USE_CPU
+    category: app
+    type: boolean
+    default: "false"
+    docker: false
+  - name: SELKIES_FRAMERATE
+    category: app
+    type: text
+    default: "8-120"
+    docker: false
+  - name: SELKIES_H264_CRF
+    category: app
+    type: text
+    default: "5-50"
+    docker: false
+  - name: SELKIES_JPEG_QUALITY
+    category: app
+    type: text
+    default: "1-100"
+    docker: false
+  - name: SELKIES_H264_FULLCOLOR
+    category: app
+    type: boolean
+    default: "false"
+    docker: false
+  - name: SELKIES_H264_STREAMING_MODE
+    category: app
+    type: boolean
+    default: "false"
+    docker: false
+  - name: SELKIES_USE_PAINT_OVER_QUALITY
+    category: app
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_PAINT_OVER_JPEG_QUALITY
+    category: app
+    type: text
+    default: "1-100"
+    docker: false
+  - name: SELKIES_H264_PAINTOVER_CRF
+    category: app
+    type: text
+    default: "5-50"
+    docker: false
+  - name: SELKIES_H264_PAINTOVER_BURST_FRAMES
+    category: app
+    type: text
+    default: "1-30"
+    docker: false
+  - name: HARDEN_DESKTOP
+    category: hardening
+    type: boolean
+    default: "false"
+    docker: false
+  - name: HARDEN_OPENBOX
+    category: hardening
+    type: boolean
+    default: "false"
+    docker: false
+  - name: DISABLE_OPEN_TOOLS
+    category: hardening
+    type: boolean
+    default: "false"
+    docker: false
+  - name: DISABLE_SUDO
+    category: hardening
+    type: boolean
+    default: "false"
+    docker: false
+  - name: DISABLE_TERMINALS
+    category: hardening
+    type: boolean
+    default: "false"
+    docker: false
+  - name: DISABLE_CLOSE_BUTTON
+    category: hardening
+    type: boolean
+    default: "false"
+    docker: false
+  - name: DISABLE_MOUSE_BUTTONS
+    category: hardening
+    type: boolean
+    default: "false"
+    docker: false
+  - name: HARDEN_KEYBINDS
+    category: hardening
+    type: boolean
+    default: "false"
+    docker: false
+  - name: RESTART_APP
+    category: hardening
+    type: boolean
+    default: "false"
+    docker: false
+  - name: MAX_RES
+    category: general
+    type: text
+    default: "15360x8640"
+    docker: false
+  - name: START_DOCKER
+    category: general
+    type: boolean
+    default: "true"
+    docker: false
+  - name: DISABLE_IPV6
+    category: general
+    type: boolean
+    default: "false"
+    docker: false
+  - name: DISABLE_ZINK
+    category: general
+    type: boolean
+    default: "false"
+    docker: false
+  - name: DISABLE_DRI3
+    category: general
+    type: boolean
+    default: "false"
+    docker: false
+  - name: NO_DECOR
+    category: general
+    type: boolean
+    default: "false"
+    docker: false
+  - name: NO_FULL
+    category: general
+    type: boolean
+    default: "false"
+    docker: false
+  - name: NO_GAMEPAD
+    category: general
+    type: boolean
+    default: "false"
+    docker: false
+  - name: SELKIES_DEBUG
+    category: general
+    type: boolean
+    default: "false"
+    docker: false
+  - name: DOCKER_PRIVILEGED
+    category: docker
+    type: boolean
+    default: "false"
+    docker: true
+  - name: DOCKER_BIND_MOUNTS
+    category: docker
+    type: text
+    default: ""
+    docker: true
+  - name: DOCKER_ENV
+    category: docker
+    type: text
+    default: ""
+    docker: true
+  - name: DOCKER_CAP_ADD
+    category: docker
+    type: text
+    default: ""
+    docker: true
+  - name: DOCKER_CAP_DROP
+    category: docker
+    type: text
+    default: ""
+    docker: true
+  - name: DOCKER_SECURITY_OPT
+    category: docker
+    type: text
+    default: ""
+    docker: true
+  - name: DOCKER_DEVICES
+    category: docker
+    type: text
+    default: ""
+    docker: true
+  - name: DOCKER_SHM_SIZE
+    category: docker
+    type: text
+    default: ""
+    docker: true
+  - name: DOCKER_MEM_LIMIT
+    category: docker
+    type: text
+    default: ""
+    docker: true
+  - name: DOCKER_CPU_SHARES
+    category: docker
+    type: text
+    default: ""
+    docker: true
+  - name: DOCKER_NANO_CPUS
+    category: docker
+    type: text
+    default: ""
+    docker: true
+  - name: DOCKER_NETWORK_MODE
+    category: docker
+    type: select
+    default: ""
+    docker: true
+    options:
+      - value: ""
+        label_key: default
+      - value: "host"
+        label_key: host
+      - value: "none"
+        label_key: none
+      - value: "bridge"
+        label_key: bridge
+  - name: DOCKER_IPC_MODE
+    category: docker
+    type: select
+    default: ""
+    docker: true
+    options:
+      - value: ""
+        label_key: default
+      - value: "host"
+        label_key: host
+      - value: "private"
+        label_key: private
+      - value: "shareable"
+        label_key: shareable
+  - name: DOCKER_PID_MODE
+    category: docker
+    type: select
+    default: ""
+    docker: true
+    options:
+      - value: ""
+        label_key: default
+      - value: "host"
+        label_key: host
+  - name: DOCKER_DNS
+    category: docker
+    type: text
+    default: ""
+    docker: true
+  - name: DOCKER_EXTRA_HOSTS
+    category: docker
+    type: text
+    default: ""
+    docker: true
+  - name: DOCKER_SYSCTLS
+    category: docker
+    type: text
+    default: ""
+    docker: true
+  - name: DOCKER_ULIMITS
+    category: docker
+    type: text
+    default: ""
+    docker: true
+  - name: DOCKER_TMPFS
+    category: docker
+    type: text
+    default: ""
+    docker: true
+  - name: DOCKER_GROUP_ADD
+    category: docker
+    type: text
+    default: ""
+    docker: true

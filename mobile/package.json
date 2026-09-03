@@ -1,10 +1,10 @@
 {
   "name": "sealskin",
-  "version": "0.1.0",
-  "description": "SealSkin mobile",
+  "version": "0.3.0",
+  "description": "SealSkin mobile shell (Capacitor). The web dir is copied from client/dist/mobile.",
   "main": "index.html",
   "scripts": {
-    "build": "rm -rf www && mkdir www && npx @capacitor/assets generate --iconBackgroundColor '#12161d' --splashBackgroundColor '#12161d' && npx esbuild index.js --bundle --minify --format=esm --outfile=www/bundle.js && cp index.html mobile-polyfill.js mobile-overrides.css www/ && cp ../browser_extension/*.js ../browser_extension/*.html ../browser_extension/*.css www/ && cp -r ../browser_extension/icons www/",
+    "build": "rm -rf www && (cd ../client && ([ -d node_modules ] || npm install --no-audit --no-fund) && SEALSKIN_BUILD_STRICT=1 npm run build --silent -- --target mobile) && cp -r ../client/dist/mobile www && npx @capacitor/assets generate --iconBackgroundColor '#12161d' --splashBackgroundColor '#12161d'",
     "android": "npm run build && npx cap sync && npx cap open android",
     "ios": "npm run build && npx cap sync && npx cap open ios"
   },
@@ -20,7 +20,6 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.0.0",
-    "@capacitor/assets": "^3.0.0",
-    "esbuild": "^0.27.2"
+    "@capacitor/assets": "^3.0.0"
   }
 }

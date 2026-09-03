@@ -1,0 +1,961 @@
+{
+  "background": {
+    "contextMenu": {
+      "openUrl": "Link in SealSkin öffnen",
+      "openFile": "Link-Ziel als Datei in SealSkin öffnen",
+      "sendMedia": "Medien an SealSkin senden",
+      "searchText": "Nach \"%s\" in SealSkin suchen",
+      "sendDownload": "Nächsten Download an SealSkin senden"
+    }
+  },
+  "common": {
+    "actions": "Aktionen",
+    "active": "Aktiv",
+    "cancel": "Abbrechen",
+    "manage": "Verwalten",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "save": "Speichern",
+    "none": "keine",
+    "error": "Fehler",
+    "na": "N/V",
+    "of": "von",
+    "status": "Status",
+    "username": "Benutzername",
+    "group": "Gruppe",
+    "groups": "Gruppen",
+    "publicKey": "Öffentlicher Schlüssel",
+    "name": "Name",
+    "source": "Quelle",
+    "imageVersion": "Image-Version",
+    "language": "Sprache",
+    "storage": "Speicher",
+    "gpu": "GPU",
+    "version": "Version",
+    "checked": "Geprüft",
+    "never": "Nie",
+    "stop": "Stoppen",
+    "reopen": "Erneut öffnen",
+    "sendFile": "Datei senden",
+    "share": "Teilen",
+    "search": "Suchen",
+    "refresh": "Aktualisieren",
+    "close": "Schließen",
+    "copy": "Kopieren",
+    "open": "Öffnen",
+    "copyUrl": "URL kopieren",
+    "download": "Herunterladen",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "page": "Seite",
+    "home": "Home-Verzeichnis",
+    "homes": "Home-Verzeichnisse",
+    "sessions": "Sitzungen",
+    "users": "Benutzer",
+    "admins": "Admins",
+    "yes": "Ja",
+    "no": "Nein",
+    "daysAgo": "{count, plural, one {vor 1 Tag} other {vor {count} Tagen}}",
+    "hoursAgo": "{count, plural, one {vor 1 Stunde} other {vor {count} Stunden}}",
+    "minutesAgo": "{count, plural, one {vor 1 Minute} other {vor {count} Minuten}}",
+    "justNow": "gerade eben",
+    "bytes": "Bytes",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB",
+    "pb": "PB"
+  },
+  "options": {
+    "sidebar": {
+      "config": "Konfiguration",
+      "home": "Home-Verzeichnisse",
+      "sessions": "Aktive Sitzungen",
+      "pinned": "Gepinntes Verhalten",
+      "appStore": "App Store",
+      "appTemplates": "App-Vorlagen",
+      "appLaboratory": "App-Labor",
+      "installedApps": "Installierte Apps",
+      "users": "Benutzer",
+      "groups": "Gruppen",
+      "admins": "Admins"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "clientSettings": "Client-Einstellungen",
+      "exportConfig": "Konfiguration exportieren",
+      "userStatus": "Benutzerstatus",
+      "loggedInAs": "Angemeldet als:",
+      "role": "Rolle",
+      "roleAdmin": "Administrator",
+      "roleUser": "Standardbenutzer",
+      "serverInfo": "Serverinformationen",
+      "server": "Server:",
+      "cpuModel": "CPU-Modell:",
+      "storageUsage": "Speichernutzung:",
+      "detectedGpus": "Erkannte GPUs:",
+      "logout": "Abmelden & Konfig. löschen",
+      "howTo": "Wie man SealSkin verwendet",
+      "howToDescription": "Dieser Abschnitt enthält eine grundlegende Dokumentation zur Verwendung der Erweiterung.",
+      "howToList": [
+        "<strong>Um Inhalte isoliert zu öffnen:</strong> Klicken Sie mit der rechten Maustaste auf einen Link, ein Bild oder einen ausgewählten Text und wählen Sie eine Option aus dem Kontextmenü \"SealSkin Isolation\".",
+        "<strong>Um einen Download in die Isolation zu senden:</strong> Klicken Sie mit der rechten Maustaste auf die Seite und wählen Sie \"Nächsten Download in die Isolation senden\". Die nächste Datei, die Sie herunterladen, wird abgefangen und an eine sichere Sitzung gesendet.",
+        "<strong>Um eine saubere Anwendung zu starten:</strong> Klicken Sie auf das SealSkin-Symbol in der Symbolleiste Ihres Browsers.",
+        "<strong>Um persistenten Speicher zu verwalten:</strong> Verwenden Sie den Tab \"Home-Verzeichnisse\" auf dieser Seite, um Speichervolumes zu erstellen und zu löschen, die über mehrere Sitzungen hinweg verwendet werden können.",
+        "<strong>Um Startoptionen zu speichern:</strong> Aktivieren Sie das Kontrollkästchen \"Diese Startoptionen speichern\" im Popup, bevor Sie eine Anwendung für einen bestimmten Dateityp (z. B. .pdf) oder für alle URLs starten. Verwalten Sie diese gespeicherten Einstellungen im Tab \"Gepinntes Verhalten\"."
+      ],
+      "confirmLogout": "Sind Sie sicher, dass Sie sich abmelden möchten? Dadurch wird Ihre gespeicherte Konfiguration aus diesem Browser gelöscht."
+    },
+    "config": {
+      "quickSetup": "Schnelleinrichtung",
+      "quickSetupDescription": "Laden Sie die von Ihrem Administrator bereitgestellte Konfigurationsdatei (.json) hoch oder fügen Sie deren Inhalt unten ein, um die Erweiterung automatisch einzurichten.",
+      "uploadLabel": "Konfigurationsdatei hochladen",
+      "pasteLabel": "Oder Konfigurationstext einfügen",
+      "pastePlaceholder": "Fügen Sie hier Ihre JSON-Konfiguration ein...",
+      "applyButton": "Konfiguration anwenden",
+      "manualLink": "Manuelle Konfiguration",
+      "advancedTitle": "Client-Konfiguration (Erweitert)",
+      "serverIpLabel": "Server-IP oder Domain",
+      "serverIpPlaceholder": "z.B. 192.168.1.100",
+      "apiPortLabel": "API-Port",
+      "apiPortPlaceholder": "z.B. 8000",
+      "sessionPortLabel": "Sitzungs-Port",
+      "sessionPortPlaceholder": "z.B. 8443",
+      "usernameLabel": "Benutzername",
+      "usernamePlaceholder": "Ihr Benutzername",
+      "privateKeyLabel": "Ihr privater Schlüssel (PEM-Format)",
+      "privateKeyPlaceholder": "Fügen Sie hier den Inhalt Ihres privaten Schlüssels ein",
+      "serverKeyLabel": "Öffentlicher Schlüssel des Servers (PEM-Format)",
+      "serverKeyPlaceholder": "Fügen Sie hier den Inhalt von server_public.pem ein",
+      "searchEngineLabel": "Standard-Suchmaschine für ausgewählten Text",
+      "saveButton": "Konfiguration speichern",
+      "loginButton": "Anmelden & Testen",
+      "automaticLink": "Automatische Konfiguration",
+      "chooseFile": "Datei auswählen",
+      "keyGeneration": "Schlüsselgenerierung",
+      "keyGenDescription": "Wenn Sie kein Schlüsselpaar haben, können Sie hier eines generieren. Der private Schlüssel wird oben eingefügt. Geben Sie den öffentlichen Schlüssel an Ihren Administrator weiter.",
+      "generateKeyButton": "Neues Schlüsselpaar generieren",
+      "publicKeyForAdminLabel": "Ihr öffentlicher Schlüssel (für den Admin)"
+    },
+    "home": {
+      "title": "Ihre Home-Verzeichnisse",
+      "description": "Erstellen Sie persistente Speicherverzeichnisse zur Verwendung über Sitzungen hinweg. Diese werden als Ihr Konfigurationsverzeichnis in Ihre Anwendungen gemountet.",
+      "newTitle": "Neues Home-Verzeichnis erstellen",
+      "nameLabel": "Verzeichnisname:",
+      "namePlaceholder": "z.B. meine-projektdateien",
+      "nameTitle": "Verwenden Sie nur Buchstaben, Zahlen, Unterstrich oder Bindestrich.",
+      "createButton": "Verzeichnis erstellen",
+      "isLaboratory": "Dies ist eine Labor-App, die aus einem Basis-Image mit benutzerdefinierten Einstellungen erstellt wurde.",
+      "laboratory": "Labor",
+      "confirmDelete": "Sind Sie sicher, dass Sie die installierte App '{appName}' löschen möchten?"
+    },
+    "sessions": {
+      "title": "Aktive Sitzungen",
+      "application": "Anwendung",
+      "started": "Gestartet",
+      "noSessionsUser": "Keine aktiven Sitzungen gefunden.",
+      "noSessionsAdmin": "Keine aktiven Sitzungen für einen Benutzer gefunden.",
+      "sessionsFor": "Sitzungen für {username} ({count})",
+      "confirmStop": "Sind Sie sicher, dass Sie diese Sitzung beenden möchten? Der Container wird zerstört."
+    },
+    "pinned": {
+      "title": "Gepinntes Erweiterungsverhalten",
+      "description": "Diese Tabelle zeigt die Startoptionen, die Sie für bestimmte Dateitypen oder für alle URLs gespeichert haben. Sie können ein gepinntes Verhalten entfernen, um erneut nach Startoptionen gefragt zu werden.",
+      "trigger": "Auslöser",
+      "savedApp": "Gespeicherte Anwendung",
+      "triggerSimple": "Einfacher Start (Symbolleisten-Button)",
+      "triggerUrl": "Alle URLs (aus Kontextmenü)",
+      "triggerFile": "Dateityp: <strong>{fileType}</strong>",
+      "unknownApp": "Unbekannte App ({appId}...)"
+    },
+    "admins": {
+      "serverKeyTitle": "Öffentlicher Schlüssel des Servers",
+      "serverKeyDescription": "Dies ist der öffentliche Schlüssel, den die Benutzerkonfigurationsdateien benötigen, um sich mit diesem Server zu verbinden.",
+      "title": "Admin-Verwaltung",
+      "searchPlaceholder": "Admins suchen...",
+      "newTitle": "Neuen Admin erstellen",
+      "publicKeyOptionalLabel": "Öffentlicher Schlüssel (Optional):",
+      "publicKeyPlaceholder": "Öffentlichen Schlüssel hier einfügen oder leer lassen, um einen zu generieren.",
+      "createButton": "Admin erstellen",
+      "confirmDelete": "Sind Sie sicher, dass Sie den Admin '{username}' löschen möchten? Dadurch wird auch sein gesamter persistenter Speicher gelöscht und kann nicht rückgängig gemacht werden."
+    },
+    "users": {
+      "title": "Benutzerverwaltung",
+      "searchPlaceholder": "Benutzer nach Name oder Gruppe suchen...",
+      "newTitle": "Neuen Benutzer erstellen",
+      "publicKeyOptionalLabel": "Öffentlicher Schlüssel (Optional):",
+      "publicKeyPlaceholder": "Öffentlichen Schlüssel des Benutzers hier einfügen oder leer lassen, um einen zu generieren.",
+      "settingsTitle": "Benutzereinstellungen",
+      "sessionLimitLabel": "Sitzungslimit",
+      "sessionLimitTitle": "Anzahl der aktiven Sitzungen, die ein Benutzer haben kann. -1 für unbegrenzt.",
+      "permissionsTitle": "Berechtigungen & Härtung",
+      "activeAccount": "Aktives Konto",
+      "allowStorage": "Persistenten Speicher erlauben",
+      "allowGpu": "GPU-Zugriff erlauben",
+      "hardenContainer": "Container härten",
+      "hardenWm": "Fenstermanager härten",
+      "createButton": "Benutzer erstellen",
+      "homesDisabledTooltip": "Persistenter Speicher für diesen Benutzer deaktiviert",
+      "confirmDelete": "Sind Sie sicher, dass Sie den Benutzer '{username}' löschen möchten? Dadurch wird auch sein gesamter persistenter Speicher gelöscht und kann nicht rückgängig gemacht werden.",
+      "allowPublicSharing": "Öffentliche Dateifreigabe zulassen"
+    },
+    "groups": {
+      "title": "Gruppenverwaltung",
+      "searchPlaceholder": "Gruppen suchen...",
+      "newTitle": "Neue Gruppe erstellen",
+      "nameLabel": "Gruppenname:",
+      "overrideTitle": "Gruppen-Überschreibungseinstellungen",
+      "permissionsTitle": "Berechtigungs- & Härtungs-Überschreibungen",
+      "createButton": "Gruppe erstellen",
+      "confirmDelete": "Sind Sie sicher, dass Sie die Gruppe '{groupName}' löschen möchten? Benutzer in dieser Gruppe werden auf ihre individuellen Einstellungen zurückgesetzt."
+    },
+    "installedApps": {
+      "title": "Installierte Anwendungen",
+      "searchPlaceholder": "Installierte Apps suchen...",
+      "noAppsFound": "Keine installierten Apps gefunden.",
+      "pulling": "Neues Image wird heruntergeladen...",
+      "notLocal": "Image lokal nicht gefunden",
+      "confirmDelete": "Sind Sie sicher, dass Sie die installierte App '{appName}' löschen möchten?"
+    },
+    "appStore": {
+      "title": "App Stores",
+      "refreshTitle": "Ausgewählten Store aktualisieren",
+      "selectLabel": "App Store auswählen",
+      "addLabel": "Neuen App Store hinzufügen",
+      "namePlaceholder": "Store-Name",
+      "urlPlaceholder": "Store YAML URL",
+      "availableTitle": "Verfügbare Apps",
+      "addManual": "Manuelle App hinzufügen",
+      "searchPlaceholder": "Verfügbare Apps suchen...",
+      "noAppsFound": "Keine Anwendungen gefunden.",
+      "availableFrom": "Verfügbare Apps von {storeName}",
+      "couldNotLoad": "Apps aus diesem Store konnten nicht geladen werden."
+    },
+    "appTemplates": {
+      "title": "Anwendungsvorlagen-Editor",
+      "loadLabel": "Vorlage laden",
+      "createOption": "Neue Vorlage erstellen",
+      "nameLabel": "Vorlagenname",
+      "namePlaceholder": "Geben Sie einen Namen für die neue Vorlage ein",
+      "saveButton": "Profil speichern",
+      "deleteButton": "Löschen",
+      "previewTitle": "UI-Vorschau",
+      "contentArea": "Anwendungsinhaltsbereich",
+      "confirmDelete": "Sind Sie sicher, dass Sie die Vorlage '{templateName}' löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "deleteDisabled": "Diese Vorlage kann nicht gelöscht werden.",
+      "enterName": "Bitte geben Sie einen Namen für die neue Vorlage ein.",
+      "settings": {
+        "TITLE": {
+          "label": "Seitentitel",
+          "description": "Der Seitentitel, der im Webbrowser angezeigt wird."
+        },
+        "SELKIES_UI_TITLE": {
+          "label": "Seitenleisten-Titel",
+          "description": "Titel in der oberen linken Ecke der Seitenleiste."
+        },
+        "SELKIES_UI_SHOW_SIDEBAR": {
+          "label": "Seitenleiste anzeigen",
+          "description": "Die Haupt-UI der Seitenleiste anzeigen."
+        },
+        "SELKIES_UI_SHOW_LOGO": {
+          "label": "Logo anzeigen",
+          "description": "Das Selkies-Logo in der Seitenleiste anzeigen."
+        },
+        "SELKIES_UI_SHOW_CORE_BUTTONS": {
+          "label": "Kern-Schaltflächen anzeigen",
+          "description": "Die Schaltflächen der Kernkomponenten (Anzeige, Audio usw.) anzeigen."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
+          "label": "Videoeinstellungen anzeigen",
+          "description": "Den Abschnitt Videoeinstellungen in der Seitenleiste anzeigen."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SCREEN_SETTINGS": {
+          "label": "Bildschirmeinstellungen anzeigen",
+          "description": "Den Abschnitt Bildschirmeinstellungen in der Seitenleiste anzeigen."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_AUDIO_SETTINGS": {
+          "label": "Audioeinstellungen anzeigen",
+          "description": "Den Abschnitt Audioeinstellungen in der Seitenleiste anzeigen."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_STATS": {
+          "label": "Statistiken anzeigen",
+          "description": "Den Statistikbereich in der Seitenleiste anzeigen."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
+          "label": "Zwischenablage anzeigen",
+          "description": "Den Zwischenablagebereich in der Seitenleiste anzeigen."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FILES": {
+          "label": "Dateibereich anzeigen",
+          "description": "Den Dateitransferbereich in der Seitenleiste anzeigen."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_APPS": {
+          "label": "App-Bereich anzeigen",
+          "description": "Den Anwendungsbereich in der Seitenleiste anzeigen."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SHARING": {
+          "label": "Freigabebereich anzeigen",
+          "description": "Den Freigabebereich in der Seitenleiste anzeigen."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
+          "label": "Gamepad-Bereich anzeigen",
+          "description": "Den Gamepad-Bereich in der Seitenleiste anzeigen."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
+          "label": "Tastatur-Schaltfläche anzeigen",
+          "description": "Die Bildschirmtastatur-Schaltfläche anzeigen."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SOFT_BUTTONS": {
+          "label": "Soft-Buttons anzeigen",
+          "description": "Den Bereich für Soft-Buttons anzeigen (für Mobilgeräte)."
+        },
+        "WATERMARK_PNG": {
+          "label": "Wasserzeichen-PNG-Pfad",
+          "description": "Vollständiger Pfad innerhalb des Containers zu einer Wasserzeichen-PNG-Datei."
+        },
+        "WATERMARK_LOCATION": {
+          "label": "Wasserzeichen-Position",
+          "description": "Wo das Bild über den Stream gemalt werden soll.",
+          "options": {
+            "disabled": "Deaktiviert",
+            "topLeft": "Oben-Links",
+            "topRight": "Oben-Rechts",
+            "bottomLeft": "Unten-Links",
+            "bottomRight": "Unten-Rechts",
+            "centered": "Zentriert",
+            "animated": "Animiert"
+          }
+        },
+        "DASHBOARD": {
+          "label": "Dashboard-Stil",
+          "description": "Ermöglicht dem Benutzer, sein Dashboard festzulegen.",
+          "options": {
+            "default": "Standard",
+            "selkiesDefault": "Selkies (Standard)",
+            "zinc": "Zinc",
+            "wish": "Wish"
+          }
+        },
+        "SELKIES_AUDIO_ENABLED": {
+          "label": "Audio aktivieren",
+          "description": "Server-zu-Client-Audio-Streaming aktivieren."
+        },
+        "SELKIES_MICROPHONE_ENABLED": {
+          "label": "Mikrofon aktivieren",
+          "description": "Client-zu-Server-Mikrofonweiterleitung aktivieren."
+        },
+        "SELKIES_GAMEPAD_ENABLED": {
+          "label": "Gamepad aktivieren",
+          "description": "Gamepad-Unterstützung aktivieren."
+        },
+        "SELKIES_CLIPBOARD_ENABLED": {
+          "label": "Zwischenablage aktivieren",
+          "description": "Synchronisierung der Zwischenablage aktivieren."
+        },
+        "SELKIES_CLIPBOARD_IN_ENABLED": {
+          "label": "Zwischenablage Client-zu-Server aktivieren",
+          "description": "Übertragung von Zwischenablagedaten vom Browser erlauben."
+        },
+        "SELKIES_CLIPBOARD_OUT_ENABLED": {
+          "label": "Zwischenablage Server-zu-Client aktivieren",
+          "description": "Übertragung von Zwischenablagedaten vom Server erlauben."
+        },
+        "SELKIES_ENABLE_BINARY_CLIPBOARD": {
+          "label": "Binäre Zwischenablage aktivieren",
+          "description": "Binäre Daten (Bilder) in der Zwischenablage zulassen."
+        },
+        "SELKIES_COMMAND_ENABLED": {
+          "label": "Befehls-Websocket aktivieren",
+          "description": "Das Parsen von Befehls-Websocket-Nachrichten aktivieren."
+        },
+        "SELKIES_FILE_TRANSFERS": {
+          "label": "Dateiübertragungen",
+          "description": "Erlaubte Richtungen ('upload,download', 'upload', 'download', 'none')."
+        },
+        "SELKIES_ENABLE_SHARING": {
+          "label": "Alle Freigaben aktivieren",
+          "description": "Hauptschalter für alle Freigabefunktionen."
+        },
+        "SELKIES_SECOND_SCREEN": {
+          "label": "Zweiten Bildschirm aktivieren",
+          "description": "Unterstützung für einen zweiten Monitor/Anzeige aktivieren."
+        },
+        "SELKIES_USE_BROWSER_CURSORS": {
+          "label": "Browser-Cursor verwenden",
+          "description": "Browser-CSS-Cursor anstelle des Renderns auf Canvas verwenden."
+        },
+        "SELKIES_USE_CSS_SCALING": {
+          "label": "CSS-Skalierung verwenden (LoDPI)",
+          "description": "Wenn wahr, wird eine niedrigere Auflösung gesendet und das Canvas gestreckt."
+        },
+        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+          "label": "Manueller Auflösungsmodus",
+          "description": "Die Auflösung auf die manuellen Breiten-/Höhenwerte festlegen."
+        },
+        "SELKIES_FORCE_ALIGNED_RESOLUTION": {
+          "label": "Ausgerichtete Auflösung erzwingen",
+          "description": "Erzwingt, dass die Bildschirmauflösung ein Vielfaches von 16 Pixeln ist."
+        },
+        "SELKIES_MANUAL_WIDTH": {
+          "label": "Manuelle Breite",
+          "description": "Breite auf einen festen Wert festlegen. Erzwingt den manuellen Modus."
+        },
+        "SELKIES_MANUAL_HEIGHT": {
+          "label": "Manuelle Höhe",
+          "description": "Höhe auf einen festen Wert festlegen. Erzwingt den manuellen Modus."
+        },
+        "SELKIES_SCALING_DPI": {
+          "label": "UI-Skalierungs-DPI",
+          "description": "Die Standard-DPI für die UI-Skalierung."
+        },
+        "SELKIES_AUDIO_BITRATE": {
+          "label": "Audio-Bitrate",
+          "description": "Die Standard-Audio-Bitrate."
+        },
+        "SELKIES_ENCODER": {
+          "label": "Encoder",
+          "description": "Komma-getrennte Liste von Encodern. Der erste ist der Standard."
+        },
+        "SELKIES_USE_CPU": {
+          "label": "CPU-Codierung erzwingen",
+          "description": "CPU-basierte Codierung für Pixelflux erzwingen."
+        },
+        "SELKIES_FRAMERATE": {
+          "label": "Framerate (Bereich oder fest)",
+          "description": "z.B. '8-120' für einen Bereich oder '60' für einen festen Wert."
+        },
+        "SELKIES_H264_CRF": {
+          "label": "H.264 CRF (Bereich oder fest)",
+          "description": "z.B. '5-50' für einen Bereich oder '25' für einen festen Wert."
+        },
+        "SELKIES_JPEG_QUALITY": {
+          "label": "JPEG-Qualität (Bereich oder fest)",
+          "description": "z.B. '1-100' für einen Bereich oder '60' für einen festen Wert."
+        },
+        "SELKIES_H264_FULLCOLOR": {
+          "label": "H.264 Vollfarbe",
+          "description": "H.264-Vollfarbbereich für Pixelflux-Encoder aktivieren."
+        },
+        "SELKIES_H264_STREAMING_MODE": {
+          "label": "H.264 Streaming (Turbo) Modus",
+          "description": "H.264-Streaming-Modus mit niedriger Latenz aktivieren."
+        },
+        "SELKIES_USE_PAINT_OVER_QUALITY": {
+          "label": "Paint-Over-Qualität verwenden",
+          "description": "Hochwertiges Paint-Over für statische Szenen aktivieren."
+        },
+        "SELKIES_PAINT_OVER_JPEG_QUALITY": {
+          "label": "Paint-Over JPEG-Qualität",
+          "description": "z.B. '1-100' für einen Bereich oder '90' für einen festen Wert."
+        },
+        "SELKIES_H264_PAINTOVER_CRF": {
+          "label": "Paint-Over H.264 CRF",
+          "description": "z.B. '5-50' für einen Bereich oder '18' für einen festen Wert."
+        },
+        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
+          "label": "Paint-Over Burst Frames",
+          "description": "z.B. '1-30' für einen Bereich oder '5' für einen festen Wert."
+        },
+        "HARDEN_DESKTOP": {
+          "label": "Desktop härten (Voreinstellung)",
+          "description": "Aktiviert DISABLE_OPEN_TOOLS, DISABLE_SUDO und DISABLE_TERMINALS."
+        },
+        "HARDEN_OPENBOX": {
+          "label": "Fenstermanager härten (Voreinstellung)",
+          "description": "Aktiviert DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS und HARDEN_KEYBINDS. Aktiviert auch RESTART_APP."
+        },
+        "DISABLE_OPEN_TOOLS": {
+          "label": "Öffnungswerkzeuge deaktivieren",
+          "description": "Deaktiviert die Binärdateien xdg-open und exo-open."
+        },
+        "DISABLE_SUDO": {
+          "label": "Sudo deaktivieren",
+          "description": "Deaktiviert den sudo-Befehl."
+        },
+        "DISABLE_TERMINALS": {
+          "label": "Terminals deaktivieren",
+          "description": "Deaktiviert gängige Terminal-Emulatoren."
+        },
+        "DISABLE_CLOSE_BUTTON": {
+          "label": "Fenster-Schließen-Button deaktivieren",
+          "description": "Entfernt den Schließen-Button aus den Fenstertitelleisten."
+        },
+        "DISABLE_MOUSE_BUTTONS": {
+          "label": "Rechts-/Mittelklick deaktivieren",
+          "description": "Deaktiviert Kontextmenüs für Rechts- und Mittelklick."
+        },
+        "HARDEN_KEYBINDS": {
+          "label": "Tastenkombinationen härten",
+          "description": "Deaktiviert Standard-Openbox-Tastenkombinationen wie Alt+F4."
+        },
+        "RESTART_APP": {
+          "label": "App bei Schließen neu starten",
+          "description": "Startet die Hauptanwendung automatisch neu, wenn sie geschlossen wird."
+        },
+        "MAX_RES": {
+          "label": "Maximale Auflösung",
+          "description": "Maximale Auflösung für den Container, Standard ist 16k."
+        },
+        "START_DOCKER": {
+          "label": "Docker-in-Docker starten",
+          "description": "Wenn falsch, startet ein privilegierter Container DinD nicht."
+        },
+        "DISABLE_IPV6": {
+          "label": "IPv6 deaktivieren",
+          "description": "Wenn wahr, wird IPv6 deaktiviert."
+        },
+        "DISABLE_ZINK": {
+          "label": "Zink deaktivieren",
+          "description": "Keine Zink-Umgebungsvariablen setzen, wenn eine Grafikkarte erkannt wird."
+        },
+        "DISABLE_DRI3": {
+          "label": "DRI3 deaktivieren",
+          "description": "Keine DRI3-Beschleunigung verwenden, wenn eine Grafikkarte erkannt wird."
+        },
+        "NO_DECOR": {
+          "label": "Keine Fensterdekorationen",
+          "description": "Anwendung ohne Fensterrahmen für PWA-Nutzung ausführen."
+        },
+        "NO_FULL": {
+          "label": "Kein Vollbild",
+          "description": "Anwendungen nicht automatisch im Vollbildmodus starten."
+        },
+        "NO_GAMEPAD": {
+          "label": "Gamepad-Injektion deaktivieren",
+          "description": "Userspace-Gamepad-Interposer-Injektion deaktivieren."
+        },
+        "SELKIES_DEBUG": {
+          "label": "Selkies-Debugging aktivieren",
+          "description": "Debug-Logging für Streaming-Komponenten aktivieren."
+        },
+        "DOCKER_PRIVILEGED": {
+          "label": "Privilegierter Modus",
+          "description": "Alle Rechte an Container geben, Cgroup-Beschränkungen aufheben, alle Host-Geräte mounten. Dies wird Dinge beschädigen!"
+        },
+        "DOCKER_BIND_MOUNTS": {
+          "label": "Zusätzliche Bind-Mounts",
+          "description": "Zusätzliche Host-Bindungen (kommagetrennt, z.B. /host/path:/container/path:ro)."
+        },
+        "DOCKER_ENV": {
+          "label": "Umgebungsvariablen",
+          "description": "Zusätzliche Umgebungsvariablen (kommagetrennt, z.B. KEY=VALUE,KEY2=VALUE2)."
+        },
+        "DOCKER_CAP_ADD": {
+          "label": "Cap Add",
+          "description": "Kernel-Fähigkeiten hinzufügen (kommagetrennt, z.B. SYS_ADMIN,MKNOD)."
+        },
+        "DOCKER_CAP_DROP": {
+          "label": "Cap Drop",
+          "description": "Kernel-Fähigkeiten entfernen (kommagetrennt)."
+        },
+        "DOCKER_SECURITY_OPT": {
+          "label": "Sicherheitsoptionen",
+          "description": "Sicherheitsoptionen (kommagetrennt, z.B. seccomp=unconfined,apparmor=unconfined)."
+        },
+        "DOCKER_DEVICES": {
+          "label": "Geräte",
+          "description": "Host-Geräte freigeben (kommagetrennt, z.B. /dev/sda:/dev/xvda:rwm)."
+        },
+        "DOCKER_SHM_SIZE": {
+          "label": "SHM Größe",
+          "description": "Größe von /dev/shm (z.B. 1G, 2G)."
+        },
+        "DOCKER_MEM_LIMIT": {
+          "label": "Speicherlimit",
+          "description": "Speicherlimit (z.B. 1g, 512m)."
+        },
+        "DOCKER_CPU_SHARES": {
+          "label": "CPU-Anteile",
+          "description": "CPU-Anteile (relatives Gewicht als Ganzzahl)."
+        },
+        "DOCKER_NANO_CPUS": {
+          "label": "Nano CPUs",
+          "description": "CPU-Quote in Einheiten von 1e-9 CPUs."
+        },
+        "DOCKER_NETWORK_MODE": {
+          "label": "Netzwerkmodus",
+          "description": "Netzwerkmodus für den Container.",
+          "options": {
+            "default": "Standard (Bridge)",
+            "host": "Host",
+            "none": "Keine",
+            "bridge": "Bridge"
+          }
+        },
+        "DOCKER_IPC_MODE": {
+          "label": "IPC-Modus",
+          "description": "Den IPC-Modus für den Container festlegen.",
+          "options": {
+            "default": "Standard",
+            "host": "Host",
+            "private": "Privat",
+            "shareable": "Teilbar"
+          }
+        },
+        "DOCKER_PID_MODE": {
+          "label": "PID-Modus",
+          "description": "Den PID-Modus für den Container festlegen.",
+          "options": {
+            "default": "Standard",
+            "host": "Host"
+          }
+        },
+        "DOCKER_DNS": {
+          "label": "DNS-Server",
+          "description": "Benutzerdefinierte DNS-Server (kommagetrennt)."
+        },
+        "DOCKER_EXTRA_HOSTS": {
+          "label": "Zusätzliche Hosts",
+          "description": "Host-zu-IP-Zuordnungen (kommagetrennt, z.B. hostname:1.2.3.4)."
+        },
+        "DOCKER_SYSCTLS": {
+          "label": "Sysctls",
+          "description": "Kernel-Parameter (kommagetrennt, z.B. net.ipv4.ip_forward=1)."
+        },
+        "DOCKER_ULIMITS": {
+          "label": "Ulimits",
+          "description": "Ulimits (kommagetrennt, z.B. nofile=1024:1024)."
+        },
+        "DOCKER_TMPFS": {
+          "label": "Tmpfs Mounts",
+          "description": "Temporäre Dateisysteme (kommagetrennt, z.B. /run:rw,noexec,nosuid,size=65536k)."
+        },
+        "DOCKER_GROUP_ADD": {
+          "label": "Gruppe hinzufügen",
+          "description": "Liste zusätzlicher Gruppennamen und/oder IDs (kommagetrennt)."
+        }
+      }
+    },
+    "appLaboratory": {
+      "title": "App-Labor",
+      "description": "Erstellen und testen Sie benutzerdefinierte Anwendungskonfigurationen, indem Sie Änderungen auf eine Basis-App aufschichten.",
+      "selectApp": "App auswählen",
+      "createNew": "Neue App erstellen",
+      "baseApp": "Basisanwendung",
+      "baseAppDescription": "Die installierte Anwendung, auf der Ihre neue benutzerdefinierte App basieren wird.",
+      "selectBase": "Basis-App auswählen",
+      "customizationTitle": "Anpassung",
+      "appName": "App-Name",
+      "appIcon": "App-Symbol",
+      "uploadIcon": "Symbol hochladen",
+      "autostartScriptLabel": "Benutzerdefiniertes Autostart-Skript",
+      "permissionsTitle": "Berechtigungen",
+      "usersLabel": "Erlaubte Benutzer",
+      "groupsLabel": "Erlaubte Gruppen",
+      "launchButton": "Speichern & Anpassungssitzung starten",
+      "closeButton": "Sitzung schließen & abschließen",
+      "savingAndLaunching": "Speichern & Starten...",
+      "placeholder": "Das App-Labor ermöglicht es Ihnen, das Basis-Home-Verzeichnis und das Startskript für eine Anwendung zu konfigurieren, die auf einer bestehenden installierten Anwendung basiert. Dieses Home-Verzeichnis wird bei der ersten Initialisierung für den Benutzer mit allen Dateien und Einstellungen kopiert, die Sie in dieser Sitzung einrichten. Sie können eine bestehende Labor-App erneut starten, um deren Inhalt weiter zu ändern.",
+      "formInvalid": "Bitte wählen Sie eine Basis-App aus und geben Sie einen Namen für die neue App an."
+    },
+    "modals": {
+      "editUserTitle": "Benutzer bearbeiten: {username}",
+      "saveChanges": "Änderungen speichern",
+      "effectiveSettings": "Effektive Einstellungen (mit Gruppen-Überschreibungen)",
+      "editGroupTitle": "Gruppe bearbeiten: {groupName}",
+      "userConfigTitle": "Benutzerkonfiguration",
+      "warning": "Diese Konfiguration wird nur dieses eine Mal angezeigt. Geben Sie sie dem Benutzer auf sichere Weise.",
+      "info": "Sie können diese Konfigurationsdatei herunterladen, um SealSkin einfach auf einem anderen Gerät einzurichten. Bewahren Sie diese Datei sicher auf, da sie Ihren privaten Schlüssel enthält.",
+      "configDataLabel": "Konfigurationsdaten (JSON)",
+      "copyButton": "Text kopieren",
+      "downloadButton": "Datei herunterladen",
+      "manageHomeDirs": "Home-Verzeichnisse verwalten",
+      "dirsForUser": "Verzeichnisse für Benutzer: {username}",
+      "dirsForAdmin": "Verzeichnisse für Admin: {username}",
+      "newDirForUser": "Neues Verzeichnis für Benutzer erstellen",
+      "createDirButton": "Verzeichnis erstellen",
+      "confirmDeleteDir": "Sind Sie sicher, dass Sie '{homeName}' für Benutzer '{username}' löschen möchten? Dies ist endgültig.",
+      "installAppTitle": "{appName} installieren",
+      "editAppTitle": "{appName} bearbeiten",
+      "customNameLabel": "Benutzerdefinierter Name",
+      "imageLabel": "Container-Image",
+      "permissions": "Berechtigungen",
+      "allowedUsersLabel": "Erlaubte Benutzer (komma-getrennt, 'all' für alle)",
+      "allowedGroupsLabel": "Erlaubte Gruppen (komma-getrennt, 'all' für alle)",
+      "features": "Funktionen",
+      "gpuSupport": "GPU-Unterstützung",
+      "homeMounting": "Home-Verzeichnis-Mounting",
+      "urlSupport": "URL-Öffnungs-Unterstützung",
+      "fileSupport": "Datei-Öffnungs-Unterstützung",
+      "autoUpdate": "Image automatisch aktualisieren",
+      "advancedSettings": "Erweiterte Einstellungen",
+      "appTemplateLabel": "Anwendungsvorlage",
+      "appTemplateDescription": "Wählen Sie eine vorkonfigurierte Vorlage für erweiterte Container-Starteinstellungen.",
+      "customAutostartScriptLabel": "Benutzerdefiniertes Autostart-Skript",
+      "customAutostartScriptDescription": "Passen Sie die Autostart-Logik an. Lassen Sie das Feld leer, um die Standardeinstellung des Anwendungsanbieters zu verwenden.",
+      "saveInstallation": "Installation speichern",
+      "updateStatusTitle": "Update-Status für {appName}",
+      "checkingUpdates": "Suche nach Updates...",
+      "updateAvailable": "Eine neue Image-Version ist verfügbar!",
+      "yourVersion": "Ihre Version: {sha}",
+      "latestAvailable": "Die neueste Version steht zum Herunterladen aus der Registry bereit.",
+      "pullLatest": "Neuestes Image herunterladen",
+      "upToDate": "Ihr Image ist auf dem neuesten Stand.",
+      "currentVersion": "Aktuelle Version: {sha}",
+      "errorChecking": "Fehler bei der Suche nach Updates.",
+      "pullingLatest": "Neuestes Image wird heruntergeladen... Dies kann einen Moment dauern.",
+      "pullComplete": "Download abgeschlossen!",
+      "newVersion": "Neue Version: {sha}",
+      "errorPulling": "Fehler beim Herunterladen des Images.",
+      "manualInstallNote": "Hinweis: Manuell hinzugefügte Images sollten auf einem selkies-baseimage-kompatiblen Image basieren.",
+      "generalTitle": "Allgemein & Leistungseinstellungen",
+      "dockerTitle": "Docker Erweiterte Überschreibungen",
+      "dockerDescription": "Diese Einstellungen überschreiben die Standard-Containerkonfiguration. Verwenden Sie sie mit Vorsicht und nur, wenn Sie wissen, was Sie tun."
+    },
+    "status": {
+      "loggingIn": "Anmeldung läuft...",
+      "configSaved": "Konfiguration erfolgreich gespeichert!",
+      "configApplied": "Konfiguration angewendet! Bitte Anmelden & Testen.",
+      "configApplyFailed": "Anwenden der Konfiguration fehlgeschlagen: {error}",
+      "fileReadError": "Fehler beim Lesen der Datei.",
+      "noConfig": "Bitte geben Sie eine Konfigurationsdatei oder Text an.",
+      "loggedInAdmin": "Angemeldet als Admin: {username}",
+      "loggedInUser": "Angemeldet als Standardbenutzer: {username}.",
+      "loginFailed": "Anmeldung fehlgeschlagen: {error}",
+      "adminDataRefreshFailed": "Aktualisieren der Admin-Daten fehlgeschlagen: {error}",
+      "closingSession": "Anpassungssitzung wird committet...",
+      "sessionClosed": "Anpassungssitzung geschlossen.",
+      "sessionCloseFailed": "Fehler beim Schließen der Anpassungssitzung: {error}",
+      "logoutSuccess": "Abgemeldet und Konfiguration gelöscht.",
+      "generateConfigFailed": "Konfiguration konnte nicht generiert werden, Benutzerdetails fehlen.",
+      "copySuccess": "Konfiguration in die Zwischenablage kopiert!",
+      "copyFailed": "Fehler beim Kopieren des Textes.",
+      "publicKeyCopied": "Öffentlicher Schlüssel kopiert!",
+      "keyCopyFailed": "Fehler beim Kopieren des Schlüssels.",
+      "creatingAdmin": "Admin wird erstellt...",
+      "adminCreated": "Admin '{username}' erstellt.",
+      "adminCreateFailed": "Fehler beim Erstellen des Admins: {error}",
+      "adminDeleted": "Admin '{username}' erfolgreich gelöscht.",
+      "adminDeleteFailed": "Fehler beim Löschen des Admins: {error}",
+      "creatingUser": "Benutzer wird erstellt...",
+      "userCreated": "Benutzer '{username}' erstellt.",
+      "userCreateFailed": "Fehler beim Erstellen des Benutzers: {error}",
+      "userDeleted": "Benutzer '{username}' erfolgreich gelöscht.",
+      "userDeleteFailed": "Fehler beim Löschen des Benutzers: {error}",
+      "userUpdated": "Benutzer '{username}' erfolgreich aktualisiert.",
+      "userUpdateFailed": "Fehler beim Aktualisieren des Benutzers: {error}",
+      "creatingGroup": "Gruppe wird erstellt...",
+      "groupCreated": "Gruppe '{groupName}' erstellt.",
+      "groupCreateFailed": "Fehler beim Erstellen der Gruppe: {error}",
+      "groupDeleted": "Gruppe '{groupName}' erfolgreich gelöscht.",
+      "groupDeleteFailed": "Fehler beim Löschen der Gruppe: {error}",
+      "groupUpdated": "Gruppe '{groupName}' erfolgreich aktualisiert.",
+      "groupUpdateFailed": "Fehler beim Aktualisieren der Gruppe: {error}",
+      "homedirLoadFailed": "Laden der Home-Verzeichnisse fehlgeschlagen: {error}",
+      "homedirCreateFailed": "Fehler beim Erstellen des Verzeichnisses: {error}",
+      "homedirCreated": "Home-Verzeichnis '{homeName}' erstellt.",
+      "homedirDeleted": "Verzeichnis '{homeName}' gelöscht.",
+      "homedirDeleteFailed": "Fehler beim Löschen des Verzeichnisses: {error}",
+      "homedirCreatedFor": "Verzeichnis '{homeName}' für {username} erstellt.",
+      "homedirDeletedFor": "Verzeichnis '{homeName}' für {username} gelöscht.",
+      "sessionsLoadFailed": "Laden der Sitzungen fehlgeschlagen: {error}",
+      "sessionStopError": "Fehler beim Beenden der Sitzung: {error}",
+      "sessionStopped": "Sitzung erfolgreich beendet.",
+      "appDataRefreshFailed": "Aktualisieren der App-Daten fehlgeschlagen: {error}",
+      "fetchingApps": "Apps aus dem Store werden abgerufen...",
+      "fetchAppsFailed": "Abrufen der Apps aus dem Store fehlgeschlagen: {error}",
+      "appStoreAddFailed": "Fehler beim Hinzufügen des Stores: {error}",
+      "appStoreAdded": "App Store '{name}' hinzugefügt.",
+      "appSaved": "App '{name}' erfolgreich {action}.",
+      "appSaveActions": {
+        "updated": "aktualisiert",
+        "installed": "installiert"
+      },
+      "appSaveFailed": "Fehler beim Speichern der App: {error}",
+      "appDeleted": "App '{name}' gelöscht.",
+      "appDeleteFailed": "Fehler beim Löschen der App: {error}",
+      "templateSaved": "Vorlage '{name}' erfolgreich gespeichert.",
+      "templateSaveFailed": "Fehler beim Speichern der Vorlage: {error}",
+      "templateDeleted": "Vorlage '{name}' erfolgreich gelöscht.",
+      "templateDeleteFailed": "Fehler beim Löschen der Vorlage: {error}",
+      "pinRemoved": "Gepinntes Verhalten entfernt.",
+      "keyGenerated": "Neues Schlüsselpaar generiert.",
+      "keyGenFailed": "Schlüsselgenerierung fehlgeschlagen: {error}",
+      "pendingConfigSaved": "Ausstehende Konfiguration gespeichert. Sie können Ihren öffentlichen Schlüssel jetzt dem Administrator zur Verfügung stellen.",
+      "settingsSaved": "Einstellungen gespeichert.",
+      "appCreated": "App '{name}' erfolgreich erstellt.",
+      "launchFailed": "Start fehlgeschlagen: {error}"
+    },
+    "placeholders": {
+      "noAdmins": "Keine Admins gefunden.",
+      "noUsers": "Keine Benutzer gefunden.",
+      "noGroups": "Keine Gruppen gefunden.",
+      "noHomeDirs": "Keine Home-Verzeichnisse gefunden.",
+      "noSessions": "Keine aktiven Sitzungen gefunden.",
+      "noPinned": "Keine gepinnten Verhalten gefunden.",
+      "errorLoading": "Fehler beim Laden der Verzeichnisse.",
+      "noInstalledApps": "Es wurden noch keine Anwendungen installiert."
+    }
+  },
+  "popup": {
+    "tabs": {
+      "launch": "Neu starten",
+      "sessions": "Aktive Sitzungen",
+      "manageFiles": "Dateien verwalten",
+      "uploadStorage": "In Speicher hochladen",
+      "uploadFiles": "Dateien hochladen",
+      "uploadFilesTitle": "Dedizierte Seite zum Hochladen von Dateien öffnen"
+    },
+    "launchView": {
+      "searchPlaceholder": "Anwendungen suchen...",
+      "uploadingFile": "Datei wird hochgeladen...",
+      "gpuLabel": "GPU",
+      "storageLabel": "Speicher",
+      "languageLabel": "Sprache",
+      "cleanroom": "Cleanroom (Temporär)",
+      "noGpu": "Keine",
+      "saveOptions": "Diese Startoptionen speichern",
+      "saveOptionsForUrl": "Optionen für alle URLs speichern",
+      "saveOptionsForFile": "Optionen für .{extension}-Dateien speichern",
+      "openFile": "Datei beim Start öffnen",
+      "launchButton": "Starten",
+      "launchingButton": "Wird gestartet...",
+      "uploadingButton": "Wird hochgeladen...",
+      "autoHome": "Automatisch (pro-App-Persistenz)",
+      "collaborationMode": "Kollaborative Sitzung",
+      "waylandMode": "Wayland-Modus"
+    },
+    "sessionsView": {
+      "noSessions": "Keine aktiven Sitzungen gefunden."
+    },
+    "uploadStorageView": {
+      "selectHome": "Home-Verzeichnis auswählen",
+      "description": "Dies lädt die Datei <strong>{filename}</strong> zur zukünftigen Verwendung direkt in Ihren Dateispeicher hoch.",
+      "descriptionFallback": "Dies lädt die Datei <strong>{filename}</strong> zur zukünftigen Verwendung direkt in Ihren Dateispeicher hoch.",
+      "uploadButton": "Datei hochladen",
+      "uploadingButton": "Wird hochgeladen...",
+      "preparing": "Datei wird vorbereitet...",
+      "uploadingChunk": "Lade Teil {current} von {total} hoch...",
+      "finalizing": "Wird abgeschlossen...",
+      "uploadComplete": "Upload abgeschlossen!"
+    },
+    "status": {
+      "unconfigured": "Bitte konfigurieren Sie die Erweiterung über die Optionsseite.",
+      "openingServerFile": "Öffne serverseitige Datei: {filename}",
+      "openingFile": "Öffne Datei: {filename}",
+      "openingUrl": "Öffne URL: {targetUrl}",
+      "error": "Fehler: {message}",
+      "preparingFile": "Datei wird vorbereitet...",
+      "sendingFile": "Datei wird an die Sitzung gesendet...",
+      "errorSendingFile": "Fehler beim Senden der Datei: {message}",
+      "errorClosingSession": "Fehler beim Schließen der Sitzung: {message}",
+      "preparingSession": "Isolierte Sitzung wird vorbereitet...",
+      "fetchingData": "Dateidaten werden abgerufen...",
+      "fetchDataFailed": "Abrufen der Dateidaten fehlgeschlagen: {statusText}",
+      "unknownAction": "Unbekannte Startaktion.",
+      "noAppSelected": "Bitte wählen Sie eine Anwendung aus.",
+      "noAppsAvailable": "Für Ihr Konto sind keine Anwendungen verfügbar.",
+      "uploadSuccess": "Datei erfolgreich hochgeladen!",
+      "creatingAutoHome": "Automatisches Home-Verzeichnis wird erstellt..."
+    },
+    "languages": {
+      "default": "Standard ({locale})"
+    }
+  },
+  "upload": {
+    "title": "Datei-Upload",
+    "description": "Wählen Sie eine Datei von Ihrem Computer aus, um sie in einer sicheren, isolierten Sitzung zu öffnen.",
+    "dropzone": {
+      "title": "Ziehen Sie eine Datei hierher",
+      "or": "oder",
+      "button": "Datei auswählen"
+    },
+    "confirm": {
+      "ready": "Die Datei ist bereit, sicher geöffnet zu werden.",
+      "button": "Weiter zum Starten"
+    }
+  },
+  "files": {
+    "title": "SealSkin-Dateien",
+    "header": {
+      "title": "Dateien",
+      "newFolder": "Neuer Ordner",
+      "uploadFiles": "Dateien hochladen",
+      "uploadFolder": "Ordner hochladen"
+    },
+    "sidebar": {
+      "sharedFiles": "SealSkin-Dateien",
+      "publicShares": "Öffentliche Freigaben"
+    },
+    "shares": {
+      "title": "Öffentlich freigegebene Dateien",
+      "searchPlaceholder": "Suche nach Dateiname oder ID..."
+    },
+    "table": {
+      "name": "Name",
+      "size": "Größe",
+      "lastModified": "Zuletzt geändert",
+      "created": "Erstellt",
+      "expires": "Läuft ab",
+      "url": "Öffentliche URL",
+      "passwordProtected": "Passwort"
+    },
+    "dropzone": {
+      "title": "Dateien zum Hochladen hier ablegen"
+    },
+    "pagination": {
+      "previous": "« Zurück",
+      "next": "Weiter »",
+      "pageOf": "Seite {page} von {totalPages}"
+    },
+    "modals": {
+      "newFolder": {
+        "title": "Neuen Ordner erstellen",
+        "folderNameLabel": "Ordnername",
+        "nameTitle": "Verwenden Sie nur Buchstaben, Zahlen, Unterstrich, Bindestrich oder Punkt.",
+        "createButton": "Erstellen"
+      },
+      "confirmDelete": {
+        "title": "Löschen bestätigen",
+        "message": "Möchten Sie {count, plural, one {1 ausgewähltes Element} other {{count} ausgewählte Elemente}} wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+        "messageDefault": "Möchten Sie die ausgewählten Elemente wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+      },
+      "uploadProgress": {
+        "title": "Upload-Fortschritt",
+        "doneButton": "Fertig"
+      },
+      "share": {
+        "title": "Datei teilen",
+        "sharingFile": "Teile Datei: <strong>{filename}</strong>",
+        "passwordLabel": "Passwort (optional)",
+        "passwordPlaceholder": "Leer lassen für kein Passwort",
+        "expiryLabel": "Läuft ab in (Stunden, optional)",
+        "expiryPlaceholder": "z.B. 24 für einen Tag",
+        "shareButton": "Freigabe-Link erstellen"
+      }
+    },
+    "status": {
+      "homeDirLoadFailed": "Fehler beim Laden der Home-Verzeichnisse: {error}",
+      "filesLoadFailed": "Fehler beim Laden der Dateien: {error}",
+      "deleteProtectedError": "Geschützte Systemordner können nicht gelöscht werden.",
+      "deletingItems": "Lösche {count, plural, one {1 Element} other {{count} Elemente}}...",
+      "deleteSuccess": "Löschen erfolgreich.",
+      "deleteFailed": "Löschen fehlgeschlagen: {error}",
+      "preparingUpload": "Vorbereitung zum Hochladen von {count, plural, one {1 Datei} other {{count} Dateien}}...",
+      "uploadPrepFailed": "Fehler bei der Vorbereitung des Ordner-Uploads: {error}",
+      "notConfigured": "Fehler: SealSkin nicht konfiguriert. Bitte in den Optionen einrichten.",
+      "folderCreated": "Ordner '{folderName}' erstellt.",
+      "folderCreateFailed": "Fehler beim Erstellen des Ordners: {error}",
+      "shareCreated": "Freigabe erfolgreich erstellt! Der Link wurde in Ihre Zwischenablage kopiert.",
+      "shareCreateFailed": "Fehler beim Erstellen der Freigabe: {error}",
+      "sharesLoadFailed": "Fehler beim Laden der freigegebenen Dateien: {error}",
+      "shareDeleteFailed": "Fehler beim Löschen der Freigabe: {error}",
+      "shareDeleted": "Freigabe erfolgreich gelöscht.",
+      "urlCopied": "Öffentliche URL in die Zwischenablage kopiert."
+    },
+    "placeholders": {
+      "errorLoading": "Fehler beim Laden der Dateien.",
+      "folderEmpty": "Dieser Ordner ist leer.",
+      "noHomeDirs": "Keine Home-Verzeichnisse verfügbar.",
+      "noShares": "Sie haben noch keine Dateien freigegeben."
+    },
+    "uploadStatus": {
+      "pending": "ausstehend",
+      "initiating": "Wird gestartet...",
+      "uploading": "Wird hochgeladen...",
+      "finalizing": "Wird abgeschlossen...",
+      "completed": "Abgeschlossen",
+      "error": "Fehler"
+    }
+  }
+}

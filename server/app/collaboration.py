@@ -1,63 +1,94 @@
-import secrets
-import logging
+"""Collaboration rooms: the room page, its WebSocket and token fan-out.
+
+A collaboration session is a normal session whose container also runs a
+control plane that accepts a table of tokens (controller, viewers, gamepad
+slots, mouse/keyboard owner). This module serves the room page, relays chat
+and control messages between participants over a WebSocket and pushes token
+changes down to every container of the session.
+"""
+
+from __future__ import annotations
+
 import asyncio
-import os
-import random
-import json
-import time
 import base64
+import json
+import logging
+import os
+import posixpath
+import random
+import re
+import secrets
+import time
+from typing import Any
 from uuid import UUID
-from typing import Optional
 
 import httpx
-from fastapi import APIRouter, HTTPException, Request, Query
-from fastapi.responses import RedirectResponse, HTMLResponse, FileResponse
+from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
-from . import api
+from . import config_store, launch
+from .routers.applications import user_can_access
 from .settings import settings
+from .state import state
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-ROOM_CONNECTIONS: dict = {}
+
+#: Live WebSocket connections keyed by session id.
+ROOM_CONNECTIONS: dict[str, dict[str, Any]] = {}
+#: Control-plane URL that last accepted a token push, keyed by container IP.
+TOKEN_ENDPOINT_CACHE: dict[str, str] = {}
 
 
-@router.get("/room/room.css", include_in_schema=False)
-async def get_room_css():
-    path = os.path.join(
-        os.path.dirname(__file__), "static", "collaboration", "room.css"
-    )
-    if os.path.exists(path):
-        return FileResponse(path, media_type="text/css")
-    raise HTTPException(status_code=404)
+_ROOM_ASSET_RE = re.compile(r'(?P<attr>\b(?:src|href))="(?P<url>[^"]+)"')
 
 
-@router.get("/room/room.js", include_in_schema=False)
-async def get_room_js():
-    path = os.path.join(os.path.dirname(__file__), "static", "collaboration", "room.js")
-    if os.path.exists(path):
-        return FileResponse(path, media_type="application/javascript")
-    raise HTTPException(status_code=404)
+def _absolutize_room_assets(html: str) -> str:
+    """Rewrite relative asset references in the room template to ``/ui/room/``.
 
+    The page is served at ``/room/<session_id>`` while its hashed assets live
+    under the static ``/ui/room/`` mount, so relative references would 404.
 
-@router.get("/room/translation.js", include_in_schema=False)
-async def get_translation_js():
-    path = os.path.join(
-        os.path.dirname(__file__), "static", "collaboration", "translation.js"
-    )
-    if os.path.exists(path):
-        return FileResponse(path, media_type="application/javascript")
-    raise HTTPException(status_code=404)
+    Args:
+        html: Raw room template.
+
+    Returns:
+        The template with relative ``src``/``href`` values made absolute.
+    """
+
+    def _rewrite(match: re.Match[str]) -> str:
+        url = match.group("url")
+        if url.startswith(("/", "http://", "https://", "data:", "about:", "#", "{{", "ws")):
+            return match.group(0)
+        absolute = posixpath.normpath(posixpath.join("/ui/room/", url))
+        return f'{match.group("attr")}="{absolute}"'
+
+    return _ROOM_ASSET_RE.sub(_rewrite, html)
 
 
 @router.get("/room/{session_id:uuid}", response_class=HTMLResponse)
 async def collaborative_room(
     request: Request,
     session_id: UUID,
-    collab_token: Optional[str] = Query(None, alias="token"),
-):
+    collab_token: str | None = Query(None, alias="token"),
+) -> Response:
+    """Serve the collaboration room page.
+
+    Authenticates the visitor as controller (session access token or
+    controller token), existing viewer, or new participant/read-only viewer
+    via an invite token. New viewers get a personal token and are redirected.
+
+    Args:
+        request: Incoming request.
+        session_id: Collaboration session id.
+        collab_token: Controller, viewer or invite token.
+
+    Returns:
+        The room HTML, or a redirect for newly registered viewers.
+    """
     session_id_str = str(session_id)
-    session_data = api.SESSIONS_DB.get(session_id_str)
+    session_data = state.sessions.get(session_id_str)
     if not session_data or not session_data.get("is_collaboration"):
         raise HTTPException(status_code=404, detail="Collaboration room not found.")
 
@@ -99,16 +130,13 @@ async def collaborative_room(
         )
 
     try:
-        room_template_path = os.path.join(
-            os.path.dirname(__file__), "static", "collaboration", "room.html"
-        )
-        with open(room_template_path, "r") as f:
-            html_content = f.read()
-    except FileNotFoundError:
-        logger.error(f"Collaboration room template not found at {room_template_path}")
-        raise HTTPException(status_code=500, detail="Room UI template is missing.")
+        room_template_path = os.path.join(settings.ui_path, "room", "room.html")
+        with open(room_template_path, encoding="utf-8") as handle:
+            html_content = handle.read()
+    except FileNotFoundError as exc:
+        logger.error("Collaboration room template not found at %s", room_template_path)
+        raise HTTPException(status_code=500, detail="Room UI template is missing.") from exc
 
-    master_token = session_data["master_token"]
     controller_token = session_data["controller_token"]
 
     user_role = "none"
@@ -140,14 +168,12 @@ async def collaborative_room(
             }
         )
 
-        mk_owner = session_data.get("mk_owner_token")
-
         try:
             await broadcast_token_state(session_id_str, session_data)
-            api.SESSIONS_DB[session_id_str] = session_data
-            await api.save_sessions_to_disk()
+            state.sessions[session_id_str] = session_data
+            await config_store.save_sessions()
             logger.info(
-                f"[{session_id_str}] New viewer ({permission}) joined. Token '{new_viewer_token}' created and pushed."
+                f"[{session_id_str}] New viewer ({permission}) joined and token pushed."
             )
         except Exception as e:
             logger.error(
@@ -155,7 +181,7 @@ async def collaborative_room(
             )
             raise HTTPException(
                 status_code=500, detail="Failed to register new viewer."
-            )
+            ) from e
 
         redirect_url = request.url.replace_query_params(token=new_viewer_token)
         return RedirectResponse(url=str(redirect_url))
@@ -191,6 +217,7 @@ async def collaborative_room(
             )
         )
 
+    html_content = _absolutize_room_assets(html_content)
     html_content = html_content.replace("{{IFRAME_SRC}}", iframe_src)
     html_content = html_content.replace(
         "<!-- CLIENT_DATA -->",
@@ -228,26 +255,14 @@ async def collaborative_room(
     return response
 
 
-TOKEN_ENDPOINT_CACHE: dict = {}
+async def broadcast_token_state(session_id: str, session_data: dict[str, Any]) -> None:
+    """Push the current token table to every container of a session.
 
-
-async def broadcast_token_state(session_id: str, session_data: dict):
-    mk_owner = session_data.get("mk_owner_token")
-    controller_token = session_data.get("controller_token")
-
-    all_tokens = {
-        controller_token: {
-            "role": "controller",
-            "slot": session_data.get("controller_slot"),
-            "mk_control": (mk_owner == controller_token) if mk_owner else True,
-        }
-    }
-    for v in session_data.get("viewers", []):
-        all_tokens[v["token"]] = {
-            "role": "viewer",
-            "slot": v["slot"],
-            "mk_control": v["token"] == mk_owner,
-        }
+    Args:
+        session_id: Session id.
+        session_data: Session record.
+    """
+    all_tokens = launch.collaboration_initial_tokens(session_data)
 
     targets = {}
     if session_data.get("ip"):
@@ -292,7 +307,15 @@ async def broadcast_token_state(session_id: str, session_data: dict):
                     continue
 
 
-async def broadcast_to_room(session_id: str, payload: dict):
+def _owner_group(username: str) -> str:
+    """Return the effective group of a user (``"none"`` when unknown)."""
+    from . import user_manager
+
+    return user_manager.get_effective_settings(username).get("group", "none")
+
+
+async def broadcast_to_room(session_id: str, payload: dict[str, Any]) -> None:
+    """Send a JSON payload to every participant of a room."""
     connections = ROOM_CONNECTIONS.get(session_id)
     if not connections:
         return
@@ -311,16 +334,15 @@ async def broadcast_to_room(session_id: str, payload: dict):
     ]
     results = await asyncio.gather(*send_tasks, return_exceptions=True)
 
-    for i, result in enumerate(results):
+    for result in results:
         if isinstance(result, Exception):
             logger.warning(
                 f"[{session_id}] Failed to send message to a client: {result}"
             )
 
 
-async def broadcast_binary_to_room(
-    session_id: str, payload: bytes, sender_ws: WebSocket
-):
+async def broadcast_binary_to_room(session_id: str, payload: bytes, sender_ws: WebSocket) -> None:
+    """Relay a binary (audio/video) packet to every participant except the sender."""
     connections = ROOM_CONNECTIONS.get(session_id)
     if not connections:
         return
@@ -343,7 +365,7 @@ async def broadcast_binary_to_room(
 
     if send_tasks:
         results = await asyncio.gather(*send_tasks, return_exceptions=True)
-        for i, result in enumerate(results):
+        for result in results:
             if isinstance(result, Exception):
                 logger.warning(
                     f"[{session_id}] Failed to send binary message to a client: {result}"
@@ -351,11 +373,17 @@ async def broadcast_binary_to_room(
 
 
 @router.websocket("/ws/room/{session_id:uuid}")
-async def room_websocket(websocket: WebSocket, session_id: UUID):
+async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
+    """Handle a participant's WebSocket for the lifetime of the connection.
+
+    Args:
+        websocket: The accepted socket.
+        session_id: Collaboration session id.
+    """
     session_id_str = str(session_id)
     token = websocket.query_params.get("token")
 
-    session_data = api.SESSIONS_DB.get(session_id_str)
+    session_data = state.sessions.get(session_id_str)
     if not session_data or not session_data.get("is_collaboration"):
         await websocket.close(code=1008)
         return
@@ -407,12 +435,15 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
     connection_info["has_joined"] = True
     await broadcast_state(session_id_str)
 
-    async def send_app_list():
+    async def send_app_list() -> None:
+        """Send the controller the apps the session owner may swap to."""
         user_apps = []
         session_registry = session_data.get("container_registry", {})
-        
-        for app in api.INSTALLED_APPS.values():
-            if "all" in app.users or session_data.get("username") in app.users:
+        owner = session_data.get("username", "")
+        owner_group = _owner_group(owner)
+
+        for app in state.installed_apps.values():
+            if user_can_access(app.users, app.groups, owner, owner_group):
                     logo_src = app.logo
                     if logo_src and logo_src.startswith("/api/app_icon/"):
                         try:
@@ -431,24 +462,25 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                         "active": app.id == session_data.get("provider_app_id"),
                         "logo": logo_src
                     })
-        
+
         await websocket.send_json({
             "type": "app_list",
             "apps": sorted(user_apps, key=lambda x: x['name'])
         })
 
-    async def handle_restart_app(target_app_id):
+    async def handle_restart_app(target_app_id: str) -> None:
+        """Restart one app's container inside the session."""
         try:
-            await api.stop_container_in_session(session_id_str, target_app_id)
-            container_info = await api.ensure_container_for_session(session_id_str, target_app_id)
-            
+            await launch.stop_container_in_session(session_id_str, target_app_id)
+            container_info = await launch.ensure_container_for_session(session_id_str, target_app_id)
+
             if target_app_id == session_data.get("provider_app_id"):
                 session_data["instance_id"] = container_info["instance_id"]
                 session_data["ip"] = container_info["ip"]
                 session_data["port"] = container_info["port"]
-                api.SESSIONS_DB[session_id_str] = session_data
-                await api.save_sessions_to_disk()
-                
+                state.sessions[session_id_str] = session_data
+                await config_store.save_sessions()
+
                 await broadcast_to_room(session_id_str, {
                     "type": "app_swapped",
                     "app_name": session_data.get("app_name"),
@@ -459,11 +491,12 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
             if websocket.client_state == WebSocketState.CONNECTED:
                 await websocket.send_json({"type": "error", "message": "Failed to restart application."})
 
-    async def handle_swap_app(target_app_id):
+    async def handle_swap_app(target_app_id: str) -> None:
+        """Make another app the active one, starting its container if needed."""
         try:
-            container_info = await api.ensure_container_for_session(session_id_str, target_app_id)
-            app_config = api.INSTALLED_APPS.get(target_app_id)
-            
+            container_info = await launch.ensure_container_for_session(session_id_str, target_app_id)
+            app_config = state.installed_apps.get(target_app_id)
+
             session_data["instance_id"] = container_info["instance_id"]
             session_data["ip"] = container_info["ip"]
             session_data["port"] = container_info["port"]
@@ -472,9 +505,9 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
             session_data["app_logo"] = app_config.logo
 
             await broadcast_token_state(session_id_str, session_data)
-            api.SESSIONS_DB[session_id_str] = session_data
-            await api.save_sessions_to_disk()
-            
+            state.sessions[session_id_str] = session_data
+            await config_store.save_sessions()
+
             await broadcast_to_room(session_id_str, {
                 "type": "app_swapped",
                 "app_name": app_config.name,
@@ -504,8 +537,8 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                 elif action == "set_designated_speaker" and is_controller:
                     speaker_token = data.get("token")
                     session_data["designated_speaker"] = speaker_token
-                    api.SESSIONS_DB[session_id_str] = session_data
-                    await api.save_sessions_to_disk()
+                    state.sessions[session_id_str] = session_data
+                    await config_store.save_sessions()
                     logger.info(
                         f"[{session_id_str}] Designated speaker set to: {speaker_token}"
                     )
@@ -529,8 +562,8 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                         viewer_data_ref["username"] = new_username
                         connection_info["last_username_change"] = now
                         username = new_username
-                        api.SESSIONS_DB[session_id_str] = session_data
-                        await api.save_sessions_to_disk()
+                        state.sessions[session_id_str] = session_data
+                        await config_store.save_sessions()
                         logger.info(
                             f"[{session_id_str}] Viewer {token[:6]} changed name from '{old_username}' to '{new_username}'."
                         )
@@ -569,7 +602,7 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                 elif action == "stop_app" and is_controller:
                     target_app_id = data.get("app_id")
                     if target_app_id and target_app_id != session_data.get("provider_app_id"):
-                        await api.stop_container_in_session(session_id_str, target_app_id)
+                        await launch.stop_container_in_session(session_id_str, target_app_id)
                         await send_app_list()
 
                 elif action == "restart_app" and is_controller:
@@ -650,7 +683,7 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                 f"[{session_id_str}] Viewer {token[:6]} disconnected from collab room."
             )
 
-            session_data = api.SESSIONS_DB.get(session_id_str)
+            session_data = state.sessions.get(session_id_str)
             if was_live and session_data:
                 state_changed = False
                 input_released = False
@@ -698,8 +731,8 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
                         )
 
                 if state_changed:
-                    api.SESSIONS_DB[session_id_str] = session_data
-                    await api.save_sessions_to_disk()
+                    state.sessions[session_id_str] = session_data
+                    await config_store.save_sessions()
 
                 if input_released:
                     try:
@@ -733,9 +766,10 @@ async def room_websocket(websocket: WebSocket, session_id: UUID):
             )
 
 
-async def broadcast_state(session_id: str):
+async def broadcast_state(session_id: str) -> None:
+    """Send the participant list and designated speaker to the room."""
     connections = ROOM_CONNECTIONS.get(session_id)
-    session_data = api.SESSIONS_DB.get(session_id)
+    session_data = state.sessions.get(session_id)
     if not connections or not session_data:
         return
 
@@ -772,8 +806,9 @@ async def broadcast_state(session_id: str):
     await broadcast_to_room(session_id, state_payload)
 
 
-async def handle_assign_slot(session_id: str, viewer_token: str, slot: Optional[int]):
-    session_data = api.SESSIONS_DB.get(session_id)
+async def handle_assign_slot(session_id: str, viewer_token: str, slot: int | None) -> None:
+    """Assign a gamepad slot to a participant (or clear it with ``None``)."""
+    session_data = state.sessions.get(session_id)
     if not session_data:
         return
 
@@ -834,10 +869,10 @@ async def handle_assign_slot(session_id: str, viewer_token: str, slot: Optional[
 
     try:
         await broadcast_token_state(session_id, session_data)
-        api.SESSIONS_DB[session_id] = session_data
-        await api.save_sessions_to_disk()
+        state.sessions[session_id] = session_data
+        await config_store.save_sessions()
         logger.info(
-            f"[{session_id}] Successfully assigned slot {slot} to user {viewer_token[:6]} and pushed update."
+            f"[{session_id}] Assigned slot {slot} and pushed update."
         )
 
         for msg in notifications:
@@ -855,8 +890,9 @@ async def handle_assign_slot(session_id: str, viewer_token: str, slot: Optional[
         )
 
 
-async def handle_assign_mk(session_id: str, target_token: Optional[str]):
-    session_data = api.SESSIONS_DB.get(session_id)
+async def handle_assign_mk(session_id: str, target_token: str | None) -> None:
+    """Give mouse and keyboard control to a participant (``None`` = controller)."""
+    session_data = state.sessions.get(session_id)
     if not session_data:
         return
 
@@ -878,8 +914,8 @@ async def handle_assign_mk(session_id: str, target_token: Optional[str]):
 
     try:
         await broadcast_token_state(session_id, session_data)
-        api.SESSIONS_DB[session_id] = session_data
-        await api.save_sessions_to_disk()
+        state.sessions[session_id] = session_data
+        await config_store.save_sessions()
 
         msg = f"Mouse & Keyboard control assigned to {username}."
         await broadcast_to_room(
@@ -894,7 +930,8 @@ async def handle_assign_mk(session_id: str, target_token: Optional[str]):
     except Exception as e:
         logger.error(f"[{session_id}] Failed to assign MK control: {e}")
 
-async def notify_session_ended(session_id: str):
+async def notify_session_ended(session_id: str) -> None:
+    """Tell every participant that the session ended and drop the room."""
     if session_id in ROOM_CONNECTIONS:
         logger.info(f"[{session_id}] Broadcasting session termination to room.")
         await broadcast_to_room(session_id, {"type": "session_ended"})

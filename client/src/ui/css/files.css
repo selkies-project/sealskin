@@ -1,0 +1,158 @@
+/* File manager. Palette and components come from options.css. */
+.file-manager-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: var(--bg-0);
+}
+
+#homedir-nav { overflow-y: auto; flex-grow: 1; min-height: 0; }
+
+.main-panel { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; min-width: 0; }
+
+.view-panel { display: none; width: 100%; }
+.view-panel.active { display: flex; animation: fadeIn var(--dur-slow) var(--ease-out); }
+
+.file-manager-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1.5rem;
+  background-color: rgba(19, 24, 34, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.header-actions { display: flex; gap: 0.6rem; }
+.header-actions .default-actions { display: flex; gap: 0.6rem; }
+
+#breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+}
+.breadcrumb-item {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--dur), color var(--dur);
+  white-space: nowrap;
+}
+.breadcrumb-item:hover { color: var(--text-primary); background-color: var(--glass-strong); text-decoration: none; }
+.breadcrumb-item.active { color: var(--text-primary); font-weight: 600; }
+.breadcrumb-separator { color: var(--text-muted); opacity: 0.6; }
+
+.file-content-area { flex-grow: 1; overflow-y: auto; position: relative; }
+.file-content-area .table-container { margin: 1rem 1.5rem; width: auto; }
+
+#file-list-table { width: 100%; }
+#file-list-table th, #file-list-table td { padding: 0.7rem 1rem; }
+#file-list-table tbody tr { cursor: pointer; transition: background-color var(--dur-fast); }
+#file-list-table tbody tr.selected { background-color: var(--accent-soft); }
+#file-list-table tbody tr.selected td { border-bottom-color: transparent; }
+#file-list-table tbody tr:hover { background-color: var(--glass-strong); }
+#file-list-table tbody tr.selected:hover { background-color: var(--accent-soft); }
+
+.col-check { width: 40px; text-align: center; }
+.col-name { width: 60%; }
+.col-size { width: 15%; text-align: right; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.col-modified { width: 25%; color: var(--text-secondary); }
+.col-date { width: 20%; }
+.col-password { width: 10%; text-align: center; }
+.col-url { width: 30%; }
+.col-actions { width: 1%; white-space: nowrap; text-align: right; }
+
+.file-item-name { display: flex; align-items: center; gap: 0.85rem; }
+.file-item-name i {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  width: 1.4rem;
+  text-align: center;
+  transition: transform var(--dur) var(--ease-spring);
+}
+.file-item-name i.fa-folder { color: var(--accent-text); }
+#file-list-table tbody tr:hover .file-item-name i { transform: scale(1.12); }
+
+.col-actions .cell-wrapper { justify-content: flex-end; }
+.col-actions button { padding: 0.35rem 0.7rem; font-size: 0.78rem; }
+
+.share-url-cell { display: flex; align-items: center; gap: 0.6rem; }
+.share-url-cell input {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.6rem;
+  background-color: var(--bg-2);
+  border: 1px solid var(--border-color);
+  flex-grow: 1;
+  font-family: var(--font-mono);
+}
+
+.file-manager-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 1.5rem;
+  background-color: rgba(19, 24, 34, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+#selection-count { font-size: 0.875rem; color: var(--text-secondary); }
+
+.spinner-container { display: flex; justify-content: center; padding: 2rem; }
+
+#file-list-body.empty td { text-align: center; padding: 4rem; color: var(--text-muted); font-size: 1rem; }
+
+/* Drag and drop overlay */
+.drop-zone-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(13, 17, 23, 0.75);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 10;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+.drop-zone-overlay.visible { display: flex; animation: fadeIn var(--dur) var(--ease-out); }
+.drop-zone-content {
+  color: var(--text-primary);
+  text-align: center;
+  border: 2px dashed var(--accent-primary);
+  background-color: var(--accent-soft);
+  border-radius: var(--radius-lg);
+  padding: 3rem 4rem;
+  animation: pulseRing 1.2s var(--ease-out) infinite;
+}
+.drop-zone-content i { font-size: 4rem; margin-bottom: 1rem; color: var(--accent-text); }
+
+/* Upload progress modal */
+.upload-progress-list { max-height: 40vh; overflow-y: auto; padding-right: 0.5rem; }
+#upload-progress-list .upload-item { margin-bottom: 1rem; }
+#upload-progress-list .upload-item:last-child { margin-bottom: 0; }
+#upload-progress-list .upload-info {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 0.4rem; font-size: 0.875rem;
+}
+#upload-progress-list .filename { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
+#upload-progress-list .status { color: var(--text-muted); }
+#upload-progress-list .status.success { color: var(--color-success-text); }
+#upload-progress-list .status.error { color: var(--color-danger-text); }
+
+.sidebar-nav .nav-link.special-homedir { color: var(--color-warning-text); font-weight: 600; }
+.sidebar-nav .nav-link.special-homedir i { color: var(--color-warning-text); }
+.sidebar-nav .nav-link.special-homedir.active { background-color: var(--color-warning-soft); color: var(--color-warning-text); }
+.sidebar-nav .nav-link.special-homedir.active::before { background: var(--color-warning); }
+.sidebar-nav .nav-link.special-homedir:hover:not(.active) { background-color: var(--glass); color: var(--color-warning-text); }

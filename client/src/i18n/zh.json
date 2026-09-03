@@ -1,0 +1,961 @@
+{
+  "background": {
+    "contextMenu": {
+      "openUrl": "在 SealSkin 中打开链接",
+      "openFile": "在 SealSkin 中以文件形式打开链接目标",
+      "sendMedia": "发送媒体到 SealSkin",
+      "searchText": "在 SealSkin 中搜索“{selection}”",
+      "sendDownload": "将下一次下载发送到 SealSkin"
+    }
+  },
+  "common": {
+    "actions": "操作",
+    "active": "启用",
+    "cancel": "取消",
+    "manage": "管理",
+    "delete": "删除",
+    "edit": "编辑",
+    "save": "保存",
+    "none": "无",
+    "error": "错误",
+    "na": "不适用",
+    "of": "之",
+    "status": "状态",
+    "username": "用户名",
+    "group": "群组",
+    "groups": "群组",
+    "publicKey": "公钥",
+    "name": "名称",
+    "source": "来源",
+    "imageVersion": "镜像版本",
+    "language": "语言",
+    "storage": "存储",
+    "gpu": "GPU",
+    "version": "版本",
+    "checked": "已选中",
+    "never": "永不",
+    "stop": "停止",
+    "reopen": "重新打开",
+    "sendFile": "发送文件",
+    "share": "分享",
+    "search": "搜索",
+    "refresh": "刷新",
+    "close": "关闭",
+    "copy": "复制",
+    "open": "打开",
+    "copyUrl": "复制URL",
+    "download": "下载",
+    "next": "下一页",
+    "previous": "上一页",
+    "page": "页码",
+    "home": "主目录",
+    "homes": "主目录",
+    "sessions": "会话",
+    "users": "用户",
+    "admins": "管理员",
+    "yes": "是",
+    "no": "否",
+    "daysAgo": "{count}天前",
+    "hoursAgo": "{count}小时前",
+    "minutesAgo": "{count}分钟前",
+    "justNow": "刚刚",
+    "bytes": "字节",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB",
+    "pb": "PB"
+  },
+  "options": {
+    "sidebar": {
+      "config": "配置",
+      "home": "主目录",
+      "sessions": "活跃会话",
+      "pinned": "固定行为",
+      "appStore": "应用商店",
+      "appTemplates": "应用模板",
+      "appLaboratory": "应用实验室",
+      "installedApps": "已安装应用",
+      "users": "用户",
+      "groups": "群组",
+      "admins": "管理员"
+    },
+    "dashboard": {
+      "title": "仪表盘",
+      "clientSettings": "客户端设置",
+      "exportConfig": "导出配置",
+      "userStatus": "用户状态",
+      "loggedInAs": "登录为:",
+      "role": "角色",
+      "roleAdmin": "管理员",
+      "roleUser": "标准用户",
+      "serverInfo": "服务器信息",
+      "server": "服务器:",
+      "cpuModel": "CPU型号:",
+      "storageUsage": "存储使用情况:",
+      "detectedGpus": "检测到的GPU:",
+      "logout": "登出并清除配置",
+      "howTo": "如何使用SealSkin",
+      "howToDescription": "本节包含有关如何使用此扩展程序的基本文档。",
+      "howToList": [
+        "<strong>在隔离环境中打开内容:</strong> 右键单击任何链接、图片或选定的文本，然后从“SealSkin隔离”上下文菜单中选择一个选项。",
+        "<strong>将下载发送到隔离环境:</strong> 在页面上右键单击并选择“将下一次下载发送到隔离环境”。您下载的下一个文件将被拦截并发送到一个安全的会话中。",
+        "<strong>启动一个干净的应用程序:</strong> 单击浏览器工具栏中的SealSkin图标。",
+        "<strong>管理持久性存储:</strong> 使用此页面上的“主目录”选项卡创建和删除可在多个会话中使用的存储卷。",
+        "<strong>保存启动选项:</strong> 在启动应用程序之前，在弹出窗口中勾选“保存这些启动选项”框，可为特定文件类型（例如.pdf）或所有URL保存设置。在“固定行为”选项卡中管理这些已保存的首选项。"
+      ],
+      "confirmLogout": "您确定要登出吗？这将清除此浏览器中保存的配置。"
+    },
+    "config": {
+      "quickSetup": "快速设置",
+      "quickSetupDescription": "上传您的管理员提供的配置文件（.json），或在下方粘贴其内容以自动设置扩展程序。",
+      "uploadLabel": "上传配置文件",
+      "pasteLabel": "或粘贴配置文本",
+      "pastePlaceholder": "在此处粘贴您的JSON配置...",
+      "applyButton": "应用配置",
+      "manualLink": "手动配置",
+      "advancedTitle": "客户端配置（高级）",
+      "serverIpLabel": "服务器IP或域名",
+      "serverIpPlaceholder": "例如, 192.168.1.100",
+      "apiPortLabel": "API端口",
+      "apiPortPlaceholder": "例如, 8000",
+      "sessionPortLabel": "会话端口",
+      "sessionPortPlaceholder": "例如, 8443",
+      "usernameLabel": "用户名",
+      "usernamePlaceholder": "您的用户名",
+      "privateKeyLabel": "您的私钥（PEM格式）",
+      "privateKeyPlaceholder": "在此处粘贴您的私钥内容",
+      "serverKeyLabel": "服务器公钥（PEM格式）",
+      "serverKeyPlaceholder": "在此处粘贴server_public.pem的内容",
+      "searchEngineLabel": "选定文本的默认搜索引擎",
+      "saveButton": "保存配置",
+      "loginButton": "登录并测试",
+      "automaticLink": "自动配置",
+      "chooseFile": "选择文件",
+      "keyGeneration": "密钥生成",
+      "keyGenDescription": "如果您没有密钥对，可以在此处生成一个。私钥将自动填写在上方。请将公钥提供给您的管理员。",
+      "generateKeyButton": "生成新密钥对",
+      "publicKeyForAdminLabel": "您的公钥（提供给管理员）"
+    },
+    "home": {
+      "title": "您的主目录",
+      "description": "创建持久性存储目录以在会话之间使用。这些目录将作为您的配置目录挂载到您的应用程序中。",
+      "newTitle": "创建新的主目录",
+      "nameLabel": "目录名称:",
+      "namePlaceholder": "例如, my-project-files",
+      "nameTitle": "只能使用字母、数字、下划线或连字符。",
+      "createButton": "创建目录",
+      "isLaboratory": "这是一个实验室应用，基于基础镜像和自定义设置构建。",
+      "laboratory": "实验室",
+      "confirmDelete": "您确定要删除已安装的应用“{appName}”吗？"
+    },
+    "sessions": {
+      "title": "活跃会话",
+      "application": "应用程序",
+      "started": "开始时间",
+      "noSessionsUser": "未找到活跃会话。",
+      "noSessionsAdmin": "未找到任何用户的活跃会话。",
+      "sessionsFor": "用户 {username} 的会话 ({count})",
+      "confirmStop": "您确定要停止此会话吗？容器将被销毁。"
+    },
+    "pinned": {
+      "title": "固定的扩展行为",
+      "description": "此表显示了您为特定文件类型或所有URL保存的启动选项。您可以删除一个固定行为，以便再次提示您选择启动选项。",
+      "trigger": "触发器",
+      "savedApp": "已保存的应用",
+      "triggerSimple": "简单启动（工具栏按钮）",
+      "triggerUrl": "所有URL（来自上下文菜单）",
+      "triggerFile": "文件类型: <strong>{fileType}</strong>",
+      "unknownApp": "未知应用 ({appId}...)"
+    },
+    "admins": {
+      "serverKeyTitle": "服务器公钥",
+      "serverKeyDescription": "这是用户配置文件连接到此服务器所需的公钥。",
+      "title": "管理员管理",
+      "searchPlaceholder": "搜索管理员...",
+      "newTitle": "创建新管理员",
+      "publicKeyOptionalLabel": "公钥（可选）:",
+      "publicKeyPlaceholder": "在此处粘贴公钥，或留空以生成一个。",
+      "createButton": "创建管理员",
+      "confirmDelete": "您确定要删除管理员“{username}”吗？此操作还将删除其所有持久性存储，且无法撤销。"
+    },
+    "users": {
+      "title": "用户管理",
+      "searchPlaceholder": "按名称或群组搜索用户...",
+      "newTitle": "创建新用户",
+      "publicKeyOptionalLabel": "公钥（可选）:",
+      "publicKeyPlaceholder": "在此处粘贴用户的公钥，或留空以生成一个。",
+      "settingsTitle": "用户设置",
+      "sessionLimitLabel": "会话限制",
+      "sessionLimitTitle": "用户可以拥有的活跃会话数。-1表示无限制。",
+      "permissionsTitle": "权限与安全加固",
+      "activeAccount": "启用账户",
+      "allowStorage": "允许持久性存储",
+      "allowGpu": "允许GPU访问",
+      "hardenContainer": "加固容器",
+      "hardenWm": "加固窗口管理器",
+      "createButton": "创建用户",
+      "homesDisabledTooltip": "此用户的持久性存储已禁用",
+      "confirmDelete": "您确定要删除用户“{username}”吗？此操作还将删除其所有持久性存储，且无法撤销。",
+      "allowPublicSharing": "允许公开文件共享"
+    },
+    "groups": {
+      "title": "群组管理",
+      "searchPlaceholder": "搜索群组...",
+      "newTitle": "创建新群组",
+      "nameLabel": "群组名称:",
+      "overrideTitle": "群组覆盖设置",
+      "permissionsTitle": "权限与安全加固覆盖",
+      "createButton": "创建群组",
+      "confirmDelete": "您确定要删除群组“{groupName}”吗？此群组中的用户将恢复其个人设置。"
+    },
+    "installedApps": {
+      "title": "已安装应用",
+      "searchPlaceholder": "搜索已安装的应用...",
+      "noAppsFound": "未找到已安装的应用。",
+      "pulling": "正在拉取新镜像...",
+      "notLocal": "本地未找到镜像",
+      "confirmDelete": "您确定要删除已安装的应用“{appName}”吗？"
+    },
+    "appStore": {
+      "title": "应用商店",
+      "refreshTitle": "刷新所选商店",
+      "selectLabel": "选择应用商店",
+      "addLabel": "添加新应用商店",
+      "namePlaceholder": "商店名称",
+      "urlPlaceholder": "商店YAML URL",
+      "availableTitle": "可用应用",
+      "addManual": "手动添加应用",
+      "searchPlaceholder": "搜索可用应用...",
+      "noAppsFound": "未找到应用程序。",
+      "availableFrom": "来自 {storeName} 的可用应用",
+      "couldNotLoad": "无法从此商店加载应用。"
+    },
+    "appTemplates": {
+      "title": "应用程序模板编辑器",
+      "loadLabel": "加载模板",
+      "createOption": "创建新模板",
+      "nameLabel": "模板名称",
+      "namePlaceholder": "为新模板输入一个名称",
+      "saveButton": "保存配置文件",
+      "deleteButton": "删除",
+      "previewTitle": "UI预览",
+      "contentArea": "应用程序内容区域",
+      "confirmDelete": "您确定要删除模板“{templateName}”吗？此操作无法撤销。",
+      "deleteDisabled": "此模板无法删除。",
+      "enterName": "请输入新模板的名称。",
+      "settings": {
+        "TITLE": {
+          "label": "页面标题",
+          "description": "Web浏览器上显示的页面标题。"
+        },
+        "SELKIES_UI_TITLE": {
+          "label": "侧边栏标题",
+          "description": "侧边栏左上角的标题。"
+        },
+        "SELKIES_UI_SHOW_SIDEBAR": {
+          "label": "显示侧边栏",
+          "description": "显示主侧边栏UI。"
+        },
+        "SELKIES_UI_SHOW_LOGO": {
+          "label": "显示Logo",
+          "description": "在侧边栏中显示Selkies Logo。"
+        },
+        "SELKIES_UI_SHOW_CORE_BUTTONS": {
+          "label": "显示核心按钮",
+          "description": "显示核心组件按钮（显示、音频等）。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
+          "label": "显示视频设置",
+          "description": "在侧边栏中显示视频设置部分。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SCREEN_SETTINGS": {
+          "label": "显示屏幕设置",
+          "description": "在侧边栏中显示屏幕设置部分。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_AUDIO_SETTINGS": {
+          "label": "显示音频设置",
+          "description": "在侧边栏中显示音频设置部分。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_STATS": {
+          "label": "显示统计信息",
+          "description": "在侧边栏中显示统计信息部分。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
+          "label": "显示剪贴板",
+          "description": "在侧边栏中显示剪贴板部分。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FILES": {
+          "label": "显示文件部分",
+          "description": "在侧边栏中显示文件传输部分。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_APPS": {
+          "label": "显示应用部分",
+          "description": "在侧边栏中显示应用程序部分。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SHARING": {
+          "label": "显示共享部分",
+          "description": "在侧边栏中显示共享部分。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
+          "label": "显示游戏手柄部分",
+          "description": "在侧边栏中显示游戏手柄部分。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
+          "label": "显示键盘按钮",
+          "description": "显示屏幕键盘按钮。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SOFT_BUTTONS": {
+          "label": "显示软按钮",
+          "description": "显示软按钮部分（用于移动设备）。"
+        },
+        "WATERMARK_PNG": {
+          "label": "水印PNG路径",
+          "description": "容器内水印PNG的完整路径。"
+        },
+        "WATERMARK_LOCATION": {
+          "label": "水印位置",
+          "description": "在视频流上绘制图像的位置。",
+          "options": {
+            "disabled": "禁用",
+            "topLeft": "左上",
+            "topRight": "右上",
+            "bottomLeft": "左下",
+            "bottomRight": "右下",
+            "centered": "居中",
+            "animated": "动画"
+          }
+        },
+        "DASHBOARD": {
+          "label": "仪表盘样式",
+          "description": "允许用户设置他们的仪表盘。",
+          "options": {
+            "default": "默认",
+            "selkiesDefault": "Selkies (默认)",
+            "zinc": "Zinc",
+            "wish": "Wish"
+          }
+        },
+        "SELKIES_AUDIO_ENABLED": {
+          "label": "启用音频",
+          "description": "启用服务器到客户端的音频流。"
+        },
+        "SELKIES_MICROPHONE_ENABLED": {
+          "label": "启用麦克风",
+          "description": "启用客户端到服务器的麦克风转发。"
+        },
+        "SELKIES_GAMEPAD_ENABLED": {
+          "label": "启用游戏手柄",
+          "description": "启用游戏手柄支持。"
+        },
+        "SELKIES_CLIPBOARD_ENABLED": {
+          "label": "启用剪贴板",
+          "description": "启用剪贴板同步。"
+        },
+        "SELKIES_CLIPBOARD_IN_ENABLED": {
+          "label": "启用客户端到服务器剪贴板",
+          "description": "允许从浏览器传输剪贴板数据。"
+        },
+        "SELKIES_CLIPBOARD_OUT_ENABLED": {
+          "label": "启用服务器到客户端剪贴板",
+          "description": "允许从服务器传输剪贴板数据。"
+        },
+        "SELKIES_ENABLE_BINARY_CLIPBOARD": {
+          "label": "启用二进制剪贴板",
+          "description": "允许剪贴板上的二进制数据（图像）。"
+        },
+        "SELKIES_COMMAND_ENABLED": {
+          "label": "启用命令Websocket",
+          "description": "启用命令Websocket消息的解析。"
+        },
+        "SELKIES_FILE_TRANSFERS": {
+          "label": "文件传输",
+          "description": "允许的方向（'upload,download', 'upload', 'download', 'none'）。"
+        },
+        "SELKIES_ENABLE_SHARING": {
+          "label": "启用所有共享",
+          "description": "所有共享功能的主开关。"
+        },
+        "SELKIES_SECOND_SCREEN": {
+          "label": "启用第二屏幕",
+          "description": "启用对第二台显示器/屏幕的支持。"
+        },
+        "SELKIES_USE_BROWSER_CURSORS": {
+          "label": "使用浏览器光标",
+          "description": "使用浏览器CSS光标而不是渲染到画布。"
+        },
+        "SELKIES_USE_CSS_SCALING": {
+          "label": "使用CSS缩放 (LoDPI)",
+          "description": "如果为true，则发送较低分辨率并拉伸画布。"
+        },
+        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+          "label": "手动分辨率模式",
+          "description": "将分辨率锁定为手动设置的宽度/高度值。"
+        },
+        "SELKIES_FORCE_ALIGNED_RESOLUTION": {
+          "label": "强制对齐分辨率",
+          "description": "强制显示分辨率为 16 像素的倍数."
+        },
+        "SELKIES_MANUAL_WIDTH": {
+          "label": "手动宽度",
+          "description": "将宽度锁定为固定值。强制使用手动模式。"
+        },
+        "SELKIES_MANUAL_HEIGHT": {
+          "label": "手动高度",
+          "description": "将高度锁定为固定值。强制使用手动模式。"
+        },
+        "SELKIES_SCALING_DPI": {
+          "label": "UI缩放DPI",
+          "description": "UI缩放的默认DPI。"
+        },
+        "SELKIES_AUDIO_BITRATE": {
+          "label": "音频比特率",
+          "description": "默认音频比特率。"
+        },
+        "SELKIES_ENCODER": {
+          "label": "编码器",
+          "description": "逗号分隔的编码器列表。第一个为默认。"
+        },
+        "SELKIES_USE_CPU": {
+          "label": "强制CPU编码",
+          "description": "强制为pixelflux使用基于CPU的编码。"
+        },
+        "SELKIES_FRAMERATE": {
+          "label": "帧率（范围或固定值）",
+          "description": "例如，'8-120'表示范围，'60'表示固定值。"
+        },
+        "SELKIES_H264_CRF": {
+          "label": "H.264 CRF（范围或固定值）",
+          "description": "例如，'5-50'表示范围，'25'表示固定值。"
+        },
+        "SELKIES_JPEG_QUALITY": {
+          "label": "JPEG质量（范围或固定值）",
+          "description": "例如，'1-100'表示范围，'60'表示固定值。"
+        },
+        "SELKIES_H264_FULLCOLOR": {
+          "label": "H.264全彩",
+          "description": "为pixelflux编码器启用H.264全彩范围。"
+        },
+        "SELKIES_H264_STREAMING_MODE": {
+          "label": "H.264流媒体（Turbo）模式",
+          "description": "启用H.264低延迟流媒体模式。"
+        },
+        "SELKIES_USE_PAINT_OVER_QUALITY": {
+          "label": "使用重绘质量",
+          "description": "为静态场景启用高质量的重绘。"
+        },
+        "SELKIES_PAINT_OVER_JPEG_QUALITY": {
+          "label": "重绘JPEG质量",
+          "description": "例如，'1-100'表示范围，'90'表示固定值。"
+        },
+        "SELKIES_H264_PAINTOVER_CRF": {
+          "label": "重绘H.264 CRF",
+          "description": "例如，'5-50'表示范围，'18'表示固定值。"
+        },
+        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
+          "label": "重绘突发帧数",
+          "description": "例如，'1-30'表示范围，'5'表示固定值。"
+        },
+        "HARDEN_DESKTOP": {
+          "label": "桌面加固（预设）",
+          "description": "启用DISABLE_OPEN_TOOLS、DISABLE_SUDO和DISABLE_TERMINALS。"
+        },
+        "HARDEN_OPENBOX": {
+          "label": "窗口管理器加固（预设）",
+          "description": "启用DISABLE_CLOSE_BUTTON、DISABLE_MOUSE_BUTTONS和HARDEN_KEYBINDS。同时启用RESTART_APP。"
+        },
+        "DISABLE_OPEN_TOOLS": {
+          "label": "禁用打开工具",
+          "description": "禁用xdg-open和exo-open二进制文件。"
+        },
+        "DISABLE_SUDO": {
+          "label": "禁用Sudo",
+          "description": "禁用sudo命令。"
+        },
+        "DISABLE_TERMINALS": {
+          "label": "禁用终端",
+          "description": "禁用常见的终端模拟器。"
+        },
+        "DISABLE_CLOSE_BUTTON": {
+          "label": "禁用窗口关闭按钮",
+          "description": "从窗口标题栏中移除关闭按钮。"
+        },
+        "DISABLE_MOUSE_BUTTONS": {
+          "label": "禁用右键/中键单击",
+          "description": "禁用右键和中键单击的上下文菜单。"
+        },
+        "HARDEN_KEYBINDS": {
+          "label": "加固快捷键",
+          "description": "禁用默认的Openbox快捷键，如Alt+F4。"
+        },
+        "RESTART_APP": {
+          "label": "关闭时重启应用",
+          "description": "如果主应用程序关闭，则自动重启它。"
+        },
+        "MAX_RES": {
+          "label": "最大分辨率",
+          "description": "容器的最大分辨率，默认为16k。"
+        },
+        "START_DOCKER": {
+          "label": "启动Docker-in-Docker",
+          "description": "如果为false，特权容器将不会启动DinD。"
+        },
+        "DISABLE_IPV6": {
+          "label": "禁用IPv6",
+          "description": "如果为true，将禁用IPv6。"
+        },
+        "DISABLE_ZINK": {
+          "label": "禁用Zink",
+          "description": "如果检测到显卡，则不设置Zink环境变量。"
+        },
+        "DISABLE_DRI3": {
+          "label": "禁用DRI3",
+          "description": "如果检测到显卡，则不使用DRI3加速。"
+        },
+        "NO_DECOR": {
+          "label": "无窗口装饰",
+          "description": "为PWA使用而运行无窗口边框的应用程序。"
+        },
+        "NO_FULL": {
+          "label": "无全屏",
+          "description": "不自动全屏应用程序。"
+        },
+        "NO_GAMEPAD": {
+          "label": "禁用游戏手柄注入",
+          "description": "禁用用户空间游戏手柄插入器注入。"
+        },
+        "SELKIES_DEBUG": {
+          "label": "启用Selkies调试",
+          "description": "为流媒体组件启用调试日志记录。"
+        },
+        "DOCKER_PRIVILEGED": {
+          "label": "特权模式",
+          "description": "赋予容器所有权限，解除cgroup限制，挂载所有主机设备。这可能会破坏系统！"
+        },
+        "DOCKER_BIND_MOUNTS": {
+          "label": "额外绑定挂载",
+          "description": "额外的绑定挂载（逗号分隔，例如 /host/path:/container/path:ro）。"
+        },
+        "DOCKER_ENV": {
+          "label": "环境变量",
+          "description": "额外的环境变量（逗号分隔，例如 KEY=VALUE,KEY2=VALUE2）。"
+        },
+        "DOCKER_CAP_ADD": {
+          "label": "添加能力 (Cap Add)",
+          "description": "添加内核能力（逗号分隔，例如 SYS_ADMIN,MKNOD）。"
+        },
+        "DOCKER_CAP_DROP": {
+          "label": "删除能力 (Cap Drop)",
+          "description": "删除内核能力（逗号分隔）。"
+        },
+        "DOCKER_SECURITY_OPT": {
+          "label": "安全选项",
+          "description": "安全选项（逗号分隔，例如 seccomp=unconfined,apparmor=unconfined）。"
+        },
+        "DOCKER_DEVICES": {
+          "label": "设备",
+          "description": "暴露主机设备（逗号分隔，例如 /dev/sda:/dev/xvda:rwm）。"
+        },
+        "DOCKER_SHM_SIZE": {
+          "label": "SHM 大小",
+          "description": "/dev/shm 的大小（例如 1G, 2G）。"
+        },
+        "DOCKER_MEM_LIMIT": {
+          "label": "内存限制",
+          "description": "内存限制（例如 1g, 512m）。"
+        },
+        "DOCKER_CPU_SHARES": {
+          "label": "CPU 份额",
+          "description": "CPU 份额（相对权重整数）。"
+        },
+        "DOCKER_NANO_CPUS": {
+          "label": "Nano CPUs",
+          "description": "以 1e-9 CPU 为单位的 CPU 配额。"
+        },
+        "DOCKER_NETWORK_MODE": {
+          "label": "网络模式",
+          "description": "容器的网络模式。",
+          "options": {
+            "default": "默认 (Bridge)",
+            "host": "Host",
+            "none": "无",
+            "bridge": "Bridge"
+          }
+        },
+        "DOCKER_IPC_MODE": {
+          "label": "IPC 模式",
+          "description": "设置容器的 IPC 模式。",
+          "options": {
+            "default": "默认",
+            "host": "Host",
+            "private": "私有",
+            "shareable": "可共享"
+          }
+        },
+        "DOCKER_PID_MODE": {
+          "label": "PID 模式",
+          "description": "设置容器的 PID 模式。",
+          "options": {
+            "default": "默认",
+            "host": "Host"
+          }
+        },
+        "DOCKER_DNS": {
+          "label": "DNS 服务器",
+          "description": "自定义 DNS 服务器（逗号分隔）。"
+        },
+        "DOCKER_EXTRA_HOSTS": {
+          "label": "额外主机",
+          "description": "主机到 IP 的映射（逗号分隔，例如 hostname:1.2.3.4）。"
+        },
+        "DOCKER_SYSCTLS": {
+          "label": "Sysctls",
+          "description": "内核参数（逗号分隔，例如 net.ipv4.ip_forward=1）。"
+        },
+        "DOCKER_ULIMITS": {
+          "label": "Ulimits",
+          "description": "Ulimits（逗号分隔，例如 nofile=1024:1024）。"
+        },
+        "DOCKER_TMPFS": {
+          "label": "Tmpfs 挂载",
+          "description": "临时文件系统（逗号分隔，例如 /run:rw,noexec,nosuid,size=65536k）。"
+        },
+        "DOCKER_GROUP_ADD": {
+          "label": "添加组",
+          "description": "附加组名称和/或 ID 的列表（逗号分隔）。"
+        }
+      }
+    },
+    "appLaboratory": {
+      "title": "应用实验室",
+      "description": "在基础应用之上叠加更改，创建和测试自定义应用程序配置。",
+      "selectApp": "选择应用",
+      "createNew": "创建新应用",
+      "baseApp": "基础应用",
+      "baseAppDescription": "您的新自定义应用将基于此已安装的应用程序。",
+      "selectBase": "选择一个基础应用",
+      "customizationTitle": "自定义",
+      "appName": "应用名称",
+      "appIcon": "应用图标",
+      "uploadIcon": "上传图标",
+      "autostartScriptLabel": "自定义自动启动脚本",
+      "permissionsTitle": "权限",
+      "usersLabel": "允许的用户",
+      "groupsLabel": "允许的群组",
+      "launchButton": "保存并启动自定义会话",
+      "closeButton": "关闭会话并最终确定",
+      "savingAndLaunching": "正在保存并启动...",
+      "placeholder": "应用实验室允许您基于现有的已安装应用程序配置基础主目录和启动脚本。此主目录将在用户首次初始化时复制，包含您在此会话中设置的所有文件和设置。您可以重新启动现有的实验室应用以进一步修改其内容。",
+      "formInvalid": "请选择一个基础应用并为新应用提供一个名称。"
+    },
+    "modals": {
+      "editUserTitle": "编辑用户: {username}",
+      "saveChanges": "保存更改",
+      "effectiveSettings": "生效设置（含群组覆盖）",
+      "editGroupTitle": "编辑群组: {groupName}",
+      "userConfigTitle": "用户配置",
+      "warning": "此配置仅显示一次。请安全地提供给用户。",
+      "info": "您可以下载此配置文件，以便在另一台设备上轻松设置SealSkin。请妥善保管此文件，因为它包含您的私钥。",
+      "configDataLabel": "配置数据 (JSON)",
+      "copyButton": "复制文本",
+      "downloadButton": "下载文件",
+      "manageHomeDirs": "管理主目录",
+      "dirsForUser": "用户目录: {username}",
+      "dirsForAdmin": "管理员目录: {username}",
+      "newDirForUser": "为用户创建新目录",
+      "createDirButton": "创建目录",
+      "confirmDeleteDir": "您确定要删除用户“{username}”的目录“{homeName}”吗？此操作是永久性的。",
+      "installAppTitle": "安装 {appName}",
+      "editAppTitle": "编辑 {appName}",
+      "customNameLabel": "自定义名称",
+      "imageLabel": "容器镜像",
+      "permissions": "权限",
+      "allowedUsersLabel": "允许的用户（逗号分隔，'all'表示所有人）",
+      "allowedGroupsLabel": "允许的群组（逗号分隔，'all'表示所有群组）",
+      "features": "功能",
+      "gpuSupport": "GPU支持",
+      "homeMounting": "主目录挂载",
+      "urlSupport": "URL打开支持",
+      "fileSupport": "文件打开支持",
+      "autoUpdate": "自动更新镜像",
+      "advancedSettings": "高级设置",
+      "appTemplateLabel": "应用程序模板",
+      "appTemplateDescription": "为高级容器启动设置选择一个预配置的模板。",
+      "customAutostartScriptLabel": "自定义自动启动脚本",
+      "customAutostartScriptDescription": "自定义自动启动逻辑，留空以使用应用程序提供商的默认设置。",
+      "saveInstallation": "保存安装",
+      "updateStatusTitle": "{appName}的更新状态",
+      "checkingUpdates": "正在检查更新...",
+      "updateAvailable": "有新的镜像版本可用！",
+      "yourVersion": "您的版本: {sha}",
+      "latestAvailable": "最新版本可从注册表中拉取。",
+      "pullLatest": "拉取最新镜像",
+      "upToDate": "您的镜像已是最新版本。",
+      "currentVersion": "当前版本: {sha}",
+      "errorChecking": "检查更新时出错。",
+      "pullingLatest": "正在拉取最新镜像... 这可能需要一些时间。",
+      "pullComplete": "拉取完成！",
+      "newVersion": "新版本: {sha}",
+      "errorPulling": "拉取镜像时出错。",
+      "manualInstallNote": "注意：手动添加的镜像应基于与 selkies-baseimage 兼容的镜像。",
+      "generalTitle": "常规与性能设置",
+      "dockerTitle": "Docker 高级覆盖",
+      "dockerDescription": "这些设置覆盖默认的容器配置。请谨慎使用，除非您知道自己在做什么。"
+    },
+    "status": {
+      "loggingIn": "登录中...",
+      "configSaved": "配置保存成功！",
+      "configApplied": "配置已应用！请登录并测试。",
+      "configApplyFailed": "应用配置失败: {error}",
+      "fileReadError": "读取文件时出错。",
+      "noConfig": "请提供配置文件或文本。",
+      "loggedInAdmin": "以管理员身份登录: {username}",
+      "loggedInUser": "以标准用户身份登录: {username}。",
+      "loginFailed": "登录失败: {error}",
+      "adminDataRefreshFailed": "刷新管理员数据失败: {error}",
+      "logoutSuccess": "已登出并清除配置。",
+      "generateConfigFailed": "无法生成配置，缺少用户详细信息。",
+      "copySuccess": "配置已复制到剪贴板！",
+      "copyFailed": "复制文本失败。",
+      "publicKeyCopied": "公钥已复制！",
+      "keyCopyFailed": "复制密钥失败。",
+      "creatingAdmin": "正在创建管理员...",
+      "adminCreated": "管理员“{username}”已创建。",
+      "adminCreateFailed": "创建管理员时出错: {error}",
+      "adminDeleted": "管理员“{username}”已成功删除。",
+      "adminDeleteFailed": "删除管理员时出错: {error}",
+      "creatingUser": "正在创建用户...",
+      "userCreated": "用户“{username}”已创建。",
+      "userCreateFailed": "创建用户时出错: {error}",
+      "userDeleted": "用户“{username}”已成功删除。",
+      "userDeleteFailed": "删除用户时出错: {error}",
+      "userUpdated": "用户“{username}”已成功更新。",
+      "userUpdateFailed": "更新用户时出错: {error}",
+      "creatingGroup": "正在创建群组...",
+      "groupCreated": "群组“{groupName}”已创建。",
+      "groupCreateFailed": "创建群组时出错: {error}",
+      "groupDeleted": "群组“{groupName}”已成功删除。",
+      "groupDeleteFailed": "删除群组时出错: {error}",
+      "groupUpdated": "群组“{groupName}”已成功更新。",
+      "groupUpdateFailed": "更新群组时出错: {error}",
+      "homedirLoadFailed": "加载主目录失败: {error}",
+      "homedirCreateFailed": "创建目录时出错: {error}",
+      "homedirCreated": "主目录“{homeName}”已创建。",
+      "homedirDeleted": "目录“{homeName}”已删除。",
+      "homedirDeleteFailed": "删除目录时出错: {error}",
+      "homedirCreatedFor": "为{username}创建了目录“{homeName}”。",
+      "homedirDeletedFor": "为{username}删除了目录“{homeName}”。",
+      "sessionsLoadFailed": "加载会话失败: {error}",
+      "sessionStopError": "停止会话时出错: {error}",
+      "sessionStopped": "会话已成功停止。",
+      "appDataRefreshFailed": "刷新应用数据失败: {error}",
+      "closingSession": "正在提交自定义会话...",
+      "sessionClosed": "自定义会话已关闭。",
+      "sessionCloseFailed": "关闭自定义会话失败：{error}",
+      "fetchingApps": "正在从商店获取应用...",
+      "fetchAppsFailed": "从商店获取应用失败: {error}",
+      "appStoreAddFailed": "添加商店时出错: {error}",
+      "appStoreAdded": "应用商店“{name}”已添加。",
+      "appSaved": "应用“{name}”已成功{action}。",
+      "appSaveActions": {
+        "updated": "更新",
+        "installed": "安装"
+      },
+      "appSaveFailed": "保存应用时出错: {error}",
+      "appDeleted": "应用“{name}”已删除。",
+      "appDeleteFailed": "删除应用时出错: {error}",
+      "templateSaved": "模板“{name}”已成功保存。",
+      "templateSaveFailed": "保存模板时出错: {error}",
+      "templateDeleted": "模板“{name}”已成功删除。",
+      "templateDeleteFailed": "删除模板时出错: {error}",
+      "pinRemoved": "已删除固定行为。",
+      "keyGenerated": "已生成新的密钥对。",
+      "keyGenFailed": "密钥生成失败：{error}",
+      "pendingConfigSaved": "待定配置已保存。您现在可以将您的公钥提供给管理员。",
+      "settingsSaved": "设置已保存。",
+      "appCreated": "应用“{name}”已成功创建。",
+      "launchFailed": "启动失败：{error}"
+    },
+    "placeholders": {
+      "noAdmins": "未找到管理员。",
+      "noUsers": "未找到用户。",
+      "noGroups": "未找到群组。",
+      "noHomeDirs": "未找到主目录。",
+      "noSessions": "未找到活跃会话。",
+      "noPinned": "未找到固定行为。",
+      "errorLoading": "加载目录时出错。",
+      "noInstalledApps": "尚未安装任何应用程序。"
+    }
+  },
+  "popup": {
+    "tabs": {
+      "launch": "启动新的",
+      "sessions": "活跃会话",
+      "manageFiles": "管理文件",
+      "uploadStorage": "上传到存储",
+      "uploadFiles": "上传文件",
+      "uploadFilesTitle": "打开专用的文件上传页面"
+    },
+    "launchView": {
+      "searchPlaceholder": "搜索应用程序...",
+      "uploadingFile": "正在上传文件...",
+      "gpuLabel": "GPU",
+      "storageLabel": "存储",
+      "languageLabel": "语言",
+      "cleanroom": "无尘室 (临时)",
+      "noGpu": "无",
+      "saveOptions": "保存这些启动选项",
+      "saveOptionsForUrl": "为所有URL保存选项",
+      "saveOptionsForFile": "为.{extension}文件保存选项",
+      "openFile": "启动时打开文件",
+      "launchButton": "启动",
+      "launchingButton": "启动中...",
+      "uploadingButton": "上传中...",
+      "autoHome": "自动 (按应用持久化)",
+      "collaborationMode": "协作会话",
+      "waylandMode": "Wayland 模式"
+    },
+    "sessionsView": {
+      "noSessions": "未找到活跃会话。"
+    },
+    "uploadStorageView": {
+      "selectHome": "选择主目录",
+      "description": "这将上传文件 <strong>{filename}</strong> 直接到您的“文件”存储中，以备将来使用。",
+      "descriptionFallback": "这将上传文件 <strong>{filename}</strong> 直接到您的“文件”存储中，以备将来使用。",
+      "uploadButton": "上传文件",
+      "uploadingButton": "上传中...",
+      "preparing": "准备文件中...",
+      "uploadingChunk": "正在上传分块 {current} / {total}...",
+      "finalizing": "正在完成...",
+      "uploadComplete": "上传完成！"
+    },
+    "status": {
+      "unconfigured": "请通过选项页面配置扩展程序。",
+      "openingServerFile": "正在打开服务器端文件：{filename}",
+      "openingFile": "正在打开文件: {filename}",
+      "openingUrl": "正在打开URL: {targetUrl}",
+      "error": "错误: {message}",
+      "preparingFile": "准备文件中...",
+      "sendingFile": "正在发送文件到会话...",
+      "errorSendingFile": "发送文件时出错: {message}",
+      "errorClosingSession": "关闭会话时出错: {message}",
+      "preparingSession": "准备隔离会话中...",
+      "fetchingData": "正在获取文件数据...",
+      "fetchDataFailed": "获取文件数据失败: {statusText}",
+      "unknownAction": "未知的启动操作。",
+      "noAppSelected": "请选择一个应用程序。",
+      "noAppsAvailable": "您的账户没有可用的应用程序。",
+      "uploadSuccess": "文件上传成功！",
+      "creatingAutoHome": "正在创建自动主目录..."
+    },
+    "languages": {
+      "default": "默认 ({locale})"
+    }
+  },
+  "upload": {
+    "title": "文件上传",
+    "description": "从您的计算机中选择一个文件，以在安全的隔离会话中打开它。",
+    "dropzone": {
+      "title": "将文件拖放到此处",
+      "or": "或",
+      "button": "选择文件"
+    },
+    "confirm": {
+      "ready": "文件已准备好，可以安全打开。",
+      "button": "继续启动"
+    }
+  },
+  "files": {
+    "title": "SealSkin 文件",
+    "header": {
+      "title": "文件",
+      "newFolder": "新建文件夹",
+      "uploadFiles": "上传文件",
+      "uploadFolder": "上传文件夹"
+    },
+    "sidebar": {
+      "sharedFiles": "SealSkin 文件",
+      "publicShares": "公开分享"
+    },
+    "shares": {
+      "title": "公开分享的文件",
+      "searchPlaceholder": "按文件名或ID搜索..."
+    },
+    "table": {
+      "name": "名称",
+      "size": "大小",
+      "lastModified": "最后修改",
+      "created": "创建时间",
+      "expires": "过期时间",
+      "url": "公开URL",
+      "passwordProtected": "密码"
+    },
+    "dropzone": {
+      "title": "拖放文件以上传"
+    },
+    "pagination": {
+      "previous": "« 上一页",
+      "next": "下一页 »",
+      "pageOf": "第 {page} 页 / 共 {totalPages} 页"
+    },
+    "modals": {
+      "newFolder": {
+        "title": "创建新文件夹",
+        "folderNameLabel": "文件夹名称",
+        "nameTitle": "只能使用字母、数字、下划线、连字符或句点。",
+        "createButton": "创建"
+      },
+      "confirmDelete": {
+        "title": "确认删除",
+        "message": "您确定要删除{count, plural, one {1 个选定项目} other {{count} 个选定项目}}吗？此操作无法撤销。",
+        "messageDefault": "您确定要删除所选项目吗？此操作无法撤销。"
+      },
+      "uploadProgress": {
+        "title": "上传进度",
+        "doneButton": "完成"
+      },
+      "share": {
+        "title": "分享文件",
+        "sharingFile": "正在分享文件: <strong>{filename}</strong>",
+        "passwordLabel": "密码 (可选)",
+        "passwordPlaceholder": "留空则无密码",
+        "expiryLabel": "过期时间 (小时, 可选)",
+        "expiryPlaceholder": "例如, 24代表一天",
+        "shareButton": "创建分享链接"
+      }
+    },
+    "status": {
+      "homeDirLoadFailed": "加载主目录失败：{error}",
+      "filesLoadFailed": "加载文件时出错：{error}",
+      "deleteProtectedError": "无法删除受保护的系统文件夹。",
+      "deletingItems": "正在删除 {count, plural, one {1 个项目} other {{count} 个项目}}...",
+      "deleteSuccess": "删除成功。",
+      "deleteFailed": "删除失败：{error}",
+      "preparingUpload": "准备上传 {count, plural, one {1 个文件} other {{count} 个文件}}...",
+      "uploadPrepFailed": "文件夹上传准备过程中出错：{error}",
+      "notConfigured": "错误：SealSkin 未配置。请在选项中进行设置。",
+      "folderCreated": "文件夹“{folderName}”已创建。",
+      "folderCreateFailed": "创建文件夹时出错：{error}",
+      "shareCreated": "分享链接创建成功！链接已复制到剪贴板。",
+      "shareCreateFailed": "创建分享失败: {error}",
+      "sharesLoadFailed": "加载分享文件失败: {error}",
+      "shareDeleteFailed": "删除分享失败: {error}",
+      "shareDeleted": "分享已成功删除。",
+      "urlCopied": "公开URL已复制到剪贴板。"
+    },
+    "placeholders": {
+      "errorLoading": "加载文件时出错。",
+      "folderEmpty": "此文件夹为空。",
+      "noHomeDirs": "没有可用的主目录。",
+      "noShares": "您尚未分享任何文件。"
+    },
+    "uploadStatus": {
+      "pending": "待处理",
+      "initiating": "正在开始...",
+      "uploading": "上传中...",
+      "finalizing": "正在完成...",
+      "completed": "已完成",
+      "error": "错误"
+    }
+  }
+}

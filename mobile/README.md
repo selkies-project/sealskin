@@ -1,56 +1,42 @@
-# SealSkin Mobile Client
+# SealSkin Mobile Client (shell)
 
-The SealSkin Mobile Client is a hybrid application built using **Capacitor**. It adapts the core logic and user interface of the SealSkin Browser Extension to run as a standalone native application on mobile devices.
+The mobile client is a Capacitor app. Since 0.3.0 it is a thin shell: it
+bundles the connection page and the outer host window, and once a server is
+configured it shows the server's web UI (`/ui/popup.html`, `/ui/options.html`,
+…) in a WebView iframe. UI changes ship with the server container; the app
+only needs a store release when the bridge protocol or native plugins change.
 
-## Platform Support
+## What runs natively
 
-*   **Current Support:** Android, iOS
+* `index.html` + `mobile.js` (built from `../client/src/shell/mobile`): the
+  outer window. It installs a small `chrome.*` polyfill, runs the same
+  `background.js` as the browser extension (E2EE, JWT, pending launch
+  context), and hosts the iframe with the bridge relay.
+* Native plugins: `@capacitor/browser` (sessions open in a Custom Tab /
+  SFSafariViewController), `@capacitor/app` (back button), `@capacitor/filesystem`
+  + `capacitor-blob-writer` + `@capawesome-team/capacitor-file-opener`
+  (downloaded files are written to the app cache and opened with the system
+  viewer).
+* `connect.html`: the connection page, the only page that works with no server.
 
-## Operational Overview
+## Functional differences from the browser extension
 
-The application runs the existing browser extension codebase within a native WebView. It injects a compatibility layer to mock specific browser APIs (the `chrome.*` namespace) and utilizes Capacitor plugins to bridge native functionality such as file system access and deep linking.
+1. No context menu integration and no download interception; those need a
+   browser extension.
+2. Sessions open in the system browser (Custom Tab), not inside the app.
+3. **A valid TLS certificate is required.** Android and iOS WebViews reject
+   self-signed certificates and block mixed content, so the served UI only
+   loads over https from a trusted certificate (the Duck DNS installer in
+   docker-sealskin produces one).
 
-### Functional Differences from Browser Extension
+## Build
 
-Because the mobile client operates as a sandboxed application rather than an extension integrated directly into a web browser, specific interception features are unavailable:
+```bash
+cd ../client && npm install && npm run build   # writes ../client/dist/mobile
+cd ../mobile && npm install
+npm run android    # copies dist/mobile to www, cap sync, opens Android Studio
+npm run ios
+```
 
-1.  **No Context Menu Integration:** The client cannot modify the context menus of other mobile browsers (e.g., Chrome for Android). Users cannot "right-click" a link in an external browser to open it in a secure session.
-2.  **No Automatic Download Interception:** The client cannot capture or redirect downloads initiated in external mobile apps or browsers.
-3.  **Session Handling:** When a secure session is launched, the client opens the session URL in the system's default browser (or a Custom Tab) rather than a new tab within the client itself, ensuring the remote session renders with full browser performance capabilities.
-
-## Build Instructions
-
-The build process relies on copying the live assets from the `../browser_extension` directory into the mobile build artifacts. This is automated through npm build scripts.
-
-### Prerequisites
-
-#### Android
-*   Node.js and npm
-*   Android Studio (with Android SDK installed)
-*   Java Development Kit (JDK)
-
-#### iOS
-*   Node.js and npm
-*   Xcode and OSX 26.2^
-
-### Installation and Deployment
-
-1.  **Install Dependencies:**
-    ```bash
-    npm install
-    ```
-
-2.  **Build and Run (Android):**
-    This command compiles the compatibility layer, copies the latest extension assets, syncs the native configuration, and opens the project in Android Studio or Xcode.  
-    ```bash
-    npm run android
-    ```
-    **Build and Run (iOS):**
-    ```bash
-    npm run ios
-    ```
-
-### Build Scripts
-
-*   `npm run build`: Cleans the distribution directory (`www`), generates assets, bundles the mobile-specific logic using esbuild, and copies the extension files (JS, HTML, CSS) from the browser extension directory.
-*   `npm run android`: Executes the build script, syncs with Capacitor, and opens the Android native IDE.
+`build.sh` produces a signed APK in CI and stamps the version and Android
+`versionCode` from `../VERSION`.

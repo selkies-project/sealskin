@@ -81,42 +81,142 @@ The browser extension is the user's entry point into the SealSkin environment. I
 
 ## Configuration
 
-The SealSkin server is configured entirely through environment variables. The table below lists all available settings.
+All settings are environment variables prefixed with `SEALSKIN_`. Every YAML file below is
+hand-editable; the server watches the configuration directory and reloads a file when it
+changes on disk (`SEALSKIN_WATCH_CONFIG_FILES=false` disables this).
 
-| Environment Variable | CLI Setting | Description | Default Value |
-| --- | --- | --- | --- |
-| `HOST_URL` | `NA` | When generating the default admin the host to use in this file. | `HOST_URL` |
-| `SEALSKIN_LOG_LEVEL` | `--log-level` | Logging level (e.g., DEBUG, INFO, WARNING). | `INFO` |
-| `SEALSKIN_API_PORT` | `--api-port` | Port for the main API server. | `8000` |
-| `SEALSKIN_SESSION_PORT` | `--session-port` | Port for the session proxy server. | `8443` |
-| `SEALSKIN_DEFAULT_PROVIDER` | `--default-provider` | The default application provider to use. | `docker` |
-| `SEALSKIN_APP_RESOURCE_PATH` | `--app-resource-path` | URL for the YAML file defining default available applications. | `https://raw.githubusercontent.com/linuxserver/sealskin-apps/refs/heads/master/apps.yml` |
-| `SEALSKIN_INSTALLED_APPS_PATH` | `--installed-apps-path` | Path to the YAML file for installed application configurations. | `/config/.config/sealskin/installed_apps.yml` |
-| `SEALSKIN_APP_STORES_PATH` | `--app-stores-path` | Path to the YAML file defining available app stores. | `/config/.config/sealskin/app_stores.yml` |
-| `SEALSKIN_APP_TEMPLATES_PATH` | `--app-templates-path` | Path to the directory for user-defined application templates. | `/config/.config/sealskin/app_templates` |
-| `SEALSKIN_DEFAULT_APP_TEMPLATES_PATH` | `--default-app-templates-path` | Path to the directory for default application templates. | `app/default_templates` |
-| `SEALSKIN_UPLOAD_DIR` | `--upload-dir` | Directory for temporary file uploads. | `/storage/sealskin_uploads` |
-| `SEALSKIN_SESSION_COOKIE_NAME` | `--session-cookie-name` | Name of the session cookie. | `sealskin_session_token` |
-| `SEALSKIN_AUTOSTART_CACHE_PATH` | `--autostart-cache-path` | Path to cache autostart scripts. | `/config/.config/sealskin/autostart_cache` |
-| `SEALSKIN_APP_STORE_CACHE_PATH` | `--app-store-cache-path` | Path to cache app store YAML files. | `/config/.config/sealskin/app_stores_cache` |
-| `SEALSKIN_AUTO_UPDATE_APPS` | `--auto-update-apps` | Enable automatic pulling of the latest app images in the background. | `True` |
-| `SEALSKIN_AUTO_UPDATE_INTERVAL_SECONDS` | `--auto-update-interval-seconds` | How often to check for app image updates (in seconds). | `3600` |
-| `SEALSKIN_PUID` | `--puid` | Default User ID to run containers as. | `1000` |
-| `SEALSKIN_PGID` | `--pgid` | Default Group ID to run containers as. | `1000` |
-| `SEALSKIN_KEYS_BASE_PATH` | `--keys-base-path` | Base directory for admin and user public keys. | `/config/.config/sealskin/keys` |
-| `SEALSKIN_GROUPS_BASE_PATH` | `--groups-base-path` | Base directory for group definition files. | `/config/.config/sealskin/groups` |
-| `SEALSKIN_STORAGE_PATH` | `--storage-path` | Base directory for user home directories. | `/storage` |
-| `SEALSKIN_APP_ICONS_PATH` | `--app-icons-path` | Directory for storing custom-uploaded application icons. | `/storage/sealskin_app_icons` |
-| `SEALSKIN_HOME_TEMPLATES_PATH` | `--home-templates-path` | Base directory for meta-app home directory templates. | `/storage/sealskin_home_templates` |
-| `SEALSKIN_CONTAINER_CONFIG_PATH` | `--container-config-path` | Mount point for home directories inside the container. | `/config` |
-| `SEALSKIN_SERVER_PRIVATE_KEY_PATH` | `--server-private-key-path` | Path to the server private key PEM file. | `/config/ssl/server_key.pem` |
-| `SEALSKIN_PROXY_KEY_PATH` | `--proxy-key-path` | Path to the proxy SSL private key file. | `/config/ssl/proxy_key.pem` |
-| `SEALSKIN_PROXY_CERT_PATH` | `--proxy-cert-path` | Path to the proxy SSL certificate file. | `/config/ssl/proxy_cert.pem` |
-| `SEALSKIN_PUBLIC_STORAGE_PATH` | `--public-storage-path` | Directory for storing publicly shared files. | `/storage/sealskin_public` |
-| `SEALSKIN_PUBLIC_SHARES_METADATA_PATH` | `--public-shares-metadata-path` | Path to the YAML file for public share metadata. | `/config/.config/sealskin/public_shares.yml` |
-| `SEALSKIN_SHARE_CLEANUP_INTERVAL_SECONDS` | `--share-cleanup-interval-seconds` | How often to run the cleanup job for expired shares (in seconds). | `600` |
-| `SEALSKIN_SESSIONS_DB_PATH` | `--sessions-db-path` | Path to the YAML file for session persistence. | `/config/.config/sealskin/sessions.yml` |
-| `SEALSKIN_CADDYFILE_PATH` | `--caddyfile-path` | Path to the generated Caddyfile for the proxy. | `/config/.config/sealskin/Caddyfile` |
+| Environment Variable | Description | Default Value |
+| --- | --- | --- |
+| `HOST_URL` | When generating the default admin the host to use in this file. | `HOST_URL` |
+| `SEALSKIN_LOG_LEVEL` | Logging level (e.g., DEBUG, INFO, WARNING). | `INFO` |
+| `SEALSKIN_API_PORT` | Port for the main API server. | `8000` |
+| `SEALSKIN_SESSION_PORT` | Port for the session proxy server. | `8443` |
+| `SEALSKIN_DEFAULT_PROVIDER` | The default application provider to use. | `docker` |
+| `SEALSKIN_APP_RESOURCE_PATH` | URL for the YAML file defining default available applications. | `https://raw.githubusercontent.com/linuxserver/sealskin-apps/refs/heads/master/apps.yml` |
+| `SEALSKIN_INSTALLED_APPS_PATH` | Path to the YAML file for installed application records. | `/config/.config/sealskin/installed_apps.yml` |
+| `SEALSKIN_APP_STORES_PATH` | Path to the YAML file defining available app stores. | `/config/.config/sealskin/app_stores.yml` |
+| `SEALSKIN_APP_TEMPLATES_PATH` | Path to the directory for user-defined application templates. | `/config/.config/sealskin/app_templates` |
+| `SEALSKIN_DEFAULT_APP_TEMPLATES_PATH` | Path to the directory for default application templates. | `app/default_templates` |
+| `SEALSKIN_UPLOAD_DIR` | Directory for temporary file uploads (one sub-directory per user). | `/storage/sealskin_uploads` |
+| `SEALSKIN_SESSION_COOKIE_NAME` | Name of the session cookie. | `sealskin_session_token` |
+| `SEALSKIN_AUTOSTART_CACHE_PATH` | Path to cache autostart scripts. | `/config/.config/sealskin/autostart_cache` |
+| `SEALSKIN_APP_STORE_CACHE_PATH` | Path to cache app store YAML files. | `/config/.config/sealskin/app_stores_cache` |
+| `SEALSKIN_AUTO_UPDATE_APPS` | Enable automatic pulling of the latest app images in the background. | `True` |
+| `SEALSKIN_AUTO_UPDATE_INTERVAL_SECONDS` | How often to check for app image updates (in seconds). | `3600` |
+| `SEALSKIN_PUID` | Default User ID to run containers as. | `1000` |
+| `SEALSKIN_PGID` | Default Group ID to run containers as. | `1000` |
+| `SEALSKIN_KEYS_BASE_PATH` | Base directory for admin and user public keys. | `/config/.config/sealskin/keys` |
+| `SEALSKIN_GROUPS_BASE_PATH` | Base directory for group definition files. | `/config/.config/sealskin/groups` |
+| `SEALSKIN_STORAGE_PATH` | Base directory for user home directories. | `/storage` |
+| `SEALSKIN_APP_ICONS_PATH` | Directory for storing custom-uploaded application icons. | `/storage/sealskin_app_icons` |
+| `SEALSKIN_HOME_TEMPLATES_PATH` | Base directory for meta-app home directory templates. | `/storage/sealskin_home_templates` |
+| `SEALSKIN_CONTAINER_CONFIG_PATH` | Mount point for home directories inside the container. | `/config` |
+| `SEALSKIN_SERVER_PRIVATE_KEY_PATH` | Path to the server private key PEM file. | `/config/ssl/server_key.pem` |
+| `SEALSKIN_PROXY_KEY_PATH` | Path to the proxy SSL private key file. | `/config/ssl/proxy_key.pem` |
+| `SEALSKIN_PROXY_CERT_PATH` | Path to the proxy SSL certificate file. | `/config/ssl/proxy_cert.pem` |
+| `SEALSKIN_PUBLIC_STORAGE_PATH` | Directory for storing publicly shared files. | `/storage/sealskin_public` |
+| `SEALSKIN_PUBLIC_SHARES_METADATA_PATH` | Path to the YAML file for public share metadata. | `/config/.config/sealskin/public_shares.yml` |
+| `SEALSKIN_SHARE_CLEANUP_INTERVAL_SECONDS` | How often to run the cleanup job for expired shares (in seconds). | `600` |
+| `SEALSKIN_SESSIONS_DB_PATH` | Path to the YAML file for session persistence. | `/config/.config/sealskin/sessions.yml` |
+| `SEALSKIN_CADDYFILE_PATH` | Path to the generated Caddyfile for the proxy. | `/config/.config/sealskin/Caddyfile` |
+| `SEALSKIN_UI_PATH` | Directory holding the built web UI served under `/ui`. | `<repo>/client/dist/ui` |
+| `SEALSKIN_TEMPLATE_SCHEMA_PATH` | YAML file describing the environment variables editable in app templates. | `server/app/template_schema.yml` |
+| `SEALSKIN_CRYPTO_SESSION_TTL_SECONDS` | Idle lifetime of an E2EE session key before it is discarded. | `86400` |
+| `SEALSKIN_WATCH_CONFIG_FILES` | Reload YAML configuration files automatically when they change on disk. | `True` |
+
+### Installed apps: references plus overrides
+
+`installed_apps.yml` stores one record per installed application. A record references the
+store entry (`source` and `source_app_id`) and keeps only the fields the administrator changed
+under `overrides`. The effective application is the store entry deep-merged with those
+overrides, so an updated image tag or extension list in the store applies on the next cache
+refresh without re-installing. Records written by earlier versions (full snapshots) are
+migrated automatically on first start and the file is rewritten once.
+
+```yaml
+- id: 5a8f...                     # generated
+  source: SealSkin Apps           # store name from app_stores.yml
+  source_app_id: firefox          # id inside that store
+  app_template: Default
+  users: [all]
+  groups: []
+  auto_update: true
+  home_directories: true
+  is_meta_app: false
+  overrides:                      # only what differs from the store entry
+    name: Work Firefox
+    provider_config:
+      env:
+        - {name: FOO, value: bar}
+```
+
+Meta-apps add `base_app_id` and `home_template_name`; their custom name, logo and autostart
+scripts live under `overrides`.
+
+### Template schema
+
+`app/template_schema.yml` lists every environment variable the template editor exposes
+(name, category, type, default, options). It is served unencrypted at
+`GET /api/ui/template_schema`, so adding a variable is a server change and never requires a
+client release. Labels and descriptions are looked up by the client under the translation key
+`options.appTemplates.settings.<NAME>` and fall back to the variable name.
+
+### Served web UI
+
+The built client (`client/dist/ui`) is mounted at `/ui`. HTML entry points and JSON are sent
+with `Cache-Control: no-cache`; every other asset has a content hash in its name and is cached
+for a year. `GET /api/ui/version` returns the server version and bridge protocol version. The
+collaboration room page is read from `<ui path>/room/room.html`.
+
+## Module layout
+
+```
+server/main.py                    entry point: renders the Caddyfile, starts Caddy and uvicorn
+server/app/api.py                 FastAPI factory, lifespan, background jobs, file watcher
+server/app/settings.py            settings definitions (environment variables)
+server/app/version.py             reads the repository VERSION file
+server/app/state.py               single container for all in-memory state
+server/app/persistence.py         atomic YAML read/write, per-file locks, change watcher
+server/app/config_store.py        stores, installed app records + resolution, templates, sessions, shares
+server/app/security.py            E2EE handshake, EncryptedRoute, JWT verification, password hashing
+server/app/launch.py              build_launch_spec(), launch_application(), session stop/swap
+server/app/docker_utils.py        Docker client, self-inspection, GPU detection, image cache
+server/app/fsutil.py              filesystem helpers
+server/app/providers/             provider interface and the Docker provider
+server/app/routers/               one router per area (handshake, applications, launch, sessions,
+                                  homedirs, admin, uploads, files, shares, internal, ui)
+server/app/collaboration.py       collaboration room page, WebSocket and token fan-out
+server/app/template_schema.yml    template editor variable definitions
+server/tests/                     pytest suite (run with `pytest` from server/)
+```
+
+## Development
+
+```bash
+cd server
+python -m venv .venv && . .venv/bin/activate
+pip install -r requirements.txt ruff pytest pytest-asyncio
+ruff check .
+pytest
+```
+
+## Docker image note
+
+The image must build the client with Node in a build stage and copy `client/dist` next to
+`server/` (the default `SEALSKIN_UI_PATH` is `<repo>/client/dist/ui`):
+
+```Dockerfile
+FROM node:22-alpine AS ui
+COPY client /src/client
+COPY VERSION /src/VERSION
+RUN cd /src/client && npm ci && npm run build
+
+FROM ghcr.io/linuxserver/baseimage-alpine:3.23
+# ... install python, caddy, requirements ...
+COPY server /opt/sealskin/server
+COPY VERSION /opt/sealskin/VERSION
+COPY --from=ui /src/client/dist /opt/sealskin/client/dist
+```
 
 ## Details
 

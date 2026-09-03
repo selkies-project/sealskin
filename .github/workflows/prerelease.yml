@@ -23,6 +23,17 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      - name: Build served UI and shells
+        working-directory: client
+        run: |
+          npm install
+          npm run build
+
+      - name: Package served UI
+        run: |
+          VERSION=$(cat VERSION)
+          tar -C client/dist -czf "sealskin-ui-v${VERSION}.tar.gz" ui
+
       - name: Build browser extensions
         working-directory: browser_extension
         run: bash build.sh
@@ -48,6 +59,7 @@ jobs:
           prerelease: true
           generate_release_notes: true
           files: |
+            sealskin-ui-v*.tar.gz
             browser_extension/sealskin-chrome-v*.zip
             browser_extension/sealskin-firefox-v*.zip
             mobile/sealskin-v*.apk

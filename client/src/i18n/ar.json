@@ -1,0 +1,961 @@
+{
+  "background": {
+    "contextMenu": {
+      "openUrl": "فتح الرابط في SealSkin",
+      "openFile": "فتح هدف الرابط كملف في SealSkin",
+      "sendMedia": "إرسال الوسائط إلى SealSkin",
+      "searchText": "البحث عن \"%s\" في SealSkin",
+      "sendDownload": "إرسال التنزيل التالي إلى SealSkin"
+    }
+  },
+  "common": {
+    "actions": "الإجراءات",
+    "active": "نشط",
+    "cancel": "إلغاء",
+    "manage": "إدارة",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "save": "حفظ",
+    "none": "لا شيء",
+    "error": "خطأ",
+    "na": "غير متاح",
+    "of": "من",
+    "status": "الحالة",
+    "username": "اسم المستخدم",
+    "group": "مجموعة",
+    "groups": "المجموعات",
+    "publicKey": "المفتاح العام",
+    "name": "الاسم",
+    "source": "المصدر",
+    "imageVersion": "إصدار الصورة",
+    "language": "اللغة",
+    "storage": "التخزين",
+    "gpu": "وحدة معالجة الرسوميات",
+    "version": "الإصدار",
+    "checked": "تم التحقق",
+    "never": "أبداً",
+    "stop": "إيقاف",
+    "reopen": "إعادة فتح",
+    "sendFile": "إرسال ملف",
+    "share": "مشاركة",
+    "search": "بحث",
+    "refresh": "تحديث",
+    "close": "إغلاق",
+    "copy": "نسخ",
+    "open": "فتح",
+    "copyUrl": "نسخ الرابط",
+    "download": "تنزيل",
+    "next": "التالي",
+    "previous": "السابق",
+    "page": "صفحة",
+    "home": "المجلد الرئيسي",
+    "homes": "المجلدات الرئيسية",
+    "sessions": "الجلسات",
+    "users": "المستخدمون",
+    "admins": "المسؤولون",
+    "yes": "نعم",
+    "no": "لا",
+    "daysAgo": "{count, plural, one {قبل يوم واحد} other {قبل {count} أيام}}",
+    "hoursAgo": "{count, plural, one {قبل ساعة واحدة} other {قبل {count} ساعات}}",
+    "minutesAgo": "{count, plural, one {قبل دقيقة واحدة} other {قبل {count} دقائق}}",
+    "justNow": "الآن",
+    "bytes": "بايت",
+    "kb": "كيلوبايت",
+    "mb": "ميجابايت",
+    "gb": "جيجابايت",
+    "tb": "تيرابايت",
+    "pb": "بيتابايت"
+  },
+  "options": {
+    "sidebar": {
+      "config": "الإعدادات",
+      "home": "المجلدات الرئيسية",
+      "sessions": "الجلسات النشطة",
+      "pinned": "السلوك المثبت",
+      "appStore": "متجر التطبيقات",
+      "appTemplates": "قوالب التطبيقات",
+      "appLaboratory": "مختبر التطبيقات",
+      "installedApps": "التطبيقات المثبتة",
+      "users": "المستخدمون",
+      "groups": "المجموعات",
+      "admins": "المسؤولون"
+    },
+    "dashboard": {
+      "title": "لوحة التحكم",
+      "clientSettings": "إعدادات العميل",
+      "exportConfig": "تصدير الإعدادات",
+      "userStatus": "حالة المستخدم",
+      "loggedInAs": "تم تسجيل الدخول باسم:",
+      "role": "الدور",
+      "roleAdmin": "مسؤول",
+      "roleUser": "مستخدم عادي",
+      "serverInfo": "معلومات الخادم",
+      "server": "الخادم:",
+      "cpuModel": "طراز وحدة المعالجة المركزية:",
+      "storageUsage": "استخدام التخزين:",
+      "detectedGpus": "وحدات معالجة الرسوميات المكتشفة:",
+      "logout": "تسجيل الخروج ومسح الإعدادات",
+      "howTo": "كيفية استخدام SealSkin",
+      "howToDescription": "يحتوي هذا القسم على وثائق أساسية حول كيفية استخدام الإضافة.",
+      "howToList": [
+        "<strong>لفتح المحتوى في بيئة معزولة:</strong> انقر بزر الماوس الأيمن على أي رابط أو صورة أو نص محدد واختر خيارًا من قائمة السياق \"SealSkin Isolation\".",
+        "<strong>لإرسال تنزيل إلى بيئة معزولة:</strong> انقر بزر الماوس الأيمن على الصفحة وحدد \"إرسال التنزيل التالي إلى بيئة معزولة\". سيتم اعتراض الملف التالي الذي تقوم بتنزيله وإرساله إلى جلسة آمنة.",
+        "<strong>لتشغيل تطبيق نظيف:</strong> انقر على أيقونة SealSkin في شريط أدوات متصفحك.",
+        "<strong>لإدارة التخزين الدائم:</strong> استخدم علامة التبويب \"المجلدات الرئيسية\" في هذه الصفحة لإنشاء وحذف وحدات تخزين يمكن استخدامها عبر جلسات متعددة.",
+        "<strong>لحفظ خيارات التشغيل:</strong> حدد مربع \"حفظ خيارات التشغيل هذه\" في النافذة المنبثقة قبل تشغيل تطبيق لنوع ملف معين (مثل .pdf) أو لجميع عناوين URL. قم بإدارة هذه التفضيلات المحفوظة في علامة التبويب \"السلوك المثبت\"."
+      ],
+      "confirmLogout": "هل أنت متأكد أنك تريد تسجيل الخروج؟ سيؤدي هذا إلى مسح إعداداتك المحفوظة من هذا المتصفح."
+    },
+    "config": {
+      "quickSetup": "الإعداد السريع",
+      "quickSetupDescription": "قم بتحميل ملف الإعدادات (.json) المقدم من المسؤول، أو الصق محتوياته أدناه لإعداد الإضافة تلقائيًا.",
+      "uploadLabel": "تحميل ملف الإعدادات",
+      "pasteLabel": "أو الصق نص الإعدادات",
+      "pastePlaceholder": "الصق إعدادات JSON الخاصة بك هنا...",
+      "applyButton": "تطبيق الإعدادات",
+      "manualLink": "الإعداد اليدوي",
+      "advancedTitle": "إعدادات العميل (متقدم)",
+      "serverIpLabel": "عنوان IP للخادم أو النطاق",
+      "serverIpPlaceholder": "مثال: 192.168.1.100",
+      "apiPortLabel": "منفذ API",
+      "apiPortPlaceholder": "مثال: 8000",
+      "sessionPortLabel": "منفذ الجلسة",
+      "sessionPortPlaceholder": "مثال: 8443",
+      "usernameLabel": "اسم المستخدم",
+      "usernamePlaceholder": "اسم المستخدم الخاص بك",
+      "privateKeyLabel": "مفتاحك الخاص (تنسيق PEM)",
+      "privateKeyPlaceholder": "الصق محتوى مفتاحك الخاص هنا",
+      "serverKeyLabel": "المفتاح العام للخادم (تنسيق PEM)",
+      "serverKeyPlaceholder": "الصق محتوى server_public.pem هنا",
+      "searchEngineLabel": "محرك البحث الافتراضي للنص المحدد",
+      "saveButton": "حفظ الإعدادات",
+      "loginButton": "تسجيل الدخول والاختبار",
+      "automaticLink": "الإعداد التلقائي",
+      "chooseFile": "اختر ملف",
+      "keyGeneration": "إنشاء المفتاح",
+      "keyGenDescription": "إذا لم يكن لديك زوج مفاتيح، يمكنك إنشاء واحد هنا. سيتم ملء المفتاح الخاص أعلاه. قدم المفتاح العام للمسؤول الخاص بك.",
+      "generateKeyButton": "إنشاء زوج مفاتيح جديد",
+      "publicKeyForAdminLabel": "مفتاحك العام (للمسؤول)"
+    },
+    "home": {
+      "title": "مجلداتك الرئيسية",
+      "description": "أنشئ مجلدات تخزين دائمة لاستخدامها عبر الجلسات. سيتم تحميلها في تطبيقاتك كمجلد إعداداتك.",
+      "newTitle": "إنشاء مجلد رئيسي جديد",
+      "nameLabel": "اسم المجلد:",
+      "namePlaceholder": "مثال: ملفات-مشروعي",
+      "nameTitle": "استخدم فقط الحروف والأرقام والشرطة السفلية أو الواصلة.",
+      "createButton": "إنشاء مجلد",
+      "confirmDelete": "هل أنت متأكد أنك تريد حذف المجلد الرئيسي '{homeName}'؟ سيتم فقدان جميع البيانات الموجودة بداخله بشكل دائم."
+    },
+    "sessions": {
+      "title": "الجلسات النشطة",
+      "application": "التطبيق",
+      "started": "بدأت في",
+      "noSessionsUser": "لم يتم العثور على جلسات نشطة.",
+      "noSessionsAdmin": "لم يتم العثور على جلسات نشطة لأي مستخدم.",
+      "sessionsFor": "جلسات المستخدم {username} ({count})",
+      "confirmStop": "هل أنت متأكد أنك تريد إيقاف هذه الجلسة؟ سيتم تدمير الحاوية."
+    },
+    "pinned": {
+      "title": "السلوك المثبت للإضافة",
+      "description": "يعرض هذا الجدول خيارات التشغيل التي حفظتها لأنواع ملفات معينة أو لجميع عناوين URL. يمكنك إزالة سلوك مثبت لتتم مطالبتك بخيارات التشغيل مرة أخرى.",
+      "trigger": "المُشغِّل",
+      "savedApp": "التطبيق المحفوظ",
+      "triggerSimple": "تشغيل بسيط (زر شريط الأدوات)",
+      "triggerUrl": "جميع عناوين URL (من قائمة السياق)",
+      "triggerFile": "نوع الملف: <strong>{fileType}</strong>",
+      "unknownApp": "تطبيق غير معروف ({appId}...)"
+    },
+    "admins": {
+      "serverKeyTitle": "المفتاح العام للخادم",
+      "serverKeyDescription": "هذا هو المفتاح العام الذي ستحتاجه ملفات إعدادات المستخدم للاتصال بهذا الخادم.",
+      "title": "إدارة المسؤولين",
+      "searchPlaceholder": "بحث عن المسؤولين...",
+      "newTitle": "إنشاء مسؤول جديد",
+      "publicKeyOptionalLabel": "المفتاح العام (اختياري):",
+      "publicKeyPlaceholder": "الصق المفتاح العام هنا، أو اتركه فارغًا لإنشاء واحد.",
+      "createButton": "إنشاء مسؤول",
+      "confirmDelete": "هل أنت متأكد أنك تريد حذف المسؤول '{username}'؟ سيؤدي هذا أيضًا إلى حذف كل مساحة التخزين الدائمة الخاصة به ولا يمكن التراجع عن هذا الإجراء."
+    },
+    "users": {
+      "title": "إدارة المستخدمين",
+      "searchPlaceholder": "بحث عن المستخدمين بالاسم أو المجموعة...",
+      "newTitle": "إنشاء مستخدم جديد",
+      "publicKeyOptionalLabel": "المفتاح العام (اختياري):",
+      "publicKeyPlaceholder": "الصق المفتاح العام للمستخدم هنا، أو اتركه فارغًا لإنشاء واحد.",
+      "settingsTitle": "إعدادات المستخدم",
+      "sessionLimitLabel": "حد الجلسات",
+      "sessionLimitTitle": "عدد الجلسات النشطة التي يمكن للمستخدم امتلاكها. -1 لعدد غير محدود.",
+      "permissionsTitle": "الأذونات والتحصين",
+      "activeAccount": "حساب نشط",
+      "allowStorage": "السماح بالتخزين الدائم",
+      "allowGpu": "السماح بالوصول إلى وحدة معالجة الرسوميات",
+      "hardenContainer": "تحصين الحاوية",
+      "hardenWm": "تحصين مدير النوافذ",
+      "createButton": "إنشاء مستخدم",
+      "homesDisabledTooltip": "تم تعطيل التخزين الدائم لهذا المستخدم",
+      "confirmDelete": "هل أنت متأكد أنك تريد حذف المستخدم '{username}'؟ سيؤدي هذا أيضًا إلى حذف كل مساحة التخزين الدائمة الخاصة به ولا يمكن التراجع عن هذا الإجراء.",
+      "allowPublicSharing": "السماح بمشاركة الملفات العامة"
+    },
+    "groups": {
+      "title": "إدارة المجموعات",
+      "searchPlaceholder": "بحث عن المجموعات...",
+      "newTitle": "إنشاء مجموعة جديدة",
+      "nameLabel": "اسم المجموعة:",
+      "overrideTitle": "إعدادات تجاوز المجموعة",
+      "permissionsTitle": "تجاوزات الأذونات والتحصين",
+      "createButton": "إنشاء مجموعة",
+      "confirmDelete": "هل أنت متأكد أنك تريد حذف المجموعة '{groupName}'؟ سيعود المستخدمون في هذه المجموعة إلى إعداداتهم الفردية."
+    },
+    "installedApps": {
+      "title": "التطبيقات المثبتة",
+      "searchPlaceholder": "بحث في التطبيقات المثبتة...",
+      "noAppsFound": "لم يتم العثور على تطبيقات مثبتة.",
+      "pulling": "جاري سحب صورة جديدة...",
+      "notLocal": "الصورة غير موجودة محليًا",
+      "isLaboratory": "هذا تطبيق مختبر، تم بناؤه من صورة أساسية بإعدادات مخصصة.",
+      "laboratory": "مختبر",
+      "confirmDelete": "هل أنت متأكد أنك تريد حذف التطبيق المثبت '{appName}'؟"
+    },
+    "appStore": {
+      "title": "متاجر التطبيقات",
+      "refreshTitle": "تحديث المتجر المحدد",
+      "selectLabel": "تحديد متجر التطبيقات",
+      "addLabel": "إضافة متجر تطبيقات جديد",
+      "namePlaceholder": "اسم المتجر",
+      "urlPlaceholder": "عنوان URL لملف YAML للمتجر",
+      "availableTitle": "التطبيقات المتاحة",
+      "addManual": "إضافة تطبيق يدوي",
+      "searchPlaceholder": "بحث في التطبيقات المتاحة...",
+      "noAppsFound": "لم يتم العثور على تطبيقات.",
+      "availableFrom": "التطبيقات المتاحة من {storeName}",
+      "couldNotLoad": "تعذر تحميل التطبيقات من هذا المتجر."
+    },
+    "appTemplates": {
+      "title": "محرر قوالب التطبيقات",
+      "loadLabel": "تحميل قالب",
+      "createOption": "إنشاء قالب جديد",
+      "nameLabel": "اسم القالب",
+      "namePlaceholder": "أدخل اسمًا للقالب الجديد",
+      "saveButton": "حفظ الملف الشخصي",
+      "deleteButton": "حذف",
+      "previewTitle": "معاينة واجهة المستخدم",
+      "contentArea": "منطقة محتوى التطبيق",
+      "confirmDelete": "هل أنت متأكد أنك تريد حذف القالب '{templateName}'؟ لا يمكن التراجع عن هذا الإجراء.",
+      "deleteDisabled": "لا يمكن حذف هذا القالب.",
+      "enterName": "الرجاء إدخال اسم للقالب الجديد.",
+      "settings": {
+        "TITLE": {
+          "label": "عنوان الصفحة",
+          "description": "عنوان الصفحة المعروض في متصفح الويب."
+        },
+        "SELKIES_UI_TITLE": {
+          "label": "عنوان الشريط الجانبي",
+          "description": "العنوان في الزاوية العلوية اليسرى من الشريط الجانبي."
+        },
+        "SELKIES_UI_SHOW_SIDEBAR": {
+          "label": "إظهار الشريط الجانبي",
+          "description": "إظهار واجهة المستخدم الرئيسية للشريط الجانبي."
+        },
+        "SELKIES_UI_SHOW_LOGO": {
+          "label": "إظهار الشعار",
+          "description": "إظهار شعار Selkies في الشريط الجانبي."
+        },
+        "SELKIES_UI_SHOW_CORE_BUTTONS": {
+          "label": "إظهار الأزرار الأساسية",
+          "description": "إظهار أزرار المكونات الأساسية (عرض، صوت، إلخ)."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
+          "label": "إظهار إعدادات الفيديو",
+          "description": "إظهار قسم إعدادات الفيديو في الشريط الجانبي."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SCREEN_SETTINGS": {
+          "label": "إظهار إعدادات الشاشة",
+          "description": "إظهار قسم إعدادات الشاشة في الشريط الجانبي."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_AUDIO_SETTINGS": {
+          "label": "إظهار إعدادات الصوت",
+          "description": "إظهار قسم إعدادات الصوت في الشريط الجانبي."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_STATS": {
+          "label": "إظهار الإحصائيات",
+          "description": "إظهار قسم الإحصائيات في الشريط الجانبي."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
+          "label": "إظهار الحافظة",
+          "description": "إظهار قسم الحافظة في الشريط الجانبي."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FILES": {
+          "label": "إظهار قسم الملفات",
+          "description": "إظهار قسم نقل الملفات في الشريط الجانبي."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_APPS": {
+          "label": "إظهار قسم التطبيقات",
+          "description": "إظهار قسم التطبيقات في الشريط الجانبي."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SHARING": {
+          "label": "إظهار قسم المشاركة",
+          "description": "إظهار قسم المشاركة في الشريط الجانبي."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
+          "label": "إظهار قسم أجهزة التحكم",
+          "description": "إظهار قسم أجهزة التحكم بالألعاب في الشريط الجانبي."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
+          "label": "إظهار زر لوحة المفاتيح",
+          "description": "إظهار زر لوحة المفاتيح على الشاشة."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SOFT_BUTTONS": {
+          "label": "إظهار الأزرار اللينة",
+          "description": "إظهار قسم الأزرار اللينة (للجوّال)."
+        },
+        "WATERMARK_PNG": {
+          "label": "مسار PNG للعلامة المائية",
+          "description": "المسار الكامل داخل الحاوية إلى ملف PNG للعلامة المائية."
+        },
+        "WATERMARK_LOCATION": {
+          "label": "موقع العلامة المائية",
+          "description": "أين يتم رسم الصورة فوق البث.",
+          "options": {
+            "disabled": "معطل",
+            "topLeft": "أعلى اليسار",
+            "topRight": "أعلى اليمين",
+            "bottomLeft": "أسفل اليسار",
+            "bottomRight": "أسفل اليمين",
+            "centered": "في المنتصف",
+            "animated": "متحرك"
+          }
+        },
+        "DASHBOARD": {
+          "label": "نمط لوحة التحكم",
+          "description": "يسمح للمستخدم بتعيين لوحة التحكم الخاصة به.",
+          "options": {
+            "default": "افتراضي",
+            "selkiesDefault": "Selkies (افتراضي)",
+            "zinc": "Zinc",
+            "wish": "Wish"
+          }
+        },
+        "SELKIES_AUDIO_ENABLED": {
+          "label": "تمكين الصوت",
+          "description": "تمكين بث الصوت من الخادم إلى العميل."
+        },
+        "SELKIES_MICROPHONE_ENABLED": {
+          "label": "تمكين الميكروفون",
+          "description": "تمكين توجيه الميكروفون من العميل إلى الخادم."
+        },
+        "SELKIES_GAMEPAD_ENABLED": {
+          "label": "تمكين جهاز التحكم",
+          "description": "تمكين دعم جهاز التحكم بالألعاب."
+        },
+        "SELKIES_CLIPBOARD_ENABLED": {
+          "label": "تمكين الحافظة",
+          "description": "تمكين مزامنة الحافظة."
+        },
+        "SELKIES_CLIPBOARD_IN_ENABLED": {
+          "label": "تمكين الحافظة من العميل إلى الخادم",
+          "description": "السماح بنقل بيانات الحافظة من المتصفح."
+        },
+        "SELKIES_CLIPBOARD_OUT_ENABLED": {
+          "label": "تمكين الحافظة من الخادم إلى العميل",
+          "description": "السماح بنقل بيانات الحافظة من الخادم."
+        },
+        "SELKIES_ENABLE_BINARY_CLIPBOARD": {
+          "label": "تمكين الحافظة الثنائية",
+          "description": "السماح بالبيانات الثنائية (الصور) في الحافظة."
+        },
+        "SELKIES_COMMAND_ENABLED": {
+          "label": "تمكين Websocket الأوامر",
+          "description": "تمكين تحليل رسائل websocket الأوامر."
+        },
+        "SELKIES_FILE_TRANSFERS": {
+          "label": "نقل الملفات",
+          "description": "الاتجاهات المسموح بها ('upload,download', 'upload', 'download', 'none')."
+        },
+        "SELKIES_ENABLE_SHARING": {
+          "label": "تمكين جميع المشاركات",
+          "description": "مفتاح رئيسي لجميع ميزات المشاركة."
+        },
+        "SELKIES_SECOND_SCREEN": {
+          "label": "تمكين الشاشة الثانية",
+          "description": "تمكين دعم شاشة/عرض ثانية."
+        },
+        "SELKIES_USE_BROWSER_CURSORS": {
+          "label": "استخدام مؤشرات المتصفح",
+          "description": "استخدام مؤشرات CSS للمتصفح بدلاً من العرض على اللوحة القماشية."
+        },
+        "SELKIES_USE_CSS_SCALING": {
+          "label": "استخدام تحجيم CSS (LoDPI)",
+          "description": "إذا كان صحيحًا، يتم إرسال دقة أقل ويتم تمديد اللوحة القماشية."
+        },
+        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+          "label": "وضع الدقة اليدوي",
+          "description": "قفل الدقة على قيم العرض/الارتفاع اليدوية."
+        },
+        "SELKIES_FORCE_ALIGNED_RESOLUTION": {
+          "label": "ﻑﺮﺿ ﻢﺣﺍﺫﺍﺓ ﺎﻟﺪﻗﺓ",
+          "description": "ﻲﻓﺮﺿ ﺄﻧ ﺖﻛﻮﻧ ﺪﻗﺓ ﺎﻠﻋﺮﺿ ﻢﻧ ﻢﺿﺎﻌﻓﺎﺗ 16 ﺐﻜﺴﻟ"
+        },
+        "SELKIES_MANUAL_WIDTH": {
+          "label": "العرض اليدوي",
+          "description": "قفل العرض على قيمة ثابتة. يفرض الوضع اليدوي."
+        },
+        "SELKIES_MANUAL_HEIGHT": {
+          "label": "الارتفاع اليدوي",
+          "description": "قفل الارتفاع على قيمة ثابتة. يفرض الوضع اليدوي."
+        },
+        "SELKIES_SCALING_DPI": {
+          "label": "DPI لتحجيم واجهة المستخدم",
+          "description": "الـ DPI الافتراضي لتحجيم واجهة المستخدم."
+        },
+        "SELKIES_AUDIO_BITRATE": {
+          "label": "معدل بت الصوت",
+          "description": "معدل بت الصوت الافتراضي."
+        },
+        "SELKIES_ENCODER": {
+          "label": "المشفرات",
+          "description": "قائمة بالمشفرات مفصولة بفواصل. الأول هو الافتراضي."
+        },
+        "SELKIES_USE_CPU": {
+          "label": "فرض تشفير وحدة المعالجة المركزية",
+          "description": "فرض التشفير المستند إلى وحدة المعالجة المركزية لـ pixelflux."
+        },
+        "SELKIES_FRAMERATE": {
+          "label": "معدل الإطارات (نطاق أو ثابت)",
+          "description": "مثال: '8-120' لنطاق أو '60' لثابت."
+        },
+        "SELKIES_H264_CRF": {
+          "label": "H.264 CRF (نطاق أو ثابت)",
+          "description": "مثال: '5-50' لنطاق أو '25' لثابت."
+        },
+        "SELKIES_JPEG_QUALITY": {
+          "label": "جودة JPEG (نطاق أو ثابت)",
+          "description": "مثال: '1-100' لنطاق أو '60' لثابت."
+        },
+        "SELKIES_H264_FULLCOLOR": {
+          "label": "H.264 ألوان كاملة",
+          "description": "تمكين نطاق الألوان الكامل H.264 لمشفرات pixelflux."
+        },
+        "SELKIES_H264_STREAMING_MODE": {
+          "label": "وضع البث H.264 (Turbo)",
+          "description": "تمكين وضع البث بزمن انتقال منخفض H.264."
+        },
+        "SELKIES_USE_PAINT_OVER_QUALITY": {
+          "label": "استخدام جودة الرسم فوق",
+          "description": "تمكين الرسم فوق عالي الجودة للمشاهد الثابتة."
+        },
+        "SELKIES_PAINT_OVER_JPEG_QUALITY": {
+          "label": "جودة JPEG للرسم فوق",
+          "description": "مثال: '1-100' لنطاق أو '90' لثابت."
+        },
+        "SELKIES_H264_PAINTOVER_CRF": {
+          "label": "H.264 CRF للرسم فوق",
+          "description": "مثال: '5-50' لنطاق أو '18' لثابت."
+        },
+        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
+          "label": "إطارات دفعة الرسم فوق",
+          "description": "مثال: '1-30' لنطاق أو '5' لثابت."
+        },
+        "HARDEN_DESKTOP": {
+          "label": "تحصين سطح المكتب (إعداد مسبق)",
+          "description": "يمكّن DISABLE_OPEN_TOOLS و DISABLE_SUDO و DISABLE_TERMINALS."
+        },
+        "HARDEN_OPENBOX": {
+          "label": "تحصين مدير النوافذ (إعداد مسبق)",
+          "description": "يمكّن DISABLE_CLOSE_BUTTON و DISABLE_MOUSE_BUTTONS و HARDEN_KEYBINDS. ويمكّن أيضًا RESTART_APP."
+        },
+        "DISABLE_OPEN_TOOLS": {
+          "label": "تعطيل أدوات الفتح",
+          "description": "يعطل ثنائيات xdg-open و exo-open."
+        },
+        "DISABLE_SUDO": {
+          "label": "تعطيل Sudo",
+          "description": "يعطل أمر sudo."
+        },
+        "DISABLE_TERMINALS": {
+          "label": "تعطيل الطرفيات",
+          "description": "يعطل محاكيات الطرفية الشائعة."
+        },
+        "DISABLE_CLOSE_BUTTON": {
+          "label": "تعطيل زر إغلاق النافذة",
+          "description": "يزيل زر الإغلاق من أشرطة عناوين النوافذ."
+        },
+        "DISABLE_MOUSE_BUTTONS": {
+          "label": "تعطيل النقر الأيمن/الأوسط",
+          "description": "يعطل قوائم السياق للنقر الأيمن والأوسط."
+        },
+        "HARDEN_KEYBINDS": {
+          "label": "تحصين روابط المفاتيح",
+          "description": "يعطل روابط مفاتيح Openbox الافتراضية مثل Alt+F4."
+        },
+        "RESTART_APP": {
+          "label": "إعادة تشغيل التطبيق عند الإغلاق",
+          "description": "يعيد تشغيل التطبيق الرئيسي تلقائيًا إذا تم إغلاقه."
+        },
+        "MAX_RES": {
+          "label": "الدقة القصوى",
+          "description": "الدقة القصوى للحاوية، الافتراضي هو 16k."
+        },
+        "START_DOCKER": {
+          "label": "بدء Docker-in-Docker",
+          "description": "إذا كان خطأ، فلن تبدأ الحاوية ذات الامتيازات DinD."
+        },
+        "DISABLE_IPV6": {
+          "label": "تعطيل IPv6",
+          "description": "إذا كان صحيحًا، فسيؤدي هذا إلى تعطيل IPv6."
+        },
+        "DISABLE_ZINK": {
+          "label": "تعطيل Zink",
+          "description": "لا تقم بتعيين متغيرات بيئة Zink إذا تم اكتشاف بطاقة فيديو."
+        },
+        "DISABLE_DRI3": {
+          "label": "تعطيل DRI3",
+          "description": "لا تستخدم تسريع DRI3 إذا تم اكتشاف بطاقة فيديو."
+        },
+        "NO_DECOR": {
+          "label": "بدون زخارف للنوافذ",
+          "description": "تشغيل التطبيق بدون حدود نافذة لاستخدام PWA."
+        },
+        "NO_FULL": {
+          "label": "بدون ملء الشاشة",
+          "description": "عدم تشغيل التطبيقات في وضع ملء الشاشة تلقائيًا."
+        },
+        "NO_GAMEPAD": {
+          "label": "تعطيل حقن جهاز التحكم",
+          "description": "تعطيل حقن مُقحِم جهاز التحكم في مساحة المستخدم."
+        },
+        "SELKIES_DEBUG": {
+          "label": "تمكين تصحيح أخطاء Selkies",
+          "description": "تمكين تسجيل تصحيح الأخطاء لمكونات البث."
+        },
+        "DOCKER_PRIVILEGED": {
+          "label": "الوضع المميز",
+          "description": "منح جميع الصلاحيات للحاوية، رفع قيود cgroup، تحميل جميع أجهزة المضيف. هذا قد يكسر الأشياء!"
+        },
+        "DOCKER_BIND_MOUNTS": {
+          "label": "نقاط تثبيت إضافية (Bind Mounts)",
+          "description": "نقاط تثبيت مضيف إضافية (مفصولة بفاصلة، مثال: /host/path:/container/path:ro)."
+        },
+        "DOCKER_ENV": {
+          "label": "متغيرات البيئة",
+          "description": "متغيرات بيئة إضافية (مفصولة بفاصلة، مثال: KEY=VALUE,KEY2=VALUE2)."
+        },
+        "DOCKER_CAP_ADD": {
+          "label": "إضافة قدرة (Cap Add)",
+          "description": "إضافة قدرات النواة (مفصولة بفاصلة، مثال: SYS_ADMIN,MKNOD)."
+        },
+        "DOCKER_CAP_DROP": {
+          "label": "إسقاط قدرة (Cap Drop)",
+          "description": "إسقاط قدرات النواة (مفصولة بفاصلة)."
+        },
+        "DOCKER_SECURITY_OPT": {
+          "label": "خيارات الأمان",
+          "description": "خيارات الأمان (مفصولة بفاصلة، مثال: seccomp=unconfined,apparmor=unconfined)."
+        },
+        "DOCKER_DEVICES": {
+          "label": "الأجهزة",
+          "description": "كشف أجهزة المضيف (مفصولة بفاصلة، مثال: /dev/sda:/dev/xvda:rwm)."
+        },
+        "DOCKER_SHM_SIZE": {
+          "label": "حجم SHM",
+          "description": "حجم /dev/shm (مثال: 1G, 2G)."
+        },
+        "DOCKER_MEM_LIMIT": {
+          "label": "حد الذاكرة",
+          "description": "حد الذاكرة (مثال: 1g, 512m)."
+        },
+        "DOCKER_CPU_SHARES": {
+          "label": "حصص المعالج",
+          "description": "حصص المعالج (عدد صحيح للوزن النسبي)."
+        },
+        "DOCKER_NANO_CPUS": {
+          "label": "Nano CPUs",
+          "description": "حصة المعالج بوحدات 1e-9 CPUs."
+        },
+        "DOCKER_NETWORK_MODE": {
+          "label": "وضع الشبكة",
+          "description": "وضع الشبكة للحاوية.",
+          "options": {
+            "default": "افتراضي (Bridge)",
+            "host": "Host",
+            "none": "لا شيء",
+            "bridge": "Bridge"
+          }
+        },
+        "DOCKER_IPC_MODE": {
+          "label": "وضع IPC",
+          "description": "تعيين وضع IPC للحاوية.",
+          "options": {
+            "default": "افتراضي",
+            "host": "Host",
+            "private": "خاص",
+            "shareable": "قابل للمشاركة"
+          }
+        },
+        "DOCKER_PID_MODE": {
+          "label": "وضع PID",
+          "description": "تعيين وضع PID للحاوية.",
+          "options": {
+            "default": "افتراضي",
+            "host": "Host"
+          }
+        },
+        "DOCKER_DNS": {
+          "label": "خوادم DNS",
+          "description": "خوادم DNS مخصصة (مفصولة بفاصلة)."
+        },
+        "DOCKER_EXTRA_HOSTS": {
+          "label": "مضيفون إضافيون",
+          "description": "تعيينات المضيف إلى IP (مفصولة بفاصلة، مثال: hostname:1.2.3.4)."
+        },
+        "DOCKER_SYSCTLS": {
+          "label": "Sysctls",
+          "description": "معلمات النواة (مفصولة بفاصلة، مثال: net.ipv4.ip_forward=1)."
+        },
+        "DOCKER_ULIMITS": {
+          "label": "Ulimits",
+          "description": "Ulimits (مفصولة بفاصلة، مثال: nofile=1024:1024)."
+        },
+        "DOCKER_TMPFS": {
+          "label": "تثبيتات Tmpfs",
+          "description": "أنظمة ملفات مؤقتة (مفصولة بفاصلة، مثال: /run:rw,noexec,nosuid,size=65536k)."
+        },
+        "DOCKER_GROUP_ADD": {
+          "label": "إضافة مجموعة",
+          "description": "قائمة بأسماء و/أو معرفات المجموعات الإضافية (مفصولة بفاصلة)."
+        }
+      }
+    },
+    "appLaboratory": {
+      "title": "مختبر التطبيقات",
+      "description": "أنشئ واختبر تكوينات التطبيقات المخصصة عن طريق إضافة طبقات من التغييرات فوق تطبيق أساسي.",
+      "selectApp": "تحديد تطبيق",
+      "createNew": "إنشاء تطبيق جديد",
+      "baseApp": "التطبيق الأساسي",
+      "baseAppDescription": "التطبيق المثبت الذي سيعتمد عليه تطبيقك المخصص الجديد.",
+      "selectBase": "تحديد تطبيق أساسي",
+      "customizationTitle": "تخصيص",
+      "appName": "اسم التطبيق",
+      "appIcon": "أيقونة التطبيق",
+      "uploadIcon": "تحميل أيقونة",
+      "autostartScriptLabel": "نص التشغيل التلقائي المخصص",
+      "permissionsTitle": "الأذونات",
+      "usersLabel": "المستخدمون المسموح لهم",
+      "groupsLabel": "المجموعات المسموح لها",
+      "launchButton": "حفظ وتشغيل جلسة التخصيص",
+      "closeButton": "إغلاق الجلسة والانتهاء",
+      "savingAndLaunching": "جاري الحفظ والتشغيل...",
+      "placeholder": "يسمح لك مختبر التطبيقات بتكوين المجلد الرئيسي الأساسي ونص التشغيل لتطبيق يعتمد على تطبيق مثبت موجود. سيتم نسخ هذا المجلد الرئيسي عند التهيئة الأولى للمستخدم مع جميع الملفات والإعدادات التي قمت بإعدادها في هذه الجلسة. يمكنك إعادة تشغيل تطبيق مختبر موجود لتعديل محتوياته بشكل أكبر.",
+      "formInvalid": "الرجاء تحديد تطبيق أساسي وتقديم اسم للتطبيق الجديد."
+    },
+    "modals": {
+      "editUserTitle": "تعديل المستخدم: {username}",
+      "saveChanges": "حفظ التغييرات",
+      "effectiveSettings": "الإعدادات الفعالة (مع تجاوزات المجموعة)",
+      "editGroupTitle": "تعديل المجموعة: {groupName}",
+      "userConfigTitle": "إعدادات المستخدم",
+      "warning": "هذه هي المرة الوحيدة التي سيتم فيها عرض هذه الإعدادات. قدمها للمستخدم بشكل آمن.",
+      "info": "يمكنك تنزيل ملف الإعدادات هذا لإعداد SealSkin بسهولة على جهاز آخر. احتفظ بهذا الملف آمنًا لأنه يحتوي على مفتاحك الخاص.",
+      "configDataLabel": "بيانات الإعدادات (JSON)",
+      "copyButton": "نسخ النص",
+      "downloadButton": "تنزيل الملف",
+      "manageHomeDirs": "إدارة المجلدات الرئيسية",
+      "dirsForUser": "مجلدات المستخدم: {username}",
+      "dirsForAdmin": "مجلدات المسؤول: {username}",
+      "newDirForUser": "إنشاء مجلد جديد للمستخدم",
+      "createDirButton": "إنشاء مجلد",
+      "confirmDeleteDir": "هل أنت متأكد أنك تريد حذف '{homeName}' للمستخدم '{username}'؟ هذا الإجراء دائم.",
+      "installAppTitle": "تثبيت {appName}",
+      "editAppTitle": "تعديل {appName}",
+      "customNameLabel": "اسم مخصص",
+      "imageLabel": "صورة الحاوية",
+      "permissions": "الأذونات",
+      "allowedUsersLabel": "المستخدمون المسموح لهم (مفصولة بفاصلة، 'all' للجميع)",
+      "allowedGroupsLabel": "المجموعات المسموح لها (مفصولة بفاصلة، 'all' للجميع)",
+      "features": "الميزات",
+      "gpuSupport": "دعم وحدة معالجة الرسوميات",
+      "homeMounting": "تحميل المجلد الرئيسي",
+      "urlSupport": "دعم فتح عناوين URL",
+      "fileSupport": "دعم فتح الملفات",
+      "autoUpdate": "تحديث الصورة تلقائيًا",
+      "advancedSettings": "إعدادات متقدمة",
+      "appTemplateLabel": "قالب التطبيق",
+      "appTemplateDescription": "حدد قالبًا مُعدًا مسبقًا لإعدادات تشغيل الحاوية المتقدمة.",
+      "customAutostartScriptLabel": "نص التشغيل التلقائي المخصص",
+      "customAutostartScriptDescription": "تخصيص منطق التشغيل التلقائي، اتركه فارغًا لاستخدام الإعداد الافتراضي من مزود التطبيق.",
+      "saveInstallation": "حفظ التثبيت",
+      "updateStatusTitle": "حالة التحديث لـ {appName}",
+      "checkingUpdates": "جاري التحقق من وجود تحديثات...",
+      "updateAvailable": "إصدار جديد من الصورة متاح!",
+      "yourVersion": "إصدارك: {sha}",
+      "latestAvailable": "أحدث إصدار متاح للسحب من السجل.",
+      "pullLatest": "سحب أحدث صورة",
+      "upToDate": "صورتك محدثة.",
+      "currentVersion": "الإصدار الحالي: {sha}",
+      "errorChecking": "خطأ في التحقق من التحديثات.",
+      "pullingLatest": "جاري سحب أحدث صورة... قد يستغرق هذا بعض الوقت.",
+      "pullComplete": "اكتمل السحب!",
+      "newVersion": "الإصدار الجديد: {sha}",
+      "errorPulling": "خطأ في سحب الصورة.",
+      "manualInstallNote": "ملاحظة: يجب أن تكون الصور المضافة يدويًا مبنية على صورة متوافقة مع selkies-baseimage.",
+      "generalTitle": "إعدادات عامة والأداء",
+      "dockerTitle": "تجاوزات Docker المتقدمة",
+      "dockerDescription": "تتجاوز هذه الإعدادات التكوين الافتراضي للحاوية. استخدمها بحذر وفقط إذا كنت تعرف ما تفعله."
+    },
+    "status": {
+      "loggingIn": "جاري تسجيل الدخول...",
+      "configSaved": "تم حفظ الإعدادات بنجاح!",
+      "configApplied": "تم تطبيق الإعدادات! الرجاء تسجيل الدخول والاختبار.",
+      "configApplyFailed": "فشل تطبيق الإعدادات: {error}",
+      "fileReadError": "خطأ في قراءة الملف.",
+      "noConfig": "الرجاء توفير ملف إعدادات أو نص.",
+      "loggedInAdmin": "تم تسجيل الدخول كمسؤول: {username}",
+      "loggedInUser": "تم تسجيل الدخول كمستخدم عادي: {username}.",
+      "loginFailed": "فشل تسجيل الدخول: {error}",
+      "adminDataRefreshFailed": "فشل تحديث بيانات المسؤول: {error}",
+      "logoutSuccess": "تم تسجيل الخروج ومسح الإعدادات.",
+      "generateConfigFailed": "تعذر إنشاء الإعدادات، تفاصيل المستخدم مفقودة.",
+      "copySuccess": "تم نسخ الإعدادات إلى الحافظة!",
+      "copyFailed": "فشل نسخ النص.",
+      "publicKeyCopied": "تم نسخ المفتاح العام!",
+      "keyCopyFailed": "فشل نسخ المفتاح.",
+      "creatingAdmin": "جاري إنشاء المسؤول...",
+      "adminCreated": "تم إنشاء المسؤول '{username}'.",
+      "adminCreateFailed": "خطأ في إنشاء المسؤول: {error}",
+      "adminDeleted": "تم حذف المسؤول '{username}' بنجاح.",
+      "adminDeleteFailed": "خطأ في حذف المسؤول: {error}",
+      "creatingUser": "جاري إنشاء المستخدم...",
+      "userCreated": "تم إنشاء المستخدم '{username}'.",
+      "userCreateFailed": "خطأ في إنشاء المستخدم: {error}",
+      "userDeleted": "تم حذف المستخدم '{username}' بنجاح.",
+      "userDeleteFailed": "خطأ في حذف المستخدم: {error}",
+      "userUpdated": "تم تحديث المستخدم '{username}' بنجاح.",
+      "userUpdateFailed": "خطأ في تحديث المستخدم: {error}",
+      "creatingGroup": "جاري إنشاء المجموعة...",
+      "groupCreated": "تم إنشاء المجموعة '{groupName}'.",
+      "groupCreateFailed": "خطأ في إنشاء المجموعة: {error}",
+      "groupDeleted": "تم حذف المجموعة '{groupName}' بنجاح.",
+      "groupDeleteFailed": "خطأ في حذف المجموعة: {error}",
+      "groupUpdated": "تم تحديث المجموعة '{groupName}' بنجاح.",
+      "groupUpdateFailed": "خطأ في تحديث المجموعة: {error}",
+      "homedirLoadFailed": "فشل تحميل المجلدات الرئيسية: {error}",
+      "homedirCreateFailed": "خطأ في إنشاء المجلد: {error}",
+      "homedirCreated": "تم إنشاء المجلد الرئيسي '{homeName}'.",
+      "homedirDeleted": "تم حذف المجلد '{homeName}'.",
+      "homedirDeleteFailed": "خطأ في حذف المجلد: {error}",
+      "homedirCreatedFor": "تم إنشاء المجلد '{homeName}' للمستخدم {username}.",
+      "homedirDeletedFor": "تم حذف المجلد '{homeName}' للمستخدم {username}.",
+      "sessionsLoadFailed": "فشل تحميل الجلسات: {error}",
+      "sessionStopError": "خطأ في إيقاف الجلسة: {error}",
+      "sessionStopped": "تم إيقاف الجلسة بنجاح.",
+      "appDataRefreshFailed": "فشل تحديث بيانات التطبيق: {error}",
+      "closingSession": "جاري تنفيذ جلسة التخصيص...",
+      "sessionClosed": "تم إغلاق جلسة التخصيص.",
+      "sessionCloseFailed": "فشل إغلاق جلسة التخصيص: {error}",
+      "fetchingApps": "جاري جلب التطبيقات من المتجر...",
+      "fetchAppsFailed": "فشل جلب التطبيقات من المتجر: {error}",
+      "appStoreAddFailed": "خطأ في إضافة المتجر: {error}",
+      "appStoreAdded": "تمت إضافة متجر التطبيقات '{name}'.",
+      "appSaved": "تم {action} التطبيق '{name}' بنجاح.",
+      "appSaveActions": {
+        "updated": "تحديث",
+        "installed": "تثبيت"
+      },
+      "appSaveFailed": "خطأ في حفظ التطبيق: {error}",
+      "appDeleted": "تم حذف التطبيق '{name}'.",
+      "appDeleteFailed": "خطأ في حذف التطبيق: {error}",
+      "templateSaved": "تم حفظ القالب '{name}' بنجاح.",
+      "templateSaveFailed": "خطأ في حفظ القالب: {error}",
+      "templateDeleted": "تم حذف القالب '{name}' بنجاح.",
+      "templateDeleteFailed": "خطأ في حذف القالب: {error}",
+      "pinRemoved": "تمت إزالة السلوك المثبت.",
+      "keyGenerated": "تم إنشاء زوج مفاتيح جديد.",
+      "keyGenFailed": "فشل إنشاء المفتاح: {error}",
+      "pendingConfigSaved": "تم حفظ التكوين المعلق. يمكنك الآن تقديم مفتاحك العام للمسؤول.",
+      "settingsSaved": "تم حفظ الإعدادات.",
+      "appCreated": "تم إنشاء التطبيق '{name}' بنجاح.",
+      "launchFailed": "فشل التشغيل: {error}"
+    },
+    "placeholders": {
+      "noAdmins": "لم يتم العثور على مسؤولين.",
+      "noUsers": "لم يتم العثور على مستخدمين.",
+      "noGroups": "لم يتم العثور على مجموعات.",
+      "noHomeDirs": "لم يتم العثور على مجلدات رئيسية.",
+      "noSessions": "لم يتم العثور على جلسات نشطة.",
+      "noPinned": "لم يتم العثور على سلوكيات مثبتة.",
+      "errorLoading": "خطأ في تحميل المجلدات.",
+      "noInstalledApps": "لم يتم تثبيت أي تطبيقات بعد."
+    }
+  },
+  "popup": {
+    "tabs": {
+      "launch": "تشغيل جديد",
+      "sessions": "الجلسات النشطة",
+      "manageFiles": "إدارة الملفات",
+      "uploadStorage": "تحميل إلى التخزين",
+      "uploadFiles": "تحميل ملفات",
+      "uploadFilesTitle": "فتح صفحة تحميل الملفات المخصصة"
+    },
+    "launchView": {
+      "searchPlaceholder": "بحث في التطبيقات...",
+      "uploadingFile": "جاري تحميل الملف...",
+      "gpuLabel": "وحدة معالجة الرسوميات",
+      "storageLabel": "التخزين",
+      "languageLabel": "اللغة",
+      "cleanroom": "غرفة نظيفة (مؤقتة)",
+      "noGpu": "لا يوجد",
+      "saveOptions": "حفظ خيارات التشغيل هذه",
+      "saveOptionsForUrl": "حفظ الخيارات لجميع عناوين URL",
+      "saveOptionsForFile": "حفظ الخيارات لملفات .{extension}",
+      "openFile": "فتح الملف عند التشغيل",
+      "launchButton": "تشغيل",
+      "launchingButton": "جاري التشغيل...",
+      "uploadingButton": "جاري التحميل...",
+      "autoHome": "تلقائي (استمرارية لكل تطبيق)",
+      "collaborationMode": "جلسة تعاونية",
+      "waylandMode": "وضع Wayland"
+    },
+    "sessionsView": {
+      "noSessions": "لم يتم العثور على جلسات نشطة."
+    },
+    "uploadStorageView": {
+      "selectHome": "تحديد المجلد الرئيسي",
+      "description": "سيؤدي هذا إلى تحميل الملف <strong>{filename}</strong> مباشرة إلى مساحة تخزين الملفات الخاصة بك لاستخدامه في المستقبل.",
+      "descriptionFallback": "سيؤدي هذا إلى تحميل الملف <strong>{filename}</strong> مباشرة إلى مساحة تخزين الملفات الخاصة بك لاستخدامه في المستقبل.",
+      "uploadButton": "تحميل الملف",
+      "uploadingButton": "جاري التحميل...",
+      "preparing": "جاري تحضير الملف...",
+      "uploadingChunk": "جاري تحميل الجزء {current} من {total}...",
+      "finalizing": "جاري الإنهاء...",
+      "uploadComplete": "اكتمل التحميل!"
+    },
+    "status": {
+      "unconfigured": "الرجاء إعداد الإضافة عبر صفحة الخيارات.",
+      "openingServerFile": "جاري فتح ملف من جانب الخادم: {filename}",
+      "openingFile": "جاري فتح الملف: {filename}",
+      "openingUrl": "جاري فتح الرابط: {targetUrl}",
+      "error": "خطأ: {message}",
+      "preparingFile": "جاري تحضير الملف...",
+      "sendingFile": "جاري إرسال الملف إلى الجلسة...",
+      "errorSendingFile": "خطأ في إرسال الملف: {message}",
+      "errorClosingSession": "خطأ في إغلاق الجلسة: {message}",
+      "preparingSession": "جاري تحضير الجلسة المعزولة...",
+      "fetchingData": "جاري جلب بيانات الملف...",
+      "fetchDataFailed": "فشل جلب بيانات الملف: {statusText}",
+      "unknownAction": "إجراء تشغيل غير معروف.",
+      "noAppSelected": "الرجاء تحديد تطبيق.",
+      "noAppsAvailable": "لا توجد تطبيقات متاحة لحسابك.",
+      "uploadSuccess": "تم تحميل الملف بنجاح!",
+      "creatingAutoHome": "جاري إنشاء المجلد الرئيسي التلقائي..."
+    },
+    "languages": {
+      "default": "افتراضي ({locale})"
+    }
+  },
+  "upload": {
+    "title": "تحميل ملف",
+    "description": "حدد ملفًا من جهاز الكمبيوتر الخاص بك لفتحه في جلسة آمنة ومعزولة.",
+    "dropzone": {
+      "title": "اسحب وأفلت ملفًا هنا",
+      "or": "أو",
+      "button": "تحديد ملف"
+    },
+    "confirm": {
+      "ready": "الملف جاهز للفتح بأمان.",
+      "button": "متابعة للتشغيل"
+    }
+  },
+  "files": {
+    "title": "ملفات SealSkin",
+    "header": {
+      "title": "الملفات",
+      "newFolder": "مجلد جديد",
+      "uploadFiles": "رفع الملفات",
+      "uploadFolder": "رفع مجلد"
+    },
+    "sidebar": {
+      "sharedFiles": "ملفات SealSkin",
+      "publicShares": "المشاركات العامة"
+    },
+    "shares": {
+      "title": "الملفات المشاركة بشكل عام",
+      "searchPlaceholder": "البحث باسم الملف أو المعرف..."
+    },
+    "table": {
+      "name": "الاسم",
+      "size": "الحجم",
+      "lastModified": "آخر تعديل",
+      "created": "تم الإنشاء",
+      "expires": "تنتهي الصلاحية",
+      "url": "الرابط العام",
+      "passwordProtected": "كلمة المرور"
+    },
+    "dropzone": {
+      "title": "أسقط الملفات هنا للرفع"
+    },
+    "pagination": {
+      "previous": "« السابق",
+      "next": "التالي »",
+      "pageOf": "صفحة {page} من {totalPages}"
+    },
+    "modals": {
+      "newFolder": {
+        "title": "إنشاء مجلد جديد",
+        "folderNameLabel": "اسم المجلد",
+        "nameTitle": "استخدم فقط الحروف أو الأرقام أو الشرطة السفلية أو الواصلة أو النقطة.",
+        "createButton": "إنشاء"
+      },
+      "confirmDelete": {
+        "title": "تأكيد الحذف",
+        "message": "هل أنت متأكد أنك تريد حذف {count, plural, one {عنصر واحد محدد} other {{count} عناصر محددة}}؟ لا يمكن التراجع عن هذا الإجراء.",
+        "messageDefault": "هل أنت متأكد أنك تريد حذف العناصر المحددة؟ لا يمكن التراجع عن هذا الإجراء."
+      },
+      "uploadProgress": {
+        "title": "تقدم الرفع",
+        "doneButton": "تم"
+      },
+      "share": {
+        "title": "مشاركة ملف",
+        "sharingFile": "مشاركة الملف: <strong>{filename}</strong>",
+        "passwordLabel": "كلمة المرور (اختياري)",
+        "passwordPlaceholder": "اتركه فارغًا لعدم استخدام كلمة مرور",
+        "expiryLabel": "تنتهي الصلاحية خلال (ساعات، اختياري)",
+        "expiryPlaceholder": "مثال: 24 ليوم واحد",
+        "shareButton": "إنشاء رابط مشاركة"
+      }
+    },
+    "status": {
+      "homeDirLoadFailed": "فشل تحميل الدلائل الرئيسية: {error}",
+      "filesLoadFailed": "خطأ في تحميل الملفات: {error}",
+      "deleteProtectedError": "لا يمكن حذف مجلدات النظام المحمية.",
+      "deletingItems": "جارٍ حذف {count, plural, one {عنصر واحد} other {{count} عناصر}}...",
+      "deleteSuccess": "تم الحذف بنجاح.",
+      "deleteFailed": "فشل الحذف: {error}",
+      "preparingUpload": "جارٍ التحضير لرفع {count, plural, one {ملف واحد} other {{count} ملفات}}...",
+      "uploadPrepFailed": "خطأ أثناء التحضير لرفع المجلد: {error}",
+      "notConfigured": "خطأ: SealSkin غير مهيأ. يرجى الإعداد في الخيارات.",
+      "folderCreated": "تم إنشاء المجلد '{folderName}'.",
+      "folderCreateFailed": "خطأ في إنشاء المجلد: {error}",
+      "shareCreated": "تم إنشاء المشاركة بنجاح! تم نسخ الرابط إلى الحافظة الخاصة بك.",
+      "shareCreateFailed": "فشل في إنشاء المشاركة: {error}",
+      "sharesLoadFailed": "فشل في تحميل الملفات المشاركة: {error}",
+      "shareDeleteFailed": "فشل في حذف المشاركة: {error}",
+      "shareDeleted": "تم حذف المشاركة بنجاح.",
+      "urlCopied": "تم نسخ الرابط العام إلى الحافظة."
+    },
+    "placeholders": {
+      "errorLoading": "خطأ في تحميل الملفات.",
+      "folderEmpty": "هذا المجلد فارغ.",
+      "noHomeDirs": "لا توجد دلائل رئيسية متاحة.",
+      "noShares": "لم تقم بمشاركة أي ملفات بعد."
+    },
+    "uploadStatus": {
+      "pending": "قيد الانتظار",
+      "initiating": "جارٍ البدء...",
+      "uploading": "جارٍ الرفع...",
+      "finalizing": "جارٍ الإنهاء...",
+      "completed": "مكتمل",
+      "error": "خطأ"
+    }
+  }
+}

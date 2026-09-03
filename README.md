@@ -53,8 +53,34 @@ The interaction between the browser extension and the server follows a secure an
 *   **Seamless Browser Integration:** Deep integration with browser context menus and download flows for a smooth user experience.
 *   **Full Admin UI:** The extension's options page transforms into a complete management dashboard for administrators, allowing for user, group, and application management directly from the browser.
 
+## Client Delivery (0.3 and later)
+
+The launcher, options, file manager, upload page and collaboration room are one web UI built from [`client/`](./client/README.md) and **served by the SealSkin server** under `/ui/`. The browser extension and the mobile app are thin shells: they hold the connection page, the privileged browser hooks (context menus, download interception, the E2EE session and your private key) and a frame host that loads the served UI once a server is configured. Updating the server image updates the UI everywhere; store submissions are only needed when the shell itself changes.
+
+```
+VERSION              single version for server, UI, extension and app
+client/              web UI source and build (npm run build -> client/dist)
+browser_extension/   manifests, icons, packaging script for the thin shell
+mobile/              Capacitor project for the thin mobile shell
+server/              Python API, Caddy proxy, YAML config store
+docs/                architecture and image build notes
+```
+
+Build everything locally:
+
+```bash
+cd client && npm install && npm run build   # served UI + extension + mobile web dir
+bash browser_extension/build.sh             # zips client/dist/extension for Chrome and Firefox
+bash mobile/build.sh                        # Android APK from client/dist/mobile
+```
+
+Load the unpacked extension from `client/dist/extension` (copy the matching `manifest.*.json` to `manifest.json`) while developing.
+
 ## Details
 
 For detailed information on each component, please see their respective README files:
 *   **[SealSkin Server README](./server/README.md)**
 *   **[SealSkin Browser Extension README](./browser_extension/README.md)**
+*   **[SealSkin Mobile README](./mobile/README.md)**
+*   **[Client build README](./client/README.md)**
+*   **[Architecture](./docs/architecture.md)** and **[Docker image notes](./docs/docker-image.md)**

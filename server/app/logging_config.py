@@ -1,23 +1,24 @@
+"""Logging configuration."""
+
+from __future__ import annotations
+
 import logging
 import sys
+
 from .settings import settings
 
 
-def setup_logging():
-    """Configures the root logger based on application settings."""
+def setup_logging() -> None:
+    """Configure the root logger from ``settings.log_level``."""
     log_level = settings.log_level.upper()
-    log_format = "[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s"
-
     logging.basicConfig(
         level=log_level,
-        format=log_format,
+        format="[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
         stream=sys.stdout,
         force=True,
     )
-
     if log_level != "DEBUG":
-        for lib in ["uvicorn", "websockets", "docker"]:
+        for lib in ["uvicorn", "websockets", "docker", "watchfiles"]:
             logging.getLogger(lib).setLevel(logging.WARNING)
-
-    logging.info(f"Logging configured with level: {log_level}")
+    logging.info("Logging configured with level: %s", log_level)

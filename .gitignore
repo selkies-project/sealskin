@@ -1,1 +1,6 @@
 codeto*
+client/node_modules/
+client/dist/
+server/.venv/
+__pycache__/
+.pytest_cache/

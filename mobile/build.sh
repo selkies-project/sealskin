@@ -1,21 +1,25 @@
 #!/bin/bash
+# Build the Android APK from the shared client build.
 set -euo pipefail
 cd "$(dirname "$0")"
 
-# Version comes from the browser extension manifest so all release artifacts match.
-VERSION=$(awk -F'"' '/"version":/ {print $4}' ../browser_extension/manifest.chrome.json)
+REPO_DIR="$(cd .. && pwd)"
+VERSION="$(tr -d '[:space:]' < "${REPO_DIR}/VERSION")"
 if [ -z "$VERSION" ]; then
-    echo "Error: Could not extract version from ../browser_extension/manifest.chrome.json"
+    echo "Error: VERSION file is empty"
     exit 1
 fi
 echo "Detected Version: $VERSION"
-# Android versionCode must be an increasing integer: 0.2.8 -> 208
+# Android versionCode must be an increasing integer: 0.3.0 -> 300
 VERSION_CODE=$(echo "$VERSION" | awk -F. '{printf "%d", $1*10000 + $2*100 + $3}')
 
-[ -d node_modules ] || npm install
+[ -d node_modules ] || npm install --no-audit --no-fund
+
+# Stamp the package version so Capacitor and the stores agree with VERSION.
+npm version --no-git-tag-version --allow-same-version "$VERSION" > /dev/null
 
 # Capacitor refuses to add a platform until the web dir has an index.html.
-mkdir -p www && cp index.html www/
+mkdir -p www && [ -f www/index.html ] || echo "<html></html>" > www/index.html
 [ -d android ] || npx cap add android
 
 npm run build

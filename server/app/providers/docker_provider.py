@@ -1,41 +1,66 @@
-import asyncio
-import time
-import logging
-from typing import Dict, Optional
+"""Docker implementation of the provider interface."""
 
-import docker
-from docker.errors import NotFound, ImageNotFound, APIError, DockerException
+from __future__ import annotations
+
+import asyncio
+import base64
+import logging
+import time
+from typing import Any
+
+import httpx
+from docker.errors import APIError, DockerException, ImageNotFound, NotFound
 from docker.types import DeviceRequest
 from fastapi import HTTPException
 
+from ..docker_utils import get_docker_client
 from .base_provider import BaseProvider
-from ..settings import settings
 
 logger = logging.getLogger(__name__)
 
 
+def image_provider(image_name: str) -> DockerProvider:
+    """Build a provider for image-only operations (pull, inspect).
+
+    Args:
+        image_name: Image reference.
+
+    Returns:
+        A :class:`DockerProvider` whose configuration only names the image.
+    """
+    return DockerProvider({"provider_config": {"image": image_name}})
+
+
 class DockerProvider(BaseProvider):
-    """A provider for launching applications in Docker containers."""
+    """Launches applications as Docker containers on the local daemon."""
 
-    def __init__(self, app_config: Dict):
+    def __init__(self, app_config: dict[str, Any]) -> None:
+        """Create a provider bound to the shared Docker client.
+
+        Args:
+            app_config: Resolved application dictionary.
+
+        Raises:
+            RuntimeError: If the Docker daemon is unreachable.
+        """
         super().__init__(app_config)
-        try:
-            self.client = docker.from_env()
-            self.client.ping()
-        except Exception as e:
-            logger.error(f"Could not connect to Docker daemon: {e}")
-            raise RuntimeError("Failed to connect to Docker daemon.") from e
+        self.client = get_docker_client()
 
-    async def initialize(self):
-        """Pulls the required image. Can be called on-demand."""
+    async def initialize(self) -> None:
+        """Pull the application's image."""
         image_name = self.app_config["provider_config"]["image"]
-        logger.info(
-            f"[{self.app_config.get('name', image_name)}] Initializing Docker provider..."
-        )
+        logger.info("[%s] Initializing Docker provider...", self.app_config.get("name", image_name))
         await self.pull_image(image_name)
 
-    async def get_local_image_info(self, image_name: str) -> Optional[Dict]:
-        """Gets information about a locally available image."""
+    async def get_local_image_info(self, image_name: str) -> dict[str, Any] | None:
+        """Return id and digests of a locally available image.
+
+        Args:
+            image_name: Image reference.
+
+        Returns:
+            ``{"id", "short_id", "digests"}`` or ``None`` when not present.
+        """
         try:
             image = await asyncio.to_thread(self.client.images.get, image_name)
             return {
@@ -45,65 +70,83 @@ class DockerProvider(BaseProvider):
             }
         except ImageNotFound:
             return None
-        except APIError as e:
-            logger.error(
-                f"Docker API error getting local image info for '{image_name}': {e}"
-            )
+        except APIError as exc:
+            logger.error("Docker API error getting local image info for '%s': %s", image_name, exc)
             return None
 
-    async def get_remote_image_digest(self, image_name: str) -> Optional[str]:
-        """Gets the digest of the latest image from the remote registry."""
+    async def get_remote_image_digest(self, image_name: str) -> str | None:
+        """Return the digest the registry currently serves for an image.
+
+        Args:
+            image_name: Image reference.
+
+        Returns:
+            The registry digest, or ``None`` if it could not be determined.
+        """
         try:
-            api_client = self.client.api
             distribution_info = await asyncio.to_thread(
-                api_client.inspect_distribution, image_name
+                self.client.api.inspect_distribution, image_name
             )
             return distribution_info["Descriptor"]["digest"]
-        except APIError as e:
-            if e.response.status_code == 404:
-                logger.warning(f"Image '{image_name}' not found in remote registry.")
+        except APIError as exc:
+            if exc.response is not None and exc.response.status_code == 404:
+                logger.warning("Image '%s' not found in remote registry.", image_name)
             else:
-                logger.error(
-                    f"Docker API error inspecting remote image '{image_name}': {e}"
-                )
+                logger.error("Docker API error inspecting remote image '%s': %s", image_name, exc)
             return None
-        except DockerException as e:
-            logger.error(f"Docker error inspecting remote image '{image_name}': {e}")
+        except DockerException as exc:
+            logger.error("Docker error inspecting remote image '%s': %s", image_name, exc)
             return None
 
-    async def pull_image(self, image_name: str):
-        """Pulls an image from the registry and returns the new image object."""
+    async def pull_image(self, image_name: str) -> Any:
+        """Pull an image from its registry.
+
+        Args:
+            image_name: Image reference.
+
+        Returns:
+            The pulled image object.
+
+        Raises:
+            APIError: If the pull fails.
+        """
         try:
-            logger.info(f"Pulling latest image for '{image_name}'...")
+            logger.info("Pulling latest image for '%s'...", image_name)
             image = await asyncio.to_thread(self.client.images.pull, image_name)
-            logger.info(f"Successfully pulled '{image_name}'.")
+            logger.info("Successfully pulled '%s'.", image_name)
             return image
-        except APIError as e:
-            logger.error(f"Failed to pull image '{image_name}': {e}")
+        except APIError as exc:
+            logger.error("Failed to pull image '%s': %s", image_name, exc)
             raise
 
     async def launch(
         self,
         session_id: str,
-        env_vars: Dict,
-        volumes: Optional[Dict] = None,
-        gpu_config: Optional[Dict] = None,
-        network: Optional[str] = None,
+        env_vars: dict[str, str],
+        volumes: dict[str, Any] | None = None,
+        gpu_config: dict[str, Any] | None = None,
+        network: str | None = None,
         is_collaboration: bool = False,
-        master_token: Optional[str] = None,
-        initial_tokens: Optional[Dict] = None,
-    ) -> Dict:
-        """Launches a Docker container for the application."""
+        master_token: str | None = None,
+        initial_tokens: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Run the application container and wait until it answers HTTP.
+
+        See :meth:`BaseProvider.launch` for the arguments.
+
+        Raises:
+            HTTPException: On Docker errors or readiness timeout.
+        """
         config = self.app_config["provider_config"]
         image = config["image"]
 
         try:
             await asyncio.to_thread(self.client.images.get, image)
         except ImageNotFound:
-            logger.info(f"[{session_id}] Image '{image}' not found locally, pulling...")
+            logger.info("[%s] Image '%s' not found locally, pulling...", session_id, image)
             await self.pull_image(image)
 
-        run_kwargs = {
+        run_kwargs: dict[str, Any] = {
             "image": image,
             "detach": True,
             "shm_size": config.get("shm_size", "1g"),
@@ -130,58 +173,55 @@ class DockerProvider(BaseProvider):
                 ]
                 run_kwargs["devices"].append("/dev/nvidia-modeset:/dev/nvidia-modeset")
                 logger.info(
-                    f"[{session_id}] Configuring container with Nvidia GPU index {gpu_config['index']}"
+                    "[%s] Configuring container with Nvidia GPU index %s",
+                    session_id,
+                    gpu_config["index"],
                 )
             elif gpu_config["type"] == "dri3":
                 device_path = gpu_config["device"]
                 run_kwargs["devices"].append(f"{device_path}:{device_path}")
                 logger.info(
-                    f"[{session_id}] Configuring container with DRI3 device {device_path}"
+                    "[%s] Configuring container with DRI3 device %s", session_id, device_path
                 )
 
         try:
             try:
-                container = await asyncio.to_thread(
-                    self.client.containers.run, **run_kwargs
-                )
-            except APIError as e:
-                error_msg = str(e).lower()
+                container = await asyncio.to_thread(self.client.containers.run, **run_kwargs)
+            except APIError as exc:
+                error_msg = str(exc).lower()
                 if "/dev/nvidia-modeset" in error_msg and "no such file or directory" in error_msg:
                     run_kwargs["devices"].remove("/dev/nvidia-modeset:/dev/nvidia-modeset")
-                    container = await asyncio.to_thread(
-                        self.client.containers.run, **run_kwargs
-                    )
+                    container = await asyncio.to_thread(self.client.containers.run, **run_kwargs)
                 else:
-                    raise e
-
+                    raise
             logger.info(
-                f"[{session_id}] Launched container {container.short_id} from image {image}."
+                "[%s] Launched container %s from image %s.", session_id, container.short_id, image
             )
-        except ImageNotFound:
-            logger.error(
-                f"[{session_id}] Image '{image}' not found after pull attempt."
-            )
+        except ImageNotFound as exc:
+            logger.error("[%s] Image '%s' not found after pull attempt.", session_id, image)
             raise HTTPException(
-                status_code=500,
-                detail=f"Application image '{image}' not found on host.",
-            )
-        except APIError as e:
-            logger.error(f"[{session_id}] Docker API error on launch: {e}")
-            if "could not select device driver" in str(
-                e
-            ) or "nvidia-container-runtime" in str(e):
+                status_code=500, detail=f"Application image '{image}' not found on host."
+            ) from exc
+        except APIError as exc:
+            logger.error("[%s] Docker API error on launch: %s", session_id, exc)
+            if "could not select device driver" in str(exc) or "nvidia-container-runtime" in str(
+                exc
+            ):
                 raise HTTPException(
                     status_code=500,
-                    detail="Nvidia runtime error on host. Is nvidia-container-toolkit installed and configured?",
-                )
+                    detail=(
+                        "Nvidia runtime error on host. Is nvidia-container-toolkit installed "
+                        "and configured?"
+                    ),
+                ) from exc
             raise HTTPException(
-                status_code=500, detail=f"Docker error: {e.explanation}"
-            )
+                status_code=500, detail=f"Docker error: {exc.explanation}"
+            ) from exc
 
         ip_address = await self._wait_for_container_ready(
             container,
             session_id,
-            env_vars.get("SUBFOLDER"),
+            env_vars.get("SUBFOLDER", "/"),
             env_vars,
             is_collaboration=is_collaboration,
             master_token=master_token,
@@ -190,48 +230,65 @@ class DockerProvider(BaseProvider):
 
         return {"instance_id": container.id, "ip": ip_address, "port": config["port"]}
 
-    async def stop(self, instance_id: str):
-        """Stops a running Docker container."""
+    async def stop(self, instance_id: str) -> None:
+        """Stop (and remove) a container.
+
+        Args:
+            instance_id: Container id.
+        """
         try:
             container = await asyncio.to_thread(self.client.containers.get, instance_id)
-            if container.status == 'running':
-                logger.info(f"Stopping container {container.short_id}...")
+            if container.status == "running":
+                logger.info("Stopping container %s...", container.short_id)
                 await asyncio.to_thread(container.stop, timeout=5)
-                logger.info(f"Stopped container {container.short_id}.")
+                logger.info("Stopped container %s.", container.short_id)
             else:
-                logger.info(f"Container {container.short_id} is not running, removing it.")
+                logger.info("Container %s is not running, removing it.", container.short_id)
                 try:
                     await asyncio.to_thread(container.remove)
-                except APIError as e:
-                     if e.response.status_code != 409:
-                         raise
+                except APIError as exc:
+                    if exc.response is None or exc.response.status_code != 409:
+                        raise
         except NotFound:
-            logger.warning(
-                f"Attempted to stop container {instance_id}, but it was not found."
-            )
-        except Exception as e:
-            logger.error(f"Error stopping container {instance_id}: {e}")
+            logger.warning("Attempted to stop container %s, but it was not found.", instance_id)
+        except Exception as exc:  # noqa: BLE001
+            logger.error("Error stopping container %s: %s", instance_id, exc)
 
     async def _wait_for_container_ready(
         self,
-        container,
-        session_id,
-        subfolder,
-        env_vars,
-        timeout=60,
+        container: Any,
+        session_id: str,
+        subfolder: str,
+        env_vars: dict[str, str],
+        timeout: int = 60,
         is_collaboration: bool = False,
-        master_token: Optional[str] = None,
-        initial_tokens: Optional[Dict] = None,
-    ):
-        import httpx
-        import base64
+        master_token: str | None = None,
+        initial_tokens: dict[str, Any] | None = None,
+    ) -> str:
+        """Poll the container until its web endpoint answers.
 
+        Args:
+            container: Docker container object.
+            session_id: Session id for log prefixes.
+            subfolder: URL prefix the app serves under.
+            env_vars: Environment used to derive the basic-auth credentials.
+            timeout: Seconds to wait before giving up.
+            is_collaboration: Also post the initial tokens to the control plane.
+            master_token: Control-plane master token.
+            initial_tokens: Tokens to post.
+
+        Returns:
+            The container's IP address.
+
+        Raises:
+            HTTPException: 504 when the container never becomes ready.
+        """
         auth_header = None
         if "CUSTOM_USER" in env_vars and "PASSWORD" in env_vars:
             auth_str = f"{env_vars['CUSTOM_USER']}:{env_vars['PASSWORD']}"
-            auth_b64 = base64.b64encode(auth_str.encode()).decode()
-            auth_header = {"Authorization": f"Basic {auth_b64}"}
+            auth_header = {"Authorization": f"Basic {base64.b64encode(auth_str.encode()).decode()}"}
 
+        port = self.app_config["provider_config"]["port"]
         health_check_passed = False
         start_time = time.time()
         while time.time() - start_time < timeout:
@@ -243,30 +300,30 @@ class DockerProvider(BaseProvider):
                     continue
 
                 if not health_check_passed:
-                    health_check_url = f"http://{ip_address}:{self.app_config['provider_config']['port']}{subfolder}"
+                    health_check_url = f"http://{ip_address}:{port}{subfolder}"
                     async with httpx.AsyncClient(
                         timeout=2.0, follow_redirects=True, headers=auth_header
                     ) as client:
                         response = await client.get(health_check_url)
-                        if response.status_code == 200:
-                            logger.info(
-                                f"[{session_id}] Basic health check passed for {health_check_url}"
-                            )
-                            health_check_passed = True
-                            if not is_collaboration:
-                                return ip_address
-                        else:
-                            await asyncio.sleep(2)
-                            continue
-                
+                    if response.status_code == 200:
+                        logger.info(
+                            "[%s] Basic health check passed for %s", session_id, health_check_url
+                        )
+                        health_check_passed = True
+                        if not is_collaboration:
+                            return ip_address
+                    else:
+                        await asyncio.sleep(2)
+                        continue
+
                 if health_check_passed and is_collaboration:
-                    logger.info(f"[{session_id}] Performing collaboration health check...")
+                    logger.info("[%s] Performing collaboration health check...", session_id)
                     stacked_headers = {"Selkies-Authorization": f"Bearer {master_token}"}
                     if auth_header:
                         stacked_headers.update(auth_header)
                     control_plane_targets = [
                         (
-                            f"http://{ip_address}:{self.app_config['provider_config']['port']}{subfolder.rstrip('/')}/api/tokens",
+                            f"http://{ip_address}:{port}{subfolder.rstrip('/')}/api/tokens",
                             stacked_headers,
                         ),
                         (
@@ -280,43 +337,54 @@ class DockerProvider(BaseProvider):
                                 response = await client.post(
                                     control_plane_url,
                                     json=initial_tokens,
-                                    headers=control_plane_headers
+                                    headers=control_plane_headers,
                                 )
                                 if response.status_code == 200:
                                     from ..collaboration import TOKEN_ENDPOINT_CACHE
+
                                     TOKEN_ENDPOINT_CACHE[ip_address] = control_plane_url
-                                    logger.info(f"[{session_id}] Collaboration health check passed. Initial tokens set.")
+                                    logger.info(
+                                        "[%s] Collaboration health check passed. Initial tokens set.",
+                                        session_id,
+                                    )
                                     return ip_address
-                                else:
-                                    logger.warning(f"[{session_id}] Collaboration health check failed with status {response.status_code} at {control_plane_url}: {response.text}")
-                            except httpx.RequestError as e:
-                                logger.debug(f"[{session_id}] Collaboration control plane not reachable at {control_plane_url}: {e}")
-                    logger.warning(f"[{session_id}] Collaboration health check failed on all endpoints.")
+                                logger.warning(
+                                    "[%s] Collaboration health check failed with status %s at %s",
+                                    session_id,
+                                    response.status_code,
+                                    control_plane_url,
+                                )
+                            except httpx.RequestError as exc:
+                                logger.debug(
+                                    "[%s] Collaboration control plane not reachable at %s: %s",
+                                    session_id,
+                                    control_plane_url,
+                                    exc,
+                                )
+                    logger.warning(
+                        "[%s] Collaboration health check failed on all endpoints.", session_id
+                    )
 
             except httpx.ConnectError:
-                logger.debug(
-                    f"[{session_id}] Health check pending for {container.short_id}..."
-                )
-            except Exception as e:
-                logger.warning(f"[{session_id}] Error during readiness check: {e}")
+                logger.debug("[%s] Health check pending for %s...", session_id, container.short_id)
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("[%s] Error during readiness check: %s", session_id, exc)
             await asyncio.sleep(2)
 
         logger.error(
-            f"[{session_id}] Container {container.short_id} failed to become ready in time."
+            "[%s] Container %s failed to become ready in time.", session_id, container.short_id
         )
         await self.stop(container.id)
-        raise HTTPException(
-            status_code=504, detail="Container failed to become ready in time."
-        )
+        raise HTTPException(status_code=504, detail="Container failed to become ready in time.")
 
-    def _get_container_ip(self, container_attrs):
+    @staticmethod
+    def _get_container_ip(container_attrs: dict[str, Any]) -> str | None:
+        """Extract the first usable IP address from container attributes."""
         networks = container_attrs.get("NetworkSettings", {}).get("Networks", {})
         if not networks:
             return None
         if "bridge" in networks:
             return networks["bridge"].get("IPAddress")
         return next(
-            (net.get("IPAddress") for net in networks.values() if net.get("IPAddress")),
-            None,
+            (net.get("IPAddress") for net in networks.values() if net.get("IPAddress")), None
         )
-

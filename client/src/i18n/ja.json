@@ -1,0 +1,961 @@
+{
+  "background": {
+    "contextMenu": {
+      "openUrl": "SealSkinでリンクを開く",
+      "openFile": "リンク先をファイルとしてSealSkinで開く",
+      "sendMedia": "メディアをSealSkinに送信",
+      "searchText": "SealSkinで「{selection}」を検索",
+      "sendDownload": "次のダウンロードをSealSkinに送信"
+    }
+  },
+  "common": {
+    "actions": "アクション",
+    "active": "アクティブ",
+    "cancel": "キャンセル",
+    "manage": "管理",
+    "delete": "削除",
+    "edit": "編集",
+    "save": "保存",
+    "none": "なし",
+    "error": "エラー",
+    "na": "N/A",
+    "of": "/",
+    "status": "ステータス",
+    "username": "ユーザー名",
+    "group": "グループ",
+    "groups": "グループ",
+    "publicKey": "公開鍵",
+    "name": "名前",
+    "source": "ソース",
+    "imageVersion": "イメージバージョン",
+    "language": "言語",
+    "storage": "ストレージ",
+    "gpu": "GPU",
+    "version": "バージョン",
+    "checked": "チェック済み",
+    "never": "なし",
+    "stop": "停止",
+    "reopen": "再開",
+    "sendFile": "ファイルを送信",
+    "share": "共有",
+    "search": "検索",
+    "refresh": "更新",
+    "close": "閉じる",
+    "copy": "コピー",
+    "open": "開く",
+    "copyUrl": "URLをコピー",
+    "download": "ダウンロード",
+    "next": "次へ",
+    "previous": "前へ",
+    "page": "ページ",
+    "home": "ホーム",
+    "homes": "ホーム",
+    "sessions": "セッション",
+    "users": "ユーザー",
+    "admins": "管理者",
+    "yes": "はい",
+    "no": "いいえ",
+    "daysAgo": "{count}日前",
+    "hoursAgo": "{count}時間前",
+    "minutesAgo": "{count}分前",
+    "justNow": "たった今",
+    "bytes": "バイト",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB",
+    "pb": "PB"
+  },
+  "options": {
+    "sidebar": {
+      "config": "設定",
+      "home": "ホームディレクトリ",
+      "sessions": "アクティブなセッション",
+      "pinned": "ピン留めされた動作",
+      "appStore": "アプリストア",
+      "appTemplates": "アプリテンプレート",
+      "appLaboratory": "アプリラボ",
+      "installedApps": "インストール済みアプリ",
+      "users": "ユーザー",
+      "groups": "グループ",
+      "admins": "管理者"
+    },
+    "dashboard": {
+      "title": "ダッシュボード",
+      "clientSettings": "クライアント設定",
+      "exportConfig": "設定をエクスポート",
+      "userStatus": "ユーザーステータス",
+      "loggedInAs": "ログイン中のユーザー:",
+      "role": "役割",
+      "roleAdmin": "管理者",
+      "roleUser": "標準ユーザー",
+      "serverInfo": "サーバー情報",
+      "server": "サーバー:",
+      "cpuModel": "CPUモデル:",
+      "storageUsage": "ストレージ使用量:",
+      "detectedGpus": "検出されたGPU:",
+      "logout": "ログアウトして設定をクリア",
+      "howTo": "SealSkinの使い方",
+      "howToDescription": "このセクションには、拡張機能の基本的な使い方に関するドキュメントが含まれています。",
+      "howToList": [
+        "<strong>隔離環境でコンテンツを開くには:</strong> リンク、画像、または選択したテキストを右クリックし、「SealSkin Isolation」コンテキストメニューからオプションを選択します。",
+        "<strong>ダウンロードを隔離環境に送信するには:</strong> ページを右クリックし、「次のダウンロードを隔離環境に送信」を選択します。次にダウンロードするファイルが傍受され、安全なセッションに送信されます。",
+        "<strong>クリーンなアプリケーションを起動するには:</strong> ブラウザのツールバーにあるSealSkinアイコンをクリックします。",
+        "<strong>永続ストレージを管理するには:</strong> このページの「ホームディレクトリ」タブを使用して、複数のセッションで使用できるストレージボリュームを作成および削除します。",
+        "<strong>起動オプションを保存するには:</strong> 特定のファイルタイプ（例：.pdf）またはすべてのURLに対してアプリケーションを起動する前に、ポップアップの「これらの起動オプションを保存する」チェックボックスをオンにします。これらの保存された設定は、「ピン留めされた動作」タブで管理します。"
+      ],
+      "confirmLogout": "本当にログアウトしますか？このブラウザに保存されている設定がすべてクリアされます。"
+    },
+    "config": {
+      "quickSetup": "クイックセットアップ",
+      "quickSetupDescription": "管理者から提供された設定ファイル（.json）をアップロードするか、以下の内容を貼り付けて拡張機能を自動的に設定します。",
+      "uploadLabel": "設定ファイルをアップロード",
+      "pasteLabel": "または設定テキストを貼り付け",
+      "pastePlaceholder": "ここにJSON設定を貼り付けてください...",
+      "applyButton": "設定を適用",
+      "manualLink": "手動設定",
+      "advancedTitle": "クライアント設定（詳細）",
+      "serverIpLabel": "サーバーIPまたはドメイン",
+      "serverIpPlaceholder": "例: 192.168.1.100",
+      "apiPortLabel": "APIポート",
+      "apiPortPlaceholder": "例: 8000",
+      "sessionPortLabel": "セッションポート",
+      "sessionPortPlaceholder": "例: 8443",
+      "usernameLabel": "ユーザー名",
+      "usernamePlaceholder": "あなたのユーザー名",
+      "privateKeyLabel": "あなたの秘密鍵（PEM形式）",
+      "privateKeyPlaceholder": "ここに秘密鍵の内容を貼り付けてください",
+      "serverKeyLabel": "サーバー公開鍵（PEM形式）",
+      "serverKeyPlaceholder": "ここにserver_public.pemの内容を貼り付けてください",
+      "searchEngineLabel": "選択したテキストのデフォルト検索エンジン",
+      "saveButton": "設定を保存",
+      "loginButton": "ログインしてテスト",
+      "automaticLink": "自動設定",
+      "chooseFile": "ファイルを選択",
+      "keyGeneration": "キー生成",
+      "keyGenDescription": "キーペアがない場合は、ここで生成できます。秘密鍵は上に記入されます。公開鍵を管理者に提供してください。",
+      "generateKeyButton": "新しいキーペアを生成",
+      "publicKeyForAdminLabel": "あなたの公開鍵（管理者向け）"
+    },
+    "home": {
+      "title": "あなたのホームディレクトリ",
+      "description": "セッション間で利用できる永続ストレージディレクトリを作成します。これらは設定ディレクトリとしてアプリケーションにマウントされます。",
+      "newTitle": "新しいホームディレクトリを作成",
+      "nameLabel": "ディレクトリ名:",
+      "namePlaceholder": "例: my-project-files",
+      "nameTitle": "文字、数字、アンダースコア、ハイフンのみを使用してください。",
+      "createButton": "ディレクトリを作成",
+      "confirmDelete": "ホームディレクトリ '{homeName}' を本当に削除しますか？内部のすべてのデータは完全に失われます。"
+    },
+    "sessions": {
+      "title": "アクティブなセッション",
+      "application": "アプリケーション",
+      "started": "開始日時",
+      "noSessionsUser": "アクティブなセッションが見つかりません。",
+      "noSessionsAdmin": "どのユーザーにもアクティブなセッションが見つかりません。",
+      "sessionsFor": "{username}のセッション ({count})",
+      "confirmStop": "このセッションを本当に停止しますか？コンテナは破棄されます。"
+    },
+    "pinned": {
+      "title": "ピン留めされた拡張機能の動作",
+      "description": "この表は、特定のファイルタイプまたはすべてのURLに対して保存した起動オプションを示しています。ピン留めされた動作を削除すると、再度起動オプションを尋ねられるようになります。",
+      "trigger": "トリガー",
+      "savedApp": "保存されたアプリケーション",
+      "triggerSimple": "シンプル起動（ツールバーボタン）",
+      "triggerUrl": "すべてのURL（コンテキストメニューから）",
+      "triggerFile": "ファイルタイプ: <strong>{fileType}</strong>",
+      "unknownApp": "不明なアプリ ({appId}...)"
+    },
+    "admins": {
+      "serverKeyTitle": "サーバー公開鍵",
+      "serverKeyDescription": "これは、ユーザー設定ファイルがこのサーバーに接続するために必要な公開鍵です。",
+      "title": "管理者管理",
+      "searchPlaceholder": "管理者で検索...",
+      "newTitle": "新しい管理者を作成",
+      "publicKeyOptionalLabel": "公開鍵（オプション）:",
+      "publicKeyPlaceholder": "ここに公開鍵を貼り付けるか、空欄にして生成します。",
+      "createButton": "管理者を作成",
+      "confirmDelete": "管理者 '{username}' を本当に削除しますか？これを行うと、その管理者の永続ストレージもすべて削除され、元に戻すことはできません。"
+    },
+    "users": {
+      "title": "ユーザー管理",
+      "searchPlaceholder": "名前またはグループでユーザーを検索...",
+      "newTitle": "新しいユーザーを作成",
+      "publicKeyOptionalLabel": "公開鍵（オプション）:",
+      "publicKeyPlaceholder": "ここにユーザーの公開鍵を貼り付けるか、空欄にして生成します。",
+      "settingsTitle": "ユーザー設定",
+      "sessionLimitLabel": "セッション制限",
+      "sessionLimitTitle": "ユーザーが持つことができるアクティブなセッションの数。-1で無制限。",
+      "permissionsTitle": "権限と強化",
+      "activeAccount": "アクティブなアカウント",
+      "allowStorage": "永続ストレージを許可",
+      "allowGpu": "GPUアクセスを許可",
+      "hardenContainer": "コンテナを強化",
+      "hardenWm": "ウィンドウマネージャを強化",
+      "createButton": "ユーザーを作成",
+      "homesDisabledTooltip": "このユーザーの永続ストレージは無効です",
+      "confirmDelete": "ユーザー '{username}' を本当に削除しますか？これを行うと、そのユーザーの永続ストレージもすべて削除され、元に戻すことはできません。",
+      "allowPublicSharing": "公開ファイル共有を許可する"
+    },
+    "groups": {
+      "title": "グループ管理",
+      "searchPlaceholder": "グループで検索...",
+      "newTitle": "新しいグループを作成",
+      "nameLabel": "グループ名:",
+      "overrideTitle": "グループの上書き設定",
+      "permissionsTitle": "権限と強化の上書き",
+      "createButton": "グループを作成",
+      "confirmDelete": "グループ '{groupName}' を本当に削除しますか？このグループのユーザーは個々の設定に戻ります。"
+    },
+    "installedApps": {
+      "title": "インストール済みアプリケーション",
+      "searchPlaceholder": "インストール済みアプリを検索...",
+      "noAppsFound": "インストール済みのアプリが見つかりません。",
+      "pulling": "新しいイメージをプルしています...",
+      "notLocal": "イメージがローカルに見つかりません",
+      "isLaboratory": "これは、基本イメージにカスタム設定を加えて構築されたラボアプリです。",
+      "laboratory": "ラボ",
+      "confirmDelete": "インストール済みのアプリ '{appName}' を本当に削除しますか？"
+    },
+    "appStore": {
+      "title": "アプリストア",
+      "refreshTitle": "選択したストアを更新",
+      "selectLabel": "アプリストアを選択",
+      "addLabel": "新しいアプリストアを追加",
+      "namePlaceholder": "ストア名",
+      "urlPlaceholder": "ストアのYAML URL",
+      "availableTitle": "利用可能なアプリ",
+      "addManual": "手動アプリを追加",
+      "searchPlaceholder": "利用可能なアプリを検索...",
+      "noAppsFound": "アプリケーションが見つかりません。",
+      "availableFrom": "{storeName} から利用可能なアプリ",
+      "couldNotLoad": "このストアからアプリを読み込めませんでした。"
+    },
+    "appTemplates": {
+      "title": "アプリケーションテンプレートエディタ",
+      "loadLabel": "テンプレートを読み込む",
+      "createOption": "新しいテンプレートを作成",
+      "nameLabel": "テンプレート名",
+      "namePlaceholder": "新しいテンプレートの名前を入力してください",
+      "saveButton": "プロファイルを保存",
+      "deleteButton": "削除",
+      "previewTitle": "UIプレビュー",
+      "contentArea": "アプリケーションコンテンツエリア",
+      "confirmDelete": "テンプレート '{templateName}' を本当に削除しますか？この操作は元に戻せません。",
+      "deleteDisabled": "このテンプレートは削除できません。",
+      "enterName": "新しいテンプレートの名前を入力してください。",
+      "settings": {
+        "TITLE": {
+          "label": "ページタイトル",
+          "description": "ウェブブラウザに表示されるページタイトルです。"
+        },
+        "SELKIES_UI_TITLE": {
+          "label": "サイドバータイトル",
+          "description": "サイドバーの左上に表示されるタイトルです。"
+        },
+        "SELKIES_UI_SHOW_SIDEBAR": {
+          "label": "サイドバーを表示",
+          "description": "メインのサイドバーUIを表示します。"
+        },
+        "SELKIES_UI_SHOW_LOGO": {
+          "label": "ロゴを表示",
+          "description": "サイドバーにSelkiesのロゴを表示します。"
+        },
+        "SELKIES_UI_SHOW_CORE_BUTTONS": {
+          "label": "コアボタンを表示",
+          "description": "コアコンポーネントのボタン（ディスプレイ、オーディオなど）を表示します。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
+          "label": "ビデオ設定を表示",
+          "description": "サイドバーにビデオ設定セクションを表示します。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SCREEN_SETTINGS": {
+          "label": "画面設定を表示",
+          "description": "サイドバーに画面設定セクションを表示します。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_AUDIO_SETTINGS": {
+          "label": "オーディオ設定を表示",
+          "description": "サイドバーにオーディオ設定セクションを表示します。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_STATS": {
+          "label": "統計情報を表示",
+          "description": "サイドバーに統計情報セクションを表示します。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
+          "label": "クリップボードを表示",
+          "description": "サイドバーにクリップボードセクションを表示します。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FILES": {
+          "label": "ファイルセクションを表示",
+          "description": "サイドバーにファイル転送セクションを表示します。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_APPS": {
+          "label": "アプリセクションを表示",
+          "description": "サイドバーにアプリケーションセクションを表示します。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SHARING": {
+          "label": "共有セクションを表示",
+          "description": "サイドバーに共有セクションを表示します。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
+          "label": "ゲームパッドセクションを表示",
+          "description": "サイドバーにゲームパッドセクションを表示します。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
+          "label": "キーボードボタンを表示",
+          "description": "オンスクリーンキーボードボタンを表示します。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SOFT_BUTTONS": {
+          "label": "ソフトボタンを表示",
+          "description": "ソフトボタンセクション（モバイル用）を表示します。"
+        },
+        "WATERMARK_PNG": {
+          "label": "ウォーターマークPNGパス",
+          "description": "コンテナ内のウォーターマークpngへのフルパス。"
+        },
+        "WATERMARK_LOCATION": {
+          "label": "ウォーターマークの位置",
+          "description": "ストリーム上に画像をどこに描画するか。",
+          "options": {
+            "disabled": "無効",
+            "topLeft": "左上",
+            "topRight": "右上",
+            "bottomLeft": "左下",
+            "bottomRight": "右下",
+            "centered": "中央",
+            "animated": "アニメーション"
+          }
+        },
+        "DASHBOARD": {
+          "label": "ダッシュボードスタイル",
+          "description": "ユーザーがダッシュボードを設定できます。",
+          "options": {
+            "default": "デフォルト",
+            "selkiesDefault": "Selkies（デフォルト）",
+            "zinc": "Zinc",
+            "wish": "Wish"
+          }
+        },
+        "SELKIES_AUDIO_ENABLED": {
+          "label": "オーディオを有効化",
+          "description": "サーバーからクライアントへのオーディオストリーミングを有効にします。"
+        },
+        "SELKIES_MICROPHONE_ENABLED": {
+          "label": "マイクを有効化",
+          "description": "クライアントからサーバーへのマイク転送を有効にします。"
+        },
+        "SELKIES_GAMEPAD_ENABLED": {
+          "label": "ゲームパッドを有効化",
+          "description": "ゲームパッドのサポートを有効にします。"
+        },
+        "SELKIES_CLIPBOARD_ENABLED": {
+          "label": "クリップボードを有効化",
+          "description": "クリップボードの同期を有効にします。"
+        },
+        "SELKIES_CLIPBOARD_IN_ENABLED": {
+          "label": "クライアントからサーバーへのクリップボードを有効化",
+          "description": "ブラウザからのクリップボードデータの転送を許可します。"
+        },
+        "SELKIES_CLIPBOARD_OUT_ENABLED": {
+          "label": "サーバーからクライアントへのクリップボードを有効化",
+          "description": "サーバーからのクリップボードデータの転送を許可します。"
+        },
+        "SELKIES_ENABLE_BINARY_CLIPBOARD": {
+          "label": "バイナリクリップボードを有効化",
+          "description": "クリップボード上のバイナリデータ（画像）を許可します。"
+        },
+        "SELKIES_COMMAND_ENABLED": {
+          "label": "コマンドWebsocketを有効化",
+          "description": "コマンドWebsocketメッセージの解析を有効にします。"
+        },
+        "SELKIES_FILE_TRANSFERS": {
+          "label": "ファイル転送",
+          "description": "許可される方向（'upload,download', 'upload', 'download', 'none'）。"
+        },
+        "SELKIES_ENABLE_SHARING": {
+          "label": "すべての共有を有効化",
+          "description": "すべての共有機能のマスター切り替え。"
+        },
+        "SELKIES_SECOND_SCREEN": {
+          "label": "セカンドスクリーンを有効化",
+          "description": "2番目のモニター/ディスプレイのサポートを有効にします。"
+        },
+        "SELKIES_USE_BROWSER_CURSORS": {
+          "label": "ブラウザカーソルを使用",
+          "description": "キャンバスにレンダリングする代わりにブラウザのCSSカーソルを使用します。"
+        },
+        "SELKIES_USE_CSS_SCALING": {
+          "label": "CSSスケーリングを使用（LoDPI）",
+          "description": "trueの場合、低解像度が送信され、キャンバスが引き伸ばされます。"
+        },
+        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+          "label": "手動解像度モード",
+          "description": "解像度を手動の幅/高さの値に固定します。"
+        },
+        "SELKIES_FORCE_ALIGNED_RESOLUTION": {
+          "label": "整列された解像度を強制",
+          "description": "ディスプレイの解像度を16ピクセルの倍数に強制します."
+        },
+        "SELKIES_MANUAL_WIDTH": {
+          "label": "手動幅",
+          "description": "幅を固定値にロックします。手動モードを強制します。"
+        },
+        "SELKIES_MANUAL_HEIGHT": {
+          "label": "手動高さ",
+          "description": "高さを固定値にロックします。手動モードを強制します。"
+        },
+        "SELKIES_SCALING_DPI": {
+          "label": "UIスケーリングDPI",
+          "description": "UIスケーリングのデフォルトDPI。"
+        },
+        "SELKIES_AUDIO_BITRATE": {
+          "label": "オーディオビットレート",
+          "description": "デフォルトのオーディオビットレート。"
+        },
+        "SELKIES_ENCODER": {
+          "label": "エンコーダー",
+          "description": "エンコーダーのカンマ区切りリスト。最初のものがデフォルトです。"
+        },
+        "SELKIES_USE_CPU": {
+          "label": "CPUエンコーディングを強制",
+          "description": "pixelfluxのCPUベースのエンコーディングを強制します。"
+        },
+        "SELKIES_FRAMERATE": {
+          "label": "フレームレート（範囲または固定）",
+          "description": "例: 範囲の場合は'8-120'、固定の場合は'60'。"
+        },
+        "SELKIES_H264_CRF": {
+          "label": "H.264 CRF（範囲または固定）",
+          "description": "例: 範囲の場合は'5-50'、固定の場合は'25'。"
+        },
+        "SELKIES_JPEG_QUALITY": {
+          "label": "JPEG品質（範囲または固定）",
+          "description": "例: 範囲の場合は'1-100'、固定の場合は'60'。"
+        },
+        "SELKIES_H264_FULLCOLOR": {
+          "label": "H.264フルカラー",
+          "description": "pixelfluxエンコーダーのH.264フルカラーレンジを有効にします。"
+        },
+        "SELKIES_H264_STREAMING_MODE": {
+          "label": "H.264ストリーミング（ターボ）モード",
+          "description": "H.264低遅延ストリーミングモードを有効にします。"
+        },
+        "SELKIES_USE_PAINT_OVER_QUALITY": {
+          "label": "ペイントオーバー品質を使用",
+          "description": "静的なシーンに対して高品質のペイントオーバーを有効にします。"
+        },
+        "SELKIES_PAINT_OVER_JPEG_QUALITY": {
+          "label": "ペイントオーバーJPEG品質",
+          "description": "例: 範囲の場合は'1-100'、固定の場合は'90'。"
+        },
+        "SELKIES_H264_PAINTOVER_CRF": {
+          "label": "ペイントオーバーH.264 CRF",
+          "description": "例: 範囲の場合は'5-50'、固定の場合は'18'。"
+        },
+        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
+          "label": "ペイントオーバーバーストフレーム",
+          "description": "例: 範囲の場合は'1-30'、固定の場合は'5'。"
+        },
+        "HARDEN_DESKTOP": {
+          "label": "デスクトップを強化（プリセット）",
+          "description": "DISABLE_OPEN_TOOLS、DISABLE_SUDO、DISABLE_TERMINALSを有効にします。"
+        },
+        "HARDEN_OPENBOX": {
+          "label": "ウィンドウマネージャを強化（プリセット）",
+          "description": "DISABLE_CLOSE_BUTTON、DISABLE_MOUSE_BUTTONS、HARDEN_KEYBINDSを有効にします。RESTART_APPも有効にします。"
+        },
+        "DISABLE_OPEN_TOOLS": {
+          "label": "オープンツールを無効化",
+          "description": "xdg-openおよびexo-openバイナリを無効にします。"
+        },
+        "DISABLE_SUDO": {
+          "label": "Sudoを無効化",
+          "description": "sudoコマンドを無効にします。"
+        },
+        "DISABLE_TERMINALS": {
+          "label": "ターミナルを無効化",
+          "description": "一般的なターミナルエミュレータを無効にします。"
+        },
+        "DISABLE_CLOSE_BUTTON": {
+          "label": "ウィンドウ閉じるボタンを無効化",
+          "description": "ウィンドウのタイトルバーから閉じるボタンを削除します。"
+        },
+        "DISABLE_MOUSE_BUTTONS": {
+          "label": "右/中クリックを無効化",
+          "description": "右クリックおよび中クリックのコンテキストメニューを無効にします。"
+        },
+        "HARDEN_KEYBINDS": {
+          "label": "キーバインドを強化",
+          "description": "Alt+F4などのデフォルトのOpenboxキーバインドを無効にします。"
+        },
+        "RESTART_APP": {
+          "label": "終了時にアプリを再起動",
+          "description": "メインアプリケーションが閉じられた場合に自動的に再起動します。"
+        },
+        "MAX_RES": {
+          "label": "最大解像度",
+          "description": "コンテナの最大解像度、デフォルトは16kです。"
+        },
+        "START_DOCKER": {
+          "label": "Docker-in-Dockerを開始",
+          "description": "falseの場合、特権コンテナはDinDを開始しません。"
+        },
+        "DISABLE_IPV6": {
+          "label": "IPv6を無効化",
+          "description": "trueの場合、IPv6を無効にします。"
+        },
+        "DISABLE_ZINK": {
+          "label": "Zinkを無効化",
+          "description": "ビデオカードが検出された場合、Zink環境変数を設定しません。"
+        },
+        "DISABLE_DRI3": {
+          "label": "DRI3を無効化",
+          "description": "ビデオカードが検出された場合、DRI3アクセラレーションを使用しません。"
+        },
+        "NO_DECOR": {
+          "label": "ウィンドウ装飾なし",
+          "description": "PWA用途のためにウィンドウボーダーなしでアプリケーションを実行します。"
+        },
+        "NO_FULL": {
+          "label": "フルスクリーンなし",
+          "description": "アプリケーションを自動的にフルスクリーンにしません。"
+        },
+        "NO_GAMEPAD": {
+          "label": "ゲームパッドインジェクションを無効化",
+          "description": "ユーザースペースのゲームパッドインターポーザーインジェクションを無効にします。"
+        },
+        "SELKIES_DEBUG": {
+          "label": "Selkiesデバッグを有効化",
+          "description": "ストリーミングコンポーネントのデバッグロギングを有効にします。"
+        },
+        "DOCKER_PRIVILEGED": {
+          "label": "特権モード",
+          "description": "コンテナにすべての権限を与え、cgroup制限を解除し、すべてのホストデバイスをマウントします。これにより問題が発生する可能性があります！"
+        },
+        "DOCKER_BIND_MOUNTS": {
+          "label": "追加のバインドマウント",
+          "description": "追加のホストバインド（カンマ区切り、例：/host/path:/container/path:ro）。"
+        },
+        "DOCKER_ENV": {
+          "label": "環境変数",
+          "description": "追加の環境変数（カンマ区切り、例：KEY=VALUE,KEY2=VALUE2）。"
+        },
+        "DOCKER_CAP_ADD": {
+          "label": "Cap追加",
+          "description": "カーネル機能を追加（カンマ区切り、例：SYS_ADMIN,MKNOD）。"
+        },
+        "DOCKER_CAP_DROP": {
+          "label": "Cap削除",
+          "description": "カーネル機能を削除（カンマ区切り）。"
+        },
+        "DOCKER_SECURITY_OPT": {
+          "label": "セキュリティオプション",
+          "description": "セキュリティオプション（カンマ区切り、例：seccomp=unconfined,apparmor=unconfined）。"
+        },
+        "DOCKER_DEVICES": {
+          "label": "デバイス",
+          "description": "ホストデバイスを公開（カンマ区切り、例：/dev/sda:/dev/xvda:rwm）。"
+        },
+        "DOCKER_SHM_SIZE": {
+          "label": "SHMサイズ",
+          "description": "/dev/shmのサイズ（例：1G, 2G）。"
+        },
+        "DOCKER_MEM_LIMIT": {
+          "label": "メモリ制限",
+          "description": "メモリ制限（例：1g, 512m）。"
+        },
+        "DOCKER_CPU_SHARES": {
+          "label": "CPUシェア",
+          "description": "CPUシェア（相対的な重みの整数）。"
+        },
+        "DOCKER_NANO_CPUS": {
+          "label": "Nano CPU",
+          "description": "1e-9 CPU単位のCPUクォータ。"
+        },
+        "DOCKER_NETWORK_MODE": {
+          "label": "ネットワークモード",
+          "description": "コンテナのネットワークモード。",
+          "options": {
+            "default": "デフォルト (Bridge)",
+            "host": "Host",
+            "none": "なし",
+            "bridge": "Bridge"
+          }
+        },
+        "DOCKER_IPC_MODE": {
+          "label": "IPCモード",
+          "description": "コンテナのIPCモードを設定します。",
+          "options": {
+            "default": "デフォルト",
+            "host": "Host",
+            "private": "プライベート",
+            "shareable": "共有可能"
+          }
+        },
+        "DOCKER_PID_MODE": {
+          "label": "PIDモード",
+          "description": "コンテナのPIDモードを設定します。",
+          "options": {
+            "default": "デフォルト",
+            "host": "Host"
+          }
+        },
+        "DOCKER_DNS": {
+          "label": "DNSサーバー",
+          "description": "カスタムDNSサーバー（カンマ区切り）。"
+        },
+        "DOCKER_EXTRA_HOSTS": {
+          "label": "追加ホスト",
+          "description": "ホストとIPのマッピング（カンマ区切り、例：hostname:1.2.3.4）。"
+        },
+        "DOCKER_SYSCTLS": {
+          "label": "Sysctls",
+          "description": "カーネルパラメータ（カンマ区切り、例：net.ipv4.ip_forward=1）。"
+        },
+        "DOCKER_ULIMITS": {
+          "label": "Ulimits",
+          "description": "Ulimits（カンマ区切り、例：nofile=1024:1024）。"
+        },
+        "DOCKER_TMPFS": {
+          "label": "Tmpfsマウント",
+          "description": "一時ファイルシステム（カンマ区切り、例：/run:rw,noexec,nosuid,size=65536k）。"
+        },
+        "DOCKER_GROUP_ADD": {
+          "label": "グループ追加",
+          "description": "追加のグループ名および/またはIDのリスト（カンマ区切り）。"
+        }
+      }
+    },
+    "appLaboratory": {
+      "title": "アプリラボ",
+      "description": "基本アプリの上に変更を重ねて、カスタムアプリケーション設定を作成およびテストします。",
+      "selectApp": "アプリを選択",
+      "createNew": "新しいアプリを作成",
+      "baseApp": "基本アプリケーション",
+      "baseAppDescription": "新しいカスタムアプリの基になるインストール済みアプリケーション。",
+      "selectBase": "基本アプリを選択",
+      "customizationTitle": "カスタマイズ",
+      "appName": "アプリ名",
+      "appIcon": "アプリアイコン",
+      "uploadIcon": "アイコンをアップロード",
+      "autostartScriptLabel": "カスタム自動起動スクリプト",
+      "permissionsTitle": "権限",
+      "usersLabel": "許可されたユーザー",
+      "groupsLabel": "許可されたグループ",
+      "launchButton": "保存してカスタマイズセッションを開始",
+      "closeButton": "セッションを閉じて確定",
+      "savingAndLaunching": "保存して起動中...",
+      "placeholder": "アプリラボでは、既存のインストール済みアプリケーションに基づいて、アプリケーションの基本ホームディレクトリと起動スクリプトを設定できます。このホームディレクトリは、このセッションで設定したすべてのファイルと設定とともに、ユーザーの初回初期化時にコピーされます。既存のラボアプリを再起動して、その内容をさらに変更することができます。",
+      "formInvalid": "基本アプリを選択し、新しいアプリの名前を入力してください。"
+    },
+    "modals": {
+      "editUserTitle": "ユーザー編集: {username}",
+      "saveChanges": "変更を保存",
+      "effectiveSettings": "有効な設定（グループの上書きを含む）",
+      "editGroupTitle": "グループ編集: {groupName}",
+      "userConfigTitle": "ユーザー設定",
+      "warning": "この設定が表示されるのはこの一度きりです。ユーザーに安全に提供してください。",
+      "info": "この設定ファイルをダウンロードすると、他のデバイスでSealSkinを簡単にセットアップできます。このファイルには秘密鍵が含まれているため、安全に保管してください。",
+      "configDataLabel": "設定データ（JSON）",
+      "copyButton": "テキストをコピー",
+      "downloadButton": "ファイルをダウンロード",
+      "manageHomeDirs": "ホームディレクトリを管理",
+      "dirsForUser": "ユーザーのディレクトリ: {username}",
+      "dirsForAdmin": "管理者のディレクトリ: {username}",
+      "newDirForUser": "ユーザー用の新しいディレクトリを作成",
+      "createDirButton": "ディレクトリを作成",
+      "confirmDeleteDir": "ユーザー '{username}' の '{homeName}' を本当に削除しますか？この操作は永続的です。",
+      "installAppTitle": "{appName} をインストール",
+      "editAppTitle": "{appName} を編集",
+      "customNameLabel": "カスタム名",
+      "imageLabel": "コンテナイメージ",
+      "permissions": "権限",
+      "allowedUsersLabel": "許可されたユーザー（カンマ区切り、'all'で全員）",
+      "allowedGroupsLabel": "許可されたグループ（カンマ区切り、'all'で全員）",
+      "features": "機能",
+      "gpuSupport": "GPUサポート",
+      "homeMounting": "ホームディレクトリのマウント",
+      "urlSupport": "URLを開くサポート",
+      "fileSupport": "ファイルを開くサポート",
+      "autoUpdate": "イメージを自動更新",
+      "advancedSettings": "詳細設定",
+      "appTemplateLabel": "アプリケーションテンプレート",
+      "appTemplateDescription": "詳細なコンテナ起動設定のために、事前設定されたテンプレートを選択します。",
+      "customAutostartScriptLabel": "カスタム自動起動スクリプト",
+      "customAutostartScriptDescription": "自動起動ロジックをカスタマイズします。空白のままにすると、アプリケーションプロバイダーのデフォルトが使用されます。",
+      "saveInstallation": "インストールを保存",
+      "updateStatusTitle": "{appName} の更新ステータス",
+      "checkingUpdates": "更新を確認中...",
+      "updateAvailable": "新しいイメージバージョンが利用可能です！",
+      "yourVersion": "あなたのバージョン: {sha}",
+      "latestAvailable": "最新バージョンがレジストリからプル可能です。",
+      "pullLatest": "最新イメージをプル",
+      "upToDate": "あなたのイメージは最新です。",
+      "currentVersion": "現在のバージョン: {sha}",
+      "errorChecking": "更新の確認中にエラーが発生しました。",
+      "pullingLatest": "最新イメージをプルしています... しばらくお待ちください。",
+      "pullComplete": "プルが完了しました！",
+      "newVersion": "新しいバージョン: {sha}",
+      "errorPulling": "イメージのプル中にエラーが発生しました。",
+      "manualInstallNote": "注意：手動で追加されたイメージは、selkies-baseimage互換のイメージに基づいている必要があります。",
+      "generalTitle": "一般とパフォーマンス設定",
+      "dockerTitle": "Docker詳細オーバーライド",
+      "dockerDescription": "これらの設定は、デフォルトのコンテナ構成を上書きします。注意して使用し、何をしているか理解している場合にのみ使用してください。"
+    },
+    "status": {
+      "loggingIn": "ログイン中...",
+      "configSaved": "設定が正常に保存されました！",
+      "configApplied": "設定が適用されました！ログインしてテストしてください。",
+      "configApplyFailed": "設定の適用に失敗しました: {error}",
+      "fileReadError": "ファイルの読み取り中にエラーが発生しました。",
+      "noConfig": "設定ファイルまたはテキストを提供してください。",
+      "loggedInAdmin": "管理者としてログインしました: {username}",
+      "loggedInUser": "標準ユーザーとしてログインしました: {username}。",
+      "loginFailed": "ログインに失敗しました: {error}",
+      "adminDataRefreshFailed": "管理者データの更新に失敗しました: {error}",
+      "logoutSuccess": "ログアウトし、設定がクリアされました。",
+      "generateConfigFailed": "ユーザーの詳細が不足しているため、設定を生成できませんでした。",
+      "copySuccess": "設定がクリップボードにコピーされました！",
+      "copyFailed": "テキストのコピーに失敗しました。",
+      "publicKeyCopied": "公開鍵がコピーされました！",
+      "keyCopyFailed": "鍵のコピーに失敗しました。",
+      "creatingAdmin": "管理者を作成中...",
+      "adminCreated": "管理者 '{username}' が作成されました。",
+      "adminCreateFailed": "管理者の作成中にエラーが発生しました: {error}",
+      "adminDeleted": "管理者 '{username}' が正常に削除されました。",
+      "adminDeleteFailed": "管理者の削除中にエラーが発生しました: {error}",
+      "creatingUser": "ユーザーを作成中...",
+      "userCreated": "ユーザー '{username}' が作成されました。",
+      "userCreateFailed": "ユーザーの作成中にエラーが発生しました: {error}",
+      "userDeleted": "ユーザー '{username}' が正常に削除されました。",
+      "userDeleteFailed": "ユーザーの削除中にエラーが発生しました: {error}",
+      "userUpdated": "ユーザー '{username}' が正常に更新されました。",
+      "userUpdateFailed": "ユーザーの更新中にエラーが発生しました: {error}",
+      "creatingGroup": "グループを作成中...",
+      "groupCreated": "グループ '{groupName}' が作成されました。",
+      "groupCreateFailed": "グループの作成中にエラーが発生しました: {error}",
+      "groupDeleted": "グループ '{groupName}' が正常に削除されました。",
+      "groupDeleteFailed": "グループの削除中にエラーが発生しました: {error}",
+      "groupUpdated": "グループ '{groupName}' が正常に更新されました。",
+      "groupUpdateFailed": "グループの更新中にエラーが発生しました: {error}",
+      "homedirLoadFailed": "ホームディレクトリの読み込みに失敗しました: {error}",
+      "homedirCreateFailed": "ディレクトリの作成中にエラーが発生しました: {error}",
+      "homedirCreated": "ホームディレクトリ '{homeName}' が作成されました。",
+      "homedirDeleted": "ディレクトリ '{homeName}' が削除されました。",
+      "homedirDeleteFailed": "ディレクトリの削除中にエラーが発生しました: {error}",
+      "homedirCreatedFor": "{username} のためにディレクトリ '{homeName}' が作成されました。",
+      "homedirDeletedFor": "{username} のためにディレクトリ '{homeName}' が削除されました。",
+      "sessionsLoadFailed": "セッションの読み込みに失敗しました: {error}",
+      "sessionStopError": "セッションの停止中にエラーが発生しました: {error}",
+      "sessionStopped": "セッションが正常に停止しました。",
+      "appDataRefreshFailed": "アプリデータの更新に失敗しました: {error}",
+      "closingSession": "カスタマイズセッションをコミットしています...",
+      "sessionClosed": "カスタマイズセッションが閉じられました。",
+      "sessionCloseFailed": "カスタマイズセッションのクローズに失敗しました: {error}",
+      "fetchingApps": "ストアからアプリを取得中...",
+      "fetchAppsFailed": "ストアからのアプリの取得に失敗しました: {error}",
+      "appStoreAddFailed": "ストアの追加中にエラーが発生しました: {error}",
+      "appStoreAdded": "アプリストア '{name}' が追加されました。",
+      "appSaved": "アプリ '{name}' が正常に{action}されました。",
+      "appSaveActions": {
+        "updated": "更新",
+        "installed": "インストール"
+      },
+      "appSaveFailed": "アプリの保存中にエラーが発生しました: {error}",
+      "appDeleted": "アプリ '{name}' が削除されました。",
+      "appDeleteFailed": "アプリの削除中にエラーが発生しました: {error}",
+      "templateSaved": "テンプレート '{name}' が正常に保存されました。",
+      "templateSaveFailed": "テンプレートの保存中にエラーが発生しました: {error}",
+      "templateDeleted": "テンプレート '{name}' が正常に削除されました。",
+      "templateDeleteFailed": "テンプレートの削除中にエラーが発生しました: {error}",
+      "pinRemoved": "ピン留めされた動作が削除されました。",
+      "keyGenerated": "新しいキーペアが生成されました。",
+      "keyGenFailed": "キー生成に失敗しました: {error}",
+      "pendingConfigSaved": "保留中の設定が保存されました。管理者に公開鍵を提供できます。",
+      "settingsSaved": "設定が保存されました。",
+      "appCreated": "アプリ「{name}」が正常に作成されました。",
+      "launchFailed": "起動に失敗しました: {error}"
+    },
+    "placeholders": {
+      "noAdmins": "管理が見つかりません。",
+      "noUsers": "ユーザーが見つかりません。",
+      "noGroups": "グループが見つかりません。",
+      "noHomeDirs": "ホームディレクトリが見つかりません。",
+      "noSessions": "アクティブなセッションが見つかりません。",
+      "noPinned": "ピン留めされた動作が見つかりません。",
+      "errorLoading": "ディレクトリの読み込み中にエラーが発生しました。",
+      "noInstalledApps": "まだアプリケーションがインストールされていません。"
+    }
+  },
+  "popup": {
+    "tabs": {
+      "launch": "新規起動",
+      "sessions": "アクティブなセッション",
+      "manageFiles": "ファイル管理",
+      "uploadStorage": "ストレージにアップロード",
+      "uploadFiles": "ファイルをアップロード",
+      "uploadFilesTitle": "専用のファイルアップロードページを開く"
+    },
+    "launchView": {
+      "searchPlaceholder": "アプリケーションを検索...",
+      "uploadingFile": "ファイルをアップロード中...",
+      "gpuLabel": "GPU",
+      "storageLabel": "ストレージ",
+      "languageLabel": "言語",
+      "cleanroom": "クリーンルーム（一時的）",
+      "noGpu": "なし",
+      "saveOptions": "これらの起動オプションを保存",
+      "saveOptionsForUrl": "すべてのURLのオプションを保存",
+      "saveOptionsForFile": ".{extension} ファイルのオプションを保存",
+      "openFile": "起動時にファイルを開く",
+      "launchButton": "起動",
+      "launchingButton": "起動中...",
+      "uploadingButton": "アップロード中...",
+      "autoHome": "自動 (アプリごとの永続化)",
+      "collaborationMode": "共同セッション",
+      "waylandMode": "Waylandモード"
+    },
+    "sessionsView": {
+      "noSessions": "アクティブなセッションが見つかりません。"
+    },
+    "uploadStorageView": {
+      "selectHome": "ホームディレクトリを選択",
+      "description": "これにより、ファイル <strong>{filename}</strong> がファイルストレージに直接アップロードされ、後で使用できるようになります。",
+      "descriptionFallback": "これにより、ファイル <strong>{filename}</strong> がファイルストレージに直接アップロードされ、後で使用できるようになります。",
+      "uploadButton": "ファイルをアップロード",
+      "uploadingButton": "アップロード中...",
+      "preparing": "ファイルを準備中...",
+      "uploadingChunk": "チャンク {current} / {total} をアップロード中...",
+      "finalizing": "最終処理中...",
+      "uploadComplete": "アップロード完了！"
+    },
+    "status": {
+      "unconfigured": "オプションページで拡張機能の設定を行ってください。",
+      "openingServerFile": "サーバー側のファイルを開いています: {filename}",
+      "openingFile": "ファイルを開いています: {filename}",
+      "openingUrl": "URLを開いています: {targetUrl}",
+      "error": "エラー: {message}",
+      "preparingFile": "ファイルを準備中...",
+      "sendingFile": "セッションにファイルを送信中...",
+      "errorSendingFile": "ファイルの送信中にエラーが発生しました: {message}",
+      "errorClosingSession": "セッションの終了中にエラーが発生しました: {message}",
+      "preparingSession": "隔離セッションを準備中...",
+      "fetchingData": "ファイルデータを取得中...",
+      "fetchDataFailed": "ファイルデータの取得に失敗しました: {statusText}",
+      "unknownAction": "不明な起動アクションです。",
+      "noAppSelected": "アプリケーションを選択してください。",
+      "noAppsAvailable": "あなたのアカウントで利用可能なアプリケーションはありません。",
+      "uploadSuccess": "ファイルが正常にアップロードされました！",
+      "creatingAutoHome": "自動ホームディレクトリを作成中..."
+    },
+    "languages": {
+      "default": "デフォルト ({locale})"
+    }
+  },
+  "upload": {
+    "title": "ファイルアップロード",
+    "description": "コンピュータからファイルを選択して、安全な隔離セッションで開きます。",
+    "dropzone": {
+      "title": "ここにファイルをドラッグ＆ドロップ",
+      "or": "または",
+      "button": "ファイルを選択"
+    },
+    "confirm": {
+      "ready": "ファイルは安全に開く準備ができました。",
+      "button": "起動に進む"
+    }
+  },
+  "files": {
+    "title": "SealSkin ファイル",
+    "header": {
+      "title": "ファイル",
+      "newFolder": "新しいフォルダー",
+      "uploadFiles": "ファイルをアップロード",
+      "uploadFolder": "フォルダーをアップロード"
+    },
+    "sidebar": {
+      "sharedFiles": "SealSkin ファイル",
+      "publicShares": "公開共有"
+    },
+    "shares": {
+      "title": "公開共有ファイル",
+      "searchPlaceholder": "ファイル名またはIDで検索..."
+    },
+    "table": {
+      "name": "名前",
+      "size": "サイズ",
+      "lastModified": "最終更新日",
+      "created": "作成日時",
+      "expires": "有効期限",
+      "url": "公開URL",
+      "passwordProtected": "パスワード"
+    },
+    "dropzone": {
+      "title": "ファイルをドロップしてアップロード"
+    },
+    "pagination": {
+      "previous": "« 前へ",
+      "next": "次へ »",
+      "pageOf": "ページ {page} / {totalPages}"
+    },
+    "modals": {
+      "newFolder": {
+        "title": "新しいフォルダーを作成",
+        "folderNameLabel": "フォルダー名",
+        "nameTitle": "文字、数字、アンダースコア、ハイフン、またはピリオドのみを使用してください。",
+        "createButton": "作成"
+      },
+      "confirmDelete": {
+        "title": "削除の確認",
+        "message": "選択した{count, plural, one {1個のアイテム} other {{count}個のアイテム}}を本当に削除しますか？この操作は元に戻せません。",
+        "messageDefault": "選択したアイテムを本当に削除しますか？この操作は元に戻せません。"
+      },
+      "uploadProgress": {
+        "title": "アップロードの進捗",
+        "doneButton": "完了"
+      },
+      "share": {
+        "title": "ファイルを共有",
+        "sharingFile": "ファイルを共有中: <strong>{filename}</strong>",
+        "passwordLabel": "パスワード（任意）",
+        "passwordPlaceholder": "パスワードなしの場合は空欄",
+        "expiryLabel": "有効期限（時間、任意）",
+        "expiryPlaceholder": "例：1日の場合は24",
+        "shareButton": "共有リンクを作成"
+      }
+    },
+    "status": {
+      "homeDirLoadFailed": "ホームディレクトリの読み込みに失敗しました：{error}",
+      "filesLoadFailed": "ファイルの読み込み中にエラーが発生しました：{error}",
+      "deleteProtectedError": "保護されたシステムフォルダーは削除できません。",
+      "deletingItems": "{count, plural, one {1個のアイテム} other {{count}個のアイテム}}を削除しています...",
+      "deleteSuccess": "削除に成功しました。",
+      "deleteFailed": "削除に失敗しました：{error}",
+      "preparingUpload": "{count, plural, one {1個のファイル} other {{count}個のファイル}}のアップロードを準備しています...",
+      "uploadPrepFailed": "フォルダーのアップロード準備中にエラーが発生しました：{error}",
+      "notConfigured": "エラー：SealSkinが設定されていません。オプションで設定してください。",
+      "folderCreated": "フォルダー「{folderName}」が作成されました。",
+      "folderCreateFailed": "フォルダーの作成中にエラーが発生しました：{error}",
+      "shareCreated": "共有が正常に作成されました！リンクがクリップボードにコピーされました。",
+      "shareCreateFailed": "共有の作成に失敗しました: {error}",
+      "sharesLoadFailed": "共有ファイルの読み込みに失敗しました: {error}",
+      "shareDeleteFailed": "共有の削除に失敗しました: {error}",
+      "shareDeleted": "共有が正常に削除されました。",
+      "urlCopied": "公開URLがクリップボードにコピーされました。"
+    },
+    "placeholders": {
+      "errorLoading": "ファイルの読み込み中にエラーが発生しました。",
+      "folderEmpty": "このフォルダーは空です。",
+      "noHomeDirs": "利用可能なホームディレクトリがありません。",
+      "noShares": "まだファイルを共有していません。"
+    },
+    "uploadStatus": {
+      "pending": "保留中",
+      "initiating": "開始中...",
+      "uploading": "アップロード中...",
+      "finalizing": "最終処理中...",
+      "completed": "完了",
+      "error": "エラー"
+    }
+  }
+}

@@ -1,0 +1,961 @@
+{
+  "background": {
+    "contextMenu": {
+      "openUrl": "Apri link in SealSkin",
+      "openFile": "Apri destinazione link come file in SealSkin",
+      "sendMedia": "Invia media a SealSkin",
+      "searchText": "Cerca \"%s\" in SealSkin",
+      "sendDownload": "Invia prossimo download a SealSkin"
+    }
+  },
+  "common": {
+    "actions": "Azioni",
+    "active": "Attivo",
+    "cancel": "Annulla",
+    "manage": "Gestisci",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "save": "Salva",
+    "none": "nessuno",
+    "error": "Errore",
+    "na": "N/D",
+    "of": "di",
+    "status": "Stato",
+    "username": "Nome utente",
+    "group": "Gruppo",
+    "groups": "Gruppi",
+    "publicKey": "Chiave Pubblica",
+    "name": "Nome",
+    "source": "Origine",
+    "imageVersion": "Versione Immagine",
+    "language": "Lingua",
+    "storage": "Archiviazione",
+    "gpu": "GPU",
+    "version": "Versione",
+    "checked": "Verificato",
+    "never": "Mai",
+    "stop": "Ferma",
+    "reopen": "Riapri",
+    "sendFile": "Invia File",
+    "share": "Condividi",
+    "search": "Cerca",
+    "refresh": "Aggiorna",
+    "close": "Chiudi",
+    "copy": "Copia",
+    "open": "Apri",
+    "copyUrl": "Copia URL",
+    "download": "Scarica",
+    "next": "Successivo",
+    "previous": "Precedente",
+    "page": "Pagina",
+    "home": "Home",
+    "homes": "Home",
+    "sessions": "Sessioni",
+    "users": "Utenti",
+    "admins": "Amministratori",
+    "yes": "Sì",
+    "no": "No",
+    "daysAgo": "{count, plural, one {1 giorno fa} other {{count} giorni fa}}",
+    "hoursAgo": "{count, plural, one {1 ora fa} other {{count} ore fa}}",
+    "minutesAgo": "{count, plural, one {1 minuto fa} other {{count} minuti fa}}",
+    "justNow": "proprio ora",
+    "bytes": "Byte",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB",
+    "pb": "PB"
+  },
+  "options": {
+    "sidebar": {
+      "config": "Configurazione",
+      "home": "Cartelle Home",
+      "sessions": "Sessioni Attive",
+      "pinned": "Comportamento Fissato",
+      "appStore": "App Store",
+      "appTemplates": "Modelli App",
+      "appLaboratory": "Laboratorio App",
+      "installedApps": "App Installate",
+      "users": "Utenti",
+      "groups": "Gruppi",
+      "admins": "Amministratori"
+    },
+    "dashboard": {
+      "title": "Pannello di Controllo",
+      "clientSettings": "Impostazioni Client",
+      "exportConfig": "Esporta Configurazione",
+      "userStatus": "Stato Utente",
+      "loggedInAs": "Accesso effettuato come:",
+      "role": "Ruolo",
+      "roleAdmin": "Amministratore",
+      "roleUser": "Utente Standard",
+      "serverInfo": "Informazioni Server",
+      "server": "Server:",
+      "cpuModel": "Modello CPU:",
+      "storageUsage": "Utilizzo Archiviazione:",
+      "detectedGpus": "GPU Rilevate:",
+      "logout": "Logout e Pulisci Config.",
+      "howTo": "Come Usare SealSkin",
+      "howToDescription": "Questa sezione contiene la documentazione di base su come utilizzare l'estensione.",
+      "howToList": [
+        "<strong>Per aprire contenuti in isolamento:</strong> Fai clic con il pulsante destro del mouse su qualsiasi link, immagine o testo selezionato e scegli un'opzione dal menu contestuale \"Isolamento SealSkin\".",
+        "<strong>Per inviare un download in isolamento:</strong> Fai clic con il pulsante destro del mouse sulla pagina e seleziona \"Invia Prossimo Download in Isolamento\". Il file successivo che scaricherai verrà intercettato e inviato a una sessione sicura.",
+        "<strong>Per avviare un'applicazione pulita:</strong> Fai clic sull'icona di SealSkin nella barra degli strumenti del tuo browser.",
+        "<strong>Per gestire l'archiviazione persistente:</strong> Usa la scheda \"Cartelle Home\" in questa pagina per creare ed eliminare volumi di archiviazione che possono essere utilizzati in più sessioni.",
+        "<strong>Per salvare le opzioni di avvio:</strong> Seleziona la casella \"Salva queste opzioni di avvio\" nel popup prima di avviare un'applicazione per un tipo di file specifico (es. .pdf) o per tutti gli URL. Gestisci queste preferenze salvate nella scheda \"Comportamento Fissato\"."
+      ],
+      "confirmLogout": "Sei sicuro di voler effettuare il logout? Questo cancellerà la configurazione salvata da questo browser."
+    },
+    "config": {
+      "quickSetup": "Configurazione Rapida",
+      "quickSetupDescription": "Carica il file di configurazione (.json) fornito dal tuo amministratore, o incolla il suo contenuto qui sotto per impostare automaticamente l'estensione.",
+      "uploadLabel": "Carica File di Configurazione",
+      "pasteLabel": "O Incolla Testo di Configurazione",
+      "pastePlaceholder": "Incolla qui la tua configurazione JSON...",
+      "applyButton": "Applica Configurazione",
+      "manualLink": "Configurazione Manuale",
+      "advancedTitle": "Configurazione Client (Avanzata)",
+      "serverIpLabel": "IP o Dominio del Server",
+      "serverIpPlaceholder": "es. 192.168.1.100",
+      "apiPortLabel": "Porta API",
+      "apiPortPlaceholder": "es. 8000",
+      "sessionPortLabel": "Porta Sessione",
+      "sessionPortPlaceholder": "es. 8443",
+      "usernameLabel": "Nome utente",
+      "usernamePlaceholder": "Il tuo nome utente",
+      "privateKeyLabel": "La Tua Chiave Privata (Formato PEM)",
+      "privateKeyPlaceholder": "Incolla qui il contenuto della tua chiave privata",
+      "serverKeyLabel": "Chiave Pubblica del Server (Formato PEM)",
+      "serverKeyPlaceholder": "Incolla qui il contenuto di server_public.pem",
+      "searchEngineLabel": "Motore di Ricerca Predefinito per Testo Selezionato",
+      "saveButton": "Salva Configurazione",
+      "loginButton": "Login e Testa",
+      "automaticLink": "Configurazione Automatica",
+      "chooseFile": "Scegli File",
+      "keyGeneration": "Generazione Chiave",
+      "keyGenDescription": "Se non hai una coppia di chiavi, puoi generarne una qui. La chiave privata verrà inserita sopra. Fornisci la chiave pubblica al tuo amministratore.",
+      "generateKeyButton": "Genera Nuova Coppia di Chiavi",
+      "publicKeyForAdminLabel": "La Tua Chiave Pubblica (per l'admin)"
+    },
+    "home": {
+      "title": "Le Tue Cartelle Home",
+      "description": "Crea cartelle di archiviazione persistenti da utilizzare tra le sessioni. Queste verranno montate nelle tue applicazioni come cartella di configurazione.",
+      "newTitle": "Crea Nuova Cartella Home",
+      "nameLabel": "Nome Cartella:",
+      "namePlaceholder": "es. i-miei-file-di-progetto",
+      "nameTitle": "Usa solo lettere, numeri, underscore o trattino.",
+      "createButton": "Crea Cartella",
+      "isLaboratory": "Questa è un'app di Laboratorio, costruita da un'immagine di base con impostazioni personalizzate.",
+      "laboratory": "Laboratorio",
+      "confirmDelete": "Sei sicuro di voler eliminare l'app installata '{appName}'?"
+    },
+    "sessions": {
+      "title": "Sessioni Attive",
+      "application": "Applicazione",
+      "started": "Avviata",
+      "noSessionsUser": "Nessuna sessione attiva trovata.",
+      "noSessionsAdmin": "Nessuna sessione attiva trovata per alcun utente.",
+      "sessionsFor": "Sessioni per {username} ({count})",
+      "confirmStop": "Sei sicuro di voler fermare questa sessione? Il container verrà distrutto."
+    },
+    "pinned": {
+      "title": "Comportamento Fissato dell'Estensione",
+      "description": "Questa tabella mostra le opzioni di avvio che hai salvato per tipi di file specifici o per tutti gli URL. Puoi rimuovere un comportamento fissato per visualizzare nuovamente le opzioni di avvio.",
+      "trigger": "Attivatore",
+      "savedApp": "Applicazione Salvata",
+      "triggerSimple": "Avvio Semplice (Pulsante Barra Strumenti)",
+      "triggerUrl": "Tutti gli URL (da menu contestuale)",
+      "triggerFile": "Tipo File: <strong>{fileType}</strong>",
+      "unknownApp": "App Sconosciuta ({appId}...)"
+    },
+    "admins": {
+      "serverKeyTitle": "Chiave Pubblica del Server",
+      "serverKeyDescription": "Questa è la chiave pubblica di cui i file di configurazione degli utenti avranno bisogno per connettersi a questo server.",
+      "title": "Gestione Amministratori",
+      "searchPlaceholder": "Cerca amministratori...",
+      "newTitle": "Crea Nuovo Amministratore",
+      "publicKeyOptionalLabel": "Chiave Pubblica (Opzionale):",
+      "publicKeyPlaceholder": "Incolla qui la chiave pubblica, o lascia vuoto per generarne una.",
+      "createButton": "Crea Amministratore",
+      "confirmDelete": "Sei sicuro di voler eliminare l'amministratore '{username}'? Questo eliminerà anche tutta la sua archiviazione persistente e non potrà essere annullato."
+    },
+    "users": {
+      "title": "Gestione Utenti",
+      "searchPlaceholder": "Cerca utenti per nome o gruppo...",
+      "newTitle": "Crea Nuovo Utente",
+      "publicKeyOptionalLabel": "Chiave Pubblica (Opzionale):",
+      "publicKeyPlaceholder": "Incolla qui la chiave pubblica dell'utente, o lascia vuoto per generarne una.",
+      "settingsTitle": "Impostazioni Utente",
+      "sessionLimitLabel": "Limite Sessioni",
+      "sessionLimitTitle": "Numero di sessioni attive che un utente può avere. -1 per illimitato.",
+      "permissionsTitle": "Permessi e Rafforzamento",
+      "activeAccount": "Account Attivo",
+      "allowStorage": "Consenti Archiviazione Persistente",
+      "allowGpu": "Consenti Accesso GPU",
+      "hardenContainer": "Rafforza Container",
+      "hardenWm": "Rafforza Window Manager",
+      "createButton": "Crea Utente",
+      "homesDisabledTooltip": "Archiviazione persistente disabilitata per questo utente",
+      "confirmDelete": "Sei sicuro di voler eliminare l'utente '{username}'? Questo eliminerà anche tutta la sua archiviazione persistente e non potrà essere annullato.",
+      "allowPublicSharing": "Consenti condivisione file pubblica"
+    },
+    "groups": {
+      "title": "Gestione Gruppi",
+      "searchPlaceholder": "Cerca gruppi...",
+      "newTitle": "Crea Nuovo Gruppo",
+      "nameLabel": "Nome Gruppo:",
+      "overrideTitle": "Impostazioni di Sovrascrittura del Gruppo",
+      "permissionsTitle": "Sovrascritture Permessi e Rafforzamento",
+      "createButton": "Crea Gruppo",
+      "confirmDelete": "Sei sicuro di voler eliminare il gruppo '{groupName}'? Gli utenti in questo gruppo torneranno alle loro impostazioni individuali."
+    },
+    "installedApps": {
+      "title": "Applicazioni Installate",
+      "searchPlaceholder": "Cerca app installate...",
+      "noAppsFound": "Nessuna app installata trovata.",
+      "pulling": "Scaricamento nuova immagine...",
+      "notLocal": "Immagine non trovata localmente",
+      "confirmDelete": "Sei sicuro di voler eliminare l'app installata '{appName}'?"
+    },
+    "appStore": {
+      "title": "App Store",
+      "refreshTitle": "Aggiorna lo store selezionato",
+      "selectLabel": "Seleziona App Store",
+      "addLabel": "Aggiungi Nuovo App Store",
+      "namePlaceholder": "Nome Store",
+      "urlPlaceholder": "URL YAML dello Store",
+      "availableTitle": "App Disponibili",
+      "addManual": "Aggiungi App Manuale",
+      "searchPlaceholder": "Cerca app disponibili...",
+      "noAppsFound": "Nessuna applicazione trovata.",
+      "availableFrom": "App Disponibili da {storeName}",
+      "couldNotLoad": "Impossibile caricare le app da questo store."
+    },
+    "appTemplates": {
+      "title": "Editor Modelli di Applicazione",
+      "loadLabel": "Carica Modello",
+      "createOption": "Crea Nuovo Modello",
+      "nameLabel": "Nome Modello",
+      "namePlaceholder": "Inserisci un nome per il nuovo modello",
+      "saveButton": "Salva Profilo",
+      "deleteButton": "Elimina",
+      "previewTitle": "Anteprima UI",
+      "contentArea": "Area Contenuto Applicazione",
+      "confirmDelete": "Sei sicuro di voler eliminare il modello '{templateName}'? Questa azione non può essere annullata.",
+      "deleteDisabled": "Questo modello non può essere eliminato.",
+      "enterName": "Inserisci un nome per il nuovo modello.",
+      "settings": {
+        "TITLE": {
+          "label": "Titolo Pagina",
+          "description": "Il titolo della pagina visualizzato nel browser web."
+        },
+        "SELKIES_UI_TITLE": {
+          "label": "Titolo Barra Laterale",
+          "description": "Titolo nell'angolo in alto a sinistra della barra laterale."
+        },
+        "SELKIES_UI_SHOW_SIDEBAR": {
+          "label": "Mostra Barra Laterale",
+          "description": "Mostra l'interfaccia utente principale della barra laterale."
+        },
+        "SELKIES_UI_SHOW_LOGO": {
+          "label": "Mostra Logo",
+          "description": "Mostra il logo Selkies nella barra laterale."
+        },
+        "SELKIES_UI_SHOW_CORE_BUTTONS": {
+          "label": "Mostra Pulsanti Principali",
+          "description": "Mostra i pulsanti dei componenti principali (display, audio, ecc.)."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
+          "label": "Mostra Impostazioni Video",
+          "description": "Mostra la sezione delle impostazioni video nella barra laterale."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SCREEN_SETTINGS": {
+          "label": "Mostra Impostazioni Schermo",
+          "description": "Mostra la sezione delle impostazioni dello schermo nella barra laterale."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_AUDIO_SETTINGS": {
+          "label": "Mostra Impostazioni Audio",
+          "description": "Mostra la sezione delle impostazioni audio nella barra laterale."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_STATS": {
+          "label": "Mostra Statistiche",
+          "description": "Mostra la sezione delle statistiche nella barra laterale."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
+          "label": "Mostra Appunti",
+          "description": "Mostra la sezione degli appunti nella barra laterale."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FILES": {
+          "label": "Mostra Sezione File",
+          "description": "Mostra la sezione di trasferimento file nella barra laterale."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_APPS": {
+          "label": "Mostra Sezione App",
+          "description": "Mostra la sezione delle applicazioni nella barra laterale."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SHARING": {
+          "label": "Mostra Sezione Condivisione",
+          "description": "Mostra la sezione di condivisione nella barra laterale."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
+          "label": "Mostra Sezione Gamepad",
+          "description": "Mostra la sezione dei gamepad nella barra laterale."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
+          "label": "Mostra Pulsante Tastiera",
+          "description": "Mostra il pulsante della tastiera su schermo."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SOFT_BUTTONS": {
+          "label": "Mostra Pulsanti Virtuali",
+          "description": "Mostra la sezione dei pulsanti virtuali (per mobile)."
+        },
+        "WATERMARK_PNG": {
+          "label": "Percorso PNG Filigrana",
+          "description": "Percorso completo all'interno del container a un file png di filigrana."
+        },
+        "WATERMARK_LOCATION": {
+          "label": "Posizione Filigrana",
+          "description": "Dove disegnare l'immagine sopra lo stream.",
+          "options": {
+            "disabled": "Disabilitato",
+            "topLeft": "In Alto a Sinistra",
+            "topRight": "In Alto a Destra",
+            "bottomLeft": "In Basso a Sinistra",
+            "bottomRight": "In Basso a Destra",
+            "centered": "Centrato",
+            "animated": "Animato"
+          }
+        },
+        "DASHBOARD": {
+          "label": "Stile Pannello di Controllo",
+          "description": "Permette all'utente di impostare il proprio pannello di controllo.",
+          "options": {
+            "default": "Predefinito",
+            "selkiesDefault": "Selkies (Predefinito)",
+            "zinc": "Zinc",
+            "wish": "Wish"
+          }
+        },
+        "SELKIES_AUDIO_ENABLED": {
+          "label": "Abilita Audio",
+          "description": "Abilita lo streaming audio da server a client."
+        },
+        "SELKIES_MICROPHONE_ENABLED": {
+          "label": "Abilita Microfono",
+          "description": "Abilita l'inoltro del microfono da client a server."
+        },
+        "SELKIES_GAMEPAD_ENABLED": {
+          "label": "Abilita Gamepad",
+          "description": "Abilita il supporto per gamepad."
+        },
+        "SELKIES_CLIPBOARD_ENABLED": {
+          "label": "Abilita Appunti",
+          "description": "Abilita la sincronizzazione degli appunti."
+        },
+        "SELKIES_CLIPBOARD_IN_ENABLED": {
+          "label": "Abilita appunti da client a server",
+          "description": "Consenti il trasferimento dei dati degli appunti dal browser."
+        },
+        "SELKIES_CLIPBOARD_OUT_ENABLED": {
+          "label": "Abilita appunti da server a client",
+          "description": "Consenti il trasferimento dei dati degli appunti dal server."
+        },
+        "SELKIES_ENABLE_BINARY_CLIPBOARD": {
+          "label": "Abilita Appunti Binari",
+          "description": "Consenti dati binari (immagini) negli appunti."
+        },
+        "SELKIES_COMMAND_ENABLED": {
+          "label": "Abilita Websocket Comandi",
+          "description": "Abilita l'analisi dei messaggi del websocket dei comandi."
+        },
+        "SELKIES_FILE_TRANSFERS": {
+          "label": "Trasferimenti File",
+          "description": "Direzioni consentite ('upload,download', 'upload', 'download', 'none')."
+        },
+        "SELKIES_ENABLE_SHARING": {
+          "label": "Abilita Tutta la Condivisione",
+          "description": "Interruttore principale per tutte le funzionalità di condivisione."
+        },
+        "SELKIES_SECOND_SCREEN": {
+          "label": "Abilita Secondo Schermo",
+          "description": "Abilita il supporto per un secondo monitor/display."
+        },
+        "SELKIES_USE_BROWSER_CURSORS": {
+          "label": "Usa Cursori del Browser",
+          "description": "Usa i cursori CSS del browser invece di renderizzarli sul canvas."
+        },
+        "SELKIES_USE_CSS_SCALING": {
+          "label": "Usa Ridimensionamento CSS (LoDPI)",
+          "description": "Se vero, viene inviata una risoluzione più bassa e il canvas viene allungato."
+        },
+        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+          "label": "Modalità Risoluzione Manuale",
+          "description": "Blocca la risoluzione ai valori manuali di larghezza/altezza."
+        },
+        "SELKIES_FORCE_ALIGNED_RESOLUTION": {
+          "label": "Forza risoluzione allineata",
+          "description": "Forza la risoluzione dello schermo a essere un multiplo di 16 pixel."
+        },
+        "SELKIES_MANUAL_WIDTH": {
+          "label": "Larghezza Manuale",
+          "description": "Blocca la larghezza a un valore fisso. Forza la modalità manuale."
+        },
+        "SELKIES_MANUAL_HEIGHT": {
+          "label": "Altezza Manuale",
+          "description": "Blocca l'altezza a un valore fisso. Forza la modalità manuale."
+        },
+        "SELKIES_SCALING_DPI": {
+          "label": "DPI Ridimensionamento UI",
+          "description": "Il DPI predefinito per il ridimensionamento dell'interfaccia utente."
+        },
+        "SELKIES_AUDIO_BITRATE": {
+          "label": "Bitrate Audio",
+          "description": "Il bitrate audio predefinito."
+        },
+        "SELKIES_ENCODER": {
+          "label": "Encoder",
+          "description": "Elenco di encoder separati da virgola. Il primo è il predefinito."
+        },
+        "SELKIES_USE_CPU": {
+          "label": "Forza Codifica CPU",
+          "description": "Forza la codifica basata su CPU per pixelflux."
+        },
+        "SELKIES_FRAMERATE": {
+          "label": "Framerate (Intervallo o Fisso)",
+          "description": "es. '8-120' per un intervallo o '60' per un valore fisso."
+        },
+        "SELKIES_H264_CRF": {
+          "label": "CRF H.264 (Intervallo o Fisso)",
+          "description": "es. '5-50' per un intervallo o '25' per un valore fisso."
+        },
+        "SELKIES_JPEG_QUALITY": {
+          "label": "Qualità JPEG (Intervallo o Fisso)",
+          "description": "es. '1-100' per un intervallo o '60' per un valore fisso."
+        },
+        "SELKIES_H264_FULLCOLOR": {
+          "label": "H.264 Colore Pieno",
+          "description": "Abilita la gamma di colori completa H.264 per gli encoder pixelflux."
+        },
+        "SELKIES_H264_STREAMING_MODE": {
+          "label": "Modalità Streaming H.264 (Turbo)",
+          "description": "Abilita la modalità di streaming H.264 a bassa latenza."
+        },
+        "SELKIES_USE_PAINT_OVER_QUALITY": {
+          "label": "Usa Qualità Paint-Over",
+          "description": "Abilita il paint-over di alta qualità per scene statiche."
+        },
+        "SELKIES_PAINT_OVER_JPEG_QUALITY": {
+          "label": "Qualità JPEG Paint-Over",
+          "description": "es. '1-100' per un intervallo o '90' per un valore fisso."
+        },
+        "SELKIES_H264_PAINTOVER_CRF": {
+          "label": "CRF H.264 Paint-Over",
+          "description": "es. '5-50' per un intervallo o '18' per un valore fisso."
+        },
+        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
+          "label": "Frame Burst Paint-Over",
+          "description": "es. '1-30' per un intervallo o '5' per un valore fisso."
+        },
+        "HARDEN_DESKTOP": {
+          "label": "Rafforza Desktop (Preimpostato)",
+          "description": "Abilita DISABLE_OPEN_TOOLS, DISABLE_SUDO e DISABLE_TERMINALS."
+        },
+        "HARDEN_OPENBOX": {
+          "label": "Rafforza Window Manager (Preimpostato)",
+          "description": "Abilita DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS e HARDEN_KEYBINDS. Abilita anche RESTART_APP."
+        },
+        "DISABLE_OPEN_TOOLS": {
+          "label": "Disabilita Strumenti di Apertura",
+          "description": "Disabilita i binari xdg-open e exo-open."
+        },
+        "DISABLE_SUDO": {
+          "label": "Disabilita Sudo",
+          "description": "Disabilita il comando sudo."
+        },
+        "DISABLE_TERMINALS": {
+          "label": "Disabilita Terminali",
+          "description": "Disabilita gli emulatori di terminale comuni."
+        },
+        "DISABLE_CLOSE_BUTTON": {
+          "label": "Disabilita Pulsante Chiusura Finestra",
+          "description": "Rimuove il pulsante di chiusura dalle barre del titolo delle finestre."
+        },
+        "DISABLE_MOUSE_BUTTONS": {
+          "label": "Disabilita Click Destro/Centrale",
+          "description": "Disabilita i menu contestuali del click destro e centrale."
+        },
+        "HARDEN_KEYBINDS": {
+          "label": "Rafforza Combinazioni Tasti",
+          "description": "Disabilita le combinazioni di tasti predefinite di Openbox come Alt+F4."
+        },
+        "RESTART_APP": {
+          "label": "Riavvia App alla Chiusura",
+          "description": "Riavvia automaticamente l'applicazione principale se viene chiusa."
+        },
+        "MAX_RES": {
+          "label": "Risoluzione Massima",
+          "description": "Risoluzione massima per il container, il valore predefinito è 16k."
+        },
+        "START_DOCKER": {
+          "label": "Avvia Docker-in-Docker",
+          "description": "Se falso, un container privilegiato non avvierà DinD."
+        },
+        "DISABLE_IPV6": {
+          "label": "Disabilita IPv6",
+          "description": "Se vero, questo disabiliterà IPv6."
+        },
+        "DISABLE_ZINK": {
+          "label": "Disabilita Zink",
+          "description": "Non impostare le variabili d'ambiente Zink se viene rilevata una scheda video."
+        },
+        "DISABLE_DRI3": {
+          "label": "Disabilita DRI3",
+          "description": "Non usare l'accelerazione DRI3 se viene rilevata una scheda video."
+        },
+        "NO_DECOR": {
+          "label": "Nessuna Decorazione Finestra",
+          "description": "Esegui l'applicazione senza bordi della finestra per l'uso come PWA."
+        },
+        "NO_FULL": {
+          "label": "Nessun Schermo Intero",
+          "description": "Non mettere automaticamente le applicazioni a schermo intero."
+        },
+        "NO_GAMEPAD": {
+          "label": "Disabilita Iniezione Gamepad",
+          "description": "Disabilita l'iniezione dell'interposer del gamepad nello spazio utente."
+        },
+        "SELKIES_DEBUG": {
+          "label": "Abilita Debugging Selkies",
+          "description": "Abilita il logging di debug per i componenti di streaming."
+        },
+        "DOCKER_PRIVILEGED": {
+          "label": "Modalità Privilegiata",
+          "description": "Dai tutti i permessi al container, rimuovi le restrizioni cgroup, monta tutti i dispositivi host. Questo romperà le cose!"
+        },
+        "DOCKER_BIND_MOUNTS": {
+          "label": "Bind Mount Extra",
+          "description": "Bind host extra (separati da virgola, es. /host/path:/container/path:ro)."
+        },
+        "DOCKER_ENV": {
+          "label": "Variabili d'Ambiente",
+          "description": "Variabili d'ambiente extra (separate da virgola, es. KEY=VALUE,KEY2=VALUE2)."
+        },
+        "DOCKER_CAP_ADD": {
+          "label": "Aggiungi Cap",
+          "description": "Aggiungi capacità del kernel (separate da virgola, es. SYS_ADMIN,MKNOD)."
+        },
+        "DOCKER_CAP_DROP": {
+          "label": "Rimuovi Cap",
+          "description": "Rimuovi capacità del kernel (separate da virgola)."
+        },
+        "DOCKER_SECURITY_OPT": {
+          "label": "Opzioni di Sicurezza",
+          "description": "Opzioni di sicurezza (separate da virgola, es. seccomp=unconfined,apparmor=unconfined)."
+        },
+        "DOCKER_DEVICES": {
+          "label": "Dispositivi",
+          "description": "Esponi dispositivi host (separati da virgola, es. /dev/sda:/dev/xvda:rwm)."
+        },
+        "DOCKER_SHM_SIZE": {
+          "label": "Dimensione SHM",
+          "description": "Dimensione di /dev/shm (es. 1G, 2G)."
+        },
+        "DOCKER_MEM_LIMIT": {
+          "label": "Limite Memoria",
+          "description": "Limite memoria (es. 1g, 512m)."
+        },
+        "DOCKER_CPU_SHARES": {
+          "label": "Quote CPU",
+          "description": "Quote CPU (intero peso relativo)."
+        },
+        "DOCKER_NANO_CPUS": {
+          "label": "Nano CPU",
+          "description": "Quota CPU in unità di 1e-9 CPU."
+        },
+        "DOCKER_NETWORK_MODE": {
+          "label": "Modalità Rete",
+          "description": "Modalità di rete per il container.",
+          "options": {
+            "default": "Predefinito (Bridge)",
+            "host": "Host",
+            "none": "Nessuno",
+            "bridge": "Bridge"
+          }
+        },
+        "DOCKER_IPC_MODE": {
+          "label": "Modalità IPC",
+          "description": "Imposta la modalità IPC per il container.",
+          "options": {
+            "default": "Predefinito",
+            "host": "Host",
+            "private": "Privato",
+            "shareable": "Condivisibile"
+          }
+        },
+        "DOCKER_PID_MODE": {
+          "label": "Modalità PID",
+          "description": "Imposta la modalità PID per il container.",
+          "options": {
+            "default": "Predefinito",
+            "host": "Host"
+          }
+        },
+        "DOCKER_DNS": {
+          "label": "Server DNS",
+          "description": "Server DNS personalizzati (separati da virgola)."
+        },
+        "DOCKER_EXTRA_HOSTS": {
+          "label": "Host Extra",
+          "description": "Mappature Host a IP (separate da virgola, es. hostname:1.2.3.4)."
+        },
+        "DOCKER_SYSCTLS": {
+          "label": "Sysctls",
+          "description": "Parametri del kernel (separati da virgola, es. net.ipv4.ip_forward=1)."
+        },
+        "DOCKER_ULIMITS": {
+          "label": "Ulimits",
+          "description": "Ulimits (separati da virgola, es. nofile=1024:1024)."
+        },
+        "DOCKER_TMPFS": {
+          "label": "Mount Tmpfs",
+          "description": "Filesystem temporanei (separati da virgola, es. /run:rw,noexec,nosuid,size=65536k)."
+        },
+        "DOCKER_GROUP_ADD": {
+          "label": "Aggiungi Gruppo",
+          "description": "Elenco di nomi e/o ID di gruppi aggiuntivi (separati da virgola)."
+        }
+      }
+    },
+    "appLaboratory": {
+      "title": "Laboratorio App",
+      "description": "Crea e testa configurazioni di applicazioni personalizzate stratificando le modifiche su un'app di base.",
+      "selectApp": "Seleziona App",
+      "createNew": "Crea Nuova App",
+      "baseApp": "Applicazione di Base",
+      "baseAppDescription": "L'applicazione installata su cui si baserà la tua nuova app personalizzata.",
+      "selectBase": "Seleziona un'App di Base",
+      "customizationTitle": "Personalizzazione",
+      "appName": "Nome App",
+      "appIcon": "Icona App",
+      "uploadIcon": "Carica Icona",
+      "autostartScriptLabel": "Script di Avvio Automatico Personalizzato",
+      "permissionsTitle": "Permessi",
+      "usersLabel": "Utenti Consentiti",
+      "groupsLabel": "Gruppi Consentiti",
+      "launchButton": "Salva e Avvia Sessione di Personalizzazione",
+      "closeButton": "Chiudi Sessione e Finalizza",
+      "savingAndLaunching": "Salvataggio e Avvio...",
+      "placeholder": "Il Laboratorio App ti permette di configurare la directory home di base e lo script di avvio per un'applicazione basata su un'applicazione installata esistente. Questa directory home verrà copiata al primo avvio per l'utente con tutti i file e le impostazioni che hai configurato in questa sessione. Puoi riavviare un'App di Laboratorio esistente per modificarne ulteriormente i contenuti.",
+      "formInvalid": "Seleziona un'app di base e fornisci un nome per la nuova app."
+    },
+    "modals": {
+      "editUserTitle": "Modifica Utente: {username}",
+      "saveChanges": "Salva Modifiche",
+      "effectiveSettings": "Impostazioni Effettive (con sovrascritture di gruppo)",
+      "editGroupTitle": "Modifica Gruppo: {groupName}",
+      "userConfigTitle": "Configurazione Utente",
+      "warning": "Questa è l'unica volta che questa configurazione verrà mostrata. Forniscila all'utente in modo sicuro.",
+      "info": "Puoi scaricare questo file di configurazione per impostare facilmente SealSkin su un altro dispositivo. Conserva questo file al sicuro poiché contiene la tua chiave privata.",
+      "configDataLabel": "Dati di Configurazione (JSON)",
+      "copyButton": "Copia Testo",
+      "downloadButton": "Scarica File",
+      "manageHomeDirs": "Gestisci Cartelle Home",
+      "dirsForUser": "Cartelle per l'utente: {username}",
+      "dirsForAdmin": "Cartelle per l'amministratore: {username}",
+      "newDirForUser": "Crea Nuova Cartella per l'Utente",
+      "createDirButton": "Crea Cartella",
+      "confirmDeleteDir": "Sei sicuro di voler eliminare '{homeName}' per l'utente '{username}'? L'azione è permanente.",
+      "installAppTitle": "Installa {appName}",
+      "editAppTitle": "Modifica {appName}",
+      "customNameLabel": "Nome Personalizzato",
+      "imageLabel": "Immagine Container",
+      "permissions": "Permessi",
+      "allowedUsersLabel": "Utenti Consentiti (separati da virgola, 'all' per tutti)",
+      "allowedGroupsLabel": "Gruppi Consentiti (separati da virgola, 'all' per tutti)",
+      "features": "Funzionalità",
+      "gpuSupport": "Supporto GPU",
+      "homeMounting": "Montaggio Cartella Home",
+      "urlSupport": "Supporto Apertura URL",
+      "fileSupport": "Supporto Apertura File",
+      "autoUpdate": "Aggiorna Immagine Automaticamente",
+      "advancedSettings": "Impostazioni Avanzate",
+      "appTemplateLabel": "Modello Applicazione",
+      "appTemplateDescription": "Seleziona un modello preconfigurato per impostazioni avanzate di avvio del container.",
+      "customAutostartScriptLabel": "Script di Avvio Automatico Personalizzato",
+      "customAutostartScriptDescription": "Personalizza la logica di avvio automatico, lascia vuoto per usare quella predefinita del fornitore dell'applicazione.",
+      "saveInstallation": "Salva Installazione",
+      "updateStatusTitle": "Stato Aggiornamento per {appName}",
+      "checkingUpdates": "Verifica aggiornamenti in corso...",
+      "updateAvailable": "È disponibile una nuova versione dell'immagine!",
+      "yourVersion": "La tua versione: {sha}",
+      "latestAvailable": "L'ultima versione è disponibile per il download dal registro.",
+      "pullLatest": "Scarica Ultima Immagine",
+      "upToDate": "La tua immagine è aggiornata.",
+      "currentVersion": "Versione attuale: {sha}",
+      "errorChecking": "Errore durante la verifica degli aggiornamenti.",
+      "pullingLatest": "Scaricamento ultima immagine... Potrebbe richiedere un momento.",
+      "pullComplete": "Scaricamento completato!",
+      "newVersion": "Nuova versione: {sha}",
+      "errorPulling": "Errore durante lo scaricamento dell'immagine.",
+      "manualInstallNote": "Nota: Le immagini aggiunte manualmente dovrebbero essere basate su un'immagine compatibile con selkies-baseimage.",
+      "generalTitle": "Impostazioni Generali e Prestazioni",
+      "dockerTitle": "Sovrascritture Avanzate Docker",
+      "dockerDescription": "Queste impostazioni sovrascrivono la configurazione predefinita del container. Usa con cautela e solo se sai cosa stai facendo."
+    },
+    "status": {
+      "loggingIn": "Accesso in corso...",
+      "configSaved": "Configurazione salvata con successo!",
+      "configApplied": "Configurazione applicata! Esegui il Login e Testa.",
+      "configApplyFailed": "Impossibile applicare la configurazione: {error}",
+      "fileReadError": "Errore durante la lettura del file.",
+      "noConfig": "Fornisci un file di configurazione o del testo.",
+      "loggedInAdmin": "Accesso effettuato come amministratore: {username}",
+      "loggedInUser": "Accesso effettuato come utente standard: {username}.",
+      "loginFailed": "Accesso fallito: {error}",
+      "adminDataRefreshFailed": "Impossibile aggiornare i dati dell'amministratore: {error}",
+      "logoutSuccess": "Logout effettuato e configurazione cancellata.",
+      "generateConfigFailed": "Impossibile generare la configurazione, mancano i dettagli dell'utente.",
+      "copySuccess": "Configurazione copiata negli appunti!",
+      "copyFailed": "Impossibile copiare il testo.",
+      "publicKeyCopied": "Chiave pubblica copiata!",
+      "keyCopyFailed": "Impossibile copiare la chiave.",
+      "creatingAdmin": "Creazione amministratore in corso...",
+      "adminCreated": "Amministratore '{username}' creato.",
+      "adminCreateFailed": "Errore durante la creazione dell'amministratore: {error}",
+      "adminDeleted": "Amministratore '{username}' eliminato con successo.",
+      "adminDeleteFailed": "Errore durante l'eliminazione dell'amministratore: {error}",
+      "creatingUser": "Creazione utente in corso...",
+      "userCreated": "Utente '{username}' creato.",
+      "userCreateFailed": "Errore durante la creazione dell'utente: {error}",
+      "userDeleted": "Utente '{username}' eliminato con successo.",
+      "userDeleteFailed": "Errore durante l'eliminazione dell'utente: {error}",
+      "userUpdated": "Utente '{username}' aggiornato con successo.",
+      "userUpdateFailed": "Errore durante l'aggiornamento dell'utente: {error}",
+      "creatingGroup": "Creazione gruppo in corso...",
+      "groupCreated": "Gruppo '{groupName}' creato.",
+      "groupCreateFailed": "Errore durante la creazione del gruppo: {error}",
+      "groupDeleted": "Gruppo '{groupName}' eliminato con successo.",
+      "groupDeleteFailed": "Errore durante l'eliminazione del gruppo: {error}",
+      "groupUpdated": "Gruppo '{groupName}' aggiornato con successo.",
+      "groupUpdateFailed": "Errore durante l'aggiornamento del gruppo: {error}",
+      "homedirLoadFailed": "Impossibile caricare le cartelle home: {error}",
+      "homedirCreateFailed": "Errore durante la creazione della cartella: {error}",
+      "homedirCreated": "Cartella home '{homeName}' creata.",
+      "homedirDeleted": "Cartella '{homeName}' eliminata.",
+      "homedirDeleteFailed": "Errore durante l'eliminazione della cartella: {error}",
+      "homedirCreatedFor": "Cartella '{homeName}' creata per {username}.",
+      "homedirDeletedFor": "Cartella '{homeName}' eliminata per {username}.",
+      "sessionsLoadFailed": "Impossibile caricare le sessioni: {error}",
+      "sessionStopError": "Errore durante l'arresto della sessione: {error}",
+      "sessionStopped": "Sessione fermata con successo.",
+      "appDataRefreshFailed": "Impossibile aggiornare i dati dell'app: {error}",
+      "closingSession": "Commit della sessione di personalizzazione in corso...",
+      "sessionClosed": "Sessione di personalizzazione chiusa.",
+      "sessionCloseFailed": "Impossibile chiudere la sessione di personalizzazione: {error}",
+      "fetchingApps": "Recupero app dallo store...",
+      "fetchAppsFailed": "Impossibile recuperare le app dallo store: {error}",
+      "appStoreAddFailed": "Errore durante l'aggiunta dello store: {error}",
+      "appStoreAdded": "App store '{name}' aggiunto.",
+      "appSaved": "App '{name}' {action} con successo.",
+      "appSaveActions": {
+        "updated": "aggiornata",
+        "installed": "installata"
+      },
+      "appSaveFailed": "Errore durante il salvataggio dell'app: {error}",
+      "appDeleted": "App '{name}' eliminata.",
+      "appDeleteFailed": "Errore durante l'eliminazione dell'app: {error}",
+      "templateSaved": "Modello '{name}' salvato con successo.",
+      "templateSaveFailed": "Errore durante il salvataggio del modello: {error}",
+      "templateDeleted": "Modello '{name}' eliminato con successo.",
+      "templateDeleteFailed": "Errore durante l'eliminazione del modello: {error}",
+      "pinRemoved": "Comportamento fissato rimosso.",
+      "keyGenerated": "Nuova coppia di chiavi generata.",
+      "keyGenFailed": "Generazione chiave fallita: {error}",
+      "pendingConfigSaved": "Configurazione in sospeso salvata. Ora puoi fornire la tua chiave pubblica all'amministratore.",
+      "settingsSaved": "Impostazioni salvate.",
+      "appCreated": "App '{name}' creata con successo.",
+      "launchFailed": "Avvio fallito: {error}"
+    },
+    "placeholders": {
+      "noAdmins": "Nessun amministratore trovato.",
+      "noUsers": "Nessun utente trovato.",
+      "noGroups": "Nessun gruppo trovato.",
+      "noHomeDirs": "Nessuna cartella home trovata.",
+      "noSessions": "Nessuna sessione attiva trovata.",
+      "noPinned": "Nessun comportamento fissato trovato.",
+      "errorLoading": "Errore durante il caricamento delle cartelle.",
+      "noInstalledApps": "Nessuna applicazione è stata ancora installata."
+    }
+  },
+  "popup": {
+    "tabs": {
+      "launch": "Avvia Nuovo",
+      "sessions": "Sessioni Attive",
+      "manageFiles": "Gestisci File",
+      "uploadStorage": "Carica su Archiviazione",
+      "uploadFiles": "Carica File",
+      "uploadFilesTitle": "Apri pagina dedicata al caricamento file"
+    },
+    "launchView": {
+      "searchPlaceholder": "Cerca applicazioni...",
+      "uploadingFile": "Caricamento file...",
+      "gpuLabel": "GPU",
+      "storageLabel": "Archiviazione",
+      "languageLabel": "Lingua",
+      "cleanroom": "Cleanroom (Effimero)",
+      "noGpu": "Nessuna",
+      "saveOptions": "Salva queste opzioni di avvio",
+      "saveOptionsForUrl": "Salva opzioni per tutti gli URL",
+      "saveOptionsForFile": "Salva opzioni per file .{extension}",
+      "openFile": "Apri file all'avvio",
+      "launchButton": "Avvia",
+      "launchingButton": "Avvio in corso...",
+      "uploadingButton": "Caricamento...",
+      "autoHome": "Automatico (persistenza per app)",
+      "collaborationMode": "Sessione collaborativa",
+      "waylandMode": "Modalità Wayland"
+    },
+    "sessionsView": {
+      "noSessions": "Nessuna sessione attiva trovata."
+    },
+    "uploadStorageView": {
+      "selectHome": "Seleziona Cartella Home",
+      "description": "Questo caricherà il file <strong>{filename}</strong> direttamente nel tuo archivio File per uso futuro.",
+      "descriptionFallback": "Questo caricherà il file <strong>{filename}</strong> direttamente nel tuo archivio File per uso futuro.",
+      "uploadButton": "Carica File",
+      "uploadingButton": "Caricamento...",
+      "preparing": "Preparazione file...",
+      "uploadingChunk": "Caricamento chunk {current} di {total}...",
+      "finalizing": "Finalizzazione...",
+      "uploadComplete": "Caricamento Completato!"
+    },
+    "status": {
+      "unconfigured": "Configura l'estensione tramite la pagina delle opzioni.",
+      "openingServerFile": "Apertura file lato server: {filename}",
+      "openingFile": "Apertura file: {filename}",
+      "openingUrl": "Apertura URL: {targetUrl}",
+      "error": "Errore: {message}",
+      "preparingFile": "Preparazione file...",
+      "sendingFile": "Invio file alla sessione...",
+      "errorSendingFile": "Errore durante l'invio del file: {message}",
+      "errorClosingSession": "Errore durante la chiusura della sessione: {message}",
+      "preparingSession": "Preparazione sessione isolata...",
+      "fetchingData": "Recupero dati del file...",
+      "fetchDataFailed": "Impossibile recuperare i dati del file: {statusText}",
+      "unknownAction": "Azione di avvio sconosciuta.",
+      "noAppSelected": "Seleziona un'applicazione.",
+      "noAppsAvailable": "Nessuna applicazione disponibile per il tuo account.",
+      "uploadSuccess": "File caricato con successo!",
+      "creatingAutoHome": "Creazione della directory home automatica in corso..."
+    },
+    "languages": {
+      "default": "Predefinito ({locale})"
+    }
+  },
+  "upload": {
+    "title": "Caricamento File",
+    "description": "Seleziona un file dal tuo computer per aprirlo in una sessione sicura e isolata.",
+    "dropzone": {
+      "title": "Trascina e rilascia un file qui",
+      "or": "o",
+      "button": "Seleziona File"
+    },
+    "confirm": {
+      "ready": "Il file è pronto per essere aperto in modo sicuro.",
+      "button": "Continua per Avviare"
+    }
+  },
+  "files": {
+    "title": "File di SealSkin",
+    "header": {
+      "title": "File",
+      "newFolder": "Nuova Cartella",
+      "uploadFiles": "Carica File",
+      "uploadFolder": "Carica Cartella"
+    },
+    "sidebar": {
+      "sharedFiles": "File di SealSkin",
+      "publicShares": "Condivisioni Pubbliche"
+    },
+    "shares": {
+      "title": "File Condivisi Pubblicamente",
+      "searchPlaceholder": "Cerca per nome file o ID..."
+    },
+    "table": {
+      "name": "Nome",
+      "size": "Dimensione",
+      "lastModified": "Ultima Modifica",
+      "created": "Creato",
+      "expires": "Scade",
+      "url": "URL Pubblico",
+      "passwordProtected": "Password"
+    },
+    "dropzone": {
+      "title": "Trascina i file per caricarli"
+    },
+    "pagination": {
+      "previous": "« Precedente",
+      "next": "Successivo »",
+      "pageOf": "Pagina {page} di {totalPages}"
+    },
+    "modals": {
+      "newFolder": {
+        "title": "Crea Nuova Cartella",
+        "folderNameLabel": "Nome Cartella",
+        "nameTitle": "Usa solo lettere, numeri, trattino basso, trattino o punto.",
+        "createButton": "Crea"
+      },
+      "confirmDelete": {
+        "title": "Conferma Eliminazione",
+        "message": "Sei sicuro di voler eliminare {count, plural, one {1 elemento selezionato} other {{count} elementi selezionati}}? Questa azione non può essere annullata.",
+        "messageDefault": "Sei sicuro di voler eliminare gli elementi selezionati? Questa azione non può essere annullata."
+      },
+      "uploadProgress": {
+        "title": "Avanzamento Caricamento",
+        "doneButton": "Fatto"
+      },
+      "share": {
+        "title": "Condividi File",
+        "sharingFile": "Condivisione del file: <strong>{filename}</strong>",
+        "passwordLabel": "Password (opzionale)",
+        "passwordPlaceholder": "Lascia vuoto per nessuna password",
+        "expiryLabel": "Scade tra (ore, opzionale)",
+        "expiryPlaceholder": "es. 24 per un giorno",
+        "shareButton": "Crea Link di Condivisione"
+      }
+    },
+    "status": {
+      "homeDirLoadFailed": "Impossibile caricare le directory home: {error}",
+      "filesLoadFailed": "Errore nel caricamento dei file: {error}",
+      "deleteProtectedError": "Impossibile eliminare le cartelle di sistema protette.",
+      "deletingItems": "Eliminazione di {count, plural, one {1 elemento} other {{count} elementi}}...",
+      "deleteSuccess": "Eliminazione riuscita.",
+      "deleteFailed": "Eliminazione fallita: {error}",
+      "preparingUpload": "Preparazione al caricamento di {count, plural, one {1 file} other {{count} file}}...",
+      "uploadPrepFailed": "Errore durante la preparazione del caricamento della cartella: {error}",
+      "notConfigured": "Errore: SealSkin non configurato. Si prega di impostarlo nelle opzioni.",
+      "folderCreated": "Cartella '{folderName}' creata.",
+      "folderCreateFailed": "Errore nella creazione della cartella: {error}",
+      "shareCreated": "Condivisione creata con successo! Il link è stato copiato negli appunti.",
+      "shareCreateFailed": "Creazione della condivisione fallita: {error}",
+      "sharesLoadFailed": "Caricamento dei file condivisi fallito: {error}",
+      "shareDeleteFailed": "Eliminazione della condivisione fallita: {error}",
+      "shareDeleted": "Condivisione eliminata con successo.",
+      "urlCopied": "URL pubblico copiato negli appunti."
+    },
+    "placeholders": {
+      "errorLoading": "Errore nel caricamento dei file.",
+      "folderEmpty": "Questa cartella è vuota.",
+      "noHomeDirs": "Nessuna directory home disponibile.",
+      "noShares": "Non hai ancora condiviso nessun file."
+    },
+    "uploadStatus": {
+      "pending": "in attesa",
+      "initiating": "Avvio...",
+      "uploading": "Caricamento...",
+      "finalizing": "Finalizzazione...",
+      "completed": "Completato",
+      "error": "Errore"
+    }
+  }
+}

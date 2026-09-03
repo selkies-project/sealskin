@@ -1,0 +1,961 @@
+{
+  "background": {
+    "contextMenu": {
+      "openUrl": "SealSkin에서 링크 열기",
+      "openFile": "SealSkin에서 링크 대상을 파일로 열기",
+      "sendMedia": "SealSkin으로 미디어 보내기",
+      "searchText": "SealSkin에서 \"%s\" 검색",
+      "sendDownload": "다음 다운로드를 SealSkin으로 보내기"
+    }
+  },
+  "common": {
+    "actions": "작업",
+    "active": "활성",
+    "cancel": "취소",
+    "manage": "관리",
+    "delete": "삭제",
+    "edit": "편집",
+    "save": "저장",
+    "none": "없음",
+    "error": "오류",
+    "na": "해당 없음",
+    "of": "의",
+    "status": "상태",
+    "username": "사용자 이름",
+    "group": "그룹",
+    "groups": "그룹",
+    "publicKey": "공개 키",
+    "name": "이름",
+    "source": "소스",
+    "imageVersion": "이미지 버전",
+    "language": "언어",
+    "storage": "스토리지",
+    "gpu": "GPU",
+    "version": "버전",
+    "checked": "확인됨",
+    "never": "절대 안 함",
+    "stop": "중지",
+    "reopen": "다시 열기",
+    "sendFile": "파일 보내기",
+    "share": "공유",
+    "search": "검색",
+    "refresh": "새로고침",
+    "close": "닫기",
+    "copy": "복사",
+    "open": "열기",
+    "copyUrl": "URL 복사",
+    "download": "다운로드",
+    "next": "다음",
+    "previous": "이전",
+    "page": "페이지",
+    "home": "홈",
+    "homes": "홈 디렉터리",
+    "sessions": "세션",
+    "users": "사용자",
+    "admins": "관리자",
+    "yes": "예",
+    "no": "아니요",
+    "daysAgo": "{count}일 전",
+    "hoursAgo": "{count}시간 전",
+    "minutesAgo": "{count}분 전",
+    "justNow": "방금 전",
+    "bytes": "바이트",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB",
+    "pb": "PB"
+  },
+  "options": {
+    "sidebar": {
+      "config": "구성",
+      "home": "홈 디렉터리",
+      "sessions": "활성 세션",
+      "pinned": "고정된 동작",
+      "appStore": "앱 스토어",
+      "appTemplates": "앱 템플릿",
+      "appLaboratory": "앱 실험실",
+      "installedApps": "설치된 앱",
+      "users": "사용자",
+      "groups": "그룹",
+      "admins": "관리자"
+    },
+    "dashboard": {
+      "title": "대시보드",
+      "clientSettings": "클라이언트 설정",
+      "exportConfig": "구성 내보내기",
+      "userStatus": "사용자 상태",
+      "loggedInAs": "로그인 계정:",
+      "role": "역할",
+      "roleAdmin": "관리자",
+      "roleUser": "일반 사용자",
+      "serverInfo": "서버 정보",
+      "server": "서버:",
+      "cpuModel": "CPU 모델:",
+      "storageUsage": "스토리지 사용량:",
+      "detectedGpus": "감지된 GPU:",
+      "logout": "로그아웃 및 구성 지우기",
+      "howTo": "SealSkin 사용 방법",
+      "howToDescription": "이 섹션에는 확장 프로그램 사용 방법에 대한 기본 설명이 포함되어 있습니다.",
+      "howToList": [
+        "<strong>격리된 환경에서 콘텐츠 열기:</strong> 링크, 이미지 또는 선택한 텍스트를 마우스 오른쪽 버튼으로 클릭하고 \"SealSkin 격리\" 컨텍스트 메뉴에서 옵션을 선택하세요.",
+        "<strong>격리된 환경으로 다운로드 보내기:</strong> 페이지를 마우스 오른쪽 버튼으로 클릭하고 \"다음 다운로드를 격리 환경으로 보내기\"를 선택하세요. 다음에 다운로드하는 파일은 가로채져 안전한 세션으로 전송됩니다.",
+        "<strong>새로운 애플리케이션 시작:</strong> 브라우저 도구 모음에서 SealSkin 아이콘을 클릭하세요.",
+        "<strong>영구 스토리지 관리:</strong> 이 페이지의 \"홈 디렉터리\" 탭을 사용하여 여러 세션에서 사용할 수 있는 스토리지 볼륨을 생성하고 삭제하세요.",
+        "<strong>시작 옵션 저장:</strong> 특정 파일 유형(예: .pdf) 또는 모든 URL에 대해 애플리케이션을 시작하기 전에 팝업에서 \"이 시작 옵션 저장\" 확인란을 선택하세요. \"고정된 동작\" 탭에서 저장된 기본 설정을 관리하세요."
+      ],
+      "confirmLogout": "로그아웃하시겠습니까? 이 브라우저에 저장된 구성이 지워집니다."
+    },
+    "config": {
+      "quickSetup": "빠른 설정",
+      "quickSetupDescription": "관리자가 제공한 구성 파일(.json)을 업로드하거나 아래에 내용을 붙여넣어 확장 프로그램을 자동으로 설정하세요.",
+      "uploadLabel": "구성 파일 업로드",
+      "pasteLabel": "또는 구성 텍스트 붙여넣기",
+      "pastePlaceholder": "여기에 JSON 구성을 붙여넣으세요...",
+      "applyButton": "구성 적용",
+      "manualLink": "수동 구성",
+      "advancedTitle": "클라이언트 구성 (고급)",
+      "serverIpLabel": "서버 IP 또는 도메인",
+      "serverIpPlaceholder": "예: 192.168.1.100",
+      "apiPortLabel": "API 포트",
+      "apiPortPlaceholder": "예: 8000",
+      "sessionPortLabel": "세션 포트",
+      "sessionPortPlaceholder": "예: 8443",
+      "usernameLabel": "사용자 이름",
+      "usernamePlaceholder": "사용자 이름",
+      "privateKeyLabel": "개인 키 (PEM 형식)",
+      "privateKeyPlaceholder": "여기에 개인 키 내용을 붙여넣으세요",
+      "serverKeyLabel": "서버 공개 키 (PEM 형식)",
+      "serverKeyPlaceholder": "여기에 server_public.pem 내용을 붙여넣으세요",
+      "searchEngineLabel": "선택한 텍스트의 기본 검색 엔진",
+      "saveButton": "구성 저장",
+      "loginButton": "로그인 및 테스트",
+      "automaticLink": "자동 구성",
+      "chooseFile": "파일 선택",
+      "keyGeneration": "키 생성",
+      "keyGenDescription": "키 쌍이 없는 경우 여기에서 생성할 수 있습니다. 개인 키는 위에 채워집니다. 관리자에게 공개 키를 제공하세요.",
+      "generateKeyButton": "새 키 쌍 생성",
+      "publicKeyForAdminLabel": "공개 키 (관리자용)"
+    },
+    "home": {
+      "title": "내 홈 디렉터리",
+      "description": "세션 간에 사용할 영구 스토리지 디렉터리를 만드세요. 이 디렉터리는 애플리케이션에 구성 디렉터리로 마운트됩니다.",
+      "newTitle": "새 홈 디렉터리 만들기",
+      "nameLabel": "디렉터리 이름:",
+      "namePlaceholder": "예: my-project-files",
+      "nameTitle": "문자, 숫자, 밑줄 또는 하이픈만 사용하세요.",
+      "createButton": "디렉터리 만들기",
+      "confirmDelete": "홈 디렉터리 '{homeName}'을(를) 삭제하시겠습니까? 내부의 모든 데이터가 영구적으로 손실됩니다."
+    },
+    "sessions": {
+      "title": "활성 세션",
+      "application": "애플리케이션",
+      "started": "시작 시간",
+      "noSessionsUser": "활성 세션이 없습니다.",
+      "noSessionsAdmin": "어떤 사용자의 활성 세션도 찾을 수 없습니다.",
+      "sessionsFor": "{username}의 세션 ({count})",
+      "confirmStop": "이 세션을 중지하시겠습니까? 컨테이너가 파괴됩니다."
+    },
+    "pinned": {
+      "title": "고정된 확장 프로그램 동작",
+      "description": "이 표는 특정 파일 유형 또는 모든 URL에 대해 저장한 시작 옵션을 보여줍니다. 고정된 동작을 제거하면 시작 옵션을 다시 묻게 됩니다.",
+      "trigger": "트리거",
+      "savedApp": "저장된 애플리케이션",
+      "triggerSimple": "단순 실행 (도구 모음 버튼)",
+      "triggerUrl": "모든 URL (컨텍스트 메뉴에서)",
+      "triggerFile": "파일 유형: <strong>{fileType}</strong>",
+      "unknownApp": "알 수 없는 앱 ({appId}...)"
+    },
+    "admins": {
+      "serverKeyTitle": "서버 공개 키",
+      "serverKeyDescription": "사용자 구성 파일이 이 서버에 연결하는 데 필요한 공개 키입니다.",
+      "title": "관리자 관리",
+      "searchPlaceholder": "관리자 검색...",
+      "newTitle": "새 관리자 만들기",
+      "publicKeyOptionalLabel": "공개 키 (선택 사항):",
+      "publicKeyPlaceholder": "공개 키를 여기에 붙여넣거나, 비워두면 새로 생성됩니다.",
+      "createButton": "관리자 만들기",
+      "confirmDelete": "관리자 '{username}'을(를) 삭제하시겠습니까? 모든 영구 스토리지도 함께 삭제되며 되돌릴 수 없습니다."
+    },
+    "users": {
+      "title": "사용자 관리",
+      "searchPlaceholder": "이름 또는 그룹으로 사용자 검색...",
+      "newTitle": "새 사용자 만들기",
+      "publicKeyOptionalLabel": "공개 키 (선택 사항):",
+      "publicKeyPlaceholder": "사용자의 공개 키를 여기에 붙여넣거나, 비워두면 새로 생성됩니다.",
+      "settingsTitle": "사용자 설정",
+      "sessionLimitLabel": "세션 제한",
+      "sessionLimitTitle": "사용자가 가질 수 있는 활성 세션의 수. -1은 무제한입니다.",
+      "permissionsTitle": "권한 및 보안 강화",
+      "activeAccount": "활성 계정",
+      "allowStorage": "영구 스토리지 허용",
+      "allowGpu": "GPU 접근 허용",
+      "hardenContainer": "컨테이너 보안 강화",
+      "hardenWm": "창 관리자 보안 강화",
+      "createButton": "사용자 만들기",
+      "homesDisabledTooltip": "이 사용자는 영구 스토리지가 비활성화되었습니다",
+      "confirmDelete": "사용자 '{username}'을(를) 삭제하시겠습니까? 모든 영구 스토리지도 함께 삭제되며 되돌릴 수 없습니다.",
+      "allowPublicSharing": "공개 파일 공유 허용"
+    },
+    "groups": {
+      "title": "그룹 관리",
+      "searchPlaceholder": "그룹 검색...",
+      "newTitle": "새 그룹 만들기",
+      "nameLabel": "그룹 이름:",
+      "overrideTitle": "그룹 재정의 설정",
+      "permissionsTitle": "권한 및 보안 강화 재정의",
+      "createButton": "그룹 만들기",
+      "confirmDelete": "그룹 '{groupName}'을(를) 삭제하시겠습니까? 이 그룹의 사용자들은 개별 설정으로 돌아갑니다."
+    },
+    "installedApps": {
+      "title": "설치된 애플리케이션",
+      "searchPlaceholder": "설치된 앱 검색...",
+      "noAppsFound": "설치된 앱이 없습니다.",
+      "pulling": "새 이미지 가져오는 중...",
+      "notLocal": "로컬에서 이미지를 찾을 수 없음",
+      "isLaboratory": "이것은 기본 이미지에 사용자 정의 설정을 더해 빌드된 실험실 앱입니다.",
+      "laboratory": "실험실",
+      "confirmDelete": "설치된 앱 '{appName}'을(를) 삭제하시겠습니까?"
+    },
+    "appStore": {
+      "title": "앱 스토어",
+      "refreshTitle": "선택한 스토어 새로고침",
+      "selectLabel": "앱 스토어 선택",
+      "addLabel": "새 앱 스토어 추가",
+      "namePlaceholder": "스토어 이름",
+      "urlPlaceholder": "스토어 YAML URL",
+      "availableTitle": "사용 가능한 앱",
+      "addManual": "수동 앱 추가",
+      "searchPlaceholder": "사용 가능한 앱 검색...",
+      "noAppsFound": "애플리케이션을 찾을 수 없습니다.",
+      "availableFrom": "{storeName}에서 사용 가능한 앱",
+      "couldNotLoad": "이 스토어에서 앱을 로드할 수 없습니다."
+    },
+    "appTemplates": {
+      "title": "애플리케이션 템플릿 편집기",
+      "loadLabel": "템플릿 로드",
+      "createOption": "새 템플릿 만들기",
+      "nameLabel": "템플릿 이름",
+      "namePlaceholder": "새 템플릿의 이름을 입력하세요",
+      "saveButton": "프로필 저장",
+      "deleteButton": "삭제",
+      "previewTitle": "UI 미리보기",
+      "contentArea": "애플리케이션 콘텐츠 영역",
+      "confirmDelete": "템플릿 '{templateName}'을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+      "deleteDisabled": "이 템플릿은 삭제할 수 없습니다.",
+      "enterName": "새 템플릿의 이름을 입력하세요.",
+      "settings": {
+        "TITLE": {
+          "label": "페이지 제목",
+          "description": "웹 브라우저에 표시되는 페이지 제목입니다."
+        },
+        "SELKIES_UI_TITLE": {
+          "label": "사이드바 제목",
+          "description": "사이드바 왼쪽 상단의 제목입니다."
+        },
+        "SELKIES_UI_SHOW_SIDEBAR": {
+          "label": "사이드바 표시",
+          "description": "메인 사이드바 UI를 표시합니다."
+        },
+        "SELKIES_UI_SHOW_LOGO": {
+          "label": "로고 표시",
+          "description": "사이드바에 Selkies 로고를 표시합니다."
+        },
+        "SELKIES_UI_SHOW_CORE_BUTTONS": {
+          "label": "핵심 버튼 표시",
+          "description": "핵심 구성 요소 버튼(디스플레이, 오디오 등)을 표시합니다."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
+          "label": "비디오 설정 표시",
+          "description": "사이드바에 비디오 설정 섹션을 표시합니다."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SCREEN_SETTINGS": {
+          "label": "화면 설정 표시",
+          "description": "사이드바에 화면 설정 섹션을 표시합니다."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_AUDIO_SETTINGS": {
+          "label": "오디오 설정 표시",
+          "description": "사이드바에 오디오 설정 섹션을 표시합니다."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_STATS": {
+          "label": "통계 표시",
+          "description": "사이드바에 통계 섹션을 표시합니다."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
+          "label": "클립보드 표시",
+          "description": "사이드바에 클립보드 섹션을 표시합니다."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FILES": {
+          "label": "파일 섹션 표시",
+          "description": "사이드바에 파일 전송 섹션을 표시합니다."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_APPS": {
+          "label": "앱 섹션 표시",
+          "description": "사이드바에 애플리케이션 섹션을 표시합니다."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SHARING": {
+          "label": "공유 섹션 표시",
+          "description": "사이드바에 공유 섹션을 표시합니다."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
+          "label": "게임패드 섹션 표시",
+          "description": "사이드바에 게임패드 섹션을 표시합니다."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
+          "label": "키보드 버튼 표시",
+          "description": "화상 키보드 버튼을 표시합니다."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_SOFT_BUTTONS": {
+          "label": "소프트 버튼 표시",
+          "description": "소프트 버튼 섹션(모바일용)을 표시합니다."
+        },
+        "WATERMARK_PNG": {
+          "label": "워터마크 PNG 경로",
+          "description": "컨테이너 내부의 워터마크 PNG 파일의 전체 경로입니다."
+        },
+        "WATERMARK_LOCATION": {
+          "label": "워터마크 위치",
+          "description": "스트림 위에 이미지를 그릴 위치입니다.",
+          "options": {
+            "disabled": "비활성화",
+            "topLeft": "상단-왼쪽",
+            "topRight": "상단-오른쪽",
+            "bottomLeft": "하단-왼쪽",
+            "bottomRight": "하단-오른쪽",
+            "centered": "중앙",
+            "animated": "애니메이션"
+          }
+        },
+        "DASHBOARD": {
+          "label": "대시보드 스타일",
+          "description": "사용자가 자신의 대시보드를 설정할 수 있습니다.",
+          "options": {
+            "default": "기본값",
+            "selkiesDefault": "Selkies (기본값)",
+            "zinc": "Zinc",
+            "wish": "Wish"
+          }
+        },
+        "SELKIES_AUDIO_ENABLED": {
+          "label": "오디오 활성화",
+          "description": "서버에서 클라이언트로의 오디오 스트리밍을 활성화합니다."
+        },
+        "SELKIES_MICROPHONE_ENABLED": {
+          "label": "마이크 활성화",
+          "description": "클라이언트에서 서버로의 마이크 전달을 활성화합니다."
+        },
+        "SELKIES_GAMEPAD_ENABLED": {
+          "label": "게임패드 활성화",
+          "description": "게임패드 지원을 활성화합니다."
+        },
+        "SELKIES_CLIPBOARD_ENABLED": {
+          "label": "클립보드 활성화",
+          "description": "클립보드 동기화를 활성화합니다."
+        },
+        "SELKIES_CLIPBOARD_IN_ENABLED": {
+          "label": "클라이언트에서 서버로 클립보드 활성화",
+          "description": "브라우저에서 클립보드 데이터를 전송하도록 허용합니다."
+        },
+        "SELKIES_CLIPBOARD_OUT_ENABLED": {
+          "label": "서버에서 클라이언트로 클립보드 활성화",
+          "description": "서버에서 클립보드 데이터를 전송하도록 허용합니다."
+        },
+        "SELKIES_ENABLE_BINARY_CLIPBOARD": {
+          "label": "바이너리 클립보드 활성화",
+          "description": "클립보드에 바이너리 데이터(이미지)를 허용합니다."
+        },
+        "SELKIES_COMMAND_ENABLED": {
+          "label": "명령 웹소켓 활성화",
+          "description": "명령 웹소켓 메시지 파싱을 활성화합니다."
+        },
+        "SELKIES_FILE_TRANSFERS": {
+          "label": "파일 전송",
+          "description": "허용된 방향 ('upload,download', 'upload', 'download', 'none')."
+        },
+        "SELKIES_ENABLE_SHARING": {
+          "label": "모든 공유 활성화",
+          "description": "모든 공유 기능에 대한 마스터 토글입니다."
+        },
+        "SELKIES_SECOND_SCREEN": {
+          "label": "두 번째 화면 활성화",
+          "description": "두 번째 모니터/디스플레이 지원을 활성화합니다."
+        },
+        "SELKIES_USE_BROWSER_CURSORS": {
+          "label": "브라우저 커서 사용",
+          "description": "캔버스에 렌더링하는 대신 브라우저 CSS 커서를 사용합니다."
+        },
+        "SELKIES_USE_CSS_SCALING": {
+          "label": "CSS 스케일링 사용 (LoDPI)",
+          "description": "true인 경우, 낮은 해상도가 전송되고 캔버스가 늘어납니다."
+        },
+        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+          "label": "수동 해상도 모드",
+          "description": "해상도를 수동 너비/높이 값으로 고정합니다."
+        },
+        "SELKIES_FORCE_ALIGNED_RESOLUTION": {
+          "label": "정렬된 해상도 강제 적용",
+          "description": "디스플레이 해상도를 16픽셀의 배수로 강제 지정합니다."
+        },
+        "SELKIES_MANUAL_WIDTH": {
+          "label": "수동 너비",
+          "description": "너비를 고정 값으로 잠급니다. 수동 모드를 강제합니다."
+        },
+        "SELKIES_MANUAL_HEIGHT": {
+          "label": "수동 높이",
+          "description": "높이를 고정 값으로 잠급니다. 수동 모드를 강제합니다."
+        },
+        "SELKIES_SCALING_DPI": {
+          "label": "UI 스케일링 DPI",
+          "description": "UI 스케일링의 기본 DPI입니다."
+        },
+        "SELKIES_AUDIO_BITRATE": {
+          "label": "오디오 비트레이트",
+          "description": "기본 오디오 비트레이트입니다."
+        },
+        "SELKIES_ENCODER": {
+          "label": "인코더",
+          "description": "쉼표로 구분된 인코더 목록. 첫 번째가 기본값입니다."
+        },
+        "SELKIES_USE_CPU": {
+          "label": "CPU 인코딩 강제",
+          "description": "pixelflux에 대해 CPU 기반 인코딩을 강제합니다."
+        },
+        "SELKIES_FRAMERATE": {
+          "label": "프레임레이트 (범위 또는 고정)",
+          "description": "예: 범위는 '8-120', 고정은 '60'."
+        },
+        "SELKIES_H264_CRF": {
+          "label": "H.264 CRF (범위 또는 고정)",
+          "description": "예: 범위는 '5-50', 고정은 '25'."
+        },
+        "SELKIES_JPEG_QUALITY": {
+          "label": "JPEG 품질 (범위 또는 고정)",
+          "description": "예: 범위는 '1-100', 고정은 '60'."
+        },
+        "SELKIES_H264_FULLCOLOR": {
+          "label": "H.264 풀 컬러",
+          "description": "pixelflux 인코더에 대해 H.264 풀 컬러 범위를 활성화합니다."
+        },
+        "SELKIES_H264_STREAMING_MODE": {
+          "label": "H.264 스트리밍 (터보) 모드",
+          "description": "H.264 저지연 스트리밍 모드를 활성화합니다."
+        },
+        "SELKIES_USE_PAINT_OVER_QUALITY": {
+          "label": "페인트 오버 품질 사용",
+          "description": "정적 장면에 대해 고품질 페인트 오버를 활성화합니다."
+        },
+        "SELKIES_PAINT_OVER_JPEG_QUALITY": {
+          "label": "페인트 오버 JPEG 품질",
+          "description": "예: 범위는 '1-100', 고정은 '90'."
+        },
+        "SELKIES_H264_PAINTOVER_CRF": {
+          "label": "페인트 오버 H.264 CRF",
+          "description": "예: 범위는 '5-50', 고정은 '18'."
+        },
+        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
+          "label": "페인트 오버 버스트 프레임",
+          "description": "예: 범위는 '1-30', 고정은 '5'."
+        },
+        "HARDEN_DESKTOP": {
+          "label": "데스크톱 강화 (프리셋)",
+          "description": "DISABLE_OPEN_TOOLS, DISABLE_SUDO, DISABLE_TERMINALS를 활성화합니다."
+        },
+        "HARDEN_OPENBOX": {
+          "label": "창 관리자 강화 (프리셋)",
+          "description": "DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS, HARDEN_KEYBINDS를 활성화합니다. 또한 RESTART_APP도 활성화합니다."
+        },
+        "DISABLE_OPEN_TOOLS": {
+          "label": "열기 도구 비활성화",
+          "description": "xdg-open 및 exo-open 바이너리를 비활성화합니다."
+        },
+        "DISABLE_SUDO": {
+          "label": "Sudo 비활성화",
+          "description": "sudo 명령을 비활성화합니다."
+        },
+        "DISABLE_TERMINALS": {
+          "label": "터미널 비활성화",
+          "description": "일반적인 터미널 에뮬레이터를 비활성화합니다."
+        },
+        "DISABLE_CLOSE_BUTTON": {
+          "label": "창 닫기 버튼 비활성화",
+          "description": "창 제목 표시줄에서 닫기 버튼을 제거합니다."
+        },
+        "DISABLE_MOUSE_BUTTONS": {
+          "label": "오른쪽/가운데 클릭 비활성화",
+          "description": "오른쪽 클릭 및 가운데 클릭 컨텍스트 메뉴를 비활성화합니다."
+        },
+        "HARDEN_KEYBINDS": {
+          "label": "키 바인딩 강화",
+          "description": "Alt+F4와 같은 기본 Openbox 키 바인딩을 비활성화합니다."
+        },
+        "RESTART_APP": {
+          "label": "닫을 때 앱 다시 시작",
+          "description": "메인 애플리케이션이 닫히면 자동으로 다시 시작합니다."
+        },
+        "MAX_RES": {
+          "label": "최대 해상도",
+          "description": "컨테이너의 최대 해상도, 기본값은 16k입니다."
+        },
+        "START_DOCKER": {
+          "label": "Docker-in-Docker 시작",
+          "description": "false인 경우, 권한 있는 컨테이너는 DinD를 시작하지 않습니다."
+        },
+        "DISABLE_IPV6": {
+          "label": "IPv6 비활성화",
+          "description": "true인 경우, IPv6를 비활성화합니다."
+        },
+        "DISABLE_ZINK": {
+          "label": "Zink 비활성화",
+          "description": "비디오 카드가 감지되면 Zink 환경 변수를 설정하지 않습니다."
+        },
+        "DISABLE_DRI3": {
+          "label": "DRI3 비활성화",
+          "description": "비디오 카드가 감지되면 DRI3 가속을 사용하지 않습니다."
+        },
+        "NO_DECOR": {
+          "label": "창 장식 없음",
+          "description": "PWA 사용을 위해 창 테두리 없이 애플리케이션을 실행합니다."
+        },
+        "NO_FULL": {
+          "label": "전체 화면 없음",
+          "description": "애플리케이션을 자동으로 전체 화면으로 만들지 않습니다."
+        },
+        "NO_GAMEPAD": {
+          "label": "게임패드 주입 비활성화",
+          "description": "사용자 공간 게임패드 인터포저 주입을 비활성화합니다."
+        },
+        "SELKIES_DEBUG": {
+          "label": "Selkies 디버깅 활성화",
+          "description": "스트리밍 구성 요소에 대한 디버그 로깅을 활성화합니다."
+        },
+        "DOCKER_PRIVILEGED": {
+          "label": "권한 모드",
+          "description": "컨테이너에 모든 권한 부여, cgroup 제한 해제, 모든 호스트 장치 마운트. 이 설정은 시스템을 손상시킬 수 있습니다!"
+        },
+        "DOCKER_BIND_MOUNTS": {
+          "label": "추가 바인드 마운트",
+          "description": "추가 호스트 바인드 (쉼표로 구분, 예: /host/path:/container/path:ro)."
+        },
+        "DOCKER_ENV": {
+          "label": "환경 변수",
+          "description": "추가 환경 변수 (쉼표로 구분, 예: KEY=VALUE,KEY2=VALUE2)."
+        },
+        "DOCKER_CAP_ADD": {
+          "label": "Cap 추가",
+          "description": "커널 기능 추가 (쉼표로 구분, 예: SYS_ADMIN,MKNOD)."
+        },
+        "DOCKER_CAP_DROP": {
+          "label": "Cap 제거",
+          "description": "커널 기능 제거 (쉼표로 구분)."
+        },
+        "DOCKER_SECURITY_OPT": {
+          "label": "보안 옵션",
+          "description": "보안 옵션 (쉼표로 구분, 예: seccomp=unconfined,apparmor=unconfined)."
+        },
+        "DOCKER_DEVICES": {
+          "label": "장치",
+          "description": "호스트 장치 노출 (쉼표로 구분, 예: /dev/sda:/dev/xvda:rwm)."
+        },
+        "DOCKER_SHM_SIZE": {
+          "label": "SHM 크기",
+          "description": "/dev/shm의 크기 (예: 1G, 2G)."
+        },
+        "DOCKER_MEM_LIMIT": {
+          "label": "메모리 제한",
+          "description": "메모리 제한 (예: 1g, 512m)."
+        },
+        "DOCKER_CPU_SHARES": {
+          "label": "CPU 공유",
+          "description": "CPU 공유 (상대적 가중치 정수)."
+        },
+        "DOCKER_NANO_CPUS": {
+          "label": "Nano CPU",
+          "description": "1e-9 CPU 단위의 CPU 할당량."
+        },
+        "DOCKER_NETWORK_MODE": {
+          "label": "네트워크 모드",
+          "description": "컨테이너의 네트워킹 모드.",
+          "options": {
+            "default": "기본값 (Bridge)",
+            "host": "Host",
+            "none": "없음",
+            "bridge": "Bridge"
+          }
+        },
+        "DOCKER_IPC_MODE": {
+          "label": "IPC 모드",
+          "description": "컨테이너의 IPC 모드 설정.",
+          "options": {
+            "default": "기본값",
+            "host": "Host",
+            "private": "비공개",
+            "shareable": "공유 가능"
+          }
+        },
+        "DOCKER_PID_MODE": {
+          "label": "PID 모드",
+          "description": "컨테이너의 PID 모드 설정.",
+          "options": {
+            "default": "기본값",
+            "host": "Host"
+          }
+        },
+        "DOCKER_DNS": {
+          "label": "DNS 서버",
+          "description": "사용자 지정 DNS 서버 (쉼표로 구분)."
+        },
+        "DOCKER_EXTRA_HOSTS": {
+          "label": "추가 호스트",
+          "description": "호스트 대 IP 매핑 (쉼표로 구분, 예: hostname:1.2.3.4)."
+        },
+        "DOCKER_SYSCTLS": {
+          "label": "Sysctls",
+          "description": "커널 매개변수 (쉼표로 구분, 예: net.ipv4.ip_forward=1)."
+        },
+        "DOCKER_ULIMITS": {
+          "label": "Ulimits",
+          "description": "Ulimits (쉼표로 구분, 예: nofile=1024:1024)."
+        },
+        "DOCKER_TMPFS": {
+          "label": "Tmpfs 마운트",
+          "description": "임시 파일 시스템 (쉼표로 구분, 예: /run:rw,noexec,nosuid,size=65536k)."
+        },
+        "DOCKER_GROUP_ADD": {
+          "label": "그룹 추가",
+          "description": "추가 그룹 이름 및/또는 ID 목록 (쉼표로 구분)."
+        }
+      }
+    },
+    "appLaboratory": {
+      "title": "앱 실험실",
+      "description": "기본 앱 위에 변경 사항을 레이어링하여 사용자 지정 애플리케이션 구성을 만들고 테스트합니다.",
+      "selectApp": "앱 선택",
+      "createNew": "새 앱 만들기",
+      "baseApp": "기본 애플리케이션",
+      "baseAppDescription": "새로운 사용자 지정 앱의 기반이 될 설치된 애플리케이션입니다.",
+      "selectBase": "기본 앱 선택",
+      "customizationTitle": "사용자 지정",
+      "appName": "앱 이름",
+      "appIcon": "앱 아이콘",
+      "uploadIcon": "아이콘 업로드",
+      "autostartScriptLabel": "사용자 지정 자동 시작 스크립트",
+      "permissionsTitle": "권한",
+      "usersLabel": "허용된 사용자",
+      "groupsLabel": "허용된 그룹",
+      "launchButton": "저장 및 사용자 지정 세션 시작",
+      "closeButton": "세션 닫기 및 최종 확정",
+      "savingAndLaunching": "저장 및 시작 중...",
+      "placeholder": "앱 실험실을 사용하면 기존에 설치된 애플리케이션을 기반으로 애플리케이션의 기본 홈 디렉터리와 시작 스크립트를 구성할 수 있습니다. 이 홈 디렉터리는 이 세션에서 설정한 모든 파일 및 설정과 함께 사용자를 위해 처음 초기화될 때 복사됩니다. 기존 실험실 앱을 다시 시작하여 내용을 추가로 수정할 수 있습니다.",
+      "formInvalid": "기본 앱을 선택하고 새 앱의 이름을 입력하세요."
+    },
+    "modals": {
+      "editUserTitle": "사용자 편집: {username}",
+      "saveChanges": "변경 사항 저장",
+      "effectiveSettings": "유효 설정 (그룹 재정의 포함)",
+      "editGroupTitle": "그룹 편집: {groupName}",
+      "userConfigTitle": "사용자 구성",
+      "warning": "이 구성은 이번에만 표시됩니다. 사용자에게 안전하게 전달하세요.",
+      "info": "이 구성 파일을 다운로드하여 다른 장치에서 SealSkin을 쉽게 설정할 수 있습니다. 이 파일에는 개인 키가 포함되어 있으니 안전하게 보관하세요.",
+      "configDataLabel": "구성 데이터 (JSON)",
+      "copyButton": "텍스트 복사",
+      "downloadButton": "파일 다운로드",
+      "manageHomeDirs": "홈 디렉터리 관리",
+      "dirsForUser": "사용자 디렉터리: {username}",
+      "dirsForAdmin": "관리자 디렉터리: {username}",
+      "newDirForUser": "사용자를 위한 새 디렉터리 만들기",
+      "createDirButton": "디렉터리 만들기",
+      "confirmDeleteDir": "사용자 '{username}'의 '{homeName}'을(를) 삭제하시겠습니까? 이 작업은 영구적입니다.",
+      "installAppTitle": "{appName} 설치",
+      "editAppTitle": "{appName} 편집",
+      "customNameLabel": "사용자 정의 이름",
+      "imageLabel": "컨테이너 이미지",
+      "permissions": "권한",
+      "allowedUsersLabel": "허용된 사용자 (쉼표로 구분, 모두는 'all')",
+      "allowedGroupsLabel": "허용된 그룹 (쉼표로 구분, 모두는 'all')",
+      "features": "기능",
+      "gpuSupport": "GPU 지원",
+      "homeMounting": "홈 디렉터리 마운트",
+      "urlSupport": "URL 열기 지원",
+      "fileSupport": "파일 열기 지원",
+      "autoUpdate": "이미지 자동 업데이트",
+      "advancedSettings": "고급 설정",
+      "appTemplateLabel": "애플리케이션 템플릿",
+      "appTemplateDescription": "고급 컨테이너 시작 설정을 위해 미리 구성된 템플릿을 선택하세요.",
+      "customAutostartScriptLabel": "사용자 지정 자동 시작 스크립트",
+      "customAutostartScriptDescription": "자동 시작 로직을 사용자 지정하고, 비워두면 애플리케이션 제공업체의 기본값을 사용합니다.",
+      "saveInstallation": "설치 저장",
+      "updateStatusTitle": "{appName} 업데이트 상태",
+      "checkingUpdates": "업데이트 확인 중...",
+      "updateAvailable": "새 이미지 버전을 사용할 수 있습니다!",
+      "yourVersion": "현재 버전: {sha}",
+      "latestAvailable": "레지스트리에서 최신 버전을 가져올 수 있습니다.",
+      "pullLatest": "최신 이미지 가져오기",
+      "upToDate": "이미지가 최신 버전입니다.",
+      "currentVersion": "현재 버전: {sha}",
+      "errorChecking": "업데이트 확인 중 오류 발생.",
+      "pullingLatest": "최신 이미지를 가져오는 중... 잠시 기다려주세요.",
+      "pullComplete": "가져오기 완료!",
+      "newVersion": "새 버전: {sha}",
+      "errorPulling": "이미지를 가져오는 중 오류 발생.",
+      "manualInstallNote": "참고: 수동으로 추가된 이미지는 selkies-baseimage 호환 이미지에 기반해야 합니다.",
+      "generalTitle": "일반 및 성능 설정",
+      "dockerTitle": "Docker 고급 재정의",
+      "dockerDescription": "이 설정은 기본 컨테이너 구성을 재정의합니다. 주의해서 사용하고 수행 중인 작업을 알고 있는 경우에만 사용하십시오."
+    },
+    "status": {
+      "loggingIn": "로그인 중...",
+      "configSaved": "구성이 성공적으로 저장되었습니다!",
+      "configApplied": "구성이 적용되었습니다! 로그인하여 테스트하세요.",
+      "configApplyFailed": "구성 적용 실패: {error}",
+      "fileReadError": "파일 읽기 오류.",
+      "noConfig": "구성 파일 또는 텍스트를 제공하세요.",
+      "loggedInAdmin": "관리자로 로그인됨: {username}",
+      "loggedInUser": "일반 사용자로 로그인됨: {username}.",
+      "loginFailed": "로그인 실패: {error}",
+      "adminDataRefreshFailed": "관리자 데이터 새로고침 실패: {error}",
+      "logoutSuccess": "로그아웃되었고 구성이 지워졌습니다.",
+      "generateConfigFailed": "사용자 정보가 누락되어 구성을 생성할 수 없습니다.",
+      "copySuccess": "구성이 클립보드에 복사되었습니다!",
+      "copyFailed": "텍스트 복사에 실패했습니다.",
+      "publicKeyCopied": "공개 키가 복사되었습니다!",
+      "keyCopyFailed": "키 복사에 실패했습니다.",
+      "creatingAdmin": "관리자 생성 중...",
+      "adminCreated": "관리자 '{username}'이(가) 생성되었습니다.",
+      "adminCreateFailed": "관리자 생성 오류: {error}",
+      "adminDeleted": "관리자 '{username}'이(가) 성공적으로 삭제되었습니다.",
+      "adminDeleteFailed": "관리자 삭제 오류: {error}",
+      "creatingUser": "사용자 생성 중...",
+      "userCreated": "사용자 '{username}'이(가) 생성되었습니다.",
+      "userCreateFailed": "사용자 생성 오류: {error}",
+      "userDeleted": "사용자 '{username}'이(가) 성공적으로 삭제되었습니다.",
+      "userDeleteFailed": "사용자 삭제 오류: {error}",
+      "userUpdated": "사용자 '{username}'이(가) 성공적으로 업데이트되었습니다.",
+      "userUpdateFailed": "사용자 업데이트 오류: {error}",
+      "creatingGroup": "그룹 생성 중...",
+      "groupCreated": "그룹 '{groupName}'이(가) 생성되었습니다.",
+      "groupCreateFailed": "그룹 생성 오류: {error}",
+      "groupDeleted": "그룹 '{groupName}'이(가) 성공적으로 삭제되었습니다.",
+      "groupDeleteFailed": "그룹 삭제 오류: {error}",
+      "groupUpdated": "그룹 '{groupName}'이(가) 성공적으로 업데이트되었습니다.",
+      "groupUpdateFailed": "그룹 업데이트 오류: {error}",
+      "homedirLoadFailed": "홈 디렉터리 로드 실패: {error}",
+      "homedirCreateFailed": "디렉터리 생성 오류: {error}",
+      "homedirCreated": "홈 디렉터리 '{homeName}'이(가) 생성되었습니다.",
+      "homedirDeleted": "디렉터리 '{homeName}'이(가) 삭제되었습니다.",
+      "homedirDeleteFailed": "디렉터리 삭제 오류: {error}",
+      "homedirCreatedFor": "{username}을(를) 위한 디렉터리 '{homeName}'이(가) 생성되었습니다.",
+      "homedirDeletedFor": "{username}의 디렉터리 '{homeName}'이(가) 삭제되었습니다.",
+      "sessionsLoadFailed": "세션 로드 실패: {error}",
+      "sessionStopError": "세션 중지 오류: {error}",
+      "sessionStopped": "세션이 성공적으로 중지되었습니다.",
+      "appDataRefreshFailed": "앱 데이터 새로고침 실패: {error}",
+      "closingSession": "사용자 지정 세션을 커밋하는 중...",
+      "sessionClosed": "사용자 지정 세션이 닫혔습니다.",
+      "sessionCloseFailed": "사용자 지정 세션을 닫지 못했습니다: {error}",
+      "fetchingApps": "스토어에서 앱 가져오는 중...",
+      "fetchAppsFailed": "스토어에서 앱 가져오기 실패: {error}",
+      "appStoreAddFailed": "스토어 추가 오류: {error}",
+      "appStoreAdded": "앱 스토어 '{name}'이(가) 추가되었습니다.",
+      "appSaved": "앱 '{name}'이(가) 성공적으로 {action}되었습니다.",
+      "appSaveActions": {
+        "updated": "업데이트",
+        "installed": "설치"
+      },
+      "appSaveFailed": "앱 저장 오류: {error}",
+      "appDeleted": "앱 '{name}'이(가) 삭제되었습니다.",
+      "appDeleteFailed": "앱 삭제 오류: {error}",
+      "templateSaved": "템플릿 '{name}'이(가) 성공적으로 저장되었습니다.",
+      "templateSaveFailed": "템플릿 저장 오류: {error}",
+      "templateDeleted": "템플릿 '{name}'이(가) 성공적으로 삭제되었습니다.",
+      "templateDeleteFailed": "템플릿 삭제 오류: {error}",
+      "pinRemoved": "고정된 동작이 제거되었습니다.",
+      "keyGenerated": "새 키 쌍이 생성되었습니다.",
+      "keyGenFailed": "키 생성 실패: {error}",
+      "pendingConfigSaved": "보류 중인 구성이 저장되었습니다. 이제 관리자에게 공개 키를 제공할 수 있습니다.",
+      "settingsSaved": "설정이 저장되었습니다.",
+      "appCreated": "앱 '{name}'이(가) 성공적으로 생성되었습니다.",
+      "launchFailed": "시작 실패: {error}"
+    },
+    "placeholders": {
+      "noAdmins": "관리자를 찾을 수 없습니다.",
+      "noUsers": "사용자를 찾을 수 없습니다.",
+      "noGroups": "그룹을 찾을 수 없습니다.",
+      "noHomeDirs": "홈 디렉터리를 찾을 수 없습니다.",
+      "noSessions": "활성 세션을 찾을 수 없습니다.",
+      "noPinned": "고정된 동작을 찾을 수 없습니다.",
+      "errorLoading": "디렉터리 로딩 중 오류 발생.",
+      "noInstalledApps": "아직 설치된 애플리케이션이 없습니다."
+    }
+  },
+  "popup": {
+    "tabs": {
+      "launch": "새로 시작",
+      "sessions": "활성 세션",
+      "manageFiles": "파일 관리",
+      "uploadStorage": "스토리지에 업로드",
+      "uploadFiles": "파일 업로드",
+      "uploadFilesTitle": "전용 파일 업로드 페이지 열기"
+    },
+    "launchView": {
+      "searchPlaceholder": "애플리케이션 검색...",
+      "uploadingFile": "파일 업로드 중...",
+      "gpuLabel": "GPU",
+      "storageLabel": "스토리지",
+      "languageLabel": "언어",
+      "cleanroom": "클린룸 (임시)",
+      "noGpu": "없음",
+      "saveOptions": "이 시작 옵션 저장",
+      "saveOptionsForUrl": "모든 URL에 대해 옵션 저장",
+      "saveOptionsForFile": ".{extension} 파일에 대해 옵션 저장",
+      "openFile": "시작 시 파일 열기",
+      "launchButton": "시작",
+      "launchingButton": "시작 중...",
+      "uploadingButton": "업로드 중...",
+      "autoHome": "자동 (앱별 영속성)",
+      "collaborationMode": "공동 작업 세션",
+      "waylandMode": "Wayland 모드"
+    },
+    "sessionsView": {
+      "noSessions": "활성 세션이 없습니다."
+    },
+    "uploadStorageView": {
+      "selectHome": "홈 디렉터리 선택",
+      "description": "이 작업은 파일 <strong>{filename}</strong>을(를) 나중에 사용할 수 있도록 파일 저장소에 직접 업로드합니다.",
+      "descriptionFallback": "이 작업은 파일 <strong>{filename}</strong>을(를) 나중에 사용할 수 있도록 파일 저장소에 직접 업로드합니다.",
+      "uploadButton": "파일 업로드",
+      "uploadingButton": "업로드 중...",
+      "preparing": "파일 준비 중...",
+      "uploadingChunk": "{total} 중 {current}번째 청크 업로드 중...",
+      "finalizing": "마무리 중...",
+      "uploadComplete": "업로드 완료!"
+    },
+    "status": {
+      "unconfigured": "옵션 페이지를 통해 확장 프로그램을 구성하세요.",
+      "openingServerFile": "서버 측 파일 여는 중: {filename}",
+      "openingFile": "파일 여는 중: {filename}",
+      "openingUrl": "URL 여는 중: {targetUrl}",
+      "error": "오류: {message}",
+      "preparingFile": "파일 준비 중...",
+      "sendingFile": "세션으로 파일 보내는 중...",
+      "errorSendingFile": "파일 전송 오류: {message}",
+      "errorClosingSession": "세션 닫기 오류: {message}",
+      "preparingSession": "격리된 세션 준비 중...",
+      "fetchingData": "파일 데이터 가져오는 중...",
+      "fetchDataFailed": "파일 데이터 가져오기 실패: {statusText}",
+      "unknownAction": "알 수 없는 시작 작업입니다.",
+      "noAppSelected": "애플리케이션을 선택하세요.",
+      "noAppsAvailable": "계정에서 사용할 수 있는 애플리케이션이 없습니다.",
+      "uploadSuccess": "파일이 성공적으로 업로드되었습니다!",
+      "creatingAutoHome": "자동 홈 디렉터리 생성 중..."
+    },
+    "languages": {
+      "default": "기본값 ({locale})"
+    }
+  },
+  "upload": {
+    "title": "파일 업로드",
+    "description": "컴퓨터에서 파일을 선택하여 안전하고 격리된 세션에서 여세요.",
+    "dropzone": {
+      "title": "여기에 파일을 드래그 앤 드롭하세요",
+      "or": "또는",
+      "button": "파일 선택"
+    },
+    "confirm": {
+      "ready": "파일을 안전하게 열 준비가 되었습니다.",
+      "button": "계속해서 시작"
+    }
+  },
+  "files": {
+    "title": "SealSkin 파일",
+    "header": {
+      "title": "파일",
+      "newFolder": "새 폴더",
+      "uploadFiles": "파일 업로드",
+      "uploadFolder": "폴더 업로드"
+    },
+    "sidebar": {
+      "sharedFiles": "SealSkin 파일",
+      "publicShares": "공개 공유"
+    },
+    "shares": {
+      "title": "공개적으로 공유된 파일",
+      "searchPlaceholder": "파일 이름 또는 ID로 검색..."
+    },
+    "table": {
+      "name": "이름",
+      "size": "크기",
+      "lastModified": "마지막 수정",
+      "created": "생성됨",
+      "expires": "만료",
+      "url": "공개 URL",
+      "passwordProtected": "비밀번호"
+    },
+    "dropzone": {
+      "title": "업로드할 파일을 여기에 놓으세요"
+    },
+    "pagination": {
+      "previous": "« 이전",
+      "next": "다음 »",
+      "pageOf": "페이지 {page} / {totalPages}"
+    },
+    "modals": {
+      "newFolder": {
+        "title": "새 폴더 만들기",
+        "folderNameLabel": "폴더 이름",
+        "nameTitle": "문자, 숫자, 밑줄, 하이픈 또는 마침표만 사용하세요.",
+        "createButton": "만들기"
+      },
+      "confirmDelete": {
+        "title": "삭제 확인",
+        "message": "선택한 {count, plural, one {1개 항목을} other {{count}개 항목을}} 정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+        "messageDefault": "선택한 항목을 정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+      },
+      "uploadProgress": {
+        "title": "업로드 진행률",
+        "doneButton": "완료"
+      },
+      "share": {
+        "title": "파일 공유",
+        "sharingFile": "파일 공유 중: <strong>{filename}</strong>",
+        "passwordLabel": "비밀번호 (선택 사항)",
+        "passwordPlaceholder": "비밀번호 없이 공유하려면 비워두세요",
+        "expiryLabel": "만료 시간 (시간, 선택 사항)",
+        "expiryPlaceholder": "예: 하루는 24",
+        "shareButton": "공유 링크 만들기"
+      }
+    },
+    "status": {
+      "homeDirLoadFailed": "홈 디렉터리 로드 실패: {error}",
+      "filesLoadFailed": "파일 로드 오류: {error}",
+      "deleteProtectedError": "보호된 시스템 폴더는 삭제할 수 없습니다.",
+      "deletingItems": "{count, plural, one {1개 항목} other {{count}개 항목}} 삭제 중...",
+      "deleteSuccess": "삭제 성공.",
+      "deleteFailed": "삭제 실패: {error}",
+      "preparingUpload": "{count, plural, one {1개 파일} other {{count}개 파일}} 업로드 준비 중...",
+      "uploadPrepFailed": "폴더 업로드 준비 중 오류 발생: {error}",
+      "notConfigured": "오류: SealSkin이 구성되지 않았습니다. 옵션에서 설정하십시오.",
+      "folderCreated": "'{folderName}' 폴더가 생성되었습니다.",
+      "folderCreateFailed": "폴더 생성 오류: {error}",
+      "shareCreated": "공유가 성공적으로 생성되었습니다! 링크가 클립보드에 복사되었습니다.",
+      "shareCreateFailed": "공유 생성 실패: {error}",
+      "sharesLoadFailed": "공유된 파일을 불러오지 못했습니다: {error}",
+      "shareDeleteFailed": "공유 삭제 실패: {error}",
+      "shareDeleted": "공유가 성공적으로 삭제되었습니다.",
+      "urlCopied": "공개 URL이 클립보드에 복사되었습니다."
+    },
+    "placeholders": {
+      "errorLoading": "파일 로드 오류.",
+      "folderEmpty": "이 폴더는 비어 있습니다.",
+      "noHomeDirs": "사용 가능한 홈 디렉터리가 없습니다.",
+      "noShares": "아직 공유한 파일이 없습니다."
+    },
+    "uploadStatus": {
+      "pending": "대기 중",
+      "initiating": "시작 중...",
+      "uploading": "업로드 중...",
+      "finalizing": "마무리 중...",
+      "completed": "완료됨",
+      "error": "오류"
+    }
+  }
+}

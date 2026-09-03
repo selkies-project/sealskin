@@ -1,21 +1,39 @@
 #!/bin/bash
+# Build the browser extension zips from the shared client build.
+#
+# Output: browser_extension/sealskin-chrome-v<VERSION>.zip and
+#         browser_extension/sealskin-firefox-v<VERSION>.zip
+set -euo pipefail
+cd "$(dirname "$0")"
 
-VERSION=$(awk -F'"' '/"version":/ {print $4}' manifest.chrome.json)
+REPO_DIR="$(cd .. && pwd)"
+VERSION="$(tr -d '[:space:]' < "${REPO_DIR}/VERSION")"
 if [ -z "$VERSION" ]; then
-    echo "Error: Could not extract version from manifest.chrome.json"
+    echo "Error: VERSION file is empty"
     exit 1
 fi
 echo "Detected Version: $VERSION"
-FILES_TO_ZIP="icons *.js *.html *.css manifest.json"
-CHROME_FILENAME="sealskin-chrome-v${VERSION}.zip"
-echo "Building Chrome: $CHROME_FILENAME"
-cp manifest.chrome.json manifest.json
-rm -f "$CHROME_FILENAME"
-zip -r "$CHROME_FILENAME" $FILES_TO_ZIP -x "*.DS_Store"
-FIREFOX_FILENAME="sealskin-firefox-v${VERSION}.zip"
-echo "Building Firefox: $FIREFOX_FILENAME"
-cp manifest.firefox.json manifest.json
-rm -f "$FIREFOX_FILENAME"
-zip -r "$FIREFOX_FILENAME" $FILES_TO_ZIP -x "*.DS_Store"
-rm manifest.json
+
+DIST="${REPO_DIR}/client/dist/extension"
+(
+    cd "${REPO_DIR}/client"
+    [ -d node_modules ] || npm install --no-audit --no-fund
+    SEALSKIN_BUILD_STRICT=1 npm run build --silent -- --target extension
+)
+if [ ! -f "${DIST}/background.js" ] || [ ! -f "${DIST}/manifest.chrome.json" ]; then
+    echo "Error: client build did not produce ${DIST}"
+    exit 1
+fi
+
+for BROWSER in chrome firefox; do
+    ZIP="${PWD}/sealskin-${BROWSER}-v${VERSION}.zip"
+    echo "Building ${BROWSER}: $(basename "$ZIP")"
+    rm -f "$ZIP"
+    (
+        cd "$DIST"
+        cp "manifest.${BROWSER}.json" manifest.json
+        zip -qr "$ZIP" . -x "manifest.chrome.json" -x "manifest.firefox.json" -x "*.DS_Store"
+        rm -f manifest.json
+    )
+done
 echo "Build Complete!"
