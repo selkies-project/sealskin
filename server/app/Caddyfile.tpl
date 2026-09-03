@@ -11,7 +11,7 @@ https://:{{SESSION_PORT}} {
         header {
                 Access-Control-Allow-Origin "{header.Origin}"
                 Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-                Access-Control-Allow-Headers "Origin, Accept, Content-Type, X-Requested-With, X-Session-ID, Authorization"
+                Access-Control-Allow-Headers "Origin, Accept, Content-Type, X-Requested-With, X-Session-ID, X-Idempotency-Key, Authorization"
                 Access-Control-Allow-Credentials "true"
                 defer 
         }
