@@ -1,0 +1,16 @@
+# dependencies
+/node_modules
+package-lock.json
+
+# generated content
+.source
+/public/assets
+/.cache
+/.venv-docs
+/content/reference
+
+# build
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo

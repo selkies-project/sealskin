@@ -1,6 +1,6 @@
 """Chunked uploads, scoped to the uploading user.
 
-Uploads live under ``<upload_dir>/<username>/<upload uuid>/`` and every
+Uploads live under `<upload_dir>/<username>/<upload uuid>/` and every
 consumer must pass the authenticated username, so one user can never read or
 complete another user's upload.
 """

@@ -2,9 +2,9 @@
 
 * The E2EE handshake: the server signs a nonce with its RSA key so the client
   can verify it, then the client sends an RSA-OAEP wrapped AES-256-GCM key.
-* :class:`EncryptedRoute` encrypts every JSON response with the session key and
-  :func:`get_decrypted_request_body` decrypts request bodies.
-* :func:`verify_token` validates client-signed RS256 JWTs against the public
+* `EncryptedRoute` encrypts every JSON response with the session key and
+  `get_decrypted_request_body` decrypts request bodies.
+* `verify_token` validates client-signed RS256 JWTs against the public
   key stored for the user.
 * Password hashing for public shares.
 """
@@ -45,7 +45,7 @@ HANDSHAKE_PATHS = ("/api/handshake/initiate", "/api/handshake/exchange")
 
 
 def init_server_keys() -> None:
-    """Load the server RSA key into ``state`` and publish the public PEM.
+    """Load the server RSA key into `state` and publish the public PEM.
 
     Exits the process when the key file is missing, matching the behaviour
     administrators rely on to notice a broken volume mount.
@@ -73,7 +73,7 @@ def sign_nonce() -> tuple[str, str]:
     """Create a random nonce and sign it with the server key.
 
     Returns:
-        ``(nonce_b64, signature_b64)`` using RSA-PSS with SHA-256.
+        `(nonce_b64, signature_b64)` using RSA-PSS with SHA-256.
     """
     nonce = os.urandom(32)
     signature = state.server_private_key.sign(
@@ -119,7 +119,7 @@ def register_crypto_session(aes_key: bytes) -> str:
 
 
 def prune_crypto_sessions() -> int:
-    """Drop E2EE sessions idle longer than ``crypto_session_ttl_seconds``.
+    """Drop E2EE sessions idle longer than `crypto_session_ttl_seconds`.
 
     Returns:
         Number of sessions removed.
@@ -134,7 +134,7 @@ def prune_crypto_sessions() -> int:
 
 
 def _touch_session(session_id: str) -> CryptoSession | None:
-    """Return the crypto session for ``session_id`` and mark it as used."""
+    """Return the crypto session for `session_id` and mark it as used."""
     session = state.crypto_sessions.get(session_id)
     if session:
         session.last_used = time.time()
@@ -145,8 +145,8 @@ async def get_decrypted_request_body(request: Request) -> dict[str, Any]:
     """FastAPI dependency returning the decrypted JSON body of a request.
 
     Args:
-        request: Incoming request carrying ``X-Session-ID`` and an
-            :class:`EncryptedPayload` body.
+        request: Incoming request carrying `X-Session-ID` and an
+            `EncryptedPayload` body.
 
     Returns:
         The decrypted JSON document.
@@ -176,7 +176,7 @@ _IDEMPOTENCY_INFLIGHT: dict[str, asyncio.Future[tuple[int, bytes, str]]] = {}
 
 
 def _prune_idempotency_cache() -> None:
-    """Drop cached responses older than :data:`IDEMPOTENCY_TTL_SECONDS`."""
+    """Drop cached responses older than `IDEMPOTENCY_TTL_SECONDS`."""
     cutoff = time.time() - IDEMPOTENCY_TTL_SECONDS
     for key in [k for k, (stamp, _, _, _) in _IDEMPOTENCY_RESULTS.items() if stamp < cutoff]:
         _IDEMPOTENCY_RESULTS.pop(key, None)
@@ -196,7 +196,7 @@ def _encrypt_json_response(session: CryptoSession, body: bytes, status_code: int
 class EncryptedRoute(APIRoute):
     """Route class that encrypts JSON responses with the E2EE session key.
 
-    Non-GET requests carrying an ``X-Idempotency-Key`` header are executed at
+    Non-GET requests carrying an `X-Idempotency-Key` header are executed at
     most once per crypto session: a retried request (for example after the
     client's network blipped while a container was being created) receives
     the stored result instead of running the handler again. While the first
@@ -289,7 +289,7 @@ def proxy_cert_not_after(cert_path: str) -> float | None:
         cert_path: Path to the PEM certificate Caddy serves.
 
     Returns:
-        The ``notAfter`` timestamp, or ``None`` if the file is missing or
+        The `notAfter` timestamp, or `None` if the file is missing or
         cannot be parsed.
     """
     try:
@@ -304,14 +304,14 @@ def proxy_cert_not_after(cert_path: str) -> float | None:
 async def verify_token(req: Request) -> dict[str, Any]:
     """FastAPI dependency authenticating a client-signed JWT.
 
-    The token's ``sub`` claim names the user; the signature is verified with
-    the public key stored for that user and ``exp`` is required.
+    The token's `sub` claim names the user; the signature is verified with
+    the public key stored for that user and `exp` is required.
 
     Args:
-        req: Incoming request with an ``Authorization: Bearer`` header.
+        req: Incoming request with an `Authorization: Bearer` header.
 
     Returns:
-        The user record including ``effective_settings`` and ``group``.
+        The user record including `effective_settings` and `group`.
 
     Raises:
         HTTPException: 401 for invalid tokens, 403 for inactive accounts.
@@ -397,7 +397,7 @@ def hash_share_password(password: str) -> str:
         password: Clear-text password.
 
     Returns:
-        ``scrypt$<salt_b64>$<hash_b64>``.
+        `scrypt$<salt_b64>$<hash_b64>`.
     """
     salt = os.urandom(16)
     digest = hashlib.scrypt(
@@ -409,7 +409,7 @@ def hash_share_password(password: str) -> str:
 def verify_share_password(password: str, stored_hash: str) -> bool:
     """Check a password against a stored hash.
 
-    Supports the current ``scrypt$salt$hash`` format and the legacy unsalted
+    Supports the current `scrypt$salt$hash` format and the legacy unsalted
     SHA-256 hex digest.
 
     Args:
@@ -417,7 +417,7 @@ def verify_share_password(password: str, stored_hash: str) -> bool:
         stored_hash: Value stored in the share metadata.
 
     Returns:
-        ``True`` when the password matches.
+        `True` when the password matches.
     """
     if not stored_hash:
         return False

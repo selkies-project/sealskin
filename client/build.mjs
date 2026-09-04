@@ -2,7 +2,7 @@
 /**
  * SealSkin client build.
  *
- * One source tree, three outputs (see docs/architecture.md section 3):
+ * One source tree, three outputs (see docs/content/development.md, "The client"):
  *   dist/ui         served by the server under /ui/ (hashed, minified)
  *   dist/extension  contents of the browser extension zip (unhashed)
  *   dist/mobile     contents of the Capacitor web dir (unhashed)

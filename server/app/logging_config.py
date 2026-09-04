@@ -9,7 +9,7 @@ from .settings import settings
 
 
 def setup_logging() -> None:
-    """Configure the root logger from ``settings.log_level``."""
+    """Configure the root logger from `settings.log_level`."""
     log_level = settings.log_level.upper()
     logging.basicConfig(
         level=log_level,

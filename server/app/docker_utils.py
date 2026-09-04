@@ -28,7 +28,7 @@ def get_docker_client() -> docker.DockerClient:
     """Return the shared Docker client, creating it on first use.
 
     Returns:
-        A :class:`docker.DockerClient` connected from the environment.
+        A `DockerClient` connected from the environment.
 
     Raises:
         RuntimeError: If the daemon cannot be reached.
@@ -52,7 +52,7 @@ async def container_exists(instance_id: str) -> bool:
         instance_id: Container id.
 
     Returns:
-        ``True`` if Docker knows the container, ``False`` if it is gone.
+        `True` if Docker knows the container, `False` if it is gone.
 
     Raises:
         DockerException: If the daemon cannot be queried.
@@ -78,8 +78,8 @@ async def prune_dangling_images() -> None:
 async def inspect_self_container() -> None:
     """Discover mount mappings, ports and network of the server's own container.
 
-    Populates ``state.path_prefix_map``, ``state.discovered_api_port``,
-    ``state.discovered_session_port`` and ``state.discovered_network``. When
+    Populates `state.path_prefix_map`, `state.discovered_api_port`,
+    `state.discovered_session_port` and `state.discovered_network`. When
     the server is not running inside Docker nothing is changed.
     """
     state.discovered_api_port = settings.api_port
@@ -184,7 +184,7 @@ def translate_path_to_host(internal_path: str) -> str:
 
 
 def read_cpu_model() -> None:
-    """Read the CPU model name from ``/proc/cpuinfo`` into ``state.cpu_model``."""
+    """Read the CPU model name from `/proc/cpuinfo` into `state.cpu_model`."""
     try:
         with open("/proc/cpuinfo", encoding="utf-8") as handle:
             for line in handle:
@@ -200,7 +200,7 @@ def get_system_stats() -> dict[str, Any]:
     """Return CPU model and storage usage, cached for one minute.
 
     Returns:
-        Dictionary with ``cpu_model``, ``disk_total`` and ``disk_used``.
+        Dictionary with `cpu_model`, `disk_total` and `disk_used`.
     """
     now = time.time()
     cache = state.system_stats_cache
@@ -223,7 +223,7 @@ def get_system_stats() -> dict[str, Any]:
 
 
 def detect_gpus() -> None:
-    """Detect render nodes under ``/sys/class/drm`` into ``state.available_gpus``."""
+    """Detect render nodes under `/sys/class/drm` into `state.available_gpus`."""
     state.available_gpus.clear()
     drm_root = "/sys/class/drm"
     try:
@@ -260,10 +260,10 @@ def detect_gpus() -> None:
 
 
 async def get_and_cache_image_metadata(image_name: str, force_refresh: bool = False) -> None:
-    """Record the local digest of an image in ``state.image_metadata``.
+    """Record the local digest of an image in `state.image_metadata`.
 
     Args:
-        image_name: Image reference such as ``ghcr.io/org/app:latest``.
+        image_name: Image reference such as `ghcr.io/org/app:latest`.
         force_refresh: Re-query Docker even when a digest is cached.
     """
     if (

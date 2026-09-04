@@ -12,7 +12,7 @@
  *   - extension: `chrome.runtime.sendMessage`
  *   - mobile:    `window.handleMessage` (background runs in the outer window)
  *
- * See docs/architecture.md section 4.2 for the contract.
+ * See docs/content/architecture.md ("The bridge") for the contract.
  */
 
 import { storePendingFile, takePendingFile } from './context-store.js';

@@ -1,0 +1,17 @@
+{
+  "title": "SealSkin",
+  "pages": [
+    "README",
+    "start",
+    "usage",
+    "administration",
+    "configuration",
+    "settings",
+    "architecture",
+    "api",
+    "development",
+    "releasing",
+    "faq",
+    "reference"
+  ]
+}

@@ -155,7 +155,7 @@ class InstalledApp(BaseModel):
     """A fully resolved installed application.
 
     This is the shape the API exposes and the launch logic consumes. On disk
-    the app is stored as an :class:`InstalledAppRecord`.
+    the app is stored as an `InstalledAppRecord`.
     """
 
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -176,7 +176,7 @@ class InstalledApp(BaseModel):
     home_template_name: str | None = None
 
 
-#: Fields of :class:`InstalledApp` that belong to the record itself rather
+#: Fields of `InstalledApp` that belong to the record itself rather
 #: than to the store entry. Everything else is derived from the store and only
 #: stored when the administrator changed it.
 RECORD_FIELDS: tuple[str, ...] = (
@@ -197,10 +197,10 @@ RECORD_FIELDS: tuple[str, ...] = (
 class InstalledAppRecord(BaseModel):
     """On-disk representation of an installed application.
 
-    The record references the store entry (``source`` and ``source_app_id``)
-    and keeps only the fields the administrator changed under ``overrides``.
-    The effective :class:`InstalledApp` is the store entry deep-merged with
-    ``overrides``; see ``config_store.resolve_app``.
+    The record references the store entry (`source` and `source_app_id`)
+    and keeps only the fields the administrator changed under `overrides`.
+    The effective `InstalledApp` is the store entry deep-merged with
+    `overrides`; see `config_store.resolve_app`.
     """
 
     model_config = ConfigDict(extra="ignore")
@@ -249,7 +249,7 @@ class AppTemplate(BaseModel):
 
 
 class TemplateSchemaOption(BaseModel):
-    """One choice of a ``select`` template setting."""
+    """One choice of a `select` template setting."""
 
     value: str
     label: str | None = None
@@ -278,13 +278,13 @@ class TemplateSchemaSetting(BaseModel):
 
 
 class TemplateSchemaResponse(BaseModel):
-    """Payload of ``GET /api/ui/template_schema``."""
+    """Payload of `GET /api/ui/template_schema`."""
 
     settings: list[TemplateSchemaSetting]
 
 
 class UiManifest(BaseModel):
-    """Payload of ``GET /api/ui/version``."""
+    """Payload of `GET /api/ui/version`."""
 
     version: str
     bridge: int

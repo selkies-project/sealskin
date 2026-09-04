@@ -1,9 +1,9 @@
 """Users, administrators and groups stored as flat files.
 
-* ``keys/admins/<username>``: the administrator's public key PEM.
-* ``keys/users/<username>``: a ``--- Settings ---`` YAML block followed by a
-  ``--- Public Key ---`` PEM block.
-* ``groups/<name>``: YAML settings applied on top of member users' settings.
+* `keys/admins/<username>`: the administrator's public key PEM.
+* `keys/users/<username>`: a `--- Settings ---` YAML block followed by a
+  `--- Public Key ---` PEM block.
+* `groups/<name>`: YAML settings applied on top of member users' settings.
 
 Files are re-scanned after every change (and by the configuration watcher
 when they are edited by hand).
@@ -63,7 +63,7 @@ def set_external_ports(api_port: int, session_port: int) -> None:
 
 
 def _atomic_write(path: str, content: str, mode: int = 0o600) -> None:
-    """Write ``content`` to ``path`` atomically with the given permissions."""
+    """Write `content` to `path` atomically with the given permissions."""
     directory = os.path.dirname(path)
     os.makedirs(directory, exist_ok=True)
     fd, temp_path = tempfile.mkstemp(dir=directory, prefix=".tmp-")
@@ -85,7 +85,7 @@ def _generate_key_pair(key_size: int = 2048) -> tuple[str, str]:
         key_size: Modulus size in bits.
 
     Returns:
-        ``(private_pem, public_pem)``.
+        `(private_pem, public_pem)`.
     """
     private_key = rsa.generate_private_key(public_exponent=65537, key_size=key_size)
     private_pem = private_key.private_bytes(
@@ -108,10 +108,10 @@ def parse_key_file(path: str) -> tuple[dict[str, Any] | None, str | None]:
     """Parse a user file into settings and public key.
 
     Args:
-        path: File under ``keys/users``.
+        path: File under `keys/users`.
 
     Returns:
-        ``(settings, public_key_pem)``; both ``None`` when unreadable.
+        `(settings, public_key_pem)`; both `None` when unreadable.
     """
     try:
         with open(path, encoding="utf-8") as handle:
@@ -150,10 +150,10 @@ def write_user_file(username: str, pub_key_pem: str, settings_dict: dict[str, An
 
 
 def _generate_default_admin() -> None:
-    """Create the default ``admin`` account when no administrator exists.
+    """Create the default `admin` account when no administrator exists.
 
-    The generated private key is written to ``admin.json`` three levels above
-    the keys directory (``/config/admin.json`` by default) for the operator to
+    The generated private key is written to `admin.json` three levels above
+    the keys directory (`/config/admin.json` by default) for the operator to
     import into a client and then delete.
     """
     admin_dir = os.path.join(settings.keys_base_path, "admins")
@@ -270,7 +270,7 @@ def get_all_groups() -> list[dict[str, Any]]:
 
 
 def _validate_username(username: str) -> None:
-    """Raise ``ValueError`` for names that are not filesystem safe."""
+    """Raise `ValueError` for names that are not filesystem safe."""
     if not _NAME_RE.match(username or ""):
         raise ValueError("Invalid username. Use only letters, numbers, underscore, or hyphen.")
 
@@ -280,10 +280,10 @@ def create_admin(username: str, public_key: str | None) -> tuple[dict[str, Any],
 
     Args:
         username: New admin name.
-        public_key: Public key PEM, or ``None`` to generate a key pair.
+        public_key: Public key PEM, or `None` to generate a key pair.
 
     Returns:
-        ``(user_record, private_key_pem_or_None)``.
+        `(user_record, private_key_pem_or_None)`.
 
     Raises:
         ValueError: For invalid or duplicate names.
@@ -333,11 +333,11 @@ def create_user(
 
     Args:
         username: New user name.
-        public_key: Public key PEM, or ``None`` to generate a key pair.
+        public_key: Public key PEM, or `None` to generate a key pair.
         settings_dict: Initial settings.
 
     Returns:
-        ``(user_record, private_key_pem_or_None)``.
+        `(user_record, private_key_pem_or_None)`.
 
     Raises:
         ValueError: For invalid or duplicate names.

@@ -1,6 +1,6 @@
 """Session launch orchestration.
 
-:func:`build_launch_spec` assembles everything a provider needs to start an
+`build_launch_spec` assembles everything a provider needs to start an
 application container (environment, volumes, GPU, autostart script, Docker
 overrides). It is used by the launch routes for new sessions and by the
 collaboration module when a room swaps to another application, so the two
@@ -40,15 +40,15 @@ DOCKER_DICT_KEYS = ("environment",)
 
 @dataclass
 class LaunchSpec:
-    """Everything needed to call ``provider.launch``.
+    """Everything needed to call `provider.launch`.
 
     Attributes:
         env: Container environment.
         volumes: Docker volume mapping (host path -> bind spec).
-        gpu_config: Selected GPU, or ``None``.
-        app_config: Resolved app dictionary with merged ``docker_overrides``.
+        gpu_config: Selected GPU, or `None`.
+        app_config: Resolved app dictionary with merged `docker_overrides`.
         host_mount_path: Server-side path mounted as the session home.
-        shared_files_path: Server-side path mounted at ``Desktop/files``.
+        shared_files_path: Server-side path mounted at `Desktop/files`.
         launch_context: What the session was opened with (URL or file).
         collaboration: Extra provider kwargs for collaboration sessions.
     """
@@ -63,7 +63,7 @@ class LaunchSpec:
     collaboration: dict[str, Any] = field(default_factory=dict)
 
     def provider_kwargs(self, session_id: str) -> dict[str, Any]:
-        """Return the keyword arguments for ``provider.launch``."""
+        """Return the keyword arguments for `provider.launch`."""
         kwargs: dict[str, Any] = {
             "session_id": session_id,
             "env_vars": self.env,
@@ -88,13 +88,13 @@ def new_ephemeral_dir(suffix: str = "") -> str:
 
 
 def extract_docker_overrides(settings_dict: dict[str, Any]) -> dict[str, Any]:
-    """Translate ``DOCKER_*`` template settings into Docker SDK run options.
+    """Translate `DOCKER_*` template settings into Docker SDK run options.
 
     Args:
         settings_dict: Template settings (environment variable names to values).
 
     Returns:
-        Keyword arguments understood by ``containers.run``.
+        Keyword arguments understood by `containers.run`.
     """
     overrides: dict[str, Any] = {}
 
@@ -187,12 +187,12 @@ def merge_docker_overrides(
 ) -> dict[str, Any]:
     """Combine store/app Docker overrides with template-derived ones.
 
-    Lists (devices, volumes) are concatenated and ``environment`` dictionaries
+    Lists (devices, volumes) are concatenated and `environment` dictionaries
     merged; any other key from the template replaces the existing value.
 
     Args:
         existing: Overrides carried by the app definition.
-        template_overrides: Overrides derived from ``DOCKER_*`` settings.
+        template_overrides: Overrides derived from `DOCKER_*` settings.
 
     Returns:
         The merged overrides.
@@ -214,12 +214,12 @@ def validate_gpu(
     """Validate a GPU selection for a launch.
 
     Args:
-        selected_gpu: Device path chosen by the user, or ``None``.
+        selected_gpu: Device path chosen by the user, or `None`.
         effective_settings: The user's effective settings.
         app: Application being launched.
 
     Returns:
-        The GPU descriptor from ``state.available_gpus``, or ``None``.
+        The GPU descriptor from `state.available_gpus`, or `None`.
 
     Raises:
         HTTPException: 400 when the GPU is unavailable or unsupported.
@@ -237,7 +237,7 @@ def validate_gpu(
 
 
 def gpu_for_app(gpu_config: dict[str, Any] | None, app: InstalledApp) -> dict[str, Any] | None:
-    """Return ``gpu_config`` if ``app`` supports it, otherwise ``None``.
+    """Return `gpu_config` if `app` supports it, otherwise `None`.
 
     Used when a collaboration room swaps applications and the session's GPU
     may not be usable by the new app.
@@ -317,11 +317,11 @@ def collaboration_initial_tokens(session: dict[str, Any]) -> dict[str, Any]:
     """Build the token table pushed to a collaboration container.
 
     Args:
-        session: Session record with ``controller_token``, ``viewers`` and
-            ``mk_owner_token``.
+        session: Session record with `controller_token`, `viewers` and
+            `mk_owner_token`.
 
     Returns:
-        Mapping of token to ``{"role", "slot", "mk_control"}``.
+        Mapping of token to `{"role", "slot", "mk_control"}`.
     """
     mk_owner = session.get("mk_owner_token")
     controller_token = session.get("controller_token")
@@ -360,16 +360,16 @@ def build_launch_spec(
         app: Resolved application.
         session_id: Session id for log prefixes.
         base_env: Session-level variables (SUBFOLDER, credentials, ...).
-        extra_env: Request-level variables such as ``SEALSKIN_URL``.
-        language: Locale for ``LC_ALL`` (ignored for the default English).
+        extra_env: Request-level variables such as `SEALSKIN_URL`.
+        language: Locale for `LC_ALL` (ignored for the default English).
         wayland_mode: Whether the session runs the Wayland compositor.
-        gpu_config: Validated GPU descriptor or ``None``.
-        host_mount_path: Session home directory on the server, or ``None``.
-        shared_files_path: Shared files directory on the server, or ``None``.
+        gpu_config: Validated GPU descriptor or `None`.
+        host_mount_path: Session home directory on the server, or `None`.
+        shared_files_path: Shared files directory on the server, or `None`.
         collaboration: Extra provider kwargs for collaboration sessions.
 
     Returns:
-        A :class:`LaunchSpec`.
+        A `LaunchSpec`.
     """
     env: dict[str, str] = dict(base_env)
     if wayland_mode:
@@ -447,17 +447,17 @@ DEFAULT_TIMEZONE = "Etc/UTC"
 
 
 def is_valid_timezone(name: Any) -> bool:
-    """Whether ``name`` looks like an IANA zone name (``Europe/Berlin``, ``UTC``)."""
+    """Whether `name` looks like an IANA zone name (`Europe/Berlin`, `UTC`)."""
     return isinstance(name, str) and 0 < len(name) <= 64 and bool(_TZ_NAME_RE.match(name))
 
 
 def resolve_timezone(*candidates: Any) -> str:
-    """Pick the ``TZ`` for a container.
+    """Pick the `TZ` for a container.
 
     The first candidate that looks like an IANA zone name wins. Candidates are
     the browser's reported zone and, for containers started inside an existing
     session, the zone the session was created with. With no usable candidate
-    the server's own ``TZ`` applies, and failing that ``Etc/UTC``.
+    the server's own `TZ` applies, and failing that `Etc/UTC`.
     """
     for candidate in candidates:
         if is_valid_timezone(candidate):
@@ -476,11 +476,11 @@ def session_base_env(
     """Return the session-level environment shared by every container of a session.
 
     Args:
-        session_id: The session; sets ``SUBFOLDER``.
+        session_id: The session; sets `SUBFOLDER`.
         custom_user: Basic-auth user for the container.
         password: Basic-auth password for the container.
-        master_token: Collaboration master token, or ``None`` outside a room.
-        timezone: IANA zone for ``TZ``; resolved via :func:`resolve_timezone`.
+        master_token: Collaboration master token, or `None` outside a room.
+        timezone: IANA zone for `TZ`; resolved via `resolve_timezone`.
     """
     env = {
         "SUBFOLDER": f"/{session_id}/",
@@ -507,7 +507,7 @@ async def _resolve_storage(
     """Decide the home and shared-files directories of a new session.
 
     Returns:
-        ``(host_mount_path, shared_files_path)``.
+        `(host_mount_path, shared_files_path)`.
 
     Raises:
         HTTPException: When a requested home directory or template is missing.
@@ -581,21 +581,21 @@ async def launch_application(
         application_id: Installed app id.
         username: Owner of the session.
         effective_settings: The user's effective settings.
-        home_name: Home directory to mount, ``"cleanroom"`` or ``None``.
-        env_vars: Request-specific environment (``SEALSKIN_URL`` / ``SEALSKIN_FILE``).
+        home_name: Home directory to mount, `"cleanroom"` or `None`.
+        env_vars: Request-specific environment (`SEALSKIN_URL` / `SEALSKIN_FILE`).
         language: Locale for the session.
-        selected_gpu: GPU device path or ``None``.
+        selected_gpu: GPU device path or `None`.
         file_bytes: Contents of an uploaded file to place in the session.
         filename: Name of that file.
         open_file_on_launch: Whether to open the file automatically.
         forced_rw_mount: Mount this directory as the home (meta-app editing).
         launch_in_room_mode: Start a collaboration session.
         wayland_mode: Use the Wayland compositor.
-        timezone: The browser's IANA zone; the container's ``TZ`` (see
-            :func:`resolve_timezone`).
+        timezone: The browser's IANA zone; the container's `TZ` (see
+            `resolve_timezone`).
 
     Returns:
-        ``{"session_url": str, "session_id": str}``.
+        `{"session_url": str, "session_id": str}`.
 
     Raises:
         HTTPException: On validation failures or provider errors.

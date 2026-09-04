@@ -1,86 +1,132 @@
-# SealSkin
+<p align="center">
+  <img src="mobile/assets/logo.png" alt="SealSkin" width="160">
+</p>
 
-SealSkin is a self-hosted, client-server platform that enables users to run powerful, containerized desktop applications streamed directly to a web browser. It uses a browser extension to intercept user actions—such as clicking a link or downloading a file and redirects them to a secure, isolated application environment running on a remote server.
+<h1 align="center">SealSkin</h1>
 
-Install the extension [For Chrome HERE](https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk)
-Install the extension [For Firefox HERE](https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/)
+<p align="center"><strong>Your browser is your new computer.</strong><br>
+Self-hosted browser isolation and remote application streaming.</p>
 
-Get the server [HERE](https://github.com/linuxserver/docker-sealskin)
+<p align="center">
+  <a href="https://github.com/selkies-project/sealskin/actions/workflows/ci.yml"><img src="https://github.com/selkies-project/sealskin/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/selkies-project/sealskin/actions/workflows/prerelease.yml"><img src="https://github.com/selkies-project/sealskin/actions/workflows/prerelease.yml/badge.svg" alt="Pre-release"></a>
+  <a href="https://github.com/selkies-project/sealskin/actions/workflows/docs.yml"><img src="https://github.com/selkies-project/sealskin/actions/workflows/docs.yml/badge.svg" alt="Docs"></a>
+  <a href="https://github.com/selkies-project/sealskin/releases/latest"><img src="https://img.shields.io/github/v/release/selkies-project/sealskin?label=release" alt="Latest release"></a>
+  <a href="https://opensource.org/licenses/MPL-2.0"><img src="https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg" alt="License: MPL 2.0"></a>
+  <a href="https://discord.com/invite/linuxserver"><img src="https://img.shields.io/discord/354974912613449730?logo=discord&label=Discord" alt="Discord"></a>
+</p>
 
-## Primary Functions
+<p align="center">
+  <a href="https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk"><img src="https://img.shields.io/chrome-web-store/v/lclgfmnljgacfdpmmmjmfpdelndbbfhk?logo=googlechrome&logoColor=white&label=Chrome%20Web%20Store" alt="Chrome Web Store"></a>
+  <a href="https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/"><img src="https://img.shields.io/amo/v/sealskin-isolation?logo=firefox&logoColor=white&label=Firefox%20Add-on" alt="Firefox Add-on"></a>
+  <a href="https://apps.apple.com/us/app/sealskin/id6758210210"><img src="https://img.shields.io/badge/App%20Store-iOS-black?logo=apple&logoColor=white" alt="App Store"></a>
+  <a href="https://play.google.com/store/apps/details?id=io.linuxserver.sealskin"><img src="https://img.shields.io/badge/Google%20Play-Android-3DDC84?logo=googleplay&logoColor=white" alt="Google Play"></a>
+  <a href="https://github.com/linuxserver/docker-sealskin"><img src="https://img.shields.io/docker/pulls/linuxserver/sealskin?logo=docker&logoColor=white&label=linuxserver%2Fsealskin" alt="Docker pulls"></a>
+</p>
 
-1.  **Remote Application Access:**
-    Stream demanding desktop applications (e.g., video editors, IDEs, 3D modeling software, office suites) to any device with a web browser. This allows any file or link on the web to be opened directly in a full-featured application. It leverages the server's hardware (CPU, GPU, RAM) and provides access to powerful tools without local installation.
+SealSkin runs desktop applications in isolated containers on a server you
+control and streams them to any browser or phone. A browser extension turns
+every link, file, download and text selection into something you open
+remotely instead of locally, so nothing from the web ever runs on the device
+in front of you. It is built on [Selkies](https://github.com/selkies-project/selkies)
+and the [LinuxServer.io](https://www.linuxserver.io) application images.
 
-2.  **Secure Browser & File Isolation:**
-    Isolate the local machine from the public internet. All web content, downloads, and application processes are executed within a sandboxed container on the remote server. This prevents malware, exploits, and trackers from ever reaching the client device, ensuring a clean and secure local environment.
+**[Read the documentation](https://selkies-project.github.io/sealskin/)** or
+visit **[sealskin.app](https://sealskin.app)**.
 
-3.  **Centralized Data Management:**
-    Intercept file downloads and redirect them directly to persistent storage on the server. This keeps the local machine free of downloaded data and makes files immediately available to your suite of remote applications for editing and processing linked through multiple configurable home directories.
+## Install
 
-## Core Architecture
+### Clients
 
-The system is composed of two primary components that communicate over a secure, end-to-end encrypted channel.
+| | |
+| --- | --- |
+| **Chrome, Edge, Brave** and other Chromium browsers | [Chrome Web Store](https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk) |
+| **Firefox** | [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/) |
+| **iPhone and iPad** | [App Store](https://apps.apple.com/us/app/sealskin/id6758210210) |
+| **Android** | [Google Play](https://play.google.com/store/apps/details?id=io.linuxserver.sealskin) |
 
-### [SealSkin Server](./server/README.md)
+Every [release](https://github.com/selkies-project/sealskin/releases) also
+carries the extension zips, the APK, the IPA and the server wheel.
 
-The server is the central hub of the platform. It is responsible for all management, orchestration, and traffic proxying. Its key design feature is a **Dual-Port Architecture** that separates management tasks from live application traffic, enhancing security and stability.
+### Server
 
-*   **Control Plane (API Server):** Handles user authentication, application management, and the orchestration of new application sessions. All communication is protected by end-to-end encryption.
-*   **Data Plane (Session Proxy Server):** Acts as a secure reverse proxy for all live application traffic (HTTP and WebSockets). It ensures that the internal application containers are never directly exposed to the internet.
+The server ships as the
+[linuxserver/sealskin](https://github.com/linuxserver/docker-sealskin)
+container. The quickest path to a working server with a trusted certificate
+is its installer, which needs Docker, a free [Duck DNS](https://www.duckdns.org/)
+subdomain and its token:
 
-### [SealSkin Browser Extension](./browser_extension/README.md)
-
-The browser extension is the user's entry point into the SealSkin environment. It integrates directly into the browser to capture user actions (e.g., right-clicking a link, downloading a file) and provides the UI for launching and managing remote sessions. It is responsible for all client-side cryptographic operations, including the E2EE handshake and signing authentication tokens.
-
-## How It Works: A Typical Workflow
-
-The interaction between the browser extension and the server follows a secure and orchestrated process:
-
-1.  **User Action:** A user initiates an action in their browser, such as right-clicking a link and selecting "Open in Secure Session" from the context menu.
-2.  **Extension Capture:** The **Browser Extension** captures this intent and opens its popup UI, presenting the user with a list of compatible remote applications.
-3.  **Secure Communication:** The extension establishes an End-to-End Encrypted (E2EE) channel with the server's API. It then authenticates the user by sending a JSON Web Token (JWT) signed with the user's private key.
-4.  **Server Orchestration:** The **Server** receives the encrypted launch request. After authenticating the user and verifying permissions, it instructs its backend provider (e.g., Docker) to launch a new, isolated application container.
-5.  **Proxy Connection:** Once the container is running, the server returns a unique, single-use URL. The extension opens this URL in a new tab, connecting the user to the running application through the server's secure **Session Proxy**. All subsequent traffic for that session flows through the proxy.
-
-## Key Features
-
-*   **End-to-End Encrypted API:** All management communication between the client and server is encrypted, protecting sensitive data like launch parameters and user information.
-*   **Passwordless Authentication:** Securely authenticates users via a public/private key cryptographic challenge (signed JWTs), eliminating the need for passwords.
-*   **Dual-Port Architecture:** A strict separation between the management control plane and the application data plane enhances security.
-*   **Containerized Application Backend:** Uses Docker as the primary provider to run applications in isolated, sandboxed environments.
-*   **Role-Based Access Control (RBAC):** A clear distinction between Admins (full system control) and Users (can only launch and manage their own sessions).
-*   **Seamless Browser Integration:** Deep integration with browser context menus and download flows for a smooth user experience.
-*   **Full Admin UI:** The extension's options page transforms into a complete management dashboard for administrators, allowing for user, group, and application management directly from the browser.
-
-## Client Delivery (0.3 and later)
-
-The launcher, options, file manager, upload page and collaboration room are one web UI built from [`client/`](./client/README.md) and **served by the SealSkin server** under `/ui/`. The browser extension and the mobile app are thin shells: they hold the connection page, the privileged browser hooks (context menus, download interception, the E2EE session and your private key) and a frame host that loads the served UI once a server is configured. Updating the server image updates the UI everywhere; store submissions are only needed when the shell itself changes.
-
-```
-VERSION              single version for server, UI, extension and app
-client/              web UI source and build (npm run build -> client/dist)
-browser_extension/   manifests, icons, packaging script for the thin shell
-mobile/              Capacitor project for the thin mobile shell
-server/              Python API, Caddy proxy, YAML config store
-docs/                architecture and image build notes
+```bash
+mkdir sealskin && cd sealskin
+bash <(curl -sSL https://raw.githubusercontent.com/linuxserver/docker-sealskin/refs/heads/master/install.sh)
 ```
 
-Build everything locally:
+Then import the generated `config/admin.json` into a client and launch your
+first application. The
+[Getting Started](https://selkies-project.github.io/sealskin/start) guide
+covers the installer, the plain `docker compose` alternative, certificates
+and the first login.
+
+## What it does
+
+* **Isolation.** Links, files, downloads and searches open in a fresh
+  container on the server. Cleanroom sessions leave nothing behind;
+  persistent home directories keep what you choose.
+* **Any application.** Browsers, office suites, IDEs, media editors,
+  emulators and 3D tools from the app stores, or any Selkies-compatible image
+  you add, with NVIDIA and DRI3 GPU acceleration.
+* **Files stay on the server.** A file manager, chunked uploads, intercepted
+  downloads and password-protected public share links.
+* **Collaboration rooms.** Launch any app into a room with chat, voice and
+  video, gamepad slots and hand-over of mouse and keyboard control.
+* **End-to-end encrypted, passwordless.** Every API call is encrypted with a
+  per-session key negotiated against the server's RSA key; users authenticate
+  with a signed token from a private key that never leaves the client.
+* **One UI, served by the server.** The extension and the app are thin
+  shells; the launcher, dashboard and admin panels ship with the server
+  image, so UI updates never wait for a store review.
+
+## Documentation
+
+| | |
+| --- | --- |
+| [Getting Started](https://selkies-project.github.io/sealskin/start) | Install the server, connect a client, launch an application. |
+| [Usage](https://selkies-project.github.io/sealskin/usage) | The launcher, context menus, sessions, storage, files and rooms. |
+| [Administration](https://selkies-project.github.io/sealskin/administration) | Users, groups, app stores, templates, the App Laboratory, GPUs. |
+| [Configuration](https://selkies-project.github.io/sealskin/configuration) | What lives in `/config` and `/storage`, keys, hand-editing the YAML. |
+| [Settings Reference](https://selkies-project.github.io/sealskin/settings) | Every environment variable the server reads. |
+| [Architecture](https://selkies-project.github.io/sealskin/architecture) | Control and data planes, encryption, the served UI and the shells. |
+| [HTTP API](https://selkies-project.github.io/sealskin/api) | Every endpoint and how requests are wrapped. |
+| [Development](https://selkies-project.github.io/sealskin/development) | Running from source, building the client, the mobile shells, this site. |
+| [Releasing](https://selkies-project.github.io/sealskin/releasing) | Versioning, release notes and the workflows. |
+| [Troubleshooting](https://selkies-project.github.io/sealskin/faq) | Certificates, Firefox, mobile, GPUs and Docker. |
+
+The pages live in [`docs/content`](docs/content) and can be edited on GitHub;
+the site is rebuilt on every push to `main`.
+
+## Repository
+
+```
+VERSION              the one version number for server, UI, extension and app
+server/              Python API server, Caddy template, tests, wheel
+client/              web UI source and build (dist/ui, dist/extension, dist/mobile)
+browser_extension/   manifests, icons and packaging for the extension shell
+mobile/              Capacitor project for the iOS and Android shells
+docs/                the documentation site
+release-notes/       one file per stable release
+```
 
 ```bash
 cd client && npm install && npm run build   # served UI + extension + mobile web dir
-bash browser_extension/build.sh             # zips client/dist/extension for Chrome and Firefox
-bash mobile/build.sh                        # Android APK from client/dist/mobile
+cd server && pip install -r requirements.txt && pytest
+cd docs && npm install && npm run dev       # documentation at http://localhost:3000
 ```
 
-Load the unpacked extension from `client/dist/extension` (copy the matching `manifest.*.json` to `manifest.json`) while developing.
+## Community
 
-## Details
+* [Issues](https://github.com/selkies-project/sealskin/issues) for bugs and feature requests
+* [LinuxServer.io Discord](https://discord.com/invite/linuxserver) for questions and support
+* [linuxserver/sealskin-apps](https://github.com/linuxserver/sealskin-apps), the default application catalogue
 
-For detailed information on each component, please see their respective README files:
-*   **[SealSkin Server README](./server/README.md)**
-*   **[SealSkin Browser Extension README](./browser_extension/README.md)**
-*   **[SealSkin Mobile README](./mobile/README.md)**
-*   **[Client build README](./client/README.md)**
-*   **[Architecture](./docs/architecture.md)** and **[Docker image notes](./docs/docker-image.md)**
+SealSkin is licensed under the [Mozilla Public License 2.0](LICENSE). The
+privacy policy for the published clients is [PRIVACY.md](PRIVACY.md).

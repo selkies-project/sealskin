@@ -153,7 +153,7 @@ async def cleanup_expired_shares() -> None:
 
 
 def _password_page(share_id: str, error: str = "") -> HTMLResponse | None:
-    """Render the password prompt page, or ``None`` if the template is missing."""
+    """Render the password prompt page, or `None` if the template is missing."""
     page_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", "public_password.html")
     if not os.path.exists(page_path):
         return None

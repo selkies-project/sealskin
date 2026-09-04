@@ -1,4 +1,4 @@
-"""Allow ``python -m app`` to start the server."""
+"""Allow `python -m app` to start the server."""
 
 from .main import main
 

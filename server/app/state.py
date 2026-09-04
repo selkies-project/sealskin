@@ -1,6 +1,6 @@
 """Process-wide runtime state.
 
-All mutable in-memory state lives on the single :data:`state` instance so that
+All mutable in-memory state lives on the single `state` instance so that
 routers, the collaboration module and the launch logic can share it without
 importing each other.
 """
@@ -34,7 +34,7 @@ class RuntimeState:
 
     Attributes:
         sessions: Live application sessions keyed by session id. Persisted to
-            ``sessions.yml``.
+            `sessions.yml`.
         sessions_lock: Guards writes of the sessions file.
         crypto_sessions: E2EE sessions keyed by session id.
         installed_records: Installed app records (reference plus overrides)
@@ -51,7 +51,7 @@ class RuntimeState:
         deletion_tasks: Background deletion task status keyed by task id.
         pull_status: Images currently being pulled keyed by image name.
         system_stats_cache: Cached CPU and disk statistics.
-        cpu_model: CPU model string read from ``/proc/cpuinfo``.
+        cpu_model: CPU model string read from `/proc/cpuinfo`.
         path_prefix_map: Container mount path to host path mapping.
         discovered_api_port: Externally mapped API port.
         discovered_session_port: Externally mapped session port.

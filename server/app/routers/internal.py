@@ -1,7 +1,7 @@
-"""Endpoints used only by Caddy's ``forward_auth`` on the loopback interface.
+"""Endpoints used only by Caddy's `forward_auth` on the loopback interface.
 
-Caddy refuses ``/internal/*`` from clients; these handlers are reached only
-through the sub-request Caddy makes to ``127.0.0.1``.
+Caddy refuses `/internal/*` from clients; these handlers are reached only
+through the sub-request Caddy makes to `127.0.0.1`.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ async def resolve_session(session_id: str, request: Request) -> Response:
     """Authorise a proxied request and tell Caddy where to send it.
 
     Returns:
-        An empty 200 response with ``X-Upstream-Host`` and ``X-Upstream-Auth``.
+        An empty 200 response with `X-Upstream-Host` and `X-Upstream-Auth`.
 
     Raises:
         HTTPException: 404 for unknown sessions, 403 for bad tokens.

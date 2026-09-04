@@ -45,16 +45,16 @@ _ROOM_ASSET_RE = re.compile(r'(?P<attr>\b(?:src|href))="(?P<url>[^"]+)"')
 
 
 def _absolutize_room_assets(html: str) -> str:
-    """Rewrite relative asset references in the room template to ``/ui/room/``.
+    """Rewrite relative asset references in the room template to `/ui/room/`.
 
-    The page is served at ``/room/<session_id>`` while its hashed assets live
-    under the static ``/ui/room/`` mount, so relative references would 404.
+    The page is served at `/room/<session_id>` while its hashed assets live
+    under the static `/ui/room/` mount, so relative references would 404.
 
     Args:
         html: Raw room template.
 
     Returns:
-        The template with relative ``src``/``href`` values made absolute.
+        The template with relative `src`/`href` values made absolute.
     """
 
     def _rewrite(match: re.Match[str]) -> str:
@@ -308,7 +308,7 @@ async def broadcast_token_state(session_id: str, session_data: dict[str, Any]) -
 
 
 def _owner_group(username: str) -> str:
-    """Return the effective group of a user (``"none"`` when unknown)."""
+    """Return the effective group of a user (`"none"` when unknown)."""
     from . import user_manager
 
     return user_manager.get_effective_settings(username).get("group", "none")
@@ -815,7 +815,7 @@ async def broadcast_state(session_id: str) -> None:
 
 
 async def handle_assign_slot(session_id: str, viewer_token: str, slot: int | None) -> None:
-    """Assign a gamepad slot to a participant (or clear it with ``None``)."""
+    """Assign a gamepad slot to a participant (or clear it with `None`)."""
     session_data = state.sessions.get(session_id)
     if not session_data:
         return
@@ -899,7 +899,7 @@ async def handle_assign_slot(session_id: str, viewer_token: str, slot: int | Non
 
 
 async def handle_assign_mk(session_id: str, target_token: str | None) -> None:
-    """Give mouse and keyboard control to a participant (``None`` = controller)."""
+    """Give mouse and keyboard control to a participant (`None` = controller)."""
     session_data = state.sessions.get(session_id)
     if not session_data:
         return

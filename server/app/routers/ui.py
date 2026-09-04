@@ -25,13 +25,13 @@ NO_CACHE_SUFFIXES = (".html", ".json")
 class UiStaticFiles(StaticFiles):
     """Static files with cache headers suited to content-hashed builds.
 
-    HTML entry points and JSON manifests are served with ``no-cache`` so a new
+    HTML entry points and JSON manifests are served with `no-cache` so a new
     build is picked up immediately; every other asset carries a content hash
     in its name and is cached for a year.
     """
 
     def file_response(self, full_path: Any, stat_result: os.stat_result, scope: Any, status_code: int = 200) -> Response:
-        """Add ``Cache-Control`` to the response Starlette builds."""
+        """Add `Cache-Control` to the response Starlette builds."""
         response = super().file_response(full_path, stat_result, scope, status_code)
         if str(full_path).endswith(NO_CACHE_SUFFIXES):
             response.headers["Cache-Control"] = "no-cache"
@@ -41,7 +41,7 @@ class UiStaticFiles(StaticFiles):
 
 
 def mount_ui(app: FastAPI) -> None:
-    """Mount the built UI at ``/ui`` when the directory exists.
+    """Mount the built UI at `/ui` when the directory exists.
 
     Args:
         app: The FastAPI application.
@@ -64,7 +64,7 @@ def load_template_schema() -> list[TemplateSchemaSetting]:
         The list of settings, or an empty list when the file is missing.
 
     Raises:
-        ValueError: If the file is not a mapping with a ``settings`` list.
+        ValueError: If the file is not a mapping with a `settings` list.
     """
     data = {}
     if os.path.exists(settings.template_schema_path):

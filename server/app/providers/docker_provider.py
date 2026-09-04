@@ -26,7 +26,7 @@ def image_provider(image_name: str) -> DockerProvider:
         image_name: Image reference.
 
     Returns:
-        A :class:`DockerProvider` whose configuration only names the image.
+        A `DockerProvider` whose configuration only names the image.
     """
     return DockerProvider({"provider_config": {"image": image_name}})
 
@@ -53,7 +53,7 @@ class DockerProvider(BaseProvider):
             image_name: Image reference.
 
         Returns:
-            ``{"id", "short_id", "digests"}`` or ``None`` when not present.
+            `{"id", "short_id", "digests"}` or `None` when not present.
         """
         try:
             image = await asyncio.to_thread(self.client.images.get, image_name)
@@ -75,7 +75,7 @@ class DockerProvider(BaseProvider):
             image_name: Image reference.
 
         Returns:
-            The registry digest, or ``None`` if it could not be determined.
+            The registry digest, or `None` if it could not be determined.
         """
         try:
             distribution_info = await asyncio.to_thread(
@@ -126,7 +126,7 @@ class DockerProvider(BaseProvider):
     ) -> dict[str, Any]:
         """Run the application container and wait until it answers HTTP.
 
-        See :meth:`BaseProvider.launch` for the arguments.
+        See `launch` for the arguments.
 
         Raises:
             HTTPException: On Docker errors or readiness timeout.

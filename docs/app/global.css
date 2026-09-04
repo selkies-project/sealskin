@@ -1,0 +1,93 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+@import 'fumadocs-python/preset.css';
+
+/*
+ * The accent is the violet end of the SealSkin logo gradient, the same accent
+ * the served web UI uses. It is darkened on the light surface so it clears
+ * 4.5:1 against the page and the text placed on top of it.
+ */
+:root {
+  --color-fd-primary: #5b3fd6;
+  --color-fd-ring: #5b3fd6;
+}
+
+.dark {
+  --color-fd-primary: #9b8cff;
+  --color-fd-ring: #9b8cff;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+/*
+ * Badges are written as a run of linked images on one line, which is a row on
+ * GitHub. The typography defaults make every image a block, which would stack
+ * them instead.
+ */
+#nd-page p a img {
+  display: inline-block;
+  margin-block: 0;
+  vertical-align: middle;
+}
+
+/*
+ * Collapsible answers are written as plain <details>, which is what GitHub
+ * renders, so they arrive as HTML and never reach the framework's accordion
+ * component. These give them the same surface and the same affordances.
+ */
+#nd-page details {
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.75rem;
+  background-color: var(--color-fd-card);
+  margin-block: 1rem;
+}
+
+#nd-page summary {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  list-style: none;
+  border-radius: inherit;
+  transition: background-color 0.15s;
+}
+
+#nd-page summary::-webkit-details-marker {
+  display: none;
+}
+
+#nd-page summary::before {
+  content: '';
+  width: 0.4rem;
+  height: 0.4rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  rotate: -45deg;
+  transition: rotate 0.2s;
+}
+
+#nd-page details[open] > summary {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+
+#nd-page details[open] > summary::before {
+  rotate: 45deg;
+}
+
+#nd-page summary:hover {
+  background-color: var(--color-fd-accent);
+}
+
+#nd-page details > :not(summary) {
+  padding-inline: 1rem;
+}
+
+#nd-page details > :last-child:not(summary) {
+  padding-bottom: 0.5rem;
+}

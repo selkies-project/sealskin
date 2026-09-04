@@ -7,7 +7,7 @@ name = "sealskin-server"
 dynamic = ["version"]
 description = "SealSkin server: API, Caddy proxy, and embedded web UI"
 readme = "README.md"
-license = "AGPL-3.0-only"
+license = "MPL-2.0"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi==0.141.1",

@@ -148,7 +148,7 @@ async def delete_app_store(store_name: str) -> Response:
 
 @router.get("/apps/available", response_model=list[AvailableApp])
 async def get_available_apps(url: str, store_name: str, refresh: bool = False) -> list[dict[str, Any]]:
-    """Return the apps published by a store (cached unless ``refresh``)."""
+    """Return the apps published by a store (cached unless `refresh`)."""
     _require_safe_name(store_name, "app store")
     try:
         return await config_store.fetch_store_apps(store_name, url, refresh)
@@ -168,10 +168,10 @@ def _save_logo(app_id: str, logo: str | None) -> str | None:
 
     Args:
         app_id: App the icon belongs to.
-        logo: Base64 image data, an existing URL, or ``None``.
+        logo: Base64 image data, an existing URL, or `None`.
 
     Returns:
-        ``/api/app_icon/<id>`` when data was saved, otherwise ``logo`` unchanged.
+        `/api/app_icon/<id>` when data was saved, otherwise `logo` unchanged.
     """
     if not logo or logo.startswith("/api/app_icon/") or logo.startswith("http"):
         return logo
@@ -188,7 +188,7 @@ def _save_logo(app_id: str, logo: str | None) -> str | None:
 
 
 def _normalise_scripts(provider_config: dict[str, Any]) -> None:
-    """Turn empty autostart script strings into ``None`` in place."""
+    """Turn empty autostart script strings into `None` in place."""
     for key in ("custom_autostart_script_b64", "custom_autostart_wayland_script_b64"):
         if provider_config.get(key) == "":
             provider_config[key] = None
@@ -270,8 +270,8 @@ async def patch_installed_app(
 ) -> InstalledApp:
     """Partially update an installed app.
 
-    Record fields (``users``, ``groups``, ``app_template``, ``auto_update``,
-    ``home_directories``) are applied directly; any other ``InstalledApp``
+    Record fields (`users`, `groups`, `app_template`, `auto_update`,
+    `home_directories`) are applied directly; any other `InstalledApp`
     field is merged into the record's overrides.
     """
     record = state.installed_records.get(app_id)
@@ -610,7 +610,7 @@ def _require_storage_user(username: str) -> None:
 
 
 def _require_admin_user(username: str) -> None:
-    """Ensure ``username`` is an administrator."""
+    """Ensure `username` is an administrator."""
     user = user_manager.get_user(username)
     if not user or not user.get("is_admin"):
         raise HTTPException(status_code=404, detail=f"Admin '{username}' not found.")

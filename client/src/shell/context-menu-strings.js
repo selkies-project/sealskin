@@ -1,7 +1,8 @@
 /**
- * Context-menu titles for every language, generated from src/i18n/*.json.
- * Regenerate with: node build.mjs (or the snippet in client/README.md).
- * Kept as a tiny static module so the background script needs no fetch.
+ * Context-menu titles for every language, mirrored from the
+ * `background.contextMenu` keys of src/i18n/*.json. Update it by hand when
+ * those strings change. Kept as a tiny static module so the background
+ * script needs no fetch before registering the menus.
  */
 export const contextMenuTitles = {
   "ar": {

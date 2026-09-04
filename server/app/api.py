@@ -2,7 +2,7 @@
 
 The application object is created here and every router is registered. State
 initialisation, cache refreshes, the configuration file watcher and the
-background jobs live in :func:`lifespan`.
+background jobs live in `lifespan`.
 """
 
 from __future__ import annotations
@@ -138,7 +138,6 @@ def _watch_targets() -> dict[str, persistence.ReloadCallback]:
     }
 
 
-@asynccontextmanager
 def _warn_if_cert_expiring(days: int = 14) -> None:
     """Log a warning when the proxy TLS certificate is expired or about to expire."""
     expires_at = proxy_cert_not_after(settings.proxy_cert_path)
@@ -160,6 +159,7 @@ def _warn_if_cert_expiring(days: int = 14) -> None:
         )
 
 
+@asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Initialise state on startup and stop background tasks on shutdown."""
     logger.info("SealSkin API server %s starting up...", __version__)
@@ -222,7 +222,7 @@ def create_app() -> FastAPI:
     """Build the FastAPI application with every router registered.
 
     Returns:
-        The configured :class:`FastAPI` instance.
+        The configured `FastAPI` instance.
     """
     app = FastAPI(title="SealSkin API", version=__version__, lifespan=lifespan)
 

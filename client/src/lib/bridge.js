@@ -4,7 +4,7 @@
  * Every served page runs inside an iframe owned by a shell host: the browser
  * extension's host page or the mobile app's outer window. The page never
  * touches `chrome.*` or `window.parent.*` directly; it sends requests through
- * this module and the host answers. See docs/architecture.md section 4.2 for
+ * this module and the host answers. See docs/content/architecture.md ("The bridge") for
  * the full contract.
  *
  * Usage:

@@ -23,13 +23,13 @@ def user_can_access(app_users: list[str], app_groups: list[str], username: str, 
     """Tell whether a user may see an application.
 
     Args:
-        app_users: Usernames allowed by the app (``"all"`` allows everyone).
-        app_groups: Groups allowed by the app (``"all"`` allows everyone).
+        app_users: Usernames allowed by the app (`"all"` allows everyone).
+        app_groups: Groups allowed by the app (`"all"` allows everyone).
         username: The user.
         group: The user's effective group.
 
     Returns:
-        ``True`` when access is allowed.
+        `True` when access is allowed.
     """
     return (
         "all" in app_users or username in app_users or "all" in app_groups or group in app_groups

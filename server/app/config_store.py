@@ -1,9 +1,9 @@
 """Loading, saving and resolving the YAML configuration.
 
 Installed applications are stored as *references plus overrides*: the record
-names the store and the store app id, and ``overrides`` holds only the fields
-the administrator changed. :func:`resolve_app` merges the processed store entry
-with those overrides to produce the :class:`~app.models.InstalledApp` the rest
+names the store and the store app id, and `overrides` holds only the fields
+the administrator changed. `resolve_app` merges the processed store entry
+with those overrides to produce the `InstalledApp` the rest
 of the server works with. Store updates therefore apply automatically after
 every cache refresh, and the file stays small enough to edit by hand.
 """
@@ -48,16 +48,16 @@ def is_safe_name(name: str) -> bool:
         name: Name supplied by an administrator.
 
     Returns:
-        ``True`` when the name only contains letters, digits, spaces, ``_``,
-        ``.`` and ``-`` and does not reduce to ``.`` or ``..``.
+        `True` when the name only contains letters, digits, spaces, `_`,
+        `.` and `-` and does not reduce to `.` or `..`.
     """
     return bool(name) and bool(SAFE_NAME_RE.match(name)) and name.strip(". ") != ""
 
 
 def deep_merge(base: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any]:
-    """Recursively merge ``overrides`` into a copy of ``base``.
+    """Recursively merge `overrides` into a copy of `base`.
 
-    Dictionaries are merged key by key; lists and scalars in ``overrides``
+    Dictionaries are merged key by key; lists and scalars in `overrides`
     replace the base value.
 
     Args:
@@ -77,7 +77,7 @@ def deep_merge(base: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any
 
 
 def diff_overrides(full: dict[str, Any], base: dict[str, Any]) -> dict[str, Any]:
-    """Return the subset of ``full`` that differs from ``base``.
+    """Return the subset of `full` that differs from `base`.
 
     Nested dictionaries are compared recursively so an override only records
     the leaves that changed.
@@ -87,7 +87,7 @@ def diff_overrides(full: dict[str, Any], base: dict[str, Any]) -> dict[str, Any]
         base: Reference values (the store entry).
 
     Returns:
-        A dictionary suitable for ``InstalledAppRecord.overrides``.
+        A dictionary suitable for `InstalledAppRecord.overrides`.
     """
     result: dict[str, Any] = {}
     for key, value in full.items():
@@ -119,7 +119,7 @@ def ensure_config_dir() -> None:
 
 
 def load_app_stores() -> None:
-    """Load ``app_stores.yml`` into ``state.app_stores``.
+    """Load `app_stores.yml` into `state.app_stores`.
 
     A default store pointing at the LinuxServer catalogue is written when the
     file does not exist.
@@ -145,7 +145,7 @@ def load_app_stores() -> None:
 
 
 def save_app_stores_sync() -> None:
-    """Write ``state.app_stores`` to disk synchronously."""
+    """Write `state.app_stores` to disk synchronously."""
     ensure_config_dir()
     try:
         persistence.write_yaml_sync(
@@ -156,7 +156,7 @@ def save_app_stores_sync() -> None:
 
 
 async def save_app_stores() -> None:
-    """Write ``state.app_stores`` to disk."""
+    """Write `state.app_stores` to disk."""
     ensure_config_dir()
     try:
         await persistence.write_yaml(
@@ -180,7 +180,7 @@ def _extract_apps(data: Any) -> list[dict[str, Any]]:
     """Return the app list from a parsed store document.
 
     Raises:
-        ValueError: If the document is neither a list nor ``{"apps": [...]}``.
+        ValueError: If the document is neither a list nor `{"apps": [...]}`.
     """
     if isinstance(data, dict) and "apps" in data:
         return list(data["apps"] or [])
@@ -246,7 +246,7 @@ def process_store_content(content: str, store_name: str) -> list[dict[str, Any]]
 
 
 def load_store_entries() -> None:
-    """Parse every cached store into ``state.store_entries``."""
+    """Parse every cached store into `state.store_entries`."""
     entries: dict[str, dict[str, dict[str, Any]]] = {}
     for store in state.app_stores:
         path = store_cache_file(store.name)
@@ -321,7 +321,7 @@ async def fetch_store_apps(store_name: str, url: str, refresh: bool) -> list[dic
     Args:
         store_name: Store name (validated by the caller).
         url: Store URL.
-        refresh: Ignore the cache and fetch from ``url``.
+        refresh: Ignore the cache and fetch from `url`.
 
     Returns:
         Processed app entries.
@@ -359,11 +359,11 @@ def autostart_cache_path(app: InstalledApp | InstalledAppRecord, suffix: str = "
     """Return the cache file for an app's repository autostart script.
 
     Args:
-        app: Installed app or record; ``source`` must name a configured store.
-        suffix: ``""`` for X11 or ``"-wayland"``.
+        app: Installed app or record; `source` must name a configured store.
+        suffix: `""` for X11 or `"-wayland"`.
 
     Returns:
-        The path, or ``None`` when the store is unknown.
+        The path, or `None` when the store is unknown.
     """
     store = get_store(app.source)
     if not store:
@@ -493,7 +493,7 @@ def resolve_app(record: InstalledAppRecord) -> InstalledApp | None:
         record: Reference plus overrides as stored on disk.
 
     Returns:
-        The resolved :class:`InstalledApp`, or ``None`` (logged) when the
+        The resolved `InstalledApp`, or `None` (logged) when the
         store entry is missing and the overrides alone are incomplete.
     """
     base = _store_base(record) or {}
@@ -535,11 +535,11 @@ def apply_partial_update(record: InstalledAppRecord, patch: dict[str, Any]) -> I
     """Merge a partial update into a record.
 
     Record fields (users, groups, template, ...) are set directly; everything
-    else is deep-merged into ``overrides``.
+    else is deep-merged into `overrides`.
 
     Args:
         record: Current record.
-        patch: Partial ``InstalledApp`` shaped dictionary.
+        patch: Partial `InstalledApp` shaped dictionary.
 
     Returns:
         The updated record (a new object).
@@ -570,7 +570,7 @@ def _migrate_legacy_record(raw: dict[str, Any]) -> InstalledAppRecord:
     full = {key: value for key, value in raw.items() if key not in RECORD_FIELDS}
     base = _store_base(temp)
     if base is None and temp.is_meta_app and temp.base_app_id:
-        # Legacy meta-apps stored the base app *name* in ``source``; recover the store.
+        # Legacy meta-apps stored the base app *name* in `source`; recover the store.
         base_raw = next(
             (r for r in state.installed_records.values() if r.id == temp.base_app_id), None
         )
@@ -585,7 +585,7 @@ def _migrate_legacy_record(raw: dict[str, Any]) -> InstalledAppRecord:
 
 
 def load_installed_apps() -> None:
-    """Load ``installed_apps.yml`` into ``state.installed_records`` and resolve.
+    """Load `installed_apps.yml` into `state.installed_records` and resolve.
 
     Legacy full-snapshot records are migrated once and the file rewritten.
     Invalid records are skipped with a log line instead of clearing the list.
@@ -630,7 +630,7 @@ def load_installed_apps() -> None:
 
 
 def resolve_all_apps() -> None:
-    """Re-resolve every record into ``state.installed_apps``."""
+    """Re-resolve every record into `state.installed_apps`."""
     resolved: dict[str, InstalledApp] = {}
     for app_id, record in state.installed_records.items():
         app = resolve_app(record)
@@ -678,7 +678,7 @@ def set_record(record: InstalledAppRecord) -> InstalledApp | None:
         record: The record to keep.
 
     Returns:
-        The resolved app, or ``None`` if it could not be resolved (the record
+        The resolved app, or `None` if it could not be resolved (the record
         is still kept so the administrator can fix it).
     """
     state.installed_records[record.id] = record
@@ -702,7 +702,7 @@ def remove_record(app_id: str) -> None:
 
 
 def _load_templates_from(directory: str, source: str) -> None:
-    """Load every YAML template in ``directory`` into state."""
+    """Load every YAML template in `directory` into state."""
     if not os.path.isdir(directory):
         return
     for filename in sorted(os.listdir(directory)):
@@ -724,9 +724,9 @@ def _load_templates_from(directory: str, source: str) -> None:
 
 
 def load_app_templates() -> None:
-    """Load default and user templates into ``state.app_templates``.
+    """Load default and user templates into `state.app_templates`.
 
-    A blank ``Default`` template is created when none exist.
+    A blank `Default` template is created when none exist.
     """
     state.app_templates.clear()
     state.template_files.clear()
@@ -801,7 +801,7 @@ def delete_app_template(name: str) -> None:
 
 
 async def load_sessions() -> None:
-    """Load persisted sessions into ``state.sessions``."""
+    """Load persisted sessions into `state.sessions`."""
     if not os.path.exists(settings.sessions_db_path):
         logger.info("Session persistence file not found. Starting with an empty session database.")
         return
@@ -816,7 +816,7 @@ async def load_sessions() -> None:
 
 
 async def save_sessions() -> None:
-    """Persist ``state.sessions`` to disk."""
+    """Persist `state.sessions` to disk."""
     async with state.sessions_lock:
         snapshot = copy.deepcopy(state.sessions)
     try:
@@ -827,7 +827,7 @@ async def save_sessions() -> None:
 
 
 def load_public_shares() -> None:
-    """Load public share metadata into ``state.public_shares``."""
+    """Load public share metadata into `state.public_shares`."""
     try:
         data = persistence.read_yaml(settings.public_shares_metadata_path, default={}) or {}
         shares: dict[str, PublicShareMetadata] = {}
@@ -844,7 +844,7 @@ def load_public_shares() -> None:
 
 
 async def save_public_shares() -> None:
-    """Persist ``state.public_shares`` to disk."""
+    """Persist `state.public_shares` to disk."""
     async with state.metadata_lock:
         snapshot = {
             share_id: metadata.model_dump(exclude_none=True)

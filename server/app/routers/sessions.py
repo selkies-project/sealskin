@@ -41,7 +41,7 @@ def session_info(session_id: str, data: dict[str, Any], for_owner: bool = True) 
         for_owner: Use the collaboration controller URL for room sessions.
 
     Returns:
-        The :class:`ActiveSessionInfo`.
+        The `ActiveSessionInfo`.
     """
     if for_owner and data.get("is_collaboration"):
         url = f"/room/{session_id}?token={data['controller_token']}"

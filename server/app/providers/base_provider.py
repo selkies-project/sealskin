@@ -13,8 +13,8 @@ class BaseProvider(ABC):
         """Initialise the provider with an application configuration.
 
         Args:
-            app_config: Resolved application dictionary (``InstalledApp`` shape)
-                including ``provider_config``.
+            app_config: Resolved application dictionary (`InstalledApp` shape)
+                including `provider_config`.
         """
         self.app_config = app_config
 
@@ -43,7 +43,7 @@ class BaseProvider(ABC):
             initial_tokens: Initial token set for the downstream control plane.
 
         Returns:
-            ``{"instance_id": str, "ip": str, "port": int}``.
+            `{"instance_id": str, "ip": str, "port": int}`.
         """
 
     @abstractmethod
@@ -51,5 +51,5 @@ class BaseProvider(ABC):
         """Stop a running instance.
 
         Args:
-            instance_id: Identifier returned by :meth:`launch`.
+            instance_id: Identifier returned by `launch`.
         """

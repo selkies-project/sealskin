@@ -1,7 +1,7 @@
 """Application settings.
 
-Every setting is defined once in :data:`SETTING_DEFINITIONS` and can be
-overridden with an environment variable named ``SEALSKIN_<NAME>`` (upper case).
+Every setting is defined once in `SETTING_DEFINITIONS` and can be
+overridden with an environment variable named `SEALSKIN_<NAME>` (upper case).
 """
 
 from __future__ import annotations
@@ -19,8 +19,8 @@ def _default_ui_path() -> str:
     """Return the default UI directory.
 
     Resolution order:
-    1. ``app/ui/`` inside the installed package (wheel layout).
-    2. ``<repo>/client/dist/ui`` (source / Docker layout).
+    1. `app/ui/` inside the installed package (wheel layout).
+    2. `<repo>/client/dist/ui` (source / Docker layout).
     """
     pkg_ui = os.path.join(_PKG_DIR, "ui")
     if os.path.isdir(pkg_ui):
@@ -247,8 +247,8 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
 class AppSettings:
     """Settings parsed from environment variables with fallback to defaults.
 
-    Each entry of :data:`SETTING_DEFINITIONS` becomes an attribute of the
-    instance (for example ``settings.api_port``).
+    Each entry of `SETTING_DEFINITIONS` becomes an attribute of the
+    instance (for example `settings.api_port`).
     """
 
     def __init__(self) -> None:

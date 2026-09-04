@@ -1,0 +1,88 @@
+name: Docs
+
+# Builds the documentation site from docs/ and publishes it to GitHub Pages.
+# The Server Reference is generated from the docstrings in server/app on
+# every run, so a docstring change is a documentation change. Pull requests
+# get the build and the link check but no deployment.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "24"
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  build:
+    name: Build documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Check the Settings Reference is current
+        run: python3 docs/scripts/generate-settings-doc.py --check
+
+      - name: Resolve the site address
+        # The site lives under the repository name on GitHub Pages unless
+        # docs/public/CNAME names a custom domain, in which case it is served
+        # from that domain's root.
+        run: |
+          if [ -f docs/public/CNAME ]; then
+            echo "NEXT_PUBLIC_BASE_PATH=" >> "$GITHUB_ENV"
+            echo "NEXT_PUBLIC_SITE_URL=https://$(tr -d '[:space:]' < docs/public/CNAME)" >> "$GITHUB_ENV"
+          else
+            echo "NEXT_PUBLIC_BASE_PATH=/${{ github.event.repository.name }}" >> "$GITHUB_ENV"
+            echo "NEXT_PUBLIC_SITE_URL=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build the static site
+        working-directory: docs
+        # The lockfile is gitignored, so `npm ci` has nothing to install from.
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+
+      - name: Check every link and anchor in the built site
+        working-directory: docs
+        run: npm run check-links
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs/out
+          retention-days: 1
+
+  publish:
+    name: Publish documentation
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      pages: write
+      id-token: write
+    if: ${{ github.event_name != 'pull_request' }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

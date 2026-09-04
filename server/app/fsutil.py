@@ -52,14 +52,14 @@ def safe_rmtree(path: str) -> None:
 
 
 def unique_filename(directory: str, filename: str) -> str:
-    """Return ``filename`` or a ``name-N.ext`` variant that does not exist yet.
+    """Return `filename` or a `name-N.ext` variant that does not exist yet.
 
     Args:
         directory: Directory the file will be placed in.
         filename: Desired file name.
 
     Returns:
-        A file name that is free inside ``directory``.
+        A file name that is free inside `directory`.
     """
     if not os.path.exists(os.path.join(directory, filename)):
         return filename
@@ -81,7 +81,7 @@ def sanitize_for_filename(name: str) -> str:
 
     Returns:
         Lower-case ASCII letters, digits and dashes, at most 50 characters,
-        or ``"unnamed"`` for an empty input.
+        or `"unnamed"` for an empty input.
     """
     if not name:
         return "unnamed"

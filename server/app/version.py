@@ -1,7 +1,7 @@
 """Product version.
 
-Reads from the repository-level ``VERSION`` file when running from source, or
-from the ``VERSION`` file bundled inside the ``app`` package when installed as
+Reads from the repository-level `VERSION` file when running from source, or
+from the `VERSION` file bundled inside the `app` package when installed as
 a wheel.
 """
 
@@ -20,13 +20,13 @@ def repo_root() -> str:
     """Return the absolute path of the repository root.
 
     Returns:
-        The directory that contains ``VERSION``, ``server/`` and ``client/``.
+        The directory that contains `VERSION`, `server/` and `client/`.
     """
     return _REPO_ROOT
 
 
 def _read_file(path: str) -> str | None:
-    """Return the trimmed contents of *path*, or ``None`` on failure."""
+    """Return the trimmed contents of *path*, or `None` on failure."""
     try:
         with open(path, encoding="utf-8") as handle:
             value = handle.read().strip()
@@ -39,9 +39,9 @@ def get_version() -> str:
     """Return the product version string.
 
     Resolution order:
-    1. ``VERSION`` file next to the package directory (wheel layout).
-    2. ``VERSION`` file at the repository root (source layout).
-    3. ``"0.0.0"`` as a fallback.
+    1. `VERSION` file next to the package directory (wheel layout).
+    2. `VERSION` file at the repository root (source layout).
+    3. `"0.0.0"` as a fallback.
     """
     for path in (_PKG_VERSION, _REPO_VERSION):
         version = _read_file(path)

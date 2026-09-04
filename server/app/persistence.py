@@ -3,8 +3,8 @@
 SealSkin keeps its configuration in hand-editable YAML files. This module is
 the single place that reads and writes them so every writer gets:
 
-* atomic replacement (temporary file in the same directory + ``os.replace``),
-* one :class:`asyncio.Lock` per path so concurrent handlers never interleave,
+* atomic replacement (temporary file in the same directory + `os.replace`),
+* one `Lock` per path so concurrent handlers never interleave,
 * a content hash of the last write so the file watcher can tell our own writes
   apart from edits made by an administrator.
 """
@@ -28,13 +28,13 @@ _LAST_WRITTEN: dict[str, str] = {}
 
 
 def lock_for(path: str) -> asyncio.Lock:
-    """Return the lock guarding ``path``, creating it on first use.
+    """Return the lock guarding `path`, creating it on first use.
 
     Args:
-        path: File path (normalised with :func:`os.path.abspath`).
+        path: File path (normalised with `abspath`).
 
     Returns:
-        The :class:`asyncio.Lock` shared by every writer of that file.
+        The `Lock` shared by every writer of that file.
     """
     key = os.path.abspath(path)
     lock = _LOCKS.get(key)
@@ -45,7 +45,7 @@ def lock_for(path: str) -> asyncio.Lock:
 
 
 def content_hash(data: bytes) -> str:
-    """Return the SHA-256 hex digest of ``data``."""
+    """Return the SHA-256 hex digest of `data`."""
     return hashlib.sha256(data).hexdigest()
 
 
@@ -57,7 +57,7 @@ def read_yaml(path: str, default: Any = None) -> Any:
         default: Value returned when the file does not exist or is empty.
 
     Returns:
-        The parsed document, or ``default``.
+        The parsed document, or `default`.
 
     Raises:
         yaml.YAMLError: If the file contains invalid YAML.
@@ -71,7 +71,7 @@ def read_yaml(path: str, default: Any = None) -> Any:
 
 
 def dump_yaml(data: Any) -> str:
-    """Serialise ``data`` the way every SealSkin file is written.
+    """Serialise `data` the way every SealSkin file is written.
 
     Args:
         data: Any YAML-serialisable structure.
@@ -83,10 +83,10 @@ def dump_yaml(data: Any) -> str:
 
 
 def write_yaml_sync(path: str, data: Any) -> None:
-    """Atomically write ``data`` to ``path`` as YAML.
+    """Atomically write `data` to `path` as YAML.
 
     The document is written to a temporary file in the target directory and
-    moved into place with :func:`os.replace`, so readers never observe a
+    moved into place with `replace`, so readers never observe a
     partially written file.
 
     Args:
@@ -117,7 +117,7 @@ def write_yaml_sync(path: str, data: Any) -> None:
 
 
 async def write_yaml(path: str, data: Any) -> None:
-    """Atomically write ``data`` to ``path`` under the file's lock.
+    """Atomically write `data` to `path` under the file's lock.
 
     Args:
         path: Destination file.
@@ -128,14 +128,14 @@ async def write_yaml(path: str, data: Any) -> None:
 
 
 def was_written_by_us(path: str) -> bool:
-    """Tell whether the current contents of ``path`` match our last write.
+    """Tell whether the current contents of `path` match our last write.
 
     Args:
         path: File to check.
 
     Returns:
-        ``True`` when the on-disk content hash equals the hash recorded by
-        :func:`write_yaml_sync`, meaning a watcher event was caused by the
+        `True` when the on-disk content hash equals the hash recorded by
+        `write_yaml_sync`, meaning a watcher event was caused by the
         server itself rather than by an external edit.
     """
     key = os.path.abspath(path)
