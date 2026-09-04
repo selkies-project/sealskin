@@ -281,6 +281,10 @@
           "label": "आँकड़े दिखाएं",
           "description": "साइडबार में आँकड़े अनुभाग दिखाएं।"
         },
+        "SELKIES_UI_SIDEBAR_SHOW_SHORTCUTS": {
+          "label": "कीबोर्ड शॉर्टकट अनुभाग दिखाएं",
+          "description": "साइडबार में कीबोर्ड शॉर्टकट अनुभाग दिखाएं।"
+        },
         "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
           "label": "क्लिपबोर्ड दिखाएं",
           "description": "साइडबार में क्लिपबोर्ड अनुभाग दिखाएं।"
@@ -300,6 +304,18 @@
         "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
           "label": "गेमपैड अनुभाग दिखाएं",
           "description": "साइडबार में गेमपैड अनुभाग दिखाएं।"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
+          "label": "फुलस्क्रीन बटन दिखाएं",
+          "description": "साइडबार में फुलस्क्रीन बटन दिखाएं।"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMING_MODE": {
+          "label": "गेमिंग मोड बटन दिखाएं",
+          "description": "साइडबार में गेमिंग मोड (पॉइंटर लॉक) बटन दिखाएं।"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_TRACKPAD": {
+          "label": "ट्रैकपैड बटन दिखाएं",
+          "description": "साइडबार में वर्चुअल ट्रैकपैड बटन दिखाएं।"
         },
         "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
           "label": "कीबोर्ड बटन दिखाएं",
@@ -332,7 +348,6 @@
           "options": {
             "default": "डिफ़ॉल्ट",
             "selkiesDefault": "सेल्कीज़ (डिफ़ॉल्ट)",
-            "zinc": "जिंक",
             "wish": "विश"
           }
         },
@@ -342,23 +357,21 @@
         },
         "SELKIES_MICROPHONE_ENABLED": {
           "label": "माइक्रोफ़ोन सक्षम करें",
-          "description": "क्लाइंट-से-सर्वर माइक्रोफ़ोन फॉरवर्डिंग सक्षम करें।"
+          "description": "क्लाइंट-से-सर्वर माइक्रोफ़ोन फॉरवर्डिंग सक्षम करें। अपस्ट्रीम में डिफ़ॉल्ट रूप से बंद।"
         },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "गेमपैड सक्षम करें",
           "description": "गेमपैड समर्थन सक्षम करें।"
         },
-        "SELKIES_CLIPBOARD_ENABLED": {
-          "label": "क्लिपबोर्ड सक्षम करें",
-          "description": "क्लिपबोर्ड सिंक्रनाइज़ेशन सक्षम करें।"
-        },
-        "SELKIES_CLIPBOARD_IN_ENABLED": {
-          "label": "क्लाइंट-टू-सर्वर क्लिपबोर्ड सक्षम करें",
-          "description": "ब्राउज़र से क्लिपबोर्ड डेटा स्थानांतरित करने की अनुमति दें।"
-        },
-        "SELKIES_CLIPBOARD_OUT_ENABLED": {
-          "label": "सर्वर-टू-क्लाइंट क्लिपबोर्ड सक्षम करें",
-          "description": "सर्वर से क्लिपबोर्ड डेटा स्थानांतरित करने की अनुमति दें।"
+        "SELKIES_ENABLE_CLIPBOARD": {
+          "label": "क्लिपबोर्ड नीति",
+          "description": "कौन सी क्लिपबोर्ड दिशाएँ अनुमत हैं। 'केवल सर्वर-टू-क्लाइंट' पेज को स्थानीय क्लिपबोर्ड पढ़ने से भी रोकता है, जो Firefox और Safari में पेस्ट प्रॉम्प्ट का कारण बनता है।",
+          "options": {
+            "both": "दोनों दिशाएँ",
+            "inOnly": "केवल क्लाइंट-टू-सर्वर",
+            "outOnly": "केवल सर्वर-टू-क्लाइंट",
+            "disabled": "अक्षम"
+          }
         },
         "SELKIES_ENABLE_BINARY_CLIPBOARD": {
           "label": "बाइनरी क्लिपबोर्ड सक्षम करें",
@@ -370,25 +383,61 @@
         },
         "SELKIES_FILE_TRANSFERS": {
           "label": "फ़ाइल स्थानांतरण",
-          "description": "अनुमत दिशाएँ ('upload,download', 'upload', 'download', 'none')।"
+          "description": "अनुमत दिशाएँ ('upload,download', 'upload', 'download' या 'none')। यहाँ सेट न होने पर डेस्कटॉप को सुदृढ़ करें द्वारा खाली कर दिया जाता है।"
+        },
+        "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
+          "label": "फ़ाइल स्थानांतरण सीमा (Mbit/s)",
+          "description": "सभी अपलोड और डाउनलोड द्वारा साझा की गई स्थिर सीमा। 0 सीमा को अक्षम करता है।"
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "सभी साझाकरण सक्षम करें",
           "description": "सभी साझाकरण सुविधाओं के लिए मास्टर टॉगल।"
         },
+        "SELKIES_ENABLE_SHARED": {
+          "label": "केवल-देखने योग्य साझाकरण सक्षम करें",
+          "description": "केवल-देखने योग्य साझाकरण लिंक सक्षम करें।"
+        },
+        "SELKIES_ENABLE_COLLAB": {
+          "label": "सहयोग सक्षम करें",
+          "description": "सत्र का मास्टर टोकन रखने वाले दर्शक को रीड-राइट सहयोगी के रूप में काम करने दें। SealSkin रूम के लिए आवश्यक।"
+        },
+        "SELKIES_ENABLE_PLAYER2": {
+          "label": "प्लेयर 2 साझाकरण सक्षम करें",
+          "description": "गेमपैड प्लेयर 2 के लिए साझाकरण लिंक सक्षम करें।"
+        },
+        "SELKIES_ENABLE_PLAYER3": {
+          "label": "प्लेयर 3 साझाकरण सक्षम करें",
+          "description": "गेमपैड प्लेयर 3 के लिए साझाकरण लिंक सक्षम करें।"
+        },
+        "SELKIES_ENABLE_PLAYER4": {
+          "label": "प्लेयर 4 साझाकरण सक्षम करें",
+          "description": "गेमपैड प्लेयर 4 के लिए साझाकरण लिंक सक्षम करें।"
+        },
         "SELKIES_SECOND_SCREEN": {
           "label": "दूसरी स्क्रीन सक्षम करें",
           "description": "दूसरे मॉनिटर/डिस्प्ले के लिए समर्थन सक्षम करें।"
+        },
+        "SELKIES_ENABLE_RESIZE": {
+          "label": "डायनामिक रीसाइज़ सक्षम करें",
+          "description": "रिमोट डिस्प्ले का आकार ब्राउज़र विंडो से मेल खाने के लिए बदलें।"
         },
         "SELKIES_USE_BROWSER_CURSORS": {
           "label": "ब्राउज़र कर्सर का उपयोग करें",
           "description": "कैनवास पर रेंडर करने के बजाय ब्राउज़र सीएसएस कर्सर का उपयोग करें।"
         },
+        "SELKIES_ENABLE_CURSORS": {
+          "label": "रिमोट कर्सर सक्षम करें",
+          "description": "एप्लिकेशन के अपने कर्सर आकार क्लाइंट को भेजें।"
+        },
+        "SELKIES_CURSOR_SIZE": {
+          "label": "कर्सर आकार",
+          "description": "96 DPI पर पॉइंट में कर्सर आकार, सत्र DPI के अनुसार स्केल किया गया। -1 प्लेटफ़ॉर्म डिफ़ॉल्ट का उपयोग करता है (X11 पर 32, Wayland पर 24)।"
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "सीएसएस स्केलिंग का उपयोग करें (LoDPI)",
           "description": "यदि सत्य है, तो एक कम रिज़ॉल्यूशन भेजा जाता है और कैनवास को खींचा जाता है।"
         },
-        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+        "SELKIES_MANUAL_RESOLUTION": {
           "label": "मैनुअल रिज़ॉल्यूशन मोड",
           "description": "रिज़ॉल्यूशन को मैनुअल चौड़ाई/ऊंचाई मानों पर लॉक करें।"
         },
@@ -410,11 +459,27 @@
         },
         "SELKIES_AUDIO_BITRATE": {
           "label": "ऑडियो बिटरेट",
-          "description": "डिफ़ॉल्ट ऑडियो बिटरेट।"
+          "description": "डिफ़ॉल्ट Opus ऑडियो बिटरेट।"
+        },
+        "SELKIES_AUDIO_FRAME_DURATION_MS": {
+          "label": "ऑडियो फ्रेम अवधि",
+          "description": "Opus फ्रेम अवधि। कम मान थोड़ी बैंडविड्थ और पैकेट-दर लागत पर ऑडियो विलंबता घटाते हैं।"
+        },
+        "SELKIES_AUDIO_CHANNELS": {
+          "label": "ऑडियो चैनल",
+          "description": "ऑडियो चैनलों की संख्या; 2 स्टीरियो है।"
+        },
+        "SELKIES_AUDIO_REDUNDANCY": {
+          "label": "ऑडियो रिडंडेंसी (Opus RED)",
+          "description": "पैकेट हानि के दौरान ड्रॉपआउट घटाने के लिए पिछले ऑडियो फ्रेम को रिडंडेंसी के रूप में साथ भेजें।"
+        },
+        "SELKIES_AUDIO_REDUNDANCY_DISTANCE": {
+          "label": "ऑडियो रिडंडेंसी दूरी",
+          "description": "रिडंडेंसी के रूप में भेजे गए पिछले फ्रेम की संख्या (0-4)। अधिक मान आनुपातिक रूप से अधिक बैंडविड्थ पर लंबे हानि-विस्फोट सहन करते हैं।"
         },
         "SELKIES_ENCODER": {
           "label": "एन्कोडर्स",
-          "description": "अल्पविराम से अलग किए गए एन्कोडर्स की सूची। पहला डिफ़ॉल्ट है।"
+          "description": "अनुमत एन्कोडर्स की अल्पविराम से अलग की गई सूची (h264enc, h264enc-striped, jpeg)। पहला डिफ़ॉल्ट है; एक ही मान विकल्प को लॉक कर देता है। केवल h264enc WebRTC पर स्ट्रीम होता है।"
         },
         "SELKIES_USE_CPU": {
           "label": "सीपीयू एन्कोडिंग को बाध्य करें",
@@ -422,23 +487,51 @@
         },
         "SELKIES_FRAMERATE": {
           "label": "फ्रेमरेट (रेंज या निश्चित)",
-          "description": "उदा., एक रेंज के लिए '8-120' या निश्चित के लिए '60'।"
+          "description": "उदा., रेंज के लिए '8-240', निश्चित प्रारंभिक मान के लिए '60', दोनों के लिए '60,8-240'; '60-60' इसे लॉक कर देता है।"
         },
-        "SELKIES_H264_CRF": {
-          "label": "H.264 CRF (रेंज या निश्चित)",
-          "description": "उदा., एक रेंज के लिए '5-50' या निश्चित के लिए '25'।"
+        "SELKIES_RATE_CONTROL_MODE": {
+          "label": "रेट कंट्रोल मोड",
+          "description": "डिफ़ॉल्ट H.264 रेट कंट्रोल: स्थिर गुणवत्ता (CRF) या स्थिर बिटरेट (CBR)।",
+          "options": {
+            "crf": "स्थिर गुणवत्ता (CRF)",
+            "cbr": "स्थिर बिटरेट (CBR)"
+          }
+        },
+        "SELKIES_ENABLE_RATE_CONTROL": {
+          "label": "रेट कंट्रोल स्विचिंग की अनुमति दें",
+          "description": "क्लाइंट को CRF और CBR के बीच स्विच करने दें। बंद करने पर एन्कोडर अपने अंतर्निहित डिफ़ॉल्ट पर लॉक हो जाता है।"
+        },
+        "SELKIES_VIDEO_CRF": {
+          "label": "वीडियो CRF (रेंज या निश्चित)",
+          "description": "H.264 स्थिर गुणवत्ता: रेंज के लिए '5-50', निश्चित प्रारंभिक मान के लिए '25', या दोनों के लिए '25,5-50'।"
+        },
+        "SELKIES_VIDEO_BITRATE": {
+          "label": "वीडियो बिटरेट kbps (रेंज या निश्चित)",
+          "description": "किलोबिट प्रति सेकंड में CBR बिटरेट: रेंज के लिए '100-1000000', निश्चित प्रारंभिक मान के लिए '8000', या दोनों के लिए '8000,100-1000000'।"
+        },
+        "SELKIES_VIDEO_MIN_QP": {
+          "label": "वीडियो न्यूनतम QP",
+          "description": "CBR-मोड न्यूनतम H.264 क्वांटाइज़र (0 = एन्कोडर डिफ़ॉल्ट)। इसे बढ़ाने से आसान सामग्री पर बिट खर्च सीमित होता है।"
+        },
+        "SELKIES_VIDEO_MAX_QP": {
+          "label": "वीडियो अधिकतम QP",
+          "description": "CBR-मोड अधिकतम H.264 क्वांटाइज़र (0 = एन्कोडर डिफ़ॉल्ट)। इसे घटाने से बिटरेट लक्ष्य से आगे जाने की कीमत पर गति के दौरान टेक्स्ट पठनीय रहता है।"
+        },
+        "SELKIES_KEYFRAME_INTERVAL": {
+          "label": "कीफ्रेम अंतराल (सेकंड)",
+          "description": "निर्धारित रिकवरी कीफ्रेम के बीच सेकंड। 0 GOP को अनंत रखता है और कीफ्रेम केवल मांग पर भेजता है।"
         },
         "SELKIES_JPEG_QUALITY": {
           "label": "JPEG गुणवत्ता (रेंज या निश्चित)",
-          "description": "उदा., एक रेंज के लिए '1-100' या निश्चित के लिए '60'।"
+          "description": "रेंज के लिए '1-100', निश्चित प्रारंभिक मान के लिए '40', या दोनों के लिए '40,1-100'।"
         },
-        "SELKIES_H264_FULLCOLOR": {
-          "label": "H.264 पूर्ण रंग",
-          "description": "पिक्सेलफ्लक्स एन्कोडर्स के लिए H.264 पूर्ण रंग रेंज सक्षम करें।"
+        "SELKIES_VIDEO_FULLCOLOR": {
+          "label": "वीडियो पूर्ण रंग (4:4:4)",
+          "description": "H.264 को 4:2:0 के बजाय 4:4:4 क्रोमा के साथ एन्कोड करें। जब यह लॉक ऑन हो तो 4:4:4 डिकोडर के बिना क्लाइंट JPEG पर वापस चले जाते हैं।"
         },
-        "SELKIES_H264_STREAMING_MODE": {
-          "label": "H.264 स्ट्रीमिंग (टर्बो) मोड",
-          "description": "H.264 कम-विलंबता स्ट्रीमिंग मोड सक्षम करें।"
+        "SELKIES_VIDEO_STREAMING_MODE": {
+          "label": "वीडियो स्ट्रीमिंग (टर्बो) मोड",
+          "description": "केवल बदले हुए क्षेत्रों के बजाय हर फ्रेम को पारंपरिक वीडियो एन्कोडर की तरह एन्कोड करें।"
         },
         "SELKIES_USE_PAINT_OVER_QUALITY": {
           "label": "पेंट-ओवर गुणवत्ता का उपयोग करें",
@@ -446,23 +539,49 @@
         },
         "SELKIES_PAINT_OVER_JPEG_QUALITY": {
           "label": "पेंट-ओवर JPEG गुणवत्ता",
-          "description": "उदा., एक रेंज के लिए '1-100' या निश्चित के लिए '90'।"
+          "description": "रेंज के लिए '1-100', निश्चित प्रारंभिक मान के लिए '90', या दोनों के लिए '90,1-100'।"
         },
-        "SELKIES_H264_PAINTOVER_CRF": {
-          "label": "पेंट-ओवर H.264 CRF",
-          "description": "उदा., एक रेंज के लिए '5-50' या निश्चित के लिए '18'।"
+        "SELKIES_VIDEO_PAINTOVER_CRF": {
+          "label": "पेंट-ओवर वीडियो CRF",
+          "description": "रेंज के लिए '5-50', निश्चित प्रारंभिक मान के लिए '18', या दोनों के लिए '18,5-50'।"
         },
-        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
-          "label": "पेंट-ओवर बर्स्ट फ्रेम्स",
-          "description": "उदा., एक रेंज के लिए '1-30' या निश्चित के लिए '5'।"
+        "SELKIES_VIDEO_PAINTOVER_BURST_FRAMES": {
+          "label": "पेंट-ओवर बर्स्ट फ्रेम",
+          "description": "रेंज के लिए '1-30', निश्चित प्रारंभिक मान के लिए '5', या दोनों के लिए '5,1-30'।"
+        },
+        "SELKIES_BACKPRESSURE_QUEUE_SIZE": {
+          "label": "बैकप्रेशर कतार आकार",
+          "description": "बैकप्रेशर में ड्रॉप करने से पहले प्रति स्ट्रीम बफ़र किए गए फ्रेम और ऑडियो चंक (WebSockets मोड)। अधिक मान विलंबता की कीमत पर क्लाइंट की रुकावटें सहन करता है।"
+        },
+        "SELKIES_WEBCAM_WIDTH": {
+          "label": "वेबकैम चौड़ाई",
+          "description": "वर्चुअल वेबकैम डिवाइस की चौड़ाई; क्लाइंट फ्रेम को फिट करने के लिए स्केल और लेटरबॉक्स किया जाता है।"
+        },
+        "SELKIES_WEBCAM_HEIGHT": {
+          "label": "वेबकैम ऊंचाई",
+          "description": "वर्चुअल वेबकैम डिवाइस की ऊंचाई; क्लाइंट फ्रेम को फिट करने के लिए स्केल और लेटरबॉक्स किया जाता है।"
+        },
+        "SELKIES_WEBCAM_ENCODER": {
+          "label": "वेबकैम अपलिंक एन्कोडर",
+          "description": "कोडेक जिसका उपयोग WebSocket क्लाइंट कैमरा फ्रेम भेजने के लिए करते हैं। ऑटो वह सर्वश्रेष्ठ चुनता है जिसे ब्राउज़र बनाए रख सके।",
+          "options": {
+            "auto": "ऑटो"
+          }
+        },
+        "SELKIES_WEBCAM_PIXEL_FORMAT": {
+          "label": "वेबकैम पिक्सेल फ़ॉर्मेट",
+          "description": "वर्चुअल वेबकैम डिवाइस का पिक्सेल फ़ॉर्मेट। ऑटो वही अपनाता है जो क्लाइंट भेजता है।",
+          "options": {
+            "auto": "ऑटो"
+          }
         },
         "HARDEN_DESKTOP": {
           "label": "डेस्कटॉप को सुदृढ़ करें (प्रीसेट)",
-          "description": "DISABLE_OPEN_TOOLS, DISABLE_SUDO, और DISABLE_TERMINALS को सक्षम करता है।"
+          "description": "DISABLE_OPEN_TOOLS, DISABLE_SUDO और DISABLE_TERMINALS को सक्षम करता है, और स्पष्ट रूप से सेट न होने पर फ़ाइल स्थानांतरण, कमांड websocket और साइडबार के फ़ाइलें व ऐप्स अनुभागों को भी अक्षम करता है। कंटेनर को सुदृढ़ करें वाले उपयोगकर्ताओं के लिए बलपूर्वक चालू।"
         },
         "HARDEN_OPENBOX": {
           "label": "विंडो मैनेजर को सुदृढ़ करें (प्रीसेट)",
-          "description": "DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS, और HARDEN_KEYBINDS को सक्षम करता है। RESTART_APP को भी सक्षम करता है।"
+          "description": "Openbox और labwc के लिए DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS और HARDEN_KEYBINDS को, और स्पष्ट रूप से सेट न होने पर RESTART_APP को भी सक्षम करता है। विंडो मैनेजर को सुदृढ़ करें वाले उपयोगकर्ताओं के लिए बलपूर्वक चालू।"
         },
         "DISABLE_OPEN_TOOLS": {
           "label": "ओपन टूल्स अक्षम करें",
@@ -486,11 +605,11 @@
         },
         "HARDEN_KEYBINDS": {
           "label": "कीबाइंड्स को सुदृढ़ करें",
-          "description": "Alt+F4 जैसे डिफ़ॉल्ट ओपनबॉक्स कीबाइंड्स को अक्षम करता है।"
+          "description": "Alt+F4, Alt+Escape, Alt+Space और Super+E जैसे विंडो मैनेजर कीबाइंड्स को अक्षम करता है, और विंडो मैनेजर कॉन्फ़िग को लॉक करता है।"
         },
         "RESTART_APP": {
           "label": "बंद होने पर ऐप पुनः आरंभ करें",
-          "description": "यदि मुख्य एप्लिकेशन बंद हो जाता है तो उसे स्वचालित रूप से पुनः आरंभ करता है।"
+          "description": "यदि मुख्य एप्लिकेशन बंद हो जाता है तो उसे स्वचालित रूप से पुनः आरंभ करता है और ऑटोस्टार्ट फ़ाइल को केवल-पढ़ने योग्य बनाता है।"
         },
         "MAX_RES": {
           "label": "अधिकतम रिज़ॉल्यूशन",
@@ -512,6 +631,10 @@
           "label": "DRI3 अक्षम करें",
           "description": "यदि वीडियो कार्ड का पता चलता है तो DRI3 त्वरण का उपयोग न करें।"
         },
+        "AUTO_GPU": {
+          "label": "स्वचालित GPU चयन",
+          "description": "'true' पहले GPU पर रेंडर करता है, 'false' इसे अक्षम करता है, या कोई वेंडर, ड्राइवर या PCI वेंडर ID (nvidia, amdgpu, 0x10de) एक विशिष्ट GPU चुनता है।"
+        },
         "NO_DECOR": {
           "label": "कोई विंडो सजावट नहीं",
           "description": "PWA उपयोग के लिए विंडो सीमाओं के बिना एप्लिकेशन चलाएं।"
@@ -522,11 +645,117 @@
         },
         "NO_GAMEPAD": {
           "label": "गेमपैड इंजेक्शन अक्षम करें",
-          "description": "उपयोगकर्ता-स्थान गेमपैड इंटरपोज़र इंजेक्शन को अक्षम करें।"
+          "description": "उपयोगकर्ता-स्थान गेमपैड इंटरपोज़र को छोड़ दें। गेमपैड अनुभाग और प्लेयर साझाकरण लिंक भी छिपा देता है।"
+        },
+        "NO_WEBCAM": {
+          "label": "वेबकैम इंजेक्शन अक्षम करें",
+          "description": "वर्चुअल वेबकैम डिवाइस और इंटरपोज़र को छोड़ दें। वेबकैम बटन भी छिपा देता है।"
+        },
+        "SELKIES_RUN_AFTER_CONNECT": {
+          "label": "कनेक्ट के बाद चलाएं",
+          "description": "पहला क्लाइंट कनेक्ट होने पर कंटेनर के अंदर चलाया जाने वाला शेल कमांड।"
+        },
+        "SELKIES_RUN_AFTER_DISCONNECT": {
+          "label": "डिस्कनेक्ट के बाद चलाएं",
+          "description": "अंतिम क्लाइंट डिस्कनेक्ट होने पर कंटेनर के अंदर चलाया जाने वाला शेल कमांड।"
         },
         "SELKIES_DEBUG": {
           "label": "सेल्कीज़ डिबगिंग सक्षम करें",
           "description": "स्ट्रीमिंग घटकों के लिए डिबग लॉगिंग सक्षम करें।"
+        },
+        "SELKIES_MODE": {
+          "label": "स्ट्रीमिंग मोड",
+          "description": "डिफ़ॉल्ट रूप से उपयोग किया जाने वाला ट्रांसपोर्ट। कोई भी TURN/STUN मान सेट होने पर ऑटो WebRTC चुनता है, अन्यथा WebSockets।",
+          "options": {
+            "auto": "ऑटो",
+            "websockets": "WebSockets",
+            "webrtc": "WebRTC"
+          }
+        },
+        "SELKIES_ENABLE_DUAL_MODE": {
+          "label": "ड्यूअल मोड",
+          "description": "उपयोगकर्ताओं को साइडबार से WebRTC और WebSockets के बीच स्विच करने दें। ऑटो इसे केवल तभी सक्षम करता है जब WebRTC कॉन्फ़िगर हो।",
+          "options": {
+            "auto": "ऑटो",
+            "enabled": "सक्षम",
+            "disabled": "अक्षम"
+          }
+        },
+        "SELKIES_WEBRTC_PACER": {
+          "label": "WebRTC पेसर",
+          "description": "आउटगोइंग WebRTC पैकेट को सख्त प्राथमिकताओं के साथ पेस करें ताकि भीड़भाड़ वाले लिंक पर ऑडियो और इनपुट वीडियो बर्स्ट से सुरक्षित रहें।"
+        },
+        "SELKIES_CONGESTION_CONTROL": {
+          "label": "कंजेशन कंट्रोल",
+          "description": "WebRTC रिसीवर फ़ीडबैक से बैंडविड्थ अनुमान के अनुसार वीडियो बिटरेट को अनुकूलित करें। CBR मोड में प्रभावी।"
+        },
+        "SELKIES_STUN_HOST": {
+          "label": "STUN होस्ट",
+          "description": "NAT होल पंचिंग के लिए STUN सर्वर। इंटरनेट रहित नेटवर्क के लिए किसी आंतरिक सर्वर की ओर इंगित करें।"
+        },
+        "SELKIES_STUN_PORT": {
+          "label": "STUN पोर्ट",
+          "description": "STUN सर्वर का पोर्ट।"
+        },
+        "SELKIES_TURN_HOST": {
+          "label": "TURN होस्ट",
+          "description": "साझा सीक्रेट या दीर्घकालिक क्रेडेंशियल के साथ उपयोग किया जाने वाला TURN सर्वर। IPv6 पतों को वर्गाकार कोष्ठक में रखें।"
+        },
+        "SELKIES_TURN_PORT": {
+          "label": "TURN पोर्ट",
+          "description": "TURN सर्वर का पोर्ट।"
+        },
+        "SELKIES_TURN_PROTOCOL": {
+          "label": "TURN प्रोटोकॉल",
+          "description": "TURN तक पहुँचने के लिए क्लाइंट द्वारा उपयोग किया जाने वाला ट्रांसपोर्ट। UDP की दृढ़ता से अनुशंसा की जाती है; TCP का उपयोग केवल वहीं करें जहाँ UDP अवरुद्ध हो।"
+        },
+        "SELKIES_TURN_TLS": {
+          "label": "TLS/DTLS पर TURN",
+          "description": "TLS (TCP) या DTLS (UDP) पर TURN का उपयोग करें। TURN सर्वर पर वैध प्रमाणपत्र आवश्यक है।"
+        },
+        "SELKIES_TURN_SHARED_SECRET": {
+          "label": "TURN साझा सीक्रेट",
+          "description": "समय-सीमित HMAC TURN क्रेडेंशियल बनाने के लिए उपयोग किया जाने वाला साझा सीक्रेट।"
+        },
+        "SELKIES_TURN_USERNAME": {
+          "label": "TURN उपयोगकर्ता नाम",
+          "description": "लीगेसी दीर्घकालिक TURN क्रेडेंशियल उपयोगकर्ता नाम।"
+        },
+        "SELKIES_TURN_PASSWORD": {
+          "label": "TURN पासवर्ड",
+          "description": "लीगेसी दीर्घकालिक TURN क्रेडेंशियल पासवर्ड।"
+        },
+        "SELKIES_TURN_REST_URI": {
+          "label": "TURN REST API URI",
+          "description": "TURN REST क्रेडेंशियल सेवा का URI, उदा. http://localhost:8008।"
+        },
+        "SELKIES_TURN_REST_API_KEY": {
+          "label": "TURN REST API कुंजी",
+          "description": "TURN REST सेवा को भेजी जाने वाली API कुंजी।"
+        },
+        "SELKIES_TURN_REST_USERNAME": {
+          "label": "TURN REST उपयोगकर्ता नाम",
+          "description": "उपयोगकर्ता नाम जिसे TURN REST सेवा क्रेडेंशियल में एम्बेड करती है। खाली होने पर 'selkies' का उपयोग होता है।"
+        },
+        "SELKIES_WEBRTC_PUBLIC_IP": {
+          "label": "WebRTC सार्वजनिक IP",
+          "description": "स्थिर 1:1 NAT के पीछे सर्वर के लिए होस्ट ICE कैंडिडेट में विज्ञापित किया जाने वाला सार्वजनिक पता। एक IPv4 और/या एक IPv6 पता।"
+        },
+        "SELKIES_ENABLE_CLOUDFLARE_TURN": {
+          "label": "Cloudflare TURN सक्षम करें",
+          "description": "Cloudflare TURN सेवा का उपयोग करें। नीचे टोकन ID और API टोकन आवश्यक हैं।"
+        },
+        "SELKIES_CLOUDFLARE_TURN_TOKEN_ID": {
+          "label": "Cloudflare TURN टोकन ID",
+          "description": "Cloudflare TURN ऐप टोकन ID।"
+        },
+        "SELKIES_CLOUDFLARE_TURN_API_TOKEN": {
+          "label": "Cloudflare TURN API टोकन",
+          "description": "Cloudflare TURN API टोकन।"
+        },
+        "SELKIES_RTC_CONFIG_JSON": {
+          "label": "RTC कॉन्फ़िग JSON पथ",
+          "description": "WebRTC कॉन्फ़िगरेशन वाली JSON फ़ाइल का कंटेनर के अंदर का पथ। हर दूसरी STUN/TURN सेटिंग को ओवरराइड करता है और समय-समय पर फिर से पढ़ा जाता है।"
         },
         "DOCKER_PRIVILEGED": {
           "label": "विशेषाधिकार प्राप्त मोड",
@@ -699,6 +928,8 @@
       "errorPulling": "छवि खींचने में त्रुटि।",
       "manualInstallNote": "ध्यान दें: मैन्युअल रूप से जोड़ी गई छवियां selkies-baseimage संगत छवि पर आधारित होनी चाहिए।",
       "generalTitle": "सामान्य और प्रदर्शन सेटिंग्स",
+      "webrtcTitle": "WebRTC और TURN सेटिंग्स",
+      "webrtcDescription": "सत्र डिफ़ॉल्ट रूप से WebSockets पर स्ट्रीम होते हैं। नीचे कोई भी STUN, TURN, Cloudflare या सार्वजनिक IP मान सेट करने, या WebRTC मोड चुनने पर कंटेनर ड्यूअल मोड सक्षम के साथ WebRTC पर स्विच हो जाता है, ताकि उपयोगकर्ता अभी भी WebSockets पर वापस जा सकें।",
       "dockerTitle": "डॉकर उन्नत ओवरराइड",
       "dockerDescription": "ये सेटिंग्स डिफ़ॉल्ट कंटेनर कॉन्फ़िगरेशन को ओवरराइड करती हैं। सावधानी से उपयोग करें और केवल तभी जब आप जानते हों कि आप क्या कर रहे हैं।"
     },

@@ -284,6 +284,10 @@
           "label": "Show Stats",
           "description": "Show the stats section in the sidebar."
         },
+        "SELKIES_UI_SIDEBAR_SHOW_SHORTCUTS": {
+          "label": "Show Keyboard Shortcuts Section",
+          "description": "Show the keyboard shortcuts section in the sidebar."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
           "label": "Show Clipboard",
           "description": "Show the clipboard section in the sidebar."
@@ -303,6 +307,18 @@
         "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
           "label": "Show Gamepads Section",
           "description": "Show the gamepads section in the sidebar."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
+          "label": "Show Fullscreen Button",
+          "description": "Show the fullscreen button in the sidebar."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMING_MODE": {
+          "label": "Show Gaming Mode Button",
+          "description": "Show the gaming mode (pointer lock) button in the sidebar."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_TRACKPAD": {
+          "label": "Show Trackpad Button",
+          "description": "Show the virtual trackpad button in the sidebar."
         },
         "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
           "label": "Show Keyboard Button",
@@ -335,7 +351,6 @@
           "options": {
             "default": "Default",
             "selkiesDefault": "Selkies (Default)",
-            "zinc": "Zinc",
             "wish": "Wish"
           }
         },
@@ -345,23 +360,21 @@
         },
         "SELKIES_MICROPHONE_ENABLED": {
           "label": "Enable Microphone",
-          "description": "Enable client-to-server microphone forwarding."
+          "description": "Enable client-to-server microphone forwarding. Off by default upstream."
         },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "Enable Gamepad",
           "description": "Enable gamepad support."
         },
-        "SELKIES_CLIPBOARD_ENABLED": {
-          "label": "Enable Clipboard",
-          "description": "Enable clipboard synchronization."
-        },
-        "SELKIES_CLIPBOARD_IN_ENABLED": {
-          "label": "Enable Client-to-Server Clipboard",
-          "description": "Allow clipboard data to be transferred from the browser."
-        },
-        "SELKIES_CLIPBOARD_OUT_ENABLED": {
-          "label": "Enable Server-to-Client Clipboard",
-          "description": "Allow clipboard data to be transferred from the server."
+        "SELKIES_ENABLE_CLIPBOARD": {
+          "label": "Clipboard Policy",
+          "description": "Which clipboard directions are allowed. 'Server to client only' also stops the page reading the local clipboard, which is what triggers paste prompts in Firefox and Safari.",
+          "options": {
+            "both": "Both directions",
+            "inOnly": "Client to server only",
+            "outOnly": "Server to client only",
+            "disabled": "Disabled"
+          }
         },
         "SELKIES_ENABLE_BINARY_CLIPBOARD": {
           "label": "Enable Binary Clipboard",
@@ -373,25 +386,61 @@
         },
         "SELKIES_FILE_TRANSFERS": {
           "label": "File Transfers",
-          "description": "Allowed directions ('upload,download', 'upload', 'download', 'none')."
+          "description": "Allowed directions ('upload,download', 'upload', 'download' or 'none'). Emptied by Harden Desktop unless set here."
+        },
+        "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
+          "label": "File Transfer Limit (Mbit/s)",
+          "description": "Static throttle shared by all uploads and downloads. 0 disables the cap."
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "Enable All Sharing",
           "description": "Master toggle for all sharing features."
         },
+        "SELKIES_ENABLE_SHARED": {
+          "label": "Enable View-Only Sharing",
+          "description": "Enable view-only sharing links."
+        },
+        "SELKIES_ENABLE_COLLAB": {
+          "label": "Enable Collaboration",
+          "description": "Let a viewer holding the session's master token act as a read-write collaborator. Required for SealSkin rooms."
+        },
+        "SELKIES_ENABLE_PLAYER2": {
+          "label": "Enable Player 2 Sharing",
+          "description": "Enable the sharing link for gamepad player 2."
+        },
+        "SELKIES_ENABLE_PLAYER3": {
+          "label": "Enable Player 3 Sharing",
+          "description": "Enable the sharing link for gamepad player 3."
+        },
+        "SELKIES_ENABLE_PLAYER4": {
+          "label": "Enable Player 4 Sharing",
+          "description": "Enable the sharing link for gamepad player 4."
+        },
         "SELKIES_SECOND_SCREEN": {
           "label": "Enable Second Screen",
           "description": "Enable support for a second monitor/display."
+        },
+        "SELKIES_ENABLE_RESIZE": {
+          "label": "Enable Dynamic Resize",
+          "description": "Resize the remote display to match the browser window."
         },
         "SELKIES_USE_BROWSER_CURSORS": {
           "label": "Use Browser Cursors",
           "description": "Use browser CSS cursors instead of rendering to canvas."
         },
+        "SELKIES_ENABLE_CURSORS": {
+          "label": "Enable Remote Cursors",
+          "description": "Send the application's own cursor shapes to the client."
+        },
+        "SELKIES_CURSOR_SIZE": {
+          "label": "Cursor Size",
+          "description": "Cursor size in points at 96 DPI, scaled with the session DPI. -1 uses the platform default (32 on X11, 24 on Wayland)."
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "Use CSS Scaling (LoDPI)",
           "description": "If true, a lower resolution is sent and the canvas is stretched."
         },
-        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+        "SELKIES_MANUAL_RESOLUTION": {
           "label": "Manual Resolution Mode",
           "description": "Lock the resolution to the manual width/height values."
         },
@@ -413,11 +462,27 @@
         },
         "SELKIES_AUDIO_BITRATE": {
           "label": "Audio Bitrate",
-          "description": "The default audio bitrate."
+          "description": "The default Opus audio bitrate."
+        },
+        "SELKIES_AUDIO_FRAME_DURATION_MS": {
+          "label": "Audio Frame Duration",
+          "description": "Opus frame duration. Lower values cut audio latency at a small bandwidth and packet-rate cost."
+        },
+        "SELKIES_AUDIO_CHANNELS": {
+          "label": "Audio Channels",
+          "description": "Number of audio channels; 2 is stereo."
+        },
+        "SELKIES_AUDIO_REDUNDANCY": {
+          "label": "Audio Redundancy (Opus RED)",
+          "description": "Carry prior audio frames as redundancy to cut dropouts under packet loss."
+        },
+        "SELKIES_AUDIO_REDUNDANCY_DISTANCE": {
+          "label": "Audio Redundancy Distance",
+          "description": "Number of prior frames carried as redundancy (0-4). Higher survives longer loss bursts at proportionally more bandwidth."
         },
         "SELKIES_ENCODER": {
           "label": "Encoders",
-          "description": "Comma-separated list of encoders. First is default."
+          "description": "Comma-separated list of allowed encoders (h264enc, h264enc-striped, jpeg). The first is the default; a single value locks the choice. Only h264enc streams over WebRTC."
         },
         "SELKIES_USE_CPU": {
           "label": "Force CPU Encoding",
@@ -425,23 +490,51 @@
         },
         "SELKIES_FRAMERATE": {
           "label": "Framerate (Range or Fixed)",
-          "description": "e.g., '8-120' for a range or '60' for fixed."
+          "description": "e.g. '8-240' for a range, '60' for a fixed initial value, '60,8-240' for both; '60-60' locks it."
         },
-        "SELKIES_H264_CRF": {
-          "label": "H.264 CRF (Range or Fixed)",
-          "description": "e.g., '5-50' for a range or '25' for fixed."
+        "SELKIES_RATE_CONTROL_MODE": {
+          "label": "Rate Control Mode",
+          "description": "Default H.264 rate control: constant quality (CRF) or constant bitrate (CBR).",
+          "options": {
+            "crf": "Constant quality (CRF)",
+            "cbr": "Constant bitrate (CBR)"
+          }
+        },
+        "SELKIES_ENABLE_RATE_CONTROL": {
+          "label": "Allow Rate Control Switching",
+          "description": "Let clients switch between CRF and CBR. Off locks the encoder to its built-in default."
+        },
+        "SELKIES_VIDEO_CRF": {
+          "label": "Video CRF (Range or Fixed)",
+          "description": "H.264 constant quality: '5-50' for a range, '25' for a fixed initial value, or '25,5-50' for both."
+        },
+        "SELKIES_VIDEO_BITRATE": {
+          "label": "Video Bitrate kbps (Range or Fixed)",
+          "description": "CBR bitrate in kilobits per second: '100-1000000' for a range, '8000' for a fixed initial value, or '8000,100-1000000' for both."
+        },
+        "SELKIES_VIDEO_MIN_QP": {
+          "label": "Video Minimum QP",
+          "description": "CBR-mode minimum H.264 quantizer (0 = encoder default). Raising it caps bit spend on easy content."
+        },
+        "SELKIES_VIDEO_MAX_QP": {
+          "label": "Video Maximum QP",
+          "description": "CBR-mode maximum H.264 quantizer (0 = encoder default). Lowering it keeps text legible under motion at the cost of overshooting the bitrate target."
+        },
+        "SELKIES_KEYFRAME_INTERVAL": {
+          "label": "Keyframe Interval (seconds)",
+          "description": "Seconds between scheduled recovery keyframes. 0 keeps the GOP infinite and sends keyframes only on demand."
         },
         "SELKIES_JPEG_QUALITY": {
           "label": "JPEG Quality (Range or Fixed)",
-          "description": "e.g., '1-100' for a range or '60' for fixed."
+          "description": "'1-100' for a range, '40' for a fixed initial value, or '40,1-100' for both."
         },
-        "SELKIES_H264_FULLCOLOR": {
-          "label": "H.264 Full Color",
-          "description": "Enable H.264 full color range for pixelflux encoders."
+        "SELKIES_VIDEO_FULLCOLOR": {
+          "label": "Video Full Color (4:4:4)",
+          "description": "Encode H.264 with 4:4:4 chroma instead of 4:2:0. Clients without a 4:4:4 decoder fall back to JPEG when this is locked on."
         },
-        "SELKIES_H264_STREAMING_MODE": {
-          "label": "H.264 Streaming (Turbo) Mode",
-          "description": "Enable H.264 low-latency streaming mode."
+        "SELKIES_VIDEO_STREAMING_MODE": {
+          "label": "Video Streaming (Turbo) Mode",
+          "description": "Encode every frame like a traditional video encoder instead of only changed regions."
         },
         "SELKIES_USE_PAINT_OVER_QUALITY": {
           "label": "Use Paint-Over Quality",
@@ -449,23 +542,49 @@
         },
         "SELKIES_PAINT_OVER_JPEG_QUALITY": {
           "label": "Paint-Over JPEG Quality",
-          "description": "e.g., '1-100' for a range or '90' for fixed."
+          "description": "'1-100' for a range, '90' for a fixed initial value, or '90,1-100' for both."
         },
-        "SELKIES_H264_PAINTOVER_CRF": {
-          "label": "Paint-Over H.264 CRF",
-          "description": "e.g., '5-50' for a range or '18' for fixed."
+        "SELKIES_VIDEO_PAINTOVER_CRF": {
+          "label": "Paint-Over Video CRF",
+          "description": "'5-50' for a range, '18' for a fixed initial value, or '18,5-50' for both."
         },
-        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
+        "SELKIES_VIDEO_PAINTOVER_BURST_FRAMES": {
           "label": "Paint-Over Burst Frames",
-          "description": "e.g., '1-30' for a range or '5' for fixed."
+          "description": "'1-30' for a range, '5' for a fixed initial value, or '5,1-30' for both."
+        },
+        "SELKIES_BACKPRESSURE_QUEUE_SIZE": {
+          "label": "Backpressure Queue Size",
+          "description": "Frames and audio chunks buffered per stream before dropping under backpressure (WebSockets mode). Higher tolerates client hiccups at the cost of latency."
+        },
+        "SELKIES_WEBCAM_WIDTH": {
+          "label": "Webcam Width",
+          "description": "Width of the virtual webcam device; client frames are scaled and letterboxed to fit."
+        },
+        "SELKIES_WEBCAM_HEIGHT": {
+          "label": "Webcam Height",
+          "description": "Height of the virtual webcam device; client frames are scaled and letterboxed to fit."
+        },
+        "SELKIES_WEBCAM_ENCODER": {
+          "label": "Webcam Uplink Encoder",
+          "description": "Codec WebSocket clients use to send camera frames. Auto picks the best the browser can sustain.",
+          "options": {
+            "auto": "Auto"
+          }
+        },
+        "SELKIES_WEBCAM_PIXEL_FORMAT": {
+          "label": "Webcam Pixel Format",
+          "description": "Pixel format of the virtual webcam device. Auto follows what the client sends.",
+          "options": {
+            "auto": "Auto"
+          }
         },
         "HARDEN_DESKTOP": {
           "label": "Harden Desktop (Preset)",
-          "description": "Enables DISABLE_OPEN_TOOLS, DISABLE_SUDO, and DISABLE_TERMINALS."
+          "description": "Enables DISABLE_OPEN_TOOLS, DISABLE_SUDO and DISABLE_TERMINALS, and unless set explicitly also disables file transfers, the command websocket and the files and apps sidebar sections. Forced on for users with Harden Container."
         },
         "HARDEN_OPENBOX": {
           "label": "Harden Window Manager (Preset)",
-          "description": "Enables DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS, and HARDEN_KEYBINDS. Also enables RESTART_APP."
+          "description": "Enables DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS and HARDEN_KEYBINDS for Openbox and labwc, and RESTART_APP unless set explicitly. Forced on for users with Harden Window Manager."
         },
         "DISABLE_OPEN_TOOLS": {
           "label": "Disable Open Tools",
@@ -489,11 +608,11 @@
         },
         "HARDEN_KEYBINDS": {
           "label": "Harden Keybinds",
-          "description": "Disables default Openbox keybinds like Alt+F4."
+          "description": "Disables window manager keybinds such as Alt+F4, Alt+Escape, Alt+Space and Super+E, and locks the window manager config."
         },
         "RESTART_APP": {
           "label": "Restart App on Close",
-          "description": "Automatically restarts the main application if it is closed."
+          "description": "Automatically restarts the main application if it is closed and makes the autostart file read-only."
         },
         "MAX_RES": {
           "label": "Maximum Resolution",
@@ -515,6 +634,10 @@
           "label": "Disable DRI3",
           "description": "Do not use DRI3 acceleration if a video card is detected."
         },
+        "AUTO_GPU": {
+          "label": "Automatic GPU Selection",
+          "description": "'true' renders on the first GPU, 'false' disables it, or a vendor, driver or PCI vendor ID (nvidia, amdgpu, 0x10de) picks a specific one."
+        },
         "NO_DECOR": {
           "label": "No Window Decorations",
           "description": "Run application without window borders for PWA use."
@@ -525,11 +648,117 @@
         },
         "NO_GAMEPAD": {
           "label": "Disable Gamepad Injection",
-          "description": "Disable userspace gamepad interposer injection."
+          "description": "Skip the userspace gamepad interposer. Also hides the gamepad section and player sharing links."
+        },
+        "NO_WEBCAM": {
+          "label": "Disable Webcam Injection",
+          "description": "Skip the virtual webcam device and interposer. Also hides the webcam button."
+        },
+        "SELKIES_RUN_AFTER_CONNECT": {
+          "label": "Run After Connect",
+          "description": "Shell command run inside the container when the first client connects."
+        },
+        "SELKIES_RUN_AFTER_DISCONNECT": {
+          "label": "Run After Disconnect",
+          "description": "Shell command run inside the container when the last client disconnects."
         },
         "SELKIES_DEBUG": {
           "label": "Enable Selkies Debugging",
           "description": "Enable debug logging for streaming components."
+        },
+        "SELKIES_MODE": {
+          "label": "Streaming Mode",
+          "description": "Transport used by default. Auto picks WebRTC when any TURN/STUN value is set, otherwise WebSockets.",
+          "options": {
+            "auto": "Auto",
+            "websockets": "WebSockets",
+            "webrtc": "WebRTC"
+          }
+        },
+        "SELKIES_ENABLE_DUAL_MODE": {
+          "label": "Dual Mode",
+          "description": "Let users switch between WebRTC and WebSockets from the sidebar. Auto enables it only when WebRTC is configured.",
+          "options": {
+            "auto": "Auto",
+            "enabled": "Enabled",
+            "disabled": "Disabled"
+          }
+        },
+        "SELKIES_WEBRTC_PACER": {
+          "label": "WebRTC Pacer",
+          "description": "Pace outgoing WebRTC packets with strict priorities so audio and input are protected from video bursts on congested links."
+        },
+        "SELKIES_CONGESTION_CONTROL": {
+          "label": "Congestion Control",
+          "description": "Adapt the video bitrate to the bandwidth estimate from WebRTC receiver feedback. Effective in CBR mode."
+        },
+        "SELKIES_STUN_HOST": {
+          "label": "STUN Host",
+          "description": "STUN server for NAT hole punching. Point at an internal server for networks without internet."
+        },
+        "SELKIES_STUN_PORT": {
+          "label": "STUN Port",
+          "description": "Port of the STUN server."
+        },
+        "SELKIES_TURN_HOST": {
+          "label": "TURN Host",
+          "description": "TURN server used with the shared secret or long-term credentials. Wrap IPv6 addresses in square brackets."
+        },
+        "SELKIES_TURN_PORT": {
+          "label": "TURN Port",
+          "description": "Port of the TURN server."
+        },
+        "SELKIES_TURN_PROTOCOL": {
+          "label": "TURN Protocol",
+          "description": "Transport the client uses to reach TURN. UDP is strongly recommended; use TCP only where UDP is blocked."
+        },
+        "SELKIES_TURN_TLS": {
+          "label": "TURN over TLS/DTLS",
+          "description": "Use TURN over TLS (TCP) or DTLS (UDP). Requires a valid certificate on the TURN server."
+        },
+        "SELKIES_TURN_SHARED_SECRET": {
+          "label": "TURN Shared Secret",
+          "description": "Shared secret used to generate time-limited HMAC TURN credentials."
+        },
+        "SELKIES_TURN_USERNAME": {
+          "label": "TURN Username",
+          "description": "Legacy long-term TURN credential username."
+        },
+        "SELKIES_TURN_PASSWORD": {
+          "label": "TURN Password",
+          "description": "Legacy long-term TURN credential password."
+        },
+        "SELKIES_TURN_REST_URI": {
+          "label": "TURN REST API URI",
+          "description": "URI of a TURN REST credential service, e.g. http://localhost:8008."
+        },
+        "SELKIES_TURN_REST_API_KEY": {
+          "label": "TURN REST API Key",
+          "description": "API key sent to the TURN REST service."
+        },
+        "SELKIES_TURN_REST_USERNAME": {
+          "label": "TURN REST Username",
+          "description": "Username the TURN REST service embeds in the credential. Empty uses 'selkies'."
+        },
+        "SELKIES_WEBRTC_PUBLIC_IP": {
+          "label": "WebRTC Public IP",
+          "description": "Public address to advertise in host ICE candidates for a server behind static 1:1 NAT. One IPv4 and/or one IPv6 address."
+        },
+        "SELKIES_ENABLE_CLOUDFLARE_TURN": {
+          "label": "Enable Cloudflare TURN",
+          "description": "Use the Cloudflare TURN service. Requires the token ID and API token below."
+        },
+        "SELKIES_CLOUDFLARE_TURN_TOKEN_ID": {
+          "label": "Cloudflare TURN Token ID",
+          "description": "The Cloudflare TURN app token ID."
+        },
+        "SELKIES_CLOUDFLARE_TURN_API_TOKEN": {
+          "label": "Cloudflare TURN API Token",
+          "description": "The Cloudflare TURN API token."
+        },
+        "SELKIES_RTC_CONFIG_JSON": {
+          "label": "RTC Config JSON Path",
+          "description": "Path inside the container to a JSON file with the WebRTC configuration. Overrides every other STUN/TURN setting and is re-read periodically."
         },
         "DOCKER_PRIVILEGED": {
           "label": "Privileged Mode",
@@ -702,6 +931,8 @@
       "errorPulling": "Error pulling image.",
       "manualInstallNote": "Note: Manually added images should be based on a selkies-baseimage compatible image.",
       "generalTitle": "General & Performance Settings",
+      "webrtcTitle": "WebRTC & TURN Settings",
+      "webrtcDescription": "Sessions stream over WebSockets by default. Setting any STUN, TURN, Cloudflare or public IP value below, or choosing WebRTC mode, switches the container to WebRTC with dual mode enabled so users can still fall back to WebSockets.",
       "dockerTitle": "Docker Advanced Overrides",
       "dockerDescription": "These settings override the default container configuration. Use with caution and only if you know what you are doing."
     },

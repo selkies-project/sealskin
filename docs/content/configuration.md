@@ -222,7 +222,9 @@ mounts, network mode and so on). The file name is derived from the name
 (`kiosk.yml`); renaming the `name` key renames the file. The set of
 variables the editor offers is `template_schema.yml` in the server package,
 served to clients as data, and a template may contain keys the editor does
-not know.
+not know. Keys from before the Selkies variable renames (`SELKIES_H264_*`,
+`SELKIES_IS_MANUAL_RESOLUTION_MODE`, the `SELKIES_CLIPBOARD_*` booleans)
+are translated to their current names when the file is loaded.
 
 A directory of read-only default templates can be supplied with
 `SEALSKIN_DEFAULT_APP_TEMPLATES_PATH`; when no template exists at all a blank

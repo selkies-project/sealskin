@@ -281,6 +281,10 @@
           "label": "Mostra Statistiche",
           "description": "Mostra la sezione delle statistiche nella barra laterale."
         },
+        "SELKIES_UI_SIDEBAR_SHOW_SHORTCUTS": {
+          "label": "Mostra Sezione Scorciatoie da Tastiera",
+          "description": "Mostra la sezione delle scorciatoie da tastiera nella barra laterale."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
           "label": "Mostra Appunti",
           "description": "Mostra la sezione degli appunti nella barra laterale."
@@ -300,6 +304,18 @@
         "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
           "label": "Mostra Sezione Gamepad",
           "description": "Mostra la sezione dei gamepad nella barra laterale."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
+          "label": "Mostra Pulsante Schermo Intero",
+          "description": "Mostra il pulsante dello schermo intero nella barra laterale."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMING_MODE": {
+          "label": "Mostra Pulsante Modalità Gioco",
+          "description": "Mostra il pulsante della modalità gioco (blocco del puntatore) nella barra laterale."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_TRACKPAD": {
+          "label": "Mostra Pulsante Trackpad",
+          "description": "Mostra il pulsante del trackpad virtuale nella barra laterale."
         },
         "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
           "label": "Mostra Pulsante Tastiera",
@@ -332,7 +348,6 @@
           "options": {
             "default": "Predefinito",
             "selkiesDefault": "Selkies (Predefinito)",
-            "zinc": "Zinc",
             "wish": "Wish"
           }
         },
@@ -342,23 +357,21 @@
         },
         "SELKIES_MICROPHONE_ENABLED": {
           "label": "Abilita Microfono",
-          "description": "Abilita l'inoltro del microfono da client a server."
+          "description": "Abilita l'inoltro del microfono da client a server. Disattivato per impostazione predefinita nel progetto originale."
         },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "Abilita Gamepad",
           "description": "Abilita il supporto per gamepad."
         },
-        "SELKIES_CLIPBOARD_ENABLED": {
-          "label": "Abilita Appunti",
-          "description": "Abilita la sincronizzazione degli appunti."
-        },
-        "SELKIES_CLIPBOARD_IN_ENABLED": {
-          "label": "Abilita appunti da client a server",
-          "description": "Consenti il trasferimento dei dati degli appunti dal browser."
-        },
-        "SELKIES_CLIPBOARD_OUT_ENABLED": {
-          "label": "Abilita appunti da server a client",
-          "description": "Consenti il trasferimento dei dati degli appunti dal server."
+        "SELKIES_ENABLE_CLIPBOARD": {
+          "label": "Criterio Appunti",
+          "description": "Quali direzioni degli appunti sono consentite. 'Solo da server a client' impedisce inoltre alla pagina di leggere gli appunti locali, che è ciò che fa comparire le richieste di incolla su Firefox e Safari.",
+          "options": {
+            "both": "Entrambe le direzioni",
+            "inOnly": "Solo da client a server",
+            "outOnly": "Solo da server a client",
+            "disabled": "Disabilitato"
+          }
         },
         "SELKIES_ENABLE_BINARY_CLIPBOARD": {
           "label": "Abilita Appunti Binari",
@@ -370,25 +383,61 @@
         },
         "SELKIES_FILE_TRANSFERS": {
           "label": "Trasferimenti File",
-          "description": "Direzioni consentite ('upload,download', 'upload', 'download', 'none')."
+          "description": "Direzioni consentite ('upload,download', 'upload', 'download' o 'none'). Svuotato da Rafforza Desktop a meno che non sia impostato qui."
+        },
+        "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
+          "label": "Limite Trasferimento File (Mbit/s)",
+          "description": "Limitazione statica condivisa da tutti gli upload e download. 0 disattiva il limite."
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "Abilita Tutta la Condivisione",
           "description": "Interruttore principale per tutte le funzionalità di condivisione."
         },
+        "SELKIES_ENABLE_SHARED": {
+          "label": "Abilita Condivisione Sola Visualizzazione",
+          "description": "Abilita i link di condivisione in sola visualizzazione."
+        },
+        "SELKIES_ENABLE_COLLAB": {
+          "label": "Abilita Collaborazione",
+          "description": "Consenti a uno spettatore in possesso del token master della sessione di agire come collaboratore in lettura e scrittura. Necessario per le stanze di SealSkin."
+        },
+        "SELKIES_ENABLE_PLAYER2": {
+          "label": "Abilita Condivisione Giocatore 2",
+          "description": "Abilita il link di condivisione per il giocatore 2 del gamepad."
+        },
+        "SELKIES_ENABLE_PLAYER3": {
+          "label": "Abilita Condivisione Giocatore 3",
+          "description": "Abilita il link di condivisione per il giocatore 3 del gamepad."
+        },
+        "SELKIES_ENABLE_PLAYER4": {
+          "label": "Abilita Condivisione Giocatore 4",
+          "description": "Abilita il link di condivisione per il giocatore 4 del gamepad."
+        },
         "SELKIES_SECOND_SCREEN": {
           "label": "Abilita Secondo Schermo",
           "description": "Abilita il supporto per un secondo monitor/display."
+        },
+        "SELKIES_ENABLE_RESIZE": {
+          "label": "Abilita Ridimensionamento Dinamico",
+          "description": "Ridimensiona lo schermo remoto per adattarlo alla finestra del browser."
         },
         "SELKIES_USE_BROWSER_CURSORS": {
           "label": "Usa Cursori del Browser",
           "description": "Usa i cursori CSS del browser invece di renderizzarli sul canvas."
         },
+        "SELKIES_ENABLE_CURSORS": {
+          "label": "Abilita Cursori Remoti",
+          "description": "Invia al client le forme del cursore proprie dell'applicazione."
+        },
+        "SELKIES_CURSOR_SIZE": {
+          "label": "Dimensione Cursore",
+          "description": "Dimensione del cursore in punti a 96 DPI, scalata con il DPI della sessione. -1 usa il valore predefinito della piattaforma (32 su X11, 24 su Wayland)."
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "Usa Ridimensionamento CSS (LoDPI)",
           "description": "Se vero, viene inviata una risoluzione più bassa e il canvas viene allungato."
         },
-        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+        "SELKIES_MANUAL_RESOLUTION": {
           "label": "Modalità Risoluzione Manuale",
           "description": "Blocca la risoluzione ai valori manuali di larghezza/altezza."
         },
@@ -410,11 +459,27 @@
         },
         "SELKIES_AUDIO_BITRATE": {
           "label": "Bitrate Audio",
-          "description": "Il bitrate audio predefinito."
+          "description": "Il bitrate audio Opus predefinito."
+        },
+        "SELKIES_AUDIO_FRAME_DURATION_MS": {
+          "label": "Durata Frame Audio",
+          "description": "Durata del frame Opus. Valori più bassi riducono la latenza audio con un piccolo costo in banda e frequenza dei pacchetti."
+        },
+        "SELKIES_AUDIO_CHANNELS": {
+          "label": "Canali Audio",
+          "description": "Numero di canali audio; 2 è stereo."
+        },
+        "SELKIES_AUDIO_REDUNDANCY": {
+          "label": "Ridondanza Audio (Opus RED)",
+          "description": "Trasporta i frame audio precedenti come ridondanza per ridurre le interruzioni in caso di perdita di pacchetti."
+        },
+        "SELKIES_AUDIO_REDUNDANCY_DISTANCE": {
+          "label": "Distanza Ridondanza Audio",
+          "description": "Numero di frame precedenti trasportati come ridondanza (0-4). Valori più alti resistono a raffiche di perdita più lunghe con proporzionalmente più banda."
         },
         "SELKIES_ENCODER": {
           "label": "Encoder",
-          "description": "Elenco di encoder separati da virgola. Il primo è il predefinito."
+          "description": "Elenco di encoder consentiti separati da virgola (h264enc, h264enc-striped, jpeg). Il primo è il predefinito; un singolo valore blocca la scelta. Solo h264enc viene trasmesso tramite WebRTC."
         },
         "SELKIES_USE_CPU": {
           "label": "Forza Codifica CPU",
@@ -422,23 +487,51 @@
         },
         "SELKIES_FRAMERATE": {
           "label": "Framerate (Intervallo o Fisso)",
-          "description": "es. '8-120' per un intervallo o '60' per un valore fisso."
+          "description": "es. '8-240' per un intervallo, '60' per un valore iniziale fisso, '60,8-240' per entrambi; '60-60' lo blocca."
         },
-        "SELKIES_H264_CRF": {
-          "label": "CRF H.264 (Intervallo o Fisso)",
-          "description": "es. '5-50' per un intervallo o '25' per un valore fisso."
+        "SELKIES_RATE_CONTROL_MODE": {
+          "label": "Modalità Controllo Bitrate",
+          "description": "Controllo del bitrate H.264 predefinito: qualità costante (CRF) o bitrate costante (CBR).",
+          "options": {
+            "crf": "Qualità costante (CRF)",
+            "cbr": "Bitrate costante (CBR)"
+          }
+        },
+        "SELKIES_ENABLE_RATE_CONTROL": {
+          "label": "Consenti Cambio Controllo Bitrate",
+          "description": "Consenti ai client di passare tra CRF e CBR. Disattivato blocca l'encoder sul suo valore predefinito integrato."
+        },
+        "SELKIES_VIDEO_CRF": {
+          "label": "CRF Video (Intervallo o Fisso)",
+          "description": "Qualità costante H.264: '5-50' per un intervallo, '25' per un valore iniziale fisso, o '25,5-50' per entrambi."
+        },
+        "SELKIES_VIDEO_BITRATE": {
+          "label": "Bitrate Video kbps (Intervallo o Fisso)",
+          "description": "Bitrate CBR in kilobit al secondo: '100-1000000' per un intervallo, '8000' per un valore iniziale fisso, o '8000,100-1000000' per entrambi."
+        },
+        "SELKIES_VIDEO_MIN_QP": {
+          "label": "QP Minimo Video",
+          "description": "Quantizzatore H.264 minimo in modalità CBR (0 = predefinito dell'encoder). Aumentarlo limita la spesa di bit sui contenuti semplici."
+        },
+        "SELKIES_VIDEO_MAX_QP": {
+          "label": "QP Massimo Video",
+          "description": "Quantizzatore H.264 massimo in modalità CBR (0 = predefinito dell'encoder). Ridurlo mantiene il testo leggibile durante il movimento al costo di superare il bitrate obiettivo."
+        },
+        "SELKIES_KEYFRAME_INTERVAL": {
+          "label": "Intervallo Keyframe (secondi)",
+          "description": "Secondi tra i keyframe di recupero programmati. 0 mantiene il GOP infinito e invia keyframe solo su richiesta."
         },
         "SELKIES_JPEG_QUALITY": {
           "label": "Qualità JPEG (Intervallo o Fisso)",
-          "description": "es. '1-100' per un intervallo o '60' per un valore fisso."
+          "description": "'1-100' per un intervallo, '40' per un valore iniziale fisso, o '40,1-100' per entrambi."
         },
-        "SELKIES_H264_FULLCOLOR": {
-          "label": "H.264 Colore Pieno",
-          "description": "Abilita la gamma di colori completa H.264 per gli encoder pixelflux."
+        "SELKIES_VIDEO_FULLCOLOR": {
+          "label": "Video Colore Pieno (4:4:4)",
+          "description": "Codifica H.264 con croma 4:4:4 invece di 4:2:0. I client senza decoder 4:4:4 ripiegano su JPEG quando questa opzione è bloccata su attivo."
         },
-        "SELKIES_H264_STREAMING_MODE": {
-          "label": "Modalità Streaming H.264 (Turbo)",
-          "description": "Abilita la modalità di streaming H.264 a bassa latenza."
+        "SELKIES_VIDEO_STREAMING_MODE": {
+          "label": "Modalità Streaming Video (Turbo)",
+          "description": "Codifica ogni frame come un encoder video tradizionale invece delle sole regioni modificate."
         },
         "SELKIES_USE_PAINT_OVER_QUALITY": {
           "label": "Usa Qualità Paint-Over",
@@ -446,23 +539,49 @@
         },
         "SELKIES_PAINT_OVER_JPEG_QUALITY": {
           "label": "Qualità JPEG Paint-Over",
-          "description": "es. '1-100' per un intervallo o '90' per un valore fisso."
+          "description": "'1-100' per un intervallo, '90' per un valore iniziale fisso, o '90,1-100' per entrambi."
         },
-        "SELKIES_H264_PAINTOVER_CRF": {
-          "label": "CRF H.264 Paint-Over",
-          "description": "es. '5-50' per un intervallo o '18' per un valore fisso."
+        "SELKIES_VIDEO_PAINTOVER_CRF": {
+          "label": "CRF Video Paint-Over",
+          "description": "'5-50' per un intervallo, '18' per un valore iniziale fisso, o '18,5-50' per entrambi."
         },
-        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
+        "SELKIES_VIDEO_PAINTOVER_BURST_FRAMES": {
           "label": "Frame Burst Paint-Over",
-          "description": "es. '1-30' per un intervallo o '5' per un valore fisso."
+          "description": "'1-30' per un intervallo, '5' per un valore iniziale fisso, o '5,1-30' per entrambi."
+        },
+        "SELKIES_BACKPRESSURE_QUEUE_SIZE": {
+          "label": "Dimensione Coda Backpressure",
+          "description": "Frame e blocchi audio memorizzati per flusso prima di scartare sotto backpressure (modalità WebSockets). Valori più alti tollerano gli intoppi del client al costo della latenza."
+        },
+        "SELKIES_WEBCAM_WIDTH": {
+          "label": "Larghezza Webcam",
+          "description": "Larghezza del dispositivo webcam virtuale; i frame del client vengono scalati e adattati con bande nere."
+        },
+        "SELKIES_WEBCAM_HEIGHT": {
+          "label": "Altezza Webcam",
+          "description": "Altezza del dispositivo webcam virtuale; i frame del client vengono scalati e adattati con bande nere."
+        },
+        "SELKIES_WEBCAM_ENCODER": {
+          "label": "Encoder Uplink Webcam",
+          "description": "Codec usato dai client WebSocket per inviare i frame della fotocamera. Auto sceglie il migliore che il browser riesce a sostenere.",
+          "options": {
+            "auto": "Auto"
+          }
+        },
+        "SELKIES_WEBCAM_PIXEL_FORMAT": {
+          "label": "Formato Pixel Webcam",
+          "description": "Formato pixel del dispositivo webcam virtuale. Auto segue ciò che invia il client.",
+          "options": {
+            "auto": "Auto"
+          }
         },
         "HARDEN_DESKTOP": {
           "label": "Rafforza Desktop (Preimpostato)",
-          "description": "Abilita DISABLE_OPEN_TOOLS, DISABLE_SUDO e DISABLE_TERMINALS."
+          "description": "Abilita DISABLE_OPEN_TOOLS, DISABLE_SUDO e DISABLE_TERMINALS e, se non impostati esplicitamente, disabilita anche i trasferimenti file, il websocket dei comandi e le sezioni file e app della barra laterale. Forzato per gli utenti con Rafforza Container."
         },
         "HARDEN_OPENBOX": {
           "label": "Rafforza Window Manager (Preimpostato)",
-          "description": "Abilita DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS e HARDEN_KEYBINDS. Abilita anche RESTART_APP."
+          "description": "Abilita DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS e HARDEN_KEYBINDS per Openbox e labwc, e RESTART_APP se non impostato esplicitamente. Forzato per gli utenti con Rafforza Window Manager."
         },
         "DISABLE_OPEN_TOOLS": {
           "label": "Disabilita Strumenti di Apertura",
@@ -486,11 +605,11 @@
         },
         "HARDEN_KEYBINDS": {
           "label": "Rafforza Combinazioni Tasti",
-          "description": "Disabilita le combinazioni di tasti predefinite di Openbox come Alt+F4."
+          "description": "Disabilita le combinazioni di tasti del window manager come Alt+F4, Alt+Escape, Alt+Space e Super+E, e blocca la configurazione del window manager."
         },
         "RESTART_APP": {
           "label": "Riavvia App alla Chiusura",
-          "description": "Riavvia automaticamente l'applicazione principale se viene chiusa."
+          "description": "Riavvia automaticamente l'applicazione principale se viene chiusa e rende il file di avvio automatico di sola lettura."
         },
         "MAX_RES": {
           "label": "Risoluzione Massima",
@@ -512,6 +631,10 @@
           "label": "Disabilita DRI3",
           "description": "Non usare l'accelerazione DRI3 se viene rilevata una scheda video."
         },
+        "AUTO_GPU": {
+          "label": "Selezione Automatica GPU",
+          "description": "'true' renderizza sulla prima GPU, 'false' la disattiva, oppure un produttore, driver o ID produttore PCI (nvidia, amdgpu, 0x10de) ne sceglie una specifica."
+        },
         "NO_DECOR": {
           "label": "Nessuna Decorazione Finestra",
           "description": "Esegui l'applicazione senza bordi della finestra per l'uso come PWA."
@@ -522,11 +645,117 @@
         },
         "NO_GAMEPAD": {
           "label": "Disabilita Iniezione Gamepad",
-          "description": "Disabilita l'iniezione dell'interposer del gamepad nello spazio utente."
+          "description": "Salta l'interposer del gamepad nello spazio utente. Nasconde anche la sezione dei gamepad e i link di condivisione dei giocatori."
+        },
+        "NO_WEBCAM": {
+          "label": "Disabilita Iniezione Webcam",
+          "description": "Salta il dispositivo webcam virtuale e l'interposer. Nasconde anche il pulsante della webcam."
+        },
+        "SELKIES_RUN_AFTER_CONNECT": {
+          "label": "Esegui dopo la Connessione",
+          "description": "Comando shell eseguito dentro il container quando si connette il primo client."
+        },
+        "SELKIES_RUN_AFTER_DISCONNECT": {
+          "label": "Esegui dopo la Disconnessione",
+          "description": "Comando shell eseguito dentro il container quando si disconnette l'ultimo client."
         },
         "SELKIES_DEBUG": {
           "label": "Abilita Debugging Selkies",
           "description": "Abilita il logging di debug per i componenti di streaming."
+        },
+        "SELKIES_MODE": {
+          "label": "Modalità Streaming",
+          "description": "Trasporto usato per impostazione predefinita. Auto sceglie WebRTC quando è impostato un qualsiasi valore TURN/STUN, altrimenti WebSockets.",
+          "options": {
+            "auto": "Auto",
+            "websockets": "WebSockets",
+            "webrtc": "WebRTC"
+          }
+        },
+        "SELKIES_ENABLE_DUAL_MODE": {
+          "label": "Modalità Doppia",
+          "description": "Consenti agli utenti di passare tra WebRTC e WebSockets dalla barra laterale. Auto la abilita solo quando WebRTC è configurato.",
+          "options": {
+            "auto": "Auto",
+            "enabled": "Abilitato",
+            "disabled": "Disabilitato"
+          }
+        },
+        "SELKIES_WEBRTC_PACER": {
+          "label": "Pacer WebRTC",
+          "description": "Regola il ritmo dei pacchetti WebRTC in uscita con priorità rigorose così che audio e input siano protetti dalle raffiche video sui collegamenti congestionati."
+        },
+        "SELKIES_CONGESTION_CONTROL": {
+          "label": "Controllo Congestione",
+          "description": "Adatta il bitrate video alla stima della banda ricavata dal feedback del ricevitore WebRTC. Efficace in modalità CBR."
+        },
+        "SELKIES_STUN_HOST": {
+          "label": "Host STUN",
+          "description": "Server STUN per l'attraversamento del NAT. Punta a un server interno per le reti senza internet."
+        },
+        "SELKIES_STUN_PORT": {
+          "label": "Porta STUN",
+          "description": "Porta del server STUN."
+        },
+        "SELKIES_TURN_HOST": {
+          "label": "Host TURN",
+          "description": "Server TURN usato con il segreto condiviso o con credenziali a lungo termine. Racchiudi gli indirizzi IPv6 tra parentesi quadre."
+        },
+        "SELKIES_TURN_PORT": {
+          "label": "Porta TURN",
+          "description": "Porta del server TURN."
+        },
+        "SELKIES_TURN_PROTOCOL": {
+          "label": "Protocollo TURN",
+          "description": "Trasporto usato dal client per raggiungere TURN. UDP è fortemente consigliato; usa TCP solo dove UDP è bloccato."
+        },
+        "SELKIES_TURN_TLS": {
+          "label": "TURN su TLS/DTLS",
+          "description": "Usa TURN su TLS (TCP) o DTLS (UDP). Richiede un certificato valido sul server TURN."
+        },
+        "SELKIES_TURN_SHARED_SECRET": {
+          "label": "Segreto Condiviso TURN",
+          "description": "Segreto condiviso usato per generare credenziali TURN HMAC a tempo limitato."
+        },
+        "SELKIES_TURN_USERNAME": {
+          "label": "Nome Utente TURN",
+          "description": "Nome utente delle credenziali TURN a lungo termine (legacy)."
+        },
+        "SELKIES_TURN_PASSWORD": {
+          "label": "Password TURN",
+          "description": "Password delle credenziali TURN a lungo termine (legacy)."
+        },
+        "SELKIES_TURN_REST_URI": {
+          "label": "URI API REST TURN",
+          "description": "URI di un servizio REST di credenziali TURN, es. http://localhost:8008."
+        },
+        "SELKIES_TURN_REST_API_KEY": {
+          "label": "Chiave API REST TURN",
+          "description": "Chiave API inviata al servizio REST TURN."
+        },
+        "SELKIES_TURN_REST_USERNAME": {
+          "label": "Nome Utente REST TURN",
+          "description": "Nome utente che il servizio REST TURN incorpora nella credenziale. Vuoto usa 'selkies'."
+        },
+        "SELKIES_WEBRTC_PUBLIC_IP": {
+          "label": "IP Pubblico WebRTC",
+          "description": "Indirizzo pubblico da annunciare nei candidati ICE di tipo host per un server dietro NAT 1:1 statico. Un indirizzo IPv4 e/o uno IPv6."
+        },
+        "SELKIES_ENABLE_CLOUDFLARE_TURN": {
+          "label": "Abilita TURN Cloudflare",
+          "description": "Usa il servizio TURN di Cloudflare. Richiede l'ID token e il token API qui sotto."
+        },
+        "SELKIES_CLOUDFLARE_TURN_TOKEN_ID": {
+          "label": "ID Token TURN Cloudflare",
+          "description": "L'ID token dell'app TURN di Cloudflare."
+        },
+        "SELKIES_CLOUDFLARE_TURN_API_TOKEN": {
+          "label": "Token API TURN Cloudflare",
+          "description": "Il token API TURN di Cloudflare."
+        },
+        "SELKIES_RTC_CONFIG_JSON": {
+          "label": "Percorso JSON Configurazione RTC",
+          "description": "Percorso dentro il container di un file JSON con la configurazione WebRTC. Sovrascrive ogni altra impostazione STUN/TURN e viene riletto periodicamente."
         },
         "DOCKER_PRIVILEGED": {
           "label": "Modalità Privilegiata",
@@ -699,6 +928,8 @@
       "errorPulling": "Errore durante lo scaricamento dell'immagine.",
       "manualInstallNote": "Nota: Le immagini aggiunte manualmente dovrebbero essere basate su un'immagine compatibile con selkies-baseimage.",
       "generalTitle": "Impostazioni Generali e Prestazioni",
+      "webrtcTitle": "Impostazioni WebRTC e TURN",
+      "webrtcDescription": "Le sessioni vengono trasmesse tramite WebSockets per impostazione predefinita. Impostare qualsiasi valore STUN, TURN, Cloudflare o IP pubblico qui sotto, oppure scegliere la modalità WebRTC, passa il container a WebRTC con la modalità doppia abilitata così che gli utenti possano comunque tornare a WebSockets.",
       "dockerTitle": "Sovrascritture Avanzate Docker",
       "dockerDescription": "Queste impostazioni sovrascrivono la configurazione predefinita del container. Usa con cautela e solo se sai cosa stai facendo."
     },

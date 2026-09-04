@@ -281,6 +281,10 @@
           "label": "إظهار الإحصائيات",
           "description": "إظهار قسم الإحصائيات في الشريط الجانبي."
         },
+        "SELKIES_UI_SIDEBAR_SHOW_SHORTCUTS": {
+          "label": "إظهار قسم اختصارات لوحة المفاتيح",
+          "description": "إظهار قسم اختصارات لوحة المفاتيح في الشريط الجانبي."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
           "label": "إظهار الحافظة",
           "description": "إظهار قسم الحافظة في الشريط الجانبي."
@@ -300,6 +304,18 @@
         "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
           "label": "إظهار قسم أجهزة التحكم",
           "description": "إظهار قسم أجهزة التحكم بالألعاب في الشريط الجانبي."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
+          "label": "إظهار زر ملء الشاشة",
+          "description": "إظهار زر ملء الشاشة في الشريط الجانبي."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMING_MODE": {
+          "label": "إظهار زر وضع الألعاب",
+          "description": "إظهار زر وضع الألعاب (قفل المؤشر) في الشريط الجانبي."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_TRACKPAD": {
+          "label": "إظهار زر لوحة اللمس",
+          "description": "إظهار زر لوحة اللمس الافتراضية في الشريط الجانبي."
         },
         "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
           "label": "إظهار زر لوحة المفاتيح",
@@ -332,7 +348,6 @@
           "options": {
             "default": "افتراضي",
             "selkiesDefault": "Selkies (افتراضي)",
-            "zinc": "Zinc",
             "wish": "Wish"
           }
         },
@@ -342,23 +357,21 @@
         },
         "SELKIES_MICROPHONE_ENABLED": {
           "label": "تمكين الميكروفون",
-          "description": "تمكين توجيه الميكروفون من العميل إلى الخادم."
+          "description": "تمكين توجيه الميكروفون من العميل إلى الخادم. معطّل افتراضيًا في المشروع الأصلي."
         },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "تمكين جهاز التحكم",
           "description": "تمكين دعم جهاز التحكم بالألعاب."
         },
-        "SELKIES_CLIPBOARD_ENABLED": {
-          "label": "تمكين الحافظة",
-          "description": "تمكين مزامنة الحافظة."
-        },
-        "SELKIES_CLIPBOARD_IN_ENABLED": {
-          "label": "تمكين الحافظة من العميل إلى الخادم",
-          "description": "السماح بنقل بيانات الحافظة من المتصفح."
-        },
-        "SELKIES_CLIPBOARD_OUT_ENABLED": {
-          "label": "تمكين الحافظة من الخادم إلى العميل",
-          "description": "السماح بنقل بيانات الحافظة من الخادم."
+        "SELKIES_ENABLE_CLIPBOARD": {
+          "label": "سياسة الحافظة",
+          "description": "اتجاهات الحافظة المسموح بها. خيار 'من الخادم إلى العميل فقط' يمنع أيضًا الصفحة من قراءة الحافظة المحلية، وهو ما يسبب مطالبات اللصق في Firefox و Safari.",
+          "options": {
+            "both": "كلا الاتجاهين",
+            "inOnly": "من العميل إلى الخادم فقط",
+            "outOnly": "من الخادم إلى العميل فقط",
+            "disabled": "معطّل"
+          }
         },
         "SELKIES_ENABLE_BINARY_CLIPBOARD": {
           "label": "تمكين الحافظة الثنائية",
@@ -370,25 +383,61 @@
         },
         "SELKIES_FILE_TRANSFERS": {
           "label": "نقل الملفات",
-          "description": "الاتجاهات المسموح بها ('upload,download', 'upload', 'download', 'none')."
+          "description": "الاتجاهات المسموح بها ('upload,download' أو 'upload' أو 'download' أو 'none'). يُفرغه تحصين سطح المكتب ما لم يتم تعيينه هنا."
+        },
+        "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
+          "label": "حد نقل الملفات (ميغابت/ثانية)",
+          "description": "حد ثابت مشترك بين جميع عمليات الرفع والتنزيل. القيمة 0 تعطّل الحد."
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "تمكين جميع المشاركات",
           "description": "مفتاح رئيسي لجميع ميزات المشاركة."
         },
+        "SELKIES_ENABLE_SHARED": {
+          "label": "تمكين المشاركة للعرض فقط",
+          "description": "تمكين روابط المشاركة للعرض فقط."
+        },
+        "SELKIES_ENABLE_COLLAB": {
+          "label": "تمكين التعاون",
+          "description": "السماح لمشاهد يحمل الرمز الرئيسي للجلسة بالعمل كمتعاون بصلاحية القراءة والكتابة. مطلوب لغرف SealSkin."
+        },
+        "SELKIES_ENABLE_PLAYER2": {
+          "label": "تمكين مشاركة اللاعب 2",
+          "description": "تمكين رابط المشاركة للاعب 2 على جهاز التحكم."
+        },
+        "SELKIES_ENABLE_PLAYER3": {
+          "label": "تمكين مشاركة اللاعب 3",
+          "description": "تمكين رابط المشاركة للاعب 3 على جهاز التحكم."
+        },
+        "SELKIES_ENABLE_PLAYER4": {
+          "label": "تمكين مشاركة اللاعب 4",
+          "description": "تمكين رابط المشاركة للاعب 4 على جهاز التحكم."
+        },
         "SELKIES_SECOND_SCREEN": {
           "label": "تمكين الشاشة الثانية",
           "description": "تمكين دعم شاشة/عرض ثانية."
+        },
+        "SELKIES_ENABLE_RESIZE": {
+          "label": "تمكين تغيير الحجم الديناميكي",
+          "description": "تغيير حجم الشاشة البعيدة ليطابق نافذة المتصفح."
         },
         "SELKIES_USE_BROWSER_CURSORS": {
           "label": "استخدام مؤشرات المتصفح",
           "description": "استخدام مؤشرات CSS للمتصفح بدلاً من العرض على اللوحة القماشية."
         },
+        "SELKIES_ENABLE_CURSORS": {
+          "label": "تمكين المؤشرات البعيدة",
+          "description": "إرسال أشكال مؤشر التطبيق نفسه إلى العميل."
+        },
+        "SELKIES_CURSOR_SIZE": {
+          "label": "حجم المؤشر",
+          "description": "حجم المؤشر بالنقاط عند 96 DPI، ويتم تحجيمه وفق DPI الجلسة. القيمة -1 تستخدم افتراضي المنصة (32 على X11 و 24 على Wayland)."
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "استخدام تحجيم CSS (LoDPI)",
           "description": "إذا كان صحيحًا، يتم إرسال دقة أقل ويتم تمديد اللوحة القماشية."
         },
-        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+        "SELKIES_MANUAL_RESOLUTION": {
           "label": "وضع الدقة اليدوي",
           "description": "قفل الدقة على قيم العرض/الارتفاع اليدوية."
         },
@@ -410,11 +459,27 @@
         },
         "SELKIES_AUDIO_BITRATE": {
           "label": "معدل بت الصوت",
-          "description": "معدل بت الصوت الافتراضي."
+          "description": "معدل بت الصوت الافتراضي لـ Opus."
+        },
+        "SELKIES_AUDIO_FRAME_DURATION_MS": {
+          "label": "مدة إطار الصوت",
+          "description": "مدة إطار Opus. القيم الأقل تقلل زمن انتقال الصوت مقابل زيادة طفيفة في عرض النطاق ومعدل الحزم."
+        },
+        "SELKIES_AUDIO_CHANNELS": {
+          "label": "قنوات الصوت",
+          "description": "عدد قنوات الصوت؛ 2 تعني ستيريو."
+        },
+        "SELKIES_AUDIO_REDUNDANCY": {
+          "label": "تكرار الصوت (Opus RED)",
+          "description": "حمل إطارات الصوت السابقة كنسخ احتياطية لتقليل الانقطاعات عند فقدان الحزم."
+        },
+        "SELKIES_AUDIO_REDUNDANCY_DISTANCE": {
+          "label": "مسافة تكرار الصوت",
+          "description": "عدد الإطارات السابقة المحمولة كنسخ احتياطية (0-4). القيم الأعلى تتحمل فترات فقدان أطول مقابل عرض نطاق أكبر بشكل متناسب."
         },
         "SELKIES_ENCODER": {
           "label": "المشفرات",
-          "description": "قائمة بالمشفرات مفصولة بفواصل. الأول هو الافتراضي."
+          "description": "قائمة بالمشفرات المسموح بها مفصولة بفواصل (h264enc و h264enc-striped و jpeg). الأول هو الافتراضي؛ القيمة الواحدة تقفل الاختيار. فقط h264enc يُبث عبر WebRTC."
         },
         "SELKIES_USE_CPU": {
           "label": "فرض تشفير وحدة المعالجة المركزية",
@@ -422,23 +487,51 @@
         },
         "SELKIES_FRAMERATE": {
           "label": "معدل الإطارات (نطاق أو ثابت)",
-          "description": "مثال: '8-120' لنطاق أو '60' لثابت."
+          "description": "مثال: '8-240' لنطاق، '60' لقيمة أولية ثابتة، '60,8-240' لكليهما؛ '60-60' يقفله."
         },
-        "SELKIES_H264_CRF": {
-          "label": "H.264 CRF (نطاق أو ثابت)",
-          "description": "مثال: '5-50' لنطاق أو '25' لثابت."
+        "SELKIES_RATE_CONTROL_MODE": {
+          "label": "وضع التحكم في المعدل",
+          "description": "التحكم الافتراضي في معدل H.264: جودة ثابتة (CRF) أو معدل بت ثابت (CBR).",
+          "options": {
+            "crf": "جودة ثابتة (CRF)",
+            "cbr": "معدل بت ثابت (CBR)"
+          }
+        },
+        "SELKIES_ENABLE_RATE_CONTROL": {
+          "label": "السماح بتبديل التحكم في المعدل",
+          "description": "السماح للعملاء بالتبديل بين CRF و CBR. التعطيل يقفل المشفر على افتراضيه المدمج."
+        },
+        "SELKIES_VIDEO_CRF": {
+          "label": "CRF الفيديو (نطاق أو ثابت)",
+          "description": "الجودة الثابتة لـ H.264: '5-50' لنطاق، '25' لقيمة أولية ثابتة، أو '25,5-50' لكليهما."
+        },
+        "SELKIES_VIDEO_BITRATE": {
+          "label": "معدل بت الفيديو kbps (نطاق أو ثابت)",
+          "description": "معدل بت CBR بالكيلوبت في الثانية: '100-1000000' لنطاق، '8000' لقيمة أولية ثابتة، أو '8000,100-1000000' لكليهما."
+        },
+        "SELKIES_VIDEO_MIN_QP": {
+          "label": "الحد الأدنى لـ QP الفيديو",
+          "description": "الحد الأدنى لمكمّم H.264 في وضع CBR ‏(0 = افتراضي المشفر). رفعه يحد من إنفاق البتات على المحتوى السهل."
+        },
+        "SELKIES_VIDEO_MAX_QP": {
+          "label": "الحد الأقصى لـ QP الفيديو",
+          "description": "الحد الأقصى لمكمّم H.264 في وضع CBR ‏(0 = افتراضي المشفر). خفضه يحافظ على وضوح النص أثناء الحركة مقابل تجاوز معدل البت المستهدف."
+        },
+        "SELKIES_KEYFRAME_INTERVAL": {
+          "label": "فاصل الإطارات المفتاحية (ثوانٍ)",
+          "description": "الثواني بين الإطارات المفتاحية المجدولة للاستعادة. القيمة 0 تبقي GOP لا نهائيًا وترسل الإطارات المفتاحية عند الطلب فقط."
         },
         "SELKIES_JPEG_QUALITY": {
           "label": "جودة JPEG (نطاق أو ثابت)",
-          "description": "مثال: '1-100' لنطاق أو '60' لثابت."
+          "description": "'1-100' لنطاق، '40' لقيمة أولية ثابتة، أو '40,1-100' لكليهما."
         },
-        "SELKIES_H264_FULLCOLOR": {
-          "label": "H.264 ألوان كاملة",
-          "description": "تمكين نطاق الألوان الكامل H.264 لمشفرات pixelflux."
+        "SELKIES_VIDEO_FULLCOLOR": {
+          "label": "ألوان كاملة للفيديو (4:4:4)",
+          "description": "تشفير H.264 بألوان 4:4:4 بدلاً من 4:2:0. العملاء الذين لا يملكون فك تشفير 4:4:4 يرجعون إلى JPEG عندما يكون هذا مقفولًا على التمكين."
         },
-        "SELKIES_H264_STREAMING_MODE": {
-          "label": "وضع البث H.264 (Turbo)",
-          "description": "تمكين وضع البث بزمن انتقال منخفض H.264."
+        "SELKIES_VIDEO_STREAMING_MODE": {
+          "label": "وضع بث الفيديو (Turbo)",
+          "description": "تشفير كل إطار كمشفر فيديو تقليدي بدلاً من المناطق المتغيرة فقط."
         },
         "SELKIES_USE_PAINT_OVER_QUALITY": {
           "label": "استخدام جودة الرسم فوق",
@@ -446,23 +539,49 @@
         },
         "SELKIES_PAINT_OVER_JPEG_QUALITY": {
           "label": "جودة JPEG للرسم فوق",
-          "description": "مثال: '1-100' لنطاق أو '90' لثابت."
+          "description": "'1-100' لنطاق، '90' لقيمة أولية ثابتة، أو '90,1-100' لكليهما."
         },
-        "SELKIES_H264_PAINTOVER_CRF": {
-          "label": "H.264 CRF للرسم فوق",
-          "description": "مثال: '5-50' لنطاق أو '18' لثابت."
+        "SELKIES_VIDEO_PAINTOVER_CRF": {
+          "label": "CRF الفيديو للرسم فوق",
+          "description": "'5-50' لنطاق، '18' لقيمة أولية ثابتة، أو '18,5-50' لكليهما."
         },
-        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
-          "label": "إطارات دفعة الرسم فوق",
-          "description": "مثال: '1-30' لنطاق أو '5' لثابت."
+        "SELKIES_VIDEO_PAINTOVER_BURST_FRAMES": {
+          "label": "إطارات الدفعة للرسم فوق",
+          "description": "'1-30' لنطاق، '5' لقيمة أولية ثابتة، أو '5,1-30' لكليهما."
+        },
+        "SELKIES_BACKPRESSURE_QUEUE_SIZE": {
+          "label": "حجم طابور الضغط الخلفي",
+          "description": "الإطارات ومقاطع الصوت المخزنة مؤقتًا لكل بث قبل الإسقاط تحت الضغط الخلفي (وضع WebSockets). القيم الأعلى تتحمل تعثر العميل مقابل زمن انتقال أكبر."
+        },
+        "SELKIES_WEBCAM_WIDTH": {
+          "label": "عرض كاميرا الويب",
+          "description": "عرض جهاز كاميرا الويب الافتراضي؛ يتم تحجيم إطارات العميل وإضافة أشرطة سوداء لتناسبه."
+        },
+        "SELKIES_WEBCAM_HEIGHT": {
+          "label": "ارتفاع كاميرا الويب",
+          "description": "ارتفاع جهاز كاميرا الويب الافتراضي؛ يتم تحجيم إطارات العميل وإضافة أشرطة سوداء لتناسبه."
+        },
+        "SELKIES_WEBCAM_ENCODER": {
+          "label": "مشفر رفع كاميرا الويب",
+          "description": "الترميز الذي يستخدمه عملاء WebSocket لإرسال إطارات الكاميرا. الوضع التلقائي يختار الأفضل الذي يستطيع المتصفح تحمله.",
+          "options": {
+            "auto": "تلقائي"
+          }
+        },
+        "SELKIES_WEBCAM_PIXEL_FORMAT": {
+          "label": "تنسيق بكسل كاميرا الويب",
+          "description": "تنسيق البكسل لجهاز كاميرا الويب الافتراضي. الوضع التلقائي يتبع ما يرسله العميل.",
+          "options": {
+            "auto": "تلقائي"
+          }
         },
         "HARDEN_DESKTOP": {
           "label": "تحصين سطح المكتب (إعداد مسبق)",
-          "description": "يمكّن DISABLE_OPEN_TOOLS و DISABLE_SUDO و DISABLE_TERMINALS."
+          "description": "يمكّن DISABLE_OPEN_TOOLS و DISABLE_SUDO و DISABLE_TERMINALS، وما لم يتم تعيينها صراحةً يعطّل أيضًا نقل الملفات وwebsocket الأوامر وقسمي الملفات والتطبيقات في الشريط الجانبي. مفروض على المستخدمين الذين لديهم تحصين الحاوية."
         },
         "HARDEN_OPENBOX": {
           "label": "تحصين مدير النوافذ (إعداد مسبق)",
-          "description": "يمكّن DISABLE_CLOSE_BUTTON و DISABLE_MOUSE_BUTTONS و HARDEN_KEYBINDS. ويمكّن أيضًا RESTART_APP."
+          "description": "يمكّن DISABLE_CLOSE_BUTTON و DISABLE_MOUSE_BUTTONS و HARDEN_KEYBINDS لـ Openbox و labwc، و RESTART_APP ما لم يتم تعيينه صراحةً. مفروض على المستخدمين الذين لديهم تحصين مدير النوافذ."
         },
         "DISABLE_OPEN_TOOLS": {
           "label": "تعطيل أدوات الفتح",
@@ -486,11 +605,11 @@
         },
         "HARDEN_KEYBINDS": {
           "label": "تحصين روابط المفاتيح",
-          "description": "يعطل روابط مفاتيح Openbox الافتراضية مثل Alt+F4."
+          "description": "يعطّل روابط مفاتيح مدير النوافذ مثل Alt+F4 و Alt+Escape و Alt+Space و Super+E، ويقفل إعدادات مدير النوافذ."
         },
         "RESTART_APP": {
           "label": "إعادة تشغيل التطبيق عند الإغلاق",
-          "description": "يعيد تشغيل التطبيق الرئيسي تلقائيًا إذا تم إغلاقه."
+          "description": "يعيد تشغيل التطبيق الرئيسي تلقائيًا إذا تم إغلاقه ويجعل ملف التشغيل التلقائي للقراءة فقط."
         },
         "MAX_RES": {
           "label": "الدقة القصوى",
@@ -512,6 +631,10 @@
           "label": "تعطيل DRI3",
           "description": "لا تستخدم تسريع DRI3 إذا تم اكتشاف بطاقة فيديو."
         },
+        "AUTO_GPU": {
+          "label": "اختيار وحدة معالجة الرسوميات تلقائيًا",
+          "description": "'true' يعرض على أول وحدة معالجة رسوميات، 'false' يعطّله، أو اسم مورّد أو تعريف أو معرّف مورّد PCI ‏(nvidia, amdgpu, 0x10de) يختار وحدة محددة."
+        },
         "NO_DECOR": {
           "label": "بدون زخارف للنوافذ",
           "description": "تشغيل التطبيق بدون حدود نافذة لاستخدام PWA."
@@ -522,11 +645,117 @@
         },
         "NO_GAMEPAD": {
           "label": "تعطيل حقن جهاز التحكم",
-          "description": "تعطيل حقن مُقحِم جهاز التحكم في مساحة المستخدم."
+          "description": "تخطي مُقحِم جهاز التحكم في مساحة المستخدم. يخفي أيضًا قسم أجهزة التحكم وروابط مشاركة اللاعبين."
+        },
+        "NO_WEBCAM": {
+          "label": "تعطيل حقن كاميرا الويب",
+          "description": "تخطي جهاز كاميرا الويب الافتراضي والمُقحِم. يخفي أيضًا زر كاميرا الويب."
+        },
+        "SELKIES_RUN_AFTER_CONNECT": {
+          "label": "التشغيل بعد الاتصال",
+          "description": "أمر shell يُنفَّذ داخل الحاوية عند اتصال أول عميل."
+        },
+        "SELKIES_RUN_AFTER_DISCONNECT": {
+          "label": "التشغيل بعد قطع الاتصال",
+          "description": "أمر shell يُنفَّذ داخل الحاوية عند قطع اتصال آخر عميل."
         },
         "SELKIES_DEBUG": {
           "label": "تمكين تصحيح أخطاء Selkies",
           "description": "تمكين تسجيل تصحيح الأخطاء لمكونات البث."
+        },
+        "SELKIES_MODE": {
+          "label": "وضع البث",
+          "description": "وسيلة النقل المستخدمة افتراضيًا. الوضع التلقائي يختار WebRTC عند تعيين أي قيمة TURN/STUN، وإلا WebSockets.",
+          "options": {
+            "auto": "تلقائي",
+            "websockets": "WebSockets",
+            "webrtc": "WebRTC"
+          }
+        },
+        "SELKIES_ENABLE_DUAL_MODE": {
+          "label": "الوضع المزدوج",
+          "description": "السماح للمستخدمين بالتبديل بين WebRTC و WebSockets من الشريط الجانبي. الوضع التلقائي يمكّنه فقط عند إعداد WebRTC.",
+          "options": {
+            "auto": "تلقائي",
+            "enabled": "ممكّن",
+            "disabled": "معطّل"
+          }
+        },
+        "SELKIES_WEBRTC_PACER": {
+          "label": "منظّم WebRTC",
+          "description": "تنظيم حزم WebRTC الصادرة بأولويات صارمة بحيث يُحمى الصوت والإدخال من دفعات الفيديو على الروابط المزدحمة."
+        },
+        "SELKIES_CONGESTION_CONTROL": {
+          "label": "التحكم في الازدحام",
+          "description": "تكييف معدل بت الفيديو مع تقدير عرض النطاق من ملاحظات مستقبل WebRTC. فعّال في وضع CBR."
+        },
+        "SELKIES_STUN_HOST": {
+          "label": "مضيف STUN",
+          "description": "خادم STUN لاختراق NAT. وجّهه إلى خادم داخلي للشبكات بدون إنترنت."
+        },
+        "SELKIES_STUN_PORT": {
+          "label": "منفذ STUN",
+          "description": "منفذ خادم STUN."
+        },
+        "SELKIES_TURN_HOST": {
+          "label": "مضيف TURN",
+          "description": "خادم TURN المستخدم مع السر المشترك أو بيانات الاعتماد طويلة الأمد. ضع عناوين IPv6 بين قوسين مربعين."
+        },
+        "SELKIES_TURN_PORT": {
+          "label": "منفذ TURN",
+          "description": "منفذ خادم TURN."
+        },
+        "SELKIES_TURN_PROTOCOL": {
+          "label": "بروتوكول TURN",
+          "description": "وسيلة النقل التي يستخدمها العميل للوصول إلى TURN. يُنصح بشدة بـ UDP؛ استخدم TCP فقط حيث يكون UDP محظورًا."
+        },
+        "SELKIES_TURN_TLS": {
+          "label": "TURN عبر TLS/DTLS",
+          "description": "استخدام TURN عبر TLS ‏(TCP) أو DTLS ‏(UDP). يتطلب شهادة صالحة على خادم TURN."
+        },
+        "SELKIES_TURN_SHARED_SECRET": {
+          "label": "سر TURN المشترك",
+          "description": "السر المشترك المستخدم لتوليد بيانات اعتماد TURN من نوع HMAC محدودة الوقت."
+        },
+        "SELKIES_TURN_USERNAME": {
+          "label": "اسم مستخدم TURN",
+          "description": "اسم المستخدم لبيانات اعتماد TURN القديمة طويلة الأمد."
+        },
+        "SELKIES_TURN_PASSWORD": {
+          "label": "كلمة مرور TURN",
+          "description": "كلمة المرور لبيانات اعتماد TURN القديمة طويلة الأمد."
+        },
+        "SELKIES_TURN_REST_URI": {
+          "label": "عنوان URI لواجهة TURN REST",
+          "description": "عنوان URI لخدمة بيانات اعتماد TURN REST، مثل http://localhost:8008."
+        },
+        "SELKIES_TURN_REST_API_KEY": {
+          "label": "مفتاح واجهة TURN REST",
+          "description": "مفتاح API المُرسل إلى خدمة TURN REST."
+        },
+        "SELKIES_TURN_REST_USERNAME": {
+          "label": "اسم مستخدم TURN REST",
+          "description": "اسم المستخدم الذي تضمّنه خدمة TURN REST في بيانات الاعتماد. الفارغ يستخدم 'selkies'."
+        },
+        "SELKIES_WEBRTC_PUBLIC_IP": {
+          "label": "عنوان IP العام لـ WebRTC",
+          "description": "العنوان العام الذي يُعلن عنه في مرشحي ICE للمضيف لخادم خلف NAT ثابت 1:1. عنوان IPv4 واحد و/أو عنوان IPv6 واحد."
+        },
+        "SELKIES_ENABLE_CLOUDFLARE_TURN": {
+          "label": "تمكين Cloudflare TURN",
+          "description": "استخدام خدمة Cloudflare TURN. يتطلب معرّف الرمز ورمز API أدناه."
+        },
+        "SELKIES_CLOUDFLARE_TURN_TOKEN_ID": {
+          "label": "معرّف رمز Cloudflare TURN",
+          "description": "معرّف رمز تطبيق Cloudflare TURN."
+        },
+        "SELKIES_CLOUDFLARE_TURN_API_TOKEN": {
+          "label": "رمز API لـ Cloudflare TURN",
+          "description": "رمز API لـ Cloudflare TURN."
+        },
+        "SELKIES_RTC_CONFIG_JSON": {
+          "label": "مسار JSON لإعدادات RTC",
+          "description": "مسار داخل الحاوية إلى ملف JSON يحتوي على إعدادات WebRTC. يتجاوز كل إعدادات STUN/TURN الأخرى ويُعاد قراءته دوريًا."
         },
         "DOCKER_PRIVILEGED": {
           "label": "الوضع المميز",
@@ -699,6 +928,8 @@
       "errorPulling": "خطأ في سحب الصورة.",
       "manualInstallNote": "ملاحظة: يجب أن تكون الصور المضافة يدويًا مبنية على صورة متوافقة مع selkies-baseimage.",
       "generalTitle": "إعدادات عامة والأداء",
+      "webrtcTitle": "إعدادات WebRTC و TURN",
+      "webrtcDescription": "تُبث الجلسات عبر WebSockets افتراضيًا. تعيين أي قيمة STUN أو TURN أو Cloudflare أو عنوان IP عام أدناه، أو اختيار وضع WebRTC، يحوّل الحاوية إلى WebRTC مع تمكين الوضع المزدوج حتى يتمكن المستخدمون من الرجوع إلى WebSockets.",
       "dockerTitle": "تجاوزات Docker المتقدمة",
       "dockerDescription": "تتجاوز هذه الإعدادات التكوين الافتراضي للحاوية. استخدمها بحذر وفقط إذا كنت تعرف ما تفعله."
     },

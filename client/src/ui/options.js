@@ -140,6 +140,7 @@ function buildTemplateForm() {
     app: document.getElementById('template-form-app'),
     hardening: document.getElementById('template-form-hardening'),
     general: document.getElementById('template-form-general'),
+    webrtc: document.getElementById('template-form-webrtc'),
     docker: document.getElementById('template-form-docker'),
   };
   Object.values(containers).forEach((c) => { if (c) c.innerHTML = ''; });

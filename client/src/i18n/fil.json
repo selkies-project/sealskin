@@ -281,6 +281,10 @@
           "label": "Ipakita ang Stats",
           "description": "Ipakita ang seksyon ng stats sa sidebar."
         },
+        "SELKIES_UI_SIDEBAR_SHOW_SHORTCUTS": {
+          "label": "Ipakita ang Seksyon ng mga Keyboard Shortcut",
+          "description": "Ipakita ang seksyon ng mga keyboard shortcut sa sidebar."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
           "label": "Ipakita ang Clipboard",
           "description": "Ipakita ang seksyon ng clipboard sa sidebar."
@@ -300,6 +304,18 @@
         "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
           "label": "Ipakita ang Seksyon ng mga Gamepad",
           "description": "Ipakita ang seksyon ng mga gamepad sa sidebar."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
+          "label": "Ipakita ang Pindutan ng Fullscreen",
+          "description": "Ipakita ang pindutan ng fullscreen sa sidebar."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMING_MODE": {
+          "label": "Ipakita ang Pindutan ng Gaming Mode",
+          "description": "Ipakita ang pindutan ng gaming mode (pointer lock) sa sidebar."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_TRACKPAD": {
+          "label": "Ipakita ang Pindutan ng Trackpad",
+          "description": "Ipakita ang pindutan ng virtual na trackpad sa sidebar."
         },
         "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
           "label": "Ipakita ang Pindutan ng Keyboard",
@@ -332,7 +348,6 @@
           "options": {
             "default": "Default",
             "selkiesDefault": "Selkies (Default)",
-            "zinc": "Zinc",
             "wish": "Wish"
           }
         },
@@ -342,23 +357,21 @@
         },
         "SELKIES_MICROPHONE_ENABLED": {
           "label": "Paganahin ang Mikropono",
-          "description": "Paganahin ang pagpapasa ng mikropono mula sa kliyente patungo sa server."
+          "description": "Paganahin ang pagpapasa ng mikropono mula sa kliyente patungo sa server. Naka-off bilang default sa upstream."
         },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "Paganahin ang Gamepad",
           "description": "Paganahin ang suporta para sa gamepad."
         },
-        "SELKIES_CLIPBOARD_ENABLED": {
-          "label": "Paganahin ang Clipboard",
-          "description": "Paganahin ang pag-synchronize ng clipboard."
-        },
-        "SELKIES_CLIPBOARD_IN_ENABLED": {
-          "label": "Paganahin ang Clipboard mula Client papuntang Server",
-          "description": "Payagan ang paglilipat ng data ng clipboard mula sa browser."
-        },
-        "SELKIES_CLIPBOARD_OUT_ENABLED": {
-          "label": "Paganahin ang Clipboard mula Server papuntang Client",
-          "description": "Payagan ang paglilipat ng data ng clipboard mula sa server."
+        "SELKIES_ENABLE_CLIPBOARD": {
+          "label": "Patakaran sa Clipboard",
+          "description": "Aling mga direksyon ng clipboard ang pinapayagan. Ang 'Server papuntang client lamang' ay pumipigil din sa pahina na basahin ang lokal na clipboard, na siyang nagpapalitaw ng mga paste prompt sa Firefox at Safari.",
+          "options": {
+            "both": "Parehong direksyon",
+            "inOnly": "Client papuntang server lamang",
+            "outOnly": "Server papuntang client lamang",
+            "disabled": "Hindi Pinagana"
+          }
         },
         "SELKIES_ENABLE_BINARY_CLIPBOARD": {
           "label": "Paganahin ang Binary Clipboard",
@@ -370,25 +383,61 @@
         },
         "SELKIES_FILE_TRANSFERS": {
           "label": "Paglilipat ng File",
-          "description": "Pinapayagang mga direksyon ('upload,download', 'upload', 'download', 'none')."
+          "description": "Pinapayagang mga direksyon ('upload,download', 'upload', 'download' o 'none'). Binubura ng Patibayin ang Desktop maliban kung itinakda dito."
+        },
+        "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
+          "label": "Limitasyon ng Paglilipat ng File (Mbit/s)",
+          "description": "Static na throttle na pinagsasaluhan ng lahat ng upload at download. Ang 0 ay nag-aalis ng limitasyon."
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "Paganahin ang Lahat ng Pagbabahagi",
           "description": "Pangunahing toggle para sa lahat ng mga tampok ng pagbabahagi."
         },
+        "SELKIES_ENABLE_SHARED": {
+          "label": "Paganahin ang View-Only na Pagbabahagi",
+          "description": "Paganahin ang mga view-only na link ng pagbabahagi."
+        },
+        "SELKIES_ENABLE_COLLAB": {
+          "label": "Paganahin ang Kolaborasyon",
+          "description": "Payagan ang isang viewer na may hawak ng master token ng session na kumilos bilang read-write na collaborator. Kinakailangan para sa mga room ng SealSkin."
+        },
+        "SELKIES_ENABLE_PLAYER2": {
+          "label": "Paganahin ang Pagbabahagi ng Player 2",
+          "description": "Paganahin ang link ng pagbabahagi para sa gamepad player 2."
+        },
+        "SELKIES_ENABLE_PLAYER3": {
+          "label": "Paganahin ang Pagbabahagi ng Player 3",
+          "description": "Paganahin ang link ng pagbabahagi para sa gamepad player 3."
+        },
+        "SELKIES_ENABLE_PLAYER4": {
+          "label": "Paganahin ang Pagbabahagi ng Player 4",
+          "description": "Paganahin ang link ng pagbabahagi para sa gamepad player 4."
+        },
         "SELKIES_SECOND_SCREEN": {
           "label": "Paganahin ang Ikalawang Screen",
           "description": "Paganahin ang suporta para sa isang pangalawang monitor/display."
+        },
+        "SELKIES_ENABLE_RESIZE": {
+          "label": "Paganahin ang Dynamic na Pag-resize",
+          "description": "I-resize ang remote display upang tumugma sa window ng browser."
         },
         "SELKIES_USE_BROWSER_CURSORS": {
           "label": "Gamitin ang mga Cursor ng Browser",
           "description": "Gamitin ang mga CSS cursor ng browser sa halip na i-render sa canvas."
         },
+        "SELKIES_ENABLE_CURSORS": {
+          "label": "Paganahin ang mga Remote Cursor",
+          "description": "Ipadala ang sariling mga hugis ng cursor ng aplikasyon sa kliyente."
+        },
+        "SELKIES_CURSOR_SIZE": {
+          "label": "Laki ng Cursor",
+          "description": "Laki ng cursor sa mga point sa 96 DPI, naka-scale ayon sa DPI ng session. Ang -1 ay gumagamit ng default ng platform (32 sa X11, 24 sa Wayland)."
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "Gamitin ang CSS Scaling (LoDPI)",
           "description": "Kung totoo, isang mas mababang resolusyon ang ipapadala at ang canvas ay i-uunat."
         },
-        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+        "SELKIES_MANUAL_RESOLUTION": {
           "label": "Mode ng Manu-manong Resolusyon",
           "description": "I-lock ang resolusyon sa mga manu-manong halaga ng lapad/taas."
         },
@@ -410,11 +459,27 @@
         },
         "SELKIES_AUDIO_BITRATE": {
           "label": "Bitrate ng Audio",
-          "description": "Ang default na bitrate ng audio."
+          "description": "Ang default na bitrate ng Opus audio."
+        },
+        "SELKIES_AUDIO_FRAME_DURATION_MS": {
+          "label": "Tagal ng Audio Frame",
+          "description": "Tagal ng Opus frame. Ang mas mababang halaga ay nagbabawas ng audio latency kapalit ng kaunting bandwidth at packet rate."
+        },
+        "SELKIES_AUDIO_CHANNELS": {
+          "label": "Mga Channel ng Audio",
+          "description": "Bilang ng mga audio channel; ang 2 ay stereo."
+        },
+        "SELKIES_AUDIO_REDUNDANCY": {
+          "label": "Audio Redundancy (Opus RED)",
+          "description": "Isama ang mga naunang audio frame bilang redundancy upang mabawasan ang mga dropout kapag may packet loss."
+        },
+        "SELKIES_AUDIO_REDUNDANCY_DISTANCE": {
+          "label": "Distansya ng Audio Redundancy",
+          "description": "Bilang ng mga naunang frame na isinasama bilang redundancy (0-4). Ang mas mataas ay nakakayanan ang mas mahabang burst ng loss kapalit ng proporsyonal na mas maraming bandwidth."
         },
         "SELKIES_ENCODER": {
           "label": "Mga Encoder",
-          "description": "Listahan ng mga encoder na pinaghihiwalay ng kuwit. Ang una ay default."
+          "description": "Listahan ng mga pinapayagang encoder na pinaghihiwalay ng kuwit (h264enc, h264enc-striped, jpeg). Ang una ay ang default; ang iisang halaga ay nagla-lock ng pagpili. Tanging h264enc lamang ang nag-i-stream sa WebRTC."
         },
         "SELKIES_USE_CPU": {
           "label": "Pilitin ang CPU Encoding",
@@ -422,23 +487,51 @@
         },
         "SELKIES_FRAMERATE": {
           "label": "Framerate (Saklaw o Nakapirmi)",
-          "description": "hal., '8-120' para sa isang saklaw o '60' para sa nakapirmi."
+          "description": "hal., '8-240' para sa isang saklaw, '60' para sa nakapirming paunang halaga, '60,8-240' para sa pareho; ang '60-60' ay nagla-lock nito."
         },
-        "SELKIES_H264_CRF": {
-          "label": "H.264 CRF (Saklaw o Nakapirmi)",
-          "description": "hal., '5-50' para sa isang saklaw o '25' para sa nakapirmi."
+        "SELKIES_RATE_CONTROL_MODE": {
+          "label": "Mode ng Rate Control",
+          "description": "Default na H.264 rate control: constant quality (CRF) o constant bitrate (CBR).",
+          "options": {
+            "crf": "Constant quality (CRF)",
+            "cbr": "Constant bitrate (CBR)"
+          }
+        },
+        "SELKIES_ENABLE_RATE_CONTROL": {
+          "label": "Payagan ang Paglipat ng Rate Control",
+          "description": "Payagan ang mga kliyente na lumipat sa pagitan ng CRF at CBR. Kapag naka-off, naka-lock ang encoder sa built-in na default nito."
+        },
+        "SELKIES_VIDEO_CRF": {
+          "label": "CRF ng Video (Saklaw o Nakapirmi)",
+          "description": "H.264 constant quality: '5-50' para sa isang saklaw, '25' para sa nakapirming paunang halaga, o '25,5-50' para sa pareho."
+        },
+        "SELKIES_VIDEO_BITRATE": {
+          "label": "Bitrate ng Video kbps (Saklaw o Nakapirmi)",
+          "description": "CBR bitrate sa kilobits bawat segundo: '100-1000000' para sa isang saklaw, '8000' para sa nakapirming paunang halaga, o '8000,100-1000000' para sa pareho."
+        },
+        "SELKIES_VIDEO_MIN_QP": {
+          "label": "Pinakamababang QP ng Video",
+          "description": "Pinakamababang H.264 quantizer sa CBR mode (0 = default ng encoder). Ang pagtaas nito ay naglilimita sa paggastos ng bits sa madaling nilalaman."
+        },
+        "SELKIES_VIDEO_MAX_QP": {
+          "label": "Pinakamataas na QP ng Video",
+          "description": "Pinakamataas na H.264 quantizer sa CBR mode (0 = default ng encoder). Ang pagbaba nito ay nagpapanatiling nababasa ang teksto habang may galaw kapalit ng paglampas sa target na bitrate."
+        },
+        "SELKIES_KEYFRAME_INTERVAL": {
+          "label": "Interval ng Keyframe (segundo)",
+          "description": "Mga segundo sa pagitan ng mga nakaiskedyul na recovery keyframe. Ang 0 ay nagpapanatiling walang hanggan ang GOP at nagpapadala lamang ng mga keyframe kapag hiniling."
         },
         "SELKIES_JPEG_QUALITY": {
           "label": "Kalidad ng JPEG (Saklaw o Nakapirmi)",
-          "description": "hal., '1-100' para sa isang saklaw o '60' para sa nakapirmi."
+          "description": "'1-100' para sa isang saklaw, '40' para sa nakapirming paunang halaga, o '40,1-100' para sa pareho."
         },
-        "SELKIES_H264_FULLCOLOR": {
-          "label": "H.264 Buong Kulay",
-          "description": "Paganahin ang buong saklaw ng kulay ng H.264 para sa mga pixelflux encoder."
+        "SELKIES_VIDEO_FULLCOLOR": {
+          "label": "Buong Kulay ng Video (4:4:4)",
+          "description": "I-encode ang H.264 gamit ang 4:4:4 chroma sa halip na 4:2:0. Ang mga kliyenteng walang 4:4:4 decoder ay babalik sa JPEG kapag naka-lock ito sa on."
         },
-        "SELKIES_H264_STREAMING_MODE": {
-          "label": "H.264 Streaming (Turbo) Mode",
-          "description": "Paganahin ang H.264 low-latency streaming mode."
+        "SELKIES_VIDEO_STREAMING_MODE": {
+          "label": "Video Streaming (Turbo) Mode",
+          "description": "I-encode ang bawat frame tulad ng tradisyonal na video encoder sa halip na ang mga nagbagong rehiyon lamang."
         },
         "SELKIES_USE_PAINT_OVER_QUALITY": {
           "label": "Gamitin ang Kalidad ng Paint-Over",
@@ -446,23 +539,49 @@
         },
         "SELKIES_PAINT_OVER_JPEG_QUALITY": {
           "label": "Kalidad ng JPEG ng Paint-Over",
-          "description": "hal., '1-100' para sa isang saklaw o '90' para sa nakapirmi."
+          "description": "'1-100' para sa isang saklaw, '90' para sa nakapirming paunang halaga, o '90,1-100' para sa pareho."
         },
-        "SELKIES_H264_PAINTOVER_CRF": {
-          "label": "CRF ng H.264 Paint-Over",
-          "description": "hal., '5-50' para sa isang saklaw o '18' para sa nakapirmi."
+        "SELKIES_VIDEO_PAINTOVER_CRF": {
+          "label": "CRF ng Video Paint-Over",
+          "description": "'5-50' para sa isang saklaw, '18' para sa nakapirming paunang halaga, o '18,5-50' para sa pareho."
         },
-        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
+        "SELKIES_VIDEO_PAINTOVER_BURST_FRAMES": {
           "label": "Mga Burst Frame ng Paint-Over",
-          "description": "hal., '1-30' para sa isang saklaw o '5' para sa nakapirmi."
+          "description": "'1-30' para sa isang saklaw, '5' para sa nakapirming paunang halaga, o '5,1-30' para sa pareho."
+        },
+        "SELKIES_BACKPRESSURE_QUEUE_SIZE": {
+          "label": "Laki ng Backpressure Queue",
+          "description": "Mga frame at audio chunk na naka-buffer bawat stream bago mag-drop dahil sa backpressure (WebSockets mode). Ang mas mataas ay nakakayanan ang mga pagkaantala ng kliyente kapalit ng latency."
+        },
+        "SELKIES_WEBCAM_WIDTH": {
+          "label": "Lapad ng Webcam",
+          "description": "Lapad ng virtual na webcam device; ang mga frame ng kliyente ay isina-scale at nila-letterbox upang magkasya."
+        },
+        "SELKIES_WEBCAM_HEIGHT": {
+          "label": "Taas ng Webcam",
+          "description": "Taas ng virtual na webcam device; ang mga frame ng kliyente ay isina-scale at nila-letterbox upang magkasya."
+        },
+        "SELKIES_WEBCAM_ENCODER": {
+          "label": "Encoder ng Webcam Uplink",
+          "description": "Codec na ginagamit ng mga WebSocket client upang magpadala ng mga frame ng camera. Pinipili ng Auto ang pinakamahusay na kayang panatilihin ng browser.",
+          "options": {
+            "auto": "Auto"
+          }
+        },
+        "SELKIES_WEBCAM_PIXEL_FORMAT": {
+          "label": "Pixel Format ng Webcam",
+          "description": "Pixel format ng virtual na webcam device. Sinusunod ng Auto ang ipinapadala ng kliyente.",
+          "options": {
+            "auto": "Auto"
+          }
         },
         "HARDEN_DESKTOP": {
           "label": "Patibayin ang Desktop (Preset)",
-          "description": "Pinapagana ang DISABLE_OPEN_TOOLS, DISABLE_SUDO, at DISABLE_TERMINALS."
+          "description": "Pinapagana ang DISABLE_OPEN_TOOLS, DISABLE_SUDO at DISABLE_TERMINALS, at maliban kung tahasang itinakda, hindi rin pinapagana ang paglilipat ng file, ang command websocket at ang mga seksyon ng mga file at app sa sidebar. Pilit na naka-on para sa mga user na may Patibayin ang Container."
         },
         "HARDEN_OPENBOX": {
           "label": "Patibayin ang Window Manager (Preset)",
-          "description": "Pinapagana ang DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS, at HARDEN_KEYBINDS. Pinapagana rin ang RESTART_APP."
+          "description": "Pinapagana ang DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS at HARDEN_KEYBINDS para sa Openbox at labwc, at ang RESTART_APP maliban kung tahasang itinakda. Pilit na naka-on para sa mga user na may Patibayin ang Window Manager."
         },
         "DISABLE_OPEN_TOOLS": {
           "label": "Huwag Paganahin ang mga Open Tool",
@@ -486,11 +605,11 @@
         },
         "HARDEN_KEYBINDS": {
           "label": "Patibayin ang mga Keybind",
-          "description": "Hindi pinapagana ang mga default na keybind ng Openbox tulad ng Alt+F4."
+          "description": "Hindi pinapagana ang mga keybind ng window manager tulad ng Alt+F4, Alt+Escape, Alt+Space at Super+E, at nila-lock ang config ng window manager."
         },
         "RESTART_APP": {
           "label": "I-restart ang App sa Pagsara",
-          "description": "Awtomatikong i-restart ang pangunahing aplikasyon kung ito ay isinara."
+          "description": "Awtomatikong nire-restart ang pangunahing aplikasyon kung ito ay isinara at ginagawang read-only ang autostart file."
         },
         "MAX_RES": {
           "label": "Pinakamataas na Resolusyon",
@@ -512,6 +631,10 @@
           "label": "Huwag Paganahin ang DRI3",
           "description": "Huwag gamitin ang DRI3 acceleration kung may natukoy na video card."
         },
+        "AUTO_GPU": {
+          "label": "Awtomatikong Pagpili ng GPU",
+          "description": "Ang 'true' ay nagre-render sa unang GPU, ang 'false' ay hindi pinapagana ito, o isang vendor, driver o PCI vendor ID (nvidia, amdgpu, 0x10de) ang pumipili ng partikular na GPU."
+        },
         "NO_DECOR": {
           "label": "Walang mga Dekorasyon ng Window",
           "description": "Patakbuhin ang aplikasyon nang walang mga border ng window para sa paggamit ng PWA."
@@ -522,11 +645,117 @@
         },
         "NO_GAMEPAD": {
           "label": "Huwag Paganahin ang Gamepad Injection",
-          "description": "Huwag paganahin ang userspace gamepad interposer injection."
+          "description": "Laktawan ang userspace gamepad interposer. Itinatago rin ang seksyon ng gamepad at ang mga link ng pagbabahagi ng player."
+        },
+        "NO_WEBCAM": {
+          "label": "Huwag Paganahin ang Webcam Injection",
+          "description": "Laktawan ang virtual na webcam device at interposer. Itinatago rin ang pindutan ng webcam."
+        },
+        "SELKIES_RUN_AFTER_CONNECT": {
+          "label": "Patakbuhin Pagkatapos Kumonekta",
+          "description": "Shell command na pinapatakbo sa loob ng container kapag kumonekta ang unang kliyente."
+        },
+        "SELKIES_RUN_AFTER_DISCONNECT": {
+          "label": "Patakbuhin Pagkatapos Madiskonekta",
+          "description": "Shell command na pinapatakbo sa loob ng container kapag nadiskonekta ang huling kliyente."
         },
         "SELKIES_DEBUG": {
           "label": "Paganahin ang Selkies Debugging",
           "description": "Paganahin ang debug logging para sa mga streaming component."
+        },
+        "SELKIES_MODE": {
+          "label": "Mode ng Streaming",
+          "description": "Transport na ginagamit bilang default. Pinipili ng Auto ang WebRTC kapag may nakatakdang halaga ng TURN/STUN, kung hindi ay WebSockets.",
+          "options": {
+            "auto": "Auto",
+            "websockets": "WebSockets",
+            "webrtc": "WebRTC"
+          }
+        },
+        "SELKIES_ENABLE_DUAL_MODE": {
+          "label": "Dual Mode",
+          "description": "Payagan ang mga user na lumipat sa pagitan ng WebRTC at WebSockets mula sa sidebar. Pinapagana ito ng Auto kapag naka-configure lamang ang WebRTC.",
+          "options": {
+            "auto": "Auto",
+            "enabled": "Pinagana",
+            "disabled": "Hindi Pinagana"
+          }
+        },
+        "SELKIES_WEBRTC_PACER": {
+          "label": "WebRTC Pacer",
+          "description": "I-pace ang mga papalabas na WebRTC packet na may mahigpit na mga priyoridad upang maprotektahan ang audio at input mula sa mga burst ng video sa mga congested na link."
+        },
+        "SELKIES_CONGESTION_CONTROL": {
+          "label": "Congestion Control",
+          "description": "I-adapt ang bitrate ng video sa pagtantya ng bandwidth mula sa feedback ng WebRTC receiver. Epektibo sa CBR mode."
+        },
+        "SELKIES_STUN_HOST": {
+          "label": "STUN Host",
+          "description": "STUN server para sa NAT hole punching. Ituro sa isang internal na server para sa mga network na walang internet."
+        },
+        "SELKIES_STUN_PORT": {
+          "label": "STUN Port",
+          "description": "Port ng STUN server."
+        },
+        "SELKIES_TURN_HOST": {
+          "label": "TURN Host",
+          "description": "TURN server na ginagamit kasama ng shared secret o mga long-term credential. Ibalot ang mga IPv6 address sa mga square bracket."
+        },
+        "SELKIES_TURN_PORT": {
+          "label": "TURN Port",
+          "description": "Port ng TURN server."
+        },
+        "SELKIES_TURN_PROTOCOL": {
+          "label": "TURN Protocol",
+          "description": "Transport na ginagamit ng kliyente upang maabot ang TURN. Mariing inirerekomenda ang UDP; gamitin lamang ang TCP kung saan naka-block ang UDP."
+        },
+        "SELKIES_TURN_TLS": {
+          "label": "TURN sa TLS/DTLS",
+          "description": "Gamitin ang TURN sa TLS (TCP) o DTLS (UDP). Nangangailangan ng valid na certificate sa TURN server."
+        },
+        "SELKIES_TURN_SHARED_SECRET": {
+          "label": "TURN Shared Secret",
+          "description": "Shared secret na ginagamit upang bumuo ng mga time-limited na HMAC TURN credential."
+        },
+        "SELKIES_TURN_USERNAME": {
+          "label": "TURN Username",
+          "description": "Legacy na username ng long-term TURN credential."
+        },
+        "SELKIES_TURN_PASSWORD": {
+          "label": "TURN Password",
+          "description": "Legacy na password ng long-term TURN credential."
+        },
+        "SELKIES_TURN_REST_URI": {
+          "label": "URI ng TURN REST API",
+          "description": "URI ng isang TURN REST credential service, hal., http://localhost:8008."
+        },
+        "SELKIES_TURN_REST_API_KEY": {
+          "label": "API Key ng TURN REST",
+          "description": "API key na ipinapadala sa TURN REST service."
+        },
+        "SELKIES_TURN_REST_USERNAME": {
+          "label": "Username ng TURN REST",
+          "description": "Username na inilalagay ng TURN REST service sa credential. Kapag walang laman, ginagamit ang 'selkies'."
+        },
+        "SELKIES_WEBRTC_PUBLIC_IP": {
+          "label": "Pampublikong IP ng WebRTC",
+          "description": "Pampublikong address na ia-advertise sa mga host ICE candidate para sa isang server sa likod ng static 1:1 NAT. Isang IPv4 at/o isang IPv6 address."
+        },
+        "SELKIES_ENABLE_CLOUDFLARE_TURN": {
+          "label": "Paganahin ang Cloudflare TURN",
+          "description": "Gamitin ang Cloudflare TURN service. Nangangailangan ng token ID at API token sa ibaba."
+        },
+        "SELKIES_CLOUDFLARE_TURN_TOKEN_ID": {
+          "label": "Token ID ng Cloudflare TURN",
+          "description": "Ang token ID ng Cloudflare TURN app."
+        },
+        "SELKIES_CLOUDFLARE_TURN_API_TOKEN": {
+          "label": "API Token ng Cloudflare TURN",
+          "description": "Ang API token ng Cloudflare TURN."
+        },
+        "SELKIES_RTC_CONFIG_JSON": {
+          "label": "Path ng RTC Config JSON",
+          "description": "Path sa loob ng container patungo sa isang JSON file na naglalaman ng konfigurasyon ng WebRTC. Nag-o-override sa bawat ibang setting ng STUN/TURN at pana-panahong binabasa muli."
         },
         "DOCKER_PRIVILEGED": {
           "label": "Privileged Mode",
@@ -699,6 +928,8 @@
       "errorPulling": "Error sa paghila ng imahe.",
       "manualInstallNote": "Tandaan: Ang mga imaheng idinagdag nang manu-mano ay dapat batay sa isang imaheng tugma sa selkies-baseimage.",
       "generalTitle": "Pangkalahatan at Pagganap na mga Setting",
+      "webrtcTitle": "Mga Setting ng WebRTC at TURN",
+      "webrtcDescription": "Bilang default, nag-i-stream ang mga session sa pamamagitan ng WebSockets. Ang pagtatakda ng anumang halaga ng STUN, TURN, Cloudflare o pampublikong IP sa ibaba, o ang pagpili ng WebRTC mode, ay naglilipat ng container sa WebRTC na may pinaganang dual mode upang makabalik pa rin ang mga user sa WebSockets.",
       "dockerTitle": "Mga Advanced na Pag-override ng Docker",
       "dockerDescription": "Ang mga setting na ito ay nag-o-override sa default na configuration ng container. Gamitin nang may pag-iingat at kung alam mo lang ang iyong ginagawa."
     },

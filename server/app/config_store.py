@@ -701,6 +701,71 @@ def remove_record(app_id: str) -> None:
 # ---------------------------------------------------------------------------
 
 
+# Template keys whose upstream Selkies name changed. Older template files keep
+# working: the legacy key is translated when the template is loaded, and the
+# editor then shows and saves the current name.
+LEGACY_TEMPLATE_KEYS = {
+    "SELKIES_IS_MANUAL_RESOLUTION_MODE": "SELKIES_MANUAL_RESOLUTION",
+    "SELKIES_H264_CRF": "SELKIES_VIDEO_CRF",
+    "SELKIES_H264_FULLCOLOR": "SELKIES_VIDEO_FULLCOLOR",
+    "SELKIES_H264_STREAMING_MODE": "SELKIES_VIDEO_STREAMING_MODE",
+    "SELKIES_H264_PAINTOVER_CRF": "SELKIES_VIDEO_PAINTOVER_CRF",
+    "SELKIES_H264_PAINTOVER_BURST_FRAMES": "SELKIES_VIDEO_PAINTOVER_BURST_FRAMES",
+}
+LEGACY_CLIPBOARD_KEYS = (
+    "SELKIES_CLIPBOARD_ENABLED",
+    "SELKIES_CLIPBOARD_IN_ENABLED",
+    "SELKIES_CLIPBOARD_OUT_ENABLED",
+)
+LEGACY_ENCODER_NAMES = {"x264enc": "h264enc", "x264enc-striped": "h264enc-striped"}
+
+
+def _is_true(value: Any) -> bool:
+    return str(value).strip().lower() in ("true", "1", "yes")
+
+
+def migrate_legacy_template_settings(template_settings: dict[str, Any]) -> dict[str, Any]:
+    """Return `template_settings` with pre-refresh Selkies keys translated.
+
+    Renamed keys move to their current name unless the current name is
+    already present. The three clipboard booleans collapse into the
+    `SELKIES_ENABLE_CLIPBOARD` policy (`true`, `in`, `out` or `false`), and
+    encoder spellings the current Selkies no longer lists are mapped onto
+    the encoders that serve them. Unknown keys pass through untouched.
+    """
+    migrated: dict[str, Any] = {}
+    for key, value in template_settings.items():
+        if key in LEGACY_CLIPBOARD_KEYS:
+            continue
+        migrated[LEGACY_TEMPLATE_KEYS.get(key, key)] = value
+    for legacy, current in LEGACY_TEMPLATE_KEYS.items():
+        if legacy in template_settings and current in template_settings:
+            migrated[current] = template_settings[current]
+
+    if "SELKIES_ENABLE_CLIPBOARD" not in template_settings and any(
+        key in template_settings for key in LEGACY_CLIPBOARD_KEYS
+    ):
+        enabled = _is_true(template_settings.get("SELKIES_CLIPBOARD_ENABLED", "true"))
+        inbound = enabled and _is_true(template_settings.get("SELKIES_CLIPBOARD_IN_ENABLED", "true"))
+        outbound = enabled and _is_true(template_settings.get("SELKIES_CLIPBOARD_OUT_ENABLED", "true"))
+        if inbound and outbound:
+            policy = "true"
+        elif inbound:
+            policy = "in"
+        elif outbound:
+            policy = "out"
+        else:
+            policy = "false"
+        migrated["SELKIES_ENABLE_CLIPBOARD"] = policy
+
+    encoder = migrated.get("SELKIES_ENCODER")
+    if isinstance(encoder, str) and encoder.strip():
+        names = [LEGACY_ENCODER_NAMES.get(n.strip().lower(), n.strip()) for n in encoder.split(",")]
+        deduped = list(dict.fromkeys(n for n in names if n))
+        migrated["SELKIES_ENCODER"] = ",".join(deduped)
+    return migrated
+
+
 def _load_templates_from(directory: str, source: str) -> None:
     """Load every YAML template in `directory` into state."""
     if not os.path.isdir(directory):
@@ -716,7 +781,7 @@ def _load_templates_from(directory: str, source: str) -> None:
                 template_data.setdefault("settings", {})
                 state.app_templates[name] = {
                     "name": name,
-                    "settings": template_data.get("settings") or {},
+                    "settings": migrate_legacy_template_settings(template_data.get("settings") or {}),
                 }
                 state.template_files[name] = path
         except Exception as exc:  # noqa: BLE001

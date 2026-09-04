@@ -24,7 +24,7 @@ from typing import Any
 import docker
 from fastapi import HTTPException
 
-from . import config_store
+from . import config_store, user_manager
 from .docker_utils import translate_path_to_host
 from .fsutil import safe_copytree, sanitize_for_filename, unique_filename
 from .models import InstalledApp
@@ -35,6 +35,29 @@ from .state import state
 logger = logging.getLogger(__name__)
 
 DOCKER_LIST_KEYS = ("devices", "volumes")
+
+# User-level hardening switches (see `UserSettings`) and the base image preset
+# each one forces on. Applied after the template and the per-app environment so
+# a restriction placed on the account cannot be undone by either.
+HARDENING_ENV = {
+    "harden_container": "HARDEN_DESKTOP",
+    "harden_openbox": "HARDEN_OPENBOX",
+}
+
+
+def hardening_env(effective_settings: dict[str, Any] | None) -> dict[str, str]:
+    """Return the environment forced by a user's hardening switches.
+
+    Args:
+        effective_settings: The user's effective settings (group applied).
+
+    Returns:
+        `HARDEN_DESKTOP` / `HARDEN_OPENBOX` set to `"true"` for each enabled
+        switch; an empty dict when none is enabled.
+    """
+    if not effective_settings:
+        return {}
+    return {var: "true" for key, var in HARDENING_ENV.items() if effective_settings.get(key)}
 DOCKER_DICT_KEYS = ("environment",)
 
 
@@ -353,6 +376,7 @@ def build_launch_spec(
     host_mount_path: str | None,
     shared_files_path: str | None,
     collaboration: dict[str, Any] | None = None,
+    forced_env: dict[str, str] | None = None,
 ) -> LaunchSpec:
     """Assemble the environment, volumes and Docker options for a launch.
 
@@ -367,6 +391,8 @@ def build_launch_spec(
         host_mount_path: Session home directory on the server, or `None`.
         shared_files_path: Shared files directory on the server, or `None`.
         collaboration: Extra provider kwargs for collaboration sessions.
+        forced_env: Variables applied last, after the template and the app's
+            own overrides; the user-level hardening from `hardening_env`.
 
     Returns:
         A `LaunchSpec`.
@@ -380,7 +406,7 @@ def build_launch_spec(
     template = state.app_templates.get(app.app_template)
     template_settings: dict[str, Any] = {}
     if template and template.get("settings"):
-        template_settings = template["settings"]
+        template_settings = config_store.migrate_legacy_template_settings(template["settings"])
         env.update({k: str(v) for k, v in template_settings.items() if not k.startswith("DOCKER_")})
     elif not template:
         logger.warning(
@@ -399,6 +425,8 @@ def build_launch_spec(
         env["LC_ALL"] = language
     for override in app.provider_config.env or []:
         env[override.name] = override.value
+    if forced_env:
+        env.update(forced_env)
 
     if gpu_config and (gpu_config["type"] == "dri3" or (gpu_config["type"] == "nvidia" and wayland_mode)):
         env["DRI_NODE"] = gpu_config["device"]
@@ -639,6 +667,7 @@ async def launch_application(
         host_mount_path=host_mount_path,
         shared_files_path=shared_files_path,
         collaboration=collaboration,
+        forced_env=hardening_env(effective_settings),
     )
 
     launch_context = spec.launch_context
@@ -806,6 +835,9 @@ async def ensure_container_for_session(
         host_mount_path=new_home,
         shared_files_path=shared_files_path,
         collaboration=collaboration,
+        forced_env=hardening_env(
+            user_manager.get_effective_settings(session["username"]) if session.get("username") else None
+        ),
     )
 
     provider = DockerProvider(spec.app_config)

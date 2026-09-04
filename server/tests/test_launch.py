@@ -148,3 +148,54 @@ def test_session_base_env_timezone(monkeypatch):
     env = launch.session_base_env("s", "u", "p", None, "Australia/Sydney")
     assert env["TZ"] == "Australia/Sydney"
     assert launch.session_base_env("s", "u", "p", None, "bogus zone")["TZ"] == "Etc/UTC"
+
+
+def test_hardening_env_from_user_settings():
+    assert launch.hardening_env(None) == {}
+    assert launch.hardening_env({"harden_container": False, "harden_openbox": False}) == {}
+    assert launch.hardening_env({"harden_container": True}) == {"HARDEN_DESKTOP": "true"}
+    assert launch.hardening_env({"harden_container": True, "harden_openbox": True}) == {
+        "HARDEN_DESKTOP": "true",
+        "HARDEN_OPENBOX": "true",
+    }
+
+
+def test_build_launch_spec_forced_env_wins_and_legacy_keys_migrate(tmp_path):
+    state.app_templates["Default"] = {
+        "name": "Default",
+        "settings": {
+            "HARDEN_DESKTOP": "false",
+            "SELKIES_H264_CRF": "10-40",
+            "SELKIES_CLIPBOARD_IN_ENABLED": "false",
+        },
+    }
+    app = make_app(provider_config={
+        "image": "img:latest",
+        "port": 3000,
+        "nvidia_support": False,
+        "dri3_support": True,
+        "type": "browser",
+        "url_support": True,
+        "open_support": False,
+        "extensions": [],
+        "env": [{"name": "HARDEN_OPENBOX", "value": "false"}],
+        "docker_overrides": {},
+    })
+    spec = launch.build_launch_spec(
+        app,
+        "sess",
+        base_env=launch.session_base_env("sess", "u", "p", None),
+        extra_env=None,
+        language=None,
+        wayland_mode=True,
+        gpu_config=None,
+        host_mount_path=None,
+        shared_files_path=None,
+        forced_env=launch.hardening_env({"harden_container": True, "harden_openbox": True}),
+    )
+    assert spec.env["HARDEN_DESKTOP"] == "true"
+    assert spec.env["HARDEN_OPENBOX"] == "true"
+    assert spec.env["SELKIES_VIDEO_CRF"] == "10-40"
+    assert "SELKIES_H264_CRF" not in spec.env
+    assert spec.env["SELKIES_ENABLE_CLIPBOARD"] == "out"
+    assert "SELKIES_CLIPBOARD_IN_ENABLED" not in spec.env

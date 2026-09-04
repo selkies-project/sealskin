@@ -281,6 +281,10 @@
           "label": "Statistieken Tonen",
           "description": "Toon de sectie statistieken in de zijbalk."
         },
+        "SELKIES_UI_SIDEBAR_SHOW_SHORTCUTS": {
+          "label": "Sneltoetsensectie Tonen",
+          "description": "Toon de sectie sneltoetsen in de zijbalk."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
           "label": "Klembord Tonen",
           "description": "Toon de klembordsectie in de zijbalk."
@@ -300,6 +304,18 @@
         "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
           "label": "Gamepad-sectie Tonen",
           "description": "Toon de gamepadsectie in de zijbalk."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
+          "label": "Volledig Scherm Knop Tonen",
+          "description": "Toon de knop voor volledig scherm in de zijbalk."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMING_MODE": {
+          "label": "Gamingmodus Knop Tonen",
+          "description": "Toon de knop voor gamingmodus (pointer lock) in de zijbalk."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_TRACKPAD": {
+          "label": "Trackpad Knop Tonen",
+          "description": "Toon de knop voor het virtuele trackpad in de zijbalk."
         },
         "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
           "label": "Toetsenbordknop Tonen",
@@ -332,7 +348,6 @@
           "options": {
             "default": "Standaard",
             "selkiesDefault": "Selkies (Standaard)",
-            "zinc": "Zinc",
             "wish": "Wish"
           }
         },
@@ -342,23 +357,21 @@
         },
         "SELKIES_MICROPHONE_ENABLED": {
           "label": "Microfoon Inschakelen",
-          "description": "Schakel client-naar-server microfoon doorsturen in."
+          "description": "Schakel client-naar-server microfoon doorsturen in. Standaard uitgeschakeld upstream."
         },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "Gamepad Inschakelen",
           "description": "Schakel gamepad-ondersteuning in."
         },
-        "SELKIES_CLIPBOARD_ENABLED": {
-          "label": "Klembord Inschakelen",
-          "description": "Schakel klembordsynchronisatie in."
-        },
-        "SELKIES_CLIPBOARD_IN_ENABLED": {
-          "label": "Klembord van client naar server inschakelen",
-          "description": "Overdracht van klembordgegevens vanuit de browser toestaan."
-        },
-        "SELKIES_CLIPBOARD_OUT_ENABLED": {
-          "label": "Klembord van server naar client inschakelen",
-          "description": "Overdracht van klembordgegevens vanuit de server toestaan."
+        "SELKIES_ENABLE_CLIPBOARD": {
+          "label": "Klembordbeleid",
+          "description": "Welke klembordrichtingen zijn toegestaan. 'Alleen server naar client' voorkomt ook dat de pagina het lokale klembord leest, wat de plakprompts in Firefox en Safari veroorzaakt.",
+          "options": {
+            "both": "Beide richtingen",
+            "inOnly": "Alleen client naar server",
+            "outOnly": "Alleen server naar client",
+            "disabled": "Uitgeschakeld"
+          }
         },
         "SELKIES_ENABLE_BINARY_CLIPBOARD": {
           "label": "Binair Klembord Inschakelen",
@@ -370,25 +383,61 @@
         },
         "SELKIES_FILE_TRANSFERS": {
           "label": "Bestandsoverdrachten",
-          "description": "Toegestane richtingen ('upload,download', 'upload', 'download', 'none')."
+          "description": "Toegestane richtingen ('upload,download', 'upload', 'download' of 'none'). Wordt leeggemaakt door Desktop Beveiligen, tenzij hier ingesteld."
+        },
+        "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
+          "label": "Bestandsoverdrachtlimiet (Mbit/s)",
+          "description": "Statische begrenzing gedeeld door alle uploads en downloads. 0 schakelt de limiet uit."
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "Alle Deling Inschakelen",
           "description": "Hoofdschakelaar voor alle deelfuncties."
         },
+        "SELKIES_ENABLE_SHARED": {
+          "label": "Alleen-lezen Deling Inschakelen",
+          "description": "Schakel alleen-lezen deellinks in."
+        },
+        "SELKIES_ENABLE_COLLAB": {
+          "label": "Samenwerking Inschakelen",
+          "description": "Laat een kijker met het master-token van de sessie optreden als medewerker met lees- en schrijfrechten. Vereist voor SealSkin-rooms."
+        },
+        "SELKIES_ENABLE_PLAYER2": {
+          "label": "Speler 2 Deling Inschakelen",
+          "description": "Schakel de deellink voor gamepad-speler 2 in."
+        },
+        "SELKIES_ENABLE_PLAYER3": {
+          "label": "Speler 3 Deling Inschakelen",
+          "description": "Schakel de deellink voor gamepad-speler 3 in."
+        },
+        "SELKIES_ENABLE_PLAYER4": {
+          "label": "Speler 4 Deling Inschakelen",
+          "description": "Schakel de deellink voor gamepad-speler 4 in."
+        },
         "SELKIES_SECOND_SCREEN": {
           "label": "Tweede Scherm Inschakelen",
           "description": "Schakel ondersteuning voor een tweede monitor/display in."
+        },
+        "SELKIES_ENABLE_RESIZE": {
+          "label": "Dynamisch Schalen Inschakelen",
+          "description": "Pas het externe scherm aan aan het browservenster."
         },
         "SELKIES_USE_BROWSER_CURSORS": {
           "label": "Browser Cursors Gebruiken",
           "description": "Gebruik browser CSS-cursors in plaats van renderen naar canvas."
         },
+        "SELKIES_ENABLE_CURSORS": {
+          "label": "Externe Cursors Inschakelen",
+          "description": "Stuur de eigen cursorvormen van de applicatie naar de client."
+        },
+        "SELKIES_CURSOR_SIZE": {
+          "label": "Cursorgrootte",
+          "description": "Cursorgrootte in punten bij 96 DPI, geschaald met de sessie-DPI. -1 gebruikt de platformstandaard (32 op X11, 24 op Wayland)."
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "CSS Schalen Gebruiken (LoDPI)",
           "description": "Indien waar, wordt een lagere resolutie verzonden en wordt het canvas uitgerekt."
         },
-        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+        "SELKIES_MANUAL_RESOLUTION": {
           "label": "Handmatige Resolutiemodus",
           "description": "Vergrendel de resolutie op de handmatige breedte/hoogte waarden."
         },
@@ -410,11 +459,27 @@
         },
         "SELKIES_AUDIO_BITRATE": {
           "label": "Audio Bitrate",
-          "description": "De standaard audio bitrate."
+          "description": "De standaard Opus audio bitrate."
+        },
+        "SELKIES_AUDIO_FRAME_DURATION_MS": {
+          "label": "Audio Frameduur",
+          "description": "Opus frameduur. Lagere waarden verminderen de audiolatentie tegen een kleine kost in bandbreedte en pakketsnelheid."
+        },
+        "SELKIES_AUDIO_CHANNELS": {
+          "label": "Audiokanalen",
+          "description": "Aantal audiokanalen; 2 is stereo."
+        },
+        "SELKIES_AUDIO_REDUNDANCY": {
+          "label": "Audioredundantie (Opus RED)",
+          "description": "Stuur eerdere audioframes mee als redundantie om onderbrekingen bij pakketverlies te verminderen."
+        },
+        "SELKIES_AUDIO_REDUNDANCY_DISTANCE": {
+          "label": "Audioredundantie Afstand",
+          "description": "Aantal eerdere frames dat als redundantie wordt meegestuurd (0-4). Hoger overleeft langere verliesperiodes tegen proportioneel meer bandbreedte."
         },
         "SELKIES_ENCODER": {
           "label": "Encoders",
-          "description": "Komma-gescheiden lijst van encoders. De eerste is standaard."
+          "description": "Komma-gescheiden lijst van toegestane encoders (h264enc, h264enc-striped, jpeg). De eerste is standaard; een enkele waarde vergrendelt de keuze. Alleen h264enc streamt over WebRTC."
         },
         "SELKIES_USE_CPU": {
           "label": "CPU-codering Forceren",
@@ -422,23 +487,51 @@
         },
         "SELKIES_FRAMERATE": {
           "label": "Framerate (Bereik of Vast)",
-          "description": "bijv., '8-120' voor een bereik of '60' voor vast."
+          "description": "bijv., '8-240' voor een bereik, '60' voor een vaste beginwaarde, '60,8-240' voor beide; '60-60' vergrendelt het."
         },
-        "SELKIES_H264_CRF": {
-          "label": "H.264 CRF (Bereik of Vast)",
-          "description": "bijv., '5-50' voor een bereik of '25' voor vast."
+        "SELKIES_RATE_CONTROL_MODE": {
+          "label": "Rate Control Modus",
+          "description": "Standaard H.264 rate control: constante kwaliteit (CRF) of constante bitrate (CBR).",
+          "options": {
+            "crf": "Constante kwaliteit (CRF)",
+            "cbr": "Constante bitrate (CBR)"
+          }
+        },
+        "SELKIES_ENABLE_RATE_CONTROL": {
+          "label": "Wisselen van Rate Control Toestaan",
+          "description": "Laat clients wisselen tussen CRF en CBR. Uit vergrendelt de encoder op zijn ingebouwde standaard."
+        },
+        "SELKIES_VIDEO_CRF": {
+          "label": "Video CRF (Bereik of Vast)",
+          "description": "H.264 constante kwaliteit: '5-50' voor een bereik, '25' voor een vaste beginwaarde, of '25,5-50' voor beide."
+        },
+        "SELKIES_VIDEO_BITRATE": {
+          "label": "Video Bitrate kbps (Bereik of Vast)",
+          "description": "CBR-bitrate in kilobits per seconde: '100-1000000' voor een bereik, '8000' voor een vaste beginwaarde, of '8000,100-1000000' voor beide."
+        },
+        "SELKIES_VIDEO_MIN_QP": {
+          "label": "Video Minimum QP",
+          "description": "Minimale H.264-quantizer in CBR-modus (0 = encoderstandaard). Verhogen beperkt het bitverbruik bij eenvoudige content."
+        },
+        "SELKIES_VIDEO_MAX_QP": {
+          "label": "Video Maximum QP",
+          "description": "Maximale H.264-quantizer in CBR-modus (0 = encoderstandaard). Verlagen houdt tekst leesbaar bij beweging, ten koste van het overschrijden van het bitratedoel."
+        },
+        "SELKIES_KEYFRAME_INTERVAL": {
+          "label": "Keyframe-interval (seconden)",
+          "description": "Seconden tussen geplande herstel-keyframes. 0 houdt de GOP oneindig en stuurt alleen keyframes op aanvraag."
         },
         "SELKIES_JPEG_QUALITY": {
           "label": "JPEG Kwaliteit (Bereik of Vast)",
-          "description": "bijv., '1-100' voor een bereik of '60' voor vast."
+          "description": "'1-100' voor een bereik, '40' voor een vaste beginwaarde, of '40,1-100' voor beide."
         },
-        "SELKIES_H264_FULLCOLOR": {
-          "label": "H.264 Volledige Kleur",
-          "description": "Schakel H.264 volledig kleurbereik in voor pixelflux-encoders."
+        "SELKIES_VIDEO_FULLCOLOR": {
+          "label": "Video Volledige Kleur (4:4:4)",
+          "description": "Codeer H.264 met 4:4:4 chroma in plaats van 4:2:0. Clients zonder 4:4:4-decoder vallen terug op JPEG als dit vergrendeld aan staat."
         },
-        "SELKIES_H264_STREAMING_MODE": {
-          "label": "H.264 Streaming (Turbo) Modus",
-          "description": "Schakel H.264 lage latentie streamingmodus in."
+        "SELKIES_VIDEO_STREAMING_MODE": {
+          "label": "Video Streaming (Turbo) Modus",
+          "description": "Codeer elk frame zoals een traditionele video-encoder in plaats van alleen gewijzigde gebieden."
         },
         "SELKIES_USE_PAINT_OVER_QUALITY": {
           "label": "Paint-Over Kwaliteit Gebruiken",
@@ -446,23 +539,49 @@
         },
         "SELKIES_PAINT_OVER_JPEG_QUALITY": {
           "label": "Paint-Over JPEG Kwaliteit",
-          "description": "bijv., '1-100' voor een bereik of '90' voor vast."
+          "description": "'1-100' voor een bereik, '90' voor een vaste beginwaarde, of '90,1-100' voor beide."
         },
-        "SELKIES_H264_PAINTOVER_CRF": {
-          "label": "Paint-Over H.264 CRF",
-          "description": "bijv., '5-50' voor een bereik of '18' voor vast."
+        "SELKIES_VIDEO_PAINTOVER_CRF": {
+          "label": "Paint-Over Video CRF",
+          "description": "'5-50' voor een bereik, '18' voor een vaste beginwaarde, of '18,5-50' voor beide."
         },
-        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
+        "SELKIES_VIDEO_PAINTOVER_BURST_FRAMES": {
           "label": "Paint-Over Burst Frames",
-          "description": "bijv., '1-30' voor een bereik of '5' voor vast."
+          "description": "'1-30' voor een bereik, '5' voor een vaste beginwaarde, of '5,1-30' voor beide."
+        },
+        "SELKIES_BACKPRESSURE_QUEUE_SIZE": {
+          "label": "Backpressure Wachtrijgrootte",
+          "description": "Frames en audiochunks die per stream worden gebufferd voordat ze bij backpressure worden weggegooid (WebSockets-modus). Hoger tolereert haperingen van de client ten koste van latentie."
+        },
+        "SELKIES_WEBCAM_WIDTH": {
+          "label": "Webcam Breedte",
+          "description": "Breedte van het virtuele webcam-apparaat; clientframes worden geschaald en geletterboxt om te passen."
+        },
+        "SELKIES_WEBCAM_HEIGHT": {
+          "label": "Webcam Hoogte",
+          "description": "Hoogte van het virtuele webcam-apparaat; clientframes worden geschaald en geletterboxt om te passen."
+        },
+        "SELKIES_WEBCAM_ENCODER": {
+          "label": "Webcam Uplink Encoder",
+          "description": "Codec die WebSocket-clients gebruiken om cameraframes te verzenden. Auto kiest de beste die de browser kan volhouden.",
+          "options": {
+            "auto": "Auto"
+          }
+        },
+        "SELKIES_WEBCAM_PIXEL_FORMAT": {
+          "label": "Webcam Pixelformaat",
+          "description": "Pixelformaat van het virtuele webcam-apparaat. Auto volgt wat de client verzendt.",
+          "options": {
+            "auto": "Auto"
+          }
         },
         "HARDEN_DESKTOP": {
           "label": "Desktop Beveiligen (Preset)",
-          "description": "Schakelt DISABLE_OPEN_TOOLS, DISABLE_SUDO en DISABLE_TERMINALS in."
+          "description": "Schakelt DISABLE_OPEN_TOOLS, DISABLE_SUDO en DISABLE_TERMINALS in, en schakelt, tenzij expliciet ingesteld, ook bestandsoverdrachten, de commando websocket en de bestands- en app-secties in de zijbalk uit. Geforceerd aan voor gebruikers met Container Beveiligen."
         },
         "HARDEN_OPENBOX": {
           "label": "Window Manager Beveiligen (Preset)",
-          "description": "Schakelt DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS en HARDEN_KEYBINDS in. Schakelt ook RESTART_APP in."
+          "description": "Schakelt DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS en HARDEN_KEYBINDS in voor Openbox en labwc, en RESTART_APP tenzij expliciet ingesteld. Geforceerd aan voor gebruikers met Window Manager Beveiligen."
         },
         "DISABLE_OPEN_TOOLS": {
           "label": "Open Tools Uitschakelen",
@@ -486,11 +605,11 @@
         },
         "HARDEN_KEYBINDS": {
           "label": "Sneltoetsen Beveiligen",
-          "description": "Schakelt standaard Openbox-sneltoetsen zoals Alt+F4 uit."
+          "description": "Schakelt window manager-sneltoetsen zoals Alt+F4, Alt+Escape, Alt+Space en Super+E uit en vergrendelt de window manager-configuratie."
         },
         "RESTART_APP": {
           "label": "App Herstarten bij Sluiten",
-          "description": "Herstart de hoofdapplicatie automatisch als deze wordt gesloten."
+          "description": "Herstart de hoofdapplicatie automatisch als deze wordt gesloten en maakt het autostart-bestand alleen-lezen."
         },
         "MAX_RES": {
           "label": "Maximale Resolutie",
@@ -512,6 +631,10 @@
           "label": "DRI3 Uitschakelen",
           "description": "Gebruik geen DRI3-versnelling als een videokaart wordt gedetecteerd."
         },
+        "AUTO_GPU": {
+          "label": "Automatische GPU-selectie",
+          "description": "'true' rendert op de eerste GPU, 'false' schakelt het uit, of een fabrikant, driver of PCI-fabrikant-ID (nvidia, amdgpu, 0x10de) kiest een specifieke."
+        },
         "NO_DECOR": {
           "label": "Geen Vensterdecoraties",
           "description": "Draai applicatie zonder vensterranden voor PWA-gebruik."
@@ -522,11 +645,117 @@
         },
         "NO_GAMEPAD": {
           "label": "Gamepad Injectie Uitschakelen",
-          "description": "Schakel userspace gamepad interposer injectie uit."
+          "description": "Sla de userspace gamepad interposer over. Verbergt ook de gamepadsectie en de deellinks voor spelers."
+        },
+        "NO_WEBCAM": {
+          "label": "Webcam Injectie Uitschakelen",
+          "description": "Sla het virtuele webcam-apparaat en de interposer over. Verbergt ook de webcamknop."
+        },
+        "SELKIES_RUN_AFTER_CONNECT": {
+          "label": "Uitvoeren na Verbinden",
+          "description": "Shell-commando dat in de container wordt uitgevoerd wanneer de eerste client verbinding maakt."
+        },
+        "SELKIES_RUN_AFTER_DISCONNECT": {
+          "label": "Uitvoeren na Verbreken",
+          "description": "Shell-commando dat in de container wordt uitgevoerd wanneer de laatste client de verbinding verbreekt."
         },
         "SELKIES_DEBUG": {
           "label": "Selkies Debugging Inschakelen",
           "description": "Schakel debug-logging in voor streamingcomponenten."
+        },
+        "SELKIES_MODE": {
+          "label": "Streamingmodus",
+          "description": "Standaard gebruikt transport. Auto kiest WebRTC wanneer een TURN/STUN-waarde is ingesteld, anders WebSockets.",
+          "options": {
+            "auto": "Auto",
+            "websockets": "WebSockets",
+            "webrtc": "WebRTC"
+          }
+        },
+        "SELKIES_ENABLE_DUAL_MODE": {
+          "label": "Dual Mode",
+          "description": "Laat gebruikers vanuit de zijbalk wisselen tussen WebRTC en WebSockets. Auto schakelt dit alleen in wanneer WebRTC is geconfigureerd.",
+          "options": {
+            "auto": "Auto",
+            "enabled": "Ingeschakeld",
+            "disabled": "Uitgeschakeld"
+          }
+        },
+        "SELKIES_WEBRTC_PACER": {
+          "label": "WebRTC Pacer",
+          "description": "Verstuur uitgaande WebRTC-pakketten gelijkmatig met strikte prioriteiten, zodat audio en invoer beschermd zijn tegen videobursts op overbelaste verbindingen."
+        },
+        "SELKIES_CONGESTION_CONTROL": {
+          "label": "Congestiebeheer",
+          "description": "Pas de videobitrate aan aan de bandbreedteschatting uit WebRTC-ontvangerfeedback. Effectief in CBR-modus."
+        },
+        "SELKIES_STUN_HOST": {
+          "label": "STUN Host",
+          "description": "STUN-server voor NAT hole punching. Verwijs naar een interne server voor netwerken zonder internet."
+        },
+        "SELKIES_STUN_PORT": {
+          "label": "STUN Poort",
+          "description": "Poort van de STUN-server."
+        },
+        "SELKIES_TURN_HOST": {
+          "label": "TURN Host",
+          "description": "TURN-server gebruikt met het gedeelde geheim of langetermijnreferenties. Zet IPv6-adressen tussen vierkante haken."
+        },
+        "SELKIES_TURN_PORT": {
+          "label": "TURN Poort",
+          "description": "Poort van de TURN-server."
+        },
+        "SELKIES_TURN_PROTOCOL": {
+          "label": "TURN Protocol",
+          "description": "Transport dat de client gebruikt om TURN te bereiken. UDP wordt sterk aanbevolen; gebruik TCP alleen waar UDP is geblokkeerd."
+        },
+        "SELKIES_TURN_TLS": {
+          "label": "TURN over TLS/DTLS",
+          "description": "Gebruik TURN over TLS (TCP) of DTLS (UDP). Vereist een geldig certificaat op de TURN-server."
+        },
+        "SELKIES_TURN_SHARED_SECRET": {
+          "label": "TURN Gedeeld Geheim",
+          "description": "Gedeeld geheim dat wordt gebruikt om tijdelijke HMAC TURN-referenties te genereren."
+        },
+        "SELKIES_TURN_USERNAME": {
+          "label": "TURN Gebruikersnaam",
+          "description": "Gebruikersnaam van de verouderde TURN-langetermijnreferenties."
+        },
+        "SELKIES_TURN_PASSWORD": {
+          "label": "TURN Wachtwoord",
+          "description": "Wachtwoord van de verouderde TURN-langetermijnreferenties."
+        },
+        "SELKIES_TURN_REST_URI": {
+          "label": "TURN REST API URI",
+          "description": "URI van een TURN REST-referentieservice, bijv. http://localhost:8008."
+        },
+        "SELKIES_TURN_REST_API_KEY": {
+          "label": "TURN REST API Sleutel",
+          "description": "API-sleutel die naar de TURN REST-service wordt gestuurd."
+        },
+        "SELKIES_TURN_REST_USERNAME": {
+          "label": "TURN REST Gebruikersnaam",
+          "description": "Gebruikersnaam die de TURN REST-service in de referentie opneemt. Leeg gebruikt 'selkies'."
+        },
+        "SELKIES_WEBRTC_PUBLIC_IP": {
+          "label": "WebRTC Publiek IP",
+          "description": "Publiek adres dat wordt geadverteerd in host ICE-kandidaten voor een server achter statische 1:1 NAT. Eén IPv4- en/of één IPv6-adres."
+        },
+        "SELKIES_ENABLE_CLOUDFLARE_TURN": {
+          "label": "Cloudflare TURN Inschakelen",
+          "description": "Gebruik de Cloudflare TURN-service. Vereist de token-ID en API-token hieronder."
+        },
+        "SELKIES_CLOUDFLARE_TURN_TOKEN_ID": {
+          "label": "Cloudflare TURN Token-ID",
+          "description": "De Cloudflare TURN app-token-ID."
+        },
+        "SELKIES_CLOUDFLARE_TURN_API_TOKEN": {
+          "label": "Cloudflare TURN API Token",
+          "description": "De Cloudflare TURN API-token."
+        },
+        "SELKIES_RTC_CONFIG_JSON": {
+          "label": "RTC Config JSON Pad",
+          "description": "Pad binnen de container naar een JSON-bestand met de WebRTC-configuratie. Overschrijft alle andere STUN/TURN-instellingen en wordt periodiek opnieuw gelezen."
         },
         "DOCKER_PRIVILEGED": {
           "label": "Geprivilegieerde Modus",
@@ -699,6 +928,8 @@
       "errorPulling": "Fout bij het pullen van de image.",
       "manualInstallNote": "Opmerking: Handmatig toegevoegde images moeten gebaseerd zijn op een selkies-baseimage compatibele image.",
       "generalTitle": "Algemene & Prestatie-instellingen",
+      "webrtcTitle": "WebRTC- en TURN-instellingen",
+      "webrtcDescription": "Sessies streamen standaard over WebSockets. Als u hieronder een STUN-, TURN-, Cloudflare- of publieke IP-waarde instelt, of de WebRTC-modus kiest, schakelt de container over naar WebRTC met dual mode ingeschakeld, zodat gebruikers nog steeds kunnen terugvallen op WebSockets.",
       "dockerTitle": "Docker Geavanceerde Overschrijvingen",
       "dockerDescription": "Deze instellingen overschrijven de standaard containerconfiguratie. Gebruik met voorzichtigheid en alleen als u weet wat u doet."
     },

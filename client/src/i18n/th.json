@@ -281,6 +281,10 @@
           "label": "แสดงสถิติ",
           "description": "แสดงส่วนสถิติในแถบด้านข้าง"
         },
+        "SELKIES_UI_SIDEBAR_SHOW_SHORTCUTS": {
+          "label": "แสดงส่วนแป้นพิมพ์ลัด",
+          "description": "แสดงส่วนแป้นพิมพ์ลัดในแถบด้านข้าง"
+        },
         "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
           "label": "แสดงคลิปบอร์ด",
           "description": "แสดงส่วนคลิปบอร์ดในแถบด้านข้าง"
@@ -300,6 +304,18 @@
         "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
           "label": "แสดงส่วนเกมแพด",
           "description": "แสดงส่วนเกมแพดในแถบด้านข้าง"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
+          "label": "แสดงปุ่มเต็มหน้าจอ",
+          "description": "แสดงปุ่มเต็มหน้าจอในแถบด้านข้าง"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMING_MODE": {
+          "label": "แสดงปุ่มโหมดเกม",
+          "description": "แสดงปุ่มโหมดเกม (ล็อกตัวชี้) ในแถบด้านข้าง"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_TRACKPAD": {
+          "label": "แสดงปุ่มแทร็กแพด",
+          "description": "แสดงปุ่มแทร็กแพดเสมือนในแถบด้านข้าง"
         },
         "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
           "label": "แสดงปุ่มคีย์บอร์ด",
@@ -332,7 +348,6 @@
           "options": {
             "default": "ค่าเริ่มต้น",
             "selkiesDefault": "Selkies (ค่าเริ่มต้น)",
-            "zinc": "Zinc",
             "wish": "Wish"
           }
         },
@@ -342,23 +357,21 @@
         },
         "SELKIES_MICROPHONE_ENABLED": {
           "label": "เปิดใช้งานไมโครโฟน",
-          "description": "เปิดใช้งานการส่งต่อไมโครโฟนจากไคลเอนต์ไปยังเซิร์ฟเวอร์"
+          "description": "เปิดใช้งานการส่งต่อไมโครโฟนจากไคลเอนต์ไปยังเซิร์ฟเวอร์ ปิดตามค่าเริ่มต้นในโครงการต้นน้ำ"
         },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "เปิดใช้งานเกมแพด",
           "description": "เปิดใช้งานการรองรับเกมแพด"
         },
-        "SELKIES_CLIPBOARD_ENABLED": {
-          "label": "เปิดใช้งานคลิปบอร์ด",
-          "description": "เปิดใช้งานการซิงโครไนซ์คลิปบอร์ด"
-        },
-        "SELKIES_CLIPBOARD_IN_ENABLED": {
-          "label": "เปิดใช้งานคลิปบอร์ดจากไคลเอนต์ไปยังเซิร์ฟเวอร์",
-          "description": "อนุญาตให้ถ่ายโอนข้อมูลคลิปบอร์ดจากเบราว์เซอร์"
-        },
-        "SELKIES_CLIPBOARD_OUT_ENABLED": {
-          "label": "เปิดใช้งานคลิปบอร์ดจากเซิร์ฟเวอร์ไปยังไคลเอนต์",
-          "description": "อนุญาตให้ถ่ายโอนข้อมูลคลิปบอร์ดจากเซิร์ฟเวอร์"
+        "SELKIES_ENABLE_CLIPBOARD": {
+          "label": "นโยบายคลิปบอร์ด",
+          "description": "ทิศทางคลิปบอร์ดที่อนุญาต 'จากเซิร์ฟเวอร์ไปยังไคลเอนต์เท่านั้น' ยังป้องกันไม่ให้หน้าเว็บอ่านคลิปบอร์ดในเครื่อง ซึ่งเป็นสิ่งที่ทำให้เกิดข้อความแจ้งเตือนการวางใน Firefox และ Safari",
+          "options": {
+            "both": "ทั้งสองทิศทาง",
+            "inOnly": "จากไคลเอนต์ไปยังเซิร์ฟเวอร์เท่านั้น",
+            "outOnly": "จากเซิร์ฟเวอร์ไปยังไคลเอนต์เท่านั้น",
+            "disabled": "ปิดใช้งาน"
+          }
         },
         "SELKIES_ENABLE_BINARY_CLIPBOARD": {
           "label": "เปิดใช้งานคลิปบอร์ดไบนารี",
@@ -370,25 +383,61 @@
         },
         "SELKIES_FILE_TRANSFERS": {
           "label": "การถ่ายโอนไฟล์",
-          "description": "ทิศทางที่อนุญาต ('upload,download', 'upload', 'download', 'none')"
+          "description": "ทิศทางที่อนุญาต ('upload,download', 'upload', 'download' หรือ 'none') จะถูกล้างค่าโดยเพิ่มความปลอดภัยเดสก์ท็อป เว้นแต่จะตั้งค่าไว้ที่นี่"
+        },
+        "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
+          "label": "ขีดจำกัดการถ่ายโอนไฟล์ (Mbit/s)",
+          "description": "ขีดจำกัดคงที่ที่ใช้ร่วมกันสำหรับการอัปโหลดและดาวน์โหลดทั้งหมด 0 จะปิดใช้งานขีดจำกัด"
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "เปิดใช้งานการแชร์ทั้งหมด",
           "description": "สวิตช์หลักสำหรับคุณสมบัติการแชร์ทั้งหมด"
         },
+        "SELKIES_ENABLE_SHARED": {
+          "label": "เปิดใช้งานการแชร์แบบดูอย่างเดียว",
+          "description": "เปิดใช้งานลิงก์การแชร์แบบดูอย่างเดียว"
+        },
+        "SELKIES_ENABLE_COLLAB": {
+          "label": "เปิดใช้งานการทำงานร่วมกัน",
+          "description": "ให้ผู้ชมที่ถือโทเค็นหลักของเซสชันทำหน้าที่เป็นผู้ร่วมงานแบบอ่านและเขียนได้ จำเป็นสำหรับห้อง SealSkin"
+        },
+        "SELKIES_ENABLE_PLAYER2": {
+          "label": "เปิดใช้งานการแชร์ผู้เล่น 2",
+          "description": "เปิดใช้งานลิงก์การแชร์สำหรับเกมแพดผู้เล่น 2"
+        },
+        "SELKIES_ENABLE_PLAYER3": {
+          "label": "เปิดใช้งานการแชร์ผู้เล่น 3",
+          "description": "เปิดใช้งานลิงก์การแชร์สำหรับเกมแพดผู้เล่น 3"
+        },
+        "SELKIES_ENABLE_PLAYER4": {
+          "label": "เปิดใช้งานการแชร์ผู้เล่น 4",
+          "description": "เปิดใช้งานลิงก์การแชร์สำหรับเกมแพดผู้เล่น 4"
+        },
         "SELKIES_SECOND_SCREEN": {
           "label": "เปิดใช้งานหน้าจอที่สอง",
           "description": "เปิดใช้งานการรองรับจอภาพ/จอแสดงผลที่สอง"
+        },
+        "SELKIES_ENABLE_RESIZE": {
+          "label": "เปิดใช้งานการปรับขนาดแบบไดนามิก",
+          "description": "ปรับขนาดจอแสดงผลระยะไกลให้ตรงกับหน้าต่างเบราว์เซอร์"
         },
         "SELKIES_USE_BROWSER_CURSORS": {
           "label": "ใช้เคอร์เซอร์ของเบราว์เซอร์",
           "description": "ใช้เคอร์เซอร์ CSS ของเบราว์เซอร์แทนการเรนเดอร์ลงบน canvas"
         },
+        "SELKIES_ENABLE_CURSORS": {
+          "label": "เปิดใช้งานเคอร์เซอร์ระยะไกล",
+          "description": "ส่งรูปร่างเคอร์เซอร์ของแอปพลิเคชันเองไปยังไคลเอนต์"
+        },
+        "SELKIES_CURSOR_SIZE": {
+          "label": "ขนาดเคอร์เซอร์",
+          "description": "ขนาดเคอร์เซอร์เป็นพอยต์ที่ 96 DPI โดยปรับตาม DPI ของเซสชัน -1 ใช้ค่าเริ่มต้นของแพลตฟอร์ม (32 บน X11, 24 บน Wayland)"
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "ใช้การปรับขนาด CSS (LoDPI)",
           "description": "หากเป็นจริง จะส่งความละเอียดที่ต่ำกว่าและยืด canvas"
         },
-        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+        "SELKIES_MANUAL_RESOLUTION": {
           "label": "โหมดความละเอียดด้วยตนเอง",
           "description": "ล็อกความละเอียดไว้ที่ค่าความกว้าง/ความสูงด้วยตนเอง"
         },
@@ -410,11 +459,27 @@
         },
         "SELKIES_AUDIO_BITRATE": {
           "label": "บิตเรตเสียง",
-          "description": "บิตเรตเสียงเริ่มต้น"
+          "description": "บิตเรตเสียง Opus เริ่มต้น"
+        },
+        "SELKIES_AUDIO_FRAME_DURATION_MS": {
+          "label": "ระยะเวลาเฟรมเสียง",
+          "description": "ระยะเวลาเฟรม Opus ค่าที่ต่ำกว่าจะลดความหน่วงของเสียงโดยแลกกับแบนด์วิดท์และอัตราแพ็กเก็ตที่เพิ่มขึ้นเล็กน้อย"
+        },
+        "SELKIES_AUDIO_CHANNELS": {
+          "label": "ช่องสัญญาณเสียง",
+          "description": "จำนวนช่องสัญญาณเสียง; 2 คือสเตอริโอ"
+        },
+        "SELKIES_AUDIO_REDUNDANCY": {
+          "label": "ความซ้ำซ้อนของเสียง (Opus RED)",
+          "description": "ส่งเฟรมเสียงก่อนหน้าไปด้วยเป็นข้อมูลสำรอง เพื่อลดเสียงขาดหายเมื่อแพ็กเก็ตสูญหาย"
+        },
+        "SELKIES_AUDIO_REDUNDANCY_DISTANCE": {
+          "label": "ระยะความซ้ำซ้อนของเสียง",
+          "description": "จำนวนเฟรมก่อนหน้าที่ส่งไปด้วยเป็นข้อมูลสำรอง (0-4) ค่าที่สูงกว่าทนต่อการสูญหายเป็นช่วงยาวขึ้นได้ โดยใช้แบนด์วิดท์เพิ่มขึ้นตามสัดส่วน"
         },
         "SELKIES_ENCODER": {
           "label": "ตัวเข้ารหัส",
-          "description": "รายการตัวเข้ารหัสที่คั่นด้วยจุลภาค ตัวแรกคือค่าเริ่มต้น"
+          "description": "รายการตัวเข้ารหัสที่อนุญาตคั่นด้วยจุลภาค (h264enc, h264enc-striped, jpeg) ตัวแรกคือค่าเริ่มต้น; ค่าเดียวจะล็อกตัวเลือกไว้ มีเพียง h264enc เท่านั้นที่สตรีมผ่าน WebRTC"
         },
         "SELKIES_USE_CPU": {
           "label": "บังคับใช้การเข้ารหัส CPU",
@@ -422,23 +487,51 @@
         },
         "SELKIES_FRAMERATE": {
           "label": "เฟรมเรต (ช่วงหรือค่าคงที่)",
-          "description": "เช่น '8-120' สำหรับช่วง หรือ '60' สำหรับค่าคงที่"
+          "description": "เช่น '8-240' สำหรับช่วง, '60' สำหรับค่าเริ่มต้นคงที่, '60,8-240' สำหรับทั้งสองอย่าง; '60-60' จะล็อกค่าไว้"
         },
-        "SELKIES_H264_CRF": {
-          "label": "H.264 CRF (ช่วงหรือค่าคงที่)",
-          "description": "เช่น '5-50' สำหรับช่วง หรือ '25' สำหรับค่าคงที่"
+        "SELKIES_RATE_CONTROL_MODE": {
+          "label": "โหมดควบคุมอัตรา",
+          "description": "การควบคุมอัตรา H.264 เริ่มต้น: คุณภาพคงที่ (CRF) หรือบิตเรตคงที่ (CBR)",
+          "options": {
+            "crf": "คุณภาพคงที่ (CRF)",
+            "cbr": "บิตเรตคงที่ (CBR)"
+          }
+        },
+        "SELKIES_ENABLE_RATE_CONTROL": {
+          "label": "อนุญาตการสลับการควบคุมอัตรา",
+          "description": "ให้ไคลเอนต์สลับระหว่าง CRF และ CBR ได้ หากปิดจะล็อกตัวเข้ารหัสไว้ที่ค่าเริ่มต้นในตัว"
+        },
+        "SELKIES_VIDEO_CRF": {
+          "label": "CRF วิดีโอ (ช่วงหรือค่าคงที่)",
+          "description": "คุณภาพคงที่ H.264: '5-50' สำหรับช่วง, '25' สำหรับค่าเริ่มต้นคงที่ หรือ '25,5-50' สำหรับทั้งสองอย่าง"
+        },
+        "SELKIES_VIDEO_BITRATE": {
+          "label": "บิตเรตวิดีโอ kbps (ช่วงหรือค่าคงที่)",
+          "description": "บิตเรต CBR เป็นกิโลบิตต่อวินาที: '100-1000000' สำหรับช่วง, '8000' สำหรับค่าเริ่มต้นคงที่ หรือ '8000,100-1000000' สำหรับทั้งสองอย่าง"
+        },
+        "SELKIES_VIDEO_MIN_QP": {
+          "label": "QP ต่ำสุดของวิดีโอ",
+          "description": "ค่าควอนไทเซอร์ H.264 ต่ำสุดในโหมด CBR (0 = ค่าเริ่มต้นของตัวเข้ารหัส) การเพิ่มค่านี้จะจำกัดการใช้บิตกับเนื้อหาที่เข้ารหัสง่าย"
+        },
+        "SELKIES_VIDEO_MAX_QP": {
+          "label": "QP สูงสุดของวิดีโอ",
+          "description": "ค่าควอนไทเซอร์ H.264 สูงสุดในโหมด CBR (0 = ค่าเริ่มต้นของตัวเข้ารหัส) การลดค่านี้จะช่วยให้ข้อความอ่านออกขณะเคลื่อนไหว โดยแลกกับการใช้บิตเรตเกินเป้าหมาย"
+        },
+        "SELKIES_KEYFRAME_INTERVAL": {
+          "label": "ช่วงเวลาคีย์เฟรม (วินาที)",
+          "description": "จำนวนวินาทีระหว่างคีย์เฟรมสำหรับกู้คืนตามกำหนด 0 จะคง GOP ไว้ไม่จำกัดและส่งคีย์เฟรมเฉพาะเมื่อร้องขอเท่านั้น"
         },
         "SELKIES_JPEG_QUALITY": {
           "label": "คุณภาพ JPEG (ช่วงหรือค่าคงที่)",
-          "description": "เช่น '1-100' สำหรับช่วง หรือ '60' สำหรับค่าคงที่"
+          "description": "'1-100' สำหรับช่วง, '40' สำหรับค่าเริ่มต้นคงที่ หรือ '40,1-100' สำหรับทั้งสองอย่าง"
         },
-        "SELKIES_H264_FULLCOLOR": {
-          "label": "H.264 สีเต็ม",
-          "description": "เปิดใช้งานช่วงสีเต็ม H.264 สำหรับตัวเข้ารหัส pixelflux"
+        "SELKIES_VIDEO_FULLCOLOR": {
+          "label": "วิดีโอสีเต็ม (4:4:4)",
+          "description": "เข้ารหัส H.264 ด้วยโครมา 4:4:4 แทน 4:2:0 ไคลเอนต์ที่ไม่มีตัวถอดรหัส 4:4:4 จะกลับไปใช้ JPEG เมื่อตัวเลือกนี้ถูกล็อกเปิดไว้"
         },
-        "SELKIES_H264_STREAMING_MODE": {
-          "label": "โหมดสตรีมมิ่ง H.264 (Turbo)",
-          "description": "เปิดใช้งานโหมดสตรีมมิ่ง H.264 ที่มีความหน่วงต่ำ"
+        "SELKIES_VIDEO_STREAMING_MODE": {
+          "label": "โหมดสตรีมมิ่งวิดีโอ (Turbo)",
+          "description": "เข้ารหัสทุกเฟรมเหมือนตัวเข้ารหัสวิดีโอแบบดั้งเดิม แทนที่จะเข้ารหัสเฉพาะบริเวณที่เปลี่ยนแปลง"
         },
         "SELKIES_USE_PAINT_OVER_QUALITY": {
           "label": "ใช้คุณภาพ Paint-Over",
@@ -446,23 +539,49 @@
         },
         "SELKIES_PAINT_OVER_JPEG_QUALITY": {
           "label": "คุณภาพ JPEG ของ Paint-Over",
-          "description": "เช่น '1-100' สำหรับช่วง หรือ '90' สำหรับค่าคงที่"
+          "description": "'1-100' สำหรับช่วง, '90' สำหรับค่าเริ่มต้นคงที่ หรือ '90,1-100' สำหรับทั้งสองอย่าง"
         },
-        "SELKIES_H264_PAINTOVER_CRF": {
-          "label": "Paint-Over H.264 CRF",
-          "description": "เช่น '5-50' สำหรับช่วง หรือ '18' สำหรับค่าคงที่"
+        "SELKIES_VIDEO_PAINTOVER_CRF": {
+          "label": "CRF วิดีโอของ Paint-Over",
+          "description": "'5-50' สำหรับช่วง, '18' สำหรับค่าเริ่มต้นคงที่ หรือ '18,5-50' สำหรับทั้งสองอย่าง"
         },
-        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
-          "label": "Paint-Over Burst Frames",
-          "description": "เช่น '1-30' สำหรับช่วง หรือ '5' สำหรับค่าคงที่"
+        "SELKIES_VIDEO_PAINTOVER_BURST_FRAMES": {
+          "label": "เฟรมเบิร์สต์ของ Paint-Over",
+          "description": "'1-30' สำหรับช่วง, '5' สำหรับค่าเริ่มต้นคงที่ หรือ '5,1-30' สำหรับทั้งสองอย่าง"
+        },
+        "SELKIES_BACKPRESSURE_QUEUE_SIZE": {
+          "label": "ขนาดคิวแบ็กเพรสเชอร์",
+          "description": "จำนวนเฟรมและชิ้นส่วนเสียงที่บัฟเฟอร์ต่อสตรีมก่อนจะทิ้งเมื่อเกิดแบ็กเพรสเชอร์ (โหมด WebSockets) ค่าที่สูงกว่าทนต่อการสะดุดของไคลเอนต์ได้มากขึ้น โดยแลกกับความหน่วง"
+        },
+        "SELKIES_WEBCAM_WIDTH": {
+          "label": "ความกว้างเว็บแคม",
+          "description": "ความกว้างของอุปกรณ์เว็บแคมเสมือน; เฟรมจากไคลเอนต์จะถูกปรับขนาดและใส่ขอบดำให้พอดี"
+        },
+        "SELKIES_WEBCAM_HEIGHT": {
+          "label": "ความสูงเว็บแคม",
+          "description": "ความสูงของอุปกรณ์เว็บแคมเสมือน; เฟรมจากไคลเอนต์จะถูกปรับขนาดและใส่ขอบดำให้พอดี"
+        },
+        "SELKIES_WEBCAM_ENCODER": {
+          "label": "ตัวเข้ารหัสอัปลิงก์เว็บแคม",
+          "description": "โคเดกที่ไคลเอนต์ WebSocket ใช้ส่งเฟรมกล้อง อัตโนมัติจะเลือกตัวที่ดีที่สุดที่เบราว์เซอร์รองรับได้อย่างต่อเนื่อง",
+          "options": {
+            "auto": "อัตโนมัติ"
+          }
+        },
+        "SELKIES_WEBCAM_PIXEL_FORMAT": {
+          "label": "รูปแบบพิกเซลเว็บแคม",
+          "description": "รูปแบบพิกเซลของอุปกรณ์เว็บแคมเสมือน อัตโนมัติจะใช้ตามที่ไคลเอนต์ส่งมา",
+          "options": {
+            "auto": "อัตโนมัติ"
+          }
         },
         "HARDEN_DESKTOP": {
           "label": "เพิ่มความปลอดภัยเดสก์ท็อป (ค่าที่ตั้งไว้ล่วงหน้า)",
-          "description": "เปิดใช้งาน DISABLE_OPEN_TOOLS, DISABLE_SUDO, และ DISABLE_TERMINALS"
+          "description": "เปิดใช้งาน DISABLE_OPEN_TOOLS, DISABLE_SUDO และ DISABLE_TERMINALS และหากไม่ได้ตั้งค่าไว้อย่างชัดเจน จะปิดใช้งานการถ่ายโอนไฟล์, websocket คำสั่ง และส่วนไฟล์กับส่วนแอปในแถบด้านข้างด้วย บังคับเปิดสำหรับผู้ใช้ที่มีเพิ่มความปลอดภัยคอนเทนเนอร์"
         },
         "HARDEN_OPENBOX": {
           "label": "เพิ่มความปลอดภัยตัวจัดการหน้าต่าง (ค่าที่ตั้งไว้ล่วงหน้า)",
-          "description": "เปิดใช้งาน DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS, และ HARDEN_KEYBINDS และยังเปิดใช้งาน RESTART_APP ด้วย"
+          "description": "เปิดใช้งาน DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS และ HARDEN_KEYBINDS สำหรับ Openbox และ labwc และเปิดใช้งาน RESTART_APP ด้วยหากไม่ได้ตั้งค่าไว้อย่างชัดเจน บังคับเปิดสำหรับผู้ใช้ที่มีเพิ่มความปลอดภัยตัวจัดการหน้าต่าง"
         },
         "DISABLE_OPEN_TOOLS": {
           "label": "ปิดใช้งานเครื่องมือเปิด",
@@ -486,11 +605,11 @@
         },
         "HARDEN_KEYBINDS": {
           "label": "เพิ่มความปลอดภัยคีย์ลัด",
-          "description": "ปิดใช้งานคีย์ลัดเริ่มต้นของ Openbox เช่น Alt+F4"
+          "description": "ปิดใช้งานคีย์ลัดของตัวจัดการหน้าต่าง เช่น Alt+F4, Alt+Escape, Alt+Space และ Super+E และล็อกการกำหนดค่าตัวจัดการหน้าต่าง"
         },
         "RESTART_APP": {
           "label": "รีสตาร์ทแอปเมื่อปิด",
-          "description": "รีสตาร์ทแอปพลิเคชันหลักโดยอัตโนมัติหากถูกปิด"
+          "description": "รีสตาร์ทแอปพลิเคชันหลักโดยอัตโนมัติหากถูกปิด และทำให้ไฟล์เริ่มอัตโนมัติเป็นแบบอ่านอย่างเดียว"
         },
         "MAX_RES": {
           "label": "ความละเอียดสูงสุด",
@@ -512,6 +631,10 @@
           "label": "ปิดใช้งาน DRI3",
           "description": "ไม่ใช้การเร่งความเร็ว DRI3 หากตรวจพบการ์ดวิดีโอ"
         },
+        "AUTO_GPU": {
+          "label": "เลือก GPU อัตโนมัติ",
+          "description": "'true' จะเรนเดอร์บน GPU ตัวแรก, 'false' จะปิดใช้งาน หรือระบุผู้ผลิต, ไดรเวอร์ หรือ PCI vendor ID (nvidia, amdgpu, 0x10de) เพื่อเลือกตัวที่ต้องการ"
+        },
         "NO_DECOR": {
           "label": "ไม่มีการตกแต่งหน้าต่าง",
           "description": "เรียกใช้แอปพลิเคชันโดยไม่มีขอบหน้าต่างสำหรับการใช้งาน PWA"
@@ -522,11 +645,117 @@
         },
         "NO_GAMEPAD": {
           "label": "ปิดใช้งานการฉีดเกมแพด",
-          "description": "ปิดใช้งานการฉีดตัวสอดแทรกเกมแพดในพื้นที่ผู้ใช้"
+          "description": "ข้ามตัวสอดแทรกเกมแพดในพื้นที่ผู้ใช้ และซ่อนส่วนเกมแพดกับลิงก์การแชร์ผู้เล่นด้วย"
+        },
+        "NO_WEBCAM": {
+          "label": "ปิดใช้งานการฉีดเว็บแคม",
+          "description": "ข้ามอุปกรณ์เว็บแคมเสมือนและตัวสอดแทรก และซ่อนปุ่มเว็บแคมด้วย"
+        },
+        "SELKIES_RUN_AFTER_CONNECT": {
+          "label": "รันหลังเชื่อมต่อ",
+          "description": "คำสั่งเชลล์ที่รันภายในคอนเทนเนอร์เมื่อไคลเอนต์แรกเชื่อมต่อ"
+        },
+        "SELKIES_RUN_AFTER_DISCONNECT": {
+          "label": "รันหลังตัดการเชื่อมต่อ",
+          "description": "คำสั่งเชลล์ที่รันภายในคอนเทนเนอร์เมื่อไคลเอนต์สุดท้ายตัดการเชื่อมต่อ"
         },
         "SELKIES_DEBUG": {
           "label": "เปิดใช้งานการดีบัก Selkies",
           "description": "เปิดใช้งานการบันทึกการดีบักสำหรับส่วนประกอบการสตรีม"
+        },
+        "SELKIES_MODE": {
+          "label": "โหมดสตรีมมิ่ง",
+          "description": "ทรานสปอร์ตที่ใช้ตามค่าเริ่มต้น อัตโนมัติจะเลือก WebRTC เมื่อตั้งค่า TURN/STUN ใดๆ ไว้ มิฉะนั้นจะใช้ WebSockets",
+          "options": {
+            "auto": "อัตโนมัติ",
+            "websockets": "WebSockets",
+            "webrtc": "WebRTC"
+          }
+        },
+        "SELKIES_ENABLE_DUAL_MODE": {
+          "label": "โหมดคู่",
+          "description": "ให้ผู้ใช้สลับระหว่าง WebRTC และ WebSockets จากแถบด้านข้างได้ อัตโนมัติจะเปิดใช้งานเฉพาะเมื่อกำหนดค่า WebRTC ไว้เท่านั้น",
+          "options": {
+            "auto": "อัตโนมัติ",
+            "enabled": "เปิดใช้งาน",
+            "disabled": "ปิดใช้งาน"
+          }
+        },
+        "SELKIES_WEBRTC_PACER": {
+          "label": "ตัวควบคุมจังหวะ WebRTC",
+          "description": "ควบคุมจังหวะการส่งแพ็กเก็ต WebRTC ขาออกด้วยลำดับความสำคัญที่เข้มงวด เพื่อให้เสียงและอินพุตได้รับการปกป้องจากการเบิร์สต์ของวิดีโอบนลิงก์ที่แออัด"
+        },
+        "SELKIES_CONGESTION_CONTROL": {
+          "label": "การควบคุมความแออัด",
+          "description": "ปรับบิตเรตวิดีโอตามค่าประมาณแบนด์วิดท์จากฟีดแบ็กของตัวรับ WebRTC มีผลในโหมด CBR"
+        },
+        "SELKIES_STUN_HOST": {
+          "label": "โฮสต์ STUN",
+          "description": "เซิร์ฟเวอร์ STUN สำหรับการเจาะรู NAT ชี้ไปยังเซิร์ฟเวอร์ภายในสำหรับเครือข่ายที่ไม่มีอินเทอร์เน็ต"
+        },
+        "SELKIES_STUN_PORT": {
+          "label": "พอร์ต STUN",
+          "description": "พอร์ตของเซิร์ฟเวอร์ STUN"
+        },
+        "SELKIES_TURN_HOST": {
+          "label": "โฮสต์ TURN",
+          "description": "เซิร์ฟเวอร์ TURN ที่ใช้ร่วมกับซีเคร็ตที่ใช้ร่วมกันหรือข้อมูลรับรองระยะยาว ใส่ที่อยู่ IPv6 ไว้ในวงเล็บเหลี่ยม"
+        },
+        "SELKIES_TURN_PORT": {
+          "label": "พอร์ต TURN",
+          "description": "พอร์ตของเซิร์ฟเวอร์ TURN"
+        },
+        "SELKIES_TURN_PROTOCOL": {
+          "label": "โปรโตคอล TURN",
+          "description": "ทรานสปอร์ตที่ไคลเอนต์ใช้เข้าถึง TURN แนะนำอย่างยิ่งให้ใช้ UDP; ใช้ TCP เฉพาะเมื่อ UDP ถูกบล็อกเท่านั้น"
+        },
+        "SELKIES_TURN_TLS": {
+          "label": "TURN ผ่าน TLS/DTLS",
+          "description": "ใช้ TURN ผ่าน TLS (TCP) หรือ DTLS (UDP) ต้องมีใบรับรองที่ถูกต้องบนเซิร์ฟเวอร์ TURN"
+        },
+        "SELKIES_TURN_SHARED_SECRET": {
+          "label": "ซีเคร็ตที่ใช้ร่วมกันของ TURN",
+          "description": "ซีเคร็ตที่ใช้ร่วมกันสำหรับสร้างข้อมูลรับรอง TURN แบบ HMAC ที่มีเวลาจำกัด"
+        },
+        "SELKIES_TURN_USERNAME": {
+          "label": "ชื่อผู้ใช้ TURN",
+          "description": "ชื่อผู้ใช้ของข้อมูลรับรอง TURN ระยะยาวแบบเดิม"
+        },
+        "SELKIES_TURN_PASSWORD": {
+          "label": "รหัสผ่าน TURN",
+          "description": "รหัสผ่านของข้อมูลรับรอง TURN ระยะยาวแบบเดิม"
+        },
+        "SELKIES_TURN_REST_URI": {
+          "label": "URI ของ TURN REST API",
+          "description": "URI ของบริการข้อมูลรับรอง TURN REST เช่น http://localhost:8008"
+        },
+        "SELKIES_TURN_REST_API_KEY": {
+          "label": "คีย์ TURN REST API",
+          "description": "คีย์ API ที่ส่งไปยังบริการ TURN REST"
+        },
+        "SELKIES_TURN_REST_USERNAME": {
+          "label": "ชื่อผู้ใช้ TURN REST",
+          "description": "ชื่อผู้ใช้ที่บริการ TURN REST ฝังไว้ในข้อมูลรับรอง หากว่างจะใช้ 'selkies'"
+        },
+        "SELKIES_WEBRTC_PUBLIC_IP": {
+          "label": "IP สาธารณะของ WebRTC",
+          "description": "ที่อยู่สาธารณะที่จะประกาศใน ICE candidate ของโฮสต์ สำหรับเซิร์ฟเวอร์ที่อยู่หลัง NAT แบบ 1:1 คงที่ ที่อยู่ IPv4 หนึ่งรายการและ/หรือ IPv6 หนึ่งรายการ"
+        },
+        "SELKIES_ENABLE_CLOUDFLARE_TURN": {
+          "label": "เปิดใช้งาน Cloudflare TURN",
+          "description": "ใช้บริการ Cloudflare TURN ต้องมี Token ID และ API token ด้านล่าง"
+        },
+        "SELKIES_CLOUDFLARE_TURN_TOKEN_ID": {
+          "label": "Token ID ของ Cloudflare TURN",
+          "description": "Token ID ของแอป Cloudflare TURN"
+        },
+        "SELKIES_CLOUDFLARE_TURN_API_TOKEN": {
+          "label": "API Token ของ Cloudflare TURN",
+          "description": "API token ของ Cloudflare TURN"
+        },
+        "SELKIES_RTC_CONFIG_JSON": {
+          "label": "พาธ JSON การกำหนดค่า RTC",
+          "description": "พาธภายในคอนเทนเนอร์ไปยังไฟล์ JSON ที่มีการกำหนดค่า WebRTC จะแทนที่การตั้งค่า STUN/TURN อื่นๆ ทั้งหมด และถูกอ่านซ้ำเป็นระยะ"
         },
         "DOCKER_PRIVILEGED": {
           "label": "โหมดสิทธิ์พิเศษ",
@@ -699,6 +928,8 @@
       "errorPulling": "เกิดข้อผิดพลาดในการดึงอิมเมจ",
       "manualInstallNote": "หมายเหตุ: อิมเมจที่เพิ่มด้วยตนเองควรเป็นอิมเมจที่เข้ากันได้กับ selkies-baseimage",
       "generalTitle": "การตั้งค่าทั่วไปและประสิทธิภาพ",
+      "webrtcTitle": "การตั้งค่า WebRTC และ TURN",
+      "webrtcDescription": "เซสชันจะสตรีมผ่าน WebSockets ตามค่าเริ่มต้น การตั้งค่า STUN, TURN, Cloudflare หรือ IP สาธารณะใดๆ ด้านล่าง หรือการเลือกโหมด WebRTC จะเปลี่ยนคอนเทนเนอร์ไปใช้ WebRTC พร้อมเปิดใช้งานโหมดคู่ เพื่อให้ผู้ใช้ยังคงกลับไปใช้ WebSockets ได้",
       "dockerTitle": "การแทนที่ขั้นสูงของ Docker",
       "dockerDescription": "การตั้งค่าเหล่านี้จะแทนที่การกำหนดค่าคอนเทนเนอร์เริ่มต้น โปรดใช้ด้วยความระมัดระวังและเฉพาะในกรณีที่คุณรู้ว่ากำลังทำอะไรอยู่"
     },

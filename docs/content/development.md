@@ -146,20 +146,33 @@ then rewrites the tag to the emitted file name:
 
 Bundled code can use these compile-time defines: `__UI_VERSION__` (the
 `VERSION` string), `__BRIDGE_VERSION__` (`1`), `__SHELL_TARGET__` (`"ui"`,
-`"extension"` or `"mobile"`) and `__I18N_FILES__` (language code to hashed
-file path).
+`"extension"` or `"mobile"`) and `__I18N_FILES__` (language code to language
+file path, hashed for the served UI). The background script imports the
+context menu titles from `sealskin-i18n/context-menu`, a module the build
+generates under `dist/.generated/` from `background.contextMenu` of every
+language, because the menus are registered before any page could fetch a
+language file.
 
 ### Translations
 
-`src/i18n/<code>.json` holds one language. At build time each is deep-merged
-over English so the runtime fetches one file; a missing key falls back to
-English. To add a language, drop in a file and rebuild. The shells receive
-only the namespaces listed in `src/shell/i18n-namespaces.json` (connection
-page, dashboard basics, background strings); the context menu titles are a
-separate small table in `src/shell/context-menu-strings.js` because they are
-registered before any page loads. The collaboration room keeps its own
-bundled translations in `src/ui/room/translation.js` since it is served on
-its own route.
+`src/i18n/<code>.json` holds one language and is the single source for every
+target. At build time each is deep-merged over English so the runtime fetches
+one file; a missing key falls back to English. To add a language, drop in a
+file and rebuild.
+
+The served UI gets the full dictionaries, minified and content-hashed. The
+extension and the mobile app must read in the user's language before any
+server is configured, so they bundle their own copy, generated at build time
+from the same source files: the build scans the HTML pages and JavaScript
+that ended up in the shell bundle for `data-i18n*` attributes and quoted
+dotted keys, adds the blocks listed whole in `src/shell/i18n-namespaces.json`
+(needed for keys assembled at runtime, such as `shell.host.*`), and writes
+one pretty-printed `i18n/<code>.json` per language holding only those keys.
+Nothing is mirrored by hand: a string added to the connection page or the
+host panel is picked up on the next build, and strings the shells never show
+stay out of the store packages. The collaboration room keeps its own bundled
+translations in `src/ui/room/translation.js` since it is served on its own
+route.
 
 Update the translations whenever user-facing strings change.
 

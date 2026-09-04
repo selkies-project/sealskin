@@ -4,7 +4,7 @@
       "openUrl": "SealSkinでリンクを開く",
       "openFile": "リンク先をファイルとしてSealSkinで開く",
       "sendMedia": "メディアをSealSkinに送信",
-      "searchText": "SealSkinで「{selection}」を検索",
+      "searchText": "SealSkinで「%s」を検索",
       "sendDownload": "次のダウンロードをSealSkinに送信"
     }
   },
@@ -281,6 +281,10 @@
           "label": "統計情報を表示",
           "description": "サイドバーに統計情報セクションを表示します。"
         },
+        "SELKIES_UI_SIDEBAR_SHOW_SHORTCUTS": {
+          "label": "キーボードショートカットセクションを表示",
+          "description": "サイドバーにキーボードショートカットセクションを表示します。"
+        },
         "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
           "label": "クリップボードを表示",
           "description": "サイドバーにクリップボードセクションを表示します。"
@@ -300,6 +304,18 @@
         "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
           "label": "ゲームパッドセクションを表示",
           "description": "サイドバーにゲームパッドセクションを表示します。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
+          "label": "フルスクリーンボタンを表示",
+          "description": "サイドバーにフルスクリーンボタンを表示します。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMING_MODE": {
+          "label": "ゲーミングモードボタンを表示",
+          "description": "サイドバーにゲーミングモード（ポインターロック）ボタンを表示します。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_TRACKPAD": {
+          "label": "トラックパッドボタンを表示",
+          "description": "サイドバーに仮想トラックパッドボタンを表示します。"
         },
         "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
           "label": "キーボードボタンを表示",
@@ -332,7 +348,6 @@
           "options": {
             "default": "デフォルト",
             "selkiesDefault": "Selkies（デフォルト）",
-            "zinc": "Zinc",
             "wish": "Wish"
           }
         },
@@ -342,23 +357,21 @@
         },
         "SELKIES_MICROPHONE_ENABLED": {
           "label": "マイクを有効化",
-          "description": "クライアントからサーバーへのマイク転送を有効にします。"
+          "description": "クライアントからサーバーへのマイク転送を有効にします。アップストリームではデフォルトでオフです。"
         },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "ゲームパッドを有効化",
           "description": "ゲームパッドのサポートを有効にします。"
         },
-        "SELKIES_CLIPBOARD_ENABLED": {
-          "label": "クリップボードを有効化",
-          "description": "クリップボードの同期を有効にします。"
-        },
-        "SELKIES_CLIPBOARD_IN_ENABLED": {
-          "label": "クライアントからサーバーへのクリップボードを有効化",
-          "description": "ブラウザからのクリップボードデータの転送を許可します。"
-        },
-        "SELKIES_CLIPBOARD_OUT_ENABLED": {
-          "label": "サーバーからクライアントへのクリップボードを有効化",
-          "description": "サーバーからのクリップボードデータの転送を許可します。"
+        "SELKIES_ENABLE_CLIPBOARD": {
+          "label": "クリップボードポリシー",
+          "description": "許可するクリップボードの方向。「サーバーからクライアントのみ」はページによるローカルクリップボードの読み取りも停止します。これはFirefoxおよびSafariで貼り付けの確認プロンプトを引き起こす原因です。",
+          "options": {
+            "both": "双方向",
+            "inOnly": "クライアントからサーバーのみ",
+            "outOnly": "サーバーからクライアントのみ",
+            "disabled": "無効"
+          }
         },
         "SELKIES_ENABLE_BINARY_CLIPBOARD": {
           "label": "バイナリクリップボードを有効化",
@@ -370,25 +383,61 @@
         },
         "SELKIES_FILE_TRANSFERS": {
           "label": "ファイル転送",
-          "description": "許可される方向（'upload,download', 'upload', 'download', 'none'）。"
+          "description": "許可される方向（'upload,download'、'upload'、'download'、'none'）。ここで設定しない限り、デスクトップの強化により空になります。"
+        },
+        "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
+          "label": "ファイル転送制限（Mbit/s）",
+          "description": "すべてのアップロードとダウンロードで共有される静的な帯域制限。0で上限を無効にします。"
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "すべての共有を有効化",
           "description": "すべての共有機能のマスター切り替え。"
         },
+        "SELKIES_ENABLE_SHARED": {
+          "label": "閲覧専用共有を有効化",
+          "description": "閲覧専用の共有リンクを有効にします。"
+        },
+        "SELKIES_ENABLE_COLLAB": {
+          "label": "コラボレーションを有効化",
+          "description": "セッションのマスタートークンを持つ閲覧者が読み書き可能なコラボレーターとして操作できるようにします。SealSkinのルームに必要です。"
+        },
+        "SELKIES_ENABLE_PLAYER2": {
+          "label": "プレイヤー2共有を有効化",
+          "description": "ゲームパッドのプレイヤー2用共有リンクを有効にします。"
+        },
+        "SELKIES_ENABLE_PLAYER3": {
+          "label": "プレイヤー3共有を有効化",
+          "description": "ゲームパッドのプレイヤー3用共有リンクを有効にします。"
+        },
+        "SELKIES_ENABLE_PLAYER4": {
+          "label": "プレイヤー4共有を有効化",
+          "description": "ゲームパッドのプレイヤー4用共有リンクを有効にします。"
+        },
         "SELKIES_SECOND_SCREEN": {
           "label": "セカンドスクリーンを有効化",
           "description": "2番目のモニター/ディスプレイのサポートを有効にします。"
+        },
+        "SELKIES_ENABLE_RESIZE": {
+          "label": "動的リサイズを有効化",
+          "description": "ブラウザウィンドウに合わせてリモートディスプレイのサイズを変更します。"
         },
         "SELKIES_USE_BROWSER_CURSORS": {
           "label": "ブラウザカーソルを使用",
           "description": "キャンバスにレンダリングする代わりにブラウザのCSSカーソルを使用します。"
         },
+        "SELKIES_ENABLE_CURSORS": {
+          "label": "リモートカーソルを有効化",
+          "description": "アプリケーション自身のカーソル形状をクライアントに送信します。"
+        },
+        "SELKIES_CURSOR_SIZE": {
+          "label": "カーソルサイズ",
+          "description": "96 DPI時のポイント単位のカーソルサイズで、セッションのDPIに応じてスケーリングされます。-1でプラットフォームのデフォルト（X11では32、Waylandでは24）を使用します。"
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "CSSスケーリングを使用（LoDPI）",
           "description": "trueの場合、低解像度が送信され、キャンバスが引き伸ばされます。"
         },
-        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+        "SELKIES_MANUAL_RESOLUTION": {
           "label": "手動解像度モード",
           "description": "解像度を手動の幅/高さの値に固定します。"
         },
@@ -410,11 +459,27 @@
         },
         "SELKIES_AUDIO_BITRATE": {
           "label": "オーディオビットレート",
-          "description": "デフォルトのオーディオビットレート。"
+          "description": "デフォルトのOpusオーディオビットレート。"
+        },
+        "SELKIES_AUDIO_FRAME_DURATION_MS": {
+          "label": "オーディオフレーム長",
+          "description": "Opusのフレーム長。値を小さくすると、わずかな帯域幅とパケットレートの増加と引き換えにオーディオ遅延が短縮されます。"
+        },
+        "SELKIES_AUDIO_CHANNELS": {
+          "label": "オーディオチャンネル",
+          "description": "オーディオチャンネル数。2はステレオです。"
+        },
+        "SELKIES_AUDIO_REDUNDANCY": {
+          "label": "オーディオ冗長化（Opus RED）",
+          "description": "以前のオーディオフレームを冗長データとして送信し、パケットロス時の音切れを軽減します。"
+        },
+        "SELKIES_AUDIO_REDUNDANCY_DISTANCE": {
+          "label": "オーディオ冗長化距離",
+          "description": "冗長データとして送信する以前のフレーム数（0-4）。大きいほど長いロスバーストに耐えられますが、帯域幅はそれに比例して増加します。"
         },
         "SELKIES_ENCODER": {
           "label": "エンコーダー",
-          "description": "エンコーダーのカンマ区切りリスト。最初のものがデフォルトです。"
+          "description": "許可するエンコーダーのカンマ区切りリスト（h264enc、h264enc-striped、jpeg）。最初のものがデフォルトで、単一の値を指定すると選択が固定されます。WebRTCでストリーミングできるのはh264encのみです。"
         },
         "SELKIES_USE_CPU": {
           "label": "CPUエンコーディングを強制",
@@ -422,23 +487,51 @@
         },
         "SELKIES_FRAMERATE": {
           "label": "フレームレート（範囲または固定）",
-          "description": "例: 範囲の場合は'8-120'、固定の場合は'60'。"
+          "description": "例: 範囲の場合は'8-240'、固定の初期値の場合は'60'、両方の場合は'60,8-240'。'60-60'で固定されます。"
         },
-        "SELKIES_H264_CRF": {
-          "label": "H.264 CRF（範囲または固定）",
-          "description": "例: 範囲の場合は'5-50'、固定の場合は'25'。"
+        "SELKIES_RATE_CONTROL_MODE": {
+          "label": "レート制御モード",
+          "description": "デフォルトのH.264レート制御: 固定品質（CRF）または固定ビットレート（CBR）。",
+          "options": {
+            "crf": "固定品質（CRF）",
+            "cbr": "固定ビットレート（CBR）"
+          }
+        },
+        "SELKIES_ENABLE_RATE_CONTROL": {
+          "label": "レート制御の切り替えを許可",
+          "description": "クライアントがCRFとCBRを切り替えられるようにします。オフにするとエンコーダーは組み込みのデフォルトに固定されます。"
+        },
+        "SELKIES_VIDEO_CRF": {
+          "label": "ビデオCRF（範囲または固定）",
+          "description": "H.264の固定品質: 範囲の場合は'5-50'、固定の初期値の場合は'25'、両方の場合は'25,5-50'。"
+        },
+        "SELKIES_VIDEO_BITRATE": {
+          "label": "ビデオビットレート kbps（範囲または固定）",
+          "description": "キロビット毎秒単位のCBRビットレート: 範囲の場合は'100-1000000'、固定の初期値の場合は'8000'、両方の場合は'8000,100-1000000'。"
+        },
+        "SELKIES_VIDEO_MIN_QP": {
+          "label": "ビデオ最小QP",
+          "description": "CBRモードでのH.264量子化パラメータの最小値（0 = エンコーダーのデフォルト）。上げると、単純なコンテンツでのビット消費が抑えられます。"
+        },
+        "SELKIES_VIDEO_MAX_QP": {
+          "label": "ビデオ最大QP",
+          "description": "CBRモードでのH.264量子化パラメータの最大値（0 = エンコーダーのデフォルト）。下げると、ビットレート目標を超過する代わりに動きのある場面でもテキストが読みやすくなります。"
+        },
+        "SELKIES_KEYFRAME_INTERVAL": {
+          "label": "キーフレーム間隔（秒）",
+          "description": "定期的な回復用キーフレームの間隔（秒）。0でGOPを無限にし、キーフレームは要求時のみ送信します。"
         },
         "SELKIES_JPEG_QUALITY": {
           "label": "JPEG品質（範囲または固定）",
-          "description": "例: 範囲の場合は'1-100'、固定の場合は'60'。"
+          "description": "範囲の場合は'1-100'、固定の初期値の場合は'40'、両方の場合は'40,1-100'。"
         },
-        "SELKIES_H264_FULLCOLOR": {
-          "label": "H.264フルカラー",
-          "description": "pixelfluxエンコーダーのH.264フルカラーレンジを有効にします。"
+        "SELKIES_VIDEO_FULLCOLOR": {
+          "label": "ビデオフルカラー（4:4:4）",
+          "description": "H.264を4:2:0の代わりに4:4:4クロマでエンコードします。これが固定で有効な場合、4:4:4デコーダーのないクライアントはJPEGにフォールバックします。"
         },
-        "SELKIES_H264_STREAMING_MODE": {
-          "label": "H.264ストリーミング（ターボ）モード",
-          "description": "H.264低遅延ストリーミングモードを有効にします。"
+        "SELKIES_VIDEO_STREAMING_MODE": {
+          "label": "ビデオストリーミング（ターボ）モード",
+          "description": "変更された領域のみではなく、従来のビデオエンコーダーのようにすべてのフレームをエンコードします。"
         },
         "SELKIES_USE_PAINT_OVER_QUALITY": {
           "label": "ペイントオーバー品質を使用",
@@ -446,23 +539,49 @@
         },
         "SELKIES_PAINT_OVER_JPEG_QUALITY": {
           "label": "ペイントオーバーJPEG品質",
-          "description": "例: 範囲の場合は'1-100'、固定の場合は'90'。"
+          "description": "範囲の場合は'1-100'、固定の初期値の場合は'90'、両方の場合は'90,1-100'。"
         },
-        "SELKIES_H264_PAINTOVER_CRF": {
-          "label": "ペイントオーバーH.264 CRF",
-          "description": "例: 範囲の場合は'5-50'、固定の場合は'18'。"
+        "SELKIES_VIDEO_PAINTOVER_CRF": {
+          "label": "ペイントオーバービデオCRF",
+          "description": "範囲の場合は'5-50'、固定の初期値の場合は'18'、両方の場合は'18,5-50'。"
         },
-        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
+        "SELKIES_VIDEO_PAINTOVER_BURST_FRAMES": {
           "label": "ペイントオーバーバーストフレーム",
-          "description": "例: 範囲の場合は'1-30'、固定の場合は'5'。"
+          "description": "範囲の場合は'1-30'、固定の初期値の場合は'5'、両方の場合は'5,1-30'。"
+        },
+        "SELKIES_BACKPRESSURE_QUEUE_SIZE": {
+          "label": "バックプレッシャーキューサイズ",
+          "description": "バックプレッシャー時に破棄するまでにストリームごとにバッファするフレームおよびオーディオチャンクの数（WebSocketsモード）。大きいほどクライアントの一時的な遅れに耐えられますが、遅延が増加します。"
+        },
+        "SELKIES_WEBCAM_WIDTH": {
+          "label": "ウェブカメラの幅",
+          "description": "仮想ウェブカメラデバイスの幅。クライアントのフレームはこれに合わせてスケーリングおよびレターボックス処理されます。"
+        },
+        "SELKIES_WEBCAM_HEIGHT": {
+          "label": "ウェブカメラの高さ",
+          "description": "仮想ウェブカメラデバイスの高さ。クライアントのフレームはこれに合わせてスケーリングおよびレターボックス処理されます。"
+        },
+        "SELKIES_WEBCAM_ENCODER": {
+          "label": "ウェブカメラアップリンクエンコーダー",
+          "description": "WebSocketクライアントがカメラフレームの送信に使用するコーデック。自動ではブラウザが維持できる最良のものを選択します。",
+          "options": {
+            "auto": "自動"
+          }
+        },
+        "SELKIES_WEBCAM_PIXEL_FORMAT": {
+          "label": "ウェブカメラピクセルフォーマット",
+          "description": "仮想ウェブカメラデバイスのピクセルフォーマット。自動ではクライアントが送信するものに従います。",
+          "options": {
+            "auto": "自動"
+          }
         },
         "HARDEN_DESKTOP": {
           "label": "デスクトップを強化（プリセット）",
-          "description": "DISABLE_OPEN_TOOLS、DISABLE_SUDO、DISABLE_TERMINALSを有効にします。"
+          "description": "DISABLE_OPEN_TOOLS、DISABLE_SUDO、DISABLE_TERMINALSを有効にし、明示的に設定されていない限り、ファイル転送、コマンドWebsocket、サイドバーのファイルおよびアプリセクションも無効にします。「コンテナを強化」が設定されたユーザーには強制的に有効になります。"
         },
         "HARDEN_OPENBOX": {
           "label": "ウィンドウマネージャを強化（プリセット）",
-          "description": "DISABLE_CLOSE_BUTTON、DISABLE_MOUSE_BUTTONS、HARDEN_KEYBINDSを有効にします。RESTART_APPも有効にします。"
+          "description": "OpenboxおよびlabwcでDISABLE_CLOSE_BUTTON、DISABLE_MOUSE_BUTTONS、HARDEN_KEYBINDSを有効にし、明示的に設定されていない限りRESTART_APPも有効にします。「ウィンドウマネージャを強化」が設定されたユーザーには強制的に有効になります。"
         },
         "DISABLE_OPEN_TOOLS": {
           "label": "オープンツールを無効化",
@@ -486,11 +605,11 @@
         },
         "HARDEN_KEYBINDS": {
           "label": "キーバインドを強化",
-          "description": "Alt+F4などのデフォルトのOpenboxキーバインドを無効にします。"
+          "description": "Alt+F4、Alt+Escape、Alt+Space、Super+Eなどのウィンドウマネージャのキーバインドを無効にし、ウィンドウマネージャの設定をロックします。"
         },
         "RESTART_APP": {
           "label": "終了時にアプリを再起動",
-          "description": "メインアプリケーションが閉じられた場合に自動的に再起動します。"
+          "description": "メインアプリケーションが閉じられた場合に自動的に再起動し、自動起動ファイルを読み取り専用にします。"
         },
         "MAX_RES": {
           "label": "最大解像度",
@@ -512,6 +631,10 @@
           "label": "DRI3を無効化",
           "description": "ビデオカードが検出された場合、DRI3アクセラレーションを使用しません。"
         },
+        "AUTO_GPU": {
+          "label": "GPUの自動選択",
+          "description": "'true'で最初のGPUでレンダリングし、'false'で無効にします。ベンダー、ドライバー、またはPCIベンダーID（nvidia、amdgpu、0x10de）を指定すると特定のGPUを選択します。"
+        },
         "NO_DECOR": {
           "label": "ウィンドウ装飾なし",
           "description": "PWA用途のためにウィンドウボーダーなしでアプリケーションを実行します。"
@@ -522,11 +645,117 @@
         },
         "NO_GAMEPAD": {
           "label": "ゲームパッドインジェクションを無効化",
-          "description": "ユーザースペースのゲームパッドインターポーザーインジェクションを無効にします。"
+          "description": "ユーザースペースのゲームパッドインターポーザーをスキップします。ゲームパッドセクションとプレイヤー共有リンクも非表示になります。"
+        },
+        "NO_WEBCAM": {
+          "label": "ウェブカメラインジェクションを無効化",
+          "description": "仮想ウェブカメラデバイスとインターポーザーをスキップします。ウェブカメラボタンも非表示になります。"
+        },
+        "SELKIES_RUN_AFTER_CONNECT": {
+          "label": "接続後に実行",
+          "description": "最初のクライアントが接続したときにコンテナ内で実行されるシェルコマンド。"
+        },
+        "SELKIES_RUN_AFTER_DISCONNECT": {
+          "label": "切断後に実行",
+          "description": "最後のクライアントが切断したときにコンテナ内で実行されるシェルコマンド。"
         },
         "SELKIES_DEBUG": {
           "label": "Selkiesデバッグを有効化",
           "description": "ストリーミングコンポーネントのデバッグロギングを有効にします。"
+        },
+        "SELKIES_MODE": {
+          "label": "ストリーミングモード",
+          "description": "デフォルトで使用するトランスポート。自動ではTURN/STUNのいずれかの値が設定されている場合にWebRTCを、それ以外の場合はWebSocketsを選択します。",
+          "options": {
+            "auto": "自動",
+            "websockets": "WebSockets",
+            "webrtc": "WebRTC"
+          }
+        },
+        "SELKIES_ENABLE_DUAL_MODE": {
+          "label": "デュアルモード",
+          "description": "ユーザーがサイドバーからWebRTCとWebSocketsを切り替えられるようにします。自動ではWebRTCが設定されている場合のみ有効になります。",
+          "options": {
+            "auto": "自動",
+            "enabled": "有効",
+            "disabled": "無効"
+          }
+        },
+        "SELKIES_WEBRTC_PACER": {
+          "label": "WebRTCペーサー",
+          "description": "送信するWebRTCパケットを厳密な優先順位でペーシングし、混雑した回線でオーディオと入力をビデオのバーストから保護します。"
+        },
+        "SELKIES_CONGESTION_CONTROL": {
+          "label": "輻輳制御",
+          "description": "WebRTC受信側フィードバックによる帯域幅推定に合わせてビデオビットレートを調整します。CBRモードで有効です。"
+        },
+        "SELKIES_STUN_HOST": {
+          "label": "STUNホスト",
+          "description": "NATホールパンチング用のSTUNサーバー。インターネットに接続されていないネットワークでは内部サーバーを指定してください。"
+        },
+        "SELKIES_STUN_PORT": {
+          "label": "STUNポート",
+          "description": "STUNサーバーのポート。"
+        },
+        "SELKIES_TURN_HOST": {
+          "label": "TURNホスト",
+          "description": "共有シークレットまたは長期認証情報とともに使用するTURNサーバー。IPv6アドレスは角括弧で囲んでください。"
+        },
+        "SELKIES_TURN_PORT": {
+          "label": "TURNポート",
+          "description": "TURNサーバーのポート。"
+        },
+        "SELKIES_TURN_PROTOCOL": {
+          "label": "TURNプロトコル",
+          "description": "クライアントがTURNに到達するために使用するトランスポート。UDPを強く推奨します。TCPはUDPがブロックされている場合にのみ使用してください。"
+        },
+        "SELKIES_TURN_TLS": {
+          "label": "TLS/DTLS経由のTURN",
+          "description": "TLS（TCP）またはDTLS（UDP）経由でTURNを使用します。TURNサーバーに有効な証明書が必要です。"
+        },
+        "SELKIES_TURN_SHARED_SECRET": {
+          "label": "TURN共有シークレット",
+          "description": "時間制限付きのHMAC TURN認証情報を生成するために使用する共有シークレット。"
+        },
+        "SELKIES_TURN_USERNAME": {
+          "label": "TURNユーザー名",
+          "description": "従来の長期TURN認証情報のユーザー名。"
+        },
+        "SELKIES_TURN_PASSWORD": {
+          "label": "TURNパスワード",
+          "description": "従来の長期TURN認証情報のパスワード。"
+        },
+        "SELKIES_TURN_REST_URI": {
+          "label": "TURN REST API URI",
+          "description": "TURN REST認証情報サービスのURI（例: http://localhost:8008）。"
+        },
+        "SELKIES_TURN_REST_API_KEY": {
+          "label": "TURN REST APIキー",
+          "description": "TURN RESTサービスに送信するAPIキー。"
+        },
+        "SELKIES_TURN_REST_USERNAME": {
+          "label": "TURN RESTユーザー名",
+          "description": "TURN RESTサービスが認証情報に埋め込むユーザー名。空の場合は'selkies'を使用します。"
+        },
+        "SELKIES_WEBRTC_PUBLIC_IP": {
+          "label": "WebRTCパブリックIP",
+          "description": "静的な1:1 NATの背後にあるサーバーのホストICE候補で通知するパブリックアドレス。IPv4アドレス1つおよび/またはIPv6アドレス1つ。"
+        },
+        "SELKIES_ENABLE_CLOUDFLARE_TURN": {
+          "label": "Cloudflare TURNを有効化",
+          "description": "Cloudflare TURNサービスを使用します。以下のトークンIDとAPIトークンが必要です。"
+        },
+        "SELKIES_CLOUDFLARE_TURN_TOKEN_ID": {
+          "label": "Cloudflare TURNトークンID",
+          "description": "Cloudflare TURNアプリのトークンID。"
+        },
+        "SELKIES_CLOUDFLARE_TURN_API_TOKEN": {
+          "label": "Cloudflare TURN APIトークン",
+          "description": "Cloudflare TURNのAPIトークン。"
+        },
+        "SELKIES_RTC_CONFIG_JSON": {
+          "label": "RTC設定JSONパス",
+          "description": "WebRTC設定を含むJSONファイルへのコンテナ内のパス。他のすべてのSTUN/TURN設定を上書きし、定期的に再読み込みされます。"
         },
         "DOCKER_PRIVILEGED": {
           "label": "特権モード",
@@ -699,6 +928,8 @@
       "errorPulling": "イメージのプル中にエラーが発生しました。",
       "manualInstallNote": "注意：手動で追加されたイメージは、selkies-baseimage互換のイメージに基づいている必要があります。",
       "generalTitle": "一般とパフォーマンス設定",
+      "webrtcTitle": "WebRTCおよびTURN設定",
+      "webrtcDescription": "セッションはデフォルトでWebSocketsを介してストリーミングされます。以下でSTUN、TURN、CloudflareまたはパブリックIPの値を設定するか、WebRTCモードを選択すると、コンテナはデュアルモードを有効にしたWebRTCに切り替わり、ユーザーは引き続きWebSocketsにフォールバックできます。",
       "dockerTitle": "Docker詳細オーバーライド",
       "dockerDescription": "これらの設定は、デフォルトのコンテナ構成を上書きします。注意して使用し、何をしているか理解している場合にのみ使用してください。"
     },

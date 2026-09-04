@@ -144,3 +144,57 @@ def test_template_save_reuses_hand_edited_file(tmp_path):
     assert state.template_files["Gaming"] == odd_path
     config_store.delete_app_template("Gaming")
     assert "Gaming" not in state.app_templates
+
+
+def test_migrate_legacy_template_settings():
+    migrate = config_store.migrate_legacy_template_settings
+    assert migrate({}) == {}
+    assert migrate({"TITLE": "x", "SELKIES_VIDEO_CRF": "5-50"}) == {"TITLE": "x", "SELKIES_VIDEO_CRF": "5-50"}
+
+    renamed = migrate({
+        "SELKIES_H264_CRF": "10-40",
+        "SELKIES_H264_FULLCOLOR": "true",
+        "SELKIES_H264_STREAMING_MODE": "true",
+        "SELKIES_H264_PAINTOVER_CRF": "20",
+        "SELKIES_H264_PAINTOVER_BURST_FRAMES": "3",
+        "SELKIES_IS_MANUAL_RESOLUTION_MODE": "true",
+    })
+    assert renamed == {
+        "SELKIES_VIDEO_CRF": "10-40",
+        "SELKIES_VIDEO_FULLCOLOR": "true",
+        "SELKIES_VIDEO_STREAMING_MODE": "true",
+        "SELKIES_VIDEO_PAINTOVER_CRF": "20",
+        "SELKIES_VIDEO_PAINTOVER_BURST_FRAMES": "3",
+        "SELKIES_MANUAL_RESOLUTION": "true",
+    }
+    # The current name wins when both spellings are present.
+    assert migrate({"SELKIES_H264_CRF": "1-2", "SELKIES_VIDEO_CRF": "3-4"}) == {"SELKIES_VIDEO_CRF": "3-4"}
+
+    assert migrate({"SELKIES_CLIPBOARD_ENABLED": "false"}) == {"SELKIES_ENABLE_CLIPBOARD": "false"}
+    assert migrate({"SELKIES_CLIPBOARD_OUT_ENABLED": "false"}) == {"SELKIES_ENABLE_CLIPBOARD": "in"}
+    assert migrate({"SELKIES_CLIPBOARD_IN_ENABLED": "false"}) == {"SELKIES_ENABLE_CLIPBOARD": "out"}
+    assert migrate({"SELKIES_CLIPBOARD_IN_ENABLED": "true", "SELKIES_CLIPBOARD_OUT_ENABLED": "true"}) == {
+        "SELKIES_ENABLE_CLIPBOARD": "true"
+    }
+    assert migrate({"SELKIES_CLIPBOARD_IN_ENABLED": "false", "SELKIES_ENABLE_CLIPBOARD": "in"}) == {
+        "SELKIES_ENABLE_CLIPBOARD": "in"
+    }
+
+    assert migrate({"SELKIES_ENCODER": "x264enc,x264enc-striped,jpeg"}) == {
+        "SELKIES_ENCODER": "h264enc,h264enc-striped,jpeg"
+    }
+    assert migrate({"SELKIES_ENCODER": "x264enc,h264enc"}) == {"SELKIES_ENCODER": "h264enc"}
+
+
+def test_load_app_templates_migrates_legacy_keys(tmp_path):
+    config_store.ensure_config_dir()
+    path = f"{settings.app_templates_path}/old.yml"
+    persistence.write_yaml_sync(
+        path, {"name": "Old", "settings": {"SELKIES_H264_CRF": "10-40", "SELKIES_CLIPBOARD_ENABLED": "false"}}
+    )
+    config_store.load_app_templates()
+    assert state.app_templates["Old"]["settings"] == {
+        "SELKIES_VIDEO_CRF": "10-40",
+        "SELKIES_ENABLE_CLIPBOARD": "false",
+    }
+    config_store.delete_app_template("Old")

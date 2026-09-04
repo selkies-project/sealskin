@@ -39,7 +39,7 @@ Each user carries these settings, editable later:
 | **Allow Persistent Storage** | Without it every session is a cleanroom, the file manager is unavailable and files cannot be sent to sessions. |
 | **Allow Public File Sharing** | Enables share links from the file manager. Requires persistent storage. |
 | **Allow GPU Access** | Whether the launcher offers GPUs to this user. |
-| **Harden Container**, **Harden Window Manager** | Recorded on the account but **not applied by the server yet**: as of 0.3.0 a launch reads only the storage, sharing and GPU switches. Hardening is applied through an [app template](#app-templates) (`HARDEN_DESKTOP`, `HARDEN_OPENBOX`). |
+| **Harden Container**, **Harden Window Manager** | Force the base image presets `HARDEN_DESKTOP` and `HARDEN_OPENBOX` on every session the user starts, including apps a collaboration room swaps to. They are applied after the [app template](#app-templates) and the app's own environment overrides, so neither can switch them back off. Leave them off to let the template decide. |
 | **Sessions limit**, **Storage limit** | Recorded but **not enforced yet**; `-1` means unlimited once they are. |
 
 Deleting a user also deletes their storage.
@@ -116,12 +116,21 @@ variables by category:
 
 * **UI**: the Selkies sidebar, its sections, the page title, watermark and
   dashboard style.
-* **App**: audio, microphone, clipboard directions, gamepads, file transfers,
-  sharing, second screen, cursor handling and scaling.
-* **General**: encoders, frame rate, quality and CRF ranges, paint-over
-  quality, resolution limits, DRI3 and Zink, debugging.
+* **App**: audio, microphone, clipboard policy, gamepads, file transfers,
+  sharing links, second screen, cursor handling, resolution and scaling, then
+  the audio and video encoding controls: encoders, frame rate, CRF and
+  bitrate ranges, rate control, keyframes, paint-over quality and the virtual
+  webcam.
+* **General**: resolution limits, Docker-in-Docker, IPv6, DRI3 and Zink, GPU
+  selection, window decorations, gamepad and webcam injection, connect and
+  disconnect hooks, debugging.
 * **Hardening**: the presets behind the user-level hardening switches and
   their individual components.
+* **WebRTC**: streaming mode, dual mode, pacing and congestion control, and
+  the STUN, TURN, TURN REST and Cloudflare TURN credentials. The base image
+  streams over WebSockets until one of these is set; any STUN, TURN,
+  Cloudflare or public IP value switches the session to WebRTC with dual mode
+  on.
 * **Docker**: `DOCKER_*` settings that become container run options rather
   than environment variables: privileged mode, capabilities, devices, extra
   bind mounts, memory and CPU limits, network, IPC and PID modes, DNS,
@@ -130,7 +139,14 @@ variables by category:
 The list of variables comes from `template_schema.yml` on the server, so a
 new image option is a server change and never needs a client update. The
 per-app environment overrides from the install dialog are applied after the
-template, so the more specific setting wins.
+template, so the more specific setting wins; the user-level hardening
+switches are applied after both.
+
+Templates written before the Selkies variables were renamed keep working:
+`SELKIES_H264_*` keys, `SELKIES_IS_MANUAL_RESOLUTION_MODE`, the three
+`SELKIES_CLIPBOARD_*` booleans and the `x264enc` encoder spellings are
+translated to their current names when the template is loaded, and saving the
+template from the editor writes the current names.
 
 A blank **Default** template is created on first start. Templates shipped in
 the default templates directory cannot be deleted from the UI.

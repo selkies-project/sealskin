@@ -281,6 +281,10 @@
           "label": "Hiển thị thống kê",
           "description": "Hiển thị phần thống kê trong thanh bên."
         },
+        "SELKIES_UI_SIDEBAR_SHOW_SHORTCUTS": {
+          "label": "Hiển thị phần phím tắt bàn phím",
+          "description": "Hiển thị phần phím tắt bàn phím trong thanh bên."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
           "label": "Hiển thị clipboard",
           "description": "Hiển thị phần clipboard trong thanh bên."
@@ -300,6 +304,18 @@
         "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
           "label": "Hiển thị phần Gamepads",
           "description": "Hiển thị phần gamepads trong thanh bên."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
+          "label": "Hiển thị nút toàn màn hình",
+          "description": "Hiển thị nút toàn màn hình trong thanh bên."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMING_MODE": {
+          "label": "Hiển thị nút chế độ chơi game",
+          "description": "Hiển thị nút chế độ chơi game (khóa con trỏ) trong thanh bên."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_TRACKPAD": {
+          "label": "Hiển thị nút trackpad",
+          "description": "Hiển thị nút trackpad ảo trong thanh bên."
         },
         "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
           "label": "Hiển thị nút bàn phím",
@@ -332,7 +348,6 @@
           "options": {
             "default": "Mặc định",
             "selkiesDefault": "Selkies (Mặc định)",
-            "zinc": "Zinc",
             "wish": "Wish"
           }
         },
@@ -342,23 +357,21 @@
         },
         "SELKIES_MICROPHONE_ENABLED": {
           "label": "Bật micro",
-          "description": "Bật chuyển tiếp micro từ máy khách đến máy chủ."
+          "description": "Bật chuyển tiếp micro từ máy khách đến máy chủ. Tắt theo mặc định ở upstream."
         },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "Bật gamepad",
           "description": "Bật hỗ trợ gamepad."
         },
-        "SELKIES_CLIPBOARD_ENABLED": {
-          "label": "Bật clipboard",
-          "description": "Bật đồng bộ hóa clipboard."
-        },
-        "SELKIES_CLIPBOARD_IN_ENABLED": {
-          "label": "Bật khay nhớ tạm từ máy khách sang máy chủ",
-          "description": "Cho phép truyền dữ liệu khay nhớ tạm từ trình duyệt."
-        },
-        "SELKIES_CLIPBOARD_OUT_ENABLED": {
-          "label": "Bật khay nhớ tạm từ máy chủ sang máy khách",
-          "description": "Cho phép truyền dữ liệu khay nhớ tạm từ máy chủ."
+        "SELKIES_ENABLE_CLIPBOARD": {
+          "label": "Chính sách clipboard",
+          "description": "Các hướng clipboard nào được phép. 'Chỉ từ máy chủ sang máy khách' cũng ngăn trang đọc clipboard cục bộ, vốn là nguyên nhân gây ra các lời nhắc dán trong Firefox và Safari.",
+          "options": {
+            "both": "Cả hai hướng",
+            "inOnly": "Chỉ từ máy khách sang máy chủ",
+            "outOnly": "Chỉ từ máy chủ sang máy khách",
+            "disabled": "Vô hiệu hóa"
+          }
         },
         "SELKIES_ENABLE_BINARY_CLIPBOARD": {
           "label": "Bật clipboard nhị phân",
@@ -370,25 +383,61 @@
         },
         "SELKIES_FILE_TRANSFERS": {
           "label": "Truyền tệp",
-          "description": "Các hướng được phép ('upload,download', 'upload', 'download', 'none')."
+          "description": "Các hướng được phép ('upload,download', 'upload', 'download' hoặc 'none'). Bị Tăng cường bảo mật Desktop xóa trống trừ khi được đặt tại đây."
+        },
+        "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
+          "label": "Giới hạn truyền tệp (Mbit/s)",
+          "description": "Giới hạn tốc độ tĩnh dùng chung cho tất cả các lượt tải lên và tải xuống. 0 sẽ bỏ giới hạn."
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "Bật tất cả chia sẻ",
           "description": "Công tắc chính cho tất cả các tính năng chia sẻ."
         },
+        "SELKIES_ENABLE_SHARED": {
+          "label": "Bật chia sẻ chỉ xem",
+          "description": "Bật các liên kết chia sẻ chỉ xem."
+        },
+        "SELKIES_ENABLE_COLLAB": {
+          "label": "Bật cộng tác",
+          "description": "Cho phép người xem giữ token chính của phiên hoạt động như một cộng tác viên có quyền đọc-ghi. Bắt buộc đối với các phòng SealSkin."
+        },
+        "SELKIES_ENABLE_PLAYER2": {
+          "label": "Bật chia sẻ người chơi 2",
+          "description": "Bật liên kết chia sẻ cho gamepad người chơi 2."
+        },
+        "SELKIES_ENABLE_PLAYER3": {
+          "label": "Bật chia sẻ người chơi 3",
+          "description": "Bật liên kết chia sẻ cho gamepad người chơi 3."
+        },
+        "SELKIES_ENABLE_PLAYER4": {
+          "label": "Bật chia sẻ người chơi 4",
+          "description": "Bật liên kết chia sẻ cho gamepad người chơi 4."
+        },
         "SELKIES_SECOND_SCREEN": {
           "label": "Bật màn hình thứ hai",
           "description": "Bật hỗ trợ cho một màn hình/hiển thị thứ hai."
+        },
+        "SELKIES_ENABLE_RESIZE": {
+          "label": "Bật thay đổi kích thước động",
+          "description": "Thay đổi kích thước màn hình từ xa cho khớp với cửa sổ trình duyệt."
         },
         "SELKIES_USE_BROWSER_CURSORS": {
           "label": "Sử dụng con trỏ trình duyệt",
           "description": "Sử dụng con trỏ CSS của trình duyệt thay vì hiển thị trên canvas."
         },
+        "SELKIES_ENABLE_CURSORS": {
+          "label": "Bật con trỏ từ xa",
+          "description": "Gửi hình dạng con trỏ của chính ứng dụng đến máy khách."
+        },
+        "SELKIES_CURSOR_SIZE": {
+          "label": "Kích thước con trỏ",
+          "description": "Kích thước con trỏ tính bằng point ở 96 DPI, được co giãn theo DPI của phiên. -1 sử dụng mặc định của nền tảng (32 trên X11, 24 trên Wayland)."
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "Sử dụng tỷ lệ CSS (LoDPI)",
           "description": "Nếu đúng, một độ phân giải thấp hơn sẽ được gửi và canvas sẽ được kéo dài."
         },
-        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+        "SELKIES_MANUAL_RESOLUTION": {
           "label": "Chế độ độ phân giải thủ công",
           "description": "Khóa độ phân giải theo các giá trị chiều rộng/chiều cao thủ công."
         },
@@ -410,11 +459,27 @@
         },
         "SELKIES_AUDIO_BITRATE": {
           "label": "Bitrate âm thanh",
-          "description": "Bitrate âm thanh mặc định."
+          "description": "Bitrate âm thanh Opus mặc định."
+        },
+        "SELKIES_AUDIO_FRAME_DURATION_MS": {
+          "label": "Thời lượng khung âm thanh",
+          "description": "Thời lượng khung Opus. Giá trị thấp hơn giảm độ trễ âm thanh với chi phí nhỏ về băng thông và tốc độ gói tin."
+        },
+        "SELKIES_AUDIO_CHANNELS": {
+          "label": "Kênh âm thanh",
+          "description": "Số kênh âm thanh; 2 là âm thanh nổi."
+        },
+        "SELKIES_AUDIO_REDUNDANCY": {
+          "label": "Dự phòng âm thanh (Opus RED)",
+          "description": "Gửi kèm các khung âm thanh trước đó làm dự phòng để giảm gián đoạn khi mất gói tin."
+        },
+        "SELKIES_AUDIO_REDUNDANCY_DISTANCE": {
+          "label": "Khoảng cách dự phòng âm thanh",
+          "description": "Số khung trước đó được gửi kèm làm dự phòng (0-4). Giá trị cao hơn chịu được các đợt mất gói dài hơn với băng thông tăng tương ứng."
         },
         "SELKIES_ENCODER": {
           "label": "Các bộ mã hóa",
-          "description": "Danh sách các bộ mã hóa được phân tách bằng dấu phẩy. Đầu tiên là mặc định."
+          "description": "Danh sách các bộ mã hóa được phép, phân tách bằng dấu phẩy (h264enc, h264enc-striped, jpeg). Đầu tiên là mặc định; một giá trị duy nhất sẽ khóa lựa chọn. Chỉ h264enc truyền phát qua WebRTC."
         },
         "SELKIES_USE_CPU": {
           "label": "Buộc mã hóa bằng CPU",
@@ -422,23 +487,51 @@
         },
         "SELKIES_FRAMERATE": {
           "label": "Tốc độ khung hình (Phạm vi hoặc Cố định)",
-          "description": "ví dụ: '8-120' cho một phạm vi hoặc '60' cho cố định."
+          "description": "ví dụ: '8-240' cho một phạm vi, '60' cho giá trị ban đầu cố định, '60,8-240' cho cả hai; '60-60' sẽ khóa giá trị."
         },
-        "SELKIES_H264_CRF": {
-          "label": "CRF H.264 (Phạm vi hoặc Cố định)",
-          "description": "ví dụ: '5-50' cho một phạm vi hoặc '25' cho cố định."
+        "SELKIES_RATE_CONTROL_MODE": {
+          "label": "Chế độ kiểm soát tốc độ bit",
+          "description": "Kiểm soát tốc độ bit H.264 mặc định: chất lượng không đổi (CRF) hoặc bitrate không đổi (CBR).",
+          "options": {
+            "crf": "Chất lượng không đổi (CRF)",
+            "cbr": "Bitrate không đổi (CBR)"
+          }
+        },
+        "SELKIES_ENABLE_RATE_CONTROL": {
+          "label": "Cho phép chuyển đổi kiểm soát tốc độ bit",
+          "description": "Cho phép máy khách chuyển đổi giữa CRF và CBR. Tắt sẽ khóa bộ mã hóa ở mặc định tích hợp của nó."
+        },
+        "SELKIES_VIDEO_CRF": {
+          "label": "CRF video (Phạm vi hoặc Cố định)",
+          "description": "Chất lượng không đổi H.264: '5-50' cho một phạm vi, '25' cho giá trị ban đầu cố định, hoặc '25,5-50' cho cả hai."
+        },
+        "SELKIES_VIDEO_BITRATE": {
+          "label": "Bitrate video kbps (Phạm vi hoặc Cố định)",
+          "description": "Bitrate CBR tính bằng kilobit mỗi giây: '100-1000000' cho một phạm vi, '8000' cho giá trị ban đầu cố định, hoặc '8000,100-1000000' cho cả hai."
+        },
+        "SELKIES_VIDEO_MIN_QP": {
+          "label": "QP tối thiểu của video",
+          "description": "Bộ lượng tử hóa H.264 tối thiểu ở chế độ CBR (0 = mặc định của bộ mã hóa). Tăng giá trị này sẽ giới hạn lượng bit tiêu tốn cho nội dung đơn giản."
+        },
+        "SELKIES_VIDEO_MAX_QP": {
+          "label": "QP tối đa của video",
+          "description": "Bộ lượng tử hóa H.264 tối đa ở chế độ CBR (0 = mặc định của bộ mã hóa). Giảm giá trị này giữ cho văn bản dễ đọc khi chuyển động, đổi lại có thể vượt quá bitrate mục tiêu."
+        },
+        "SELKIES_KEYFRAME_INTERVAL": {
+          "label": "Khoảng cách keyframe (giây)",
+          "description": "Số giây giữa các keyframe khôi phục theo lịch. 0 giữ GOP vô hạn và chỉ gửi keyframe khi có yêu cầu."
         },
         "SELKIES_JPEG_QUALITY": {
           "label": "Chất lượng JPEG (Phạm vi hoặc Cố định)",
-          "description": "ví dụ: '1-100' cho một phạm vi hoặc '60' cho cố định."
+          "description": "'1-100' cho một phạm vi, '40' cho giá trị ban đầu cố định, hoặc '40,1-100' cho cả hai."
         },
-        "SELKIES_H264_FULLCOLOR": {
-          "label": "Màu đầy đủ H.264",
-          "description": "Bật dải màu đầy đủ H.264 cho các bộ mã hóa pixelflux."
+        "SELKIES_VIDEO_FULLCOLOR": {
+          "label": "Màu đầy đủ video (4:4:4)",
+          "description": "Mã hóa H.264 với chroma 4:4:4 thay vì 4:2:0. Các máy khách không có bộ giải mã 4:4:4 sẽ quay về JPEG khi tùy chọn này bị khóa bật."
         },
-        "SELKIES_H264_STREAMING_MODE": {
-          "label": "Chế độ truyền phát H.264 (Turbo)",
-          "description": "Bật chế độ truyền phát độ trễ thấp H.264."
+        "SELKIES_VIDEO_STREAMING_MODE": {
+          "label": "Chế độ truyền phát video (Turbo)",
+          "description": "Mã hóa mọi khung hình như một bộ mã hóa video truyền thống thay vì chỉ các vùng thay đổi."
         },
         "SELKIES_USE_PAINT_OVER_QUALITY": {
           "label": "Sử dụng chất lượng vẽ đè",
@@ -446,23 +539,49 @@
         },
         "SELKIES_PAINT_OVER_JPEG_QUALITY": {
           "label": "Chất lượng JPEG vẽ đè",
-          "description": "ví dụ: '1-100' cho một phạm vi hoặc '90' cho cố định."
+          "description": "'1-100' cho một phạm vi, '90' cho giá trị ban đầu cố định, hoặc '90,1-100' cho cả hai."
         },
-        "SELKIES_H264_PAINTOVER_CRF": {
-          "label": "CRF H.264 vẽ đè",
-          "description": "ví dụ: '5-50' cho một phạm vi hoặc '18' cho cố định."
+        "SELKIES_VIDEO_PAINTOVER_CRF": {
+          "label": "CRF video vẽ đè",
+          "description": "'5-50' cho một phạm vi, '18' cho giá trị ban đầu cố định, hoặc '18,5-50' cho cả hai."
         },
-        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
+        "SELKIES_VIDEO_PAINTOVER_BURST_FRAMES": {
           "label": "Khung hình Burst vẽ đè",
-          "description": "ví dụ: '1-30' cho một phạm vi hoặc '5' cho cố định."
+          "description": "'1-30' cho một phạm vi, '5' cho giá trị ban đầu cố định, hoặc '5,1-30' cho cả hai."
+        },
+        "SELKIES_BACKPRESSURE_QUEUE_SIZE": {
+          "label": "Kích thước hàng đợi backpressure",
+          "description": "Số khung hình và đoạn âm thanh được đệm cho mỗi luồng trước khi bị loại bỏ do backpressure (chế độ WebSockets). Giá trị cao hơn chịu được các gián đoạn của máy khách với chi phí là độ trễ."
+        },
+        "SELKIES_WEBCAM_WIDTH": {
+          "label": "Chiều rộng webcam",
+          "description": "Chiều rộng của thiết bị webcam ảo; các khung hình từ máy khách được co giãn và thêm viền đen cho vừa."
+        },
+        "SELKIES_WEBCAM_HEIGHT": {
+          "label": "Chiều cao webcam",
+          "description": "Chiều cao của thiết bị webcam ảo; các khung hình từ máy khách được co giãn và thêm viền đen cho vừa."
+        },
+        "SELKIES_WEBCAM_ENCODER": {
+          "label": "Bộ mã hóa đường lên webcam",
+          "description": "Codec mà các máy khách WebSocket dùng để gửi khung hình camera. Tự động chọn codec tốt nhất mà trình duyệt có thể duy trì.",
+          "options": {
+            "auto": "Tự động"
+          }
+        },
+        "SELKIES_WEBCAM_PIXEL_FORMAT": {
+          "label": "Định dạng pixel webcam",
+          "description": "Định dạng pixel của thiết bị webcam ảo. Tự động sẽ theo những gì máy khách gửi.",
+          "options": {
+            "auto": "Tự động"
+          }
         },
         "HARDEN_DESKTOP": {
           "label": "Tăng cường bảo mật Desktop (Cài đặt sẵn)",
-          "description": "Bật DISABLE_OPEN_TOOLS, DISABLE_SUDO và DISABLE_TERMINALS."
+          "description": "Bật DISABLE_OPEN_TOOLS, DISABLE_SUDO và DISABLE_TERMINALS, và trừ khi được đặt rõ ràng, cũng vô hiệu hóa truyền tệp, websocket lệnh và các phần tệp và ứng dụng trong thanh bên. Bắt buộc bật đối với người dùng có Tăng cường bảo mật Container."
         },
         "HARDEN_OPENBOX": {
           "label": "Tăng cường bảo mật Trình quản lý cửa sổ (Cài đặt sẵn)",
-          "description": "Bật DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS và HARDEN_KEYBINDS. Cũng bật RESTART_APP."
+          "description": "Bật DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS và HARDEN_KEYBINDS cho Openbox và labwc, và RESTART_APP trừ khi được đặt rõ ràng. Bắt buộc bật đối với người dùng có Tăng cường bảo mật Trình quản lý cửa sổ."
         },
         "DISABLE_OPEN_TOOLS": {
           "label": "Vô hiệu hóa các công cụ mở",
@@ -486,11 +605,11 @@
         },
         "HARDEN_KEYBINDS": {
           "label": "Tăng cường bảo mật các phím tắt",
-          "description": "Vô hiệu hóa các phím tắt mặc định của Openbox như Alt+F4."
+          "description": "Vô hiệu hóa các phím tắt của trình quản lý cửa sổ như Alt+F4, Alt+Escape, Alt+Space và Super+E, và khóa cấu hình trình quản lý cửa sổ."
         },
         "RESTART_APP": {
           "label": "Khởi động lại ứng dụng khi đóng",
-          "description": "Tự động khởi động lại ứng dụng chính nếu nó bị đóng."
+          "description": "Tự động khởi động lại ứng dụng chính nếu nó bị đóng và đặt tệp tự khởi động thành chỉ đọc."
         },
         "MAX_RES": {
           "label": "Độ phân giải tối đa",
@@ -512,6 +631,10 @@
           "label": "Vô hiệu hóa DRI3",
           "description": "Không sử dụng tăng tốc DRI3 nếu phát hiện có card màn hình."
         },
+        "AUTO_GPU": {
+          "label": "Tự động chọn GPU",
+          "description": "'true' kết xuất trên GPU đầu tiên, 'false' vô hiệu hóa, hoặc một nhà cung cấp, trình điều khiển hay ID nhà cung cấp PCI (nvidia, amdgpu, 0x10de) sẽ chọn một GPU cụ thể."
+        },
         "NO_DECOR": {
           "label": "Không có trang trí cửa sổ",
           "description": "Chạy ứng dụng không có viền cửa sổ để sử dụng PWA."
@@ -522,11 +645,117 @@
         },
         "NO_GAMEPAD": {
           "label": "Vô hiệu hóa tiêm Gamepad",
-          "description": "Vô hiệu hóa tiêm trình xen kẽ gamepad không gian người dùng."
+          "description": "Bỏ qua trình xen kẽ gamepad không gian người dùng. Cũng ẩn phần gamepad và các liên kết chia sẻ người chơi."
+        },
+        "NO_WEBCAM": {
+          "label": "Vô hiệu hóa tiêm Webcam",
+          "description": "Bỏ qua thiết bị webcam ảo và trình xen kẽ. Cũng ẩn nút webcam."
+        },
+        "SELKIES_RUN_AFTER_CONNECT": {
+          "label": "Chạy sau khi kết nối",
+          "description": "Lệnh shell được chạy bên trong container khi máy khách đầu tiên kết nối."
+        },
+        "SELKIES_RUN_AFTER_DISCONNECT": {
+          "label": "Chạy sau khi ngắt kết nối",
+          "description": "Lệnh shell được chạy bên trong container khi máy khách cuối cùng ngắt kết nối."
         },
         "SELKIES_DEBUG": {
           "label": "Bật gỡ lỗi Selkies",
           "description": "Bật ghi nhật ký gỡ lỗi cho các thành phần truyền phát."
+        },
+        "SELKIES_MODE": {
+          "label": "Chế độ truyền phát",
+          "description": "Phương thức truyền tải được dùng theo mặc định. Tự động chọn WebRTC khi có bất kỳ giá trị TURN/STUN nào được đặt, nếu không thì WebSockets.",
+          "options": {
+            "auto": "Tự động",
+            "websockets": "WebSockets",
+            "webrtc": "WebRTC"
+          }
+        },
+        "SELKIES_ENABLE_DUAL_MODE": {
+          "label": "Chế độ kép",
+          "description": "Cho phép người dùng chuyển đổi giữa WebRTC và WebSockets từ thanh bên. Tự động chỉ bật khi WebRTC được cấu hình.",
+          "options": {
+            "auto": "Tự động",
+            "enabled": "Đã bật",
+            "disabled": "Vô hiệu hóa"
+          }
+        },
+        "SELKIES_WEBRTC_PACER": {
+          "label": "Bộ điều tiết WebRTC",
+          "description": "Điều tiết các gói WebRTC gửi đi với mức ưu tiên nghiêm ngặt để âm thanh và đầu vào được bảo vệ khỏi các đợt bùng nổ video trên các liên kết bị nghẽn."
+        },
+        "SELKIES_CONGESTION_CONTROL": {
+          "label": "Kiểm soát tắc nghẽn",
+          "description": "Điều chỉnh bitrate video theo ước tính băng thông từ phản hồi của bên nhận WebRTC. Có hiệu lực ở chế độ CBR."
+        },
+        "SELKIES_STUN_HOST": {
+          "label": "Máy chủ STUN",
+          "description": "Máy chủ STUN cho NAT hole punching. Trỏ đến một máy chủ nội bộ đối với các mạng không có internet."
+        },
+        "SELKIES_STUN_PORT": {
+          "label": "Cổng STUN",
+          "description": "Cổng của máy chủ STUN."
+        },
+        "SELKIES_TURN_HOST": {
+          "label": "Máy chủ TURN",
+          "description": "Máy chủ TURN được dùng với khóa bí mật dùng chung hoặc thông tin xác thực dài hạn. Đặt địa chỉ IPv6 trong dấu ngoặc vuông."
+        },
+        "SELKIES_TURN_PORT": {
+          "label": "Cổng TURN",
+          "description": "Cổng của máy chủ TURN."
+        },
+        "SELKIES_TURN_PROTOCOL": {
+          "label": "Giao thức TURN",
+          "description": "Phương thức truyền tải mà máy khách dùng để kết nối đến TURN. Rất khuyến nghị dùng UDP; chỉ dùng TCP khi UDP bị chặn."
+        },
+        "SELKIES_TURN_TLS": {
+          "label": "TURN qua TLS/DTLS",
+          "description": "Sử dụng TURN qua TLS (TCP) hoặc DTLS (UDP). Yêu cầu chứng chỉ hợp lệ trên máy chủ TURN."
+        },
+        "SELKIES_TURN_SHARED_SECRET": {
+          "label": "Khóa bí mật dùng chung TURN",
+          "description": "Khóa bí mật dùng chung để tạo thông tin xác thực TURN HMAC có giới hạn thời gian."
+        },
+        "SELKIES_TURN_USERNAME": {
+          "label": "Tên người dùng TURN",
+          "description": "Tên người dùng thông tin xác thực TURN dài hạn kiểu cũ."
+        },
+        "SELKIES_TURN_PASSWORD": {
+          "label": "Mật khẩu TURN",
+          "description": "Mật khẩu thông tin xác thực TURN dài hạn kiểu cũ."
+        },
+        "SELKIES_TURN_REST_URI": {
+          "label": "URI của TURN REST API",
+          "description": "URI của một dịch vụ cấp thông tin xác thực TURN REST, ví dụ: http://localhost:8008."
+        },
+        "SELKIES_TURN_REST_API_KEY": {
+          "label": "Khóa API của TURN REST",
+          "description": "Khóa API được gửi đến dịch vụ TURN REST."
+        },
+        "SELKIES_TURN_REST_USERNAME": {
+          "label": "Tên người dùng TURN REST",
+          "description": "Tên người dùng mà dịch vụ TURN REST nhúng vào thông tin xác thực. Để trống sẽ dùng 'selkies'."
+        },
+        "SELKIES_WEBRTC_PUBLIC_IP": {
+          "label": "IP công khai WebRTC",
+          "description": "Địa chỉ công khai được quảng bá trong các ứng viên ICE của máy chủ đối với máy chủ nằm sau NAT 1:1 tĩnh. Một địa chỉ IPv4 và/hoặc một địa chỉ IPv6."
+        },
+        "SELKIES_ENABLE_CLOUDFLARE_TURN": {
+          "label": "Bật Cloudflare TURN",
+          "description": "Sử dụng dịch vụ Cloudflare TURN. Yêu cầu ID token và token API bên dưới."
+        },
+        "SELKIES_CLOUDFLARE_TURN_TOKEN_ID": {
+          "label": "ID token Cloudflare TURN",
+          "description": "ID token ứng dụng Cloudflare TURN."
+        },
+        "SELKIES_CLOUDFLARE_TURN_API_TOKEN": {
+          "label": "Token API Cloudflare TURN",
+          "description": "Token API của Cloudflare TURN."
+        },
+        "SELKIES_RTC_CONFIG_JSON": {
+          "label": "Đường dẫn JSON cấu hình RTC",
+          "description": "Đường dẫn bên trong container đến một tệp JSON chứa cấu hình WebRTC. Ghi đè mọi cài đặt STUN/TURN khác và được đọc lại định kỳ."
         },
         "DOCKER_PRIVILEGED": {
           "label": "Chế độ đặc quyền",
@@ -699,6 +928,8 @@
       "errorPulling": "Lỗi khi kéo image.",
       "manualInstallNote": "Lưu ý: Các hình ảnh được thêm thủ công phải dựa trên một hình ảnh tương thích với selkies-baseimage.",
       "generalTitle": "Cài đặt Chung & Hiệu suất",
+      "webrtcTitle": "Cài đặt WebRTC và TURN",
+      "webrtcDescription": "Theo mặc định, các phiên truyền phát qua WebSockets. Việc đặt bất kỳ giá trị STUN, TURN, Cloudflare hoặc IP công khai nào bên dưới, hoặc chọn chế độ WebRTC, sẽ chuyển container sang WebRTC với chế độ kép được bật để người dùng vẫn có thể quay lại WebSockets.",
       "dockerTitle": "Ghi đè nâng cao Docker",
       "dockerDescription": "Các cài đặt này ghi đè cấu hình container mặc định. Sử dụng thận trọng và chỉ khi bạn biết mình đang làm gì."
     },

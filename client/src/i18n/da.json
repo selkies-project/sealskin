@@ -281,6 +281,10 @@
           "label": "Vis Statistik",
           "description": "Vis statistiksektionen i sidepanelet."
         },
+        "SELKIES_UI_SIDEBAR_SHOW_SHORTCUTS": {
+          "label": "Vis Tastaturgenvejssektion",
+          "description": "Vis sektionen for tastaturgenveje i sidepanelet."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
           "label": "Vis Udklipsholder",
           "description": "Vis sektionen for udklipsholder i sidepanelet."
@@ -300,6 +304,18 @@
         "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
           "label": "Vis Gamepad-sektion",
           "description": "Vis gamepad-sektionen i sidepanelet."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
+          "label": "Vis Fuldskærmsknap",
+          "description": "Vis fuldskærmsknappen i sidepanelet."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMING_MODE": {
+          "label": "Vis Spiltilstandsknap",
+          "description": "Vis knappen for spiltilstand (markørlås) i sidepanelet."
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_TRACKPAD": {
+          "label": "Vis Trackpad-knap",
+          "description": "Vis knappen for det virtuelle trackpad i sidepanelet."
         },
         "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
           "label": "Vis Tastaturknap",
@@ -332,7 +348,6 @@
           "options": {
             "default": "Standard",
             "selkiesDefault": "Selkies (Standard)",
-            "zinc": "Zinc",
             "wish": "Wish"
           }
         },
@@ -342,23 +357,21 @@
         },
         "SELKIES_MICROPHONE_ENABLED": {
           "label": "Aktiver Mikrofon",
-          "description": "Aktiver mikrofon-forwarding fra klient til server."
+          "description": "Aktiver mikrofon-forwarding fra klient til server. Som standard slået fra upstream."
         },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "Aktiver Gamepad",
           "description": "Aktiver gamepad-understøttelse."
         },
-        "SELKIES_CLIPBOARD_ENABLED": {
-          "label": "Aktiver Udklipsholder",
-          "description": "Aktiver synkronisering af udklipsholder."
-        },
-        "SELKIES_CLIPBOARD_IN_ENABLED": {
-          "label": "Aktiver udklipsholder fra klient til server",
-          "description": "Tillad overførsel af udklipsholderdata fra browseren."
-        },
-        "SELKIES_CLIPBOARD_OUT_ENABLED": {
-          "label": "Aktiver udklipsholder fra server til klient",
-          "description": "Tillad overførsel af udklipsholderdata fra serveren."
+        "SELKIES_ENABLE_CLIPBOARD": {
+          "label": "Udklipsholderpolitik",
+          "description": "Hvilke retninger for udklipsholderen der er tilladt. 'Kun server til klient' forhindrer også siden i at læse den lokale udklipsholder, hvilket er det, der udløser indsæt-prompter i Firefox og Safari.",
+          "options": {
+            "both": "Begge retninger",
+            "inOnly": "Kun klient til server",
+            "outOnly": "Kun server til klient",
+            "disabled": "Deaktiveret"
+          }
         },
         "SELKIES_ENABLE_BINARY_CLIPBOARD": {
           "label": "Aktiver Binær Udklipsholder",
@@ -370,25 +383,61 @@
         },
         "SELKIES_FILE_TRANSFERS": {
           "label": "Filoverførsler",
-          "description": "Tilladte retninger ('upload,download', 'upload', 'download', 'none')."
+          "description": "Tilladte retninger ('upload,download', 'upload', 'download' eller 'none'). Tømmes af Hærd Desktop, medmindre det angives her."
+        },
+        "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
+          "label": "Filoverførselsgrænse (Mbit/s)",
+          "description": "Statisk begrænsning delt af alle uploads og downloads. 0 deaktiverer loftet."
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "Aktiver al Deling",
           "description": "Hovedafbryder for alle delingsfunktioner."
         },
+        "SELKIES_ENABLE_SHARED": {
+          "label": "Aktiver Skrivebeskyttet Deling",
+          "description": "Aktiver skrivebeskyttede delingslinks."
+        },
+        "SELKIES_ENABLE_COLLAB": {
+          "label": "Aktiver Samarbejde",
+          "description": "Lad en seer med sessionens master-token fungere som samarbejdspartner med læse- og skriveadgang. Påkrævet for SealSkin-rum."
+        },
+        "SELKIES_ENABLE_PLAYER2": {
+          "label": "Aktiver Deling for Spiller 2",
+          "description": "Aktiver delingslinket for gamepad-spiller 2."
+        },
+        "SELKIES_ENABLE_PLAYER3": {
+          "label": "Aktiver Deling for Spiller 3",
+          "description": "Aktiver delingslinket for gamepad-spiller 3."
+        },
+        "SELKIES_ENABLE_PLAYER4": {
+          "label": "Aktiver Deling for Spiller 4",
+          "description": "Aktiver delingslinket for gamepad-spiller 4."
+        },
         "SELKIES_SECOND_SCREEN": {
           "label": "Aktiver Anden Skærm",
           "description": "Aktiver understøttelse for en ekstra skærm/monitor."
+        },
+        "SELKIES_ENABLE_RESIZE": {
+          "label": "Aktiver Dynamisk Størrelsesændring",
+          "description": "Tilpas den eksterne skærm, så den matcher browservinduet."
         },
         "SELKIES_USE_BROWSER_CURSORS": {
           "label": "Brug Browser-markører",
           "description": "Brug browserens CSS-markører i stedet for at rendere til canvas."
         },
+        "SELKIES_ENABLE_CURSORS": {
+          "label": "Aktiver Eksterne Markører",
+          "description": "Send applikationens egne markørformer til klienten."
+        },
+        "SELKIES_CURSOR_SIZE": {
+          "label": "Markørstørrelse",
+          "description": "Markørstørrelse i punkter ved 96 DPI, skaleret med sessionens DPI. -1 bruger platformens standard (32 på X11, 24 på Wayland)."
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "Brug CSS-skalering (LoDPI)",
           "description": "Hvis sand, sendes en lavere opløsning, og canvas strækkes."
         },
-        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+        "SELKIES_MANUAL_RESOLUTION": {
           "label": "Manuel Opløsningstilstand",
           "description": "Lås opløsningen til de manuelle bredde/højde-værdier."
         },
@@ -410,11 +459,27 @@
         },
         "SELKIES_AUDIO_BITRATE": {
           "label": "Lyd Bitrate",
-          "description": "Standard lyd-bitrate."
+          "description": "Standard Opus lyd-bitrate."
+        },
+        "SELKIES_AUDIO_FRAME_DURATION_MS": {
+          "label": "Lydframevarighed",
+          "description": "Opus framevarighed. Lavere værdier reducerer lydlatens mod en lille omkostning i båndbredde og pakkerate."
+        },
+        "SELKIES_AUDIO_CHANNELS": {
+          "label": "Lydkanaler",
+          "description": "Antal lydkanaler; 2 er stereo."
+        },
+        "SELKIES_AUDIO_REDUNDANCY": {
+          "label": "Lydredundans (Opus RED)",
+          "description": "Medsend tidligere lydframes som redundans for at reducere udfald ved pakketab."
+        },
+        "SELKIES_AUDIO_REDUNDANCY_DISTANCE": {
+          "label": "Lydredundansafstand",
+          "description": "Antal tidligere frames, der medsendes som redundans (0-4). Højere overlever længere tabsperioder mod proportionelt mere båndbredde."
         },
         "SELKIES_ENCODER": {
           "label": "Encodere",
-          "description": "Kommasepareret liste af encodere. Den første er standard."
+          "description": "Kommasepareret liste af tilladte encodere (h264enc, h264enc-striped, jpeg). Den første er standard; en enkelt værdi låser valget. Kun h264enc streamer over WebRTC."
         },
         "SELKIES_USE_CPU": {
           "label": "Tving CPU Encoding",
@@ -422,23 +487,51 @@
         },
         "SELKIES_FRAMERATE": {
           "label": "Billedfrekvens (Område eller Fast)",
-          "description": "f.eks., '8-120' for et område eller '60' for fast."
+          "description": "f.eks., '8-240' for et område, '60' for en fast startværdi, '60,8-240' for begge; '60-60' låser den."
         },
-        "SELKIES_H264_CRF": {
-          "label": "H.264 CRF (Område eller Fast)",
-          "description": "f.eks., '5-50' for et område eller '25' for fast."
+        "SELKIES_RATE_CONTROL_MODE": {
+          "label": "Ratestyringstilstand",
+          "description": "Standard H.264-ratestyring: konstant kvalitet (CRF) eller konstant bitrate (CBR).",
+          "options": {
+            "crf": "Konstant kvalitet (CRF)",
+            "cbr": "Konstant bitrate (CBR)"
+          }
+        },
+        "SELKIES_ENABLE_RATE_CONTROL": {
+          "label": "Tillad Skift af Ratestyring",
+          "description": "Lad klienter skifte mellem CRF og CBR. Fra låser encoderen til dens indbyggede standard."
+        },
+        "SELKIES_VIDEO_CRF": {
+          "label": "Video CRF (Område eller Fast)",
+          "description": "H.264 konstant kvalitet: '5-50' for et område, '25' for en fast startværdi eller '25,5-50' for begge."
+        },
+        "SELKIES_VIDEO_BITRATE": {
+          "label": "Video Bitrate kbps (Område eller Fast)",
+          "description": "CBR-bitrate i kilobit per sekund: '100-1000000' for et område, '8000' for en fast startværdi eller '8000,100-1000000' for begge."
+        },
+        "SELKIES_VIDEO_MIN_QP": {
+          "label": "Video Minimum QP",
+          "description": "Minimum H.264-kvantisering i CBR-tilstand (0 = encoderens standard). Hæves den, begrænses bitforbruget på simpelt indhold."
+        },
+        "SELKIES_VIDEO_MAX_QP": {
+          "label": "Video Maksimum QP",
+          "description": "Maksimum H.264-kvantisering i CBR-tilstand (0 = encoderens standard). Sænkes den, holdes tekst læsbar under bevægelse, på bekostning af at bitrate-målet overskrides."
+        },
+        "SELKIES_KEYFRAME_INTERVAL": {
+          "label": "Keyframe-interval (sekunder)",
+          "description": "Sekunder mellem planlagte gendannelses-keyframes. 0 holder GOP uendelig og sender kun keyframes på forespørgsel."
         },
         "SELKIES_JPEG_QUALITY": {
           "label": "JPEG Kvalitet (Område eller Fast)",
-          "description": "f.eks., '1-100' for et område eller '60' for fast."
+          "description": "'1-100' for et område, '40' for en fast startværdi eller '40,1-100' for begge."
         },
-        "SELKIES_H264_FULLCOLOR": {
-          "label": "H.264 Fuld Farve",
-          "description": "Aktiver H.264 fuld farveområde for pixelflux-encodere."
+        "SELKIES_VIDEO_FULLCOLOR": {
+          "label": "Video Fuld Farve (4:4:4)",
+          "description": "Encode H.264 med 4:4:4 chroma i stedet for 4:2:0. Klienter uden en 4:4:4-decoder falder tilbage til JPEG, når dette er låst til."
         },
-        "SELKIES_H264_STREAMING_MODE": {
-          "label": "H.264 Streaming (Turbo) Tilstand",
-          "description": "Aktiver H.264 lav-latens streamingtilstand."
+        "SELKIES_VIDEO_STREAMING_MODE": {
+          "label": "Video Streaming (Turbo) Tilstand",
+          "description": "Encode hver frame som en traditionel video-encoder i stedet for kun ændrede områder."
         },
         "SELKIES_USE_PAINT_OVER_QUALITY": {
           "label": "Brug Overmaling Kvalitet",
@@ -446,23 +539,49 @@
         },
         "SELKIES_PAINT_OVER_JPEG_QUALITY": {
           "label": "Overmaling JPEG Kvalitet",
-          "description": "f.eks., '1-100' for et område eller '90' for fast."
+          "description": "'1-100' for et område, '90' for en fast startværdi eller '90,1-100' for begge."
         },
-        "SELKIES_H264_PAINTOVER_CRF": {
-          "label": "Overmaling H.264 CRF",
-          "description": "f.eks., '5-50' for et område eller '18' for fast."
+        "SELKIES_VIDEO_PAINTOVER_CRF": {
+          "label": "Overmaling Video CRF",
+          "description": "'5-50' for et område, '18' for en fast startværdi eller '18,5-50' for begge."
         },
-        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
+        "SELKIES_VIDEO_PAINTOVER_BURST_FRAMES": {
           "label": "Overmaling Burst Frames",
-          "description": "f.eks., '1-30' for et område eller '5' for fast."
+          "description": "'1-30' for et område, '5' for en fast startværdi eller '5,1-30' for begge."
+        },
+        "SELKIES_BACKPRESSURE_QUEUE_SIZE": {
+          "label": "Backpressure-køstørrelse",
+          "description": "Frames og lydstykker, der bufferes per stream, før der droppes under backpressure (WebSockets-tilstand). Højere tolererer klientudsving på bekostning af latens."
+        },
+        "SELKIES_WEBCAM_WIDTH": {
+          "label": "Webcam Bredde",
+          "description": "Bredde af den virtuelle webcam-enhed; klientframes skaleres og letterboxes, så de passer."
+        },
+        "SELKIES_WEBCAM_HEIGHT": {
+          "label": "Webcam Højde",
+          "description": "Højde af den virtuelle webcam-enhed; klientframes skaleres og letterboxes, så de passer."
+        },
+        "SELKIES_WEBCAM_ENCODER": {
+          "label": "Webcam Uplink-encoder",
+          "description": "Codec, som WebSocket-klienter bruger til at sende kameraframes. Auto vælger det bedste, browseren kan holde.",
+          "options": {
+            "auto": "Auto"
+          }
+        },
+        "SELKIES_WEBCAM_PIXEL_FORMAT": {
+          "label": "Webcam Pixelformat",
+          "description": "Pixelformat for den virtuelle webcam-enhed. Auto følger det, klienten sender.",
+          "options": {
+            "auto": "Auto"
+          }
         },
         "HARDEN_DESKTOP": {
           "label": "Hærd Desktop (Forudindstilling)",
-          "description": "Aktiverer DISABLE_OPEN_TOOLS, DISABLE_SUDO, og DISABLE_TERMINALS."
+          "description": "Aktiverer DISABLE_OPEN_TOOLS, DISABLE_SUDO og DISABLE_TERMINALS, og medmindre det angives eksplicit, deaktiveres også filoverførsler, kommando-websocket samt fil- og app-sektionerne i sidepanelet. Tvunget til for brugere med Hærd Container."
         },
         "HARDEN_OPENBOX": {
           "label": "Hærd Vindueshåndtering (Forudindstilling)",
-          "description": "Aktiverer DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS, og HARDEN_KEYBINDS. Aktiverer også RESTART_APP."
+          "description": "Aktiverer DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS og HARDEN_KEYBINDS for Openbox og labwc, samt RESTART_APP medmindre det angives eksplicit. Tvunget til for brugere med Hærd Vindueshåndtering."
         },
         "DISABLE_OPEN_TOOLS": {
           "label": "Deaktiver Åbn-værktøjer",
@@ -486,11 +605,11 @@
         },
         "HARDEN_KEYBINDS": {
           "label": "Hærd Tastaturgenveje",
-          "description": "Deaktiverer standard Openbox tastaturgenveje som Alt+F4."
+          "description": "Deaktiverer vindueshåndteringens tastaturgenveje som Alt+F4, Alt+Escape, Alt+Space og Super+E, og låser vindueshåndteringens konfiguration."
         },
         "RESTART_APP": {
           "label": "Genstart App ved Lukning",
-          "description": "Genstarter automatisk hovedapplikationen, hvis den lukkes."
+          "description": "Genstarter automatisk hovedapplikationen, hvis den lukkes, og gør autostart-filen skrivebeskyttet."
         },
         "MAX_RES": {
           "label": "Maksimal Opløsning",
@@ -512,6 +631,10 @@
           "label": "Deaktiver DRI3",
           "description": "Brug ikke DRI3-acceleration, hvis et grafikkort registreres."
         },
+        "AUTO_GPU": {
+          "label": "Automatisk GPU-valg",
+          "description": "'true' renderer på den første GPU, 'false' deaktiverer det, eller en producent, driver eller PCI-producent-ID (nvidia, amdgpu, 0x10de) vælger en bestemt."
+        },
         "NO_DECOR": {
           "label": "Ingen Vinduesdekorationer",
           "description": "Kør applikation uden vinduesrammer til PWA-brug."
@@ -522,11 +645,117 @@
         },
         "NO_GAMEPAD": {
           "label": "Deaktiver Gamepad Injektion",
-          "description": "Deaktiver injektion af userspace gamepad interposer."
+          "description": "Spring userspace gamepad interposer over. Skjuler også gamepad-sektionen og delingslinks for spillere."
+        },
+        "NO_WEBCAM": {
+          "label": "Deaktiver Webcam Injektion",
+          "description": "Spring den virtuelle webcam-enhed og interposer over. Skjuler også webcam-knappen."
+        },
+        "SELKIES_RUN_AFTER_CONNECT": {
+          "label": "Kør Efter Forbindelse",
+          "description": "Shell-kommando, der køres inde i containeren, når den første klient forbinder."
+        },
+        "SELKIES_RUN_AFTER_DISCONNECT": {
+          "label": "Kør Efter Afbrydelse",
+          "description": "Shell-kommando, der køres inde i containeren, når den sidste klient afbryder."
         },
         "SELKIES_DEBUG": {
           "label": "Aktiver Selkies Debugging",
           "description": "Aktiver debug-logning for streamingkomponenter."
+        },
+        "SELKIES_MODE": {
+          "label": "Streamingtilstand",
+          "description": "Transport, der bruges som standard. Auto vælger WebRTC, når en TURN/STUN-værdi er angivet, ellers WebSockets.",
+          "options": {
+            "auto": "Auto",
+            "websockets": "WebSockets",
+            "webrtc": "WebRTC"
+          }
+        },
+        "SELKIES_ENABLE_DUAL_MODE": {
+          "label": "Dobbelt Tilstand",
+          "description": "Lad brugere skifte mellem WebRTC og WebSockets fra sidepanelet. Auto aktiverer det kun, når WebRTC er konfigureret.",
+          "options": {
+            "auto": "Auto",
+            "enabled": "Aktiveret",
+            "disabled": "Deaktiveret"
+          }
+        },
+        "SELKIES_WEBRTC_PACER": {
+          "label": "WebRTC Pacer",
+          "description": "Udjævn udgående WebRTC-pakker med strenge prioriteter, så lyd og input beskyttes mod video-bursts på overbelastede forbindelser."
+        },
+        "SELKIES_CONGESTION_CONTROL": {
+          "label": "Overbelastningsstyring",
+          "description": "Tilpas video-bitraten til båndbreddeestimatet fra WebRTC-modtagerfeedback. Virker i CBR-tilstand."
+        },
+        "SELKIES_STUN_HOST": {
+          "label": "STUN Vært",
+          "description": "STUN-server til NAT hole punching. Peg på en intern server for netværk uden internet."
+        },
+        "SELKIES_STUN_PORT": {
+          "label": "STUN Port",
+          "description": "Port for STUN-serveren."
+        },
+        "SELKIES_TURN_HOST": {
+          "label": "TURN Vært",
+          "description": "TURN-server, der bruges med den delte hemmelighed eller langtidslegitimationsoplysninger. Omslut IPv6-adresser med firkantede parenteser."
+        },
+        "SELKIES_TURN_PORT": {
+          "label": "TURN Port",
+          "description": "Port for TURN-serveren."
+        },
+        "SELKIES_TURN_PROTOCOL": {
+          "label": "TURN Protokol",
+          "description": "Transport, som klienten bruger til at nå TURN. UDP anbefales kraftigt; brug kun TCP, hvor UDP er blokeret."
+        },
+        "SELKIES_TURN_TLS": {
+          "label": "TURN over TLS/DTLS",
+          "description": "Brug TURN over TLS (TCP) eller DTLS (UDP). Kræver et gyldigt certifikat på TURN-serveren."
+        },
+        "SELKIES_TURN_SHARED_SECRET": {
+          "label": "TURN Delt Hemmelighed",
+          "description": "Delt hemmelighed, der bruges til at generere tidsbegrænsede HMAC TURN-legitimationsoplysninger."
+        },
+        "SELKIES_TURN_USERNAME": {
+          "label": "TURN Brugernavn",
+          "description": "Brugernavn for ældre TURN-langtidslegitimationsoplysninger."
+        },
+        "SELKIES_TURN_PASSWORD": {
+          "label": "TURN Adgangskode",
+          "description": "Adgangskode for ældre TURN-langtidslegitimationsoplysninger."
+        },
+        "SELKIES_TURN_REST_URI": {
+          "label": "TURN REST API URI",
+          "description": "URI for en TURN REST-legitimationstjeneste, f.eks. http://localhost:8008."
+        },
+        "SELKIES_TURN_REST_API_KEY": {
+          "label": "TURN REST API-nøgle",
+          "description": "API-nøgle, der sendes til TURN REST-tjenesten."
+        },
+        "SELKIES_TURN_REST_USERNAME": {
+          "label": "TURN REST Brugernavn",
+          "description": "Brugernavn, som TURN REST-tjenesten indlejrer i legitimationsoplysningerne. Tomt bruger 'selkies'."
+        },
+        "SELKIES_WEBRTC_PUBLIC_IP": {
+          "label": "WebRTC Offentlig IP",
+          "description": "Offentlig adresse, der annonceres i host ICE-kandidater for en server bag statisk 1:1 NAT. Én IPv4- og/eller én IPv6-adresse."
+        },
+        "SELKIES_ENABLE_CLOUDFLARE_TURN": {
+          "label": "Aktiver Cloudflare TURN",
+          "description": "Brug Cloudflare TURN-tjenesten. Kræver token-ID og API-token nedenfor."
+        },
+        "SELKIES_CLOUDFLARE_TURN_TOKEN_ID": {
+          "label": "Cloudflare TURN Token-ID",
+          "description": "Cloudflare TURN app-token-ID."
+        },
+        "SELKIES_CLOUDFLARE_TURN_API_TOKEN": {
+          "label": "Cloudflare TURN API-token",
+          "description": "Cloudflare TURN API-token."
+        },
+        "SELKIES_RTC_CONFIG_JSON": {
+          "label": "RTC Konfiguration JSON-sti",
+          "description": "Sti inde i containeren til en JSON-fil med WebRTC-konfigurationen. Tilsidesætter alle andre STUN/TURN-indstillinger og genindlæses periodisk."
         },
         "DOCKER_PRIVILEGED": {
           "label": "Priviligeret Tilstand",
@@ -699,6 +928,8 @@
       "errorPulling": "Fejl under hentning af image.",
       "manualInstallNote": "Bemærk: Manuelt tilføjede billeder skal være baseret på et selkies-baseimage-kompatibelt billede.",
       "generalTitle": "Generelle & Ydelsesindstillinger",
+      "webrtcTitle": "WebRTC- og TURN-indstillinger",
+      "webrtcDescription": "Sessioner streames som standard over WebSockets. Angives en STUN-, TURN-, Cloudflare- eller offentlig IP-værdi nedenfor, eller vælges WebRTC-tilstand, skifter containeren til WebRTC med dobbelt tilstand aktiveret, så brugerne stadig kan falde tilbage til WebSockets.",
       "dockerTitle": "Docker Avancerede Tilsidesættelser",
       "dockerDescription": "Disse indstillinger tilsidesætter standard containerkonfigurationen. Brug med forsigtighed og kun hvis du ved, hvad du gør."
     },

@@ -1,16 +1,3 @@
 [
-  "common",
-  "options.config",
-  "options.status",
-  "options.dashboard.logout",
-  "options.dashboard.confirmLogout",
-  "options.dashboard.exportConfig",
-  "options.dashboard.loggedInAs",
-  "options.dashboard.role",
-  "options.dashboard.roleAdmin",
-  "options.dashboard.roleUser",
-  "options.dashboard.server",
-  "options.dashboard.userStatus",
-  "options.dashboard.serverInfo",
   "shell"
 ]

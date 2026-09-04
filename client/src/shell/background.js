@@ -18,7 +18,10 @@
  */
 
 import { pemToArrayBuffer, arrayBufferToBase64, generateJwtNative } from '../lib/crypto-utils.js';
-import { contextMenuTitles } from './context-menu-strings.js';
+// Context menu titles per language. The build generates this module from
+// `background.contextMenu` of src/i18n/*.json (see build.mjs); it is bundled
+// because the menus are registered before any page could fetch a language file.
+import { contextMenuTitles } from 'sealskin-i18n/context-menu';
 
 /* global __SHELL_TARGET__ */
 

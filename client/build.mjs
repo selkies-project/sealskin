@@ -34,7 +34,9 @@ const VERSION = fs.readFileSync(path.join(REPO_DIR, 'VERSION'), 'utf8').trim();
 const BRIDGE_VERSION = 1;
 const LANGS = fs.readdirSync(path.join(SRC, 'i18n')).filter((f) => f.endsWith('.json')).map((f) => f.slice(0, -5));
 
-const DEFAULT_SHELL_NAMESPACES = ['common', 'connect', 'options.config', 'options.status', 'options.dashboard', 'background'];
+// Translation blocks the shells always bundle whole, on top of the keys the
+// build discovers in the shell sources (see collectI18nKeys).
+const DEFAULT_SHELL_NAMESPACES = ['shell'];
 const DEFAULT_MOBILE_SHARED_PAGES = ['connect.html'];
 
 const args = process.argv.slice(2);
@@ -105,23 +107,96 @@ function pick(dict, prefixes) {
 
 const I18N_SOURCE = Object.fromEntries(LANGS.map((l) => [l, readJson(path.join(SRC, 'i18n', `${l}.json`), {})]));
 
+function mergedLanguage(lang) {
+  return deepMerge(I18N_SOURCE.en || {}, I18N_SOURCE[lang]);
+}
+
 /**
- * Emit one JSON per language, merged over English, optionally filtered to
- * namespaces, optionally hashed. Returns the map used for __I18N_FILES__.
+ * Emit the full dictionary per language for the served UI, minified and
+ * content-hashed. Returns the map used for __I18N_FILES__.
  */
-function emitI18n(outDir, { hashed, namespaces = null }) {
+function emitI18n(outDir) {
   const files = {};
   mkdirp(path.join(outDir, 'i18n'));
-  const en = I18N_SOURCE.en || {};
   for (const lang of LANGS) {
-    let dict = deepMerge(en, I18N_SOURCE[lang]);
-    if (namespaces) dict = pick(dict, namespaces);
-    const content = JSON.stringify(dict);
-    const name = hashed ? `${lang}.${hashOf(content)}.json` : `${lang}.json`;
+    const content = JSON.stringify(mergedLanguage(lang));
+    const name = `${lang}.${hashOf(content)}.json`;
     fs.writeFileSync(path.join(outDir, 'i18n', name), content);
     files[lang] = `i18n/${name}`;
   }
   return files;
+}
+
+/** Unhashed language file names for the shells; known before bundling. */
+function shellI18nFiles() {
+  return Object.fromEntries(LANGS.map((lang) => [lang, `i18n/${lang}.json`]));
+}
+
+function lookupKey(dict, key) {
+  return key.split('.').reduce((obj, k) => (obj && typeof obj === 'object' && k in obj) ? obj[k] : undefined, dict);
+}
+
+// A quoted literal shaped like a translation key: dotted, no spaces.
+const KEY_LITERAL_RE = /(['"])([a-z][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)+)\1/g;
+const KEY_ATTR_RE = /data-i18n(?:-placeholder|-title)?\s*=\s*["']([^"']+)["']/g;
+
+/**
+ * Translation keys a set of bundled sources reference: `data-i18n*`
+ * attributes in HTML and quoted dotted literals in JavaScript that resolve in
+ * the English dictionary. Keys built at runtime (template literals) are not
+ * found; the blocks they live in are listed in src/shell/i18n-namespaces.json.
+ */
+function collectI18nKeys(sources) {
+  const en = I18N_SOURCE.en || {};
+  const keys = new Set();
+  for (const file of sources) {
+    if (!fs.existsSync(file)) continue;
+    const text = fs.readFileSync(file, 'utf8');
+    const re = file.endsWith('.html') ? KEY_ATTR_RE : KEY_LITERAL_RE;
+    for (const m of text.matchAll(re)) {
+      const key = file.endsWith('.html') ? m[1] : m[2];
+      if (lookupKey(en, key) !== undefined) keys.add(key);
+    }
+  }
+  return keys;
+}
+
+/**
+ * Emit the shell subset per language: the keys the bundled shell sources
+ * reference plus the whole blocks listed in i18n-namespaces.json, pretty
+ * printed so the extension reviewers can read them. The shells carry these
+ * files so the connection page reads in the user's language with no server.
+ */
+function emitShellI18n(outDir, sources) {
+  const namespaces = readJson(path.join(SRC, 'shell', 'i18n-namespaces.json'), DEFAULT_SHELL_NAMESPACES);
+  const keys = [...new Set([...namespaces, ...collectI18nKeys(sources)])].sort();
+  mkdirp(path.join(outDir, 'i18n'));
+  for (const lang of LANGS) {
+    const dict = pick(mergedLanguage(lang), keys);
+    fs.writeFileSync(path.join(outDir, 'i18n', `${lang}.json`), JSON.stringify(dict, null, 2) + '\n');
+  }
+  log(`shell i18n: ${keys.length} key(s) for ${LANGS.length} language(s)`);
+  return keys;
+}
+
+// Bare specifier the background script imports the context menu titles from;
+// the build aliases it to a module generated from `background.contextMenu`.
+const CONTEXT_MENU_MODULE = 'sealskin-i18n/context-menu';
+const GENERATED_DIR = path.join(DIST, '.generated');
+
+/**
+ * Write the context menu titles per language as a pretty-printed ES module
+ * and return the alias map for esbuild. The menus are registered before any
+ * page could fetch a language file, so the table is bundled; esbuild keeps
+ * the module's formatting, which leaves it readable in the unminified shells.
+ */
+function generateContextMenuModule() {
+  const titles = {};
+  for (const lang of LANGS) titles[lang] = lookupKey(mergedLanguage(lang), 'background.contextMenu') || {};
+  mkdirp(GENERATED_DIR);
+  const file = path.join(GENERATED_DIR, 'context-menu-strings.js');
+  fs.writeFileSync(file, `// Generated by build.mjs from background.contextMenu of src/i18n/*.json.\nexport const contextMenuTitles = ${JSON.stringify(titles, null, 2)};\n`);
+  return { [CONTEXT_MENU_MODULE]: file };
 }
 
 // ---------------------------------------------------------------------------
@@ -165,8 +240,8 @@ function rewriteHtml(html, htmlOutDir, refMap) {
 // ---------------------------------------------------------------------------
 // esbuild
 
-async function bundle({ entries, outdir, outbase, hashed, format, minify, define, nodePaths }) {
-  if (entries.length === 0) return new Map();
+async function bundle({ entries, outdir, outbase, hashed, format, minify, define, nodePaths, alias }) {
+  if (entries.length === 0) return { outputs: new Map(), inputs: [] };
   const result = await build({
     entryPoints: entries,
     outdir,
@@ -190,29 +265,40 @@ async function bundle({ entries, outdir, outbase, hashed, format, minify, define
     },
     define,
     nodePaths,
+    alias,
+    // Keep non-ASCII text as written instead of \u escapes: the shells ship
+    // unminified for extension review and their strings should read as text.
+    charset: 'utf8',
   });
   const map = new Map();
   for (const [out, meta] of Object.entries(result.metafile.outputs)) {
     if (!meta.entryPoint) continue;
     map.set(path.resolve(CLIENT_DIR, meta.entryPoint), path.resolve(CLIENT_DIR, out));
   }
-  return map;
+  const inputs = Object.keys(result.metafile.inputs)
+    .filter((f) => !f.includes('node_modules') && !f.includes('/.generated/'))
+    .map((f) => path.resolve(CLIENT_DIR, f));
+  return { outputs: map, inputs };
 }
 
 /**
  * Build one target: discover entries from the given HTML pages, bundle them,
  * emit the rewritten HTML, copy vendor/icons.
  */
-async function buildTarget(name, { pages, outdir, outbase, hashed, minify, i18n, extraEntries = [], nodePaths = [] }) {
+async function buildTarget(name, { pages, outdir, outbase, hashed, minify, shell = false, extraEntries = [], nodePaths = [] }) {
   log(`target ${name} -> ${rel(outdir)}`);
   mkdirp(outdir);
-  const i18nFiles = emitI18n(outdir, i18n);
+  // The served UI gets the full, hashed dictionaries now; a shell gets its
+  // subset after bundling, once the bundled sources are known (emitShellI18n).
+  const i18nFiles = shell ? shellI18nFiles() : emitI18n(outdir);
   const define = {
     __UI_VERSION__: JSON.stringify(VERSION),
     __BRIDGE_VERSION__: String(BRIDGE_VERSION),
     __I18N_FILES__: JSON.stringify(i18nFiles),
     __SHELL_TARGET__: JSON.stringify(name),
   };
+  const alias = generateContextMenuModule();
+  const sources = new Set();
 
   const discovered = [];
   for (const page of pages) {
@@ -239,17 +325,19 @@ async function buildTarget(name, { pages, outdir, outbase, hashed, minify, i18n,
     }
   }
   const outMap = new Map();
-  const common = { outdir, outbase, hashed, minify, define, nodePaths };
+  const common = { outdir, outbase, hashed, minify, define, nodePaths, alias };
+  const record = ({ outputs, inputs }) => {
+    for (const [k, v] of outputs) outMap.set(k, v);
+    for (const f of inputs) sources.add(f);
+  };
   for (const [format, set] of Object.entries(byFormat)) {
     const entries = [...set];
-    const m = await bundle({ ...common, entries, format: format === 'css' ? 'esm' : format });
-    for (const [k, v] of m) outMap.set(k, v);
+    record(await bundle({ ...common, entries, format: format === 'css' ? 'esm' : format }));
   }
   // Extra entries (no page references them) land flat at the target root.
   for (const e of extraEntries) {
     if (!fs.existsSync(e.abs)) { warn(`extra entry ${rel(e.abs)} does not exist yet, skipping`); strictFailures++; continue; }
-    const m = await bundle({ ...common, outbase: path.dirname(e.abs), entries: [e.abs], format: e.format });
-    for (const [k, v] of m) outMap.set(k, v);
+    record(await bundle({ ...common, outbase: path.dirname(e.abs), entries: [e.abs], format: e.format }));
   }
 
   // Vendor: copy the whole vendored package directories that were referenced.
@@ -262,6 +350,7 @@ async function buildTarget(name, { pages, outdir, outbase, hashed, minify, i18n,
 
   // Emit HTML.
   for (const d of discovered) {
+    sources.add(d.page);
     const outHtml = path.join(outdir, path.relative(outbase, d.page));
     mkdirp(path.dirname(outHtml));
     const refMap = new Map();
@@ -273,7 +362,7 @@ async function buildTarget(name, { pages, outdir, outbase, hashed, minify, i18n,
   }
 
   copyDir(ICONS_SRC, path.join(outdir, 'icons'));
-  return { i18nFiles, outMap };
+  return { i18nFiles, outMap, sources };
 }
 
 // ---------------------------------------------------------------------------
@@ -289,23 +378,18 @@ async function buildUi() {
   const pages = [...listHtml(path.join(SRC, 'ui')), ...listHtml(path.join(SRC, 'ui', 'room'))];
   await buildTarget('ui', {
     pages, outdir, outbase: path.join(SRC, 'ui'), hashed: true, minify: true,
-    i18n: { hashed: true },
   });
   fs.writeFileSync(path.join(outdir, 'manifest.json'), JSON.stringify({ version: VERSION, bridge: BRIDGE_VERSION }, null, 2) + '\n');
-}
-
-function shellNamespaces() {
-  return readJson(path.join(SRC, 'shell', 'i18n-namespaces.json'), DEFAULT_SHELL_NAMESPACES);
 }
 
 async function buildExtension() {
   const outdir = path.join(DIST, 'extension');
   const pages = listHtml(path.join(SRC, 'shell'));
-  await buildTarget('extension', {
-    pages, outdir, outbase: path.join(SRC, 'shell'), hashed: false, minify: false,
-    i18n: { hashed: false, namespaces: shellNamespaces() },
+  const { sources } = await buildTarget('extension', {
+    pages, outdir, outbase: path.join(SRC, 'shell'), hashed: false, minify: false, shell: true,
     extraEntries: [{ abs: path.join(SRC, 'shell', 'background.js'), format: 'iife' }],
   });
+  emitShellI18n(outdir, sources);
   for (const browser of ['chrome', 'firefox']) {
     const src = path.join(MANIFEST_DIR, `manifest.${browser}.json`);
     const manifest = readJson(src, null);
@@ -330,21 +414,20 @@ async function buildMobile() {
     try { execSync('npm install --no-audit --no-fund', { cwd: path.join(REPO_DIR, 'mobile'), stdio: 'inherit' }); }
     catch (e) { warn('npm install in mobile/ failed; Capacitor imports will not resolve'); }
   }
-  const { outMap } = await buildTarget('mobile', {
-    pages: listHtml(path.join(SRC, 'shell', 'mobile')), outdir, outbase: path.join(SRC, 'shell', 'mobile'), hashed: false, minify: false,
-    i18n: { hashed: false, namespaces: shellNamespaces() },
+  const { sources } = await buildTarget('mobile', {
+    pages: listHtml(path.join(SRC, 'shell', 'mobile')), outdir, outbase: path.join(SRC, 'shell', 'mobile'), hashed: false, minify: false, shell: true,
     extraEntries: [{ abs: path.join(SRC, 'shell', 'background.js'), format: 'iife' }],
     nodePaths: [MOBILE_NODE_MODULES],
   });
   if (shared.length) {
-    await buildTarget('mobile', {
+    const second = await buildTarget('mobile', {
       pages: shared.map((f) => path.join(SRC, 'shell', f)),
-      outdir, outbase: path.join(SRC, 'shell'), hashed: false, minify: false,
-      i18n: { hashed: false, namespaces: shellNamespaces() },
+      outdir, outbase: path.join(SRC, 'shell'), hashed: false, minify: false, shell: true,
       nodePaths: [MOBILE_NODE_MODULES],
     });
+    for (const f of second.sources) sources.add(f);
   }
-  void outMap;
+  emitShellI18n(outdir, sources);
 }
 
 async function buildAll() {

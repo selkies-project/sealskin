@@ -4,7 +4,7 @@
       "openUrl": "在 SealSkin 中打开链接",
       "openFile": "在 SealSkin 中以文件形式打开链接目标",
       "sendMedia": "发送媒体到 SealSkin",
-      "searchText": "在 SealSkin 中搜索“{selection}”",
+      "searchText": "在 SealSkin 中搜索“%s”",
       "sendDownload": "将下一次下载发送到 SealSkin"
     }
   },
@@ -281,6 +281,10 @@
           "label": "显示统计信息",
           "description": "在侧边栏中显示统计信息部分。"
         },
+        "SELKIES_UI_SIDEBAR_SHOW_SHORTCUTS": {
+          "label": "显示键盘快捷键部分",
+          "description": "在侧边栏中显示键盘快捷键部分。"
+        },
         "SELKIES_UI_SIDEBAR_SHOW_CLIPBOARD": {
           "label": "显示剪贴板",
           "description": "在侧边栏中显示剪贴板部分。"
@@ -300,6 +304,18 @@
         "SELKIES_UI_SIDEBAR_SHOW_GAMEPADS": {
           "label": "显示游戏手柄部分",
           "description": "在侧边栏中显示游戏手柄部分。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
+          "label": "显示全屏按钮",
+          "description": "在侧边栏中显示全屏按钮。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_GAMING_MODE": {
+          "label": "显示游戏模式按钮",
+          "description": "在侧边栏中显示游戏模式（指针锁定）按钮。"
+        },
+        "SELKIES_UI_SIDEBAR_SHOW_TRACKPAD": {
+          "label": "显示触控板按钮",
+          "description": "在侧边栏中显示虚拟触控板按钮。"
         },
         "SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON": {
           "label": "显示键盘按钮",
@@ -332,7 +348,6 @@
           "options": {
             "default": "默认",
             "selkiesDefault": "Selkies (默认)",
-            "zinc": "Zinc",
             "wish": "Wish"
           }
         },
@@ -342,23 +357,21 @@
         },
         "SELKIES_MICROPHONE_ENABLED": {
           "label": "启用麦克风",
-          "description": "启用客户端到服务器的麦克风转发。"
+          "description": "启用客户端到服务器的麦克风转发。上游默认关闭。"
         },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "启用游戏手柄",
           "description": "启用游戏手柄支持。"
         },
-        "SELKIES_CLIPBOARD_ENABLED": {
-          "label": "启用剪贴板",
-          "description": "启用剪贴板同步。"
-        },
-        "SELKIES_CLIPBOARD_IN_ENABLED": {
-          "label": "启用客户端到服务器剪贴板",
-          "description": "允许从浏览器传输剪贴板数据。"
-        },
-        "SELKIES_CLIPBOARD_OUT_ENABLED": {
-          "label": "启用服务器到客户端剪贴板",
-          "description": "允许从服务器传输剪贴板数据。"
+        "SELKIES_ENABLE_CLIPBOARD": {
+          "label": "剪贴板策略",
+          "description": "允许的剪贴板方向。“仅服务器到客户端”还会阻止页面读取本地剪贴板，而这正是在 Firefox 和 Safari 中触发粘贴提示的原因。",
+          "options": {
+            "both": "双向",
+            "inOnly": "仅客户端到服务器",
+            "outOnly": "仅服务器到客户端",
+            "disabled": "禁用"
+          }
         },
         "SELKIES_ENABLE_BINARY_CLIPBOARD": {
           "label": "启用二进制剪贴板",
@@ -370,25 +383,61 @@
         },
         "SELKIES_FILE_TRANSFERS": {
           "label": "文件传输",
-          "description": "允许的方向（'upload,download', 'upload', 'download', 'none'）。"
+          "description": "允许的方向（'upload,download'、'upload'、'download' 或 'none'）。除非在此设置，否则会被桌面加固清空。"
+        },
+        "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
+          "label": "文件传输限制 (Mbit/s)",
+          "description": "所有上传和下载共享的静态限速。0 表示不限制。"
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "启用所有共享",
           "description": "所有共享功能的主开关。"
         },
+        "SELKIES_ENABLE_SHARED": {
+          "label": "启用只读共享",
+          "description": "启用只读共享链接。"
+        },
+        "SELKIES_ENABLE_COLLAB": {
+          "label": "启用协作",
+          "description": "允许持有会话主令牌的观看者作为可读写的协作者进行操作。SealSkin 房间需要此项。"
+        },
+        "SELKIES_ENABLE_PLAYER2": {
+          "label": "启用玩家 2 共享",
+          "description": "启用游戏手柄玩家 2 的共享链接。"
+        },
+        "SELKIES_ENABLE_PLAYER3": {
+          "label": "启用玩家 3 共享",
+          "description": "启用游戏手柄玩家 3 的共享链接。"
+        },
+        "SELKIES_ENABLE_PLAYER4": {
+          "label": "启用玩家 4 共享",
+          "description": "启用游戏手柄玩家 4 的共享链接。"
+        },
         "SELKIES_SECOND_SCREEN": {
           "label": "启用第二屏幕",
           "description": "启用对第二台显示器/屏幕的支持。"
+        },
+        "SELKIES_ENABLE_RESIZE": {
+          "label": "启用动态调整大小",
+          "description": "调整远程显示的大小以匹配浏览器窗口。"
         },
         "SELKIES_USE_BROWSER_CURSORS": {
           "label": "使用浏览器光标",
           "description": "使用浏览器CSS光标而不是渲染到画布。"
         },
+        "SELKIES_ENABLE_CURSORS": {
+          "label": "启用远程光标",
+          "description": "将应用程序自身的光标形状发送到客户端。"
+        },
+        "SELKIES_CURSOR_SIZE": {
+          "label": "光标大小",
+          "description": "以 96 DPI 下的点为单位的光标大小，并按会话 DPI 缩放。-1 使用平台默认值（X11 为 32，Wayland 为 24）。"
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "使用CSS缩放 (LoDPI)",
           "description": "如果为true，则发送较低分辨率并拉伸画布。"
         },
-        "SELKIES_IS_MANUAL_RESOLUTION_MODE": {
+        "SELKIES_MANUAL_RESOLUTION": {
           "label": "手动分辨率模式",
           "description": "将分辨率锁定为手动设置的宽度/高度值。"
         },
@@ -410,11 +459,27 @@
         },
         "SELKIES_AUDIO_BITRATE": {
           "label": "音频比特率",
-          "description": "默认音频比特率。"
+          "description": "默认的 Opus 音频比特率。"
+        },
+        "SELKIES_AUDIO_FRAME_DURATION_MS": {
+          "label": "音频帧时长",
+          "description": "Opus 帧时长。较低的值可降低音频延迟，代价是略微增加带宽和包速率。"
+        },
+        "SELKIES_AUDIO_CHANNELS": {
+          "label": "音频声道",
+          "description": "音频声道数；2 为立体声。"
+        },
+        "SELKIES_AUDIO_REDUNDANCY": {
+          "label": "音频冗余 (Opus RED)",
+          "description": "将先前的音频帧作为冗余数据一并传送，以减少丢包时的断音。"
+        },
+        "SELKIES_AUDIO_REDUNDANCY_DISTANCE": {
+          "label": "音频冗余距离",
+          "description": "作为冗余数据传送的先前帧数（0-4）。数值越高越能抵御更长的突发丢包，但带宽会按比例增加。"
         },
         "SELKIES_ENCODER": {
           "label": "编码器",
-          "description": "逗号分隔的编码器列表。第一个为默认。"
+          "description": "逗号分隔的允许编码器列表（h264enc、h264enc-striped、jpeg）。第一个为默认；只填一个值则锁定选择。只有 h264enc 可通过 WebRTC 传输。"
         },
         "SELKIES_USE_CPU": {
           "label": "强制CPU编码",
@@ -422,47 +487,101 @@
         },
         "SELKIES_FRAMERATE": {
           "label": "帧率（范围或固定值）",
-          "description": "例如，'8-120'表示范围，'60'表示固定值。"
+          "description": "例如，'8-240' 表示范围，'60' 表示固定初始值，'60,8-240' 表示两者兼有；'60-60' 则锁定该值。"
         },
-        "SELKIES_H264_CRF": {
-          "label": "H.264 CRF（范围或固定值）",
-          "description": "例如，'5-50'表示范围，'25'表示固定值。"
+        "SELKIES_RATE_CONTROL_MODE": {
+          "label": "码率控制模式",
+          "description": "默认的 H.264 码率控制：恒定质量 (CRF) 或恒定比特率 (CBR)。",
+          "options": {
+            "crf": "恒定质量 (CRF)",
+            "cbr": "恒定比特率 (CBR)"
+          }
+        },
+        "SELKIES_ENABLE_RATE_CONTROL": {
+          "label": "允许切换码率控制",
+          "description": "允许客户端在 CRF 和 CBR 之间切换。关闭后编码器将锁定为其内置默认值。"
+        },
+        "SELKIES_VIDEO_CRF": {
+          "label": "视频 CRF（范围或固定值）",
+          "description": "H.264 恒定质量：'5-50' 表示范围，'25' 表示固定初始值，'25,5-50' 表示两者兼有。"
+        },
+        "SELKIES_VIDEO_BITRATE": {
+          "label": "视频比特率 kbps（范围或固定值）",
+          "description": "以千比特每秒为单位的 CBR 比特率：'100-1000000' 表示范围，'8000' 表示固定初始值，'8000,100-1000000' 表示两者兼有。"
+        },
+        "SELKIES_VIDEO_MIN_QP": {
+          "label": "视频最小 QP",
+          "description": "CBR 模式下的 H.264 最小量化参数（0 = 编码器默认值）。调高可限制简单内容上的比特消耗。"
+        },
+        "SELKIES_VIDEO_MAX_QP": {
+          "label": "视频最大 QP",
+          "description": "CBR 模式下的 H.264 最大量化参数（0 = 编码器默认值）。调低可在画面运动时保持文字清晰，代价是可能超出比特率目标。"
+        },
+        "SELKIES_KEYFRAME_INTERVAL": {
+          "label": "关键帧间隔（秒）",
+          "description": "定期恢复关键帧之间的秒数。0 使 GOP 保持无限，仅在需要时发送关键帧。"
         },
         "SELKIES_JPEG_QUALITY": {
-          "label": "JPEG质量（范围或固定值）",
-          "description": "例如，'1-100'表示范围，'60'表示固定值。"
+          "label": "JPEG 质量（范围或固定值）",
+          "description": "'1-100' 表示范围，'40' 表示固定初始值，'40,1-100' 表示两者兼有。"
         },
-        "SELKIES_H264_FULLCOLOR": {
-          "label": "H.264全彩",
-          "description": "为pixelflux编码器启用H.264全彩范围。"
+        "SELKIES_VIDEO_FULLCOLOR": {
+          "label": "视频全彩 (4:4:4)",
+          "description": "使用 4:4:4 色度而非 4:2:0 编码 H.264。当此项锁定开启时，没有 4:4:4 解码器的客户端将回退到 JPEG。"
         },
-        "SELKIES_H264_STREAMING_MODE": {
-          "label": "H.264流媒体（Turbo）模式",
-          "description": "启用H.264低延迟流媒体模式。"
+        "SELKIES_VIDEO_STREAMING_MODE": {
+          "label": "视频流媒体（Turbo）模式",
+          "description": "像传统视频编码器一样编码每一帧，而不是仅编码变化的区域。"
         },
         "SELKIES_USE_PAINT_OVER_QUALITY": {
           "label": "使用重绘质量",
           "description": "为静态场景启用高质量的重绘。"
         },
         "SELKIES_PAINT_OVER_JPEG_QUALITY": {
-          "label": "重绘JPEG质量",
-          "description": "例如，'1-100'表示范围，'90'表示固定值。"
+          "label": "重绘 JPEG 质量",
+          "description": "'1-100' 表示范围，'90' 表示固定初始值，'90,1-100' 表示两者兼有。"
         },
-        "SELKIES_H264_PAINTOVER_CRF": {
-          "label": "重绘H.264 CRF",
-          "description": "例如，'5-50'表示范围，'18'表示固定值。"
+        "SELKIES_VIDEO_PAINTOVER_CRF": {
+          "label": "重绘视频 CRF",
+          "description": "'5-50' 表示范围，'18' 表示固定初始值，'18,5-50' 表示两者兼有。"
         },
-        "SELKIES_H264_PAINTOVER_BURST_FRAMES": {
+        "SELKIES_VIDEO_PAINTOVER_BURST_FRAMES": {
           "label": "重绘突发帧数",
-          "description": "例如，'1-30'表示范围，'5'表示固定值。"
+          "description": "'1-30' 表示范围，'5' 表示固定初始值，'5,1-30' 表示两者兼有。"
+        },
+        "SELKIES_BACKPRESSURE_QUEUE_SIZE": {
+          "label": "背压队列大小",
+          "description": "在背压下丢弃之前，每个流缓冲的帧和音频块数量（WebSockets 模式）。数值越高越能容忍客户端的短暂卡顿，但延迟会增加。"
+        },
+        "SELKIES_WEBCAM_WIDTH": {
+          "label": "摄像头宽度",
+          "description": "虚拟摄像头设备的宽度；客户端帧会被缩放并加黑边以适应。"
+        },
+        "SELKIES_WEBCAM_HEIGHT": {
+          "label": "摄像头高度",
+          "description": "虚拟摄像头设备的高度；客户端帧会被缩放并加黑边以适应。"
+        },
+        "SELKIES_WEBCAM_ENCODER": {
+          "label": "摄像头上行编码器",
+          "description": "WebSocket 客户端发送摄像头帧所用的编解码器。自动会选择浏览器能够持续支持的最佳选项。",
+          "options": {
+            "auto": "自动"
+          }
+        },
+        "SELKIES_WEBCAM_PIXEL_FORMAT": {
+          "label": "摄像头像素格式",
+          "description": "虚拟摄像头设备的像素格式。自动会跟随客户端发送的格式。",
+          "options": {
+            "auto": "自动"
+          }
         },
         "HARDEN_DESKTOP": {
           "label": "桌面加固（预设）",
-          "description": "启用DISABLE_OPEN_TOOLS、DISABLE_SUDO和DISABLE_TERMINALS。"
+          "description": "启用 DISABLE_OPEN_TOOLS、DISABLE_SUDO 和 DISABLE_TERMINALS，并且除非显式设置，还会禁用文件传输、命令 Websocket 以及侧边栏的文件和应用部分。对设置了容器加固的用户强制开启。"
         },
         "HARDEN_OPENBOX": {
           "label": "窗口管理器加固（预设）",
-          "description": "启用DISABLE_CLOSE_BUTTON、DISABLE_MOUSE_BUTTONS和HARDEN_KEYBINDS。同时启用RESTART_APP。"
+          "description": "为 Openbox 和 labwc 启用 DISABLE_CLOSE_BUTTON、DISABLE_MOUSE_BUTTONS 和 HARDEN_KEYBINDS，并且除非显式设置，还会启用 RESTART_APP。对设置了窗口管理器加固的用户强制开启。"
         },
         "DISABLE_OPEN_TOOLS": {
           "label": "禁用打开工具",
@@ -486,11 +605,11 @@
         },
         "HARDEN_KEYBINDS": {
           "label": "加固快捷键",
-          "description": "禁用默认的Openbox快捷键，如Alt+F4。"
+          "description": "禁用窗口管理器快捷键，如 Alt+F4、Alt+Escape、Alt+Space 和 Super+E，并锁定窗口管理器配置。"
         },
         "RESTART_APP": {
           "label": "关闭时重启应用",
-          "description": "如果主应用程序关闭，则自动重启它。"
+          "description": "如果主应用程序关闭，则自动重启它，并将自动启动文件设为只读。"
         },
         "MAX_RES": {
           "label": "最大分辨率",
@@ -512,6 +631,10 @@
           "label": "禁用DRI3",
           "description": "如果检测到显卡，则不使用DRI3加速。"
         },
+        "AUTO_GPU": {
+          "label": "自动选择 GPU",
+          "description": "'true' 在第一块 GPU 上渲染，'false' 禁用此功能，或填写厂商、驱动或 PCI 厂商 ID（nvidia、amdgpu、0x10de）以选择特定的 GPU。"
+        },
         "NO_DECOR": {
           "label": "无窗口装饰",
           "description": "为PWA使用而运行无窗口边框的应用程序。"
@@ -522,11 +645,117 @@
         },
         "NO_GAMEPAD": {
           "label": "禁用游戏手柄注入",
-          "description": "禁用用户空间游戏手柄插入器注入。"
+          "description": "跳过用户空间游戏手柄插入器。同时隐藏游戏手柄部分和玩家共享链接。"
+        },
+        "NO_WEBCAM": {
+          "label": "禁用摄像头注入",
+          "description": "跳过虚拟摄像头设备和插入器。同时隐藏摄像头按钮。"
+        },
+        "SELKIES_RUN_AFTER_CONNECT": {
+          "label": "连接后运行",
+          "description": "第一个客户端连接时在容器内运行的 Shell 命令。"
+        },
+        "SELKIES_RUN_AFTER_DISCONNECT": {
+          "label": "断开后运行",
+          "description": "最后一个客户端断开时在容器内运行的 Shell 命令。"
         },
         "SELKIES_DEBUG": {
           "label": "启用Selkies调试",
           "description": "为流媒体组件启用调试日志记录。"
+        },
+        "SELKIES_MODE": {
+          "label": "流媒体模式",
+          "description": "默认使用的传输方式。自动会在设置了任意 TURN/STUN 值时选择 WebRTC，否则选择 WebSockets。",
+          "options": {
+            "auto": "自动",
+            "websockets": "WebSockets",
+            "webrtc": "WebRTC"
+          }
+        },
+        "SELKIES_ENABLE_DUAL_MODE": {
+          "label": "双模式",
+          "description": "允许用户从侧边栏在 WebRTC 和 WebSockets 之间切换。自动仅在配置了 WebRTC 时启用。",
+          "options": {
+            "auto": "自动",
+            "enabled": "启用",
+            "disabled": "禁用"
+          }
+        },
+        "SELKIES_WEBRTC_PACER": {
+          "label": "WebRTC 平滑发送器",
+          "description": "以严格的优先级对发出的 WebRTC 数据包进行平滑发送，使音频和输入在拥塞链路上免受视频突发的影响。"
+        },
+        "SELKIES_CONGESTION_CONTROL": {
+          "label": "拥塞控制",
+          "description": "根据 WebRTC 接收端反馈的带宽估计调整视频比特率。在 CBR 模式下生效。"
+        },
+        "SELKIES_STUN_HOST": {
+          "label": "STUN 主机",
+          "description": "用于 NAT 打洞的 STUN 服务器。对于没有互联网的网络，请指向内部服务器。"
+        },
+        "SELKIES_STUN_PORT": {
+          "label": "STUN 端口",
+          "description": "STUN 服务器的端口。"
+        },
+        "SELKIES_TURN_HOST": {
+          "label": "TURN 主机",
+          "description": "与共享密钥或长期凭据一起使用的 TURN 服务器。IPv6 地址请用方括号括起来。"
+        },
+        "SELKIES_TURN_PORT": {
+          "label": "TURN 端口",
+          "description": "TURN 服务器的端口。"
+        },
+        "SELKIES_TURN_PROTOCOL": {
+          "label": "TURN 协议",
+          "description": "客户端连接 TURN 所用的传输方式。强烈推荐 UDP；仅在 UDP 被阻止时使用 TCP。"
+        },
+        "SELKIES_TURN_TLS": {
+          "label": "通过 TLS/DTLS 的 TURN",
+          "description": "通过 TLS (TCP) 或 DTLS (UDP) 使用 TURN。需要 TURN 服务器上有有效的证书。"
+        },
+        "SELKIES_TURN_SHARED_SECRET": {
+          "label": "TURN 共享密钥",
+          "description": "用于生成有时限的 HMAC TURN 凭据的共享密钥。"
+        },
+        "SELKIES_TURN_USERNAME": {
+          "label": "TURN 用户名",
+          "description": "旧式长期 TURN 凭据的用户名。"
+        },
+        "SELKIES_TURN_PASSWORD": {
+          "label": "TURN 密码",
+          "description": "旧式长期 TURN 凭据的密码。"
+        },
+        "SELKIES_TURN_REST_URI": {
+          "label": "TURN REST API URI",
+          "description": "TURN REST 凭据服务的 URI，例如 http://localhost:8008。"
+        },
+        "SELKIES_TURN_REST_API_KEY": {
+          "label": "TURN REST API 密钥",
+          "description": "发送到 TURN REST 服务的 API 密钥。"
+        },
+        "SELKIES_TURN_REST_USERNAME": {
+          "label": "TURN REST 用户名",
+          "description": "TURN REST 服务嵌入到凭据中的用户名。留空则使用 'selkies'。"
+        },
+        "SELKIES_WEBRTC_PUBLIC_IP": {
+          "label": "WebRTC 公网 IP",
+          "description": "位于静态 1:1 NAT 之后的服务器在主机 ICE 候选中通告的公网地址。一个 IPv4 地址和/或一个 IPv6 地址。"
+        },
+        "SELKIES_ENABLE_CLOUDFLARE_TURN": {
+          "label": "启用 Cloudflare TURN",
+          "description": "使用 Cloudflare TURN 服务。需要下方的令牌 ID 和 API 令牌。"
+        },
+        "SELKIES_CLOUDFLARE_TURN_TOKEN_ID": {
+          "label": "Cloudflare TURN 令牌 ID",
+          "description": "Cloudflare TURN 应用的令牌 ID。"
+        },
+        "SELKIES_CLOUDFLARE_TURN_API_TOKEN": {
+          "label": "Cloudflare TURN API 令牌",
+          "description": "Cloudflare TURN 的 API 令牌。"
+        },
+        "SELKIES_RTC_CONFIG_JSON": {
+          "label": "RTC 配置 JSON 路径",
+          "description": "容器内包含 WebRTC 配置的 JSON 文件路径。会覆盖所有其他 STUN/TURN 设置，并定期重新读取。"
         },
         "DOCKER_PRIVILEGED": {
           "label": "特权模式",
@@ -699,6 +928,8 @@
       "errorPulling": "拉取镜像时出错。",
       "manualInstallNote": "注意：手动添加的镜像应基于与 selkies-baseimage 兼容的镜像。",
       "generalTitle": "常规与性能设置",
+      "webrtcTitle": "WebRTC 与 TURN 设置",
+      "webrtcDescription": "会话默认通过 WebSockets 进行流传输。在下方设置任意 STUN、TURN、Cloudflare 或公网 IP 值，或选择 WebRTC 模式，都会将容器切换到启用双模式的 WebRTC，使用户仍可回退到 WebSockets。",
       "dockerTitle": "Docker 高级覆盖",
       "dockerDescription": "这些设置覆盖默认的容器配置。请谨慎使用，除非您知道自己在做什么。"
     },

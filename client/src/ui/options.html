@@ -442,6 +442,12 @@
                     </div>
                     <hr class="nav-separator">
                     <div class="card">
+                        <div class="card-header"><h3 data-i18n="options.modals.webrtcTitle">WebRTC &amp; TURN Settings</h3></div>
+                        <p class="description" style="margin-bottom: 1rem;" data-i18n="options.modals.webrtcDescription">Sessions stream over WebSockets by default. Setting any STUN, TURN, Cloudflare or public IP value below, or choosing WebRTC mode, switches the container to WebRTC with dual mode enabled so users can still fall back to WebSockets.</p>
+                        <div id="template-form-webrtc" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
+                    </div>
+                    <hr class="nav-separator">
+                    <div class="card">
                         <div class="card-header"><h3 data-i18n="options.modals.dockerTitle">Docker Advanced Overrides</h3></div>
                         <p class="description" style="margin-bottom: 1rem;" data-i18n="options.modals.dockerDescription">These settings override the default container configuration. Use with caution and only if you know what you are doing.</p>
                         <div id="template-form-docker" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
