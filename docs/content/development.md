@@ -266,7 +266,9 @@ Two parts of the site are generated:
   The Docs workflow runs the script with `--check` and fails when the page
   is stale.
 
-The site is served from a GitHub Pages project path, so the workflow sets
-`NEXT_PUBLIC_BASE_PATH` to `/sealskin`. Adding a `CNAME` file under
-`docs/public` switches it to a custom domain at the site root; the workflow
-detects the file and clears the base path.
+The site is served from the custom domain named in `docs/public/CNAME`
+(`docs.sealskin.app`), so the workflow leaves `NEXT_PUBLIC_BASE_PATH` empty.
+Without that file it would fall back to the GitHub Pages project path and set
+the base path to `/sealskin`, which breaks every asset URL on the custom
+domain. The domain configured in the repository's Pages settings must match
+the file.
