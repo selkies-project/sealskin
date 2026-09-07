@@ -2660,9 +2660,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const initInviteControls = () => {
         inviteBtn.addEventListener('click', openInvite);
+        const absolute = (url) => (url ? new URL(url, window.location.href).href : url);
         const inviteUrls = {
-            participant: COLLAB_DATA.participantJoinUrl,
-            readonly: COLLAB_DATA.readonlyJoinUrl,
+            participant: absolute(COLLAB_DATA.participantJoinUrl),
+            readonly: absolute(COLLAB_DATA.readonlyJoinUrl),
         };
         inviteTile.querySelectorAll('.invite-copy').forEach((button) => {
             let resetTimer = null;

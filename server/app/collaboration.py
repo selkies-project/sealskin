@@ -29,6 +29,7 @@ from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
 from . import config_store, launch
 from .routers.applications import user_can_access
+from .security import canonical_uuid
 from .settings import settings
 from .state import state
 
@@ -67,6 +68,11 @@ def _absolutize_room_assets(html: str) -> str:
     return _ROOM_ASSET_RE.sub(_rewrite, html)
 
 
+def _join_url(session_id: str, token: str) -> str:
+    """Return the relative invite URL of a room for `token`."""
+    return f"/room/{session_id}?token={token}"
+
+
 @router.get("/room/{session_id:uuid}", response_class=HTMLResponse)
 async def collaborative_room(
     request: Request,
@@ -87,7 +93,7 @@ async def collaborative_room(
     Returns:
         The room HTML, or a redirect for newly registered viewers.
     """
-    session_id_str = str(session_id)
+    session_id_str = canonical_uuid(session_id)
     session_data = state.sessions.get(session_id_str)
     if not session_data or not session_data.get("is_collaboration"):
         raise HTTPException(status_code=404, detail="Collaboration room not found.")
@@ -148,12 +154,12 @@ async def collaborative_room(
         user_token = controller_token
     elif is_viewer_by_collab:
         user_role = "viewer"
-        user_token = collab_token
         viewer_data = next(
             (v for v in session_data.get("viewers", []) if v["token"] == collab_token),
             None,
         )
         if viewer_data:
+            user_token = viewer_data["token"]
             user_permission = viewer_data.get("permission", "participant")
     elif is_new_participant_by_collab or is_new_readonly_by_collab:
         permission = "participant" if is_new_participant_by_collab else "readonly"
@@ -200,21 +206,15 @@ async def collaborative_room(
     }
 
     if user_role == "controller":
-        client_data["participantJoinUrl"] = str(
-            request.url.replace_query_params(
-                token=session_data["participant_invite_token"]
-            )
+        client_data["participantJoinUrl"] = _join_url(
+            session_id_str, session_data["participant_invite_token"]
         )
-        client_data["readonlyJoinUrl"] = str(
-            request.url.replace_query_params(
-                token=session_data["readonly_invite_token"]
-            )
+        client_data["readonlyJoinUrl"] = _join_url(
+            session_id_str, session_data["readonly_invite_token"]
         )
     elif user_role == "viewer" and user_permission == "participant":
-        client_data["readonlyJoinUrl"] = str(
-            request.url.replace_query_params(
-                token=session_data["readonly_invite_token"]
-            )
+        client_data["readonlyJoinUrl"] = _join_url(
+            session_id_str, session_data["readonly_invite_token"]
         )
 
     html_content = _absolutize_room_assets(html_content)
@@ -225,7 +225,11 @@ async def collaborative_room(
     )
     response = HTMLResponse(content=html_content)
 
-    initial_auth_token = request.query_params.get("access_token")
+    initial_auth_token = (
+        session_data["access_token"]
+        if request.query_params.get("access_token") and is_controller_by_session
+        else None
+    )
     current_collab_token = user_token
 
     if initial_auth_token:

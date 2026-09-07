@@ -20,6 +20,8 @@ const REQUEST_TIMEOUT_MS = 120000;
 let nextId = 1;
 const pending = new Map();
 let helloInfo = null;
+let helloPromise = null;
+let hostOrigin = null;
 
 function isFramed() {
   try {
@@ -37,6 +39,7 @@ window.addEventListener('message', (event) => {
   if (!entry) return;
   pending.delete(msg.id);
   if (entry.timer) clearTimeout(entry.timer);
+  if (!hostOrigin && event.origin && event.origin !== 'null') hostOrigin = event.origin;
   if (msg.ok) {
     entry.resolve(msg.data);
   } else {
@@ -45,7 +48,110 @@ window.addEventListener('message', (event) => {
 });
 
 /**
+ * Register a pending request and return the promise for its reply.
+ *
+ * @param {number} id Message id.
+ * @param {string} type Request type, used in the timeout error.
+ * @param {object} opts Request options (see `request`).
+ * @returns {Promise<any>} Resolves with the host's reply data.
+ */
+function awaitReply(id, type, opts) {
+  return new Promise((resolve, reject) => {
+    // A timeout of 0 disables the timer (long transfers such as blobs).
+    const timeoutMs = opts.timeout === undefined ? REQUEST_TIMEOUT_MS : opts.timeout;
+    const timer = timeoutMs > 0
+      ? setTimeout(() => {
+          pending.delete(id);
+          reject(new Error(`Bridge request '${type}' timed out`));
+        }, timeoutMs)
+      : null;
+    pending.set(id, { resolve, reject, timer });
+  });
+}
+
+/**
+ * Send the `hello` request. The host's origin is unknown until it answers,
+ * so this is the only message posted without a target origin; it carries
+ * nothing but protocol and version information.
+ *
+ * @returns {Promise<object>} HelloInfo from the host.
+ */
+function sendHello() {
+  const id = nextId++;
+  const reply = awaitReply(id, 'hello', { timeout: 15000 });
+  window.parent.postMessage({
+    sealskin: BRIDGE_VERSION,
+    id,
+    type: 'hello',
+    payload: {
+      bridge: BRIDGE_VERSION,
+      uiVersion: typeof __UI_VERSION__ !== 'undefined' ? __UI_VERSION__ : 'dev',
+    },
+  }, '*');
+  return reply;
+}
+
+/**
+ * Complete the hello exchange once and cache its result.
+ *
+ * @returns {Promise<object>} HelloInfo from the host.
+ */
+function ensureHello() {
+  if (helloInfo) return Promise.resolve(helloInfo);
+  if (!helloPromise) {
+    helloPromise = sendHello().then(
+      (info) => {
+        helloInfo = info;
+        return info;
+      },
+      (error) => {
+        helloPromise = null;
+        throw error;
+      },
+    );
+  }
+  return helloPromise;
+}
+
+/**
+ * Post one message to the host at its known origin.
+ *
+ * @param {object} message Bridge message.
+ * @throws {Error} A fixed message when the browser refuses the post, so no
+ *   browser-generated text reaches the page.
+ */
+function post(message) {
+  try {
+    window.parent.postMessage(message, hostOrigin);
+  } catch (e) {
+    throw new Error('Could not reach the SealSkin shell.');
+  }
+}
+
+/**
+ * Send one message to the host and return the promise for its reply.
+ *
+ * @param {string} type Request type from the bridge contract.
+ * @param {object} payload Structured-cloneable payload.
+ * @param {object} opts Request options (see `request`).
+ * @returns {Promise<any>} The host's reply data.
+ */
+function send(type, payload, opts) {
+  const id = nextId++;
+  const message = { sealskin: BRIDGE_VERSION, id, type, payload };
+  try {
+    post(message);
+  } catch (e) {
+    return Promise.reject(e);
+  }
+  return opts.fireAndForget ? Promise.resolve() : awaitReply(id, type, opts);
+}
+
+/**
  * Send one request to the host and wait for its reply.
+ *
+ * The first request completes the hello exchange to learn the host's origin;
+ * afterwards messages are posted synchronously.
  *
  * @param {string} type Request type from the bridge contract.
  * @param {object} [payload] Structured-cloneable payload.
@@ -58,23 +164,12 @@ export function request(type, payload = {}, opts = {}) {
   if (!isFramed()) {
     return Promise.reject(new Error('This page must be opened from the SealSkin extension or app.'));
   }
-  const id = nextId++;
-  const message = { sealskin: BRIDGE_VERSION, id, type, payload };
-  if (opts.fireAndForget) {
-    window.parent.postMessage(message, '*');
-    return Promise.resolve();
-  }
-  return new Promise((resolve, reject) => {
-    // A timeout of 0 disables the timer (long transfers such as blobs).
-    const timeoutMs = opts.timeout === undefined ? REQUEST_TIMEOUT_MS : opts.timeout;
-    const timer = timeoutMs > 0
-      ? setTimeout(() => {
-          pending.delete(id);
-          reject(new Error(`Bridge request '${type}' timed out`));
-        }, timeoutMs)
-      : null;
-    pending.set(id, { resolve, reject, timer });
-    window.parent.postMessage(message, '*');
+  if (hostOrigin) return send(type, payload, opts);
+  return ensureHello().then(() => {
+    if (!hostOrigin) {
+      throw new Error('The SealSkin shell did not report a usable origin.');
+    }
+    return send(type, payload, opts);
   });
 }
 
@@ -85,13 +180,11 @@ export const bridge = {
    *
    * @returns {Promise<object>} HelloInfo as described in the architecture doc.
    */
-  async hello() {
-    if (helloInfo) return helloInfo;
-    helloInfo = await request('hello', {
-      bridge: BRIDGE_VERSION,
-      uiVersion: typeof __UI_VERSION__ !== 'undefined' ? __UI_VERSION__ : 'dev',
-    }, { timeout: 15000 });
-    return helloInfo;
+  hello() {
+    if (!isFramed()) {
+      return Promise.reject(new Error('This page must be opened from the SealSkin extension or app.'));
+    }
+    return ensureHello();
   },
 
   /** @returns {object|null} The cached HelloInfo, or null before hello(). */

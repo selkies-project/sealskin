@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import html
 import logging
 import os
 import secrets
@@ -16,6 +17,7 @@ from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from pydantic import ValidationError
 
 from .. import config_store
+from ..fsutil import safe_join
 from ..models import PublicShareInfo, PublicShareMetadata, ShareFileRequest
 from ..security import (
     EncryptedRoute,
@@ -123,7 +125,11 @@ async def delete_public_share(
 
 def _remove_share_file(share_id: str) -> None:
     """Delete the public copy of a shared file, logging failures."""
-    path = os.path.join(settings.public_storage_path, share_id)
+    try:
+        path = safe_join(settings.public_storage_path, share_id)
+    except ValueError:
+        logger.error("Refusing to delete share file for invalid id %r", share_id)
+        return
     if os.path.exists(path):
         try:
             os.remove(path)
@@ -158,8 +164,12 @@ def _password_page(share_id: str, error: str = "") -> HTMLResponse | None:
     if not os.path.exists(page_path):
         return None
     with open(page_path, encoding="utf-8") as handle:
-        html = handle.read().replace("{{SHARE_ID}}", share_id).replace("{{ERROR_MESSAGE}}", error)
-    return HTMLResponse(content=html, status_code=401 if error else 200)
+        page = (
+            handle.read()
+            .replace("{{SHARE_ID}}", html.escape(share_id))
+            .replace("{{ERROR_MESSAGE}}", html.escape(error))
+        )
+    return HTMLResponse(content=page, status_code=401 if error else 200)
 
 
 def _share_or_404(share_id: str) -> PublicShareMetadata:
@@ -172,7 +182,10 @@ def _share_or_404(share_id: str) -> PublicShareMetadata:
 
 def _file_response(share_id: str, metadata: PublicShareMetadata) -> FileResponse:
     """Stream the shared file with its original name."""
-    path = os.path.join(settings.public_storage_path, share_id)
+    try:
+        path = safe_join(settings.public_storage_path, share_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail="Shared file not found on disk.") from exc
     if not os.path.exists(path):
         raise HTTPException(status_code=404, detail="Shared file not found on disk.")
     return FileResponse(path=path, filename=metadata.original_filename, media_type="application/octet-stream")

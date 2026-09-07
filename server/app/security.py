@@ -20,6 +20,7 @@ import os
 import secrets
 import sys
 import time
+import uuid
 from collections.abc import Callable
 from typing import Any
 
@@ -385,6 +386,24 @@ async def verify_public_sharing_enabled(
     raise HTTPException(status_code=403, detail="Public file sharing is disabled for this account.")
 
 
+def canonical_uuid(value: uuid.UUID | str) -> str:
+    """Return the canonical `8-4-4-4-12` text form of a UUID.
+
+    Used for values that end up in cookie names, paths and generated HTML so
+    only the validated, re-serialised form is ever used.
+
+    Args:
+        value: A UUID or its text form.
+
+    Returns:
+        The lower-case hyphenated UUID string.
+
+    Raises:
+        ValueError: If `value` is not a UUID.
+    """
+    return str(uuid.UUID(str(value)))
+
+
 _SCRYPT_N = 2**14
 _SCRYPT_R = 8
 _SCRYPT_P = 1
@@ -407,10 +426,7 @@ def hash_share_password(password: str) -> str:
 
 
 def verify_share_password(password: str, stored_hash: str) -> bool:
-    """Check a password against a stored hash.
-
-    Supports the current `scrypt$salt$hash` format and the legacy unsalted
-    SHA-256 hex digest.
+    """Check a password against a stored `scrypt$salt$hash` value.
 
     Args:
         password: Clear-text password to check.
@@ -419,18 +435,15 @@ def verify_share_password(password: str, stored_hash: str) -> bool:
     Returns:
         `True` when the password matches.
     """
-    if not stored_hash:
+    if not stored_hash or not stored_hash.startswith("scrypt$"):
         return False
-    if stored_hash.startswith("scrypt$"):
-        try:
-            _prefix, salt_b64, hash_b64 = stored_hash.split("$", 2)
-            salt = base64.b64decode(salt_b64)
-            expected = base64.b64decode(hash_b64)
-        except (ValueError, TypeError):
-            return False
-        candidate = hashlib.scrypt(
-            password.encode("utf-8"), salt=salt, n=_SCRYPT_N, r=_SCRYPT_R, p=_SCRYPT_P, dklen=32
-        )
-        return secrets.compare_digest(candidate, expected)
-    legacy = hashlib.sha256(password.encode("utf-8")).hexdigest()
-    return secrets.compare_digest(legacy, stored_hash)
+    try:
+        _prefix, salt_b64, hash_b64 = stored_hash.split("$", 2)
+        salt = base64.b64decode(salt_b64)
+        expected = base64.b64decode(hash_b64)
+    except (ValueError, TypeError):
+        return False
+    candidate = hashlib.scrypt(
+        password.encode("utf-8"), salt=salt, n=_SCRYPT_N, r=_SCRYPT_R, p=_SCRYPT_P, dklen=32
+    )
+    return secrets.compare_digest(candidate, expected)

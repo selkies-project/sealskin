@@ -12,6 +12,49 @@ from fastapi import HTTPException
 logger = logging.getLogger(__name__)
 
 
+def resolve_within(base: str, path: str) -> str:
+    """Return the real path of `path` after checking that it lies inside `base`.
+
+    Both paths are resolved with `os.path.realpath`, so neither `..` segments
+    nor symlinks can be used to escape `base`. Trailing components that do not
+    exist yet are allowed, which makes the helper usable for paths about to be
+    created.
+
+    Args:
+        base: Trusted directory the result must stay inside.
+        path: Candidate path, usually built from client-supplied names.
+
+    Returns:
+        The resolved absolute path.
+
+    Raises:
+        ValueError: If `path` resolves outside `base`.
+    """
+    root = os.path.realpath(base)
+    resolved = os.path.realpath(path)
+    if resolved == root:
+        return root
+    if not resolved.startswith(root + os.sep):
+        raise ValueError(f"Path '{path}' is outside '{base}'.")
+    return resolved
+
+
+def safe_join(base: str, *parts: str) -> str:
+    """Join `parts` onto `base` and return the resolved path inside `base`.
+
+    Args:
+        base: Trusted directory.
+        *parts: Path components, typically client-supplied names.
+
+    Returns:
+        The resolved absolute path.
+
+    Raises:
+        ValueError: If the joined path resolves outside `base`.
+    """
+    return resolve_within(base, os.path.join(base, *parts))
+
+
 def safe_copytree(src: str, dst: str, symlinks: bool = True) -> None:
     """Copy a directory tree, tolerating dangling symlinks.
 

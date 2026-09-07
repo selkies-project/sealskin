@@ -8,16 +8,13 @@ from app.security import hash_share_password, verify_share_password
 from app.settings import settings
 
 
-def test_scrypt_hash_roundtrip_and_legacy():
+def test_scrypt_hash_roundtrip_and_legacy_rejected():
     stored = hash_share_password("hunter2")
     assert stored.startswith("scrypt$")
     assert verify_share_password("hunter2", stored)
     assert not verify_share_password("wrong", stored)
-    import hashlib
-
-    legacy = hashlib.sha256(b"old").hexdigest()
-    assert verify_share_password("old", legacy)
-    assert not verify_share_password("new", legacy)
+    legacy = "e0c9035898dd52fc65c41454cec9c4d2611bfb37" + "0" * 24
+    assert not verify_share_password("old", legacy)
     assert not verify_share_password("x", "")
 
 

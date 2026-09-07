@@ -24,7 +24,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import ValidationError
 
 from .. import user_manager
-from ..fsutil import unique_filename
+from ..fsutil import safe_join, unique_filename
 from ..models import (
     UploadChunkRequest,
     UploadInitiateRequest,
@@ -76,14 +76,20 @@ def user_upload_root(username: str) -> str:
     """
     if not _USERNAME_RE.match(username or ""):
         raise HTTPException(status_code=400, detail="Invalid username.")
-    root = os.path.join(settings.upload_dir, username)
+    try:
+        root = safe_join(settings.upload_dir, username)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail="Invalid username.") from exc
     os.makedirs(root, exist_ok=True, mode=0o700)
     return root
 
 
 def upload_path(username: str, upload_id: str) -> str:
     """Return the directory of one upload after validating ownership inputs."""
-    return os.path.join(user_upload_root(username), validate_upload_id(upload_id))
+    try:
+        return safe_join(user_upload_root(username), validate_upload_id(upload_id))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail="Invalid upload id.") from exc
 
 
 async def reassemble_file(username: str, upload_id: str, total_chunks: int) -> str:
@@ -108,7 +114,7 @@ async def reassemble_file(username: str, upload_id: str, total_chunks: int) -> s
         if not os.path.exists(os.path.join(directory, f"chunk_{index}")):
             raise HTTPException(status_code=400, detail=f"Missing chunk {index} for upload.")
 
-    fd, temp_path = tempfile.mkstemp(dir=user_upload_root(username), prefix=f"{upload_id}-")
+    fd, temp_path = tempfile.mkstemp(dir=user_upload_root(username), prefix="reassembled-")
     try:
 
         def concatenate() -> None:

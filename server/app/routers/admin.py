@@ -18,7 +18,7 @@ from pydantic import ValidationError
 
 from .. import config_store, user_manager
 from ..docker_utils import get_and_cache_image_metadata, get_system_stats, pull_and_cache_image
-from ..fsutil import safe_rmtree
+from ..fsutil import safe_join, safe_rmtree
 from ..launch import launch_application, stop_session
 from ..models import (
     AdminStatusResponse,
@@ -147,14 +147,25 @@ async def delete_app_store(store_name: str) -> Response:
 
 
 @router.get("/apps/available", response_model=list[AvailableApp])
-async def get_available_apps(url: str, store_name: str, refresh: bool = False) -> list[dict[str, Any]]:
-    """Return the apps published by a store (cached unless `refresh`)."""
+async def get_available_apps(
+    store_name: str, url: str | None = None, refresh: bool = False
+) -> list[dict[str, Any]]:
+    """Return the apps published by a configured store (cached unless `refresh`).
+
+    The store is fetched from the URL saved with it; a `url` query parameter
+    is accepted for older clients but must match that saved URL.
+    """
     _require_safe_name(store_name, "app store")
+    store = config_store.get_store(store_name)
+    if not store:
+        raise HTTPException(status_code=404, detail="App store not found.")
+    if url is not None and url != store.url:
+        raise HTTPException(status_code=400, detail="URL does not match the configured app store.")
     try:
-        return await config_store.fetch_store_apps(store_name, url, refresh)
+        return await config_store.fetch_store_apps(store, refresh)
     except httpx.RequestError as exc:
         raise HTTPException(
-            status_code=400, detail=f"Failed to fetch app store from URL '{url}': {exc}"
+            status_code=400, detail=f"Failed to fetch app store from URL '{store.url}': {exc}"
         ) from exc
     except (yaml.YAMLError, ValueError) as exc:
         raise HTTPException(status_code=500, detail=f"Failed to parse app store YAML: {exc}") from exc
@@ -180,7 +191,10 @@ def _save_logo(app_id: str, logo: str | None) -> str | None:
     except (ValueError, TypeError, binascii.Error):
         return logo
     os.makedirs(settings.app_icons_path, exist_ok=True, mode=0o700)
-    icon_path = os.path.join(settings.app_icons_path, f"{app_id}.png")
+    try:
+        icon_path = safe_join(settings.app_icons_path, f"{app_id}.png")
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail="Invalid application id.") from exc
     with open(icon_path, "wb") as handle:
         handle.write(icon_data)
     logger.info("Saved custom icon for app %s", app_id)
@@ -306,21 +320,27 @@ async def delete_installed_app(app_id: str) -> Response:
         raise HTTPException(status_code=404, detail="Installed app not found.")
 
     if record.is_meta_app:
-        icon_path = os.path.join(settings.app_icons_path, f"{app_id}.png")
+        try:
+            icon_path = safe_join(settings.app_icons_path, f"{app_id}.png")
+            template_dir = (
+                safe_join(settings.home_templates_path, record.home_template_name)
+                if record.home_template_name
+                else None
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail="Invalid application id.") from exc
         if os.path.exists(icon_path):
             try:
                 os.remove(icon_path)
                 logger.info("Deleted custom icon for meta-app %s", app_id)
             except OSError as exc:
                 logger.error("Failed to delete icon for meta-app %s: %s", app_id, exc)
-        if record.home_template_name:
-            template_dir = os.path.join(settings.home_templates_path, record.home_template_name)
-            if os.path.isdir(template_dir):
-                try:
-                    safe_rmtree(template_dir)
-                    logger.info("Purged home template directory for meta-app %s", app_id)
-                except (OSError, HTTPException) as exc:
-                    logger.error("Failed to purge home template for meta-app %s: %s", app_id, exc)
+        if template_dir and os.path.isdir(template_dir):
+            try:
+                safe_rmtree(template_dir)
+                logger.info("Purged home template directory for meta-app %s", app_id)
+            except (OSError, HTTPException) as exc:
+                logger.error("Failed to purge home template for meta-app %s: %s", app_id, exc)
 
     config_store.remove_record(app_id)
     await config_store.save_installed_apps()
