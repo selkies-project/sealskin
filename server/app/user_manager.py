@@ -23,6 +23,7 @@ import yaml
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
+from .fsutil import safe_join
 from .settings import settings
 
 logger = logging.getLogger(__name__)
@@ -137,7 +138,7 @@ def write_user_file(username: str, pub_key_pem: str, settings_dict: dict[str, An
         pub_key_pem: Public key PEM.
         settings_dict: Settings to store.
     """
-    file_path = os.path.join(settings.keys_base_path, "users", username)
+    file_path = safe_join(settings.keys_base_path, "users", username)
     settings_yaml = yaml.safe_dump(settings_dict, default_flow_style=False, sort_keys=False)
     content = (
         "--- Settings ---\n"
@@ -296,7 +297,7 @@ def create_admin(username: str, public_key: str | None) -> tuple[dict[str, Any],
         public_pem = public_key
     else:
         private_pem, public_pem = _generate_key_pair()
-    _atomic_write(os.path.join(settings.keys_base_path, "admins", username), public_pem.strip())
+    _atomic_write(safe_join(settings.keys_base_path, "admins", username), public_pem.strip())
     load_users_and_groups()
     return get_user(username), private_pem
 
@@ -313,12 +314,12 @@ def delete_admin(username: str) -> None:
     if not user or not user.get("is_admin"):
         raise ValueError(f"Admin '{username}' not found.")
 
-    user_storage_path = os.path.join(settings.storage_path, username)
+    user_storage_path = safe_join(settings.storage_path, username)
     if os.path.isdir(user_storage_path):
         shutil.rmtree(user_storage_path)
         logger.info("Deleted storage for admin '%s'.", username)
 
-    admin_file_path = os.path.join(settings.keys_base_path, "admins", username)
+    admin_file_path = safe_join(settings.keys_base_path, "admins", username)
     if not os.path.exists(admin_file_path):
         raise ValueError(f"Admin file for '{username}' not found.")
     os.remove(admin_file_path)
@@ -367,12 +368,12 @@ def delete_user(username: str) -> None:
     if user.get("is_admin"):
         raise ValueError("Cannot delete an admin user.")
 
-    user_storage_path = os.path.join(settings.storage_path, username)
+    user_storage_path = safe_join(settings.storage_path, username)
     if os.path.isdir(user_storage_path):
         shutil.rmtree(user_storage_path)
         logger.info("Deleted storage for user '%s'.", username)
 
-    file_path = os.path.join(settings.keys_base_path, "users", username)
+    file_path = safe_join(settings.keys_base_path, "users", username)
     if not os.path.exists(file_path):
         raise ValueError(f"User file for '{username}' not found.")
     os.remove(file_path)
@@ -402,7 +403,7 @@ def write_group_file(group_name: str, settings_dict: dict[str, Any]) -> None:
         group_name: Group name (validated by the API model).
         settings_dict: Settings applied to members.
     """
-    file_path = os.path.join(settings.groups_base_path, group_name)
+    file_path = safe_join(settings.groups_base_path, group_name)
     _atomic_write(file_path, yaml.safe_dump(settings_dict, default_flow_style=False, sort_keys=False))
     logger.info("Wrote group file for '%s'.", group_name)
     load_users_and_groups()
@@ -416,7 +417,7 @@ def delete_group(group_name: str) -> None:
     """
     if group_name not in GROUP_DATA:
         raise ValueError(f"Group '{group_name}' not found.")
-    file_path = os.path.join(settings.groups_base_path, group_name)
+    file_path = safe_join(settings.groups_base_path, group_name)
     if not os.path.exists(file_path):
         raise ValueError(f"Group file for '{group_name}' not found.")
     os.remove(file_path)
@@ -426,8 +427,11 @@ def delete_group(group_name: str) -> None:
 
 def get_home_dirs(username: str) -> list[str]:
     """List a user's home directories (sub-directories of their storage)."""
-    user_storage_path = os.path.join(settings.storage_path, username)
-    if not os.path.isdir(user_storage_path):
+    try:
+        user_storage_path = safe_join(settings.storage_path, username)
+    except ValueError:
+        return []
+    if not username or not os.path.isdir(user_storage_path):
         return []
     try:
         return sorted(
@@ -447,7 +451,7 @@ def create_home_dir(username: str, home_name: str) -> None:
     """
     if not _NAME_RE.match(home_name or ""):
         raise ValueError("Invalid home directory name. Use only letters, numbers, underscore, or hyphen.")
-    new_home_path = os.path.join(settings.storage_path, username, home_name)
+    new_home_path = safe_join(settings.storage_path, username, home_name)
     if os.path.exists(new_home_path):
         raise ValueError(f"Home directory '{home_name}' already exists for user '{username}'.")
     try:
@@ -468,7 +472,7 @@ def delete_home_dir(username: str, home_name: str) -> None:
     """
     if not _NAME_RE.match(home_name or ""):
         raise ValueError("Invalid home directory name.")
-    home_path = os.path.join(settings.storage_path, username, home_name)
+    home_path = safe_join(settings.storage_path, username, home_name)
     if not os.path.isdir(home_path):
         raise ValueError(f"Home directory '{home_name}' not found for user '{username}'.")
     try:

@@ -9,6 +9,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import ValidationError
 
+from ..fsutil import safe_join
 from ..launch import launch_application
 from ..models import (
     LaunchRequestFile,
@@ -131,11 +132,13 @@ async def launch_file_path(
         )
 
     username = auth_user["username"]
-    shared_files_path = os.path.abspath(
-        os.path.join(settings.storage_path, username, "_sealskin_shared_files")
-    )
     safe_filename = os.path.basename(req.filename)
-    if not os.path.exists(os.path.join(shared_files_path, safe_filename)):
+    try:
+        shared_files_path = safe_join(settings.storage_path, username, "_sealskin_shared_files")
+        file_path = safe_join(shared_files_path, safe_filename)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail="Invalid file name.") from exc
+    if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail=f"File '{safe_filename}' not found.")
 
     env_vars = {

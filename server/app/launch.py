@@ -26,7 +26,7 @@ from fastapi import HTTPException
 
 from . import config_store, user_manager
 from .docker_utils import translate_path_to_host
-from .fsutil import safe_copytree, sanitize_for_filename, unique_filename
+from .fsutil import safe_copytree, safe_join, sanitize_for_filename, unique_filename
 from .models import InstalledApp
 from .providers.docker_provider import DockerProvider
 from .settings import settings
@@ -546,17 +546,24 @@ async def _resolve_storage(
         return forced_rw_mount, None
 
     if app.is_meta_app:
-        template_path = os.path.join(settings.home_templates_path, app.home_template_name or "")
-        if not app.home_template_name or not os.path.isdir(template_path):
+        try:
+            template_path = safe_join(settings.home_templates_path, app.home_template_name or "")
+        except ValueError:
+            template_path = ""
+        if not app.home_template_name or not template_path or not os.path.isdir(template_path):
             raise HTTPException(
                 status_code=500,
                 detail=f"Home directory template for meta app '{app.name}' not found on server.",
             )
         is_persistent = persistent_allowed and (home_name is None or home_name.lower() != "cleanroom")
         if is_persistent:
-            host_mount_path = os.path.join(
-                settings.storage_path, username, f"auto-{sanitize_for_filename(app.name)}"
-            )
+            try:
+                host_mount_path = safe_join(
+                    settings.storage_path, username, f"auto-{sanitize_for_filename(app.name)}"
+                )
+                shared = safe_join(settings.storage_path, username, "_sealskin_shared_files")
+            except ValueError as exc:
+                raise HTTPException(status_code=400, detail="Invalid user storage path.") from exc
             if not os.path.exists(host_mount_path):
                 logger.info(
                     "[%s] First launch for meta-app. Copying template '%s' for user '%s'.",
@@ -565,7 +572,7 @@ async def _resolve_storage(
                     username,
                 )
                 await asyncio.to_thread(safe_copytree, template_path, host_mount_path, True)
-            return host_mount_path, os.path.join(settings.storage_path, username, "_sealskin_shared_files")
+            return host_mount_path, shared
         host_mount_path = os.path.join(ephemeral_base(), str(uuid.uuid4()))
         logger.info(
             "[%s] Launching meta-app in cleanroom mode. Copying template '%s' to ephemeral storage.",
@@ -579,10 +586,13 @@ async def _resolve_storage(
     if not use_persistent:
         home_name = "cleanroom"
     if home_name and home_name.lower() != "cleanroom":
-        host_mount_path = os.path.abspath(os.path.join(settings.storage_path, username, home_name))
+        try:
+            host_mount_path = safe_join(settings.storage_path, username, home_name)
+            shared = safe_join(settings.storage_path, username, "_sealskin_shared_files")
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=f"Home directory '{home_name}' not found.") from exc
         if not os.path.isdir(host_mount_path):
             raise HTTPException(status_code=404, detail=f"Home directory '{home_name}' not found.")
-        shared = os.path.abspath(os.path.join(settings.storage_path, username, "_sealskin_shared_files"))
         return host_mount_path, shared
     return new_ephemeral_dir(), new_ephemeral_dir("_shared")
 

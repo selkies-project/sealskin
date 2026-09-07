@@ -16,7 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import ValidationError
 
 from .. import user_manager
-from ..fsutil import safe_rmtree, unique_filename
+from ..fsutil import safe_join, safe_rmtree, unique_filename
 from ..models import (
     CreateFolderRequest,
     DeleteItemsRequest,
@@ -72,19 +72,23 @@ def get_validated_path(
     if home_dir not in user_manager.get_home_dirs(username):
         raise HTTPException(status_code=403, detail=f"Access to home directory '{home_dir}' denied.")
 
-    base_dir = (pathlib.Path(settings.storage_path) / username / home_dir).resolve()
-    if not base_dir.is_dir():
+    try:
+        base_dir = safe_join(settings.storage_path, username, home_dir)
+    except ValueError as exc:
+        raise HTTPException(status_code=403, detail=f"Access to home directory '{home_dir}' denied.") from exc
+    if not os.path.isdir(base_dir):
         raise HTTPException(status_code=404, detail="Home directory not found.")
 
     normalized = os.path.normpath(sub_path).lstrip("/")
     if ".." in normalized.split(os.path.sep):
         raise HTTPException(status_code=403, detail="Directory traversal attempt detected.")
-    full_path = (base_dir / normalized).resolve()
-    if base_dir not in full_path.parents and full_path != base_dir:
-        raise HTTPException(status_code=403, detail="Directory traversal attempt detected.")
-    if check_existence and not full_path.exists():
+    try:
+        full_path = safe_join(base_dir, normalized)
+    except ValueError as exc:
+        raise HTTPException(status_code=403, detail="Directory traversal attempt detected.") from exc
+    if check_existence and not os.path.exists(full_path):
         raise HTTPException(status_code=404, detail="Path not found.")
-    return full_path
+    return pathlib.Path(full_path)
 
 
 async def _perform_deletion(task_id: str, username: str, home_dir: str, paths: list[str]) -> None:
@@ -148,8 +152,11 @@ async def create_folder(
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {exc}") from exc
     parent = get_validated_path(user["username"], home_dir, req.path)
-    new_folder = parent / req.folder_name
-    if new_folder.exists():
+    try:
+        new_folder = pathlib.Path(safe_join(str(parent), req.folder_name))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail="Invalid folder name.") from exc
+    if new_folder == parent or new_folder.exists():
         raise HTTPException(status_code=409, detail=f"Folder '{req.folder_name}' already exists.")
     try:
         new_folder.mkdir()
@@ -198,7 +205,7 @@ async def list_files(
     validated = get_validated_path(user["username"], home_dir, path)
     if not validated.is_dir():
         raise HTTPException(status_code=400, detail="Path is not a valid directory.")
-    home_root = pathlib.Path(settings.storage_path) / user["username"] / home_dir
+    home_root = pathlib.Path(os.path.realpath(pathlib.Path(settings.storage_path) / user["username"] / home_dir))
 
     def scan() -> tuple[int, list[dict[str, Any]]]:
         try:
@@ -246,7 +253,11 @@ async def finalize_upload_to_dir(
     reassembled_path = await reassemble_file(user["username"], req.upload_id, req.total_chunks)
     safe_filename = os.path.basename(req.filename)
     actual_filename = await asyncio.to_thread(unique_filename, str(dest_dir), safe_filename)
-    final_location = dest_dir / actual_filename
+    try:
+        final_location = pathlib.Path(safe_join(str(dest_dir), actual_filename))
+    except ValueError as exc:
+        os.remove(reassembled_path)
+        raise HTTPException(status_code=400, detail="Invalid file name.") from exc
     try:
         await asyncio.to_thread(shutil.move, reassembled_path, str(final_location))
         await asyncio.to_thread(os.chmod, str(final_location), 0o644)

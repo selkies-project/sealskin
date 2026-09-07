@@ -24,6 +24,7 @@ import yaml
 from pydantic import ValidationError
 
 from . import persistence
+from .fsutil import resolve_within, safe_join
 from .models import (
     RECORD_FIELDS,
     AppStore,
@@ -134,9 +135,14 @@ def load_app_stores() -> None:
             stores: list[AppStore] = []
             for raw in stores_data or []:
                 try:
-                    stores.append(AppStore(**raw))
+                    store = AppStore(**raw)
                 except (ValidationError, TypeError) as exc:
                     logger.error("Skipping invalid app store entry %r: %s", raw, exc)
+                    continue
+                if not is_safe_name(store.name):
+                    logger.error("Skipping app store with unsafe name %r.", store.name)
+                    continue
+                stores.append(store)
             state.app_stores = stores
         logger.info("Loaded %d app store(s).", len(state.app_stores))
     except (OSError, yaml.YAMLError) as exc:
@@ -172,8 +178,12 @@ def get_store(store_name: str) -> AppStore | None:
 
 
 def store_cache_file(store_name: str) -> str:
-    """Return the cache file path of a store."""
-    return os.path.join(settings.app_store_cache_path, f"{store_name}.yml")
+    """Return the cache file path of a store.
+
+    Raises:
+        ValueError: If the name would place the file outside the cache directory.
+    """
+    return safe_join(settings.app_store_cache_path, f"{store_name}.yml")
 
 
 def _extract_apps(data: Any) -> list[dict[str, Any]]:
@@ -191,7 +201,11 @@ def _extract_apps(data: Any) -> list[dict[str, Any]]:
 
 def _read_cached_script_b64(store_name: str, app_id: str, suffix: str = "") -> str | None:
     """Return the cached autostart script of an app as base64, if present."""
-    path = os.path.join(settings.autostart_cache_path, store_name, f"{app_id}{suffix}")
+    try:
+        path = safe_join(settings.autostart_cache_path, store_name, f"{app_id}{suffix}")
+    except ValueError:
+        logger.error("Refusing autostart cache lookup for unsafe name %r/%r", store_name, app_id)
+        return None
     try:
         if os.path.exists(path) and os.path.getsize(path) > 0:
             with open(path, "rb") as handle:
@@ -315,21 +329,21 @@ async def refresh_store_caches() -> None:
     logger.info("App store cache refresh complete.")
 
 
-async def fetch_store_apps(store_name: str, url: str, refresh: bool) -> list[dict[str, Any]]:
-    """Return the processed app list of a store, fetching it when needed.
+async def fetch_store_apps(store: AppStore, refresh: bool) -> list[dict[str, Any]]:
+    """Return the processed app list of a configured store, fetching it when needed.
 
     Args:
-        store_name: Store name (validated by the caller).
-        url: Store URL.
-        refresh: Ignore the cache and fetch from `url`.
+        store: A configured store; only its saved URL is ever fetched.
+        refresh: Ignore the cache and fetch from the store URL.
 
     Returns:
         Processed app entries.
 
     Raises:
         httpx.RequestError: If the store cannot be fetched.
-        ValueError, yaml.YAMLError: If the document is invalid.
+        ValueError, yaml.YAMLError: If the name or document is invalid.
     """
+    store_name = store.name
     cache_path = store_cache_file(store_name)
     if not refresh and os.path.exists(cache_path):
         try:
@@ -339,7 +353,7 @@ async def fetch_store_apps(store_name: str, url: str, refresh: bool) -> list[dic
             logger.warning("Cache read failed for %s: %s", store_name, exc)
 
     async with httpx.AsyncClient() as client:
-        response = await client.get(url, follow_redirects=True, timeout=15)
+        response = await client.get(store.url, follow_redirects=True, timeout=15)
         response.raise_for_status()
     ensure_config_dir()
     with open(cache_path, "w", encoding="utf-8") as handle:
@@ -846,16 +860,18 @@ def delete_app_template(name: str) -> None:
         PermissionError: If the template is a default template.
         FileNotFoundError: If no template of that name exists.
     """
-    path = state.template_files.get(name)
-    user_dir = os.path.abspath(settings.app_templates_path)
-    if path is None:
-        candidate = os.path.join(settings.app_templates_path, template_filename(name))
-        if os.path.exists(candidate):
-            path = candidate
-    if path is None:
+    known = state.template_files.get(name)
+    try:
+        if known is None:
+            path = safe_join(settings.app_templates_path, template_filename(name))
+            if not os.path.exists(path):
+                raise FileNotFoundError(name)
+        else:
+            path = resolve_within(settings.app_templates_path, known)
+    except ValueError as exc:
+        raise PermissionError(name) from exc
+    if path == os.path.realpath(settings.app_templates_path):
         raise FileNotFoundError(name)
-    if not os.path.abspath(path).startswith(user_dir + os.sep):
-        raise PermissionError(name)
     os.remove(path)
     load_app_templates()
 

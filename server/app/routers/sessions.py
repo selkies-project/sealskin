@@ -14,10 +14,10 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
 from pydantic import ValidationError
 
-from ..fsutil import unique_filename
+from ..fsutil import resolve_within, safe_join, unique_filename
 from ..launch import ephemeral_base, stop_session
 from ..models import ActiveSessionInfo, SendFileToSessionRequest
-from ..security import EncryptedRoute, get_decrypted_request_body, verify_token
+from ..security import EncryptedRoute, canonical_uuid, get_decrypted_request_body, verify_token
 from ..settings import settings
 from ..state import state
 from .uploads import reassemble_file
@@ -104,16 +104,25 @@ async def send_file_to_session(
     reassembled_path = await reassemble_file(user["username"], req.upload_id, req.total_chunks)
     safe_filename = os.path.basename(req.filename)
     is_persistent = not host_mount_path.startswith(ephemeral_base())
-    if is_persistent:
-        dest_dir = os.path.abspath(
-            os.path.join(settings.storage_path, user["username"], "_sealskin_shared_files")
-        )
-    else:
-        dest_dir = data.get("shared_files_path") or os.path.join(host_mount_path, "Desktop", "files")
+    try:
+        if is_persistent:
+            dest_dir = safe_join(settings.storage_path, user["username"], "_sealskin_shared_files")
+        else:
+            dest_dir = resolve_within(
+                ephemeral_base(),
+                data.get("shared_files_path") or os.path.join(host_mount_path, "Desktop", "files"),
+            )
+    except ValueError as exc:
+        os.remove(reassembled_path)
+        raise HTTPException(status_code=400, detail="Session storage path is invalid.") from exc
     os.makedirs(dest_dir, exist_ok=True, mode=0o755)
 
     actual_filename = await asyncio.to_thread(unique_filename, dest_dir, safe_filename)
-    file_location = os.path.join(dest_dir, actual_filename)
+    try:
+        file_location = safe_join(dest_dir, actual_filename)
+    except ValueError as exc:
+        os.remove(reassembled_path)
+        raise HTTPException(status_code=400, detail="Invalid file name.") from exc
     try:
         await asyncio.to_thread(shutil.move, reassembled_path, file_location)
         await asyncio.to_thread(os.chmod, file_location, 0o644)
@@ -133,14 +142,36 @@ async def send_file_to_session(
     return {"status": "success", "message": f"File '{safe_filename}' sent to session."}
 
 
+def _known_collab_token(data: dict[str, Any], token: str | None) -> str | None:
+    """Return the stored copy of a collaboration token, or `None` if unknown.
+
+    Args:
+        data: Session record.
+        token: Token supplied by the client.
+
+    Returns:
+        The controller or viewer token as held in the session record.
+    """
+    if not token:
+        return None
+    candidates = [data.get("controller_token")] + [
+        viewer.get("token") for viewer in data.get("viewers", [])
+    ]
+    for candidate in candidates:
+        if candidate and secrets.compare_digest(candidate, token):
+            return candidate
+    return None
+
+
 @proxy_router.get("/{session_id:uuid}/")
 async def initial_session_auth(session_id: uuid.UUID, request: Request) -> Response:
     """Exchange the one-time access token for the session cookie and redirect."""
-    session_id_str = str(session_id)
+    session_id_str = canonical_uuid(session_id)
     token = request.query_params.get("access_token")
     data = state.sessions.get(session_id_str)
     if not data or not token or not secrets.compare_digest(token, data.get("access_token", "")):
         raise HTTPException(status_code=403, detail="Forbidden: Invalid session or token.")
+    token = data["access_token"]
 
     redirect_url = request.url.remove_query_params("access_token")
     response = RedirectResponse(url=str(redirect_url), status_code=303)
@@ -159,7 +190,7 @@ async def initial_session_auth(session_id: uuid.UUID, request: Request) -> Respo
         samesite=samesite_policy,
         path=f"/{session_id_str}",
     )
-    collab_token = request.query_params.get("token")
+    collab_token = _known_collab_token(data, request.query_params.get("token"))
     if collab_token and data.get("is_collaboration"):
         response.set_cookie(
             key=f"collab_token_{session_id_str}",
