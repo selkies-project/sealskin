@@ -625,14 +625,22 @@ function applyMobileLayout() {
             <img src="icons/icon128.png" alt="SealSkin" style="height: 32px; margin-right: 10px;">
             <h1>SealSkin</h1>
         </div>
-        <button id="mobile-refresh-btn" style="background: none; border: none; color: inherit; font-size: 1.2rem; cursor: pointer; padding: 0 10px;">
-            <i class="fas fa-sync-alt"></i>
-        </button>
+        <div class="mobile-header-actions" style="display: flex; align-items: center;">
+            <button id="mobile-refresh-btn" style="background: none; border: none; color: inherit; font-size: 1.2rem; cursor: pointer; padding: 0 10px;">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
     `;
     container.insertBefore(header, tabs);
     document.getElementById('mobile-refresh-btn').addEventListener('click', () => {
       window.location.reload();
     });
+    const gearBtn = document.getElementById('options-gear-btn');
+    if (gearBtn) {
+      gearBtn.className = '';
+      gearBtn.style.cssText = 'background: none; border: none; color: inherit; font-size: 1.2rem; cursor: pointer; padding: 0 10px; margin: 0;';
+      header.querySelector('.mobile-header-actions').appendChild(gearBtn);
+    }
   }
 
   const footer = document.querySelector('.popup-footer');
