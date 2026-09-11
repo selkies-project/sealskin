@@ -1291,20 +1291,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    let isAudioUnlocked = false;
+    // Tile contexts start suspended until a gesture; any gesture wakes them.
     const unlockAllAudio = () => {
-        if (isAudioUnlocked) return;
-        console.log("Attempting to unlock media stream audio contexts.");
-
         Object.values(remoteStreams).forEach(stream => {
-            if (stream.audioContext && stream.audioContext.state === 'suspended') {
-                stream.audioContext.resume().then(() => {
-                    console.log(`Resumed audio for ${stream.username}`);
-                });
+            if (stream.audioContext && !stream.audioMuted && stream.audioContext.state === 'suspended') {
+                stream.audioContext.resume().catch(() => {});
             }
         });
-        isAudioUnlocked = true;
     };
+    document.addEventListener('pointerdown', unlockAllAudio, true);
+    document.addEventListener('keydown', unlockAllAudio, true);
 
 
     const audioWorkletCode = `
@@ -2008,9 +2004,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let analyser;
         try {
             audioContext = new AudioContext({ sampleRate: 48000 });
-            if (isAudioUnlocked && audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
+            if (audioContext.state === 'suspended') audioContext.resume().catch(() => {});
 
             const workletBlob = new Blob([audioWorkletCode], { type: 'application/javascript' });
             const workletURL = URL.createObjectURL(workletBlob);
@@ -3534,8 +3528,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // Re-lock on click after an Escape release.
+        // Clicks in the stream wake audio and re-lock after an Escape release.
         const onFrameMouseDown = (e) => {
+            unlockAllAudio();
             if (e.button === 0) requestLock();
         };
         // Selkies escape hatch: three quick Escapes exit, third press swallowed.
