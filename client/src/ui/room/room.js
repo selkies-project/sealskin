@@ -2727,22 +2727,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        gamingModeBtn.addEventListener('click', () => {
-            if (document.fullscreenElement) {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen().catch(err => console.error(err));
-                }
-            } else {
-                const iframe = document.getElementById('session-frame');
-                if (iframe && iframe.contentWindow) {
-                    iframe.contentWindow.postMessage({ type: 'requestFullscreen' }, window.location.origin);
-                    iframe.focus();
-                }
-                if (COLLAB_DATA.userRole !== 'controller' && ws && ws.readyState === WebSocket.OPEN) {
-                    ws.send(JSON.stringify({ action: 'force_cursor_render', state: 1 }));
-                }
-            }
-        });
+        gamingModeBtn.addEventListener('click', () => gamingMode.toggle());
 
         document.addEventListener('pointerdown', (e) => {
             if (isChatOpen && !e.target.closest('#chat-dock')) closeChat();
@@ -3457,7 +3442,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const iframeEl = document.getElementById('session-frame');
     if (iframeEl) {
-        const resizeObserver = new ResizeObserver(() => {
+        const RESIZE_SETTLE_MS = 250;
+        let resizeTimer = null;
+        const reportResolution = () => {
+            resizeTimer = null;
             if (ws && ws.readyState === WebSocket.OPEN) {
                 const width = iframeEl.clientWidth;
                 const height = iframeEl.clientHeight;
@@ -3469,14 +3457,163 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
+        };
+        const resizeObserver = new ResizeObserver(() => {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(reportResolution, RESIZE_SETTLE_MS);
         });
         resizeObserver.observe(iframeEl);
         iframeEl.addEventListener('load', sendVolumeToIframe);
     }
 
-    document.addEventListener('fullscreenchange', () => {
-        if (!document.fullscreenElement && COLLAB_DATA.userRole !== 'controller' && ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ action: 'force_cursor_render', state: 0 }));
+    // Replicates selkies gaming mode from the top-level page: fullscreen the
+    // frame, pointer lock the core's overlay inside it, keyboard lock from here.
+    // Avoids the permission click-through of activating it in the child frame.
+    const gamingMode = (() => {
+        const LOCKED_KEYS = ['AltLeft', 'AltRight', 'Tab', 'Escape', 'MetaLeft', 'MetaRight', 'ContextMenu'];
+        const LOCK_RETRY_MS = 60;
+        const LOCK_RETRIES = 5;
+        const ESCAPE_PRESSES = 3;
+        const ESCAPE_WINDOW_MS = 1000;
+        let boundDoc = null;
+        let active = false;
+        let escapePresses = 0;
+        let lastEscapeAt = 0;
+
+        const frame = () => document.getElementById('session-frame');
+        const isFullscreen = () => {
+            const el = frame();
+            return !!el && document.fullscreenElement === el;
+        };
+        const frameDoc = () => {
+            const el = frame();
+            try { return el ? el.contentDocument : null; } catch (err) { return null; }
+        };
+        const lockTarget = () => {
+            const el = frame();
+            const doc = frameDoc();
+            if (!el || !doc) return null;
+            const input = el.contentWindow && el.contentWindow.webrtcInput;
+            return (input && input.element) || doc.getElementById('overlayInput');
+        };
+
+        const requestLock = (attempt = 0) => {
+            if (!isFullscreen()) return;
+            const doc = frameDoc();
+            const target = lockTarget();
+            if (!doc || !target || typeof target.requestPointerLock !== 'function') return;
+            if (doc.pointerLockElement === target) return;
+            let request;
+            try {
+                request = target.requestPointerLock();
+            } catch (err) {
+                request = Promise.reject(err);
+            }
+            if (!request || typeof request.catch !== 'function') return;
+            request.catch((err) => {
+                // Chrome refuses a lock while fullscreen is still settling.
+                if (attempt < LOCK_RETRIES) {
+                    setTimeout(() => requestLock(attempt + 1), LOCK_RETRY_MS);
+                } else {
+                    console.warn('[Gaming] Pointer lock refused:', err);
+                }
+            });
+        };
+        const releaseLock = () => {
+            const doc = frameDoc();
+            if (doc && doc.pointerLockElement && typeof doc.exitPointerLock === 'function') doc.exitPointerLock();
+        };
+        const lockKeyboard = () => {
+            if (navigator.keyboard && typeof navigator.keyboard.lock === 'function') {
+                navigator.keyboard.lock(LOCKED_KEYS).catch((err) => console.warn('[Gaming] Keyboard lock refused:', err));
+            }
+        };
+        const unlockKeyboard = () => {
+            if (navigator.keyboard && typeof navigator.keyboard.unlock === 'function') {
+                try { navigator.keyboard.unlock(); } catch (err) { /* nothing was locked */ }
+            }
+        };
+
+        // Re-lock on click after an Escape release.
+        const onFrameMouseDown = (e) => {
+            if (e.button === 0) requestLock();
+        };
+        // Selkies escape hatch: three quick Escapes exit, third press swallowed.
+        // Bound at frame load so it runs before the core's keydown listener.
+        const onFrameKeyDown = (e) => {
+            if (!isFullscreen() || e.repeat) return;
+            const now = performance.now();
+            if (e.code !== 'Escape' || now - lastEscapeAt > ESCAPE_WINDOW_MS) escapePresses = 0;
+            lastEscapeAt = now;
+            if (e.code !== 'Escape') return;
+            escapePresses += 1;
+            if (escapePresses < ESCAPE_PRESSES) return;
+            escapePresses = 0;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            leave();
+        };
+        // Keyed by document; the window proxy survives a reload, listeners do not.
+        const unbindFrame = () => {
+            if (!boundDoc) return;
+            try {
+                const win = boundDoc.defaultView;
+                if (win) win.removeEventListener('keydown', onFrameKeyDown, true);
+                boundDoc.removeEventListener('mousedown', onFrameMouseDown, true);
+            } catch (err) { /* frame gone */ }
+            boundDoc = null;
+        };
+        const bindFrame = () => {
+            const doc = frameDoc();
+            if (!doc || doc === boundDoc) return;
+            unbindFrame();
+            const win = doc.defaultView;
+            if (!win) return;
+            win.addEventListener('keydown', onFrameKeyDown, true);
+            doc.addEventListener('mousedown', onFrameMouseDown, true);
+            boundDoc = doc;
+        };
+
+        const setActive = (next) => {
+            if (active === next) return;
+            active = next;
+            if (COLLAB_DATA.userRole !== 'controller' && ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ action: 'force_cursor_render', state: next ? 1 : 0 }));
+            }
+        };
+
+        const enter = () => {
+            const el = frame();
+            if (!el || typeof el.requestFullscreen !== 'function') return;
+            // Locks are taken on fullscreenchange; the transition cancels an earlier lock.
+            el.requestFullscreen().catch((err) => console.error('[Gaming] Fullscreen refused:', err));
+            el.focus();
+        };
+        const leave = () => {
+            if (document.fullscreenElement && document.exitFullscreen) {
+                document.exitFullscreen().catch((err) => console.error(err));
+            }
+        };
+
+        document.addEventListener('fullscreenchange', () => {
+            if (isFullscreen()) {
+                bindFrame();
+                requestLock();
+                lockKeyboard();
+                setActive(true);
+            } else {
+                unlockKeyboard();
+                releaseLock();
+                setActive(false);
+            }
+        });
+        // Bind every frame document as it loads; handlers idle outside gaming mode.
+        const el = frame();
+        if (el) {
+            el.addEventListener('load', bindFrame);
+            bindFrame();
         }
-    });
+
+        return { toggle: () => (document.fullscreenElement ? leave() : enter()) };
+    })();
 });
