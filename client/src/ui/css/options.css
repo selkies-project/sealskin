@@ -1250,8 +1250,9 @@ body:has(.popup-container)::before { display: none; }
 }
 .popup-tab-btn {
   position: relative;
-  flex: 1;
-  padding: 0.6rem 0.5rem 0.7rem;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.6rem 0.4rem 0.7rem;
   font-size: 0.82rem;
   font-weight: 600;
   background-color: transparent;
@@ -1261,9 +1262,21 @@ body:has(.popup-container)::before { display: none; }
   cursor: pointer;
   transition: color var(--dur), background-color var(--dur);
   white-space: nowrap;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+}
+.popup-tab-btn > span {
+  display: inline-block;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: top;
 }
 .popup-tab-btn:hover:not(:disabled) { transform: none; }
-.popup-tab-btn i.fa-external-link-alt { font-size: 0.75em; margin-left: 0.4em; opacity: 0.7; }
+.popup-tab-btn i.fa-external-link-alt { flex-shrink: 0; font-size: 0.75em; margin-left: 0.4em; opacity: 0.7; }
 .popup-tab-btn:hover { background-color: var(--glass); color: var(--text-primary); }
 .popup-tab-btn.active { color: var(--text-primary); }
 .popup-tab-btn.active::after {
@@ -1280,9 +1293,11 @@ body:has(.popup-container)::before { display: none; }
 
 #options-gear-btn {
   flex: 0 0 auto;
+  min-width: max-content;
   margin-left: auto;
   padding-left: 0.8rem;
   padding-right: 0.8rem;
+  overflow: visible;
 }
 #options-gear-btn.active::after { display: none; }
 #options-gear-btn > i { transition: transform var(--dur-slow) var(--ease-spring); }
