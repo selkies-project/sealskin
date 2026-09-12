@@ -245,10 +245,19 @@ Previewing the site needs Node.js and, for the Server Reference, `python3`:
 ```bash
 cd docs
 npm install
-npm run dev          # http://localhost:3000
-npm run build        # static site in docs/out
-npm run check-links  # every link and anchor in docs/out must resolve
+npm run dev            # http://localhost:3000
+npm run build          # static site in docs/out
+npm run build:versions # every version in docs/out, as published
+npm run check-links    # every link and anchor in docs/out must resolve
 ```
+
+The published site carries every version: `npm run build:versions`, which is
+what the Docs workflow uploads, builds one copy per release tag from the first
+that shipped the site and one for `main`. The newest release is built as
+`latest`, which its own version segment and the site root redirect to. The
+sidebar's version dropdown switches between them. Every version is rendered by the current `docs/`
+tooling over that version's own `docs/content` and server source, so a fix to
+the site reaches every version the next time it is published.
 
 Two parts of the site are generated:
 
