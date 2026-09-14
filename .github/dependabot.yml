@@ -22,9 +22,14 @@ updates:
         patterns: ["*"]
     ignore:
       # `fumadocs-ui` is installed under an alias the updater cannot rewrite,
-      # and the aliased package pins an exact peer on this one, so the pair
-      # moves by hand or the documentation site stops resolving
+      # and the aliased package pins its peers to one exact version, so the
+      # Fumadocs packages move together by hand or the site stops resolving
       - dependency-name: fumadocs-core
+      - dependency-name: fumadocs-mdx
+      - dependency-name: fumadocs-ui
+      # The aliased package takes one Next major
+      - dependency-name: next
+        update-types: ["version-update:semver-major"]
 
   # The server pins exact versions in both requirements.txt and pyproject.toml
   - package-ecosystem: pip
