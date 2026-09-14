@@ -21,10 +21,10 @@ jobs:
       - name: Locate release notes
         id: notes
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${GITHUB_REF_NAME}"
           FILE_VERSION="$(cat VERSION)"
           if [ "$VERSION" != "$FILE_VERSION" ]; then
-            echo "::error::Tag ${GITHUB_REF_NAME} does not match VERSION file (${FILE_VERSION})"
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match VERSION file (${FILE_VERSION}); a release tag carries the version alone, with no leading v"
             exit 1
           fi
           NOTES="release-notes/${VERSION}.md"

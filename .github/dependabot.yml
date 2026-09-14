@@ -1,0 +1,31 @@
+# One grouped weekly pull request per ecosystem, so a bump does not arrive as a
+# dozen separate reviews.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # Served UI, the documentation site, and the Capacitor mobile shells. The
+  # shells' Swift packages resolve to these same node modules, so npm is where
+  # they are bumped.
+  - package-ecosystem: npm
+    directories: ["/client", "/docs", "/mobile"]
+    schedule:
+      interval: weekly
+    groups:
+      javascript:
+        patterns: ["*"]
+
+  # The server pins exact versions in both requirements.txt and pyproject.toml
+  - package-ecosystem: pip
+    directory: /server
+    schedule:
+      interval: weekly
+    groups:
+      python:
+        patterns: ["*"]
