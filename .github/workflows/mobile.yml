@@ -37,7 +37,7 @@ jobs:
       version: ${{ steps.numbers.outputs.version }}
       build: ${{ steps.numbers.outputs.build }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -63,13 +63,13 @@ jobs:
     needs: version
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 21
@@ -85,7 +85,7 @@ jobs:
         run: bash build.sh
 
       - name: Keep the APK and AAB as a workflow artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sealskin-android-${{ needs.version.outputs.version }}
           path: |
@@ -117,9 +117,9 @@ jobs:
       IOS_VERSION: 2.${{ needs.version.outputs.build }}
       IOS_BUILD: ${{ needs.version.outputs.build }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
 
@@ -251,7 +251,7 @@ jobs:
           mv "$RUNNER_TEMP/export/App.ipa" "$RUNNER_TEMP/export/sealskin-v${{ needs.version.outputs.version }}.ipa"
 
       - name: Keep the IPA as a workflow artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sealskin-ios-${{ needs.version.outputs.version }}
           path: ${{ runner.temp }}/export/sealskin-v*.ipa
@@ -282,7 +282,7 @@ jobs:
     if: inputs.upload
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: sealskin-android-${{ needs.version.outputs.version }}
           path: dist
@@ -309,7 +309,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: sealskin-ios-${{ needs.version.outputs.version }}
           path: dist
