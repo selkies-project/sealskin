@@ -20,6 +20,11 @@ updates:
     groups:
       javascript:
         patterns: ["*"]
+    ignore:
+      # `fumadocs-ui` is installed under an alias the updater cannot rewrite,
+      # and the aliased package pins an exact peer on this one, so the pair
+      # moves by hand or the documentation site stops resolving
+      - dependency-name: fumadocs-core
 
   # The server pins exact versions in both requirements.txt and pyproject.toml
   - package-ecosystem: pip
