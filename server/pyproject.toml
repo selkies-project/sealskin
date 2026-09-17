@@ -11,7 +11,7 @@ license = "MPL-2.0"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi==0.141.1",
-    "uvicorn[standard]==0.52.4",
+    "uvicorn[standard]==0.53.0",
     "uvloop==0.22.1",
     "PyJWT[crypto]==2.14.0",
     "pydantic==2.13.5",
