@@ -4,7 +4,7 @@
   "description": "SealSkin mobile shell (Capacitor). The web dir is copied from client/dist/mobile.",
   "main": "index.html",
   "scripts": {
-    "build": "rm -rf www && (cd ../client && ([ -d node_modules ] || npm ci --no-audit --no-fund) && SEALSKIN_BUILD_STRICT=1 npm run build --silent -- --target mobile) && cp -r ../client/dist/mobile www && npx @capacitor/assets generate --iconBackgroundColor '#12161d' --splashBackgroundColor '#12161d'",
+    "build": "rm -rf www && (cd ../client && ([ -d node_modules ] || npm ci --no-audit --no-fund) && SEALSKIN_BUILD_STRICT=1 npm run build --silent -- --target mobile) && cp -r ../client/dist/mobile www && node gen-assets.mjs",
     "android": "npm run build && npx cap sync android && npx cap open android",
     "ios": "npm run build && npx cap sync ios && npx cap open ios"
   },
@@ -19,12 +19,10 @@
     "capacitor-blob-writer": "^1.0.0"
   },
   "devDependencies": {
-    "@capacitor/assets": "^3.0.0",
-    "@capacitor/cli": "^8.5.1"
+    "@capacitor/cli": "^8.5.1",
+    "sharp": "^0.35.4"
   },
   "overrides": {
-    "sharp": "^0.35.4",
-    "tar": "^7.5.22",
     "uuid": "^14.0.2"
   }
 }
