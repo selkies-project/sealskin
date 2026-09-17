@@ -58,9 +58,8 @@ jobs:
 
       - name: Build the static site, one version per release and main
         working-directory: docs
-        # The lockfile is gitignored, so `npm ci` has nothing to install from.
         run: |
-          npm install --no-audit --no-fund
+          npm ci --no-audit --no-fund
           npm run build:versions
 
       - name: Check every link and anchor in the built site

@@ -34,7 +34,7 @@ jobs:
       - name: Build served UI and shells
         working-directory: client
         run: |
-          npm install
+          npm ci
           npm run build
 
       - name: Package served UI

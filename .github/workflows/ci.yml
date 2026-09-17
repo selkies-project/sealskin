@@ -44,7 +44,7 @@ jobs:
       - name: Build served UI and shells
         working-directory: client
         run: |
-          npm install
+          npm ci
           npm run build
 
       - name: Check version consistency
@@ -72,7 +72,7 @@ jobs:
       - name: Build UI
         working-directory: client
         run: |
-          npm install
+          npm ci
           SEALSKIN_BUILD_STRICT=1 node build.mjs --target ui
 
       - name: Copy UI and VERSION into package

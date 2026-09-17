@@ -411,8 +411,8 @@ async function buildMobile() {
   ];
   if (!fs.existsSync(MOBILE_NODE_MODULES)) {
     log('installing mobile node_modules for Capacitor packages');
-    try { execSync('npm install --no-audit --no-fund', { cwd: path.join(REPO_DIR, 'mobile'), stdio: 'inherit' }); }
-    catch (e) { warn('npm install in mobile/ failed; Capacitor imports will not resolve'); }
+    try { execSync('npm ci --no-audit --no-fund', { cwd: path.join(REPO_DIR, 'mobile'), stdio: 'inherit' }); }
+    catch (e) { warn('npm ci in mobile/ failed; Capacitor imports will not resolve'); }
   }
   const { sources } = await buildTarget('mobile', {
     pages: listHtml(path.join(SRC, 'shell', 'mobile')), outdir, outbase: path.join(SRC, 'shell', 'mobile'), hashed: false, minify: false, shell: true,

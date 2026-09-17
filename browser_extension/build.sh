@@ -17,7 +17,7 @@ echo "Detected Version: $VERSION"
 DIST="${REPO_DIR}/client/dist/extension"
 (
     cd "${REPO_DIR}/client"
-    [ -d node_modules ] || npm install --no-audit --no-fund
+    [ -d node_modules ] || npm ci --no-audit --no-fund
     SEALSKIN_BUILD_STRICT=1 npm run build --silent -- --target extension
 )
 if [ ! -f "${DIST}/background.js" ] || [ ! -f "${DIST}/manifest.chrome.json" ]; then

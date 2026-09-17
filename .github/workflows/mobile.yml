@@ -195,7 +195,7 @@ jobs:
       - name: Build web assets and sync Capacitor
         working-directory: mobile
         run: |
-          npm install --no-audit --no-fund
+          npm ci --no-audit --no-fund
           npm run build
           npx cap sync ios
 

@@ -13,7 +13,7 @@ echo "Detected Version: $VERSION"
 # Android versionCode must be an increasing integer: 0.3.0 -> 300.
 VERSION_CODE="${ANDROID_VERSION_CODE:-$(echo "$VERSION" | awk -F. '{printf "%d", $1*10000 + $2*100 + $3}')}"
 
-[ -d node_modules ] || npm install --no-audit --no-fund
+[ -d node_modules ] || npm ci --no-audit --no-fund
 
 # Stamp the package version so Capacitor and the stores agree with VERSION.
 npm version --no-git-tag-version --allow-same-version "$VERSION" > /dev/null
