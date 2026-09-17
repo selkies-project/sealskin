@@ -1,7 +1,7 @@
 fastapi==0.141.1
 uvicorn[standard]==0.52.4
 uvloop==0.22.1
-PyJWT[crypto]==2.13.0
+PyJWT[crypto]==2.14.0
 pydantic==2.13.5
 cryptography==50.0.1
 httpx==0.28.1
