@@ -71,6 +71,9 @@ jobs:
         with:
           tag_name: ${{ steps.sha.outputs.short }}
           name: ${{ steps.sha.outputs.short }}
+          # A new tag is created at this commit rather than at the default branch's head by the
+          # time the builds have finished.
+          target_commitish: ${{ github.sha }}
           prerelease: true
           generate_release_notes: true
           files: |

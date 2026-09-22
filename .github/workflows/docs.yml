@@ -11,9 +11,11 @@ on:
     branches: [ main ]
   pull_request:
 
+# A newer push to the same ref supersedes its build; the one Pages site takes deployments
+# in turn, in the publish job, so a pull request's build never displaces main's.
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -80,7 +82,10 @@ jobs:
       actions: read
       pages: write
       id-token: write
-    if: ${{ github.event_name != 'pull_request' }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    if: ${{ github.ref == 'refs/heads/main' }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
