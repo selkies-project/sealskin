@@ -92,10 +92,10 @@ the server uses the network it finds itself attached to.
 <details>
 <summary>"Nvidia runtime error on host."</summary>
 
-Install the `nvidia-container-toolkit` and register it with Docker. NVIDIA
-support needs the proprietary driver 580 or newer with
-`nvidia-drm.modeset=1`; on a headless host run `nvidia-modprobe --modeset`
-once per boot so `/dev/nvidia-modeset` exists before a session starts.
+Install the `nvidia-container-toolkit`, v1.20.1 or higher, and register it
+with Docker. NVIDIA support needs the proprietary driver 580 or newer with
+`nvidia-drm.modeset=1`; the toolkit's refresh service creates
+`/dev/nvidia-modeset` at boot, so a headless host needs nothing more.
 </details>
 
 <details>

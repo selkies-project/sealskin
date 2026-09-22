@@ -23,8 +23,8 @@ nothing to a running session.
   Port `8000` is a plain-HTTP fallback for the API that only the Chrome
   self-signed workflow needs.
 * Optionally, a GPU. NVIDIA needs the proprietary driver (580 or newer) with
-  the `nvidia-container-toolkit` and `nvidia-drm.modeset=1`; Intel and AMD
-  need nothing beyond `/dev/dri`. See [Administration](administration.md#gpus).
+  the `nvidia-container-toolkit` (v1.20.1 or higher) and `nvidia-drm.modeset=1`;
+  Intel and AMD need nothing beyond `/dev/dri`. See [Administration](administration.md#gpus).
 
 SealSkin is designed to be exposed directly on the internet rather than placed
 behind another reverse proxy: its own Caddy instance terminates TLS and
