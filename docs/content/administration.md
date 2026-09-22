@@ -180,10 +180,10 @@ time and launch context, and can stop any of them. Users see only their own.
 At start-up the server detects GPUs on the host:
 
 * **NVIDIA** cards through the NVIDIA driver. Sessions get the NVIDIA
-  container runtime with all capabilities, which passes the driver, the DRM
-  nodes and `/dev/nvidia-modeset` in. This needs the proprietary driver 580 or
-  newer, the `nvidia-container-toolkit` v1.20.1 or higher and the kernel
-  parameter `nvidia-drm.modeset=1`.
+  container runtime with all capabilities and, when it exists,
+  `/dev/nvidia-modeset`. This needs the proprietary driver 580 or newer, the
+  `nvidia-container-toolkit` v1.20.1 or higher, whose refresh service creates
+  that node at boot, and the kernel parameter `nvidia-drm.modeset=1`.
 * **DRI3** devices (Intel, AMD and others) through `/dev/dri`. The render
   node is passed into the container and exported as `DRI_NODE`.
 

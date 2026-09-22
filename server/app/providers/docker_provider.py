@@ -165,6 +165,7 @@ class DockerProvider(BaseProvider):
                         ],
                     )
                 ]
+                run_kwargs["devices"].append("/dev/nvidia-modeset:/dev/nvidia-modeset")
                 logger.info(
                     "[%s] Configuring container with Nvidia GPU index %s",
                     session_id,
@@ -178,7 +179,15 @@ class DockerProvider(BaseProvider):
                 )
 
         try:
-            container = await asyncio.to_thread(self.client.containers.run, **run_kwargs)
+            try:
+                container = await asyncio.to_thread(self.client.containers.run, **run_kwargs)
+            except APIError as exc:
+                error_msg = str(exc).lower()
+                if "/dev/nvidia-modeset" in error_msg and "no such file or directory" in error_msg:
+                    run_kwargs["devices"].remove("/dev/nvidia-modeset:/dev/nvidia-modeset")
+                    container = await asyncio.to_thread(self.client.containers.run, **run_kwargs)
+                else:
+                    raise
             logger.info(
                 "[%s] Launched container %s from image %s.", session_id, container.short_id, image
             )
