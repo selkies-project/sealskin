@@ -5,11 +5,13 @@ import {
   DocsPage,
   DocsTitle,
   EditOnGitHub,
+  MarkdownCopyButton,
+  ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
-import { gitConfig, pageUrl, siteName } from '@/lib/shared';
+import { gitConfig, pageMarkdownUrl, pageUrl, siteName } from '@/lib/shared';
 import { source } from '@/lib/source';
 
 const isLanding = (url: string) => url === '/';
@@ -24,6 +26,12 @@ function editUrl(path: string) {
   return `https://github.com/${user}/${repo}/edit/${branch}/${dir}/${path}`;
 }
 
+/** The page's Markdown source on GitHub, for the "open in" menu. */
+function blobUrl(path: string) {
+  const { user, repo, branch, dir } = gitConfig;
+  return `https://github.com/${user}/${repo}/blob/${branch}/${dir}/${path}`;
+}
+
 export default async function Page(props: PageProps<'/[[...slug]]'>) {
   const params = await props.params;
   const page = source.getPage(params.slug);
@@ -34,6 +42,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
   // the Python module rather than a Markdown file.
   const generated = page.path.startsWith('reference/');
   const edit = generated ? undefined : <EditOnGitHub href={editUrl(page.path)} />;
+  const markdownUrl = pageMarkdownUrl(page);
 
   return (
     <DocsPage
@@ -49,6 +58,12 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
           <DocsDescription className="mb-0">{page.data.description}</DocsDescription>
         </div>
       )}
+      {/* The page as Markdown: copied, or opened in a language model's chat
+          with the page's URL, for the reader and for an agent alike. */}
+      <div className="flex flex-row items-center gap-2 mb-4">
+        <MarkdownCopyButton markdownUrl={markdownUrl} />
+        <ViewOptionsPopover markdownUrl={markdownUrl} githubUrl={generated ? undefined : blobUrl(page.path)} />
+      </div>
       <DocsBody>
         <MDX
           components={getMDXComponents({

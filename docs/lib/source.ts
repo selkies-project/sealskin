@@ -7,7 +7,8 @@ const docs = defineDocs({
   // The pages are plain Markdown under docs/content so they read on GitHub
   // as well as on the site.
   dir: 'content',
-  docs: { schema: pageSchema },
+  // The processed Markdown of each page is kept for the copies lib/llms.ts serves.
+  docs: { schema: pageSchema, postprocess: { includeProcessedMarkdown: true } },
   meta: { schema: metaSchema },
 });
 
