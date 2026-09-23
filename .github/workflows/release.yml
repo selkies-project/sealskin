@@ -35,6 +35,18 @@ jobs:
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "path=${NOTES}" >> "$GITHUB_OUTPUT"
 
+      - name: Check the tag is on main
+        # A release is cut from main and its tags alone: a tag on any other
+        # commit is refused before anything is built or created under it
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          status="$(gh api "repos/${GITHUB_REPOSITORY}/compare/main...${GITHUB_SHA}" --jq .status)"
+          case "${status}" in
+            identical|behind) ;;
+            *) echo "::error::${GITHUB_REF_NAME} points at a commit that is not on main (${status:-unknown})"; exit 1 ;;
+          esac
+
   # A stable release is the one automatic path to the stores: the mobile
   # workflow builds both apps and pushes them to TestFlight and the Google
   # Play internal track.
