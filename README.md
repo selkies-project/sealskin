@@ -96,7 +96,7 @@ and the first login.
 | [Administration](https://selkies-project.github.io/sealskin/administration) | Users, groups, app stores, templates, the App Laboratory, GPUs. |
 | [Configuration](https://selkies-project.github.io/sealskin/configuration) | What lives in `/config` and `/storage`, keys, hand-editing the YAML. |
 | [Settings Reference](https://selkies-project.github.io/sealskin/settings) | Every environment variable the server reads. |
-| [Architecture](https://selkies-project.github.io/sealskin/architecture) | Control and data planes, encryption, the served UI and the shells. |
+| [Architecture](https://selkies-project.github.io/sealskin/architecture) | Control and data planes, encryption, the served UI, and the shells. |
 | [HTTP API](https://selkies-project.github.io/sealskin/api) | Every endpoint and how requests are wrapped. |
 | [Development](https://selkies-project.github.io/sealskin/development) | Running from source, building the client, the mobile shells, this site. |
 | [Releasing](https://selkies-project.github.io/sealskin/releasing) | Versioning, release notes, and the workflows. |

@@ -92,7 +92,7 @@ keys and certificates, and editing the YAML by hand.
 reads.
 
 [**Architecture**](architecture.md): the control and data planes, the
-encryption and authentication model, the served UI and the shells.
+encryption and authentication model, the served UI, and the shells.
 
 [**HTTP API**](api.md): every endpoint and how requests are wrapped.
 
