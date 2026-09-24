@@ -14,6 +14,7 @@ Self-hosted browser isolation and remote application streaming.</p>
   <a href="https://github.com/selkies-project/sealskin/releases/latest"><img src="https://img.shields.io/github/v/release/selkies-project/sealskin?label=release" alt="Latest release"></a>
   <a href="https://opensource.org/licenses/MPL-2.0"><img src="https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg" alt="License: MPL 2.0"></a>
   <a href="https://discord.com/invite/linuxserver"><img src="https://img.shields.io/discord/354974912613449730?logo=discord&label=Discord" alt="Discord"></a>
+  <a href="https://deepwiki.com/selkies-project/sealskin"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
 </p>
 
 <p align="center">
