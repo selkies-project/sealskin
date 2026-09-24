@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="mobile/assets/logo.png" alt="SealSkin" width="160">
+  <img src="https://raw.githubusercontent.com/selkies-project/sealskin/main/mobile/assets/logo.png" alt="SealSkin" width="160">
 </p>
 
 <h1 align="center">SealSkin</h1>
