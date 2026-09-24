@@ -305,6 +305,10 @@
           "label": "ゲームパッドセクションを表示",
           "description": "サイドバーにゲームパッドセクションを表示します。"
         },
+        "SELKIES_UI_SIDEBAR_SHOW_WEBCAM": {
+          "label": "ウェブカメラボタンを表示",
+          "description": "コアボタンとストリーム操作の中にウェブカメラの切り替えを表示します。操作部を隠すだけで、サーバーがカメラのフレームを受け付けるかは「ウェブカメラを有効化」で決まります。"
+        },
         "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
           "label": "フルスクリーンボタンを表示",
           "description": "サイドバーにフルスクリーンボタンを表示します。"
@@ -359,6 +363,10 @@
           "label": "マイクを有効化",
           "description": "クライアントからサーバーへのマイク転送を有効にします。アップストリームではデフォルトでオフです。"
         },
+        "SELKIES_WEBCAM_ENABLED": {
+          "label": "ウェブカメラを有効化",
+          "description": "クライアントのカメラを仮想ウェブカメラデバイスへ転送します。ベースイメージはデバイスを作成する際にこれを有効にします。「ウェブカメラ注入を無効化」は両方を取り除きます。"
+        },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "ゲームパッドを有効化",
           "description": "ゲームパッドのサポートを有効にします。"
@@ -377,6 +385,10 @@
           "label": "バイナリクリップボードを有効化",
           "description": "クリップボード上のバイナリデータ（画像）を許可します。"
         },
+        "SELKIES_CLIPBOARD_SEAMLESS": {
+          "label": "シームレスなクリップボード同期",
+          "description": "どちらかの側でクリップボードが変わると同期し、コピーした内容を相手側ですぐ貼り付けられるようにします。オフではサイドバーのクリップボード欄を通じてのみ内容が移動します。方向ポリシーは引き続き適用されます。"
+        },
         "SELKIES_COMMAND_ENABLED": {
           "label": "コマンドWebsocketを有効化",
           "description": "コマンドWebsocketメッセージの解析を有効にします。"
@@ -388,6 +400,14 @@
         "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
           "label": "ファイル転送制限（Mbit/s）",
           "description": "すべてのアップロードとダウンロードで共有される静的な帯域制限。0で上限を無効にします。"
+        },
+        "FILE_MANAGER_PATH": {
+          "label": "ファイル転送ディレクトリ",
+          "description": "アップロードの保存先であり、ファイルブラウザーが提供するディレクトリです。存在しなければ起動時に作成されます。"
+        },
+        "SELKIES_PRINTING_ENABLED": {
+          "label": "印刷を有効化",
+          "description": "セッションの Selkies キューに印刷された文書を PDF としてブラウザーへ渡します。オフでは拒否し、プリンター欄を隠します。「デスクトップを強化」はここで設定しない限りこれをオフにします。"
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "すべての共有を有効化",
@@ -433,6 +453,31 @@
           "label": "カーソルサイズ",
           "description": "96 DPI時のポイント単位のカーソルサイズで、セッションのDPIに応じてスケーリングされます。-1でプラットフォームのデフォルト（X11では32、Waylandでは24）を使用します。"
         },
+        "SELKIES_KEYBOARD_SHORTCUTS": {
+          "label": "クライアントのキーボードショートカット",
+          "description": "クライアント自身のキー組み合わせ（Ctrl+Shift と F、M、X、G、および Ctrl+Shift+クリック）をセッションへ渡さず保持します。同じ組み合わせを使うアプリケーションがある場合はオフにしてください。"
+        },
+        "SELKIES_MAC_CMD_AS_CTRL": {
+          "label": "macOS の Command を Control として送信",
+          "description": "macOS クライアントの Command 組み合わせを Control 組み合わせとして送り、Cmd+C でリモートアプリケーションがコピーするようにします。ウィンドウマネージャーが Super を使う場合はオフにしてください。Command は Super として届きます。"
+        },
+        "SELKIES_RAW_POINTER_MOTION": {
+          "label": "生のポインター移動",
+          "description": "ポインターロック中に加速のないポインター移動をブラウザーへ要求し、ロックされたポインターがマウス自身のカウントで動くようにします。Windows と macOS は許可し、Linux と Android は加速カーブを維持します。"
+        },
+        "SELKIES_PUBLISH_INPUT_DEVICES": {
+          "label": "入力デバイスを公開",
+          "description": "ディスプレイサーバーではなく evdev を読むアプリケーション（全画面ゲームやリマッパーなど）向けに、セッションのキーボードとポインターを入力デバイスに複製します。デスクトップは従来どおり操作されます。"
+        },
+        "SELKIES_UINPUT_GAMEPAD": {
+          "label": "カーネルのゲームパッドデバイス",
+          "description": "/dev/uinput を通じてゲームパッドを登録し、Steam、Proton、セッション内のブラウザーがインターポーザーなしで見つけられるようにします。自動では、インターポーザーが未設定で /dev/uinput に書き込める場合のみ行います。",
+          "options": {
+            "auto": "自動",
+            "always": "常に",
+            "never": "しない"
+          }
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "CSSスケーリングを使用（LoDPI）",
           "description": "trueの場合、低解像度が送信され、キャンバスが引き伸ばされます。"
@@ -457,6 +502,36 @@
           "label": "UIスケーリングDPI",
           "description": "UIスケーリングのデフォルトDPI。"
         },
+        "SELKIES_VIDEO_ON_START": {
+          "label": "開始時にビデオをオン",
+          "description": "ディスプレイのビデオストリームをオンにして開始します。オフではクライアントがビデオをオンにするまでプライマリディスプレイを取り込みません。共有ビューアーとセカンドディスプレイは常にストリームを開始します。"
+        },
+        "SELKIES_AUDIO_ON_START": {
+          "label": "開始時にオーディオをオン",
+          "description": "サーバーからクライアントへのオーディオをオンにして開始します。オフではクライアントがオーディオをオンにするまで取り込みを停止したままにします。オーディオの無効化とは異なり何も解体されず、マイクは引き続き機能します。"
+        },
+        "SELKIES_MICROPHONE_ON_START": {
+          "label": "マイクの開始ポリシー",
+          "description": "ブラウザーにマイクを要求する時点：接続時、サイドバーの切り替え使用時、またはアプリケーションが仮想ソースから録音している間のみ。",
+          "options": {
+            "atConnect": "接続時",
+            "onToggle": "サイドバーの切り替え時",
+            "onDemand": "必要時のみ"
+          }
+        },
+        "SELKIES_WEBCAM_ON_START": {
+          "label": "ウェブカメラの開始ポリシー",
+          "description": "ブラウザーにカメラを要求する時点：接続時、サイドバーの切り替え使用時、またはアプリケーションが仮想デバイスを開いている間のみ。",
+          "options": {
+            "atConnect": "接続時",
+            "onToggle": "サイドバーの切り替え時",
+            "onDemand": "必要時のみ"
+          }
+        },
+        "SELKIES_GAMEPAD_ON_START": {
+          "label": "開始時にゲームパッドをオン",
+          "description": "ゲームパッド入力をオンにして開始します。オフではクライアントがオンにするまで接続されたゲームパッドを読み取りません。ブラウザーはその選択を記憶します。"
+        },
         "SELKIES_AUDIO_BITRATE": {
           "label": "オーディオビットレート",
           "description": "デフォルトのOpusオーディオビットレート。"
@@ -479,7 +554,7 @@
         },
         "SELKIES_ENCODER": {
           "label": "エンコーダー",
-          "description": "許可するエンコーダーのカンマ区切りリスト（h264enc、h264enc-striped、jpeg）。最初のものがデフォルトで、単一の値を指定すると選択が固定されます。WebRTCでストリーミングできるのはh264encのみです。"
+          "description": "許可するエンコーダーのカンマ区切りリスト：h264enc、h265enc、vp8enc、vp9enc、av1enc、h264enc-striped、jpeg。最初のものがデフォルトで、単一の値を指定すると選択が固定されます。クライアントは自身のブラウザーがデコードできるものを順に試します。WebRTC はフルフレームのエンコーダーを運び、h264enc-striped と jpeg は WebSocket 専用です。"
         },
         "SELKIES_USE_CPU": {
           "label": "CPUエンコーディングを強制",
@@ -491,7 +566,7 @@
         },
         "SELKIES_RATE_CONTROL_MODE": {
           "label": "レート制御モード",
-          "description": "デフォルトのH.264レート制御: 固定品質（CRF）または固定ビットレート（CBR）。",
+          "description": "ビデオエンコーダーのデフォルトのレート制御：固定品質（CRF）または固定ビットレート（CBR）。",
           "options": {
             "crf": "固定品質（CRF）",
             "cbr": "固定ビットレート（CBR）"
@@ -503,7 +578,7 @@
         },
         "SELKIES_VIDEO_CRF": {
           "label": "ビデオCRF（範囲または固定）",
-          "description": "H.264の固定品質: 範囲の場合は'5-50'、固定の初期値の場合は'25'、両方の場合は'25,5-50'。"
+          "description": "H.264 の QP スケール上の固定品質で、各コーデックに対応付けられます。「5-50」で範囲、「25」で固定の初期値、「25,5-50」で両方を指定します。"
         },
         "SELKIES_VIDEO_BITRATE": {
           "label": "ビデオビットレート kbps（範囲または固定）",
@@ -527,7 +602,7 @@
         },
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "ビデオフルカラー（4:4:4）",
-          "description": "H.264を4:2:0の代わりに4:4:4クロマでエンコードします。これが固定で有効な場合、4:4:4デコーダーのないクライアントはJPEGにフォールバックします。"
+          "description": "コーデックとエンコーダーが対応する場合に 4:4:4 クロマでエンコードします（NVENC、VA-API、x264、x265 の H.264 と H.265、VA-API と libvpx の VP9）。4:4:4 プロファイルのないクライアントは、これが固定されていない限り同じコーデックで 4:2:0 を受信し、固定されている場合はデコードできる次のエンコーダーへ移ります。"
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "ビデオストリーミング（ターボ）モード",
@@ -563,7 +638,7 @@
         },
         "SELKIES_WEBCAM_ENCODER": {
           "label": "ウェブカメラアップリンクエンコーダー",
-          "description": "WebSocketクライアントがカメラフレームの送信に使用するコーデック。自動ではブラウザが維持できる最良のものを選択します。",
+          "description": "クライアントがカメラのアップリンクをエンコードするコーデック。自動では計測済みの順序をたどります：H.264、なければ VP8、続いてブラウザーがエンコードできる VP9、AV1、H.265、いずれも追いつかなければ JPEG。コーデック名を指定するとそれに固定し、追いつかない場合は JPEG に戻ります。",
           "options": {
             "auto": "自動"
           }
@@ -577,7 +652,7 @@
         },
         "HARDEN_DESKTOP": {
           "label": "デスクトップを強化（プリセット）",
-          "description": "DISABLE_OPEN_TOOLS、DISABLE_SUDO、DISABLE_TERMINALSを有効にし、明示的に設定されていない限り、ファイル転送、コマンドWebsocket、サイドバーのファイルおよびアプリセクションも無効にします。「コンテナを強化」が設定されたユーザーには強制的に有効になります。"
+          "description": "DISABLE_OPEN_TOOLS、DISABLE_SUDO、DISABLE_TERMINALS を有効にし、明示的に設定しない限りファイル転送、コマンド WebSocket、印刷、サイドバーのファイルとアプリの欄も無効にします。「コンテナを強化」のユーザーには強制されます。"
         },
         "HARDEN_OPENBOX": {
           "label": "ウィンドウマネージャを強化（プリセット）",
@@ -611,6 +686,10 @@
           "label": "終了時にアプリを再起動",
           "description": "メインアプリケーションが閉じられた場合に自動的に再起動し、自動起動ファイルを読み取り専用にします。"
         },
+        "PIXELFLUX_WAYLAND": {
+          "label": "Wayland バックエンド",
+          "description": "X11 サーバーの代わりに Wayland バックエンド（ウィンドウ管理用に labwc をネストしたヘッドレスコンポジター）でセッションを実行します。X11 アプリケーションは XWayland 経由で動作します。"
+        },
         "MAX_RES": {
           "label": "最大解像度",
           "description": "コンテナの最大解像度、デフォルトは16kです。"
@@ -635,6 +714,14 @@
           "label": "GPUの自動選択",
           "description": "'true'で最初のGPUでレンダリングし、'false'で無効にします。ベンダー、ドライバー、またはPCIベンダーID（nvidia、amdgpu、0x10de）を指定すると特定のGPUを選択します。"
         },
+        "DRI_NODE": {
+          "label": "エンコード用レンダーノード",
+          "description": "ビデオエンコーダー（VA-API または NVENC）が使う DRI レンダーノード。例：/dev/dri/renderD128。空欄なら GPU の自動選択に従います。"
+        },
+        "DRINODE": {
+          "label": "レンダーノード",
+          "description": "X サーバー（DRI3）または Wayland コンポジターが描画する DRI レンダーノード。例：/dev/dri/renderD128。空欄なら GPU の自動選択に従います。"
+        },
         "NO_DECOR": {
           "label": "ウィンドウ装飾なし",
           "description": "PWA用途のためにウィンドウボーダーなしでアプリケーションを実行します。"
@@ -651,6 +738,10 @@
           "label": "ウェブカメラインジェクションを無効化",
           "description": "仮想ウェブカメラデバイスとインターポーザーをスキップします。ウェブカメラボタンも非表示になります。"
         },
+        "NO_STEAM": {
+          "label": "Steam シムを削除",
+          "description": "イメージの Steam 起動ラッパーをインストールしません。独自の Steam を含むイメージ向けです。"
+        },
         "SELKIES_RUN_AFTER_CONNECT": {
           "label": "接続後に実行",
           "description": "最初のクライアントが接続したときにコンテナ内で実行されるシェルコマンド。"
@@ -658,6 +749,38 @@
         "SELKIES_RUN_AFTER_DISCONNECT": {
           "label": "切断後に実行",
           "description": "最後のクライアントが切断したときにコンテナ内で実行されるシェルコマンド。"
+        },
+        "SELKIES_APP_WAIT_READY": {
+          "label": "アプリ準備完了ファイルを待つ",
+          "description": "準備完了ファイルが存在してからストリーミングを開始します。サイドカーがアプリケーションの起動を通知するイメージ向けです。"
+        },
+        "SELKIES_APP_READY_FILE": {
+          "label": "アプリ準備完了ファイル",
+          "description": "アプリケーションの初期化が終わったときにサイドカーが作成するファイルです。"
+        },
+        "SELKIES_AUDIT_WEBHOOK_URL": {
+          "label": "監査 Webhook の URL",
+          "description": "クリップボード転送、ファイルのアップロードやダウンロード、印刷された文書、ページ接続、録画ごとに JSON の POST を 1 件受け取ります。内容は含まずメタデータのみです。空欄なら何も送信しません。"
+        },
+        "SELKIES_AUDIT_WEBHOOK_TOKEN": {
+          "label": "監査 Webhook のトークン",
+          "description": "すべての監査 POST の Authorization ヘッダーで送られる Bearer トークンです。"
+        },
+        "SELKIES_AUDIT_WEBHOOK_TIMEOUT": {
+          "label": "監査 Webhook のタイムアウト（秒）",
+          "description": "1 件の監査 POST が失敗とみなされ次のイベントが送られるまでに許される秒数です。"
+        },
+        "SELKIES_COMPUTER_USE_BIND": {
+          "label": "Computer-Use サーバー",
+          "description": "pixelflux の Computer-Use HTTP サーバーをカンマ区切りの項目で起動します。ポート番号のみならループバックでのみ待ち受け、host:port はアドレスを指定します。空欄ならオフのままです。"
+        },
+        "SELKIES_RECORDING_SOCKET": {
+          "label": "録画ソケット",
+          "description": "接続したレコーダーへビデオストリームを提供する録画タップの Unix ソケットのパスです。空欄ならオフのままです。"
+        },
+        "SELKIES_ENABLE_METRICS_HTTP": {
+          "label": "Prometheus メトリクス",
+          "description": "Prometheus の /metrics エンドポイントを提供します。"
         },
         "SELKIES_DEBUG": {
           "label": "Selkiesデバッグを有効化",
@@ -688,6 +811,22 @@
         "SELKIES_CONGESTION_CONTROL": {
           "label": "輻輳制御",
           "description": "WebRTC受信側フィードバックによる帯域幅推定に合わせてビデオビットレートを調整します。CBRモードで有効です。"
+        },
+        "SELKIES_WEBRTC_ICE_LITE": {
+          "label": "ICE-Lite",
+          "description": "ホスト候補のみを提示し、クライアントの接続性チェックに応答します。公開 IP、公開 IP を設定した静的 NAT、転送された mux ポートなど、告知どおりにアドレスへ到達できるサーバー向けです。"
+        },
+        "SELKIES_WEBRTC_PORT_RANGE": {
+          "label": "UDP ポート範囲",
+          "description": "直接のホスト候補の背後にあるソケットがバインドする両端を含む範囲（例：50000-50100）。各セッションに小さなファイアウォールの窓を割り当てる展開向けです。空欄なら一時ポートを使います。"
+        },
+        "SELKIES_WEBRTC_UDP_MUX_PORT": {
+          "label": "UDP Mux ポート",
+          "description": "すべてのセッションがホスト候補に共用する 1 つの UDP ポート。転送したポート 1 つで任意の数のセッションに対応します。0 では各セッションが独自のソケットを持ちます。"
+        },
+        "SELKIES_WEBRTC_TCP_MUX_PORT": {
+          "label": "TCP Mux ポート",
+          "description": "UDP を遮断するネットワークのクライアント向けに ICE-TCP 接続を受け付ける 1 つの TCP ポート。公開環境では 443 が一般的です。0 では TCP 候補を提示しません。"
         },
         "SELKIES_STUN_HOST": {
           "label": "STUNホスト",
@@ -737,6 +876,18 @@
           "label": "TURN RESTユーザー名",
           "description": "TURN RESTサービスが認証情報に埋め込むユーザー名。空の場合は'selkies'を使用します。"
         },
+        "SELKIES_TURN_REST_USERNAME_AUTH_HEADER": {
+          "label": "TURN REST ユーザー名ヘッダー",
+          "description": "ユーザー名を TURN REST サービスへ渡すヘッダーです。"
+        },
+        "SELKIES_TURN_REST_PROTOCOL_HEADER": {
+          "label": "TURN REST プロトコルヘッダー",
+          "description": "希望する TURN トランスポートプロトコルを TURN REST サービスへ渡すヘッダーです。"
+        },
+        "SELKIES_TURN_REST_TLS_HEADER": {
+          "label": "TURN REST TLS ヘッダー",
+          "description": "TURN の TLS の選択を TURN REST サービスへ渡すヘッダーです。"
+        },
         "SELKIES_WEBRTC_PUBLIC_IP": {
           "label": "WebRTCパブリックIP",
           "description": "静的な1:1 NATの背後にあるサーバーのホストICE候補で通知するパブリックアドレス。IPv4アドレス1つおよび/またはIPv6アドレス1つ。"
@@ -756,6 +907,10 @@
         "SELKIES_RTC_CONFIG_JSON": {
           "label": "RTC設定JSONパス",
           "description": "WebRTC設定を含むJSONファイルへのコンテナ内のパス。他のすべてのSTUN/TURN設定を上書きし、定期的に再読み込みされます。"
+        },
+        "SELKIES_ENABLE_WEBRTC_STATISTICS": {
+          "label": "WebRTC 統計を出力",
+          "description": "診断のため、クライアントの WebRTC 統計をコンテナ内の /tmp に CSV ファイルとして書き出します。"
         },
         "DOCKER_PRIVILEGED": {
           "label": "特権モード",

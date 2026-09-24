@@ -305,6 +305,10 @@
           "label": "Oyun Kumandaları Bölümünü Göster",
           "description": "Kenar çubuğunda oyun kumandaları bölümünü göster."
         },
+        "SELKIES_UI_SIDEBAR_SHOW_WEBCAM": {
+          "label": "Web Kamerası Düğmesini Göster",
+          "description": "Web kamerası anahtarını ana düğmeler ve akış denetimleri arasında gösterir. Yalnızca denetimi gizler; sunucunun kamera karelerini kabul edip etmeyeceğine „Web Kamerasını Etkinleştir“ karar verir."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
           "label": "Tam Ekran Düğmesini Göster",
           "description": "Kenar çubuğunda tam ekran düğmesini göster."
@@ -359,6 +363,10 @@
           "label": "Mikrofonu Etkinleştir",
           "description": "İstemciden sunucuya mikrofon yönlendirmesini etkinleştir. Yukarı akışta varsayılan olarak kapalıdır."
         },
+        "SELKIES_WEBCAM_ENABLED": {
+          "label": "Web Kamerasını Etkinleştir",
+          "description": "İstemcinin kamerasını sanal web kamerası aygıtına iletir. Temel imaj, aygıtı oluşturduğunda bunu açar; „Web Kamerası Enjeksiyonunu Devre Dışı Bırak“ her ikisini de kaldırır."
+        },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "Oyun Kumandasını Etkinleştir",
           "description": "Oyun kumandası desteğini etkinleştir."
@@ -377,6 +385,10 @@
           "label": "İkili Panoyu Etkinleştir",
           "description": "Panoda ikili verilere (resimler) izin ver."
         },
+        "SELKIES_CLIPBOARD_SEAMLESS": {
+          "label": "Kesintisiz Pano Eşitlemesi",
+          "description": "Taraflardan biri panoyu değiştirdiğinde eşitler; böylece kopyalanan öğe diğer tarafta yapıştırılmaya hazır olur. Kapalıyken içerik yalnızca kenar çubuğundaki pano kutusuyla taşınır; yön ilkesi yine geçerlidir."
+        },
         "SELKIES_COMMAND_ENABLED": {
           "label": "Komut Websocket'ini Etkinleştir",
           "description": "Komut websocket mesajlarının ayrıştırılmasını etkinleştir."
@@ -388,6 +400,14 @@
         "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
           "label": "Dosya Aktarım Sınırı (Mbit/s)",
           "description": "Tüm yüklemeler ve indirmeler tarafından paylaşılan sabit kısıtlama. 0 sınırı devre dışı bırakır."
+        },
+        "FILE_MANAGER_PATH": {
+          "label": "Dosya Aktarım Dizini",
+          "description": "Yüklemelerin indiği ve dosya tarayıcısının sunduğu dizin; yoksa başlangıçta oluşturulur."
+        },
+        "SELKIES_PRINTING_ENABLED": {
+          "label": "Yazdırmayı Etkinleştir",
+          "description": "Oturumun Selkies kuyruğuna yazdırılan belgeleri PDF olarak tarayıcıya verir. Kapalıyken reddeder ve yazıcı bölümünü gizler; burada ayarlanmadıkça „Masaüstünü Sıkılaştır“ kapatır."
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "Tüm Paylaşımı Etkinleştir",
@@ -433,6 +453,31 @@
           "label": "İmleç Boyutu",
           "description": "96 DPI'da punto cinsinden imleç boyutu, oturum DPI'sına göre ölçeklenir. -1 platform varsayılanını kullanır (X11'de 32, Wayland'de 24)."
         },
+        "SELKIES_KEYBOARD_SHORTCUTS": {
+          "label": "İstemci Klavye Kısayolları",
+          "description": "İstemcinin kendi tuş kombinasyonlarını (F, M, X veya G ile Ctrl+Shift ve Ctrl+Shift+tık) oturuma iletmek yerine korur. Bir uygulama aynı kombinasyonları kullanıyorsa kapatın."
+        },
+        "SELKIES_MAC_CMD_AS_CTRL": {
+          "label": "macOS Command'i Control Olarak",
+          "description": "macOS istemcisinin Command kombinasyonlarını Control kombinasyonları olarak gönderir; böylece Cmd+C uzak uygulamada kopyalar. Pencere yöneticisi Super'i kullanıyorsa kapatın; Command o zaman Super olarak gelir."
+        },
+        "SELKIES_RAW_POINTER_MOTION": {
+          "label": "Ham İşaretçi Hareketi",
+          "description": "İşaretçi kilidi altında tarayıcıdan ivmesiz işaretçi hareketi ister; kilitli işaretçi farenin kendi sayımlarıyla hareket eder. Windows ve macOS izin verir; Linux ve Android eğrilerini korur."
+        },
+        "SELKIES_PUBLISH_INPUT_DEVICES": {
+          "label": "Giriş Aygıtlarını Yayımla",
+          "description": "Oturumun klavyesini ve işaretçisini, görüntü sunucusu yerine evdev okuyan uygulamalar (tam ekran oyunlar, yeniden eşleyiciler) için giriş aygıtlarına yansıtır. Masaüstü eskisi gibi sürülür."
+        },
+        "SELKIES_UINPUT_GAMEPAD": {
+          "label": "Çekirdek Oyun Kumandası Aygıtları",
+          "description": "Oyun kumandalarını /dev/uinput üzerinden kaydeder; Steam, Proton ve oturumdaki tarayıcılar bunları araya girici olmadan bulur. Otomatik, yalnızca araya girici ayarlı değilse ve /dev/uinput yazılabilirse bunu yapar.",
+          "options": {
+            "auto": "Otomatik",
+            "always": "Her zaman",
+            "never": "Hiçbir zaman"
+          }
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "CSS Ölçeklendirme Kullan (LoDPI)",
           "description": "Eğer doğruysa, daha düşük bir çözünürlük gönderilir ve tuval gerilir."
@@ -457,6 +502,36 @@
           "label": "Arayüz Ölçeklendirme DPI",
           "description": "Arayüz ölçeklendirmesi için varsayılan DPI."
         },
+        "SELKIES_VIDEO_ON_START": {
+          "label": "Başlangıçta Video Açık",
+          "description": "Ekranın video akışı açık olarak başlar. Kapalıyken istemci videoyu açana dek birincil ekrandan hiçbir şey yakalanmaz; paylaşılan izleyiciler ve ikinci ekranlar akışlarını her zaman başlatır."
+        },
+        "SELKIES_AUDIO_ON_START": {
+          "label": "Başlangıçta Ses Açık",
+          "description": "Sunucudan istemciye ses açık olarak başlar. Kapalıyken istemci sesi açana dek yakalama durur; sesi devre dışı bırakmanın aksine hiçbir şey sökülmez ve mikrofon çalışmayı sürdürür."
+        },
+        "SELKIES_MICROPHONE_ON_START": {
+          "label": "Mikrofon Başlatma İlkesi",
+          "description": "Tarayıcıdan mikrofonun ne zaman istendiği: bağlanırken, kenar çubuğu anahtarı kullanıldığında ya da yalnızca bir uygulama sanal kaynaktan kayıt yaparken.",
+          "options": {
+            "atConnect": "Bağlanırken",
+            "onToggle": "Kenar çubuğu anahtarıyla",
+            "onDemand": "İstek üzerine"
+          }
+        },
+        "SELKIES_WEBCAM_ON_START": {
+          "label": "Web Kamerası Başlatma İlkesi",
+          "description": "Tarayıcıdan kameranın ne zaman istendiği: bağlanırken, kenar çubuğu anahtarı kullanıldığında ya da yalnızca bir uygulama sanal aygıtı açık tutarken.",
+          "options": {
+            "atConnect": "Bağlanırken",
+            "onToggle": "Kenar çubuğu anahtarıyla",
+            "onDemand": "İstek üzerine"
+          }
+        },
+        "SELKIES_GAMEPAD_ON_START": {
+          "label": "Başlangıçta Oyun Kumandaları Açık",
+          "description": "Oyun kumandası girişi açık olarak başlar. Kapalıyken bağlı kumandalar istemci açana dek okunmaz; tarayıcı bu seçimi hatırlar."
+        },
         "SELKIES_AUDIO_BITRATE": {
           "label": "Ses Bit Hızı",
           "description": "Varsayılan Opus ses bit hızı."
@@ -479,7 +554,7 @@
         },
         "SELKIES_ENCODER": {
           "label": "Kodlayıcılar",
-          "description": "Virgülle ayrılmış izin verilen kodlayıcı listesi (h264enc, h264enc-striped, jpeg). Birincisi varsayılandır; tek bir değer seçimi kilitler. Yalnızca h264enc WebRTC üzerinden akar."
+          "description": "İzin verilen kodlayıcıların virgülle ayrılmış listesi: h264enc, h265enc, vp8enc, vp9enc, av1enc, h264enc-striped, jpeg. İlki varsayılandır ve tek bir değer seçimi kilitler; istemciler tarayıcılarının çözebildiği kodlayıcılar arasında ilerler. WebRTC tam kare kodlayıcıları taşır; h264enc-striped ve jpeg yalnızca WebSocket içindir."
         },
         "SELKIES_USE_CPU": {
           "label": "CPU Kodlamasını Zorla",
@@ -491,7 +566,7 @@
         },
         "SELKIES_RATE_CONTROL_MODE": {
           "label": "Hız Kontrol Modu",
-          "description": "Varsayılan H.264 hız kontrolü: sabit kalite (CRF) veya sabit bit hızı (CBR).",
+          "description": "Video kodlayıcıların varsayılan hız denetimi: sabit kalite (CRF) veya sabit bit hızı (CBR).",
           "options": {
             "crf": "Sabit kalite (CRF)",
             "cbr": "Sabit bit hızı (CBR)"
@@ -503,7 +578,7 @@
         },
         "SELKIES_VIDEO_CRF": {
           "label": "Video CRF (Aralık veya Sabit)",
-          "description": "H.264 sabit kalite: bir aralık için '5-50', sabit bir başlangıç değeri için '25' veya her ikisi için '25,5-50'."
+          "description": "H.264 QP ölçeğinde, her kodeğe eşlenen sabit kalite: aralık için „5-50“, sabit başlangıç değeri için „25“ ya da her ikisi için „25,5-50“."
         },
         "SELKIES_VIDEO_BITRATE": {
           "label": "Video Bit Hızı kbps (Aralık veya Sabit)",
@@ -527,7 +602,7 @@
         },
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "Video Tam Renk (4:4:4)",
-          "description": "H.264'ü 4:2:0 yerine 4:4:4 renk örneklemesiyle kodla. Bu açık olarak kilitlendiğinde 4:4:4 çözücüsü olmayan istemciler JPEG'e geri döner."
+          "description": "Kodek ve kodlayıcının desteklediği yerde 4:4:4 renk örneklemesiyle kodlar (NVENC, VA-API, x264 ve x265'te H.264 ve H.265; VA-API ve libvpx'te VP9). 4:4:4 profili olmayan istemci, bu kilitlenmemişse aynı kodekle 4:2:0 alır; kilitliyse çözebildiği sonraki kodlayıcıya geçer."
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "Video Akış (Turbo) Modu",
@@ -563,7 +638,7 @@
         },
         "SELKIES_WEBCAM_ENCODER": {
           "label": "Web Kamerası Yükleme Kodlayıcısı",
-          "description": "WebSocket istemcilerinin kamera karelerini göndermek için kullandığı codec. Otomatik, tarayıcının sürdürebileceği en iyisini seçer.",
+          "description": "İstemcilerin kamera yükleme akışını kodladığı kodek. Otomatik, ölçülen sıralamayı izler: H.264, yoksa VP8, sonra tarayıcının kodladığı yerde VP9, AV1 ve H.265, hiçbiri yetişemezse JPEG. Bir kodek adı onu sabitler; yetişemediği yerde JPEG'e düşer.",
           "options": {
             "auto": "Otomatik"
           }
@@ -577,7 +652,7 @@
         },
         "HARDEN_DESKTOP": {
           "label": "Masaüstünü Güçlendir (Ön Ayar)",
-          "description": "DISABLE_OPEN_TOOLS, DISABLE_SUDO ve DISABLE_TERMINALS'ı etkinleştirir ve açıkça ayarlanmadıkça dosya aktarımlarını, komut websocket'ini ve kenar çubuğundaki dosyalar ve uygulamalar bölümlerini de devre dışı bırakır. Konteyneri Güçlendir yetkisine sahip kullanıcılar için zorunlu olarak açıktır."
+          "description": "DISABLE_OPEN_TOOLS, DISABLE_SUDO ve DISABLE_TERMINALS'ı etkinleştirir; açıkça ayarlanmadıkça dosya aktarımlarını, komut websocket'ini, yazdırmayı ve kenar çubuğundaki dosyalar ile uygulamalar bölümlerini de devre dışı bırakır. „Konteyneri Sıkılaştır“ olan kullanıcılar için zorunludur."
         },
         "HARDEN_OPENBOX": {
           "label": "Pencere Yöneticisini Güçlendir (Ön Ayar)",
@@ -611,6 +686,10 @@
           "label": "Kapatıldığında Uygulamayı Yeniden Başlat",
           "description": "Ana uygulama kapatılırsa otomatik olarak yeniden başlatır ve otomatik başlatma dosyasını salt okunur yapar."
         },
+        "PIXELFLUX_WAYLAND": {
+          "label": "Wayland Arka Ucu",
+          "description": "Oturumu X11 sunucusu yerine Wayland arka ucunda, pencere yönetimi için iç içe labwc çalıştıran başsız bir birleştiricide çalıştırır. X11 uygulamaları XWayland üzerinden çalışır."
+        },
         "MAX_RES": {
           "label": "Maksimum Çözünürlük",
           "description": "Konteyner için maksimum çözünürlük, varsayılan 16k'dır."
@@ -635,6 +714,14 @@
           "label": "Otomatik GPU Seçimi",
           "description": "'true' ilk GPU'da render eder, 'false' devre dışı bırakır; bir üretici, sürücü veya PCI üretici kimliği (nvidia, amdgpu, 0x10de) belirli birini seçer."
         },
+        "DRI_NODE": {
+          "label": "Kodlama İçin Render Düğümü",
+          "description": "Video kodlayıcının kullandığı DRI render düğümü (VA-API veya NVENC), örneğin /dev/dri/renderD128. Boş bırakılırsa Otomatik GPU Seçimi'ni izler."
+        },
+        "DRINODE": {
+          "label": "Render Düğümü",
+          "description": "X sunucusunun (DRI3) veya Wayland birleştiricisinin üzerinde çizdiği DRI render düğümü, örneğin /dev/dri/renderD128. Boş bırakılırsa Otomatik GPU Seçimi'ni izler."
+        },
         "NO_DECOR": {
           "label": "Pencere Dekorasyonu Yok",
           "description": "Uygulamayı PWA kullanımı için pencere kenarlıkları olmadan çalıştır."
@@ -651,6 +738,10 @@
           "label": "Web Kamerası Enjeksiyonunu Devre Dışı Bırak",
           "description": "Sanal web kamerası aygıtını ve aracını atla. Ayrıca web kamerası düğmesini gizler."
         },
+        "NO_STEAM": {
+          "label": "Steam Ara Katmanını Kaldır",
+          "description": "İmajın Steam başlatıcı sarmalayıcısını kurmaz; kendi Steam'ini taşıyan imajlar için."
+        },
         "SELKIES_RUN_AFTER_CONNECT": {
           "label": "Bağlantıdan Sonra Çalıştır",
           "description": "İlk istemci bağlandığında konteyner içinde çalıştırılan kabuk komutu."
@@ -658,6 +749,38 @@
         "SELKIES_RUN_AFTER_DISCONNECT": {
           "label": "Bağlantı Kesildikten Sonra Çalıştır",
           "description": "Son istemcinin bağlantısı kesildiğinde konteyner içinde çalıştırılan kabuk komutu."
+        },
+        "SELKIES_APP_WAIT_READY": {
+          "label": "Uygulama Hazır Dosyasını Bekle",
+          "description": "Hazır dosyası var olduğunda akışa başlar; yan konteyneri uygulamanın ne zaman ayakta olduğunu bildiren imajlar için."
+        },
+        "SELKIES_APP_READY_FILE": {
+          "label": "Uygulama Hazır Dosyası",
+          "description": "Yan konteynerin, uygulama başlatıldığında oluşturduğu dosya."
+        },
+        "SELKIES_AUDIT_WEBHOOK_URL": {
+          "label": "Denetim Web Kancası URL'si",
+          "description": "Her pano aktarımı, dosya yükleme veya indirme, yazdırılan belge, sayfa bağlantısı ve kayıt için yalnızca meta verileri içeren, asla içerik içermeyen bir JSON POST alır. Boş bırakılırsa hiçbir şey gönderilmez."
+        },
+        "SELKIES_AUDIT_WEBHOOK_TOKEN": {
+          "label": "Denetim Web Kancası Belirteci",
+          "description": "Her denetim POST'unun Authorization üstbilgisinde gönderilen Bearer belirteci."
+        },
+        "SELKIES_AUDIT_WEBHOOK_TIMEOUT": {
+          "label": "Denetim Web Kancası Zaman Aşımı (saniye)",
+          "description": "Bir denetim POST'unun başarısız sayılıp sonraki olayın gönderilmesinden önce sürebileceği saniye."
+        },
+        "SELKIES_COMPUTER_USE_BIND": {
+          "label": "Computer-Use Sunucusu",
+          "description": "pixelflux'un Computer-Use HTTP sunucusunu virgülle ayrılmış bu girdilerde başlatır: yalın bir port yalnızca loopback'te dinler, host:port adresi belirtir. Boş bırakılırsa kapalı kalır."
+        },
+        "SELKIES_RECORDING_SOCKET": {
+          "label": "Kayıt Soketi",
+          "description": "Video akışını bağlı kayıtçılara sunan kayıt kolunun Unix soket yolu. Boş bırakılırsa kapalı kalır."
+        },
+        "SELKIES_ENABLE_METRICS_HTTP": {
+          "label": "Prometheus Metrikleri",
+          "description": "Prometheus /metrics uç noktasını sunar."
         },
         "SELKIES_DEBUG": {
           "label": "Selkies Hata Ayıklamayı Etkinleştir",
@@ -688,6 +811,22 @@
         "SELKIES_CONGESTION_CONTROL": {
           "label": "Tıkanıklık Kontrolü",
           "description": "Video bit hızını WebRTC alıcı geri bildiriminden gelen bant genişliği tahminine uyarla. CBR modunda etkilidir."
+        },
+        "SELKIES_WEBRTC_ICE_LITE": {
+          "label": "ICE-Lite",
+          "description": "Yalnızca ana bilgisayar adayları sunar ve istemcinin bağlantı denetimlerini yanıtlar; adresleri duyurulduğu gibi erişilebilen bir sunucu için: genel IP, genel IP'si ayarlanmış statik NAT ya da yönlendirilmiş mux portları."
+        },
+        "SELKIES_WEBRTC_PORT_RANGE": {
+          "label": "UDP Port Aralığı",
+          "description": "Doğrudan ana bilgisayar adaylarının arkasındaki soketlerin bağlandığı kapsayıcı aralık, örneğin 50000-50100; her oturuma küçük bir güvenlik duvarı penceresi ayıran dağıtımlar için. Boş bırakılırsa geçici portlar kullanılır."
+        },
+        "SELKIES_WEBRTC_UDP_MUX_PORT": {
+          "label": "UDP Mux Portu",
+          "description": "Tüm oturumların ana bilgisayar adayları için paylaştığı tek UDP portu; böylece yönlendirilen tek port istenen sayıda oturuma hizmet eder. 0 her oturuma kendi soketlerini verir."
+        },
+        "SELKIES_WEBRTC_TCP_MUX_PORT": {
+          "label": "TCP Mux Portu",
+          "description": "UDP'yi engelleyen ağlardaki istemciler için ICE-TCP bağlantılarını kabul eden tek TCP portu; 443 olağan genel seçimdir. 0 TCP adayı sunmaz."
         },
         "SELKIES_STUN_HOST": {
           "label": "STUN Sunucusu",
@@ -737,6 +876,18 @@
           "label": "TURN REST Kullanıcı Adı",
           "description": "TURN REST hizmetinin kimlik bilgisine gömdüğü kullanıcı adı. Boş bırakılırsa 'selkies' kullanılır."
         },
+        "SELKIES_TURN_REST_USERNAME_AUTH_HEADER": {
+          "label": "TURN REST Kullanıcı Üstbilgisi",
+          "description": "Kullanıcı adını TURN REST hizmetine taşıyan üstbilgi."
+        },
+        "SELKIES_TURN_REST_PROTOCOL_HEADER": {
+          "label": "TURN REST Protokol Üstbilgisi",
+          "description": "İstenen TURN aktarım protokolünü TURN REST hizmetine taşıyan üstbilgi."
+        },
+        "SELKIES_TURN_REST_TLS_HEADER": {
+          "label": "TURN REST TLS Üstbilgisi",
+          "description": "TURN TLS seçimini TURN REST hizmetine taşıyan üstbilgi."
+        },
         "SELKIES_WEBRTC_PUBLIC_IP": {
           "label": "WebRTC Genel IP",
           "description": "Statik 1:1 NAT arkasındaki bir sunucu için ana bilgisayar ICE adaylarında duyurulacak genel adres. Bir IPv4 ve/veya bir IPv6 adresi."
@@ -756,6 +907,10 @@
         "SELKIES_RTC_CONFIG_JSON": {
           "label": "RTC Yapılandırma JSON Yolu",
           "description": "WebRTC yapılandırmasını içeren bir JSON dosyasının konteyner içindeki yolu. Diğer tüm STUN/TURN ayarlarını geçersiz kılar ve periyodik olarak yeniden okunur."
+        },
+        "SELKIES_ENABLE_WEBRTC_STATISTICS": {
+          "label": "WebRTC İstatistiklerini Yaz",
+          "description": "İstemcinin WebRTC istatistiklerini tanılama için konteynerde /tmp altına CSV dosyaları olarak yazar."
         },
         "DOCKER_PRIVILEGED": {
           "label": "Ayrıcalıklı Mod",

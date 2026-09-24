@@ -305,6 +305,10 @@
           "label": "显示游戏手柄部分",
           "description": "在侧边栏中显示游戏手柄部分。"
         },
+        "SELKIES_UI_SIDEBAR_SHOW_WEBCAM": {
+          "label": "显示摄像头按钮",
+          "description": "在核心按钮和流控件中显示摄像头开关。仅隐藏该控件；服务器是否接受摄像头帧由“启用摄像头”决定。"
+        },
         "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
           "label": "显示全屏按钮",
           "description": "在侧边栏中显示全屏按钮。"
@@ -359,6 +363,10 @@
           "label": "启用麦克风",
           "description": "启用客户端到服务器的麦克风转发。上游默认关闭。"
         },
+        "SELKIES_WEBCAM_ENABLED": {
+          "label": "启用摄像头",
+          "description": "将客户端的摄像头转发到虚拟摄像头设备。基础镜像在创建该设备时会将其打开；“禁用摄像头注入”会同时移除两者。"
+        },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "启用游戏手柄",
           "description": "启用游戏手柄支持。"
@@ -377,6 +385,10 @@
           "label": "启用二进制剪贴板",
           "description": "允许剪贴板上的二进制数据（图像）。"
         },
+        "SELKIES_CLIPBOARD_SEAMLESS": {
+          "label": "无缝剪贴板同步",
+          "description": "任一侧更改剪贴板时即同步，使复制内容可在另一侧直接粘贴。关闭后内容仅通过侧边栏的剪贴板框传送；方向策略仍然有效。"
+        },
         "SELKIES_COMMAND_ENABLED": {
           "label": "启用命令Websocket",
           "description": "启用命令Websocket消息的解析。"
@@ -388,6 +400,14 @@
         "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
           "label": "文件传输限制 (Mbit/s)",
           "description": "所有上传和下载共享的静态限速。0 表示不限制。"
+        },
+        "FILE_MANAGER_PATH": {
+          "label": "文件传输目录",
+          "description": "上传文件存放且文件浏览器提供服务的目录；启动时若不存在则创建。"
+        },
+        "SELKIES_PRINTING_ENABLED": {
+          "label": "启用打印",
+          "description": "将打印到会话 Selkies 队列的文档以 PDF 形式交给浏览器。关闭后会拒绝这些文档并隐藏打印机部分；除非在此设置，否则“加固桌面”会将其关闭。"
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "启用所有共享",
@@ -433,6 +453,31 @@
           "label": "光标大小",
           "description": "以 96 DPI 下的点为单位的光标大小，并按会话 DPI 缩放。-1 使用平台默认值（X11 为 32，Wayland 为 24）。"
         },
+        "SELKIES_KEYBOARD_SHORTCUTS": {
+          "label": "客户端键盘快捷键",
+          "description": "保留客户端自身的组合键（Ctrl+Shift 加 F、M、X 或 G，以及 Ctrl+Shift+点击），而不传递给会话。若某应用使用相同的组合键，请关闭。"
+        },
+        "SELKIES_MAC_CMD_AS_CTRL": {
+          "label": "macOS Command 作为 Control",
+          "description": "将 macOS 客户端的 Command 组合键作为 Control 组合键发送，使 Cmd+C 在远程应用中执行复制。若窗口管理器使用 Super 键，请关闭；此时 Command 以 Super 到达。"
+        },
+        "SELKIES_RAW_POINTER_MOTION": {
+          "label": "原始指针移动",
+          "description": "在指针锁定时请求浏览器提供无加速的指针移动，使锁定的指针按鼠标自身的计数移动。Windows 和 macOS 允许此项；Linux 和 Android 保留其加速曲线。"
+        },
+        "SELKIES_PUBLISH_INPUT_DEVICES": {
+          "label": "发布输入设备",
+          "description": "为读取 evdev 而非显示服务器的应用（如全屏游戏和按键重映射工具）把会话的键盘和指针镜像到输入设备上。桌面的驱动方式不变。"
+        },
+        "SELKIES_UINPUT_GAMEPAD": {
+          "label": "内核手柄设备",
+          "description": "通过 /dev/uinput 注册手柄，使 Steam、Proton 和会话内的浏览器无需 interposer 即可找到它们。自动仅在未配置 interposer 且 /dev/uinput 可写时执行。",
+          "options": {
+            "auto": "自动",
+            "always": "始终",
+            "never": "从不"
+          }
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "使用CSS缩放 (LoDPI)",
           "description": "如果为true，则发送较低分辨率并拉伸画布。"
@@ -457,6 +502,36 @@
           "label": "UI缩放DPI",
           "description": "UI缩放的默认DPI。"
         },
+        "SELKIES_VIDEO_ON_START": {
+          "label": "启动时开启视频",
+          "description": "以开启的显示器视频流启动。关闭后，在客户端开启视频前不会捕获主显示器；共享观看者和第二显示器始终启动其流。"
+        },
+        "SELKIES_AUDIO_ON_START": {
+          "label": "启动时开启音频",
+          "description": "以开启的服务器到客户端音频启动。关闭后，在客户端开启音频前捕获保持停止；与禁用音频不同，不会拆除任何组件，麦克风继续可用。"
+        },
+        "SELKIES_MICROPHONE_ON_START": {
+          "label": "麦克风启动策略",
+          "description": "何时向浏览器请求麦克风：连接时、使用侧边栏开关时，或仅在某应用从虚拟音源录音期间。",
+          "options": {
+            "atConnect": "连接时",
+            "onToggle": "使用侧边栏开关时",
+            "onDemand": "按需"
+          }
+        },
+        "SELKIES_WEBCAM_ON_START": {
+          "label": "摄像头启动策略",
+          "description": "何时向浏览器请求摄像头：连接时、使用侧边栏开关时，或仅在某应用保持虚拟设备打开期间。",
+          "options": {
+            "atConnect": "连接时",
+            "onToggle": "使用侧边栏开关时",
+            "onDemand": "按需"
+          }
+        },
+        "SELKIES_GAMEPAD_ON_START": {
+          "label": "启动时开启手柄",
+          "description": "以开启的手柄输入启动。关闭后，在客户端开启前不会读取已连接的手柄；浏览器会记住该选择。"
+        },
         "SELKIES_AUDIO_BITRATE": {
           "label": "音频比特率",
           "description": "默认的 Opus 音频比特率。"
@@ -479,7 +554,7 @@
         },
         "SELKIES_ENCODER": {
           "label": "编码器",
-          "description": "逗号分隔的允许编码器列表（h264enc、h264enc-striped、jpeg）。第一个为默认；只填一个值则锁定选择。只有 h264enc 可通过 WebRTC 传输。"
+          "description": "允许的编码器列表，以逗号分隔：h264enc、h265enc、vp8enc、vp9enc、av1enc、h264enc-striped、jpeg。第一项为默认值，单个值会锁定选择；客户端依次尝试其浏览器可解码的编码器。WebRTC 传输全帧编码器；h264enc-striped 和 jpeg 仅用于 WebSocket。"
         },
         "SELKIES_USE_CPU": {
           "label": "强制CPU编码",
@@ -491,7 +566,7 @@
         },
         "SELKIES_RATE_CONTROL_MODE": {
           "label": "码率控制模式",
-          "description": "默认的 H.264 码率控制：恒定质量 (CRF) 或恒定比特率 (CBR)。",
+          "description": "视频编码器的默认码率控制：恒定质量（CRF）或恒定码率（CBR）。",
           "options": {
             "crf": "恒定质量 (CRF)",
             "cbr": "恒定比特率 (CBR)"
@@ -503,7 +578,7 @@
         },
         "SELKIES_VIDEO_CRF": {
           "label": "视频 CRF（范围或固定值）",
-          "description": "H.264 恒定质量：'5-50' 表示范围，'25' 表示固定初始值，'25,5-50' 表示两者兼有。"
+          "description": "以 H.264 QP 刻度表示并映射到各编解码器的恒定质量：“5-50”为范围，“25”为固定初始值，“25,5-50”为两者兼有。"
         },
         "SELKIES_VIDEO_BITRATE": {
           "label": "视频比特率 kbps（范围或固定值）",
@@ -527,7 +602,7 @@
         },
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "视频全彩 (4:4:4)",
-          "description": "使用 4:4:4 色度而非 4:2:0 编码 H.264。当此项锁定开启时，没有 4:4:4 解码器的客户端将回退到 JPEG。"
+          "description": "在编解码器和编码器支持时以 4:4:4 色度编码（NVENC、VA-API、x264 和 x265 上的 H.264 与 H.265；VA-API 和 libvpx 上的 VP9）。没有 4:4:4 配置的客户端在未锁定时以同一编解码器接收 4:2:0；锁定时则切换到其可解码的下一个编码器。"
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "视频流媒体（Turbo）模式",
@@ -563,7 +638,7 @@
         },
         "SELKIES_WEBCAM_ENCODER": {
           "label": "摄像头上行编码器",
-          "description": "WebSocket 客户端发送摄像头帧所用的编解码器。自动会选择浏览器能够持续支持的最佳选项。",
+          "description": "客户端编码摄像头上行的编解码器。自动按测得的顺序尝试：H.264，否则 VP8，然后是浏览器可编码的 VP9、AV1 和 H.265，都跟不上时用 JPEG。指定编解码器名称会固定使用它，跟不上时回退到 JPEG。",
           "options": {
             "auto": "自动"
           }
@@ -577,7 +652,7 @@
         },
         "HARDEN_DESKTOP": {
           "label": "桌面加固（预设）",
-          "description": "启用 DISABLE_OPEN_TOOLS、DISABLE_SUDO 和 DISABLE_TERMINALS，并且除非显式设置，还会禁用文件传输、命令 Websocket 以及侧边栏的文件和应用部分。对设置了容器加固的用户强制开启。"
+          "description": "启用 DISABLE_OPEN_TOOLS、DISABLE_SUDO 和 DISABLE_TERMINALS，并在未显式设置时同时禁用文件传输、命令 websocket、打印以及侧边栏的文件和应用部分。对启用“加固容器”的用户强制生效。"
         },
         "HARDEN_OPENBOX": {
           "label": "窗口管理器加固（预设）",
@@ -611,6 +686,10 @@
           "label": "关闭时重启应用",
           "description": "如果主应用程序关闭，则自动重启它，并将自动启动文件设为只读。"
         },
+        "PIXELFLUX_WAYLAND": {
+          "label": "Wayland 后端",
+          "description": "在 Wayland 后端（嵌套 labwc 进行窗口管理的无头合成器）而非 X11 服务器上运行会话。X11 应用通过 XWayland 运行。"
+        },
         "MAX_RES": {
           "label": "最大分辨率",
           "description": "容器的最大分辨率，默认为16k。"
@@ -635,6 +714,14 @@
           "label": "自动选择 GPU",
           "description": "'true' 在第一块 GPU 上渲染，'false' 禁用此功能，或填写厂商、驱动或 PCI 厂商 ID（nvidia、amdgpu、0x10de）以选择特定的 GPU。"
         },
+        "DRI_NODE": {
+          "label": "编码渲染节点",
+          "description": "视频编码器（VA-API 或 NVENC）使用的 DRI 渲染节点，例如 /dev/dri/renderD128。留空则遵循自动 GPU 选择。"
+        },
+        "DRINODE": {
+          "label": "渲染节点",
+          "description": "X 服务器（DRI3）或 Wayland 合成器进行渲染的 DRI 渲染节点，例如 /dev/dri/renderD128。留空则遵循自动 GPU 选择。"
+        },
         "NO_DECOR": {
           "label": "无窗口装饰",
           "description": "为PWA使用而运行无窗口边框的应用程序。"
@@ -651,6 +738,10 @@
           "label": "禁用摄像头注入",
           "description": "跳过虚拟摄像头设备和插入器。同时隐藏摄像头按钮。"
         },
+        "NO_STEAM": {
+          "label": "移除 Steam 垫片",
+          "description": "不安装镜像的 Steam 启动器包装器，用于自带 Steam 的镜像。"
+        },
         "SELKIES_RUN_AFTER_CONNECT": {
           "label": "连接后运行",
           "description": "第一个客户端连接时在容器内运行的 Shell 命令。"
@@ -658,6 +749,38 @@
         "SELKIES_RUN_AFTER_DISCONNECT": {
           "label": "断开后运行",
           "description": "最后一个客户端断开时在容器内运行的 Shell 命令。"
+        },
+        "SELKIES_APP_WAIT_READY": {
+          "label": "等待应用就绪文件",
+          "description": "仅在就绪文件存在后才开始推流，用于由 sidecar 通知应用已启动的镜像。"
+        },
+        "SELKIES_APP_READY_FILE": {
+          "label": "应用就绪文件",
+          "description": "应用初始化完成时由 sidecar 创建的文件。"
+        },
+        "SELKIES_AUDIT_WEBHOOK_URL": {
+          "label": "审计 Webhook URL",
+          "description": "每次剪贴板传输、文件上传或下载、打印文档、页面连接和录制都会收到一个 JSON POST，仅含元数据，绝不含内容。留空则不发送。"
+        },
+        "SELKIES_AUDIT_WEBHOOK_TOKEN": {
+          "label": "审计 Webhook 令牌",
+          "description": "在每个审计 POST 的 Authorization 头中发送的 Bearer 令牌。"
+        },
+        "SELKIES_AUDIT_WEBHOOK_TIMEOUT": {
+          "label": "审计 Webhook 超时（秒）",
+          "description": "一个审计 POST 在被视为失败并发送下一事件前允许耗费的秒数。"
+        },
+        "SELKIES_COMPUTER_USE_BIND": {
+          "label": "Computer-Use 服务器",
+          "description": "在这些以逗号分隔的条目上启动 pixelflux 的 Computer-Use HTTP 服务器：仅端口号则只监听回环地址，host:port 指定地址。留空则保持关闭。"
+        },
+        "SELKIES_RECORDING_SOCKET": {
+          "label": "录制套接字",
+          "description": "录制分路的 Unix 套接字路径，向已连接的录制器提供视频流。留空则保持关闭。"
+        },
+        "SELKIES_ENABLE_METRICS_HTTP": {
+          "label": "Prometheus 指标",
+          "description": "提供 Prometheus 的 /metrics 端点。"
         },
         "SELKIES_DEBUG": {
           "label": "启用Selkies调试",
@@ -688,6 +811,22 @@
         "SELKIES_CONGESTION_CONTROL": {
           "label": "拥塞控制",
           "description": "根据 WebRTC 接收端反馈的带宽估计调整视频比特率。在 CBR 模式下生效。"
+        },
+        "SELKIES_WEBRTC_ICE_LITE": {
+          "label": "ICE-Lite",
+          "description": "仅提供主机候选并应答客户端的连通性检查，适用于地址可按宣告到达的服务器：公网 IP、设置了公网 IP 的静态 NAT，或已转发的复用端口。"
+        },
+        "SELKIES_WEBRTC_PORT_RANGE": {
+          "label": "UDP 端口范围",
+          "description": "直接主机候选背后的套接字绑定的闭区间范围，例如 50000-50100，用于为每个会话分配小段防火墙窗口的部署。留空则使用临时端口。"
+        },
+        "SELKIES_WEBRTC_UDP_MUX_PORT": {
+          "label": "UDP 复用端口",
+          "description": "所有会话共用于主机候选的单个 UDP 端口，使一个转发端口即可服务任意数量的会话。0 表示每个会话使用自己的套接字。"
+        },
+        "SELKIES_WEBRTC_TCP_MUX_PORT": {
+          "label": "TCP 复用端口",
+          "description": "为处于阻断 UDP 网络的客户端接受 ICE-TCP 连接的单个 TCP 端口；公网部署通常选 443。0 表示不提供 TCP 候选。"
         },
         "SELKIES_STUN_HOST": {
           "label": "STUN 主机",
@@ -737,6 +876,18 @@
           "label": "TURN REST 用户名",
           "description": "TURN REST 服务嵌入到凭据中的用户名。留空则使用 'selkies'。"
         },
+        "SELKIES_TURN_REST_USERNAME_AUTH_HEADER": {
+          "label": "TURN REST 用户名头",
+          "description": "向 TURN REST 服务传递用户名的请求头。"
+        },
+        "SELKIES_TURN_REST_PROTOCOL_HEADER": {
+          "label": "TURN REST 协议头",
+          "description": "向 TURN REST 服务传递所需 TURN 传输协议的请求头。"
+        },
+        "SELKIES_TURN_REST_TLS_HEADER": {
+          "label": "TURN REST TLS 头",
+          "description": "向 TURN REST 服务传递 TURN TLS 选择的请求头。"
+        },
         "SELKIES_WEBRTC_PUBLIC_IP": {
           "label": "WebRTC 公网 IP",
           "description": "位于静态 1:1 NAT 之后的服务器在主机 ICE 候选中通告的公网地址。一个 IPv4 地址和/或一个 IPv6 地址。"
@@ -756,6 +907,10 @@
         "SELKIES_RTC_CONFIG_JSON": {
           "label": "RTC 配置 JSON 路径",
           "description": "容器内包含 WebRTC 配置的 JSON 文件路径。会覆盖所有其他 STUN/TURN 设置，并定期重新读取。"
+        },
+        "SELKIES_ENABLE_WEBRTC_STATISTICS": {
+          "label": "导出 WebRTC 统计",
+          "description": "将客户端的 WebRTC 统计以 CSV 文件写入容器内的 /tmp，用于诊断。"
         },
         "DOCKER_PRIVILEGED": {
           "label": "特权模式",

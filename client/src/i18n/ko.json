@@ -305,6 +305,10 @@
           "label": "게임패드 섹션 표시",
           "description": "사이드바에 게임패드 섹션을 표시합니다."
         },
+        "SELKIES_UI_SIDEBAR_SHOW_WEBCAM": {
+          "label": "웹캠 버튼 표시",
+          "description": "핵심 버튼과 스트림 제어 사이에 웹캠 토글을 표시합니다. 제어만 숨기며, 서버가 카메라 프레임을 받을지는 «웹캠 사용»이 결정합니다."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
           "label": "전체 화면 버튼 표시",
           "description": "사이드바에 전체 화면 버튼을 표시합니다."
@@ -359,6 +363,10 @@
           "label": "마이크 활성화",
           "description": "클라이언트에서 서버로의 마이크 전달을 활성화합니다. 업스트림에서는 기본적으로 꺼져 있습니다."
         },
+        "SELKIES_WEBCAM_ENABLED": {
+          "label": "웹캠 사용",
+          "description": "클라이언트의 카메라를 가상 웹캠 장치로 전달합니다. 기본 이미지는 장치를 만들 때 이를 켭니다. «웹캠 주입 비활성화»는 둘 다 제거합니다."
+        },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "게임패드 활성화",
           "description": "게임패드 지원을 활성화합니다."
@@ -377,6 +385,10 @@
           "label": "바이너리 클립보드 활성화",
           "description": "클립보드에 바이너리 데이터(이미지)를 허용합니다."
         },
+        "SELKIES_CLIPBOARD_SEAMLESS": {
+          "label": "클립보드 자동 동기화",
+          "description": "어느 쪽에서든 클립보드가 바뀌면 동기화하여 복사한 내용을 다른 쪽에서 바로 붙여 넣을 수 있게 합니다. 끄면 사이드바의 클립보드 상자를 통해서만 내용이 이동하며, 방향 정책은 계속 적용됩니다."
+        },
         "SELKIES_COMMAND_ENABLED": {
           "label": "명령 웹소켓 활성화",
           "description": "명령 웹소켓 메시지 파싱을 활성화합니다."
@@ -388,6 +400,14 @@
         "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
           "label": "파일 전송 제한 (Mbit/s)",
           "description": "모든 업로드와 다운로드가 공유하는 고정 속도 제한입니다. 0은 제한을 비활성화합니다."
+        },
+        "FILE_MANAGER_PATH": {
+          "label": "파일 전송 디렉터리",
+          "description": "업로드가 저장되고 파일 브라우저가 제공하는 디렉터리입니다. 없으면 시작 시 만들어집니다."
+        },
+        "SELKIES_PRINTING_ENABLED": {
+          "label": "인쇄 사용",
+          "description": "세션의 Selkies 대기열로 인쇄된 문서를 PDF로 브라우저에 전달합니다. 끄면 거부하고 프린터 섹션을 숨깁니다. «데스크톱 강화»는 여기서 설정하지 않으면 이를 끕니다."
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "모든 공유 활성화",
@@ -433,6 +453,31 @@
           "label": "커서 크기",
           "description": "96 DPI 기준 포인트 단위의 커서 크기이며 세션 DPI에 따라 조정됩니다. -1은 플랫폼 기본값(X11에서 32, Wayland에서 24)을 사용합니다."
         },
+        "SELKIES_KEYBOARD_SHORTCUTS": {
+          "label": "클라이언트 키보드 단축키",
+          "description": "클라이언트 고유의 조합(F, M, X, G와 함께 쓰는 Ctrl+Shift, Ctrl+Shift+클릭)을 세션에 전달하지 않고 유지합니다. 같은 조합을 쓰는 애플리케이션이 있으면 끄십시오."
+        },
+        "SELKIES_MAC_CMD_AS_CTRL": {
+          "label": "macOS Command를 Control로",
+          "description": "macOS 클라이언트의 Command 조합을 Control 조합으로 보내 Cmd+C가 원격 애플리케이션에서 복사되게 합니다. 창 관리자가 Super를 사용하면 끄십시오. 그러면 Command가 Super로 전달됩니다."
+        },
+        "SELKIES_RAW_POINTER_MOTION": {
+          "label": "원시 포인터 이동",
+          "description": "포인터 잠금 중 브라우저에 가속 없는 포인터 이동을 요청해 잠긴 포인터가 마우스 자체의 카운트대로 움직이게 합니다. Windows와 macOS는 허용하고, Linux와 Android는 가속 곡선을 유지합니다."
+        },
+        "SELKIES_PUBLISH_INPUT_DEVICES": {
+          "label": "입력 장치 게시",
+          "description": "디스플레이 서버 대신 evdev를 읽는 애플리케이션(전체 화면 게임, 리매퍼 등)을 위해 세션의 키보드와 포인터를 입력 장치에 복제합니다. 데스크톱은 이전처럼 제어됩니다."
+        },
+        "SELKIES_UINPUT_GAMEPAD": {
+          "label": "커널 게임패드 장치",
+          "description": "/dev/uinput을 통해 게임패드를 등록하여 Steam, Proton, 세션 내 브라우저가 인터포저 없이 찾을 수 있게 합니다. 자동은 인터포저가 구성되지 않고 /dev/uinput에 쓸 수 있을 때만 수행합니다.",
+          "options": {
+            "auto": "자동",
+            "always": "항상",
+            "never": "사용 안 함"
+          }
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "CSS 스케일링 사용 (LoDPI)",
           "description": "true인 경우, 낮은 해상도가 전송되고 캔버스가 늘어납니다."
@@ -457,6 +502,36 @@
           "label": "UI 스케일링 DPI",
           "description": "UI 스케일링의 기본 DPI입니다."
         },
+        "SELKIES_VIDEO_ON_START": {
+          "label": "시작 시 비디오 켜기",
+          "description": "디스플레이의 비디오 스트림을 켠 상태로 시작합니다. 끄면 클라이언트가 비디오를 켤 때까지 기본 디스플레이를 캡처하지 않습니다. 공유 시청자와 두 번째 디스플레이는 항상 스트림을 시작합니다."
+        },
+        "SELKIES_AUDIO_ON_START": {
+          "label": "시작 시 오디오 켜기",
+          "description": "서버에서 클라이언트로의 오디오를 켠 상태로 시작합니다. 끄면 클라이언트가 오디오를 켤 때까지 캡처가 멈춰 있습니다. 오디오 비활성화와 달리 아무것도 해체되지 않고 마이크는 계속 작동합니다."
+        },
+        "SELKIES_MICROPHONE_ON_START": {
+          "label": "마이크 시작 정책",
+          "description": "브라우저에 마이크를 요청하는 시점: 연결 시, 사이드바 토글 사용 시, 또는 애플리케이션이 가상 소스에서 녹음하는 동안에만.",
+          "options": {
+            "atConnect": "연결 시",
+            "onToggle": "사이드바 토글 시",
+            "onDemand": "필요할 때만"
+          }
+        },
+        "SELKIES_WEBCAM_ON_START": {
+          "label": "웹캠 시작 정책",
+          "description": "브라우저에 카메라를 요청하는 시점: 연결 시, 사이드바 토글 사용 시, 또는 애플리케이션이 가상 장치를 열어 두는 동안에만.",
+          "options": {
+            "atConnect": "연결 시",
+            "onToggle": "사이드바 토글 시",
+            "onDemand": "필요할 때만"
+          }
+        },
+        "SELKIES_GAMEPAD_ON_START": {
+          "label": "시작 시 게임패드 켜기",
+          "description": "게임패드 입력을 켠 상태로 시작합니다. 끄면 클라이언트가 켤 때까지 연결된 게임패드를 읽지 않으며, 브라우저가 그 선택을 기억합니다."
+        },
         "SELKIES_AUDIO_BITRATE": {
           "label": "오디오 비트레이트",
           "description": "기본 Opus 오디오 비트레이트입니다."
@@ -479,7 +554,7 @@
         },
         "SELKIES_ENCODER": {
           "label": "인코더",
-          "description": "허용된 인코더의 쉼표로 구분된 목록(h264enc, h264enc-striped, jpeg)입니다. 첫 번째가 기본값이며, 단일 값을 지정하면 선택이 잠깁니다. WebRTC로 스트리밍할 수 있는 것은 h264enc뿐입니다."
+          "description": "허용되는 인코더의 쉼표 구분 목록: h264enc, h265enc, vp8enc, vp9enc, av1enc, h264enc-striped, jpeg. 첫 항목이 기본값이며 값이 하나면 선택이 고정됩니다. 클라이언트는 자신의 브라우저가 디코딩하는 것을 차례로 시도합니다. WebRTC는 전체 프레임 인코더를 전송하며, h264enc-striped와 jpeg는 WebSocket 전용입니다."
         },
         "SELKIES_USE_CPU": {
           "label": "CPU 인코딩 강제",
@@ -491,7 +566,7 @@
         },
         "SELKIES_RATE_CONTROL_MODE": {
           "label": "레이트 제어 모드",
-          "description": "기본 H.264 레이트 제어: 고정 품질(CRF) 또는 고정 비트레이트(CBR).",
+          "description": "비디오 인코더의 기본 레이트 제어: 고정 품질(CRF) 또는 고정 비트레이트(CBR).",
           "options": {
             "crf": "고정 품질 (CRF)",
             "cbr": "고정 비트레이트 (CBR)"
@@ -503,7 +578,7 @@
         },
         "SELKIES_VIDEO_CRF": {
           "label": "비디오 CRF (범위 또는 고정)",
-          "description": "H.264 고정 품질: 범위는 '5-50', 고정 초기값은 '25', 둘 다는 '25,5-50'."
+          "description": "H.264 QP 척도의 고정 품질로 각 코덱에 대응됩니다. «5-50»은 범위, «25»는 고정 초깃값, «25,5-50»은 둘 다를 뜻합니다."
         },
         "SELKIES_VIDEO_BITRATE": {
           "label": "비디오 비트레이트 kbps (범위 또는 고정)",
@@ -527,7 +602,7 @@
         },
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "비디오 풀 컬러 (4:4:4)",
-          "description": "H.264를 4:2:0 대신 4:4:4 크로마로 인코딩합니다. 이 설정이 잠긴 상태로 켜져 있으면 4:4:4 디코더가 없는 클라이언트는 JPEG로 폴백합니다."
+          "description": "코덱과 인코더가 지원하는 경우 4:4:4 크로마로 인코딩합니다(NVENC, VA-API, x264, x265의 H.264와 H.265; VA-API와 libvpx의 VP9). 4:4:4 프로필이 없는 클라이언트는 이 값이 고정되지 않았다면 같은 코덱으로 4:2:0을 스트리밍하고, 고정되었다면 디코딩 가능한 다음 인코더로 넘어갑니다."
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "비디오 스트리밍 (터보) 모드",
@@ -563,7 +638,7 @@
         },
         "SELKIES_WEBCAM_ENCODER": {
           "label": "웹캠 업링크 인코더",
-          "description": "WebSocket 클라이언트가 카메라 프레임을 전송할 때 사용하는 코덱입니다. 자동은 브라우저가 유지할 수 있는 최선의 코덱을 선택합니다.",
+          "description": "클라이언트가 카메라 업링크를 인코딩하는 코덱입니다. 자동은 측정된 순서를 따릅니다: H.264, 없으면 VP8, 그다음 브라우저가 인코딩하는 VP9, AV1, H.265, 어느 것도 따라가지 못하면 JPEG. 코덱 이름을 지정하면 그 코덱으로 고정되며 따라가지 못하는 곳에서는 JPEG로 돌아갑니다.",
           "options": {
             "auto": "자동"
           }
@@ -577,7 +652,7 @@
         },
         "HARDEN_DESKTOP": {
           "label": "데스크톱 강화 (프리셋)",
-          "description": "DISABLE_OPEN_TOOLS, DISABLE_SUDO, DISABLE_TERMINALS를 활성화하고, 명시적으로 설정하지 않는 한 파일 전송, 명령 웹소켓, 사이드바의 파일 및 앱 섹션도 비활성화합니다. 컨테이너 강화가 설정된 사용자에게는 강제로 켜집니다."
+          "description": "DISABLE_OPEN_TOOLS, DISABLE_SUDO, DISABLE_TERMINALS를 활성화하고, 명시적으로 설정하지 않으면 파일 전송, 명령 websocket, 인쇄, 사이드바의 파일 및 앱 섹션도 비활성화합니다. «컨테이너 강화» 사용자에게는 강제 적용됩니다."
         },
         "HARDEN_OPENBOX": {
           "label": "창 관리자 강화 (프리셋)",
@@ -611,6 +686,10 @@
           "label": "닫을 때 앱 다시 시작",
           "description": "메인 애플리케이션이 닫히면 자동으로 다시 시작하고 자동 시작 파일을 읽기 전용으로 만듭니다."
         },
+        "PIXELFLUX_WAYLAND": {
+          "label": "Wayland 백엔드",
+          "description": "X11 서버 대신 창 관리를 위해 labwc를 중첩한 헤드리스 컴포지터인 Wayland 백엔드에서 세션을 실행합니다. X11 애플리케이션은 XWayland를 통해 실행됩니다."
+        },
         "MAX_RES": {
           "label": "최대 해상도",
           "description": "컨테이너의 최대 해상도, 기본값은 16k입니다."
@@ -635,6 +714,14 @@
           "label": "자동 GPU 선택",
           "description": "'true'는 첫 번째 GPU에서 렌더링하고, 'false'는 비활성화하며, 벤더, 드라이버 또는 PCI 벤더 ID(nvidia, amdgpu, 0x10de)를 지정하면 특정 GPU를 선택합니다."
         },
+        "DRI_NODE": {
+          "label": "인코딩용 렌더 노드",
+          "description": "비디오 인코더(VA-API 또는 NVENC)가 사용하는 DRI 렌더 노드입니다. 예: /dev/dri/renderD128. 비워 두면 자동 GPU 선택을 따릅니다."
+        },
+        "DRINODE": {
+          "label": "렌더 노드",
+          "description": "X 서버(DRI3) 또는 Wayland 컴포지터가 렌더링하는 DRI 렌더 노드입니다. 예: /dev/dri/renderD128. 비워 두면 자동 GPU 선택을 따릅니다."
+        },
         "NO_DECOR": {
           "label": "창 장식 없음",
           "description": "PWA 사용을 위해 창 테두리 없이 애플리케이션을 실행합니다."
@@ -651,6 +738,10 @@
           "label": "웹캠 주입 비활성화",
           "description": "가상 웹캠 장치와 인터포저를 건너뜁니다. 웹캠 버튼도 숨깁니다."
         },
+        "NO_STEAM": {
+          "label": "Steam 심 제거",
+          "description": "이미지의 Steam 실행 래퍼를 설치하지 않습니다. 자체 Steam을 포함한 이미지용입니다."
+        },
         "SELKIES_RUN_AFTER_CONNECT": {
           "label": "연결 후 실행",
           "description": "첫 번째 클라이언트가 연결될 때 컨테이너 내부에서 실행되는 셸 명령입니다."
@@ -658,6 +749,38 @@
         "SELKIES_RUN_AFTER_DISCONNECT": {
           "label": "연결 해제 후 실행",
           "description": "마지막 클라이언트의 연결이 해제될 때 컨테이너 내부에서 실행되는 셸 명령입니다."
+        },
+        "SELKIES_APP_WAIT_READY": {
+          "label": "앱 준비 파일 대기",
+          "description": "준비 파일이 존재할 때만 스트리밍을 시작합니다. 사이드카가 애플리케이션 실행을 알리는 이미지용입니다."
+        },
+        "SELKIES_APP_READY_FILE": {
+          "label": "앱 준비 파일",
+          "description": "애플리케이션이 초기화되면 사이드카가 만드는 파일입니다."
+        },
+        "SELKIES_AUDIT_WEBHOOK_URL": {
+          "label": "감사 웹훅 URL",
+          "description": "클립보드 전송, 파일 업로드나 다운로드, 인쇄된 문서, 페이지 연결, 녹화마다 JSON POST 하나를 받습니다. 내용은 포함하지 않고 메타데이터만 보냅니다. 비워 두면 아무것도 보내지 않습니다."
+        },
+        "SELKIES_AUDIT_WEBHOOK_TOKEN": {
+          "label": "감사 웹훅 토큰",
+          "description": "모든 감사 POST의 Authorization 헤더에 보내는 Bearer 토큰입니다."
+        },
+        "SELKIES_AUDIT_WEBHOOK_TIMEOUT": {
+          "label": "감사 웹훅 제한 시간(초)",
+          "description": "감사 POST 하나가 실패로 간주되어 다음 이벤트를 보내기 전까지 걸릴 수 있는 초입니다."
+        },
+        "SELKIES_COMPUTER_USE_BIND": {
+          "label": "Computer-Use 서버",
+          "description": "pixelflux의 Computer-Use HTTP 서버를 쉼표로 구분한 항목에서 시작합니다. 포트만 쓰면 루프백에서만 수신하고, host:port는 주소를 지정합니다. 비워 두면 꺼진 상태로 둡니다."
+        },
+        "SELKIES_RECORDING_SOCKET": {
+          "label": "녹화 소켓",
+          "description": "연결된 레코더에 비디오 스트림을 제공하는 녹화 탭의 Unix 소켓 경로입니다. 비워 두면 꺼진 상태로 둡니다."
+        },
+        "SELKIES_ENABLE_METRICS_HTTP": {
+          "label": "Prometheus 메트릭",
+          "description": "Prometheus /metrics 엔드포인트를 제공합니다."
         },
         "SELKIES_DEBUG": {
           "label": "Selkies 디버깅 활성화",
@@ -688,6 +811,22 @@
         "SELKIES_CONGESTION_CONTROL": {
           "label": "혼잡 제어",
           "description": "WebRTC 수신 측 피드백의 대역폭 추정치에 맞춰 비디오 비트레이트를 조정합니다. CBR 모드에서 효과가 있습니다."
+        },
+        "SELKIES_WEBRTC_ICE_LITE": {
+          "label": "ICE-Lite",
+          "description": "호스트 후보만 제시하고 클라이언트의 연결성 검사에 응답합니다. 공용 IP, 공용 IP를 설정한 정적 NAT, 포워딩된 mux 포트처럼 주소가 알린 대로 도달 가능한 서버용입니다."
+        },
+        "SELKIES_WEBRTC_PORT_RANGE": {
+          "label": "UDP 포트 범위",
+          "description": "직접 호스트 후보 뒤의 소켓이 바인드하는 양끝 포함 범위(예: 50000-50100)로, 각 세션에 작은 방화벽 창을 할당하는 배포용입니다. 비워 두면 임시 포트를 사용합니다."
+        },
+        "SELKIES_WEBRTC_UDP_MUX_PORT": {
+          "label": "UDP 먹스 포트",
+          "description": "모든 세션이 호스트 후보에 공유하는 UDP 포트 하나로, 포워딩된 포트 하나가 세션 수와 관계없이 서비스합니다. 0이면 세션마다 자체 소켓을 갖습니다."
+        },
+        "SELKIES_WEBRTC_TCP_MUX_PORT": {
+          "label": "TCP 먹스 포트",
+          "description": "UDP를 차단하는 네트워크의 클라이언트를 위해 ICE-TCP 연결을 받는 TCP 포트 하나입니다. 공용 환경에서는 443이 일반적입니다. 0이면 TCP 후보를 제시하지 않습니다."
         },
         "SELKIES_STUN_HOST": {
           "label": "STUN 호스트",
@@ -737,6 +876,18 @@
           "label": "TURN REST 사용자 이름",
           "description": "TURN REST 서비스가 자격 증명에 포함하는 사용자 이름입니다. 비워 두면 'selkies'를 사용합니다."
         },
+        "SELKIES_TURN_REST_USERNAME_AUTH_HEADER": {
+          "label": "TURN REST 사용자 이름 헤더",
+          "description": "사용자 이름을 TURN REST 서비스에 전달하는 헤더입니다."
+        },
+        "SELKIES_TURN_REST_PROTOCOL_HEADER": {
+          "label": "TURN REST 프로토콜 헤더",
+          "description": "원하는 TURN 전송 프로토콜을 TURN REST 서비스에 전달하는 헤더입니다."
+        },
+        "SELKIES_TURN_REST_TLS_HEADER": {
+          "label": "TURN REST TLS 헤더",
+          "description": "TURN TLS 선택을 TURN REST 서비스에 전달하는 헤더입니다."
+        },
         "SELKIES_WEBRTC_PUBLIC_IP": {
           "label": "WebRTC 공용 IP",
           "description": "고정 1:1 NAT 뒤에 있는 서버의 호스트 ICE 후보에 알릴 공용 주소입니다. IPv4 주소 하나 및/또는 IPv6 주소 하나."
@@ -756,6 +907,10 @@
         "SELKIES_RTC_CONFIG_JSON": {
           "label": "RTC 구성 JSON 경로",
           "description": "WebRTC 구성이 담긴 JSON 파일의 컨테이너 내부 경로입니다. 다른 모든 STUN/TURN 설정을 재정의하며 주기적으로 다시 읽습니다."
+        },
+        "SELKIES_ENABLE_WEBRTC_STATISTICS": {
+          "label": "WebRTC 통계 덤프",
+          "description": "진단을 위해 클라이언트의 WebRTC 통계를 컨테이너의 /tmp 아래에 CSV 파일로 기록합니다."
         },
         "DOCKER_PRIVILEGED": {
           "label": "권한 모드",

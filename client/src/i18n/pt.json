@@ -305,6 +305,10 @@
           "label": "Exibir Seção de Gamepads",
           "description": "Exibir a seção de gamepads na barra lateral."
         },
+        "SELKIES_UI_SIDEBAR_SHOW_WEBCAM": {
+          "label": "Mostrar botão da webcam",
+          "description": "Mostra o interruptor da webcam entre os botões principais e os controles de transmissão. Oculta apenas o controle; «Habilitar webcam» decide se o servidor aceita quadros da câmera."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
           "label": "Exibir Botão de Tela Cheia",
           "description": "Exibir o botão de tela cheia na barra lateral."
@@ -359,6 +363,10 @@
           "label": "Habilitar Microfone",
           "description": "Habilitar encaminhamento de microfone do cliente para o servidor. Desativado por padrão no projeto original."
         },
+        "SELKIES_WEBCAM_ENABLED": {
+          "label": "Habilitar webcam",
+          "description": "Encaminha a câmera do cliente ao dispositivo de webcam virtual. A imagem base o ativa ao criar o dispositivo; «Desabilitar injeção de webcam» remove ambos."
+        },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "Habilitar Gamepad",
           "description": "Habilitar suporte a gamepad."
@@ -377,6 +385,10 @@
           "label": "Habilitar Área de Transferência Binária",
           "description": "Permitir dados binários (imagens) na área de transferência."
         },
+        "SELKIES_CLIPBOARD_SEAMLESS": {
+          "label": "Sincronização contínua da área de transferência",
+          "description": "Sincroniza a área de transferência assim que um dos lados a altera, para que uma cópia esteja pronta para colar no outro. Desligado, o conteúdo só passa pela caixa de área de transferência da barra lateral; a política de direção continua valendo."
+        },
         "SELKIES_COMMAND_ENABLED": {
           "label": "Habilitar Websocket de Comando",
           "description": "Habilitar a análise de mensagens do websocket de comando."
@@ -388,6 +400,14 @@
         "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
           "label": "Limite de Transferência de Arquivos (Mbit/s)",
           "description": "Limitação estática compartilhada por todos os uploads e downloads. 0 desativa o limite."
+        },
+        "FILE_MANAGER_PATH": {
+          "label": "Diretório de transferências de arquivos",
+          "description": "Diretório onde os envios chegam e que o navegador de arquivos serve, criado na inicialização se faltar."
+        },
+        "SELKIES_PRINTING_ENABLED": {
+          "label": "Habilitar impressão",
+          "description": "Entrega ao navegador, como PDF, os documentos impressos na fila Selkies da sessão. Desligado, recusa-os e oculta a seção de impressora; «Reforçar área de trabalho» o desliga salvo se definido aqui."
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "Habilitar Todo o Compartilhamento",
@@ -433,6 +453,31 @@
           "label": "Tamanho do Cursor",
           "description": "Tamanho do cursor em pontos a 96 DPI, escalado com o DPI da sessão. -1 usa o padrão da plataforma (32 no X11, 24 no Wayland)."
         },
+        "SELKIES_KEYBOARD_SHORTCUTS": {
+          "label": "Atalhos de teclado do cliente",
+          "description": "Mantém as combinações próprias do cliente (Ctrl+Shift com F, M, X ou G, e Ctrl+Shift+clique) em vez de passá-las à sessão. Desligue onde um aplicativo usa as mesmas combinações."
+        },
+        "SELKIES_MAC_CMD_AS_CTRL": {
+          "label": "Command do macOS como Control",
+          "description": "Envia as combinações com Command de um cliente macOS como combinações com Control, para que Cmd+C copie no aplicativo remoto. Desligue se o gerenciador de janelas usa Super; Command chega então como Super."
+        },
+        "SELKIES_RAW_POINTER_MOTION": {
+          "label": "Movimento bruto do ponteiro",
+          "description": "Pede ao navegador movimento do ponteiro sem aceleração com o ponteiro travado, para que ele se mova pelas contagens do próprio mouse. Windows e macOS concedem; Linux e Android mantêm sua curva."
+        },
+        "SELKIES_PUBLISH_INPUT_DEVICES": {
+          "label": "Publicar dispositivos de entrada",
+          "description": "Espelha o teclado e o ponteiro da sessão em dispositivos de entrada para aplicativos que leem evdev em vez do servidor gráfico, como jogos em tela cheia e remapeadores. A área de trabalho é controlada como antes."
+        },
+        "SELKIES_UINPUT_GAMEPAD": {
+          "label": "Controles como dispositivos do kernel",
+          "description": "Registra controles via /dev/uinput para que Steam, Proton e navegadores na sessão os encontrem sem o interposer. Auto só o faz onde o interposer não está configurado e /dev/uinput é gravável.",
+          "options": {
+            "auto": "Auto",
+            "always": "Sempre",
+            "never": "Nunca"
+          }
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "Usar Escalonamento CSS (LoDPI)",
           "description": "Se verdadeiro, uma resolução mais baixa é enviada e o canvas é esticado."
@@ -457,6 +502,36 @@
           "label": "DPI de Escalonamento da UI",
           "description": "O DPI padrão para o escalonamento da UI."
         },
+        "SELKIES_VIDEO_ON_START": {
+          "label": "Vídeo ligado ao iniciar",
+          "description": "Inicia com a transmissão de vídeo da tela ligada. Desligado, nada é capturado da tela principal até o cliente ligar o vídeo; espectadores compartilhados e segundas telas sempre iniciam a sua."
+        },
+        "SELKIES_AUDIO_ON_START": {
+          "label": "Áudio ligado ao iniciar",
+          "description": "Inicia com o áudio do servidor para o cliente ligado. Desligado, a captura fica parada até o cliente ligar o áudio; ao contrário de desabilitar o áudio, nada é desmontado e o microfone continua funcionando."
+        },
+        "SELKIES_MICROPHONE_ON_START": {
+          "label": "Política de início do microfone",
+          "description": "Quando o navegador pede o microfone: ao conectar, ao usar o botão da barra lateral, ou apenas enquanto um aplicativo grava da fonte virtual.",
+          "options": {
+            "atConnect": "Ao conectar",
+            "onToggle": "Pelo botão da barra lateral",
+            "onDemand": "Sob demanda"
+          }
+        },
+        "SELKIES_WEBCAM_ON_START": {
+          "label": "Política de início da webcam",
+          "description": "Quando o navegador pede a câmera: ao conectar, ao usar o botão da barra lateral, ou apenas enquanto um aplicativo mantém o dispositivo virtual aberto.",
+          "options": {
+            "atConnect": "Ao conectar",
+            "onToggle": "Pelo botão da barra lateral",
+            "onDemand": "Sob demanda"
+          }
+        },
+        "SELKIES_GAMEPAD_ON_START": {
+          "label": "Controles ligados ao iniciar",
+          "description": "Inicia com a entrada de controles ligada. Desligado, os controles conectados não são lidos até o cliente ligá-los; o navegador lembra essa escolha."
+        },
         "SELKIES_AUDIO_BITRATE": {
           "label": "Taxa de Bits de Áudio",
           "description": "A taxa de bits de áudio Opus padrão."
@@ -479,7 +554,7 @@
         },
         "SELKIES_ENCODER": {
           "label": "Codificadores",
-          "description": "Lista de codificadores permitidos separados por vírgula (h264enc, h264enc-striped, jpeg). O primeiro é o padrão; um único valor bloqueia a escolha. Apenas h264enc é transmitido por WebRTC."
+          "description": "Lista de codificadores permitidos separados por vírgula: h264enc, h265enc, vp8enc, vp9enc, av1enc, h264enc-striped, jpeg. O primeiro é o padrão e um único valor trava a escolha; os clientes percorrem os que seu navegador decodifica. WebRTC transporta os codificadores de quadro inteiro; h264enc-striped e jpeg são só WebSocket."
         },
         "SELKIES_USE_CPU": {
           "label": "Forçar Codificação por CPU",
@@ -491,7 +566,7 @@
         },
         "SELKIES_RATE_CONTROL_MODE": {
           "label": "Modo de Controle de Taxa",
-          "description": "Controle de taxa H.264 padrão: qualidade constante (CRF) ou taxa de bits constante (CBR).",
+          "description": "Controle de taxa padrão dos codificadores de vídeo: qualidade constante (CRF) ou taxa de bits constante (CBR).",
           "options": {
             "crf": "Qualidade constante (CRF)",
             "cbr": "Taxa de bits constante (CBR)"
@@ -503,7 +578,7 @@
         },
         "SELKIES_VIDEO_CRF": {
           "label": "CRF de Vídeo (Intervalo ou Fixo)",
-          "description": "Qualidade constante H.264: '5-50' para um intervalo, '25' para um valor inicial fixo, ou '25,5-50' para ambos."
+          "description": "Qualidade constante na escala QP do H.264, mapeada para cada codec: «5-50» para uma faixa, «25» para um valor inicial fixo ou «25,5-50» para ambos."
         },
         "SELKIES_VIDEO_BITRATE": {
           "label": "Taxa de Bits de Vídeo kbps (Intervalo ou Fixo)",
@@ -527,7 +602,7 @@
         },
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "Cor Completa de Vídeo (4:4:4)",
-          "description": "Codificar H.264 com croma 4:4:4 em vez de 4:2:0. Clientes sem decodificador 4:4:4 recorrem a JPEG quando isto está bloqueado como ativado."
+          "description": "Codifica com croma 4:4:4 onde o codec e o codificador suportam (H.264 e H.265 em NVENC, VA-API, x264 e x265; VP9 em VA-API e libvpx). Um cliente sem perfil 4:4:4 transmite 4:2:0 no mesmo codec, a menos que isto esteja travado; então passa ao próximo codificador que decodifica."
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "Modo de Streaming de Vídeo (Turbo)",
@@ -563,7 +638,7 @@
         },
         "SELKIES_WEBCAM_ENCODER": {
           "label": "Codificador de Envio da Webcam",
-          "description": "Codec que os clientes WebSocket usam para enviar quadros da câmera. Auto escolhe o melhor que o navegador consegue sustentar.",
+          "description": "Codec com que os clientes codificam o envio da câmera. Auto percorre a escala medida: H.264, senão VP8, depois VP9, AV1 e H.265 onde o navegador os codifica, e JPEG quando nenhum acompanha. Um nome de codec o fixa, recuando para JPEG onde não acompanha.",
           "options": {
             "auto": "Auto"
           }
@@ -577,7 +652,7 @@
         },
         "HARDEN_DESKTOP": {
           "label": "Reforçar Desktop (Predefinição)",
-          "description": "Habilita DISABLE_OPEN_TOOLS, DISABLE_SUDO e DISABLE_TERMINALS e, a menos que sejam definidos explicitamente, também desabilita as transferências de arquivos, o websocket de comandos e as seções de arquivos e aplicativos da barra lateral. Forçado para usuários com Reforçar Contêiner."
+          "description": "Ativa DISABLE_OPEN_TOOLS, DISABLE_SUDO e DISABLE_TERMINALS e, salvo se definidos explicitamente, também desativa transferências de arquivos, o websocket de comandos, a impressão e as seções de arquivos e aplicativos da barra lateral. Forçado para usuários com «Reforçar contêiner»."
         },
         "HARDEN_OPENBOX": {
           "label": "Reforçar Gerenciador de Janelas (Predefinição)",
@@ -611,6 +686,10 @@
           "label": "Reiniciar App ao Fechar",
           "description": "Reinicia automaticamente o aplicativo principal se ele for fechado e torna o arquivo de inicialização automática somente leitura."
         },
+        "PIXELFLUX_WAYLAND": {
+          "label": "Backend Wayland",
+          "description": "Executa a sessão no backend Wayland, um compositor headless com labwc aninhado para gerenciar janelas, em vez do servidor X11. Aplicativos X11 rodam via XWayland."
+        },
         "MAX_RES": {
           "label": "Resolução Máxima",
           "description": "Resolução máxima para o contêiner, o padrão é 16k."
@@ -635,6 +714,14 @@
           "label": "Seleção Automática de GPU",
           "description": "'true' renderiza na primeira GPU, 'false' desativa, ou um fabricante, driver ou ID de fabricante PCI (nvidia, amdgpu, 0x10de) escolhe uma específica."
         },
+        "DRI_NODE": {
+          "label": "Nó de renderização para codificação",
+          "description": "Nó de renderização DRI usado pelo codificador de vídeo (VA-API ou NVENC), como /dev/dri/renderD128. Vazio segue a seleção automática de GPU."
+        },
+        "DRINODE": {
+          "label": "Nó de renderização",
+          "description": "Nó de renderização DRI em que o servidor X (DRI3) ou o compositor Wayland desenha, como /dev/dri/renderD128. Vazio segue a seleção automática de GPU."
+        },
         "NO_DECOR": {
           "label": "Sem Decorações de Janela",
           "description": "Executar aplicativo sem bordas de janela para uso PWA."
@@ -651,6 +738,10 @@
           "label": "Desabilitar Injeção de Webcam",
           "description": "Ignorar o dispositivo de webcam virtual e o interpositor. Também oculta o botão da webcam."
         },
+        "NO_STEAM": {
+          "label": "Remover shim do Steam",
+          "description": "Não instala o wrapper de inicialização do Steam da imagem, para imagens que trazem seu próprio Steam."
+        },
         "SELKIES_RUN_AFTER_CONNECT": {
           "label": "Executar após Conectar",
           "description": "Comando de shell executado dentro do contêiner quando o primeiro cliente se conecta."
@@ -658,6 +749,38 @@
         "SELKIES_RUN_AFTER_DISCONNECT": {
           "label": "Executar após Desconectar",
           "description": "Comando de shell executado dentro do contêiner quando o último cliente se desconecta."
+        },
+        "SELKIES_APP_WAIT_READY": {
+          "label": "Aguardar arquivo de aplicativo pronto",
+          "description": "Só transmite quando o arquivo de pronto existe, para imagens cujo sidecar sinaliza quando o aplicativo está ativo."
+        },
+        "SELKIES_APP_READY_FILE": {
+          "label": "Arquivo de aplicativo pronto",
+          "description": "Arquivo que o sidecar cria quando o aplicativo está inicializado."
+        },
+        "SELKIES_AUDIT_WEBHOOK_URL": {
+          "label": "URL do webhook de auditoria",
+          "description": "Recebe um POST JSON por transferência de área de transferência, envio ou download de arquivo, documento impresso, conexão de página e gravação, só com metadados e nunca com o conteúdo. Vazio não envia nada."
+        },
+        "SELKIES_AUDIT_WEBHOOK_TOKEN": {
+          "label": "Token do webhook de auditoria",
+          "description": "Token Bearer enviado no cabeçalho Authorization de cada POST de auditoria."
+        },
+        "SELKIES_AUDIT_WEBHOOK_TIMEOUT": {
+          "label": "Tempo limite do webhook de auditoria (segundos)",
+          "description": "Segundos que um POST de auditoria pode levar antes de contar como falho e o próximo evento ser enviado."
+        },
+        "SELKIES_COMPUTER_USE_BIND": {
+          "label": "Servidor Computer-Use",
+          "description": "Inicia o servidor HTTP Computer-Use do pixelflux nestas entradas separadas por vírgula: uma porta sozinha escuta apenas em loopback, host:porta nomeia o endereço. Vazio o deixa desligado."
+        },
+        "SELKIES_RECORDING_SOCKET": {
+          "label": "Socket de gravação",
+          "description": "Caminho do socket Unix da derivação de gravação, que serve a transmissão de vídeo aos gravadores conectados. Vazio a deixa desligada."
+        },
+        "SELKIES_ENABLE_METRICS_HTTP": {
+          "label": "Métricas Prometheus",
+          "description": "Serve o endpoint Prometheus /metrics."
         },
         "SELKIES_DEBUG": {
           "label": "Habilitar Depuração Selkies",
@@ -688,6 +811,22 @@
         "SELKIES_CONGESTION_CONTROL": {
           "label": "Controle de Congestionamento",
           "description": "Adaptar a taxa de bits de vídeo à estimativa de largura de banda do feedback do receptor WebRTC. Eficaz no modo CBR."
+        },
+        "SELKIES_WEBRTC_ICE_LITE": {
+          "label": "ICE-Lite",
+          "description": "Oferece apenas candidatos de host e responde às verificações de conectividade do cliente, para um servidor cujos endereços são alcançáveis como anunciados: um IP público, um NAT estático com o IP público definido ou portas mux encaminhadas."
+        },
+        "SELKIES_WEBRTC_PORT_RANGE": {
+          "label": "Faixa de portas UDP",
+          "description": "Faixa inclusiva, como 50000-50100, em que os sockets dos candidatos de host diretos se vinculam, para implantações que dão a cada sessão uma pequena janela no firewall. Vazio usa portas efêmeras."
+        },
+        "SELKIES_WEBRTC_UDP_MUX_PORT": {
+          "label": "Porta mux UDP",
+          "description": "Uma porta UDP que todas as sessões compartilham para seus candidatos de host, de modo que uma única porta encaminhada atende qualquer número de sessões. 0 dá a cada sessão sockets próprios."
+        },
+        "SELKIES_WEBRTC_TCP_MUX_PORT": {
+          "label": "Porta mux TCP",
+          "description": "Uma porta TCP que aceita conexões ICE-TCP para clientes em redes que bloqueiam UDP; 443 é a escolha pública habitual. 0 não oferece candidatos TCP."
         },
         "SELKIES_STUN_HOST": {
           "label": "Host STUN",
@@ -737,6 +876,18 @@
           "label": "Usuário REST do TURN",
           "description": "Nome de usuário que o serviço REST do TURN incorpora na credencial. Vazio usa 'selkies'."
         },
+        "SELKIES_TURN_REST_USERNAME_AUTH_HEADER": {
+          "label": "Cabeçalho de usuário do TURN REST",
+          "description": "Cabeçalho que leva o nome de usuário ao serviço TURN REST."
+        },
+        "SELKIES_TURN_REST_PROTOCOL_HEADER": {
+          "label": "Cabeçalho de protocolo do TURN REST",
+          "description": "Cabeçalho que leva o protocolo de transporte TURN desejado ao serviço TURN REST."
+        },
+        "SELKIES_TURN_REST_TLS_HEADER": {
+          "label": "Cabeçalho TLS do TURN REST",
+          "description": "Cabeçalho que leva a escolha de TLS do TURN ao serviço TURN REST."
+        },
         "SELKIES_WEBRTC_PUBLIC_IP": {
           "label": "IP Público do WebRTC",
           "description": "Endereço público a anunciar nos candidatos ICE do tipo host para um servidor atrás de NAT 1:1 estático. Um endereço IPv4 e/ou um IPv6."
@@ -756,6 +907,10 @@
         "SELKIES_RTC_CONFIG_JSON": {
           "label": "Caminho do JSON de Configuração RTC",
           "description": "Caminho dentro do contêiner para um arquivo JSON com a configuração do WebRTC. Sobrepõe todas as outras configurações de STUN/TURN e é relido periodicamente."
+        },
+        "SELKIES_ENABLE_WEBRTC_STATISTICS": {
+          "label": "Exportar estatísticas WebRTC",
+          "description": "Grava as estatísticas WebRTC do cliente como arquivos CSV em /tmp no contêiner, para diagnóstico."
         },
         "DOCKER_PRIVILEGED": {
           "label": "Modo Privilegiado",

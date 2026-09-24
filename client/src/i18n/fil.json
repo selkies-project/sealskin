@@ -305,6 +305,10 @@
           "label": "Ipakita ang Seksyon ng mga Gamepad",
           "description": "Ipakita ang seksyon ng mga gamepad sa sidebar."
         },
+        "SELKIES_UI_SIDEBAR_SHOW_WEBCAM": {
+          "label": "Ipakita ang Button ng Webcam",
+          "description": "Ipinapakita ang toggle ng webcam kasama ng mga pangunahing button at mga kontrol ng stream. Itinatago lamang ang kontrol; ang «Paganahin ang Webcam» ang nagpapasya kung tatanggap ang server ng mga frame ng camera."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
           "label": "Ipakita ang Pindutan ng Fullscreen",
           "description": "Ipakita ang pindutan ng fullscreen sa sidebar."
@@ -359,6 +363,10 @@
           "label": "Paganahin ang Mikropono",
           "description": "Paganahin ang pagpapasa ng mikropono mula sa kliyente patungo sa server. Naka-off bilang default sa upstream."
         },
+        "SELKIES_WEBCAM_ENABLED": {
+          "label": "Paganahin ang Webcam",
+          "description": "Ipinapasa ang camera ng client sa virtual na webcam device. Binubuksan ito ng base image kapag ginagawa nito ang device; inaalis ng «Huwag Paganahin ang Webcam Injection» ang pareho."
+        },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "Paganahin ang Gamepad",
           "description": "Paganahin ang suporta para sa gamepad."
@@ -377,6 +385,10 @@
           "label": "Paganahin ang Binary Clipboard",
           "description": "Payagan ang binary data (mga imahe) sa clipboard."
         },
+        "SELKIES_CLIPBOARD_SEAMLESS": {
+          "label": "Tuluy-tuloy na Pag-sync ng Clipboard",
+          "description": "Isini-sync ang clipboard kapag binago ito ng alinmang panig, para handa nang i-paste sa kabila ang kinopya. Kung naka-off, dumadaan lamang ang nilalaman sa kahon ng clipboard sa sidebar; nananatiling umiiral ang patakaran sa direksyon."
+        },
         "SELKIES_COMMAND_ENABLED": {
           "label": "Paganahin ang Command Websocket",
           "description": "Paganahin ang pag-parse ng mga mensahe ng command websocket."
@@ -388,6 +400,14 @@
         "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
           "label": "Limitasyon ng Paglilipat ng File (Mbit/s)",
           "description": "Static na throttle na pinagsasaluhan ng lahat ng upload at download. Ang 0 ay nag-aalis ng limitasyon."
+        },
+        "FILE_MANAGER_PATH": {
+          "label": "Directory ng Paglilipat ng File",
+          "description": "Directory kung saan dumarating ang mga upload at inihahain ng file browser; nililikha sa pagsisimula kung wala."
+        },
+        "SELKIES_PRINTING_ENABLED": {
+          "label": "Paganahin ang Pag-print",
+          "description": "Ibinibigay sa browser bilang PDF ang mga dokumentong na-print sa Selkies queue ng session. Kung naka-off, tinatanggihan ang mga ito at itinatago ang seksyon ng printer; ino-off ito ng «Patigasin ang Desktop» maliban kung itinakda dito."
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "Paganahin ang Lahat ng Pagbabahagi",
@@ -433,6 +453,31 @@
           "label": "Laki ng Cursor",
           "description": "Laki ng cursor sa mga point sa 96 DPI, naka-scale ayon sa DPI ng session. Ang -1 ay gumagamit ng default ng platform (32 sa X11, 24 sa Wayland)."
         },
+        "SELKIES_KEYBOARD_SHORTCUTS": {
+          "label": "Mga Keyboard Shortcut ng Client",
+          "description": "Pinananatili ang sariling mga kumbinasyon ng client (Ctrl+Shift kasama ang F, M, X o G, at Ctrl+Shift+click) sa halip na ipasa ang mga ito sa session. I-off kung may application na gumagamit ng parehong mga kumbinasyon."
+        },
+        "SELKIES_MAC_CMD_AS_CTRL": {
+          "label": "macOS Command bilang Control",
+          "description": "Ipinapadala ang mga kumbinasyong Command ng macOS client bilang mga kumbinasyong Control, para kumopya ang Cmd+C sa remote na application. I-off kung ginagamit ng window manager ang Super; darating ang Command bilang Super."
+        },
+        "SELKIES_RAW_POINTER_MOTION": {
+          "label": "Raw na Galaw ng Pointer",
+          "description": "Humihiling sa browser ng galaw ng pointer na walang acceleration habang naka-lock ang pointer, para gumalaw ang naka-lock na pointer ayon sa sariling bilang ng mouse. Pinapayagan ito ng Windows at macOS; pinananatili ng Linux at Android ang kanilang curve."
+        },
+        "SELKIES_PUBLISH_INPUT_DEVICES": {
+          "label": "I-publish ang mga Input Device",
+          "description": "Sinasalamin ang keyboard at pointer ng session sa mga input device para sa mga application na nagbabasa ng evdev sa halip na sa display server, tulad ng mga fullscreen na laro at remapper. Pinapatakbo ang desktop gaya ng dati."
+        },
+        "SELKIES_UINPUT_GAMEPAD": {
+          "label": "Mga Gamepad bilang Kernel Device",
+          "description": "Inirerehistro ang mga gamepad sa pamamagitan ng /dev/uinput para mahanap ng Steam, Proton at mga browser sa session ang mga ito nang walang interposer. Ginagawa lamang ito ng Auto kung hindi naka-configure ang interposer at nasusulatan ang /dev/uinput.",
+          "options": {
+            "auto": "Auto",
+            "always": "Palagi",
+            "never": "Hindi kailanman"
+          }
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "Gamitin ang CSS Scaling (LoDPI)",
           "description": "Kung totoo, isang mas mababang resolusyon ang ipapadala at ang canvas ay i-uunat."
@@ -457,6 +502,36 @@
           "label": "UI Scaling DPI",
           "description": "Ang default na DPI para sa pag-scale ng UI."
         },
+        "SELKIES_VIDEO_ON_START": {
+          "label": "Naka-on ang Video sa Pagsisimula",
+          "description": "Nagsisimula nang naka-on ang video stream ng display. Kung naka-off, walang kinukuha mula sa pangunahing display hanggang buksan ng client ang video; laging nagsisimula ng kanilang stream ang mga shared viewer at ikalawang display."
+        },
+        "SELKIES_AUDIO_ON_START": {
+          "label": "Naka-on ang Audio sa Pagsisimula",
+          "description": "Nagsisimula nang naka-on ang audio mula server papuntang client. Kung naka-off, nananatiling nakatigil ang capture hanggang buksan ng client ang audio; hindi tulad ng pag-disable ng audio, walang binabaklas at patuloy na gumagana ang mikropono."
+        },
+        "SELKIES_MICROPHONE_ON_START": {
+          "label": "Patakaran sa Pagsisimula ng Mikropono",
+          "description": "Kung kailan hinihiling sa browser ang mikropono: sa pagkonekta, kapag ginamit ang toggle sa sidebar, o kapag may application lamang na nagrerekord mula sa virtual na source.",
+          "options": {
+            "atConnect": "Sa pagkonekta",
+            "onToggle": "Sa toggle ng sidebar",
+            "onDemand": "Kapag kinakailangan"
+          }
+        },
+        "SELKIES_WEBCAM_ON_START": {
+          "label": "Patakaran sa Pagsisimula ng Webcam",
+          "description": "Kung kailan hinihiling sa browser ang camera: sa pagkonekta, kapag ginamit ang toggle sa sidebar, o kapag may application lamang na nagpapanatiling bukas sa virtual na device.",
+          "options": {
+            "atConnect": "Sa pagkonekta",
+            "onToggle": "Sa toggle ng sidebar",
+            "onDemand": "Kapag kinakailangan"
+          }
+        },
+        "SELKIES_GAMEPAD_ON_START": {
+          "label": "Naka-on ang mga Gamepad sa Pagsisimula",
+          "description": "Nagsisimula nang naka-on ang input ng gamepad. Kung naka-off, hindi binabasa ang mga nakakonektang gamepad hanggang buksan ng client ang mga ito; naaalala ng browser ang pagpipiliang iyon."
+        },
         "SELKIES_AUDIO_BITRATE": {
           "label": "Bitrate ng Audio",
           "description": "Ang default na bitrate ng Opus audio."
@@ -479,7 +554,7 @@
         },
         "SELKIES_ENCODER": {
           "label": "Mga Encoder",
-          "description": "Listahan ng mga pinapayagang encoder na pinaghihiwalay ng kuwit (h264enc, h264enc-striped, jpeg). Ang una ay ang default; ang iisang halaga ay nagla-lock ng pagpili. Tanging h264enc lamang ang nag-i-stream sa WebRTC."
+          "description": "Listahan ng mga pinapayagang encoder na pinaghihiwalay ng kuwit: h264enc, h265enc, vp8enc, vp9enc, av1enc, h264enc-striped, jpeg. Ang una ang default at ang iisang halaga ay nagla-lock ng pagpili; dinadaanan ng mga client ang mga nade-decode ng kanilang browser. Dinadala ng WebRTC ang mga full-frame na encoder; para lamang sa WebSocket ang h264enc-striped at jpeg."
         },
         "SELKIES_USE_CPU": {
           "label": "Pilitin ang CPU Encoding",
@@ -491,7 +566,7 @@
         },
         "SELKIES_RATE_CONTROL_MODE": {
           "label": "Mode ng Rate Control",
-          "description": "Default na H.264 rate control: constant quality (CRF) o constant bitrate (CBR).",
+          "description": "Default na rate control ng mga video encoder: constant quality (CRF) o constant bitrate (CBR).",
           "options": {
             "crf": "Constant quality (CRF)",
             "cbr": "Constant bitrate (CBR)"
@@ -503,7 +578,7 @@
         },
         "SELKIES_VIDEO_CRF": {
           "label": "CRF ng Video (Saklaw o Nakapirmi)",
-          "description": "H.264 constant quality: '5-50' para sa isang saklaw, '25' para sa nakapirming paunang halaga, o '25,5-50' para sa pareho."
+          "description": "Constant quality sa H.264 QP scale, na inimapa sa bawat codec: «5-50» para sa saklaw, «25» para sa nakapirming panimulang halaga, o «25,5-50» para sa pareho."
         },
         "SELKIES_VIDEO_BITRATE": {
           "label": "Bitrate ng Video kbps (Saklaw o Nakapirmi)",
@@ -527,7 +602,7 @@
         },
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "Buong Kulay ng Video (4:4:4)",
-          "description": "I-encode ang H.264 gamit ang 4:4:4 chroma sa halip na 4:2:0. Ang mga kliyenteng walang 4:4:4 decoder ay babalik sa JPEG kapag naka-lock ito sa on."
+          "description": "Nag-e-encode gamit ang 4:4:4 chroma kung saan sinusuportahan ito ng codec at encoder (H.264 at H.265 sa NVENC, VA-API, x264 at x265; VP9 sa VA-API at libvpx). Ang client na walang 4:4:4 profile ay nag-i-stream ng 4:2:0 sa parehong codec maliban kung naka-lock ito; kung gayon, lilipat ito sa susunod na encoder na nade-decode nito."
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "Video Streaming (Turbo) Mode",
@@ -563,7 +638,7 @@
         },
         "SELKIES_WEBCAM_ENCODER": {
           "label": "Encoder ng Webcam Uplink",
-          "description": "Codec na ginagamit ng mga WebSocket client upang magpadala ng mga frame ng camera. Pinipili ng Auto ang pinakamahusay na kayang panatilihin ng browser.",
+          "description": "Codec na ginagamit ng mga client sa pag-encode ng camera uplink. Sinusunod ng Auto ang sinukat na hagdan: H.264, kung hindi VP8, pagkatapos VP9, AV1 at H.265 kung saan ine-encode ito ng browser, at JPEG kung wala nang makasabay. Ang pangalan ng codec ay nagpipirmi nito, na bumabalik sa JPEG kung hindi makasabay.",
           "options": {
             "auto": "Auto"
           }
@@ -577,7 +652,7 @@
         },
         "HARDEN_DESKTOP": {
           "label": "Patibayin ang Desktop (Preset)",
-          "description": "Pinapagana ang DISABLE_OPEN_TOOLS, DISABLE_SUDO at DISABLE_TERMINALS, at maliban kung tahasang itinakda, hindi rin pinapagana ang paglilipat ng file, ang command websocket at ang mga seksyon ng mga file at app sa sidebar. Pilit na naka-on para sa mga user na may Patibayin ang Container."
+          "description": "Pinagagana ang DISABLE_OPEN_TOOLS, DISABLE_SUDO at DISABLE_TERMINALS at, maliban kung tahasang itinakda, hindi rin pinagagana ang mga paglilipat ng file, ang command websocket, ang pag-print, at ang mga seksyon ng files at apps sa sidebar. Sapilitan para sa mga user na may «Patigasin ang Container»."
         },
         "HARDEN_OPENBOX": {
           "label": "Patibayin ang Window Manager (Preset)",
@@ -611,6 +686,10 @@
           "label": "I-restart ang App sa Pagsara",
           "description": "Awtomatikong nire-restart ang pangunahing aplikasyon kung ito ay isinara at ginagawang read-only ang autostart file."
         },
+        "PIXELFLUX_WAYLAND": {
+          "label": "Wayland Backend",
+          "description": "Pinapatakbo ang session sa Wayland backend, isang headless compositor na may nested na labwc para sa pamamahala ng mga window, sa halip na sa X11 server. Tumatakbo ang mga X11 application sa pamamagitan ng XWayland."
+        },
         "MAX_RES": {
           "label": "Pinakamataas na Resolusyon",
           "description": "Pinakamataas na resolusyon para sa container, default ay 16k."
@@ -635,6 +714,14 @@
           "label": "Awtomatikong Pagpili ng GPU",
           "description": "Ang 'true' ay nagre-render sa unang GPU, ang 'false' ay hindi pinapagana ito, o isang vendor, driver o PCI vendor ID (nvidia, amdgpu, 0x10de) ang pumipili ng partikular na GPU."
         },
+        "DRI_NODE": {
+          "label": "Render Node para sa Pag-encode",
+          "description": "DRI render node na ginagamit ng video encoder (VA-API o NVENC), tulad ng /dev/dri/renderD128. Kung blangko, sinusunod ang Awtomatikong Pagpili ng GPU."
+        },
+        "DRINODE": {
+          "label": "Render Node",
+          "description": "DRI render node kung saan nagre-render ang X server (DRI3) o ang Wayland compositor, tulad ng /dev/dri/renderD128. Kung blangko, sinusunod ang Awtomatikong Pagpili ng GPU."
+        },
         "NO_DECOR": {
           "label": "Walang mga Dekorasyon ng Window",
           "description": "Patakbuhin ang aplikasyon nang walang mga border ng window para sa paggamit ng PWA."
@@ -651,6 +738,10 @@
           "label": "Huwag Paganahin ang Webcam Injection",
           "description": "Laktawan ang virtual na webcam device at interposer. Itinatago rin ang pindutan ng webcam."
         },
+        "NO_STEAM": {
+          "label": "Alisin ang Steam Shim",
+          "description": "Hindi ini-install ang Steam launcher wrapper ng image, para sa mga image na may sariling Steam."
+        },
         "SELKIES_RUN_AFTER_CONNECT": {
           "label": "Patakbuhin Pagkatapos Kumonekta",
           "description": "Shell command na pinapatakbo sa loob ng container kapag kumonekta ang unang kliyente."
@@ -658,6 +749,38 @@
         "SELKIES_RUN_AFTER_DISCONNECT": {
           "label": "Patakbuhin Pagkatapos Madiskonekta",
           "description": "Shell command na pinapatakbo sa loob ng container kapag nadiskonekta ang huling kliyente."
+        },
+        "SELKIES_APP_WAIT_READY": {
+          "label": "Hintayin ang App Ready File",
+          "description": "Nagsisimula lamang ng streaming kapag umiiral na ang ready file, para sa mga image na ang sidecar ay nagsesenyas kung kailan nakatakbo na ang application."
+        },
+        "SELKIES_APP_READY_FILE": {
+          "label": "App Ready File",
+          "description": "File na nililikha ng sidecar kapag na-initialize na ang application."
+        },
+        "SELKIES_AUDIT_WEBHOOK_URL": {
+          "label": "URL ng Audit Webhook",
+          "description": "Tumatanggap ng isang JSON POST bawat paglilipat ng clipboard, pag-upload o pag-download ng file, na-print na dokumento, koneksyon ng page, at pagrerekord, na may metadata lamang at hindi kailanman ang nilalaman. Kung blangko, walang ipinapadala."
+        },
+        "SELKIES_AUDIT_WEBHOOK_TOKEN": {
+          "label": "Token ng Audit Webhook",
+          "description": "Bearer token na ipinapadala sa Authorization header ng bawat audit POST."
+        },
+        "SELKIES_AUDIT_WEBHOOK_TIMEOUT": {
+          "label": "Timeout ng Audit Webhook (segundo)",
+          "description": "Bilang ng segundong maaaring abutin ng isang audit POST bago ituring na bigo at ipadala ang susunod na event."
+        },
+        "SELKIES_COMPUTER_USE_BIND": {
+          "label": "Computer-Use Server",
+          "description": "Sinisimulan ang Computer-Use HTTP server ng pixelflux sa mga entry na ito na pinaghihiwalay ng kuwit: ang port lamang ay nakikinig sa loopback lang, ang host:port ay nagpapangalan ng address. Kung blangko, nananatiling naka-off."
+        },
+        "SELKIES_RECORDING_SOCKET": {
+          "label": "Socket ng Pagrerekord",
+          "description": "Path ng Unix socket ng recording tap, na naghahain ng video stream sa mga nakakonektang recorder. Kung blangko, nananatiling naka-off."
+        },
+        "SELKIES_ENABLE_METRICS_HTTP": {
+          "label": "Mga Sukatan ng Prometheus",
+          "description": "Inihahain ang Prometheus /metrics endpoint."
         },
         "SELKIES_DEBUG": {
           "label": "Paganahin ang Selkies Debugging",
@@ -688,6 +811,22 @@
         "SELKIES_CONGESTION_CONTROL": {
           "label": "Congestion Control",
           "description": "I-adapt ang bitrate ng video sa pagtantya ng bandwidth mula sa feedback ng WebRTC receiver. Epektibo sa CBR mode."
+        },
+        "SELKIES_WEBRTC_ICE_LITE": {
+          "label": "ICE-Lite",
+          "description": "Nag-aalok lamang ng mga host candidate at sumasagot sa mga connectivity check ng client, para sa server na maaabot ang mga address gaya ng inanunsyo: pampublikong IP, static na NAT na nakatakda ang pampublikong IP, o mga naka-forward na mux port."
+        },
+        "SELKIES_WEBRTC_PORT_RANGE": {
+          "label": "Saklaw ng UDP Port",
+          "description": "Inklusibong saklaw, tulad ng 50000-50100, kung saan nagbi-bind ang mga socket sa likod ng mga direktang host candidate, para sa mga deployment na nagbibigay sa bawat session ng maliit na bintana sa firewall. Kung blangko, gumagamit ng mga pansamantalang port."
+        },
+        "SELKIES_WEBRTC_UDP_MUX_PORT": {
+          "label": "UDP Mux Port",
+          "description": "Isang UDP port na pinagsasaluhan ng lahat ng session para sa kanilang mga host candidate, para maghain ang isang naka-forward na port sa kahit ilang session. Binibigyan ng 0 ang bawat session ng sariling mga socket."
+        },
+        "SELKIES_WEBRTC_TCP_MUX_PORT": {
+          "label": "TCP Mux Port",
+          "description": "Isang TCP port na tumatanggap ng mga koneksyong ICE-TCP para sa mga client sa mga network na humaharang sa UDP; 443 ang karaniwang pampublikong pipiliin. Walang inaalok na TCP candidate ang 0."
         },
         "SELKIES_STUN_HOST": {
           "label": "STUN Host",
@@ -737,6 +876,18 @@
           "label": "Username ng TURN REST",
           "description": "Username na inilalagay ng TURN REST service sa credential. Kapag walang laman, ginagamit ang 'selkies'."
         },
+        "SELKIES_TURN_REST_USERNAME_AUTH_HEADER": {
+          "label": "Header ng Username para sa TURN REST",
+          "description": "Header na nagdadala ng username sa serbisyo ng TURN REST."
+        },
+        "SELKIES_TURN_REST_PROTOCOL_HEADER": {
+          "label": "Header ng Protocol para sa TURN REST",
+          "description": "Header na nagdadala ng nais na TURN transport protocol sa serbisyo ng TURN REST."
+        },
+        "SELKIES_TURN_REST_TLS_HEADER": {
+          "label": "Header ng TLS para sa TURN REST",
+          "description": "Header na nagdadala ng pagpipilian sa TURN TLS sa serbisyo ng TURN REST."
+        },
         "SELKIES_WEBRTC_PUBLIC_IP": {
           "label": "Pampublikong IP ng WebRTC",
           "description": "Pampublikong address na ia-advertise sa mga host ICE candidate para sa isang server sa likod ng static 1:1 NAT. Isang IPv4 at/o isang IPv6 address."
@@ -756,6 +907,10 @@
         "SELKIES_RTC_CONFIG_JSON": {
           "label": "Path ng RTC Config JSON",
           "description": "Path sa loob ng container patungo sa isang JSON file na naglalaman ng konfigurasyon ng WebRTC. Nag-o-override sa bawat ibang setting ng STUN/TURN at pana-panahong binabasa muli."
+        },
+        "SELKIES_ENABLE_WEBRTC_STATISTICS": {
+          "label": "I-dump ang mga Istatistika ng WebRTC",
+          "description": "Isinusulat ang mga istatistika ng WebRTC ng client bilang mga CSV file sa ilalim ng /tmp sa container, para sa diagnosis."
         },
         "DOCKER_PRIVILEGED": {
           "label": "Privileged Mode",

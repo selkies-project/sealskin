@@ -114,20 +114,25 @@ A template is a named set of environment variables applied to every session
 of the apps that use it. The **Application Template Editor** groups the
 variables by category:
 
-* **UI**: the Selkies sidebar, its sections, the page title, watermark, and
-  dashboard style.
-* **App**: audio, microphone, clipboard policy, gamepads, file transfers,
-  sharing links, second screen, cursor handling, resolution and scaling, then
-  the audio and video encoding controls: encoders, frame rate, CRF and
-  bitrate ranges, rate control, keyframes, paint-over quality, and the virtual
-  webcam.
-* **General**: resolution limits, Docker-in-Docker, IPv6, DRI3 and Zink, GPU
-  selection, window decorations, gamepad and webcam injection, connect and
-  disconnect hooks, debugging.
+* **UI**: the Selkies sidebar, its sections and buttons, the page title,
+  watermark, and dashboard style.
+* **App**: audio, microphone, webcam, clipboard policy and seamless sync,
+  printing, gamepads and their kernel devices, file transfers and their
+  directory, sharing links, second screen, cursor handling, keyboard
+  shortcut and pointer options, what starts at connect, resolution and
+  scaling, then the audio and video encoding controls: encoders, frame rate,
+  CRF and bitrate ranges, rate control, keyframes, paint-over quality, and
+  the virtual webcam.
+* **General**: the Wayland backend, resolution limits, Docker-in-Docker,
+  IPv6, DRI3 and Zink, GPU selection and render nodes, window decorations,
+  gamepad, webcam, and Steam shims, connect and disconnect hooks, the
+  application ready file, the audit webhook, the Computer-Use server,
+  recording, metrics, debugging.
 * **Hardening**: the presets behind the user-level hardening switches and
   their individual components.
-* **WebRTC**: streaming mode, dual mode, pacing and congestion control, and
-  the STUN, TURN, TURN REST, and Cloudflare TURN credentials. The base image
+* **WebRTC**: streaming mode, dual mode, pacing and congestion control,
+  ICE-lite, the port range and mux ports, the STUN, TURN, TURN REST, and
+  Cloudflare TURN credentials and headers, and statistics dumps. The base image
   streams over WebSockets until one of these is set; any STUN, TURN,
   Cloudflare, or public IP value switches the session to WebRTC with dual mode
   on.

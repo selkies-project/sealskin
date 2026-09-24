@@ -305,6 +305,10 @@
           "label": "Hiển thị phần Gamepads",
           "description": "Hiển thị phần gamepads trong thanh bên."
         },
+        "SELKIES_UI_SIDEBAR_SHOW_WEBCAM": {
+          "label": "Hiện nút webcam",
+          "description": "Hiện công tắc webcam trong các nút chính và điều khiển luồng. Chỉ ẩn điều khiển; «Bật webcam» quyết định máy chủ có nhận khung hình camera hay không."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
           "label": "Hiển thị nút toàn màn hình",
           "description": "Hiển thị nút toàn màn hình trong thanh bên."
@@ -359,6 +363,10 @@
           "label": "Bật micro",
           "description": "Bật chuyển tiếp micro từ máy khách đến máy chủ. Tắt theo mặc định ở upstream."
         },
+        "SELKIES_WEBCAM_ENABLED": {
+          "label": "Bật webcam",
+          "description": "Chuyển tiếp camera của máy khách tới thiết bị webcam ảo. Ảnh nền bật mục này khi tạo thiết bị; «Tắt chèn webcam» loại bỏ cả hai."
+        },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "Bật gamepad",
           "description": "Bật hỗ trợ gamepad."
@@ -377,6 +385,10 @@
           "label": "Bật clipboard nhị phân",
           "description": "Cho phép dữ liệu nhị phân (hình ảnh) trên clipboard."
         },
+        "SELKIES_CLIPBOARD_SEAMLESS": {
+          "label": "Đồng bộ bảng nhớ tạm liền mạch",
+          "description": "Đồng bộ bảng nhớ tạm ngay khi một bên thay đổi, để nội dung đã sao chép sẵn sàng dán ở bên kia. Khi tắt, nội dung chỉ đi qua ô bảng nhớ tạm trong thanh bên; chính sách hướng vẫn được áp dụng."
+        },
         "SELKIES_COMMAND_ENABLED": {
           "label": "Bật websocket lệnh",
           "description": "Bật phân tích cú pháp các thông điệp websocket lệnh."
@@ -388,6 +400,14 @@
         "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
           "label": "Giới hạn truyền tệp (Mbit/s)",
           "description": "Giới hạn tốc độ tĩnh dùng chung cho tất cả các lượt tải lên và tải xuống. 0 sẽ bỏ giới hạn."
+        },
+        "FILE_MANAGER_PATH": {
+          "label": "Thư mục truyền tệp",
+          "description": "Thư mục nơi các tệp tải lên được lưu và trình duyệt tệp phục vụ; được tạo khi khởi động nếu chưa có."
+        },
+        "SELKIES_PRINTING_ENABLED": {
+          "label": "Bật in",
+          "description": "Chuyển các tài liệu được in vào hàng đợi Selkies của phiên cho trình duyệt dưới dạng PDF. Khi tắt sẽ từ chối chúng và ẩn phần máy in; «Tăng cường bảo mật máy tính để bàn» sẽ tắt mục này trừ khi được đặt ở đây."
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "Bật tất cả chia sẻ",
@@ -433,6 +453,31 @@
           "label": "Kích thước con trỏ",
           "description": "Kích thước con trỏ tính bằng point ở 96 DPI, được co giãn theo DPI của phiên. -1 sử dụng mặc định của nền tảng (32 trên X11, 24 trên Wayland)."
         },
+        "SELKIES_KEYBOARD_SHORTCUTS": {
+          "label": "Phím tắt của máy khách",
+          "description": "Giữ các tổ hợp phím riêng của máy khách (Ctrl+Shift với F, M, X hoặc G, và Ctrl+Shift+nhấp) thay vì chuyển chúng tới phiên. Tắt khi một ứng dụng dùng cùng tổ hợp phím."
+        },
+        "SELKIES_MAC_CMD_AS_CTRL": {
+          "label": "Command của macOS thành Control",
+          "description": "Gửi các tổ hợp Command của máy khách macOS dưới dạng tổ hợp Control, để Cmd+C sao chép trong ứng dụng từ xa. Tắt nếu trình quản lý cửa sổ dùng Super; khi đó Command tới dưới dạng Super."
+        },
+        "SELKIES_RAW_POINTER_MOTION": {
+          "label": "Chuyển động con trỏ thô",
+          "description": "Yêu cầu trình duyệt cung cấp chuyển động con trỏ không tăng tốc khi khóa con trỏ, để con trỏ bị khóa di chuyển theo số đếm của chính chuột. Windows và macOS cho phép; Linux và Android giữ đường cong của mình."
+        },
+        "SELKIES_PUBLISH_INPUT_DEVICES": {
+          "label": "Công bố thiết bị đầu vào",
+          "description": "Phản chiếu bàn phím và con trỏ của phiên lên các thiết bị đầu vào cho những ứng dụng đọc evdev thay vì máy chủ hiển thị, như trò chơi toàn màn hình và công cụ ánh xạ lại phím. Máy tính để bàn vẫn được điều khiển như trước."
+        },
+        "SELKIES_UINPUT_GAMEPAD": {
+          "label": "Thiết bị tay cầm cấp nhân",
+          "description": "Đăng ký tay cầm qua /dev/uinput để Steam, Proton và trình duyệt trong phiên tìm thấy chúng mà không cần interposer. Tự động chỉ làm vậy khi interposer chưa được cấu hình và /dev/uinput ghi được.",
+          "options": {
+            "auto": "Tự động",
+            "always": "Luôn luôn",
+            "never": "Không bao giờ"
+          }
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "Sử dụng tỷ lệ CSS (LoDPI)",
           "description": "Nếu đúng, một độ phân giải thấp hơn sẽ được gửi và canvas sẽ được kéo dài."
@@ -457,6 +502,36 @@
           "label": "DPI tỷ lệ giao diện người dùng",
           "description": "DPI mặc định cho tỷ lệ giao diện người dùng."
         },
+        "SELKIES_VIDEO_ON_START": {
+          "label": "Bật video khi khởi động",
+          "description": "Khởi động với luồng video của màn hình đang bật. Khi tắt, không ghi hình màn hình chính cho đến khi máy khách bật video; người xem chia sẻ và màn hình thứ hai luôn khởi động luồng của mình."
+        },
+        "SELKIES_AUDIO_ON_START": {
+          "label": "Bật âm thanh khi khởi động",
+          "description": "Khởi động với âm thanh từ máy chủ tới máy khách đang bật. Khi tắt, việc thu vẫn dừng cho đến khi máy khách bật âm thanh; khác với vô hiệu hóa âm thanh, không có gì bị gỡ bỏ và micrô vẫn hoạt động."
+        },
+        "SELKIES_MICROPHONE_ON_START": {
+          "label": "Chính sách khởi động micrô",
+          "description": "Thời điểm yêu cầu micrô từ trình duyệt: khi kết nối, khi dùng công tắc ở thanh bên, hoặc chỉ trong lúc một ứng dụng ghi âm từ nguồn ảo.",
+          "options": {
+            "atConnect": "Khi kết nối",
+            "onToggle": "Khi bật công tắc ở thanh bên",
+            "onDemand": "Theo yêu cầu"
+          }
+        },
+        "SELKIES_WEBCAM_ON_START": {
+          "label": "Chính sách khởi động webcam",
+          "description": "Thời điểm yêu cầu camera từ trình duyệt: khi kết nối, khi dùng công tắc ở thanh bên, hoặc chỉ trong lúc một ứng dụng giữ thiết bị ảo đang mở.",
+          "options": {
+            "atConnect": "Khi kết nối",
+            "onToggle": "Khi bật công tắc ở thanh bên",
+            "onDemand": "Theo yêu cầu"
+          }
+        },
+        "SELKIES_GAMEPAD_ON_START": {
+          "label": "Bật tay cầm khi khởi động",
+          "description": "Khởi động với đầu vào tay cầm đang bật. Khi tắt, các tay cầm đã kết nối không được đọc cho đến khi máy khách bật; trình duyệt ghi nhớ lựa chọn đó."
+        },
         "SELKIES_AUDIO_BITRATE": {
           "label": "Bitrate âm thanh",
           "description": "Bitrate âm thanh Opus mặc định."
@@ -478,8 +553,8 @@
           "description": "Số khung trước đó được gửi kèm làm dự phòng (0-4). Giá trị cao hơn chịu được các đợt mất gói dài hơn với băng thông tăng tương ứng."
         },
         "SELKIES_ENCODER": {
-          "label": "Các bộ mã hóa",
-          "description": "Danh sách các bộ mã hóa được phép, phân tách bằng dấu phẩy (h264enc, h264enc-striped, jpeg). Đầu tiên là mặc định; một giá trị duy nhất sẽ khóa lựa chọn. Chỉ h264enc truyền phát qua WebRTC."
+          "label": "Bộ mã hóa",
+          "description": "Danh sách bộ mã hóa được phép, phân tách bằng dấu phẩy: h264enc, h265enc, vp8enc, vp9enc, av1enc, h264enc-striped, jpeg. Mục đầu là mặc định và một giá trị duy nhất khóa lựa chọn; máy khách lần lượt thử những bộ mà trình duyệt của họ giải mã được. WebRTC truyền các bộ mã hóa toàn khung; h264enc-striped và jpeg chỉ dành cho WebSocket."
         },
         "SELKIES_USE_CPU": {
           "label": "Buộc mã hóa bằng CPU",
@@ -491,7 +566,7 @@
         },
         "SELKIES_RATE_CONTROL_MODE": {
           "label": "Chế độ kiểm soát tốc độ bit",
-          "description": "Kiểm soát tốc độ bit H.264 mặc định: chất lượng không đổi (CRF) hoặc bitrate không đổi (CBR).",
+          "description": "Điều khiển tốc độ mặc định của các bộ mã hóa video: chất lượng cố định (CRF) hoặc tốc độ bit cố định (CBR).",
           "options": {
             "crf": "Chất lượng không đổi (CRF)",
             "cbr": "Bitrate không đổi (CBR)"
@@ -503,7 +578,7 @@
         },
         "SELKIES_VIDEO_CRF": {
           "label": "CRF video (Phạm vi hoặc Cố định)",
-          "description": "Chất lượng không đổi H.264: '5-50' cho một phạm vi, '25' cho giá trị ban đầu cố định, hoặc '25,5-50' cho cả hai."
+          "description": "Chất lượng cố định trên thang QP của H.264, ánh xạ sang từng codec: «5-50» cho một dải, «25» cho giá trị khởi đầu cố định, hoặc «25,5-50» cho cả hai."
         },
         "SELKIES_VIDEO_BITRATE": {
           "label": "Bitrate video kbps (Phạm vi hoặc Cố định)",
@@ -527,7 +602,7 @@
         },
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "Màu đầy đủ video (4:4:4)",
-          "description": "Mã hóa H.264 với chroma 4:4:4 thay vì 4:2:0. Các máy khách không có bộ giải mã 4:4:4 sẽ quay về JPEG khi tùy chọn này bị khóa bật."
+          "description": "Mã hóa với chroma 4:4:4 khi codec và bộ mã hóa hỗ trợ (H.264 và H.265 trên NVENC, VA-API, x264 và x265; VP9 trên VA-API và libvpx). Máy khách không có cấu hình 4:4:4 sẽ phát 4:2:0 với cùng codec trừ khi mục này bị khóa; khi đó nó chuyển sang bộ mã hóa kế tiếp mà nó giải mã được."
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "Chế độ truyền phát video (Turbo)",
@@ -563,7 +638,7 @@
         },
         "SELKIES_WEBCAM_ENCODER": {
           "label": "Bộ mã hóa đường lên webcam",
-          "description": "Codec mà các máy khách WebSocket dùng để gửi khung hình camera. Tự động chọn codec tốt nhất mà trình duyệt có thể duy trì.",
+          "description": "Codec mà máy khách dùng để mã hóa luồng camera gửi lên. Tự động đi theo bậc thang đã đo: H.264, nếu không thì VP8, rồi VP9, AV1 và H.265 khi trình duyệt mã hóa được, và JPEG khi không bộ nào theo kịp. Tên codec sẽ cố định codec đó, lùi về JPEG khi không theo kịp.",
           "options": {
             "auto": "Tự động"
           }
@@ -577,7 +652,7 @@
         },
         "HARDEN_DESKTOP": {
           "label": "Tăng cường bảo mật Desktop (Cài đặt sẵn)",
-          "description": "Bật DISABLE_OPEN_TOOLS, DISABLE_SUDO và DISABLE_TERMINALS, và trừ khi được đặt rõ ràng, cũng vô hiệu hóa truyền tệp, websocket lệnh và các phần tệp và ứng dụng trong thanh bên. Bắt buộc bật đối với người dùng có Tăng cường bảo mật Container."
+          "description": "Bật DISABLE_OPEN_TOOLS, DISABLE_SUDO và DISABLE_TERMINALS, và trừ khi được đặt rõ, cũng tắt truyền tệp, websocket lệnh, in ấn cùng các phần tệp và ứng dụng trong thanh bên. Bắt buộc với người dùng có «Tăng cường bảo mật bộ chứa»."
         },
         "HARDEN_OPENBOX": {
           "label": "Tăng cường bảo mật Trình quản lý cửa sổ (Cài đặt sẵn)",
@@ -611,6 +686,10 @@
           "label": "Khởi động lại ứng dụng khi đóng",
           "description": "Tự động khởi động lại ứng dụng chính nếu nó bị đóng và đặt tệp tự khởi động thành chỉ đọc."
         },
+        "PIXELFLUX_WAYLAND": {
+          "label": "Backend Wayland",
+          "description": "Chạy phiên trên backend Wayland, một trình tổng hợp không đầu với labwc lồng bên trong để quản lý cửa sổ, thay cho máy chủ X11. Các ứng dụng X11 chạy qua XWayland."
+        },
         "MAX_RES": {
           "label": "Độ phân giải tối đa",
           "description": "Độ phân giải tối đa cho container, mặc định là 16k."
@@ -635,6 +714,14 @@
           "label": "Tự động chọn GPU",
           "description": "'true' kết xuất trên GPU đầu tiên, 'false' vô hiệu hóa, hoặc một nhà cung cấp, trình điều khiển hay ID nhà cung cấp PCI (nvidia, amdgpu, 0x10de) sẽ chọn một GPU cụ thể."
         },
+        "DRI_NODE": {
+          "label": "Nút kết xuất để mã hóa",
+          "description": "Nút kết xuất DRI mà bộ mã hóa video dùng (VA-API hoặc NVENC), ví dụ /dev/dri/renderD128. Để trống sẽ theo lựa chọn GPU tự động."
+        },
+        "DRINODE": {
+          "label": "Nút kết xuất",
+          "description": "Nút kết xuất DRI mà máy chủ X (DRI3) hoặc trình tổng hợp Wayland kết xuất trên đó, ví dụ /dev/dri/renderD128. Để trống sẽ theo lựa chọn GPU tự động."
+        },
         "NO_DECOR": {
           "label": "Không có trang trí cửa sổ",
           "description": "Chạy ứng dụng không có viền cửa sổ để sử dụng PWA."
@@ -651,6 +738,10 @@
           "label": "Vô hiệu hóa tiêm Webcam",
           "description": "Bỏ qua thiết bị webcam ảo và trình xen kẽ. Cũng ẩn nút webcam."
         },
+        "NO_STEAM": {
+          "label": "Gỡ shim Steam",
+          "description": "Không cài trình bao khởi chạy Steam của ảnh, dành cho các ảnh có Steam riêng."
+        },
         "SELKIES_RUN_AFTER_CONNECT": {
           "label": "Chạy sau khi kết nối",
           "description": "Lệnh shell được chạy bên trong container khi máy khách đầu tiên kết nối."
@@ -658,6 +749,38 @@
         "SELKIES_RUN_AFTER_DISCONNECT": {
           "label": "Chạy sau khi ngắt kết nối",
           "description": "Lệnh shell được chạy bên trong container khi máy khách cuối cùng ngắt kết nối."
+        },
+        "SELKIES_APP_WAIT_READY": {
+          "label": "Chờ tệp báo ứng dụng sẵn sàng",
+          "description": "Chỉ bắt đầu phát khi tệp sẵn sàng tồn tại, dành cho các ảnh có sidecar báo hiệu khi ứng dụng đã chạy."
+        },
+        "SELKIES_APP_READY_FILE": {
+          "label": "Tệp báo ứng dụng sẵn sàng",
+          "description": "Tệp mà sidecar tạo khi ứng dụng đã khởi tạo xong."
+        },
+        "SELKIES_AUDIT_WEBHOOK_URL": {
+          "label": "URL webhook kiểm toán",
+          "description": "Nhận một JSON POST cho mỗi lần truyền bảng nhớ tạm, tải lên hoặc tải xuống tệp, tài liệu được in, kết nối trang và bản ghi, chỉ gồm siêu dữ liệu và không bao giờ có nội dung. Để trống sẽ không gửi gì."
+        },
+        "SELKIES_AUDIT_WEBHOOK_TOKEN": {
+          "label": "Mã thông báo webhook kiểm toán",
+          "description": "Mã thông báo Bearer gửi trong tiêu đề Authorization của mọi POST kiểm toán."
+        },
+        "SELKIES_AUDIT_WEBHOOK_TIMEOUT": {
+          "label": "Thời gian chờ webhook kiểm toán (giây)",
+          "description": "Số giây một POST kiểm toán được phép kéo dài trước khi bị coi là thất bại và sự kiện tiếp theo được gửi."
+        },
+        "SELKIES_COMPUTER_USE_BIND": {
+          "label": "Máy chủ Computer-Use",
+          "description": "Khởi động máy chủ HTTP Computer-Use của pixelflux trên các mục phân tách bằng dấu phẩy này: chỉ một cổng sẽ lắng nghe trên loopback, host:port chỉ định địa chỉ. Để trống sẽ giữ tắt."
+        },
+        "SELKIES_RECORDING_SOCKET": {
+          "label": "Socket ghi hình",
+          "description": "Đường dẫn socket Unix của nhánh ghi hình, cung cấp luồng video cho các trình ghi đã kết nối. Để trống sẽ giữ tắt."
+        },
+        "SELKIES_ENABLE_METRICS_HTTP": {
+          "label": "Số liệu Prometheus",
+          "description": "Cung cấp điểm cuối Prometheus /metrics."
         },
         "SELKIES_DEBUG": {
           "label": "Bật gỡ lỗi Selkies",
@@ -688,6 +811,22 @@
         "SELKIES_CONGESTION_CONTROL": {
           "label": "Kiểm soát tắc nghẽn",
           "description": "Điều chỉnh bitrate video theo ước tính băng thông từ phản hồi của bên nhận WebRTC. Có hiệu lực ở chế độ CBR."
+        },
+        "SELKIES_WEBRTC_ICE_LITE": {
+          "label": "ICE-Lite",
+          "description": "Chỉ đưa ra các ứng viên máy chủ và trả lời các kiểm tra kết nối của máy khách, dành cho máy chủ có địa chỉ truy cập được như đã công bố: IP công cộng, NAT tĩnh đã đặt IP công cộng, hoặc các cổng mux được chuyển tiếp."
+        },
+        "SELKIES_WEBRTC_PORT_RANGE": {
+          "label": "Dải cổng UDP",
+          "description": "Dải bao gồm hai đầu, ví dụ 50000-50100, mà các socket phía sau ứng viên máy chủ trực tiếp gắn vào, dành cho các triển khai cấp cho mỗi phiên một cửa sổ tường lửa nhỏ. Để trống sẽ dùng cổng tạm thời."
+        },
+        "SELKIES_WEBRTC_UDP_MUX_PORT": {
+          "label": "Cổng mux UDP",
+          "description": "Một cổng UDP mà mọi phiên dùng chung cho ứng viên máy chủ, để một cổng được chuyển tiếp phục vụ bất kỳ số phiên nào. 0 cho mỗi phiên socket riêng."
+        },
+        "SELKIES_WEBRTC_TCP_MUX_PORT": {
+          "label": "Cổng mux TCP",
+          "description": "Một cổng TCP nhận kết nối ICE-TCP cho máy khách trên các mạng chặn UDP; 443 là lựa chọn công cộng thường dùng. 0 không đưa ra ứng viên TCP."
         },
         "SELKIES_STUN_HOST": {
           "label": "Máy chủ STUN",
@@ -737,6 +876,18 @@
           "label": "Tên người dùng TURN REST",
           "description": "Tên người dùng mà dịch vụ TURN REST nhúng vào thông tin xác thực. Để trống sẽ dùng 'selkies'."
         },
+        "SELKIES_TURN_REST_USERNAME_AUTH_HEADER": {
+          "label": "Tiêu đề tên người dùng TURN REST",
+          "description": "Tiêu đề mang tên người dùng tới dịch vụ TURN REST."
+        },
+        "SELKIES_TURN_REST_PROTOCOL_HEADER": {
+          "label": "Tiêu đề giao thức TURN REST",
+          "description": "Tiêu đề mang giao thức vận chuyển TURN mong muốn tới dịch vụ TURN REST."
+        },
+        "SELKIES_TURN_REST_TLS_HEADER": {
+          "label": "Tiêu đề TLS TURN REST",
+          "description": "Tiêu đề mang lựa chọn TLS của TURN tới dịch vụ TURN REST."
+        },
         "SELKIES_WEBRTC_PUBLIC_IP": {
           "label": "IP công khai WebRTC",
           "description": "Địa chỉ công khai được quảng bá trong các ứng viên ICE của máy chủ đối với máy chủ nằm sau NAT 1:1 tĩnh. Một địa chỉ IPv4 và/hoặc một địa chỉ IPv6."
@@ -756,6 +907,10 @@
         "SELKIES_RTC_CONFIG_JSON": {
           "label": "Đường dẫn JSON cấu hình RTC",
           "description": "Đường dẫn bên trong container đến một tệp JSON chứa cấu hình WebRTC. Ghi đè mọi cài đặt STUN/TURN khác và được đọc lại định kỳ."
+        },
+        "SELKIES_ENABLE_WEBRTC_STATISTICS": {
+          "label": "Xuất thống kê WebRTC",
+          "description": "Ghi thống kê WebRTC của máy khách thành các tệp CSV trong /tmp của bộ chứa, để chẩn đoán."
         },
         "DOCKER_PRIVILEGED": {
           "label": "Chế độ đặc quyền",

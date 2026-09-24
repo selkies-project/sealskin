@@ -305,6 +305,10 @@
           "label": "Gamepad-sectie Tonen",
           "description": "Toon de gamepadsectie in de zijbalk."
         },
+        "SELKIES_UI_SIDEBAR_SHOW_WEBCAM": {
+          "label": "Webcamknop tonen",
+          "description": "Toont de webcamschakelaar tussen de kernknoppen en streambediening. Verbergt alleen de bediening; „Webcam inschakelen” bepaalt of de server camerabeelden accepteert."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
           "label": "Volledig Scherm Knop Tonen",
           "description": "Toon de knop voor volledig scherm in de zijbalk."
@@ -359,6 +363,10 @@
           "label": "Microfoon Inschakelen",
           "description": "Schakel client-naar-server microfoon doorsturen in. Standaard uitgeschakeld upstream."
         },
+        "SELKIES_WEBCAM_ENABLED": {
+          "label": "Webcam inschakelen",
+          "description": "Stuurt de camera van de client door naar het virtuele webcamapparaat. De basisimage zet dit aan wanneer het apparaat wordt aangemaakt; „Webcaminjectie uitschakelen” verwijdert beide."
+        },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "Gamepad Inschakelen",
           "description": "Schakel gamepad-ondersteuning in."
@@ -377,6 +385,10 @@
           "label": "Binair Klembord Inschakelen",
           "description": "Sta binaire gegevens (afbeeldingen) toe op het klembord."
         },
+        "SELKIES_CLIPBOARD_SEAMLESS": {
+          "label": "Naadloze klembordsynchronisatie",
+          "description": "Synchroniseert het klembord zodra een kant het wijzigt, zodat een kopie aan de andere kant direct te plakken is. Uit verplaatst inhoud alleen via het klembordvak in de zijbalk; het richtingsbeleid blijft gelden."
+        },
         "SELKIES_COMMAND_ENABLED": {
           "label": "Commando Websocket Inschakelen",
           "description": "Schakel het parsen van commando websocket-berichten in."
@@ -388,6 +400,14 @@
         "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
           "label": "Bestandsoverdrachtlimiet (Mbit/s)",
           "description": "Statische begrenzing gedeeld door alle uploads en downloads. 0 schakelt de limiet uit."
+        },
+        "FILE_MANAGER_PATH": {
+          "label": "Map voor bestandsoverdrachten",
+          "description": "Map waar uploads terechtkomen en die de bestandsbrowser aanbiedt, bij het starten aangemaakt als die ontbreekt."
+        },
+        "SELKIES_PRINTING_ENABLED": {
+          "label": "Afdrukken inschakelen",
+          "description": "Geeft documenten die naar de Selkies-wachtrij van de sessie zijn afgedrukt als PDF aan de browser. Uit weigert ze en verbergt de printersectie; „Bureaublad verharden” zet het uit tenzij hier ingesteld."
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "Alle Deling Inschakelen",
@@ -433,6 +453,31 @@
           "label": "Cursorgrootte",
           "description": "Cursorgrootte in punten bij 96 DPI, geschaald met de sessie-DPI. -1 gebruikt de platformstandaard (32 op X11, 24 op Wayland)."
         },
+        "SELKIES_KEYBOARD_SHORTCUTS": {
+          "label": "Sneltoetsen van de client",
+          "description": "Behoudt de eigen toetscombinaties van de client (Ctrl+Shift met F, M, X of G, en Ctrl+Shift+klik) in plaats van ze aan de sessie door te geven. Uitzetten waar een toepassing dezelfde combinaties gebruikt."
+        },
+        "SELKIES_MAC_CMD_AS_CTRL": {
+          "label": "macOS Command als Control",
+          "description": "Stuurt de Command-combinaties van een macOS-client als Control-combinaties, zodat Cmd+C kopieert in de externe toepassing. Uitzetten als de vensterbeheerder Super gebruikt; Command komt dan aan als Super."
+        },
+        "SELKIES_RAW_POINTER_MOTION": {
+          "label": "Onbewerkte aanwijzerbeweging",
+          "description": "Vraagt de browser om onversnelde aanwijzerbeweging bij een vergrendelde aanwijzer, zodat die beweegt volgens de tellingen van de muis zelf. Windows en macOS staan dit toe; Linux en Android houden hun curve."
+        },
+        "SELKIES_PUBLISH_INPUT_DEVICES": {
+          "label": "Invoerapparaten publiceren",
+          "description": "Spiegelt het toetsenbord en de aanwijzer van de sessie naar invoerapparaten voor toepassingen die evdev lezen in plaats van de displayserver, zoals schermvullende spellen en remappers. Het bureaublad wordt aangestuurd als voorheen."
+        },
+        "SELKIES_UINPUT_GAMEPAD": {
+          "label": "Gamepads als kernelapparaten",
+          "description": "Registreert gamepads via /dev/uinput zodat Steam, Proton en browsers in de sessie ze zonder de interposer vinden. Auto doet dit alleen waar de interposer niet is geconfigureerd en /dev/uinput schrijfbaar is.",
+          "options": {
+            "auto": "Auto",
+            "always": "Altijd",
+            "never": "Nooit"
+          }
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "CSS Schalen Gebruiken (LoDPI)",
           "description": "Indien waar, wordt een lagere resolutie verzonden en wordt het canvas uitgerekt."
@@ -457,6 +502,36 @@
           "label": "UI Schaling DPI",
           "description": "De standaard DPI voor UI-schaling."
         },
+        "SELKIES_VIDEO_ON_START": {
+          "label": "Video aan bij start",
+          "description": "Start met de videostream van het scherm aan. Uit legt niets vast van het primaire scherm totdat de client video aanzet; gedeelde kijkers en tweede schermen starten hun stream altijd."
+        },
+        "SELKIES_AUDIO_ON_START": {
+          "label": "Audio aan bij start",
+          "description": "Start met audio van server naar client aan. Uit laat de opname gestopt totdat de client audio aanzet; anders dan bij uitschakelen wordt niets afgebroken en blijft de microfoon werken."
+        },
+        "SELKIES_MICROPHONE_ON_START": {
+          "label": "Startbeleid microfoon",
+          "description": "Wanneer de browser om de microfoon wordt gevraagd: bij verbinden, bij gebruik van de schakelaar in de zijbalk, of alleen terwijl een toepassing opneemt van de virtuele bron.",
+          "options": {
+            "atConnect": "Bij verbinden",
+            "onToggle": "Via de schakelaar in de zijbalk",
+            "onDemand": "Op aanvraag"
+          }
+        },
+        "SELKIES_WEBCAM_ON_START": {
+          "label": "Startbeleid webcam",
+          "description": "Wanneer de browser om de camera wordt gevraagd: bij verbinden, bij gebruik van de schakelaar in de zijbalk, of alleen terwijl een toepassing het virtuele apparaat open houdt.",
+          "options": {
+            "atConnect": "Bij verbinden",
+            "onToggle": "Via de schakelaar in de zijbalk",
+            "onDemand": "Op aanvraag"
+          }
+        },
+        "SELKIES_GAMEPAD_ON_START": {
+          "label": "Gamepads aan bij start",
+          "description": "Start met gamepadinvoer aan. Uit laat aangesloten gamepads ongelezen totdat de client ze aanzet; de browser onthoudt die keuze."
+        },
         "SELKIES_AUDIO_BITRATE": {
           "label": "Audio Bitrate",
           "description": "De standaard Opus audio bitrate."
@@ -479,7 +554,7 @@
         },
         "SELKIES_ENCODER": {
           "label": "Encoders",
-          "description": "Komma-gescheiden lijst van toegestane encoders (h264enc, h264enc-striped, jpeg). De eerste is standaard; een enkele waarde vergrendelt de keuze. Alleen h264enc streamt over WebRTC."
+          "description": "Door komma's gescheiden lijst van toegestane encoders: h264enc, h265enc, vp8enc, vp9enc, av1enc, h264enc-striped, jpeg. De eerste is de standaard en één enkele waarde vergrendelt de keuze; clients lopen de encoders af die hun browser decodeert. WebRTC draagt de volledigeframe-encoders; h264enc-striped en jpeg zijn alleen voor WebSocket."
         },
         "SELKIES_USE_CPU": {
           "label": "CPU-codering Forceren",
@@ -491,7 +566,7 @@
         },
         "SELKIES_RATE_CONTROL_MODE": {
           "label": "Rate Control Modus",
-          "description": "Standaard H.264 rate control: constante kwaliteit (CRF) of constante bitrate (CBR).",
+          "description": "Standaard bitratebeheer van de videocoders: constante kwaliteit (CRF) of constante bitrate (CBR).",
           "options": {
             "crf": "Constante kwaliteit (CRF)",
             "cbr": "Constante bitrate (CBR)"
@@ -503,7 +578,7 @@
         },
         "SELKIES_VIDEO_CRF": {
           "label": "Video CRF (Bereik of Vast)",
-          "description": "H.264 constante kwaliteit: '5-50' voor een bereik, '25' voor een vaste beginwaarde, of '25,5-50' voor beide."
+          "description": "Constante kwaliteit op de H.264-QP-schaal, per codec vertaald: „5-50” voor een bereik, „25” voor een vaste beginwaarde of „25,5-50” voor beide."
         },
         "SELKIES_VIDEO_BITRATE": {
           "label": "Video Bitrate kbps (Bereik of Vast)",
@@ -527,7 +602,7 @@
         },
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "Video Volledige Kleur (4:4:4)",
-          "description": "Codeer H.264 met 4:4:4 chroma in plaats van 4:2:0. Clients zonder 4:4:4-decoder vallen terug op JPEG als dit vergrendeld aan staat."
+          "description": "Codeert met 4:4:4-chroma waar codec en encoder het dragen (H.264 en H.265 op NVENC, VA-API, x264 en x265; VP9 op VA-API en libvpx). Een client zonder 4:4:4-profiel streamt 4:2:0 met dezelfde codec tenzij dit is vergrendeld; dan stapt hij over naar de volgende encoder die hij decodeert."
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "Video Streaming (Turbo) Modus",
@@ -563,7 +638,7 @@
         },
         "SELKIES_WEBCAM_ENCODER": {
           "label": "Webcam Uplink Encoder",
-          "description": "Codec die WebSocket-clients gebruiken om cameraframes te verzenden. Auto kiest de beste die de browser kan volhouden.",
+          "description": "Codec waarmee clients de camera-uplink coderen. Auto loopt de gemeten ladder af: H.264, anders VP8, dan VP9, AV1 en H.265 waar de browser ze codeert, en JPEG wanneer geen ervan bijblijft. Een codecnaam legt die codec vast en valt terug op JPEG waar die niet bijblijft.",
           "options": {
             "auto": "Auto"
           }
@@ -577,7 +652,7 @@
         },
         "HARDEN_DESKTOP": {
           "label": "Desktop Beveiligen (Preset)",
-          "description": "Schakelt DISABLE_OPEN_TOOLS, DISABLE_SUDO en DISABLE_TERMINALS in, en schakelt, tenzij expliciet ingesteld, ook bestandsoverdrachten, de commando websocket en de bestands- en app-secties in de zijbalk uit. Geforceerd aan voor gebruikers met Container Beveiligen."
+          "description": "Schakelt DISABLE_OPEN_TOOLS, DISABLE_SUDO en DISABLE_TERMINALS in en schakelt, tenzij expliciet ingesteld, ook bestandsoverdrachten, de opdrachten-websocket, afdrukken en de secties bestanden en apps in de zijbalk uit. Geforceerd voor gebruikers met „Container verharden”."
         },
         "HARDEN_OPENBOX": {
           "label": "Window Manager Beveiligen (Preset)",
@@ -611,6 +686,10 @@
           "label": "App Herstarten bij Sluiten",
           "description": "Herstart de hoofdapplicatie automatisch als deze wordt gesloten en maakt het autostart-bestand alleen-lezen."
         },
+        "PIXELFLUX_WAYLAND": {
+          "label": "Wayland-backend",
+          "description": "Draait de sessie op de Wayland-backend, een headless compositor met geneste labwc voor vensterbeheer, in plaats van de X11-server. X11-toepassingen draaien via XWayland."
+        },
         "MAX_RES": {
           "label": "Maximale Resolutie",
           "description": "Max resolutie voor de container, standaard is 16k."
@@ -635,6 +714,14 @@
           "label": "Automatische GPU-selectie",
           "description": "'true' rendert op de eerste GPU, 'false' schakelt het uit, of een fabrikant, driver of PCI-fabrikant-ID (nvidia, amdgpu, 0x10de) kiest een specifieke."
         },
+        "DRI_NODE": {
+          "label": "Rendernode voor codering",
+          "description": "DRI-rendernode die de videocoder gebruikt (VA-API of NVENC), zoals /dev/dri/renderD128. Leeg volgt de automatische GPU-selectie."
+        },
+        "DRINODE": {
+          "label": "Rendernode",
+          "description": "DRI-rendernode waarop de X-server (DRI3) of de Wayland-compositor rendert, zoals /dev/dri/renderD128. Leeg volgt de automatische GPU-selectie."
+        },
         "NO_DECOR": {
           "label": "Geen Vensterdecoraties",
           "description": "Draai applicatie zonder vensterranden voor PWA-gebruik."
@@ -651,6 +738,10 @@
           "label": "Webcam Injectie Uitschakelen",
           "description": "Sla het virtuele webcam-apparaat en de interposer over. Verbergt ook de webcamknop."
         },
+        "NO_STEAM": {
+          "label": "Steam-shim verwijderen",
+          "description": "Installeert de Steam-startwrapper van de image niet, voor images met een eigen Steam."
+        },
         "SELKIES_RUN_AFTER_CONNECT": {
           "label": "Uitvoeren na Verbinden",
           "description": "Shell-commando dat in de container wordt uitgevoerd wanneer de eerste client verbinding maakt."
@@ -658,6 +749,38 @@
         "SELKIES_RUN_AFTER_DISCONNECT": {
           "label": "Uitvoeren na Verbreken",
           "description": "Shell-commando dat in de container wordt uitgevoerd wanneer de laatste client de verbinding verbreekt."
+        },
+        "SELKIES_APP_WAIT_READY": {
+          "label": "Wachten op app-gereedbestand",
+          "description": "Streamt pas zodra het gereedbestand bestaat, voor images waarvan de sidecar meldt wanneer de toepassing draait."
+        },
+        "SELKIES_APP_READY_FILE": {
+          "label": "App-gereedbestand",
+          "description": "Bestand dat de sidecar aanmaakt wanneer de toepassing is geïnitialiseerd."
+        },
+        "SELKIES_AUDIT_WEBHOOK_URL": {
+          "label": "URL van audit-webhook",
+          "description": "Ontvangt één JSON-POST per klembordoverdracht, bestandsupload of -download, afgedrukt document, paginaverbinding en opname, met alleen metadata en nooit inhoud. Leeg verstuurt niets."
+        },
+        "SELKIES_AUDIT_WEBHOOK_TOKEN": {
+          "label": "Token van audit-webhook",
+          "description": "Bearer-token dat in de Authorization-header van elke audit-POST wordt meegestuurd."
+        },
+        "SELKIES_AUDIT_WEBHOOK_TIMEOUT": {
+          "label": "Time-out van audit-webhook (seconden)",
+          "description": "Seconden die een audit-POST mag duren voordat die als mislukt telt en het volgende event wordt verstuurd."
+        },
+        "SELKIES_COMPUTER_USE_BIND": {
+          "label": "Computer-Use-server",
+          "description": "Start de Computer-Use-HTTP-server van pixelflux op deze door komma's gescheiden ingangen: een kale poort luistert alleen op loopback, host:poort noemt het adres. Leeg laat hem uit."
+        },
+        "SELKIES_RECORDING_SOCKET": {
+          "label": "Opnamesocket",
+          "description": "Pad van de Unix-socket van de opnameaftakking, die de videostream aan verbonden recorders levert. Leeg laat die uit."
+        },
+        "SELKIES_ENABLE_METRICS_HTTP": {
+          "label": "Prometheus-metrieken",
+          "description": "Biedt het Prometheus-eindpunt /metrics aan."
         },
         "SELKIES_DEBUG": {
           "label": "Selkies Debugging Inschakelen",
@@ -688,6 +811,22 @@
         "SELKIES_CONGESTION_CONTROL": {
           "label": "Congestiebeheer",
           "description": "Pas de videobitrate aan aan de bandbreedteschatting uit WebRTC-ontvangerfeedback. Effectief in CBR-modus."
+        },
+        "SELKIES_WEBRTC_ICE_LITE": {
+          "label": "ICE-Lite",
+          "description": "Biedt alleen hostkandidaten aan en beantwoordt de connectiviteitscontroles van de client, voor een server waarvan de adressen bereikbaar zijn zoals aangekondigd: een publiek IP, een statische NAT met ingesteld publiek IP, of doorgestuurde mux-poorten."
+        },
+        "SELKIES_WEBRTC_PORT_RANGE": {
+          "label": "UDP-poortbereik",
+          "description": "Inclusief bereik, zoals 50000-50100, waarin de sockets achter directe hostkandidaten binden, voor uitrol die elke sessie een klein firewallvenster toewijst. Leeg gebruikt tijdelijke poorten."
+        },
+        "SELKIES_WEBRTC_UDP_MUX_PORT": {
+          "label": "UDP-muxpoort",
+          "description": "Eén UDP-poort die alle sessies delen voor hun hostkandidaten, zodat één doorgestuurde poort elk aantal sessies bedient. 0 geeft elke sessie eigen sockets."
+        },
+        "SELKIES_WEBRTC_TCP_MUX_PORT": {
+          "label": "TCP-muxpoort",
+          "description": "Eén TCP-poort die ICE-TCP-verbindingen accepteert voor clients op netwerken die UDP blokkeren; 443 is de gebruikelijke publieke keuze. 0 biedt geen TCP-kandidaten aan."
         },
         "SELKIES_STUN_HOST": {
           "label": "STUN Host",
@@ -737,6 +876,18 @@
           "label": "TURN REST Gebruikersnaam",
           "description": "Gebruikersnaam die de TURN REST-service in de referentie opneemt. Leeg gebruikt 'selkies'."
         },
+        "SELKIES_TURN_REST_USERNAME_AUTH_HEADER": {
+          "label": "TURN REST-gebruikersheader",
+          "description": "Header die de gebruikersnaam aan de TURN REST-dienst doorgeeft."
+        },
+        "SELKIES_TURN_REST_PROTOCOL_HEADER": {
+          "label": "TURN REST-protocolheader",
+          "description": "Header die het gewenste TURN-transportprotocol aan de TURN REST-dienst doorgeeft."
+        },
+        "SELKIES_TURN_REST_TLS_HEADER": {
+          "label": "TURN REST-TLS-header",
+          "description": "Header die de TURN-TLS-keuze aan de TURN REST-dienst doorgeeft."
+        },
         "SELKIES_WEBRTC_PUBLIC_IP": {
           "label": "WebRTC Publiek IP",
           "description": "Publiek adres dat wordt geadverteerd in host ICE-kandidaten voor een server achter statische 1:1 NAT. Eén IPv4- en/of één IPv6-adres."
@@ -756,6 +907,10 @@
         "SELKIES_RTC_CONFIG_JSON": {
           "label": "RTC Config JSON Pad",
           "description": "Pad binnen de container naar een JSON-bestand met de WebRTC-configuratie. Overschrijft alle andere STUN/TURN-instellingen en wordt periodiek opnieuw gelezen."
+        },
+        "SELKIES_ENABLE_WEBRTC_STATISTICS": {
+          "label": "WebRTC-statistieken wegschrijven",
+          "description": "Schrijft de WebRTC-statistieken van de client als CSV-bestanden onder /tmp in de container, voor diagnose."
         },
         "DOCKER_PRIVILEGED": {
           "label": "Geprivilegieerde Modus",

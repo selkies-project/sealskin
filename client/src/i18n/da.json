@@ -305,6 +305,10 @@
           "label": "Vis Gamepad-sektion",
           "description": "Vis gamepad-sektionen i sidepanelet."
         },
+        "SELKIES_UI_SIDEBAR_SHOW_WEBCAM": {
+          "label": "Vis webcam-knap",
+          "description": "Viser webcam-kontakten blandt kerneknapperne og streamkontrollerne. Skjuler kun kontrollen; „Aktivér webcam“ afgør, om serveren tager imod kamerabilleder."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN": {
           "label": "Vis Fuldskærmsknap",
           "description": "Vis fuldskærmsknappen i sidepanelet."
@@ -359,6 +363,10 @@
           "label": "Aktiver Mikrofon",
           "description": "Aktiver mikrofon-forwarding fra klient til server. Som standard slået fra upstream."
         },
+        "SELKIES_WEBCAM_ENABLED": {
+          "label": "Aktivér webcam",
+          "description": "Sender klientens kamera videre til den virtuelle webcam-enhed. Basisimaget slår det til, når det opretter enheden; „Deaktivér webcam-injektion“ fjerner begge."
+        },
         "SELKIES_GAMEPAD_ENABLED": {
           "label": "Aktiver Gamepad",
           "description": "Aktiver gamepad-understøttelse."
@@ -377,6 +385,10 @@
           "label": "Aktiver Binær Udklipsholder",
           "description": "Tillad binære data (billeder) i udklipsholderen."
         },
+        "SELKIES_CLIPBOARD_SEAMLESS": {
+          "label": "Sømløs synkronisering af udklipsholder",
+          "description": "Synkroniserer udklipsholderen, så snart en af siderne ændrer den, så en kopi er klar til at indsætte på den anden. Fra flytter kun indhold via sidepanelets udklipsholderfelt; retningspolitikken gælder stadig."
+        },
         "SELKIES_COMMAND_ENABLED": {
           "label": "Aktiver Kommando Websocket",
           "description": "Aktiver parsing af kommando-websocket-meddelelser."
@@ -388,6 +400,14 @@
         "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
           "label": "Filoverførselsgrænse (Mbit/s)",
           "description": "Statisk begrænsning delt af alle uploads og downloads. 0 deaktiverer loftet."
+        },
+        "FILE_MANAGER_PATH": {
+          "label": "Mappe til filoverførsler",
+          "description": "Mappe, hvor uploads lander, og som filbrowseren viser; oprettes ved start, hvis den mangler."
+        },
+        "SELKIES_PRINTING_ENABLED": {
+          "label": "Aktivér udskrivning",
+          "description": "Giver dokumenter udskrevet til sessionens Selkies-kø til browseren som PDF. Fra afviser dem og skjuler printerafsnittet; „Hærd skrivebord“ slår det fra, medmindre det sættes her."
         },
         "SELKIES_ENABLE_SHARING": {
           "label": "Aktiver al Deling",
@@ -433,6 +453,31 @@
           "label": "Markørstørrelse",
           "description": "Markørstørrelse i punkter ved 96 DPI, skaleret med sessionens DPI. -1 bruger platformens standard (32 på X11, 24 på Wayland)."
         },
+        "SELKIES_KEYBOARD_SHORTCUTS": {
+          "label": "Klientens tastaturgenveje",
+          "description": "Beholder klientens egne tastekombinationer (Ctrl+Skift med F, M, X eller G samt Ctrl+Skift+klik) i stedet for at sende dem til sessionen. Slå fra, hvor et program bruger de samme kombinationer."
+        },
+        "SELKIES_MAC_CMD_AS_CTRL": {
+          "label": "macOS-kommando som Ctrl",
+          "description": "Sender en macOS-klients kommandokombinationer som Ctrl-kombinationer, så Cmd+C kopierer i det fjerne program. Slå fra, hvis vindueshåndteringen bruger Super; Kommando ankommer så som Super."
+        },
+        "SELKIES_RAW_POINTER_MOTION": {
+          "label": "Rå markørbevægelse",
+          "description": "Beder browseren om uaccelereret markørbevægelse under markørlås, så en låst markør følger musens egne tællinger. Windows og macOS tillader det; Linux og Android beholder deres kurve."
+        },
+        "SELKIES_PUBLISH_INPUT_DEVICES": {
+          "label": "Udgiv inputenheder",
+          "description": "Spejler sessionens tastatur og markør på inputenheder til programmer, der læser evdev i stedet for displayserveren, såsom fuldskærmsspil og remappere. Skrivebordet styres som før."
+        },
+        "SELKIES_UINPUT_GAMEPAD": {
+          "label": "Gamepads som kerneenheder",
+          "description": "Registrerer gamepads via /dev/uinput, så Steam, Proton og browsere i sessionen finder dem uden interposeren. Auto gør det kun, hvor interposeren ikke er konfigureret, og /dev/uinput kan skrives.",
+          "options": {
+            "auto": "Auto",
+            "always": "Altid",
+            "never": "Aldrig"
+          }
+        },
         "SELKIES_USE_CSS_SCALING": {
           "label": "Brug CSS-skalering (LoDPI)",
           "description": "Hvis sand, sendes en lavere opløsning, og canvas strækkes."
@@ -457,6 +502,36 @@
           "label": "UI Skalering DPI",
           "description": "Standard DPI for UI-skalering."
         },
+        "SELKIES_VIDEO_ON_START": {
+          "label": "Video slået til ved start",
+          "description": "Starter med skærmens videostream slået til. Fra optager intet fra den primære skærm, før klienten slår video til; delte tilskuere og anden skærm starter altid deres stream."
+        },
+        "SELKIES_AUDIO_ON_START": {
+          "label": "Lyd slået til ved start",
+          "description": "Starter med lyd fra server til klient slået til. Fra lader optagelsen være stoppet, til klienten slår lyd til; i modsætning til at deaktivere lyd nedbrydes intet, og mikrofonen virker fortsat."
+        },
+        "SELKIES_MICROPHONE_ON_START": {
+          "label": "Startpolitik for mikrofon",
+          "description": "Hvornår browseren bedes om mikrofonen: ved forbindelse, når sidepanelets kontakt bruges, eller kun mens et program optager fra den virtuelle kilde.",
+          "options": {
+            "atConnect": "Ved forbindelse",
+            "onToggle": "Via sidepanelets kontakt",
+            "onDemand": "Efter behov"
+          }
+        },
+        "SELKIES_WEBCAM_ON_START": {
+          "label": "Startpolitik for webcam",
+          "description": "Hvornår browseren bedes om kameraet: ved forbindelse, når sidepanelets kontakt bruges, eller kun mens et program holder den virtuelle enhed åben.",
+          "options": {
+            "atConnect": "Ved forbindelse",
+            "onToggle": "Via sidepanelets kontakt",
+            "onDemand": "Efter behov"
+          }
+        },
+        "SELKIES_GAMEPAD_ON_START": {
+          "label": "Gamepads slået til ved start",
+          "description": "Starter med gamepad-input slået til. Fra lader tilsluttede gamepads være ulæste, til klienten slår dem til; browseren husker valget."
+        },
         "SELKIES_AUDIO_BITRATE": {
           "label": "Lyd Bitrate",
           "description": "Standard Opus lyd-bitrate."
@@ -478,8 +553,8 @@
           "description": "Antal tidligere frames, der medsendes som redundans (0-4). Højere overlever længere tabsperioder mod proportionelt mere båndbredde."
         },
         "SELKIES_ENCODER": {
-          "label": "Encodere",
-          "description": "Kommasepareret liste af tilladte encodere (h264enc, h264enc-striped, jpeg). Den første er standard; en enkelt værdi låser valget. Kun h264enc streamer over WebRTC."
+          "label": "Kodere",
+          "description": "Kommasepareret liste over tilladte kodere: h264enc, h265enc, vp8enc, vp9enc, av1enc, h264enc-striped, jpeg. Den første er standard, og én værdi låser valget; klienter går dem igennem, som deres browser dekoder. WebRTC bærer fuldbilledkoderne; h264enc-striped og jpeg er kun til WebSocket."
         },
         "SELKIES_USE_CPU": {
           "label": "Tving CPU Encoding",
@@ -491,7 +566,7 @@
         },
         "SELKIES_RATE_CONTROL_MODE": {
           "label": "Ratestyringstilstand",
-          "description": "Standard H.264-ratestyring: konstant kvalitet (CRF) eller konstant bitrate (CBR).",
+          "description": "Standard ratestyring for videokoderne: konstant kvalitet (CRF) eller konstant bitrate (CBR).",
           "options": {
             "crf": "Konstant kvalitet (CRF)",
             "cbr": "Konstant bitrate (CBR)"
@@ -503,7 +578,7 @@
         },
         "SELKIES_VIDEO_CRF": {
           "label": "Video CRF (Område eller Fast)",
-          "description": "H.264 konstant kvalitet: '5-50' for et område, '25' for en fast startværdi eller '25,5-50' for begge."
+          "description": "Konstant kvalitet på H.264-QP-skalaen, overført til hvert codec: „5-50“ for et interval, „25“ for en fast startværdi eller „25,5-50“ for begge."
         },
         "SELKIES_VIDEO_BITRATE": {
           "label": "Video Bitrate kbps (Område eller Fast)",
@@ -527,7 +602,7 @@
         },
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "Video Fuld Farve (4:4:4)",
-          "description": "Encode H.264 med 4:4:4 chroma i stedet for 4:2:0. Klienter uden en 4:4:4-decoder falder tilbage til JPEG, når dette er låst til."
+          "description": "Koder med 4:4:4-chroma, hvor codec og koder understøtter det (H.264 og H.265 på NVENC, VA-API, x264 og x265; VP9 på VA-API og libvpx). En klient uden 4:4:4-profil streamer 4:2:0 med samme codec, medmindre dette er låst; så går den videre til den næste koder, den dekoder."
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "Video Streaming (Turbo) Tilstand",
@@ -563,7 +638,7 @@
         },
         "SELKIES_WEBCAM_ENCODER": {
           "label": "Webcam Uplink-encoder",
-          "description": "Codec, som WebSocket-klienter bruger til at sende kameraframes. Auto vælger det bedste, browseren kan holde.",
+          "description": "Codec, som klienter koder kameraets uplink med. Auto går den målte rækkefølge igennem: H.264, ellers VP8, så VP9, AV1 og H.265, hvor browseren koder dem, og JPEG, når ingen følger med. Et codecnavn fastlåser det og falder tilbage til JPEG, hvor det ikke følger med.",
           "options": {
             "auto": "Auto"
           }
@@ -577,7 +652,7 @@
         },
         "HARDEN_DESKTOP": {
           "label": "Hærd Desktop (Forudindstilling)",
-          "description": "Aktiverer DISABLE_OPEN_TOOLS, DISABLE_SUDO og DISABLE_TERMINALS, og medmindre det angives eksplicit, deaktiveres også filoverførsler, kommando-websocket samt fil- og app-sektionerne i sidepanelet. Tvunget til for brugere med Hærd Container."
+          "description": "Aktiverer DISABLE_OPEN_TOOLS, DISABLE_SUDO og DISABLE_TERMINALS og deaktiverer, medmindre det er sat udtrykkeligt, også filoverførsler, kommando-websocketen, udskrivning samt sidepanelets fil- og app-afsnit. Gennemtvinges for brugere med „Hærd container“."
         },
         "HARDEN_OPENBOX": {
           "label": "Hærd Vindueshåndtering (Forudindstilling)",
@@ -611,6 +686,10 @@
           "label": "Genstart App ved Lukning",
           "description": "Genstarter automatisk hovedapplikationen, hvis den lukkes, og gør autostart-filen skrivebeskyttet."
         },
+        "PIXELFLUX_WAYLAND": {
+          "label": "Wayland-backend",
+          "description": "Kører sessionen på Wayland-backenden, en hovedløs compositor med indlejret labwc til vindueshåndtering, i stedet for X11-serveren. X11-programmer kører via XWayland."
+        },
         "MAX_RES": {
           "label": "Maksimal Opløsning",
           "description": "Maksimal opløsning for containeren, standard er 16k."
@@ -635,6 +714,14 @@
           "label": "Automatisk GPU-valg",
           "description": "'true' renderer på den første GPU, 'false' deaktiverer det, eller en producent, driver eller PCI-producent-ID (nvidia, amdgpu, 0x10de) vælger en bestemt."
         },
+        "DRI_NODE": {
+          "label": "Renderknude til kodning",
+          "description": "DRI-renderknude, som videokoderen bruger (VA-API eller NVENC), fx /dev/dri/renderD128. Tom følger automatisk GPU-valg."
+        },
+        "DRINODE": {
+          "label": "Renderknude",
+          "description": "DRI-renderknude, som X-serveren (DRI3) eller Wayland-compositoren tegner på, fx /dev/dri/renderD128. Tom følger automatisk GPU-valg."
+        },
         "NO_DECOR": {
           "label": "Ingen Vinduesdekorationer",
           "description": "Kør applikation uden vinduesrammer til PWA-brug."
@@ -651,6 +738,10 @@
           "label": "Deaktiver Webcam Injektion",
           "description": "Spring den virtuelle webcam-enhed og interposer over. Skjuler også webcam-knappen."
         },
+        "NO_STEAM": {
+          "label": "Fjern Steam-shim",
+          "description": "Installerer ikke imagets Steam-startwrapper, til images med deres egen Steam."
+        },
         "SELKIES_RUN_AFTER_CONNECT": {
           "label": "Kør Efter Forbindelse",
           "description": "Shell-kommando, der køres inde i containeren, når den første klient forbinder."
@@ -658,6 +749,38 @@
         "SELKIES_RUN_AFTER_DISCONNECT": {
           "label": "Kør Efter Afbrydelse",
           "description": "Shell-kommando, der køres inde i containeren, når den sidste klient afbryder."
+        },
+        "SELKIES_APP_WAIT_READY": {
+          "label": "Vent på app-klar-fil",
+          "description": "Streamer først, når klar-filen findes, til images hvis sidecar melder, når programmet kører."
+        },
+        "SELKIES_APP_READY_FILE": {
+          "label": "App-klar-fil",
+          "description": "Fil, som sidecaren opretter, når programmet er initialiseret."
+        },
+        "SELKIES_AUDIT_WEBHOOK_URL": {
+          "label": "URL til revisions-webhook",
+          "description": "Modtager ét JSON-POST pr. udklipsholderoverførsel, filupload eller -download, udskrevet dokument, sideforbindelse og optagelse, kun med metadata og aldrig indhold. Tom sender intet."
+        },
+        "SELKIES_AUDIT_WEBHOOK_TOKEN": {
+          "label": "Token til revisions-webhook",
+          "description": "Bearer-token, der sendes i Authorization-headeren på hvert revisions-POST."
+        },
+        "SELKIES_AUDIT_WEBHOOK_TIMEOUT": {
+          "label": "Timeout for revisions-webhook (sekunder)",
+          "description": "Sekunder, ét revisions-POST må tage, før det tæller som mislykket, og næste hændelse sendes."
+        },
+        "SELKIES_COMPUTER_USE_BIND": {
+          "label": "Computer-Use-server",
+          "description": "Starter pixelflux’ Computer-Use-HTTP-server på disse kommaseparerede poster: en ren port lytter kun på loopback, host:port angiver adressen. Tom lader den være slået fra."
+        },
+        "SELKIES_RECORDING_SOCKET": {
+          "label": "Optagelsessocket",
+          "description": "Sti til Unix-socketen for optagelsesaftapningen, der leverer videostreamen til tilsluttede optagere. Tom lader den være slået fra."
+        },
+        "SELKIES_ENABLE_METRICS_HTTP": {
+          "label": "Prometheus-metrikker",
+          "description": "Udstiller Prometheus-endepunktet /metrics."
         },
         "SELKIES_DEBUG": {
           "label": "Aktiver Selkies Debugging",
@@ -688,6 +811,22 @@
         "SELKIES_CONGESTION_CONTROL": {
           "label": "Overbelastningsstyring",
           "description": "Tilpas video-bitraten til båndbreddeestimatet fra WebRTC-modtagerfeedback. Virker i CBR-tilstand."
+        },
+        "SELKIES_WEBRTC_ICE_LITE": {
+          "label": "ICE-Lite",
+          "description": "Tilbyder kun hostkandidater og besvarer klientens forbindelsestjek, til en server hvis adresser kan nås som annonceret: en offentlig IP, en statisk NAT med sat offentlig IP eller videresendte mux-porte."
+        },
+        "SELKIES_WEBRTC_PORT_RANGE": {
+          "label": "UDP-portinterval",
+          "description": "Inklusivt interval, fx 50000-50100, som socketerne bag direkte hostkandidater binder i, til udrulninger, der giver hver session et lille firewallvindue. Tom bruger flygtige porte."
+        },
+        "SELKIES_WEBRTC_UDP_MUX_PORT": {
+          "label": "UDP-muxport",
+          "description": "Én UDP-port, som alle sessioner deler til deres hostkandidater, så én videresendt port betjener et vilkårligt antal sessioner. 0 giver hver session egne socketer."
+        },
+        "SELKIES_WEBRTC_TCP_MUX_PORT": {
+          "label": "TCP-muxport",
+          "description": "Én TCP-port, der tager imod ICE-TCP-forbindelser fra klienter på netværk, der blokerer UDP; 443 er det sædvanlige offentlige valg. 0 tilbyder ingen TCP-kandidater."
         },
         "SELKIES_STUN_HOST": {
           "label": "STUN Vært",
@@ -737,6 +876,18 @@
           "label": "TURN REST Brugernavn",
           "description": "Brugernavn, som TURN REST-tjenesten indlejrer i legitimationsoplysningerne. Tomt bruger 'selkies'."
         },
+        "SELKIES_TURN_REST_USERNAME_AUTH_HEADER": {
+          "label": "TURN REST-brugerheader",
+          "description": "Header, der sender brugernavnet til TURN REST-tjenesten."
+        },
+        "SELKIES_TURN_REST_PROTOCOL_HEADER": {
+          "label": "TURN REST-protokolheader",
+          "description": "Header, der sender den ønskede TURN-transportprotokol til TURN REST-tjenesten."
+        },
+        "SELKIES_TURN_REST_TLS_HEADER": {
+          "label": "TURN REST-TLS-header",
+          "description": "Header, der sender TURN-TLS-valget til TURN REST-tjenesten."
+        },
         "SELKIES_WEBRTC_PUBLIC_IP": {
           "label": "WebRTC Offentlig IP",
           "description": "Offentlig adresse, der annonceres i host ICE-kandidater for en server bag statisk 1:1 NAT. Én IPv4- og/eller én IPv6-adresse."
@@ -756,6 +907,10 @@
         "SELKIES_RTC_CONFIG_JSON": {
           "label": "RTC Konfiguration JSON-sti",
           "description": "Sti inde i containeren til en JSON-fil med WebRTC-konfigurationen. Tilsidesætter alle andre STUN/TURN-indstillinger og genindlæses periodisk."
+        },
+        "SELKIES_ENABLE_WEBRTC_STATISTICS": {
+          "label": "Dump WebRTC-statistik",
+          "description": "Skriver klientens WebRTC-statistik som CSV-filer under /tmp i containeren til diagnose."
         },
         "DOCKER_PRIVILEGED": {
           "label": "Priviligeret Tilstand",

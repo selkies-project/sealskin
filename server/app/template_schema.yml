@@ -106,6 +106,11 @@ settings:
     type: boolean
     default: "true"
     docker: false
+  - name: SELKIES_UI_SIDEBAR_SHOW_WEBCAM
+    category: ui
+    type: boolean
+    default: "true"
+    docker: false
   - name: SELKIES_UI_SIDEBAR_SHOW_FULLSCREEN
     category: ui
     type: boolean
@@ -181,6 +186,11 @@ settings:
     type: boolean
     default: "false"
     docker: false
+  - name: SELKIES_WEBCAM_ENABLED
+    category: app
+    type: boolean
+    default: "true"
+    docker: false
   - name: SELKIES_GAMEPAD_ENABLED
     category: app
     type: boolean
@@ -205,6 +215,11 @@ settings:
     type: boolean
     default: "true"
     docker: false
+  - name: SELKIES_CLIPBOARD_SEAMLESS
+    category: app
+    type: boolean
+    default: "true"
+    docker: false
   - name: SELKIES_COMMAND_ENABLED
     category: app
     type: boolean
@@ -219,6 +234,16 @@ settings:
     category: app
     type: text
     default: "0"
+    docker: false
+  - name: FILE_MANAGER_PATH
+    category: app
+    type: text
+    default: "~/Desktop"
+    docker: false
+  - name: SELKIES_PRINTING_ENABLED
+    category: app
+    type: boolean
+    default: "true"
     docker: false
   - name: SELKIES_ENABLE_SHARING
     category: app
@@ -275,6 +300,38 @@ settings:
     type: text
     default: "-1"
     docker: false
+  - name: SELKIES_KEYBOARD_SHORTCUTS
+    category: app
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_MAC_CMD_AS_CTRL
+    category: app
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_RAW_POINTER_MOTION
+    category: app
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_PUBLISH_INPUT_DEVICES
+    category: app
+    type: boolean
+    default: "false"
+    docker: false
+  - name: SELKIES_UINPUT_GAMEPAD
+    category: app
+    type: select
+    default: "auto"
+    docker: false
+    options:
+      - value: "auto"
+        label_key: auto
+      - value: "true"
+        label_key: always
+      - value: "false"
+        label_key: never
   - name: SELKIES_USE_CSS_SCALING
     category: app
     type: boolean
@@ -324,6 +381,48 @@ settings:
         label: "275%"
       - value: "288"
         label: "300%"
+  # ---------------------------------------------------------------------------
+  # App: what starts at connect
+  # ---------------------------------------------------------------------------
+  - name: SELKIES_VIDEO_ON_START
+    category: app
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_AUDIO_ON_START
+    category: app
+    type: boolean
+    default: "true"
+    docker: false
+  - name: SELKIES_MICROPHONE_ON_START
+    category: app
+    type: select
+    default: "false"
+    docker: false
+    options:
+      - value: "true"
+        label_key: atConnect
+      - value: "false"
+        label_key: onToggle
+      - value: "demand"
+        label_key: onDemand
+  - name: SELKIES_WEBCAM_ON_START
+    category: app
+    type: select
+    default: "false"
+    docker: false
+    options:
+      - value: "true"
+        label_key: atConnect
+      - value: "false"
+        label_key: onToggle
+      - value: "demand"
+        label_key: onDemand
+  - name: SELKIES_GAMEPAD_ON_START
+    category: app
+    type: boolean
+    default: "true"
+    docker: false
   # ---------------------------------------------------------------------------
   # App: audio
   # ---------------------------------------------------------------------------
@@ -392,7 +491,7 @@ settings:
   - name: SELKIES_ENCODER
     category: app
     type: text
-    default: "h264enc,jpeg"
+    default: "h264enc,h265enc,vp8enc,vp9enc,av1enc,jpeg"
     docker: false
   - name: SELKIES_USE_CPU
     category: app
@@ -507,8 +606,14 @@ settings:
         label_key: auto
       - value: "h264"
         label: "H.264"
+      - value: "h265"
+        label: "H.265"
       - value: "vp8"
         label: "VP8"
+      - value: "vp9"
+        label: "VP9"
+      - value: "av1"
+        label: "AV1"
       - value: "mjpeg"
         label: "MJPEG"
   - name: SELKIES_WEBCAM_PIXEL_FORMAT
@@ -578,6 +683,11 @@ settings:
   # ---------------------------------------------------------------------------
   # General
   # ---------------------------------------------------------------------------
+  - name: PIXELFLUX_WAYLAND
+    category: general
+    type: boolean
+    default: "false"
+    docker: false
   - name: MAX_RES
     category: general
     type: text
@@ -608,6 +718,16 @@ settings:
     type: text
     default: "true"
     docker: false
+  - name: DRI_NODE
+    category: general
+    type: text
+    default: ""
+    docker: false
+  - name: DRINODE
+    category: general
+    type: text
+    default: ""
+    docker: false
   - name: NO_DECOR
     category: general
     type: boolean
@@ -628,6 +748,11 @@ settings:
     type: boolean
     default: "false"
     docker: false
+  - name: NO_STEAM
+    category: general
+    type: boolean
+    default: "false"
+    docker: false
   - name: SELKIES_RUN_AFTER_CONNECT
     category: general
     type: text
@@ -637,6 +762,46 @@ settings:
     category: general
     type: text
     default: ""
+    docker: false
+  - name: SELKIES_APP_WAIT_READY
+    category: general
+    type: boolean
+    default: "false"
+    docker: false
+  - name: SELKIES_APP_READY_FILE
+    category: general
+    type: text
+    default: "/tmp/selkies-appready"
+    docker: false
+  - name: SELKIES_AUDIT_WEBHOOK_URL
+    category: general
+    type: text
+    default: ""
+    docker: false
+  - name: SELKIES_AUDIT_WEBHOOK_TOKEN
+    category: general
+    type: text
+    default: ""
+    docker: false
+  - name: SELKIES_AUDIT_WEBHOOK_TIMEOUT
+    category: general
+    type: text
+    default: "2.0"
+    docker: false
+  - name: SELKIES_COMPUTER_USE_BIND
+    category: general
+    type: text
+    default: ""
+    docker: false
+  - name: SELKIES_RECORDING_SOCKET
+    category: general
+    type: text
+    default: ""
+    docker: false
+  - name: SELKIES_ENABLE_METRICS_HTTP
+    category: general
+    type: boolean
+    default: "false"
     docker: false
   - name: SELKIES_DEBUG
     category: general
@@ -681,6 +846,26 @@ settings:
     category: webrtc
     type: boolean
     default: "false"
+    docker: false
+  - name: SELKIES_WEBRTC_ICE_LITE
+    category: webrtc
+    type: boolean
+    default: "false"
+    docker: false
+  - name: SELKIES_WEBRTC_PORT_RANGE
+    category: webrtc
+    type: text
+    default: ""
+    docker: false
+  - name: SELKIES_WEBRTC_UDP_MUX_PORT
+    category: webrtc
+    type: text
+    default: "0"
+    docker: false
+  - name: SELKIES_WEBRTC_TCP_MUX_PORT
+    category: webrtc
+    type: text
+    default: "0"
     docker: false
   - name: SELKIES_STUN_HOST
     category: webrtc
@@ -747,6 +932,21 @@ settings:
     type: text
     default: ""
     docker: false
+  - name: SELKIES_TURN_REST_USERNAME_AUTH_HEADER
+    category: webrtc
+    type: text
+    default: "x-auth-user"
+    docker: false
+  - name: SELKIES_TURN_REST_PROTOCOL_HEADER
+    category: webrtc
+    type: text
+    default: "x-turn-protocol"
+    docker: false
+  - name: SELKIES_TURN_REST_TLS_HEADER
+    category: webrtc
+    type: text
+    default: "x-turn-tls"
+    docker: false
   - name: SELKIES_WEBRTC_PUBLIC_IP
     category: webrtc
     type: text
@@ -771,6 +971,11 @@ settings:
     category: webrtc
     type: text
     default: ""
+    docker: false
+  - name: SELKIES_ENABLE_WEBRTC_STATISTICS
+    category: webrtc
+    type: boolean
+    default: "false"
     docker: false
   # ---------------------------------------------------------------------------
   # Docker run options
