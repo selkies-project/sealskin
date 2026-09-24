@@ -1,4 +1,4 @@
-"""Loading, saving and resolving the YAML configuration.
+"""Loading, saving, and resolving the YAML configuration.
 
 Installed applications are stored as *references plus overrides*: the record
 names the store and the store app id, and `overrides` holds only the fields
@@ -50,7 +50,7 @@ def is_safe_name(name: str) -> bool:
 
     Returns:
         `True` when the name only contains letters, digits, spaces, `_`,
-        `.` and `-` and does not reduce to `.` or `..`.
+        `.`, and `-` and does not reduce to `.` or `..`.
     """
     return bool(name) and bool(SAFE_NAME_RE.match(name)) and name.strip(". ") != ""
 
@@ -743,7 +743,7 @@ def migrate_legacy_template_settings(template_settings: dict[str, Any]) -> dict[
 
     Renamed keys move to their current name unless the current name is
     already present. The three clipboard booleans collapse into the
-    `SELKIES_ENABLE_CLIPBOARD` policy (`true`, `in`, `out` or `false`), and
+    `SELKIES_ENABLE_CLIPBOARD` policy (`true`, `in`, `out`, or `false`), and
     encoder spellings the current Selkies no longer lists are mapped onto
     the encoders that serve them. Unknown keys pass through untouched.
     """

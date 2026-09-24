@@ -1,7 +1,7 @@
 export const siteName = 'SealSkin';
 
 export const siteDescription =
-  'Self-hosted browser isolation and remote application streaming. Open any link, file or download in a containerized desktop application streamed to your browser or phone.';
+  'Self-hosted browser isolation and remote application streaming. Open any link, file, or download in a containerized desktop application streamed to your browser or phone.';
 
 // Pages live in docs/content, so a contributor can edit them straight from
 // GitHub without touching the site.

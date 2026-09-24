@@ -340,7 +340,7 @@ def collaboration_initial_tokens(session: dict[str, Any]) -> dict[str, Any]:
     """Build the token table pushed to a collaboration container.
 
     Args:
-        session: Session record with `controller_token`, `viewers` and
+        session: Session record with `controller_token`, `viewers`, and
             `mk_owner_token`.
 
     Returns:
@@ -378,7 +378,7 @@ def build_launch_spec(
     collaboration: dict[str, Any] | None = None,
     forced_env: dict[str, str] | None = None,
 ) -> LaunchSpec:
-    """Assemble the environment, volumes and Docker options for a launch.
+    """Assemble the environment, volumes, and Docker options for a launch.
 
     Args:
         app: Resolved application.
@@ -619,7 +619,7 @@ async def launch_application(
         application_id: Installed app id.
         username: Owner of the session.
         effective_settings: The user's effective settings.
-        home_name: Home directory to mount, `"cleanroom"` or `None`.
+        home_name: Home directory to mount, `"cleanroom"`, or `None`.
         env_vars: Request-specific environment (`SEALSKIN_URL` / `SEALSKIN_FILE`).
         language: Locale for the session.
         selected_gpu: GPU device path or `None`.

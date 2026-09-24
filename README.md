@@ -26,7 +26,7 @@ Self-hosted browser isolation and remote application streaming.</p>
 
 SealSkin runs desktop applications in isolated containers on a server you
 control and streams them to any browser or phone. A browser extension turns
-every link, file, download and text selection into something you open
+every link, file, download, and text selection into something you open
 remotely instead of locally, so nothing from the web ever runs on the device
 in front of you. It is built on [Selkies](https://github.com/selkies-project/selkies)
 and the [LinuxServer.io](https://www.linuxserver.io) application images.
@@ -40,13 +40,13 @@ visit **[sealskin.app](https://sealskin.app)**.
 
 | | |
 | --- | --- |
-| **Chrome, Edge, Brave** and other Chromium browsers | [Chrome Web Store](https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk) |
+| **Chrome, Edge, Brave**, and other Chromium browsers | [Chrome Web Store](https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk) |
 | **Firefox** | [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/) |
 | **iPhone and iPad** | [App Store](https://apps.apple.com/us/app/sealskin/id6758210210) |
 | **Android** | [Google Play](https://play.google.com/store/apps/details?id=io.linuxserver.sealskin) |
 
 Every [release](https://github.com/selkies-project/sealskin/releases) also
-carries the extension zips, the APK, the IPA and the server wheel.
+carries the extension zips, the APK, the IPA, and the server wheel.
 
 ### Server
 
@@ -54,7 +54,7 @@ The server ships as the
 [linuxserver/sealskin](https://github.com/linuxserver/docker-sealskin)
 container. The quickest path to a working server with a trusted certificate
 is its installer, which needs Docker, a free [Duck DNS](https://www.duckdns.org/)
-subdomain and its token:
+subdomain, and its token:
 
 ```bash
 mkdir sealskin && cd sealskin
@@ -64,26 +64,26 @@ bash <(curl -sSL https://raw.githubusercontent.com/linuxserver/docker-sealskin/r
 Then import the generated `config/admin.json` into a client and launch your
 first application. The
 [Getting Started](https://selkies-project.github.io/sealskin/start) guide
-covers the installer, the plain `docker compose` alternative, certificates
+covers the installer, the plain `docker compose` alternative, certificates,
 and the first login.
 
 ## What it does
 
-* **Isolation.** Links, files, downloads and searches open in a fresh
+* **Isolation.** Links, files, downloads, and searches open in a fresh
   container on the server. Cleanroom sessions leave nothing behind;
   persistent home directories keep what you choose.
 * **Any application.** Browsers, office suites, IDEs, media editors,
-  emulators and 3D tools from the app stores, or any Selkies-compatible image
+  emulators, and 3D tools from the app stores, or any Selkies-compatible image
   you add, with NVIDIA and DRI3 GPU acceleration.
 * **Files stay on the server.** A file manager, chunked uploads, intercepted
-  downloads and password-protected public share links.
+  downloads, and password-protected public share links.
 * **Collaboration rooms.** Launch any app into a room with chat, voice and
-  video, gamepad slots and hand-over of mouse and keyboard control.
+  video, gamepad slots, and hand-over of mouse and keyboard control.
 * **End-to-end encrypted, passwordless.** Every API call is encrypted with a
   per-session key negotiated against the server's RSA key; users authenticate
   with a signed token from a private key that never leaves the client.
 * **One UI, served by the server.** The extension and the app are thin
-  shells; the launcher, dashboard and admin panels ship with the server
+  shells; the launcher, dashboard, and admin panels ship with the server
   image, so UI updates never wait for a store review.
 
 ## Documentation
@@ -91,15 +91,15 @@ and the first login.
 | | |
 | --- | --- |
 | [Getting Started](https://selkies-project.github.io/sealskin/start) | Install the server, connect a client, launch an application. |
-| [Usage](https://selkies-project.github.io/sealskin/usage) | The launcher, context menus, sessions, storage, files and rooms. |
+| [Usage](https://selkies-project.github.io/sealskin/usage) | The launcher, context menus, sessions, storage, files, and rooms. |
 | [Administration](https://selkies-project.github.io/sealskin/administration) | Users, groups, app stores, templates, the App Laboratory, GPUs. |
 | [Configuration](https://selkies-project.github.io/sealskin/configuration) | What lives in `/config` and `/storage`, keys, hand-editing the YAML. |
 | [Settings Reference](https://selkies-project.github.io/sealskin/settings) | Every environment variable the server reads. |
 | [Architecture](https://selkies-project.github.io/sealskin/architecture) | Control and data planes, encryption, the served UI and the shells. |
 | [HTTP API](https://selkies-project.github.io/sealskin/api) | Every endpoint and how requests are wrapped. |
 | [Development](https://selkies-project.github.io/sealskin/development) | Running from source, building the client, the mobile shells, this site. |
-| [Releasing](https://selkies-project.github.io/sealskin/releasing) | Versioning, release notes and the workflows. |
-| [Troubleshooting](https://selkies-project.github.io/sealskin/faq) | Certificates, Firefox, mobile, GPUs and Docker. |
+| [Releasing](https://selkies-project.github.io/sealskin/releasing) | Versioning, release notes, and the workflows. |
+| [Troubleshooting](https://selkies-project.github.io/sealskin/faq) | Certificates, Firefox, mobile, GPUs, and Docker. |
 
 The pages live in [`docs/content`](docs/content) and can be edited on GitHub;
 the site is rebuilt on every push to `main`.

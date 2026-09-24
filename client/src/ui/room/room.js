@@ -1034,7 +1034,7 @@ class RoomSocket {
     }
 
     // Transfers a native track-processor stream for the worker to read,
-    // encode and send: the whole microphone chain then skips the page.
+    // encode, and send: the whole microphone chain then skips the page.
     connectMicStream(readable) {
         try { this._worker.postMessage({ type: 'micStream', readable }, [readable]); } catch (err) {}
     }

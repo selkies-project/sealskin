@@ -1,4 +1,4 @@
-"""Serving the built web UI, the template schema and the landing page."""
+"""Serving the built web UI, the template schema, and the landing page."""
 
 from __future__ import annotations
 

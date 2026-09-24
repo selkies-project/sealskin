@@ -48,7 +48,7 @@ validation, `500` for provider errors.
 | --- | --- | --- |
 | `POST /api/handshake/initiate` | none | Signed nonce for server verification. |
 | `POST /api/handshake/exchange` | none | Register the wrapped AES key; returns the crypto session id. |
-| `POST /api/admin/status` | encrypted, user | The caller's role, effective settings, detected GPUs, CPU model, disk usage and proxy certificate expiry. |
+| `POST /api/admin/status` | encrypted, user | The caller's role, effective settings, detected GPUs, CPU model, disk usage, and proxy certificate expiry. |
 | `GET /api/ui/version` | none | `{"version", "bridge"}`: server version and bridge protocol version. |
 | `GET /api/ui/template_schema` | none | The template editor's variable definitions. |
 
@@ -130,7 +130,7 @@ All *encrypted, admin*.
 
 | Method and path | Purpose |
 | --- | --- |
-| `POST /api/admin/data` | Admins, users, groups, server public key, ports and GPUs in one call. |
+| `POST /api/admin/data` | Admins, users, groups, server public key, ports, and GPUs in one call. |
 | `POST /api/admin/admins`, `DELETE /api/admin/admins/{username}` | Create (`username`, `public_key?`) or delete an administrator. |
 | `POST /api/admin/users` | Create a user (`username`, `public_key?`, `settings`); returns the generated private key when no key was supplied. |
 | `PUT /api/admin/users/{username}` | Replace a user's settings. |

@@ -108,7 +108,7 @@ export async function loadTranslator(locale) {
 }
 
 /**
- * Apply `data-i18n`, `data-i18n-placeholder` and `data-i18n-title` attributes.
+ * Apply `data-i18n`, `data-i18n-placeholder`, and `data-i18n-title` attributes.
  *
  * @param {ParentNode} scope Element or document to translate.
  * @param {function} t Translator from loadTranslator().

@@ -2,7 +2,7 @@
 
 The [Fumadocs](https://fumadocs.dev) site the `Docs` workflow publishes to
 GitHub Pages. It renders the Markdown under [`content/`](content) and nothing
-else; the pages stay plain Markdown so they read, review and edit straight
+else; the pages stay plain Markdown so they read, review, and edit straight
 from GitHub.
 
 ```bash
@@ -24,7 +24,7 @@ The published site is versioned the way Read the Docs lays a site out:
 `scripts/build-versions.mjs` builds one export per release tag that carries
 this directory and one for `main`, and assembles them as `out/<version>/`.
 The newest release is built as `latest`, and its own version segment, the
-site root and every page address without a version redirect into it.
+site root, and every page address without a version redirect into it.
 `out/versions.json` lists the versions, and the sidebar's version dropdown
 switches between them. Every
 version is rendered by the tooling in this directory over that version's own

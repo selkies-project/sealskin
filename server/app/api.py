@@ -1,7 +1,7 @@
 """FastAPI application factory and lifespan.
 
 The application object is created here and every router is registered. State
-initialisation, cache refreshes, the configuration file watcher and the
+initialisation, cache refreshes, the configuration file watcher, and the
 background jobs live in `lifespan`.
 """
 
@@ -73,7 +73,7 @@ async def _remove_stale_sessions() -> None:
 
 
 async def background_update_job() -> None:
-    """Periodically refresh store caches, pull images and prune dangling ones."""
+    """Periodically refresh store caches, pull images, and prune dangling ones."""
     while True:
         await asyncio.sleep(settings.auto_update_interval_seconds)
         prune_crypto_sessions()

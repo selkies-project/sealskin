@@ -389,7 +389,7 @@ async def verify_public_sharing_enabled(
 def canonical_uuid(value: uuid.UUID | str) -> str:
     """Return the canonical `8-4-4-4-12` text form of a UUID.
 
-    Used for values that end up in cookie names, paths and generated HTML so
+    Used for values that end up in cookie names, paths, and generated HTML so
     only the validated, re-serialised form is ever used.
 
     Args:

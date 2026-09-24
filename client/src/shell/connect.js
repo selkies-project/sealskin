@@ -2,10 +2,10 @@
  * Connection page (bundled in every shell).
  *
  * The only page that must work with no server: it collects the server
- * address, ports, username and keys, tests the connection through the
+ * address, ports, username, and keys, tests the connection through the
  * background, and stores the configuration. It is framed by the shell host
  * and talks to it with the same bridge as the served pages, plus the
- * connect-only requests `getConnectConfig`, `saveConfig` and `clearConfig`.
+ * connect-only requests `getConnectConfig`, `saveConfig`, and `clearConfig`.
  *
  * The stored `sealskinConfig` keeps its historical shape:
  * `{serverIp, apiPort, sessionPort, username, clientPrivateKey,

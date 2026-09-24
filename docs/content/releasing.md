@@ -10,7 +10,7 @@ description: Versioning, release notes, the GitHub workflows, what each release 
 | **CI** (`ci.yml`) | every push to `main` and every pull request | Lints (`ruff`) and tests (`pytest`) the server, builds the client and checks that every manifest carries the version from `VERSION`, builds and validates the wheel. |
 | **Pre-release** (`prerelease.yml`) | every push to `main` | Builds everything, including the mobile apps, and publishes a GitHub pre-release named after the short commit SHA with all the artifacts attached. Nothing is uploaded to a store. |
 | **Release** (`release.yml`) | every pushed tag | Refuses to run unless the tag matches `VERSION` and `release-notes/<VERSION>.md` exists; then builds everything, uploads the mobile apps to TestFlight and the Google Play internal track, and publishes a stable GitHub release with the notes as its body. |
-| **Mobile** (`mobile.yml`) | called by the two above, or by hand from the Actions tab | Builds the signed IPA, APK and AAB. Uploads to the stores only when the `upload` input is set, which the Release workflow does and a manual run can. |
+| **Mobile** (`mobile.yml`) | called by the two above, or by hand from the Actions tab | Builds the signed IPA, APK, and AAB. Uploads to the stores only when the `upload` input is set, which the Release workflow does and a manual run can. |
 | **Docs** (`docs.yml`) | every push to `main` and every pull request touching `docs/` or the server | Builds this site, checks every link and anchor, verifies the Settings Reference is current, and (on `main`) deploys it to GitHub Pages. |
 
 ## Cutting a release
@@ -22,7 +22,7 @@ description: Versioning, release notes, the GitHub workflows, what each release 
    update the [documentation](development.md#this-documentation) for anything
    user-visible.
 4. Merge to `main` and let CI and the pre-release run. The pre-release is the
-   release candidate: its extension zips, APK and IPA are what you test.
+   release candidate: its extension zips, APK, and IPA are what you test.
 5. Tag the commit with the version and push the tag:
 
    ```bash
@@ -70,7 +70,7 @@ The Mobile workflow needs these repository secrets:
 | `APPSTORE_KEY_ID`, `APPSTORE_ISSUER_ID`, `APPSTORE_PRIVATE_KEY` | The App Store Connect API key used by `altool` to upload the IPA. |
 
 The Docs workflow needs GitHub Pages enabled with **GitHub Actions** as the
-source; it uses the built-in `GITHUB_TOKEN`. CI, Pre-release and Release need
+source; it uses the built-in `GITHUB_TOKEN`. CI, Pre-release, and Release need
 nothing beyond `contents: write` for creating releases.
 
 ## Release notes

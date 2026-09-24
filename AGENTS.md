@@ -7,8 +7,8 @@ implements it and in the [development page](docs/content/development.md), never 
 
 ## Layout
 
-`VERSION` at the root is the one version of the server, the served UI, the browser extension and
-the mobile shells. `server/` is the FastAPI application with its tests, Caddy template and wheel
+`VERSION` at the root is the one version of the server, the served UI, the browser extension, and
+the mobile shells. `server/` is the FastAPI application with its tests, Caddy template, and wheel
 packaging; `client/` the plain-JavaScript UI and the esbuild pipeline that also packages the
 extension and mobile shells; `browser_extension/` the manifests and zip script; `mobile/` the
 Capacitor project; `docs/` the Fumadocs site over the pages under `docs/content`; `release-notes/`
@@ -17,7 +17,7 @@ own Next.js version, not a copy of this file.
 
 ## Comments and documentation
 
-Google-style docstrings on every module, class and public function, with the types on the
+Google-style docstrings on every module, class, and public function, with the types on the
 signature; Ruff enforces the `D` rules with the Google convention. The Server Reference is rendered
 from those docstrings as Markdown, so a docblock describes the tree as it is now, names no issue or
 task number, narrates no past revision, and keeps anything shaped like `<name>` inside backticks.
@@ -33,7 +33,7 @@ Everything is written in American English. The prose under `docs/content` follow
 - The collaboration and token tables (`server/app/collaboration.py`) drive Selkies' secure mode as
   its documentation describes it, and are a reference implementation of it: a change there is
   measured against a Selkies session, not reasoned about.
-- `VERSION` is read by the client build, the packaging scripts, `server/app/version.py` and the
+- `VERSION` is read by the client build, the packaging scripts, `server/app/version.py`, and the
   wheel build; a release tag is that version exactly, with no leading `v`, on a commit of `main`,
   with `release-notes/<version>.md` present, or the release workflow refuses it.
 
@@ -50,5 +50,5 @@ Validate in a sandbox, never in a session someone is using.
 
 One commit per concern under a one-line `type: Sentence` subject, the contributor's own identity
 on it, no generated bundles, and the suites run named in the pull request. Pushes to `main` alone
-publish anything: the pre-release, the site, the mobile store uploads and the release; every other
+publish anything: the pre-release, the site, the mobile store uploads, and the release; every other
 ref builds self-contained. An issue is closed by a maintainer, never by you.

@@ -96,7 +96,7 @@ container was started with, as discovered from Docker. Delete the file after
 importing it: nothing on the server reads it again, and it is the only copy
 of the private key.
 
-## Users, administrators and groups
+## Users, administrators, and groups
 
 An administrator is a file `keys/admins/<name>` containing a public key. A
 user is a file `keys/users/<name>` with two sections:
@@ -121,7 +121,7 @@ session_limit: -1
 Missing settings take the defaults shown. A group is a file `groups/<name>`
 holding a YAML mapping of the same keys; a user whose `group` names it gets
 the group's values in place of their own for every key the group defines.
-Names may contain letters, digits, `_` and `-`. Files starting with `.` are
+Names may contain letters, digits, `_`, and `-`. Files starting with `.` are
 ignored.
 
 To rotate a user's key, replace the public key block; to disable a user
@@ -199,7 +199,7 @@ overrides, so store updates apply on the next cache refresh:
 ```
 
 Meta-apps (from the App Laboratory) add `base_app_id` and
-`home_template_name`, and keep their own `name`, `logo` and autostart
+`home_template_name`, and keep their own `name`, `logo`, and autostart
 scripts under `overrides`. Records from versions before 0.3.0 were full
 snapshots; they are migrated on first load, and the file is rewritten once.
 
@@ -218,7 +218,7 @@ settings:
 Values are strings. Keys that are not `DOCKER_*` become environment
 variables of the session container; `DOCKER_*` keys are translated into
 Docker run options (memory and CPU limits, capabilities, devices, bind
-mounts, network mode and so on). The file name is derived from the name
+mounts, network mode, and so on). The file name is derived from the name
 (`kiosk.yml`); renaming the `name` key renames the file. The set of
 variables the editor offers is `template_schema.yml` in the server package,
 served to clients as data, and a template may contain keys the editor does
@@ -233,13 +233,13 @@ A directory of read-only default templates can be supplied with
 ## Sessions and shares
 
 `sessions.yml` is the server's record of live sessions: container ids,
-addresses, tokens, storage paths and, for rooms, the collaboration tokens.
+addresses, tokens, storage paths, and, for rooms, the collaboration tokens.
 It exists so sessions survive a restart. The server rewrites it, skips
-records it cannot parse and drops records whose containers no longer exist;
+records it cannot parse, and drops records whose containers no longer exist;
 there is no reason to edit it.
 
 `public_shares.yml` maps share ids to their owner, original file name,
-password hash and expiry. The files themselves live under
+password hash, and expiry. The files themselves live under
 `/storage/sealskin_public`. Expired entries are removed by a background job
 every ten minutes.
 
@@ -255,7 +255,7 @@ modified template.
 
 Everything else is an environment variable. The
 [Settings Reference](settings.md) lists all of them with defaults; the
-container additionally understands `PUID`, `PGID`, `TZ` and `HOST_URL`, and
+container additionally understands `PUID`, `PGID`, `TZ`, and `HOST_URL`, and
 the LinuxServer.io conventions (`FILE__` secrets, `UMASK`, Docker mods)
 described in the
 [image's README](https://github.com/linuxserver/docker-sealskin#readme).

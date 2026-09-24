@@ -20,7 +20,7 @@ def repo_root() -> str:
     """Return the absolute path of the repository root.
 
     Returns:
-        The directory that contains `VERSION`, `server/` and `client/`.
+        The directory that contains `VERSION`, `server/`, and `client/`.
     """
     return _REPO_ROOT
 

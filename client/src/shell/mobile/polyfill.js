@@ -4,7 +4,7 @@
  * Only what `background.js` touches when it runs outside a browser extension:
  * local storage with change events, runtime messaging wired to
  * `window.handleMessage`, tab opening through the Capacitor Browser plugin,
- * `action.openPopup` (shows the served popup in the app frame) and inert stubs
+ * `action.openPopup` (shows the served popup in the app frame), and inert stubs
  * for the extension-only APIs. Served pages never see this object; they use
  * the bridge.
  *

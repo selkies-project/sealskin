@@ -1,6 +1,6 @@
 ---
 title: Troubleshooting and FAQ
-description: Certificates, Firefox and mobile requirements, the Docker socket, GPUs, storage and other things that go wrong.
+description: Certificates, Firefox and mobile requirements, the Docker socket, GPUs, storage, and other things that go wrong.
 ---
 
 ## Connecting
@@ -131,7 +131,7 @@ container's `TZ` follows it; failing that, the server's own `TZ` applies. Set
 <summary>Can I run SealSkin behind my existing reverse proxy?</summary>
 
 It is not designed for it. Caddy inside the container terminates TLS,
-authenticates every session request with `forward_auth` and proxies
+authenticates every session request with `forward_auth`, and proxies
 WebSockets to the containers; another proxy in front has to pass all of that
 through untouched, including the `Upgrade` headers and the cookies scoped to
 each session path. Exposing the session port directly is the supported

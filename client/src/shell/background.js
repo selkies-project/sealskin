@@ -193,7 +193,7 @@ function describeNetworkError(baseUrl, error) {
   if (!isNetworkError(error)) return msg;
   if (msg.startsWith('Could not connect to')) return msg;
   if (baseUrl && baseUrl.startsWith('https://')) {
-    return `Could not connect to ${baseUrl}. The server may be down, or its TLS certificate may be expired, untrusted or for a different host name. Open ${baseUrl} in a browser tab to check the certificate.`;
+    return `Could not connect to ${baseUrl}. The server may be down, or its TLS certificate may be expired, untrusted, or for a different host name. Open ${baseUrl} in a browser tab to check the certificate.`;
   }
   return `Could not connect to ${baseUrl}. The server may be down, the port may not be reachable, or your network changed. (${msg})`;
 }

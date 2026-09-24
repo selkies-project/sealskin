@@ -1,11 +1,11 @@
 ---
 title: Usage
-description: The launcher, the right-click menu, downloads, sessions, storage, the file manager and collaboration rooms.
+description: The launcher, the right-click menu, downloads, sessions, storage, the file manager, and collaboration rooms.
 ---
 
 Everything on this page happens in the client after it is
 [connected](start.md#connect). The browser extension has the full set of entry
-points; the mobile apps have the launcher, sessions, files and the dashboard
+points; the mobile apps have the launcher, sessions, files, and the dashboard
 but no context menu or download interception, because those hooks only exist
 in a browser.
 
@@ -17,7 +17,7 @@ The toolbar icon opens the launcher. Its tabs:
   opening: only apps that declare URL support appear for a link, only apps
   registered for the file's extension appear for a file. A search box narrows
   long lists.
-* **Active Sessions** shows your running sessions with **Re-open**, **Stop**
+* **Active Sessions** shows your running sessions with **Re-open**, **Stop**,
   and **Send File** (drop a file into a running session's `Desktop/files`).
 * **Manage Files** opens the [file manager](#the-file-manager).
 * **Upload to Storage** appears when you arrived with a file and would rather
@@ -43,7 +43,7 @@ match yours.
 **Launch** asks the server to start the container, waits until it answers
 (up to a minute, longer on the first pull of an image), then opens the
 session in a new tab. Sessions are streamed by Selkies: the tab is a full
-desktop application with clipboard, audio, file transfer, gamepads and the
+desktop application with clipboard, audio, file transfer, gamepads, and the
 rest, depending on what the [template](administration.md#app-templates)
 enables.
 
@@ -99,7 +99,7 @@ Persistent data lives under `/storage/<username>/` on the server:
   home directory named after the app.
 * **Shared files** (`_sealskin_shared_files`) is one folder per user that is
   mounted at `/config/Desktop/files` in every persistent session, whichever
-  home directory is in use. Files you upload, intercept or send to a session
+  home directory is in use. Files you upload, intercept, or send to a session
   land here, so every application sees the same files.
 * **Cleanroom** sessions get throwaway versions of both, deleted when the
   session stops.
@@ -158,7 +158,7 @@ Stopping the session ends the room for everyone.
 
 ## On mobile
 
-The iOS and Android apps host the same launcher, file manager and dashboard.
+The iOS and Android apps host the same launcher, file manager, and dashboard.
 Differences from the extension:
 
 * No context menus and no download interception. Share a file into the
@@ -176,6 +176,6 @@ Differences from the extension:
 The extension's options page (and the app's dashboard) is where the client
 configuration lives, alongside the account-level views: **Configuration**
 (connection, export your config file for another device, log out), **Home
-Directories**, **Active Sessions** and **Pinned Behavior**. Administrators see
+Directories**, **Active Sessions**, and **Pinned Behavior**. Administrators see
 the management panels described in [Administration](administration.md) in the
 same place.

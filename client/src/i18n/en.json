@@ -386,7 +386,7 @@
         },
         "SELKIES_FILE_TRANSFERS": {
           "label": "File Transfers",
-          "description": "Allowed directions ('upload,download', 'upload', 'download' or 'none'). Emptied by Harden Desktop unless set here."
+          "description": "Allowed directions ('upload,download', 'upload', 'download', or 'none'). Emptied by Harden Desktop unless set here."
         },
         "SELKIES_FILE_TRANSFER_LIMIT_MBPS": {
           "label": "File Transfer Limit (Mbit/s)",
@@ -580,11 +580,11 @@
         },
         "HARDEN_DESKTOP": {
           "label": "Harden Desktop (Preset)",
-          "description": "Enables DISABLE_OPEN_TOOLS, DISABLE_SUDO and DISABLE_TERMINALS, and unless set explicitly also disables file transfers, the command websocket and the files and apps sidebar sections. Forced on for users with Harden Container."
+          "description": "Enables DISABLE_OPEN_TOOLS, DISABLE_SUDO, and DISABLE_TERMINALS, and unless set explicitly also disables file transfers, the command websocket, and the files and apps sidebar sections. Forced on for users with Harden Container."
         },
         "HARDEN_OPENBOX": {
           "label": "Harden Window Manager (Preset)",
-          "description": "Enables DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS and HARDEN_KEYBINDS for Openbox and labwc, and RESTART_APP unless set explicitly. Forced on for users with Harden Window Manager."
+          "description": "Enables DISABLE_CLOSE_BUTTON, DISABLE_MOUSE_BUTTONS, and HARDEN_KEYBINDS for Openbox and labwc, and RESTART_APP unless set explicitly. Forced on for users with Harden Window Manager."
         },
         "DISABLE_OPEN_TOOLS": {
           "label": "Disable Open Tools",
@@ -608,7 +608,7 @@
         },
         "HARDEN_KEYBINDS": {
           "label": "Harden Keybinds",
-          "description": "Disables window manager keybinds such as Alt+F4, Alt+Escape, Alt+Space and Super+E, and locks the window manager config."
+          "description": "Disables window manager keybinds such as Alt+F4, Alt+Escape, Alt+Space, and Super+E, and locks the window manager config."
         },
         "RESTART_APP": {
           "label": "Restart App on Close",
@@ -636,7 +636,7 @@
         },
         "AUTO_GPU": {
           "label": "Automatic GPU Selection",
-          "description": "'true' renders on the first GPU, 'false' disables it, or a vendor, driver or PCI vendor ID (nvidia, amdgpu, 0x10de) picks a specific one."
+          "description": "'true' renders on the first GPU, 'false' disables it, or a vendor, driver, or PCI vendor ID (nvidia, amdgpu, 0x10de) picks a specific one."
         },
         "NO_DECOR": {
           "label": "No Window Decorations",
@@ -932,7 +932,7 @@
       "manualInstallNote": "Note: Manually added images should be based on a selkies-baseimage compatible image.",
       "generalTitle": "General & Performance Settings",
       "webrtcTitle": "WebRTC & TURN Settings",
-      "webrtcDescription": "Sessions stream over WebSockets by default. Setting any STUN, TURN, Cloudflare or public IP value below, or choosing WebRTC mode, switches the container to WebRTC with dual mode enabled so users can still fall back to WebSockets.",
+      "webrtcDescription": "Sessions stream over WebSockets by default. Setting any STUN, TURN, Cloudflare, or public IP value below, or choosing WebRTC mode, switches the container to WebRTC with dual mode enabled so users can still fall back to WebSockets.",
       "dockerTitle": "Docker Advanced Overrides",
       "dockerDescription": "These settings override the default container configuration. Use with caution and only if you know what you are doing."
     },

@@ -1,6 +1,6 @@
 ---
 title: SealSkin
-description: Self-hosted browser isolation and remote application streaming. Open any link, file or download in a containerized desktop application streamed to your browser or phone.
+description: Self-hosted browser isolation and remote application streaming. Open any link, file, or download in a containerized desktop application streamed to your browser or phone.
 ---
 
 <p align="center"><img src="assets/logo.png" alt="SealSkin" width="160" height="160"></p>
@@ -14,7 +14,7 @@ description: Self-hosted browser isolation and remote application streaming. Ope
 
 **Your browser is your new computer.** SealSkin runs desktop applications in
 isolated containers on a server you control and streams them to any browser
-or phone. A browser extension turns every link, file, download and text
+or phone. A browser extension turns every link, file, download, and text
 selection into something you can open remotely instead of locally, so nothing
 from the web ever runs on the device in front of you.
 
@@ -27,21 +27,21 @@ site is <https://sealskin.app>.
 
 | Client | Install |
 | --- | --- |
-| Chrome, Edge, Brave and other Chromium browsers | [Chrome Web Store](https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk) |
+| Chrome, Edge, Brave, and other Chromium browsers | [Chrome Web Store](https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk) |
 | Firefox | [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/) |
 | iPhone and iPad | [App Store](https://apps.apple.com/us/app/sealskin/id6758210210) |
 | Android | [Google Play](https://play.google.com/store/apps/details?id=io.linuxserver.sealskin) |
 | Server | [linuxserver/sealskin](https://github.com/linuxserver/docker-sealskin) container image |
 
 Every [release](https://github.com/selkies-project/sealskin/releases) also
-carries the extension zips, the Android APK, the iOS IPA, the server wheel and
+carries the extension zips, the Android APK, the iOS IPA, the server wheel, and
 the built web UI for anyone who prefers to sideload.
 
 ## Get the server
 
 The fastest route to a working server with a trusted TLS certificate is the
 installer from the container repository. It needs Docker, a free
-[Duck DNS](https://www.duckdns.org/) subdomain and its token:
+[Duck DNS](https://www.duckdns.org/) subdomain, and its token:
 
 ```bash
 mkdir sealskin && cd sealskin
@@ -49,28 +49,28 @@ bash <(curl -sSL https://raw.githubusercontent.com/linuxserver/docker-sealskin/r
 ```
 
 [Getting Started](start.md) walks through that script, the plain
-`docker compose` alternative, the first login and installing your first
+`docker compose` alternative, the first login, and installing your first
 application.
 
 ## What it does
 
-* **Isolation.** Links, files, downloads and searches open in a fresh
+* **Isolation.** Links, files, downloads, and searches open in a fresh
   container on the server. Cleanroom sessions leave nothing behind; persistent
   home directories keep what you choose.
-* **Any application.** Browsers, office suites, IDEs, media editors, emulators
+* **Any application.** Browsers, office suites, IDEs, media editors, emulators,
   and 3D tools from the app stores, or any Selkies-compatible image you add
   yourself, with GPU acceleration on NVIDIA and DRI3 hardware.
 * **Files stay on the server.** A built-in file manager, chunked uploads,
-  drag-and-drop, intercepted downloads and password-protected public share
+  drag-and-drop, intercepted downloads, and password-protected public share
   links.
 * **Collaboration rooms.** Launch any app into a room with chat, voice and
-  video, gamepad slots and hand-over of mouse and keyboard control.
+  video, gamepad slots, and hand-over of mouse and keyboard control.
 * **End-to-end encryption and no passwords.** Every API call is encrypted with
   a per-session AES key negotiated against the server's RSA key, and users
   authenticate with a signed JWT from a private key that never leaves the
   client.
 * **One UI, served by the server.** The extension and the mobile app are thin
-  shells; the launcher, dashboard, file manager and admin panels ship with the
+  shells; the launcher, dashboard, file manager, and admin panels ship with the
   server image, so UI updates never wait for a store review.
 
 ## Documentation
@@ -79,10 +79,10 @@ application.
 an application.
 
 [**Usage**](usage.md): the launcher, context menus, sessions, storage, the file
-manager and collaboration rooms.
+manager, and collaboration rooms.
 
 [**Administration**](administration.md): users, groups, app stores, templates,
-the App Laboratory and GPUs.
+the App Laboratory, and GPUs.
 
 [**Configuration**](configuration.md): what lives in `/config` and `/storage`,
 keys and certificates, and editing the YAML by hand.
@@ -96,11 +96,11 @@ encryption and authentication model, the served UI and the shells.
 [**HTTP API**](api.md): every endpoint and how requests are wrapped.
 
 [**Development**](development.md): running the server, building the client,
-loading the extension, the mobile shells and this site.
+loading the extension, the mobile shells, and this site.
 
-[**Releasing**](releasing.md): versioning, release notes and the workflows.
+[**Releasing**](releasing.md): versioning, release notes, and the workflows.
 
-[**Troubleshooting and FAQ**](faq.md): certificates, Firefox, mobile, GPUs
+[**Troubleshooting and FAQ**](faq.md): certificates, Firefox, mobile, GPUs,
 and Docker.
 
 [**Server Reference**](reference/index.mdx): generated from the server's

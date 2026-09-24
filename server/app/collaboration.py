@@ -1,9 +1,9 @@
-"""Collaboration rooms: the room page, its WebSocket and token fan-out.
+"""Collaboration rooms: the room page, its WebSocket, and token fan-out.
 
 A collaboration session is a normal session whose container also runs a
 control plane that accepts a table of tokens (controller, viewers, gamepad
 slots, mouse/keyboard owner). This module serves the room page, relays chat
-and control messages between participants over a WebSocket and pushes token
+and control messages between participants over a WebSocket, and pushes token
 changes down to every container of the session.
 """
 
@@ -88,7 +88,7 @@ async def collaborative_room(
     Args:
         request: Incoming request.
         session_id: Collaboration session id.
-        collab_token: Controller, viewer or invite token.
+        collab_token: Controller, viewer, or invite token.
 
     Returns:
         The room HTML, or a redirect for newly registered viewers.

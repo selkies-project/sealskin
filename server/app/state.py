@@ -1,7 +1,7 @@
 """Process-wide runtime state.
 
 All mutable in-memory state lives on the single `state` instance so that
-routers, the collaboration module and the launch logic can share it without
+routers, the collaboration module, and the launch logic can share it without
 importing each other.
 """
 

@@ -1,6 +1,6 @@
 ---
 title: Development
-description: Running the server from source, building the client, loading the extension, the mobile shells, tests, conventions and this documentation site.
+description: Running the server from source, building the client, loading the extension, the mobile shells, tests, conventions, and this documentation site.
 ---
 
 ## Repository layout
@@ -18,7 +18,7 @@ release-notes/       one Markdown file per stable release
 
 The server is a FastAPI application; the client is plain JavaScript bundled
 by esbuild with no framework; the shells are the same JavaScript packaged for
-Chrome, Firefox and Capacitor.
+Chrome, Firefox, and Capacitor.
 
 ## Prerequisites
 
@@ -81,7 +81,7 @@ python main.py          # or: python -m app
 
 The same works from the release wheel: `pip install
 sealskin_server-<VERSION>-py3-none-any.whl` installs the `sealskin-server`
-command with the built UI, the Caddyfile template and all dependencies
+command with the built UI, the Caddyfile template, and all dependencies
 inside the package, so only the environment above and the key files are
 needed.
 
@@ -99,7 +99,7 @@ network, which is the case on a Linux host.
 
 ### Conventions
 
-* Google-style docstrings on every module, class and public function, with
+* Google-style docstrings on every module, class, and public function, with
   type hints on the signature. Ruff enforces the `D` rules with the Google
   convention; see `pyproject.toml`. The
   [Server Reference](reference/index.mdx) is rendered from these docstrings
@@ -146,7 +146,7 @@ then rewrites the tag to the emitted file name:
 
 Bundled code can use these compile-time defines: `__UI_VERSION__` (the
 `VERSION` string), `__BRIDGE_VERSION__` (`1`), `__SHELL_TARGET__` (`"ui"`,
-`"extension"` or `"mobile"`) and `__I18N_FILES__` (language code to language
+`"extension"`, or `"mobile"`), and `__I18N_FILES__` (language code to language
 file path, hashed for the served UI). The background script imports the
 context menu titles from `sealskin-i18n/context-menu`, a module the build
 generates under `dist/.generated/` from `background.contextMenu` of every
@@ -182,9 +182,9 @@ After `npm run build`:
 
 * **Chrome**: copy `client/dist/extension/manifest.chrome.json` to
   `client/dist/extension/manifest.json`, open `chrome://extensions`, enable
-  Developer mode and **Load unpacked** on `client/dist/extension`.
+  Developer mode, and **Load unpacked** on `client/dist/extension`.
 * **Firefox**: copy `manifest.firefox.json` to `manifest.json`, open
-  `about:debugging#/runtime/this-firefox` and **Load Temporary Add-on**,
+  `about:debugging#/runtime/this-firefox`, and **Load Temporary Add-on**,
   picking that `manifest.json`.
 
 `browser_extension/build.sh` runs the client build and zips the Chrome and
@@ -210,15 +210,15 @@ which also produces a signed APK and AAB when the keystore variables are set
 (see [Releasing](releasing.md)) and a debug APK otherwise. Android's
 `versionCode` is derived from `VERSION` locally and overridden by a build
 number in CI. Native plugins: Browser (sessions in a Custom Tab or Safari
-view), App (back button), Filesystem, blob writer and file opener
+view), App (back button), Filesystem, blob writer, and file opener
 (downloads). The WebView needs a trusted certificate.
 
 ## Versioning
 
 `VERSION` at the repository root is read by the client build (stamped into
-the served UI manifest, both extension manifests and the mobile package), by
+the served UI manifest, both extension manifests, and the mobile package), by
 the packaging scripts (artifact names, Android `versionCode`), by
-`server/app/version.py` (the API and `/api/ui/version`) and by the wheel
+`server/app/version.py` (the API and `/api/ui/version`), and by the wheel
 build. [Releasing](releasing.md) explains how a version becomes a release.
 
 ## This documentation

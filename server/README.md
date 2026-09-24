@@ -1,6 +1,6 @@
 # SealSkin server
 
-The API server, Caddy proxy and embedded web UI behind
+The API server, Caddy proxy, and embedded web UI behind
 [SealSkin](https://github.com/selkies-project/sealskin): self-hosted browser
 isolation and remote application streaming.
 

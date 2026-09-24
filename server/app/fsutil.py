@@ -123,7 +123,7 @@ def sanitize_for_filename(name: str) -> str:
         name: Display name such as an application name.
 
     Returns:
-        Lower-case ASCII letters, digits and dashes, at most 50 characters,
+        Lower-case ASCII letters, digits, and dashes, at most 50 characters,
         or `"unnamed"` for an empty input.
     """
     if not name:

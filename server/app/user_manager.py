@@ -1,4 +1,4 @@
-"""Users, administrators and groups stored as flat files.
+"""Users, administrators, and groups stored as flat files.
 
 * `keys/admins/<username>`: the administrator's public key PEM.
 * `keys/users/<username>`: a `--- Settings ---` YAML block followed by a

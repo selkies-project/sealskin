@@ -76,7 +76,7 @@ def _gpu_list() -> list[GPUInfo]:
 
 @status_router.post("/api/admin/status", response_model=AdminStatusResponse)
 async def admin_status(user: dict[str, Any] = Depends(verify_token)) -> dict[str, Any]:
-    """Return the caller's role, settings and host statistics."""
+    """Return the caller's role, settings, and host statistics."""
     response: dict[str, Any] = {
         "is_admin": user.get("is_admin", False),
         "username": user.get("username"),
@@ -92,7 +92,7 @@ async def admin_status(user: dict[str, Any] = Depends(verify_token)) -> dict[str
 
 @router.post("/data", response_model=ManagementDataResponse)
 async def get_management_data() -> dict[str, Any]:
-    """Return users, groups and server details for the dashboard."""
+    """Return users, groups, and server details for the dashboard."""
     return {
         "admins": user_manager.get_all_admins(),
         "users": user_manager.get_all_users(),

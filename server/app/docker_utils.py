@@ -1,4 +1,4 @@
-"""Docker host helpers: client access, self-inspection, GPUs and images.
+"""Docker host helpers: client access, self-inspection, GPUs, and images.
 
 Everything that talks to the Docker daemon outside of a launch goes through
 this module so the rest of the server never creates its own client.
@@ -76,10 +76,10 @@ async def prune_dangling_images() -> None:
 
 
 async def inspect_self_container() -> None:
-    """Discover mount mappings, ports and network of the server's own container.
+    """Discover mount mappings, ports, and network of the server's own container.
 
     Populates `state.path_prefix_map`, `state.discovered_api_port`,
-    `state.discovered_session_port` and `state.discovered_network`. When
+    `state.discovered_session_port`, and `state.discovered_network`. When
     the server is not running inside Docker nothing is changed.
     """
     state.discovered_api_port = settings.api_port
@@ -200,7 +200,7 @@ def get_system_stats() -> dict[str, Any]:
     """Return CPU model and storage usage, cached for one minute.
 
     Returns:
-        Dictionary with `cpu_model`, `disk_total` and `disk_used`.
+        Dictionary with `cpu_model`, `disk_total`, and `disk_used`.
     """
     now = time.time()
     cache = state.system_stats_cache

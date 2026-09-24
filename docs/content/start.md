@@ -5,14 +5,14 @@ description: Install the server, connect a browser extension or mobile app, and 
 
 SealSkin has two halves: a **server** that runs applications in Docker
 containers and streams them, and a **client** (browser extension or mobile
-app) that sends links, files and downloads to it. This page takes you from
+app) that sends links, files, and downloads to it. This page takes you from
 nothing to a running session.
 
 ## What you need
 
 * A Linux host with [Docker](https://docs.docker.com/engine/install/) and a
   user in the `docker` group. Sessions are ordinary containers on that host,
-  so give it the CPU, memory and disk you would give the applications
+  so give it the CPU, memory, and disk you would give the applications
   themselves.
 * A hostname and a **trusted TLS certificate** if you want to use Firefox or
   the mobile apps. Chrome and other Chromium browsers also work with the
@@ -37,7 +37,7 @@ authenticates every request to a session.
 The [linuxserver/docker-sealskin](https://github.com/linuxserver/docker-sealskin)
 repository ships an interactive script that creates the directories, obtains a
 Let's Encrypt wildcard certificate through [Duck DNS](https://www.duckdns.org/),
-writes a `docker-compose.yml` and starts the stack. Create a Duck DNS
+writes a `docker-compose.yml`, and starts the stack. Create a Duck DNS
 subdomain and copy its token first, then:
 
 ```bash
@@ -46,7 +46,7 @@ bash <(curl -sSL https://raw.githubusercontent.com/linuxserver/docker-sealskin/r
 ```
 
 The script asks for the user and group id to run as (defaults to yours), the
-storage, config and certificate paths (defaults under the current directory),
+storage, config, and certificate paths (defaults under the current directory),
 the port to expose, your Duck DNS domain and token, and an e-mail address for
 Let's Encrypt. It ends with the address of your server, for example
 `https://sealskin.example.duckdns.org:8443`.
@@ -89,13 +89,13 @@ A few things about this file are not negotiable:
 
 * **The container must be named `sealskin`.** The server inspects its own
   container to learn the host paths behind `/config` and `/storage`, the
-  externally mapped ports and the Docker network, and it finds itself by that
+  externally mapped ports, and the Docker network, and it finds itself by that
   name (falling back to its hostname).
 * **The Docker socket is required.** Every session is a container the server
   starts through it, so the container's user must be allowed to use the
   socket. If launches fail with a permission error from Docker, make the
   socket group-writable on the host (`sudo chmod g+rw /var/run/docker.sock`).
-* **`PUID` and `PGID` own everything.** The server, its files and every
+* **`PUID` and `PGID` own everything.** The server, its files, and every
   session container run as that user, so the `/config` and `/storage`
   directories on the host must be writable by it.
 * **`HOST_URL`** is written into the generated admin configuration file so it
@@ -110,7 +110,7 @@ files.
 ### Other ways to run it
 
 The server is also published as a Python wheel on every release. It needs
-Python 3.11 or newer, Caddy on the `PATH`, access to a Docker daemon and the
+Python 3.11 or newer, Caddy on the `PATH`, access to a Docker daemon, and the
 same key and certificate files. That route is meant for developers and is
 described in [Development](development.md#running-it-locally).
 
@@ -139,10 +139,10 @@ the proxy certificate is within 14 days of expiring.
 | --- | --- | --- |
 | Chromium browsers | [Chrome Web Store](https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk) | Full feature set: context menus, download interception, streamed downloads. Works with self-signed certificates. |
 | Firefox | [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/) | Context menus and uploads. Requires a trusted certificate. |
-| iOS | [App Store](https://apps.apple.com/us/app/sealskin/id6758210210) | Launcher, files and admin dashboard; sessions open in Safari. Requires a trusted certificate. |
+| iOS | [App Store](https://apps.apple.com/us/app/sealskin/id6758210210) | Launcher, files, and admin dashboard; sessions open in Safari. Requires a trusted certificate. |
 | Android | [Google Play](https://play.google.com/store/apps/details?id=io.linuxserver.sealskin) | Same as iOS; sessions open in a Custom Tab. Requires a trusted certificate. |
 
-The zips, APK and IPA on the
+The zips, APK, and IPA on the
 [releases page](https://github.com/selkies-project/sealskin/releases) are the
 same builds for sideloading; [Development](development.md#loading-the-extension-unpacked)
 covers loading an unpacked extension.
@@ -159,11 +159,11 @@ server configured you land on the **connection page**.
 1. Under **Quick Setup**, upload `admin.json` or paste its contents and click
    **Apply Configuration**. The manual form underneath takes the same values
    individually: server address, API port, session port, username, your
-   private key and the server's public key. It can also generate a key pair
+   private key, and the server's public key. It can also generate a key pair
    for you, which is how a user asks an administrator for an account without
    ever sending a private key.
 2. Click **Login & Test**. The client performs the encrypted handshake, signs
-   a token with your key and calls the server; on success it saves the
+   a token with your key, and calls the server; on success it saves the
    configuration and opens the dashboard.
 
 ### Certificates

@@ -25,7 +25,7 @@ A SealSkin installation is one server container and any number of clients.
 
 * **The API server** (`server/app`, FastAPI on uvicorn) is the control plane:
   handshake, authentication, launching, sessions, files, shares, the
-  collaboration WebSocket and everything administrative. It listens on the
+  collaboration WebSocket, and everything administrative. It listens on the
   API port (`8000`) over plain HTTP.
 * **Caddy** is the data plane. It listens on the session port (`8443`) with
   the proxy certificate, forwards the API and the served UI to the API
@@ -51,7 +51,7 @@ calls. `POST /api/handshake/initiate` returns a random nonce and its RSA-PSS
 signature, which the client verifies with the stored server public key, so a
 server that does not hold the private key is rejected before anything is
 sent. The client then generates an AES-256-GCM key, wraps it with RSA-OAEP
-under the server public key and sends it to `POST /api/handshake/exchange`,
+under the server public key, and sends it to `POST /api/handshake/exchange`,
 receiving a crypto session id. Session keys live in server memory and are
 dropped after a day of inactivity (`SEALSKIN_CRYPTO_SESSION_TTL_SECONDS`).
 
@@ -70,7 +70,7 @@ running waits for it.
 
 **Users.** Authentication is a JWT (`RS256`) the client signs with its
 private key and sends as `Authorization: Bearer`. The `sub` claim names the
-user, `exp` is required and one minute of clock skew is tolerated. The
+user, `exp` is required, and one minute of clock skew is tolerated. The
 server verifies the signature against the public key stored for that user
 and refuses inactive accounts. There are no passwords and no server-side
 user sessions to steal; the private key never leaves the client, and on the
@@ -92,8 +92,8 @@ from a directory that holds copies, never from the user's home.
 
 ## A launch, step by step
 
-1. The client sends `POST /api/launch/simple`, `/url`, `/file` or
-   `/file_path` with the app, storage choice, language, time zone, GPU and
+1. The client sends `POST /api/launch/simple`, `/url`, `/file`, or
+   `/file_path` with the app, storage choice, language, time zone, GPU, and
    mode flags. For `/file`, the file was first uploaded in chunks to
    `/api/upload/*` under the user's own upload directory.
 2. The server resolves the installed app (store entry merged with
@@ -121,19 +121,19 @@ the record removed, and room participants notified.
 ## Served UI and thin shells
 
 Since 0.3.0 the launcher, options and admin dashboard, file manager, upload
-page and collaboration room are one web application built from `client/` and
+page, and collaboration room are one web application built from `client/` and
 served by the API server under `/ui/`. The browser extension and the mobile
 app bundle only what cannot be served:
 
 * the **connection page**, the one page that works with no server,
 * the **background script**: context menus, download interception, the
-  handshake and encrypted fetch, JWT signing, the session-to-tab map and
+  handshake and encrypted fetch, JWT signing, the session-to-tab map, and
   Chrome's streaming download handler,
 * the **host page**, which frames the served UI and relays its requests to
   the background.
 
 Updating the server image therefore updates the UI everywhere; a store
-release is needed only when the manifest, the native plugins or the bridge
+release is needed only when the manifest, the native plugins, or the bridge
 protocol change. HTML entry points are served with `Cache-Control: no-cache`
 and every other asset has a content hash in its name and is cached for a
 year, so browsers pick up a new UI on the next load.
@@ -149,7 +149,7 @@ The host page owns one iframe and cycles through three states:
    for the page's `hello`.
 3. **No `hello` within eight seconds**, or the manifest fetch failed: the
    unreachable panel, with **Retry**, **Open server** (opens `<base>/ui/` in
-   a top-level tab so a self-signed certificate can be accepted) and
+   a top-level tab so a self-signed certificate can be accepted), and
    **Change connection**.
 
 If the page's bridge version differs from the shell's, the host shows an
@@ -167,11 +167,11 @@ never crosses the bridge: signing and encryption stay in the background.
 | Request | Payload | Reply | Notes |
 | --- | --- | --- | --- |
 | `hello` | `{bridge, uiVersion}` | shell, platform, shell version, locale, capabilities, connection config | The first message; the host treats it as the ready signal. |
-| `secureFetch` | `{url, options}` | decrypted JSON | The host adds the JWT, encrypts the body and decrypts the response. |
+| `secureFetch` | `{url, options}` | decrypted JSON | The host adds the JWT, encrypts the body, and decrypts the response. |
 | `getContext` | | pending launch context or `null` | Clears it. `{action: 'url' \| 'file' \| 'search' \| 'server-file', targetUrl?, filename?, selectionText?, file?}`. |
 | `setContext` | `{context, openPopup}` | | Used by the files and upload pages. |
 | `fetchBlob` | `{url}` | `Blob` | Fetched with extension privileges; link targets and media. |
-| `openSession` / `focusSession` / `closeSession` | session | | Open, focus or close the tracked tab; close also deletes the session. |
+| `openSession` / `focusSession` / `closeSession` | session | | Open, focus, or close the tracked tab; close also deletes the session. |
 | `openPage` | `{page, params?}` | | `popup`, `options`, `files`, `upload`, `connect`. |
 | `openExternal` | `{url}` | | New tab or Custom Tab. |
 | `downloadFile` | `{home, path, filename}` | | Chrome only (`capabilities.streamDownload`): the service worker streams the file. |
