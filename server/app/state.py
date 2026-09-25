@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import time
+from collections import deque
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -57,6 +58,7 @@ class RuntimeState:
         discovered_session_port: Externally mapped session port.
         discovered_network: Docker network the server container is attached to.
         download_tokens: One-shot public download tokens.
+        share_password_failures: Recent failed password tries keyed by share id.
         server_private_key: The server's RSA private key object.
         server_public_key_pem: PEM encoding of the server's public key.
     """
@@ -85,6 +87,7 @@ class RuntimeState:
     discovered_session_port: int = 0
     discovered_network: str | None = None
     download_tokens: dict[str, dict[str, Any]] = field(default_factory=dict)
+    share_password_failures: dict[str, deque[float]] = field(default_factory=dict)
     server_private_key: Any = None
     server_public_key_pem: str = ""
 

@@ -121,7 +121,7 @@ All paths are relative to the named home directory (or `_sealskin_shared_files`)
 | `GET /api/files/shares` | encrypted, user, public sharing | The caller's shares. |
 | `DELETE /api/files/share/{share_id}` | encrypted, user, public sharing | Revoke a share. |
 | `GET /public/{share_id}` | none | The file, or a password form. |
-| `POST /public/{share_id}` | none | Form field `password`; redirects to a one-time download URL. |
+| `POST /public/{share_id}` | none | Form field `password`; redirects to a one-time download URL. Five wrong passwords within a minute answer 429 until the oldest ages out. |
 | `GET /public/download/{token}` | none | Download with a one-time token while the share has not expired. |
 
 ## Administration

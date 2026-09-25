@@ -91,7 +91,9 @@ read what the cookie authenticates.
 **Shares.** Public share passwords are stored as salted scrypt hashes. A
 correct password yields a one-time download token, which stops working when
 the share expires; the file itself is served from a directory that holds
-copies, never from the user's home.
+copies, never from the user's home. Five wrong passwords within a minute
+close a share's form with 429 until the oldest ages out, which bounds both
+guessing and the scrypt work it costs the server.
 
 ## A launch, step by step
 

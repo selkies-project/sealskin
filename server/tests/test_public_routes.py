@@ -27,6 +27,7 @@ def http():
     yield TestClient(app, raise_server_exceptions=False)
     state.public_shares.clear()
     state.download_tokens.clear()
+    state.share_password_failures.clear()
 
 
 def _share(share_id, password):
@@ -43,12 +44,27 @@ def _share(share_id, password):
     return state.public_shares[share_id]
 
 
+def _try(http, share_id, password):
+    return http.post(f"/public/{share_id}", data={"password": password}, follow_redirects=False).status_code
+
+
 def test_a_download_token_ends_with_its_share(http):
     share = _share("s1", "right")
     issued = http.post("/public/s1", data={"password": "right"}, follow_redirects=False)
     assert issued.status_code == 303
     share.expiry_timestamp = time.time() - 1
     assert http.get(issued.headers["location"]).status_code == 410
+
+
+def test_password_failures_spend_a_per_share_budget(http):
+    _share("s1", "right")
+    _share("s2", "right")
+    assert [_try(http, "s1", "wrong") for _ in range(shares.PASSWORD_ATTEMPTS)] == [401] * shares.PASSWORD_ATTEMPTS
+    assert _try(http, "s1", "right") == 429
+    assert _try(http, "s2", "right") == 303
+    failures = state.share_password_failures["s1"]
+    failures[0] -= shares.PASSWORD_WINDOW
+    assert _try(http, "s1", "right") == 303
 
 
 def test_forward_auth_accepts_each_token_and_nothing_else(http):

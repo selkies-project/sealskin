@@ -10,6 +10,7 @@ import secrets
 import shutil
 import time
 import uuid
+from collections import deque
 from typing import Any
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Response
@@ -40,6 +41,9 @@ router = APIRouter(
 public_router = APIRouter()
 
 DOWNLOAD_TOKEN_TTL = 60
+# Every try costs a 16 MiB scrypt, so a share takes this many failures per window.
+PASSWORD_ATTEMPTS = 5
+PASSWORD_WINDOW = 60.0
 
 
 def _share_info(share_id: str, meta: PublicShareMetadata) -> PublicShareInfo:
@@ -119,6 +123,7 @@ async def delete_public_share(
         raise HTTPException(status_code=403, detail="Share not found or permission denied.")
     _remove_share_file(share_id)
     del state.public_shares[share_id]
+    state.share_password_failures.pop(share_id, None)
     await config_store.save_public_shares()
     return Response(status_code=204)
 
@@ -154,6 +159,7 @@ async def cleanup_expired_shares() -> None:
     for share_id in expired:
         _remove_share_file(share_id)
         state.public_shares.pop(share_id, None)
+        state.share_password_failures.pop(share_id, None)
     await config_store.save_public_shares()
     logger.info("Expired share cleanup complete.")
 
@@ -225,6 +231,13 @@ async def access_public_share_post(share_id: str, password: str = Form(...)) -> 
         return HTMLResponse(content="<h1>This link has expired.</h1>", status_code=410)
     if not metadata.password_hash:
         raise HTTPException(status_code=400, detail="This share is not password protected.")
+    failures = state.share_password_failures.setdefault(share_id, deque(maxlen=PASSWORD_ATTEMPTS))
+    if len(failures) == PASSWORD_ATTEMPTS and failures[0] > time.monotonic() - PASSWORD_WINDOW:
+        return HTMLResponse(
+            content="<h1>Too many attempts. Try again in a minute.</h1>",
+            status_code=429,
+            headers={"Retry-After": str(int(PASSWORD_WINDOW))},
+        )
 
     if verify_share_password(password, metadata.password_hash):
         token = secrets.token_urlsafe(32)
@@ -233,6 +246,7 @@ async def access_public_share_post(share_id: str, password: str = Form(...)) -> 
             "expires_at": time.time() + DOWNLOAD_TOKEN_TTL,
         }
         return RedirectResponse(url=f"/public/download/{token}", status_code=303)
+    failures.append(time.monotonic())
     return _password_page(share_id, "Incorrect password. Please try again.") or HTMLResponse(
         content="<h1>Incorrect Password</h1>", status_code=401
     )
