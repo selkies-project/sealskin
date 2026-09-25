@@ -604,7 +604,7 @@ function initializeAppLaboratoryTab() {
         wayland_mode: launchWaylandCheckbox.checked,
         timezone: browserTimezone(),
       };
-      const launchResponse = await secureFetch('/api/admin/launch/meta_customize', { method: 'POST', body: JSON.stringify(launchPayload) });
+      const launchResponse = await secureFetch('/api/admin/launch/meta_customize', { method: 'POST', body: JSON.stringify(launchPayload) }, { timeout: 0 });
 
       const sessionUrlBase = `https://${config.serverIp}:${config.sessionPort}`;
       const frameUrl = `${sessionUrlBase}${launchResponse.session_url}&embedded=true`;
