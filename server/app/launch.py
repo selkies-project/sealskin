@@ -416,6 +416,13 @@ def build_launch_spec(
             app.name,
         )
 
+    app_config = app.model_dump()
+    provider_config = app_config.setdefault("provider_config", {})
+    provider_config["docker_overrides"] = merge_docker_overrides(
+        provider_config.get("docker_overrides"), extract_docker_overrides(template_settings)
+    )
+    env.update({k: str(v) for k, v in provider_config["docker_overrides"].pop("environment", {}).items()})
+
     launch_context: dict[str, Any] | None = None
     if extra_env:
         env.update(extra_env)
@@ -431,14 +438,6 @@ def build_launch_spec(
     if gpu_config and (gpu_config["type"] == "dri3" or (gpu_config["type"] == "nvidia" and wayland_mode)):
         env["DRI_NODE"] = gpu_config["device"]
         env["DRINODE"] = gpu_config["device"]
-
-    app_config = app.model_dump()
-    template_overrides = extract_docker_overrides(template_settings)
-    if template_overrides:
-        provider_config = app_config.setdefault("provider_config", {})
-        provider_config["docker_overrides"] = merge_docker_overrides(
-            provider_config.get("docker_overrides"), template_overrides
-        )
 
     if host_mount_path:
         write_autostart(app, host_mount_path, wayland_mode, session_id)

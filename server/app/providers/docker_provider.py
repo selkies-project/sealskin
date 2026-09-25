@@ -31,6 +31,19 @@ def image_provider(image_name: str) -> DockerProvider:
     return DockerProvider({"provider_config": {"image": image_name}})
 
 
+def _bind_volumes(bind_mounts: Any) -> dict[str, dict[str, str]]:
+    """Normalise Docker bind mounts (a `volumes` dict or `host:path[:mode]` list) to a dict."""
+    if isinstance(bind_mounts, dict):
+        return dict(bind_mounts)
+    result: dict[str, dict[str, str]] = {}
+    for mount in bind_mounts or []:
+        host, _, rest = str(mount).partition(":")
+        bind, _, mode = rest.partition(":")
+        if host and bind:
+            result[host] = {"bind": bind, "mode": mode or "rw"}
+    return result
+
+
 class DockerProvider(BaseProvider):
     """Launches applications as Docker containers on the local daemon."""
 
@@ -140,6 +153,8 @@ class DockerProvider(BaseProvider):
             logger.info("[%s] Image '%s' not found locally, pulling...", session_id, image)
             await self.pull_image(image)
 
+        overrides = dict(config.get("docker_overrides") or {})
+        bind_mounts = _bind_volumes(overrides.pop("volumes", None))
         run_kwargs: dict[str, Any] = {
             "image": image,
             "detach": True,
@@ -151,8 +166,8 @@ class DockerProvider(BaseProvider):
             "network": network,
         }
 
-        if config.get("docker_overrides"):
-            run_kwargs.update(config["docker_overrides"])
+        run_kwargs.update(overrides)
+        run_kwargs["volumes"] = {**(volumes or {}), **bind_mounts}
 
         if gpu_config:
             if gpu_config["type"] == "nvidia":
