@@ -18,9 +18,11 @@ from ..docker_utils import (
     translate_path_to_host,
 )
 from ..state import state
-from .base_provider import BaseProvider
+from .base_provider import INSTANCE_LABEL, MANAGED_BY_LABEL, BaseProvider, epoch, instance_labels
 
 logger = logging.getLogger(__name__)
+
+ENDED_STATES = ("exited", "dead", "removing")
 
 
 def _bind_volumes(bind_mounts: Any) -> dict[str, dict[str, str]]:
@@ -169,6 +171,7 @@ class DockerProvider(BaseProvider):
         }
         run_kwargs.update(overrides)
         run_kwargs["devices"] = list(run_kwargs["devices"])
+        run_kwargs["labels"] = {**(run_kwargs.get("labels") or {}), **instance_labels(session_id)}
         run_kwargs["volumes"] = {
             translate_path_to_host(path): bind for path, bind in (volumes or {}).items()
         }
@@ -273,6 +276,23 @@ class DockerProvider(BaseProvider):
             logger.warning("Attempted to stop container %s, but it was not found.", instance_id)
         except Exception as exc:  # noqa: BLE001
             logger.error("Error stopping container %s: %s", instance_id, exc)
+
+    async def is_running(self, instance_id: str) -> bool:
+        """Tell whether a container still exists and has not exited."""
+        try:
+            container = await asyncio.to_thread(self.client.containers.get, instance_id)
+        except NotFound:
+            return False
+        return container.status not in ENDED_STATES
+
+    async def managed_instances(self) -> dict[str, float]:
+        """Return this server's labelled containers with their creation times."""
+        containers = await asyncio.to_thread(
+            self.client.containers.list,
+            all=True,
+            filters={"label": [f"{MANAGED_BY_LABEL}=sealskin", f"{INSTANCE_LABEL}={state.instance_name}"]},
+        )
+        return {container.id: epoch(container.attrs["Created"]) for container in containers}
 
     @staticmethod
     def _get_container_ip(container_attrs: dict[str, Any]) -> str | None:

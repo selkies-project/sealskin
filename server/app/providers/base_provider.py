@@ -5,18 +5,26 @@ from __future__ import annotations
 import asyncio
 import base64
 import logging
+import re
 import time
 from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable
+from datetime import datetime
 from typing import Any
 
 import httpx
 from fastapi import HTTPException
 
+from ..state import state
+
 logger = logging.getLogger(__name__)
 
 #: Seconds an instance's web endpoint gets to answer once it runs.
 READY_TIMEOUT = 60
+
+MANAGED_BY_LABEL = "app.kubernetes.io/managed-by"
+INSTANCE_LABEL = "app.kubernetes.io/instance"
+SESSION_LABEL = "sealskin.app/session"
 
 
 def host_port(ip: str, port: int | str) -> str:
@@ -24,8 +32,31 @@ def host_port(ip: str, port: int | str) -> str:
     return f"[{ip}]:{port}" if ":" in ip else f"{ip}:{port}"
 
 
+def epoch(timestamp: str) -> float:
+    """Parse an RFC 3339 time, nanoseconds included, to seconds since the epoch."""
+    return datetime.fromisoformat(
+        re.sub(r"(\.\d{6})\d+", r"\1", timestamp).replace("Z", "+00:00")
+    ).timestamp()
+
+
+def instance_labels(session_id: str) -> dict[str, str]:
+    """Labels that mark an instance as this server's, for `managed_instances`."""
+    return {
+        MANAGED_BY_LABEL: "sealskin",
+        INSTANCE_LABEL: state.instance_name,
+        SESSION_LABEL: session_id,
+    }
+
+
 class BaseProvider(ABC):
-    """A backend that runs session instances and reports on its host."""
+    """A backend that runs session instances and reports on its host.
+
+    Attributes:
+        orphan_grace: Seconds an unreferenced instance may belong to a launch
+            still in progress before `managed_instances` callers remove it.
+    """
+
+    orphan_grace: float = READY_TIMEOUT * 2
 
     def __init__(self, app_config: dict[str, Any] | None = None) -> None:
         """Bind the provider to an application.
@@ -67,6 +98,19 @@ class BaseProvider(ABC):
     @abstractmethod
     async def stop(self, instance_id: str) -> None:
         """Stop and remove an instance; a missing one is not an error."""
+
+    @abstractmethod
+    async def is_running(self, instance_id: str) -> bool:
+        """Tell whether an instance still runs.
+
+        Raises:
+            Exception: When the backend cannot be asked, so callers never
+                mistake an outage for an ended instance.
+        """
+
+    @abstractmethod
+    async def managed_instances(self) -> dict[str, float]:
+        """Return the instances this server labelled, with their creation times."""
 
     @abstractmethod
     async def inspect_self(self) -> None:

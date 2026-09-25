@@ -912,3 +912,43 @@ async def stop_session(session_id: str) -> None:
         if path and path.startswith(ephemeral_base()) and os.path.exists(path):
             await asyncio.to_thread(shutil.rmtree, path, ignore_errors=True)
     logger.info("[%s] Session stopped and cleaned up successfully.", session_id)
+
+
+async def reconcile_sessions() -> None:
+    """Stop sessions whose instance ended and remove instances no session references.
+
+    An instance of another app in a room is dropped from the session when it
+    ends. A backend that cannot be asked skips the pass, so an outage never
+    reads as ended sessions; unreferenced instances are left alone for the
+    provider's `orphan_grace`, while a launch may still own them.
+    """
+    provider = get_provider()
+    referenced: set[str] = set()
+    changed = False
+    try:
+        owned = await provider.managed_instances()
+        for session_id, data in list(state.sessions.items()):
+            registry = data.get("container_registry") or {}
+            referenced.update(entry["instance_id"] for entry in registry.values())
+            referenced.add(data.get("instance_id", ""))
+            if not data.get("instance_id") or not await provider.is_running(data["instance_id"]):
+                logger.info("[%s] Session instance ended; stopping the session.", session_id)
+                await stop_session(session_id)
+                continue
+            for app_id, entry in list(registry.items()):
+                if entry["instance_id"] != data["instance_id"] and not await provider.is_running(
+                    entry["instance_id"]
+                ):
+                    logger.info("[%s] Instance of app %s ended.", session_id, app_id)
+                    del registry[app_id]
+                    changed = True
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Could not reconcile sessions with the backend: %s", exc)
+        return
+    if changed:
+        await config_store.save_sessions()
+    cutoff = time.time() - provider.orphan_grace
+    for instance_id, created_at in owned.items():
+        if instance_id not in referenced and created_at < cutoff:
+            logger.info("Removing instance %s, which no session references.", instance_id)
+            await provider.stop(instance_id)

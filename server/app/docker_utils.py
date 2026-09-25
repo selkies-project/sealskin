@@ -45,26 +45,6 @@ def get_docker_client() -> docker.DockerClient:
     return _CLIENT
 
 
-async def container_exists(instance_id: str) -> bool:
-    """Tell whether a container still exists on the host.
-
-    Args:
-        instance_id: Container id.
-
-    Returns:
-        `True` if Docker knows the container, `False` if it is gone.
-
-    Raises:
-        DockerException: If the daemon cannot be queried.
-    """
-    client = await asyncio.to_thread(get_docker_client)
-    try:
-        await asyncio.to_thread(client.containers.get, instance_id)
-        return True
-    except NotFound:
-        return False
-
-
 async def prune_dangling_images() -> None:
     """Remove dangling images left behind by pulls."""
     try:
@@ -79,11 +59,12 @@ async def inspect_self_container() -> None:
     """Discover mount mappings, ports, and network of the server's own container.
 
     Populates `state.path_prefix_map`, `state.discovered_api_port`,
-    `state.discovered_session_port`, and `state.discovered_network`. When
-    the server is not running inside Docker nothing is changed.
+    `state.discovered_session_port`, `state.discovered_network`, and
+    `state.instance_name` (the container's name, else the host name).
     """
     state.discovered_api_port = settings.api_port
     state.discovered_session_port = settings.session_port
+    state.instance_name = os.uname()[1]
     if not os.path.exists("/var/run/docker.sock"):
         logger.info("Docker socket not found. Assuming running on host.")
         return
@@ -110,6 +91,7 @@ async def inspect_self_container() -> None:
             container = containers[0]
 
         logger.info("Found self-container '%s'. Inspecting mounts.", container.name)
+        state.instance_name = container.name
         for mount in container.attrs.get("Mounts", []) or []:
             host_path = mount.get("Source")
             container_path = mount.get("Destination")

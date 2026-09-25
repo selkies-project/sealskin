@@ -2,7 +2,8 @@
 
 The application object is created here and every router is registered. State
 initialisation, cache refreshes, the configuration file watcher, and the
-background jobs live in `lifespan`.
+background jobs (image updates, share expiry, and session reconciliation)
+live in `lifespan`.
 """
 
 from __future__ import annotations
@@ -14,16 +15,11 @@ import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from docker.errors import DockerException
 from fastapi import FastAPI
 
 from . import collaboration, config_store, persistence, user_manager
-from .docker_utils import (
-    container_exists,
-    get_and_cache_image_metadata,
-    pull_and_cache_image,
-    read_cpu_model,
-)
+from .docker_utils import get_and_cache_image_metadata, pull_and_cache_image, read_cpu_model
+from .launch import reconcile_sessions
 from .providers import get_provider
 from .routers import (
     admin,
@@ -48,26 +44,15 @@ logger = logging.getLogger(__name__)
 init_server_keys()
 
 
-async def _remove_stale_sessions() -> None:
-    """Drop persisted sessions whose containers no longer exist."""
-    if not state.sessions:
-        return
-    logger.info("Checking for stale sessions from persistence file...")
-    stale: list[str] = []
-    try:
-        for session_id, data in list(state.sessions.items()):
-            instance_id = data.get("instance_id")
-            if not instance_id or not await container_exists(instance_id):
-                stale.append(session_id)
-    except (DockerException, RuntimeError) as exc:
-        logger.error("Could not connect to Docker to clean up stale sessions: %s", exc)
-        return
-    if stale:
-        logger.info("Found %d stale session(s) to remove.", len(stale))
-        async with state.sessions_lock:
-            for session_id in stale:
-                state.sessions.pop(session_id, None)
-        await config_store.save_sessions()
+#: Seconds between two passes of `reconcile_sessions`.
+RECONCILE_INTERVAL = 30
+
+
+async def background_reconcile_job() -> None:
+    """Periodically reconcile sessions with the backend."""
+    while True:
+        await asyncio.sleep(RECONCILE_INTERVAL)
+        await reconcile_sessions()
 
 
 async def background_update_job() -> None:
@@ -176,10 +161,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     _warn_if_cert_expiring()
     config_store.load_public_shares()
     await config_store.load_sessions()
-    await _remove_stale_sessions()
 
     provider = get_provider()
     await provider.inspect_self()
+    await reconcile_sessions()
     read_cpu_model()
     _, external_port = user_manager.external_address()
     if external_port:
@@ -207,6 +192,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     if settings.auto_update_apps:
         tasks.append(asyncio.create_task(background_update_job()))
     tasks.append(asyncio.create_task(background_share_cleanup_job()))
+    tasks.append(asyncio.create_task(background_reconcile_job()))
     if settings.watch_config_files:
         tasks.append(asyncio.create_task(persistence.watch_paths(_watch_targets(), stop_event)))
     try:
