@@ -25,10 +25,9 @@ import docker
 from fastapi import HTTPException
 
 from . import config_store, user_manager
-from .docker_utils import translate_path_to_host
 from .fsutil import safe_copytree, safe_join, sanitize_for_filename, unique_filename
 from .models import InstalledApp
-from .providers.docker_provider import DockerProvider
+from .providers import get_provider
 from .settings import settings
 from .state import state
 
@@ -67,7 +66,7 @@ class LaunchSpec:
 
     Attributes:
         env: Container environment.
-        volumes: Docker volume mapping (host path -> bind spec).
+        volumes: Server paths to mount, each to `{"bind", "mode"}`.
         gpu_config: Selected GPU, or `None`.
         app_config: Resolved app dictionary with merged `docker_overrides`.
         host_mount_path: Server-side path mounted as the session home.
@@ -444,7 +443,7 @@ def build_launch_spec(
 
     volumes: dict[str, dict[str, str]] = {}
     if host_mount_path:
-        volumes[translate_path_to_host(host_mount_path)] = {
+        volumes[host_mount_path] = {
             "bind": settings.container_config_path,
             "mode": "rw",
         }
@@ -452,7 +451,7 @@ def build_launch_spec(
         os.makedirs(shared_files_path, exist_ok=True, mode=0o755)
         if host_mount_path:
             os.makedirs(os.path.join(host_mount_path, "Desktop", "files"), exist_ok=True, mode=0o755)
-        volumes[translate_path_to_host(shared_files_path)] = {
+        volumes[shared_files_path] = {
             "bind": os.path.join(settings.container_config_path, "Desktop", "files"),
             "mode": "rw",
         }
@@ -695,7 +694,7 @@ async def launch_application(
             launch_context = {"type": "file", "value": filename}
 
     try:
-        provider = DockerProvider(spec.app_config)
+        provider = get_provider(spec.app_config)
         instance = await provider.launch(**spec.provider_kwargs(session_id))
         now = time.time()
         session: dict[str, Any] = {
@@ -851,7 +850,7 @@ async def ensure_container_for_session(
         ),
     )
 
-    provider = DockerProvider(spec.app_config)
+    provider = get_provider(spec.app_config)
     instance = await provider.launch(**spec.provider_kwargs(session_id))
     container_info = {
         "instance_id": instance["instance_id"],
@@ -873,9 +872,7 @@ async def stop_container_in_session(session_id: str, target_app_id: str) -> None
     container_info = session["container_registry"].get(target_app_id)
     if not container_info:
         return
-    app = state.installed_apps.get(target_app_id)
-    if app:
-        await DockerProvider(app.model_dump()).stop(container_info["instance_id"])
+    await get_provider().stop(container_info["instance_id"])
     del session["container_registry"][target_app_id]
     await config_store.save_sessions()
 
@@ -904,11 +901,8 @@ async def stop_session(session_id: str) -> None:
     if not registry and "provider_app_id" in session:
         registry = {session["provider_app_id"]: {"instance_id": session["instance_id"]}}
     for app_id, container_info in registry.items():
-        app = state.installed_apps.get(app_id)
-        if not app:
-            continue
         try:
-            await DockerProvider(app.model_dump()).stop(container_info["instance_id"])
+            await get_provider().stop(container_info["instance_id"])
         except Exception as exc:  # noqa: BLE001
             logger.error("[%s] Failed to stop container for app %s: %s", session_id, app_id, exc)
 

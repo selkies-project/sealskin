@@ -3,32 +3,24 @@
 from __future__ import annotations
 
 import asyncio
-import base64
 import logging
-import time
 from typing import Any
 
-import httpx
 from docker.errors import APIError, DockerException, ImageNotFound, NotFound
 from docker.types import DeviceRequest
 from fastapi import HTTPException
 
-from ..docker_utils import get_docker_client
-from .base_provider import BaseProvider, host_port
+from ..docker_utils import (
+    get_docker_client,
+    inspect_self_container,
+    prune_dangling_images,
+    scan_render_nodes,
+    translate_path_to_host,
+)
+from ..state import state
+from .base_provider import BaseProvider
 
 logger = logging.getLogger(__name__)
-
-
-def image_provider(image_name: str) -> DockerProvider:
-    """Build a provider for image-only operations (pull, inspect).
-
-    Args:
-        image_name: Image reference.
-
-    Returns:
-        A `DockerProvider` whose configuration only names the image.
-    """
-    return DockerProvider({"provider_config": {"image": image_name}})
 
 
 def _bind_volumes(bind_mounts: Any) -> dict[str, dict[str, str]]:
@@ -47,17 +39,23 @@ def _bind_volumes(bind_mounts: Any) -> dict[str, dict[str, str]]:
 class DockerProvider(BaseProvider):
     """Launches applications as Docker containers on the local daemon."""
 
-    def __init__(self, app_config: dict[str, Any]) -> None:
-        """Create a provider bound to the shared Docker client.
-
-        Args:
-            app_config: Resolved application dictionary.
+    @property
+    def client(self) -> Any:
+        """The shared Docker client.
 
         Raises:
             RuntimeError: If the Docker daemon is unreachable.
         """
-        super().__init__(app_config)
-        self.client = get_docker_client()
+        return get_docker_client()
+
+    async def inspect_self(self) -> None:
+        """Map the server container's mounts, ports, and network (see `inspect_self_container`)."""
+        await inspect_self_container()
+
+    async def detect_gpus(self) -> None:
+        """Offer the host's render nodes; NVIDIA ones carry their device index."""
+        state.available_gpus[:] = scan_render_nodes()
+        logger.info("Detected %d GPU(s): %s", len(state.available_gpus), state.available_gpus)
 
     async def get_local_image_info(self, image_name: str) -> dict[str, Any] | None:
         """Return id and digests of a locally available image.
@@ -126,6 +124,10 @@ class DockerProvider(BaseProvider):
             logger.error("Failed to pull image '%s': %s", image_name, exc)
             raise
 
+    async def prune_images(self) -> None:
+        """Remove dangling images left behind by pulls."""
+        await prune_dangling_images()
+
     async def launch(
         self,
         session_id: str,
@@ -139,7 +141,8 @@ class DockerProvider(BaseProvider):
     ) -> dict[str, Any]:
         """Run the application container and wait until it answers HTTP.
 
-        See `launch` for the arguments.
+        See `BaseProvider.launch` for the arguments; volume keys are server
+        paths and are translated to host paths here.
 
         Raises:
             HTTPException: On Docker errors or readiness timeout.
@@ -158,16 +161,18 @@ class DockerProvider(BaseProvider):
         run_kwargs: dict[str, Any] = {
             "image": image,
             "detach": True,
-            "shm_size": config.get("shm_size", "1g"),
+            "shm_size": "1g",
             "environment": env_vars,
-            "volumes": volumes,
-            "devices": list(config.get("devices", [])),
+            "devices": [],
             "remove": True,
             "network": network,
         }
-
         run_kwargs.update(overrides)
-        run_kwargs["volumes"] = {**(volumes or {}), **bind_mounts}
+        run_kwargs["devices"] = list(run_kwargs["devices"])
+        run_kwargs["volumes"] = {
+            translate_path_to_host(path): bind for path, bind in (volumes or {}).items()
+        }
+        run_kwargs["volumes"].update(bind_mounts)
 
         if gpu_config:
             if gpu_config["type"] == "nvidia":
@@ -227,16 +232,22 @@ class DockerProvider(BaseProvider):
                 status_code=500, detail=f"Docker error: {exc.explanation}"
             ) from exc
 
-        ip_address = await self._wait_for_container_ready(
-            container,
-            session_id,
-            env_vars.get("SUBFOLDER", "/"),
-            env_vars,
-            is_collaboration=is_collaboration,
-            master_token=master_token,
-            initial_tokens=initial_tokens,
-        )
+        async def current_ip() -> str | None:
+            await asyncio.to_thread(container.reload)
+            return self._get_container_ip(container.attrs)
 
+        try:
+            ip_address = await self._wait_until_ready(
+                session_id,
+                current_ip,
+                env_vars,
+                is_collaboration=is_collaboration,
+                master_token=master_token,
+                initial_tokens=initial_tokens,
+            )
+        except HTTPException:
+            await self.stop(container.id)
+            raise
         return {"instance_id": container.id, "ip": ip_address, "port": config["port"]}
 
     async def stop(self, instance_id: str) -> None:
@@ -262,130 +273,6 @@ class DockerProvider(BaseProvider):
             logger.warning("Attempted to stop container %s, but it was not found.", instance_id)
         except Exception as exc:  # noqa: BLE001
             logger.error("Error stopping container %s: %s", instance_id, exc)
-
-    async def _wait_for_container_ready(
-        self,
-        container: Any,
-        session_id: str,
-        subfolder: str,
-        env_vars: dict[str, str],
-        timeout: int = 60,
-        is_collaboration: bool = False,
-        master_token: str | None = None,
-        initial_tokens: dict[str, Any] | None = None,
-    ) -> str:
-        """Poll the container until its web endpoint answers.
-
-        Args:
-            container: Docker container object.
-            session_id: Session id for log prefixes.
-            subfolder: URL prefix the app serves under.
-            env_vars: Environment used to derive the basic-auth credentials.
-            timeout: Seconds to wait before giving up.
-            is_collaboration: Also post the initial tokens to the control plane.
-            master_token: Control-plane master token.
-            initial_tokens: Tokens to post.
-
-        Returns:
-            The container's IP address.
-
-        Raises:
-            HTTPException: 504 when the container never becomes ready.
-        """
-        auth_header = None
-        if "CUSTOM_USER" in env_vars and "PASSWORD" in env_vars:
-            auth_str = f"{env_vars['CUSTOM_USER']}:{env_vars['PASSWORD']}"
-            auth_header = {"Authorization": f"Basic {base64.b64encode(auth_str.encode()).decode()}"}
-
-        port = self.app_config["provider_config"]["port"]
-        health_check_passed = False
-        start_time = time.time()
-        while time.time() - start_time < timeout:
-            try:
-                await asyncio.to_thread(container.reload)
-                ip_address = self._get_container_ip(container.attrs)
-                if not ip_address:
-                    await asyncio.sleep(0.5)
-                    continue
-
-                address = host_port(ip_address, port)
-                if not health_check_passed:
-                    health_check_url = f"http://{address}{subfolder}"
-                    async with httpx.AsyncClient(
-                        timeout=2.0, follow_redirects=True, headers=auth_header
-                    ) as client:
-                        response = await client.get(health_check_url)
-                    if response.status_code == 200:
-                        logger.info(
-                            "[%s] Basic health check passed for %s", session_id, health_check_url
-                        )
-                        health_check_passed = True
-                        if not is_collaboration:
-                            return ip_address
-                    else:
-                        await asyncio.sleep(2)
-                        continue
-
-                if health_check_passed and is_collaboration:
-                    logger.info("[%s] Performing collaboration health check...", session_id)
-                    stacked_headers = {"Selkies-Authorization": f"Bearer {master_token}"}
-                    if auth_header:
-                        stacked_headers.update(auth_header)
-                    control_plane_targets = [
-                        (
-                            f"http://{address}{subfolder.rstrip('/')}/api/tokens",
-                            stacked_headers,
-                        ),
-                        (
-                            f"http://{host_port(ip_address, 8083)}/tokens",
-                            {"Authorization": f"Bearer {master_token}"},
-                        ),
-                    ]
-                    async with httpx.AsyncClient(timeout=5.0) as client:
-                        for control_plane_url, control_plane_headers in control_plane_targets:
-                            try:
-                                response = await client.post(
-                                    control_plane_url,
-                                    json=initial_tokens,
-                                    headers=control_plane_headers,
-                                )
-                                if response.status_code == 200:
-                                    from ..collaboration import TOKEN_ENDPOINT_CACHE
-
-                                    TOKEN_ENDPOINT_CACHE[ip_address] = control_plane_url
-                                    logger.info(
-                                        "[%s] Collaboration health check passed. Initial tokens set.",
-                                        session_id,
-                                    )
-                                    return ip_address
-                                logger.warning(
-                                    "[%s] Collaboration health check failed with status %s at %s",
-                                    session_id,
-                                    response.status_code,
-                                    control_plane_url,
-                                )
-                            except httpx.RequestError as exc:
-                                logger.debug(
-                                    "[%s] Collaboration control plane not reachable at %s: %s",
-                                    session_id,
-                                    control_plane_url,
-                                    exc,
-                                )
-                    logger.warning(
-                        "[%s] Collaboration health check failed on all endpoints.", session_id
-                    )
-
-            except httpx.ConnectError:
-                logger.debug("[%s] Health check pending for %s...", session_id, container.short_id)
-            except Exception as exc:  # noqa: BLE001
-                logger.warning("[%s] Error during readiness check: %s", session_id, exc)
-            await asyncio.sleep(2)
-
-        logger.error(
-            "[%s] Container %s failed to become ready in time.", session_id, container.short_id
-        )
-        await self.stop(container.id)
-        raise HTTPException(status_code=504, detail="Container failed to become ready in time.")
 
     @staticmethod
     def _get_container_ip(container_attrs: dict[str, Any]) -> str | None:

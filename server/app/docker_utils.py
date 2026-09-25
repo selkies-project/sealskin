@@ -222,9 +222,12 @@ def get_system_stats() -> dict[str, Any]:
         return {"cpu_model": state.cpu_model, "disk_total": None, "disk_used": None}
 
 
-def detect_gpus() -> None:
-    """Detect render nodes under `/sys/class/drm` into `state.available_gpus`."""
-    state.available_gpus.clear()
+def scan_render_nodes() -> list[dict[str, Any]]:
+    """Return the render nodes under `/sys/class/drm` as GPU descriptors.
+
+    NVIDIA nodes are typed `nvidia` and numbered in order for the runtime's
+    device request; every other driver is `dri3`.
+    """
     drm_root = "/sys/class/drm"
     try:
         render_devices = sorted(
@@ -233,11 +236,12 @@ def detect_gpus() -> None:
         )
     except FileNotFoundError:
         logger.info("No DRM devices found. No GPUs will be available.")
-        return
+        return []
     except Exception as exc:  # noqa: BLE001
         logger.error("An unexpected error occurred during GPU detection: %s", exc)
-        return
+        return []
 
+    gpus: list[dict[str, Any]] = []
     nvidia_index = 0
     for device_name in render_devices:
         driver_link = os.path.join(drm_root, device_name, "device", "driver")
@@ -254,9 +258,8 @@ def detect_gpus() -> None:
             nvidia_index += 1
         else:
             gpu_info["type"] = "dri3"
-        state.available_gpus.append(gpu_info)
-
-    logger.info("Detected %d GPU(s): %s", len(state.available_gpus), state.available_gpus)
+        gpus.append(gpu_info)
+    return gpus
 
 
 async def get_and_cache_image_metadata(image_name: str, force_refresh: bool = False) -> None:
@@ -273,10 +276,9 @@ async def get_and_cache_image_metadata(image_name: str, force_refresh: bool = Fa
     ):
         return
 
-    from .providers.docker_provider import image_provider
+    from .providers import get_provider
 
-    provider = image_provider(image_name)
-    info = await provider.get_local_image_info(image_name)
+    info = await get_provider().get_local_image_info(image_name)
 
     entry = state.image_metadata.setdefault(image_name, {})
     if info:
@@ -297,12 +299,12 @@ async def pull_and_cache_image(image_name: str) -> None:
         logger.info("Pull for image '%s' is already in progress.", image_name)
         return
 
-    from .providers.docker_provider import image_provider
+    from .providers import get_provider
 
     state.pull_status[image_name] = "pulling"
     try:
         logger.info("Starting background pull for image '%s'...", image_name)
-        await image_provider(image_name).pull_image(image_name)
+        await get_provider().pull_image(image_name)
         await get_and_cache_image_metadata(image_name, force_refresh=True)
         state.image_metadata.setdefault(image_name, {})["last_checked_at"] = time.time()
         logger.info("Background pull for '%s' completed successfully.", image_name)

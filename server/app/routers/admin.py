@@ -47,7 +47,7 @@ from ..models import (
     User,
     UserSessionList,
 )
-from ..providers.docker_provider import DockerProvider
+from ..providers import get_provider
 from ..security import (
     EncryptedRoute,
     get_decrypted_request_body,
@@ -362,7 +362,7 @@ async def check_app_update(app_id: str) -> ImageUpdateCheckResponse:
     if not app:
         raise HTTPException(status_code=404, detail="Installed app not found.")
     image_name = app.provider_config.image
-    provider = DockerProvider(app.model_dump())
+    provider = get_provider()
     local_info = await provider.get_local_image_info(image_name)
     remote_digest = await provider.get_remote_image_digest(image_name)
     if not remote_digest:
@@ -385,7 +385,7 @@ async def pull_latest_app_image(app_id: str) -> ImagePullResponse:
         raise HTTPException(status_code=404, detail="Installed app not found.")
     image_name = app.provider_config.image
     try:
-        await DockerProvider(app.model_dump()).pull_image(image_name)
+        await get_provider().pull_image(image_name)
         await config_store.refresh_autostart_for_app(app)
         await get_and_cache_image_metadata(image_name, force_refresh=True)
         return ImagePullResponse(
