@@ -1,9 +1,22 @@
-"""Abstract provider interface."""
+"""Abstract provider interface and the readiness check every backend shares."""
 
 from __future__ import annotations
 
+import asyncio
+import base64
+import logging
+import time
 from abc import ABC, abstractmethod
+from collections.abc import Awaitable, Callable
 from typing import Any
+
+import httpx
+from fastapi import HTTPException
+
+logger = logging.getLogger(__name__)
+
+#: Seconds an instance's web endpoint gets to answer once it runs.
+READY_TIMEOUT = 60
 
 
 def host_port(ip: str, port: int | str) -> str:
@@ -12,16 +25,16 @@ def host_port(ip: str, port: int | str) -> str:
 
 
 class BaseProvider(ABC):
-    """Abstract base class for all application providers."""
+    """A backend that runs session instances and reports on its host."""
 
-    def __init__(self, app_config: dict[str, Any]) -> None:
-        """Initialise the provider with an application configuration.
+    def __init__(self, app_config: dict[str, Any] | None = None) -> None:
+        """Bind the provider to an application.
 
         Args:
             app_config: Resolved application dictionary (`InstalledApp` shape)
-                including `provider_config`.
+                including `provider_config`; omitted for host-level calls.
         """
-        self.app_config = app_config
+        self.app_config = app_config or {"provider_config": {}}
 
     @abstractmethod
     async def launch(
@@ -35,14 +48,14 @@ class BaseProvider(ABC):
         master_token: str | None = None,
         initial_tokens: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """Launch an instance of the application.
+        """Launch an instance of the application and wait until it answers.
 
         Args:
             session_id: Unique id of the session.
             env_vars: Environment variables for the instance.
-            volumes: Volume mounts in Docker SDK format.
-            gpu_config: GPU details when a GPU was requested.
-            network: Network to attach the instance to.
+            volumes: Server paths to mount, each to `{"bind": <path in the instance>}`.
+            gpu_config: GPU descriptor from `state.available_gpus`.
+            network: Docker network to attach the instance to.
             is_collaboration: Whether this is a collaboration session.
             master_token: Master token of the downstream control plane.
             initial_tokens: Initial token set for the downstream control plane.
@@ -53,8 +66,148 @@ class BaseProvider(ABC):
 
     @abstractmethod
     async def stop(self, instance_id: str) -> None:
-        """Stop a running instance.
+        """Stop and remove an instance; a missing one is not an error."""
+
+    @abstractmethod
+    async def inspect_self(self) -> None:
+        """Discover what the backend needs to know about the server's own container."""
+
+    @abstractmethod
+    async def detect_gpus(self) -> None:
+        """Fill `state.available_gpus` with the GPUs sessions can request."""
+
+    @abstractmethod
+    async def get_local_image_info(self, image_name: str) -> dict[str, Any] | None:
+        """Return `{"id", "short_id", "digests"}` of the image sessions run, or `None`."""
+
+    @abstractmethod
+    async def get_remote_image_digest(self, image_name: str) -> str | None:
+        """Return the digest the registry serves for an image now, or `None`."""
+
+    @abstractmethod
+    async def pull_image(self, image_name: str) -> Any:
+        """Make new sessions run the registry's current image."""
+
+    @abstractmethod
+    async def prune_images(self) -> None:
+        """Remove images no session can use any more."""
+
+    async def _wait_until_ready(
+        self,
+        session_id: str,
+        current_ip: Callable[[], Awaitable[str | None]],
+        env_vars: dict[str, str],
+        is_collaboration: bool = False,
+        master_token: str | None = None,
+        initial_tokens: dict[str, Any] | None = None,
+    ) -> str:
+        """Poll the instance's web endpoint until it answers, then seed a room's tokens.
 
         Args:
-            instance_id: Identifier returned by `launch`.
+            session_id: Session id for log prefixes.
+            current_ip: Returns the instance's address, `None` while it has none;
+                raises `HTTPException` when the instance can no longer start.
+            env_vars: Environment the basic-auth credentials and subfolder come from.
+            is_collaboration: Also post the initial tokens to the control plane.
+            master_token: Control-plane master token.
+            initial_tokens: Tokens to post.
+
+        Returns:
+            The instance's IP address.
+
+        Raises:
+            HTTPException: 504 when the instance never becomes ready.
         """
+        auth_header = None
+        if "CUSTOM_USER" in env_vars and "PASSWORD" in env_vars:
+            auth_str = f"{env_vars['CUSTOM_USER']}:{env_vars['PASSWORD']}"
+            auth_header = {"Authorization": f"Basic {base64.b64encode(auth_str.encode()).decode()}"}
+
+        port = self.app_config["provider_config"]["port"]
+        subfolder = env_vars.get("SUBFOLDER", "/")
+        health_check_passed = False
+        deadline = time.monotonic() + READY_TIMEOUT
+        while time.monotonic() < deadline:
+            try:
+                ip_address = await current_ip()
+                if not ip_address:
+                    await asyncio.sleep(0.5)
+                    continue
+                address = host_port(ip_address, port)
+
+                if not health_check_passed:
+                    health_check_url = f"http://{address}{subfolder}"
+                    async with httpx.AsyncClient(
+                        timeout=2.0, follow_redirects=True, headers=auth_header
+                    ) as client:
+                        response = await client.get(health_check_url)
+                    if response.status_code == 200:
+                        logger.info(
+                            "[%s] Basic health check passed for %s", session_id, health_check_url
+                        )
+                        health_check_passed = True
+                        if not is_collaboration:
+                            return ip_address
+                    else:
+                        await asyncio.sleep(2)
+                        continue
+
+                if health_check_passed and is_collaboration:
+                    logger.info("[%s] Performing collaboration health check...", session_id)
+                    stacked_headers = {"Selkies-Authorization": f"Bearer {master_token}"}
+                    if auth_header:
+                        stacked_headers.update(auth_header)
+                    control_plane_targets = [
+                        (
+                            f"http://{address}{subfolder.rstrip('/')}/api/tokens",
+                            stacked_headers,
+                        ),
+                        (
+                            f"http://{host_port(ip_address, 8083)}/tokens",
+                            {"Authorization": f"Bearer {master_token}"},
+                        ),
+                    ]
+                    async with httpx.AsyncClient(timeout=5.0) as client:
+                        for control_plane_url, control_plane_headers in control_plane_targets:
+                            try:
+                                response = await client.post(
+                                    control_plane_url,
+                                    json=initial_tokens,
+                                    headers=control_plane_headers,
+                                )
+                                if response.status_code == 200:
+                                    from ..collaboration import TOKEN_ENDPOINT_CACHE
+
+                                    TOKEN_ENDPOINT_CACHE[ip_address] = control_plane_url
+                                    logger.info(
+                                        "[%s] Collaboration health check passed. Initial tokens set.",
+                                        session_id,
+                                    )
+                                    return ip_address
+                                logger.warning(
+                                    "[%s] Collaboration health check failed with status %s at %s",
+                                    session_id,
+                                    response.status_code,
+                                    control_plane_url,
+                                )
+                            except httpx.RequestError as exc:
+                                logger.debug(
+                                    "[%s] Collaboration control plane not reachable at %s: %s",
+                                    session_id,
+                                    control_plane_url,
+                                    exc,
+                                )
+                    logger.warning(
+                        "[%s] Collaboration health check failed on all endpoints.", session_id
+                    )
+
+            except HTTPException:
+                raise
+            except httpx.ConnectError:
+                logger.debug("[%s] Health check pending...", session_id)
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("[%s] Error during readiness check: %s", session_id, exc)
+            await asyncio.sleep(2)
+
+        logger.error("[%s] Instance failed to become ready in time.", session_id)
+        raise HTTPException(status_code=504, detail="Container failed to become ready in time.")

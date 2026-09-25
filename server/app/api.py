@@ -20,13 +20,11 @@ from fastapi import FastAPI
 from . import collaboration, config_store, persistence, user_manager
 from .docker_utils import (
     container_exists,
-    detect_gpus,
     get_and_cache_image_metadata,
-    inspect_self_container,
-    prune_dangling_images,
     pull_and_cache_image,
     read_cpu_model,
 )
+from .providers import get_provider
 from .routers import (
     admin,
     applications,
@@ -90,7 +88,7 @@ async def background_update_job() -> None:
             await asyncio.sleep(2)
 
         logger.info("Cleaning up dangling images...")
-        await prune_dangling_images()
+        await get_provider().prune_images()
 
 
 async def background_share_cleanup_job() -> None:
@@ -180,7 +178,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     await config_store.load_sessions()
     await _remove_stale_sessions()
 
-    await inspect_self_container()
+    provider = get_provider()
+    await provider.inspect_self()
     read_cpu_model()
     _, external_port = user_manager.external_address()
     if external_port:
@@ -190,7 +189,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     config_store.load_app_stores()
     config_store.load_app_templates()
-    detect_gpus()
+    await provider.detect_gpus()
 
     logger.info("Populating app store cache...")
     await config_store.refresh_store_caches()
