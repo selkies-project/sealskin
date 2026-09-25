@@ -447,3 +447,21 @@ def verify_share_password(password: str, stored_hash: str) -> bool:
         password.encode("utf-8"), salt=salt, n=_SCRYPT_N, r=_SCRYPT_R, p=_SCRYPT_P, dklen=32
     )
     return secrets.compare_digest(candidate, expected)
+
+
+def token_matches(given: str | None, expected: str | None) -> bool:
+    """Compare a token a client sent with the stored one in constant time.
+
+    Missing values never match. The compare runs on the UTF-8 bytes, since
+    `secrets.compare_digest` refuses a `str` holding anything but ASCII.
+
+    Args:
+        given: Token from the request.
+        expected: Token held in the session record.
+
+    Returns:
+        `True` when both are present and equal.
+    """
+    if not given or not expected:
+        return False
+    return secrets.compare_digest(given.encode(), expected.encode())

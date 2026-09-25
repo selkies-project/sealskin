@@ -29,7 +29,7 @@ from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
 from . import config_store, launch
 from .routers.applications import user_can_access
-from .security import canonical_uuid
+from .security import canonical_uuid, token_matches
 from .settings import settings
 from .state import state
 
@@ -109,19 +109,17 @@ async def collaborative_room(
     main_access_token = request.query_params.get("access_token") or request.cookies.get(
         settings.session_cookie_name
     )
-    is_controller_by_session = main_access_token and secrets.compare_digest(
-        main_access_token, session_data.get("access_token", "")
-    )
+    is_controller_by_session = token_matches(main_access_token, session_data.get("access_token"))
 
-    is_controller_by_collab = collab_token == session_data.get("controller_token")
+    is_controller_by_collab = token_matches(collab_token, session_data.get("controller_token"))
     is_viewer_by_collab = any(
-        v["token"] == collab_token for v in session_data.get("viewers", [])
+        token_matches(collab_token, v["token"]) for v in session_data.get("viewers", [])
     )
-    is_new_participant_by_collab = collab_token == session_data.get(
-        "participant_invite_token"
+    is_new_participant_by_collab = token_matches(
+        collab_token, session_data.get("participant_invite_token")
     )
-    is_new_readonly_by_collab = collab_token == session_data.get(
-        "readonly_invite_token"
+    is_new_readonly_by_collab = token_matches(
+        collab_token, session_data.get("readonly_invite_token")
     )
 
     if not (

@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
-import secrets
 import shutil
 import uuid
 from typing import Any
@@ -17,7 +16,13 @@ from pydantic import ValidationError
 from ..fsutil import resolve_within, safe_join, unique_filename
 from ..launch import ephemeral_base, stop_session
 from ..models import ActiveSessionInfo, SendFileToSessionRequest
-from ..security import EncryptedRoute, canonical_uuid, get_decrypted_request_body, verify_token
+from ..security import (
+    EncryptedRoute,
+    canonical_uuid,
+    get_decrypted_request_body,
+    token_matches,
+    verify_token,
+)
 from ..settings import settings
 from ..state import state
 from .uploads import reassemble_file
@@ -158,7 +163,7 @@ def _known_collab_token(data: dict[str, Any], token: str | None) -> str | None:
         viewer.get("token") for viewer in data.get("viewers", [])
     ]
     for candidate in candidates:
-        if candidate and secrets.compare_digest(candidate, token):
+        if token_matches(token, candidate):
             return candidate
     return None
 
@@ -169,7 +174,7 @@ async def initial_session_auth(session_id: uuid.UUID, request: Request) -> Respo
     session_id_str = canonical_uuid(session_id)
     token = request.query_params.get("access_token")
     data = state.sessions.get(session_id_str)
-    if not data or not token or not secrets.compare_digest(token, data.get("access_token", "")):
+    if not data or not token_matches(token, data.get("access_token")):
         raise HTTPException(status_code=403, detail="Forbidden: Invalid session or token.")
     token = data["access_token"]
 

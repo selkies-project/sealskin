@@ -8,10 +8,10 @@ from __future__ import annotations
 
 import base64
 import logging
-import secrets
 
 from fastapi import APIRouter, HTTPException, Request, Response
 
+from ..security import token_matches
 from ..settings import settings
 from ..state import state
 
@@ -39,14 +39,12 @@ async def resolve_session(session_id: str, request: Request) -> Response:
     if not session:
         raise HTTPException(status_code=404, detail="Session not found.")
 
-    is_standard_auth = bool(token) and secrets.compare_digest(token, session.get("access_token", ""))
+    is_standard_auth = token_matches(token, session.get("access_token"))
     is_collab_controller = False
     is_collab_viewer = False
     if session.get("is_collaboration"):
-        is_collab_controller = bool(collab_token) and collab_token == session.get("controller_token")
-        is_collab_viewer = bool(collab_token) and any(
-            v["token"] == collab_token for v in session.get("viewers", [])
-        )
+        is_collab_controller = token_matches(collab_token, session.get("controller_token"))
+        is_collab_viewer = any(token_matches(collab_token, v["token"]) for v in session.get("viewers", []))
     if not (is_standard_auth or is_collab_controller or is_collab_viewer):
         raise HTTPException(status_code=403, detail="Forbidden: Invalid session or token.")
 
