@@ -1,5 +1,6 @@
 """Session reconciliation against a backend's view of its instances."""
 
+import asyncio
 import os
 import time
 
@@ -53,6 +54,7 @@ async def test_ended_sessions_stop_and_orphans_go(monkeypatch):
     _use(monkeypatch, provider)
 
     await launch.reconcile_sessions()
+    await asyncio.gather(*launch._removals)
 
     assert set(state.sessions) == {"live"}
     assert state.sessions["live"]["container_registry"] == {"app1": {"instance_id": "a"}}
