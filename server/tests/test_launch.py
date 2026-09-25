@@ -1,5 +1,6 @@
 """Launch spec assembly."""
 
+import asyncio
 import os
 
 import pytest
@@ -7,6 +8,7 @@ from fastapi import HTTPException
 
 from app import launch
 from app.models import InstalledApp
+from app.settings import settings
 from app.state import state
 
 
@@ -199,3 +201,20 @@ def test_build_launch_spec_forced_env_wins_and_legacy_keys_migrate(tmp_path):
     assert "SELKIES_H264_CRF" not in spec.env
     assert spec.env["SELKIES_ENABLE_CLIPBOARD"] == "out"
     assert "SELKIES_CLIPBOARD_IN_ENABLED" not in spec.env
+
+
+def test_home_name_stays_in_the_callers_storage():
+    for user, home in (("attacker", "work"), ("victim", "private")):
+        os.makedirs(os.path.join(settings.storage_path, user, home))
+    app = make_app()
+    allowed = {"persistent_storage": True}
+
+    def resolve(home_name):
+        return asyncio.run(launch._resolve_storage(app, "s1", "attacker", allowed, home_name, None))
+
+    own, _ = resolve("work")
+    assert own == os.path.realpath(os.path.join(settings.storage_path, "attacker", "work"))
+    for name in ("../victim/private", "../../etc", "/etc"):
+        with pytest.raises(HTTPException) as refused:
+            resolve(name)
+        assert refused.value.status_code == 404, name

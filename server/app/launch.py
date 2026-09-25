@@ -587,8 +587,10 @@ async def _resolve_storage(
         home_name = "cleanroom"
     if home_name and home_name.lower() != "cleanroom":
         try:
-            host_mount_path = safe_join(settings.storage_path, username, home_name)
-            shared = safe_join(settings.storage_path, username, "_sealskin_shared_files")
+            # The caller's own storage is the base, so a name cannot step into a sibling's.
+            user_storage = safe_join(settings.storage_path, username)
+            host_mount_path = safe_join(user_storage, home_name)
+            shared = safe_join(user_storage, "_sealskin_shared_files")
         except ValueError as exc:
             raise HTTPException(status_code=404, detail=f"Home directory '{home_name}' not found.") from exc
         if not os.path.isdir(host_mount_path):
