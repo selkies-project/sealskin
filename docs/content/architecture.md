@@ -137,6 +137,9 @@ app bundle only what cannot be served:
 * the **host page**, which frames the served UI and relays its requests to
   the background.
 
+The [web app](#web-app) is a third shell that the server serves itself, so it
+needs no store at all.
+
 Updating the server image therefore updates the UI everywhere; a store
 release is needed only when the manifest, the native plugins, or the bridge
 protocol change. HTML entry points are served with `Cache-Control: no-cache`
@@ -166,8 +169,9 @@ Served pages never call `chrome.*`. They send `postMessage` requests to the
 host, `{sealskin: 1, id, type, payload}`, and receive `{sealskin: 1, id, ok,
 data}` or an error. The host accepts only messages from its own iframe whose
 origin matches the base it loaded; the page accepts only replies from its
-parent, and only when that parent is a shell: an extension page, or the mobile
-app's `capacitor://localhost` (iOS) or `https://localhost` (Android). Structured
+parent, and only when that parent is a shell: an extension page, the mobile
+app's `capacitor://localhost` (iOS) or `https://localhost` (Android), or the web
+app on the page's own origin. Structured
 clone carries `File` and `Blob` objects. The private key
 never crosses the bridge: signing and encryption stay in the background.
 
@@ -179,6 +183,7 @@ never crosses the bridge: signing and encryption stay in the background.
 | `setContext` | `{context, openPopup}` | | Used by the files and upload pages. |
 | `fetchBlob` | `{url}` | `Blob` | Fetched with extension privileges; link targets and media. |
 | `openSession` / `focusSession` / `closeSession` | session | | Open, focus, or close the tracked tab; close also deletes the session. |
+| `reserveTab` | `{reserve}` | | Web app: opens a blank tab during the **Launch** click for `openSession` to fill, or closes it when the launch fails. |
 | `openPage` | `{page, params?}` | | `popup`, `options`, `files`, `upload`, `connect`. |
 | `openExternal` | `{url}` | | New tab or Custom Tab. |
 | `downloadFile` | `{home, path, filename}` | | Chrome only (`capabilities.streamDownload`): the service worker streams the file. |
@@ -199,6 +204,44 @@ over the Browser plugin, `chrome.action.openPopup` setting the iframe) and
 runs the same background script as the extension in the outer window.
 Native file opening and the back button stay outside the iframe. The WebView
 requires a trusted certificate.
+
+### Web app
+
+`/ui/` itself (`client/src/ui/index.html` and `app.js`) is a host: like the
+mobile app it installs the `chrome.*` polyfill and runs the background script
+in the page, frames the served pages, and frames the connection page, which
+the server serves as well. It connects only to the server that serves it.
+
+Session content is served from the same origin, which shapes the rest:
+
+* **Keys.** The connection page's private key is wrapped (AES-GCM under a
+  PBKDF2-SHA256 key, 600,000 iterations) with the browser's one passphrase
+  before it is stored, together with a saved but not yet active key. Unlocked,
+  the keys live only in this page's memory, as non-extractable `CryptoKey`s.
+  The passphrase is typed into masked text fields rather than password
+  fields, so browsers do not offer to save it: a saved password is filled
+  into any page of its origin, which Firefox does with no interaction and
+  Chrome after one click.
+* **Isolation.** The page is sent with `Cross-Origin-Opener-Policy:
+  same-origin-allow-popups` and `frame-ancestors 'none'`, so a session page
+  that opens or frames it gets no handle on it. The page opens every session
+  tab itself (a `reserveTab` at the click, since a tab opened when a long
+  launch ends is blocked as a popup), clears its `opener`, and keeps the
+  handle to focus and close it; it never looks a tab up by name, which would
+  make it the tab's opener. Caddy drops `Service-Worker-Allowed` from session
+  responses, so a session's service worker cannot claim `/ui/`.
+* **Storage.** Session pages can rewrite `localStorage`, so the stored
+  configuration never decides the server address or the signing key: reads
+  pin both to this origin and the sealed key.
+
+`/ui/manifest.webmanifest` makes it installable. Its share target posts to
+`/ui/share`, where the service worker (`sw.js`, which caches nothing) parks
+the link, text, or file for the launcher; its file handlers list the
+extensions of the installed applications that have a MIME type, since Linux
+desktops register the pair; and it handles `web+sealskin:` links.
+`/ui/opensearch.xml` offers the app as a search engine. `?url=` and `?q=` open
+the launcher with a link or a search, which is also how the dashboard's
+bookmarklet sends a page or a selection.
 
 ## Persistence
 
@@ -248,7 +291,7 @@ docstrings.
 
 ```
 client/build.mjs              esbuild pipeline; writes client/dist/{ui,extension,mobile}
-client/src/ui/                served pages: popup, options, files, upload, css/, room/
+client/src/ui/                served pages: popup, options, files, upload, css/, room/; the web app (index, app, sw)
 client/src/shell/             host, connect page, background script, mobile host
 client/src/lib/               bridge, host-bridge, api, crypto-utils, i18n, dom, languages
 client/src/i18n/<lang>.json   one file per language, merged over English at build time
