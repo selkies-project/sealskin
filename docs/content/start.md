@@ -1,11 +1,12 @@
 ---
 title: Getting Started
-description: Install the server, connect a browser extension or mobile app, and launch your first isolated application.
+description: Install the server, connect a browser extension, the mobile app, or the web app, and launch your first isolated application.
 ---
 
 SealSkin has two halves: a **server** that runs applications in Docker
-containers and streams them, and a **client** (browser extension or mobile
-app) that sends links, files, and downloads to it. This page takes you from
+containers and streams them, and a **client** (browser extension, mobile
+app, or the web app the server serves) that sends links, files, and downloads
+to it. This page takes you from
 nothing to a running session.
 
 ## What you need
@@ -14,10 +15,10 @@ nothing to a running session.
   user in the `docker` group. Sessions are ordinary containers on that host,
   so give it the CPU, memory, and disk you would give the applications
   themselves.
-* A hostname and a **trusted TLS certificate** if you want to use Firefox or
-  the mobile apps. Chrome and other Chromium browsers also work with the
-  self-signed certificate the container generates, at the cost of one extra
-  step (see [Certificates](#certificates)).
+* A hostname and a **trusted TLS certificate** if you want to use Firefox,
+  the mobile apps, or the web app. The extension in Chrome and other Chromium
+  browsers also works with the self-signed certificate the container
+  generates, at the cost of one extra step (see [Certificates](#certificates)).
 * One TCP port reachable from wherever your clients are. The default is
   `8443`, which carries both the encrypted API and the streamed sessions.
   Port `8000` is a plain-HTTP fallback for the API that only the Chrome
@@ -141,6 +142,7 @@ the proxy certificate is within 14 days of expiring.
 | Firefox | [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/) | Context menus and uploads. Requires a trusted certificate. |
 | iOS | [App Store](https://apps.apple.com/us/app/sealskin/id6758210210) | Launcher, files, and admin dashboard; sessions open in Safari. Requires a trusted certificate. |
 | Android | [Google Play](https://play.google.com/store/apps/details?id=io.linuxserver.sealskin) | Same as iOS; sessions open in a Custom Tab. Requires a trusted certificate. |
+| Any browser | `https://<server>:8443/ui/` | The web app: launcher, sessions, files, and dashboard, with a bookmarklet, `web+sealskin:` links, and a search engine in place of the context menu; installed from a Chromium browser it also receives shared links and files. Requires a trusted certificate. See [Usage](usage.md#in-a-browser-with-nothing-installed). |
 
 The zips, APK, and IPA on the
 [releases page](https://github.com/selkies-project/sealskin/releases) are the
@@ -149,12 +151,14 @@ covers loading an unpacked extension.
 
 The extension and the app are thin shells. Everything you see after
 connecting, from the launcher to the admin dashboard, is served by your
-server, so the clients rarely need updating.
+server, so the clients rarely need updating. The web app is those same pages
+with a small host around them.
 
 ## Connect
 
-Open the extension (toolbar icon or its options page) or the app. With no
-server configured you land on the **connection page**.
+Open the extension (toolbar icon or its options page), the app, or
+`https://<server>:8443/ui/`. With no server configured you land on the
+**connection page**.
 
 1. Under **Quick Setup**, upload `admin.json` or paste its contents and click
    **Apply Configuration**. The manual form underneath takes the same values
@@ -165,6 +169,10 @@ server configured you land on the **connection page**.
 2. Click **Login & Test**. The client performs the encrypted handshake, signs
    a token with your key, and calls the server; on success it saves the
    configuration and opens the dashboard.
+
+The web app always connects to the server that serves it, so its form has no
+server fields. It asks instead for a **passphrase**, which encrypts your
+private key in the browser, and asks for it again each time the page opens.
 
 ### Certificates
 
@@ -178,8 +186,8 @@ then **Retry**. After that both the API and the sessions use HTTPS.
 
 **Firefox** does not let extensions talk to servers with untrusted
 certificates, and the **mobile** WebViews reject them outright, so those
-clients need a certificate the device already trusts. The installer's Duck DNS
-certificate satisfies all of them.
+clients need a certificate the device already trusts. So does the **web
+app**. The installer's Duck DNS certificate satisfies all of them.
 
 ## Add users and applications
 
