@@ -772,7 +772,11 @@
         },
         "SELKIES_COMPUTER_USE_BIND": {
           "label": "Computer-Use सर्वर",
-          "description": "pixelflux के Computer-Use HTTP सर्वर को इन अल्पविराम से अलग प्रविष्टियों पर शुरू करता है: केवल पोर्ट लूपबैक पर सुनता है, host:port पता बताता है। रिक्त होने पर बंद रहता है।"
+          "description": "pixelflux के Computer-Use HTTP सर्वर को इन अल्पविराम से अलग प्रविष्टियों पर शुरू करता है: केवल पोर्ट लूपबैक पर सुनता है, host:port पता बताता है। रिक्त होने पर बंद रहता है। यह केवल Computer-Use टोकन के साथ शुरू होता है।"
+        },
+        "SELKIES_COMPUTER_USE_TOKEN": {
+          "label": "Computer-Use टोकन",
+          "description": "Bearer टोकन जो हर Computer-Use अनुरोध के Authorization हेडर में होना चाहिए; इसके बिना सर्वर शुरू नहीं होता।"
         },
         "SELKIES_RECORDING_SOCKET": {
           "label": "रिकॉर्डिंग सॉकेट",

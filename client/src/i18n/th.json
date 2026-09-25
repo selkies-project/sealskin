@@ -772,7 +772,11 @@
         },
         "SELKIES_COMPUTER_USE_BIND": {
           "label": "เซิร์ฟเวอร์ Computer-Use",
-          "description": "เริ่มเซิร์ฟเวอร์ HTTP Computer-Use ของ pixelflux บนรายการที่คั่นด้วยจุลภาคเหล่านี้: พอร์ตเดี่ยวจะรับฟังเฉพาะ loopback ส่วน host:port ระบุที่อยู่ เว้นว่างจะปิดไว้"
+          "description": "เริ่มเซิร์ฟเวอร์ HTTP Computer-Use ของ pixelflux บนรายการที่คั่นด้วยจุลภาคเหล่านี้: พอร์ตเดี่ยวจะรับฟังเฉพาะ loopback ส่วน host:port ระบุที่อยู่ เว้นว่างจะปิดไว้ จะเริ่มทำงานเฉพาะเมื่อมีโทเค็น Computer-Use"
+        },
+        "SELKIES_COMPUTER_USE_TOKEN": {
+          "label": "โทเค็น Computer-Use",
+          "description": "โทเค็น Bearer ที่ทุกคำขอ Computer-Use ต้องส่งในส่วนหัว Authorization หากไม่มี เซิร์ฟเวอร์จะไม่เริ่มทำงาน"
         },
         "SELKIES_RECORDING_SOCKET": {
           "label": "ซ็อกเก็ตบันทึก",

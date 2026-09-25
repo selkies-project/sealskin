@@ -793,6 +793,11 @@ settings:
     type: text
     default: ""
     docker: false
+  - name: SELKIES_COMPUTER_USE_TOKEN
+    category: general
+    type: text
+    default: ""
+    docker: false
   - name: SELKIES_RECORDING_SOCKET
     category: general
     type: text

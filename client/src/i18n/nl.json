@@ -772,7 +772,11 @@
         },
         "SELKIES_COMPUTER_USE_BIND": {
           "label": "Computer-Use-server",
-          "description": "Start de Computer-Use-HTTP-server van pixelflux op deze door komma's gescheiden ingangen: een kale poort luistert alleen op loopback, host:poort noemt het adres. Leeg laat hem uit."
+          "description": "Start de Computer-Use-HTTP-server van pixelflux op deze door komma's gescheiden ingangen: een kale poort luistert alleen op loopback, host:poort noemt het adres. Leeg laat hem uit. Hij start alleen met het Computer-Use-token."
+        },
+        "SELKIES_COMPUTER_USE_TOKEN": {
+          "label": "Computer-Use-token",
+          "description": "Bearer-token dat elk Computer-Use-verzoek in de Authorization-header moet meesturen; zonder token start de server niet."
         },
         "SELKIES_RECORDING_SOCKET": {
           "label": "Opnamesocket",

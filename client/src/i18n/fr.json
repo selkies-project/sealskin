@@ -772,7 +772,11 @@
         },
         "SELKIES_COMPUTER_USE_BIND": {
           "label": "Serveur Computer-Use",
-          "description": "Démarre le serveur HTTP Computer-Use de pixelflux sur ces entrées séparées par des virgules : un port seul écoute sur la boucle locale, hôte:port nomme l'adresse. Vide le laisse éteint."
+          "description": "Démarre le serveur HTTP Computer-Use de pixelflux sur ces entrées séparées par des virgules : un port seul écoute sur la boucle locale, hôte:port nomme l'adresse. Vide le laisse éteint. Il ne démarre qu'avec le jeton Computer-Use."
+        },
+        "SELKIES_COMPUTER_USE_TOKEN": {
+          "label": "Jeton Computer-Use",
+          "description": "Jeton Bearer que chaque requête Computer-Use doit porter dans son en-tête Authorization ; sans lui, le serveur ne démarre pas."
         },
         "SELKIES_RECORDING_SOCKET": {
           "label": "Socket d'enregistrement",

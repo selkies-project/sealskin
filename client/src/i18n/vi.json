@@ -772,7 +772,11 @@
         },
         "SELKIES_COMPUTER_USE_BIND": {
           "label": "Máy chủ Computer-Use",
-          "description": "Khởi động máy chủ HTTP Computer-Use của pixelflux trên các mục phân tách bằng dấu phẩy này: chỉ một cổng sẽ lắng nghe trên loopback, host:port chỉ định địa chỉ. Để trống sẽ giữ tắt."
+          "description": "Khởi động máy chủ HTTP Computer-Use của pixelflux trên các mục phân tách bằng dấu phẩy này: chỉ một cổng sẽ lắng nghe trên loopback, host:port chỉ định địa chỉ. Để trống sẽ giữ tắt. Máy chủ chỉ khởi động khi có mã thông báo Computer-Use."
+        },
+        "SELKIES_COMPUTER_USE_TOKEN": {
+          "label": "Mã thông báo Computer-Use",
+          "description": "Mã thông báo Bearer mà mọi yêu cầu Computer-Use phải gửi trong tiêu đề Authorization; không có nó thì máy chủ không khởi động."
         },
         "SELKIES_RECORDING_SOCKET": {
           "label": "Socket ghi hình",

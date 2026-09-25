@@ -772,7 +772,11 @@
         },
         "SELKIES_COMPUTER_USE_BIND": {
           "label": "Servidor Computer-Use",
-          "description": "Inicia el servidor HTTP Computer-Use de pixelflux en estas entradas separadas por comas: un puerto solo escucha en loopback, host:puerto indica la dirección. Vacío lo deja apagado."
+          "description": "Inicia el servidor HTTP Computer-Use de pixelflux en estas entradas separadas por comas: un puerto solo escucha en loopback, host:puerto indica la dirección. Vacío lo deja apagado. Solo se inicia con el token de Computer-Use."
+        },
+        "SELKIES_COMPUTER_USE_TOKEN": {
+          "label": "Token de Computer-Use",
+          "description": "Token Bearer que cada solicitud de Computer-Use debe llevar en su cabecera Authorization; sin él, el servidor no se inicia."
         },
         "SELKIES_RECORDING_SOCKET": {
           "label": "Socket de grabación",

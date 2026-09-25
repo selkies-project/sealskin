@@ -772,7 +772,11 @@
         },
         "SELKIES_COMPUTER_USE_BIND": {
           "label": "خادم Computer-Use",
-          "description": "يشغّل خادم HTTP الخاص بـ Computer-Use في pixelflux على هذه المدخلات المفصولة بفواصل: منفذ مجرد يستمع على loopback فقط، وhost:port يحدد العنوان. الفراغ يبقيه معطّلًا."
+          "description": "يشغّل خادم HTTP الخاص بـ Computer-Use في pixelflux على هذه المدخلات المفصولة بفواصل: منفذ مجرد يستمع على loopback فقط، وhost:port يحدد العنوان. الفراغ يبقيه معطّلًا. لا يبدأ إلا مع رمز Computer-Use."
+        },
+        "SELKIES_COMPUTER_USE_TOKEN": {
+          "label": "رمز Computer-Use",
+          "description": "رمز Bearer يجب أن يحمله كل طلب إلى Computer-Use في ترويسة Authorization؛ لا يبدأ الخادم بدونه."
         },
         "SELKIES_RECORDING_SOCKET": {
           "label": "مقبس التسجيل",

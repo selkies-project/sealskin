@@ -772,7 +772,11 @@
         },
         "SELKIES_COMPUTER_USE_BIND": {
           "label": "Сервер Computer-Use",
-          "description": "Запускает HTTP-сервер Computer-Use из pixelflux на этих записях через запятую: голый порт слушает только loopback, host:port задаёт адрес. Пустое значение оставляет его выключенным."
+          "description": "Запускает HTTP-сервер Computer-Use из pixelflux на этих записях через запятую: голый порт слушает только loopback, host:port задаёт адрес. Пустое значение оставляет его выключенным. Запускается только с токеном Computer-Use."
+        },
+        "SELKIES_COMPUTER_USE_TOKEN": {
+          "label": "Токен Computer-Use",
+          "description": "Bearer-токен, который каждый запрос Computer-Use должен передавать в заголовке Authorization; без него сервер не запускается."
         },
         "SELKIES_RECORDING_SOCKET": {
           "label": "Сокет записи",

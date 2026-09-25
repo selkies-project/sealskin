@@ -772,7 +772,11 @@
         },
         "SELKIES_COMPUTER_USE_BIND": {
           "label": "Computer-Use サーバー",
-          "description": "pixelflux の Computer-Use HTTP サーバーをカンマ区切りの項目で起動します。ポート番号のみならループバックでのみ待ち受け、host:port はアドレスを指定します。空欄ならオフのままです。"
+          "description": "pixelflux の Computer-Use HTTP サーバーをカンマ区切りの項目で起動します。ポート番号のみならループバックでのみ待ち受け、host:port はアドレスを指定します。空欄ならオフのままです。Computer-Use のトークンがある場合にのみ起動します。"
+        },
+        "SELKIES_COMPUTER_USE_TOKEN": {
+          "label": "Computer-Use のトークン",
+          "description": "すべての Computer-Use リクエストが Authorization ヘッダーで送る Bearer トークンです。これがないとサーバーは起動しません。"
         },
         "SELKIES_RECORDING_SOCKET": {
           "label": "録画ソケット",

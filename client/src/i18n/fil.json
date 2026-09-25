@@ -772,7 +772,11 @@
         },
         "SELKIES_COMPUTER_USE_BIND": {
           "label": "Computer-Use Server",
-          "description": "Sinisimulan ang Computer-Use HTTP server ng pixelflux sa mga entry na ito na pinaghihiwalay ng kuwit: ang port lamang ay nakikinig sa loopback lang, ang host:port ay nagpapangalan ng address. Kung blangko, nananatiling naka-off."
+          "description": "Sinisimulan ang Computer-Use HTTP server ng pixelflux sa mga entry na ito na pinaghihiwalay ng kuwit: ang port lamang ay nakikinig sa loopback lang, ang host:port ay nagpapangalan ng address. Kung blangko, nananatiling naka-off. Nagsisimula lang ito kapag may Computer-Use token."
+        },
+        "SELKIES_COMPUTER_USE_TOKEN": {
+          "label": "Token ng Computer-Use",
+          "description": "Bearer token na dapat dala ng bawat Computer-Use request sa Authorization header nito; hindi magsisimula ang server kung wala ito."
         },
         "SELKIES_RECORDING_SOCKET": {
           "label": "Socket ng Pagrerekord",

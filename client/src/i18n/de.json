@@ -772,7 +772,11 @@
         },
         "SELKIES_COMPUTER_USE_BIND": {
           "label": "Computer-Use-Server",
-          "description": "Startet den Computer-Use-HTTP-Server von pixelflux auf diesen kommagetrennten Einträgen: ein bloßer Port lauscht nur auf Loopback, host:port nennt die Adresse. Leer lässt ihn aus."
+          "description": "Startet den Computer-Use-HTTP-Server von pixelflux auf diesen kommagetrennten Einträgen: ein bloßer Port lauscht nur auf Loopback, host:port nennt die Adresse. Leer lässt ihn aus. Er startet nur mit dem Computer-Use-Token."
+        },
+        "SELKIES_COMPUTER_USE_TOKEN": {
+          "label": "Computer-Use-Token",
+          "description": "Bearer-Token, das jede Computer-Use-Anfrage im Authorization-Header tragen muss; ohne es startet der Server nicht."
         },
         "SELKIES_RECORDING_SOCKET": {
           "label": "Aufzeichnungs-Socket",

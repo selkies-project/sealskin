@@ -772,7 +772,11 @@
         },
         "SELKIES_COMPUTER_USE_BIND": {
           "label": "Computer-Use 서버",
-          "description": "pixelflux의 Computer-Use HTTP 서버를 쉼표로 구분한 항목에서 시작합니다. 포트만 쓰면 루프백에서만 수신하고, host:port는 주소를 지정합니다. 비워 두면 꺼진 상태로 둡니다."
+          "description": "pixelflux의 Computer-Use HTTP 서버를 쉼표로 구분한 항목에서 시작합니다. 포트만 쓰면 루프백에서만 수신하고, host:port는 주소를 지정합니다. 비워 두면 꺼진 상태로 둡니다. Computer-Use 토큰이 있어야 시작합니다."
+        },
+        "SELKIES_COMPUTER_USE_TOKEN": {
+          "label": "Computer-Use 토큰",
+          "description": "모든 Computer-Use 요청이 Authorization 헤더에 담아야 하는 Bearer 토큰입니다. 토큰이 없으면 서버가 시작되지 않습니다."
         },
         "SELKIES_RECORDING_SOCKET": {
           "label": "녹화 소켓",

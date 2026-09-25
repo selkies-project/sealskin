@@ -772,7 +772,11 @@
         },
         "SELKIES_COMPUTER_USE_BIND": {
           "label": "Computer-Use Sunucusu",
-          "description": "pixelflux'un Computer-Use HTTP sunucusunu virgülle ayrılmış bu girdilerde başlatır: yalın bir port yalnızca loopback'te dinler, host:port adresi belirtir. Boş bırakılırsa kapalı kalır."
+          "description": "pixelflux'un Computer-Use HTTP sunucusunu virgülle ayrılmış bu girdilerde başlatır: yalın bir port yalnızca loopback'te dinler, host:port adresi belirtir. Boş bırakılırsa kapalı kalır. Yalnızca Computer-Use belirteciyle başlar."
+        },
+        "SELKIES_COMPUTER_USE_TOKEN": {
+          "label": "Computer-Use Belirteci",
+          "description": "Her Computer-Use isteğinin Authorization başlığında taşıması gereken Bearer belirteci; belirteç olmadan sunucu başlamaz."
         },
         "SELKIES_RECORDING_SOCKET": {
           "label": "Kayıt Soketi",

@@ -772,7 +772,11 @@
         },
         "SELKIES_COMPUTER_USE_BIND": {
           "label": "Computer-Use-server",
-          "description": "Starter pixelflux’ Computer-Use-HTTP-server på disse kommaseparerede poster: en ren port lytter kun på loopback, host:port angiver adressen. Tom lader den være slået fra."
+          "description": "Starter pixelflux’ Computer-Use-HTTP-server på disse kommaseparerede poster: en ren port lytter kun på loopback, host:port angiver adressen. Tom lader den være slået fra. Den starter kun med Computer-Use-tokenet."
+        },
+        "SELKIES_COMPUTER_USE_TOKEN": {
+          "label": "Computer-Use-token",
+          "description": "Bearer-token, som hver Computer-Use-anmodning skal bære i Authorization-headeren; uden det starter serveren ikke."
         },
         "SELKIES_RECORDING_SOCKET": {
           "label": "Optagelsessocket",

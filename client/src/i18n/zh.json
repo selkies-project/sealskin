@@ -772,7 +772,11 @@
         },
         "SELKIES_COMPUTER_USE_BIND": {
           "label": "Computer-Use 服务器",
-          "description": "在这些以逗号分隔的条目上启动 pixelflux 的 Computer-Use HTTP 服务器：仅端口号则只监听回环地址，host:port 指定地址。留空则保持关闭。"
+          "description": "在这些以逗号分隔的条目上启动 pixelflux 的 Computer-Use HTTP 服务器：仅端口号则只监听回环地址，host:port 指定地址。留空则保持关闭。只有设置了 Computer-Use 令牌才会启动。"
+        },
+        "SELKIES_COMPUTER_USE_TOKEN": {
+          "label": "Computer-Use 令牌",
+          "description": "每个 Computer-Use 请求都必须在 Authorization 标头中携带的 Bearer 令牌；没有令牌时服务器不会启动。"
         },
         "SELKIES_RECORDING_SOCKET": {
           "label": "录制套接字",
