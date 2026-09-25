@@ -8,12 +8,12 @@
 https://:{{SESSION_PORT}} {
         tls {{PROXY_CERT_PATH}} {{PROXY_KEY_PATH}}
 
+        # Other origins get uncredentialed reads only: a session path authenticates on its cookie alone.
         header {
                 Access-Control-Allow-Origin "{header.Origin}"
                 Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
                 Access-Control-Allow-Headers "Origin, Accept, Content-Type, X-Requested-With, X-Session-ID, X-Idempotency-Key, Authorization"
-                Access-Control-Allow-Credentials "true"
-                defer 
+                defer
         }
 
         @options {

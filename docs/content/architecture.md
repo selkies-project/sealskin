@@ -84,7 +84,9 @@ request under that path to `/internal/resolve_session/<id>` on the loopback
 API port; the handler checks the cookie (or, for rooms, a collaboration
 token), and answers with the container's address and the HTTP basic-auth
 credentials the container was started with, which Caddy injects upstream.
-`/internal/*` is refused on the public listener.
+`/internal/*` is refused on the public listener. Other origins get CORS
+answers without `Access-Control-Allow-Credentials`, so no page elsewhere can
+read what the cookie authenticates.
 
 **Shares.** Public share passwords are stored as salted scrypt hashes. A
 correct password yields a one-time download token; the file itself is served
