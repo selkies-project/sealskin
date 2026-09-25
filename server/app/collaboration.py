@@ -28,6 +28,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
 from . import config_store, launch
+from .providers.base_provider import host_port
 from .routers.applications import user_can_access
 from .security import canonical_uuid, token_matches
 from .settings import settings
@@ -287,8 +288,8 @@ async def broadcast_token_state(session_id: str, session_data: dict[str, Any]) -
         for ip, port in targets.items():
             urls = []
             if port:
-                urls.append(f"http://{ip}:{port}/{session_id}/api/tokens")
-            urls.append(f"http://{ip}:8083/tokens")
+                urls.append(f"http://{host_port(ip, port)}/{session_id}/api/tokens")
+            urls.append(f"http://{host_port(ip, 8083)}/tokens")
             cached = TOKEN_ENDPOINT_CACHE.get(ip)
             if cached in urls:
                 urls.remove(cached)
