@@ -95,7 +95,9 @@ the port you enter, and honour the same environment variables.
 
 Every installed application with its source, image, and image status.
 **Check** compares the local image digest with the registry; **Pull** fetches
-the newest image and refreshes the app's cached autostart script. **Edit**
+the newest image and refreshes the app's cached autostart script. On
+Kubernetes, where nodes pull images themselves, **Pull** pins the registry's
+current digest for new sessions instead (see [Kubernetes](kubernetes.md#images)). **Edit**
 reopens the install dialog. Deleting an app does not stop its running
 sessions.
 
@@ -195,7 +197,9 @@ At start-up the server detects GPUs on the host:
 
 A launch may use a GPU when the user's settings allow it and the app declares
 support for that GPU type. On Wayland, NVIDIA sessions also receive the DRI
-node so the compositor can use the card directly.
+node so the compositor can use the card directly. On Kubernetes the GPUs are
+the requests sessions can make, detected or defined as PodTemplates, as
+[Kubernetes](kubernetes.md#gpus) describes.
 
 ## Keys and certificates
 

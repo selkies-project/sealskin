@@ -11,6 +11,7 @@ server/              Python API server, Caddy template, tests, wheel packaging
 client/              web UI source and the esbuild pipeline (dist/ui, dist/extension, dist/mobile)
 browser_extension/   manifests, icons and the zip script for the extension shell
 mobile/              Capacitor project for the iOS and Android shells
+kubernetes/          the manifest that installs the server in a namespace
 docs/                this site (Fumadocs) with the pages under docs/content
 release-notes/       one Markdown file per stable release
 .github/workflows/   CI, Pre-release, Release, Mobile and Docs
@@ -108,8 +109,9 @@ network, which is the case on a Linux host.
 * Settings are declared once in `SETTING_DEFINITIONS`; a new setting means
   an entry there and a regenerated [Settings Reference](settings.md)
   (`npm run generate:settings` in `docs/`).
-* All Docker access goes through `docker_utils` and the provider; all YAML
-  goes through `persistence`; all launches go through `build_launch_spec`.
+* All backend access goes through the provider `get_provider` returns
+  (Docker's also through `docker_utils`); all YAML goes through
+  `persistence`; all launches go through `build_launch_spec`.
 
 ## The client
 

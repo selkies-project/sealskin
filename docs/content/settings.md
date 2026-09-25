@@ -23,7 +23,7 @@ paths refer to.
 | `SEALSKIN_LOG_LEVEL` | `str` | `INFO` | Logging level (e.g., DEBUG, INFO, WARNING). |
 | `SEALSKIN_API_PORT` | `int` | `8000` | Port for the main API server. |
 | `SEALSKIN_SESSION_PORT` | `int` | `8443` | Port for the session proxy server. |
-| `SEALSKIN_DEFAULT_PROVIDER` | `str` | `docker` | The default application provider to use. |
+| `SEALSKIN_DEFAULT_PROVIDER` | `str` | `auto` | Backend that runs sessions: `docker`, `kubernetes`, or `auto`, which picks Kubernetes when the server runs in a Kubernetes pod and Docker otherwise. |
 | `SEALSKIN_APP_RESOURCE_PATH` | `str` | `https://raw.githubusercontent.com/linuxserver/sealskin-apps/refs/heads/master/apps.yml` | URL for the YAML file defining default available applications. |
 | `SEALSKIN_INSTALLED_APPS_PATH` | `str` | `/config/.config/sealskin/installed_apps.yml` | Path to the YAML file for installed application configurations. |
 | `SEALSKIN_APP_STORES_PATH` | `str` | `/config/.config/sealskin/app_stores.yml` | Path to the YAML file defining available app stores. |
