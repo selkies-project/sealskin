@@ -2,10 +2,11 @@
  * Page side of the shell bridge (bridge protocol version 1).
  *
  * Every served page runs inside an iframe owned by a shell host: the browser
- * extension's host page or the mobile app's outer window. The page never
- * touches `chrome.*` or `window.parent.*` directly; it sends requests through
- * this module and the host answers. See docs/content/architecture.md ("The bridge") for
- * the full contract.
+ * extension's host page, the mobile app's outer window, or the web app. The
+ * page never touches `chrome.*` or `window.parent.*` directly; it sends
+ * requests through this module and the host answers. A served page opened on
+ * its own moves into the web app. See docs/content/architecture.md ("The
+ * bridge") for the full contract.
  *
  * Usage:
  *   import { bridge } from '../lib/bridge.js';
@@ -15,6 +16,8 @@
 
 export const BRIDGE_VERSION = 1;
 
+/* global __SHELL_TARGET__ */
+
 const REQUEST_TIMEOUT_MS = 120000;
 
 let nextId = 1;
@@ -23,9 +26,10 @@ let helloInfo = null;
 let helloPromise = null;
 let hostOrigin = null;
 
-// The origins a shell host runs at: an extension page, or the Capacitor app's local
-// server, `capacitor://localhost` on iOS and `https://localhost` on Android. Replies
-// from any other parent are ignored, so a page framed by a site cannot be fed them.
+// The origins a shell host runs at: an extension page, the Capacitor app's local
+// server (`capacitor://localhost` on iOS, `https://localhost` on Android), or the web
+// app, which is this page's own origin. Replies from any other parent are ignored, so a
+// page framed by a site cannot be fed them.
 const SHELL_ORIGIN = /^(chrome-extension|moz-extension):\/\/[^/]+$|^(capacitor|https):\/\/localhost$/;
 
 function isFramed() {
@@ -36,11 +40,19 @@ function isFramed() {
   }
 }
 
+const moving = !isFramed() && typeof __SHELL_TARGET__ !== 'undefined' && __SHELL_TARGET__ === 'ui';
+if (moving) location.replace(`./?page=${location.pathname.split('/').pop().replace(/\.html$/, '')}`);
+
+// A page on its way into the web app waits for the navigation instead of failing.
+const unframed = () => (moving
+  ? new Promise(() => {})
+  : Promise.reject(new Error('This page must be opened from the SealSkin extension or app.')));
+
 window.addEventListener('message', (event) => {
   const msg = event.data;
   if (!msg || msg.sealskin !== BRIDGE_VERSION || typeof msg.id !== 'number') return;
   if (isFramed() && event.source !== window.parent) return;
-  if (!SHELL_ORIGIN.test(event.origin)) return;
+  if (event.origin !== location.origin && !SHELL_ORIGIN.test(event.origin)) return;
   const entry = pending.get(msg.id);
   if (!entry) return;
   pending.delete(msg.id);
@@ -167,9 +179,7 @@ function send(type, payload, opts) {
  * @returns {Promise<any>} The host's reply data.
  */
 export function request(type, payload = {}, opts = {}) {
-  if (!isFramed()) {
-    return Promise.reject(new Error('This page must be opened from the SealSkin extension or app.'));
-  }
+  if (!isFramed()) return unframed();
   if (hostOrigin) return send(type, payload, opts);
   return ensureHello().then(() => {
     if (!hostOrigin) {
@@ -187,9 +197,7 @@ export const bridge = {
    * @returns {Promise<object>} HelloInfo as described in the architecture doc.
    */
   hello() {
-    if (!isFramed()) {
-      return Promise.reject(new Error('This page must be opened from the SealSkin extension or app.'));
-    }
+    if (!isFramed()) return unframed();
     return ensureHello();
   },
 
@@ -237,6 +245,16 @@ export const bridge = {
 
   openSession(sessionId, sessionUrl) {
     return request('openSession', { sessionId, sessionUrl });
+  },
+
+  /**
+   * Web app: take a blank tab during the click that launches a session, for
+   * `openSession` to fill once the launch ends, or give it back.
+   *
+   * @param {boolean} [reserve=true]
+   */
+  reserveTab(reserve = true) {
+    return request('reserveTab', { reserve });
   },
 
   focusSession(session) {

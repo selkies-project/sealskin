@@ -69,6 +69,7 @@ export async function callBackground(transport, type, payload = {}) {
  * @param {function} [options.onHelloMismatch] Called when the page's bridge version differs.
  * @param {function} options.openPage `(page, params?) => void` implemented by the host page.
  * @param {function} [options.saveBlob] `(blob, filename) => Promise` for mobile native open.
+ * @param {function} [options.reserveTab] `(reserve) => void`, web app tab reservation.
  * @param {function} [options.close] Closes the popup (extension) or no-op.
  * @param {function} [options.isConnectPage] `() => boolean`, true while the bundled connect page is framed.
  * @returns {{setExpectedOrigin: function(string): void, destroy: function(): void}}
@@ -167,6 +168,11 @@ export function createHost(options) {
 
     closeSession({ sessionId }) {
       return callBackground(transport, 'closeSession', { sessionId });
+    },
+
+    reserveTab({ reserve }) {
+      if (options.reserveTab) options.reserveTab(reserve !== false);
+      return {};
     },
 
     async openPage({ page, params }) {

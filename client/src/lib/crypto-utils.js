@@ -21,7 +21,7 @@ export function arrayBufferToBase64(buffer) {
   return btoa(binary);
 }
 
-function arrayBufferToPem(buffer, type) {
+export function arrayBufferToPem(buffer, type) {
   const b64 = arrayBufferToBase64(buffer);
   const lines = b64.match(/.{1,64}/g).join('\n');
   return `-----BEGIN ${type} KEY-----\n${lines}\n-----END ${type} KEY-----\n`;
@@ -61,6 +61,17 @@ function arrayBufferToBase64Url(buffer) {
 }
 
 const keyCache = new Map();
+
+/**
+ * Sign for `ref` with a key already imported, such as one the web app
+ * unwrapped; `generateJwtNative(ref, ...)` then uses it instead of a PEM.
+ *
+ * @param {string} ref Stand-in stored where the PEM would be.
+ * @param {CryptoKey} key RSASSA-PKCS1-v1_5 signing key.
+ */
+export function setSigningKey(ref, key) {
+  keyCache.set(ref, key);
+}
 
 export async function generateJwtNative(privateKeyPem, username) {
   if (!privateKeyPem || !username) {

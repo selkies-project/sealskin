@@ -135,7 +135,9 @@
       "keyGeneration": "Nøglegenerering",
       "keyGenDescription": "Hvis du ikke har et nøglepar, kan du generere et her. Den private nøgle vil blive udfyldt ovenfor. Giv den offentlige nøgle til din administrator.",
       "generateKeyButton": "Generer Nyt Nøglepar",
-      "publicKeyForAdminLabel": "Din Offentlige Nøgle (til admin)"
+      "publicKeyForAdminLabel": "Din Offentlige Nøgle (til admin)",
+      "passphraseLabel": "Adgangssætning",
+      "passphraseHelp": "Din private nøgle gemmes i denne browser krypteret med denne adgangssætning, som du indtaster, hver gang du åbner SealSkin her."
     },
     "home": {
       "title": "Dine Hjemmemapper",
@@ -1166,7 +1168,8 @@
       "pendingConfigSaved": "Ventende konfiguration gemt. Du kan nu give din offentlige nøgle til administratoren.",
       "settingsSaved": "Indstillinger gemt.",
       "appCreated": "Appen '{name}' blev oprettet med succes.",
-      "launchFailed": "Start mislykkedes: {error}"
+      "launchFailed": "Start mislykkedes: {error}",
+      "passphraseRequired": "Indtast en adgangssætning for at beskytte din nøgle i denne browser."
     },
     "placeholders": {
       "noAdmins": "Ingen administratorer fundet.",
@@ -1177,6 +1180,14 @@
       "noPinned": "Ingen fastgjorte adfærd fundet.",
       "errorLoading": "Fejl ved indlæsning af mapper.",
       "noInstalledApps": "Ingen applikationer er installeret endnu."
+    },
+    "web": {
+      "title": "SealSkin i denne browser",
+      "bookmarklet": "Send til SealSkin",
+      "bookmarkletHelp": "Træk dette link til din bogmærkelinje. Et klik på det åbner den side, du er på, i SealSkin eller søger efter den tekst, du har markeret.",
+      "protocol": "Åbn web+sealskin:-links her",
+      "protocolHelp": "Et link skrevet som web+sealskin: efterfulgt af en adresse åbner derefter adressen i SealSkin.",
+      "install": "Hvis browseren kan installere webapps, så installer SealSkin fra dens menu for at dele links og filer til den og åbne filer med den."
     }
   },
   "popup": {
@@ -1349,5 +1360,12 @@
       "completed": "Fuldført",
       "error": "Fejl"
     }
+  },
+  "web": {
+    "unlockTitle": "Lås SealSkin op",
+    "unlockBody": "Indtast adgangssætningen, der beskytter din nøgle i denne browser.",
+    "passphrase": "Adgangssætning",
+    "unlock": "Lås op",
+    "wrongPassphrase": "Den adgangssætning låser ikke din nøgle op."
   }
 }

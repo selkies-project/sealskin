@@ -135,7 +135,9 @@
       "keyGeneration": "Tạo khóa",
       "keyGenDescription": "Nếu bạn không có cặp khóa, bạn có thể tạo một cặp ở đây. Khóa riêng sẽ được điền vào ở trên. Cung cấp khóa công khai cho quản trị viên của bạn.",
       "generateKeyButton": "Tạo cặp khóa mới",
-      "publicKeyForAdminLabel": "Khóa công khai của bạn (cho quản trị viên)"
+      "publicKeyForAdminLabel": "Khóa công khai của bạn (cho quản trị viên)",
+      "passphraseLabel": "Cụm mật khẩu",
+      "passphraseHelp": "Khóa riêng của bạn được lưu trong trình duyệt này, mã hóa bằng cụm mật khẩu này; bạn nhập nó mỗi lần mở SealSkin tại đây."
     },
     "home": {
       "title": "Các thư mục chính của bạn",
@@ -1166,7 +1168,8 @@
       "pendingConfigSaved": "Đã lưu cấu hình đang chờ xử lý. Bây giờ bạn có thể cung cấp khóa công khai của mình cho quản trị viên.",
       "settingsSaved": "Đã lưu cài đặt.",
       "appCreated": "Đã tạo ứng dụng '{name}' thành công.",
-      "launchFailed": "Khởi chạy thất bại: {error}"
+      "launchFailed": "Khởi chạy thất bại: {error}",
+      "passphraseRequired": "Nhập cụm mật khẩu để bảo vệ khóa của bạn trong trình duyệt này."
     },
     "placeholders": {
       "noAdmins": "Không tìm thấy quản trị viên nào.",
@@ -1177,6 +1180,14 @@
       "noPinned": "Không tìm thấy hành vi đã ghim nào.",
       "errorLoading": "Lỗi khi tải thư mục.",
       "noInstalledApps": "Chưa có ứng dụng nào được cài đặt."
+    },
+    "web": {
+      "title": "SealSkin trong trình duyệt này",
+      "bookmarklet": "Gửi tới SealSkin",
+      "bookmarkletHelp": "Kéo liên kết này vào thanh dấu trang. Nhấp vào nó sẽ mở trang bạn đang xem trong SealSkin, hoặc tìm kiếm văn bản bạn đã chọn.",
+      "protocol": "Mở liên kết web+sealskin: tại đây",
+      "protocolHelp": "Liên kết viết dạng web+sealskin: kèm theo một địa chỉ sẽ mở địa chỉ đó trong SealSkin.",
+      "install": "Nếu trình duyệt có thể cài đặt ứng dụng web, hãy cài SealSkin từ menu của trình duyệt để chia sẻ liên kết và tệp tới nó và mở tệp bằng nó."
     }
   },
   "popup": {
@@ -1349,5 +1360,12 @@
       "completed": "Hoàn thành",
       "error": "Lỗi"
     }
+  },
+  "web": {
+    "unlockTitle": "Mở khóa SealSkin",
+    "unlockBody": "Nhập cụm mật khẩu bảo vệ khóa của bạn trong trình duyệt này.",
+    "passphrase": "Cụm mật khẩu",
+    "unlock": "Mở khóa",
+    "wrongPassphrase": "Cụm mật khẩu này không mở được khóa của bạn."
   }
 }

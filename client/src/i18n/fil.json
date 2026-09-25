@@ -135,7 +135,9 @@
       "keyGeneration": "Pagbuo ng Key",
       "keyGenDescription": "Kung wala kang key pair, maaari kang bumuo ng isa dito. Ang pribadong key ay pupunan sa itaas. Ibigay ang pampublikong key sa iyong administrator.",
       "generateKeyButton": "Bumuo ng Bagong Key Pair",
-      "publicKeyForAdminLabel": "Iyong Pampublikong Key (para sa admin)"
+      "publicKeyForAdminLabel": "Iyong Pampublikong Key (para sa admin)",
+      "passphraseLabel": "Passphrase",
+      "passphraseHelp": "Nakatago ang iyong pribadong key sa browser na ito at naka-encrypt gamit ang passphrase na ito, na ilalagay mo tuwing bubuksan mo ang SealSkin dito."
     },
     "home": {
       "title": "Iyong mga Home Directory",
@@ -1166,7 +1168,8 @@
       "pendingConfigSaved": "Nai-save ang nakabinbing konfigurasyon. Maaari mo nang ibigay ang iyong pampublikong key sa administrator.",
       "settingsSaved": "Nai-save ang mga setting.",
       "appCreated": "Matagumpay na nagawa ang app na '{name}'.",
-      "launchFailed": "Nabigo ang paglunsad: {error}"
+      "launchFailed": "Nabigo ang paglunsad: {error}",
+      "passphraseRequired": "Maglagay ng passphrase para protektahan ang iyong key sa browser na ito."
     },
     "placeholders": {
       "noAdmins": "Walang nahanap na admin.",
@@ -1177,6 +1180,14 @@
       "noPinned": "Walang nahanap na naka-pin na gawi.",
       "errorLoading": "Error sa pag-load ng mga directory.",
       "noInstalledApps": "Wala pang naka-install na mga application."
+    },
+    "web": {
+      "title": "SealSkin sa Browser na Ito",
+      "bookmarklet": "Ipadala sa SealSkin",
+      "bookmarkletHelp": "I-drag ang link na ito sa iyong bookmarks bar. Kapag kinlik ito, bubuksan nito sa SealSkin ang pahinang kinaroroonan mo, o hahanapin ang tekstong pinili mo.",
+      "protocol": "Buksan dito ang mga web+sealskin: link",
+      "protocolHelp": "Ang link na isinulat bilang web+sealskin: na sinusundan ng isang address ay magbubukas ng address na iyon sa SealSkin.",
+      "install": "Kung kayang mag-install ng browser ng mga web app, i-install ang SealSkin mula sa menu nito para makapagbahagi ng mga link at file dito at makapagbukas ng mga file gamit ito."
     }
   },
   "popup": {
@@ -1349,5 +1360,12 @@
       "completed": "Kumpleto",
       "error": "Error"
     }
+  },
+  "web": {
+    "unlockTitle": "I-unlock ang SealSkin",
+    "unlockBody": "Ilagay ang passphrase na nagpoprotekta sa iyong key sa browser na ito.",
+    "passphrase": "Passphrase",
+    "unlock": "I-unlock",
+    "wrongPassphrase": "Hindi nabubuksan ng passphrase na iyon ang iyong key."
   }
 }

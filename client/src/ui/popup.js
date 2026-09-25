@@ -62,7 +62,11 @@ let isSimpleLaunch = false;
 let selectedAppId = null;
 let launchProfileKey = 'workflow_profile_simple';
 
-const isMobile = () => info && info.shell === 'mobile';
+// The mobile and web shells keep the launcher in their frame; the extension closes its popup.
+const inFrame = () => info && info.shell !== 'extension';
+// The mobile layout, also for the web app wherever its launcher fills the window instead of floating as a card (css/app.css).
+const compact = () => info && (info.shell === 'mobile'
+  || (info.shell === 'web' && !window.top.matchMedia('(min-width: 600px) and (min-height: 640px)').matches));
 
 function setStatus(message, isError = false) {
   statusDiv.textContent = message;
@@ -517,6 +521,8 @@ async function handleLaunch() {
 
   const collaborationMode = document.getElementById('collaborationMode').checked;
   const waylandMode = waylandModeCheckbox.checked;
+  // A tab opened once a long launch ends is blocked as a popup, so the web app takes it at the click.
+  if (info.shell === 'web') bridge.reserveTab();
 
   const profile = {
     appId: selectedAppId,
@@ -595,12 +601,13 @@ async function handleLaunch() {
 
     await bridge.openSession(data.session_id, data.session_url);
 
-    if (isMobile()) {
+    if (inFrame()) {
       window.location.reload();
     } else {
       bridge.close();
     }
   } catch (error) {
+    if (info.shell === 'web') bridge.reserveTab(false);
     spinner.style.display = 'none';
     setStatus(t('popup.status.error', { message: error.message }), true);
     launchBtnText.textContent = t('popup.launchView.launchButton');
@@ -662,18 +669,21 @@ async function init() {
   info = await announce();
   t = await loadTranslator(info.locale);
 
-  if (isMobile()) applyMobileLayout();
+  if (compact()) {
+    document.documentElement.classList.add('shell-mobile');
+    applyMobileLayout();
+  }
 
   applyTranslations(document.body, t);
   document.getElementById('options-gear-btn').addEventListener('click', () => {
     bridge.openPage('options');
-    if (!isMobile()) bridge.close();
+    if (!inFrame()) bridge.close();
   });
 
   try {
     sealskinConfig = info.config || {};
     if (!sealskinConfig.serverIp || !sealskinConfig.username) {
-      if (isMobile()) {
+      if (inFrame()) {
         bridge.openPage('connect');
         return;
       }
@@ -743,7 +753,7 @@ async function init() {
     availableApps = appsData;
     activeSessions = sessionsData;
 
-    if (activeSessions.length === 0 && !isMobile()) {
+    if (activeSessions.length === 0 && !inFrame()) {
       sessionsTabBtn.style.display = 'none';
     }
 
@@ -754,7 +764,7 @@ async function init() {
       populateHomeDirDropdown();
     }
 
-    if (userSettings.persistent_storage && (isSimpleLaunch || isMobile())) {
+    if (userSettings.persistent_storage && (isSimpleLaunch || inFrame())) {
       manageFilesBtn.style.display = 'flex';
     }
 
@@ -786,7 +796,7 @@ async function init() {
     const isFileContext = sealskinContext.action === 'file';
 
     if (isFileContext) {
-      if (!isMobile()) uploadFilesTabBtn.style.display = 'none';
+      if (!inFrame()) uploadFilesTabBtn.style.display = 'none';
       if (userSettings.persistent_storage) {
         uploadStorageTabBtn.style.display = 'flex';
         const filename = sealskinContext.filename;
@@ -819,11 +829,11 @@ sessionsTabBtn.addEventListener('click', () => showView('sessions'));
 launchTabBtn.addEventListener('click', () => showView('launch'));
 manageFilesBtn.addEventListener('click', () => {
   bridge.openPage('files');
-  if (!isMobile()) bridge.close();
+  if (!inFrame()) bridge.close();
 });
 uploadFilesTabBtn.addEventListener('click', () => {
   bridge.openPage('upload');
-  if (!isMobile()) bridge.close();
+  if (!inFrame()) bridge.close();
 });
 uploadStorageTabBtn.addEventListener('click', () => showView('upload-storage'));
 uploadStorageBtn.addEventListener('click', handleUploadToStorage);

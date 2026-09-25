@@ -61,6 +61,9 @@ https://:{{SESSION_PORT}} {
 
                                 header_up -X-Upstream-Host
                                 header_up -X-Upstream-Auth
+
+                                # A session's service worker stays under its own path, off the web app at /ui/.
+                                header_down -Service-Worker-Allowed
                         }
                 }
         }

@@ -50,15 +50,14 @@ async function init() {
   const info = await announce();
   t = await loadTranslator(info.locale);
 
+  const header = document.querySelector('header');
   if (info.shell === 'mobile') {
     document.body.classList.add('mobile-scroll-layout');
-    const header = document.querySelector('header');
-    if (header) {
-      const backBtn = addMobileBackButton(header, () => window.history.back());
-      backBtn.style.fontSize = '1.5rem';
-      const desc = header.querySelector('[data-i18n="upload.description"]');
-      if (desc) desc.style.display = 'none';
-    }
+    const desc = header && header.querySelector('[data-i18n="upload.description"]');
+    if (desc) desc.style.display = 'none';
+  }
+  if (info.shell !== 'extension' && header) {
+    addMobileBackButton(header, () => window.history.back()).style.fontSize = '1.5rem';
   }
 
   applyTranslations(document.body, t, { html: true });
