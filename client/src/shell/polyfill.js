@@ -1,16 +1,17 @@
 /**
- * Minimal `chrome.*` polyfill for the mobile outer window.
+ * Minimal `chrome.*` polyfill for the shells that run the background in a
+ * page: the mobile app's outer window and the web app.
  *
  * Only what `background.js` touches when it runs outside a browser extension:
  * local storage with change events, runtime messaging wired to
- * `window.handleMessage`, tab opening through the Capacitor Browser plugin,
- * `action.openPopup` (shows the served popup in the app frame), and inert stubs
+ * `window.handleMessage`, tab opening through `hooks.openExternal`,
+ * `action.openPopup` (shows the served popup in the frame), and inert stubs
  * for the extension-only APIs. Served pages never see this object; they use
  * the bridge.
  *
  * @param {object} hooks
- * @param {function(string): Promise<void>} hooks.openExternal Opens a URL in a Custom Tab / SFSafariViewController.
- * @param {function(): void} hooks.openPopup Shows the popup page in the app frame.
+ * @param {function(string): Promise<void>} hooks.openExternal Opens a URL in a tab, Custom Tab, or SFSafariViewController.
+ * @param {function(): void} hooks.openPopup Shows the popup page in the frame.
  */
 export function installPolyfill(hooks) {
   const noopListener = { addListener() {}, removeListener() {}, hasListener() { return false; } };

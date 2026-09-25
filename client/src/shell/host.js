@@ -15,7 +15,7 @@
  * can be accepted, after which https works for both the API and the iframe.
  *
  * On the extension this module runs on its own (see the bottom); the mobile
- * shell imports `initHost` and passes its native hooks.
+ * and web shells import `initHost` and pass their shell name and hooks.
  */
 
 import { createHost, callBackground } from '../lib/host-bridge.js';
@@ -76,7 +76,12 @@ function extensionTransport(message) {
   });
 }
 
-function mobileTransport(message) {
+/**
+ * Relay to a background running in this window (mobile and web shells).
+ *
+ * @param {object} message
+ */
+export function pageTransport(message) {
   return new Promise((resolve, reject) => {
     if (typeof window.handleMessage !== 'function') {
       reject(new Error('Background is not loaded.'));
@@ -90,6 +95,7 @@ function mobileTransport(message) {
  * Start the host.
  *
  * @param {object} [overrides]
+ * @param {'extension'|'mobile'|'web'} [overrides.shell] defaults to the build target
  * @param {function} [overrides.transport]
  * @param {function} [overrides.saveBlob] mobile native file open
  * @param {function} [overrides.onPageChange] `(page) => void`, mobile back button bookkeeping
@@ -99,7 +105,8 @@ export function initHost(overrides = {}) {
   const params = new URLSearchParams(location.search);
   const iframe = document.getElementById('app-frame');
   const panel = document.getElementById('host-panel');
-  const transport = overrides.transport || (SHELL === 'mobile' ? mobileTransport : extensionTransport);
+  const shell = overrides.shell || SHELL;
+  const transport = overrides.transport || (shell === 'extension' ? extensionTransport : pageTransport);
 
   let page = document.body.dataset.page || params.get('page') || 'popup';
   // Extra query parameters (anything except page/tab) are forwarded to the served page.
@@ -107,7 +114,7 @@ export function initHost(overrides = {}) {
   for (const [key, value] of params.entries()) {
     if (key !== 'page' && key !== 'tab') pageParams[key] = value;
   }
-  const isPopupWindow = SHELL === 'extension' && document.body.dataset.page === 'popup' && !params.has('tab');
+  const isPopupWindow = shell === 'extension' && document.body.dataset.page === 'popup' && !params.has('tab');
   let framedConnect = false;
   let readyTimer = null;
   let lastBase = null;
@@ -262,7 +269,7 @@ export function initHost(overrides = {}) {
    */
   function openPage(target, extraParams) {
     const nextParams = extraParams && typeof extraParams === 'object' ? { ...extraParams } : {};
-    if (SHELL === 'extension' && isPopupWindow) {
+    if (isPopupWindow) {
       if (target === 'popup') {
         pageParams = nextParams;
         boot();
@@ -279,13 +286,14 @@ export function initHost(overrides = {}) {
   }
 
   const host = createHost({
+    shell,
     iframe,
     transport,
     openPage,
     saveBlob: overrides.saveBlob,
     isConnectPage: () => framedConnect,
     close: () => {
-      if (SHELL === 'extension' && isPopupWindow) window.close();
+      if (isPopupWindow) window.close();
     },
     onReady: () => {
       showPanel(null);
@@ -296,7 +304,7 @@ export function initHost(overrides = {}) {
     },
   });
 
-  document.documentElement.classList.add(`shell-${SHELL}`);
+  document.documentElement.classList.add(`shell-${shell}`);
   localizeStrings().finally(() => boot());
 
   return {
@@ -307,6 +315,6 @@ export function initHost(overrides = {}) {
   };
 }
 
-if (SHELL !== 'mobile') {
+if (SHELL === 'extension') {
   initHost();
 }
