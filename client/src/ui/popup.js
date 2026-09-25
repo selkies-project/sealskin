@@ -591,7 +591,8 @@ async function handleLaunch() {
       throw new Error(t('popup.status.unknownAction'));
     }
 
-    const data = await secureFetch(endpoint, { method: 'POST', body: JSON.stringify(payload) });
+    // The server answers once the session runs, which a first image pull can delay for minutes.
+    const data = await secureFetch(endpoint, { method: 'POST', body: JSON.stringify(payload) }, { timeout: 0 });
 
     await bridge.openSession(data.session_id, data.session_url);
 

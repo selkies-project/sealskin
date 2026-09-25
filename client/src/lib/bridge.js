@@ -204,10 +204,11 @@ export const bridge = {
    *
    * @param {string} url Path beginning with `/api/`.
    * @param {object} [options] fetch-like options: method, headers, body (string).
+   * @param {object} [opts] Request options (see `request`).
    * @returns {Promise<any>} Decrypted JSON body, or null for empty responses.
    */
-  secureFetch(url, options = {}) {
-    return request('secureFetch', { url, options });
+  secureFetch(url, options = {}, opts = {}) {
+    return request('secureFetch', { url, options }, opts);
   },
 
   /** @returns {Promise<object|null>} Pending launch context; cleared on read. */
