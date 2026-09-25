@@ -98,6 +98,7 @@ export function pageTransport(message) {
  * @param {'extension'|'mobile'|'web'} [overrides.shell] defaults to the build target
  * @param {function} [overrides.transport]
  * @param {function} [overrides.saveBlob] mobile native file open
+ * @param {function} [overrides.reserveTab] web app tab reservation, see `bridge.reserveTab`
  * @param {function} [overrides.onPageChange] `(page) => void`, mobile back button bookkeeping
  * @returns {{openPage: function(string, object=): void, currentPage: function(): string, boot: function(): Promise<void>}}
  */
@@ -291,6 +292,7 @@ export function initHost(overrides = {}) {
     transport,
     openPage,
     saveBlob: overrides.saveBlob,
+    reserveTab: overrides.reserveTab,
     isConnectPage: () => framedConnect,
     close: () => {
       if (isPopupWindow) window.close();

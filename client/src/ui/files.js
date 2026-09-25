@@ -657,8 +657,8 @@ async function init() {
   info = await announce();
   t = await loadTranslator(info.locale);
 
-  if (info.shell === 'mobile') {
-    addMobileSafeArea();
+  if (info.shell === 'mobile') addMobileSafeArea();
+  if (info.shell !== 'extension') {
     const header = document.querySelector('.sidebar-header');
     if (header) addMobileBackButton(header, () => window.history.back());
   }

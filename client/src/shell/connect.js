@@ -9,7 +9,8 @@
  *
  * The stored `sealskinConfig` keeps its historical shape:
  * `{serverIp, apiPort, sessionPort, username, clientPrivateKey,
- *   serverPublicKey, searchEngineUrl, userSettings}`.
+ *   serverPublicKey, searchEngineUrl, userSettings}`. The web app also asks
+ * for the passphrase that seals the private key in the browser.
  */
 
 import { bridge, request } from '../lib/bridge.js';
@@ -47,6 +48,7 @@ function showView(view) {
   connectedView.hidden = view !== 'connected';
   simpleConfigView.hidden = view !== 'simple';
   advancedConfigView.hidden = view !== 'advanced';
+  $('passphrase-view').hidden = view === 'connected' || !info || info.shell !== 'web';
 }
 
 function fillForm(config) {
@@ -115,6 +117,7 @@ async function handleLogin() {
     ...formConfig(),
     searchEngineUrl: (currentConfig && currentConfig.searchEngineUrl) || DEFAULT_SEARCH_ENGINE,
   };
+  if (info.shell === 'web') config.passphrase = $('passphrase').value;
   try {
     await request('saveConfig', { config });
     await bridge.storageRemove(['sealskinPendingConfig']);
@@ -134,9 +137,15 @@ async function handleLogin() {
     return true;
   } catch (error) {
     currentConfig = config;
-    displayStatus(t('options.status.loginFailed', { error: error.message }), true);
+    displayStatus(sealingError(error) || t('options.status.loginFailed', { error: error.message }), true);
     return false;
   }
+}
+
+/** The web app's reasons for not sealing a key, as the status line shows them. */
+function sealingError(error) {
+  const key = { passphraseRequired: 'options.status.passphraseRequired', wrongPassphrase: 'web.wrongPassphrase' }[error.message];
+  return key ? t(key) : null;
 }
 
 function readFileAsText(file) {
@@ -185,7 +194,7 @@ async function exportConfig() {
 
 async function init() {
   info = await bridge.hello();
-  if (info.shell === 'mobile') document.documentElement.classList.add('shell-mobile');
+  document.documentElement.classList.add(`shell-${info.shell}`);
   t = await loadTranslator(info.locale || navigator.language);
   applyTranslations(document.body, t);
 
@@ -241,8 +250,14 @@ async function init() {
   });
 
   $('save').addEventListener('click', async () => {
-    await bridge.storageSet({ sealskinPendingConfig: formConfig() });
-    displayStatus(t('options.status.pendingConfigSaved'), false);
+    const pending = formConfig();
+    if (info.shell === 'web') pending.passphrase = $('passphrase').value;
+    try {
+      await bridge.storageSet({ sealskinPendingConfig: pending });
+      displayStatus(t('options.status.pendingConfigSaved'), false);
+    } catch (error) {
+      displayStatus(sealingError(error) || error.message, true);
+    }
   });
 
   $('login').addEventListener('click', handleLogin);

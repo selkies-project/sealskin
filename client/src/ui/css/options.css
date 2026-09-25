@@ -543,6 +543,17 @@ button.primary:hover:not(:disabled), label.button.primary:hover:not(:disabled) {
 }
 button.primary:disabled { box-shadow: none; }
 
+a.bookmarklet {
+  display: inline-flex;
+  padding: 0.6rem 1.15rem;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: grab;
+}
+
 button.secondary, label.button.secondary {
   background-color: var(--glass-strong);
   border-color: var(--border-color);

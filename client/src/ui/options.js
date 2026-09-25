@@ -537,7 +537,8 @@ function initializeAppLaboratoryTab() {
           if (!success && !confirm('Failed to save changes. Close anyway?')) return;
         }
         displayStatus(t('options.status.closingSession'));
-        await secureFetch(`/api/admin/sessions/${labState.currentSessionId}`, { method: 'DELETE' });
+        if (info.shell === 'web') await bridge.closeSession(labState.currentSessionId);
+        else await secureFetch(`/api/admin/sessions/${labState.currentSessionId}`, { method: 'DELETE' });
         labState.currentSessionId = null;
         sessionFrame.src = 'about:blank';
         sessionFrame.style.display = 'none';
@@ -571,6 +572,8 @@ function initializeAppLaboratoryTab() {
     launchBtn.disabled = true;
     spinner.style.display = 'inline-block';
     launchBtnText.textContent = t('options.appLaboratory.savingAndLaunching');
+    // Session content shares the web app's origin, so there it gets a tab of its own instead of a frame in this page.
+    if (info.shell === 'web') bridge.reserveTab();
 
     try {
       let appToLaunch;
@@ -610,12 +613,17 @@ function initializeAppLaboratoryTab() {
       const frameUrl = `${sessionUrlBase}${launchResponse.session_url}&embedded=true`;
 
       labState.currentSessionId = launchResponse.session_url.substring(1).split('/?')[0];
-      sessionFrame.src = frameUrl;
-      sessionFrame.style.display = 'block';
-      mainPlaceholder.style.display = 'none';
+      if (info.shell === 'web') {
+        await bridge.openSession(labState.currentSessionId, launchResponse.session_url);
+      } else {
+        sessionFrame.src = frameUrl;
+        sessionFrame.style.display = 'block';
+        mainPlaceholder.style.display = 'none';
+      }
 
       launchBtnText.textContent = t('options.appLaboratory.closeButton');
     } catch (error) {
+      if (info.shell === 'web') bridge.reserveTab(false);
       displayStatus(t('options.status.launchFailed', { error: error.message }), true);
       launchBtnText.textContent = t('options.appLaboratory.launchButton');
     } finally {
@@ -1446,11 +1454,22 @@ function applyMobileLayout() {
   if (optionsContainer) {
     optionsContainer.style.height = `calc(100vh - ${safeAreaPad.style.paddingTop})`;
   }
-  const header = document.querySelector('.sidebar-header');
-  if (header) addMobileBackButton(header, () => bridge.openPage('popup'));
+}
 
-  const howToCard = document.getElementById('how-to-card');
-  if (howToCard) howToCard.style.display = 'none';
+/**
+ * The web app's stand-ins for the context menu: a bookmarklet that opens the
+ * current page (or searches the selection) here, and `web+sealskin:` links.
+ */
+function applyWebLayout() {
+  document.getElementById('web-card').style.display = '';
+  const app = new URL('./', location.href).href;
+  const bookmarklet = document.getElementById('web-bookmarklet');
+  // A javascript: URL is percent-decoded before it runs, so a `%` in the address must survive that.
+  const appLiteral = JSON.stringify(app).replace(/%/g, '%25');
+  bookmarklet.href = `javascript:(()=>{const s=String(getSelection()).trim();window.open(${appLiteral}+(s?'?q='+encodeURIComponent(s):'?url='+encodeURIComponent(location.href)))})()`;
+  bookmarklet.addEventListener('click', (event) => event.preventDefault());
+  document.getElementById('web-protocol').hidden = typeof navigator.registerProtocolHandler !== 'function';
+  document.getElementById('web-protocol-button').addEventListener('click', () => navigator.registerProtocolHandler('web+sealskin', `${app}?url=%s`));
 }
 
 function bindEvents() {
@@ -1968,7 +1987,13 @@ async function init() {
     howToList.innerHTML = Array.isArray(items) ? items.map((item) => `<li>${item}</li>`).join('') : '';
   }
 
+  if (info.shell !== 'extension') {
+    const header = document.querySelector('.sidebar-header');
+    if (header) addMobileBackButton(header, () => bridge.openPage('popup'));
+    document.getElementById('how-to-card').style.display = 'none';
+  }
   if (info.shell === 'mobile') applyMobileLayout();
+  if (info.shell === 'web') applyWebLayout();
 
   bindEvents();
 

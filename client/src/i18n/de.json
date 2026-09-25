@@ -135,7 +135,9 @@
       "keyGeneration": "Schlüsselgenerierung",
       "keyGenDescription": "Wenn Sie kein Schlüsselpaar haben, können Sie hier eines generieren. Der private Schlüssel wird oben eingefügt. Geben Sie den öffentlichen Schlüssel an Ihren Administrator weiter.",
       "generateKeyButton": "Neues Schlüsselpaar generieren",
-      "publicKeyForAdminLabel": "Ihr öffentlicher Schlüssel (für den Admin)"
+      "publicKeyForAdminLabel": "Ihr öffentlicher Schlüssel (für den Admin)",
+      "passphraseLabel": "Passphrase",
+      "passphraseHelp": "Ihr privater Schlüssel wird in diesem Browser mit dieser Passphrase verschlüsselt gespeichert. Sie geben sie bei jedem Öffnen von SealSkin hier ein."
     },
     "home": {
       "title": "Ihre Home-Verzeichnisse",
@@ -1166,7 +1168,8 @@
       "pendingConfigSaved": "Ausstehende Konfiguration gespeichert. Sie können Ihren öffentlichen Schlüssel jetzt dem Administrator zur Verfügung stellen.",
       "settingsSaved": "Einstellungen gespeichert.",
       "appCreated": "App '{name}' erfolgreich erstellt.",
-      "launchFailed": "Start fehlgeschlagen: {error}"
+      "launchFailed": "Start fehlgeschlagen: {error}",
+      "passphraseRequired": "Geben Sie eine Passphrase ein, um Ihren Schlüssel in diesem Browser zu schützen."
     },
     "placeholders": {
       "noAdmins": "Keine Admins gefunden.",
@@ -1177,6 +1180,14 @@
       "noPinned": "Keine gepinnten Verhalten gefunden.",
       "errorLoading": "Fehler beim Laden der Verzeichnisse.",
       "noInstalledApps": "Es wurden noch keine Anwendungen installiert."
+    },
+    "web": {
+      "title": "SealSkin in diesem Browser",
+      "bookmarklet": "An SealSkin senden",
+      "bookmarkletHelp": "Ziehen Sie diesen Link in Ihre Lesezeichenleiste. Ein Klick darauf öffnet die aktuelle Seite in SealSkin oder sucht nach dem markierten Text.",
+      "protocol": "web+sealskin:-Links hier öffnen",
+      "protocolHelp": "Ein Link der Form web+sealskin: gefolgt von einer Adresse öffnet diese Adresse dann in SealSkin.",
+      "install": "Wenn Ihr Browser Web-Apps installieren kann, installieren Sie SealSkin über sein Menü, um Links und Dateien daran zu teilen und Dateien damit zu öffnen."
     }
   },
   "popup": {
@@ -1349,5 +1360,12 @@
       "completed": "Abgeschlossen",
       "error": "Fehler"
     }
+  },
+  "web": {
+    "unlockTitle": "SealSkin entsperren",
+    "unlockBody": "Geben Sie die Passphrase ein, die Ihren Schlüssel in diesem Browser schützt.",
+    "passphrase": "Passphrase",
+    "unlock": "Entsperren",
+    "wrongPassphrase": "Diese Passphrase entsperrt Ihren Schlüssel nicht."
   }
 }

@@ -11,6 +11,7 @@
  *
  * @param {object} hooks
  * @param {function(string): Promise<void>} hooks.openExternal Opens a URL in a tab, Custom Tab, or SFSafariViewController.
+ * @param {function(string): void} [hooks.closeExternal] Closes the tab `openExternal` opened for a URL, where the shell can.
  * @param {function(): void} hooks.openPopup Shows the popup page in the frame.
  */
 export function installPolyfill(hooks) {
@@ -84,6 +85,7 @@ export function installPolyfill(hooks) {
       return { id, windowId: 1 };
     },
     async remove(id) {
+      if (hooks.closeExternal && tabUrls.has(id)) hooks.closeExternal(tabUrls.get(id));
       tabUrls.delete(id);
     },
     query: async () => [],

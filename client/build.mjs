@@ -379,6 +379,16 @@ async function buildUi() {
   await buildTarget('ui', {
     pages, outdir, outbase: path.join(SRC, 'ui'), hashed: true, minify: true,
   });
+  // The web app frames the connection page from the server.
+  await buildTarget('ui', {
+    pages: [path.join(SRC, 'shell', 'connect.html')], outdir, outbase: path.join(SRC, 'shell'), hashed: true, minify: true,
+  });
+  // A service worker keeps one address: its scope is the directory it is served from.
+  await bundle({
+    entries: [path.join(SRC, 'ui', 'sw.js')], outdir, outbase: path.join(SRC, 'ui'), hashed: false, format: 'iife', minify: true,
+  });
+  // Installing the web app wants an icon of at least 512 px.
+  fs.copyFileSync(path.join(REPO_DIR, 'mobile', 'assets', 'logo.png'), path.join(outdir, 'icons', 'logo.png'));
   fs.writeFileSync(path.join(outdir, 'manifest.json'), JSON.stringify({ version: VERSION, bridge: BRIDGE_VERSION }, null, 2) + '\n');
 }
 

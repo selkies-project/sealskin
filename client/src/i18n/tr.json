@@ -135,7 +135,9 @@
       "keyGeneration": "Anahtar Oluşturma",
       "keyGenDescription": "Bir anahtar çiftiniz yoksa, buradan bir tane oluşturabilirsiniz. Özel anahtar yukarıda doldurulacaktır. Açık anahtarı yöneticinize verin.",
       "generateKeyButton": "Yeni Anahtar Çifti Oluştur",
-      "publicKeyForAdminLabel": "Açık Anahtarınız (yönetici için)"
+      "publicKeyForAdminLabel": "Açık Anahtarınız (yönetici için)",
+      "passphraseLabel": "Parola İfadesi",
+      "passphraseHelp": "Özel anahtarınız bu tarayıcıda bu parola ifadesiyle şifrelenmiş olarak saklanır; SealSkin'i burada her açtığınızda onu girersiniz."
     },
     "home": {
       "title": "Ana Dizinleriniz",
@@ -1166,7 +1168,8 @@
       "pendingConfigSaved": "Bekleyen yapılandırma kaydedildi. Artık açık anahtarınızı yöneticiye sağlayabilirsiniz.",
       "settingsSaved": "Ayarlar kaydedildi.",
       "appCreated": "Uygulama '{name}' başarıyla oluşturuldu.",
-      "launchFailed": "Başlatma başarısız: {error}"
+      "launchFailed": "Başlatma başarısız: {error}",
+      "passphraseRequired": "Bu tarayıcıda anahtarınızı korumak için bir parola ifadesi girin."
     },
     "placeholders": {
       "noAdmins": "Yönetici bulunamadı.",
@@ -1177,6 +1180,14 @@
       "noPinned": "Sabitlenmiş davranış bulunamadı.",
       "errorLoading": "Dizinler yüklenirken hata oluştu.",
       "noInstalledApps": "Henüz hiçbir uygulama yüklenmedi."
+    },
+    "web": {
+      "title": "Bu Tarayıcıda SealSkin",
+      "bookmarklet": "SealSkin'e Gönder",
+      "bookmarkletHelp": "Bu bağlantıyı yer imleri çubuğunuza sürükleyin. Tıkladığınızda bulunduğunuz sayfayı SealSkin'de açar veya seçtiğiniz metni arar.",
+      "protocol": "web+sealskin: Bağlantılarını Burada Aç",
+      "protocolHelp": "web+sealskin: ve ardından bir adres olarak yazılan bağlantı, o adresi SealSkin'de açar.",
+      "install": "Tarayıcınız web uygulamalarını yükleyebiliyorsa, bağlantı ve dosya paylaşmak ve dosya açmak için SealSkin'i tarayıcının menüsünden yükleyin."
     }
   },
   "popup": {
@@ -1349,5 +1360,12 @@
       "completed": "Tamamlandı",
       "error": "Hata"
     }
+  },
+  "web": {
+    "unlockTitle": "SealSkin Kilidini Aç",
+    "unlockBody": "Bu tarayıcıda anahtarınızı koruyan parola ifadesini girin.",
+    "passphrase": "Parola ifadesi",
+    "unlock": "Kilidi Aç",
+    "wrongPassphrase": "Bu parola ifadesi anahtarınızın kilidini açmıyor."
   }
 }
