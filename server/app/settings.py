@@ -50,8 +50,11 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
     {
         "name": "default_provider",
         "type": "str",
-        "default": "docker",
-        "help": "The default application provider to use.",
+        "default": "auto",
+        "help": (
+            "Backend that runs sessions: `docker`, `kubernetes`, or `auto`, which picks "
+            "Kubernetes when the server runs in a Kubernetes pod and Docker otherwise."
+        ),
     },
     {
         "name": "app_resource_path",

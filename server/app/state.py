@@ -57,7 +57,8 @@ class RuntimeState:
         discovered_api_port: Externally mapped API port.
         discovered_session_port: Externally mapped session port.
         discovered_network: Docker network the server container is attached to.
-        instance_name: Name that labels this server's session instances.
+        instance_name: Name that labels this server's session instances: its
+            container's, or its Kubernetes Deployment's or StatefulSet's.
         download_tokens: One-shot public download tokens.
         share_password_failures: Recent failed password tries keyed by share id.
         server_private_key: The server's RSA private key object.

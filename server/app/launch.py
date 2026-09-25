@@ -2,9 +2,9 @@
 
 `build_launch_spec` assembles everything a provider needs to start an
 application container (environment, volumes, GPU, autostart script, Docker
-overrides). It is used by the launch routes for new sessions and by the
-collaboration module when a room swaps to another application, so the two
-paths can no longer drift apart.
+run options, which the Kubernetes backend maps onto the pod). It is used by
+the launch routes for new sessions and by the collaboration module when a room
+swaps to another application, so the two paths can no longer drift apart.
 """
 
 from __future__ import annotations
@@ -436,7 +436,12 @@ def build_launch_spec(
     if forced_env:
         env.update(forced_env)
 
-    if gpu_config and (gpu_config["type"] == "dri3" or (gpu_config["type"] == "nvidia" and wayland_mode)):
+    # A Kubernetes GPU is a resource the device plugin mounts wherever it likes.
+    if (
+        gpu_config
+        and gpu_config["device"].startswith("/dev/")
+        and (gpu_config["type"] == "dri3" or wayland_mode)
+    ):
         env["DRI_NODE"] = gpu_config["device"]
         env["DRINODE"] = gpu_config["device"]
 
