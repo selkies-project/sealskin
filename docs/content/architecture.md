@@ -89,8 +89,9 @@ answers without `Access-Control-Allow-Credentials`, so no page elsewhere can
 read what the cookie authenticates.
 
 **Shares.** Public share passwords are stored as salted scrypt hashes. A
-correct password yields a one-time download token; the file itself is served
-from a directory that holds copies, never from the user's home.
+correct password yields a one-time download token, which stops working when
+the share expires; the file itself is served from a directory that holds
+copies, never from the user's home.
 
 ## A launch, step by step
 

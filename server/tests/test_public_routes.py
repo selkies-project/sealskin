@@ -1,10 +1,16 @@
 """Anonymous routes: public share downloads and the session proxy's `forward_auth`."""
 
+import os
+import time
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from app.models import PublicShareMetadata
 from app.routers import internal, sessions, shares
+from app.security import hash_share_password
+from app.settings import settings
 from app.state import state
 
 pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
@@ -21,6 +27,28 @@ def http():
     yield TestClient(app, raise_server_exceptions=False)
     state.public_shares.clear()
     state.download_tokens.clear()
+
+
+def _share(share_id, password):
+    os.makedirs(settings.public_storage_path, exist_ok=True)
+    with open(os.path.join(settings.public_storage_path, share_id), "w", encoding="utf-8") as handle:
+        handle.write("shared")
+    state.public_shares[share_id] = PublicShareMetadata(
+        owner_username="owner",
+        original_filename="f.txt",
+        created_at=time.time(),
+        size_bytes=6,
+        password_hash=hash_share_password(password),
+    )
+    return state.public_shares[share_id]
+
+
+def test_a_download_token_ends_with_its_share(http):
+    share = _share("s1", "right")
+    issued = http.post("/public/s1", data={"password": "right"}, follow_redirects=False)
+    assert issued.status_code == 303
+    share.expiry_timestamp = time.time() - 1
+    assert http.get(issued.headers["location"]).status_code == 410
 
 
 def test_forward_auth_accepts_each_token_and_nothing_else(http):

@@ -198,7 +198,10 @@ async def download_shared_file(token: str) -> FileResponse:
     if not token_data or token_data.get("expires_at", 0) < time.time():
         raise HTTPException(status_code=403, detail="Invalid or expired download token.")
     share_id = token_data["share_id"]
-    return _file_response(share_id, _share_or_404(share_id))
+    metadata = _share_or_404(share_id)
+    if metadata.expiry_timestamp and metadata.expiry_timestamp < time.time():
+        return HTMLResponse(content="<h1>This link has expired.</h1>", status_code=410)
+    return _file_response(share_id, metadata)
 
 
 @public_router.get("/public/{share_id}")
