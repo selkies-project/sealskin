@@ -19,6 +19,29 @@ on:
         description: "Upload to TestFlight and the Google Play internal track"
         type: boolean
         default: false
+    secrets:
+      ANDROID_KEYSTORE_BASE64:
+        required: false
+      ANDROID_KEYSTORE_PASSWORD:
+        required: false
+      ANDROID_KEY_ALIAS:
+        required: false
+      ANDROID_KEY_PASSWORD:
+        required: false
+      IOS_DIST_CERT_P12:
+        required: false
+      IOS_DIST_CERT_PASSWORD:
+        required: false
+      IOS_PROVISIONING_PROFILE:
+        required: false
+      PLAY_SERVICE_ACCOUNT_JSON:
+        required: false
+      APPSTORE_KEY_ID:
+        required: false
+      APPSTORE_ISSUER_ID:
+        required: false
+      APPSTORE_PRIVATE_KEY:
+        required: false
 
 permissions:
   contents: read
