@@ -182,6 +182,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     await inspect_self_container()
     read_cpu_model()
+    _, external_port = user_manager.external_address()
+    if external_port:
+        state.discovered_api_port = state.discovered_session_port = external_port
     user_manager.set_external_ports(state.discovered_api_port, state.discovered_session_port)
     user_manager.load_users_and_groups()
 
