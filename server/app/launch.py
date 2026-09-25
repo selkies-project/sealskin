@@ -34,6 +34,8 @@ from .state import state
 logger = logging.getLogger(__name__)
 
 DOCKER_LIST_KEYS = ("devices", "volumes")
+#: Ephemeral directories being deleted, referenced until their task ends.
+_removals: set[asyncio.Task] = set()
 
 # User-level hardening switches (see `UserSettings`) and the base image preset
 # each one forces on. Applied after the template and the per-app environment so
@@ -909,8 +911,11 @@ async def stop_session(session_id: str) -> None:
     await config_store.save_sessions()
     for key in ("host_mount_path", "shared_files_path"):
         path = session.get(key)
-        if path and path.startswith(ephemeral_base()) and os.path.exists(path):
-            await asyncio.to_thread(shutil.rmtree, path, ignore_errors=True)
+        if path and path.startswith(ephemeral_base()):
+            # Deleting a cleanroom home on network storage takes long; nobody waits for it.
+            task = asyncio.create_task(asyncio.to_thread(shutil.rmtree, path, ignore_errors=True))
+            _removals.add(task)
+            task.add_done_callback(_removals.discard)
     logger.info("[%s] Session stopped and cleaned up successfully.", session_id)
 
 
