@@ -6,6 +6,11 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 
+def host_port(ip: str, port: int | str) -> str:
+    """Join an address and a port, bracketing IPv6 literals."""
+    return f"[{ip}]:{port}" if ":" in ip else f"{ip}:{port}"
+
+
 class BaseProvider(ABC):
     """Abstract base class for all application providers."""
 

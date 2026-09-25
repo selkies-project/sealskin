@@ -14,7 +14,7 @@ from docker.types import DeviceRequest
 from fastapi import HTTPException
 
 from ..docker_utils import get_docker_client
-from .base_provider import BaseProvider
+from .base_provider import BaseProvider, host_port
 
 logger = logging.getLogger(__name__)
 
@@ -308,8 +308,9 @@ class DockerProvider(BaseProvider):
                     await asyncio.sleep(0.5)
                     continue
 
+                address = host_port(ip_address, port)
                 if not health_check_passed:
-                    health_check_url = f"http://{ip_address}:{port}{subfolder}"
+                    health_check_url = f"http://{address}{subfolder}"
                     async with httpx.AsyncClient(
                         timeout=2.0, follow_redirects=True, headers=auth_header
                     ) as client:
@@ -332,11 +333,11 @@ class DockerProvider(BaseProvider):
                         stacked_headers.update(auth_header)
                     control_plane_targets = [
                         (
-                            f"http://{ip_address}:{port}{subfolder.rstrip('/')}/api/tokens",
+                            f"http://{address}{subfolder.rstrip('/')}/api/tokens",
                             stacked_headers,
                         ),
                         (
-                            f"http://{ip_address}:8083/tokens",
+                            f"http://{host_port(ip_address, 8083)}/tokens",
                             {"Authorization": f"Bearer {master_token}"},
                         ),
                     ]
