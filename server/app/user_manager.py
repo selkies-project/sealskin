@@ -273,7 +273,7 @@ def get_all_groups() -> list[dict[str, Any]]:
 
 def _validate_username(username: str) -> None:
     """Raise `ValueError` for names that are not filesystem safe."""
-    if not _NAME_RE.match(username or ""):
+    if not _NAME_RE.fullmatch(username or ""):
         raise ValueError("Invalid username. Use only letters, numbers, underscore, or hyphen.")
 
 
@@ -450,7 +450,7 @@ def create_home_dir(username: str, home_name: str) -> None:
         ValueError: For invalid names or existing directories.
         OSError: If the directory cannot be created.
     """
-    if not _NAME_RE.match(home_name or ""):
+    if not _NAME_RE.fullmatch(home_name or ""):
         raise ValueError("Invalid home directory name. Use only letters, numbers, underscore, or hyphen.")
     new_home_path = safe_join(settings.storage_path, username, home_name)
     if os.path.exists(new_home_path):
@@ -471,7 +471,7 @@ def delete_home_dir(username: str, home_name: str) -> None:
         ValueError: For invalid names or missing directories.
         OSError: If the directory cannot be removed.
     """
-    if not _NAME_RE.match(home_name or ""):
+    if not _NAME_RE.fullmatch(home_name or ""):
         raise ValueError("Invalid home directory name.")
     home_path = safe_join(settings.storage_path, username, home_name)
     if not os.path.isdir(home_path):

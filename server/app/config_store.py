@@ -52,7 +52,7 @@ def is_safe_name(name: str) -> bool:
         `True` when the name only contains letters, digits, spaces, `_`,
         `.`, and `-` and does not reduce to `.` or `..`.
     """
-    return bool(name) and bool(SAFE_NAME_RE.match(name)) and name.strip(". ") != ""
+    return bool(name) and bool(SAFE_NAME_RE.fullmatch(name)) and name.strip(". ") != ""
 
 
 def deep_merge(base: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any]:

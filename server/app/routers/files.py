@@ -67,7 +67,7 @@ def get_validated_path(
         HTTPException: 400 for bad names, 403 for traversal or denied access,
             404 when missing.
     """
-    if not re.match(r"^[a-zA-Z0-9_-]+$", home_dir):
+    if not re.fullmatch(r"[a-zA-Z0-9_-]+", home_dir):
         raise HTTPException(status_code=400, detail="Invalid home directory name.")
     if home_dir not in user_manager.get_home_dirs(username):
         raise HTTPException(status_code=403, detail=f"Access to home directory '{home_dir}' denied.")

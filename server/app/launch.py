@@ -476,7 +476,7 @@ DEFAULT_TIMEZONE = "Etc/UTC"
 
 def is_valid_timezone(name: Any) -> bool:
     """Whether `name` looks like an IANA zone name (`Europe/Berlin`, `UTC`)."""
-    return isinstance(name, str) and 0 < len(name) <= 64 and bool(_TZ_NAME_RE.match(name))
+    return isinstance(name, str) and 0 < len(name) <= 64 and bool(_TZ_NAME_RE.fullmatch(name))
 
 
 def resolve_timezone(*candidates: Any) -> str:
