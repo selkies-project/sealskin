@@ -99,6 +99,7 @@ export function pageTransport(message) {
  * @param {function} [overrides.transport]
  * @param {function} [overrides.saveBlob] mobile native file open
  * @param {function} [overrides.reserveTab] web app tab reservation, see `bridge.reserveTab`
+ * @param {function} [overrides.streamDownload] web app streamed download, see `createHost`
  * @param {function} [overrides.onPageChange] `(page) => void`, mobile back button bookkeeping
  * @returns {{openPage: function(string, object=): void, currentPage: function(): string, boot: function(): Promise<void>}}
  */
@@ -293,6 +294,7 @@ export function initHost(overrides = {}) {
     openPage,
     saveBlob: overrides.saveBlob,
     reserveTab: overrides.reserveTab,
+    streamDownload: overrides.streamDownload,
     isConnectPage: () => framedConnect,
     close: () => {
       if (isPopupWindow) window.close();

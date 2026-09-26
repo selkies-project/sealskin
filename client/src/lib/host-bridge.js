@@ -69,6 +69,7 @@ export async function callBackground(transport, type, payload = {}) {
  * @param {function} [options.onHelloMismatch] Called when the page's bridge version differs.
  * @param {function} options.openPage `(page, params?) => void` implemented by the host page.
  * @param {function} [options.saveBlob] `(blob, filename) => Promise` for mobile native open.
+ * @param {function} [options.streamDownload] `(home, path, filename) => Promise`, the web app's streamed download.
  * @param {function} [options.reserveTab] `(reserve) => void`, web app tab reservation.
  * @param {function} [options.close] Closes the popup (extension) or no-op.
  * @param {function} [options.isConnectPage] `() => boolean`, true while the bundled connect page is framed.
@@ -82,7 +83,7 @@ export function createHost(options) {
   let helloSeen = false;
 
   const capabilities = {
-    streamDownload: shell === 'extension' && platform === 'chrome',
+    streamDownload: Boolean(options.streamDownload) || (shell === 'extension' && platform === 'chrome'),
     nativeFileOpen: shell === 'mobile',
     contextMenus: shell === 'extension',
     tabs: shell === 'extension',
@@ -186,6 +187,10 @@ export function createHost(options) {
 
     async downloadFile({ home, path, filename }) {
       if (!capabilities.streamDownload) throw new Error('Streaming download is not available in this shell.');
+      if (options.streamDownload) {
+        await options.streamDownload(home, path, filename);
+        return {};
+      }
       const params = new URLSearchParams({ home, path, filename });
       const a = document.createElement('a');
       a.href = chrome.runtime.getURL(`/download-stream?${params.toString()}`);

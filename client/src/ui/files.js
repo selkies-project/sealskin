@@ -404,7 +404,7 @@ async function downloadFile(home, path) {
   const caps = info.capabilities || {};
 
   if (caps.streamDownload) {
-    // Chrome extension: the service worker streams the chunks straight into a download.
+    // The Chrome extension and the web app: a service worker streams the chunks straight into a download.
     try {
       await bridge.downloadFile(home, path, filename);
     } catch (error) {

@@ -20,6 +20,7 @@
 import { KEY_REF, hooks, reserveTab } from './web-polyfill.js';
 import '../shell/background.js';
 import { initHost, pageTransport } from '../shell/host.js';
+import { callBackground } from '../lib/host-bridge.js';
 import { arrayBufferToBase64, arrayBufferToPem, pemToArrayBuffer, setSigningKey } from '../lib/crypto-utils.js';
 import { storePendingFile, takeShared } from '../lib/context-store.js';
 import { loadTranslator } from '../lib/i18n.js';
@@ -30,11 +31,13 @@ const PENDING = 'sealskinPendingConfig';
 const PENDING_REF = 'sealed-pending-key';
 const SIGNING = { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' };
 const PBKDF2_ITERATIONS = 600000;
+// Firefox stops a service worker 30 s after its last event, cutting a download short without an error.
+const KEEPALIVE_MS = 10000;
 
 let kek = null;
 let hostApi = null;
 
-const fromBase64 = (value) => Uint8Array.from(atob(value), (c) => c.charCodeAt(0));
+const fromBase64 = (value) => (Uint8Array.fromBase64 ? Uint8Array.fromBase64(value) : Uint8Array.from(atob(value), (c) => c.charCodeAt(0)));
 const keyring = () => JSON.parse(localStorage.getItem(KEYRING) || 'null');
 
 async function deriveKek(passphrase, salt) {
@@ -190,6 +193,52 @@ function unlockScreen(t) {
   });
 }
 
+/** Whether a stream can be handed to the service worker, which is how a download reaches it. */
+function streamsTransfer() {
+  try {
+    const stream = new ReadableStream();
+    structuredClone(stream, { transfer: [stream] });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Save a file from the file manager to disk as it arrives: the stream pulls
+ * one chunk at a time through the encrypted API, and the service worker
+ * answers a download address with it.
+ */
+async function streamDownload(home, path, filename) {
+  const { active } = await navigator.serviceWorker.ready;
+  const keepalive = setInterval(() => active.postMessage(null), KEEPALIVE_MS);
+  let index = 0;
+  const stream = new ReadableStream({
+    async pull(controller) {
+      const params = new URLSearchParams({ path, chunk_index: index++ });
+      try {
+        const chunk = await callBackground(pageTransport, 'secureFetch', { url: `/api/files/download/chunk/${home}?${params}`, options: { method: 'GET' } });
+        if (chunk.chunk_data_b64) controller.enqueue(fromBase64(chunk.chunk_data_b64));
+        if (chunk.is_last_chunk) {
+          controller.close();
+          clearInterval(keepalive);
+        }
+      } catch (e) {
+        controller.error(e);
+        clearInterval(keepalive);
+      }
+    },
+    cancel: () => clearInterval(keepalive),
+  });
+  const id = crypto.randomUUID();
+  active.postMessage({ id, filename, stream }, [stream]);
+  // WebKit starts a download from a frame, not from a link.
+  const frame = document.createElement('iframe');
+  frame.hidden = true;
+  frame.src = `download/${id}`;
+  document.body.append(frame);
+}
+
 /** Hand the popup what this page was opened with: a link, a search, or a share. */
 async function takeLaunchContext() {
   const params = new URLSearchParams(location.search);
@@ -202,7 +251,8 @@ async function takeLaunchContext() {
 }
 
 async function start() {
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  // No worker registers on an untrusted certificate; downloads then go through memory.
+  const worker = 'serviceWorker' in navigator && navigator.serviceWorker.register('sw.js').then(() => true, () => false);
   if ('launchQueue' in window) {
     window.launchQueue.setConsumer(async ({ files }) => {
       if (!files || !files.length) return;
@@ -218,6 +268,7 @@ async function start() {
     shell: 'web',
     transport,
     reserveTab,
+    streamDownload: (await worker) && streamsTransfer() ? streamDownload : undefined,
     onPageChange: (page) => { document.body.dataset.frame = page; },
   });
   hooks.openPopup = () => hostApi.openPage('popup');
