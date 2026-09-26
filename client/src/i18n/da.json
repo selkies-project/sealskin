@@ -197,7 +197,8 @@
       "createButton": "Opret Bruger",
       "homesDisabledTooltip": "Vedvarende lager deaktiveret for denne bruger",
       "confirmDelete": "Er du sikker på, at du vil slette brugeren '{username}'? Dette vil også slette alt deres vedvarende lager og kan ikke fortrydes.",
-      "allowPublicSharing": "Tillad offentlig fildeling"
+      "allowPublicSharing": "Tillad offentlig fildeling",
+      "allowEditTemplates": "Tillad redigering af app-skabeloner"
     },
     "groups": {
       "title": "Gruppeadministration",
@@ -244,6 +245,7 @@
       "confirmDelete": "Er du sikker på, at du vil slette skabelonen '{templateName}'? Handlingen kan ikke fortrydes.",
       "deleteDisabled": "Denne skabelon kan ikke slettes.",
       "enterName": "Indtast venligst et navn til den nye skabelon.",
+      "dockerAdminOnly": "Kun en administrator kan ændre disse indstillinger.",
       "settings": {
         "TITLE": {
           "label": "Sidetitel",

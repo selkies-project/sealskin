@@ -53,6 +53,7 @@ from ..security import (
     get_decrypted_request_body,
     proxy_cert_not_after,
     verify_admin,
+    verify_template_editor,
     verify_token,
 )
 from ..settings import settings
@@ -65,6 +66,13 @@ status_router = APIRouter(route_class=EncryptedRoute)
 router = APIRouter(
     prefix="/api/admin",
     dependencies=[Depends(verify_admin)],
+    route_class=EncryptedRoute,
+)
+# Templates are open to users granted `edit_templates` as well, short of the settings that
+# carry authority over the Docker host (`_docker_settings`).
+template_router = APIRouter(
+    prefix="/api/admin",
+    dependencies=[Depends(verify_template_editor)],
     route_class=EncryptedRoute,
 )
 
@@ -482,20 +490,48 @@ async def launch_meta_for_customization(
 # --- Templates -------------------------------------------------------------
 
 
-@router.get("/apps/templates", response_model=list[AppTemplate])
+def _docker_settings(template_settings: dict[str, Any]) -> dict[str, str]:
+    """A template's `DOCKER_*` settings, as text.
+
+    They become container run options (privileged mode, devices, namespaces, binds)
+    and so carry authority over the Docker host. Text, since a hand-edited template
+    may hold them as YAML booleans or numbers.
+    """
+    return {
+        key: ("true" if value is True else "false" if value is False else str(value))
+        for key, value in template_settings.items()
+        if key.startswith("DOCKER_")
+    }
+
+
+@template_router.get("/apps/templates", response_model=list[AppTemplate])
 async def get_app_templates() -> list[dict[str, Any]]:
     """List app templates."""
     return sorted(state.app_templates.values(), key=lambda t: t["name"])
 
 
-@router.post("/apps/templates", response_model=AppTemplate, status_code=201)
-async def save_app_template(decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body)) -> AppTemplate:
-    """Create or replace a template."""
+@template_router.post("/apps/templates", response_model=AppTemplate, status_code=201)
+async def save_app_template(
+    decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body),
+    user: dict[str, Any] = Depends(verify_template_editor),
+) -> AppTemplate:
+    """Create or replace a template.
+
+    A template editor who is not an administrator keeps the template's `DOCKER_*`
+    settings as they are: one left out keeps its value, and one added or changed is refused.
+    """
     try:
         template = AppTemplate(**decrypted_body)
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     _require_safe_name(template.name, "template")
+    if not user.get("is_admin"):
+        kept = _docker_settings(state.app_templates.get(template.name, {}).get("settings", {}))
+        if any(kept.get(key) != value for key, value in _docker_settings(template.settings).items()):
+            raise HTTPException(
+                status_code=403, detail="Only an administrator can change a template's Docker settings."
+            )
+        template.settings = {**template.settings, **kept}
     try:
         await config_store.save_app_template(template)
     except OSError as exc:
@@ -506,10 +542,18 @@ async def save_app_template(decrypted_body: dict[str, Any] = Depends(get_decrypt
     return template
 
 
-@router.delete("/apps/templates/{template_name}", status_code=204)
-async def delete_app_template(template_name: str) -> Response:
-    """Delete a user template."""
+@template_router.delete("/apps/templates/{template_name}", status_code=204)
+async def delete_app_template(
+    template_name: str, user: dict[str, Any] = Depends(verify_template_editor)
+) -> Response:
+    """Delete a user template; one with `DOCKER_*` settings only as an administrator."""
     _require_safe_name(template_name, "template")
+    if not user.get("is_admin") and _docker_settings(
+        state.app_templates.get(template_name, {}).get("settings", {})
+    ):
+        raise HTTPException(
+            status_code=403, detail="Only an administrator can delete a template with Docker settings."
+        )
     try:
         config_store.delete_app_template(template_name)
     except PermissionError as exc:

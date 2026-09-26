@@ -149,7 +149,7 @@ All *encrypted, admin*.
 | `POST /api/admin/apps/installed/{app_id}/pull_latest` | Pull the newest image. |
 | `POST /api/admin/apps/meta` | Create a meta-app (`name`, `base_app_id`, `logo`, autostart scripts, `users`, `groups`). |
 | `POST /api/admin/launch/meta_customize` | Launch a meta-app with its template mounted read-write. |
-| `GET`/`POST /api/admin/apps/templates`, `DELETE /api/admin/apps/templates/{name}` | Templates. |
+| `GET`/`POST /api/admin/apps/templates`, `DELETE /api/admin/apps/templates/{name}` | Templates; also open to a user allowed to edit app templates, short of their `DOCKER_*` settings. |
 | `GET /api/admin/sessions` | Every session grouped by user. |
 | `DELETE /api/admin/sessions/{session_id}` | Stop any session. |
 

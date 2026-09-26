@@ -364,6 +364,13 @@ async def verify_admin(user: dict[str, Any] = Depends(verify_token)) -> dict[str
     return user
 
 
+async def verify_template_editor(user: dict[str, Any] = Depends(verify_token)) -> dict[str, Any]:
+    """Dependency requiring an administrator or a user allowed to edit app templates."""
+    if user.get("is_admin") or user.get("effective_settings", {}).get("edit_templates", False):
+        return user
+    raise HTTPException(status_code=403, detail="Editing app templates is not allowed for this account.")
+
+
 async def verify_persistent_storage_enabled(
     user: dict[str, Any] = Depends(verify_token),
 ) -> dict[str, Any]:

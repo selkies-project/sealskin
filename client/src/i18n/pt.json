@@ -197,7 +197,8 @@
       "createButton": "Criar Usuário",
       "homesDisabledTooltip": "Armazenamento persistente desativado para este usuário",
       "confirmDelete": "Tem certeza de que deseja excluir o usuário '{username}'? Isso também excluirá todo o seu armazenamento persistente e não pode ser desfeito.",
-      "allowPublicSharing": "Permitir Compartilhamento Público de Arquivos"
+      "allowPublicSharing": "Permitir Compartilhamento Público de Arquivos",
+      "allowEditTemplates": "Permitir Edição de Modelos de Aplicativos"
     },
     "groups": {
       "title": "Gerenciamento de Grupos",
@@ -244,6 +245,7 @@
       "confirmDelete": "Tem certeza de que deseja excluir o modelo '{templateName}'? Esta ação não pode ser desfeita.",
       "deleteDisabled": "Este modelo não pode ser excluído.",
       "enterName": "Por favor, insira um nome para o novo modelo.",
+      "dockerAdminOnly": "Somente um administrador pode alterar estas configurações.",
       "settings": {
         "TITLE": {
           "label": "Título da Página",

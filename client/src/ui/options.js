@@ -186,6 +186,15 @@ function buildTemplateForm() {
     const container = containers[setting.category];
     if (container) container.insertAdjacentHTML('beforeend', formElementHtml);
   });
+  if (!isAdmin) {
+    containers.docker?.querySelectorAll('input, select').forEach((el) => { el.disabled = true; });
+    document.getElementById('template-docker-admin-only').style.display = 'block';
+  }
+}
+
+/** Reload the template list alone, all a template editor who is not an administrator may read. */
+async function refreshTemplates() {
+  adminData.appTemplates = await secureFetch('/api/admin/apps/templates', { method: 'GET' });
 }
 
 function updateTemplatePreview() {
@@ -248,7 +257,7 @@ async function saveTemplateProfile() {
   try {
     await secureFetch('/api/admin/apps/templates', { method: 'POST', body: JSON.stringify(payload) });
     displayStatus(t('options.status.templateSaved', { name: payload.name }), false);
-    await refreshAppData();
+    await (isAdmin ? refreshAppData() : refreshTemplates());
     populateTemplateDropdowns();
     templateSelect.value = payload.name;
     nameInput.value = '';
@@ -271,7 +280,7 @@ async function deleteTemplateProfile() {
   try {
     await secureFetch(`/api/admin/apps/templates/${encodeURIComponent(templateName)}`, { method: 'DELETE' });
     displayStatus(t('options.status.templateDeleted', { templateName }), false);
-    await refreshAppData();
+    await (isAdmin ? refreshAppData() : refreshTemplates());
     populateTemplateDropdowns();
     templateSelect.value = 'new';
     templateSelect.dispatchEvent(new Event('change'));
@@ -807,6 +816,7 @@ function getSettingsFromForm(formPrefix) {
     public_sharing: document.getElementById(`${formPrefix}PublicSharing`).checked,
     harden_container: document.getElementById(`${formPrefix}HardenContainer`).checked,
     harden_openbox: document.getElementById(`${formPrefix}HardenOpenbox`).checked,
+    edit_templates: document.getElementById(`${formPrefix}EditTemplates`).checked,
     gpu: document.getElementById(`${formPrefix}Gpu`).checked,
     storage_limit: -1,
     session_limit: parseInt(document.getElementById(`${formPrefix}SessionLimit`).value, 10),
@@ -822,6 +832,7 @@ function populateSettingsForm(formPrefix, settings) {
   document.getElementById(`${formPrefix}PublicSharing`).checked = settings.public_sharing;
   document.getElementById(`${formPrefix}HardenContainer`).checked = settings.harden_container;
   document.getElementById(`${formPrefix}HardenOpenbox`).checked = settings.harden_openbox;
+  document.getElementById(`${formPrefix}EditTemplates`).checked = !!settings.edit_templates;
   document.getElementById(`${formPrefix}Gpu`).checked = settings.gpu;
   document.getElementById(`${formPrefix}SessionLimit`).value = settings.session_limit;
 }
@@ -975,6 +986,11 @@ async function loadDashboard() {
       displayStatus(t('options.status.loggedInUser', { username: statusData.username }), false);
       setAdminNavVisibility(false);
       homeDirTabButton.style.display = statusData.settings.persistent_storage ? 'flex' : 'none';
+      if (statusData.settings.edit_templates) {
+        await refreshTemplates();
+        document.querySelector('.nav-link[data-tabname="AppTemplates"]').style.display = 'flex';
+        adminNavSeparator.style.display = 'block';
+      }
     }
     return true;
   } catch (error) {

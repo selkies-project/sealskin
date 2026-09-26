@@ -231,6 +231,7 @@ def create_app() -> FastAPI:
     app.include_router(launch.router)
     app.include_router(admin.status_router)
     app.include_router(admin.router)
+    app.include_router(admin.template_router)
     app.include_router(homedirs.router)
     app.include_router(sessions.router)
     app.include_router(uploads.router)

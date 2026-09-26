@@ -195,7 +195,8 @@
       "createButton": "사용자 만들기",
       "homesDisabledTooltip": "이 사용자는 영구 스토리지가 비활성화되었습니다",
       "confirmDelete": "사용자 '{username}'을(를) 삭제하시겠습니까? 모든 영구 스토리지도 함께 삭제되며 되돌릴 수 없습니다.",
-      "allowPublicSharing": "공개 파일 공유 허용"
+      "allowPublicSharing": "공개 파일 공유 허용",
+      "allowEditTemplates": "앱 템플릿 편집 허용"
     },
     "groups": {
       "title": "그룹 관리",
@@ -244,6 +245,7 @@
       "confirmDelete": "템플릿 '{templateName}'을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
       "deleteDisabled": "이 템플릿은 삭제할 수 없습니다.",
       "enterName": "새 템플릿의 이름을 입력하세요.",
+      "dockerAdminOnly": "이 설정은 관리자만 변경할 수 있습니다.",
       "settings": {
         "TITLE": {
           "label": "페이지 제목",

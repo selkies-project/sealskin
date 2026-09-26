@@ -109,6 +109,7 @@ persistent_storage: true
 public_sharing: false
 harden_container: false
 harden_openbox: false
+edit_templates: false
 gpu: true
 storage_limit: -1
 session_limit: -1

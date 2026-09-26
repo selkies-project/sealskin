@@ -299,6 +299,7 @@ class UserSettings(BaseModel):
     public_sharing: bool = False
     harden_container: bool = False
     harden_openbox: bool = False
+    edit_templates: bool = False
     gpu: bool = True
     storage_limit: int = -1
     session_limit: int = -1

@@ -197,7 +197,8 @@
       "createButton": "Tạo người dùng",
       "homesDisabledTooltip": "Lưu trữ lâu dài bị vô hiệu hóa cho người dùng này",
       "confirmDelete": "Bạn có chắc chắn muốn xóa người dùng '{username}' không? Thao tác này cũng sẽ xóa tất cả bộ nhớ lâu dài của họ và không thể hoàn tác.",
-      "allowPublicSharing": "Cho phép chia sẻ tệp công khai"
+      "allowPublicSharing": "Cho phép chia sẻ tệp công khai",
+      "allowEditTemplates": "Cho phép chỉnh sửa mẫu ứng dụng"
     },
     "groups": {
       "title": "Quản lý nhóm",
@@ -244,6 +245,7 @@
       "confirmDelete": "Bạn có chắc chắn muốn xóa mẫu '{templateName}' không? Hành động này không thể được hoàn tác.",
       "deleteDisabled": "Mẫu này không thể bị xóa.",
       "enterName": "Vui lòng nhập tên cho mẫu mới.",
+      "dockerAdminOnly": "Chỉ quản trị viên mới có thể thay đổi các cài đặt này.",
       "settings": {
         "TITLE": {
           "label": "Tiêu đề trang",

@@ -38,6 +38,7 @@ DEFAULT_USER_SETTINGS: dict[str, Any] = {
     "public_sharing": False,
     "harden_container": False,
     "harden_openbox": False,
+    "edit_templates": False,
     "gpu": True,
     "storage_limit": -1,
     "session_limit": -1,

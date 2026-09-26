@@ -197,7 +197,8 @@
       "createButton": "创建用户",
       "homesDisabledTooltip": "此用户的持久性存储已禁用",
       "confirmDelete": "您确定要删除用户“{username}”吗？此操作还将删除其所有持久性存储，且无法撤销。",
-      "allowPublicSharing": "允许公开文件共享"
+      "allowPublicSharing": "允许公开文件共享",
+      "allowEditTemplates": "允许编辑应用模板"
     },
     "groups": {
       "title": "群组管理",
@@ -244,6 +245,7 @@
       "confirmDelete": "您确定要删除模板“{templateName}”吗？此操作无法撤销。",
       "deleteDisabled": "此模板无法删除。",
       "enterName": "请输入新模板的名称。",
+      "dockerAdminOnly": "只有管理员可以更改这些设置。",
       "settings": {
         "TITLE": {
           "label": "页面标题",

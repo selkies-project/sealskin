@@ -255,6 +255,7 @@
                             <div class="form-group"><label><input type="checkbox" id="newUserGpu"> <span data-i18n="options.users.allowGpu">Allow GPU Access</span></label></div>
                             <div class="form-group"><label><input type="checkbox" id="newUserHardenContainer"> <span data-i18n="options.users.hardenContainer">Harden Container</span></label></div>
                             <div class="form-group"><label><input type="checkbox" id="newUserHardenOpenbox"> <span data-i18n="options.users.hardenWm">Harden Window Manager</span></label></div>
+                            <div class="form-group"><label><input type="checkbox" id="newUserEditTemplates"> <span data-i18n="options.users.allowEditTemplates">Allow Editing App Templates</span></label></div>
                         </div>
                         <br><button type="submit" class="primary"><i class="fas fa-user-plus"></i> <span data-i18n="options.users.createButton">Create User</span></button>
                     </form>
@@ -296,6 +297,7 @@
                             <div class="form-group"><label><input type="checkbox" id="newGroupGpu" checked> <span data-i18n="options.users.allowGpu">Allow GPU Access</span></label></div>
                             <div class="form-group"><label><input type="checkbox" id="newGroupHardenContainer"> <span data-i18n="options.users.hardenContainer">Harden Container</span></label></div>
                             <div class="form-group"><label><input type="checkbox" id="newGroupHardenOpenbox"> <span data-i18n="options.users.hardenWm">Harden Window Manager</span></label></div>
+                            <div class="form-group"><label><input type="checkbox" id="newGroupEditTemplates"> <span data-i18n="options.users.allowEditTemplates">Allow Editing App Templates</span></label></div>
                         </div>
                         <br><button type="submit" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.groups.createButton">Create Group</span></button>
                     </form>
@@ -450,6 +452,7 @@
                     <div class="card">
                         <div class="card-header"><h3 data-i18n="options.modals.dockerTitle">Docker Advanced Overrides</h3></div>
                         <p class="description" style="margin-bottom: 1rem;" data-i18n="options.modals.dockerDescription">These settings override the default container configuration. Use with caution and only if you know what you are doing.</p>
+                        <p id="template-docker-admin-only" class="description" style="display: none; margin-bottom: 1rem;" data-i18n="options.appTemplates.dockerAdminOnly">Only an administrator can change these settings.</p>
                         <div id="template-form-docker" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
                     </div>
                 </form>
@@ -553,6 +556,7 @@
                     <div class="form-group"><label><input type="checkbox" id="editUserGpu"> <span data-i18n="options.users.allowGpu">Allow GPU Access</span></label></div>
                     <div class="form-group"><label><input type="checkbox" id="editUserHardenContainer"> <span data-i18n="options.users.hardenContainer">Harden Container</span></label></div>
                     <div class="form-group"><label><input type="checkbox" id="editUserHardenOpenbox"> <span data-i18n="options.users.hardenWm">Harden Window Manager</span></label></div>
+                    <div class="form-group"><label><input type="checkbox" id="editUserEditTemplates"> <span data-i18n="options.users.allowEditTemplates">Allow Editing App Templates</span></label></div>
                 </div>
                 <br>
                 <button type="submit" class="primary" data-i18n="options.modals.saveChanges">Save Changes</button>
@@ -587,6 +591,7 @@
                     <div class="form-group"><label><input type="checkbox" id="editGroupGpu"> <span data-i18n="options.users.allowGpu">Allow GPU Access</span></label></div>
                     <div class="form-group"><label><input type="checkbox" id="editGroupHardenContainer"> <span data-i18n="options.users.hardenContainer">Harden Container</span></label></div>
                     <div class="form-group"><label><input type="checkbox" id="editGroupHardenOpenbox"> <span data-i18n="options.users.hardenWm">Harden Window Manager</span></label></div>
+                    <div class="form-group"><label><input type="checkbox" id="editGroupEditTemplates"> <span data-i18n="options.users.allowEditTemplates">Allow Editing App Templates</span></label></div>
                 </div>
                 <br>
                 <button type="submit" class="primary" data-i18n="options.modals.saveChanges">Save Changes</button>

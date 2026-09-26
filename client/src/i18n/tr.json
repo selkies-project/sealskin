@@ -197,7 +197,8 @@
       "createButton": "Kullanıcı Oluştur",
       "homesDisabledTooltip": "Bu kullanıcı için kalıcı depolama devre dışı bırakıldı",
       "confirmDelete": "'{username}' kullanıcısını silmek istediğinizden emin misiniz? Bu, tüm kalıcı depolamasını da silecek ve geri alınamaz.",
-      "allowPublicSharing": "Herkese Açık Dosya Paylaşımına İzin Ver"
+      "allowPublicSharing": "Herkese Açık Dosya Paylaşımına İzin Ver",
+      "allowEditTemplates": "Uygulama Şablonlarını Düzenlemeye İzin Ver"
     },
     "groups": {
       "title": "Grup Yönetimi",
@@ -244,6 +245,7 @@
       "confirmDelete": "'{templateName}' şablonunu silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
       "deleteDisabled": "Bu şablon silinemez.",
       "enterName": "Lütfen yeni şablon için bir isim girin.",
+      "dockerAdminOnly": "Bu ayarları yalnızca bir yönetici değiştirebilir.",
       "settings": {
         "TITLE": {
           "label": "Sayfa Başlığı",

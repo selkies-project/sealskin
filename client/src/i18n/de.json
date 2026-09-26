@@ -197,7 +197,8 @@
       "createButton": "Benutzer erstellen",
       "homesDisabledTooltip": "Persistenter Speicher für diesen Benutzer deaktiviert",
       "confirmDelete": "Sind Sie sicher, dass Sie den Benutzer '{username}' löschen möchten? Dadurch wird auch sein gesamter persistenter Speicher gelöscht und kann nicht rückgängig gemacht werden.",
-      "allowPublicSharing": "Öffentliche Dateifreigabe zulassen"
+      "allowPublicSharing": "Öffentliche Dateifreigabe zulassen",
+      "allowEditTemplates": "Bearbeiten von App-Vorlagen zulassen"
     },
     "groups": {
       "title": "Gruppenverwaltung",
@@ -244,6 +245,7 @@
       "confirmDelete": "Sind Sie sicher, dass Sie die Vorlage '{templateName}' löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
       "deleteDisabled": "Diese Vorlage kann nicht gelöscht werden.",
       "enterName": "Bitte geben Sie einen Namen für die neue Vorlage ein.",
+      "dockerAdminOnly": "Nur ein Administrator kann diese Einstellungen ändern.",
       "settings": {
         "TITLE": {
           "label": "Seitentitel",

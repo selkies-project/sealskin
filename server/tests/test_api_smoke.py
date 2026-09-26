@@ -210,3 +210,71 @@ def test_idempotency_key_replays_without_reexecuting(api_client, store_with_fire
     status, listing = api_client.call("GET", "/api/admin/apps/installed")
     assert status == 200
     assert [app["id"] for app in listing].count("inst-idem") == 1
+
+
+@pytest.fixture
+def role_clients(tmp_path, monkeypatch, store_with_firefox):
+    """An administrator, a user granted `edit_templates`, and a user without it."""
+    _key, server_priv, server_pub = _pem_pair()
+    key_path = tmp_path / "server_key.pem"
+    key_path.write_text(server_priv)
+    monkeypatch.setattr(settings, "server_private_key_path", str(key_path))
+    monkeypatch.setattr(settings, "auto_update_apps", False)
+    monkeypatch.setattr(settings, "watch_config_files", False)
+    monkeypatch.setattr(settings, "ui_path", str(tmp_path / "no-ui"))
+    keys = tmp_path / "config" / "keys"
+    (keys / "admins").mkdir(parents=True)
+    (keys / "users").mkdir(parents=True)
+    private = {}
+    for name, folder, edit in (("boss", "admins", None), ("editor", "users", True), ("plain", "users", False)):
+        _k, priv, pub = _pem_pair()
+        private[name] = priv
+        if edit is None:
+            (keys / folder / name).write_text(pub)
+        else:
+            (keys / folder / name).write_text(
+                f"--- Settings ---\nactive: true\nedit_templates: {str(edit).lower()}\n--- Public Key ---\n{pub}"
+            )
+    from app import persistence
+
+    persistence.write_yaml_sync(
+        settings.app_stores_path, [{"name": "Test Store", "url": "https://example.invalid/apps.yml"}]
+    )
+
+    import app.api as api_module
+    from app import security
+
+    security.init_server_keys()
+    with TestClient(api_module.api_app) as http:
+        clients = {}
+        for name in private:
+            clients[name] = Client(http, server_pub, name, private[name])
+            clients[name].handshake()
+        yield clients
+
+
+def test_template_editors_keep_docker_settings_to_administrators(role_clients):
+    boss, editor, plain = role_clients["boss"], role_clients["editor"], role_clients["plain"]
+    templates = "/api/admin/apps/templates"
+
+    assert plain.call("GET", templates)[0] == 403
+    assert editor.call("GET", templates)[0] == 200
+    assert editor.call("GET", "/api/admin/apps/stores")[0] == 403
+
+    assert editor.call("POST", templates, {"name": "Team", "settings": {"TITLE": "Team"}})[0] == 201
+    assert editor.call("POST", templates, {"name": "Team", "settings": {"DOCKER_PRIVILEGED": "true"}})[0] == 403
+
+    devices = "/dev/dri/renderD128"
+    assert boss.call("POST", templates, {"name": "Hosted", "settings": {"DOCKER_DEVICES": devices}})[0] == 201
+    status, saved = editor.call("POST", templates, {"name": "Hosted", "settings": {"TITLE": "Kept"}})
+    assert status == 201 and saved["settings"] == {"TITLE": "Kept", "DOCKER_DEVICES": devices}
+    changed = {"TITLE": "Kept", "DOCKER_DEVICES": "/dev/dri/renderD129"}
+    assert editor.call("POST", templates, {"name": "Hosted", "settings": changed})[0] == 403
+    same = {"TITLE": "Again", "DOCKER_DEVICES": devices}
+    assert editor.call("POST", templates, {"name": "Hosted", "settings": same})[0] == 201
+
+    assert editor.call("DELETE", f"{templates}/Hosted")[0] == 403
+    assert editor.call("DELETE", f"{templates}/Team")[0] == 204
+    assert boss.call("DELETE", f"{templates}/Hosted")[0] == 204
+    status, data = boss.call("POST", "/api/admin/status", {})
+    assert status == 200 and data["settings"]["edit_templates"] is False

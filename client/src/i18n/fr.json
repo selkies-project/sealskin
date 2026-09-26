@@ -197,7 +197,8 @@
       "createButton": "Créer l'Utilisateur",
       "homesDisabledTooltip": "Stockage persistant désactivé pour cet utilisateur",
       "confirmDelete": "Êtes-vous sûr de vouloir supprimer l'utilisateur '{username}' ? Cela supprimera également tout son stockage persistant et ne pourra pas être annulé.",
-      "allowPublicSharing": "Autoriser le partage de fichiers public"
+      "allowPublicSharing": "Autoriser le partage de fichiers public",
+      "allowEditTemplates": "Autoriser la modification des modèles d'applications"
     },
     "groups": {
       "title": "Gestion des Groupes",
@@ -244,6 +245,7 @@
       "confirmDelete": "Êtes-vous sûr de vouloir supprimer le modèle '{templateName}' ? Cette action ne peut pas être annulée.",
       "deleteDisabled": "Ce modèle ne peut pas être supprimé.",
       "enterName": "Veuillez entrer un nom pour le nouveau modèle.",
+      "dockerAdminOnly": "Seul un administrateur peut modifier ces paramètres.",
       "settings": {
         "TITLE": {
           "label": "Titre de la Page",

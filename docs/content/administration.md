@@ -39,6 +39,7 @@ Each user carries these settings, editable later:
 | **Allow Persistent Storage** | Without it every session is a cleanroom, the file manager is unavailable, and files cannot be sent to sessions. |
 | **Allow Public File Sharing** | Enables share links from the file manager. Requires persistent storage. |
 | **Allow GPU Access** | Whether the launcher offers GPUs to this user. |
+| **Allow Editing App Templates** | Opens the [App Templates](#app-templates) editor to a user who is not an administrator. They create, change, and delete templates, except for the `DOCKER_*` settings, which grant authority over the Docker host: those keep the values an administrator gave them, and only an administrator deletes a template that carries any. |
 | **Harden Container**, **Harden Window Manager** | Force the base image presets `HARDEN_DESKTOP` and `HARDEN_OPENBOX` on every session the user starts, including apps a collaboration room swaps to. They are applied after the [app template](#app-templates) and the app's own environment overrides, so neither can switch them back off. Leave them off to let the template decide. |
 | **Sessions limit**, **Storage limit** | Recorded but **not enforced yet**; `-1` means unlimited once they are. |
 

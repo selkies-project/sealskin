@@ -195,7 +195,8 @@
       "createButton": "ユーザーを作成",
       "homesDisabledTooltip": "このユーザーの永続ストレージは無効です",
       "confirmDelete": "ユーザー '{username}' を本当に削除しますか？これを行うと、そのユーザーの永続ストレージもすべて削除され、元に戻すことはできません。",
-      "allowPublicSharing": "公開ファイル共有を許可する"
+      "allowPublicSharing": "公開ファイル共有を許可する",
+      "allowEditTemplates": "アプリテンプレートの編集を許可する"
     },
     "groups": {
       "title": "グループ管理",
@@ -244,6 +245,7 @@
       "confirmDelete": "テンプレート '{templateName}' を本当に削除しますか？この操作は元に戻せません。",
       "deleteDisabled": "このテンプレートは削除できません。",
       "enterName": "新しいテンプレートの名前を入力してください。",
+      "dockerAdminOnly": "これらの設定を変更できるのは管理者だけです。",
       "settings": {
         "TITLE": {
           "label": "ページタイトル",

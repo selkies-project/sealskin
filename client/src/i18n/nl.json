@@ -197,7 +197,8 @@
       "createButton": "Gebruiker Aanmaken",
       "homesDisabledTooltip": "Persistente opslag uitgeschakeld voor deze gebruiker",
       "confirmDelete": "Weet u zeker dat u gebruiker '{username}' wilt verwijderen? Dit verwijdert ook al hun persistente opslag en kan niet ongedaan worden gemaakt.",
-      "allowPublicSharing": "Openbaar delen van bestanden toestaan"
+      "allowPublicSharing": "Openbaar delen van bestanden toestaan",
+      "allowEditTemplates": "Bewerken van app-sjablonen toestaan"
     },
     "groups": {
       "title": "Groepsbeheer",
@@ -244,6 +245,7 @@
       "confirmDelete": "Weet u zeker dat u het sjabloon '{templateName}' wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
       "deleteDisabled": "Dit sjabloon kan niet worden verwijderd.",
       "enterName": "Voer een naam in voor het nieuwe sjabloon.",
+      "dockerAdminOnly": "Alleen een beheerder kan deze instellingen wijzigen.",
       "settings": {
         "TITLE": {
           "label": "Paginatitel",

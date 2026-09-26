@@ -197,7 +197,8 @@
       "createButton": "Gumawa ng User",
       "homesDisabledTooltip": "Ang persistenteng imbakan ay hindi pinagana para sa user na ito",
       "confirmDelete": "Sigurado ka bang gusto mong burahin ang user na si '{username}'? Mabubura rin nito ang lahat ng kanilang persistenteng imbakan at hindi na maibabalik.",
-      "allowPublicSharing": "Pahintulutan ang Pampublikong Pagbabahagi ng File"
+      "allowPublicSharing": "Pahintulutan ang Pampublikong Pagbabahagi ng File",
+      "allowEditTemplates": "Pahintulutan ang Pag-edit ng mga Template ng App"
     },
     "groups": {
       "title": "Pamamahala ng Grupo",
@@ -244,6 +245,7 @@
       "confirmDelete": "Sigurado ka bang gusto mong burahin ang template na '{templateName}'? Hindi na maibabalik ang aksyon na ito.",
       "deleteDisabled": "Hindi maaaring burahin ang template na ito.",
       "enterName": "Mangyaring maglagay ng pangalan para sa bagong template.",
+      "dockerAdminOnly": "Isang administrator lamang ang makapagbabago ng mga setting na ito.",
       "settings": {
         "TITLE": {
           "label": "Pamagat ng Pahina",

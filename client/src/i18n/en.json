@@ -198,7 +198,8 @@
       "createButton": "Create User",
       "homesDisabledTooltip": "Persistent storage disabled for this user",
       "confirmDelete": "Are you sure you want to delete user '{username}'? This will also delete all their persistent storage and cannot be undone.",
-      "allowPublicSharing": "Allow Public File Sharing"
+      "allowPublicSharing": "Allow Public File Sharing",
+      "allowEditTemplates": "Allow Editing App Templates"
     },
     "groups": {
       "title": "Group Management",
@@ -247,6 +248,7 @@
       "confirmDelete": "Are you sure you want to delete the template '{templateName}'? This action cannot be undone.",
       "deleteDisabled": "This template cannot be deleted.",
       "enterName": "Please enter a name for the new template.",
+      "dockerAdminOnly": "Only an administrator can change these settings.",
       "settings": {
         "TITLE": {
           "label": "Page Title",
