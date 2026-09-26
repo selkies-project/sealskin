@@ -43,7 +43,9 @@ Each user carries these settings, editable later:
 | **Harden Container**, **Harden Window Manager** | Force the base image presets `HARDEN_DESKTOP` and `HARDEN_OPENBOX` on every session the user starts, including apps a collaboration room swaps to. They are applied after the [app template](#app-templates) and the app's own environment overrides, so neither can switch them back off. Leave them off to let the template decide. |
 | **Sessions limit**, **Storage limit** | Recorded but **not enforced yet**; `-1` means unlimited once they are. |
 
-Deleting a user also deletes their storage.
+Deleting a user also deletes their storage. A user created by a
+[single sign-on](configuration.md#single-sign-on) shows **Single sign-on only**
+in place of a public key.
 
 **Manage Home Directories** in a user's row lists, creates, and deletes home
 directories on their behalf.

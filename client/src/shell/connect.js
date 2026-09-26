@@ -10,7 +10,9 @@
  * The stored `sealskinConfig` keeps its historical shape:
  * `{serverIp, apiPort, sessionPort, username, clientPrivateKey,
  *   serverPublicKey, searchEngineUrl, userSettings}`. The web app also asks
- * for the passphrase that seals the private key in the browser.
+ * for the passphrase that seals the private key in the browser, and offers
+ * the server's identity provider sign-ins, whose configurations carry the
+ * `keyId` and `signIn` the web app gives them and no key to edit or export.
  */
 
 import { bridge, request } from '../lib/bridge.js';
@@ -37,6 +39,7 @@ const serverPublicKeyInput = $('serverPublicKey');
 let t = (key) => key;
 let info = null;
 let currentConfig = null;
+let signInOffered = false;
 
 function displayStatus(message, isError = false) {
   statusDiv.textContent = message;
@@ -49,6 +52,7 @@ function showView(view) {
   simpleConfigView.hidden = view !== 'simple';
   advancedConfigView.hidden = view !== 'advanced';
   $('passphrase-view').hidden = view === 'connected' || !info || info.shell !== 'web';
+  $('sign-in-view').hidden = view === 'connected' || !signInOffered;
 }
 
 function fillForm(config) {
@@ -103,7 +107,24 @@ function parseAndApplyConfig(configText) {
 function showConnected(config) {
   $('connected-username').textContent = config.username || '';
   $('connected-server').textContent = `${config.serverIp}:${config.sessionPort || config.apiPort}`;
+  $('edit-connection').hidden = Boolean(config.signIn);
+  $('export-config-button').hidden = Boolean(config.signIn);
   showView('connected');
+}
+
+/** Offer the identity provider sign-ins the server that serves the web app configures. */
+async function offerSignIn() {
+  if (!info || info.shell !== 'web') return;
+  try {
+    const offered = await (await fetch('/api/auth/config')).json();
+    for (const via of ['oidc', 'saml']) {
+      $(`sign-in-${via}`).hidden = !offered[via];
+      $(`sign-in-${via}`).addEventListener('click', () => request('signIn', { via }));
+    }
+    signInOffered = Boolean(offered.oidc || offered.saml);
+  } catch (e) {
+    signInOffered = false;
+  }
 }
 
 /**
@@ -207,8 +228,13 @@ async function init() {
   t = await loadTranslator(info.locale || navigator.language);
   applyTranslations(document.body, t);
 
-  const { config, pendingConfig, remember } = await request('getConnectConfig');
+  const { config, pendingConfig, remember, signInError } = await request('getConnectConfig');
   currentConfig = config;
+  await offerSignIn();
+  if (signInError) {
+    const key = `web.signIn.${signInError}`;
+    displayStatus(t(key) === key ? t('web.signIn.failed') : t(key), true);
+  }
   $('remember').checked = remember !== false;
   $('passphrase-group').hidden = !$('remember').checked;
   $('remember').addEventListener('change', () => { $('passphrase-group').hidden = !$('remember').checked; });

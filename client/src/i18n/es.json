@@ -139,7 +139,11 @@
       "passphraseLabel": "Frase de contraseña",
       "remember": "Conservar mi clave en este navegador",
       "rememberHelp": "Desactive esta opción en un equipo compartido: SealSkin conservará su clave solo mientras esta pestaña esté abierta, y la próxima vez volverá a cargar su configuración.",
-      "passphraseHelp": "Su clave privada se guarda en este navegador cifrada con esta frase de contraseña, que introducirá cada vez que abra SealSkin aquí."
+      "passphraseHelp": "Su clave privada se guarda en este navegador cifrada con esta frase de contraseña, que introducirá cada vez que abra SealSkin aquí.",
+      "signInTitle": "Inicio de sesión único",
+      "signInHelp": "Inicie sesión con la cuenta que administra su organización en lugar de un archivo de configuración. SealSkin conserva la sesión solo en esta pestaña, así que volverá a iniciar sesión la próxima vez.",
+      "signInOidc": "Iniciar sesión con OpenID Connect",
+      "signInSaml": "Iniciar sesión con SAML"
     },
     "home": {
       "title": "Sus Directorios Personales",
@@ -202,7 +206,8 @@
       "homesDisabledTooltip": "Almacenamiento persistente deshabilitado para este usuario",
       "confirmDelete": "¿Está seguro de que quiere eliminar al usuario '{username}'? Esto también eliminará todo su almacenamiento persistente y no se puede deshacer.",
       "allowPublicSharing": "Permitir compartir archivos públicamente",
-      "allowEditTemplates": "Permitir editar plantillas de apps"
+      "allowEditTemplates": "Permitir editar plantillas de apps",
+      "signInOnly": "Solo inicio de sesión único"
     },
     "groups": {
       "title": "Gestión de Grupos",
@@ -1373,6 +1378,17 @@
     "passphrase": "Frase de contraseña",
     "unlock": "Desbloquear",
     "wrongPassphrase": "Esa frase de contraseña no desbloquea su clave.",
-    "receiving": "Enviando el archivo a SealSkin…"
+    "receiving": "Enviando el archivo a SealSkin…",
+    "signIn": {
+      "failed": "El inicio de sesión no se completó. Inténtelo de nuevo o consulte a su administrador.",
+      "refused": "El proveedor de identidad rechazó el inicio de sesión.",
+      "expired": "El inicio de sesión tardó demasiado o ya se usó. Vuelva a iniciar sesión.",
+      "browser": "El inicio de sesión terminó en otro navegador o pestaña. Vuelva a iniciarlo aquí.",
+      "invalidUsername": "El nombre de su cuenta no puede ser un nombre de usuario de SealSkin, que solo admite letras, dígitos, guiones bajos y guiones. Consulte a su administrador.",
+      "adminName": "El nombre de su cuenta pertenece a un administrador de SealSkin, que inicia sesión con un archivo de clave. Consulte a su administrador.",
+      "otherIdentity": "Otra cuenta del proveedor de identidad ya inicia sesión como este usuario de SealSkin. Consulte a su administrador.",
+      "notConfigured": "Este servidor no ofrece inicio de sesión único.",
+      "ended": "El proveedor de identidad terminó su sesión. Vuelva a iniciar sesión."
+    }
   }
 }

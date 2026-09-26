@@ -39,6 +39,17 @@
             </div>
         </section>
 
+        <section class="card" id="sign-in-view" hidden>
+            <div class="card-header">
+                <h3 data-i18n="options.config.signInTitle">Single Sign-On</h3>
+            </div>
+            <p data-i18n="options.config.signInHelp">Sign in with the account your organization manages instead of a configuration file. SealSkin keeps the sign-in in this tab alone, so you sign in again next time.</p>
+            <div class="button-group">
+                <button id="sign-in-oidc" class="primary" hidden data-i18n="options.config.signInOidc">Sign In with OpenID Connect</button>
+                <button id="sign-in-saml" class="primary" hidden data-i18n="options.config.signInSaml">Sign In with SAML</button>
+            </div>
+        </section>
+
         <section class="card" id="simple-config-view" hidden>
             <div class="card-header">
                 <h3 data-i18n="options.config.quickSetup">Quick Setup</h3>

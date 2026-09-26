@@ -139,7 +139,11 @@
       "passphraseLabel": "Cụm mật khẩu",
       "remember": "Giữ khóa của tôi trong trình duyệt này",
       "rememberHelp": "Hãy tắt tùy chọn này trên máy tính dùng chung: khi đó SealSkin chỉ giữ khóa của bạn khi thẻ này còn mở, và lần sau bạn tải lại cấu hình.",
-      "passphraseHelp": "Khóa riêng của bạn được lưu trong trình duyệt này, mã hóa bằng cụm mật khẩu này; bạn nhập nó mỗi lần mở SealSkin tại đây."
+      "passphraseHelp": "Khóa riêng của bạn được lưu trong trình duyệt này, mã hóa bằng cụm mật khẩu này; bạn nhập nó mỗi lần mở SealSkin tại đây.",
+      "signInTitle": "Đăng nhập một lần",
+      "signInHelp": "Đăng nhập bằng tài khoản do tổ chức của bạn quản lý thay cho tệp cấu hình. SealSkin chỉ giữ lần đăng nhập trong thẻ này, nên lần sau bạn sẽ đăng nhập lại.",
+      "signInOidc": "Đăng nhập bằng OpenID Connect",
+      "signInSaml": "Đăng nhập bằng SAML"
     },
     "home": {
       "title": "Các thư mục chính của bạn",
@@ -202,7 +206,8 @@
       "homesDisabledTooltip": "Lưu trữ lâu dài bị vô hiệu hóa cho người dùng này",
       "confirmDelete": "Bạn có chắc chắn muốn xóa người dùng '{username}' không? Thao tác này cũng sẽ xóa tất cả bộ nhớ lâu dài của họ và không thể hoàn tác.",
       "allowPublicSharing": "Cho phép chia sẻ tệp công khai",
-      "allowEditTemplates": "Cho phép chỉnh sửa mẫu ứng dụng"
+      "allowEditTemplates": "Cho phép chỉnh sửa mẫu ứng dụng",
+      "signInOnly": "Chỉ đăng nhập một lần"
     },
     "groups": {
       "title": "Quản lý nhóm",
@@ -1373,6 +1378,17 @@
     "passphrase": "Cụm mật khẩu",
     "unlock": "Mở khóa",
     "wrongPassphrase": "Cụm mật khẩu này không mở được khóa của bạn.",
-    "receiving": "Đang gửi tệp tới SealSkin…"
+    "receiving": "Đang gửi tệp tới SealSkin…",
+    "signIn": {
+      "failed": "Đăng nhập chưa hoàn tất. Hãy thử lại hoặc hỏi quản trị viên của bạn.",
+      "refused": "Nhà cung cấp danh tính đã từ chối đăng nhập.",
+      "expired": "Đăng nhập mất quá lâu hoặc đã được dùng. Hãy đăng nhập lại.",
+      "browser": "Đăng nhập đã hoàn tất trong trình duyệt hoặc thẻ khác. Hãy bắt đầu lại tại đây.",
+      "invalidUsername": "Tên tài khoản của bạn không thể là tên người dùng SealSkin, vốn chỉ gồm chữ cái, chữ số, dấu gạch dưới và dấu gạch ngang. Hãy hỏi quản trị viên của bạn.",
+      "adminName": "Tên tài khoản của bạn thuộc về một quản trị viên SealSkin, người đăng nhập bằng tệp khóa. Hãy hỏi quản trị viên của bạn.",
+      "otherIdentity": "Một tài khoản khác của nhà cung cấp danh tính đã đăng nhập với tư cách người dùng SealSkin này. Hãy hỏi quản trị viên của bạn.",
+      "notConfigured": "Máy chủ này không cung cấp đăng nhập một lần.",
+      "ended": "Nhà cung cấp danh tính đã kết thúc lần đăng nhập của bạn. Hãy đăng nhập lại."
+    }
   }
 }

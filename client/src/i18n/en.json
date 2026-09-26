@@ -142,7 +142,11 @@
       "passphraseLabel": "Passphrase",
       "remember": "Keep my key in this browser",
       "rememberHelp": "Turn this off on a computer you share: SealSkin then keeps your key only while this tab is open, and you load your configuration again next time.",
-      "passphraseHelp": "Your private key is kept in this browser encrypted with this passphrase, which you enter each time you open SealSkin here."
+      "passphraseHelp": "Your private key is kept in this browser encrypted with this passphrase, which you enter each time you open SealSkin here.",
+      "signInTitle": "Single Sign-On",
+      "signInHelp": "Sign in with the account your organization manages instead of a configuration file. SealSkin keeps the sign-in in this tab alone, so you sign in again next time.",
+      "signInOidc": "Sign In with OpenID Connect",
+      "signInSaml": "Sign In with SAML"
     },
     "home": {
       "title": "Your Home Directories",
@@ -203,7 +207,8 @@
       "homesDisabledTooltip": "Persistent storage disabled for this user",
       "confirmDelete": "Are you sure you want to delete user '{username}'? This will also delete all their persistent storage and cannot be undone.",
       "allowPublicSharing": "Allow Public File Sharing",
-      "allowEditTemplates": "Allow Editing App Templates"
+      "allowEditTemplates": "Allow Editing App Templates",
+      "signInOnly": "Single sign-on only"
     },
     "groups": {
       "title": "Group Management",
@@ -1398,6 +1403,17 @@
     "passphrase": "Passphrase",
     "unlock": "Unlock",
     "wrongPassphrase": "That passphrase does not unlock your key.",
-    "receiving": "Sending the file to SealSkin…"
+    "receiving": "Sending the file to SealSkin…",
+    "signIn": {
+      "failed": "The sign-in did not complete. Try again, or ask your administrator.",
+      "refused": "The identity provider refused the sign-in.",
+      "expired": "The sign-in took too long or was already used. Sign in again.",
+      "browser": "The sign-in finished in another browser or tab. Start it again here.",
+      "invalidUsername": "Your account's name cannot be a SealSkin user name, which takes only letters, digits, underscores, and hyphens. Ask your administrator.",
+      "adminName": "Your account's name belongs to a SealSkin administrator, who signs in with a key file. Ask your administrator.",
+      "otherIdentity": "Another account of the identity provider already signs in as this SealSkin user. Ask your administrator.",
+      "notConfigured": "This server offers no single sign-on.",
+      "ended": "The identity provider ended your sign-in. Sign in again."
+    }
   }
 }

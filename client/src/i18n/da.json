@@ -139,7 +139,11 @@
       "passphraseLabel": "Adgangssætning",
       "remember": "Behold min nøgle i denne browser",
       "rememberHelp": "Slå dette fra på en computer, du deler med andre: SealSkin beholder så kun din nøgle, mens denne fane er åben, og du indlæser din konfiguration igen næste gang.",
-      "passphraseHelp": "Din private nøgle gemmes i denne browser krypteret med denne adgangssætning, som du indtaster, hver gang du åbner SealSkin her."
+      "passphraseHelp": "Din private nøgle gemmes i denne browser krypteret med denne adgangssætning, som du indtaster, hver gang du åbner SealSkin her.",
+      "signInTitle": "Single sign-on",
+      "signInHelp": "Log ind med den konto, din organisation administrerer, i stedet for en konfigurationsfil. SealSkin beholder log ind kun i denne fane, så du logger ind igen næste gang.",
+      "signInOidc": "Log ind med OpenID Connect",
+      "signInSaml": "Log ind med SAML"
     },
     "home": {
       "title": "Dine Hjemmemapper",
@@ -202,7 +206,8 @@
       "homesDisabledTooltip": "Vedvarende lager deaktiveret for denne bruger",
       "confirmDelete": "Er du sikker på, at du vil slette brugeren '{username}'? Dette vil også slette alt deres vedvarende lager og kan ikke fortrydes.",
       "allowPublicSharing": "Tillad offentlig fildeling",
-      "allowEditTemplates": "Tillad redigering af app-skabeloner"
+      "allowEditTemplates": "Tillad redigering af app-skabeloner",
+      "signInOnly": "Kun single sign-on"
     },
     "groups": {
       "title": "Gruppeadministration",
@@ -1373,6 +1378,17 @@
     "passphrase": "Adgangssætning",
     "unlock": "Lås op",
     "wrongPassphrase": "Den adgangssætning låser ikke din nøgle op.",
-    "receiving": "Sender filen til SealSkin…"
+    "receiving": "Sender filen til SealSkin…",
+    "signIn": {
+      "failed": "Log ind blev ikke gennemført. Prøv igen, eller spørg din administrator.",
+      "refused": "Identitetsudbyderen afviste log ind.",
+      "expired": "Log ind tog for lang tid eller er allerede brugt. Log ind igen.",
+      "browser": "Log ind blev afsluttet i en anden browser eller fane. Start det igen her.",
+      "invalidUsername": "Din kontos navn kan ikke være et SealSkin-brugernavn, som kun må indeholde bogstaver, tal, understregninger og bindestreger. Spørg din administrator.",
+      "adminName": "Din kontos navn tilhører en SealSkin-administrator, som logger ind med en nøglefil. Spørg din administrator.",
+      "otherIdentity": "En anden konto hos identitetsudbyderen logger allerede ind som denne SealSkin-bruger. Spørg din administrator.",
+      "notConfigured": "Denne server tilbyder ikke single sign-on.",
+      "ended": "Identitetsudbyderen afsluttede dit log ind. Log ind igen."
+    }
   }
 }

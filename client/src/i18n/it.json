@@ -139,7 +139,11 @@
       "passphraseLabel": "Passphrase",
       "remember": "Conserva la mia chiave in questo browser",
       "rememberHelp": "Disattiva questa opzione su un computer condiviso: SealSkin conserva la tua chiave solo finché questa scheda è aperta, e la prossima volta caricherai di nuovo la configurazione.",
-      "passphraseHelp": "La tua chiave privata è conservata in questo browser cifrata con questa passphrase, da inserire ogni volta che apri SealSkin qui."
+      "passphraseHelp": "La tua chiave privata è conservata in questo browser cifrata con questa passphrase, da inserire ogni volta che apri SealSkin qui.",
+      "signInTitle": "Single sign-on",
+      "signInHelp": "Accedi con l'account gestito dalla tua organizzazione invece che con un file di configurazione. SealSkin conserva l'accesso solo in questa scheda, quindi la prossima volta accederai di nuovo.",
+      "signInOidc": "Accedi con OpenID Connect",
+      "signInSaml": "Accedi con SAML"
     },
     "home": {
       "title": "Le Tue Cartelle Home",
@@ -202,7 +206,8 @@
       "homesDisabledTooltip": "Archiviazione persistente disabilitata per questo utente",
       "confirmDelete": "Sei sicuro di voler eliminare l'utente '{username}'? Questo eliminerà anche tutta la sua archiviazione persistente e non potrà essere annullato.",
       "allowPublicSharing": "Consenti condivisione file pubblica",
-      "allowEditTemplates": "Consenti modifica dei modelli app"
+      "allowEditTemplates": "Consenti modifica dei modelli app",
+      "signInOnly": "Solo single sign-on"
     },
     "groups": {
       "title": "Gestione Gruppi",
@@ -1373,6 +1378,17 @@
     "passphrase": "Passphrase",
     "unlock": "Sblocca",
     "wrongPassphrase": "Questa passphrase non sblocca la tua chiave.",
-    "receiving": "Invio del file a SealSkin…"
+    "receiving": "Invio del file a SealSkin…",
+    "signIn": {
+      "failed": "L'accesso non è stato completato. Riprova o chiedi al tuo amministratore.",
+      "refused": "Il provider di identità ha rifiutato l'accesso.",
+      "expired": "L'accesso ha richiesto troppo tempo o è già stato usato. Accedi di nuovo.",
+      "browser": "L'accesso si è concluso in un altro browser o scheda. Ricomincialo qui.",
+      "invalidUsername": "Il nome del tuo account non può essere un nome utente SealSkin, che ammette solo lettere, cifre, trattini bassi e trattini. Chiedi al tuo amministratore.",
+      "adminName": "Il nome del tuo account appartiene a un amministratore SealSkin, che accede con un file di chiave. Chiedi al tuo amministratore.",
+      "otherIdentity": "Un altro account del provider di identità accede già come questo utente SealSkin. Chiedi al tuo amministratore.",
+      "notConfigured": "Questo server non offre il single sign-on.",
+      "ended": "Il provider di identità ha terminato il tuo accesso. Accedi di nuovo."
+    }
   }
 }

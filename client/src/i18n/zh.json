@@ -139,7 +139,11 @@
       "passphraseLabel": "密码短语",
       "remember": "在此浏览器中保留我的密钥",
       "rememberHelp": "在共用电脑上请关闭此项：SealSkin 只会在此标签页打开期间保留您的密钥，下次需要重新加载配置。",
-      "passphraseHelp": "您的私钥以此密码短语加密后保存在此浏览器中，每次在这里打开 SealSkin 时都需要输入。"
+      "passphraseHelp": "您的私钥以此密码短语加密后保存在此浏览器中，每次在这里打开 SealSkin 时都需要输入。",
+      "signInTitle": "单点登录",
+      "signInHelp": "使用您的组织管理的账户登录，而不是配置文件。SealSkin 只在此标签页中保留登录，下次需要重新登录。",
+      "signInOidc": "使用 OpenID Connect 登录",
+      "signInSaml": "使用 SAML 登录"
     },
     "home": {
       "title": "您的主目录",
@@ -202,7 +206,8 @@
       "homesDisabledTooltip": "此用户的持久性存储已禁用",
       "confirmDelete": "您确定要删除用户“{username}”吗？此操作还将删除其所有持久性存储，且无法撤销。",
       "allowPublicSharing": "允许公开文件共享",
-      "allowEditTemplates": "允许编辑应用模板"
+      "allowEditTemplates": "允许编辑应用模板",
+      "signInOnly": "仅单点登录"
     },
     "groups": {
       "title": "群组管理",
@@ -1373,6 +1378,17 @@
     "passphrase": "密码短语",
     "unlock": "解锁",
     "wrongPassphrase": "该密码短语无法解锁您的密钥。",
-    "receiving": "正在将文件发送到 SealSkin…"
+    "receiving": "正在将文件发送到 SealSkin…",
+    "signIn": {
+      "failed": "登录未完成。请重试，或询问您的管理员。",
+      "refused": "身份提供方拒绝了登录。",
+      "expired": "登录耗时过长或已被使用。请重新登录。",
+      "browser": "登录在另一个浏览器或标签页中完成。请在此重新开始。",
+      "invalidUsername": "您的账户名称不能作为 SealSkin 用户名，用户名只能包含字母、数字、下划线和连字符。请询问您的管理员。",
+      "adminName": "您的账户名称属于一位使用密钥文件登录的 SealSkin 管理员。请询问您的管理员。",
+      "otherIdentity": "身份提供方的另一个账户已作为此 SealSkin 用户登录。请询问您的管理员。",
+      "notConfigured": "此服务器不提供单点登录。",
+      "ended": "身份提供方结束了您的登录。请重新登录。"
+    }
   }
 }

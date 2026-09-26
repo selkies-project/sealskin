@@ -139,7 +139,11 @@
       "passphraseLabel": "Passphrase",
       "remember": "Meinen Schlüssel in diesem Browser behalten",
       "rememberHelp": "Schalten Sie dies auf einem gemeinsam genutzten Computer aus: SealSkin behält Ihren Schlüssel dann nur, solange dieser Tab geöffnet ist, und Sie laden Ihre Konfiguration beim nächsten Mal erneut.",
-      "passphraseHelp": "Ihr privater Schlüssel wird in diesem Browser mit dieser Passphrase verschlüsselt gespeichert. Sie geben sie bei jedem Öffnen von SealSkin hier ein."
+      "passphraseHelp": "Ihr privater Schlüssel wird in diesem Browser mit dieser Passphrase verschlüsselt gespeichert. Sie geben sie bei jedem Öffnen von SealSkin hier ein.",
+      "signInTitle": "Single Sign-On",
+      "signInHelp": "Melden Sie sich mit dem Konto an, das Ihre Organisation verwaltet, statt mit einer Konfigurationsdatei. SealSkin behält die Anmeldung nur in diesem Tab, sodass Sie sich beim nächsten Mal erneut anmelden.",
+      "signInOidc": "Mit OpenID Connect anmelden",
+      "signInSaml": "Mit SAML anmelden"
     },
     "home": {
       "title": "Ihre Home-Verzeichnisse",
@@ -202,7 +206,8 @@
       "homesDisabledTooltip": "Persistenter Speicher für diesen Benutzer deaktiviert",
       "confirmDelete": "Sind Sie sicher, dass Sie den Benutzer '{username}' löschen möchten? Dadurch wird auch sein gesamter persistenter Speicher gelöscht und kann nicht rückgängig gemacht werden.",
       "allowPublicSharing": "Öffentliche Dateifreigabe zulassen",
-      "allowEditTemplates": "Bearbeiten von App-Vorlagen zulassen"
+      "allowEditTemplates": "Bearbeiten von App-Vorlagen zulassen",
+      "signInOnly": "Nur Single Sign-On"
     },
     "groups": {
       "title": "Gruppenverwaltung",
@@ -1373,6 +1378,17 @@
     "passphrase": "Passphrase",
     "unlock": "Entsperren",
     "wrongPassphrase": "Diese Passphrase entsperrt Ihren Schlüssel nicht.",
-    "receiving": "Datei wird an SealSkin gesendet…"
+    "receiving": "Datei wird an SealSkin gesendet…",
+    "signIn": {
+      "failed": "Die Anmeldung wurde nicht abgeschlossen. Versuchen Sie es erneut oder wenden Sie sich an Ihren Administrator.",
+      "refused": "Der Identitätsanbieter hat die Anmeldung abgelehnt.",
+      "expired": "Die Anmeldung hat zu lange gedauert oder wurde bereits verwendet. Melden Sie sich erneut an.",
+      "browser": "Die Anmeldung wurde in einem anderen Browser oder Tab abgeschlossen. Starten Sie sie hier erneut.",
+      "invalidUsername": "Der Name Ihres Kontos kann kein SealSkin-Benutzername sein; dieser besteht nur aus Buchstaben, Ziffern, Unterstrichen und Bindestrichen. Wenden Sie sich an Ihren Administrator.",
+      "adminName": "Der Name Ihres Kontos gehört einem SealSkin-Administrator, der sich mit einer Schlüsseldatei anmeldet. Wenden Sie sich an Ihren Administrator.",
+      "otherIdentity": "Ein anderes Konto des Identitätsanbieters meldet sich bereits als dieser SealSkin-Benutzer an. Wenden Sie sich an Ihren Administrator.",
+      "notConfigured": "Dieser Server bietet kein Single Sign-On an.",
+      "ended": "Der Identitätsanbieter hat Ihre Anmeldung beendet. Melden Sie sich erneut an."
+    }
   }
 }

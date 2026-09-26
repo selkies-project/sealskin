@@ -214,7 +214,7 @@ async function secureFetchInBackground(url, options = {}) {
       }
 
       if (url.startsWith('/api/') && !url.startsWith('/api/handshake')) {
-        const jwt = await generateJwtNative(sealskinConfig.clientPrivateKey, sealskinConfig.username);
+        const jwt = await generateJwtNative(sealskinConfig.clientPrivateKey, sealskinConfig.username, sealskinConfig.keyId);
         options.headers = {
           ...options.headers,
           'Authorization': `Bearer ${jwt}`

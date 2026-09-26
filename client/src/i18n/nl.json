@@ -139,7 +139,11 @@
       "passphraseLabel": "Wachtwoordzin",
       "remember": "Mijn sleutel in deze browser bewaren",
       "rememberHelp": "Zet dit uit op een gedeelde computer: SealSkin bewaart uw sleutel dan alleen zolang dit tabblad open is, en u laadt uw configuratie de volgende keer opnieuw.",
-      "passphraseHelp": "Uw privésleutel wordt in deze browser versleuteld met deze wachtwoordzin bewaard. U voert die in telkens wanneer u SealSkin hier opent."
+      "passphraseHelp": "Uw privésleutel wordt in deze browser versleuteld met deze wachtwoordzin bewaard. U voert die in telkens wanneer u SealSkin hier opent.",
+      "signInTitle": "Eenmalige aanmelding",
+      "signInHelp": "Meld u aan met het account dat uw organisatie beheert in plaats van met een configuratiebestand. SealSkin bewaart de aanmelding alleen in dit tabblad, dus volgende keer meldt u zich opnieuw aan.",
+      "signInOidc": "Aanmelden met OpenID Connect",
+      "signInSaml": "Aanmelden met SAML"
     },
     "home": {
       "title": "Uw Home Directories",
@@ -202,7 +206,8 @@
       "homesDisabledTooltip": "Persistente opslag uitgeschakeld voor deze gebruiker",
       "confirmDelete": "Weet u zeker dat u gebruiker '{username}' wilt verwijderen? Dit verwijdert ook al hun persistente opslag en kan niet ongedaan worden gemaakt.",
       "allowPublicSharing": "Openbaar delen van bestanden toestaan",
-      "allowEditTemplates": "Bewerken van app-sjablonen toestaan"
+      "allowEditTemplates": "Bewerken van app-sjablonen toestaan",
+      "signInOnly": "Alleen eenmalige aanmelding"
     },
     "groups": {
       "title": "Groepsbeheer",
@@ -1373,6 +1378,17 @@
     "passphrase": "Wachtwoordzin",
     "unlock": "Ontgrendelen",
     "wrongPassphrase": "Deze wachtwoordzin ontgrendelt uw sleutel niet.",
-    "receiving": "Bestand wordt naar SealSkin gestuurd…"
+    "receiving": "Bestand wordt naar SealSkin gestuurd…",
+    "signIn": {
+      "failed": "De aanmelding is niet voltooid. Probeer het opnieuw of vraag het uw beheerder.",
+      "refused": "De identiteitsprovider heeft de aanmelding geweigerd.",
+      "expired": "De aanmelding duurde te lang of is al gebruikt. Meld u opnieuw aan.",
+      "browser": "De aanmelding is in een andere browser of een ander tabblad voltooid. Begin hier opnieuw.",
+      "invalidUsername": "De naam van uw account kan geen SealSkin-gebruikersnaam zijn, die alleen letters, cijfers, onderstrepingstekens en koppeltekens toelaat. Vraag het uw beheerder.",
+      "adminName": "De naam van uw account is die van een SealSkin-beheerder, die zich met een sleutelbestand aanmeldt. Vraag het uw beheerder.",
+      "otherIdentity": "Een ander account van de identiteitsprovider meldt zich al aan als deze SealSkin-gebruiker. Vraag het uw beheerder.",
+      "notConfigured": "Deze server biedt geen eenmalige aanmelding.",
+      "ended": "De identiteitsprovider heeft uw aanmelding beëindigd. Meld u opnieuw aan."
+    }
   }
 }

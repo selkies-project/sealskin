@@ -77,7 +77,15 @@ export function setSigningKey(ref, key) {
   keyCache.set(ref, key);
 }
 
-export async function generateJwtNative(privateKeyPem, username) {
+/**
+ * Sign a five-minute API token for `username`.
+ *
+ * @param {string} privateKeyPem PKCS#8 PEM, or a stand-in `setSigningKey` registered.
+ * @param {string} username
+ * @param {string} [keyId] The `kid` an identity provider sign-in registered the key under.
+ * @returns {Promise<string>} The RS256 JWT.
+ */
+export async function generateJwtNative(privateKeyPem, username, keyId) {
   if (!privateKeyPem || !username) {
     throw new Error("Private key and username are required to generate a token.");
   }
@@ -104,7 +112,8 @@ export async function generateJwtNative(privateKeyPem, username) {
 
   const header = {
     alg: 'RS256',
-    typ: 'JWT'
+    typ: 'JWT',
+    ...(keyId ? { kid: keyId } : {}),
   };
   const now = Math.floor(Date.now() / 1000);
   const payload = {

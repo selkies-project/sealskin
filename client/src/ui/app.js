@@ -12,6 +12,10 @@
  * with a cross-origin opener policy and no framing, and session tabs get no
  * opener, so session content cannot reach it.
  *
+ * A user signing in through the server's identity provider comes back with a
+ * one-time grant in the URL fragment; this page registers a key it generates,
+ * which never leaves it, and connects with it until the tab closes.
+ *
  * Launch contexts arrive through `?url=` (links, the bookmarklet, and
  * `web+sealskin:` addresses), `?q=` (OpenSearch and a selection sent by the
  * bookmarklet), the manifest's share target (parked by `sw.js`), and its file
@@ -37,6 +41,9 @@ const KEEPALIVE_MS = 10000;
 
 let kek = null;
 let hostApi = null;
+// The identity provider the configuration signed in through, and a refusal the connection page shows.
+let signedIn = null;
+let signInError = null;
 // Set while the user keeps no key in this browser: the keys, by slot, live in this page alone.
 let tabKeys = null;
 
@@ -148,6 +155,10 @@ async function transport(message) {
     }
     if (slot === 'config') payload.config = config; else payload.items[PENDING] = config;
   }
+  if (type === 'clearConfig' && signedIn) {
+    await callBackground(pageTransport, 'secureFetch', { url: '/api/auth/signout', options: { method: 'POST', body: '{}' } }).catch(() => {});
+    signedIn = null;
+  }
   if (type === 'clearConfig') ['config', 'pending'].forEach((slot) => { drop(slot); if (tabKeys) delete tabKeys[slot]; });
   if (type === 'storageRemove' && [].concat(payload.keys).includes(PENDING)) {
     drop('pending');
@@ -162,8 +173,72 @@ async function transport(message) {
       else if (kek && keys[slot]) reply.data[field].clientPrivateKey = arrayBufferToPem(await crypto.subtle.exportKey('pkcs8', await unwrap(keys[slot], true)), 'PRIVATE');
     }
     reply.data.remember = !tabKeys;
+    reply.data.signInError = signInError;
+    signInError = null;
   }
+  if (signedIn && type === 'secureFetch' && !reply.success && /status: 401\b/.test(reply.error)) await signInEnded();
   return reply;
+}
+
+/**
+ * Finish a sign-in the identity provider sent this page back from: register a
+ * key generated here, never extractable, and connect with it from this page's
+ * memory.
+ */
+async function takeSignIn() {
+  const fragment = new URLSearchParams(location.hash.slice(1));
+  if (!fragment.has('sso') && !fragment.has('sso-error')) return;
+  history.replaceState(null, '', location.pathname + location.search);
+  signInError = fragment.get('sso-error');
+  if (signInError) return;
+  let pair;
+  let registration;
+  try {
+    pair = await crypto.subtle.generateKey({ ...SIGNING, modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]) }, false, ['sign', 'verify']);
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ grant: fragment.get('sso'), public_key: arrayBufferToPem(await crypto.subtle.exportKey('spki', pair.publicKey), 'PUBLIC') }),
+    });
+    registration = await response.json();
+    if (!response.ok) throw new Error(registration.detail);
+  } catch (e) {
+    signInError = /^[a-zA-Z]+$/.test(e.message) ? e.message : 'failed';
+    return;
+  }
+  ['config', 'pending'].forEach(drop);
+  tabKeys = {};
+  keepInMemory(true);
+  setSigningKey(KEY_REF, pair.privateKey);
+  const port = location.port || '443';
+  await pageTransport({
+    type: 'saveConfig',
+    payload: {
+      config: {
+        serverIp: location.hostname,
+        apiPort: port,
+        sessionPort: port,
+        username: registration.username,
+        keyId: registration.kid,
+        clientPrivateKey: KEY_REF,
+        serverPublicKey: registration.server_public_key,
+        signIn: registration.via,
+      },
+    },
+  });
+  signedIn = registration.via;
+  // After a login land on the dashboard, as the connection page does.
+  history.replaceState(null, '', `${location.pathname}?page=options`);
+  const status = await callBackground(pageTransport, 'secureFetch', { url: '/api/admin/status', options: { method: 'POST', body: '{}' } }).catch(() => null);
+  if (status) await callBackground(pageTransport, 'updateConfig', { userSettings: { ...status.settings, is_admin: status.is_admin } });
+}
+
+/** Forget a sign-in the identity provider ended and show the connection page to sign in again. */
+async function signInEnded() {
+  signedIn = null;
+  signInError = 'ended';
+  await pageTransport({ type: 'clearConfig', payload: {} });
+  if (hostApi) hostApi.openPage('connect');
 }
 
 /**
@@ -284,11 +359,13 @@ async function start() {
     });
   }
   await takeLaunchContext();
-  if (keyring()) await unlockScreen(await loadTranslator(navigator.language));
+  await takeSignIn();
+  if (keyring() && !signedIn) await unlockScreen(await loadTranslator(navigator.language));
   hostApi = initHost({
     shell: 'web',
     transport,
     reserveTab,
+    signIn: (via) => { if (via === 'oidc' || via === 'saml') location.assign(`/api/auth/${via}/login`); },
     streamDownload: (await worker) && streamsTransfer() ? streamDownload : undefined,
     onPageChange: (page) => { document.body.dataset.frame = page; },
   });

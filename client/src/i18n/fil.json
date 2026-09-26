@@ -139,7 +139,11 @@
       "passphraseLabel": "Passphrase",
       "remember": "Itago ang aking key sa browser na ito",
       "rememberHelp": "I-off ito sa computer na may kahati ka: itatago lang ng SealSkin ang iyong key habang bukas ang tab na ito, at ilo-load mo ulit ang iyong configuration sa susunod.",
-      "passphraseHelp": "Nakatago ang iyong pribadong key sa browser na ito at naka-encrypt gamit ang passphrase na ito, na ilalagay mo tuwing bubuksan mo ang SealSkin dito."
+      "passphraseHelp": "Nakatago ang iyong pribadong key sa browser na ito at naka-encrypt gamit ang passphrase na ito, na ilalagay mo tuwing bubuksan mo ang SealSkin dito.",
+      "signInTitle": "Single Sign-On",
+      "signInHelp": "Mag-sign in gamit ang account na pinamamahalaan ng iyong organisasyon sa halip na file ng konfigurasyon. Itinatago ng SealSkin ang sign-in sa tab na ito lamang, kaya magsa-sign in ka ulit sa susunod.",
+      "signInOidc": "Mag-sign in gamit ang OpenID Connect",
+      "signInSaml": "Mag-sign in gamit ang SAML"
     },
     "home": {
       "title": "Iyong mga Home Directory",
@@ -202,7 +206,8 @@
       "homesDisabledTooltip": "Ang persistenteng imbakan ay hindi pinagana para sa user na ito",
       "confirmDelete": "Sigurado ka bang gusto mong burahin ang user na si '{username}'? Mabubura rin nito ang lahat ng kanilang persistenteng imbakan at hindi na maibabalik.",
       "allowPublicSharing": "Pahintulutan ang Pampublikong Pagbabahagi ng File",
-      "allowEditTemplates": "Pahintulutan ang Pag-edit ng mga Template ng App"
+      "allowEditTemplates": "Pahintulutan ang Pag-edit ng mga Template ng App",
+      "signInOnly": "Single sign-on lamang"
     },
     "groups": {
       "title": "Pamamahala ng Grupo",
@@ -1373,6 +1378,17 @@
     "passphrase": "Passphrase",
     "unlock": "I-unlock",
     "wrongPassphrase": "Hindi nabubuksan ng passphrase na iyon ang iyong key.",
-    "receiving": "Ipinapadala ang file sa SealSkin…"
+    "receiving": "Ipinapadala ang file sa SealSkin…",
+    "signIn": {
+      "failed": "Hindi natapos ang sign-in. Subukan ulit, o magtanong sa iyong administrator.",
+      "refused": "Tinanggihan ng identity provider ang sign-in.",
+      "expired": "Masyadong natagalan ang sign-in o nagamit na ito. Mag-sign in ulit.",
+      "browser": "Natapos ang sign-in sa ibang browser o tab. Simulan ito ulit dito.",
+      "invalidUsername": "Hindi maaaring maging username sa SealSkin ang pangalan ng iyong account, na tumatanggap lamang ng mga titik, numero, underscore, at gitling. Magtanong sa iyong administrator.",
+      "adminName": "Pag-aari ng isang administrator ng SealSkin, na nagsa-sign in gamit ang key file, ang pangalan ng iyong account. Magtanong sa iyong administrator.",
+      "otherIdentity": "May ibang account ng identity provider na nagsa-sign in na bilang user na ito ng SealSkin. Magtanong sa iyong administrator.",
+      "notConfigured": "Walang single sign-on ang server na ito.",
+      "ended": "Tinapos ng identity provider ang iyong sign-in. Mag-sign in ulit."
+    }
   }
 }

@@ -711,8 +711,8 @@ const tableRenderConfig = {
                     <td>${escapeHtml(item.settings.group) || t('common.none')}</td>
                     <td class="pubkey-cell" title="${pubkey}">
                         <div class="cell-wrapper">
-                            <span class="key-text">${shortKey(item.public_key)}</span>
-                            <button class="secondary copy-btn" data-pubkey="${pubkey}"><i class="fas fa-copy"></i></button>
+                            <span class="key-text">${item.public_key ? shortKey(item.public_key) : t('options.users.signInOnly')}</span>
+                            ${item.public_key ? `<button class="secondary copy-btn" data-pubkey="${pubkey}"><i class="fas fa-copy"></i></button>` : ''}
                         </div>
                     </td>
                     <td class="actions-cell">

@@ -139,7 +139,11 @@
       "passphraseLabel": "Parola İfadesi",
       "remember": "Anahtarımı bu tarayıcıda sakla",
       "rememberHelp": "Paylaşılan bir bilgisayarda bunu kapatın: SealSkin anahtarınızı yalnızca bu sekme açıkken tutar ve bir dahaki sefere yapılandırmanızı yeniden yüklersiniz.",
-      "passphraseHelp": "Özel anahtarınız bu tarayıcıda bu parola ifadesiyle şifrelenmiş olarak saklanır; SealSkin'i burada her açtığınızda onu girersiniz."
+      "passphraseHelp": "Özel anahtarınız bu tarayıcıda bu parola ifadesiyle şifrelenmiş olarak saklanır; SealSkin'i burada her açtığınızda onu girersiniz.",
+      "signInTitle": "Çoklu Oturum Açma",
+      "signInHelp": "Yapılandırma dosyası yerine kuruluşunuzun yönettiği hesapla oturum açın. SealSkin oturumu yalnızca bu sekmede tutar; bir dahaki sefere yeniden oturum açarsınız.",
+      "signInOidc": "OpenID Connect ile Oturum Aç",
+      "signInSaml": "SAML ile Oturum Aç"
     },
     "home": {
       "title": "Ana Dizinleriniz",
@@ -202,7 +206,8 @@
       "homesDisabledTooltip": "Bu kullanıcı için kalıcı depolama devre dışı bırakıldı",
       "confirmDelete": "'{username}' kullanıcısını silmek istediğinizden emin misiniz? Bu, tüm kalıcı depolamasını da silecek ve geri alınamaz.",
       "allowPublicSharing": "Herkese Açık Dosya Paylaşımına İzin Ver",
-      "allowEditTemplates": "Uygulama Şablonlarını Düzenlemeye İzin Ver"
+      "allowEditTemplates": "Uygulama Şablonlarını Düzenlemeye İzin Ver",
+      "signInOnly": "Yalnızca çoklu oturum açma"
     },
     "groups": {
       "title": "Grup Yönetimi",
@@ -1373,6 +1378,17 @@
     "passphrase": "Parola ifadesi",
     "unlock": "Kilidi Aç",
     "wrongPassphrase": "Bu parola ifadesi anahtarınızın kilidini açmıyor.",
-    "receiving": "Dosya SealSkin'e gönderiliyor…"
+    "receiving": "Dosya SealSkin'e gönderiliyor…",
+    "signIn": {
+      "failed": "Oturum açma tamamlanmadı. Yeniden deneyin veya yöneticinize danışın.",
+      "refused": "Kimlik sağlayıcı oturum açmayı reddetti.",
+      "expired": "Oturum açma çok uzun sürdü veya zaten kullanıldı. Yeniden oturum açın.",
+      "browser": "Oturum açma başka bir tarayıcıda veya sekmede tamamlandı. Burada yeniden başlatın.",
+      "invalidUsername": "Hesabınızın adı bir SealSkin kullanıcı adı olamaz; kullanıcı adları yalnızca harf, rakam, alt çizgi ve kısa çizgi içerebilir. Yöneticinize danışın.",
+      "adminName": "Hesabınızın adı, bir anahtar dosyasıyla oturum açan bir SealSkin yöneticisine ait. Yöneticinize danışın.",
+      "otherIdentity": "Kimlik sağlayıcının başka bir hesabı zaten bu SealSkin kullanıcısı olarak oturum açıyor. Yöneticinize danışın.",
+      "notConfigured": "Bu sunucu çoklu oturum açma sunmuyor.",
+      "ended": "Kimlik sağlayıcı oturumunuzu sonlandırdı. Yeniden oturum açın."
+    }
   }
 }

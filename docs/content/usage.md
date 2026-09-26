@@ -183,6 +183,12 @@ passphrase is lost, after which you connect again. Turn off **Keep my key in
 this browser** on a computer you share: the key then stays in the tab alone,
 and you load the configuration again next time.
 
+Where the administrator set up [single sign-on](configuration.md#single-sign-on),
+the connection page also offers **Sign In with OpenID Connect** or **Sign In
+with SAML**: sign in at your organization's identity provider, and the web app
+connects with a key it keeps in that tab alone. A reload, **Logout & Clear
+Config**, or a logout at the identity provider ends it.
+
 In place of the context menu:
 
 * **The bookmarklets.** The dashboard's **SealSkin in This Browser** card has

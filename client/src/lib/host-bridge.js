@@ -71,6 +71,7 @@ export async function callBackground(transport, type, payload = {}) {
  * @param {function} [options.saveBlob] `(blob, filename) => Promise` for mobile native open.
  * @param {function} [options.streamDownload] `(home, path, filename) => Promise`, the web app's streamed download.
  * @param {function} [options.reserveTab] `(reserve) => void`, web app tab reservation.
+ * @param {function} [options.signIn] `(via) => void`, the web app's identity provider sign-in.
  * @param {function} [options.close] Closes the popup (extension) or no-op.
  * @param {function} [options.isConnectPage] `() => boolean`, true while the bundled connect page is framed.
  * @returns {{setExpectedOrigin: function(string): void, destroy: function(): void}}
@@ -242,6 +243,14 @@ export function createHost(options) {
         throw new Error('clearConfig is only accepted from the connect page.');
       }
       return callBackground(transport, 'clearConfig');
+    },
+
+    async signIn({ via }) {
+      if (!(options.isConnectPage && options.isConnectPage()) || !options.signIn) {
+        throw new Error('signIn is only accepted from the web app\'s connect page.');
+      }
+      options.signIn(via);
+      return {};
     },
 
     async close() {
