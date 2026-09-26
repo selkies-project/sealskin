@@ -55,6 +55,7 @@ class FakeApi:
         self.reject_runtime_class = False
         self.pod_status = {"phase": "Running", "podIP": "fd00::5"}
         self.pod_templates = {}
+        self.pod_templates_failure = None
         self.events = []
 
     def handler(self, request: httpx.Request) -> httpx.Response:
@@ -64,6 +65,10 @@ class FakeApi:
                 return httpx.Response(403, json={"message": "nodes is forbidden"})
             return httpx.Response(200, json={"items": self.nodes})
         if path.endswith("/podtemplates"):
+            if isinstance(self.pod_templates_failure, Exception):
+                raise self.pod_templates_failure
+            if self.pod_templates_failure:
+                return httpx.Response(self.pod_templates_failure, json={"message": "podtemplates failed"})
             selector = request.url.params.get("labelSelector", "")
             items = [{**t, "metadata": {**t.get("metadata", {}), "name": n}} for n, t in self.pod_templates.items()]
             return httpx.Response(200, json={"items": [i for i in items if selector in i["metadata"].get("labels", {})]})
@@ -497,6 +502,20 @@ async def test_gpu_options_follow_pod_templates_while_running(api):
     api.nodes = []
     await kp.KubernetesProvider().refresh_gpus()
     assert [g["device"] for g in state.available_gpus] == ["nvidia.com/gpu"]
+
+
+async def test_gpu_options_stand_while_the_templates_cannot_be_read(api):
+    await kp.KubernetesProvider().inspect_self()
+    api.pod_templates["radeon"] = {"metadata": {"labels": {"sealskin.app/gpu": "amdgpu"}}, "template": {"spec": {}}}
+    await kp.KubernetesProvider().detect_gpus()
+    api.nodes = [{"metadata": {"labels": {}}, "status": {"allocatable": {"nvidia.com/gpu": "4"}}}]
+    for failure in (httpx.ConnectTimeout("unreachable"), 503, 429, 401):
+        api.pod_templates_failure = failure
+        await kp.KubernetesProvider().refresh_gpus()
+        assert [g["device"] for g in state.available_gpus] == ["radeon"], failure
+    api.pod_templates_failure = 403
+    await kp.KubernetesProvider().refresh_gpus()
+    assert [g["device"] for g in state.available_gpus] == ["nvidia.com/gpu"], "a Role withholding them"
 
 
 async def test_nvidia_defaults_yield_to_the_template(api):

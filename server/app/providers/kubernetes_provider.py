@@ -68,6 +68,8 @@ NETWORK_VOLUMES = {"azureFile", "cephfs", "glusterfs", "nfs"}
 #: Label of the PodTemplates that are the namespace's GPU options, valued with the GPU's
 #: kernel driver (`nvidia`, `amdgpu`, `i915`, `xe`, and so on).
 GPU_TEMPLATE_LABEL = "sealskin.app/gpu"
+#: Seconds the GPU PodTemplates may take to list before the options offered stand as they are.
+GPU_TEMPLATES_TIMEOUT = 5.0
 #: Node label naming the model of a node's GPUs, by driver: GPU Feature Discovery's for
 #: NVIDIA, the AMD node labeller's, and Intel's NFD rules for its discrete GPUs.
 PRODUCT_LABELS = {
@@ -490,14 +492,30 @@ class KubernetesProvider(BaseProvider):
         await self.refresh_gpus()
 
     async def refresh_gpus(self) -> None:
-        """Offer the namespace's GPU PodTemplates as they are now, else the scanned GPUs."""
+        """Offer the namespace's GPU PodTemplates as they are now, else the scanned GPUs.
+
+        The options offered stand when the templates cannot be listed for any reason but the
+        Role withholding them, so an API server that is slow or restarting neither holds up
+        the launcher nor swaps the templates for the scanned GPUs.
+        """
         global _scanned
         api = kube()
         try:
             options = (
-                await api.request("GET", api.path("podtemplates"), params={"labelSelector": GPU_TEMPLATE_LABEL})
+                await api.request(
+                    "GET",
+                    api.path("podtemplates"),
+                    params={"labelSelector": GPU_TEMPLATE_LABEL},
+                    timeout=GPU_TEMPLATES_TIMEOUT,
+                )
             )["items"]
-        except KubeError:
+        except (KubeError, httpx.HTTPError) as exc:
+            if not isinstance(exc, KubeError) or exc.status != 403:
+                logger.warning(
+                    "Keeping the GPU options offered: the GPU PodTemplates could not be listed (%s).",
+                    str(exc) or type(exc).__name__,
+                )
+                return
             options = []
         if options:
             named = sorted((o["metadata"]["name"], o["metadata"]["labels"][GPU_TEMPLATE_LABEL] or "gpu") for o in options)
