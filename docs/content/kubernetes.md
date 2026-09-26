@@ -213,12 +213,14 @@ template:
         - name: gpu
 ```
 
-The options are read when the server starts, so restart it after changing
-them.
+The templates are read again whenever the launcher lists the options and
+when a session starts, so adding, changing, or removing one needs no restart.
 
 ### Detected GPUs
 
-Without such templates, the server finds the GPUs itself:
+Without such templates, the server finds the GPUs itself, once, the first
+time it needs them: at startup, or when the last template is removed. Restart
+it to offer GPUs the cluster gained since.
 
 * When it may list nodes, every whole GPU a schedulable node advertises to
   containers: `nvidia.com/gpu` and its MIG and shared variants,

@@ -663,6 +663,8 @@ async def launch_application(
     host_mount_path, shared_files_path = await _resolve_storage(
         app, session_id, username, effective_settings, home_name, forced_rw_mount
     )
+    if selected_gpu:
+        await get_provider().refresh_gpus()
     gpu_config = validate_gpu(selected_gpu, effective_settings, app)
 
     collaboration: dict[str, Any] = {}

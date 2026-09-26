@@ -77,8 +77,9 @@ template_router = APIRouter(
 )
 
 
-def _gpu_list() -> list[GPUInfo]:
-    """Return the detected GPUs as API models."""
+async def _gpu_list() -> list[GPUInfo]:
+    """Return the GPUs sessions can request now, as API models."""
+    await get_provider().refresh_gpus()
     return [GPUInfo(device=gpu["device"], driver=gpu["driver"]) for gpu in state.available_gpus]
 
 
@@ -94,7 +95,7 @@ async def admin_status(user: dict[str, Any] = Depends(verify_token)) -> dict[str
         **get_system_stats(),
     }
     if user.get("effective_settings", {}).get("gpu", False):
-        response["gpus"] = _gpu_list()
+        response["gpus"] = await _gpu_list()
     return response
 
 
@@ -108,7 +109,7 @@ async def get_management_data() -> dict[str, Any]:
         "server_public_key": state.server_public_key_pem,
         "api_port": state.discovered_api_port,
         "session_port": state.discovered_session_port,
-        "gpus": _gpu_list(),
+        "gpus": await _gpu_list(),
     }
 
 

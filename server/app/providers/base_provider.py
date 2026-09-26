@@ -121,6 +121,10 @@ class BaseProvider(ABC):
         """Fill `state.available_gpus` with the GPUs sessions can request."""
 
     @abstractmethod
+    async def refresh_gpus(self) -> None:
+        """Bring `state.available_gpus` up to date before it is offered or used."""
+
+    @abstractmethod
     async def get_local_image_info(self, image_name: str) -> dict[str, Any] | None:
         """Return `{"id", "short_id", "digests"}` of the image sessions run, or `None`."""
 

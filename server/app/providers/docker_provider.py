@@ -59,6 +59,9 @@ class DockerProvider(BaseProvider):
         state.available_gpus[:] = scan_render_nodes()
         logger.info("Detected %d GPU(s): %s", len(state.available_gpus), state.available_gpus)
 
+    async def refresh_gpus(self) -> None:
+        """Keep the render nodes found at startup."""
+
     async def get_local_image_info(self, image_name: str) -> dict[str, Any] | None:
         """Return id and digests of a locally available image.
 

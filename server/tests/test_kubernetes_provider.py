@@ -131,6 +131,7 @@ def api(tmp_path, monkeypatch):
         "https://kube.test", "team-a", token_path=str(token), transport=httpx.MockTransport(fake.handler)
     )
     monkeypatch.setattr(kp, "_client", client)
+    monkeypatch.setattr(kp, "_scanned", None)
     monkeypatch.setattr(kp.socket, "gethostname", lambda: "sealskin-0")
     monkeypatch.setattr(settings, "storage_path", "/storage")
     monkeypatch.setattr(kp.asyncio, "sleep", _no_sleep)
@@ -474,6 +475,28 @@ async def test_gpu_options_from_pod_templates(api, monkeypatch):
     with pytest.raises(HTTPException) as gone:
         await _provider().launch("u" * 36, {}, {}, state.available_gpus[1])
     assert gone.value.status_code == 400
+
+
+async def test_gpu_options_follow_pod_templates_while_running(api):
+    await kp.KubernetesProvider().inspect_self()
+    api.pod_templates["radeon"] = {"metadata": {"labels": {"sealskin.app/gpu": "amdgpu"}}, "template": {"spec": {}}}
+    await kp.KubernetesProvider().detect_gpus()
+    assert [(g["device"], g["driver"]) for g in state.available_gpus] == [("radeon", "amdgpu")]
+    api.pod_templates["radeon"]["metadata"]["labels"]["sealskin.app/gpu"] = "nvidia"
+    api.pod_templates["arc"] = {"metadata": {"labels": {"sealskin.app/gpu": "xe"}}, "template": {"spec": {}}}
+    await kp.KubernetesProvider().refresh_gpus()
+    assert [(g["device"], g["driver"], g["type"]) for g in state.available_gpus] == [
+        ("arc", "xe", "dri3"),
+        ("radeon", "nvidia", "nvidia"),
+    ]
+    # With the templates gone the cluster is scanned, once.
+    api.nodes = [{"metadata": {"labels": {}}, "status": {"allocatable": {"nvidia.com/gpu": "4"}}}]
+    api.pod_templates.clear()
+    await kp.KubernetesProvider().refresh_gpus()
+    assert [g["device"] for g in state.available_gpus] == ["nvidia.com/gpu"]
+    api.nodes = []
+    await kp.KubernetesProvider().refresh_gpus()
+    assert [g["device"] for g in state.available_gpus] == ["nvidia.com/gpu"]
 
 
 async def test_nvidia_defaults_yield_to_the_template(api):

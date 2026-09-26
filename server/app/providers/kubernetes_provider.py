@@ -173,6 +173,8 @@ class KubeClient:
 
 
 _client: KubeClient | None = None
+#: The GPUs the cluster scan found, which stand while the namespace has no GPU PodTemplates.
+_scanned: list[dict[str, Any]] | None = None
 
 
 def kube() -> KubeClient:
@@ -473,14 +475,23 @@ class KubernetesProvider(BaseProvider):
 
         PodTemplates labelled `sealskin.app/gpu` are the options when the
         namespace has any, each carrying what its GPU needs (a device plugin
-        resource or a DRA claim, node placement). Otherwise, as nodes are
+        resource or a DRA claim, node placement); `refresh_gpus` reads them
+        again whenever the options are offered or used. Otherwise, as nodes are
         cluster-scoped: the GPU resources schedulable nodes advertise or DRA
         device classes map, when the server may list them; else those the
         namespace's quota grants; else the GPUs of the server's own node.
         Resources a quota covering session pods caps at zero are left out,
         GPUs handed to virtual machines are skipped, and nodes labelled with
-        their GPUs' model are offered per model.
+        their GPUs' model are offered per model. The cluster is scanned once,
+        when the templates are first found missing.
         """
+        global _scanned
+        _scanned = None
+        await self.refresh_gpus()
+
+    async def refresh_gpus(self) -> None:
+        """Offer the namespace's GPU PodTemplates as they are now, else the scanned GPUs."""
+        global _scanned
         api = kube()
         try:
             options = (
@@ -490,12 +501,22 @@ class KubernetesProvider(BaseProvider):
             options = []
         if options:
             named = sorted((o["metadata"]["name"], o["metadata"]["labels"][GPU_TEMPLATE_LABEL] or "gpu") for o in options)
-            state.available_gpus[:] = [
+            offered = [
                 {"device": name, "driver": driver, "type": "nvidia" if driver == "nvidia" else "dri3", "template": name}
                 for name, driver in named
             ]
-            logger.info("Offering %d GPU option(s) from PodTemplates: %s", len(named), [name for name, _ in named])
+            if offered != state.available_gpus:
+                logger.info("Offering %d GPU option(s) from PodTemplates: %s", len(named), [name for name, _ in named])
+            state.available_gpus[:] = offered
             return
+        if _scanned is None:
+            _scanned = await self._scan_gpus()
+            logger.info("Detected %d GPU type(s): %s", len(_scanned), [gpu["device"] for gpu in _scanned])
+        state.available_gpus[:] = _scanned
+
+    async def _scan_gpus(self) -> list[dict[str, Any]]:
+        """Return the GPUs the cluster's nodes and device classes, the quota, or this node offer."""
+        api = kube()
         session = (await self._pod_template() or {}).get("spec") or {}
         try:
             quotas = (await api.request("GET", api.path("resourcequotas")))["items"]
@@ -548,8 +569,7 @@ class KubernetesProvider(BaseProvider):
                 "resource": resource,
                 "node_selector": {PRODUCT_LABELS[driver]: product} if product else {},
             }
-        state.available_gpus[:] = [gpus[device] for device in sorted(gpus)]
-        logger.info("Detected %d GPU type(s): %s", len(state.available_gpus), sorted(gpus))
+        return [gpus[device] for device in sorted(gpus)]
 
     async def get_local_image_info(self, image_name: str) -> dict[str, Any] | None:
         """Return the digest sessions run for an image, once one was pinned."""
