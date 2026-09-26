@@ -2,9 +2,9 @@
 
 `build_launch_spec` assembles everything a provider needs to start an
 application container (environment, volumes, GPU, autostart script, Docker
-overrides). It is used by the launch routes for new sessions and by the
-collaboration module when a room swaps to another application, so the two
-paths can no longer drift apart.
+run options, which the Kubernetes backend maps onto the pod). It is used by
+the launch routes for new sessions and by the collaboration module when a room
+swaps to another application, so the two paths can no longer drift apart.
 """
 
 from __future__ import annotations
@@ -25,16 +25,17 @@ import docker
 from fastapi import HTTPException
 
 from . import config_store, user_manager
-from .docker_utils import translate_path_to_host
 from .fsutil import safe_copytree, safe_join, sanitize_for_filename, unique_filename
 from .models import InstalledApp
-from .providers.docker_provider import DockerProvider
+from .providers import get_provider
 from .settings import settings
 from .state import state
 
 logger = logging.getLogger(__name__)
 
 DOCKER_LIST_KEYS = ("devices", "volumes")
+#: Ephemeral directories being deleted, referenced until their task ends.
+_removals: set[asyncio.Task] = set()
 
 # User-level hardening switches (see `UserSettings`) and the base image preset
 # each one forces on. Applied after the template and the per-app environment so
@@ -67,7 +68,7 @@ class LaunchSpec:
 
     Attributes:
         env: Container environment.
-        volumes: Docker volume mapping (host path -> bind spec).
+        volumes: Server paths to mount, each to `{"bind", "mode"}`.
         gpu_config: Selected GPU, or `None`.
         app_config: Resolved app dictionary with merged `docker_overrides`.
         host_mount_path: Server-side path mounted as the session home.
@@ -416,6 +417,13 @@ def build_launch_spec(
             app.name,
         )
 
+    app_config = app.model_dump()
+    provider_config = app_config.setdefault("provider_config", {})
+    provider_config["docker_overrides"] = merge_docker_overrides(
+        provider_config.get("docker_overrides"), extract_docker_overrides(template_settings)
+    )
+    env.update({k: str(v) for k, v in provider_config["docker_overrides"].pop("environment", {}).items()})
+
     launch_context: dict[str, Any] | None = None
     if extra_env:
         env.update(extra_env)
@@ -428,24 +436,21 @@ def build_launch_spec(
     if forced_env:
         env.update(forced_env)
 
-    if gpu_config and (gpu_config["type"] == "dri3" or (gpu_config["type"] == "nvidia" and wayland_mode)):
+    # A Kubernetes GPU is a resource the device plugin mounts wherever it likes.
+    if (
+        gpu_config
+        and gpu_config["device"].startswith("/dev/")
+        and (gpu_config["type"] == "dri3" or wayland_mode)
+    ):
         env["DRI_NODE"] = gpu_config["device"]
         env["DRINODE"] = gpu_config["device"]
-
-    app_config = app.model_dump()
-    template_overrides = extract_docker_overrides(template_settings)
-    if template_overrides:
-        provider_config = app_config.setdefault("provider_config", {})
-        provider_config["docker_overrides"] = merge_docker_overrides(
-            provider_config.get("docker_overrides"), template_overrides
-        )
 
     if host_mount_path:
         write_autostart(app, host_mount_path, wayland_mode, session_id)
 
     volumes: dict[str, dict[str, str]] = {}
     if host_mount_path:
-        volumes[translate_path_to_host(host_mount_path)] = {
+        volumes[host_mount_path] = {
             "bind": settings.container_config_path,
             "mode": "rw",
         }
@@ -453,7 +458,7 @@ def build_launch_spec(
         os.makedirs(shared_files_path, exist_ok=True, mode=0o755)
         if host_mount_path:
             os.makedirs(os.path.join(host_mount_path, "Desktop", "files"), exist_ok=True, mode=0o755)
-        volumes[translate_path_to_host(shared_files_path)] = {
+        volumes[shared_files_path] = {
             "bind": os.path.join(settings.container_config_path, "Desktop", "files"),
             "mode": "rw",
         }
@@ -696,7 +701,7 @@ async def launch_application(
             launch_context = {"type": "file", "value": filename}
 
     try:
-        provider = DockerProvider(spec.app_config)
+        provider = get_provider(spec.app_config)
         instance = await provider.launch(**spec.provider_kwargs(session_id))
         now = time.time()
         session: dict[str, Any] = {
@@ -852,7 +857,7 @@ async def ensure_container_for_session(
         ),
     )
 
-    provider = DockerProvider(spec.app_config)
+    provider = get_provider(spec.app_config)
     instance = await provider.launch(**spec.provider_kwargs(session_id))
     container_info = {
         "instance_id": instance["instance_id"],
@@ -874,9 +879,7 @@ async def stop_container_in_session(session_id: str, target_app_id: str) -> None
     container_info = session["container_registry"].get(target_app_id)
     if not container_info:
         return
-    app = state.installed_apps.get(target_app_id)
-    if app:
-        await DockerProvider(app.model_dump()).stop(container_info["instance_id"])
+    await get_provider().stop(container_info["instance_id"])
     del session["container_registry"][target_app_id]
     await config_store.save_sessions()
 
@@ -905,17 +908,57 @@ async def stop_session(session_id: str) -> None:
     if not registry and "provider_app_id" in session:
         registry = {session["provider_app_id"]: {"instance_id": session["instance_id"]}}
     for app_id, container_info in registry.items():
-        app = state.installed_apps.get(app_id)
-        if not app:
-            continue
         try:
-            await DockerProvider(app.model_dump()).stop(container_info["instance_id"])
+            await get_provider().stop(container_info["instance_id"])
         except Exception as exc:  # noqa: BLE001
             logger.error("[%s] Failed to stop container for app %s: %s", session_id, app_id, exc)
 
     await config_store.save_sessions()
     for key in ("host_mount_path", "shared_files_path"):
         path = session.get(key)
-        if path and path.startswith(ephemeral_base()) and os.path.exists(path):
-            await asyncio.to_thread(shutil.rmtree, path, ignore_errors=True)
+        if path and path.startswith(ephemeral_base()):
+            # Deleting a cleanroom home on network storage takes long; nobody waits for it.
+            task = asyncio.create_task(asyncio.to_thread(shutil.rmtree, path, ignore_errors=True))
+            _removals.add(task)
+            task.add_done_callback(_removals.discard)
     logger.info("[%s] Session stopped and cleaned up successfully.", session_id)
+
+
+async def reconcile_sessions() -> None:
+    """Stop sessions whose instance ended and remove instances no session references.
+
+    An instance of another app in a room is dropped from the session when it
+    ends. A backend that cannot be asked skips the pass, so an outage never
+    reads as ended sessions; unreferenced instances are left alone for the
+    provider's `orphan_grace`, while a launch may still own them.
+    """
+    provider = get_provider()
+    referenced: set[str] = set()
+    changed = False
+    try:
+        owned = await provider.managed_instances()
+        for session_id, data in list(state.sessions.items()):
+            registry = data.get("container_registry") or {}
+            referenced.update(entry["instance_id"] for entry in registry.values())
+            referenced.add(data.get("instance_id", ""))
+            if not data.get("instance_id") or not await provider.is_running(data["instance_id"]):
+                logger.info("[%s] Session instance ended; stopping the session.", session_id)
+                await stop_session(session_id)
+                continue
+            for app_id, entry in list(registry.items()):
+                if entry["instance_id"] != data["instance_id"] and not await provider.is_running(
+                    entry["instance_id"]
+                ):
+                    logger.info("[%s] Instance of app %s ended.", session_id, app_id)
+                    del registry[app_id]
+                    changed = True
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Could not reconcile sessions with the backend: %s", exc)
+        return
+    if changed:
+        await config_store.save_sessions()
+    cutoff = time.time() - provider.orphan_grace
+    for instance_id, created_at in owned.items():
+        if instance_id not in referenced and created_at < cutoff:
+            logger.info("Removing instance %s, which no session references.", instance_id)
+            await provider.stop(instance_id)

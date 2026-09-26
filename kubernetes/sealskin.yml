@@ -1,0 +1,205 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# SealSkin in any namespace you can administer, with no cluster-scoped objects:
+#   kubectl apply -n <namespace> -f sealskin.yml
+# The server launches every session as a pod in its own namespace through the
+# Role below. https://docs.sealskin.app/kubernetes describes the rest.
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sealskin
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: sealskin
+rules:
+# Session pods, the template they start from, and why one does not start
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "create", "delete"]
+- apiGroups: [""]
+  resources: ["podtemplates", "events"]
+  verbs: ["get", "list"]
+# Whether sessions may run on any node (a ReadWriteMany claim), and which GPU
+# resources the namespace's quota rules out
+- apiGroups: [""]
+  resources: ["persistentvolumeclaims", "resourcequotas"]
+  verbs: ["get", "list"]
+# The Deployment that owns the server, which then owns its sessions
+- apiGroups: ["apps"]
+  resources: ["replicasets"]
+  verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: sealskin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: sealskin
+subjects:
+- kind: ServiceAccount
+  name: sealskin
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sealskin-config
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Home directories and shared files, mounted into every session. With
+# ReadWriteOnce every session runs on the server's node; a ReadWriteMany
+# class (NFS, CephFS, and the like) lets sessions run on any node.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sealskin-storage
+spec:
+  accessModes: ["ReadWriteOnce"]
+#  accessModes: ["ReadWriteMany"]
+#  storageClassName: <a ReadWriteMany class>
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sealskin
+  labels:
+    app.kubernetes.io/name: sealskin
+    app.kubernetes.io/component: server
+spec:
+  replicas: 1
+  # One server owns the sessions at a time
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sealskin
+      app.kubernetes.io/component: server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sealskin
+        app.kubernetes.io/component: server
+    spec:
+      serviceAccountName: sealskin
+      # Service variables would collide with the server's SEALSKIN_ settings
+      enableServiceLinks: false
+      containers:
+      - name: sealskin
+        image: lscr.io/linuxserver/sealskin:latest
+        env:
+        - name: PUID
+          value: "1000"
+        - name: PGID
+          value: "1000"
+        - name: TZ
+          value: "Etc/UTC"
+        # The address clients use, written into the first admin.json; add the
+        # port when it is not 8443, as behind an ingress (`sealskin.example.com:443`)
+        - name: HOST_URL
+          value: "sealskin.example.com"
+        ports:
+        - name: https
+          containerPort: 8443
+        - name: http
+          containerPort: 8000
+        # Caddy relays every session's stream: raise the CPU with the number of
+        # concurrent sessions
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: "4"
+            memory: 2Gi
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: storage
+          mountPath: /storage
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: sealskin-config
+      - name: storage
+        persistentVolumeClaim:
+          claimName: sealskin-storage
+---
+# What every session pod starts from: SealSkin sets the image, environment,
+# storage, and GPU on top. Node placement, a sandboxed runtime class, a
+# priority class, and the resources where the namespace imposes small
+# defaults belong here.
+apiVersion: v1
+kind: PodTemplate
+metadata:
+  name: sealskin-session
+template:
+  spec:
+#    runtimeClassName: gvisor
+#    nodeSelector:
+#      node-pool: desktops
+#    tolerations:
+#    - key: desktops
+#      operator: Exists
+    containers:
+    - name: app
+      # Replaced by the application's image
+      image: sealskin-session
+#      resources:
+#        requests:
+#          cpu: "1"
+#          memory: 2Gi
+#        limits:
+#          cpu: "8"
+#          memory: 8Gi
+---
+# Clients connect to 8443 (HTTPS, sessions and API) and, for a self-signed
+# certificate in Chrome, 8000. Expose it as a LoadBalancer, or behind an
+# ingress or gateway that forwards HTTPS and WebSockets to 8443.
+apiVersion: v1
+kind: Service
+metadata:
+  name: sealskin
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: sealskin
+    app.kubernetes.io/component: server
+  ports:
+  - name: https
+    port: 8443
+    targetPort: https
+  - name: http
+    port: 8000
+    targetPort: http
+---
+# Only the server reaches a session; enforced where the network plugin
+# supports NetworkPolicy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sealskin-sessions
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: sealskin
+      app.kubernetes.io/component: session
+  policyTypes: ["Ingress"]
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: sealskin
+          app.kubernetes.io/component: server

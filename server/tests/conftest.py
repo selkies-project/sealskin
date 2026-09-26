@@ -9,6 +9,7 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from app.providers import provider_class  # noqa: E402
 from app.settings import settings  # noqa: E402
 from app.state import state  # noqa: E402
 
@@ -55,6 +56,8 @@ def isolated_settings(tmp_path, monkeypatch):
     for name, path in layout.items():
         monkeypatch.setattr(settings, name, str(path))
     monkeypatch.setattr(settings, "app_resource_path", "https://example.invalid/apps.yml")
+    monkeypatch.setattr(settings, "default_provider", "docker")
+    provider_class.cache_clear()
     state.installed_records.clear()
     state.installed_apps.clear()
     state.app_stores.clear()

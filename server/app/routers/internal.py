@@ -11,6 +11,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException, Request, Response
 
+from ..providers.base_provider import host_port
 from ..security import token_matches
 from ..settings import settings
 from ..state import state
@@ -48,7 +49,7 @@ async def resolve_session(session_id: str, request: Request) -> Response:
     if not (is_standard_auth or is_collab_controller or is_collab_viewer):
         raise HTTPException(status_code=403, detail="Forbidden: Invalid session or token.")
 
-    headers = {"X-Upstream-Host": f"{session['ip']}:{session['port']}"}
+    headers = {"X-Upstream-Host": host_port(session["ip"], session["port"])}
     if "custom_user" in session and "password" in session:
         auth_b64 = base64.b64encode(f"{session['custom_user']}:{session['password']}".encode()).decode()
         headers["X-Upstream-Auth"] = f"Basic {auth_b64}"

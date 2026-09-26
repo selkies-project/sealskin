@@ -68,6 +68,16 @@ first application. The
 covers the installer, the plain `docker compose` alternative, certificates,
 and the first login.
 
+On Kubernetes, one manifest installs the server in any namespace you
+administer, with no cluster-scoped objects, and every session runs as a pod
+beside it ([Kubernetes](https://selkies-project.github.io/sealskin/kubernetes)):
+
+```bash
+curl -LO https://raw.githubusercontent.com/selkies-project/sealskin/main/kubernetes/sealskin.yml
+# set HOST_URL, and a ReadWriteMany class for the storage to use more than one node
+kubectl apply -n <namespace> -f sealskin.yml
+```
+
 ## What it does
 
 * **Isolation.** Links, files, downloads, and searches open in a fresh
@@ -92,6 +102,7 @@ and the first login.
 | | |
 | --- | --- |
 | [Getting Started](https://selkies-project.github.io/sealskin/start) | Install the server, connect a client, launch an application. |
+| [Kubernetes](https://selkies-project.github.io/sealskin/kubernetes) | Run the server in any namespace, with sessions as pods beside it. |
 | [Usage](https://selkies-project.github.io/sealskin/usage) | The launcher, context menus, sessions, storage, files, and rooms. |
 | [Administration](https://selkies-project.github.io/sealskin/administration) | Users, groups, app stores, templates, the App Laboratory, GPUs. |
 | [Configuration](https://selkies-project.github.io/sealskin/configuration) | What lives in `/config` and `/storage`, keys, hand-editing the YAML. |
@@ -113,6 +124,7 @@ server/              Python API server, Caddy template, tests, wheel
 client/              web UI source and build (dist/ui, dist/extension, dist/mobile)
 browser_extension/   manifests, icons and packaging for the extension shell
 mobile/              Capacitor project for the iOS and Android shells
+kubernetes/          manifest for running the server in a Kubernetes namespace
 docs/                the documentation site
 release-notes/       one file per stable release
 ```
