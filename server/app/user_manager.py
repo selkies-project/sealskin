@@ -2,7 +2,8 @@
 
 * `keys/admins/<username>`: the administrator's public key PEM.
 * `keys/users/<username>`: a `--- Settings ---` YAML block followed by a
-  `--- Public Key ---` PEM block.
+  `--- Public Key ---` PEM block, empty for a user who signs in only through
+  an identity provider (see `sso.py`).
 * `groups/<name>`: YAML settings applied on top of member users' settings.
 
 Files are re-scanned after every change (and by the configuration watcher
@@ -136,7 +137,7 @@ def write_user_file(username: str, pub_key_pem: str, settings_dict: dict[str, An
 
     Args:
         username: The user.
-        pub_key_pem: Public key PEM.
+        pub_key_pem: Public key PEM, empty for a user who signs in only through an identity provider.
         settings_dict: Settings to store.
     """
     file_path = safe_join(settings.keys_base_path, "users", username)
@@ -212,9 +213,9 @@ def load_users_and_groups() -> None:
         if username.startswith(".") or username in USER_DATA:
             continue
         settings_dict, pub_key = parse_key_file(os.path.join(user_dir, username))
-        if pub_key:
+        if settings_dict is not None:
             USER_DATA[username] = {
-                "public_key": pub_key,
+                "public_key": pub_key or "",
                 "settings": settings_dict,
                 "is_admin": False,
                 "username": username,
@@ -271,7 +272,7 @@ def get_all_groups() -> list[dict[str, Any]]:
     return list(GROUP_DATA.values())
 
 
-def _validate_username(username: str) -> None:
+def validate_name(username: str) -> None:
     """Raise `ValueError` for names that are not filesystem safe."""
     if not _NAME_RE.fullmatch(username or ""):
         raise ValueError("Invalid username. Use only letters, numbers, underscore, or hyphen.")
@@ -290,7 +291,7 @@ def create_admin(username: str, public_key: str | None) -> tuple[dict[str, Any],
     Raises:
         ValueError: For invalid or duplicate names.
     """
-    _validate_username(username)
+    validate_name(username)
     if username in USER_DATA:
         raise ValueError(f"User or admin '{username}' already exists.")
     private_pem: str | None = None
@@ -344,7 +345,7 @@ def create_user(
     Raises:
         ValueError: For invalid or duplicate names.
     """
-    _validate_username(username)
+    validate_name(username)
     if username in USER_DATA:
         raise ValueError(f"User '{username}' already exists.")
     private_pem: str | None = None
