@@ -11,7 +11,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException, Request, Response
 
-from ..security import token_matches
+from ..security import on_session_origin, token_matches
 from ..settings import settings
 from ..state import state
 
@@ -47,6 +47,8 @@ async def resolve_session(session_id: str, request: Request) -> Response:
         is_collab_viewer = any(token_matches(collab_token, v["token"]) for v in session.get("viewers", []))
     if not (is_standard_auth or is_collab_controller or is_collab_viewer):
         raise HTTPException(status_code=403, detail="Forbidden: Invalid session or token.")
+    if bool(session.get("own_origin")) != on_session_origin(request, session_id):
+        raise HTTPException(status_code=403, detail="Forbidden: the session is served from another origin.")
 
     headers = {"X-Upstream-Host": f"{session['ip']}:{session['port']}"}
     if "custom_user" in session and "password" in session:

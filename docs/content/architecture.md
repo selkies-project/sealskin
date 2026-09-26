@@ -212,7 +212,15 @@ mobile app it installs the `chrome.*` polyfill and runs the background script
 in the page, frames the served pages, and frames the connection page, which
 the server serves as well. It connects only to the server that serves it.
 
-Session content is served from the same origin, which shapes the rest:
+A session opens on an origin of its own wherever the browser reaches one
+(see [Session origins](configuration.md#session-origins)): the shells probe a
+random `<id>.<server name>`, and `<id>.<parent name>` for a certificate that
+covers the server's siblings, and open the session under the first that
+answers. Its first token exchange settles that origin, and the server refuses
+the session anywhere else (`on_session_origin`). Caddy refuses other origins'
+requests and WebSockets on a session path, so sessions on sibling origins,
+which are same-site, cannot reach one another. Every other session is served
+from the same origin as the web app, which shapes the rest:
 
 * **Keys.** The connection page's private key is wrapped (AES-GCM under a
   PBKDF2-SHA256 key, 600,000 iterations) with the browser's one passphrase

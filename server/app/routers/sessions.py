@@ -13,6 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
 from pydantic import ValidationError
 
+from .. import config_store
 from ..fsutil import resolve_within, safe_join, unique_filename
 from ..launch import ephemeral_base, stop_session
 from ..models import ActiveSessionInfo, SendFileToSessionRequest
@@ -20,6 +21,7 @@ from ..security import (
     EncryptedRoute,
     canonical_uuid,
     get_decrypted_request_body,
+    on_session_origin,
     token_matches,
     verify_token,
 )
@@ -61,6 +63,7 @@ def session_info(session_id: str, data: dict[str, Any], for_owner: bool = True) 
         session_url=url,
         launch_context=data.get("launch_context"),
         is_collaboration=data.get("is_collaboration", False),
+        own_origin=bool(data.get("own_origin")),
     )
 
 
@@ -170,21 +173,33 @@ def _known_collab_token(data: dict[str, Any], token: str | None) -> str | None:
 
 @proxy_router.get("/{session_id:uuid}/")
 async def initial_session_auth(session_id: uuid.UUID, request: Request) -> Response:
-    """Exchange the one-time access token for the session cookie and redirect."""
+    """Exchange the one-time access token for the session cookie and redirect.
+
+    The first exchange settles the origin the session is served from (see
+    `on_session_origin`); a collaboration session stays on the shared origin,
+    where its room frames it.
+    """
     session_id_str = canonical_uuid(session_id)
     token = request.query_params.get("access_token")
     data = state.sessions.get(session_id_str)
     if not data or not token_matches(token, data.get("access_token")):
         raise HTTPException(status_code=403, detail="Forbidden: Invalid session or token.")
     token = data["access_token"]
+    own_origin = on_session_origin(request, session_id_str)
+    if "own_origin" not in data and not (own_origin and data.get("is_collaboration")):
+        data["own_origin"] = own_origin
+        await config_store.save_sessions()
+    if bool(data.get("own_origin")) != own_origin:
+        raise HTTPException(status_code=403, detail="Forbidden: the session is served from another origin.")
 
     redirect_url = request.url.remove_query_params("access_token")
     response = RedirectResponse(url=str(redirect_url), status_code=303)
     is_embedded = request.query_params.get("embedded") == "true"
     samesite_policy = "none" if is_embedded else "lax"
     logger.info(
-        "[%s] Initial auth successful. Setting session cookie (SameSite=%s) and redirecting.",
+        "[%s] Initial auth successful on the %s origin. Setting session cookie (SameSite=%s) and redirecting.",
         session_id_str,
+        "session's own" if own_origin else "shared",
         samesite_policy,
     )
     response.set_cookie(

@@ -215,8 +215,11 @@ Sessions open in tabs of their own. While the web app's tab stays open,
 web app is reloaded, and always in Safari, which lets the web app keep no
 hold on the tab, **Re-open** opens the session in a new tab.
 
-Session content is served from the same address as the web app, so the web
-app keeps it at arm's length: session tabs get no link back to it, it cannot
+Where the server's certificate and DNS cover addresses under its name (see
+[Session origins](configuration.md#session-origins)), each session opens at
+an address of its own, which keeps its pages away from the web app and from
+other sessions altogether. Otherwise session content is served from the same
+address as the web app, so the web app keeps it at arm's length: session tabs get no link back to it, it cannot
 be framed, and it trusts nothing session pages could leave in the browser's
 storage for where to connect or which key to sign with. The stored key is as
 strong as its passphrase, which the browser is never offered to save, since a

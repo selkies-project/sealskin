@@ -455,6 +455,7 @@ class ActiveSessionInfo(BaseModel):
     session_url: str
     launch_context: dict[str, Any] | None = None
     is_collaboration: bool = False
+    own_origin: bool = False
 
 
 class SendFileToSessionRequest(BaseModel):

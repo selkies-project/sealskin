@@ -8,7 +8,7 @@
  *  - the E2EE handshake and encrypted fetch (`secureFetchInBackground`)
  *  - JWT signing with the stored private key
  *  - context menus, "send next download" interception, badge
- *  - the session-to-tab map and tab focus/close
+ *  - the session-to-tab map and tab focus/close, and the origin a session opens on
  *  - the pending launch context handed to the popup
  *  - the Chrome streaming-download fetch handler
  *
@@ -282,6 +282,54 @@ function getSessionUrlBase(config) {
   return `https://${config.serverIp}:${config.sessionPort}`;
 }
 
+const SESSION_PATH = /^\/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\//i;
+const sessionOriginProbes = new Map();
+
+async function reachesSessionOrigin(suffix, port) {
+  try {
+    const res = await fetch(`https://${crypto.randomUUID()}.${suffix}:${port}/sealskin-origin`, {
+      cache: 'no-store', credentials: 'omit', signal: AbortSignal.timeout(5000),
+    });
+    return res.ok && (await res.text()) === 'sealskin';
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * The name under which this browser reaches a session's own origin,
+ * `<session id>.<suffix>`: the server's name, or its parent's where a wildcard
+ * certificate covers the server's siblings instead, as the installer's does.
+ * Each is probed once per server with a random id, which takes a name that
+ * resolves, a certificate the browser trusts, and the proxy answering there;
+ * an IP address has no names under it. A session opened on its own origin
+ * shares no storage, cookies, or service workers with the web app or other
+ * sessions, and one opened on the shared origin is served as it always was.
+ *
+ * @param {object} config
+ * @returns {Promise<string|null>} The suffix, or null for the shared origin.
+ */
+function sessionOriginSuffix(config) {
+  const { serverIp: host, sessionPort: port } = config;
+  if (!host || !port || host.includes(':') || /^[\d.]+$/.test(host)) return Promise.resolve(null);
+  const server = `${host}:${port}`;
+  if (!sessionOriginProbes.has(server)) {
+    const labels = host.split('.');
+    const suffixes = labels.length > 2 ? [host, labels.slice(1).join('.')] : [host];
+    const probes = suffixes.map((suffix) => reachesSessionOrigin(suffix, port));
+    sessionOriginProbes.set(server, (async () => {
+      for (const [i, probe] of probes.entries()) if (await probe) return suffixes[i];
+      return null;
+    })());
+  }
+  return sessionOriginProbes.get(server);
+}
+
+function sessionHref(config, sessionId, sessionUrl, suffix) {
+  if (!suffix) return `${getSessionUrlBase(config)}${sessionUrl}`;
+  return `https://${sessionId}.${suffix}:${config.sessionPort}${sessionUrl}`;
+}
+
 // --- Pending launch context ---------------------------------------------------
 
 /** True when the context can round-trip through chrome.storage (no File). */
@@ -403,8 +451,8 @@ const handlers = {
 
   async createTabAndTrack({ sessionId, session_url }) {
     const config = await getConfig();
-    const fullUrl = `${getSessionUrlBase(config)}${session_url}`;
-    const newTab = await chrome.tabs.create({ url: fullUrl });
+    const suffix = SESSION_PATH.test(session_url) ? await sessionOriginSuffix(config) : null;
+    const newTab = await chrome.tabs.create({ url: sessionHref(config, sessionId, session_url, suffix) });
     const map = await getSessionTabMap();
     if (newTab && newTab.id) {
       map[sessionId] = newTab.id;
@@ -432,8 +480,8 @@ const handlers = {
     }
 
     const config = await getConfig();
-    const fullUrl = `${getSessionUrlBase(config)}${sess.session_url}`;
-    const newTab = await chrome.tabs.create({ url: fullUrl });
+    const suffix = sess.own_origin ? (await sessionOriginSuffix(config)) || config.serverIp : null;
+    const newTab = await chrome.tabs.create({ url: sessionHref(config, sess.session_id, sess.session_url, suffix) });
     if (newTab && newTab.id) {
       map[sess.session_id] = newTab.id;
       await saveSessionTabMap(map);

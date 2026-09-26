@@ -74,6 +74,20 @@ To provide your own administrator, place a public key PEM at
 `keys/admins/<name>` before the first start; the server then skips creating
 the default `admin` account and `admin.json`.
 
+### Session origins
+
+A session opens on an origin of its own, `<session id>.<name>`, wherever the
+browser reaches one, so its pages share no storage, cookies, or service
+workers with the web app or with other sessions. The certificate has to cover
+such names and be trusted by the browser, and DNS has to resolve them to the
+server: `*.<server name>`, or, as the installer's Duck DNS certificate does,
+`*.<parent name>`, which covers the server's own name and its siblings (Duck DNS
+resolves every name under a domain). Nothing is configured: the extension, the
+apps, and the web app probe a random name under each before opening a session,
+and a session reached by IP address, one whose names do not resolve or are
+not covered, a collaboration room, and the extension's App Laboratory frame
+are served from the shared origin, as they always have been.
+
 ## admin.json
 
 Written once, on the first start with no administrator present. It is a

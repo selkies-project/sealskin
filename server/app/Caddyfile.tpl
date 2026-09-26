@@ -23,6 +23,21 @@ https://:{{SESSION_PORT}} {
                 respond "" 204
         }
 
+        # A session's own origin, whose name starts with its id, serves that session alone, and
+        # answers the probe the shells send before opening a session there.
+        @own_origin_other {
+                header_regexp Host ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\.
+                not path_regexp ^/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(/.*)?$
+        }
+        handle @own_origin_other {
+                handle /sealskin-origin {
+                        respond "sealskin"
+                }
+                handle {
+                        respond 404
+                }
+        }
+
         # forward_auth reaches /internal/* directly on the loopback API port;
         # never expose it to clients.
         handle /internal/* {

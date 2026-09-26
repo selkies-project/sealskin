@@ -3,7 +3,8 @@
  * runs (app.js imports this module first). The hooks are late-bound: app.js
  * fills them in once the host exists.
  *
- * Session pages share this origin and can edit its storage, so a stored
+ * A session the browser cannot open on its own origin is served from this
+ * one, and its pages can edit this origin's storage, so a stored
  * configuration never decides where to connect or what to sign with: reads
  * name this origin as the server and the sealed key as the client key.
  */
@@ -40,27 +41,29 @@ export function reserveTab(reserve) {
  * Open a session in a tab of its own, or bring forward the tab showing it.
  *
  * This page opens every session tab itself and keeps its handle: looking a
- * tab up by name would make this page its opener, and session content comes
- * from this origin. Session tabs keep no `opener`. Anything else opens
- * detached.
+ * tab up by name would make this page its opener, and session content may
+ * come from this origin. A session is on this origin or on its own, whose
+ * name starts with the session's id. Session tabs keep no `opener`. Anything
+ * else opens detached.
  *
  * @param {string} url
  */
 function openTab(url) {
   const target = new URL(url, location.href);
-  const session = target.origin === location.origin && target.pathname.match(SESSION_ID);
+  const id = (target.pathname.match(SESSION_ID) || [])[0];
+  const session = id && (target.origin === location.origin || target.hostname.startsWith(`${id}.`)) && id;
   if (!session) {
     window.open(target.href, '_blank', 'noopener');
     return;
   }
-  let tab = sessionTabs.get(session[0]);
+  let tab = sessionTabs.get(session);
   if (!tab || tab.closed) {
     tab = reserved && !reserved.closed ? reserved : window.open();
     reserved = null;
     if (!tab) return;
     tab.opener = null;
     tab.location.replace(target.href);
-    sessionTabs.set(session[0], tab);
+    sessionTabs.set(session, tab);
   }
   tab.focus();
 }

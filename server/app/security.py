@@ -461,6 +461,17 @@ def verify_share_password(password: str, stored_hash: str) -> bool:
     return secrets.compare_digest(candidate, expected)
 
 
+def on_session_origin(request: Request, session_id: str) -> bool:
+    """Whether a request reached a session on the session's own origin, whose name starts with its id.
+
+    A session is served from one origin, the first its token was exchanged on:
+    its own where the browser reaches one, so its pages share no storage,
+    cookies, or service workers with the web app or other sessions, and the
+    server's shared origin otherwise.
+    """
+    return request.headers.get("host", "").split(".", 1)[0].lower() == session_id
+
+
 def token_matches(given: str | None, expected: str | None) -> bool:
     """Compare a token a client sent with the stored one in constant time.
 
