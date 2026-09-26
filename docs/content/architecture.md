@@ -166,7 +166,9 @@ Served pages never call `chrome.*`. They send `postMessage` requests to the
 host, `{sealskin: 1, id, type, payload}`, and receive `{sealskin: 1, id, ok,
 data}` or an error. The host accepts only messages from its own iframe whose
 origin matches the base it loaded; the page accepts only replies from its
-parent. Structured clone carries `File` and `Blob` objects. The private key
+parent, and only when that parent is a shell: an extension page, or the mobile
+app's `capacitor://localhost` (iOS) or `https://localhost` (Android). Structured
+clone carries `File` and `Blob` objects. The private key
 never crosses the bridge: signing and encryption stay in the background.
 
 | Request | Payload | Reply | Notes |

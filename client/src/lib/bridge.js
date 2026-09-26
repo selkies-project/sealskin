@@ -23,6 +23,11 @@ let helloInfo = null;
 let helloPromise = null;
 let hostOrigin = null;
 
+// The origins a shell host runs at: an extension page, or the Capacitor app's local
+// server, `capacitor://localhost` on iOS and `https://localhost` on Android. Replies
+// from any other parent are ignored, so a page framed by a site cannot be fed them.
+const SHELL_ORIGIN = /^(chrome-extension|moz-extension):\/\/[^/]+$|^(capacitor|https):\/\/localhost$/;
+
 function isFramed() {
   try {
     return window.parent && window.parent !== window;
@@ -35,6 +40,7 @@ window.addEventListener('message', (event) => {
   const msg = event.data;
   if (!msg || msg.sealskin !== BRIDGE_VERSION || typeof msg.id !== 'number') return;
   if (isFramed() && event.source !== window.parent) return;
+  if (!SHELL_ORIGIN.test(event.origin)) return;
   const entry = pending.get(msg.id);
   if (!entry) return;
   pending.delete(msg.id);
