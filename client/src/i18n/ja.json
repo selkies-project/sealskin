@@ -137,6 +137,8 @@
       "generateKeyButton": "新しいキーペアを生成",
       "publicKeyForAdminLabel": "あなたの公開鍵（管理者向け）",
       "passphraseLabel": "パスフレーズ",
+      "remember": "このブラウザーに鍵を保存する",
+      "rememberHelp": "共用のコンピューターではオフにしてください。SealSkinはこのタブが開いている間だけ鍵を保持し、次回は構成を読み込み直します。",
       "passphraseHelp": "秘密鍵はこのパスフレーズで暗号化されてこのブラウザーに保存されます。ここでSealSkinを開くたびに入力します。"
     },
     "home": {
@@ -1169,7 +1171,8 @@
       "settingsSaved": "設定が保存されました。",
       "appCreated": "アプリ「{name}」が正常に作成されました。",
       "launchFailed": "起動に失敗しました: {error}",
-      "passphraseRequired": "このブラウザーで鍵を保護するパスフレーズを入力してください。"
+      "passphraseRequired": "このブラウザーで鍵を保護するパスフレーズを入力してください。",
+      "passphraseTooShort": "{count}文字以上のパスフレーズを使用してください。"
     },
     "placeholders": {
       "noAdmins": "管理が見つかりません。",

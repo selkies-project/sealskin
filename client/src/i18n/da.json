@@ -137,6 +137,8 @@
       "generateKeyButton": "Generer Nyt Nøglepar",
       "publicKeyForAdminLabel": "Din Offentlige Nøgle (til admin)",
       "passphraseLabel": "Adgangssætning",
+      "remember": "Behold min nøgle i denne browser",
+      "rememberHelp": "Slå dette fra på en computer, du deler med andre: SealSkin beholder så kun din nøgle, mens denne fane er åben, og du indlæser din konfiguration igen næste gang.",
       "passphraseHelp": "Din private nøgle gemmes i denne browser krypteret med denne adgangssætning, som du indtaster, hver gang du åbner SealSkin her."
     },
     "home": {
@@ -1169,7 +1171,8 @@
       "settingsSaved": "Indstillinger gemt.",
       "appCreated": "Appen '{name}' blev oprettet med succes.",
       "launchFailed": "Start mislykkedes: {error}",
-      "passphraseRequired": "Indtast en adgangssætning for at beskytte din nøgle i denne browser."
+      "passphraseRequired": "Indtast en adgangssætning for at beskytte din nøgle i denne browser.",
+      "passphraseTooShort": "Brug en adgangssætning på mindst {count} tegn."
     },
     "placeholders": {
       "noAdmins": "Ingen administratorer fundet.",

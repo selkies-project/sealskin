@@ -137,6 +137,8 @@
       "generateKeyButton": "Générer une Nouvelle Paire de Clés",
       "publicKeyForAdminLabel": "Votre Clé Publique (pour l'admin)",
       "passphraseLabel": "Phrase secrète",
+      "remember": "Conserver ma clé dans ce navigateur",
+      "rememberHelp": "Désactivez cette option sur un ordinateur partagé : SealSkin ne conserve alors votre clé que tant que cet onglet est ouvert, et vous chargez à nouveau votre configuration la prochaine fois.",
       "passphraseHelp": "Votre clé privée est conservée dans ce navigateur, chiffrée avec cette phrase secrète, que vous saisirez à chaque ouverture de SealSkin ici."
     },
     "home": {
@@ -1169,7 +1171,8 @@
       "settingsSaved": "Paramètres enregistrés.",
       "appCreated": "Application '{name}' créée avec succès.",
       "launchFailed": "Échec du lancement : {error}",
-      "passphraseRequired": "Saisissez une phrase secrète pour protéger votre clé dans ce navigateur."
+      "passphraseRequired": "Saisissez une phrase secrète pour protéger votre clé dans ce navigateur.",
+      "passphraseTooShort": "Utilisez une phrase secrète d'au moins {count} caractères."
     },
     "placeholders": {
       "noAdmins": "Aucun admin trouvé.",

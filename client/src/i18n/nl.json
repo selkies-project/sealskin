@@ -137,6 +137,8 @@
       "generateKeyButton": "Nieuw Sleutelpaar Genereren",
       "publicKeyForAdminLabel": "Uw Publieke Sleutel (voor admin)",
       "passphraseLabel": "Wachtwoordzin",
+      "remember": "Mijn sleutel in deze browser bewaren",
+      "rememberHelp": "Zet dit uit op een gedeelde computer: SealSkin bewaart uw sleutel dan alleen zolang dit tabblad open is, en u laadt uw configuratie de volgende keer opnieuw.",
       "passphraseHelp": "Uw privésleutel wordt in deze browser versleuteld met deze wachtwoordzin bewaard. U voert die in telkens wanneer u SealSkin hier opent."
     },
     "home": {
@@ -1169,7 +1171,8 @@
       "settingsSaved": "Instellingen opgeslagen.",
       "appCreated": "App '{name}' succesvol aangemaakt.",
       "launchFailed": "Starten mislukt: {error}",
-      "passphraseRequired": "Voer een wachtwoordzin in om uw sleutel in deze browser te beschermen."
+      "passphraseRequired": "Voer een wachtwoordzin in om uw sleutel in deze browser te beschermen.",
+      "passphraseTooShort": "Gebruik een wachtwoordzin van minstens {count} tekens."
     },
     "placeholders": {
       "noAdmins": "Geen beheerders gevonden.",

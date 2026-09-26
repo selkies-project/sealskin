@@ -137,6 +137,8 @@
       "generateKeyButton": "生成新密钥对",
       "publicKeyForAdminLabel": "您的公钥（提供给管理员）",
       "passphraseLabel": "密码短语",
+      "remember": "在此浏览器中保留我的密钥",
+      "rememberHelp": "在共用电脑上请关闭此项：SealSkin 只会在此标签页打开期间保留您的密钥，下次需要重新加载配置。",
       "passphraseHelp": "您的私钥以此密码短语加密后保存在此浏览器中，每次在这里打开 SealSkin 时都需要输入。"
     },
     "home": {
@@ -1169,7 +1171,8 @@
       "settingsSaved": "设置已保存。",
       "appCreated": "应用“{name}”已成功创建。",
       "launchFailed": "启动失败：{error}",
-      "passphraseRequired": "请输入密码短语以保护此浏览器中的密钥。"
+      "passphraseRequired": "请输入密码短语以保护此浏览器中的密钥。",
+      "passphraseTooShort": "请使用至少 {count} 个字符的密码短语。"
     },
     "placeholders": {
       "noAdmins": "未找到管理员。",

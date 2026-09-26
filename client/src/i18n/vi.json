@@ -137,6 +137,8 @@
       "generateKeyButton": "Tạo cặp khóa mới",
       "publicKeyForAdminLabel": "Khóa công khai của bạn (cho quản trị viên)",
       "passphraseLabel": "Cụm mật khẩu",
+      "remember": "Giữ khóa của tôi trong trình duyệt này",
+      "rememberHelp": "Hãy tắt tùy chọn này trên máy tính dùng chung: khi đó SealSkin chỉ giữ khóa của bạn khi thẻ này còn mở, và lần sau bạn tải lại cấu hình.",
       "passphraseHelp": "Khóa riêng của bạn được lưu trong trình duyệt này, mã hóa bằng cụm mật khẩu này; bạn nhập nó mỗi lần mở SealSkin tại đây."
     },
     "home": {
@@ -1169,7 +1171,8 @@
       "settingsSaved": "Đã lưu cài đặt.",
       "appCreated": "Đã tạo ứng dụng '{name}' thành công.",
       "launchFailed": "Khởi chạy thất bại: {error}",
-      "passphraseRequired": "Nhập cụm mật khẩu để bảo vệ khóa của bạn trong trình duyệt này."
+      "passphraseRequired": "Nhập cụm mật khẩu để bảo vệ khóa của bạn trong trình duyệt này.",
+      "passphraseTooShort": "Hãy dùng cụm mật khẩu dài ít nhất {count} ký tự."
     },
     "placeholders": {
       "noAdmins": "Không tìm thấy quản trị viên nào.",

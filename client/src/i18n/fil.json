@@ -137,6 +137,8 @@
       "generateKeyButton": "Bumuo ng Bagong Key Pair",
       "publicKeyForAdminLabel": "Iyong Pampublikong Key (para sa admin)",
       "passphraseLabel": "Passphrase",
+      "remember": "Itago ang aking key sa browser na ito",
+      "rememberHelp": "I-off ito sa computer na may kahati ka: itatago lang ng SealSkin ang iyong key habang bukas ang tab na ito, at ilo-load mo ulit ang iyong configuration sa susunod.",
       "passphraseHelp": "Nakatago ang iyong pribadong key sa browser na ito at naka-encrypt gamit ang passphrase na ito, na ilalagay mo tuwing bubuksan mo ang SealSkin dito."
     },
     "home": {
@@ -1169,7 +1171,8 @@
       "settingsSaved": "Nai-save ang mga setting.",
       "appCreated": "Matagumpay na nagawa ang app na '{name}'.",
       "launchFailed": "Nabigo ang paglunsad: {error}",
-      "passphraseRequired": "Maglagay ng passphrase para protektahan ang iyong key sa browser na ito."
+      "passphraseRequired": "Maglagay ng passphrase para protektahan ang iyong key sa browser na ito.",
+      "passphraseTooShort": "Gumamit ng passphrase na may hindi bababa sa {count} character."
     },
     "placeholders": {
       "noAdmins": "Walang nahanap na admin.",

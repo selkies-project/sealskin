@@ -15,7 +15,7 @@
 
 import { bridge, request } from '../lib/bridge.js';
 import { loadTranslator, applyTranslations } from '../lib/i18n.js';
-import { generateRsaKeyPair } from '../lib/crypto-utils.js';
+import { MIN_PASSPHRASE, generateRsaKeyPair } from '../lib/crypto-utils.js';
 
 const DEFAULT_SEARCH_ENGINE = 'https://google.com/search?q=';
 
@@ -117,7 +117,7 @@ async function handleLogin() {
     ...formConfig(),
     searchEngineUrl: (currentConfig && currentConfig.searchEngineUrl) || DEFAULT_SEARCH_ENGINE,
   };
-  if (info.shell === 'web') config.passphrase = $('passphrase').value;
+  if (info.shell === 'web') Object.assign(config, webSealing());
   try {
     await request('saveConfig', { config });
     await bridge.storageRemove(['sealskinPendingConfig']);
@@ -144,8 +144,17 @@ async function handleLogin() {
 
 /** The web app's reasons for not sealing a key, as the status line shows them. */
 function sealingError(error) {
-  const key = { passphraseRequired: 'options.status.passphraseRequired', wrongPassphrase: 'web.wrongPassphrase' }[error.message];
-  return key ? t(key) : null;
+  const key = {
+    passphraseRequired: 'options.status.passphraseRequired',
+    passphraseTooShort: 'options.status.passphraseTooShort',
+    wrongPassphrase: 'web.wrongPassphrase',
+  }[error.message];
+  return key ? t(key, { count: MIN_PASSPHRASE }) : null;
+}
+
+/** How the web app keeps the key: sealed under the passphrase, or in the tab alone. */
+function webSealing() {
+  return { passphrase: $('passphrase').value, remember: $('remember').checked };
 }
 
 function readFileAsText(file) {
@@ -198,8 +207,11 @@ async function init() {
   t = await loadTranslator(info.locale || navigator.language);
   applyTranslations(document.body, t);
 
-  const { config, pendingConfig } = await request('getConnectConfig');
+  const { config, pendingConfig, remember } = await request('getConnectConfig');
   currentConfig = config;
+  $('remember').checked = remember !== false;
+  $('passphrase-group').hidden = !$('remember').checked;
+  $('remember').addEventListener('change', () => { $('passphrase-group').hidden = !$('remember').checked; });
   fillForm(pendingConfig || config);
 
   if (config && config.serverIp && config.username && config.clientPrivateKey && !pendingConfig) {
@@ -251,7 +263,7 @@ async function init() {
 
   $('save').addEventListener('click', async () => {
     const pending = formConfig();
-    if (info.shell === 'web') pending.passphrase = $('passphrase').value;
+    if (info.shell === 'web') Object.assign(pending, webSealing());
     try {
       await bridge.storageSet({ sealskinPendingConfig: pending });
       displayStatus(t('options.status.pendingConfigSaved'), false);

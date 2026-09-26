@@ -77,9 +77,45 @@ installPolyfill({
   openPopup: () => hooks.openPopup(),
 });
 
-const { get } = chrome.storage.local;
+// The configurations, which stay in this page alone while the user keeps no key in this browser.
+const CONFIGS = ['sealskinConfig', 'sealskinPendingConfig'];
+let memory = null;
+
+/**
+ * Keep the configurations in this page's memory and none in storage, or go
+ * back to storage for the next one saved. While they are in memory, one a
+ * session page writes into storage is never read.
+ *
+ * @param {boolean} on
+ */
+export function keepInMemory(on) {
+  memory = on ? memory || {} : null;
+  if (on) CONFIGS.forEach((key) => localStorage.removeItem(key));
+}
+
+const { get, set, remove } = chrome.storage.local;
+chrome.storage.local.set = (items, cb) => {
+  const rest = { ...items };
+  CONFIGS.forEach((key) => {
+    if (memory && key in rest) {
+      memory[key] = rest[key];
+      delete rest[key];
+    }
+  });
+  return set(rest, cb);
+};
+chrome.storage.local.remove = (keys, cb) => {
+  if (memory) [].concat(keys).forEach((key) => delete memory[key]);
+  return remove(keys, cb);
+};
 chrome.storage.local.get = async (keys, cb) => {
   const result = await get(keys);
+  if (memory) {
+    CONFIGS.filter((key) => keys == null || [].concat(keys).includes(key)).forEach((key) => {
+      if (key in memory) result[key] = memory[key];
+      else delete result[key];
+    });
+  }
   if (result.sealskinConfig) {
     const port = location.port || '443';
     Object.assign(result.sealskinConfig, { serverIp: location.hostname, apiPort: port, sessionPort: port, clientPrivateKey: KEY_REF });

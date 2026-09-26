@@ -1,3 +1,7 @@
+// The shortest passphrase that seals a key: NIST SP 800-63B's floor for a secret used with another factor,
+// here the browser that holds the sealed key.
+export const MIN_PASSPHRASE = 8;
+
 export function pemToArrayBuffer(pem) {
   const b64 = pem
     .replace(/-----BEGIN (PUBLIC|PRIVATE) KEY-----/, '')

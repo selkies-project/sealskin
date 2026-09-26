@@ -179,7 +179,9 @@ and dashboard in an ordinary tab. Connect it with your configuration file as
 in [Connect](start.md#connect), choosing a passphrase; your private key is
 stored in the browser encrypted with it, and the page asks for it each time
 it opens. **Logout & Clear Config** on that prompt forgets the key if the
-passphrase is lost, after which you connect again.
+passphrase is lost, after which you connect again. Turn off **Keep my key in
+this browser** on a computer you share: the key then stays in the tab alone,
+and you load the configuration again next time.
 
 In place of the context menu:
 

@@ -16,7 +16,9 @@
         <div id="status" class="status" hidden></div>
 
         <section class="card" id="passphrase-view" hidden>
-            <div class="form-group">
+            <label class="remember"><input type="checkbox" id="remember" checked> <span data-i18n="options.config.remember">Keep my key in this browser</span></label>
+            <p class="muted" data-i18n="options.config.rememberHelp">Turn this off on a computer you share: SealSkin then keeps your key only while this tab is open, and you load your configuration again next time.</p>
+            <div class="form-group" id="passphrase-group">
                 <label for="passphrase" data-i18n="options.config.passphraseLabel">Passphrase</label>
                 <input type="text" id="passphrase" class="passphrase" autocomplete="off" autocapitalize="off" spellcheck="false">
                 <p class="muted" data-i18n="options.config.passphraseHelp">Your private key is kept in this browser encrypted with this passphrase, which you enter each time you open SealSkin here.</p>

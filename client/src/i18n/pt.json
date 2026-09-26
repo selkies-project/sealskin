@@ -137,6 +137,8 @@
       "generateKeyButton": "Gerar Novo Par de Chaves",
       "publicKeyForAdminLabel": "Sua Chave Pública (para o admin)",
       "passphraseLabel": "Frase secreta",
+      "remember": "Manter minha chave neste navegador",
+      "rememberHelp": "Desative esta opção em um computador compartilhado: o SealSkin mantém sua chave apenas enquanto esta aba estiver aberta, e você carrega sua configuração de novo na próxima vez.",
       "passphraseHelp": "Sua chave privada fica guardada neste navegador, criptografada com esta frase secreta, que você digita sempre que abrir o SealSkin aqui."
     },
     "home": {
@@ -1169,7 +1171,8 @@
       "settingsSaved": "Configurações salvas.",
       "appCreated": "Aplicativo '{name}' criado com sucesso.",
       "launchFailed": "Falha ao iniciar: {error}",
-      "passphraseRequired": "Digite uma frase secreta para proteger sua chave neste navegador."
+      "passphraseRequired": "Digite uma frase secreta para proteger sua chave neste navegador.",
+      "passphraseTooShort": "Use uma frase secreta com pelo menos {count} caracteres."
     },
     "placeholders": {
       "noAdmins": "Nenhum admin encontrado.",

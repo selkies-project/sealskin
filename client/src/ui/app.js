@@ -6,8 +6,9 @@
  * frames the served pages, as the mobile app does. Session content is served
  * from this same origin, so private keys never rest in the browser in the
  * clear: the active key and a saved, not yet active, one are wrapped under a
- * key derived from the browser's one passphrase (PBKDF2, AES-GCM), and only
- * this page holds them unwrapped while it is open. The server sends this page
+ * key derived from the browser's one passphrase (PBKDF2, AES-GCM), or, for a
+ * user who keeps no key in this browser, never stored at all, and only this
+ * page holds them unwrapped while it is open. The server sends this page
  * with a cross-origin opener policy and no framing, and session tabs get no
  * opener, so session content cannot reach it.
  *
@@ -17,11 +18,11 @@
  * handlers (`launchQueue`).
  */
 
-import { KEY_REF, hooks, reserveTab } from './web-polyfill.js';
+import { KEY_REF, hooks, keepInMemory, reserveTab } from './web-polyfill.js';
 import '../shell/background.js';
 import { initHost, pageTransport } from '../shell/host.js';
 import { callBackground } from '../lib/host-bridge.js';
-import { arrayBufferToBase64, arrayBufferToPem, pemToArrayBuffer, setSigningKey } from '../lib/crypto-utils.js';
+import { MIN_PASSPHRASE, arrayBufferToBase64, arrayBufferToPem, pemToArrayBuffer, setSigningKey } from '../lib/crypto-utils.js';
 import { storePendingFile, takeShared } from '../lib/context-store.js';
 import { loadTranslator } from '../lib/i18n.js';
 
@@ -36,6 +37,8 @@ const KEEPALIVE_MS = 10000;
 
 let kek = null;
 let hostApi = null;
+// Set while the user keeps no key in this browser: the keys, by slot, live in this page alone.
+let tabKeys = null;
 
 const fromBase64 = (value) => (Uint8Array.fromBase64 ? Uint8Array.fromBase64(value) : Uint8Array.from(atob(value), (c) => c.charCodeAt(0)));
 const keyring = () => JSON.parse(localStorage.getItem(KEYRING) || 'null');
@@ -84,6 +87,7 @@ async function seal(slot, pem, passphrase) {
   if (ring) {
     await unlock(passphrase);
   } else {
+    if (passphrase.length < MIN_PASSPHRASE) throw new Error('passphraseTooShort');
     ring = { salt: arrayBufferToBase64(crypto.getRandomValues(new Uint8Array(16))), keys: {} };
     kek = await deriveKek(passphrase, fromBase64(ring.salt));
   }
@@ -109,7 +113,10 @@ function drop(slot) {
 
 /**
  * The page transport, sealing private keys on their way into storage and
- * handing the connection page the PEMs it exports.
+ * handing the connection page the PEMs it exports. Saving a configuration
+ * that keeps no key in this browser holds the configurations in this page's
+ * memory from then on, and saving one that does puts them back in storage;
+ * either change drops what the other way kept.
  *
  * @param {object} message
  */
@@ -117,30 +124,44 @@ async function transport(message) {
   const { type, payload } = message;
   const draft = type === 'saveConfig' ? payload.config : type === 'storageSet' && payload.items && payload.items[PENDING];
   if (draft) {
-    const { passphrase, ...config } = draft;
+    const { passphrase, remember, ...config } = draft;
     const [slot, ref] = type === 'saveConfig' ? ['config', KEY_REF] : ['pending', PENDING_REF];
+    if (remember !== undefined && remember === Boolean(tabKeys)) {
+      ['config', 'pending'].forEach(drop);
+      tabKeys = remember ? null : {};
+      keepInMemory(!remember);
+    }
     if (config.clientPrivateKey && config.clientPrivateKey !== ref) {
-      if (!passphrase) return { success: false, error: 'passphraseRequired' };
-      try {
-        await seal(slot, config.clientPrivateKey, passphrase);
-      } catch (e) {
-        // Unwrapping under the wrong passphrase fails the AES-GCM tag.
-        return { success: false, error: e.name === 'OperationError' ? 'wrongPassphrase' : e.message };
+      if (tabKeys) {
+        tabKeys[slot] = config.clientPrivateKey;
+        if (slot === 'config') setSigningKey(KEY_REF, await crypto.subtle.importKey('pkcs8', pemToArrayBuffer(tabKeys.config), SIGNING, false, ['sign']));
+      } else {
+        if (!passphrase) return { success: false, error: 'passphraseRequired' };
+        try {
+          await seal(slot, config.clientPrivateKey, passphrase);
+        } catch (e) {
+          // Unwrapping under the wrong passphrase fails the AES-GCM tag.
+          return { success: false, error: e.name === 'OperationError' ? 'wrongPassphrase' : e.message };
+        }
       }
       config.clientPrivateKey = ref;
     }
     if (slot === 'config') payload.config = config; else payload.items[PENDING] = config;
   }
-  if (type === 'clearConfig') ['config', 'pending'].forEach(drop);
-  if (type === 'storageRemove' && [].concat(payload.keys).includes(PENDING)) drop('pending');
+  if (type === 'clearConfig') ['config', 'pending'].forEach((slot) => { drop(slot); if (tabKeys) delete tabKeys[slot]; });
+  if (type === 'storageRemove' && [].concat(payload.keys).includes(PENDING)) {
+    drop('pending');
+    if (tabKeys) delete tabKeys.pending;
+  }
   const reply = await pageTransport(message);
-  if (type === 'getFullConfig' && reply.data && kek) {
-    const { keys } = keyring();
+  if (type === 'getFullConfig' && reply.data) {
+    const { keys } = keyring() || { keys: {} };
     for (const [field, slot] of [['config', 'config'], ['pendingConfig', 'pending']]) {
-      if (reply.data[field] && keys[slot]) {
-        reply.data[field].clientPrivateKey = arrayBufferToPem(await crypto.subtle.exportKey('pkcs8', await unwrap(keys[slot], true)), 'PRIVATE');
-      }
+      if (!reply.data[field]) continue;
+      if (tabKeys && tabKeys[slot]) reply.data[field].clientPrivateKey = tabKeys[slot];
+      else if (kek && keys[slot]) reply.data[field].clientPrivateKey = arrayBufferToPem(await crypto.subtle.exportKey('pkcs8', await unwrap(keys[slot], true)), 'PRIVATE');
     }
+    reply.data.remember = !tabKeys;
   }
   return reply;
 }

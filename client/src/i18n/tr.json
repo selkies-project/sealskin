@@ -137,6 +137,8 @@
       "generateKeyButton": "Yeni Anahtar Çifti Oluştur",
       "publicKeyForAdminLabel": "Açık Anahtarınız (yönetici için)",
       "passphraseLabel": "Parola İfadesi",
+      "remember": "Anahtarımı bu tarayıcıda sakla",
+      "rememberHelp": "Paylaşılan bir bilgisayarda bunu kapatın: SealSkin anahtarınızı yalnızca bu sekme açıkken tutar ve bir dahaki sefere yapılandırmanızı yeniden yüklersiniz.",
       "passphraseHelp": "Özel anahtarınız bu tarayıcıda bu parola ifadesiyle şifrelenmiş olarak saklanır; SealSkin'i burada her açtığınızda onu girersiniz."
     },
     "home": {
@@ -1169,7 +1171,8 @@
       "settingsSaved": "Ayarlar kaydedildi.",
       "appCreated": "Uygulama '{name}' başarıyla oluşturuldu.",
       "launchFailed": "Başlatma başarısız: {error}",
-      "passphraseRequired": "Bu tarayıcıda anahtarınızı korumak için bir parola ifadesi girin."
+      "passphraseRequired": "Bu tarayıcıda anahtarınızı korumak için bir parola ifadesi girin.",
+      "passphraseTooShort": "En az {count} karakterlik bir parola ifadesi kullanın."
     },
     "placeholders": {
       "noAdmins": "Yönetici bulunamadı.",
