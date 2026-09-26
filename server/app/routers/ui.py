@@ -44,9 +44,13 @@ class UiStaticFiles(StaticFiles):
             response.headers["Cache-Control"] = "no-cache"
         else:
             response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
-        if os.path.basename(str(full_path)) == "index.html":
-            response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
+        name = os.path.basename(str(full_path))
+        if name in ("index.html", "receive.html"):
             response.headers["Content-Security-Policy"] = WEB_APP_CSP
+        # Only the app page severs its opener; receive.html keeps the one the
+        # pick bookmarklet opened it with, to take the fetched file from it.
+        if name == "index.html":
+            response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
         return response
 
 

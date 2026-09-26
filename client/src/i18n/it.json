@@ -1185,6 +1185,9 @@
       "title": "SealSkin in Questo Browser",
       "bookmarklet": "Invia a SealSkin",
       "bookmarkletHelp": "Trascina questo link nella barra dei preferiti. Facendo clic su di esso si apre in SealSkin la pagina in cui ti trovi, oppure si cerca il testo selezionato.",
+      "pick": "Scegli per SealSkin",
+      "pickHelp": "Trascina lì anche questo link. Fai clic su di esso, poi su un link per aprirlo in SealSkin, oppure su un'immagine, un video o un audio per inviare il file. Maiusc+clic su un link invia il file a cui porta, recuperato con il tuo accesso a quel sito.",
+      "pickHint": "SealSkin: fai clic su un link, oppure su un'immagine, un video o un audio, per inviarlo; Maiusc+clic su un link invia il suo file. Premi Esc per annullare.",
       "protocol": "Apri qui i link web+sealskin:",
       "protocolHelp": "Un link scritto come web+sealskin: seguito da un indirizzo apre poi quell'indirizzo in SealSkin.",
       "install": "Se il browser può installare app web, installa SealSkin dal suo menu per condividere link e file con esso e aprire file con esso."
@@ -1366,6 +1369,7 @@
     "unlockBody": "Inserisci la passphrase che protegge la tua chiave in questo browser.",
     "passphrase": "Passphrase",
     "unlock": "Sblocca",
-    "wrongPassphrase": "Questa passphrase non sblocca la tua chiave."
+    "wrongPassphrase": "Questa passphrase non sblocca la tua chiave.",
+    "receiving": "Invio del file a SealSkin…"
   }
 }

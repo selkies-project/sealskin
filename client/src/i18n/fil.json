@@ -1185,6 +1185,9 @@
       "title": "SealSkin sa Browser na Ito",
       "bookmarklet": "Ipadala sa SealSkin",
       "bookmarkletHelp": "I-drag ang link na ito sa iyong bookmarks bar. Kapag kinlik ito, bubuksan nito sa SealSkin ang pahinang kinaroroonan mo, o hahanapin ang tekstong pinili mo.",
+      "pick": "Pumili para sa SealSkin",
+      "pickHelp": "I-drag din doon ang link na ito. I-click ito, pagkatapos ay i-click ang isang link para buksan ang link na iyon sa SealSkin, o ang isang larawan, video, o audio para ipadala ang file. Mag-Shift-click sa isang link para ipadala ang file na tinuturo nito, na kinukuha gamit ang pag-sign in mo sa site na iyon.",
+      "pickHint": "SealSkin: mag-click sa isang link, o sa larawan, video, o audio, para ipadala ito; mag-Shift-click sa isang link para ipadala ang file nito. Pindutin ang Esc para kanselahin.",
       "protocol": "Buksan dito ang mga web+sealskin: link",
       "protocolHelp": "Ang link na isinulat bilang web+sealskin: na sinusundan ng isang address ay magbubukas ng address na iyon sa SealSkin.",
       "install": "Kung kayang mag-install ng browser ng mga web app, i-install ang SealSkin mula sa menu nito para makapagbahagi ng mga link at file dito at makapagbukas ng mga file gamit ito."
@@ -1366,6 +1369,7 @@
     "unlockBody": "Ilagay ang passphrase na nagpoprotekta sa iyong key sa browser na ito.",
     "passphrase": "Passphrase",
     "unlock": "I-unlock",
-    "wrongPassphrase": "Hindi nabubuksan ng passphrase na iyon ang iyong key."
+    "wrongPassphrase": "Hindi nabubuksan ng passphrase na iyon ang iyong key.",
+    "receiving": "Ipinapadala ang file sa SealSkin…"
   }
 }

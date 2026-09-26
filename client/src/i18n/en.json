@@ -1188,6 +1188,9 @@
       "title": "SealSkin in This Browser",
       "bookmarklet": "Send to SealSkin",
       "bookmarkletHelp": "Drag this link to your bookmarks bar. Clicking it opens the page you are on in SealSkin, or searches for the text you selected.",
+      "pick": "Pick for SealSkin",
+      "pickHelp": "Drag this one there too. Click it, then click a link to open that link in SealSkin, or an image, video, or audio to send the file. Shift-click a link to send the file it leads to, fetched with your sign-in on that site.",
+      "pickHint": "SealSkin: click a link, or an image, video, or audio, to send it; Shift-click a link to send its file. Press Esc to cancel.",
       "protocol": "Open web+sealskin: Links Here",
       "protocolHelp": "A link written as web+sealskin: followed by an address then opens that address in SealSkin.",
       "install": "Where the browser can install web apps, install SealSkin from its menu to share links and files to it and to open files with it."
@@ -1391,6 +1394,7 @@
     "unlockBody": "Enter the passphrase that protects your key in this browser.",
     "passphrase": "Passphrase",
     "unlock": "Unlock",
-    "wrongPassphrase": "That passphrase does not unlock your key."
+    "wrongPassphrase": "That passphrase does not unlock your key.",
+    "receiving": "Sending the file to SealSkin…"
   }
 }

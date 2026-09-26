@@ -1185,6 +1185,9 @@
       "title": "SealSkin en Este Navegador",
       "bookmarklet": "Enviar a SealSkin",
       "bookmarkletHelp": "Arrastre este enlace a su barra de marcadores. Al hacer clic en él, se abre en SealSkin la página en la que está, o se busca el texto seleccionado.",
+      "pick": "Elegir para SealSkin",
+      "pickHelp": "Arrastre también este enlace allí. Haga clic en él y luego en un enlace para abrirlo en SealSkin, o en una imagen, un vídeo o un audio para enviar el archivo. Mayús+clic en un enlace envía el archivo al que lleva, obtenido con su sesión en ese sitio.",
+      "pickHint": "SealSkin: haga clic en un enlace, o en una imagen, un vídeo o un audio, para enviarlo; Mayús+clic en un enlace envía su archivo. Pulse Esc para cancelar.",
       "protocol": "Abrir aquí los enlaces web+sealskin:",
       "protocolHelp": "Un enlace escrito como web+sealskin: seguido de una dirección abre entonces esa dirección en SealSkin.",
       "install": "Si su navegador puede instalar aplicaciones web, instale SealSkin desde su menú para compartir enlaces y archivos con él y abrir archivos con él."
@@ -1366,6 +1369,7 @@
     "unlockBody": "Introduzca la frase de contraseña que protege su clave en este navegador.",
     "passphrase": "Frase de contraseña",
     "unlock": "Desbloquear",
-    "wrongPassphrase": "Esa frase de contraseña no desbloquea su clave."
+    "wrongPassphrase": "Esa frase de contraseña no desbloquea su clave.",
+    "receiving": "Enviando el archivo a SealSkin…"
   }
 }

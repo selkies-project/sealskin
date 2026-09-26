@@ -1185,6 +1185,9 @@
       "title": "Bu Tarayıcıda SealSkin",
       "bookmarklet": "SealSkin'e Gönder",
       "bookmarkletHelp": "Bu bağlantıyı yer imleri çubuğunuza sürükleyin. Tıkladığınızda bulunduğunuz sayfayı SealSkin'de açar veya seçtiğiniz metni arar.",
+      "pick": "SealSkin İçin Seç",
+      "pickHelp": "Bunu da oraya sürükleyin. Tıklayın, ardından bir bağlantıyı SealSkin'de açmak için ona, dosyayı göndermek için bir resme, videoya veya sese tıklayın. Bir bağlantıya Shift ile tıklamak, o sitedeki oturumunuzla alınan ve bağlantının götürdüğü dosyayı gönderir.",
+      "pickHint": "SealSkin: göndermek için bir bağlantıya ya da bir resme, videoya veya sese tıklayın; bağlantının dosyası için Shift ile tıklayın. İptal için Esc'ye basın.",
       "protocol": "web+sealskin: Bağlantılarını Burada Aç",
       "protocolHelp": "web+sealskin: ve ardından bir adres olarak yazılan bağlantı, o adresi SealSkin'de açar.",
       "install": "Tarayıcınız web uygulamalarını yükleyebiliyorsa, bağlantı ve dosya paylaşmak ve dosya açmak için SealSkin'i tarayıcının menüsünden yükleyin."
@@ -1366,6 +1369,7 @@
     "unlockBody": "Bu tarayıcıda anahtarınızı koruyan parola ifadesini girin.",
     "passphrase": "Parola ifadesi",
     "unlock": "Kilidi Aç",
-    "wrongPassphrase": "Bu parola ifadesi anahtarınızın kilidini açmıyor."
+    "wrongPassphrase": "Bu parola ifadesi anahtarınızın kilidini açmıyor.",
+    "receiving": "Dosya SealSkin'e gönderiliyor…"
   }
 }

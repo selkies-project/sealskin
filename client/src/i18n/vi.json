@@ -1185,6 +1185,9 @@
       "title": "SealSkin trong trình duyệt này",
       "bookmarklet": "Gửi tới SealSkin",
       "bookmarkletHelp": "Kéo liên kết này vào thanh dấu trang. Nhấp vào nó sẽ mở trang bạn đang xem trong SealSkin, hoặc tìm kiếm văn bản bạn đã chọn.",
+      "pick": "Chọn cho SealSkin",
+      "pickHelp": "Kéo cả liên kết này vào đó. Nhấp vào nó, rồi nhấp vào một liên kết để mở liên kết đó trong SealSkin, hoặc vào hình ảnh, video hay âm thanh để gửi tệp. Shift-nhấp vào một liên kết để gửi tệp mà nó trỏ tới, được tải bằng phiên đăng nhập của bạn trên trang đó.",
+      "pickHint": "SealSkin: nhấp vào một liên kết, hoặc hình ảnh, video hay âm thanh, để gửi; Shift-nhấp vào liên kết để gửi tệp của nó. Nhấn Esc để hủy.",
       "protocol": "Mở liên kết web+sealskin: tại đây",
       "protocolHelp": "Liên kết viết dạng web+sealskin: kèm theo một địa chỉ sẽ mở địa chỉ đó trong SealSkin.",
       "install": "Nếu trình duyệt có thể cài đặt ứng dụng web, hãy cài SealSkin từ menu của trình duyệt để chia sẻ liên kết và tệp tới nó và mở tệp bằng nó."
@@ -1366,6 +1369,7 @@
     "unlockBody": "Nhập cụm mật khẩu bảo vệ khóa của bạn trong trình duyệt này.",
     "passphrase": "Cụm mật khẩu",
     "unlock": "Mở khóa",
-    "wrongPassphrase": "Cụm mật khẩu này không mở được khóa của bạn."
+    "wrongPassphrase": "Cụm mật khẩu này không mở được khóa của bạn.",
+    "receiving": "Đang gửi tệp tới SealSkin…"
   }
 }

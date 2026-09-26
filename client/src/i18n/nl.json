@@ -1185,6 +1185,9 @@
       "title": "SealSkin in Deze Browser",
       "bookmarklet": "Naar SealSkin sturen",
       "bookmarkletHelp": "Sleep deze link naar uw bladwijzerbalk. Erop klikken opent de pagina waarop u bent in SealSkin, of zoekt naar de tekst die u hebt geselecteerd.",
+      "pick": "Kiezen voor SealSkin",
+      "pickHelp": "Sleep ook deze naar die balk. Klik erop en klik dan op een link om die in SealSkin te openen, of op een afbeelding, video of audio om het bestand te sturen. Shift-klik op een link om het bestand te sturen waar die naartoe leidt, opgehaald met uw aanmelding op die site.",
+      "pickHint": "SealSkin: klik op een link, of op een afbeelding, video of audio, om die te sturen; Shift-klik op een link stuurt het bestand. Druk op Esc om te annuleren.",
       "protocol": "web+sealskin:-links hier openen",
       "protocolHelp": "Een link geschreven als web+sealskin: gevolgd door een adres opent dat adres dan in SealSkin.",
       "install": "Als uw browser webapps kan installeren, installeer SealSkin dan via het menu om er links en bestanden mee te delen en er bestanden mee te openen."
@@ -1366,6 +1369,7 @@
     "unlockBody": "Voer de wachtwoordzin in die uw sleutel in deze browser beschermt.",
     "passphrase": "Wachtwoordzin",
     "unlock": "Ontgrendelen",
-    "wrongPassphrase": "Deze wachtwoordzin ontgrendelt uw sleutel niet."
+    "wrongPassphrase": "Deze wachtwoordzin ontgrendelt uw sleutel niet.",
+    "receiving": "Bestand wordt naar SealSkin gestuurd…"
   }
 }

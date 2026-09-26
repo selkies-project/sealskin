@@ -183,10 +183,14 @@ passphrase is lost, after which you connect again.
 
 In place of the context menu:
 
-* **The bookmarklet.** The dashboard's **SealSkin in This Browser** card has a
-  **Send to SealSkin** link to drag to your bookmarks bar. Clicked on any
-  page, it opens that page in SealSkin, or searches for the text you
-  selected.
+* **The bookmarklets.** The dashboard's **SealSkin in This Browser** card has
+  two links to drag to your bookmarks bar. **Send to SealSkin** opens the page
+  you are on in SealSkin, or searches for the text you selected. **Pick for
+  SealSkin** waits for your next click: click a link to open that link in
+  SealSkin, or an image, video, or audio to send the file; Shift-click a link
+  to send the file it leads to. A picked file is fetched by the page you are
+  on, with your sign-in on that site, so it works for files only that site can
+  read; anything the page cannot fetch opens as a link instead.
 * **`web+sealskin:` links.** After **Open web+sealskin: Links Here** (Chrome,
   Edge, Firefox), a link such as `web+sealskin:https://example.com` opens
   its address in SealSkin.

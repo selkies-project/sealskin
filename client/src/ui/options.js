@@ -1457,8 +1457,70 @@ function applyMobileLayout() {
 }
 
 /**
+ * The pick bookmarklet, serialized into its link and run in the page it is
+ * clicked on. The next click on a link opens that link here; on an image,
+ * video, or audio, or a Shift-click on a link, the page fetches the file with
+ * its own cookies and hands it to `receive.html`. What the page cannot fetch
+ * opens as a link, and what has no web address sends the page itself.
+ *
+ * @param {string} app The web app's address.
+ * @param {string} hint The banner shown until the click.
+ */
+function pickForSealSkin(app, hint) {
+  const banner = document.createElement('div');
+  const stop = () => {
+    banner.remove();
+    removeEventListener('click', onClick, true);
+    removeEventListener('keydown', onKey, true);
+  };
+  const onKey = (event) => { if (event.key === 'Escape') stop(); };
+  const onClick = (event) => {
+    const media = event.target.closest && event.target.closest('img, video, audio');
+    const link = event.target.closest && event.target.closest('a[href]');
+    if (event.target !== banner && !media && !link) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    stop();
+    if (!media && !link) return;
+    const target = event.shiftKey && link ? link : media || link;
+    const url = target === link ? link.href : media.currentSrc || media.src;
+    const web = /^https?:/.test(url);
+    const address = `${app}?url=${encodeURIComponent(web ? url : location.href)}`;
+    if (target === link && !event.shiftKey && !link.hasAttribute('download')) {
+      open(address);
+      return;
+    }
+    const tab = open(`${app}receive.html#${encodeURIComponent(address)}`);
+    const ready = new Promise((resolve) => {
+      addEventListener('message', function listen(message) {
+        if (message.source !== tab || message.data !== 'sealskin-receive') return;
+        removeEventListener('message', listen);
+        resolve();
+      });
+    });
+    fetch(url).then(async (response) => {
+      if (!response.ok) throw new Error(response.statusText);
+      const header = response.headers.get('content-disposition') || '';
+      const encoded = /filename\*=UTF-8''([^;]+)/i.exec(header);
+      const plain = /filename="?([^";]+)/i.exec(header);
+      const name = (encoded && decodeURIComponent(encoded[1])) || (plain && plain[1]) || (target === link && link.download)
+        || (web && decodeURIComponent(new URL(url).pathname.split('/').pop())) || 'file';
+      const blob = await response.blob();
+      await ready;
+      tab.postMessage({ file: new File([blob], name, { type: blob.type }) }, new URL(app).origin);
+    }).catch(() => { tab.location = address; });
+  };
+  banner.textContent = hint;
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483647;padding:12px;text-align:center;font:15px/1.4 system-ui,sans-serif;color:#fff;background:#a82a69;cursor:pointer';
+  document.body.append(banner);
+  addEventListener('click', onClick, true);
+  addEventListener('keydown', onKey, true);
+}
+
+/**
  * The web app's stand-ins for the context menu: a bookmarklet that opens the
- * current page (or searches the selection) here, and `web+sealskin:` links.
+ * current page (or searches the selection) here, one that picks a link or a
+ * file on the page, and `web+sealskin:` links.
  */
 function applyWebLayout() {
   document.getElementById('web-card').style.display = '';
@@ -1467,7 +1529,9 @@ function applyWebLayout() {
   // A javascript: URL is percent-decoded before it runs, so a `%` in the address must survive that.
   const appLiteral = JSON.stringify(app).replace(/%/g, '%25');
   bookmarklet.href = `javascript:(()=>{const s=String(getSelection()).trim();window.open(${appLiteral}+(s?'?q='+encodeURIComponent(s):'?url='+encodeURIComponent(location.href)))})()`;
-  bookmarklet.addEventListener('click', (event) => event.preventDefault());
+  const pick = document.getElementById('web-pick');
+  pick.href = `javascript:(${encodeURIComponent(pickForSealSkin)})(${encodeURIComponent(JSON.stringify(app))},${encodeURIComponent(JSON.stringify(t('options.web.pickHint')))})`;
+  [bookmarklet, pick].forEach((link) => link.addEventListener('click', (event) => event.preventDefault()));
   document.getElementById('web-protocol').hidden = typeof navigator.registerProtocolHandler !== 'function';
   document.getElementById('web-protocol-button').addEventListener('click', () => navigator.registerProtocolHandler('web+sealskin', `${app}?url=%s`));
 }

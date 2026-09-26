@@ -16,7 +16,7 @@ pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def http(tmp_path, monkeypatch):
     dist = tmp_path / "ui"
     dist.mkdir()
-    for name in ("index.html", "popup.html", "sw.js", "app.ABC123.js"):
+    for name in ("index.html", "receive.html", "popup.html", "sw.js", "app.ABC123.js"):
         (dist / name).write_text(name)
     monkeypatch.setattr(settings, "ui_path", str(dist))
     app = FastAPI()
@@ -35,6 +35,11 @@ def test_only_the_app_page_is_isolated(http):
     framed = http.get("/ui/popup.html")
     assert "Cross-Origin-Opener-Policy" not in framed.headers
     assert "Content-Security-Policy" not in framed.headers
+    # The pick bookmarklet's receive page keeps the opener that hands it the
+    # file, so it carries the script CSP but not the opener policy.
+    receive = http.get("/ui/receive.html")
+    assert "Cross-Origin-Opener-Policy" not in receive.headers
+    assert receive.headers["Content-Security-Policy"].startswith("frame-ancestors 'none'; script-src 'self'")
     assert http.get("/ui/sw.js").headers["Cache-Control"] == "no-cache"
     assert "immutable" in http.get("/ui/app.ABC123.js").headers["Cache-Control"]
 

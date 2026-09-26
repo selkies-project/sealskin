@@ -1185,6 +1185,9 @@
       "title": "在此浏览器中使用 SealSkin",
       "bookmarklet": "发送到 SealSkin",
       "bookmarkletHelp": "将此链接拖到书签栏。点击它会在 SealSkin 中打开当前页面，或搜索您选中的文本。",
+      "pick": "为 SealSkin 选取",
+      "pickHelp": "也把这个链接拖到那里。点击它，然后点击某个链接即可在 SealSkin 中打开该链接，点击图片、视频或音频即可发送文件。按住 Shift 点击链接，会以您在该网站上的登录状态获取链接指向的文件并发送。",
+      "pickHint": "SealSkin：点击链接，或图片、视频、音频即可发送；按住 Shift 点击链接可发送其文件。按 Esc 取消。",
       "protocol": "在此打开 web+sealskin: 链接",
       "protocolHelp": "以 web+sealskin: 开头、后接地址的链接会在 SealSkin 中打开该地址。",
       "install": "如果浏览器支持安装网页应用，请从其菜单安装 SealSkin，以便向其分享链接和文件，并用它打开文件。"
@@ -1366,6 +1369,7 @@
     "unlockBody": "输入在此浏览器中保护您密钥的密码短语。",
     "passphrase": "密码短语",
     "unlock": "解锁",
-    "wrongPassphrase": "该密码短语无法解锁您的密钥。"
+    "wrongPassphrase": "该密码短语无法解锁您的密钥。",
+    "receiving": "正在将文件发送到 SealSkin…"
   }
 }
