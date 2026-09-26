@@ -135,7 +135,9 @@
       "keyGeneration": "Génération de Clé",
       "keyGenDescription": "Si vous n'avez pas de paire de clés, vous pouvez en générer une ici. La clé privée sera remplie ci-dessus. Fournissez la clé publique à votre administrateur.",
       "generateKeyButton": "Générer une Nouvelle Paire de Clés",
-      "publicKeyForAdminLabel": "Votre Clé Publique (pour l'admin)"
+      "publicKeyForAdminLabel": "Votre Clé Publique (pour l'admin)",
+      "passphraseLabel": "Phrase secrète",
+      "passphraseHelp": "Votre clé privée est conservée dans ce navigateur, chiffrée avec cette phrase secrète, que vous saisirez à chaque ouverture de SealSkin ici."
     },
     "home": {
       "title": "Vos Dossiers Personnels",
@@ -1166,7 +1168,8 @@
       "pendingConfigSaved": "Configuration en attente enregistrée. Vous pouvez maintenant fournir votre clé publique à l'administrateur.",
       "settingsSaved": "Paramètres enregistrés.",
       "appCreated": "Application '{name}' créée avec succès.",
-      "launchFailed": "Échec du lancement : {error}"
+      "launchFailed": "Échec du lancement : {error}",
+      "passphraseRequired": "Saisissez une phrase secrète pour protéger votre clé dans ce navigateur."
     },
     "placeholders": {
       "noAdmins": "Aucun admin trouvé.",
@@ -1177,6 +1180,14 @@
       "noPinned": "Aucun comportement épinglé trouvé.",
       "errorLoading": "Erreur lors du chargement des dossiers.",
       "noInstalledApps": "Aucune application n'a encore été installée."
+    },
+    "web": {
+      "title": "SealSkin dans ce Navigateur",
+      "bookmarklet": "Envoyer à SealSkin",
+      "bookmarkletHelp": "Faites glisser ce lien dans votre barre de favoris. Un clic dessus ouvre la page en cours dans SealSkin, ou recherche le texte sélectionné.",
+      "protocol": "Ouvrir ici les liens web+sealskin:",
+      "protocolHelp": "Un lien écrit web+sealskin: suivi d'une adresse ouvre alors cette adresse dans SealSkin.",
+      "install": "Si votre navigateur sait installer des applications web, installez SealSkin depuis son menu pour lui partager des liens et des fichiers et ouvrir des fichiers avec."
     }
   },
   "popup": {
@@ -1349,5 +1360,12 @@
       "completed": "Terminé",
       "error": "Erreur"
     }
+  },
+  "web": {
+    "unlockTitle": "Déverrouiller SealSkin",
+    "unlockBody": "Saisissez la phrase secrète qui protège votre clé dans ce navigateur.",
+    "passphrase": "Phrase secrète",
+    "unlock": "Déverrouiller",
+    "wrongPassphrase": "Cette phrase secrète ne déverrouille pas votre clé."
   }
 }

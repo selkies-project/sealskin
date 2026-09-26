@@ -29,15 +29,15 @@ const SHELL_VERSION = typeof __UI_VERSION__ !== 'undefined' ? __UI_VERSION__ : '
  *
  * @returns {'chrome'|'firefox'|'android'|'ios'|'web'}
  */
-function detectPlatform() {
+function detectPlatform(shell) {
   const cap = typeof window !== 'undefined' && window.Capacitor;
   if (cap && typeof cap.getPlatform === 'function') {
     const p = cap.getPlatform();
     if (p === 'android' || p === 'ios') return p;
   }
   const ua = navigator.userAgent || '';
-  if (/Android/i.test(ua) && SHELL === 'mobile') return 'android';
-  if (/iPhone|iPad|iPod/i.test(ua) && SHELL === 'mobile') return 'ios';
+  if (/Android/i.test(ua) && shell === 'mobile') return 'android';
+  if (/iPhone|iPad|iPod/i.test(ua) && shell === 'mobile') return 'ios';
   if (typeof browser !== 'undefined' && /Firefox/.test(ua)) return 'firefox';
   if (/Firefox/.test(ua)) return 'firefox';
   if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) return 'chrome';
@@ -62,27 +62,30 @@ export async function callBackground(transport, type, payload = {}) {
  * Create the host bridge.
  *
  * @param {object} options
+ * @param {'extension'|'mobile'|'web'} [options.shell] defaults to the build target
  * @param {HTMLIFrameElement} options.iframe The single framed page.
  * @param {function} options.transport Sends a message to the background, resolves its reply.
  * @param {function} [options.onReady] Called with the page's hello payload the first time it arrives.
  * @param {function} [options.onHelloMismatch] Called when the page's bridge version differs.
  * @param {function} options.openPage `(page, params?) => void` implemented by the host page.
  * @param {function} [options.saveBlob] `(blob, filename) => Promise` for mobile native open.
+ * @param {function} [options.reserveTab] `(reserve) => void`, web app tab reservation.
  * @param {function} [options.close] Closes the popup (extension) or no-op.
  * @param {function} [options.isConnectPage] `() => boolean`, true while the bundled connect page is framed.
  * @returns {{setExpectedOrigin: function(string): void, destroy: function(): void}}
  */
 export function createHost(options) {
   const { iframe, transport } = options;
-  const platform = detectPlatform();
+  const shell = options.shell || SHELL;
+  const platform = detectPlatform(shell);
   let expectedOrigin = null;
   let helloSeen = false;
 
   const capabilities = {
-    streamDownload: SHELL === 'extension' && platform === 'chrome',
-    nativeFileOpen: SHELL === 'mobile',
-    contextMenus: SHELL === 'extension',
-    tabs: SHELL === 'extension',
+    streamDownload: shell === 'extension' && platform === 'chrome',
+    nativeFileOpen: shell === 'mobile',
+    contextMenus: shell === 'extension',
+    tabs: shell === 'extension',
   };
 
   const handlers = {
@@ -90,7 +93,7 @@ export function createHost(options) {
       const config = await callBackground(transport, 'getPublicConfig');
       const info = {
         bridge: BRIDGE_VERSION,
-        shell: SHELL,
+        shell,
         platform,
         shellVersion: SHELL_VERSION,
         locale: navigator.language || 'en-US',
@@ -138,7 +141,7 @@ export function createHost(options) {
       }
       await callBackground(transport, 'setContext', { context: toStore });
       if (openPopup) {
-        if (SHELL === 'mobile') {
+        if (shell !== 'extension') {
           options.openPage('popup');
         } else {
           await callBackground(transport, 'openPopup');
@@ -165,6 +168,11 @@ export function createHost(options) {
 
     closeSession({ sessionId }) {
       return callBackground(transport, 'closeSession', { sessionId });
+    },
+
+    reserveTab({ reserve }) {
+      if (options.reserveTab) options.reserveTab(reserve !== false);
+      return {};
     },
 
     async openPage({ page, params }) {

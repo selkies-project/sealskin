@@ -135,7 +135,9 @@
       "keyGeneration": "Geração de Chave",
       "keyGenDescription": "Se você não tiver um par de chaves, pode gerar um aqui. A chave privada será preenchida acima. Forneça a chave pública ao seu administrador.",
       "generateKeyButton": "Gerar Novo Par de Chaves",
-      "publicKeyForAdminLabel": "Sua Chave Pública (para o admin)"
+      "publicKeyForAdminLabel": "Sua Chave Pública (para o admin)",
+      "passphraseLabel": "Frase secreta",
+      "passphraseHelp": "Sua chave privada fica guardada neste navegador, criptografada com esta frase secreta, que você digita sempre que abrir o SealSkin aqui."
     },
     "home": {
       "title": "Seus Diretórios Home",
@@ -1166,7 +1168,8 @@
       "pendingConfigSaved": "Configuração pendente salva. Agora você pode fornecer sua chave pública ao administrador.",
       "settingsSaved": "Configurações salvas.",
       "appCreated": "Aplicativo '{name}' criado com sucesso.",
-      "launchFailed": "Falha ao iniciar: {error}"
+      "launchFailed": "Falha ao iniciar: {error}",
+      "passphraseRequired": "Digite uma frase secreta para proteger sua chave neste navegador."
     },
     "placeholders": {
       "noAdmins": "Nenhum admin encontrado.",
@@ -1177,6 +1180,14 @@
       "noPinned": "Nenhum comportamento fixo encontrado.",
       "errorLoading": "Erro ao carregar diretórios.",
       "noInstalledApps": "Nenhuma aplicação foi instalada ainda."
+    },
+    "web": {
+      "title": "SealSkin Neste Navegador",
+      "bookmarklet": "Enviar ao SealSkin",
+      "bookmarkletHelp": "Arraste este link para a barra de favoritos. Clicar nele abre a página em que você está no SealSkin ou pesquisa o texto selecionado.",
+      "protocol": "Abrir links web+sealskin: aqui",
+      "protocolHelp": "Um link escrito como web+sealskin: seguido de um endereço abre esse endereço no SealSkin.",
+      "install": "Se o navegador puder instalar aplicativos web, instale o SealSkin pelo menu dele para compartilhar links e arquivos com ele e abrir arquivos com ele."
     }
   },
   "popup": {
@@ -1349,5 +1360,12 @@
       "completed": "Concluído",
       "error": "Erro"
     }
+  },
+  "web": {
+    "unlockTitle": "Desbloquear o SealSkin",
+    "unlockBody": "Digite a frase secreta que protege sua chave neste navegador.",
+    "passphrase": "Frase secreta",
+    "unlock": "Desbloquear",
+    "wrongPassphrase": "Essa frase secreta não desbloqueia sua chave."
   }
 }

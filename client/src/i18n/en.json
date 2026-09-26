@@ -138,7 +138,9 @@
       "keyGeneration": "Key Generation",
       "keyGenDescription": "If you don't have a key pair, you can generate one here. The private key will be filled in above. Provide the public key to your administrator.",
       "generateKeyButton": "Generate New Key Pair",
-      "publicKeyForAdminLabel": "Your Public Key (for admin)"
+      "publicKeyForAdminLabel": "Your Public Key (for admin)",
+      "passphraseLabel": "Passphrase",
+      "passphraseHelp": "Your private key is kept in this browser encrypted with this passphrase, which you enter each time you open SealSkin here."
     },
     "home": {
       "title": "Your Home Directories",
@@ -1169,7 +1171,8 @@
       "pendingConfigSaved": "Pending configuration saved. You can now provide your public key to the administrator.",
       "settingsSaved": "Settings saved.",
       "appCreated": "App '{name}' created successfully.",
-      "launchFailed": "Launch failed: {error}"
+      "launchFailed": "Launch failed: {error}",
+      "passphraseRequired": "Enter a passphrase to protect your key in this browser."
     },
     "placeholders": {
       "noAdmins": "No admins found.",
@@ -1180,6 +1183,14 @@
       "noPinned": "No pinned behaviors found.",
       "errorLoading": "Error loading directories.",
       "noInstalledApps": "No applications have been installed yet."
+    },
+    "web": {
+      "title": "SealSkin in This Browser",
+      "bookmarklet": "Send to SealSkin",
+      "bookmarkletHelp": "Drag this link to your bookmarks bar. Clicking it opens the page you are on in SealSkin, or searches for the text you selected.",
+      "protocol": "Open web+sealskin: Links Here",
+      "protocolHelp": "A link written as web+sealskin: followed by an address then opens that address in SealSkin.",
+      "install": "Where the browser can install web apps, install SealSkin from its menu to share links and files to it and to open files with it."
     }
   },
   "popup": {
@@ -1374,5 +1385,12 @@
       "mismatchTitle": "Update required",
       "mismatchBody": "This app and the server web interface speak different bridge versions. Update the extension or app, or update the server, so both match."
     }
+  },
+  "web": {
+    "unlockTitle": "Unlock SealSkin",
+    "unlockBody": "Enter the passphrase that protects your key in this browser.",
+    "passphrase": "Passphrase",
+    "unlock": "Unlock",
+    "wrongPassphrase": "That passphrase does not unlock your key."
   }
 }

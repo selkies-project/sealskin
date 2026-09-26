@@ -135,7 +135,9 @@
       "keyGeneration": "キー生成",
       "keyGenDescription": "キーペアがない場合は、ここで生成できます。秘密鍵は上に記入されます。公開鍵を管理者に提供してください。",
       "generateKeyButton": "新しいキーペアを生成",
-      "publicKeyForAdminLabel": "あなたの公開鍵（管理者向け）"
+      "publicKeyForAdminLabel": "あなたの公開鍵（管理者向け）",
+      "passphraseLabel": "パスフレーズ",
+      "passphraseHelp": "秘密鍵はこのパスフレーズで暗号化されてこのブラウザーに保存されます。ここでSealSkinを開くたびに入力します。"
     },
     "home": {
       "title": "あなたのホームディレクトリ",
@@ -1166,7 +1168,8 @@
       "pendingConfigSaved": "保留中の設定が保存されました。管理者に公開鍵を提供できます。",
       "settingsSaved": "設定が保存されました。",
       "appCreated": "アプリ「{name}」が正常に作成されました。",
-      "launchFailed": "起動に失敗しました: {error}"
+      "launchFailed": "起動に失敗しました: {error}",
+      "passphraseRequired": "このブラウザーで鍵を保護するパスフレーズを入力してください。"
     },
     "placeholders": {
       "noAdmins": "管理が見つかりません。",
@@ -1177,6 +1180,14 @@
       "noPinned": "ピン留めされた動作が見つかりません。",
       "errorLoading": "ディレクトリの読み込み中にエラーが発生しました。",
       "noInstalledApps": "まだアプリケーションがインストールされていません。"
+    },
+    "web": {
+      "title": "このブラウザーでのSealSkin",
+      "bookmarklet": "SealSkinに送る",
+      "bookmarkletHelp": "このリンクをブックマークバーにドラッグしてください。クリックすると、表示中のページをSealSkinで開くか、選択したテキストを検索します。",
+      "protocol": "web+sealskin: リンクをここで開く",
+      "protocolHelp": "web+sealskin: の後にアドレスを続けたリンクは、そのアドレスをSealSkinで開きます。",
+      "install": "ブラウザーがWebアプリのインストールに対応している場合は、メニューからSealSkinをインストールすると、リンクやファイルを共有したり、ファイルを開いたりできます。"
     }
   },
   "popup": {
@@ -1349,5 +1360,12 @@
       "completed": "完了",
       "error": "エラー"
     }
+  },
+  "web": {
+    "unlockTitle": "SealSkinのロックを解除",
+    "unlockBody": "このブラウザーで鍵を保護しているパスフレーズを入力してください。",
+    "passphrase": "パスフレーズ",
+    "unlock": "ロック解除",
+    "wrongPassphrase": "このパスフレーズでは鍵のロックを解除できません。"
   }
 }

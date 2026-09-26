@@ -29,7 +29,8 @@ SealSkin runs desktop applications in isolated containers on a server you
 control and streams them to any browser or phone. A browser extension turns
 every link, file, download, and text selection into something you open
 remotely instead of locally, so nothing from the web ever runs on the device
-in front of you. It is built on [Selkies](https://github.com/selkies-project/selkies)
+in front of you; with nothing installed, the server's own web app does the
+same from any browser. It is built on [Selkies](https://github.com/selkies-project/selkies)
 and the [LinuxServer.io](https://www.linuxserver.io) application images.
 
 **[Read the documentation](https://selkies-project.github.io/sealskin/)** or
@@ -45,6 +46,7 @@ visit **[sealskin.app](https://sealskin.app)**.
 | **Firefox** | [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/) |
 | **iPhone and iPad** | [App Store](https://apps.apple.com/us/app/sealskin/id6758210210) |
 | **Android** | [Google Play](https://play.google.com/store/apps/details?id=io.linuxserver.sealskin) |
+| **Any browser**, nothing to install | the web app at `https://<server>:8443/ui/` |
 
 Every [release](https://github.com/selkies-project/sealskin/releases) also
 carries the extension zips, the APK, the IPA, and the server wheel.
@@ -84,8 +86,9 @@ and the first login.
   per-session key negotiated against the server's RSA key; users authenticate
   with a signed token from a private key that never leaves the client.
 * **One UI, served by the server.** The extension and the app are thin
-  shells; the launcher, dashboard, and admin panels ship with the server
-  image, so UI updates never wait for a store review.
+  shells, and any browser can use the same pages as a web app; the launcher,
+  dashboard, and admin panels ship with the server image, so UI updates never
+  wait for a store review.
 
 ## Documentation
 

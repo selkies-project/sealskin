@@ -135,7 +135,9 @@
       "keyGeneration": "密钥生成",
       "keyGenDescription": "如果您没有密钥对，可以在此处生成一个。私钥将自动填写在上方。请将公钥提供给您的管理员。",
       "generateKeyButton": "生成新密钥对",
-      "publicKeyForAdminLabel": "您的公钥（提供给管理员）"
+      "publicKeyForAdminLabel": "您的公钥（提供给管理员）",
+      "passphraseLabel": "密码短语",
+      "passphraseHelp": "您的私钥以此密码短语加密后保存在此浏览器中，每次在这里打开 SealSkin 时都需要输入。"
     },
     "home": {
       "title": "您的主目录",
@@ -1166,7 +1168,8 @@
       "pendingConfigSaved": "待定配置已保存。您现在可以将您的公钥提供给管理员。",
       "settingsSaved": "设置已保存。",
       "appCreated": "应用“{name}”已成功创建。",
-      "launchFailed": "启动失败：{error}"
+      "launchFailed": "启动失败：{error}",
+      "passphraseRequired": "请输入密码短语以保护此浏览器中的密钥。"
     },
     "placeholders": {
       "noAdmins": "未找到管理员。",
@@ -1177,6 +1180,14 @@
       "noPinned": "未找到固定行为。",
       "errorLoading": "加载目录时出错。",
       "noInstalledApps": "尚未安装任何应用程序。"
+    },
+    "web": {
+      "title": "在此浏览器中使用 SealSkin",
+      "bookmarklet": "发送到 SealSkin",
+      "bookmarkletHelp": "将此链接拖到书签栏。点击它会在 SealSkin 中打开当前页面，或搜索您选中的文本。",
+      "protocol": "在此打开 web+sealskin: 链接",
+      "protocolHelp": "以 web+sealskin: 开头、后接地址的链接会在 SealSkin 中打开该地址。",
+      "install": "如果浏览器支持安装网页应用，请从其菜单安装 SealSkin，以便向其分享链接和文件，并用它打开文件。"
     }
   },
   "popup": {
@@ -1349,5 +1360,12 @@
       "completed": "已完成",
       "error": "错误"
     }
+  },
+  "web": {
+    "unlockTitle": "解锁 SealSkin",
+    "unlockBody": "输入在此浏览器中保护您密钥的密码短语。",
+    "passphrase": "密码短语",
+    "unlock": "解锁",
+    "wrongPassphrase": "该密码短语无法解锁您的密钥。"
   }
 }

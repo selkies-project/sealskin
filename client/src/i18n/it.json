@@ -135,7 +135,9 @@
       "keyGeneration": "Generazione Chiave",
       "keyGenDescription": "Se non hai una coppia di chiavi, puoi generarne una qui. La chiave privata verrà inserita sopra. Fornisci la chiave pubblica al tuo amministratore.",
       "generateKeyButton": "Genera Nuova Coppia di Chiavi",
-      "publicKeyForAdminLabel": "La Tua Chiave Pubblica (per l'admin)"
+      "publicKeyForAdminLabel": "La Tua Chiave Pubblica (per l'admin)",
+      "passphraseLabel": "Passphrase",
+      "passphraseHelp": "La tua chiave privata è conservata in questo browser cifrata con questa passphrase, da inserire ogni volta che apri SealSkin qui."
     },
     "home": {
       "title": "Le Tue Cartelle Home",
@@ -1166,7 +1168,8 @@
       "pendingConfigSaved": "Configurazione in sospeso salvata. Ora puoi fornire la tua chiave pubblica all'amministratore.",
       "settingsSaved": "Impostazioni salvate.",
       "appCreated": "App '{name}' creata con successo.",
-      "launchFailed": "Avvio fallito: {error}"
+      "launchFailed": "Avvio fallito: {error}",
+      "passphraseRequired": "Inserisci una passphrase per proteggere la tua chiave in questo browser."
     },
     "placeholders": {
       "noAdmins": "Nessun amministratore trovato.",
@@ -1177,6 +1180,14 @@
       "noPinned": "Nessun comportamento fissato trovato.",
       "errorLoading": "Errore durante il caricamento delle cartelle.",
       "noInstalledApps": "Nessuna applicazione è stata ancora installata."
+    },
+    "web": {
+      "title": "SealSkin in Questo Browser",
+      "bookmarklet": "Invia a SealSkin",
+      "bookmarkletHelp": "Trascina questo link nella barra dei preferiti. Facendo clic su di esso si apre in SealSkin la pagina in cui ti trovi, oppure si cerca il testo selezionato.",
+      "protocol": "Apri qui i link web+sealskin:",
+      "protocolHelp": "Un link scritto come web+sealskin: seguito da un indirizzo apre poi quell'indirizzo in SealSkin.",
+      "install": "Se il browser può installare app web, installa SealSkin dal suo menu per condividere link e file con esso e aprire file con esso."
     }
   },
   "popup": {
@@ -1349,5 +1360,12 @@
       "completed": "Completato",
       "error": "Errore"
     }
+  },
+  "web": {
+    "unlockTitle": "Sblocca SealSkin",
+    "unlockBody": "Inserisci la passphrase che protegge la tua chiave in questo browser.",
+    "passphrase": "Passphrase",
+    "unlock": "Sblocca",
+    "wrongPassphrase": "Questa passphrase non sblocca la tua chiave."
   }
 }

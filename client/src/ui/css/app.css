@@ -1,0 +1,30 @@
+/* Web app: the shell host in a browser tab. */
+@import "../../shell/host.css";
+
+/* The launcher keeps the extension popup's size; on a large screen it floats as a card. */
+@media (min-width: 600px) and (min-height: 640px) {
+  body[data-frame="popup"] { display: grid; place-items: center; }
+  body[data-frame="popup"] #app-frame {
+    width: 450px;
+    height: 580px;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.6);
+  }
+}
+
+.host-box input.passphrase {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-1);
+  color: var(--text-primary);
+  font: inherit;
+  -webkit-text-security: disc;
+}
+.host-box input.passphrase:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft), 0 0 0 1px var(--accent-primary);
+}

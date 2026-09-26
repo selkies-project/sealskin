@@ -15,6 +15,14 @@
 
         <div id="status" class="status" hidden></div>
 
+        <section class="card" id="passphrase-view" hidden>
+            <div class="form-group">
+                <label for="passphrase" data-i18n="options.config.passphraseLabel">Passphrase</label>
+                <input type="text" id="passphrase" class="passphrase" autocomplete="off" autocapitalize="off" spellcheck="false">
+                <p class="muted" data-i18n="options.config.passphraseHelp">Your private key is kept in this browser encrypted with this passphrase, which you enter each time you open SealSkin here.</p>
+            </div>
+        </section>
+
         <section class="card" id="connected-view" hidden>
             <div class="card-header">
                 <h3 data-i18n="options.dashboard.userStatus">User Status</h3>
@@ -60,15 +68,15 @@
                 <button id="save" class="primary" data-i18n="options.config.saveButton">Save Configuration</button>
             </div>
             <div class="form-grid">
-                <div class="form-group">
+                <div class="form-group server-field">
                     <label for="serverIp" data-i18n="options.config.serverIpLabel">Server IP or Domain</label>
                     <input type="text" id="serverIp" autocomplete="off" data-i18n-placeholder="options.config.serverIpPlaceholder" placeholder="e.g., 192.168.1.100">
                 </div>
-                <div class="form-group">
+                <div class="form-group server-field">
                     <label for="apiPort" data-i18n="options.config.apiPortLabel">API Port</label>
                     <input type="text" id="apiPort" inputmode="numeric" data-i18n-placeholder="options.config.apiPortPlaceholder" placeholder="e.g., 8000">
                 </div>
-                <div class="form-group">
+                <div class="form-group server-field">
                     <label for="sessionPort" data-i18n="options.config.sessionPortLabel">Session Port</label>
                     <input type="text" id="sessionPort" inputmode="numeric" data-i18n-placeholder="options.config.sessionPortPlaceholder" placeholder="e.g., 8443">
                 </div>

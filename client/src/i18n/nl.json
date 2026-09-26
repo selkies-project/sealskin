@@ -135,7 +135,9 @@
       "keyGeneration": "Sleutelgeneratie",
       "keyGenDescription": "Als u geen sleutelpaar heeft, kunt u er hier een genereren. De privésleutel wordt hierboven ingevuld. Geef de publieke sleutel aan uw beheerder.",
       "generateKeyButton": "Nieuw Sleutelpaar Genereren",
-      "publicKeyForAdminLabel": "Uw Publieke Sleutel (voor admin)"
+      "publicKeyForAdminLabel": "Uw Publieke Sleutel (voor admin)",
+      "passphraseLabel": "Wachtwoordzin",
+      "passphraseHelp": "Uw privésleutel wordt in deze browser versleuteld met deze wachtwoordzin bewaard. U voert die in telkens wanneer u SealSkin hier opent."
     },
     "home": {
       "title": "Uw Home Directories",
@@ -1166,7 +1168,8 @@
       "pendingConfigSaved": "Wachtende configuratie opgeslagen. U kunt nu uw publieke sleutel aan de beheerder verstrekken.",
       "settingsSaved": "Instellingen opgeslagen.",
       "appCreated": "App '{name}' succesvol aangemaakt.",
-      "launchFailed": "Starten mislukt: {error}"
+      "launchFailed": "Starten mislukt: {error}",
+      "passphraseRequired": "Voer een wachtwoordzin in om uw sleutel in deze browser te beschermen."
     },
     "placeholders": {
       "noAdmins": "Geen beheerders gevonden.",
@@ -1177,6 +1180,14 @@
       "noPinned": "Geen vastgezet gedrag gevonden.",
       "errorLoading": "Fout bij het laden van de mappen.",
       "noInstalledApps": "Er zijn nog geen applicaties geïnstalleerd."
+    },
+    "web": {
+      "title": "SealSkin in Deze Browser",
+      "bookmarklet": "Naar SealSkin sturen",
+      "bookmarkletHelp": "Sleep deze link naar uw bladwijzerbalk. Erop klikken opent de pagina waarop u bent in SealSkin, of zoekt naar de tekst die u hebt geselecteerd.",
+      "protocol": "web+sealskin:-links hier openen",
+      "protocolHelp": "Een link geschreven als web+sealskin: gevolgd door een adres opent dat adres dan in SealSkin.",
+      "install": "Als uw browser webapps kan installeren, installeer SealSkin dan via het menu om er links en bestanden mee te delen en er bestanden mee te openen."
     }
   },
   "popup": {
@@ -1349,5 +1360,12 @@
       "completed": "Voltooid",
       "error": "Fout"
     }
+  },
+  "web": {
+    "unlockTitle": "SealSkin ontgrendelen",
+    "unlockBody": "Voer de wachtwoordzin in die uw sleutel in deze browser beschermt.",
+    "passphrase": "Wachtwoordzin",
+    "unlock": "Ontgrendelen",
+    "wrongPassphrase": "Deze wachtwoordzin ontgrendelt uw sleutel niet."
   }
 }

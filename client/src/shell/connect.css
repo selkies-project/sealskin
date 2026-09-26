@@ -227,3 +227,8 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* The web app always connects to the server that serves it. */
+html.shell-web .server-field { display: none; }
+/* Masked, but not a password field: a password manager would fill it into session pages. */
+.passphrase { -webkit-text-security: disc; }
