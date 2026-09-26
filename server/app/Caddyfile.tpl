@@ -42,6 +42,17 @@ https://:{{SESSION_PORT}} {
         @session_path path_regexp session_id ^/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})(/.*)?$
 
         handle @session_path {
+                # A session answers its own pages and navigations to it, never another origin's
+                # requests or WebSockets: those carry its cookie wherever the two are same-site.
+                @foreign_request expression `{http.request.header.Sec-Fetch-Site} != "" && {http.request.header.Sec-Fetch-Site} != "same-origin" && {http.request.header.Sec-Fetch-Site} != "none" && {http.request.header.Sec-Fetch-Mode} != "navigate"`
+                @foreign_socket expression `{http.request.header.Sec-WebSocket-Version} != "" && {http.request.header.Origin} != "" && {http.request.header.Origin} != "https://" + {http.request.host} && !{http.request.header.Origin}.startsWith("https://" + {http.request.host} + ":")`
+                handle @foreign_request {
+                        respond "Forbidden" 403
+                }
+                handle @foreign_socket {
+                        respond "Forbidden" 403
+                }
+
                 @initial_auth query access_token=*
                 handle @initial_auth {
                         reverse_proxy 127.0.0.1:{{API_PORT}}
