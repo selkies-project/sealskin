@@ -7,23 +7,7 @@
 <p align="center"><strong>Your browser is your new computer.</strong><br>
 Self-hosted browser isolation and remote application streaming.</p>
 
-<p align="center">
-  <a href="https://github.com/selkies-project/sealskin/actions/workflows/ci.yml"><img src="https://github.com/selkies-project/sealskin/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://github.com/selkies-project/sealskin/actions/workflows/prerelease.yml"><img src="https://github.com/selkies-project/sealskin/actions/workflows/prerelease.yml/badge.svg" alt="Pre-release"></a>
-  <a href="https://github.com/selkies-project/sealskin/actions/workflows/docs.yml"><img src="https://github.com/selkies-project/sealskin/actions/workflows/docs.yml/badge.svg" alt="Docs"></a>
-  <a href="https://github.com/selkies-project/sealskin/releases/latest"><img src="https://img.shields.io/github/v/release/selkies-project/sealskin?label=release" alt="Latest release"></a>
-  <a href="https://opensource.org/licenses/MPL-2.0"><img src="https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg" alt="License: MPL 2.0"></a>
-  <a href="https://discord.com/invite/linuxserver"><img src="https://img.shields.io/discord/354974912613449730?logo=discord&label=Discord" alt="Discord"></a>
-  <a href="https://deepwiki.com/selkies-project/sealskin"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
-</p>
-
-<p align="center">
-  <a href="https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk"><img src="https://img.shields.io/chrome-web-store/v/lclgfmnljgacfdpmmmjmfpdelndbbfhk?logo=googlechrome&logoColor=white&label=Chrome%20Web%20Store" alt="Chrome Web Store"></a>
-  <a href="https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/"><img src="https://img.shields.io/amo/v/sealskin-isolation?logo=firefox&logoColor=white&label=Firefox%20Add-on" alt="Firefox Add-on"></a>
-  <a href="https://apps.apple.com/us/app/sealskin/id6758210210"><img src="https://img.shields.io/badge/App%20Store-iOS-black?logo=apple&logoColor=white" alt="App Store"></a>
-  <a href="https://play.google.com/store/apps/details?id=io.linuxserver.sealskin"><img src="https://img.shields.io/badge/Google%20Play-Android-3DDC84?logo=googleplay&logoColor=white" alt="Google Play"></a>
-  <a href="https://github.com/linuxserver/docker-sealskin"><img src="https://img.shields.io/docker/pulls/linuxserver/sealskin?logo=docker&logoColor=white&label=linuxserver%2Fsealskin" alt="Docker pulls"></a>
-</p>
+<p align="center"><a href="https://github.com/selkies-project/sealskin/actions/workflows/ci.yml"><img src="https://github.com/selkies-project/sealskin/actions/workflows/ci.yml/badge.svg" alt="CI"></a> <a href="https://github.com/selkies-project/sealskin/actions/workflows/prerelease.yml"><img src="https://github.com/selkies-project/sealskin/actions/workflows/prerelease.yml/badge.svg" alt="Pre-release"></a> <a href="https://github.com/selkies-project/sealskin/actions/workflows/docs.yml"><img src="https://github.com/selkies-project/sealskin/actions/workflows/docs.yml/badge.svg" alt="Docs"></a> <a href="https://github.com/selkies-project/sealskin/releases/latest"><img src="https://img.shields.io/github/v/release/selkies-project/sealskin?label=release" alt="Latest release"></a> <a href="https://opensource.org/licenses/MPL-2.0"><img src="https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg" alt="License: MPL 2.0"></a> <a href="https://discord.com/invite/linuxserver"><img src="https://img.shields.io/discord/354974912613449730?logo=discord&label=Discord" alt="Discord"></a> <a href="https://deepwiki.com/selkies-project/sealskin"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a> <a href="https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk"><img src="https://img.shields.io/chrome-web-store/v/lclgfmnljgacfdpmmmjmfpdelndbbfhk?logo=googlechrome&logoColor=white&label=Chrome%20Web%20Store" alt="Chrome Web Store"></a> <a href="https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/"><img src="https://img.shields.io/amo/v/sealskin-isolation?logo=firefox&logoColor=white&label=Firefox%20Add-on" alt="Firefox Add-on"></a> <a href="https://apps.apple.com/us/app/sealskin/id6758210210"><img src="https://img.shields.io/badge/App%20Store-iOS-black?logo=apple&logoColor=white" alt="App Store"></a> <a href="https://play.google.com/store/apps/details?id=io.linuxserver.sealskin"><img src="https://img.shields.io/badge/Google%20Play-Android-3DDC84?logo=googleplay&logoColor=white" alt="Google Play"></a> <a href="https://github.com/linuxserver/docker-sealskin"><img src="https://img.shields.io/docker/pulls/linuxserver/sealskin?logo=docker&logoColor=white&label=linuxserver%2Fsealskin" alt="Docker pulls"></a></p>
 
 SealSkin runs desktop applications in isolated containers on a server you
 control and streams them to any browser or phone. A browser extension turns

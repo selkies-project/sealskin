@@ -5,13 +5,7 @@ description: Self-hosted browser isolation and remote application streaming. Ope
 
 <p align="center"><img src="assets/logo.png" alt="SealSkin" width="160" height="160"></p>
 
-[![CI](https://github.com/selkies-project/sealskin/actions/workflows/ci.yml/badge.svg)](https://github.com/selkies-project/sealskin/actions/workflows/ci.yml)
-[![Pre-release](https://github.com/selkies-project/sealskin/actions/workflows/prerelease.yml/badge.svg)](https://github.com/selkies-project/sealskin/actions/workflows/prerelease.yml)
-[![Docs](https://github.com/selkies-project/sealskin/actions/workflows/docs.yml/badge.svg)](https://github.com/selkies-project/sealskin/actions/workflows/docs.yml)
-[![Release](https://img.shields.io/github/v/release/selkies-project/sealskin?label=release)](https://github.com/selkies-project/sealskin/releases/latest)
-[![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
-[![Discord](https://img.shields.io/discord/354974912613449730?logo=discord&label=Discord)](https://discord.com/invite/linuxserver)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/selkies-project/sealskin)
+[![CI](https://github.com/selkies-project/sealskin/actions/workflows/ci.yml/badge.svg)](https://github.com/selkies-project/sealskin/actions/workflows/ci.yml) [![Pre-release](https://github.com/selkies-project/sealskin/actions/workflows/prerelease.yml/badge.svg)](https://github.com/selkies-project/sealskin/actions/workflows/prerelease.yml) [![Docs](https://github.com/selkies-project/sealskin/actions/workflows/docs.yml/badge.svg)](https://github.com/selkies-project/sealskin/actions/workflows/docs.yml) [![Release](https://img.shields.io/github/v/release/selkies-project/sealskin?label=release)](https://github.com/selkies-project/sealskin/releases/latest) [![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0) [![Discord](https://img.shields.io/discord/354974912613449730?logo=discord&label=Discord)](https://discord.com/invite/linuxserver) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/selkies-project/sealskin)
 
 **Your browser is your new computer.** SealSkin runs desktop applications in
 isolated containers on a server you control and streams them to any browser
