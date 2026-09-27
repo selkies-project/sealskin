@@ -38,6 +38,7 @@ const SIGNING = { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' };
 const PBKDF2_ITERATIONS = 600000;
 // Firefox stops a service worker 30 s after its last event, cutting a download short without an error.
 const KEEPALIVE_MS = 10000;
+const WORKER_WAIT_MS = 3000;
 
 let kek = null;
 let hostApi = null;
@@ -303,10 +304,13 @@ function streamsTransfer() {
 /**
  * Save a file from the file manager to disk as it arrives: the stream pulls
  * one chunk at a time through the encrypted API, and the service worker
- * answers a download address with it.
+ * answers a download address with it. A worker that registered but never
+ * activates fails it with `no-stream-worker`, on which the file manager
+ * downloads through memory instead.
  */
 async function streamDownload(home, path, filename) {
-  const { active } = await navigator.serviceWorker.ready;
+  const { active } = await Promise.race([navigator.serviceWorker.ready, new Promise((resolve) => setTimeout(resolve, WORKER_WAIT_MS, {}))]);
+  if (!active) throw new Error('no-stream-worker');
   const keepalive = setInterval(() => active.postMessage(null), KEEPALIVE_MS);
   let index = 0;
   const stream = new ReadableStream({
@@ -347,8 +351,8 @@ async function takeLaunchContext() {
 }
 
 async function start() {
-  // No worker registers on an untrusted certificate; downloads then go through memory.
-  const worker = 'serviceWorker' in navigator && navigator.serviceWorker.register('sw.js').then(() => true, () => false);
+  // No worker registers on an untrusted certificate, and WebKit holds register() until the worker installs; downloads then go through memory.
+  const worker = 'serviceWorker' in navigator && Promise.race([navigator.serviceWorker.register('sw.js').then(() => true, () => false), new Promise((resolve) => setTimeout(resolve, WORKER_WAIT_MS, false))]);
   if ('launchQueue' in window) {
     window.launchQueue.setConsumer(async ({ files }) => {
       if (!files || !files.length) return;

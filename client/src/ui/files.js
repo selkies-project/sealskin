@@ -407,10 +407,13 @@ async function downloadFile(home, path) {
     // The Chrome extension and the web app: a service worker streams the chunks straight into a download.
     try {
       await bridge.downloadFile(home, path, filename);
+      return;
     } catch (error) {
-      displayStatus(t('files.status.downloadFailed', { error: error.message }), true);
+      if (error.message !== 'no-stream-worker') {
+        displayStatus(t('files.status.downloadFailed', { error: error.message }), true);
+        return;
+      }
     }
-    return;
   }
 
   displayStatus(t('files.status.downloading', { filename }) || `Downloading ${filename}...`);
