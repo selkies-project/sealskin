@@ -58,7 +58,7 @@ export async function storePendingFile(file) {
 /** @returns {Promise<File|Blob|undefined>} The stored file, removed on read. */
 export async function takePendingFile() {
   const value = await take(KEY);
-  return value && value.bytes ? new File([value.bytes], value.name, { type: value.type }) : value;
+  return value && !(value instanceof Blob) ? new File([value.bytes], value.name, { type: value.type }) : value;
 }
 
 /** @param {object} context A launch context the web app picks up when it opens. */
