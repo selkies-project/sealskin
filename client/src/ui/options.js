@@ -1461,21 +1461,30 @@ function applyMobileLayout() {
  * clicked on. The next click on a link opens that link here; on an image,
  * video, or audio, or a Shift-click on a link, the page fetches the file with
  * its own cookies and hands it to `receive.html`. What the page cannot fetch
- * opens as a link, and what has no web address sends the page itself.
+ * opens as a link, and what has no web address sends the page itself. Chrome
+ * and Firefox keep clicks on a media element's own controls from the page, so
+ * each audio or video that shows them is covered by a shield until the click.
  *
  * @param {string} app The web app's address.
  * @param {string} hint The banner shown until the click.
  */
 function pickForSealSkin(app, hint) {
   const banner = document.createElement('div');
+  const shields = new Map([...document.querySelectorAll('audio[controls], video[controls]')].map((media) => {
+    const shield = document.createElement('div');
+    const box = media.getBoundingClientRect();
+    shield.style.cssText = `position:absolute;left:${box.left + scrollX}px;top:${box.top + scrollY}px;width:${box.width}px;height:${box.height}px;z-index:2147483646;cursor:pointer`;
+    return [shield, media];
+  }));
   const stop = () => {
     banner.remove();
+    shields.forEach((media, shield) => shield.remove());
     removeEventListener('click', onClick, true);
     removeEventListener('keydown', onKey, true);
   };
   const onKey = (event) => { if (event.key === 'Escape') stop(); };
   const onClick = (event) => {
-    const media = event.target.closest && event.target.closest('img, video, audio');
+    const media = shields.get(event.target) || (event.target.closest && event.target.closest('img, video, audio'));
     const link = event.target.closest && event.target.closest('a[href]');
     if (event.target !== banner && !media && !link) return;
     event.preventDefault();
@@ -1512,7 +1521,7 @@ function pickForSealSkin(app, hint) {
   };
   banner.textContent = hint;
   banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483647;padding:12px;text-align:center;font:15px/1.4 system-ui,sans-serif;color:#fff;background:#a82a69;cursor:pointer';
-  document.body.append(banner);
+  document.body.append(banner, ...shields.keys());
   addEventListener('click', onClick, true);
   addEventListener('keydown', onKey, true);
 }
