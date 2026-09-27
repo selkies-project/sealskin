@@ -55,3 +55,18 @@ def test_a_room_stays_on_the_shared_origin(app_client):
     assert "own_origin" not in state.sessions[SID]
     assert exchange(app_client(SHARED)).status_code == 303
     assert state.sessions[SID]["own_origin"] is False
+
+
+def test_a_stopped_session_page_closes_its_tab(app_client, tmp_path, monkeypatch):
+    (tmp_path / "i18n").mkdir()
+    (tmp_path / "i18n" / "en.0000.json").write_text('{"options": {"status": {"sessionStopped": "Stopped."}}}')
+    (tmp_path / "i18n" / "de.1111.json").write_text('{"options": {"status": {"sessionStopped": "Beendet <b>."}}}')
+    monkeypatch.setattr(settings, "ui_path", str(tmp_path))
+    state.sessions.clear()
+    client = app_client(SHARED)
+    page = client.get(f"/internal/resolve_session/{SID}", headers={"Sec-Fetch-Dest": "document", "Accept-Language": "fr, de-DE;q=0.8"})
+    assert page.status_code == 404
+    assert "<script>close()</script>" in page.text and "Beendet &lt;b&gt;." in page.text
+    fallback = client.get(f"/internal/resolve_session/{SID}", headers={"Sec-Fetch-Dest": "document", "Accept-Language": "../../x"})
+    assert "<p>Stopped.</p>" in fallback.text
+    assert client.get(f"/internal/resolve_session/{SID}").json() == {"detail": "Session not found."}

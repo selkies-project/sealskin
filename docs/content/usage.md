@@ -213,7 +213,11 @@ In place of the context menu:
 Sessions open in tabs of their own. While the web app's tab stays open,
 **Re-open** brings a session's tab forward and **Stop** closes it; after the
 web app is reloaded, and always in Safari, which lets the web app keep no
-hold on the tab, **Re-open** opens the session in a new tab.
+hold on the tab, **Re-open** opens the session in a new tab. Where the web app
+cannot close the tab (Safari, and Chrome for a session at an address of its
+own), the tab closes itself a few seconds after **Stop**, when its page
+reconnects to the stopped session, or says the session stopped where the
+browser does not let a page close its tab.
 
 Where the server's certificate and DNS cover addresses under its name (see
 [Session origins](configuration.md#session-origins)), each session opens at

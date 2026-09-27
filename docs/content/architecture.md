@@ -236,8 +236,13 @@ from the same origin as the web app, which shapes the rest:
   tab itself (a `reserveTab` at the click, since a tab opened when a long
   launch ends is blocked as a popup), clears its `opener`, and keeps the
   handle to focus and close it; it never looks a tab up by name, which would
-  make it the tab's opener. Caddy drops `Service-Worker-Allowed` from session
-  responses, so a session's service worker cannot claim `/ui/`.
+  make it the tab's opener. WebKit severs every tab a page with that COOP
+  opens, and Chrome lets no page close a cross-origin tab it gave no opener,
+  so a stopped session's tab closes itself instead: its page reloads to
+  reconnect, and Caddy's check answers a page load of a session that is not
+  running with a page that closes its tab (`internal.stopped_page`). Caddy
+  drops `Service-Worker-Allowed` from session responses, so a session's
+  service worker cannot claim `/ui/`.
 * **Storage.** Session pages can rewrite `localStorage`, so the stored
   configuration never decides the server address or the signing key: reads
   pin both to this origin and the sealed key.
