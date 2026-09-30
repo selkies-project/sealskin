@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.1",
-    "sharp": "^0.35.4"
+    "sharp": "^0.35.5"
   },
   "overrides": {
     "uuid": "^14.0.2"
