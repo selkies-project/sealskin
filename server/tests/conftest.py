@@ -28,6 +28,7 @@ PATH_SETTINGS = [
     "public_storage_path",
     "public_shares_metadata_path",
     "sessions_db_path",
+    "sso_keys_path",
 ]
 
 
@@ -51,6 +52,7 @@ def isolated_settings(tmp_path, monkeypatch):
         "public_storage_path": tmp_path / "storage" / "public",
         "public_shares_metadata_path": base / "public_shares.yml",
         "sessions_db_path": base / "sessions.yml",
+        "sso_keys_path": base / "sso_keys.yml",
     }
     for name, path in layout.items():
         monkeypatch.setattr(settings, name, str(path))

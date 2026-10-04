@@ -63,7 +63,7 @@ def validate_upload_id(upload_id: str) -> str:
     Raises:
         HTTPException: 400 when the id is malformed.
     """
-    if not upload_id or not _UPLOAD_ID_RE.match(upload_id):
+    if not upload_id or not _UPLOAD_ID_RE.fullmatch(upload_id):
         raise HTTPException(status_code=400, detail="Invalid upload id.")
     return upload_id
 
@@ -74,7 +74,7 @@ def user_upload_root(username: str) -> str:
     Raises:
         HTTPException: 400 when the username is not filesystem safe.
     """
-    if not _USERNAME_RE.match(username or ""):
+    if not _USERNAME_RE.fullmatch(username or ""):
         raise HTTPException(status_code=400, detail="Invalid username.")
     try:
         root = safe_join(settings.upload_dir, username)

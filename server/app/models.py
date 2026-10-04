@@ -96,6 +96,29 @@ class HandshakeExchangeResponse(BaseModel):
     session_id: str
 
 
+class SignInConfig(BaseModel):
+    """The identity provider sign-ins the web app offers."""
+
+    oidc: bool
+    saml: bool
+
+
+class SignInRegistrationRequest(BaseModel):
+    """A browser key to register for the identity provider sign-in a grant carries."""
+
+    grant: str = Field(max_length=128)
+    public_key: str = Field(max_length=8192)
+
+
+class SignInRegistration(BaseModel):
+    """A registered sign-in key and what the web app connects with."""
+
+    kid: str
+    username: str
+    via: str
+    server_public_key: str
+
+
 class EncryptedPayload(BaseModel):
     """AES-GCM envelope used for every encrypted request and response."""
 
@@ -432,6 +455,7 @@ class ActiveSessionInfo(BaseModel):
     session_url: str
     launch_context: dict[str, Any] | None = None
     is_collaboration: bool = False
+    own_origin: bool = False
 
 
 class SendFileToSessionRequest(BaseModel):

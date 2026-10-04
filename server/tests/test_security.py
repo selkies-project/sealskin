@@ -28,3 +28,24 @@ def test_upload_id_validation_and_user_scoping():
     assert path.startswith(f"{settings.upload_dir}/alice/")
     with pytest.raises(HTTPException):
         upload_path("../bob", good)
+
+
+def test_names_ending_in_a_newline_are_refused():
+    from app import user_manager
+    from app.config_store import is_safe_name
+    from app.launch import is_valid_timezone
+    from app.routers.files import get_validated_path
+
+    good = "123e4567-e89b-12d3-a456-426614174000"
+    with pytest.raises(HTTPException):
+        validate_upload_id(good + "\n")
+    with pytest.raises(HTTPException):
+        upload_path("alice\n", good)
+    with pytest.raises(HTTPException):
+        get_validated_path("alice", "home\n", "")
+    with pytest.raises(ValueError):
+        user_manager.create_user("alice\n", None, {})
+    with pytest.raises(ValueError):
+        user_manager.create_home_dir("alice", "home\n")
+    assert not is_safe_name("Default\n")
+    assert not is_valid_timezone("Etc/UTC\n")

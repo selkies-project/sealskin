@@ -5,7 +5,8 @@
 * `EncryptedRoute` encrypts every JSON response with the session key and
   `get_decrypted_request_body` decrypts request bodies.
 * `verify_token` validates client-signed RS256 JWTs against the public
-  key stored for the user.
+  key stored for the user, or the browser key their identity provider
+  sign-in registered, which the token names by `kid`.
 * Password hashing for public shares.
 """
 
@@ -33,7 +34,7 @@ from fastapi import Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 
-from . import user_manager
+from . import sso, user_manager
 from .models import EncryptedPayload
 from .settings import settings
 from .state import CryptoSession, state
@@ -305,14 +306,17 @@ def proxy_cert_not_after(cert_path: str) -> float | None:
 async def verify_token(req: Request) -> dict[str, Any]:
     """FastAPI dependency authenticating a client-signed JWT.
 
-    The token's `sub` claim names the user; the signature is verified with
-    the public key stored for that user and `exp` is required.
+    The token's `sub` claim names the user and `exp` is required. A token
+    naming a `kid` is verified with the browser key an identity provider
+    sign-in registered under it, which must still be live at the provider
+    and grants administration where the provider's groups do; any other
+    token is verified with the public key stored for the user.
 
     Args:
         req: Incoming request with an `Authorization: Bearer` header.
 
     Returns:
-        The user record including `effective_settings` and `group`.
+        The user record including `effective_settings`, `group`, and `kid`.
 
     Raises:
         HTTPException: 401 for invalid tokens, 403 for inactive accounts.
@@ -323,35 +327,36 @@ async def verify_token(req: Request) -> dict[str, Any]:
     token = auth_header.split(" ", 1)[1]
     try:
         unverified_claims = jwt.decode(token, options={"verify_signature": False})
+        kid = jwt.get_unverified_header(token).get("kid")
     except jwt.PyJWTError as exc:
         raise HTTPException(status_code=401, detail="Invalid token format.") from exc
     username = unverified_claims.get("sub")
     if not username:
         raise HTTPException(status_code=401, detail="Token missing username claim.")
     user = user_manager.get_user(username)
-    if not user:
+    signed_in = sso.registered(kid, username) if kid else None
+    public_key = signed_in["public_key"] if signed_in else None if kid else user and user["public_key"]
+    if not user or not public_key:
         raise HTTPException(status_code=401, detail="Invalid token.")
-
-    effective_settings = user_manager.get_effective_settings(username)
-    is_active = user.get("is_admin") or effective_settings.get("active", False)
-    if not is_active:
-        raise HTTPException(status_code=403, detail="User account is inactive.")
     try:
         jwt.decode(
             token,
-            user["public_key"],
+            public_key,
             algorithms=[ALGORITHM],
             options={"require": ["exp"]},
             leeway=JWT_LEEWAY_SECONDS,
         )
-    except KeyError as exc:
-        raise HTTPException(
-            status_code=500, detail="Server configuration error for user."
-        ) from exc
     except jwt.PyJWTError as exc:
         raise HTTPException(status_code=401, detail="Invalid token signature or claims.") from exc
+    if signed_in and not (signed_in := await sso.current(kid)):
+        raise HTTPException(status_code=401, detail="The identity provider ended this sign-in.")
 
-    user = dict(user)
+    is_admin = user.get("is_admin") or bool(signed_in and signed_in["admin"])
+    effective_settings = user_manager.get_effective_settings(username)
+    if not (is_admin or effective_settings.get("active", False)):
+        raise HTTPException(status_code=403, detail="User account is inactive.")
+
+    user = dict(user, is_admin=is_admin, kid=kid)
     user["effective_settings"] = effective_settings
     user["group"] = effective_settings.get("group", "none")
     return user
@@ -454,6 +459,17 @@ def verify_share_password(password: str, stored_hash: str) -> bool:
         password.encode("utf-8"), salt=salt, n=_SCRYPT_N, r=_SCRYPT_R, p=_SCRYPT_P, dklen=32
     )
     return secrets.compare_digest(candidate, expected)
+
+
+def on_session_origin(request: Request, session_id: str) -> bool:
+    """Whether a request reached a session on the session's own origin, whose name starts with its id.
+
+    A session is served from one origin, the first its token was exchanged on:
+    its own where the browser reaches one, so its pages share no storage,
+    cookies, or service workers with the web app or other sessions, and the
+    server's shared origin otherwise.
+    """
+    return request.headers.get("host", "").split(".", 1)[0].lower() == session_id
 
 
 def token_matches(given: str | None, expected: str | None) -> bool:

@@ -135,7 +135,15 @@
       "keyGeneration": "키 생성",
       "keyGenDescription": "키 쌍이 없는 경우 여기에서 생성할 수 있습니다. 개인 키는 위에 채워집니다. 관리자에게 공개 키를 제공하세요.",
       "generateKeyButton": "새 키 쌍 생성",
-      "publicKeyForAdminLabel": "공개 키 (관리자용)"
+      "publicKeyForAdminLabel": "공개 키 (관리자용)",
+      "passphraseLabel": "암호 문구",
+      "remember": "이 브라우저에 내 키 보관",
+      "rememberHelp": "여럿이 쓰는 컴퓨터에서는 끄세요. 그러면 SealSkin은 이 탭이 열려 있는 동안에만 키를 보관하고, 다음번에는 구성을 다시 불러와야 합니다.",
+      "passphraseHelp": "개인 키는 이 암호 문구로 암호화되어 이 브라우저에 저장되며, 여기서 SealSkin을 열 때마다 입력합니다.",
+      "signInTitle": "통합 인증(SSO)",
+      "signInHelp": "구성 파일 대신 조직에서 관리하는 계정으로 로그인합니다. SealSkin은 로그인을 이 탭에만 유지하므로 다음에는 다시 로그인합니다.",
+      "signInOidc": "OpenID Connect로 로그인",
+      "signInSaml": "SAML로 로그인"
     },
     "home": {
       "title": "내 홈 디렉터리",
@@ -196,7 +204,8 @@
       "homesDisabledTooltip": "이 사용자는 영구 스토리지가 비활성화되었습니다",
       "confirmDelete": "사용자 '{username}'을(를) 삭제하시겠습니까? 모든 영구 스토리지도 함께 삭제되며 되돌릴 수 없습니다.",
       "allowPublicSharing": "공개 파일 공유 허용",
-      "allowEditTemplates": "앱 템플릿 편집 허용"
+      "allowEditTemplates": "앱 템플릿 편집 허용",
+      "signInOnly": "통합 인증만 사용"
     },
     "groups": {
       "title": "그룹 관리",
@@ -1166,7 +1175,9 @@
       "pendingConfigSaved": "보류 중인 구성이 저장되었습니다. 이제 관리자에게 공개 키를 제공할 수 있습니다.",
       "settingsSaved": "설정이 저장되었습니다.",
       "appCreated": "앱 '{name}'이(가) 성공적으로 생성되었습니다.",
-      "launchFailed": "시작 실패: {error}"
+      "launchFailed": "시작 실패: {error}",
+      "passphraseRequired": "이 브라우저에서 키를 보호할 암호 문구를 입력하세요.",
+      "passphraseTooShort": "{count}자 이상의 암호 문구를 사용하세요."
     },
     "placeholders": {
       "noAdmins": "관리자를 찾을 수 없습니다.",
@@ -1177,6 +1188,17 @@
       "noPinned": "고정된 동작을 찾을 수 없습니다.",
       "errorLoading": "디렉터리 로딩 중 오류 발생.",
       "noInstalledApps": "아직 설치된 애플리케이션이 없습니다."
+    },
+    "web": {
+      "title": "이 브라우저의 SealSkin",
+      "bookmarklet": "SealSkin으로 보내기",
+      "bookmarkletHelp": "이 링크를 북마크바로 끌어다 놓으세요. 클릭하면 보고 있는 페이지를 SealSkin에서 열거나 선택한 텍스트를 검색합니다.",
+      "pick": "SealSkin용으로 고르기",
+      "pickHelp": "이 링크도 거기로 끌어다 놓으세요. 클릭한 다음 링크를 클릭하면 그 링크를 SealSkin에서 열고, 이미지·동영상·오디오를 클릭하면 파일을 보냅니다. 링크를 Shift+클릭하면 그 사이트의 로그인 상태로 링크가 가리키는 파일을 가져와 보냅니다.",
+      "pickHint": "SealSkin: 보낼 링크나 이미지·동영상·오디오를 클릭하세요. 링크를 Shift+클릭하면 그 파일을 보냅니다. 취소하려면 Esc를 누르세요.",
+      "protocol": "web+sealskin: 링크를 여기서 열기",
+      "protocolHelp": "web+sealskin: 뒤에 주소를 붙인 링크는 해당 주소를 SealSkin에서 엽니다.",
+      "install": "브라우저가 웹 앱 설치를 지원하면 메뉴에서 SealSkin을 설치하여 링크와 파일을 공유하고 파일을 열 수 있습니다."
     }
   },
   "popup": {
@@ -1348,6 +1370,25 @@
       "finalizing": "마무리 중...",
       "completed": "완료됨",
       "error": "오류"
+    }
+  },
+  "web": {
+    "unlockTitle": "SealSkin 잠금 해제",
+    "unlockBody": "이 브라우저에서 키를 보호하는 암호 문구를 입력하세요.",
+    "passphrase": "암호 문구",
+    "unlock": "잠금 해제",
+    "wrongPassphrase": "이 암호 문구로는 키의 잠금을 해제할 수 없습니다.",
+    "receiving": "파일을 SealSkin으로 보내는 중…",
+    "signIn": {
+      "failed": "로그인을 완료하지 못했습니다. 다시 시도하거나 관리자에게 문의하세요.",
+      "refused": "ID 공급자가 로그인을 거부했습니다.",
+      "expired": "로그인이 너무 오래 걸렸거나 이미 사용되었습니다. 다시 로그인하세요.",
+      "browser": "로그인이 다른 브라우저나 탭에서 완료되었습니다. 여기에서 다시 시작하세요.",
+      "invalidUsername": "계정 이름은 SealSkin 사용자 이름이 될 수 없습니다. 사용자 이름에는 문자, 숫자, 밑줄, 하이픈만 쓸 수 있습니다. 관리자에게 문의하세요.",
+      "adminName": "계정 이름이 키 파일로 로그인하는 SealSkin 관리자의 이름입니다. 관리자에게 문의하세요.",
+      "otherIdentity": "ID 공급자의 다른 계정이 이미 이 SealSkin 사용자로 로그인하고 있습니다. 관리자에게 문의하세요.",
+      "notConfigured": "이 서버는 통합 인증을 제공하지 않습니다.",
+      "ended": "ID 공급자가 로그인을 종료했습니다. 다시 로그인하세요."
     }
   }
 }

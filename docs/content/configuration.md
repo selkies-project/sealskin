@@ -33,6 +33,7 @@ watcher only fires for edits made by someone else.
     keys/admins/<name>             administrator public keys
     keys/users/<name>              user settings and public keys
     groups/<name>                  group settings
+    sso_keys.yml                   browser keys of identity provider sign-ins
     sessions.yml                   live sessions, rewritten by the server
     public_shares.yml              public share metadata
 
@@ -72,6 +73,20 @@ openssl rsa -in config/ssl/server_key.pem -pubout    # the public key clients ne
 To provide your own administrator, place a public key PEM at
 `keys/admins/<name>` before the first start; the server then skips creating
 the default `admin` account and `admin.json`.
+
+### Session origins
+
+A session opens on an origin of its own, `<session id>.<name>`, wherever the
+browser reaches one, so its pages share no storage, cookies, or service
+workers with the web app or with other sessions. The certificate has to cover
+such names and be trusted by the browser, and DNS has to resolve them to the
+server: `*.<server name>`, or, as the installer's Duck DNS certificate does,
+`*.<parent name>`, which covers the server's own name and its siblings (Duck DNS
+resolves every name under a domain). Nothing is configured: the extension, the
+apps, and the web app probe a random name under each before opening a session,
+and a session reached by IP address, one whose names do not resolve or are
+not covered, a collaboration room, and the extension's App Laboratory frame
+are served from the shared origin, as they always have been.
 
 ## admin.json
 
@@ -126,7 +141,50 @@ Names may contain letters, digits, `_`, and `-`. Files starting with `.` are
 ignored.
 
 To rotate a user's key, replace the public key block; to disable a user
-without deleting their storage, set `active: false`.
+without deleting their storage, set `active: false`. A user created by a
+[single sign-on](#single-sign-on) has an empty public key block and signs in
+only through the identity provider.
+
+## Single sign-on
+
+The web app offers sign-in through an OpenID Connect or a SAML 2.0 identity
+provider beside the configuration file, once the settings name one; the
+extension and the mobile app keep the configuration file. Signing in
+generates a key in the web app's tab, which never leaves it, and registers
+its public half in `sso_keys.yml`; the tab signs its requests with that key
+until it closes or the sign-in ends.
+
+**OpenID Connect.** Register SealSkin with the provider as a confidential
+client (a public one works with no secret) using the authorization code flow,
+with the redirect URI `https://<server>:<port>/api/auth/oidc/callback` as the
+browser reaches the web app, then set `SEALSKIN_OIDC_ISSUER`,
+`SEALSKIN_OIDC_CLIENT_ID`, and `SEALSKIN_OIDC_CLIENT_SECRET`. SealSkin uses
+PKCE and asks for a fresh authentication on every sign-in. Where the provider
+issues refresh tokens (the `offline_access` scope on some providers, set in
+`SEALSKIN_OIDC_SCOPES`), SealSkin checks the sign-in with it every minute
+while it is in use; otherwise the sign-in ends when its ID token expires.
+Register `/api/auth/oidc/backchannel-logout` as the back-channel logout URL,
+or `/api/auth/oidc/frontchannel-logout` as the front-channel one, for a
+logout at the provider to end the sign-in at once.
+
+**SAML.** Set `SEALSKIN_SAML_METADATA_URL` to the provider's metadata, and
+register SealSkin with the provider from `https://<server>:<port>/api/auth/saml/metadata`:
+its entity ID is that URL, assertions go to `/api/auth/saml/acs` over
+HTTP-POST, and single logout to `/api/auth/saml/slo`. The provider signs the
+response or the assertion; encrypted assertions are not supported. The sign-in
+lasts until the assertion's `SessionNotOnOrAfter`, or until the provider sends
+a signed logout request.
+
+**Who signs in.** The user is the value of `SEALSKIN_SSO_USERNAME_CLAIM`
+(`preferred_username`, or the SAML attribute `username`, else the NameID),
+which has to be a valid SealSkin user name; choose a claim users cannot set
+for themselves at the provider. A name with no user file gets one, with the
+default settings and no public key. The first sign-in through each protocol
+binds the user to the provider's account, and another account naming the same
+user is refused from then on. Members of `SEALSKIN_SSO_ADMIN_GROUP` (read from
+`SEALSKIN_SSO_GROUPS_CLAIM`) sign in as administrators; the names of key-file
+administrators are refused. Every sign-in ends after
+`SEALSKIN_SSO_MAX_AGE_SECONDS` at the latest.
 
 ## Application stores
 

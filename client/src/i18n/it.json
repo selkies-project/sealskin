@@ -135,7 +135,15 @@
       "keyGeneration": "Generazione Chiave",
       "keyGenDescription": "Se non hai una coppia di chiavi, puoi generarne una qui. La chiave privata verrà inserita sopra. Fornisci la chiave pubblica al tuo amministratore.",
       "generateKeyButton": "Genera Nuova Coppia di Chiavi",
-      "publicKeyForAdminLabel": "La Tua Chiave Pubblica (per l'admin)"
+      "publicKeyForAdminLabel": "La Tua Chiave Pubblica (per l'admin)",
+      "passphraseLabel": "Passphrase",
+      "remember": "Conserva la mia chiave in questo browser",
+      "rememberHelp": "Disattiva questa opzione su un computer condiviso: SealSkin conserva la tua chiave solo finché questa scheda è aperta, e la prossima volta caricherai di nuovo la configurazione.",
+      "passphraseHelp": "La tua chiave privata è conservata in questo browser cifrata con questa passphrase, da inserire ogni volta che apri SealSkin qui.",
+      "signInTitle": "Single sign-on",
+      "signInHelp": "Accedi con l'account gestito dalla tua organizzazione invece che con un file di configurazione. SealSkin conserva l'accesso solo in questa scheda, quindi la prossima volta accederai di nuovo.",
+      "signInOidc": "Accedi con OpenID Connect",
+      "signInSaml": "Accedi con SAML"
     },
     "home": {
       "title": "Le Tue Cartelle Home",
@@ -198,7 +206,8 @@
       "homesDisabledTooltip": "Archiviazione persistente disabilitata per questo utente",
       "confirmDelete": "Sei sicuro di voler eliminare l'utente '{username}'? Questo eliminerà anche tutta la sua archiviazione persistente e non potrà essere annullato.",
       "allowPublicSharing": "Consenti condivisione file pubblica",
-      "allowEditTemplates": "Consenti modifica dei modelli app"
+      "allowEditTemplates": "Consenti modifica dei modelli app",
+      "signInOnly": "Solo single sign-on"
     },
     "groups": {
       "title": "Gestione Gruppi",
@@ -1166,7 +1175,9 @@
       "pendingConfigSaved": "Configurazione in sospeso salvata. Ora puoi fornire la tua chiave pubblica all'amministratore.",
       "settingsSaved": "Impostazioni salvate.",
       "appCreated": "App '{name}' creata con successo.",
-      "launchFailed": "Avvio fallito: {error}"
+      "launchFailed": "Avvio fallito: {error}",
+      "passphraseRequired": "Inserisci una passphrase per proteggere la tua chiave in questo browser.",
+      "passphraseTooShort": "Usa una passphrase di almeno {count} caratteri."
     },
     "placeholders": {
       "noAdmins": "Nessun amministratore trovato.",
@@ -1177,6 +1188,17 @@
       "noPinned": "Nessun comportamento fissato trovato.",
       "errorLoading": "Errore durante il caricamento delle cartelle.",
       "noInstalledApps": "Nessuna applicazione è stata ancora installata."
+    },
+    "web": {
+      "title": "SealSkin in Questo Browser",
+      "bookmarklet": "Invia a SealSkin",
+      "bookmarkletHelp": "Trascina questo link nella barra dei preferiti. Facendo clic su di esso si apre in SealSkin la pagina in cui ti trovi, oppure si cerca il testo selezionato.",
+      "pick": "Scegli per SealSkin",
+      "pickHelp": "Trascina lì anche questo link. Fai clic su di esso, poi su un link per aprirlo in SealSkin, oppure su un'immagine, un video o un audio per inviare il file. Maiusc+clic su un link invia il file a cui porta, recuperato con il tuo accesso a quel sito.",
+      "pickHint": "SealSkin: fai clic su un link, oppure su un'immagine, un video o un audio, per inviarlo; Maiusc+clic su un link invia il suo file. Premi Esc per annullare.",
+      "protocol": "Apri qui i link web+sealskin:",
+      "protocolHelp": "Un link scritto come web+sealskin: seguito da un indirizzo apre poi quell'indirizzo in SealSkin.",
+      "install": "Se il browser può installare app web, installa SealSkin dal suo menu per condividere link e file con esso e aprire file con esso."
     }
   },
   "popup": {
@@ -1348,6 +1370,25 @@
       "finalizing": "Finalizzazione...",
       "completed": "Completato",
       "error": "Errore"
+    }
+  },
+  "web": {
+    "unlockTitle": "Sblocca SealSkin",
+    "unlockBody": "Inserisci la passphrase che protegge la tua chiave in questo browser.",
+    "passphrase": "Passphrase",
+    "unlock": "Sblocca",
+    "wrongPassphrase": "Questa passphrase non sblocca la tua chiave.",
+    "receiving": "Invio del file a SealSkin…",
+    "signIn": {
+      "failed": "L'accesso non è stato completato. Riprova o chiedi al tuo amministratore.",
+      "refused": "Il provider di identità ha rifiutato l'accesso.",
+      "expired": "L'accesso ha richiesto troppo tempo o è già stato usato. Accedi di nuovo.",
+      "browser": "L'accesso si è concluso in un altro browser o scheda. Ricomincialo qui.",
+      "invalidUsername": "Il nome del tuo account non può essere un nome utente SealSkin, che ammette solo lettere, cifre, trattini bassi e trattini. Chiedi al tuo amministratore.",
+      "adminName": "Il nome del tuo account appartiene a un amministratore SealSkin, che accede con un file di chiave. Chiedi al tuo amministratore.",
+      "otherIdentity": "Un altro account del provider di identità accede già come questo utente SealSkin. Chiedi al tuo amministratore.",
+      "notConfigured": "Questo server non offre il single sign-on.",
+      "ended": "Il provider di identità ha terminato il tuo accesso. Accedi di nuovo."
     }
   }
 }

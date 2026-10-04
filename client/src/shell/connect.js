@@ -9,12 +9,15 @@
  *
  * The stored `sealskinConfig` keeps its historical shape:
  * `{serverIp, apiPort, sessionPort, username, clientPrivateKey,
- *   serverPublicKey, searchEngineUrl, userSettings}`.
+ *   serverPublicKey, searchEngineUrl, userSettings}`. The web app also asks
+ * for the passphrase that seals the private key in the browser, and offers
+ * the server's identity provider sign-ins, whose configurations carry the
+ * `keyId` and `signIn` the web app gives them and no key to edit or export.
  */
 
 import { bridge, request } from '../lib/bridge.js';
 import { loadTranslator, applyTranslations } from '../lib/i18n.js';
-import { generateRsaKeyPair } from '../lib/crypto-utils.js';
+import { MIN_PASSPHRASE, generateRsaKeyPair } from '../lib/crypto-utils.js';
 
 const DEFAULT_SEARCH_ENGINE = 'https://google.com/search?q=';
 
@@ -36,6 +39,7 @@ const serverPublicKeyInput = $('serverPublicKey');
 let t = (key) => key;
 let info = null;
 let currentConfig = null;
+let signInOffered = false;
 
 function displayStatus(message, isError = false) {
   statusDiv.textContent = message;
@@ -47,6 +51,8 @@ function showView(view) {
   connectedView.hidden = view !== 'connected';
   simpleConfigView.hidden = view !== 'simple';
   advancedConfigView.hidden = view !== 'advanced';
+  $('passphrase-view').hidden = view === 'connected' || !info || info.shell !== 'web';
+  $('sign-in-view').hidden = view === 'connected' || !signInOffered;
 }
 
 function fillForm(config) {
@@ -101,7 +107,24 @@ function parseAndApplyConfig(configText) {
 function showConnected(config) {
   $('connected-username').textContent = config.username || '';
   $('connected-server').textContent = `${config.serverIp}:${config.sessionPort || config.apiPort}`;
+  $('edit-connection').hidden = Boolean(config.signIn);
+  $('export-config-button').hidden = Boolean(config.signIn);
   showView('connected');
+}
+
+/** Offer the identity provider sign-ins the server that serves the web app configures. */
+async function offerSignIn() {
+  if (!info || info.shell !== 'web') return;
+  try {
+    const offered = await (await fetch('/api/auth/config')).json();
+    for (const via of ['oidc', 'saml']) {
+      $(`sign-in-${via}`).hidden = !offered[via];
+      $(`sign-in-${via}`).addEventListener('click', () => request('signIn', { via }));
+    }
+    signInOffered = Boolean(offered.oidc || offered.saml);
+  } catch (e) {
+    signInOffered = false;
+  }
 }
 
 /**
@@ -115,6 +138,7 @@ async function handleLogin() {
     ...formConfig(),
     searchEngineUrl: (currentConfig && currentConfig.searchEngineUrl) || DEFAULT_SEARCH_ENGINE,
   };
+  if (info.shell === 'web') Object.assign(config, webSealing());
   try {
     await request('saveConfig', { config });
     await bridge.storageRemove(['sealskinPendingConfig']);
@@ -134,9 +158,24 @@ async function handleLogin() {
     return true;
   } catch (error) {
     currentConfig = config;
-    displayStatus(t('options.status.loginFailed', { error: error.message }), true);
+    displayStatus(sealingError(error) || t('options.status.loginFailed', { error: error.message }), true);
     return false;
   }
+}
+
+/** The web app's reasons for not sealing a key, as the status line shows them. */
+function sealingError(error) {
+  const key = {
+    passphraseRequired: 'options.status.passphraseRequired',
+    passphraseTooShort: 'options.status.passphraseTooShort',
+    wrongPassphrase: 'web.wrongPassphrase',
+  }[error.message];
+  return key ? t(key, { count: MIN_PASSPHRASE }) : null;
+}
+
+/** How the web app keeps the key: sealed under the passphrase, or in the tab alone. */
+function webSealing() {
+  return { passphrase: $('passphrase').value, remember: $('remember').checked };
 }
 
 function readFileAsText(file) {
@@ -185,12 +224,20 @@ async function exportConfig() {
 
 async function init() {
   info = await bridge.hello();
-  if (info.shell === 'mobile') document.documentElement.classList.add('shell-mobile');
+  document.documentElement.classList.add(`shell-${info.shell}`);
   t = await loadTranslator(info.locale || navigator.language);
   applyTranslations(document.body, t);
 
-  const { config, pendingConfig } = await request('getConnectConfig');
+  const { config, pendingConfig, remember, signInError } = await request('getConnectConfig');
   currentConfig = config;
+  await offerSignIn();
+  if (signInError) {
+    const key = `web.signIn.${signInError}`;
+    displayStatus(t(key) === key ? t('web.signIn.failed') : t(key), true);
+  }
+  $('remember').checked = remember !== false;
+  $('passphrase-group').hidden = !$('remember').checked;
+  $('remember').addEventListener('change', () => { $('passphrase-group').hidden = !$('remember').checked; });
   fillForm(pendingConfig || config);
 
   if (config && config.serverIp && config.username && config.clientPrivateKey && !pendingConfig) {
@@ -241,8 +288,14 @@ async function init() {
   });
 
   $('save').addEventListener('click', async () => {
-    await bridge.storageSet({ sealskinPendingConfig: formConfig() });
-    displayStatus(t('options.status.pendingConfigSaved'), false);
+    const pending = formConfig();
+    if (info.shell === 'web') Object.assign(pending, webSealing());
+    try {
+      await bridge.storageSet({ sealskinPendingConfig: pending });
+      displayStatus(t('options.status.pendingConfigSaved'), false);
+    } catch (error) {
+      displayStatus(sealingError(error) || error.message, true);
+    }
   });
 
   $('login').addEventListener('click', handleLogin);

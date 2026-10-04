@@ -17,7 +17,7 @@ from contextlib import asynccontextmanager
 from docker.errors import DockerException
 from fastapi import FastAPI
 
-from . import collaboration, config_store, persistence, user_manager
+from . import collaboration, config_store, persistence, sso, user_manager
 from .docker_utils import (
     container_exists,
     detect_gpus,
@@ -40,6 +40,7 @@ from .routers import (
     ui,
     uploads,
 )
+from .routers import sso as sso_routes
 from .security import init_server_keys, proxy_cert_not_after, prune_crypto_sessions
 from .settings import settings
 from .state import state
@@ -184,6 +185,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     read_cpu_model()
     user_manager.set_external_ports(state.discovered_api_port, state.discovered_session_port)
     user_manager.load_users_and_groups()
+    sso.load()
 
     config_store.load_app_stores()
     config_store.load_app_templates()
@@ -242,6 +244,8 @@ def create_app() -> FastAPI:
     app.include_router(sessions.proxy_router)
     app.include_router(shares.public_router)
     app.include_router(ui.router)
+    app.include_router(sso_routes.router)
+    app.include_router(sso_routes.signed_in_router)
     ui.mount_ui(app)
     return app
 

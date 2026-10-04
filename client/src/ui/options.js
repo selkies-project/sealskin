@@ -537,7 +537,8 @@ function initializeAppLaboratoryTab() {
           if (!success && !confirm('Failed to save changes. Close anyway?')) return;
         }
         displayStatus(t('options.status.closingSession'));
-        await secureFetch(`/api/admin/sessions/${labState.currentSessionId}`, { method: 'DELETE' });
+        if (info.shell === 'web') await bridge.closeSession(labState.currentSessionId);
+        else await secureFetch(`/api/admin/sessions/${labState.currentSessionId}`, { method: 'DELETE' });
         labState.currentSessionId = null;
         sessionFrame.src = 'about:blank';
         sessionFrame.style.display = 'none';
@@ -571,6 +572,8 @@ function initializeAppLaboratoryTab() {
     launchBtn.disabled = true;
     spinner.style.display = 'inline-block';
     launchBtnText.textContent = t('options.appLaboratory.savingAndLaunching');
+    // Session content shares the web app's origin, so there it gets a tab of its own instead of a frame in this page.
+    if (info.shell === 'web') bridge.reserveTab();
 
     try {
       let appToLaunch;
@@ -610,12 +613,17 @@ function initializeAppLaboratoryTab() {
       const frameUrl = `${sessionUrlBase}${launchResponse.session_url}&embedded=true`;
 
       labState.currentSessionId = launchResponse.session_url.substring(1).split('/?')[0];
-      sessionFrame.src = frameUrl;
-      sessionFrame.style.display = 'block';
-      mainPlaceholder.style.display = 'none';
+      if (info.shell === 'web') {
+        await bridge.openSession(labState.currentSessionId, launchResponse.session_url);
+      } else {
+        sessionFrame.src = frameUrl;
+        sessionFrame.style.display = 'block';
+        mainPlaceholder.style.display = 'none';
+      }
 
       launchBtnText.textContent = t('options.appLaboratory.closeButton');
     } catch (error) {
+      if (info.shell === 'web') bridge.reserveTab(false);
       displayStatus(t('options.status.launchFailed', { error: error.message }), true);
       launchBtnText.textContent = t('options.appLaboratory.launchButton');
     } finally {
@@ -703,8 +711,8 @@ const tableRenderConfig = {
                     <td>${escapeHtml(item.settings.group) || t('common.none')}</td>
                     <td class="pubkey-cell" title="${pubkey}">
                         <div class="cell-wrapper">
-                            <span class="key-text">${shortKey(item.public_key)}</span>
-                            <button class="secondary copy-btn" data-pubkey="${pubkey}"><i class="fas fa-copy"></i></button>
+                            <span class="key-text">${item.public_key ? shortKey(item.public_key) : t('options.users.signInOnly')}</span>
+                            ${item.public_key ? `<button class="secondary copy-btn" data-pubkey="${pubkey}"><i class="fas fa-copy"></i></button>` : ''}
                         </div>
                     </td>
                     <td class="actions-cell">
@@ -1446,11 +1454,95 @@ function applyMobileLayout() {
   if (optionsContainer) {
     optionsContainer.style.height = `calc(100vh - ${safeAreaPad.style.paddingTop})`;
   }
-  const header = document.querySelector('.sidebar-header');
-  if (header) addMobileBackButton(header, () => bridge.openPage('popup'));
+}
 
-  const howToCard = document.getElementById('how-to-card');
-  if (howToCard) howToCard.style.display = 'none';
+/**
+ * The pick bookmarklet, serialized into its link and run in the page it is
+ * clicked on. The next click on a link opens that link here; on an image,
+ * video, or audio, or a Shift-click on a link, the page fetches the file with
+ * its own cookies and hands it to `receive.html`. What the page cannot fetch
+ * opens as a link, and what has no web address sends the page itself. Chrome
+ * and Firefox keep clicks on a media element's own controls from the page, so
+ * each audio or video that shows them is covered by a shield until the click.
+ *
+ * @param {string} app The web app's address.
+ * @param {string} hint The banner shown until the click.
+ */
+function pickForSealSkin(app, hint) {
+  const banner = document.createElement('div');
+  const shields = new Map([...document.querySelectorAll('audio[controls], video[controls]')].map((media) => {
+    const shield = document.createElement('div');
+    const box = media.getBoundingClientRect();
+    shield.style.cssText = `position:absolute;left:${box.left + scrollX}px;top:${box.top + scrollY}px;width:${box.width}px;height:${box.height}px;z-index:2147483646;cursor:pointer`;
+    return [shield, media];
+  }));
+  const stop = () => {
+    banner.remove();
+    shields.forEach((media, shield) => shield.remove());
+    removeEventListener('click', onClick, true);
+    removeEventListener('keydown', onKey, true);
+  };
+  const onKey = (event) => { if (event.key === 'Escape') stop(); };
+  const onClick = (event) => {
+    const media = shields.get(event.target) || (event.target.closest && event.target.closest('img, video, audio'));
+    const link = event.target.closest && event.target.closest('a[href]');
+    if (event.target !== banner && !media && !link) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    stop();
+    if (!media && !link) return;
+    const target = event.shiftKey && link ? link : media || link;
+    const url = target === link ? link.href : media.currentSrc || media.src;
+    const web = /^https?:/.test(url);
+    const address = `${app}?url=${encodeURIComponent(web ? url : location.href)}`;
+    if (target === link && !event.shiftKey && !link.hasAttribute('download')) {
+      open(address);
+      return;
+    }
+    const tab = open(`${app}receive.html#${encodeURIComponent(address)}`);
+    const ready = new Promise((resolve) => {
+      addEventListener('message', function listen(message) {
+        if (message.source !== tab || message.data !== 'sealskin-receive') return;
+        removeEventListener('message', listen);
+        resolve();
+      });
+    });
+    fetch(url).then(async (response) => {
+      if (!response.ok) throw new Error(response.statusText);
+      const header = response.headers.get('content-disposition') || '';
+      const encoded = /filename\*=UTF-8''([^;]+)/i.exec(header);
+      const plain = /filename="?([^";]+)/i.exec(header);
+      const name = (encoded && decodeURIComponent(encoded[1])) || (plain && plain[1]) || (target === link && link.download)
+        || (web && decodeURIComponent(new URL(url).pathname.split('/').pop())) || 'file';
+      const blob = await response.blob();
+      await ready;
+      tab.postMessage({ file: new File([blob], name, { type: blob.type }) }, new URL(app).origin);
+    }).catch(() => { tab.location = address; });
+  };
+  banner.textContent = hint;
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483647;padding:12px;text-align:center;font:15px/1.4 system-ui,sans-serif;color:#fff;background:#a82a69;cursor:pointer';
+  document.body.append(banner, ...shields.keys());
+  addEventListener('click', onClick, true);
+  addEventListener('keydown', onKey, true);
+}
+
+/**
+ * The web app's stand-ins for the context menu: a bookmarklet that opens the
+ * current page (or searches the selection) here, one that picks a link or a
+ * file on the page, and `web+sealskin:` links.
+ */
+function applyWebLayout() {
+  document.getElementById('web-card').style.display = '';
+  const app = new URL('./', location.href).href;
+  const bookmarklet = document.getElementById('web-bookmarklet');
+  // A javascript: URL is percent-decoded before it runs, so a `%` in the address must survive that.
+  const appLiteral = JSON.stringify(app).replace(/%/g, '%25');
+  bookmarklet.href = `javascript:(()=>{const s=String(getSelection()).trim();window.open(${appLiteral}+(s?'?q='+encodeURIComponent(s):'?url='+encodeURIComponent(location.href)))})()`;
+  const pick = document.getElementById('web-pick');
+  pick.href = `javascript:(${encodeURIComponent(pickForSealSkin)})(${encodeURIComponent(JSON.stringify(app))},${encodeURIComponent(JSON.stringify(t('options.web.pickHint')))})`;
+  [bookmarklet, pick].forEach((link) => link.addEventListener('click', (event) => event.preventDefault()));
+  document.getElementById('web-protocol').hidden = typeof navigator.registerProtocolHandler !== 'function';
+  document.getElementById('web-protocol-button').addEventListener('click', () => navigator.registerProtocolHandler('web+sealskin', `${app}?url=%s`));
 }
 
 function bindEvents() {
@@ -1968,7 +2060,13 @@ async function init() {
     howToList.innerHTML = Array.isArray(items) ? items.map((item) => `<li>${item}</li>`).join('') : '';
   }
 
+  if (info.shell !== 'extension') {
+    const header = document.querySelector('.sidebar-header');
+    if (header) addMobileBackButton(header, () => bridge.openPage('popup'));
+    document.getElementById('how-to-card').style.display = 'none';
+  }
   if (info.shell === 'mobile') applyMobileLayout();
+  if (info.shell === 'web') applyWebLayout();
 
   bindEvents();
 

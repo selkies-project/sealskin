@@ -1,4 +1,4 @@
-"""E2EE handshake endpoints (the only unencrypted API routes besides /ui)."""
+"""E2EE handshake endpoints, the routes a client reaches before it has a session key."""
 
 from __future__ import annotations
 

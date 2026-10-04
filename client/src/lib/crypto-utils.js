@@ -1,3 +1,7 @@
+// The shortest passphrase that seals a key: NIST SP 800-63B's floor for a secret used with another factor,
+// here the browser that holds the sealed key.
+export const MIN_PASSPHRASE = 8;
+
 export function pemToArrayBuffer(pem) {
   const b64 = pem
     .replace(/-----BEGIN (PUBLIC|PRIVATE) KEY-----/, '')
@@ -21,7 +25,7 @@ export function arrayBufferToBase64(buffer) {
   return btoa(binary);
 }
 
-function arrayBufferToPem(buffer, type) {
+export function arrayBufferToPem(buffer, type) {
   const b64 = arrayBufferToBase64(buffer);
   const lines = b64.match(/.{1,64}/g).join('\n');
   return `-----BEGIN ${type} KEY-----\n${lines}\n-----END ${type} KEY-----\n`;
@@ -62,7 +66,26 @@ function arrayBufferToBase64Url(buffer) {
 
 const keyCache = new Map();
 
-export async function generateJwtNative(privateKeyPem, username) {
+/**
+ * Sign for `ref` with a key already imported, such as one the web app
+ * unwrapped; `generateJwtNative(ref, ...)` then uses it instead of a PEM.
+ *
+ * @param {string} ref Stand-in stored where the PEM would be.
+ * @param {CryptoKey} key RSASSA-PKCS1-v1_5 signing key.
+ */
+export function setSigningKey(ref, key) {
+  keyCache.set(ref, key);
+}
+
+/**
+ * Sign a five-minute API token for `username`.
+ *
+ * @param {string} privateKeyPem PKCS#8 PEM, or a stand-in `setSigningKey` registered.
+ * @param {string} username
+ * @param {string} [keyId] The `kid` an identity provider sign-in registered the key under.
+ * @returns {Promise<string>} The RS256 JWT.
+ */
+export async function generateJwtNative(privateKeyPem, username, keyId) {
   if (!privateKeyPem || !username) {
     throw new Error("Private key and username are required to generate a token.");
   }
@@ -89,7 +112,8 @@ export async function generateJwtNative(privateKeyPem, username) {
 
   const header = {
     alg: 'RS256',
-    typ: 'JWT'
+    typ: 'JWT',
+    ...(keyId ? { kid: keyId } : {}),
   };
   const now = Math.floor(Date.now() / 1000);
   const payload = {

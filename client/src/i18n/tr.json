@@ -135,7 +135,15 @@
       "keyGeneration": "Anahtar Oluşturma",
       "keyGenDescription": "Bir anahtar çiftiniz yoksa, buradan bir tane oluşturabilirsiniz. Özel anahtar yukarıda doldurulacaktır. Açık anahtarı yöneticinize verin.",
       "generateKeyButton": "Yeni Anahtar Çifti Oluştur",
-      "publicKeyForAdminLabel": "Açık Anahtarınız (yönetici için)"
+      "publicKeyForAdminLabel": "Açık Anahtarınız (yönetici için)",
+      "passphraseLabel": "Parola İfadesi",
+      "remember": "Anahtarımı bu tarayıcıda sakla",
+      "rememberHelp": "Paylaşılan bir bilgisayarda bunu kapatın: SealSkin anahtarınızı yalnızca bu sekme açıkken tutar ve bir dahaki sefere yapılandırmanızı yeniden yüklersiniz.",
+      "passphraseHelp": "Özel anahtarınız bu tarayıcıda bu parola ifadesiyle şifrelenmiş olarak saklanır; SealSkin'i burada her açtığınızda onu girersiniz.",
+      "signInTitle": "Çoklu Oturum Açma",
+      "signInHelp": "Yapılandırma dosyası yerine kuruluşunuzun yönettiği hesapla oturum açın. SealSkin oturumu yalnızca bu sekmede tutar; bir dahaki sefere yeniden oturum açarsınız.",
+      "signInOidc": "OpenID Connect ile Oturum Aç",
+      "signInSaml": "SAML ile Oturum Aç"
     },
     "home": {
       "title": "Ana Dizinleriniz",
@@ -198,7 +206,8 @@
       "homesDisabledTooltip": "Bu kullanıcı için kalıcı depolama devre dışı bırakıldı",
       "confirmDelete": "'{username}' kullanıcısını silmek istediğinizden emin misiniz? Bu, tüm kalıcı depolamasını da silecek ve geri alınamaz.",
       "allowPublicSharing": "Herkese Açık Dosya Paylaşımına İzin Ver",
-      "allowEditTemplates": "Uygulama Şablonlarını Düzenlemeye İzin Ver"
+      "allowEditTemplates": "Uygulama Şablonlarını Düzenlemeye İzin Ver",
+      "signInOnly": "Yalnızca çoklu oturum açma"
     },
     "groups": {
       "title": "Grup Yönetimi",
@@ -1166,7 +1175,9 @@
       "pendingConfigSaved": "Bekleyen yapılandırma kaydedildi. Artık açık anahtarınızı yöneticiye sağlayabilirsiniz.",
       "settingsSaved": "Ayarlar kaydedildi.",
       "appCreated": "Uygulama '{name}' başarıyla oluşturuldu.",
-      "launchFailed": "Başlatma başarısız: {error}"
+      "launchFailed": "Başlatma başarısız: {error}",
+      "passphraseRequired": "Bu tarayıcıda anahtarınızı korumak için bir parola ifadesi girin.",
+      "passphraseTooShort": "En az {count} karakterlik bir parola ifadesi kullanın."
     },
     "placeholders": {
       "noAdmins": "Yönetici bulunamadı.",
@@ -1177,6 +1188,17 @@
       "noPinned": "Sabitlenmiş davranış bulunamadı.",
       "errorLoading": "Dizinler yüklenirken hata oluştu.",
       "noInstalledApps": "Henüz hiçbir uygulama yüklenmedi."
+    },
+    "web": {
+      "title": "Bu Tarayıcıda SealSkin",
+      "bookmarklet": "SealSkin'e Gönder",
+      "bookmarkletHelp": "Bu bağlantıyı yer imleri çubuğunuza sürükleyin. Tıkladığınızda bulunduğunuz sayfayı SealSkin'de açar veya seçtiğiniz metni arar.",
+      "pick": "SealSkin İçin Seç",
+      "pickHelp": "Bunu da oraya sürükleyin. Tıklayın, ardından bir bağlantıyı SealSkin'de açmak için ona, dosyayı göndermek için bir resme, videoya veya sese tıklayın. Bir bağlantıya Shift ile tıklamak, o sitedeki oturumunuzla alınan ve bağlantının götürdüğü dosyayı gönderir.",
+      "pickHint": "SealSkin: göndermek için bir bağlantıya ya da bir resme, videoya veya sese tıklayın; bağlantının dosyası için Shift ile tıklayın. İptal için Esc'ye basın.",
+      "protocol": "web+sealskin: Bağlantılarını Burada Aç",
+      "protocolHelp": "web+sealskin: ve ardından bir adres olarak yazılan bağlantı, o adresi SealSkin'de açar.",
+      "install": "Tarayıcınız web uygulamalarını yükleyebiliyorsa, bağlantı ve dosya paylaşmak ve dosya açmak için SealSkin'i tarayıcının menüsünden yükleyin."
     }
   },
   "popup": {
@@ -1348,6 +1370,25 @@
       "finalizing": "Tamamlanıyor...",
       "completed": "Tamamlandı",
       "error": "Hata"
+    }
+  },
+  "web": {
+    "unlockTitle": "SealSkin Kilidini Aç",
+    "unlockBody": "Bu tarayıcıda anahtarınızı koruyan parola ifadesini girin.",
+    "passphrase": "Parola ifadesi",
+    "unlock": "Kilidi Aç",
+    "wrongPassphrase": "Bu parola ifadesi anahtarınızın kilidini açmıyor.",
+    "receiving": "Dosya SealSkin'e gönderiliyor…",
+    "signIn": {
+      "failed": "Oturum açma tamamlanmadı. Yeniden deneyin veya yöneticinize danışın.",
+      "refused": "Kimlik sağlayıcı oturum açmayı reddetti.",
+      "expired": "Oturum açma çok uzun sürdü veya zaten kullanıldı. Yeniden oturum açın.",
+      "browser": "Oturum açma başka bir tarayıcıda veya sekmede tamamlandı. Burada yeniden başlatın.",
+      "invalidUsername": "Hesabınızın adı bir SealSkin kullanıcı adı olamaz; kullanıcı adları yalnızca harf, rakam, alt çizgi ve kısa çizgi içerebilir. Yöneticinize danışın.",
+      "adminName": "Hesabınızın adı, bir anahtar dosyasıyla oturum açan bir SealSkin yöneticisine ait. Yöneticinize danışın.",
+      "otherIdentity": "Kimlik sağlayıcının başka bir hesabı zaten bu SealSkin kullanıcısı olarak oturum açıyor. Yöneticinize danışın.",
+      "notConfigured": "Bu sunucu çoklu oturum açma sunmuyor.",
+      "ended": "Kimlik sağlayıcı oturumunuzu sonlandırdı. Yeniden oturum açın."
     }
   }
 }

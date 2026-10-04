@@ -23,6 +23,21 @@ https://:{{SESSION_PORT}} {
                 respond "" 204
         }
 
+        # A session's own origin, whose name starts with its id, serves that session alone, and
+        # answers the probe the shells send before opening a session there.
+        @own_origin_other {
+                header_regexp Host ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\.
+                not path_regexp ^/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(/.*)?$
+        }
+        handle @own_origin_other {
+                handle /sealskin-origin {
+                        respond "sealskin"
+                }
+                handle {
+                        respond 404
+                }
+        }
+
         # forward_auth reaches /internal/* directly on the loopback API port;
         # never expose it to clients.
         handle /internal/* {
@@ -42,6 +57,17 @@ https://:{{SESSION_PORT}} {
         @session_path path_regexp session_id ^/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})(/.*)?$
 
         handle @session_path {
+                # A session answers its own pages and navigations to it, never another origin's
+                # requests or WebSockets: those carry its cookie wherever the two are same-site.
+                @foreign_request expression `{http.request.header.Sec-Fetch-Site} != "" && {http.request.header.Sec-Fetch-Site} != "same-origin" && {http.request.header.Sec-Fetch-Site} != "none" && {http.request.header.Sec-Fetch-Mode} != "navigate"`
+                @foreign_socket expression `{http.request.header.Sec-WebSocket-Version} != "" && {http.request.header.Origin} != "" && {http.request.header.Origin} != "https://" + {http.request.host} && !{http.request.header.Origin}.startsWith("https://" + {http.request.host} + ":")`
+                handle @foreign_request {
+                        respond "Forbidden" 403
+                }
+                handle @foreign_socket {
+                        respond "Forbidden" 403
+                }
+
                 @initial_auth query access_token=*
                 handle @initial_auth {
                         reverse_proxy 127.0.0.1:{{API_PORT}}
@@ -61,6 +87,9 @@ https://:{{SESSION_PORT}} {
 
                                 header_up -X-Upstream-Host
                                 header_up -X-Upstream-Auth
+
+                                # A session's service worker stays under its own path, off the web app at /ui/.
+                                header_down -Service-Worker-Allowed
                         }
                 }
         }

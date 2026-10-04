@@ -404,13 +404,16 @@ async function downloadFile(home, path) {
   const caps = info.capabilities || {};
 
   if (caps.streamDownload) {
-    // Chrome extension: the service worker streams the chunks straight into a download.
+    // The Chrome extension and the web app: a service worker streams the chunks straight into a download.
     try {
       await bridge.downloadFile(home, path, filename);
+      return;
     } catch (error) {
-      displayStatus(t('files.status.downloadFailed', { error: error.message }), true);
+      if (error.message !== 'no-stream-worker') {
+        displayStatus(t('files.status.downloadFailed', { error: error.message }), true);
+        return;
+      }
     }
-    return;
   }
 
   displayStatus(t('files.status.downloading', { filename }) || `Downloading ${filename}...`);
@@ -657,8 +660,8 @@ async function init() {
   info = await announce();
   t = await loadTranslator(info.locale);
 
-  if (info.shell === 'mobile') {
-    addMobileSafeArea();
+  if (info.shell === 'mobile') addMobileSafeArea();
+  if (info.shell !== 'extension') {
     const header = document.querySelector('.sidebar-header');
     if (header) addMobileBackButton(header, () => window.history.back());
   }

@@ -62,7 +62,7 @@ async def get_applications(user: dict[str, Any] = Depends(verify_token)) -> list
 @router.get("/api/app_icon/{app_id}")
 async def get_app_icon(app_id: str, user: dict[str, Any] = Depends(verify_token)) -> dict[str, str]:
     """Return a custom-uploaded app icon as base64 inside JSON."""
-    if not re.match(r"^[a-zA-Z0-9_-]+$", app_id):
+    if not re.fullmatch(r"[a-zA-Z0-9_-]+", app_id):
         raise HTTPException(status_code=400, detail="Invalid application ID.")
 
     icons_root = os.path.abspath(settings.app_icons_path)

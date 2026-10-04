@@ -54,4 +54,14 @@ paths refer to.
 | `SEALSKIN_UI_PATH` | `str` | `app/ui` inside the installed package, else `<repo>/client/dist/ui` | Directory holding the built web UI served under /ui. |
 | `SEALSKIN_TEMPLATE_SCHEMA_PATH` | `str` | `template_schema.yml` next to the server package | YAML file describing the environment variables editable in app templates. |
 | `SEALSKIN_CRYPTO_SESSION_TTL_SECONDS` | `int` | `86400` | Idle lifetime of an E2EE session key before it is discarded. |
+| `SEALSKIN_SSO_KEYS_PATH` | `str` | `/config/.config/sealskin/sso_keys.yml` | Path to the YAML file of browser keys registered by signing in through an identity provider. |
+| `SEALSKIN_OIDC_ISSUER` | `str` | _(empty)_ | Issuer URL of an OpenID Connect provider the web app offers sign-in with; empty offers none. |
+| `SEALSKIN_OIDC_CLIENT_ID` | `str` | _(empty)_ | Client ID of SealSkin at the OpenID Connect provider. |
+| `SEALSKIN_OIDC_CLIENT_SECRET` | `str` | _(empty)_ | Client secret of SealSkin at the OpenID Connect provider; empty for a public client. |
+| `SEALSKIN_OIDC_SCOPES` | `str` | `openid profile email` | Scopes requested from the OpenID Connect provider. |
+| `SEALSKIN_SAML_METADATA_URL` | `str` | _(empty)_ | Metadata URL of a SAML identity provider the web app offers sign-in with; empty offers none. |
+| `SEALSKIN_SSO_USERNAME_CLAIM` | `str` | _(empty)_ | Claim (OpenID Connect) or attribute (SAML) naming the SealSkin user; empty takes `preferred_username`, or the SAML attribute `username`, else the SAML NameID. |
+| `SEALSKIN_SSO_GROUPS_CLAIM` | `str` | `groups` | Claim or attribute listing the user's groups at the identity provider. |
+| `SEALSKIN_SSO_ADMIN_GROUP` | `str` | _(empty)_ | Identity provider group whose members sign in as administrators; empty makes none. |
+| `SEALSKIN_SSO_MAX_AGE_SECONDS` | `int` | `43200` | Longest an identity provider sign-in lasts; one the provider ends sooner ends then. |
 | `SEALSKIN_WATCH_CONFIG_FILES` | `bool` | `true` | Reload YAML configuration files automatically when they change on disk. |

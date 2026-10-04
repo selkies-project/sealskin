@@ -236,6 +236,69 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "help": "Idle lifetime of an E2EE session key before it is discarded.",
     },
     {
+        "name": "sso_keys_path",
+        "type": "str",
+        "default": "/config/.config/sealskin/sso_keys.yml",
+        "help": "Path to the YAML file of browser keys registered by signing in through an identity provider.",
+    },
+    {
+        "name": "oidc_issuer",
+        "type": "str",
+        "default": "",
+        "help": "Issuer URL of an OpenID Connect provider the web app offers sign-in with; empty offers none.",
+    },
+    {
+        "name": "oidc_client_id",
+        "type": "str",
+        "default": "",
+        "help": "Client ID of SealSkin at the OpenID Connect provider.",
+    },
+    {
+        "name": "oidc_client_secret",
+        "type": "str",
+        "default": "",
+        "help": "Client secret of SealSkin at the OpenID Connect provider; empty for a public client.",
+    },
+    {
+        "name": "oidc_scopes",
+        "type": "str",
+        "default": "openid profile email",
+        "help": "Scopes requested from the OpenID Connect provider.",
+    },
+    {
+        "name": "saml_metadata_url",
+        "type": "str",
+        "default": "",
+        "help": "Metadata URL of a SAML identity provider the web app offers sign-in with; empty offers none.",
+    },
+    {
+        "name": "sso_username_claim",
+        "type": "str",
+        "default": "",
+        "help": (
+            "Claim (OpenID Connect) or attribute (SAML) naming the SealSkin user; empty takes "
+            "`preferred_username`, or the SAML attribute `username`, else the SAML NameID."
+        ),
+    },
+    {
+        "name": "sso_groups_claim",
+        "type": "str",
+        "default": "groups",
+        "help": "Claim or attribute listing the user's groups at the identity provider.",
+    },
+    {
+        "name": "sso_admin_group",
+        "type": "str",
+        "default": "",
+        "help": "Identity provider group whose members sign in as administrators; empty makes none.",
+    },
+    {
+        "name": "sso_max_age_seconds",
+        "type": "int",
+        "default": 43200,
+        "help": "Longest an identity provider sign-in lasts; one the provider ends sooner ends then.",
+    },
+    {
         "name": "watch_config_files",
         "type": "bool",
         "default": True,

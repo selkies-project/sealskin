@@ -135,7 +135,15 @@
       "keyGeneration": "Generación de Claves",
       "keyGenDescription": "Si no tiene un par de claves, puede generar uno aquí. La clave privada se completará arriba. Proporcione la clave pública a su administrador.",
       "generateKeyButton": "Generar Nuevo Par de Claves",
-      "publicKeyForAdminLabel": "Su Clave Pública (para el admin)"
+      "publicKeyForAdminLabel": "Su Clave Pública (para el admin)",
+      "passphraseLabel": "Frase de contraseña",
+      "remember": "Conservar mi clave en este navegador",
+      "rememberHelp": "Desactive esta opción en un equipo compartido: SealSkin conservará su clave solo mientras esta pestaña esté abierta, y la próxima vez volverá a cargar su configuración.",
+      "passphraseHelp": "Su clave privada se guarda en este navegador cifrada con esta frase de contraseña, que introducirá cada vez que abra SealSkin aquí.",
+      "signInTitle": "Inicio de sesión único",
+      "signInHelp": "Inicie sesión con la cuenta que administra su organización en lugar de un archivo de configuración. SealSkin conserva la sesión solo en esta pestaña, así que volverá a iniciar sesión la próxima vez.",
+      "signInOidc": "Iniciar sesión con OpenID Connect",
+      "signInSaml": "Iniciar sesión con SAML"
     },
     "home": {
       "title": "Sus Directorios Personales",
@@ -198,7 +206,8 @@
       "homesDisabledTooltip": "Almacenamiento persistente deshabilitado para este usuario",
       "confirmDelete": "¿Está seguro de que quiere eliminar al usuario '{username}'? Esto también eliminará todo su almacenamiento persistente y no se puede deshacer.",
       "allowPublicSharing": "Permitir compartir archivos públicamente",
-      "allowEditTemplates": "Permitir editar plantillas de apps"
+      "allowEditTemplates": "Permitir editar plantillas de apps",
+      "signInOnly": "Solo inicio de sesión único"
     },
     "groups": {
       "title": "Gestión de Grupos",
@@ -1166,7 +1175,9 @@
       "pendingConfigSaved": "Configuración pendiente guardada. Ahora puede proporcionar su clave pública al administrador.",
       "settingsSaved": "Configuración guardada.",
       "appCreated": "App '{name}' creada con éxito.",
-      "launchFailed": "Lanzamiento fallido: {error}"
+      "launchFailed": "Lanzamiento fallido: {error}",
+      "passphraseRequired": "Introduzca una frase de contraseña para proteger su clave en este navegador.",
+      "passphraseTooShort": "Use una frase de contraseña de al menos {count} caracteres."
     },
     "placeholders": {
       "noAdmins": "No se encontraron administradores.",
@@ -1177,6 +1188,17 @@
       "noPinned": "No se encontraron comportamientos anclados.",
       "errorLoading": "Error al cargar los directorios.",
       "noInstalledApps": "Aún no se han instalado aplicaciones."
+    },
+    "web": {
+      "title": "SealSkin en Este Navegador",
+      "bookmarklet": "Enviar a SealSkin",
+      "bookmarkletHelp": "Arrastre este enlace a su barra de marcadores. Al hacer clic en él, se abre en SealSkin la página en la que está, o se busca el texto seleccionado.",
+      "pick": "Elegir para SealSkin",
+      "pickHelp": "Arrastre también este enlace allí. Haga clic en él y luego en un enlace para abrirlo en SealSkin, o en una imagen, un vídeo o un audio para enviar el archivo. Mayús+clic en un enlace envía el archivo al que lleva, obtenido con su sesión en ese sitio.",
+      "pickHint": "SealSkin: haga clic en un enlace, o en una imagen, un vídeo o un audio, para enviarlo; Mayús+clic en un enlace envía su archivo. Pulse Esc para cancelar.",
+      "protocol": "Abrir aquí los enlaces web+sealskin:",
+      "protocolHelp": "Un enlace escrito como web+sealskin: seguido de una dirección abre entonces esa dirección en SealSkin.",
+      "install": "Si su navegador puede instalar aplicaciones web, instale SealSkin desde su menú para compartir enlaces y archivos con él y abrir archivos con él."
     }
   },
   "popup": {
@@ -1348,6 +1370,25 @@
       "finalizing": "Finalizando...",
       "completed": "Completado",
       "error": "Error"
+    }
+  },
+  "web": {
+    "unlockTitle": "Desbloquear SealSkin",
+    "unlockBody": "Introduzca la frase de contraseña que protege su clave en este navegador.",
+    "passphrase": "Frase de contraseña",
+    "unlock": "Desbloquear",
+    "wrongPassphrase": "Esa frase de contraseña no desbloquea su clave.",
+    "receiving": "Enviando el archivo a SealSkin…",
+    "signIn": {
+      "failed": "El inicio de sesión no se completó. Inténtelo de nuevo o consulte a su administrador.",
+      "refused": "El proveedor de identidad rechazó el inicio de sesión.",
+      "expired": "El inicio de sesión tardó demasiado o ya se usó. Vuelva a iniciar sesión.",
+      "browser": "El inicio de sesión terminó en otro navegador o pestaña. Vuelva a iniciarlo aquí.",
+      "invalidUsername": "El nombre de su cuenta no puede ser un nombre de usuario de SealSkin, que solo admite letras, dígitos, guiones bajos y guiones. Consulte a su administrador.",
+      "adminName": "El nombre de su cuenta pertenece a un administrador de SealSkin, que inicia sesión con un archivo de clave. Consulte a su administrador.",
+      "otherIdentity": "Otra cuenta del proveedor de identidad ya inicia sesión como este usuario de SealSkin. Consulte a su administrador.",
+      "notConfigured": "Este servidor no ofrece inicio de sesión único.",
+      "ended": "El proveedor de identidad terminó su sesión. Vuelva a iniciar sesión."
     }
   }
 }

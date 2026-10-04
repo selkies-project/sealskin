@@ -135,7 +135,15 @@
       "keyGeneration": "Pagbuo ng Key",
       "keyGenDescription": "Kung wala kang key pair, maaari kang bumuo ng isa dito. Ang pribadong key ay pupunan sa itaas. Ibigay ang pampublikong key sa iyong administrator.",
       "generateKeyButton": "Bumuo ng Bagong Key Pair",
-      "publicKeyForAdminLabel": "Iyong Pampublikong Key (para sa admin)"
+      "publicKeyForAdminLabel": "Iyong Pampublikong Key (para sa admin)",
+      "passphraseLabel": "Passphrase",
+      "remember": "Itago ang aking key sa browser na ito",
+      "rememberHelp": "I-off ito sa computer na may kahati ka: itatago lang ng SealSkin ang iyong key habang bukas ang tab na ito, at ilo-load mo ulit ang iyong configuration sa susunod.",
+      "passphraseHelp": "Nakatago ang iyong pribadong key sa browser na ito at naka-encrypt gamit ang passphrase na ito, na ilalagay mo tuwing bubuksan mo ang SealSkin dito.",
+      "signInTitle": "Single Sign-On",
+      "signInHelp": "Mag-sign in gamit ang account na pinamamahalaan ng iyong organisasyon sa halip na file ng konfigurasyon. Itinatago ng SealSkin ang sign-in sa tab na ito lamang, kaya magsa-sign in ka ulit sa susunod.",
+      "signInOidc": "Mag-sign in gamit ang OpenID Connect",
+      "signInSaml": "Mag-sign in gamit ang SAML"
     },
     "home": {
       "title": "Iyong mga Home Directory",
@@ -198,7 +206,8 @@
       "homesDisabledTooltip": "Ang persistenteng imbakan ay hindi pinagana para sa user na ito",
       "confirmDelete": "Sigurado ka bang gusto mong burahin ang user na si '{username}'? Mabubura rin nito ang lahat ng kanilang persistenteng imbakan at hindi na maibabalik.",
       "allowPublicSharing": "Pahintulutan ang Pampublikong Pagbabahagi ng File",
-      "allowEditTemplates": "Pahintulutan ang Pag-edit ng mga Template ng App"
+      "allowEditTemplates": "Pahintulutan ang Pag-edit ng mga Template ng App",
+      "signInOnly": "Single sign-on lamang"
     },
     "groups": {
       "title": "Pamamahala ng Grupo",
@@ -1166,7 +1175,9 @@
       "pendingConfigSaved": "Nai-save ang nakabinbing konfigurasyon. Maaari mo nang ibigay ang iyong pampublikong key sa administrator.",
       "settingsSaved": "Nai-save ang mga setting.",
       "appCreated": "Matagumpay na nagawa ang app na '{name}'.",
-      "launchFailed": "Nabigo ang paglunsad: {error}"
+      "launchFailed": "Nabigo ang paglunsad: {error}",
+      "passphraseRequired": "Maglagay ng passphrase para protektahan ang iyong key sa browser na ito.",
+      "passphraseTooShort": "Gumamit ng passphrase na may hindi bababa sa {count} character."
     },
     "placeholders": {
       "noAdmins": "Walang nahanap na admin.",
@@ -1177,6 +1188,17 @@
       "noPinned": "Walang nahanap na naka-pin na gawi.",
       "errorLoading": "Error sa pag-load ng mga directory.",
       "noInstalledApps": "Wala pang naka-install na mga application."
+    },
+    "web": {
+      "title": "SealSkin sa Browser na Ito",
+      "bookmarklet": "Ipadala sa SealSkin",
+      "bookmarkletHelp": "I-drag ang link na ito sa iyong bookmarks bar. Kapag kinlik ito, bubuksan nito sa SealSkin ang pahinang kinaroroonan mo, o hahanapin ang tekstong pinili mo.",
+      "pick": "Pumili para sa SealSkin",
+      "pickHelp": "I-drag din doon ang link na ito. I-click ito, pagkatapos ay i-click ang isang link para buksan ang link na iyon sa SealSkin, o ang isang larawan, video, o audio para ipadala ang file. Mag-Shift-click sa isang link para ipadala ang file na tinuturo nito, na kinukuha gamit ang pag-sign in mo sa site na iyon.",
+      "pickHint": "SealSkin: mag-click sa isang link, o sa larawan, video, o audio, para ipadala ito; mag-Shift-click sa isang link para ipadala ang file nito. Pindutin ang Esc para kanselahin.",
+      "protocol": "Buksan dito ang mga web+sealskin: link",
+      "protocolHelp": "Ang link na isinulat bilang web+sealskin: na sinusundan ng isang address ay magbubukas ng address na iyon sa SealSkin.",
+      "install": "Kung kayang mag-install ng browser ng mga web app, i-install ang SealSkin mula sa menu nito para makapagbahagi ng mga link at file dito at makapagbukas ng mga file gamit ito."
     }
   },
   "popup": {
@@ -1348,6 +1370,25 @@
       "finalizing": "Tinatapos...",
       "completed": "Kumpleto",
       "error": "Error"
+    }
+  },
+  "web": {
+    "unlockTitle": "I-unlock ang SealSkin",
+    "unlockBody": "Ilagay ang passphrase na nagpoprotekta sa iyong key sa browser na ito.",
+    "passphrase": "Passphrase",
+    "unlock": "I-unlock",
+    "wrongPassphrase": "Hindi nabubuksan ng passphrase na iyon ang iyong key.",
+    "receiving": "Ipinapadala ang file sa SealSkin…",
+    "signIn": {
+      "failed": "Hindi natapos ang sign-in. Subukan ulit, o magtanong sa iyong administrator.",
+      "refused": "Tinanggihan ng identity provider ang sign-in.",
+      "expired": "Masyadong natagalan ang sign-in o nagamit na ito. Mag-sign in ulit.",
+      "browser": "Natapos ang sign-in sa ibang browser o tab. Simulan ito ulit dito.",
+      "invalidUsername": "Hindi maaaring maging username sa SealSkin ang pangalan ng iyong account, na tumatanggap lamang ng mga titik, numero, underscore, at gitling. Magtanong sa iyong administrator.",
+      "adminName": "Pag-aari ng isang administrator ng SealSkin, na nagsa-sign in gamit ang key file, ang pangalan ng iyong account. Magtanong sa iyong administrator.",
+      "otherIdentity": "May ibang account ng identity provider na nagsa-sign in na bilang user na ito ng SealSkin. Magtanong sa iyong administrator.",
+      "notConfigured": "Walang single sign-on ang server na ito.",
+      "ended": "Tinapos ng identity provider ang iyong sign-in. Mag-sign in ulit."
     }
   }
 }

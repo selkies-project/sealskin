@@ -1,13 +1,14 @@
 ---
 title: Usage
-description: The launcher, the right-click menu, downloads, sessions, storage, the file manager, and collaboration rooms.
+description: The launcher, the right-click menu, downloads, sessions, storage, the file manager, collaboration rooms, and the web app.
 ---
 
 Everything on this page happens in the client after it is
 [connected](start.md#connect). The browser extension has the full set of entry
-points; the mobile apps have the launcher, sessions, files, and the dashboard
-but no context menu or download interception, because those hooks only exist
-in a browser.
+points; the mobile apps and the web app have the launcher, sessions, files,
+and the dashboard but no context menu or download interception, because those
+hooks only exist in a browser extension. The web app has its own
+[entry points](#in-a-browser-with-nothing-installed) instead.
 
 ## The launcher
 
@@ -171,11 +172,68 @@ Differences from the extension:
 * A trusted TLS certificate is mandatory; the WebView refuses self-signed
   certificates and mixed content.
 
+## In a browser, with nothing installed
+
+`https://<server>:8443/ui/` is the web app: the same launcher, file manager,
+and dashboard in an ordinary tab. Connect it with your configuration file as
+in [Connect](start.md#connect), choosing a passphrase; your private key is
+stored in the browser encrypted with it, and the page asks for it each time
+it opens. **Logout & Clear Config** on that prompt forgets the key if the
+passphrase is lost, after which you connect again. Turn off **Keep my key in
+this browser** on a computer you share: the key then stays in the tab alone,
+and you load the configuration again next time.
+
+Where the administrator set up [single sign-on](configuration.md#single-sign-on),
+the connection page also offers **Sign In with OpenID Connect** or **Sign In
+with SAML**: sign in at your organization's identity provider, and the web app
+connects with a key it keeps in that tab alone. A reload, **Logout & Clear
+Config**, or a logout at the identity provider ends it.
+
+In place of the context menu:
+
+* **The bookmarklets.** The dashboard's **SealSkin in This Browser** card has
+  two links to drag to your bookmarks bar. **Send to SealSkin** opens the page
+  you are on in SealSkin, or searches for the text you selected. **Pick for
+  SealSkin** waits for your next click: click a link to open that link in
+  SealSkin, or an image, video, or audio to send the file; Shift-click a link
+  to send the file it leads to. A picked file is fetched by the page you are
+  on, with your sign-in on that site, so it works for files only that site can
+  read; anything the page cannot fetch opens as a link instead.
+* **`web+sealskin:` links.** After **Open web+sealskin: Links Here** (Chrome,
+  Edge, Firefox), a link such as `web+sealskin:https://example.com` opens
+  its address in SealSkin.
+* **Search.** The web app offers itself to the browser as a search engine
+  (OpenSearch), and `…/ui/?q=terms` and `…/ui/?url=address` open the launcher
+  with that search or address.
+* **As an installed app** (Chrome and Edge, from the browser's install
+  option): SealSkin becomes a target that other applications **share** links,
+  text, and files to, and on a desktop it is offered to **open** the file types
+  your installed applications open.
+
+Sessions open in tabs of their own. While the web app's tab stays open,
+**Re-open** brings a session's tab forward and **Stop** closes it; after the
+web app is reloaded, and always in Safari, which lets the web app keep no
+hold on the tab, **Re-open** opens the session in a new tab. Where the web app
+cannot close the tab (Safari, and Chrome for a session at an address of its
+own), the tab closes itself a few seconds after **Stop**, when its page
+reconnects to the stopped session, or says the session stopped where the
+browser does not let a page close its tab.
+
+Where the server's certificate and DNS cover addresses under its name (see
+[Session origins](configuration.md#session-origins)), each session opens at
+an address of its own, which keeps its pages away from the web app and from
+other sessions altogether. Otherwise session content is served from the same
+address as the web app, so the web app keeps it at arm's length: session tabs get no link back to it, it cannot
+be framed, and it trusts nothing session pages could leave in the browser's
+storage for where to connect or which key to sign with. The stored key is as
+strong as its passphrase, which the browser is never offered to save, since a
+saved one would be filled into session pages too.
+
 ## The options page
 
-The extension's options page (and the app's dashboard) is where the client
-configuration lives, alongside the account-level views: **Configuration**
-(connection, export your config file for another device, log out), **Home
-Directories**, **Active Sessions**, and **Pinned Behavior**. Administrators see
-the management panels described in [Administration](administration.md) in the
-same place.
+The extension's options page (and the dashboard of the app and the web app)
+is where the client configuration lives, alongside the account-level views:
+**Configuration** (connection, export your config file for another device,
+log out), **Home Directories**, **Active Sessions**, and **Pinned Behavior**.
+Administrators see the management panels described in
+[Administration](administration.md) in the same place.

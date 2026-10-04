@@ -124,7 +124,7 @@ SEALSKIN_BUILD_STRICT=1 npm run build # fail if any page or entry is missing
 
 | Output | Consumer | Hashed | Minified |
 | --- | --- | --- | --- |
-| `dist/ui` | served by the server under `/ui/` | yes | yes |
+| `dist/ui` | served by the server under `/ui/`, the web app included | yes | yes |
 | `dist/extension` | contents of the extension zip | no | no (store review friendly) |
 | `dist/mobile` | Capacitor web directory (`mobile/www`) | no | no |
 
@@ -139,6 +139,9 @@ then rewrites the tag to the emitted file name:
   targets even though no page references it.
 * Anything under `vendor/` is copied verbatim, never bundled.
   `browser_extension/icons` is copied to every target.
+* The served UI also gets the connection page, the web app's service worker
+  (`sw.js`, unhashed: its address is its scope), and `mobile/assets/logo.png`
+  as the installed web app's large icon.
 * `{{PLACEHOLDER}}` tokens in HTML (the room page) are left for the server to
   substitute.
 * Pages that import `lib/i18n.js` must sit at the target root, because the
