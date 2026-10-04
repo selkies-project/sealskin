@@ -14,6 +14,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from fastapi.testclient import TestClient
 
 from app.settings import settings
+from app.state import state
 
 pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
 
@@ -178,6 +179,17 @@ def test_status_install_patch_flow(api_client, store_with_firefox):
 
     status, _ = api_client.call("DELETE", "/api/admin/apps/installed/inst-1")
     assert status == 204
+
+
+def test_gpu_options_are_refreshed_when_offered(api_client, monkeypatch):
+    from app.providers.docker_provider import DockerProvider
+
+    async def refresh(self):
+        state.available_gpus[:] = [{"device": "gpu-l40s", "driver": "nvidia", "type": "nvidia"}]
+
+    monkeypatch.setattr(DockerProvider, "refresh_gpus", refresh)
+    status, data = api_client.call("POST", "/api/admin/data", {})
+    assert status == 200 and [gpu["device"] for gpu in data["gpus"]] == ["gpu-l40s"]
 
 
 def test_unauthenticated_and_bad_session_are_rejected(api_client):

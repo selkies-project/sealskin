@@ -18,6 +18,7 @@ import re
 import shutil
 import tempfile
 from typing import Any
+from urllib.parse import urlsplit
 
 import yaml
 from cryptography.hazmat.primitives import serialization
@@ -55,6 +56,20 @@ def set_server_public_key(key: str) -> None:
     """Record the server public key used in generated admin config files."""
     global SERVER_PUBLIC_KEY_PEM
     SERVER_PUBLIC_KEY_PEM = key
+
+
+def external_address() -> tuple[str, int | None]:
+    """Split `HOST_URL` into the address clients use and the port it names, if any.
+
+    A port there is the one clients reach both the API and sessions on, as
+    behind an ingress; without one the discovered ports apply.
+    """
+    host_url = os.environ.get("HOST_URL", "HOST_URL")
+    try:
+        port = urlsplit(f"//{host_url}").port
+    except ValueError:
+        return host_url, None
+    return (host_url.rsplit(":", 1)[0], port) if port else (host_url, None)
 
 
 def set_external_ports(api_port: int, session_port: int) -> None:
@@ -169,7 +184,7 @@ def _generate_default_admin() -> None:
 
     config_path = os.path.abspath(os.path.join(settings.keys_base_path, "..", "..", "..", "admin.json"))
     admin_config = {
-        "server_endpoint": os.environ.get("HOST_URL", "HOST_URL"),
+        "server_endpoint": external_address()[0],
         "api_port": EXTERNAL_API_PORT,
         "session_port": EXTERNAL_SESSION_PORT,
         "username": "admin",

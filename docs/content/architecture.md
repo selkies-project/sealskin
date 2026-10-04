@@ -32,8 +32,9 @@ A SealSkin installation is one server container and any number of clients.
   server, and reverse-proxies every session path to the right container
   after asking the API server whether the request may pass.
 * **Session containers** are Selkies-based application images started
-  through the Docker socket on the same network as the server. They are
-  never published on a host port; only Caddy reaches them.
+  through the Docker socket on the same network as the server, or as pods in
+  the server's namespace on [Kubernetes](kubernetes.md). They are never
+  published on a host port; only Caddy reaches them.
 * **Clients** hold the user's private key and the server's public key,
   perform the handshake, sign tokens, and frame the web UI the server
   serves.
@@ -113,15 +114,19 @@ guessing and the scrypt work it costs the server.
    volumes, and Docker run options merged from the store entry and the
    template's `DOCKER_*` settings. If the app has an autostart script, it is
    written into the home directory as the `openbox` or `labwc` autostart.
-4. The Docker provider pulls the image if needed, runs the container
-   (removed on exit) on the server's network, and polls it over HTTP with
-   the session credentials until it answers, up to a minute.
+4. The provider starts the instance: the Docker provider pulls the image if
+   needed and runs the container (removed on exit) on the server's network;
+   the Kubernetes provider creates a pod and waits for it to be scheduled and
+   pull its image. Either then polls it over HTTP with the session
+   credentials until it answers, up to a minute.
 5. The session is recorded in `sessions.yml` and the one-time URL returned.
    Rooms get a controller token and invite tokens as well, and the container
    is told the initial token table.
 
 Stopping reverses it: containers are stopped, ephemeral directories deleted,
-the record removed, and room participants notified.
+the record removed, and room participants notified. The server does the same
+for a session whose container ended on its own, which it checks every 30
+seconds, and removes containers it labelled that no session references.
 
 ## Served UI and thin shells
 
@@ -211,8 +216,8 @@ tell the server's own writes from an administrator's edits, and a
 
 Installed apps are stored as references plus overrides and resolved against
 the cached store entry on every load, so the file stays small and store
-updates apply without reinstalling. Sessions are saved at launch and pruned
-against Docker at start-up.
+updates apply without reinstalling. Sessions are saved at launch and
+reconciled with the backend at start-up and every 30 seconds after.
 
 ## Server modules
 
@@ -228,10 +233,10 @@ server/app/persistence.py     atomic YAML read/write, per-file locks, change wat
 server/app/config_store.py    stores, installed records and resolution, templates, sessions, shares
 server/app/security.py        handshake, EncryptedRoute, JWT verification, password hashing
 server/app/launch.py          build_launch_spec(), launch_application(), stop and swap
-server/app/docker_utils.py    Docker client, self-inspection, GPU detection, image cache
+server/app/docker_utils.py    Docker client and self-inspection, render nodes, image cache
 server/app/fsutil.py          filesystem helpers
 server/app/user_manager.py    users, admins and groups on disk
-server/app/providers/         provider interface and the Docker provider
+server/app/providers/         provider interface, the Docker and Kubernetes providers
 server/app/routers/           one router per area: handshake, applications, launch, sessions,
                               homedirs, admin, uploads, files, shares, internal, ui
 server/app/collaboration.py   room page, WebSocket and token fan-out

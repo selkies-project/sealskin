@@ -47,7 +47,7 @@ from ..models import (
     User,
     UserSessionList,
 )
-from ..providers.docker_provider import DockerProvider
+from ..providers import get_provider
 from ..security import (
     EncryptedRoute,
     get_decrypted_request_body,
@@ -77,8 +77,9 @@ template_router = APIRouter(
 )
 
 
-def _gpu_list() -> list[GPUInfo]:
-    """Return the detected GPUs as API models."""
+async def _gpu_list() -> list[GPUInfo]:
+    """Return the GPUs sessions can request now, as API models."""
+    await get_provider().refresh_gpus()
     return [GPUInfo(device=gpu["device"], driver=gpu["driver"]) for gpu in state.available_gpus]
 
 
@@ -94,7 +95,7 @@ async def admin_status(user: dict[str, Any] = Depends(verify_token)) -> dict[str
         **get_system_stats(),
     }
     if user.get("effective_settings", {}).get("gpu", False):
-        response["gpus"] = _gpu_list()
+        response["gpus"] = await _gpu_list()
     return response
 
 
@@ -108,7 +109,7 @@ async def get_management_data() -> dict[str, Any]:
         "server_public_key": state.server_public_key_pem,
         "api_port": state.discovered_api_port,
         "session_port": state.discovered_session_port,
-        "gpus": _gpu_list(),
+        "gpus": await _gpu_list(),
     }
 
 
@@ -362,7 +363,7 @@ async def check_app_update(app_id: str) -> ImageUpdateCheckResponse:
     if not app:
         raise HTTPException(status_code=404, detail="Installed app not found.")
     image_name = app.provider_config.image
-    provider = DockerProvider(app.model_dump())
+    provider = get_provider()
     local_info = await provider.get_local_image_info(image_name)
     remote_digest = await provider.get_remote_image_digest(image_name)
     if not remote_digest:
@@ -385,7 +386,7 @@ async def pull_latest_app_image(app_id: str) -> ImagePullResponse:
         raise HTTPException(status_code=404, detail="Installed app not found.")
     image_name = app.provider_config.image
     try:
-        await DockerProvider(app.model_dump()).pull_image(image_name)
+        await get_provider().pull_image(image_name)
         await config_store.refresh_autostart_for_app(app)
         await get_and_cache_image_metadata(image_name, force_refresh=True)
         return ImagePullResponse(

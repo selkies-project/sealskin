@@ -3,6 +3,7 @@
   "pages": [
     "README",
     "start",
+    "kubernetes",
     "usage",
     "administration",
     "configuration",

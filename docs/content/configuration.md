@@ -52,6 +52,8 @@ own container (found by the name `sealskin`, or by hostname) and records how
 each mount maps to the host. The same inspection discovers the externally
 mapped API and session ports, which are what generated configuration files
 tell clients to connect to, and the Docker network sessions are attached to.
+On [Kubernetes](kubernetes.md) the server reads its own pod instead and
+mounts the volume behind a path into the session with a `subPath`.
 
 ## Keys and certificates
 
@@ -92,7 +94,9 @@ connection page's **Export Config** writes:
 
 `server_endpoint` is the value of `HOST_URL`, or the literal string
 `HOST_URL` when that variable was not set. The ports are the ones the
-container was started with, as discovered from Docker. Delete the file after
+container was started with, as discovered from Docker, unless `HOST_URL`
+names a port (`sealskin.example.com:443`), which is then both ports, as
+behind an ingress. Delete the file after
 importing it: nothing on the server reads it again, and it is the only copy
 of the private key.
 

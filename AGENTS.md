@@ -11,7 +11,7 @@ implements it and in the [development page](docs/content/development.md), never 
 the mobile shells. `server/` is the FastAPI application with its tests, Caddy template, and wheel
 packaging; `client/` the plain-JavaScript UI and the esbuild pipeline that also packages the
 extension and mobile shells; `browser_extension/` the manifests and zip script; `mobile/` the
-Capacitor project; `docs/` the Fumadocs site over the pages under `docs/content`; `release-notes/`
+Capacitor project; `kubernetes/` the manifest that installs the server in a namespace; `docs/` the Fumadocs site over the pages under `docs/content`; `release-notes/`
 one Markdown file per stable release. `docs/AGENTS.md` is the block `next dev` writes for the site's
 own Next.js version, not a copy of this file.
 
@@ -28,8 +28,8 @@ Everything is written in American English. The prose under `docs/content` follow
 
 - Settings are declared once, in `SETTING_DEFINITIONS`; a new setting is an entry there and a
   regenerated `docs/content/settings.md` (`npm run generate:settings` in `docs/`), which CI checks.
-- All Docker access goes through `docker_utils` and the provider, all YAML through `persistence`,
-  and every launch through `build_launch_spec`.
+- All backend access goes through the provider `get_provider` returns (Docker's also through
+  `docker_utils`), all YAML through `persistence`, and every launch through `build_launch_spec`.
 - The collaboration and token tables (`server/app/collaboration.py`) drive Selkies' secure mode as
   its documentation describes it, and are a reference implementation of it: a change there is
   measured against a Selkies session, not reasoned about.

@@ -4,9 +4,9 @@ description: Install the server, connect a browser extension or mobile app, and 
 ---
 
 SealSkin has two halves: a **server** that runs applications in Docker
-containers and streams them, and a **client** (browser extension or mobile
-app) that sends links, files, and downloads to it. This page takes you from
-nothing to a running session.
+containers or Kubernetes pods and streams them, and a **client** (browser
+extension or mobile app) that sends links, files, and downloads to it. This
+page takes you from nothing to a running session.
 
 ## What you need
 
@@ -108,6 +108,10 @@ server needs it generates itself; [Configuration](configuration.md) lists the
 files.
 
 ### Other ways to run it
+
+On Kubernetes, one manifest runs the server in any namespace you administer
+and starts every session as a pod beside it; [Kubernetes](kubernetes.md)
+covers it.
 
 The server is also published as a Python wheel on every release. It needs
 Python 3.11 or newer, Caddy on the `PATH`, access to a Docker daemon, and the

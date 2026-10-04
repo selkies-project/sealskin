@@ -15,10 +15,11 @@ import { bridge, request } from './bridge.js';
  *
  * @param {string} url Path beginning with `/api/`.
  * @param {object} [options] fetch-like options: method, headers, body (string).
+ * @param {object} [opts] Bridge request options, such as `timeout`.
  * @returns {Promise<any>} Decrypted JSON body.
  */
-export async function secureFetch(url, options = {}) {
-  const data = await bridge.secureFetch(url, options);
+export async function secureFetch(url, options = {}, opts = {}) {
+  const data = await bridge.secureFetch(url, options, opts);
   if (data === null && (options.method === 'DELETE' || options.method === 'POST')) {
     return {};
   }

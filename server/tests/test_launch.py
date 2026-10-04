@@ -79,6 +79,41 @@ def test_build_launch_spec_env_volumes_and_overrides(tmp_path):
     assert kwargs["env_vars"] is spec.env and "is_collaboration" not in kwargs
 
 
+def test_docker_env_joins_the_session_environment(tmp_path):
+    state.app_templates["Default"] = {
+        "name": "Default",
+        "settings": {"DOCKER_ENV": "EXTRA=1,APP_ENV=template", "DOCKER_BIND_MOUNTS": "/srv:/srv:ro"},
+    }
+    spec = launch.build_launch_spec(
+        make_app(),
+        "sess",
+        base_env=launch.session_base_env("sess", "u", "p", None),
+        extra_env=None,
+        language=None,
+        wayland_mode=False,
+        gpu_config={"type": "nvidia", "device": "nvidia.com/gpu", "resource": "nvidia.com/gpu"},
+        host_mount_path=str(tmp_path),
+        shared_files_path=None,
+    )
+    assert spec.env["EXTRA"] == "1" and spec.env["SUBFOLDER"] == "/sess/" and spec.env["PASSWORD"] == "p"
+    assert spec.env["APP_ENV"] == "1"
+    assert "DRI_NODE" not in spec.env
+    overrides = spec.app_config["provider_config"]["docker_overrides"]
+    assert "environment" not in overrides and overrides["volumes"] == ["/srv:/srv:ro"]
+    assert set(spec.volumes) == {str(tmp_path)}
+
+
+def test_docker_bind_mounts_keep_session_volumes():
+    from app.providers.docker_provider import _bind_volumes
+
+    assert _bind_volumes(["/srv:/srv:ro", "/data:/mnt", "bad"]) == {
+        "/srv": {"bind": "/srv", "mode": "ro"},
+        "/data": {"bind": "/mnt", "mode": "rw"},
+    }
+    assert _bind_volumes({"/a": {"bind": "/b", "mode": "rw"}}) == {"/a": {"bind": "/b", "mode": "rw"}}
+    assert _bind_volumes(None) == {}
+
+
 def test_extract_docker_overrides_parsing():
     result = launch.extract_docker_overrides(
         {
