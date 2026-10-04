@@ -194,7 +194,7 @@ async def collaborative_room(
             content="<h1>Invalid or expired collaboration link.</h1>", status_code=403
         )
 
-    iframe_src = f"/{session_id_str}/?token={user_token}"
+    iframe_src = f"/{session_id_str}/#token={user_token}"
 
     client_data = {
         "sessionId": session_id_str,
