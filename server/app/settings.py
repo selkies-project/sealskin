@@ -50,8 +50,11 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
     {
         "name": "default_provider",
         "type": "str",
-        "default": "docker",
-        "help": "The default application provider to use.",
+        "default": "auto",
+        "help": (
+            "Backend that runs sessions: `docker`, `kubernetes`, or `auto`, which picks "
+            "Kubernetes when the server runs in a Kubernetes pod and Docker otherwise."
+        ),
     },
     {
         "name": "app_resource_path",
@@ -236,6 +239,284 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "help": "Idle lifetime of an E2EE session key before it is discarded.",
     },
     {
+        "name": "sso_keys_path",
+        "type": "str",
+        "default": "/config/.config/sealskin/sso_keys.yml",
+        "help": "Path to the YAML file of browser keys registered by signing in through an identity provider.",
+    },
+    {
+        "name": "oidc_issuer",
+        "type": "str",
+        "default": "",
+        "help": "Issuer URL of an OpenID Connect provider the web app offers sign-in with; empty offers none.",
+    },
+    {
+        "name": "oidc_client_id",
+        "type": "str",
+        "default": "",
+        "help": "Client ID of SealSkin at the OpenID Connect provider.",
+    },
+    {
+        "name": "oidc_client_secret",
+        "type": "str",
+        "default": "",
+        "help": "Client secret of SealSkin at the OpenID Connect provider; empty for a public client.",
+    },
+    {
+        "name": "oidc_scopes",
+        "type": "str",
+        "default": "openid profile email",
+        "help": "Scopes requested from the OpenID Connect provider.",
+    },
+    {
+        "name": "saml_metadata_url",
+        "type": "str",
+        "default": "",
+        "help": "Metadata URL of a SAML identity provider the web app offers sign-in with; empty offers none.",
+    },
+    {
+        "name": "sso_username_claim",
+        "type": "str",
+        "default": "",
+        "help": (
+            "Claim (OpenID Connect) or attribute (SAML) naming the SealSkin user; empty takes "
+            "`preferred_username`, or the SAML attribute `username`, else the SAML NameID."
+        ),
+    },
+    {
+        "name": "sso_groups_claim",
+        "type": "str",
+        "default": "groups",
+        "help": "Claim or attribute listing the user's groups at the identity provider.",
+    },
+    {
+        "name": "sso_admin_group",
+        "type": "str",
+        "default": "",
+        "help": "Identity provider group whose members sign in as administrators; empty makes none.",
+    },
+    {
+        "name": "sso_max_age_seconds",
+        "type": "int",
+        "default": 43200,
+        "help": "Longest an identity provider sign-in lasts; one the provider ends sooner ends then.",
+    },
+    {
+        "name": "store_url",
+        "type": "str",
+        "default": "file",
+        "help": (
+            "Where the objects the nodes of a cluster share are kept: `file` for this server's own "
+            "files, or `s3://<bucket>/<prefix>?endpoint=<url>&region=<region>` for a bucket of an "
+            "S3-compatible service."
+        ),
+    },
+    {
+        "name": "store_access_key",
+        "type": "str",
+        "default": "",
+        "help": "Access key id for an S3 store.",
+    },
+    {
+        "name": "store_secret_key",
+        "type": "str",
+        "default": "",
+        "help": "Secret access key for an S3 store.",
+    },
+    {
+        "name": "store_poll_seconds",
+        "type": "int",
+        "default": 15,
+        "help": "How often a node looks for objects another node changed in a remote store.",
+    },
+    {
+        "name": "cluster_path",
+        "type": "str",
+        "default": "/config/.config/sealskin/cluster",
+        "help": "Directory of the cluster's shared records (nodes, pools, sign-in settings, home locations).",
+    },
+    {
+        "name": "node_state_path",
+        "type": "str",
+        "default": "/config/.config/sealskin/node",
+        "help": "Directory of this node's own state: web sign-ins, its join record, and usage not yet reported.",
+    },
+    {
+        "name": "node_name",
+        "type": "str",
+        "default": "",
+        "help": "Name this node shows in the dashboard; empty takes the host name.",
+    },
+    {
+        "name": "node_roles",
+        "type": "str",
+        "default": "frontend,runtime",
+        "help": (
+            "Comma-separated roles of this node: `frontend` signs users in and proxies their "
+            "sessions, `runtime` runs sessions."
+        ),
+    },
+    {
+        "name": "node_pool",
+        "type": "str",
+        "default": "default",
+        "help": "Pool this node joins when it first registers; an administrator can move it later.",
+    },
+    {
+        "name": "node_address",
+        "type": "str",
+        "default": "",
+        "help": (
+            "`host:port` other nodes reach this node's peer listener on; empty takes the host of "
+            "`HOST_URL` and `peer_port`."
+        ),
+    },
+    {
+        "name": "node_max_sessions",
+        "type": "int",
+        "default": 0,
+        "help": "Most sessions this node runs at once; 0 sets no limit.",
+    },
+    {
+        "name": "node_gpu_slots",
+        "type": "int",
+        "default": 0,
+        "help": "Most GPU sessions this node runs at once; 0 sets no limit.",
+    },
+    {
+        "name": "peer_port",
+        "type": "int",
+        "default": 8444,
+        "help": "Port of the listener other nodes of the cluster reach this one on.",
+    },
+    {
+        "name": "peer_poll_seconds",
+        "type": "int",
+        "default": 10,
+        "help": "How often a node asks every other node for its sessions and load.",
+    },
+    {
+        "name": "join_url",
+        "type": "str",
+        "default": "",
+        "help": (
+            "`host:port` of the peer listener of a node of the cluster to join; with `join_code`, "
+            "the node asks to join at start and keeps the cluster's records on that node."
+        ),
+    },
+    {
+        "name": "join_code",
+        "type": "str",
+        "default": "",
+        "help": "Join code an administrator of the cluster issued for this node.",
+    },
+    {
+        "name": "legacy_auth",
+        "type": "bool",
+        "default": True,
+        "help": (
+            "Accept the key-file clients (browser extension and mobile app configuration files) and "
+            "their encrypted API; they reach this node alone, never the rest of a cluster."
+        ),
+    },
+    {
+        "name": "public_url",
+        "type": "str",
+        "default": "",
+        "help": (
+            "URL browsers reach the web app on, `https://sealskin.example.com`; empty takes "
+            "`HOST_URL` and the session port. Set it behind a reverse proxy."
+        ),
+    },
+    {
+        "name": "session_domain",
+        "type": "str",
+        "default": "",
+        "help": (
+            "Domain whose every subdomain reaches this node, `apps.example.com`: a session of a "
+            "signed-in web user opens on `<session id>.<domain>`, apart from the web app. Needs "
+            "wildcard DNS and a certificate for `*.<domain>`; empty takes the host of `public_url`."
+        ),
+    },
+    {
+        "name": "trusted_proxies",
+        "type": "str",
+        "default": "",
+        "help": (
+            "Comma-separated addresses or networks of the reverse proxies in front of this node, "
+            "whose forwarded client address and sign-in headers are believed."
+        ),
+    },
+    {
+        "name": "proxy_auth_user_header",
+        "type": "str",
+        "default": "",
+        "help": (
+            "Header a trusted proxy names the signed-in user in, `Remote-User`; empty takes no "
+            "sign-in from a proxy."
+        ),
+    },
+    {
+        "name": "proxy_auth_groups_header",
+        "type": "str",
+        "default": "Remote-Groups",
+        "help": "Header a trusted proxy lists the user's groups in, comma-separated.",
+    },
+    {
+        "name": "root_token",
+        "type": "str",
+        "default": "",
+        "help": (
+            "Token the `root` administrator signs in to the web app with; empty generates one at "
+            "first start and writes it to `root_token_path`."
+        ),
+    },
+    {
+        "name": "root_token_path",
+        "type": "str",
+        "default": "/config/root_token",
+        "help": "File the generated root token is written to, for the administrator to copy and delete.",
+    },
+    {
+        "name": "web_session_seconds",
+        "type": "int",
+        "default": 43200,
+        "help": "Longest a web sign-in with the root token or through a proxy lasts unused.",
+    },
+    {
+        "name": "sso_force_login",
+        "type": "bool",
+        "default": False,
+        "help": "Make the identity provider ask for credentials at every sign-in instead of reusing its session.",
+    },
+    {
+        "name": "sso_create_users",
+        "type": "bool",
+        "default": True,
+        "help": "Create a user at the first sign-in an identity provider or a proxy vouches for.",
+    },
+    {
+        "name": "usage_flush_seconds",
+        "type": "int",
+        "default": 300,
+        "help": "How often a node adds the session time it ran to the cluster's usage records.",
+    },
+    {
+        "name": "files_sync",
+        "type": "str",
+        "default": "auto",
+        "help": (
+            "Keep every user's shared files in the object store so each node a session starts on "
+            "has them: `on`, `off`, or `auto`, which syncs once the cluster has a second node."
+        ),
+    },
+    {
+        "name": "shared_files_path",
+        "type": "str",
+        "default": "/storage/sealskin_shared_store",
+        "help": "Directory a `file` store keeps the users' shared files in.",
+    },
+    {
         "name": "watch_config_files",
         "type": "bool",
         "default": True,
@@ -286,5 +567,56 @@ class AppSettings:
 
             setattr(self, name, processed_value)
 
+
+    def apply_overrides(self, values: dict[str, Any]) -> None:
+        """Lay the cluster's written settings over the environment's.
+
+        Only the settings in `CLUSTER_SETTINGS` are taken, each coerced to its
+        declared type; one the cluster no longer sets goes back to what the
+        environment or the default gave it.
+
+        Args:
+            values: The content of `cluster/settings.yml`.
+        """
+        held: dict[str, Any] = self.__dict__.setdefault("_overridden", {})
+        types = {s["name"]: s["type"] for s in SETTING_DEFINITIONS}
+        for name in CLUSTER_SETTINGS:
+            value = values.get(name)
+            if value is None or value == "":
+                if name in held:
+                    setattr(self, name, held.pop(name))
+                continue
+            held.setdefault(name, getattr(self, name))
+            if types[name] == "bool":
+                value = value if isinstance(value, bool) else str(value).lower() in ["true", "1", "yes"]
+            elif types[name] == "int":
+                try:
+                    value = int(value)
+                except (TypeError, ValueError):
+                    value = held[name]
+            else:
+                value = str(value)
+            setattr(self, name, value)
+
+
+#: Settings an administrator may also write for the whole cluster, in `cluster/settings.yml`
+#: of the shared store, where they take precedence over each node's environment.
+CLUSTER_SETTINGS = (
+    "oidc_issuer",
+    "oidc_client_id",
+    "oidc_client_secret",
+    "oidc_scopes",
+    "saml_metadata_url",
+    "sso_username_claim",
+    "sso_groups_claim",
+    "sso_admin_group",
+    "sso_max_age_seconds",
+    "sso_force_login",
+    "sso_create_users",
+    "proxy_auth_user_header",
+    "proxy_auth_groups_header",
+    "web_session_seconds",
+    "files_sync",
+)
 
 settings = AppSettings()

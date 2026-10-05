@@ -78,7 +78,10 @@
       "installedApps": "Installed Apps",
       "users": "Users",
       "groups": "Groups",
-      "admins": "Admins"
+      "admins": "Admins",
+      "cluster": "Cluster",
+      "signIn": "Sign In",
+      "audit": "Audit Log"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -107,7 +110,11 @@
       "confirmLogout": "Are you sure you want to logout? This will clear your saved configuration from this browser.",
       "changeConnection": "Change connection",
       "certExpired": "The server TLS certificate has expired. HTTPS connections will fail until it is renewed.",
-      "certExpiring": "The server TLS certificate expires in {days} day(s). Renew it to avoid connection failures."
+      "certExpiring": "The server TLS certificate expires in {days} day(s). Renew it to avoid connection failures.",
+      "signOut": "Sign out",
+      "signedInThrough": "Signed in through:",
+      "allowance": "Allowance:",
+      "allowanceUsed": "{used} of {hours} hours this {period}"
     },
     "config": {
       "quickSetup": "Quick Setup",
@@ -148,7 +155,13 @@
       "namePlaceholder": "e.g., my-project-files",
       "nameTitle": "Use only letters, numbers, underscore, or hyphen.",
       "createButton": "Create Directory",
-      "confirmDelete": "Are you sure you want to delete the home directory '{homeName}'? All data within it will be permanently lost."
+      "confirmDelete": "Are you sure you want to delete the home directory '{homeName}'? All data within it will be permanently lost.",
+      "node": "Node",
+      "move": "Move",
+      "moveTo": "Move to node",
+      "moveHelp": "The home directory is copied to the node and removed from the one that holds it. Sessions using it must be stopped first.",
+      "moveTitle": "Move '{homeName}'",
+      "noOtherNode": "There is no other node to move it to."
     },
     "sessions": {
       "title": "Active Sessions",
@@ -199,7 +212,22 @@
       "homesDisabledTooltip": "Persistent storage disabled for this user",
       "confirmDelete": "Are you sure you want to delete user '{username}'? This will also delete all their persistent storage and cannot be undone.",
       "allowPublicSharing": "Allow Public File Sharing",
-      "allowEditTemplates": "Allow Editing App Templates"
+      "allowEditTemplates": "Allow Editing App Templates",
+      "signInOnly": "Single sign-on only",
+      "admin": "Administrator",
+      "gpuShare": "Allow Sharing a GPU with Other Sessions",
+      "homeMigration": "Allow Moving Home Directories Between Nodes",
+      "storageLimit": "Storage limit (GB per node)",
+      "sessionCpus": "CPUs per session",
+      "sessionMemory": "Memory per session (MB)",
+      "sessionHours": "Hours a session may run",
+      "allowanceHours": "Allowance (weighted session hours)",
+      "allowancePeriod": "Allowance period",
+      "pools": "Restricted pools allowed (comma-separated)",
+      "poolsDenied": "Pools denied (comma-separated)",
+      "groupsHelp": "Hold Ctrl or Command to select several. Where groups disagree, the restricting value wins.",
+      "providerGroups": "Groups the identity provider named at the last sign-in: {groups}",
+      "limitsHelp": "A limit of -1, or left blank, sets none."
     },
     "groups": {
       "title": "Group Management",
@@ -209,7 +237,14 @@
       "overrideTitle": "Group Override Settings",
       "permissionsTitle": "Permissions & Hardening Overrides",
       "createButton": "Create Group",
-      "confirmDelete": "Are you sure you want to delete group '{groupName}'? Users in this group will revert to their individual settings."
+      "confirmDelete": "Are you sure you want to delete group '{groupName}'? Users in this group will revert to their individual settings.",
+      "notSet": "Not set",
+      "allow": "Allow",
+      "deny": "Deny",
+      "on": "On",
+      "off": "Off",
+      "ssoGroups": "Identity provider groups whose members are in this group (comma-separated)",
+      "overrideHelp": "A group decides only what is set here; everything left unset or blank stays each member's own."
     },
     "installedApps": {
       "title": "Installed Applications",
@@ -1039,7 +1074,33 @@
       "closeButton": "Close Session & Finalize",
       "savingAndLaunching": "Saving & Launching...",
       "placeholder": "The App Labratory allows you to configure the base home directory and launch script for an application based on an existing installed application. This home directory will be copied on first init for the user with all files and settings you setup in this session. You can re-launch an existing Labratory App to modify it's contents further.",
-      "formInvalid": "Please select a base app and provide a name for the new app."
+      "formInvalid": "Please select a base app and provide a name for the new app.",
+      "explainer": "The App Laboratory builds a meta-app: a variant of an installed application with its own name, icon, autostart script, and a home directory that is already set up. You set the application up once in a customization session, and every user's first launch starts from a copy of that home directory.",
+      "step1Title": "Describe the app",
+      "step1": "Pick the application to build on, and give the meta-app a name, an icon, and the users who may launch it.",
+      "step2Title": "Customize it in a live session",
+      "step2": "A customization session opens with the template home directory writable. Install extensions, sign in, arrange it as users should find it.",
+      "step3Title": "Close the session to save the template",
+      "step3": "Closing the session from this page keeps the home directory as the template.",
+      "openTitle": "Customization session open",
+      "openStarted": "Started {when}",
+      "openDescription": "Everything changed in this session's home directory becomes the template. The session stays open until you close it here; it is not listed among your sessions.",
+      "reopen": "Re-open session",
+      "closeAndSave": "Close & save template",
+      "confirmClose": "Close the customization session of '{name}'? The session stops, and its home directory is kept as the template.",
+      "templateSaved": "Session closed. The template is saved.",
+      "busy": "A customization session for '{name}' is open. Close it above before changing a meta-app or starting another.",
+      "describeTitle": "1. Describe",
+      "customizeTitle": "2. Customize",
+      "customizeDescription": "The customization session starts with these options. One session can be open at a time.",
+      "advanced": "Advanced",
+      "saveAndOpen": "Save & open customization session",
+      "listTitle": "Your meta-apps",
+      "listNone": "No meta-apps yet.",
+      "closingStopping": "Stopping the session…",
+      "closingSaving": "Saving the template…",
+      "closingSaved": "Template saved: {files} files, {size}",
+      "closingFailed": "Closing the session failed."
     },
     "modals": {
       "editUserTitle": "Edit User: {username}",
@@ -1169,7 +1230,17 @@
       "pendingConfigSaved": "Pending configuration saved. You can now provide your public key to the administrator.",
       "settingsSaved": "Settings saved.",
       "appCreated": "App '{name}' created successfully.",
-      "launchFailed": "Launch failed: {error}"
+      "launchFailed": "Launch failed: {error}",
+      "homedirMoving": "Moving home directory '{homeName}'...",
+      "homedirMoved": "Home directory '{homeName}' moved.",
+      "homedirMoveFailed": "Failed to move home directory: {error}",
+      "clusterLoadFailed": "Failed to load the cluster: {error}",
+      "clusterWriteFailed": "Failed to save: {error}",
+      "nodeUpdated": "Node updated.",
+      "nodeRemoved": "Node removed.",
+      "poolSaved": "Pool '{name}' saved.",
+      "poolDeleted": "Pool '{name}' deleted.",
+      "nothingChanged": "Nothing changed."
     },
     "placeholders": {
       "noAdmins": "No admins found.",
@@ -1180,6 +1251,201 @@
       "noPinned": "No pinned behaviors found.",
       "errorLoading": "Error loading directories.",
       "noInstalledApps": "No applications have been installed yet."
+    },
+    "web": {
+      "title": "SealSkin in This Browser",
+      "bookmarklet": "Send to SealSkin",
+      "bookmarkletHelp": "Drag this link to your bookmarks bar. Clicking it opens the page you are on in SealSkin, or searches for the text you selected.",
+      "pick": "Pick for SealSkin",
+      "pickHelp": "Drag this one there too. Click it, then click a link to open that link in SealSkin, or an image, video, or audio to send the file. Shift-click a link to send the file it leads to, fetched with your sign-in on that site.",
+      "pickHint": "SealSkin: click a link, or an image, video, or audio, to send it; Shift-click a link to send its file. Press Esc to cancel.",
+      "protocol": "Open web+sealskin: Links Here",
+      "protocolHelp": "A link written as web+sealskin: followed by an address then opens that address in SealSkin.",
+      "install": "Where the browser can install web apps, install SealSkin from its menu to share links and files to it and to open files with it."
+    },
+    "via": {
+      "root": "Root token",
+      "oidc": "OpenID Connect",
+      "saml": "SAML",
+      "proxy": "Reverse proxy",
+      "key": "Key file"
+    },
+    "periods": {
+      "day": "Day",
+      "week": "Week",
+      "month": "Month"
+    },
+    "cluster": {
+      "nodesTitle": "Nodes",
+      "pool": "Pool",
+      "load": "Load",
+      "online": "Online",
+      "offline": "Offline",
+      "waiting": "Waiting for approval",
+      "lastSeen": "last seen {when}",
+      "storeUnreachableNode": "cannot reach the shared records",
+      "cpus": "{count} CPUs",
+      "gpus": "{count} GPUs",
+      "gpuSessions": "GPU: {used} / {slots}",
+      "thisNode": "this node",
+      "approve": "Approve",
+      "suspend": "Suspend",
+      "remove": "Remove",
+      "confirmRemove": "Remove node '{name}' from the cluster? A node that is still running registers again and waits for approval.",
+      "joinTitle": "Add a Node",
+      "joinDescription": "Create a join code, start the new node with the two lines below in its environment, then approve it in the table above. A code admits one node and lasts an hour.",
+      "joinButton": "Create Join Code",
+      "joinExpires": "Environment of the new node (the code expires {when})",
+      "poolsTitle": "Pools",
+      "poolsDescription": "A pool is a set of nodes sessions start on. A restricted pool is open only to the users and groups named here or allowed by their settings.",
+      "poolDomain": "Domain",
+      "poolAccess": "Access",
+      "poolCost": "Cost per hour",
+      "poolCostWithGpu": "{cost} (GPU: {gpuCost})",
+      "poolOpen": "Open",
+      "poolRestricted": "Restricted",
+      "poolNew": "New Pool",
+      "poolEdit": "Edit Pool '{name}'",
+      "poolDescriptionLabel": "Description",
+      "poolDomainLabel": "Domain the pool's nodes are named under",
+      "poolCostLabel": "Allowance an hour of session costs",
+      "poolGpuCostLabel": "Allowance an hour of GPU session costs (blank: the same)",
+      "poolUsersLabel": "Users it is open to when restricted (comma-separated)",
+      "poolGroupsLabel": "Groups it is open to when restricted (comma-separated)",
+      "poolStopWhenSpent": "End sessions when the allowance is spent",
+      "poolSave": "Save Pool",
+      "confirmDeletePool": "Delete pool '{name}'?",
+      "storeTitle": "Shared Records",
+      "storeDescription": "Where the nodes keep the records they share: users, groups, apps, pools, and these settings.",
+      "storeKept": "Kept:",
+      "storeKinds": {
+        "file": "On this node's disk",
+        "s3": "In an object store bucket",
+        "peer": "On another node"
+      },
+      "reachable": "Reachable",
+      "unreachable": "Unreachable",
+      "publicUrl": "Web app address:",
+      "sessionDomain": "Session domain:",
+      "sessionDomainUnset": "Not set (the web app's host name)",
+      "signInDescription": "Written here, a setting holds for every node and takes precedence over a node's environment. Clear a field to hand the setting back to each node's environment.",
+      "settingWritten": "Set here for every node.",
+      "settingFromEnvironment": "From each node's environment; the value shown is this node's.",
+      "settingInherit": "From each node's environment (here: {value})",
+      "secretSet": "A secret is set; leave blank to keep it",
+      "secretUnset": "No secret is set",
+      "secretClear": "Remove the secret set here",
+      "settings": {
+        "oidc_issuer": "OpenID Connect issuer URL",
+        "oidc_client_id": "OpenID Connect client ID",
+        "oidc_client_secret": "OpenID Connect client secret",
+        "oidc_scopes": "OpenID Connect scopes",
+        "saml_metadata_url": "SAML metadata URL",
+        "sso_username_claim": "Claim or attribute naming the user",
+        "sso_groups_claim": "Claim or attribute listing the user's groups",
+        "sso_admin_group": "Identity provider group of administrators",
+        "sso_max_age_seconds": "Longest an identity provider sign-in lasts (hours)",
+        "sso_force_login": "Ask for credentials at every sign-in",
+        "sso_create_users": "Create a user at the first sign-in",
+        "proxy_auth_user_header": "Header a trusted proxy names the user in",
+        "proxy_auth_groups_header": "Header a trusted proxy lists the user's groups in",
+        "web_session_seconds": "Longest a root or proxy sign-in lasts unused (hours)",
+        "files_sync": "Keep shared files in the object store"
+      },
+      "usageTitle": "Usage",
+      "usageHours": "Weighted hours",
+      "usageNone": "No usage in this period.",
+      "settingsTitle": "Cluster Settings"
+    },
+    "audit": {
+      "title": "Audit Log",
+      "searchPlaceholder": "Search events...",
+      "range": "Range",
+      "pageSize": "Events per page",
+      "today": "Today",
+      "last7": "Last 7 days",
+      "last30": "Last 30 days",
+      "oneDay": "One day (UTC)",
+      "time": "Time",
+      "event": "Event",
+      "details": "Details",
+      "none": "No events match.",
+      "shown": "{from}–{to} of {total}",
+      "exportCsv": "Export CSV",
+      "exportJson": "Export JSON",
+      "exported": "Exported {count} events."
+    },
+    "signin": {
+      "pill": {
+        "active": "Active",
+        "off": "Off",
+        "none": "Not configured"
+      },
+      "test": "Test",
+      "testing": "Testing the saved settings...",
+      "testOk": "The provider answered.",
+      "testFailed": "The test failed.",
+      "register": "Register these with the provider",
+      "provider": "Provider",
+      "providerChoose": "Choose a provider for hints",
+      "providerHelp": "A provider only fills the hints below; nothing about it is stored.",
+      "presets": {
+        "keycloak": {
+          "name": "Keycloak",
+          "hint": "The issuer is the realm's address, https://<host>/realms/<realm>. Create an OpenID Connect client with client authentication on, and add a group membership mapper named 'groups' to send the user's groups."
+        },
+        "authentik": {
+          "name": "Authentik",
+          "hint": "The issuer is the application's address, https://<host>/application/o/<slug>/, with its trailing slash. Create an OAuth2/OpenID provider and an application that uses it."
+        },
+        "entra": {
+          "name": "Microsoft Entra ID",
+          "hint": "The issuer is https://login.microsoftonline.com/<tenant>/v2.0. Register an application, add a client secret, and add the groups claim under Token configuration."
+        },
+        "google": {
+          "name": "Google",
+          "hint": "The issuer is https://accounts.google.com. Create an OAuth client ID of type Web application. Google sends no groups."
+        },
+        "okta": {
+          "name": "Okta",
+          "hint": "The issuer is your organization's address, https://<org>.okta.com. Create an OIDC web application and add a groups claim to its ID token."
+        },
+        "other": {
+          "name": "Other",
+          "hint": "The issuer is the address whose /.well-known/openid-configuration describes the provider."
+        }
+      },
+      "oidcTitle": "OpenID Connect",
+      "oidcRedirect": "Redirect URI",
+      "oidcBackchannel": "Back-channel logout URL",
+      "oidcFrontchannel": "Front-channel logout URL",
+      "samlTitle": "SAML 2.0",
+      "samlEntity": "Entity ID / metadata URL",
+      "samlAcs": "ACS URL",
+      "samlSlo": "Single logout URL",
+      "samlMetadata": "Open this server's service provider metadata",
+      "proxyTitle": "Reverse Proxy",
+      "trustedProxies": "Trusted proxies of this node:",
+      "trustedProxiesHelp": "Set on each node with SEALSKIN_TRUSTED_PROXIES. The header is believed only when the request comes from one of those addresses.",
+      "noTrustedProxy": "A user header is set, but this node trusts no proxy yet, so no proxy sign-in is accepted.",
+      "whoTitle": "Who Signs In",
+      "whoHelp": "These hold for OpenID Connect, SAML, and the reverse proxy. To put the members of an identity provider group into a SealSkin group, list it under \"Identity provider groups\" of that group in Groups.",
+      "rootTitle": "Root Token",
+      "rootHelp": "Always available. The token is in /config/root_token on the server until that file is deleted, and can be set with SEALSKIN_ROOT_TOKEN.",
+      "keyTitle": "Key Files",
+      "keyOn": "This node accepts the key-file clients: the browser extension and the mobile app. Set on each node with SEALSKIN_LEGACY_AUTH.",
+      "keyOff": "This node does not accept key-file clients. Set on each node with SEALSKIN_LEGACY_AUTH.",
+      "resultIssuer": "Issuer:",
+      "resultAuthorization": "Authorization endpoint:",
+      "resultBackchannel": "Back-channel logout supported:",
+      "resultScopes": "Scopes offered:",
+      "resultGroupsClaim": "Groups claim:",
+      "claimListed": "'{claim}' is among the claims the provider lists",
+      "claimNotListed": "'{claim}' is not among the claims the provider lists",
+      "resultEntity": "Entity ID:",
+      "resultSso": "Sign-on URL:",
+      "resultSlo": "Single logout offered:",
+      "resultCertificates": "Signing certificates:"
     }
   },
   "popup": {
@@ -1208,7 +1474,16 @@
       "uploadingButton": "Uploading...",
       "autoHome": "Auto (per-app persistence)",
       "collaborationMode": "Collaborative Session",
-      "waylandMode": "Wayland Mode"
+      "waylandMode": "Wayland Mode",
+      "where": "Where",
+      "whereAuto": "Automatic",
+      "wherePools": "Pools",
+      "whereNodes": "Nodes",
+      "moveHome": "Move storage",
+      "moveHomeStay": "On {node}",
+      "moveHomeTo": "Move to {node}",
+      "moveHomeConfirm": "Move '{home}' to {node}? Sessions using it must be stopped first.",
+      "allowance": "Allowance: {used} of {hours} hours this {period}"
     },
     "sessionsView": {
       "noSessions": "No active sessions found."
@@ -1241,7 +1516,10 @@
       "noAppSelected": "Please select an application.",
       "noAppsAvailable": "No applications are available for your account.",
       "uploadSuccess": "File uploaded successfully!",
-      "creatingAutoHome": "Creating automatic home directory..."
+      "creatingAutoHome": "Creating automatic home directory...",
+      "noSessionOrigin": "This browser cannot reach an address of the session's own. The server needs wildcard DNS and a certificate for session names; the administrator sets SEALSKIN_SESSION_DOMAIN.",
+      "movingHome": "Moving '{home}'...",
+      "movedHome": "Moved '{home}' to {node}."
     },
     "languages": {
       "default": "Default ({locale})"
@@ -1373,6 +1651,81 @@
       "changeConnection": "Change connection",
       "mismatchTitle": "Update required",
       "mismatchBody": "This app and the server web interface speak different bridge versions. Update the extension or app, or update the server, so both match."
+    }
+  },
+  "web": {
+    "receiving": "Sending the file to SealSkin…",
+    "signInTitle": "Sign in to SealSkin",
+    "signInWith": {
+      "oidc": "Sign In with OpenID Connect",
+      "saml": "Sign In with SAML"
+    },
+    "rootToken": "Root token",
+    "rootTokenHelp": "The administrator's token, which the server keeps in its /config/root_token file.",
+    "rootSignIn": "Sign In as Root",
+    "rootRefused": "That is not the server's root token.",
+    "rootLocked": "Too many tries. Wait a while, then try again.",
+    "signIn": {
+      "failed": "The sign-in did not complete. Try again, or ask your administrator.",
+      "refused": "The identity provider refused the sign-in.",
+      "expired": "The sign-in took too long or was already used. Sign in again.",
+      "browser": "The sign-in finished in another browser or tab. Start it again here.",
+      "invalidUsername": "Your account's name cannot be a SealSkin user name, which takes only letters, digits, underscores, and hyphens. Ask your administrator.",
+      "adminName": "Your account's name belongs to a SealSkin administrator, who signs in with a key file. Ask your administrator.",
+      "otherIdentity": "Another account of the identity provider already signs in as this SealSkin user. Ask your administrator.",
+      "notConfigured": "This server offers no sign-in here. Ask your administrator.",
+      "ended": "Your sign-in ended. Sign in again."
+    },
+    "nav": {
+      "home": "Home",
+      "sessions": "Sessions",
+      "files": "Files",
+      "settings": "Settings"
+    },
+    "home": {
+      "searchPlaceholder": "Search applications, or paste a link to open it in isolation",
+      "upload": "Upload a file",
+      "drop": "Drop the file to open it in SealSkin",
+      "running": "Running sessions",
+      "applications": "Applications",
+      "allowance": "Allowance",
+      "allowanceValue": "{used} / {hours} h per {period}",
+      "room": "Room",
+      "started": "Started {when}",
+      "typeAll": "All",
+      "typeRecent": "Recent",
+      "typeOther": "Other",
+      "quickLaunch": "Launch with the options last used",
+      "wherePool": "Pool: {pool}",
+      "openingUrl": "Choose an application to open {url}",
+      "openingFile": "Choose an application to open {filename}",
+      "noApps": "No applications are available to you. Ask your administrator to install applications.",
+      "noAppsAdmin": "No applications are installed yet.",
+      "noMatch": "No application matches.",
+      "openAppStores": "Open the App Stores",
+      "popupBlocked": "The browser blocked the session's tab. Allow pop-ups for this site, then launch again.",
+      "serverFileNeedsHome": "A file kept on the server cannot be opened in Cleanroom mode. Choose a storage directory."
+    },
+    "launch": {
+      "title": "Launching {app}",
+      "stages": {
+        "requesting": "Sending the launch request",
+        "placing": "Checking limits and choosing a node",
+        "forwarding": "Handing the launch to node {node}",
+        "storage": "Preparing the home directory",
+        "files": "Syncing shared files",
+        "image": "Downloading the application image",
+        "starting": "Creating the container",
+        "waiting": "Waiting for the desktop to respond",
+        "ready": "Opening the session"
+      },
+      "uploading": "Uploading the file ({done} of {total})",
+      "imageHint": "The first launch of an application on a node downloads it, which can take minutes. Later launches are fast.",
+      "onNode": "On node {node}",
+      "seconds": "{count} s",
+      "failed": "The launch failed",
+      "unseen": "The launch request has not reached the server. Check the SealSkin tab that started it.",
+      "closeTab": "The browser kept this tab open. Close it yourself."
     }
   }
 }

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SealSkin</title>
+    <link rel="stylesheet" href="css/options.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css">
+</head>
+<body class="home">
+    <div class="home-wrap">
+        <section class="hero" id="hero">
+            <div class="hero-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="hero-input" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-placeholder="web.home.searchPlaceholder" placeholder="Search applications, or paste a link to open it in isolation">
+                <button type="button" id="upload-button" class="secondary"><i class="fas fa-upload"></i> <span data-i18n="web.home.upload">Upload a file</span></button>
+                <input type="file" id="file-input" hidden>
+            </div>
+            <div class="hero-chips" id="status-chips"></div>
+        </section>
+
+        <div id="context-bar" class="context-bar" hidden>
+            <i class="fas fa-link" id="context-icon"></i>
+            <span id="context-text"></span>
+            <button type="button" id="context-clear" class="secondary" data-i18n="common.cancel">Cancel</button>
+        </div>
+
+        <section id="sessions-section" hidden>
+            <h2 data-i18n="web.home.running">Running sessions</h2>
+            <div id="sessions-row" class="session-row"></div>
+            <p id="sessions-empty" class="home-empty" hidden data-i18n="popup.sessionsView.noSessions">No active sessions.</p>
+        </section>
+
+        <section id="apps-section">
+            <div class="section-head">
+                <h2 data-i18n="web.home.applications">Applications</h2>
+                <div id="type-chips" class="chip-row"></div>
+            </div>
+            <div id="app-grid" class="app-tiles"></div>
+            <div id="apps-empty" class="home-empty" hidden>
+                <i class="fas fa-box-open"></i>
+                <p id="apps-empty-text"></p>
+                <button type="button" id="apps-empty-admin" class="primary" hidden data-i18n="web.home.openAppStores">Open the App Stores</button>
+            </div>
+        </section>
+    </div>
+
+    <div id="drawer-backdrop" hidden></div>
+    <aside id="drawer" class="drawer" hidden aria-modal="true" role="dialog">
+        <header class="drawer-head">
+            <img id="drawer-logo" src="icons/icon128.png" alt="">
+            <div>
+                <h3 id="drawer-name"></h3>
+                <p id="drawer-context" class="drawer-context"></p>
+            </div>
+            <button type="button" id="drawer-close" class="secondary" data-i18n-title="common.close" title="Close"><i class="fas fa-times"></i></button>
+        </header>
+        <div class="drawer-body">
+            <div id="homedir-form-group" class="form-group">
+                <label for="homeDirectory" data-i18n="common.storage">Storage</label>
+                <select id="homeDirectory"></select>
+            </div>
+            <div id="gpu-form-group" class="form-group">
+                <label for="gpuSelect" data-i18n="common.gpu">GPU</label>
+                <select id="gpuSelect"></select>
+            </div>
+            <div id="where-form-group" class="form-group">
+                <label for="whereSelect" data-i18n="popup.launchView.where">Where</label>
+                <select id="whereSelect"></select>
+            </div>
+            <div class="form-group">
+                <label for="language" data-i18n="common.language">Language</label>
+                <select id="language"></select>
+            </div>
+            <div class="settings-grid" style="grid-template-columns: 1fr;">
+                <div class="form-group"><label><input type="checkbox" id="collaborationMode"> <span data-i18n="popup.launchView.collaborationMode">Collaborative Session</span></label></div>
+                <div class="form-group"><label><input type="checkbox" id="waylandMode" checked> <span data-i18n="popup.launchView.waylandMode">Wayland Mode</span></label></div>
+                <div class="form-group" id="open-file-group"><label><input type="checkbox" id="openFileOnLaunch" checked> <span data-i18n="popup.launchView.openFile">Open file on launch</span></label></div>
+            </div>
+        </div>
+        <footer class="drawer-foot">
+            <button type="button" id="launch-btn" class="primary"><i class="fas fa-play"></i> <span data-i18n="popup.launchView.launchButton">Launch</span></button>
+        </footer>
+    </aside>
+
+    <div id="drop-overlay" hidden><div><i class="fas fa-file-upload"></i><p data-i18n="web.home.drop">Drop the file to open it in SealSkin</p></div></div>
+
+    <script type="module" src="home.js"></script>
+</body>
+</html>

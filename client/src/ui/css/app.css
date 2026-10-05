@@ -1,0 +1,154 @@
+/* Web app: the shell host in a browser tab. */
+@import "../../shell/host.css";
+
+/* The frame around the served pages: a rail on a wide window, a top bar and a tab bar on a narrow one. */
+:root {
+  --rail: 84px;
+  --bar: 52px;
+  --tabs: 58px;
+  --text-secondary: #b8c2d2;
+  --brand-gradient: linear-gradient(100deg, #e04fb0 10%, #7c6cf0 90%);
+}
+
+body { display: grid; grid-template: "rail stage" 100% / var(--rail) 1fr; height: 100dvh; overflow: hidden; }
+#stage { grid-area: stage; position: relative; min-width: 0; min-height: 0; }
+#stage #host-panel { position: absolute; }
+#topbar { display: none; }
+
+#rail {
+  grid-area: rail;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1rem 0.4rem;
+  background-color: var(--bg-1);
+  border-right: 1px solid var(--border-color);
+  min-height: 0;
+}
+.rail-logo { width: 40px; height: 40px; filter: drop-shadow(0 6px 14px rgba(224, 79, 176, 0.3)); }
+.rail-links { display: flex; flex-direction: column; gap: 0.35rem; width: 100%; flex: 1; }
+
+.rail-links button, .sign-out {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  width: 100%;
+  padding: 0.6rem 0.2rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur), color var(--dur), border-color var(--dur);
+}
+.rail-links button[hidden] { display: none; }
+.rail-links button i, .sign-out i { font-size: 1.15rem; }
+.rail-links button:hover, .sign-out:hover { background-color: var(--glass-strong); color: var(--text-primary); }
+.rail-links button:focus-visible, .sign-out:focus-visible, .avatar:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-soft), 0 0 0 1px var(--accent-primary); }
+.rail-links button[aria-current="page"] { background-color: var(--accent-soft); border-color: rgba(139, 124, 246, 0.5); color: #cdc6ff; }
+
+#sessions-badge {
+  position: absolute;
+  top: 0.3rem;
+  left: calc(50% + 0.45rem);
+  min-width: 1.1rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--accent-gradient);
+  color: #fff;
+  font-size: 0.65rem;
+  line-height: 1.1rem;
+  text-align: center;
+}
+#sessions-badge[hidden] { display: none; }
+
+.rail-account { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; width: 100%; padding-top: 0.75rem; border-top: 1px solid var(--border-color); }
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: var(--brand-gradient);
+  color: #fff;
+  font: 600 0.95rem var(--font-family);
+  text-transform: uppercase;
+}
+.account-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.72rem; font-weight: 600; margin-top: 0.3rem; }
+.account-via { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.62rem; color: var(--text-muted); }
+.rail-account .sign-out { margin-top: 0.4rem; }
+
+#account-menu {
+  position: fixed;
+  top: calc(var(--bar) + env(safe-area-inset-top) + 0.4rem);
+  right: 0.6rem;
+  z-index: 5;
+  min-width: 200px;
+  padding: 0.9rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background-color: var(--bg-1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+#account-menu[hidden] { display: none; }
+#account-menu .account-name { font-size: 0.95rem; margin: 0; }
+#account-menu .account-via { font-size: 0.8rem; }
+#account-menu .sign-out { flex-direction: row; justify-content: center; gap: 0.5rem; margin-top: 0.75rem; font-size: 0.85rem; border-color: var(--border-color); color: var(--text-primary); }
+
+@media (max-width: 899px) {
+  body { grid-template: "bar" calc(var(--bar) + env(safe-area-inset-top)) "stage" 1fr "rail" calc(var(--tabs) + env(safe-area-inset-bottom)) / 100%; }
+  #topbar {
+    grid-area: bar;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: env(safe-area-inset-top) 0.9rem 0;
+    background-color: var(--bg-1);
+    border-bottom: 1px solid var(--border-color);
+  }
+  #topbar img { width: 28px; height: 28px; }
+  #topbar .wordmark { flex: 1; font-weight: 700; letter-spacing: -0.01em; background: var(--brand-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  #topbar .avatar { width: 32px; height: 32px; cursor: pointer; }
+  #rail { flex-direction: row; gap: 0; padding: 0 0.3rem env(safe-area-inset-bottom); border-right: none; border-top: 1px solid var(--border-color); }
+  .rail-logo, .rail-account { display: none; }
+  .rail-links { flex-direction: row; align-items: stretch; height: 100%; }
+  .rail-links button { flex: 1; justify-content: center; padding: 0.3rem 0.2rem; }
+}
+
+/* Signed out, the sign-in panel has the window. */
+body.signed-out { display: block; }
+body.signed-out #rail, body.signed-out #topbar, body.signed-out #account-menu { display: none; }
+body.signed-out #stage { height: 100%; }
+
+.host-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+.host-field label { font-size: 0.9rem; font-weight: 600; }
+
+/* Masked, but not a password field: a password manager would offer to save the root token. */
+.host-box input.masked {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-1);
+  color: var(--text-primary);
+  font: inherit;
+  -webkit-text-security: disc;
+}
+.host-box input.masked:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft), 0 0 0 1px var(--accent-primary);
+}

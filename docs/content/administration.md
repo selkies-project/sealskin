@@ -24,38 +24,77 @@ Config** wipes the client.
 
 ## Users
 
-**Create New User** takes a username (letters, digits, `_`, and `-`) and,
-optionally, a public key. Leave the key blank and the server generates an RSA
-key pair, shows the resulting configuration file **once**, and forgets the
-private key; hand that file to the user. Paste a key when the user generated
-their own pair on the connection page and sent you the public half.
+**Create New User** takes a username (letters, digits, `_`, and `-`). In the
+web app that is all: the user signs in through the
+[identity provider or proxy](signin.md), and one who signs in before being
+created is created then, with the default settings. In the extension and the
+mobile app the form also takes a public key: leave it blank and the server
+generates an RSA key pair, shows the resulting configuration file **once**,
+and forgets the private key; paste a key when the user generated their own
+pair on the connection page and sent you the public half.
 
 Each user carries these settings, editable later:
 
 | Setting | Effect |
 | --- | --- |
-| **Active Account** | An inactive user's tokens are refused. |
-| **Group** | Applies the group's settings on top of the user's own (see below). |
+| **Active Account** | An inactive user is refused. |
+| **Groups** | The groups the user is in, beside those the identity provider puts them in, which the form lists. |
+| **Administrator** | The user administers the server. |
 | **Allow Persistent Storage** | Without it every session is a cleanroom, the file manager is unavailable, and files cannot be sent to sessions. |
 | **Allow Public File Sharing** | Enables share links from the file manager. Requires persistent storage. |
 | **Allow GPU Access** | Whether the launcher offers GPUs to this user. |
+| **Share GPUs** | Off gives each of the user's GPU sessions a GPU no other session is on. |
+| **Move Home Directories** | The user may move their own home directories between the nodes of a [cluster](cluster.md). |
 | **Allow Editing App Templates** | Opens the [App Templates](#app-templates) editor to a user who is not an administrator. They create, change, and delete templates, except for the `DOCKER_*` settings, which grant authority over the Docker host: those keep the values an administrator gave them, and only an administrator deletes a template that carries any. |
 | **Harden Container**, **Harden Window Manager** | Force the base image presets `HARDEN_DESKTOP` and `HARDEN_OPENBOX` on every session the user starts, including apps a collaboration room swaps to. They are applied after the [app template](#app-templates) and the app's own environment overrides, so neither can switch them back off. Leave them off to let the template decide. |
-| **Sessions limit**, **Storage limit** | Recorded but **not enforced yet**; `-1` means unlimited once they are. |
+| **Limits** | Sessions at once, storage, CPUs and memory per session, session length, and a time allowance per day, week, or month; see [the limits](signin.md#groups-switches-and-limits). Blank or negative is no limit. |
+| **Pools** | Restricted [pools](cluster.md#pools) open to the user, and pools closed to them. |
 
-Deleting a user also deletes their storage.
+Deleting a user also deletes their storage on the node the dashboard is
+served from. A user with no key shows **Single sign-on only** in place of a
+public key.
 
-**Manage Home Directories** in a user's row lists, creates, and deletes home
-directories on their behalf.
+**Manage Home Directories** in a user's row lists, creates, deletes, and, on a
+cluster, moves home directories on their behalf.
 
 ## Groups
 
-A group is a named set of the same settings. A user assigned to a group gets
-the group's values **in place of** their own for every setting the group
-defines, which the edit dialog shows as **Effective Settings**. Groups are
-also a permission target for applications: an app can be limited to the
-members of certain groups. Deleting a group reverts its members to their
-individual settings.
+A group sets some of the same switches and limits for its members and leaves
+the rest alone: each switch is **Not set**, **Allow**, or **Deny**, and a
+blank limit is not set. A user in one group gets the group's value for
+everything the group sets. A user in several gets, for each setting, the
+restricting value if any of the groups gives it, and the smallest limit; the
+edit dialog shows the result as **Effective Settings**. **Identity provider
+groups** names the provider's groups whose members are in this group without
+being listed. Groups are also a permission target for applications and
+pools. Deleting a group leaves its members with what their other groups and
+their own settings give.
+
+## Cluster
+
+Shown to administrators; [Clusters](cluster.md) explains each part.
+
+* **Nodes**: every node with its roles, pool, load, and sessions, whether it
+  is answering, and the controls to approve, suspend, move to a pool, or
+  remove it. **Add a node** issues a join code.
+* **Pools**: who may use each pool and what an hour in it costs.
+* **Store**: where the shared records are kept and whether it answers.
+* **Usage**: the weighted hours each user spent this day, week, or month.
+
+## Sign In
+
+One card for each [way of signing in](signin.md), written for the whole
+cluster: OpenID Connect and SAML with the addresses to register at the
+provider and a **Test** that asks the provider for its metadata and shows
+what came back; the reverse proxy headers; and who a sign-in is (the username
+and groups claims, the administrator group, and how long a sign-in lasts). A
+field left empty is taken from each node's environment.
+
+## Audit Log
+
+What was done on every node, by whom, newest first: sign-ins, launches and
+stops, and administrative changes. Search it, choose a day or a range, page
+through it, and export everything that matches as CSV or JSON.
 
 ## Admins
 
@@ -95,7 +134,9 @@ the port you enter, and honour the same environment variables.
 
 Every installed application with its source, image, and image status.
 **Check** compares the local image digest with the registry; **Pull** fetches
-the newest image and refreshes the app's cached autostart script. **Edit**
+the newest image and refreshes the app's cached autostart script. On
+Kubernetes, where nodes pull images themselves, **Pull** pins the registry's
+current digest for new sessions instead (see [Kubernetes](kubernetes.md#images)). **Edit**
 reopens the install dialog. Deleting an app does not stop its running
 sessions.
 
@@ -171,6 +212,14 @@ adjust settings; when you are done, **Close Session & Finalize** stops it and
 keeps the directory as the template. Reopening the laboratory on an existing
 meta-app launches it the same way for further changes.
 
+In the web app the customization session opens in a tab of its own, and the
+laboratory keeps track of it: while one is open the page shows it first, with
+**Re-open session** and **Close & save template**, wherever you have been in
+between. An administrator has one open at a time. It is not a session in the
+ordinary sense: it appears in no session list, only here, and counts toward
+no limit. It runs on the node the dashboard is served from, where the
+template is kept.
+
 For users, a meta-app behaves like any other app, except that the first
 launch copies the template into their `auto-<name>` home directory, and a
 cleanroom launch copies it into the ephemeral one. Deleting a meta-app
@@ -195,7 +244,9 @@ At start-up the server detects GPUs on the host:
 
 A launch may use a GPU when the user's settings allow it and the app declares
 support for that GPU type. On Wayland, NVIDIA sessions also receive the DRI
-node so the compositor can use the card directly.
+node so the compositor can use the card directly. On Kubernetes the GPUs are
+the requests sessions can make, detected or defined as PodTemplates, as
+[Kubernetes](kubernetes.md#gpus) describes.
 
 ## Keys and certificates
 

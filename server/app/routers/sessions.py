@@ -13,13 +13,16 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
 from pydantic import ValidationError
 
+from .. import cluster, config_store, routing
 from ..fsutil import resolve_within, safe_join, unique_filename
 from ..launch import ephemeral_base, stop_session
 from ..models import ActiveSessionInfo, SendFileToSessionRequest
 from ..security import (
+    OWN_ORIGIN_NEEDED,
     EncryptedRoute,
     canonical_uuid,
     get_decrypted_request_body,
+    on_session_origin,
     token_matches,
     verify_token,
 )
@@ -35,6 +38,12 @@ router = APIRouter(
     route_class=EncryptedRoute,
 )
 proxy_router = APIRouter()
+
+
+def _home_of(data: dict[str, Any]) -> str:
+    """Return the name of the persistent home directory a session mounts, or nothing for a cleanroom."""
+    path = data.get("host_mount_path") or ""
+    return "" if not path or path.startswith(ephemeral_base()) else os.path.basename(path)
 
 
 def session_info(session_id: str, data: dict[str, Any], for_owner: bool = True) -> ActiveSessionInfo:
@@ -61,21 +70,29 @@ def session_info(session_id: str, data: dict[str, Any], for_owner: bool = True) 
         session_url=url,
         launch_context=data.get("launch_context"),
         is_collaboration=data.get("is_collaboration", False),
+        own_origin=bool(data.get("own_origin")),
+        node=cluster.node_name(),
+        home=_home_of(data),
+        gpu=bool(data.get("gpu_config")),
     )
 
 
 @router.get("", response_model=list[ActiveSessionInfo])
-async def get_my_sessions(user: dict[str, Any] = Depends(verify_token)) -> list[ActiveSessionInfo]:
-    """List the calling user's sessions, newest first."""
+async def get_my_sessions(
+    request: Request, user: dict[str, Any] = Depends(verify_token)
+) -> list[ActiveSessionInfo]:
+    """List the calling user's sessions on every node, newest first."""
     sessions = [
         session_info(sid, data)
         for sid, data in state.sessions.items()
-        if data.get("username") == user["username"]
+        if data.get("username") == user["username"] and not data.get("lab")
     ]
+    for answer in await routing.gather(request, user):
+        sessions.extend(ActiveSessionInfo(**item) for item in answer)
     return sorted(sessions, key=lambda s: s.created_at, reverse=True)
 
 
-@router.delete("/{session_id}", status_code=204)
+@router.delete("/{session_id}", status_code=204, dependencies=[Depends(routing.session_node)])
 async def stop_my_session(session_id: str, user: dict[str, Any] = Depends(verify_token)) -> Response:
     """Stop one of the calling user's sessions."""
     data = state.sessions.get(session_id)
@@ -85,7 +102,7 @@ async def stop_my_session(session_id: str, user: dict[str, Any] = Depends(verify
     return Response(status_code=204)
 
 
-@router.post("/{session_id}/send_file")
+@router.post("/{session_id}/send_file", dependencies=[Depends(routing.session_node)])
 async def send_file_to_session(
     session_id: str,
     decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body),
@@ -170,21 +187,36 @@ def _known_collab_token(data: dict[str, Any], token: str | None) -> str | None:
 
 @proxy_router.get("/{session_id:uuid}/")
 async def initial_session_auth(session_id: uuid.UUID, request: Request) -> Response:
-    """Exchange the one-time access token for the session cookie and redirect."""
+    """Exchange the one-time access token for the session cookie and redirect.
+
+    The first exchange settles the origin the session is served from (see
+    `on_session_origin`); a collaboration session of a key-file client stays
+    on the shared origin, where its room frames it. A session of a web
+    sign-in, room or not, is served on its own origin alone.
+    """
     session_id_str = canonical_uuid(session_id)
     token = request.query_params.get("access_token")
     data = state.sessions.get(session_id_str)
     if not data or not token_matches(token, data.get("access_token")):
         raise HTTPException(status_code=403, detail="Forbidden: Invalid session or token.")
     token = data["access_token"]
+    own_origin = on_session_origin(request, session_id_str)
+    if data.get("native") and not own_origin:
+        raise HTTPException(status_code=403, detail=OWN_ORIGIN_NEEDED)
+    if "own_origin" not in data and not (own_origin and data.get("is_collaboration")):
+        data["own_origin"] = own_origin
+        await config_store.save_sessions()
+    if bool(data.get("own_origin")) != own_origin:
+        raise HTTPException(status_code=403, detail="Forbidden: the session is served from another origin.")
 
     redirect_url = request.url.remove_query_params("access_token")
     response = RedirectResponse(url=str(redirect_url), status_code=303)
     is_embedded = request.query_params.get("embedded") == "true"
     samesite_policy = "none" if is_embedded else "lax"
     logger.info(
-        "[%s] Initial auth successful. Setting session cookie (SameSite=%s) and redirecting.",
+        "[%s] Initial auth successful on the %s origin. Setting session cookie (SameSite=%s) and redirecting.",
         session_id_str,
+        "session's own" if own_origin else "shared",
         samesite_policy,
     )
     response.set_cookie(

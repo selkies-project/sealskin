@@ -13,14 +13,15 @@ from typing import Any
 
 import httpx
 import yaml
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import ValidationError
 
-from .. import config_store, user_manager
+from .. import cluster, config_store, progress, quota, routing, sso, user_manager
 from ..docker_utils import get_and_cache_image_metadata, get_system_stats, pull_and_cache_image
 from ..fsutil import safe_join, safe_rmtree
 from ..launch import launch_application, stop_session
 from ..models import (
+    ActiveSessionInfo,
     AdminStatusResponse,
     AppStore,
     AppTemplate,
@@ -47,7 +48,7 @@ from ..models import (
     User,
     UserSessionList,
 )
-from ..providers.docker_provider import DockerProvider
+from ..providers import get_provider
 from ..security import (
     EncryptedRoute,
     get_decrypted_request_body,
@@ -65,20 +66,21 @@ logger = logging.getLogger(__name__)
 status_router = APIRouter(route_class=EncryptedRoute)
 router = APIRouter(
     prefix="/api/admin",
-    dependencies=[Depends(verify_admin)],
+    dependencies=[Depends(verify_admin), Depends(routing.announce_changes)],
     route_class=EncryptedRoute,
 )
 # Templates are open to users granted `edit_templates` as well, short of the settings that
 # carry authority over the Docker host (`_docker_settings`).
 template_router = APIRouter(
     prefix="/api/admin",
-    dependencies=[Depends(verify_template_editor)],
+    dependencies=[Depends(verify_template_editor), Depends(routing.announce_changes)],
     route_class=EncryptedRoute,
 )
 
 
-def _gpu_list() -> list[GPUInfo]:
-    """Return the detected GPUs as API models."""
+async def _gpu_list() -> list[GPUInfo]:
+    """Return the GPUs sessions can request now, as API models."""
+    await get_provider().refresh_gpus()
     return [GPUInfo(device=gpu["device"], driver=gpu["driver"]) for gpu in state.available_gpus]
 
 
@@ -89,12 +91,17 @@ async def admin_status(user: dict[str, Any] = Depends(verify_token)) -> dict[str
         "is_admin": user.get("is_admin", False),
         "username": user.get("username"),
         "settings": user.get("effective_settings"),
+        "via": user.get("via") or "key",
+        "session_domain": settings.session_domain,
+        "clustered": cluster.is_clustered(),
+        "node_id": cluster.NODE_ID,
+        "allowance": quota.allowance(user),
         "gpus": [],
         "proxy_cert_expires_at": proxy_cert_not_after(settings.proxy_cert_path),
         **get_system_stats(),
     }
     if user.get("effective_settings", {}).get("gpu", False):
-        response["gpus"] = _gpu_list()
+        response["gpus"] = await _gpu_list()
     return response
 
 
@@ -108,7 +115,7 @@ async def get_management_data() -> dict[str, Any]:
         "server_public_key": state.server_public_key_pem,
         "api_port": state.discovered_api_port,
         "session_port": state.discovered_session_port,
-        "gpus": _gpu_list(),
+        "gpus": await _gpu_list(),
     }
 
 
@@ -362,7 +369,7 @@ async def check_app_update(app_id: str) -> ImageUpdateCheckResponse:
     if not app:
         raise HTTPException(status_code=404, detail="Installed app not found.")
     image_name = app.provider_config.image
-    provider = DockerProvider(app.model_dump())
+    provider = get_provider()
     local_info = await provider.get_local_image_info(image_name)
     remote_digest = await provider.get_remote_image_digest(image_name)
     if not remote_digest:
@@ -385,7 +392,7 @@ async def pull_latest_app_image(app_id: str) -> ImagePullResponse:
         raise HTTPException(status_code=404, detail="Installed app not found.")
     image_name = app.provider_config.image
     try:
-        await DockerProvider(app.model_dump()).pull_image(image_name)
+        await get_provider().pull_image(image_name)
         await config_store.refresh_autostart_for_app(app)
         await get_and_cache_image_metadata(image_name, force_refresh=True)
         return ImagePullResponse(
@@ -457,16 +464,89 @@ async def create_meta_app(decrypted_body: dict[str, Any] = Depends(get_decrypted
         ) from exc
 
 
-@router.post("/launch/meta_customize", response_model=LaunchResponse)
+def _lab_session(username: str) -> tuple[str, dict[str, Any]] | None:
+    """Return the App Laboratory session an administrator has open on this node, if any."""
+    for session_id, data in state.sessions.items():
+        if data.get("lab") and data.get("username") == username:
+            return session_id, data
+    return None
+
+
+@router.get("/lab")
+async def lab_session(auth_user: dict[str, Any] = Depends(verify_admin)) -> dict[str, Any]:
+    """Return the caller's open App Laboratory session, which no session list shows.
+
+    Returns:
+        `{"session": null}`, or the session with `app_id`, `app_name`,
+        `session_id`, `session_url`, and `created_at`.
+    """
+    found = _lab_session(auth_user["username"])
+    if not found:
+        return {"session": None}
+    return {"session": session_info(found[0], found[1]).model_dump()}
+
+
+def _measure(path: str) -> dict[str, int]:
+    """Return the file count and size of a directory."""
+    files = size = 0
+    for directory, _subdirs, names in os.walk(path):
+        for name in names:
+            try:
+                size += os.lstat(os.path.join(directory, name)).st_size
+                files += 1
+            except OSError:
+                continue
+    return {"files": files, "bytes": size}
+
+
+@router.delete("/lab")
+async def close_lab_session(progress_id: str = "", auth_user: dict[str, Any] = Depends(verify_admin)) -> dict[str, Any]:
+    """Stop the caller's App Laboratory session, which keeps what it changed as the meta-app's template.
+
+    With `progress_id`, a UUID the client chose, the closing reports its
+    stages to `GET /api/launch/progress/{progress_id}`: `stopping` the
+    session, then `saving`, which measures the template, then `ready` with
+    the template's `files` and `bytes`.
+
+    Returns:
+        `{"files": n, "bytes": n}` of the template kept, zeros when no
+        session was open.
+    """
+    progress.begin(progress_id, auth_user["username"])
+    found = _lab_session(auth_user["username"])
+    kept = {"files": 0, "bytes": 0}
+    if found:
+        progress.step("stopping", app=found[1].get("app_name"))
+        await stop_session(found[0])
+        template = found[1].get("host_mount_path") or ""
+        if os.path.isdir(template):
+            progress.step("saving", app=found[1].get("app_name"))
+            kept = await asyncio.to_thread(_measure, template)
+    progress.finish(kept)
+    return kept
+
+
+@router.post("/launch/meta_customize", response_model=LaunchResponse, dependencies=[Depends(routing.follow_launch)])
 async def launch_meta_for_customization(
     decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body),
     auth_user: dict[str, Any] = Depends(verify_admin),
 ) -> dict[str, str]:
-    """Launch a meta-app with its home template mounted read-write."""
+    """Launch a meta-app with its home template mounted read-write.
+
+    An administrator of a web sign-in has one such session at a time: a
+    second is refused with 409 until the first is closed.
+    """
     try:
         req = LaunchMetaCustomizeRequest(**decrypted_body)
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {exc}") from exc
+    # A key-file client frames its customization session and tracks it itself, as it always has.
+    open_already = _lab_session(auth_user["username"]) if auth_user.get("via") != "key" else None
+    if open_already:
+        raise HTTPException(
+            status_code=409,
+            detail=f"An App Laboratory session for '{open_already[1].get('app_name')}' is open. Close it before starting another.",
+        )
     app = state.installed_apps.get(req.application_id)
     if not app or not app.is_meta_app or not app.home_template_name:
         raise HTTPException(
@@ -484,6 +564,7 @@ async def launch_meta_for_customization(
         forced_rw_mount=template_path,
         wayland_mode=req.wayland_mode,
         timezone=req.timezone,
+        auth_user=auth_user,
     )
 
 
@@ -576,11 +657,15 @@ async def delete_app_template(
 
 
 @router.get("/sessions", response_model=list[UserSessionList])
-async def get_all_sessions() -> list[UserSessionList]:
-    """List every session grouped by user."""
+async def get_all_sessions(request: Request, user: dict[str, Any] = Depends(verify_admin)) -> list[UserSessionList]:
+    """List every session on every node grouped by user."""
     by_user: dict[str, list] = defaultdict(list)
     for sid, data in state.sessions.items():
-        by_user[data.get("username", "unknown")].append(session_info(sid, data, for_owner=False))
+        if not data.get("lab"):
+            by_user[data.get("username", "unknown")].append(session_info(sid, data, for_owner=False))
+    for answer in await routing.gather(request, user):
+        for entry in answer:
+            by_user[entry["username"]].extend(ActiveSessionInfo(**item) for item in entry["sessions"])
     response = [
         UserSessionList(username=name, sessions=sorted(items, key=lambda s: s.created_at, reverse=True))
         for name, items in by_user.items()
@@ -588,7 +673,7 @@ async def get_all_sessions() -> list[UserSessionList]:
     return sorted(response, key=lambda u: u.username)
 
 
-@router.delete("/sessions/{session_id}", status_code=204)
+@router.delete("/sessions/{session_id}", status_code=204, dependencies=[Depends(routing.session_node)])
 async def stop_any_session(session_id: str) -> Response:
     """Stop any user's session."""
     if session_id not in state.sessions:
@@ -660,6 +745,7 @@ async def delete_user(username: str) -> Response:
     """Delete a user and their storage."""
     try:
         user_manager.delete_user(username)
+        await sso.end_sign_ins_of(username)
         return Response(status_code=204)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -684,10 +770,10 @@ def _require_admin_user(username: str) -> None:
 async def list_user_home_dirs(username: str) -> dict[str, list[str]]:
     """List a user's home directories."""
     _require_storage_user(username)
-    return {"home_dirs": user_manager.get_home_dirs(username)}
+    return {"home_dirs": routing.homes_of(username)}
 
 
-@router.post("/users/{username}/homedirs", status_code=201)
+@router.post("/users/{username}/homedirs", status_code=201, dependencies=[Depends(routing.new_home_node)])
 async def create_user_home_dir(
     username: str, decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body)
 ) -> dict[str, str]:
@@ -695,7 +781,10 @@ async def create_user_home_dir(
     _require_storage_user(username)
     try:
         req = HomeDirectoryCreate(**decrypted_body)
+        if cluster.node_of_home(username, req.home_name):
+            raise ValueError(f"Home directory '{req.home_name}' already exists for user '{username}'.")
         user_manager.create_home_dir(username, req.home_name)
+        cluster.record_home(username, req.home_name, cluster.NODE_ID)
         return {"status": "success"}
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
@@ -703,12 +792,15 @@ async def create_user_home_dir(
         raise HTTPException(status_code=422, detail=f"Invalid request body: {exc}") from exc
 
 
-@router.delete("/users/{username}/homedirs/{home_name}", status_code=204)
+@router.delete(
+    "/users/{username}/homedirs/{home_name}", status_code=204, dependencies=[Depends(routing.home_node)]
+)
 async def delete_user_home_dir(username: str, home_name: str) -> Response:
     """Delete a user's home directory."""
     _require_storage_user(username)
     try:
         user_manager.delete_home_dir(username, home_name)
+        cluster.record_home(username, home_name, None)
         return Response(status_code=204)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -718,10 +810,10 @@ async def delete_user_home_dir(username: str, home_name: str) -> Response:
 async def list_admin_home_dirs(username: str) -> dict[str, list[str]]:
     """List an administrator's home directories."""
     _require_admin_user(username)
-    return {"home_dirs": user_manager.get_home_dirs(username)}
+    return {"home_dirs": routing.homes_of(username)}
 
 
-@router.post("/admins/{username}/homedirs", status_code=201)
+@router.post("/admins/{username}/homedirs", status_code=201, dependencies=[Depends(routing.new_home_node)])
 async def create_admin_home_dir(
     username: str, decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body)
 ) -> dict[str, str]:
@@ -729,7 +821,10 @@ async def create_admin_home_dir(
     _require_admin_user(username)
     try:
         req = HomeDirectoryCreate(**decrypted_body)
+        if cluster.node_of_home(username, req.home_name):
+            raise ValueError(f"Home directory '{req.home_name}' already exists for user '{username}'.")
         user_manager.create_home_dir(username, req.home_name)
+        cluster.record_home(username, req.home_name, cluster.NODE_ID)
         return {"status": "success"}
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
@@ -737,12 +832,15 @@ async def create_admin_home_dir(
         raise HTTPException(status_code=422, detail=f"Invalid request body: {exc}") from exc
 
 
-@router.delete("/admins/{username}/homedirs/{home_name}", status_code=204)
+@router.delete(
+    "/admins/{username}/homedirs/{home_name}", status_code=204, dependencies=[Depends(routing.home_node)]
+)
 async def delete_admin_home_dir(username: str, home_name: str) -> Response:
     """Delete an administrator's home directory."""
     _require_admin_user(username)
     try:
         user_manager.delete_home_dir(username, home_name)
+        cluster.record_home(username, home_name, None)
         return Response(status_code=204)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

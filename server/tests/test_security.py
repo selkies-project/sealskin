@@ -28,3 +28,47 @@ def test_upload_id_validation_and_user_scoping():
     assert path.startswith(f"{settings.upload_dir}/alice/")
     with pytest.raises(HTTPException):
         upload_path("../bob", good)
+
+
+def test_host_port_brackets_ipv6():
+    from app.providers.base_provider import host_port
+
+    assert host_port("10.0.0.5", 3000) == "10.0.0.5:3000"
+    assert host_port("fd00:10:244::b", 3000) == "[fd00:10:244::b]:3000"
+
+
+@pytest.mark.parametrize(
+    ("host_url", "expected"),
+    [
+        ("sealskin.example.com", ("sealskin.example.com", None)),
+        ("sealskin.example.com:443", ("sealskin.example.com", 443)),
+        ("[2001:db8::1]:8443", ("[2001:db8::1]", 8443)),
+        ("2001:db8::1", ("2001:db8::1", None)),
+    ],
+)
+def test_external_address_splits_a_port_off_host_url(monkeypatch, host_url, expected):
+    from app import user_manager
+
+    monkeypatch.setenv("HOST_URL", host_url)
+    assert user_manager.external_address() == expected
+
+
+def test_names_ending_in_a_newline_are_refused():
+    from app import user_manager
+    from app.config_store import is_safe_name
+    from app.launch import is_valid_timezone
+    from app.routers.files import get_validated_path
+
+    good = "123e4567-e89b-12d3-a456-426614174000"
+    with pytest.raises(HTTPException):
+        validate_upload_id(good + "\n")
+    with pytest.raises(HTTPException):
+        upload_path("alice\n", good)
+    with pytest.raises(HTTPException):
+        get_validated_path("alice", "home\n", "")
+    with pytest.raises(ValueError):
+        user_manager.create_user("alice\n", None, {})
+    with pytest.raises(ValueError):
+        user_manager.create_home_dir("alice", "home\n")
+    assert not is_safe_name("Default\n")
+    assert not is_valid_timezone("Etc/UTC\n")

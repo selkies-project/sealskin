@@ -3,15 +3,17 @@
  *
  * The connection settings (server, keys) live in the shell's bundled connect
  * page; this page only shows who is connected and lets the user jump there.
+ * In the web app there are none: the page shows who is signed in and signs out.
  */
 
-import { bridge } from '../lib/bridge.js';
+import { bridge, request } from '../lib/bridge.js';
 import { secureFetch, fetchSchema, openPage } from '../lib/api.js';
 import { loadTranslator, applyTranslations } from '../lib/i18n.js';
 import { browserTimezone } from '../lib/timezone.js';
+import { supportedLangs } from '../lib/languages.js';
 import {
-  announce, escapeHtml, formatBytes, timeAgo, formatLogoSrc, hydrateLogos, showToast, tOr,
-  addMobileSafeArea, addMobileBackButton, downloadBlob,
+  announce, escapeHtml, formatBytes, formatDate, timeAgo, formatLogoSrc, hydrateLogos, showToast, tOr,
+  addMobileSafeArea, addMobileBackButton, downloadBlob, currentLocale,
 } from '../lib/dom.js';
 
 let t;
@@ -101,6 +103,12 @@ let labState = {
   isDirty: false,
 };
 let currentAdminManagedUser = null;
+// Whether the server is one node of several, the administrator's view of them, and the user's.
+let clustered = false;
+let clusterData = null;
+let myCluster = null;
+// The node holding each home of the user whose homes an administrator is managing.
+let managedHomes = {};
 let currentAppForUpdateCheck = null;
 let installedAppsPollingInterval = null;
 
@@ -537,7 +545,8 @@ function initializeAppLaboratoryTab() {
           if (!success && !confirm('Failed to save changes. Close anyway?')) return;
         }
         displayStatus(t('options.status.closingSession'));
-        await secureFetch(`/api/admin/sessions/${labState.currentSessionId}`, { method: 'DELETE' });
+        if (info.shell === 'web') await bridge.closeSession(labState.currentSessionId);
+        else await secureFetch(`/api/admin/sessions/${labState.currentSessionId}`, { method: 'DELETE' });
         labState.currentSessionId = null;
         sessionFrame.src = 'about:blank';
         sessionFrame.style.display = 'none';
@@ -571,6 +580,8 @@ function initializeAppLaboratoryTab() {
     launchBtn.disabled = true;
     spinner.style.display = 'inline-block';
     launchBtnText.textContent = t('options.appLaboratory.savingAndLaunching');
+    // A web sign-in's session is served on an origin of its own, so there it gets a tab instead of a frame in this page.
+    if (info.shell === 'web') bridge.reserveTab();
 
     try {
       let appToLaunch;
@@ -604,19 +615,25 @@ function initializeAppLaboratoryTab() {
         wayland_mode: launchWaylandCheckbox.checked,
         timezone: browserTimezone(),
       };
-      const launchResponse = await secureFetch('/api/admin/launch/meta_customize', { method: 'POST', body: JSON.stringify(launchPayload) });
+      const launchResponse = await secureFetch('/api/admin/launch/meta_customize', { method: 'POST', body: JSON.stringify(launchPayload) }, { timeout: 0 });
 
       const sessionUrlBase = `https://${config.serverIp}:${config.sessionPort}`;
       const frameUrl = `${sessionUrlBase}${launchResponse.session_url}&embedded=true`;
 
       labState.currentSessionId = launchResponse.session_url.substring(1).split('/?')[0];
-      sessionFrame.src = frameUrl;
-      sessionFrame.style.display = 'block';
-      mainPlaceholder.style.display = 'none';
+      if (info.shell === 'web') {
+        await bridge.openSession(labState.currentSessionId, launchResponse.session_url);
+      } else {
+        sessionFrame.src = frameUrl;
+        sessionFrame.style.display = 'block';
+        mainPlaceholder.style.display = 'none';
+      }
 
       launchBtnText.textContent = t('options.appLaboratory.closeButton');
     } catch (error) {
-      displayStatus(t('options.status.launchFailed', { error: error.message }), true);
+      if (info.shell === 'web') bridge.reserveTab(false);
+      const reason = error.message === 'noSessionOrigin' ? t('popup.status.noSessionOrigin') : error.message;
+      displayStatus(t('options.status.launchFailed', { error: reason }), true);
       launchBtnText.textContent = t('options.appLaboratory.launchButton');
     } finally {
       spinner.style.display = 'none';
@@ -660,6 +677,988 @@ function populateLabDropdowns() {
   }
 }
 
+// --- APP LABORATORY (WEB APP) ---
+
+const LAB_POLL_MS = 15000;
+const wlab = (name) => document.getElementById(`wlab-${name}`);
+// The administrator's open customization session as the server reports it, the meta-app in the form, and its icon.
+let labSession = null;
+let labApp = null;
+let labIcon = '';
+let labPoll = null;
+let labLaunching = false;
+
+function labGpus() {
+  const base = adminData.installedApps.find((app) => app.id === (labApp ? labApp.base_app_id : wlab('base-app-select').value));
+  const config = (base && base.provider_config) || {};
+  return (adminData.gpus || []).filter((gpu) => (gpu.driver === 'nvidia' ? config.nvidia_support : config.dri3_support));
+}
+
+function renderLabGpus() {
+  const gpus = labGpus();
+  const current = wlab('gpu').value;
+  wlab('gpu').innerHTML = `<option value="">${escapeHtml(t('popup.launchView.noGpu'))}</option>`
+    + gpus.map((gpu) => `<option value="${escapeHtml(gpu.device)}">${escapeHtml(`${gpu.device.split('/').pop()} (${gpu.driver})`)}</option>`).join('');
+  if (gpus.some((gpu) => gpu.device === current)) wlab('gpu').value = current;
+  wlab('gpu-group').style.display = gpus.length ? '' : 'none';
+}
+
+/** Put a meta-app into the form to edit, or clear the form for a new one. */
+async function loadLabApp(app) {
+  labApp = app || null;
+  const config = (app && app.provider_config) || {};
+  wlab('app-select').value = app ? app.id : 'new';
+  wlab('base-app-select').value = app ? app.base_app_id || '' : '';
+  wlab('app-name').value = app ? app.name : '';
+  wlab('app-users').value = app ? app.users.join(',') : 'all';
+  wlab('app-groups').value = app ? app.groups.join(',') : 'all';
+  wlab('autostart-script').value = decodeB64(config.custom_autostart_script_b64, 'autostart script');
+  wlab('autostart-wayland-script').value = decodeB64(config.custom_autostart_wayland_script_b64, 'wayland autostart script');
+  labIcon = app ? await formatLogoSrc(app.logo) : '';
+  wlab('icon-preview').src = labIcon || 'icons/icon128.png';
+  renderLabGpus();
+  renderLabState();
+}
+
+function populateWebLab() {
+  const metas = adminData.installedApps.filter((app) => app.is_meta_app);
+  const bases = adminData.installedApps.filter((app) => !app.is_meta_app);
+  const names = new Map(adminData.installedApps.map((app) => [app.id, app.name]));
+  wlab('app-select').innerHTML = `<option value="new">${escapeHtml(t('options.appLaboratory.createNew'))}</option>`
+    + metas.map((app) => `<option value="${escapeHtml(app.id)}">${escapeHtml(app.name)}</option>`).join('');
+  wlab('app-select').value = labApp && metas.some((app) => app.id === labApp.id) ? labApp.id : 'new';
+  const base = wlab('base-app-select').value;
+  wlab('base-app-select').innerHTML = `<option value="">${escapeHtml(t('options.appLaboratory.selectBase'))}</option>`
+    + bases.map((app) => `<option value="${escapeHtml(app.id)}">${escapeHtml(app.name)}</option>`).join('');
+  wlab('base-app-select').value = labApp ? labApp.base_app_id || '' : base;
+  document.querySelector('#wlab-apps-table tbody').innerHTML = metas.length ? metas.map((app) => `
+            <tr>
+                <td>${escapeHtml(app.name)}</td>
+                <td>${escapeHtml(names.get(app.base_app_id) || t('common.na'))}</td>
+                <td class="actions-cell"><button type="button" class="warning" data-appid="${escapeHtml(app.id)}">${t('common.edit')}</button></td>
+            </tr>`).join('')
+    : `<tr class="empty-row"><td colspan="3" style="text-align:center; padding: 2rem;">${t('options.appLaboratory.listNone')}</td></tr>`;
+}
+
+/** Show the open session, and hold the form while there is one: it describes the app being customized. */
+function renderLabState() {
+  const open = Boolean(labSession) || labClosing;
+  wlab('open-panel').style.display = open ? 'block' : 'none';
+  if (open && labSession) {
+    wlab('open-name').textContent = labSession.app_name;
+    wlab('open-started').textContent = [t('options.appLaboratory.openStarted', { when: timeAgo(labSession.created_at, t) }), labSession.node].filter(Boolean).join(' · ');
+    formatLogoSrc(labSession.app_logo).then((src) => { wlab('open-logo').src = src; });
+  }
+  wlab('form').querySelectorAll('input, select, textarea, button').forEach((control) => { control.disabled = open || labLaunching; });
+  wlab('icon-upload').closest('div').querySelector('label').classList.toggle('disabled', open || labLaunching);
+  if (!open && !labLaunching) {
+    wlab('app-name').disabled = Boolean(labApp);
+    wlab('base-app-select').disabled = Boolean(labApp);
+  }
+  wlab('busy-note').textContent = open ? t('options.appLaboratory.busy', { name: labSession.app_name }) : '';
+  wlab('busy-note').style.display = open ? 'block' : 'none';
+  document.querySelectorAll('#wlab-apps-table button').forEach((button) => { button.disabled = open || labLaunching; });
+}
+
+/** Ask the server for the open customization session, which only it keeps track of. */
+async function refreshLab() {
+  try {
+    const { session } = await secureFetch('/api/admin/lab', { method: 'GET' });
+    const changed = (session && session.session_id) !== (labSession && labSession.session_id);
+    labSession = session || null;
+    if (changed && labSession) {
+      const app = adminData.installedApps.find((a) => a.id === labSession.app_id);
+      if (app) await loadLabApp(app);
+    }
+  } catch (error) {
+    console.warn('Could not read the App Laboratory session:', error);
+  }
+  renderLabState();
+}
+
+/**
+ * Save the form as a meta-app: a new one, or the one being edited.
+ *
+ * @returns {Promise<object>} The saved application.
+ */
+async function saveLabApp() {
+  const users = splitList(wlab('app-users').value);
+  const groups = splitList(wlab('app-groups').value);
+  const scripts = {
+    custom_autostart_script_b64: btoa(wlab('autostart-script').value),
+    custom_autostart_wayland_script_b64: btoa(wlab('autostart-wayland-script').value),
+  };
+  let saved;
+  if (labApp) {
+    const payload = { ...labApp, users, groups, provider_config: { ...(labApp.provider_config || {}), ...scripts } };
+    if (labIcon.startsWith('data:image')) payload.logo = labIcon.split(',')[1];
+    else delete payload.logo;
+    saved = await secureFetch(`/api/admin/apps/installed/${labApp.id}`, { method: 'PUT', body: JSON.stringify(payload) });
+  } else {
+    if (!wlab('base-app-select').value || !wlab('app-name').value.trim()) throw new Error(t('options.appLaboratory.formInvalid'));
+    saved = await secureFetch('/api/admin/apps/meta', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: wlab('app-name').value.trim(),
+        base_app_id: wlab('base-app-select').value,
+        logo: labIcon.startsWith('data:image') ? labIcon.split(',')[1] : labIcon,
+        users,
+        groups,
+        ...scripts,
+      }),
+    });
+  }
+  labApp = saved;
+  await refreshAppData();
+  await loadLabApp(adminData.installedApps.find((app) => app.id === saved.id) || saved);
+  return saved;
+}
+
+/** Save the meta-app and open its customization session, in a tab that shows the launch's progress. */
+async function launchLab() {
+  const id = crypto.randomUUID();
+  const name = wlab('app-name').value.trim();
+  try {
+    await request('reserveTab', { reserve: true, launch: { id, app: name, logo: (labApp && labApp.logo) || '', room: false } });
+  } catch (error) {
+    const reason = { noSessionOrigin: t('popup.status.noSessionOrigin'), popupBlocked: t('web.home.popupBlocked') }[error.message] || error.message;
+    displayStatus(escapeHtml(reason), true);
+    return;
+  }
+  // The launching page asks for news when it loads, which may be after a failure.
+  const channel = new BroadcastChannel(`sealskin-launch-${id}`);
+  let news = null;
+  const tell = (message) => {
+    news = message;
+    channel.postMessage(message);
+  };
+  channel.onmessage = (event) => { if (event.data && event.data.hello && news) channel.postMessage(news); };
+  labLaunching = true;
+  wlab('spinner').style.display = 'inline-block';
+  renderLabState();
+  try {
+    const app = await saveLabApp();
+    tell({ posted: true });
+    const data = await secureFetch('/api/admin/launch/meta_customize', {
+      method: 'POST',
+      body: JSON.stringify({
+        launch_id: id,
+        application_id: app.id,
+        language: wlab('language').value,
+        timezone: browserTimezone(),
+        selected_gpu: wlab('gpu').value || null,
+        wayland_mode: wlab('launch-wayland').checked,
+      }),
+    }, { timeout: 0 });
+    await request('openSession', { sessionId: data.session_id, sessionUrl: data.session_url, launchId: id });
+    channel.close();
+  } catch (error) {
+    tell({ error: error.message });
+    setTimeout(() => channel.close(), 120000);
+    displayStatus(t('options.status.launchFailed', { error: escapeHtml(error.message) }), true);
+  }
+  labLaunching = false;
+  wlab('spinner').style.display = 'none';
+  await refreshLab();
+}
+
+// Whether the open session is being closed, so the panel keeps showing that through refreshes.
+let labClosing = false;
+
+/** Show what closing the session is doing: a stage, the saved template, or a failure to retry. */
+function showLabClosing(text, failed = false) {
+  wlab('open-actions').style.display = labClosing || failed ? 'none' : '';
+  wlab('closing').style.display = labClosing || failed ? '' : 'none';
+  wlab('closing-spinner').style.display = labClosing && !failed ? '' : 'none';
+  wlab('closing-status').textContent = text;
+  wlab('closing-status').classList.toggle('error', failed);
+  wlab('close-retry').style.display = failed ? '' : 'none';
+}
+
+/**
+ * Close the customization session and keep its home directory as the
+ * template, following the server's progress alongside the request.
+ */
+async function closeLab() {
+  if (labClosing) return;
+  labClosing = true;
+  wlab('close-btn').disabled = true;
+  const progressId = crypto.randomUUID();
+  const stages = { stopping: 'options.appLaboratory.closingStopping', saving: 'options.appLaboratory.closingSaving' };
+  showLabClosing(t(stages.stopping));
+  let failure = null;
+  const poll = setInterval(async () => {
+    try {
+      const progress = await secureFetch(`/api/launch/progress/${progressId}`, { method: 'GET' });
+      if (progress.stage === 'failed') failure = progress.error || t('options.appLaboratory.closingFailed');
+      else if (stages[progress.stage]) showLabClosing(t(stages[progress.stage]));
+    } catch (e) { /* not known to the server yet */ }
+  }, 500);
+  let kept = null;
+  try {
+    kept = await secureFetch(`/api/admin/lab?progress_id=${progressId}`, { method: 'DELETE' });
+  } catch (error) {
+    failure = error.message;
+  }
+  clearInterval(poll);
+  labClosing = false;
+  wlab('close-btn').disabled = false;
+  if (failure) {
+    showLabClosing(failure, true);
+    return;
+  }
+  const saved = t('options.appLaboratory.closingSaved', { files: kept.files || 0, size: formatBytes(kept.bytes || 0, t) });
+  showLabClosing(saved);
+  displayStatus(escapeHtml(saved));
+  await refreshLab();
+  await refreshAppData();
+  showLabClosing('');
+}
+
+async function openWebLab() {
+  if (!wlab('language').options.length) {
+    wlab('language').innerHTML = Object.entries(supportedLangs)
+      .map(([name, value]) => `<option value="${escapeHtml(value)}">${escapeHtml(name)}</option>`).join('');
+    const [lang, region = ''] = currentLocale().split('-');
+    const wanted = `${lang.toLowerCase()}_${region.toUpperCase()}.UTF-8`;
+    wlab('language').value = Object.values(supportedLangs).includes(wanted) ? wanted : 'en_US.UTF-8';
+  }
+  if (adminData.installedApps.length === 0) await refreshAppData();
+  populateWebLab();
+  renderLabGpus();
+  await refreshLab();
+  labPoll = setInterval(() => { if (!document.hidden && !labLaunching) refreshLab(); }, LAB_POLL_MS);
+}
+
+function bindWebLabEvents() {
+  wlab('app-select').addEventListener('change', (e) => loadLabApp(adminData.installedApps.find((app) => app.id === e.target.value)));
+  wlab('base-app-select').addEventListener('change', async () => {
+    const base = adminData.installedApps.find((app) => app.id === wlab('base-app-select').value);
+    const config = (base && base.provider_config) || {};
+    wlab('autostart-script').value = decodeB64(config.custom_autostart_script_b64, 'base app autostart script');
+    wlab('autostart-wayland-script').value = decodeB64(config.custom_autostart_wayland_script_b64, 'base app wayland autostart script');
+    labIcon = base ? await formatLogoSrc(base.logo) : '';
+    wlab('icon-preview').src = labIcon || 'icons/icon128.png';
+    renderLabGpus();
+  });
+  wlab('icon-upload').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file || file.type !== 'image/png') return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      labIcon = reader.result;
+      wlab('icon-preview').src = labIcon;
+    };
+    reader.readAsDataURL(file);
+  });
+  wlab('update-btn').addEventListener('click', async () => {
+    try {
+      const saved = await saveLabApp();
+      displayStatus(t('options.status.appSaved', { name: escapeHtml(saved.name), action: t('options.status.appSaveActions.updated') }));
+    } catch (error) {
+      displayStatus(t('options.status.appSaveFailed', { error: escapeHtml(error.message) }), true);
+    }
+  });
+  wlab('launch-btn').addEventListener('click', launchLab);
+  wlab('reopen-btn').addEventListener('click', async () => {
+    try {
+      await bridge.focusSession(labSession);
+    } catch (error) {
+      displayStatus(escapeHtml(error.message === 'noSessionOrigin' ? t('popup.status.noSessionOrigin') : error.message), true);
+    }
+  });
+  wlab('close-btn').addEventListener('click', () => {
+    if (!confirm(t('options.appLaboratory.confirmClose', { name: labSession.app_name }))) return;
+    closeLab();
+  });
+  wlab('close-retry').addEventListener('click', closeLab);
+  document.querySelector('#wlab-apps-table tbody').addEventListener('click', (e) => {
+    const button = e.target.closest('button[data-appid]');
+    if (!button) return;
+    loadLabApp(adminData.installedApps.find((app) => app.id === button.dataset.appid));
+    wlab('form').scrollIntoView({ block: 'start' });
+  });
+}
+
+// --- CLUSTER ---
+
+const nodeLabel = (node) => node.name || node.id;
+
+/**
+ * Ask which node to move a home directory to.
+ *
+ * @param {string} title
+ * @param {Array<object>} nodes Nodes to offer, as the cluster endpoints list them.
+ * @returns {Promise<string>} The chosen node's id; never settles when the dialog is closed.
+ */
+function pickNode(title, nodes) {
+  const modal = document.getElementById('node-pick-modal');
+  const select = document.getElementById('node-pick-select');
+  document.getElementById('node-pick-title').textContent = title;
+  select.innerHTML = nodes.map((node) => {
+    const offline = node.alive === false ? ` (${t('options.cluster.offline')})` : '';
+    return `<option value="${escapeHtml(node.id)}">${escapeHtml(`${nodeLabel(node)} · ${node.pool}${offline}`)}</option>`;
+  }).join('');
+  modal.style.display = 'block';
+  return new Promise((resolve) => {
+    document.getElementById('node-pick-form').onsubmit = (event) => {
+      event.preventDefault();
+      modal.style.display = 'none';
+      resolve(select.value);
+    };
+  });
+}
+
+/**
+ * Move a home directory to a node the user picks.
+ *
+ * @param {string} url The move endpoint of the home.
+ * @param {string} homeName
+ * @param {Array<object>} nodes Nodes to offer.
+ * @param {function} reload Called once the move ends, either way.
+ */
+async function moveHome(url, homeName, nodes, reload) {
+  if (!nodes.length) {
+    displayStatus(t('options.home.noOtherNode'), true);
+    return;
+  }
+  const node = await pickNode(t('options.home.moveTitle', { homeName }), nodes);
+  try {
+    displayStatus(t('options.status.homedirMoving', { homeName }));
+    await secureFetch(url, { method: 'POST', body: JSON.stringify({ node }) }, { timeout: 0 });
+    displayStatus(t('options.status.homedirMoved', { homeName }));
+  } catch (error) {
+    displayStatus(t('options.status.homedirMoveFailed', { error: error.message }), true);
+  }
+  await reload();
+}
+
+function renderClusterNodes() {
+  const tbody = document.querySelector('#cluster-nodes-table tbody');
+  const pools = Object.keys(clusterData.pools).sort();
+  tbody.innerHTML = clusterData.nodes.map((node) => {
+    const id = escapeHtml(node.id);
+    let state = node.alive ? t('options.cluster.online') : t('options.cluster.offline');
+    if (!node.approved) state = t('options.cluster.waiting');
+    const notes = [];
+    if (!node.alive && node.last_seen) notes.push(t('options.cluster.lastSeen', { when: timeAgo(node.last_seen, t) }));
+    if (node.alive && !node.store_reachable) notes.push(t('options.cluster.storeUnreachableNode'));
+    if (!node.alive && node.error) notes.push(node.error);
+    if (node.roles && node.roles.length) notes.push(node.roles.join(', '));
+    const load = typeof node.load === 'number' ? node.load.toFixed(2) : t('common.na');
+    const capacity = [];
+    if (node.cpus) capacity.push(t('options.cluster.cpus', { count: node.cpus }));
+    if (node.gpus.length) capacity.push(t('options.cluster.gpus', { count: node.gpus.length }));
+    const sessions = `${node.sessions}${node.max_sessions > 0 ? ` / ${node.max_sessions}` : ''}`;
+    const gpuSessions = node.gpus.length || node.gpu_sessions
+      ? `<small>${escapeHtml(t('options.cluster.gpuSessions', { used: node.gpu_sessions, slots: node.gpu_slots > 0 ? node.gpu_slots : '∞' }))}</small>`
+      : '';
+    const approve = node.approved
+      ? (node.self ? '' : `<button class="warning" data-action="suspend" data-node="${id}">${t('options.cluster.suspend')}</button>`)
+      : `<button class="primary" data-action="approve" data-node="${id}">${t('options.cluster.approve')}</button>`;
+    return `
+            <tr>
+                <td>
+                    <div>${escapeHtml(nodeLabel(node))}${node.self ? ` <small>(${escapeHtml(t('options.cluster.thisNode'))})</small>` : ''}</div>
+                    <small title="${id}">${escapeHtml(node.public_url || node.address || '')}</small>
+                </td>
+                <td>
+                    <select data-node="${id}" style="min-width: 8rem;">
+                        ${[...new Set([...pools, node.pool])].map((pool) => `<option value="${escapeHtml(pool)}"${pool === node.pool ? ' selected' : ''}>${escapeHtml(pool)}</option>`).join('')}
+                    </select>
+                </td>
+                <td><div>${escapeHtml(state)}</div><small>${escapeHtml(notes.join(' · '))}</small></td>
+                <td><div>${escapeHtml(load)}</div><small>${escapeHtml(capacity.join(' · '))}</small></td>
+                <td><div>${escapeHtml(sessions)}</div>${gpuSessions}</td>
+                <td>${escapeHtml(node.version || t('common.na'))}</td>
+                <td class="actions-cell">
+                    <div class="cell-wrapper">
+                        ${approve}
+                        ${node.self ? '' : `<button class="danger" data-action="remove" data-node="${id}">${t('options.cluster.remove')}</button>`}
+                    </div>
+                </td>
+            </tr>`;
+  }).join('');
+}
+
+function renderClusterPools() {
+  const tbody = document.querySelector('#cluster-pools-table tbody');
+  const names = Object.keys(clusterData.pools).sort();
+  tbody.innerHTML = names.map((name) => {
+    const pool = clusterData.pools[name];
+    const nodes = clusterData.nodes.filter((node) => node.pool === name).length;
+    const cost = pool.gpu_cost === undefined || pool.gpu_cost === null
+      ? String(pool.cost)
+      : t('options.cluster.poolCostWithGpu', { cost: pool.cost, gpuCost: pool.gpu_cost });
+    return `
+            <tr>
+                <td><div>${escapeHtml(name)}</div><small>${escapeHtml(pool.description || '')}</small></td>
+                <td>${escapeHtml(pool.domain || t('common.none'))}</td>
+                <td>${escapeHtml(t(pool.restricted ? 'options.cluster.poolRestricted' : 'options.cluster.poolOpen'))}</td>
+                <td>${escapeHtml(cost)}</td>
+                <td>${nodes}</td>
+                <td class="actions-cell">
+                    <div class="cell-wrapper">
+                        <button class="warning" data-pool="${escapeHtml(name)}">${t('common.edit')}</button>
+                        <button class="danger" data-pool="${escapeHtml(name)}">${t('common.delete')}</button>
+                    </div>
+                </td>
+            </tr>`;
+  }).join('');
+
+  const joinPool = document.getElementById('cluster-join-pool');
+  const chosen = joinPool.value;
+  joinPool.innerHTML = names.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('');
+  if (names.includes(chosen)) joinPool.value = chosen;
+}
+
+/** Put a pool into the pool form to edit, or clear the form for a new one. */
+function editPool(name) {
+  const pool = name ? clusterData.pools[name] : { cost: 1 };
+  const nameInput = document.getElementById('cluster-pool-name');
+  nameInput.value = name || '';
+  nameInput.readOnly = Boolean(name);
+  document.getElementById('cluster-pool-form-title').textContent = name ? t('options.cluster.poolEdit', { name }) : t('options.cluster.poolNew');
+  document.getElementById('cluster-pool-description').value = pool.description || '';
+  document.getElementById('cluster-pool-domain').value = pool.domain || '';
+  document.getElementById('cluster-pool-cost').value = pool.cost;
+  document.getElementById('cluster-pool-gpu-cost').value = pool.gpu_cost ?? '';
+  document.getElementById('cluster-pool-users').value = (pool.users || []).join(', ');
+  document.getElementById('cluster-pool-groups').value = (pool.groups || []).join(', ');
+  document.getElementById('cluster-pool-restricted').checked = Boolean(pool.restricted);
+  document.getElementById('cluster-pool-stop').checked = Boolean(pool.stop_when_spent);
+}
+
+function renderClusterStore() {
+  const { store } = clusterData;
+  document.getElementById('cluster-store-kind').textContent = tOr(t, `options.cluster.storeKinds.${store.kind}`, store.kind);
+  document.getElementById('cluster-store-detail').textContent = store.detail || '';
+  document.getElementById('cluster-store-detail-row').style.display = store.detail ? 'block' : 'none';
+  document.getElementById('cluster-store-reachable').textContent = t(store.reachable ? 'options.cluster.reachable' : 'options.cluster.unreachable');
+  document.getElementById('cluster-public-url').textContent = clusterData.public_url || t('common.na');
+  document.getElementById('cluster-session-domain').textContent = clusterData.session_domain || t('options.cluster.sessionDomainUnset');
+}
+
+async function refreshClusterUsage() {
+  const tbody = document.querySelector('#cluster-usage-table tbody');
+  const period = document.getElementById('cluster-usage-period').value;
+  try {
+    const { hours } = await secureFetch(`/api/admin/cluster/usage?period=${period}`, { method: 'GET' });
+    const rows = Object.entries(hours).sort((a, b) => b[1] - a[1]);
+    tbody.innerHTML = rows.length
+      ? rows.map(([username, used]) => `<tr><td>${escapeHtml(username)}</td><td>${escapeHtml(used)}</td></tr>`).join('')
+      : `<tr class="empty-row"><td colspan="2" style="text-align:center; padding: 2rem;">${t('options.cluster.usageNone')}</td></tr>`;
+  } catch (error) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="2" style="text-align:center; padding: 2rem;">${escapeHtml(error.message)}</td></tr>`;
+  }
+}
+
+async function refreshCluster() {
+  try {
+    clusterData = await secureFetch('/api/admin/cluster', { method: 'GET' });
+  } catch (error) {
+    displayStatus(t('options.status.clusterLoadFailed', { error: error.message }), true);
+    return;
+  }
+  renderClusterNodes();
+  renderClusterPools();
+  renderClusterStore();
+  renderClusterSettings();
+  if (info.shell === 'web') renderSignIn();
+  await refreshClusterUsage();
+}
+
+/** Run a cluster write, then show the cluster as it is now, which is also what a conflict asks for. */
+async function clusterWrite(url, options, done) {
+  try {
+    const result = await secureFetch(url, options);
+    displayStatus(done);
+    await refreshCluster();
+    return result;
+  } catch (error) {
+    displayStatus(t('options.status.clusterWriteFailed', { error: error.message }), true);
+    if (error.status === 409) await refreshCluster();
+    return null;
+  }
+}
+
+function bindClusterEvents() {
+  document.getElementById('cluster-refresh-btn').addEventListener('click', refreshCluster);
+
+  const nodes = document.querySelector('#cluster-nodes-table tbody');
+  nodes.addEventListener('change', (e) => {
+    const select = e.target.closest('select[data-node]');
+    if (!select) return;
+    clusterWrite(`/api/admin/cluster/nodes/${select.dataset.node}`, { method: 'PUT', body: JSON.stringify({ pool: select.value }) }, t('options.status.nodeUpdated'));
+  });
+  nodes.addEventListener('click', (e) => {
+    const button = e.target.closest('button[data-action]');
+    if (!button) return;
+    const url = `/api/admin/cluster/nodes/${button.dataset.node}`;
+    const node = clusterData.nodes.find((n) => n.id === button.dataset.node);
+    const { action } = button.dataset;
+    if (action === 'remove') {
+      if (confirm(t('options.cluster.confirmRemove', { name: nodeLabel(node) }))) clusterWrite(url, { method: 'DELETE' }, t('options.status.nodeRemoved'));
+    } else {
+      clusterWrite(url, { method: 'PUT', body: JSON.stringify({ approved: action === 'approve' }) }, t('options.status.nodeUpdated'));
+    }
+  });
+
+  document.getElementById('cluster-join-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const pool = document.getElementById('cluster-join-pool').value;
+    try {
+      const issued = await secureFetch('/api/admin/cluster/join_codes', { method: 'POST', body: JSON.stringify(pool ? { pool } : {}) });
+      document.getElementById('cluster-join-env').value = `SEALSKIN_JOIN_URL=${issued.join_url}\nSEALSKIN_JOIN_CODE=${issued.code}`;
+      document.getElementById('cluster-join-expires').textContent = t('options.cluster.joinExpires', { when: formatDate(issued.expires) });
+      document.getElementById('cluster-join-result').style.display = 'block';
+    } catch (error) {
+      document.getElementById('cluster-join-result').style.display = 'none';
+      displayStatus(error.message, true);
+    }
+  });
+  document.getElementById('cluster-join-copy').addEventListener('click', () => navigator.clipboard.writeText(document.getElementById('cluster-join-env').value)
+    .then(() => displayStatus(t('options.status.copySuccess')), () => displayStatus(t('options.status.copyFailed'), true)));
+
+  document.querySelector('#cluster-pools-table tbody').addEventListener('click', (e) => {
+    const button = e.target.closest('button[data-pool]');
+    if (!button) return;
+    const name = button.dataset.pool;
+    if (button.classList.contains('warning')) {
+      editPool(name);
+      document.getElementById('cluster-pool-form').scrollIntoView({ block: 'nearest' });
+    } else if (confirm(t('options.cluster.confirmDeletePool', { name }))) {
+      clusterWrite(`/api/admin/cluster/pools/${encodeURIComponent(name)}`, { method: 'DELETE' }, t('options.status.poolDeleted', { name }));
+    }
+  });
+  document.getElementById('cluster-pool-reset').addEventListener('click', () => editPool(null));
+  document.getElementById('cluster-pool-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('cluster-pool-name').value.trim();
+    const number = (id) => parseFloat(document.getElementById(id).value);
+    const gpuCost = number('cluster-pool-gpu-cost');
+    const body = {
+      description: document.getElementById('cluster-pool-description').value.trim(),
+      domain: document.getElementById('cluster-pool-domain').value.trim(),
+      restricted: document.getElementById('cluster-pool-restricted').checked,
+      users: splitList(document.getElementById('cluster-pool-users').value),
+      groups: splitList(document.getElementById('cluster-pool-groups').value),
+      cost: Number.isFinite(number('cluster-pool-cost')) ? number('cluster-pool-cost') : 1,
+      gpu_cost: Number.isFinite(gpuCost) ? gpuCost : null,
+      stop_when_spent: document.getElementById('cluster-pool-stop').checked,
+    };
+    const saved = await clusterWrite(`/api/admin/cluster/pools/${encodeURIComponent(name)}`, { method: 'PUT', body: JSON.stringify(body) }, t('options.status.poolSaved', { name }));
+    if (saved) editPool(null);
+  });
+
+  document.getElementById('cluster-settings-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const body = changedSettings(e.target.dataset.settings.split(','));
+    if (!Object.keys(body).length) {
+      displayStatus(t('options.status.nothingChanged'));
+      return;
+    }
+    clusterWrite('/api/admin/cluster/settings', { method: 'PUT', body: JSON.stringify(body) }, t('options.status.settingsSaved'));
+  });
+
+  document.getElementById('cluster-usage-period').addEventListener('change', refreshClusterUsage);
+}
+
+// The settings an administrator may write for every node, and the control each takes.
+const CLUSTER_SETTINGS = {
+  oidc_issuer: 'text',
+  oidc_client_id: 'text',
+  oidc_client_secret: 'secret',
+  oidc_scopes: 'text',
+  saml_metadata_url: 'text',
+  sso_username_claim: 'text',
+  sso_groups_claim: 'text',
+  sso_admin_group: 'text',
+  sso_max_age_seconds: 'hours',
+  sso_force_login: 'bool',
+  sso_create_users: 'bool',
+  proxy_auth_user_header: 'text',
+  proxy_auth_groups_header: 'text',
+  web_session_seconds: 'hours',
+  files_sync: 'sync',
+};
+// What the web app's Sign In section shows, card by card; the other shells keep one form in the Cluster section.
+const SIGNIN_CARDS = {
+  oidc: ['oidc_issuer', 'oidc_client_id', 'oidc_client_secret', 'oidc_scopes'],
+  saml: ['saml_metadata_url'],
+  proxy: ['proxy_auth_user_header', 'proxy_auth_groups_header'],
+  who: ['sso_username_claim', 'sso_groups_claim', 'sso_admin_group', 'sso_max_age_seconds', 'web_session_seconds', 'sso_create_users', 'sso_force_login'],
+};
+// Issuer URL shapes of common OpenID Connect providers; a preset fills the hints and stores nothing.
+const OIDC_PRESETS = {
+  keycloak: 'https://<host>/realms/<realm>',
+  authentik: 'https://<host>/application/o/<slug>/',
+  entra: 'https://login.microsoftonline.com/<tenant>/v2.0',
+  google: 'https://accounts.google.com',
+  okta: 'https://<org>.okta.com',
+  other: '',
+};
+
+// The card whose save is being shown: its controls take the saved values, not what was typed.
+let savedSignInCard = null;
+
+const hoursOf = (secondsValue) => String(Math.round((Number(secondsValue) / 3600) * 100) / 100);
+// A setting's value as its control shows it.
+const shownSetting = (name) => {
+  const value = clusterData.settings[name];
+  return CLUSTER_SETTINGS[name] === 'hours' ? hoursOf(value) : String(value ?? '');
+};
+
+/** The form group of one cluster setting, saying whether its value is written for the cluster or a node's own. */
+function settingField(name) {
+  const kind = CLUSTER_SETTINGS[name];
+  const id = `cluster-setting-${name}`;
+  const written = clusterData.written_settings.includes(name);
+  const hint = t(written ? 'options.cluster.settingWritten' : 'options.cluster.settingFromEnvironment');
+  let control;
+  if (kind === 'bool' || kind === 'sync') {
+    const choices = kind === 'bool'
+      ? [['true', t('options.groups.on')], ['false', t('options.groups.off')]]
+      : ['auto', 'on', 'off'].map((choice) => [choice, choice]);
+    const current = written ? String(clusterData.settings[name]) : '';
+    control = `<select id="${id}">
+                <option value="">${escapeHtml(t('options.cluster.settingInherit', { value: String(clusterData.settings[name]) }))}</option>
+                ${choices.map(([choice, label]) => `<option value="${choice}"${choice === current ? ' selected' : ''}>${escapeHtml(label)}</option>`).join('')}
+            </select>`;
+  } else if (kind === 'secret') {
+    const set = clusterData.secret_set[name];
+    control = `<input type="text" id="${id}" class="masked" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${escapeHtml(t(set ? 'options.cluster.secretSet' : 'options.cluster.secretUnset'))}">
+            ${written ? `<label><input type="checkbox" id="${id}-clear"> <span>${escapeHtml(t('options.cluster.secretClear'))}</span></label>` : ''}`;
+  } else {
+    control = `<input type="${kind === 'hours' ? 'number' : 'text'}"${kind === 'hours' ? ' min="0" step="any"' : ''} id="${id}" value="${escapeHtml(shownSetting(name))}">`;
+  }
+  return `
+        <div class="form-group${written ? ' setting-written' : ''}">
+            <label for="${id}">${escapeHtml(t(`options.cluster.settings.${name}`))}</label>
+            ${control}
+            <p class="description">${escapeHtml(hint)}</p>
+        </div>`;
+}
+
+/** @returns {object} What the controls of `names` change; an empty string hands a setting back to the nodes. */
+function changedSettings(names) {
+  const written = new Set(clusterData.written_settings);
+  const body = {};
+  names.forEach((name) => {
+    const kind = CLUSTER_SETTINGS[name];
+    const input = document.getElementById(`cluster-setting-${name}`);
+    if (!input) return;
+    const value = input.value.trim();
+    if (kind === 'secret') {
+      const clear = document.getElementById(`cluster-setting-${name}-clear`);
+      if (value) body[name] = value;
+      else if (clear && clear.checked) body[name] = '';
+    } else if (kind === 'bool' || kind === 'sync') {
+      const current = written.has(name) ? String(clusterData.settings[name]) : '';
+      if (value !== current) body[name] = kind === 'bool' && value ? value === 'true' : value;
+    } else if (value !== shownSetting(name)) {
+      body[name] = kind === 'hours' && value ? Math.round(Number(value) * 3600) : value;
+    }
+  });
+  return body;
+}
+
+function renderClusterSettings() {
+  // The web app has a section for signing in; elsewhere every setting stays here.
+  const names = info.shell === 'web' ? ['files_sync'] : Object.keys(CLUSTER_SETTINGS);
+  document.getElementById('cluster-settings-form').dataset.settings = names.join(',');
+  document.getElementById('cluster-settings-fields').innerHTML = names.map(settingField).join('');
+}
+
+function signInPill(state) {
+  return `<span class="pill ${state}">${escapeHtml(t(`options.signin.pill.${state}`))}</span>`;
+}
+
+function copyRows(rows) {
+  return `<div class="copy-rows">${rows.filter(([, value]) => value).map(([label, value]) => `
+            <div class="copy-row">
+                <span>${escapeHtml(t(label))}</span>
+                <code>${escapeHtml(value)}</code>
+                <button type="button" class="secondary" data-copy="${escapeHtml(value)}" title="${escapeHtml(t('common.copy'))}"><i class="fas fa-copy"></i></button>
+            </div>`).join('')}</div>`;
+}
+
+function signInCard(kind, title, state, body, test) {
+  return `
+    <form class="card signin-card" data-card="${kind}">
+        <div class="card-header"><h3>${escapeHtml(t(title))}</h3>${signInPill(state)}</div>
+        ${body}
+        ${SIGNIN_CARDS[kind] ? `<div class="button-group">
+            <button type="submit" class="primary"><i class="fas fa-save"></i> ${escapeHtml(t('common.save'))}</button>
+            ${test ? `<button type="button" class="secondary" data-test="${kind}"><i class="fas fa-plug"></i> ${escapeHtml(t('options.signin.test'))}</button>` : ''}
+        </div>
+        <div class="signin-result" id="signin-result-${kind}"></div>` : ''}
+    </form>`;
+}
+
+/** Draw the Sign In section: one card per way of signing in, each saved on its own. */
+function renderSignIn() {
+  const container = document.getElementById('signin-cards');
+  const { signin = { enabled: {}, urls: {}, trusted_proxies: '' }, settings } = clusterData;
+  const { enabled, urls } = signin;
+  // What is typed into a card and not saved survives another card's save.
+  const typed = new Map([...container.querySelectorAll('input[id], select[id]')]
+    .filter((control) => !control.classList.contains('masked') && control.closest('.signin-card').dataset.card !== savedSignInCard)
+    .map((control) => [control.id, control.type === 'checkbox' ? control.checked : control.value]));
+  const fields = (kind) => `<div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.5rem 2rem;">${SIGNIN_CARDS[kind].map(settingField).join('')}</div>`;
+  const stateOf = (kind, configured) => (enabled[kind] ? 'active' : configured ? 'off' : 'none');
+  const sentence = (key) => `<p class="description">${escapeHtml(t(key))}</p>`;
+
+  const presets = Object.keys(OIDC_PRESETS).map((preset) => `<option value="${preset}">${escapeHtml(t(`options.signin.presets.${preset}.name`))}</option>`).join('');
+  const oidc = `
+        <div class="form-group">
+            <label for="signin-oidc-preset">${escapeHtml(t('options.signin.provider'))}</label>
+            <select id="signin-oidc-preset"><option value="">${escapeHtml(t('options.signin.providerChoose'))}</option>${presets}</select>
+            <p class="description" id="signin-oidc-hint">${escapeHtml(t('options.signin.providerHelp'))}</p>
+        </div>
+        ${fields('oidc')}
+        <h4>${escapeHtml(t('options.signin.register'))}</h4>
+        ${copyRows([['options.signin.oidcRedirect', urls.oidc_redirect], ['options.signin.oidcBackchannel', urls.oidc_backchannel_logout], ['options.signin.oidcFrontchannel', urls.oidc_frontchannel_logout]])}`;
+  const saml = `
+        ${fields('saml')}
+        <h4>${escapeHtml(t('options.signin.register'))}</h4>
+        ${copyRows([['options.signin.samlEntity', urls.saml_entity_id], ['options.signin.samlAcs', urls.saml_acs], ['options.signin.samlSlo', urls.saml_slo]])}
+        ${urls.saml_entity_id ? `<p><a href="${escapeHtml(urls.saml_entity_id)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('options.signin.samlMetadata'))}</a></p>` : ''}`;
+  const untrusted = settings.proxy_auth_user_header && !signin.trusted_proxies;
+  const proxy = `
+        ${fields('proxy')}
+        <p><span>${escapeHtml(t('options.signin.trustedProxies'))}</span> <code>${escapeHtml(signin.trusted_proxies || t('common.none'))}</code></p>
+        ${sentence('options.signin.trustedProxiesHelp')}
+        ${untrusted ? `<p class="status-message error">${escapeHtml(t('options.signin.noTrustedProxy'))}</p>` : ''}`;
+  const who = `${sentence('options.signin.whoHelp')}${fields('who')}`;
+
+  container.innerHTML = [
+    signInCard('oidc', 'options.signin.oidcTitle', stateOf('oidc', settings.oidc_issuer), oidc, true),
+    signInCard('saml', 'options.signin.samlTitle', stateOf('saml', settings.saml_metadata_url), saml, true),
+    signInCard('proxy', 'options.signin.proxyTitle', stateOf('proxy', settings.proxy_auth_user_header), proxy, false),
+    `<form class="card signin-card" data-card="who">
+        <div class="card-header"><h3>${escapeHtml(t('options.signin.whoTitle'))}</h3></div>
+        ${who}
+        <div class="button-group"><button type="submit" class="primary"><i class="fas fa-save"></i> ${escapeHtml(t('common.save'))}</button></div>
+    </form>`,
+    signInCard('root', 'options.signin.rootTitle', enabled.root === false ? 'off' : 'active', sentence('options.signin.rootHelp'), false),
+    signInCard('key', 'options.signin.keyTitle', enabled.key ? 'active' : 'off', sentence(enabled.key ? 'options.signin.keyOn' : 'options.signin.keyOff'), false),
+  ].join('');
+
+  typed.forEach((value, id) => {
+    const control = document.getElementById(id);
+    if (!control) return;
+    if (control.type === 'checkbox') control.checked = value;
+    else control.value = value;
+  });
+  applyOidcPreset();
+}
+
+function applyOidcPreset() {
+  const preset = document.getElementById('signin-oidc-preset').value;
+  const issuer = document.getElementById('cluster-setting-oidc_issuer');
+  issuer.placeholder = OIDC_PRESETS[preset] || '';
+  document.getElementById('signin-oidc-hint').textContent = t(preset ? `options.signin.presets.${preset}.hint` : 'options.signin.providerHelp');
+}
+
+/** Write a card's changed settings; the saved card then shows what the cluster holds. */
+async function saveSignInCard(kind) {
+  const body = changedSettings(SIGNIN_CARDS[kind]);
+  if (!Object.keys(body).length) return true;
+  savedSignInCard = kind;
+  const saved = await clusterWrite('/api/admin/cluster/settings', { method: 'PUT', body: JSON.stringify(body) }, t('options.status.settingsSaved'));
+  savedSignInCard = null;
+  return Boolean(saved);
+}
+
+/** Test the saved settings of a provider, saving the card first when it was changed. */
+async function testSignIn(kind) {
+  if (!(await saveSignInCard(kind))) return;
+  const result = () => document.getElementById(`signin-result-${kind}`);
+  result().innerHTML = `<p class="description"><span class="spinner-small" style="display: inline-block;"></span> ${escapeHtml(t('options.signin.testing'))}</p>`;
+  let answer;
+  try {
+    answer = await secureFetch('/api/admin/cluster/signin/test', { method: 'POST', body: JSON.stringify({ kind }) });
+  } catch (error) {
+    answer = { ok: false, error: error.message };
+  }
+  if (!answer.ok) {
+    result().innerHTML = `<p class="status-message error">${escapeHtml(answer.error || t('options.signin.testFailed'))}</p>`;
+    return;
+  }
+  const yesNo = (value) => t(value ? 'common.yes' : 'common.no');
+  const groupsClaim = clusterData.settings.sso_groups_claim;
+  const lines = kind === 'oidc' ? [
+    ['options.signin.resultIssuer', answer.issuer],
+    ['options.signin.resultAuthorization', answer.authorization_endpoint],
+    ['options.signin.resultBackchannel', yesNo(answer.backchannel_logout)],
+    ['options.signin.resultScopes', (answer.scopes || []).join(' ')],
+    ['options.signin.resultGroupsClaim', t((answer.claims || []).includes(groupsClaim) ? 'options.signin.claimListed' : 'options.signin.claimNotListed', { claim: groupsClaim })],
+  ] : [
+    ['options.signin.resultEntity', answer.entity_id],
+    ['options.signin.resultSso', answer.sso_url],
+    ['options.signin.resultSlo', yesNo(answer.single_logout)],
+    ['options.signin.resultCertificates', Array.isArray(answer.certificates) ? answer.certificates.length : answer.certificates],
+  ];
+  result().innerHTML = `<div class="signin-ok"><p><i class="fas fa-check-circle"></i> ${escapeHtml(t('options.signin.testOk'))}</p>${lines
+    .map(([label, value]) => `<p><span>${escapeHtml(t(label))}</span> <strong>${escapeHtml(value ?? '')}</strong></p>`).join('')}</div>`;
+}
+
+function bindSignInEvents() {
+  const container = document.getElementById('signin-cards');
+  container.addEventListener('submit', (e) => {
+    e.preventDefault();
+    saveSignInCard(e.target.dataset.card);
+  });
+  container.addEventListener('click', (e) => {
+    const copy = e.target.closest('button[data-copy]');
+    if (copy) {
+      navigator.clipboard.writeText(copy.dataset.copy)
+        .then(() => displayStatus(t('options.status.copySuccess')), () => displayStatus(t('options.status.copyFailed'), true));
+    }
+    const test = e.target.closest('button[data-test]');
+    if (test) testSignIn(test.dataset.test);
+  });
+  container.addEventListener('change', (e) => { if (e.target.id === 'signin-oidc-preset') applyOidcPreset(); });
+}
+
+// --- AUDIT LOG ---
+
+// What every audit event carries, shown in columns of their own.
+const AUDIT_COLUMNS = ['time', 'node', 'event', 'user'];
+const AUDIT_EXPORT_PAGE = 5000;
+const AUDIT_SEARCH_DELAY_MS = 300;
+let auditOffset = 0;
+
+const utcDay = (daysAgo = 0) => new Date(Date.now() - daysAgo * 86400000).toISOString().slice(0, 10);
+const auditDetails = (entry, separator) => Object.entries(entry)
+  .filter(([key, value]) => !AUDIT_COLUMNS.includes(key) && value !== null && value !== '')
+  .map(([key, value]) => `${key}=${typeof value === 'object' ? JSON.stringify(value) : value}`)
+  .join(separator);
+
+/** The search and range of the audit controls as query parameters, and a name for the range. */
+function auditQuery() {
+  const range = document.getElementById('audit-range').value || 'today';
+  const query = new URLSearchParams();
+  let label = utcDay();
+  if (range.startsWith('day:')) {
+    label = range.slice(4);
+    query.set('day', label);
+  } else if (range.startsWith('last:')) {
+    const days = Number(range.slice(5));
+    query.set('since', utcDay(days - 1));
+    label = `last-${days}-days`;
+  }
+  const words = document.getElementById('audit-search').value.trim();
+  if (words) query.set('q', words);
+  return { query, label };
+}
+
+function renderAuditRanges(days) {
+  const select = document.getElementById('audit-range');
+  const current = select.value || 'today';
+  const listed = [...new Set([...(days || []), ...(current.startsWith('day:') ? [current.slice(4)] : [])])].sort().reverse();
+  select.innerHTML = `
+        <option value="today">${escapeHtml(t('options.audit.today'))}</option>
+        <option value="last:7">${escapeHtml(t('options.audit.last7'))}</option>
+        <option value="last:30">${escapeHtml(t('options.audit.last30'))}</option>
+        ${listed.length ? `<optgroup label="${escapeHtml(t('options.audit.oneDay'))}">${listed.map((day) => `<option value="day:${escapeHtml(day)}">${escapeHtml(day)}</option>`).join('')}</optgroup>` : ''}`;
+  select.value = current;
+}
+
+async function refreshAudit() {
+  const tbody = document.querySelector('#audit-table tbody');
+  const pager = document.getElementById('audit-pagination');
+  const limit = Number(document.getElementById('audit-page-size').value);
+  const message = (text) => `<tr class="empty-row"><td colspan="5" style="text-align:center; padding: 2rem;">${escapeHtml(text)}</td></tr>`;
+  const { query } = auditQuery();
+  query.set('offset', auditOffset);
+  query.set('limit', limit);
+  try {
+    const { total, events, days } = await secureFetch(`/api/admin/cluster/audit?${query}`, { method: 'GET' });
+    renderAuditRanges(days);
+    if (clustered && !clusterData) clusterData = await secureFetch('/api/admin/cluster', { method: 'GET' }).catch(() => null);
+    const nodeNames = new Map(((clusterData && clusterData.nodes) || []).map((node) => [node.id, nodeLabel(node)]));
+    tbody.innerHTML = events.length ? events.map((entry) => {
+      const at = new Date(entry.time);
+      return `
+            <tr>
+                <td title="${escapeHtml(entry.time)}">${escapeHtml(Number.isNaN(at.getTime()) ? entry.time : at.toLocaleString())}</td>
+                <td>${escapeHtml(nodeNames.get(entry.node) || entry.node || '')}</td>
+                <td>${escapeHtml(entry.event)}</td>
+                <td>${escapeHtml(entry.user || '')}</td>
+                <td class="audit-details">${escapeHtml(auditDetails(entry, ' '))}</td>
+            </tr>`;
+    }).join('') : message(t('options.audit.none'));
+    pager.innerHTML = `
+        <button class="secondary" data-page="prev" ${auditOffset === 0 ? 'disabled' : ''}>&laquo; ${t('common.previous')}</button>
+        <span class="page-info">${escapeHtml(t('options.audit.shown', { from: total ? auditOffset + 1 : 0, to: auditOffset + events.length, total }))}</span>
+        <button class="secondary" data-page="next" ${auditOffset + events.length >= total ? 'disabled' : ''}>${t('common.next')} &raquo;</button>`;
+  } catch (error) {
+    tbody.innerHTML = message(error.message);
+    pager.innerHTML = '';
+  }
+}
+
+// A cell a spreadsheet would run as a formula is kept as text.
+const csvCell = (value) => {
+  const text = String(value ?? '');
+  return `"${(/^[=+\-@\t\r]/.test(text) ? `'${text}` : text).replace(/"/g, '""')}"`;
+};
+
+/** Download every event of the current search and range, a page at a time, as CSV or JSON. */
+async function exportAudit(format, button) {
+  const { query, label } = auditQuery();
+  button.disabled = true;
+  try {
+    const all = [];
+    for (let total = Infinity; all.length < total;) {
+      query.set('offset', all.length);
+      query.set('limit', AUDIT_EXPORT_PAGE);
+      const page = await secureFetch(`/api/admin/cluster/audit?${query}`, { method: 'GET' });
+      total = page.total;
+      if (!page.events.length) break;
+      all.push(...page.events);
+    }
+    const text = format === 'json'
+      ? JSON.stringify(all, null, 2)
+      : [[...AUDIT_COLUMNS, 'details'].map(csvCell).join(','),
+        ...all.map((entry) => [...AUDIT_COLUMNS.map((column) => entry[column]), auditDetails(entry, '; ')].map(csvCell).join(','))].join('\r\n');
+    const blob = new Blob([text], { type: format === 'json' ? 'application/json' : 'text/csv' });
+    const filename = `sealskin-audit-${label}.${format}`;
+    // The mobile app saves through its native file plugin; a browser downloads.
+    if (info.capabilities && info.capabilities.nativeFileOpen) await bridge.saveBlob(blob, filename);
+    else downloadBlob(blob, filename);
+    displayStatus(t('options.audit.exported', { count: all.length }));
+  } catch (error) {
+    displayStatus(escapeHtml(error.message), true);
+  }
+  button.disabled = false;
+}
+
+function bindAuditEvents() {
+  const reload = () => {
+    auditOffset = 0;
+    refreshAudit();
+  };
+  let timer = null;
+  document.getElementById('audit-search').addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(reload, AUDIT_SEARCH_DELAY_MS);
+  });
+  document.getElementById('audit-range').addEventListener('change', reload);
+  document.getElementById('audit-page-size').addEventListener('change', reload);
+  document.getElementById('audit-refresh').addEventListener('click', refreshAudit);
+  document.getElementById('audit-pagination').addEventListener('click', (e) => {
+    const button = e.target.closest('button[data-page]');
+    if (!button) return;
+    const size = Number(document.getElementById('audit-page-size').value);
+    auditOffset = Math.max(0, auditOffset + (button.dataset.page === 'next' ? size : -size));
+    refreshAudit();
+  });
+  document.querySelectorAll('.audit-export').forEach((button) => button.addEventListener('click', () => exportAudit(button.dataset.format, button)));
+}
+
 // --- TABLES ---
 
 const shortKey = (pem) => escapeHtml(pem.replace(/-----(BEGIN|END) PUBLIC KEY-----/g, '').replace(/\s/g, ''));
@@ -691,7 +1690,7 @@ const tableRenderConfig = {
   },
   users: {
     tbody: document.querySelector('#users-table tbody'),
-    filter: (item, term) => item.username.toLowerCase().includes(term) || (item.settings.group || '').toLowerCase().includes(term),
+    filter: (item, term) => item.username.toLowerCase().includes(term) || groupsOf(item.settings).some((group) => group.toLowerCase().includes(term)),
     row: (item) => {
       const effectiveSettings = calculateEffectiveSettings(item);
       const homesDisabled = !effectiveSettings.persistent_storage;
@@ -700,11 +1699,11 @@ const tableRenderConfig = {
       return `
                 <tr>
                     <td>${username}</td>
-                    <td>${escapeHtml(item.settings.group) || t('common.none')}</td>
+                    <td>${escapeHtml(groupsOf(item.settings).join(', ')) || t('common.none')}</td>
                     <td class="pubkey-cell" title="${pubkey}">
                         <div class="cell-wrapper">
-                            <span class="key-text">${shortKey(item.public_key)}</span>
-                            <button class="secondary copy-btn" data-pubkey="${pubkey}"><i class="fas fa-copy"></i></button>
+                            <span class="key-text">${item.public_key ? shortKey(item.public_key) : t('options.users.signInOnly')}</span>
+                            ${item.public_key ? `<button class="secondary copy-btn" data-pubkey="${pubkey}"><i class="fas fa-copy"></i></button>` : ''}
                         </div>
                     </td>
                     <td class="actions-cell">
@@ -808,54 +1807,212 @@ function renderTable(dataType) {
     `;
 }
 
-function getSettingsFromForm(formPrefix) {
-  return {
-    active: document.getElementById(`${formPrefix}Active`).checked,
-    group: document.getElementById(`${formPrefix}Group`)?.value || 'none',
-    persistent_storage: document.getElementById(`${formPrefix}PersistentStorage`).checked,
-    public_sharing: document.getElementById(`${formPrefix}PublicSharing`).checked,
-    harden_container: document.getElementById(`${formPrefix}HardenContainer`).checked,
-    harden_openbox: document.getElementById(`${formPrefix}HardenOpenbox`).checked,
-    edit_templates: document.getElementById(`${formPrefix}EditTemplates`).checked,
-    gpu: document.getElementById(`${formPrefix}Gpu`).checked,
-    storage_limit: -1,
-    session_limit: parseInt(document.getElementById(`${formPrefix}SessionLimit`).value, 10),
-  };
+// --- USER AND GROUP SETTINGS ---
+
+// Each switch with its label and the value that wins where a user's groups disagree.
+const SETTING_SWITCHES = [
+  ['active', 'options.users.activeAccount', false],
+  ['admin', 'options.users.admin', false],
+  ['persistent_storage', 'options.users.allowStorage', false],
+  ['public_sharing', 'options.users.allowPublicSharing', false],
+  ['gpu', 'options.users.allowGpu', false],
+  ['gpu_share', 'options.users.gpuShare', false],
+  ['home_migration', 'options.users.homeMigration', false],
+  ['edit_templates', 'options.users.allowEditTemplates', false],
+  ['harden_container', 'options.users.hardenContainer', true],
+  ['harden_openbox', 'options.users.hardenWm', true],
+];
+// Each limit with its label and whether the server takes a whole number.
+const SETTING_LIMITS = [
+  ['session_limit', 'options.users.sessionLimitLabel', true],
+  ['storage_limit', 'options.users.storageLimit', true],
+  ['session_cpus', 'options.users.sessionCpus', false],
+  ['session_memory_mb', 'options.users.sessionMemory', true],
+  ['session_hours', 'options.users.sessionHours', false],
+  ['allowance_hours', 'options.users.allowanceHours', false],
+];
+const SETTING_LISTS = [
+  ['pools', 'options.users.pools'],
+  ['pools_denied', 'options.users.poolsDenied'],
+  ['sso_groups', 'options.groups.ssoGroups'],
+];
+const PERIODS = ['day', 'week', 'month'];
+// What the server gives a user whose record leaves a setting out.
+const USER_DEFAULTS = {
+  active: true, admin: false, persistent_storage: true, public_sharing: false, gpu: true, gpu_share: true,
+  home_migration: false, edit_templates: false, harden_container: false, harden_openbox: false,
+  session_limit: -1, storage_limit: -1, session_cpus: -1, session_memory_mb: -1, session_hours: -1,
+  allowance_hours: -1, allowance_period: 'month', groups: [], pools: [], pools_denied: [],
+};
+// The new-user form starts without a GPU, as it always has.
+const NEW_USER_SETTINGS = { ...USER_DEFAULTS, gpu: false };
+
+const splitList = (value) => value.split(',').map((s) => s.trim()).filter(Boolean);
+const field = (prefix, name) => document.getElementById(`${prefix}-${name}`);
+
+/** The groups a user's settings name; records written before `groups` name one in `group`. */
+function groupsOf(settings) {
+  if (settings.groups && settings.groups.length) return settings.groups;
+  return settings.group && settings.group !== 'none' ? [settings.group] : [];
 }
 
-function populateSettingsForm(formPrefix, settings) {
-  document.getElementById(`${formPrefix}Active`).checked = settings.active;
-  if (document.getElementById(`${formPrefix}Group`)) {
-    document.getElementById(`${formPrefix}Group`).value = settings.group;
-  }
-  document.getElementById(`${formPrefix}PersistentStorage`).checked = settings.persistent_storage;
-  document.getElementById(`${formPrefix}PublicSharing`).checked = settings.public_sharing;
-  document.getElementById(`${formPrefix}HardenContainer`).checked = settings.harden_container;
-  document.getElementById(`${formPrefix}HardenOpenbox`).checked = settings.harden_openbox;
-  document.getElementById(`${formPrefix}EditTemplates`).checked = !!settings.edit_templates;
-  document.getElementById(`${formPrefix}Gpu`).checked = settings.gpu;
-  document.getElementById(`${formPrefix}SessionLimit`).value = settings.session_limit;
+/**
+ * Build a settings form into `#<prefix>Settings`. A user's form holds a value
+ * for every setting; a group's leaves each one unset until it is chosen.
+ *
+ * @param {string} prefix `newUser`, `editUser`, `newGroup`, or `editGroup`.
+ * @param {'user'|'group'} kind
+ */
+function buildSettingsForm(prefix, kind) {
+  const isGroup = kind === 'group';
+  const notSet = escapeHtml(t('options.groups.notSet'));
+  const id = (name) => `${prefix}-${name}`;
+
+  const limits = SETTING_LIMITS.map(([name, label, whole]) => `
+        <div class="form-group">
+            <label for="${id(name)}">${escapeHtml(t(label))}</label>
+            <input type="number" id="${id(name)}" step="${whole ? '1' : 'any'}" ${isGroup ? `placeholder="${notSet}"` : `value="${NEW_USER_SETTINGS[name]}"`}>
+        </div>`).join('');
+  const period = `
+        <div class="form-group">
+            <label for="${id('allowance_period')}">${escapeHtml(t('options.users.allowancePeriod'))}</label>
+            <select id="${id('allowance_period')}">
+                ${isGroup ? `<option value="" selected>${notSet}</option>` : ''}
+                ${PERIODS.map((p) => `<option value="${p}"${!isGroup && p === NEW_USER_SETTINGS.allowance_period ? ' selected' : ''}>${escapeHtml(t(`options.periods.${p}`))}</option>`).join('')}
+            </select>
+        </div>`;
+  const lists = SETTING_LISTS.filter(([name]) => isGroup || name !== 'sso_groups').map(([name, label]) => `
+        <div class="form-group">
+            <label for="${id(name)}">${escapeHtml(t(label))}</label>
+            <input type="text" id="${id(name)}">
+        </div>`).join('');
+  const switches = SETTING_SWITCHES.map(([name, label, restricting]) => (isGroup ? `
+        <div class="form-group">
+            <label for="${id(name)}">${escapeHtml(t(label))}</label>
+            <select id="${id(name)}">
+                <option value="" selected>${notSet}</option>
+                <option value="true">${escapeHtml(t(restricting ? 'options.groups.on' : 'options.groups.allow'))}</option>
+                <option value="false">${escapeHtml(t(restricting ? 'options.groups.off' : 'options.groups.deny'))}</option>
+            </select>
+        </div>` : `
+        <div class="form-group"><label><input type="checkbox" id="${id(name)}"${NEW_USER_SETTINGS[name] ? ' checked' : ''}> <span>${escapeHtml(t(label))}</span></label></div>`)).join('');
+  const groups = isGroup ? '' : `
+        <div class="form-group">
+            <label for="${id('groups')}">${escapeHtml(t('common.groups'))}</label>
+            <select id="${id('groups')}" multiple size="4"></select>
+            <p class="description">${escapeHtml(t('options.users.groupsHelp'))}</p>
+            <p class="description" id="${id('provider_groups')}" style="display: none;"></p>
+        </div>`;
+
+  document.getElementById(`${prefix}Settings`).innerHTML = `
+    <h4>${escapeHtml(t(isGroup ? 'options.groups.overrideTitle' : 'options.users.settingsTitle'))}</h4>
+    <p class="description">${escapeHtml(t(isGroup ? 'options.groups.overrideHelp' : 'options.users.limitsHelp'))}</p>
+    ${groups}
+    <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.5rem 2rem;">${limits}${period}${lists}</div>
+    <h4>${escapeHtml(t(isGroup ? 'options.groups.permissionsTitle' : 'options.users.permissionsTitle'))}</h4>
+    <div class="${isGroup ? 'form-grid' : 'settings-grid'}" style="grid-template-columns: repeat(auto-fit, minmax(${isGroup ? 220 : 250}px, 1fr));${isGroup ? ' gap: 0.5rem 2rem;' : ''}">${switches}</div>`;
 }
 
+/** @returns {object} The user settings a form holds; a blank limit sets none. */
+function readUserSettings(prefix) {
+  const settings = {};
+  SETTING_SWITCHES.forEach(([name]) => { settings[name] = field(prefix, name).checked; });
+  SETTING_LIMITS.forEach(([name, , whole]) => {
+    const value = parseFloat(field(prefix, name).value);
+    settings[name] = Number.isFinite(value) ? (whole ? Math.trunc(value) : value) : -1;
+  });
+  settings.allowance_period = field(prefix, 'allowance_period').value;
+  settings.groups = [...field(prefix, 'groups').selectedOptions].map((option) => option.value);
+  settings.group = settings.groups[0] || 'none';
+  settings.pools = splitList(field(prefix, 'pools').value);
+  settings.pools_denied = splitList(field(prefix, 'pools_denied').value);
+  return settings;
+}
+
+function fillUserSettings(prefix, stored) {
+  const settings = { ...USER_DEFAULTS, ...stored };
+  SETTING_SWITCHES.forEach(([name]) => { field(prefix, name).checked = Boolean(settings[name]); });
+  SETTING_LIMITS.forEach(([name]) => { field(prefix, name).value = settings[name]; });
+  field(prefix, 'allowance_period').value = settings.allowance_period;
+  const groups = groupsOf(settings);
+  [...field(prefix, 'groups').options].forEach((option) => { option.selected = groups.includes(option.value); });
+  field(prefix, 'pools').value = (settings.pools || []).join(', ');
+  field(prefix, 'pools_denied').value = (settings.pools_denied || []).join(', ');
+  const provided = field(prefix, 'provider_groups');
+  const named = settings.provider_groups || [];
+  provided.textContent = t('options.users.providerGroups', { groups: named.join(', ') });
+  provided.style.display = named.length ? 'block' : 'none';
+}
+
+/** @returns {object} The group settings a form holds; null for each one the group leaves alone. */
+function readGroupSettings(prefix) {
+  const settings = {};
+  SETTING_SWITCHES.forEach(([name]) => {
+    const { value } = field(prefix, name);
+    settings[name] = value === '' ? null : value === 'true';
+  });
+  SETTING_LIMITS.forEach(([name, , whole]) => {
+    const value = parseFloat(field(prefix, name).value);
+    settings[name] = Number.isFinite(value) ? (whole ? Math.trunc(value) : value) : null;
+  });
+  settings.allowance_period = field(prefix, 'allowance_period').value || null;
+  SETTING_LISTS.forEach(([name]) => { settings[name] = splitList(field(prefix, name).value); });
+  return settings;
+}
+
+function fillGroupSettings(prefix, settings) {
+  SETTING_SWITCHES.forEach(([name]) => { field(prefix, name).value = typeof settings[name] === 'boolean' ? String(settings[name]) : ''; });
+  SETTING_LIMITS.forEach(([name]) => { field(prefix, name).value = typeof settings[name] === 'number' ? settings[name] : ''; });
+  field(prefix, 'allowance_period').value = settings.allowance_period || '';
+  SETTING_LISTS.forEach(([name]) => { field(prefix, name).value = (settings[name] || []).join(', '); });
+}
+
+/**
+ * The settings a user runs under, as the server works them out: a switch
+ * takes its restricting value when any of the user's groups gives it that, a
+ * limit the smallest any group sets, and what no group sets stays the user's.
+ */
 function calculateEffectiveSettings(user) {
   if (!user || !user.settings) return {};
-  const baseSettings = { ...user.settings };
-  const group = adminData.groups.find((g) => g.name === baseSettings.group);
-  if (group && group.settings) {
-    return { ...baseSettings, ...group.settings };
-  }
-  return baseSettings;
+  const base = { ...USER_DEFAULTS, ...user.settings };
+  const known = new Map(adminData.groups.map((group) => [group.name, group.settings || {}]));
+  const brought = new Set(base.provider_groups || []);
+  const names = groupsOf(base).filter((name) => known.has(name));
+  known.forEach((settings, name) => {
+    if (!names.includes(name) && (brought.has(name) || (settings.sso_groups || []).some((g) => brought.has(g)))) names.push(name);
+  });
+  const members = names.map((name) => known.get(name));
+  const effective = { ...base, groups: names, group: names[0] || 'none' };
+  SETTING_SWITCHES.forEach(([key, , restricting]) => {
+    const chosen = members.filter((g) => typeof g[key] === 'boolean').map((g) => g[key]);
+    if (chosen.length) effective[key] = chosen.includes(restricting) ? restricting : !restricting;
+  });
+  SETTING_LIMITS.forEach(([key]) => {
+    const chosen = members.map((g) => g[key]).filter((value) => typeof value === 'number' && value >= 0);
+    if (!chosen.length) return;
+    effective[key] = Math.min(...chosen);
+    if (key === 'allowance_hours') {
+      effective.allowance_period = members.find((g) => g[key] === effective[key]).allowance_period || base.allowance_period;
+    }
+  });
+  effective.pools = [...new Set([...members.flatMap((g) => g.pools || []), ...(base.pools || [])])].sort();
+  effective.pools_denied = [...new Set([...members.flatMap((g) => g.pools_denied || []), ...(base.pools_denied || [])])].sort();
+  return effective;
 }
 
 function populateGroupDropdowns() {
-  document.querySelectorAll('#newUserGroup, #editUserGroup').forEach((select) => {
-    const currentVal = select.value;
-    select.innerHTML = `<option value="none">${t('common.none')}</option>`;
-    adminData.groups.forEach((group) => {
-      select.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(group.name)}">${escapeHtml(group.name)}</option>`);
-    });
-    select.value = currentVal;
+  document.querySelectorAll('#newUser-groups, #editUser-groups').forEach((select) => {
+    const chosen = [...select.selectedOptions].map((option) => option.value);
+    select.innerHTML = adminData.groups
+      .map((group) => `<option value="${escapeHtml(group.name)}"${chosen.includes(group.name) ? ' selected' : ''}>${escapeHtml(group.name)}</option>`)
+      .join('');
   });
+}
+
+/** Report a failed write; where another node changed the record first, show what it is now. */
+async function writeFailed(error, message, reload) {
+  displayStatus(message, true);
+  if (error.status === 409) await reload();
 }
 
 function showUserConfigModal(user, privateKey, isNewUser = false) {
@@ -908,6 +2065,8 @@ function setAdminNavVisibility(visible) {
   const display = visible ? 'flex' : 'none';
   adminNavLinks.forEach((link) => { link.style.display = display; });
   adminNavSeparator.style.display = visible ? 'block' : 'none';
+  // The Sign In section is the web app's; the other shells keep those settings in the Cluster section.
+  if (info.shell !== 'web') document.querySelector('.nav-link[data-tabname="SignIn"]').style.display = 'none';
   if (visible && info.platform === 'ios') {
     const lab = document.querySelector('.nav-link[data-tabname="AppLaboratory"]');
     if (lab) lab.style.display = 'none';
@@ -959,6 +2118,16 @@ async function loadDashboard() {
     dashboardUsername.textContent = statusData.username;
     dashboardRole.textContent = isAdmin ? t('options.dashboard.roleAdmin') : t('options.dashboard.roleUser');
     dashboardCpuModel.textContent = statusData.cpu_model || t('common.na');
+    clustered = Boolean(statusData.clustered);
+    document.getElementById('dashboard-via').textContent = tOr(t, `options.via.${statusData.via}`, statusData.via || '');
+    document.getElementById('dashboard-via-row').style.display = statusData.via ? 'block' : 'none';
+    const { allowance } = statusData;
+    if (allowance) {
+      document.getElementById('dashboard-allowance').textContent = t('options.dashboard.allowanceUsed', {
+        used: Number(allowance.used).toFixed(1), hours: allowance.hours, period: t(`options.periods.${allowance.period}`).toLowerCase(),
+      });
+    }
+    document.getElementById('dashboard-allowance-row').style.display = allowance ? 'block' : 'none';
     renderCertWarning(statusData.proxy_cert_expires_at);
     if (statusData.disk_total && statusData.disk_used) {
       dashboardDiskUsageText.textContent = `${formatBytes(statusData.disk_used, t)} / ${formatBytes(statusData.disk_total, t)}`;
@@ -1005,30 +2174,46 @@ async function loadDashboard() {
 
 async function refreshHomeDirs() {
   try {
-    const data = await secureFetch('/api/homedirs', { method: 'GET' });
+    const [data, mine] = await Promise.all([
+      secureFetch('/api/homedirs', { method: 'GET' }),
+      clustered ? secureFetch('/api/cluster', { method: 'GET' }).catch(() => null) : null,
+    ]);
+    myCluster = mine && mine.clustered ? mine : null;
     renderHomeDirsTable(data.home_dirs);
   } catch (error) {
     displayStatus(t('options.status.homedirLoadFailed', { error: error.message }), true);
-    homeDirsTbody.innerHTML = `<tr><td colspan="2" class="empty-row" style="text-align:center;">${t('options.placeholders.errorLoading')}</td></tr>`;
+    homeDirsTbody.innerHTML = `<tr><td colspan="3" class="empty-row" style="text-align:center;">${t('options.placeholders.errorLoading')}</td></tr>`;
   }
 }
 
 function renderHomeDirsTable(dirs) {
   const filteredDirs = dirs ? dirs.filter((dir) => dir !== '_sealskin_shared_files') : [];
+  document.getElementById('homedirs-node-header').style.display = myCluster ? '' : 'none';
+  // In a cluster, the node holding each home, and the way to another for who may move one.
+  const nodeCell = (dir) => {
+    if (!myCluster) return '';
+    const holder = myCluster.nodes.find((node) => node.id === myCluster.homes[dir]);
+    return `<td>${escapeHtml(holder ? nodeLabel(holder) : myCluster.homes[dir] || t('common.na'))}</td>`;
+  };
+  const move = (dir) => (myCluster && myCluster.can_move_homes
+    ? `<button class="secondary move-btn" data-homedir-name="${escapeHtml(dir)}">${t('options.home.move')}</button>`
+    : '');
   if (filteredDirs.length > 0) {
     homeDirsTbody.innerHTML = filteredDirs.map((dir) => `
             <tr>
                 <td>${escapeHtml(dir)}</td>
+                ${nodeCell(dir)}
                 <td class="actions-cell">
                     <div class="cell-wrapper">
                         <button class="secondary manage-btn" data-homedir-name="${escapeHtml(dir)}">${t('common.manage')}</button>
+                        ${move(dir)}
                         <button class="danger" data-homedir-name="${escapeHtml(dir)}">${t('common.delete')}</button>
                     </div>
                 </td>
             </tr>
         `).join('');
   } else {
-    homeDirsTbody.innerHTML = `<tr class="empty-row"><td colspan="2" style="text-align:center; padding: 2rem;">${t('options.placeholders.noHomeDirs')}</td></tr>`;
+    homeDirsTbody.innerHTML = `<tr class="empty-row"><td colspan="3" style="text-align:center; padding: 2rem;">${t('options.placeholders.noHomeDirs')}</td></tr>`;
   }
 }
 
@@ -1039,26 +2224,41 @@ async function refreshAdminUserHomeDirs(username, isAdminUser = false) {
     : t('options.modals.dirsForUser', { username });
   try {
     const path = isAdminUser ? 'admins' : 'users';
-    const data = await secureFetch(`/api/admin/${path}/${username}/homedirs`, { method: 'GET' });
+    const [data, held] = await Promise.all([
+      secureFetch(`/api/admin/${path}/${username}/homedirs`, { method: 'GET' }),
+      clustered ? secureFetch(`/api/admin/cluster/users/${encodeURIComponent(username)}/homes`, { method: 'GET' }).catch(() => null) : null,
+    ]);
+    managedHomes = (held && held.homes) || {};
+    if (clustered && !clusterData) clusterData = await secureFetch('/api/admin/cluster', { method: 'GET' }).catch(() => null);
     renderAdminUserHomeDirsTable(data.home_dirs);
   } catch (error) {
     displayStatus(t('options.status.homedirLoadFailed', { error: error.message }), true);
-    userHomeDirsTbody.innerHTML = `<tr><td colspan="2" class="empty-row" style="text-align:center;">${t('options.placeholders.errorLoading')}</td></tr>`;
+    userHomeDirsTbody.innerHTML = `<tr><td colspan="3" class="empty-row" style="text-align:center;">${t('options.placeholders.errorLoading')}</td></tr>`;
   }
 }
 
 function renderAdminUserHomeDirsTable(dirs) {
+  document.getElementById('user-homedirs-node-header').style.display = clustered ? '' : 'none';
+  const nodeCell = (dir) => {
+    if (!clustered) return '';
+    const holder = clusterData && clusterData.nodes.find((node) => node.id === managedHomes[dir]);
+    return `<td>${escapeHtml(holder ? nodeLabel(holder) : managedHomes[dir] || t('common.na'))}</td>`;
+  };
   if (dirs && dirs.length > 0) {
     userHomeDirsTbody.innerHTML = dirs.map((dir) => `
             <tr>
                 <td>${escapeHtml(dir)}</td>
+                ${nodeCell(dir)}
                 <td class="actions-cell">
-                    <button class="danger" data-homedir-name="${escapeHtml(dir)}">${t('common.delete')}</button>
+                    <div class="cell-wrapper">
+                        ${clustered ? `<button class="secondary move-btn" data-homedir-name="${escapeHtml(dir)}">${t('options.home.move')}</button>` : ''}
+                        <button class="danger" data-homedir-name="${escapeHtml(dir)}">${t('common.delete')}</button>
+                    </div>
                 </td>
             </tr>
         `).join('');
   } else {
-    userHomeDirsTbody.innerHTML = `<tr class="empty-row"><td colspan="2" style="text-align:center; padding: 2rem;">${t('options.placeholders.noHomeDirs')}</td></tr>`;
+    userHomeDirsTbody.innerHTML = `<tr class="empty-row"><td colspan="3" style="text-align:center; padding: 2rem;">${t('options.placeholders.noHomeDirs')}</td></tr>`;
   }
 }
 
@@ -1160,6 +2360,7 @@ async function refreshAppData() {
     renderTable('installedApps');
 
     if (appLaboratoryTabInitialized) populateLabDropdowns();
+    if (info.shell === 'web') populateWebLab();
 
     const selectedStoreUrl = appStoreSelect.value;
     if (selectedStoreUrl) await fetchAndRenderAvailableApps(selectedStoreUrl);
@@ -1400,6 +2601,7 @@ async function openTab(tabName) {
     clearInterval(installedAppsPollingInterval);
     installedAppsPollingInterval = null;
   }
+  clearInterval(labPoll);
 
   const oldActiveTab = document.querySelector('.tab-content.active');
   if (oldActiveTab && oldActiveTab.id === 'InstalledApps' && tabName !== 'InstalledApps') {
@@ -1433,6 +2635,12 @@ async function openTab(tabName) {
     await initializeAppTemplatesTab();
   } else if (tabName === 'AppLaboratory') {
     initializeAppLaboratoryTab();
+  } else if (tabName === 'WebLaboratory') {
+    await openWebLab();
+  } else if (tabName === 'Cluster' || tabName === 'SignIn') {
+    await refreshCluster();
+  } else if (tabName === 'Audit') {
+    await refreshAudit();
   }
 }
 
@@ -1446,11 +2654,101 @@ function applyMobileLayout() {
   if (optionsContainer) {
     optionsContainer.style.height = `calc(100vh - ${safeAreaPad.style.paddingTop})`;
   }
-  const header = document.querySelector('.sidebar-header');
-  if (header) addMobileBackButton(header, () => bridge.openPage('popup'));
+}
 
-  const howToCard = document.getElementById('how-to-card');
-  if (howToCard) howToCard.style.display = 'none';
+/**
+ * The pick bookmarklet, serialized into its link and run in the page it is
+ * clicked on. The next click on a link opens that link here; on an image,
+ * video, or audio, or a Shift-click on a link, the page fetches the file with
+ * its own cookies and hands it to `receive.html`. What the page cannot fetch
+ * opens as a link, and what has no web address sends the page itself. Chrome
+ * and Firefox keep clicks on a media element's own controls from the page, so
+ * each audio or video that shows them is covered by a shield until the click.
+ *
+ * @param {string} app The web app's address.
+ * @param {string} hint The banner shown until the click.
+ */
+function pickForSealSkin(app, hint) {
+  const banner = document.createElement('div');
+  const shields = new Map([...document.querySelectorAll('audio[controls], video[controls]')].map((media) => {
+    const shield = document.createElement('div');
+    const box = media.getBoundingClientRect();
+    shield.style.cssText = `position:absolute;left:${box.left + scrollX}px;top:${box.top + scrollY}px;width:${box.width}px;height:${box.height}px;z-index:2147483646;cursor:pointer`;
+    return [shield, media];
+  }));
+  const stop = () => {
+    banner.remove();
+    shields.forEach((media, shield) => shield.remove());
+    removeEventListener('click', onClick, true);
+    removeEventListener('keydown', onKey, true);
+  };
+  const onKey = (event) => { if (event.key === 'Escape') stop(); };
+  const onClick = (event) => {
+    const media = shields.get(event.target) || (event.target.closest && event.target.closest('img, video, audio'));
+    const link = event.target.closest && event.target.closest('a[href]');
+    if (event.target !== banner && !media && !link) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    stop();
+    if (!media && !link) return;
+    const target = event.shiftKey && link ? link : media || link;
+    const url = target === link ? link.href : media.currentSrc || media.src;
+    const web = /^https?:/.test(url);
+    const address = `${app}?url=${encodeURIComponent(web ? url : location.href)}`;
+    if (target === link && !event.shiftKey && !link.hasAttribute('download')) {
+      open(address);
+      return;
+    }
+    const tab = open(`${app}receive.html#${encodeURIComponent(address)}`);
+    const ready = new Promise((resolve) => {
+      addEventListener('message', function listen(message) {
+        if (message.source !== tab || message.data !== 'sealskin-receive') return;
+        removeEventListener('message', listen);
+        resolve();
+      });
+    });
+    fetch(url).then(async (response) => {
+      if (!response.ok) throw new Error(response.statusText);
+      const header = response.headers.get('content-disposition') || '';
+      const encoded = /filename\*=UTF-8''([^;]+)/i.exec(header);
+      const plain = /filename="?([^";]+)/i.exec(header);
+      const name = (encoded && decodeURIComponent(encoded[1])) || (plain && plain[1]) || (target === link && link.download)
+        || (web && decodeURIComponent(new URL(url).pathname.split('/').pop())) || 'file';
+      const blob = await response.blob();
+      await ready;
+      tab.postMessage({ file: new File([blob], name, { type: blob.type }) }, new URL(app).origin);
+    }).catch(() => { tab.location = address; });
+  };
+  banner.textContent = hint;
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483647;padding:12px;text-align:center;font:15px/1.4 system-ui,sans-serif;color:#fff;background:#a82a69;cursor:pointer';
+  document.body.append(banner, ...shields.keys());
+  addEventListener('click', onClick, true);
+  addEventListener('keydown', onKey, true);
+}
+
+/**
+ * The web app's stand-ins for the context menu: a bookmarklet that opens the
+ * current page (or searches the selection) here, one that picks a link or a
+ * file on the page, and `web+sealskin:` links.
+ */
+function applyWebLayout() {
+  document.getElementById('web-card').style.display = '';
+  // No connection to change and no key to give a user: the server signs both in.
+  changeConnectionButton.style.display = 'none';
+  document.getElementById('sign-out-button').style.display = '';
+  document.getElementById('newUserKeyGroup').style.display = 'none';
+  // The web app's laboratory opens its session in a tab; the other shells keep the framed one.
+  document.querySelector('.nav-link[data-tabname="AppLaboratory"]').dataset.tabname = 'WebLaboratory';
+  const app = new URL('./', location.href).href;
+  const bookmarklet = document.getElementById('web-bookmarklet');
+  // A javascript: URL is percent-decoded before it runs, so a `%` in the address must survive that.
+  const appLiteral = JSON.stringify(app).replace(/%/g, '%25');
+  bookmarklet.href = `javascript:(()=>{const s=String(getSelection()).trim();window.open(${appLiteral}+(s?'?q='+encodeURIComponent(s):'?url='+encodeURIComponent(location.href)))})()`;
+  const pick = document.getElementById('web-pick');
+  pick.href = `javascript:(${encodeURIComponent(pickForSealSkin)})(${encodeURIComponent(JSON.stringify(app))},${encodeURIComponent(JSON.stringify(t('options.web.pickHint')))})`;
+  [bookmarklet, pick].forEach((link) => link.addEventListener('click', (event) => event.preventDefault()));
+  document.getElementById('web-protocol').hidden = typeof navigator.registerProtocolHandler !== 'function';
+  document.getElementById('web-protocol-button').addEventListener('click', () => navigator.registerProtocolHandler('web+sealskin', `${app}?url=%s`));
 }
 
 function bindEvents() {
@@ -1459,6 +2757,11 @@ function bindEvents() {
   });
 
   changeConnectionButton.addEventListener('click', () => bridge.openPage('connect'));
+  document.getElementById('sign-out-button').addEventListener('click', async () => {
+    await secureFetch('/api/auth/signout', { method: 'POST', body: '{}' }).catch((e) => console.warn('Sign-out failed:', e));
+    // The web app asks the server who is signed in and shows its sign-in.
+    bridge.openPage('connect');
+  });
 
   searchEngineDashboardSelect.addEventListener('change', async () => {
     try {
@@ -1561,8 +2864,9 @@ function bindEvents() {
     event.preventDefault();
     const payload = {
       username: document.getElementById('newUsername').value.trim(),
-      public_key: document.getElementById('newUserPublicKey').value.trim() || null,
-      settings: getSettingsFromForm('newUser'),
+      // A user of the web app signs in through the server; null has the server generate a key file.
+      public_key: info.shell === 'web' ? '' : document.getElementById('newUserPublicKey').value.trim() || null,
+      settings: readUserSettings('newUser'),
     };
     if (!payload.username) return displayStatus(t('common.username') + ' is required.', true);
     try {
@@ -1573,7 +2877,7 @@ function bindEvents() {
       addUserForm.reset();
       await refreshAdminData();
     } catch (error) {
-      displayStatus(t('options.status.userCreateFailed', { error: error.message }), true);
+      await writeFailed(error, t('options.status.userCreateFailed', { error: error.message }), refreshAdminData);
     }
     return undefined;
   });
@@ -1596,7 +2900,7 @@ function bindEvents() {
           displayStatus(t('options.status.userDeleted', { username }));
           await refreshAdminData();
         } catch (error) {
-          displayStatus(t('options.status.userDeleteFailed', { error: error.message }), true);
+          await writeFailed(error, t('options.status.userDeleteFailed', { error: error.message }), refreshAdminData);
         }
       }
     } else if (button.classList.contains('warning')) {
@@ -1604,10 +2908,11 @@ function bindEvents() {
       if (!user) return;
       document.getElementById('user-edit-title').textContent = t('options.modals.editUserTitle', { username });
       document.getElementById('editUsername').value = username;
-      populateSettingsForm('editUser', user.settings);
+      fillUserSettings('editUser', user.settings);
       const effectiveSettingsPre = document.getElementById('effective-settings-pre');
       const updateEffectiveSettingsDisplay = () => {
-        effectiveSettingsPre.textContent = JSON.stringify(calculateEffectiveSettings({ settings: getSettingsFromForm('editUser') }), null, 2);
+        const settings = { ...readUserSettings('editUser'), provider_groups: user.settings.provider_groups || [] };
+        effectiveSettingsPre.textContent = JSON.stringify(calculateEffectiveSettings({ settings }), null, 2);
       };
       userEditForm.oninput = updateEffectiveSettingsDisplay;
       updateEffectiveSettingsDisplay();
@@ -1624,13 +2929,16 @@ function bindEvents() {
     try {
       await secureFetch(`/api/admin/users/${username}`, {
         method: 'PUT',
-        body: JSON.stringify({ settings: getSettingsFromForm('editUser') }),
+        body: JSON.stringify({ settings: readUserSettings('editUser') }),
       });
       displayStatus(t('options.status.userUpdated', { username }));
       userEditModal.style.display = 'none';
       await refreshAdminData();
     } catch (error) {
-      displayStatus(t('options.status.userUpdateFailed', { error: error.message }), true);
+      await writeFailed(error, t('options.status.userUpdateFailed', { error: error.message }), async () => {
+        userEditModal.style.display = 'none';
+        await refreshAdminData();
+      });
     }
   });
 
@@ -1638,15 +2946,14 @@ function bindEvents() {
     e.preventDefault();
     const groupName = document.getElementById('newGroupName').value.trim();
     if (!groupName) return displayStatus(t('common.group') + ' name is required.', true);
-    const payload = { name: groupName, settings: getSettingsFromForm('newGroup') };
-    delete payload.settings.group;
+    const payload = { name: groupName, settings: readGroupSettings('newGroup') };
     try {
       await secureFetch('/api/admin/groups', { method: 'POST', body: JSON.stringify(payload) });
       displayStatus(t('options.status.groupCreated', { groupName }));
       addGroupForm.reset();
       await refreshAdminData();
     } catch (error) {
-      displayStatus(t('options.status.groupCreateFailed', { error: error.message }), true);
+      await writeFailed(error, t('options.status.groupCreateFailed', { error: error.message }), refreshAdminData);
     }
     return undefined;
   });
@@ -1663,7 +2970,7 @@ function bindEvents() {
           displayStatus(t('options.status.groupDeleted', { groupName }));
           await refreshAdminData();
         } catch (error) {
-          displayStatus(t('options.status.groupDeleteFailed', { error: error.message }), true);
+          await writeFailed(error, t('options.status.groupDeleteFailed', { error: error.message }), refreshAdminData);
         }
       }
     } else if (button.classList.contains('warning')) {
@@ -1671,7 +2978,7 @@ function bindEvents() {
       if (!group) return;
       document.getElementById('group-edit-title').textContent = t('options.modals.editGroupTitle', { groupName });
       document.getElementById('editGroupName').value = groupName;
-      populateSettingsForm('editGroup', { ...getSettingsFromForm('editGroup'), ...group.settings });
+      fillGroupSettings('editGroup', group.settings || {});
       groupEditModal.style.display = 'block';
     }
   });
@@ -1679,15 +2986,17 @@ function bindEvents() {
   groupEditForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const groupName = document.getElementById('editGroupName').value;
-    const payload = { settings: getSettingsFromForm('editGroup') };
-    delete payload.settings.group;
+    const payload = { settings: readGroupSettings('editGroup') };
     try {
       await secureFetch(`/api/admin/groups/${groupName}`, { method: 'PUT', body: JSON.stringify(payload) });
       displayStatus(t('options.status.groupUpdated', { groupName }));
       groupEditModal.style.display = 'none';
       await refreshAdminData();
     } catch (error) {
-      displayStatus(t('options.status.groupUpdateFailed', { error: error.message }), true);
+      await writeFailed(error, t('options.status.groupUpdateFailed', { error: error.message }), async () => {
+        groupEditModal.style.display = 'none';
+        await refreshAdminData();
+      });
     }
   });
 
@@ -1713,6 +3022,9 @@ function bindEvents() {
 
     if (button.classList.contains('manage-btn')) {
       openPage('files', { home: homeName });
+    } else if (button.classList.contains('move-btn')) {
+      const elsewhere = myCluster.nodes.filter((node) => node.id !== myCluster.homes[homeName]);
+      await moveHome(`/api/cluster/homedirs/${encodeURIComponent(homeName)}/move`, homeName, elsewhere, refreshHomeDirs);
     } else if (button.classList.contains('danger')) {
       if (confirm(t('options.home.confirmDelete', { homeName }))) {
         try {
@@ -1745,11 +3057,16 @@ function bindEvents() {
   });
 
   userHomeDirsTbody.addEventListener('click', async (e) => {
-    const button = e.target.closest('button.danger');
+    const button = e.target.closest('button');
     if (!button || !currentAdminManagedUser) return;
     const homeName = button.dataset.homedirName;
     const { username, isAdmin: isAdminUser } = currentAdminManagedUser;
-    if (confirm(t('options.modals.confirmDeleteDir', { homeName, username }))) {
+    if (button.classList.contains('move-btn')) {
+      if (!clusterData) await refreshCluster();
+      const nodes = clusterData ? clusterData.nodes.filter((node) => node.approved && node.id !== managedHomes[homeName]) : [];
+      const url = `/api/admin/cluster/users/${encodeURIComponent(username)}/homedirs/${encodeURIComponent(homeName)}/move`;
+      await moveHome(url, homeName, nodes, () => refreshAdminUserHomeDirs(username, isAdminUser));
+    } else if (confirm(t('options.modals.confirmDeleteDir', { homeName, username }))) {
       try {
         const path = isAdminUser ? 'admins' : 'users';
         await secureFetch(`/api/admin/${path}/${username}/homedirs/${homeName}`, { method: 'DELETE' });
@@ -1916,10 +3233,15 @@ function bindEvents() {
       }
     } else if (button.classList.contains('warning')) {
       if (app.is_meta_app) {
-        await openTab('AppLaboratory');
-        const labAppSelect = document.getElementById('lab-app-select');
-        labAppSelect.value = app.id;
-        labAppSelect.dispatchEvent(new Event('change'));
+        if (info.shell === 'web') {
+          await openTab('WebLaboratory');
+          if (!labSession) await loadLabApp(app);
+        } else {
+          await openTab('AppLaboratory');
+          const labAppSelect = document.getElementById('lab-app-select');
+          labAppSelect.value = app.id;
+          labAppSelect.dispatchEvent(new Event('change'));
+        }
       } else {
         const sourceApp = adminData.availableApps.find((a) => a.id === app.source_app_id);
         const appDataForModal = sourceApp || {
@@ -1952,6 +3274,11 @@ function bindEvents() {
       await renderPinnedBehaviorTable();
     }
   });
+
+  bindClusterEvents();
+  bindSignInEvents();
+  bindAuditEvents();
+  bindWebLabEvents();
 }
 
 async function init() {
@@ -1968,8 +3295,17 @@ async function init() {
     howToList.innerHTML = Array.isArray(items) ? items.map((item) => `<li>${item}</li>`).join('') : '';
   }
 
+  if (info.shell !== 'extension') {
+    const header = document.querySelector('.sidebar-header');
+    // The web app's rail is always there to leave by.
+    if (header && info.shell === 'mobile') addMobileBackButton(header, () => bridge.openPage('popup'));
+    document.getElementById('how-to-card').style.display = 'none';
+  }
   if (info.shell === 'mobile') applyMobileLayout();
+  if (info.shell === 'web') applyWebLayout();
 
+  ['newUser', 'editUser'].forEach((prefix) => buildSettingsForm(prefix, 'user'));
+  ['newGroup', 'editGroup'].forEach((prefix) => buildSettingsForm(prefix, 'group'));
   bindEvents();
 
   if (!config.serverIp || !config.username) {
@@ -1979,7 +3315,10 @@ async function init() {
   }
 
   await openTab('Config');
-  await loadDashboard();
+  const loaded = await loadDashboard();
+  // A page that sends an administrator here may name the section to show.
+  const section = new URLSearchParams(location.search).get('section');
+  if (loaded && isAdmin && section && document.querySelector(`.nav-link[data-tabname="${CSS.escape(section)}"]`)) await openTab(section);
 }
 
 init();

@@ -135,7 +135,15 @@
       "keyGeneration": "キー生成",
       "keyGenDescription": "キーペアがない場合は、ここで生成できます。秘密鍵は上に記入されます。公開鍵を管理者に提供してください。",
       "generateKeyButton": "新しいキーペアを生成",
-      "publicKeyForAdminLabel": "あなたの公開鍵（管理者向け）"
+      "publicKeyForAdminLabel": "あなたの公開鍵（管理者向け）",
+      "passphraseLabel": "パスフレーズ",
+      "remember": "このブラウザーに鍵を保存する",
+      "rememberHelp": "共用のコンピューターではオフにしてください。SealSkinはこのタブが開いている間だけ鍵を保持し、次回は構成を読み込み直します。",
+      "passphraseHelp": "秘密鍵はこのパスフレーズで暗号化されてこのブラウザーに保存されます。ここでSealSkinを開くたびに入力します。",
+      "signInTitle": "シングルサインオン",
+      "signInHelp": "構成ファイルの代わりに、組織が管理するアカウントでサインインします。SealSkinはサインインをこのタブの中だけに保持するため、次回は再度サインインします。",
+      "signInOidc": "OpenID Connectでサインイン",
+      "signInSaml": "SAMLでサインイン"
     },
     "home": {
       "title": "あなたのホームディレクトリ",
@@ -196,7 +204,8 @@
       "homesDisabledTooltip": "このユーザーの永続ストレージは無効です",
       "confirmDelete": "ユーザー '{username}' を本当に削除しますか？これを行うと、そのユーザーの永続ストレージもすべて削除され、元に戻すことはできません。",
       "allowPublicSharing": "公開ファイル共有を許可する",
-      "allowEditTemplates": "アプリテンプレートの編集を許可する"
+      "allowEditTemplates": "アプリテンプレートの編集を許可する",
+      "signInOnly": "シングルサインオンのみ"
     },
     "groups": {
       "title": "グループ管理",
@@ -1166,7 +1175,9 @@
       "pendingConfigSaved": "保留中の設定が保存されました。管理者に公開鍵を提供できます。",
       "settingsSaved": "設定が保存されました。",
       "appCreated": "アプリ「{name}」が正常に作成されました。",
-      "launchFailed": "起動に失敗しました: {error}"
+      "launchFailed": "起動に失敗しました: {error}",
+      "passphraseRequired": "このブラウザーで鍵を保護するパスフレーズを入力してください。",
+      "passphraseTooShort": "{count}文字以上のパスフレーズを使用してください。"
     },
     "placeholders": {
       "noAdmins": "管理が見つかりません。",
@@ -1177,6 +1188,17 @@
       "noPinned": "ピン留めされた動作が見つかりません。",
       "errorLoading": "ディレクトリの読み込み中にエラーが発生しました。",
       "noInstalledApps": "まだアプリケーションがインストールされていません。"
+    },
+    "web": {
+      "title": "このブラウザーでのSealSkin",
+      "bookmarklet": "SealSkinに送る",
+      "bookmarkletHelp": "このリンクをブックマークバーにドラッグしてください。クリックすると、表示中のページをSealSkinで開くか、選択したテキストを検索します。",
+      "pick": "SealSkinで選ぶ",
+      "pickHelp": "こちらもブックマークバーにドラッグしてください。クリックしてから、リンクをクリックするとそのリンクをSealSkinで開き、画像・動画・音声をクリックするとファイルを送ります。Shiftを押しながらリンクをクリックすると、そのサイトへのログイン状態でリンク先のファイルを取得して送ります。",
+      "pickHint": "SealSkin: 送るリンク、または画像・動画・音声をクリックしてください。Shift+クリックでリンク先のファイルを送ります。Escでキャンセルします。",
+      "protocol": "web+sealskin: リンクをここで開く",
+      "protocolHelp": "web+sealskin: の後にアドレスを続けたリンクは、そのアドレスをSealSkinで開きます。",
+      "install": "ブラウザーがWebアプリのインストールに対応している場合は、メニューからSealSkinをインストールすると、リンクやファイルを共有したり、ファイルを開いたりできます。"
     }
   },
   "popup": {
@@ -1348,6 +1370,25 @@
       "finalizing": "最終処理中...",
       "completed": "完了",
       "error": "エラー"
+    }
+  },
+  "web": {
+    "unlockTitle": "SealSkinのロックを解除",
+    "unlockBody": "このブラウザーで鍵を保護しているパスフレーズを入力してください。",
+    "passphrase": "パスフレーズ",
+    "unlock": "ロック解除",
+    "wrongPassphrase": "このパスフレーズでは鍵のロックを解除できません。",
+    "receiving": "ファイルをSealSkinに送信しています…",
+    "signIn": {
+      "failed": "サインインが完了しませんでした。もう一度試すか、管理者に問い合わせてください。",
+      "refused": "IDプロバイダーがサインインを拒否しました。",
+      "expired": "サインインに時間がかかりすぎたか、すでに使用されています。もう一度サインインしてください。",
+      "browser": "サインインは別のブラウザーまたはタブで完了しました。ここでもう一度開始してください。",
+      "invalidUsername": "アカウントの名前はSealSkinのユーザー名にできません。ユーザー名に使えるのは英字、数字、アンダースコア、ハイフンだけです。管理者に問い合わせてください。",
+      "adminName": "アカウントの名前は、鍵ファイルでサインインするSealSkin管理者のものです。管理者に問い合わせてください。",
+      "otherIdentity": "IDプロバイダーの別のアカウントが、すでにこのSealSkinユーザーとしてサインインしています。管理者に問い合わせてください。",
+      "notConfigured": "このサーバーはシングルサインオンを提供していません。",
+      "ended": "IDプロバイダーがサインインを終了しました。もう一度サインインしてください。"
     }
   }
 }

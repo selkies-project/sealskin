@@ -2,13 +2,14 @@
  * SealSkin shell background script.
  *
  * Runs as the extension's background (MV3 service worker on Chrome, background
- * page on Firefox) and, on mobile, inside the app's outer window on top of the
- * polyfill in `mobile/polyfill.js`. It owns everything privileged:
+ * page on Firefox) and, in the mobile app and the web app, inside the host
+ * window on top of the polyfill in `polyfill.js`. It owns everything privileged:
  *
  *  - the E2EE handshake and encrypted fetch (`secureFetchInBackground`)
  *  - JWT signing with the stored private key
+ *  - in the web app, in their place, plain same-origin calls under the sign-in cookie
  *  - context menus, "send next download" interception, badge
- *  - the session-to-tab map and tab focus/close
+ *  - the session-to-tab map and tab focus/close, and the origin a session opens on
  *  - the pending launch context handed to the popup
  *  - the Chrome streaming-download fetch handler
  *
@@ -18,12 +19,18 @@
  */
 
 import { pemToArrayBuffer, arrayBufferToBase64, generateJwtNative } from '../lib/crypto-utils.js';
+import { probeSessionOrigin } from '../lib/session-origin.js';
 // Context menu titles per language. The build generates this module from
 // `background.contextMenu` of src/i18n/*.json (see build.mjs); it is bundled
 // because the menus are registered before any page could fetch a language file.
 import { contextMenuTitles } from 'sealskin-i18n/context-menu';
 
 /* global __SHELL_TARGET__ */
+
+// The web app signs in with a cookie and calls the plain API of its own origin.
+const WEB = typeof __SHELL_TARGET__ !== 'undefined' && __SHELL_TARGET__ === 'ui';
+// Thrown where the web app cannot reach a session's own origin; the pages translate it.
+const NO_SESSION_ORIGIN = 'noSessionOrigin';
 
 const isServiceWorker = typeof ServiceWorkerGlobalScope !== 'undefined' && self instanceof ServiceWorkerGlobalScope;
 
@@ -200,7 +207,32 @@ function describeNetworkError(baseUrl, error) {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/**
+ * The web app's API call: JSON as it is, on this origin, under the sign-in
+ * cookie. No `X-Session-ID` goes with it, which is how the server tells it
+ * from an encrypted call.
+ */
+async function plainFetch(url, options = {}) {
+  const headers = { ...options.headers };
+  // One key per logical request so a retried POST is executed once server-side.
+  if ((options.method || 'GET').toUpperCase() !== 'GET') headers['X-Idempotency-Key'] = crypto.randomUUID();
+  if (options.body) headers['Content-Type'] = 'application/json';
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const response = await fetch(url, { ...options, headers, credentials: 'same-origin' });
+      const text = response.status === 204 ? '' : await response.text();
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status} - ${text}`);
+      return text ? JSON.parse(text) : null;
+    } catch (error) {
+      if (!isNetworkError(error)) throw error;
+      if (attempt >= NETWORK_RETRY_DELAYS_MS.length) throw new Error(describeNetworkError(location.origin, error));
+      await sleep(NETWORK_RETRY_DELAYS_MS[attempt]);
+    }
+  }
+}
+
 async function secureFetchInBackground(url, options = {}) {
+  if (WEB) return plainFetch(url, options);
   // One key per logical request so a retried POST is executed once server-side.
   const idempotencyKey = (options.method || 'GET').toUpperCase() === 'GET' ? null : crypto.randomUUID();
   let sessionRetried = false;
@@ -282,6 +314,61 @@ function getSessionUrlBase(config) {
   return `https://${config.serverIp}:${config.sessionPort}`;
 }
 
+const SESSION_PATH = /^\/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\//i;
+const ROOM_PATH = /^\/room\/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}(?:[/?]|$)/i;
+// A web sign-in's collaboration room is served on its session's own origin too.
+const opensOnOwnOrigin = (sessionUrl) => SESSION_PATH.test(sessionUrl) || (WEB && ROOM_PATH.test(sessionUrl));
+
+// The web app keeps the session domain in memory: pages on its origin can rewrite its storage.
+let webSessionDomain = '';
+
+/** Keep the session domain the server's status names, which the probe tries first. */
+async function noteSessionDomain(status) {
+  if (!status || typeof status.session_domain !== 'string') return;
+  if (WEB) {
+    webSessionDomain = status.session_domain;
+    return;
+  }
+  const { sealskinSessionDomain } = await chrome.storage.local.get('sealskinSessionDomain');
+  if (sealskinSessionDomain !== status.session_domain) await chrome.storage.local.set({ sealskinSessionDomain: status.session_domain });
+}
+
+async function sessionDomain() {
+  if (WEB) return webSessionDomain;
+  const { sealskinSessionDomain } = await chrome.storage.local.get('sealskinSessionDomain');
+  return sealskinSessionDomain || '';
+}
+const sessionOriginProbes = new Map();
+
+/**
+ * The name under which this browser reaches a session's own origin,
+ * `<session id>.<suffix>` (see `probeSessionOrigin`), probed once per server
+ * and session domain; a probe that found none runs again at the next ask. A
+ * session opened on its own origin shares no storage, cookies, or service
+ * workers with the web app or other sessions, and one opened on the shared
+ * origin is served as it always was; the web app opens a session on its own
+ * origin or not at all.
+ *
+ * @param {object} config
+ * @returns {Promise<string|null>} The suffix, or null for the shared origin.
+ */
+async function sessionOriginSuffix(config) {
+  const { serverIp: host, sessionPort: port } = config || {};
+  if (!host || !port) return null;
+  const key = `${host}:${port}|${await sessionDomain()}`;
+  if (!sessionOriginProbes.has(key)) {
+    const probe = probeSessionOrigin(host, port, key.split('|')[1]);
+    sessionOriginProbes.set(key, probe);
+    probe.then((suffix) => { if (!suffix) sessionOriginProbes.delete(key); });
+  }
+  return sessionOriginProbes.get(key);
+}
+
+function sessionHref(config, sessionId, sessionUrl, suffix) {
+  if (!suffix) return `${getSessionUrlBase(config)}${sessionUrl}`;
+  return `https://${sessionId}.${suffix}:${config.sessionPort}${sessionUrl}`;
+}
+
 // --- Pending launch context ---------------------------------------------------
 
 /** True when the context can round-trip through chrome.storage (no File). */
@@ -317,12 +404,24 @@ async function takePendingContext() {
 
 const handlers = {
   async secureFetch({ url, options }) {
-    return secureFetchInBackground(url, options);
+    const data = await secureFetchInBackground(url, options);
+    if (url === '/api/admin/status') {
+      await noteSessionDomain(data);
+      // Probed while the user picks an application, the session origin is known by the launch.
+      getConfig().then(sessionOriginSuffix).catch(() => {});
+    }
+    return data;
   },
 
   async getUiBase() {
+    if (WEB) return location.origin;
     const currentSession = await ensureSession();
     return currentSession.baseUrl;
+  },
+
+  // The web app asks ahead of a launch, so the answer is known by the click.
+  async sessionOrigin() {
+    return sessionOriginSuffix(await getConfig());
   },
 
   async getPublicConfig() {
@@ -403,8 +502,11 @@ const handlers = {
 
   async createTabAndTrack({ sessionId, session_url }) {
     const config = await getConfig();
-    const fullUrl = `${getSessionUrlBase(config)}${session_url}`;
-    const newTab = await chrome.tabs.create({ url: fullUrl });
+    const own = opensOnOwnOrigin(session_url);
+    const suffix = own ? await sessionOriginSuffix(config) : null;
+    // The server serves a web sign-in's session on its own origin alone.
+    if (WEB && own && !suffix) throw new Error(NO_SESSION_ORIGIN);
+    const newTab = await chrome.tabs.create({ url: sessionHref(config, sessionId, session_url, suffix) });
     const map = await getSessionTabMap();
     if (newTab && newTab.id) {
       map[sessionId] = newTab.id;
@@ -432,8 +534,11 @@ const handlers = {
     }
 
     const config = await getConfig();
-    const fullUrl = `${getSessionUrlBase(config)}${sess.session_url}`;
-    const newTab = await chrome.tabs.create({ url: fullUrl });
+    const own = WEB ? opensOnOwnOrigin(sess.session_url) : sess.own_origin;
+    const probed = own ? await sessionOriginSuffix(config) : null;
+    if (WEB && own && !probed) throw new Error(NO_SESSION_ORIGIN);
+    const suffix = own ? probed || config.serverIp : null;
+    const newTab = await chrome.tabs.create({ url: sessionHref(config, sess.session_id, sess.session_url, suffix) });
     if (newTab && newTab.id) {
       map[sess.session_id] = newTab.id;
       await saveSessionTabMap(map);

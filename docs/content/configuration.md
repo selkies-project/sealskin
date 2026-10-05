@@ -9,6 +9,13 @@ of which are volumes of the container. The paths on this page are the
 defaults; every one of them can be moved with a
 [setting](settings.md).
 
+Users, groups, applications, stores, templates, and the `cluster/` records
+are the objects the nodes of a [cluster](cluster.md) share. On a single
+server, and on the node of a cluster that holds them, they are the files
+below. With `SEALSKIN_STORE_URL` set to a bucket they live there instead,
+under the same names, and the files are each node's copy: edit the bucket's
+objects, not the copies.
+
 All configuration files are meant to be edited by hand as well as through
 the admin panels. The server watches them and reloads a file when it changes
 on disk, so an edit takes effect without a restart. Its own writes are atomic
@@ -33,8 +40,18 @@ watcher only fires for edits made by someone else.
     keys/admins/<name>             administrator public keys
     keys/users/<name>              user settings and public keys
     groups/<name>                  group settings
+    cluster/root.yml               hash of the root token
+    cluster/nodes/<id>.yml         one record per node: key, address, roles, pool, approval
+    cluster/pools/<name>.yml       pools of nodes
+    cluster/settings.yml           sign-in settings written for the whole cluster
+    cluster/homes/<user>.yml       which node holds each home directory
+    cluster/usage/<day>/<id>.yml   session time each node ran, per user
+    node/                          this node's own: peer certificate and key, the trust
+                                   bundle, the cluster it joined, shared-file sync state
+    sso_keys.yml                   this node's web sign-ins
     sessions.yml                   live sessions, rewritten by the server
     public_shares.yml              public share metadata
+  root_token                       first-run root token, delete after signing in
 
 /storage
   <username>/<home>/               home directories, mounted at /config in sessions
@@ -44,14 +61,19 @@ watcher only fires for edits made by someone else.
   sealskin_public/                 files behind public share links
   sealskin_home_templates/         meta-app home templates
   sealskin_app_icons/              icons uploaded for meta-apps
+  sealskin_shared_store/<user>/    the users' shared files, on the node that holds the
+                                   records of a cluster without a bucket
 ```
 
 Inside the container these paths are what the server sees. When it starts a
 session it has to hand Docker **host** paths, so at start-up it inspects its
-own container (found by the name `sealskin`, or by hostname) and records how
+own container (the one whose host name is the server's own: found by that
+name or id, else by the name `sealskin`) and records how
 each mount maps to the host. The same inspection discovers the externally
 mapped API and session ports, which are what generated configuration files
 tell clients to connect to, and the Docker network sessions are attached to.
+On [Kubernetes](kubernetes.md) the server reads its own pod instead and
+mounts the volume behind a path into the session with a `subPath`.
 
 ## Keys and certificates
 
@@ -73,6 +95,22 @@ To provide your own administrator, place a public key PEM at
 `keys/admins/<name>` before the first start; the server then skips creating
 the default `admin` account and `admin.json`.
 
+### Session origins
+
+A session opens on an origin of its own, `<session id>.<name>`, wherever the
+browser reaches one, so its pages share no storage, cookies, or service
+workers with the web app or with other sessions. The certificate has to cover
+such names and be trusted by the browser, and DNS has to resolve them to the
+server: `*.<server name>`, or, as the installer's Duck DNS certificate does,
+`*.<parent name>`, which covers the server's own name and its siblings (Duck DNS
+resolves every name under a domain). The extension, the apps, and the web app
+probe a random name under each, and under `SEALSKIN_SESSION_DOMAIN` when it
+is set, before opening a session. For a key-file client, a session reached by
+IP address, one whose names do not resolve or are not covered, a
+collaboration room, and the extension's App Laboratory frame are served from
+the shared origin, as they always have been. A session of a
+[web sign-in](signin.md) is served on its own origin or not at all.
+
 ## admin.json
 
 Written once, on the first start with no administrator present. It is a
@@ -92,41 +130,62 @@ connection page's **Export Config** writes:
 
 `server_endpoint` is the value of `HOST_URL`, or the literal string
 `HOST_URL` when that variable was not set. The ports are the ones the
-container was started with, as discovered from Docker. Delete the file after
+container was started with, as discovered from Docker, unless `HOST_URL`
+names a port (`sealskin.example.com:443`), which is then both ports, as
+behind an ingress. Delete the file after
 importing it: nothing on the server reads it again, and it is the only copy
 of the private key.
 
 ## Users, administrators, and groups
 
-An administrator is a file `keys/admins/<name>` containing a public key. A
-user is a file `keys/users/<name>` with two sections:
+A key-file administrator is a file `keys/admins/<name>` containing a public
+key. A user is a file `keys/users/<name>` with two sections:
 
 ```
 --- Settings ---
 active: true
-group: none
+groups: [staff, render]
+admin: false
 persistent_storage: true
 public_sharing: false
 harden_container: false
 harden_openbox: false
 edit_templates: false
 gpu: true
+gpu_share: true
+home_migration: false
 storage_limit: -1
 session_limit: -1
+session_cpus: -1
+session_memory_mb: -1
+session_hours: -1
+allowance_hours: -1
+allowance_period: month
+pools: []
+pools_denied: []
 --- Public Key ---
 -----BEGIN PUBLIC KEY-----
 ...
 -----END PUBLIC KEY-----
 ```
 
-Missing settings take the defaults shown. A group is a file `groups/<name>`
-holding a YAML mapping of the same keys; a user whose `group` names it gets
-the group's values in place of their own for every key the group defines.
-Names may contain letters, digits, `_`, and `-`. Files starting with `.` are
-ignored.
+Missing settings take the defaults shown; an older file's single `group` is
+read as the first of `groups`. The public key block is empty for a user who
+signs in through the [web sign-in](signin.md) alone, and the server adds two
+entries of its own to such a user: `auth`, the identity provider account the
+user is bound to, and `provider_groups`, the groups the provider last named.
+Remove `auth` to let another account sign in as the user.
+
+A group is a file `groups/<name>` holding a YAML mapping of the switches and
+limits it sets, and nothing for those it leaves alone, plus `pools`,
+`pools_denied`, and `sso_groups`, the identity provider groups whose members
+are in it. [Signing in](signin.md#groups-switches-and-limits) describes how
+the groups of a user combine. Names may contain letters, digits, `_`, and
+`-`. Files starting with `.` are ignored.
 
 To rotate a user's key, replace the public key block; to disable a user
-without deleting their storage, set `active: false`.
+without deleting their storage, set `active: false`. `admin: true` makes a
+user an administrator, as membership in a group that sets it does.
 
 ## Application stores
 

@@ -135,7 +135,15 @@
       "keyGeneration": "Sleutelgeneratie",
       "keyGenDescription": "Als u geen sleutelpaar heeft, kunt u er hier een genereren. De privésleutel wordt hierboven ingevuld. Geef de publieke sleutel aan uw beheerder.",
       "generateKeyButton": "Nieuw Sleutelpaar Genereren",
-      "publicKeyForAdminLabel": "Uw Publieke Sleutel (voor admin)"
+      "publicKeyForAdminLabel": "Uw Publieke Sleutel (voor admin)",
+      "passphraseLabel": "Wachtwoordzin",
+      "remember": "Mijn sleutel in deze browser bewaren",
+      "rememberHelp": "Zet dit uit op een gedeelde computer: SealSkin bewaart uw sleutel dan alleen zolang dit tabblad open is, en u laadt uw configuratie de volgende keer opnieuw.",
+      "passphraseHelp": "Uw privésleutel wordt in deze browser versleuteld met deze wachtwoordzin bewaard. U voert die in telkens wanneer u SealSkin hier opent.",
+      "signInTitle": "Eenmalige aanmelding",
+      "signInHelp": "Meld u aan met het account dat uw organisatie beheert in plaats van met een configuratiebestand. SealSkin bewaart de aanmelding alleen in dit tabblad, dus volgende keer meldt u zich opnieuw aan.",
+      "signInOidc": "Aanmelden met OpenID Connect",
+      "signInSaml": "Aanmelden met SAML"
     },
     "home": {
       "title": "Uw Home Directories",
@@ -198,7 +206,8 @@
       "homesDisabledTooltip": "Persistente opslag uitgeschakeld voor deze gebruiker",
       "confirmDelete": "Weet u zeker dat u gebruiker '{username}' wilt verwijderen? Dit verwijdert ook al hun persistente opslag en kan niet ongedaan worden gemaakt.",
       "allowPublicSharing": "Openbaar delen van bestanden toestaan",
-      "allowEditTemplates": "Bewerken van app-sjablonen toestaan"
+      "allowEditTemplates": "Bewerken van app-sjablonen toestaan",
+      "signInOnly": "Alleen eenmalige aanmelding"
     },
     "groups": {
       "title": "Groepsbeheer",
@@ -1166,7 +1175,9 @@
       "pendingConfigSaved": "Wachtende configuratie opgeslagen. U kunt nu uw publieke sleutel aan de beheerder verstrekken.",
       "settingsSaved": "Instellingen opgeslagen.",
       "appCreated": "App '{name}' succesvol aangemaakt.",
-      "launchFailed": "Starten mislukt: {error}"
+      "launchFailed": "Starten mislukt: {error}",
+      "passphraseRequired": "Voer een wachtwoordzin in om uw sleutel in deze browser te beschermen.",
+      "passphraseTooShort": "Gebruik een wachtwoordzin van minstens {count} tekens."
     },
     "placeholders": {
       "noAdmins": "Geen beheerders gevonden.",
@@ -1177,6 +1188,17 @@
       "noPinned": "Geen vastgezet gedrag gevonden.",
       "errorLoading": "Fout bij het laden van de mappen.",
       "noInstalledApps": "Er zijn nog geen applicaties geïnstalleerd."
+    },
+    "web": {
+      "title": "SealSkin in Deze Browser",
+      "bookmarklet": "Naar SealSkin sturen",
+      "bookmarkletHelp": "Sleep deze link naar uw bladwijzerbalk. Erop klikken opent de pagina waarop u bent in SealSkin, of zoekt naar de tekst die u hebt geselecteerd.",
+      "pick": "Kiezen voor SealSkin",
+      "pickHelp": "Sleep ook deze naar die balk. Klik erop en klik dan op een link om die in SealSkin te openen, of op een afbeelding, video of audio om het bestand te sturen. Shift-klik op een link om het bestand te sturen waar die naartoe leidt, opgehaald met uw aanmelding op die site.",
+      "pickHint": "SealSkin: klik op een link, of op een afbeelding, video of audio, om die te sturen; Shift-klik op een link stuurt het bestand. Druk op Esc om te annuleren.",
+      "protocol": "web+sealskin:-links hier openen",
+      "protocolHelp": "Een link geschreven als web+sealskin: gevolgd door een adres opent dat adres dan in SealSkin.",
+      "install": "Als uw browser webapps kan installeren, installeer SealSkin dan via het menu om er links en bestanden mee te delen en er bestanden mee te openen."
     }
   },
   "popup": {
@@ -1348,6 +1370,25 @@
       "finalizing": "Afronden...",
       "completed": "Voltooid",
       "error": "Fout"
+    }
+  },
+  "web": {
+    "unlockTitle": "SealSkin ontgrendelen",
+    "unlockBody": "Voer de wachtwoordzin in die uw sleutel in deze browser beschermt.",
+    "passphrase": "Wachtwoordzin",
+    "unlock": "Ontgrendelen",
+    "wrongPassphrase": "Deze wachtwoordzin ontgrendelt uw sleutel niet.",
+    "receiving": "Bestand wordt naar SealSkin gestuurd…",
+    "signIn": {
+      "failed": "De aanmelding is niet voltooid. Probeer het opnieuw of vraag het uw beheerder.",
+      "refused": "De identiteitsprovider heeft de aanmelding geweigerd.",
+      "expired": "De aanmelding duurde te lang of is al gebruikt. Meld u opnieuw aan.",
+      "browser": "De aanmelding is in een andere browser of een ander tabblad voltooid. Begin hier opnieuw.",
+      "invalidUsername": "De naam van uw account kan geen SealSkin-gebruikersnaam zijn, die alleen letters, cijfers, onderstrepingstekens en koppeltekens toelaat. Vraag het uw beheerder.",
+      "adminName": "De naam van uw account is die van een SealSkin-beheerder, die zich met een sleutelbestand aanmeldt. Vraag het uw beheerder.",
+      "otherIdentity": "Een ander account van de identiteitsprovider meldt zich al aan als deze SealSkin-gebruiker. Vraag het uw beheerder.",
+      "notConfigured": "Deze server biedt geen eenmalige aanmelding.",
+      "ended": "De identiteitsprovider heeft uw aanmelding beëindigd. Meld u opnieuw aan."
     }
   }
 }

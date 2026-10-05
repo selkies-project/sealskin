@@ -3,6 +3,9 @@
   "pages": [
     "README",
     "start",
+    "signin",
+    "cluster",
+    "kubernetes",
     "usage",
     "administration",
     "configuration",

@@ -135,7 +135,15 @@
       "keyGeneration": "Schlüsselgenerierung",
       "keyGenDescription": "Wenn Sie kein Schlüsselpaar haben, können Sie hier eines generieren. Der private Schlüssel wird oben eingefügt. Geben Sie den öffentlichen Schlüssel an Ihren Administrator weiter.",
       "generateKeyButton": "Neues Schlüsselpaar generieren",
-      "publicKeyForAdminLabel": "Ihr öffentlicher Schlüssel (für den Admin)"
+      "publicKeyForAdminLabel": "Ihr öffentlicher Schlüssel (für den Admin)",
+      "passphraseLabel": "Passphrase",
+      "remember": "Meinen Schlüssel in diesem Browser behalten",
+      "rememberHelp": "Schalten Sie dies auf einem gemeinsam genutzten Computer aus: SealSkin behält Ihren Schlüssel dann nur, solange dieser Tab geöffnet ist, und Sie laden Ihre Konfiguration beim nächsten Mal erneut.",
+      "passphraseHelp": "Ihr privater Schlüssel wird in diesem Browser mit dieser Passphrase verschlüsselt gespeichert. Sie geben sie bei jedem Öffnen von SealSkin hier ein.",
+      "signInTitle": "Single Sign-On",
+      "signInHelp": "Melden Sie sich mit dem Konto an, das Ihre Organisation verwaltet, statt mit einer Konfigurationsdatei. SealSkin behält die Anmeldung nur in diesem Tab, sodass Sie sich beim nächsten Mal erneut anmelden.",
+      "signInOidc": "Mit OpenID Connect anmelden",
+      "signInSaml": "Mit SAML anmelden"
     },
     "home": {
       "title": "Ihre Home-Verzeichnisse",
@@ -198,7 +206,8 @@
       "homesDisabledTooltip": "Persistenter Speicher für diesen Benutzer deaktiviert",
       "confirmDelete": "Sind Sie sicher, dass Sie den Benutzer '{username}' löschen möchten? Dadurch wird auch sein gesamter persistenter Speicher gelöscht und kann nicht rückgängig gemacht werden.",
       "allowPublicSharing": "Öffentliche Dateifreigabe zulassen",
-      "allowEditTemplates": "Bearbeiten von App-Vorlagen zulassen"
+      "allowEditTemplates": "Bearbeiten von App-Vorlagen zulassen",
+      "signInOnly": "Nur Single Sign-On"
     },
     "groups": {
       "title": "Gruppenverwaltung",
@@ -1166,7 +1175,9 @@
       "pendingConfigSaved": "Ausstehende Konfiguration gespeichert. Sie können Ihren öffentlichen Schlüssel jetzt dem Administrator zur Verfügung stellen.",
       "settingsSaved": "Einstellungen gespeichert.",
       "appCreated": "App '{name}' erfolgreich erstellt.",
-      "launchFailed": "Start fehlgeschlagen: {error}"
+      "launchFailed": "Start fehlgeschlagen: {error}",
+      "passphraseRequired": "Geben Sie eine Passphrase ein, um Ihren Schlüssel in diesem Browser zu schützen.",
+      "passphraseTooShort": "Verwenden Sie eine Passphrase mit mindestens {count} Zeichen."
     },
     "placeholders": {
       "noAdmins": "Keine Admins gefunden.",
@@ -1177,6 +1188,17 @@
       "noPinned": "Keine gepinnten Verhalten gefunden.",
       "errorLoading": "Fehler beim Laden der Verzeichnisse.",
       "noInstalledApps": "Es wurden noch keine Anwendungen installiert."
+    },
+    "web": {
+      "title": "SealSkin in diesem Browser",
+      "bookmarklet": "An SealSkin senden",
+      "bookmarkletHelp": "Ziehen Sie diesen Link in Ihre Lesezeichenleiste. Ein Klick darauf öffnet die aktuelle Seite in SealSkin oder sucht nach dem markierten Text.",
+      "pick": "Für SealSkin auswählen",
+      "pickHelp": "Ziehen Sie auch diesen Link dorthin. Klicken Sie darauf und dann auf einen Link, um ihn in SealSkin zu öffnen, oder auf ein Bild, Video oder Audio, um die Datei zu senden. Mit Umschalt-Klick auf einen Link senden Sie die Datei, zu der er führt, abgerufen mit Ihrer Anmeldung auf dieser Website.",
+      "pickHint": "SealSkin: Klicken Sie auf einen Link oder ein Bild, Video oder Audio, um es zu senden; Umschalt-Klick auf einen Link sendet dessen Datei. Esc bricht ab.",
+      "protocol": "web+sealskin:-Links hier öffnen",
+      "protocolHelp": "Ein Link der Form web+sealskin: gefolgt von einer Adresse öffnet diese Adresse dann in SealSkin.",
+      "install": "Wenn Ihr Browser Web-Apps installieren kann, installieren Sie SealSkin über sein Menü, um Links und Dateien daran zu teilen und Dateien damit zu öffnen."
     }
   },
   "popup": {
@@ -1348,6 +1370,25 @@
       "finalizing": "Wird abgeschlossen...",
       "completed": "Abgeschlossen",
       "error": "Fehler"
+    }
+  },
+  "web": {
+    "unlockTitle": "SealSkin entsperren",
+    "unlockBody": "Geben Sie die Passphrase ein, die Ihren Schlüssel in diesem Browser schützt.",
+    "passphrase": "Passphrase",
+    "unlock": "Entsperren",
+    "wrongPassphrase": "Diese Passphrase entsperrt Ihren Schlüssel nicht.",
+    "receiving": "Datei wird an SealSkin gesendet…",
+    "signIn": {
+      "failed": "Die Anmeldung wurde nicht abgeschlossen. Versuchen Sie es erneut oder wenden Sie sich an Ihren Administrator.",
+      "refused": "Der Identitätsanbieter hat die Anmeldung abgelehnt.",
+      "expired": "Die Anmeldung hat zu lange gedauert oder wurde bereits verwendet. Melden Sie sich erneut an.",
+      "browser": "Die Anmeldung wurde in einem anderen Browser oder Tab abgeschlossen. Starten Sie sie hier erneut.",
+      "invalidUsername": "Der Name Ihres Kontos kann kein SealSkin-Benutzername sein; dieser besteht nur aus Buchstaben, Ziffern, Unterstrichen und Bindestrichen. Wenden Sie sich an Ihren Administrator.",
+      "adminName": "Der Name Ihres Kontos gehört einem SealSkin-Administrator, der sich mit einer Schlüsseldatei anmeldet. Wenden Sie sich an Ihren Administrator.",
+      "otherIdentity": "Ein anderes Konto des Identitätsanbieters meldet sich bereits als dieser SealSkin-Benutzer an. Wenden Sie sich an Ihren Administrator.",
+      "notConfigured": "Dieser Server bietet kein Single Sign-On an.",
+      "ended": "Der Identitätsanbieter hat Ihre Anmeldung beendet. Melden Sie sich erneut an."
     }
   }
 }

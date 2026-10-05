@@ -28,8 +28,9 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
 from . import config_store, launch
+from .providers.base_provider import host_port
 from .routers.applications import user_can_access
-from .security import canonical_uuid, token_matches
+from .security import OWN_ORIGIN_NEEDED, canonical_uuid, on_session_origin, token_matches
 from .settings import settings
 from .state import state
 
@@ -97,6 +98,9 @@ async def collaborative_room(
     session_data = state.sessions.get(session_id_str)
     if not session_data or not session_data.get("is_collaboration"):
         raise HTTPException(status_code=404, detail="Collaboration room not found.")
+    # A web sign-in's room stays off the web app's origin, like its session.
+    if session_data.get("native") and not on_session_origin(request, session_id_str):
+        raise HTTPException(status_code=403, detail=OWN_ORIGIN_NEEDED)
 
     if (
         "viewer_token" in session_data
@@ -287,8 +291,8 @@ async def broadcast_token_state(session_id: str, session_data: dict[str, Any]) -
         for ip, port in targets.items():
             urls = []
             if port:
-                urls.append(f"http://{ip}:{port}/{session_id}/api/tokens")
-            urls.append(f"http://{ip}:8083/tokens")
+                urls.append(f"http://{host_port(ip, port)}/{session_id}/api/tokens")
+            urls.append(f"http://{host_port(ip, 8083)}/tokens")
             cached = TOKEN_ENDPOINT_CACHE.get(ip)
             if cached in urls:
                 urls.remove(cached)
@@ -309,11 +313,11 @@ async def broadcast_token_state(session_id: str, session_data: dict[str, Any]) -
                     continue
 
 
-def _owner_group(username: str) -> str:
-    """Return the effective group of a user (`"none"` when unknown)."""
+def _owner_group(username: str) -> list[str]:
+    """Return the groups of a user."""
     from . import user_manager
 
-    return user_manager.get_effective_settings(username).get("group", "none")
+    return user_manager.get_effective_settings(username).get("groups") or []
 
 
 async def broadcast_to_room(session_id: str, payload: dict[str, Any]) -> None:

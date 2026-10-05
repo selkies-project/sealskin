@@ -135,7 +135,15 @@
       "keyGeneration": "Génération de Clé",
       "keyGenDescription": "Si vous n'avez pas de paire de clés, vous pouvez en générer une ici. La clé privée sera remplie ci-dessus. Fournissez la clé publique à votre administrateur.",
       "generateKeyButton": "Générer une Nouvelle Paire de Clés",
-      "publicKeyForAdminLabel": "Votre Clé Publique (pour l'admin)"
+      "publicKeyForAdminLabel": "Votre Clé Publique (pour l'admin)",
+      "passphraseLabel": "Phrase secrète",
+      "remember": "Conserver ma clé dans ce navigateur",
+      "rememberHelp": "Désactivez cette option sur un ordinateur partagé : SealSkin ne conserve alors votre clé que tant que cet onglet est ouvert, et vous chargez à nouveau votre configuration la prochaine fois.",
+      "passphraseHelp": "Votre clé privée est conservée dans ce navigateur, chiffrée avec cette phrase secrète, que vous saisirez à chaque ouverture de SealSkin ici.",
+      "signInTitle": "Authentification unique",
+      "signInHelp": "Connectez-vous avec le compte que gère votre organisation plutôt qu'avec un fichier de configuration. SealSkin conserve la connexion dans cet onglet seulement ; vous vous reconnecterez la prochaine fois.",
+      "signInOidc": "Se connecter avec OpenID Connect",
+      "signInSaml": "Se connecter avec SAML"
     },
     "home": {
       "title": "Vos Dossiers Personnels",
@@ -198,7 +206,8 @@
       "homesDisabledTooltip": "Stockage persistant désactivé pour cet utilisateur",
       "confirmDelete": "Êtes-vous sûr de vouloir supprimer l'utilisateur '{username}' ? Cela supprimera également tout son stockage persistant et ne pourra pas être annulé.",
       "allowPublicSharing": "Autoriser le partage de fichiers public",
-      "allowEditTemplates": "Autoriser la modification des modèles d'applications"
+      "allowEditTemplates": "Autoriser la modification des modèles d'applications",
+      "signInOnly": "Authentification unique seulement"
     },
     "groups": {
       "title": "Gestion des Groupes",
@@ -1166,7 +1175,9 @@
       "pendingConfigSaved": "Configuration en attente enregistrée. Vous pouvez maintenant fournir votre clé publique à l'administrateur.",
       "settingsSaved": "Paramètres enregistrés.",
       "appCreated": "Application '{name}' créée avec succès.",
-      "launchFailed": "Échec du lancement : {error}"
+      "launchFailed": "Échec du lancement : {error}",
+      "passphraseRequired": "Saisissez une phrase secrète pour protéger votre clé dans ce navigateur.",
+      "passphraseTooShort": "Utilisez une phrase secrète d'au moins {count} caractères."
     },
     "placeholders": {
       "noAdmins": "Aucun admin trouvé.",
@@ -1177,6 +1188,17 @@
       "noPinned": "Aucun comportement épinglé trouvé.",
       "errorLoading": "Erreur lors du chargement des dossiers.",
       "noInstalledApps": "Aucune application n'a encore été installée."
+    },
+    "web": {
+      "title": "SealSkin dans ce Navigateur",
+      "bookmarklet": "Envoyer à SealSkin",
+      "bookmarkletHelp": "Faites glisser ce lien dans votre barre de favoris. Un clic dessus ouvre la page en cours dans SealSkin, ou recherche le texte sélectionné.",
+      "pick": "Choisir pour SealSkin",
+      "pickHelp": "Faites aussi glisser ce lien dans la barre. Cliquez dessus, puis sur un lien pour l'ouvrir dans SealSkin, ou sur une image, une vidéo ou un son pour envoyer le fichier. Maj+clic sur un lien envoie le fichier vers lequel il mène, récupéré avec votre connexion à ce site.",
+      "pickHint": "SealSkin : cliquez sur un lien, ou sur une image, une vidéo ou un son, pour l'envoyer ; Maj+clic sur un lien envoie son fichier. Appuyez sur Échap pour annuler.",
+      "protocol": "Ouvrir ici les liens web+sealskin:",
+      "protocolHelp": "Un lien écrit web+sealskin: suivi d'une adresse ouvre alors cette adresse dans SealSkin.",
+      "install": "Si votre navigateur sait installer des applications web, installez SealSkin depuis son menu pour lui partager des liens et des fichiers et ouvrir des fichiers avec."
     }
   },
   "popup": {
@@ -1348,6 +1370,25 @@
       "finalizing": "Finalisation...",
       "completed": "Terminé",
       "error": "Erreur"
+    }
+  },
+  "web": {
+    "unlockTitle": "Déverrouiller SealSkin",
+    "unlockBody": "Saisissez la phrase secrète qui protège votre clé dans ce navigateur.",
+    "passphrase": "Phrase secrète",
+    "unlock": "Déverrouiller",
+    "wrongPassphrase": "Cette phrase secrète ne déverrouille pas votre clé.",
+    "receiving": "Envoi du fichier à SealSkin…",
+    "signIn": {
+      "failed": "La connexion n'a pas abouti. Réessayez ou contactez votre administrateur.",
+      "refused": "Le fournisseur d'identité a refusé la connexion.",
+      "expired": "La connexion a pris trop de temps ou a déjà servi. Reconnectez-vous.",
+      "browser": "La connexion s'est terminée dans un autre navigateur ou onglet. Recommencez-la ici.",
+      "invalidUsername": "Le nom de votre compte ne peut pas être un nom d'utilisateur SealSkin, qui n'admet que des lettres, des chiffres, des traits de soulignement et des traits d'union. Contactez votre administrateur.",
+      "adminName": "Le nom de votre compte appartient à un administrateur SealSkin, qui se connecte avec un fichier de clé. Contactez votre administrateur.",
+      "otherIdentity": "Un autre compte du fournisseur d'identité se connecte déjà sous cet utilisateur SealSkin. Contactez votre administrateur.",
+      "notConfigured": "Ce serveur ne propose pas d'authentification unique.",
+      "ended": "Le fournisseur d'identité a mis fin à votre connexion. Reconnectez-vous."
     }
   }
 }

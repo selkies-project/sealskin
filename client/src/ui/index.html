@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0d1117">
+    <title>SealSkin</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="search" type="application/opensearchdescription+xml" title="SealSkin" href="opensearch.xml">
+    <link rel="icon" href="icons/icon128.png">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css">
+</head>
+<body>
+    <header id="topbar">
+        <img src="icons/icon128.png" alt="">
+        <span class="wordmark">SealSkin</span>
+        <button type="button" id="account-button" class="avatar" aria-haspopup="true" aria-expanded="false"></button>
+    </header>
+    <nav id="rail">
+        <img class="rail-logo" src="icons/icon128.png" alt="SealSkin">
+        <div class="rail-links">
+            <button type="button" data-dest="home"><i class="fas fa-th-large"></i><span></span></button>
+            <button type="button" data-dest="sessions"><i class="fas fa-desktop"></i><span></span><b id="sessions-badge" hidden></b></button>
+            <button type="button" data-dest="files" hidden><i class="fas fa-folder"></i><span></span></button>
+            <button type="button" data-dest="options"><i class="fas fa-sliders-h"></i><span></span></button>
+        </div>
+        <div class="rail-account">
+            <div class="avatar" aria-hidden="true"></div>
+            <div class="account-name"></div>
+            <div class="account-via"></div>
+            <button type="button" class="sign-out"><i class="fas fa-sign-out-alt"></i><span></span></button>
+        </div>
+    </nav>
+    <div id="account-menu" hidden>
+        <div class="account-name"></div>
+        <div class="account-via"></div>
+        <button type="button" class="sign-out"><i class="fas fa-sign-out-alt"></i><span></span></button>
+    </div>
+    <main id="stage">
+        <div id="host-panel" hidden></div>
+        <iframe id="app-frame" src="about:blank" hidden allow="clipboard-write"></iframe>
+    </main>
+    <script type="module" src="app.js"></script>
+</body>
+</html>

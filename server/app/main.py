@@ -6,6 +6,7 @@ import asyncio
 import logging
 import os
 import platform
+import secrets
 import shutil
 import signal
 import subprocess
@@ -14,8 +15,11 @@ from typing import Any
 import uvicorn
 import uvloop
 
+from . import cluster
 from .logging_config import setup_logging
+from .security import init_server_keys
 from .settings import settings
+from .state import state
 
 setup_logging()
 
@@ -45,16 +49,31 @@ def run_caddy() -> None:
         logger.info("Generating Caddyfile from template: %s", template_path)
         with open(template_path, encoding="utf-8") as handle:
             config_content = handle.read()
+        init_server_keys()
+        cluster.init()
+        cluster.reload_proxy = reload_caddy
+        peer_cert, peer_key, peer_trust = cluster.peer_certificate_paths()
+        state.proxy_secret = state.proxy_secret or secrets.token_urlsafe(32)
+        networks = " ".join(n.strip() for n in settings.trusted_proxies.split(",") if n.strip())
+        trusted = f"        servers {{\n                trusted_proxies static {networks}\n        }}" if networks else ""
         for placeholder, value in (
             ("{{API_PORT}}", str(settings.api_port)),
             ("{{SESSION_PORT}}", str(settings.session_port)),
+            ("{{PEER_PORT}}", str(settings.peer_port)),
             ("{{PROXY_CERT_PATH}}", settings.proxy_cert_path),
             ("{{PROXY_KEY_PATH}}", settings.proxy_key_path),
+            ("{{PEER_CERT_PATH}}", peer_cert),
+            ("{{PEER_KEY_PATH}}", peer_key),
+            ("{{PEER_TRUST_PATH}}", peer_trust),
+            ("{{PROXY_SECRET}}", state.proxy_secret),
+            ("{{TRUSTED_PROXIES}}", trusted),
         ):
             config_content = config_content.replace(placeholder, value)
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        with open(output_path, "w", encoding="utf-8") as handle:
+        fd = os.open(output_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
             handle.write(config_content)
+        os.chmod(output_path, 0o600)
         logger.info("Caddyfile written to %s", output_path)
     except OSError as exc:
         logger.error("Failed to generate Caddyfile: %s", exc)
@@ -69,6 +88,22 @@ def run_caddy() -> None:
     except OSError as exc:
         logger.error("Failed to start Caddy: %s", exc)
         caddy_process = None
+
+
+def reload_caddy() -> None:
+    """Have the running Caddy read its configuration again, as when the peer trust bundle changed."""
+    if not caddy_process or caddy_process.poll() is not None:
+        return
+    try:
+        subprocess.run(
+            ["caddy", "reload", "--force", "--config", settings.caddyfile_path, "--adapter", "caddyfile"],
+            check=True,
+            capture_output=True,
+            timeout=30,
+        )
+        logger.info("Caddy reloaded its configuration.")
+    except (OSError, subprocess.SubprocessError) as exc:
+        logger.error("Could not reload Caddy: %s", exc)
 
 
 def stop_caddy(signum: int | None = None, frame: Any = None) -> None:

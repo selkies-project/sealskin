@@ -1,13 +1,14 @@
 ---
 title: Usage
-description: The launcher, the right-click menu, downloads, sessions, storage, the file manager, and collaboration rooms.
+description: The launcher, the right-click menu, downloads, sessions, storage, the file manager, collaboration rooms, and the web app.
 ---
 
 Everything on this page happens in the client after it is
 [connected](start.md#connect). The browser extension has the full set of entry
-points; the mobile apps have the launcher, sessions, files, and the dashboard
-but no context menu or download interception, because those hooks only exist
-in a browser.
+points; the mobile apps and the web app have the launcher, sessions, files,
+and the dashboard but no context menu or download interception, because those
+hooks only exist in a browser extension. The web app has its own
+[entry points](#in-a-browser-with-nothing-installed) instead.
 
 ## The launcher
 
@@ -171,11 +172,85 @@ Differences from the extension:
 * A trusted TLS certificate is mandatory; the WebView refuses self-signed
   certificates and mixed content.
 
+## In a browser, with nothing installed
+
+`https://<server>:8443/ui/` is the web app: the same launcher, file manager,
+and dashboard in an ordinary tab. It has no configuration file and keeps no
+key. [Sign in](signin.md) with what the administrator set up: **Sign In with
+OpenID Connect** or **Sign In with SAML** takes you to your organization's
+identity provider and back, a reverse proxy that signs you in opens the app
+signed in, and the administrator of the server uses the **Root token**. The
+dashboard shows who you are signed in as and has **Sign out**; a logout at
+the identity provider ends the sign-in as well.
+
+The web app fills the window. A rail on the left (a tab bar at the bottom of
+a phone) moves between **Home**, **Sessions**, **Files**, and the dashboard,
+and shows who is signed in. **Home** has a box that filters the applications
+as you type and takes a pasted link to open in isolation, the sessions you
+have running with **Open** and **Stop**, and the applications as tiles,
+grouped by kind with your recent ones first. Click a tile for its launch
+options, which are remembered per application, or its play button to launch
+with them straight away. Drop a file anywhere on the page to open it in an
+application that takes it.
+
+Launching opens a tab at once that shows what the server is doing: choosing a
+node, preparing storage, downloading the application the first time a node
+runs it, starting it, and waiting for its desktop. The tab becomes the
+session when it is ready, or says why it could not start.
+
+A session opens in a tab of its own, on an address of its own
+(`<session id>.<server name>`). If the launcher says the server has no such
+name the browser reaches, the administrator has to give it wildcard DNS and a
+certificate for it.
+
+On a [cluster](cluster.md) the launcher has a **Where** choice: leave it on
+**Automatic**, or pick a pool or a node. Each home directory shows the node
+that holds it, and a session using it starts there. Where the administrator
+allows, **Move storage** moves a home directory to another node once no
+session is using it. A line under the launcher shows what is left of a time
+allowance.
+
+In place of the context menu:
+
+* **The bookmarklets.** The dashboard's **SealSkin in This Browser** card has
+  two links to drag to your bookmarks bar. **Send to SealSkin** opens the page
+  you are on in SealSkin, or searches for the text you selected. **Pick for
+  SealSkin** waits for your next click: click a link to open that link in
+  SealSkin, or an image, video, or audio to send the file; Shift-click a link
+  to send the file it leads to. A picked file is fetched by the page you are
+  on, with your sign-in on that site, so it works for files only that site can
+  read; anything the page cannot fetch opens as a link instead.
+* **`web+sealskin:` links.** After **Open web+sealskin: Links Here** (Chrome,
+  Edge, Firefox), a link such as `web+sealskin:https://example.com` opens
+  its address in SealSkin.
+* **Search.** The web app offers itself to the browser as a search engine
+  (OpenSearch), and `…/ui/?q=terms` and `…/ui/?url=address` open the launcher
+  with that search or address.
+* **As an installed app** (Chrome and Edge, from the browser's install
+  option): SealSkin becomes a target that other applications **share** links,
+  text, and files to, and on a desktop it is offered to **open** the file types
+  your installed applications open.
+
+Sessions open in tabs of their own. While the web app's tab stays open,
+**Re-open** brings a session's tab forward and **Stop** closes it; after the
+web app is reloaded, and always in Safari, which lets the web app keep no
+hold on the tab, **Re-open** opens the session in a new tab. Where the web app
+cannot close the tab (Safari, and Chrome for a session at an address of its
+own), the tab closes itself a few seconds after **Stop**, when its page
+reconnects to the stopped session, or says the session stopped where the
+browser does not let a page close its tab.
+
+Each session opens at an address of its own (see
+[Session origins](configuration.md#session-origins)), which keeps its pages
+away from the web app and from other sessions altogether: session tabs get no
+link back to the web app, it cannot be framed, and nothing a session's page
+does can use your sign-in.
+
 ## The options page
 
-The extension's options page (and the app's dashboard) is where the client
-configuration lives, alongside the account-level views: **Configuration**
-(connection, export your config file for another device, log out), **Home
-Directories**, **Active Sessions**, and **Pinned Behavior**. Administrators see
-the management panels described in [Administration](administration.md) in the
-same place.
+The extension's options page (and the dashboard of the app and the web app)
+is where the client configuration lives, alongside the account-level views:
+**Configuration** (connection, export your config file for another device,
+log out), **Home Directories**, **Active Sessions**, and **Pinned Behavior**.
+Administrators see the management panels described in
+[Administration](administration.md) in the same place.

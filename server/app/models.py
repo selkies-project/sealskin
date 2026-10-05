@@ -27,6 +27,27 @@ class Application(BaseModel):
     url_support: bool
     extensions: list[str]
     is_meta_app: bool = False
+    type: str = ""
+
+
+class LaunchProgress(BaseModel):
+    """Where a launch is (see `app.progress`).
+
+    Attributes:
+        stage: The stage the launch reached.
+        detail: What the stage is about: `node` or `image`.
+        elapsed: Seconds since the launch began.
+        session_url: Path the session opens at, once `stage` is `ready`.
+        session_id: Its id, once `stage` is `ready`.
+        error: Why it failed, once `stage` is `failed`.
+    """
+
+    stage: str
+    detail: dict[str, Any] = {}
+    elapsed: float = 0
+    session_url: str | None = None
+    session_id: str | None = None
+    error: str | None = None
 
 
 class LaunchRequestSimple(BaseModel):
@@ -94,6 +115,36 @@ class HandshakeExchangeResponse(BaseModel):
     """Identifier of the established E2EE session."""
 
     session_id: str
+
+
+class SignInConfig(BaseModel):
+    """The sign-ins the web app offers."""
+
+    oidc: bool
+    saml: bool
+    proxy: bool = False
+    root: bool = True
+    key: bool = True
+
+
+class SignInRegistrationRequest(BaseModel):
+    """The grant of a finished identity provider flow."""
+
+    grant: str = Field(max_length=128)
+
+
+class RootSignInRequest(BaseModel):
+    """The root token."""
+
+    token: str = Field(max_length=512)
+
+
+class SignInRegistration(BaseModel):
+    """A started web sign-in."""
+
+    username: str
+    via: str
+    expires: float
 
 
 class EncryptedPayload(BaseModel):
@@ -291,18 +342,87 @@ class UiManifest(BaseModel):
 
 
 class UserSettings(BaseModel):
-    """Per-user or per-group settings."""
+    """A user's own settings, and the form of the settings a request runs under.
+
+    Attributes:
+        active: The account may sign in.
+        group: The first of `groups`, as older clients read it.
+        groups: Groups the user is in.
+        admin: The user administers the server.
+        persistent_storage: The user has home directories.
+        public_sharing: The user may share files by public link.
+        harden_container: Sessions run with the container hardening.
+        harden_openbox: Sessions run with the desktop hardening.
+        edit_templates: The user may edit app templates.
+        gpu: Sessions may use a GPU.
+        gpu_share: Sessions may use a GPU other sessions use; off gives each a GPU of its own.
+        home_migration: The user may move their home directories between nodes.
+        storage_limit: Gigabytes of storage per node; negative for no limit.
+        session_limit: Sessions at once, on all nodes; negative for no limit.
+        session_cpus: CPUs per session; negative for no limit.
+        session_memory_mb: Megabytes of memory per session; negative for no limit.
+        session_hours: Hours a session may run; negative for no limit.
+        allowance_hours: Weighted session hours per `allowance_period`; negative for no limit.
+        allowance_period: `day`, `week`, or `month`.
+        pools: Restricted pools open to the user.
+        pools_denied: Pools closed to the user.
+        provider_groups: Groups the identity provider named at the last sign-in.
+    """
 
     active: bool = True
     group: str = "none"
+    groups: list[str] = []
+    admin: bool = False
     persistent_storage: bool = True
     public_sharing: bool = False
     harden_container: bool = False
     harden_openbox: bool = False
     edit_templates: bool = False
     gpu: bool = True
+    gpu_share: bool = True
+    home_migration: bool = False
     storage_limit: int = -1
     session_limit: int = -1
+    session_cpus: float = -1
+    session_memory_mb: int = -1
+    session_hours: float = -1
+    allowance_hours: float = -1
+    allowance_period: str = Field(default="month", pattern=r"^(day|week|month)$")
+    pools: list[str] = []
+    pools_denied: list[str] = []
+    provider_groups: list[str] = []
+
+
+class GroupSettings(BaseModel):
+    """What a group sets for its members; a setting left out is not the group's to decide.
+
+    Where the groups of a user disagree, the restricting value of a switch
+    wins and the smallest limit does (see `user_manager.get_effective_settings`).
+
+    Attributes:
+        sso_groups: Identity provider groups whose members are in this group.
+    """
+
+    active: bool | None = None
+    admin: bool | None = None
+    persistent_storage: bool | None = None
+    public_sharing: bool | None = None
+    harden_container: bool | None = None
+    harden_openbox: bool | None = None
+    edit_templates: bool | None = None
+    gpu: bool | None = None
+    gpu_share: bool | None = None
+    home_migration: bool | None = None
+    storage_limit: int | None = None
+    session_limit: int | None = None
+    session_cpus: float | None = None
+    session_memory_mb: int | None = None
+    session_hours: float | None = None
+    allowance_hours: float | None = None
+    allowance_period: str | None = Field(default=None, pattern=r"^(day|week|month)$")
+    pools: list[str] = []
+    pools_denied: list[str] = []
+    sso_groups: list[str] = []
 
 
 class AdminStatusResponse(BaseModel):
@@ -311,6 +431,11 @@ class AdminStatusResponse(BaseModel):
     is_admin: bool
     username: str
     settings: UserSettings
+    via: str = "key"
+    session_domain: str = ""
+    clustered: bool = False
+    node_id: str = ""
+    allowance: dict[str, Any] | None = None
     gpus: list[GPUInfo] = []
     cpu_model: str | None = None
     disk_total: int | None = None
@@ -331,7 +456,7 @@ class Group(BaseModel):
     """A group of users sharing settings."""
 
     name: str
-    settings: UserSettings
+    settings: GroupSettings
 
 
 class ManagementDataResponse(BaseModel):
@@ -371,13 +496,13 @@ class CreateGroupRequest(BaseModel):
     """Create a group."""
 
     name: str = Field(..., pattern=r"^[a-zA-Z0-9_-]+$")
-    settings: UserSettings
+    settings: GroupSettings
 
 
 class UpdateGroupRequest(BaseModel):
     """Replace a group's settings."""
 
-    settings: UserSettings
+    settings: GroupSettings
 
 
 class CreateMetaAppRequest(BaseModel):
@@ -432,6 +557,10 @@ class ActiveSessionInfo(BaseModel):
     session_url: str
     launch_context: dict[str, Any] | None = None
     is_collaboration: bool = False
+    own_origin: bool = False
+    node: str = ""
+    home: str = ""
+    gpu: bool = False
 
 
 class SendFileToSessionRequest(BaseModel):

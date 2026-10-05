@@ -11,6 +11,7 @@ server/              Python API server, Caddy template, tests, wheel packaging
 client/              web UI source and the esbuild pipeline (dist/ui, dist/extension, dist/mobile)
 browser_extension/   manifests, icons and the zip script for the extension shell
 mobile/              Capacitor project for the iOS and Android shells
+kubernetes/          the manifest that installs the server in a namespace
 docs/                this site (Fumadocs) with the pages under docs/content
 release-notes/       one Markdown file per stable release
 .github/workflows/   CI, Pre-release, Release, Mobile and Docs
@@ -75,6 +76,11 @@ export SEALSKIN_UPLOAD_DIR=~/sealskin-dev/storage/uploads
 export SEALSKIN_PUBLIC_STORAGE_PATH=~/sealskin-dev/storage/public
 export SEALSKIN_HOME_TEMPLATES_PATH=~/sealskin-dev/storage/home_templates
 export SEALSKIN_APP_ICONS_PATH=~/sealskin-dev/storage/app_icons
+export SEALSKIN_CLUSTER_PATH=~/sealskin-dev/config/cluster
+export SEALSKIN_NODE_STATE_PATH=~/sealskin-dev/config/node
+export SEALSKIN_SSO_KEYS_PATH=~/sealskin-dev/config/sso_keys.yml
+export SEALSKIN_ROOT_TOKEN_PATH=~/sealskin-dev/config/root_token
+export SEALSKIN_SHARED_FILES_PATH=~/sealskin-dev/storage/shared_store
 export HOST_URL=localhost
 python main.py          # or: python -m app
 ```
@@ -86,7 +92,8 @@ inside the package, so only the environment above and the key files are
 needed.
 
 The first start creates the `admin` account and writes `admin.json` into
-`~/sealskin-dev/config`, three levels above the keys directory. Build the
+`~/sealskin-dev/config`, three levels above the keys directory, and the root
+token for the [web sign-in](signin.md) beside it. Build the
 client first (below) or the server has no UI to serve; `SEALSKIN_UI_PATH`
 overrides where it looks. The [Settings Reference](settings.md) lists every
 variable.
@@ -97,19 +104,25 @@ ones. Sessions are still started through Docker on the local daemon, and
 the container has to be able to reach the session's IP on the default bridge
 network, which is the case on a Linux host.
 
-### Conventions
+### In a container, and as a cluster
 
-* Google-style docstrings on every module, class, and public function, with
-  type hints on the signature. Ruff enforces the `D` rules with the Google
-  convention; see `pyproject.toml`. The
-  [Server Reference](reference/index.mdx) is rendered from these docstrings
-  as Markdown, so inline code goes in single backticks and cross-references
-  are plain `` `name` `` rather than Sphinx roles.
-* Settings are declared once in `SETTING_DEFINITIONS`; a new setting means
-  an entry there and a regenerated [Settings Reference](settings.md)
-  (`npm run generate:settings` in `docs/`).
-* All Docker access goes through `docker_utils` and the provider; all YAML
-  goes through `persistence`; all launches go through `build_launch_spec`.
+The released image brings Caddy and the init scripts; a wheel built from a
+checkout lays the server and the served UI over it, so a change can be run
+the way it ships. From the repository root, with the UI built:
+
+```dockerfile
+FROM lscr.io/linuxserver/sealskin:latest
+COPY server/dist/*.whl /tmp/
+RUN apk add --no-cache --virtual=build-dependencies py3-pip && \
+    pip3 uninstall -y --break-system-packages sealskin-server && \
+    pip3 install --break-system-packages /tmp/*.whl && \
+    apk del --purge build-dependencies && rm -rf /tmp/*.whl
+```
+
+(`cp -r client/dist/ui server/app/ui && cp VERSION server/app/VERSION &&
+python -m build --wheel server/` makes the wheel, as the release workflow
+does.) A change to what nodes say to each other is tried as a
+[cluster](cluster.md#a-lab-on-one-machine), with two nodes at least.
 
 ## The client
 
@@ -124,7 +137,7 @@ SEALSKIN_BUILD_STRICT=1 npm run build # fail if any page or entry is missing
 
 | Output | Consumer | Hashed | Minified |
 | --- | --- | --- | --- |
-| `dist/ui` | served by the server under `/ui/` | yes | yes |
+| `dist/ui` | served by the server under `/ui/`, the web app included | yes | yes |
 | `dist/extension` | contents of the extension zip | no | no (store review friendly) |
 | `dist/mobile` | Capacitor web directory (`mobile/www`) | no | no |
 
@@ -139,6 +152,9 @@ then rewrites the tag to the emitted file name:
   targets even though no page references it.
 * Anything under `vendor/` is copied verbatim, never bundled.
   `browser_extension/icons` is copied to every target.
+* The served UI also gets the connection page, the web app's service worker
+  (`sw.js`, unhashed: its address is its scope), and `mobile/assets/logo.png`
+  as the installed web app's large icon.
 * `{{PLACEHOLDER}}` tokens in HTML (the room page) are left for the server to
   substitute.
 * Pages that import `lib/i18n.js` must sit at the target root, because the

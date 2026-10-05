@@ -5,7 +5,8 @@
 * `EncryptedRoute` encrypts every JSON response with the session key and
   `get_decrypted_request_body` decrypts request bodies.
 * `verify_token` validates client-signed RS256 JWTs against the public
-  key stored for the user.
+  key stored for the user, or the browser key their identity provider
+  sign-in registered, which the token names by `kid`.
 * Password hashing for public shares.
 """
 
@@ -33,7 +34,7 @@ from fastapi import Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 
-from . import user_manager
+from . import cluster, sso, user_manager
 from .models import EncryptedPayload
 from .settings import settings
 from .state import CryptoSession, state
@@ -142,6 +143,31 @@ def _touch_session(session_id: str) -> CryptoSession | None:
     return session
 
 
+def is_plain(request: Request) -> bool:
+    """Whether a request belongs to the plain lane, whose bodies TLS alone protects.
+
+    That is a request with no crypto session that came through this node's
+    proxy, so over TLS: the web app's, a signed-in shell's, or another node's.
+    A request to the API port itself always takes the encrypted lane.
+    """
+    return not request.headers.get("X-Session-ID") and cluster.via_proxy(request)
+
+
+def same_origin(request: Request) -> bool:
+    """Whether the browser vouches that a request comes from the web app's own pages.
+
+    A cookie or a proxy's sign-in travels with any request the browser makes
+    to this origin, so a session's page on a sibling origin must not ride it.
+    """
+    site = request.headers.get("sec-fetch-site")
+    if site:
+        return site in ("same-origin", "none")
+    origin = request.headers.get("origin")
+    if origin:
+        return origin.split("://", 1)[-1] == request.headers.get("host", "") or origin == settings.public_url.rstrip("/")
+    return request.method in ("GET", "HEAD")
+
+
 async def get_decrypted_request_body(request: Request) -> dict[str, Any]:
     """FastAPI dependency returning the decrypted JSON body of a request.
 
@@ -152,10 +178,20 @@ async def get_decrypted_request_body(request: Request) -> dict[str, Any]:
     Returns:
         The decrypted JSON document.
 
+    A request of the plain lane (see `is_plain`) carries the document itself.
+
     Raises:
         HTTPException: 400 when the session is unknown or decryption fails.
     """
     session_id = request.headers.get("X-Session-ID", "")
+    if is_plain(request):
+        try:
+            body = await request.json()
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail="The request body is not JSON.") from exc
+        if not isinstance(body, dict):
+            raise HTTPException(status_code=400, detail="The request body is not a JSON object.")
+        return body
     session = _touch_session(session_id) if session_id else None
     if not session:
         raise HTTPException(status_code=400, detail="Invalid or missing session ID")
@@ -202,6 +238,10 @@ class EncryptedRoute(APIRoute):
     client's network blipped while a container was being created) receives
     the stored result instead of running the handler again. While the first
     attempt is still running, the retry waits for it.
+
+    A request of the plain lane (see `is_plain`) is answered as it is, and
+    its idempotency key counts per credential. A request naming a crypto
+    session this server does not hold is refused before the handler runs.
     """
 
     def get_route_handler(self) -> Callable:
@@ -209,7 +249,11 @@ class EncryptedRoute(APIRoute):
         original_handler = super().get_route_handler()
 
         async def run_and_capture(request: Request) -> tuple[int, bytes, str]:
-            response = await original_handler(request)
+            try:
+                response = await original_handler(request)
+            except cluster.Forwarded as forwarded:
+                # Another node's answer, kept like this node's own for a retried request.
+                response = forwarded.response
             content_type = response.headers.get("content-type", "")
             body = response.body if hasattr(response, "body") else b""
             return response.status_code, body, content_type
@@ -217,14 +261,23 @@ class EncryptedRoute(APIRoute):
         async def custom_handler(request: Request) -> Response:
             session_id = request.headers.get("X-Session-ID", "")
             session = _touch_session(session_id) if session_id else None
-            if request.url.path not in HANDSHAKE_PATHS and not session:
+            plain = is_plain(request)
+            if request.url.path not in HANDSHAKE_PATHS and not session and not plain:
                 logger.warning(
                     "Security: Request to %s has invalid/missing session key.", request.url.path
                 )
+                return JSONResponse(
+                    status_code=400,
+                    content={"detail": "Secure session required. Encryption key missing or invalid."},
+                )
 
             idem_key = request.headers.get("X-Idempotency-Key", "").strip()
-            cache_key = f"{session_id}:{request.method}:{request.url.path}:{idem_key}"
-            use_idempotency = bool(session and idem_key and request.method != "GET")
+            principal = session_id
+            if plain:
+                credential = request.headers.get("cookie", "") + request.headers.get("authorization", "")
+                principal = "plain:" + hashlib.sha256(credential.encode()).hexdigest()
+            cache_key = f"{principal}:{request.method}:{request.url.path}:{idem_key}"
+            use_idempotency = bool((session or plain) and idem_key and request.method != "GET")
 
             if use_idempotency:
                 _prune_idempotency_cache()
@@ -261,7 +314,7 @@ class EncryptedRoute(APIRoute):
                 status_code, body, content_type = await run_and_capture(request)
 
             is_json = content_type.startswith("application/json")
-            if not (is_json and body):
+            if plain or not (is_json and body):
                 return Response(status_code=status_code, content=body, media_type=content_type or None)
 
             if session:
@@ -302,23 +355,89 @@ def proxy_cert_not_after(cert_path: str) -> float | None:
         return None
 
 
-async def verify_token(req: Request) -> dict[str, Any]:
-    """FastAPI dependency authenticating a client-signed JWT.
+def _signed_in(username: str, via: str, provider_groups: Any = (), admin: bool = False, **extra: Any) -> dict[str, Any]:
+    """Build the record of an authenticated user, or refuse an unknown or inactive one."""
+    user = user_manager.get_user(username)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid token.")
+    is_admin = bool(user.get("is_admin") or admin)
+    effective = user_manager.get_effective_settings(username, provider_groups)
+    is_admin = is_admin or bool(effective.get("admin"))
+    if is_admin:
+        effective = dict(user_manager.DEFAULT_USER_SETTINGS, admin=True, groups=effective.get("groups") or [])
+    elif not effective.get("active", False):
+        raise HTTPException(status_code=403, detail="User account is inactive.")
+    return dict(
+        user,
+        is_admin=is_admin,
+        effective_settings=effective,
+        group=effective.get("group", "none"),
+        groups=effective.get("groups") or [],
+        provider_groups=sorted(provider_groups or []),
+        via=via,
+        **extra,
+    )
 
-    The token's `sub` claim names the user; the signature is verified with
-    the public key stored for that user and `exp` is required.
 
-    Args:
-        req: Incoming request with an `Authorization: Bearer` header.
+async def _peer_user(req: Request) -> dict[str, Any] | None:
+    """Return the user a frontend's peer request acts as."""
+    if not req.headers.get("authorization", "").startswith(cluster.SCHEME + " "):
+        return None
+    peer = await cluster.verify_request(req)
+    act = peer["claims"].get("act")
+    if not act or "frontend" not in (peer["node"].get("roles") or []):
+        raise HTTPException(status_code=403, detail="This node may not act for users.")
+    return _signed_in(
+        str(act.get("username")),
+        str(act.get("via") or "peer"),
+        act.get("provider_groups") or (),
+        bool(act.get("is_admin")),
+        forwarded=True,
+    )
 
-    Returns:
-        The user record including `effective_settings` and `group`.
 
-    Raises:
-        HTTPException: 401 for invalid tokens, 403 for inactive accounts.
-    """
+async def _web_user(req: Request) -> dict[str, Any] | None:
+    """Return the user of the web sign-in a request's cookie names, while it lasts."""
+    token = req.cookies.get(sso.SESSION_COOKIE)
+    if not token or not is_plain(req):
+        return None
+    signed_in = await sso.current(sso.session_id(token))
+    if not signed_in:
+        raise HTTPException(status_code=401, detail="This sign-in ended.")
+    if not same_origin(req):
+        raise HTTPException(status_code=403, detail="Requests from other origins are refused.")
+    return _signed_in(
+        signed_in["username"],
+        signed_in["via"],
+        signed_in.get("groups") or (),
+        bool(signed_in.get("admin")),
+        sid=sso.session_id(token),
+    )
+
+
+def _proxy_user(req: Request) -> dict[str, Any] | None:
+    """Return the user a trusted reverse proxy signed in and names in its header."""
+    header = settings.proxy_auth_user_header
+    if not header or not is_plain(req) or not cluster.trusted_proxy(req.headers.get("x-sealskin-remote", "")):
+        return None
+    username = req.headers.get(header, "").strip()
+    if not username:
+        return None
+    if not same_origin(req):
+        raise HTTPException(status_code=403, detail="Requests from other origins are refused.")
+    groups = [g.strip() for g in req.headers.get(settings.proxy_auth_groups_header, "").split(",") if g.strip()]
+    try:
+        user_manager.ensure_user(username, "proxy", "", groups)
+    except ValueError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    admin_group = settings.sso_admin_group.strip().lstrip("/")
+    return _signed_in(username, "proxy", groups, bool(admin_group) and admin_group in groups)
+
+
+def _key_user(req: Request) -> dict[str, Any]:
+    """Return the user of a key-file client's signed token."""
     auth_header = req.headers.get("Authorization", "")
-    if not auth_header.startswith("Bearer "):
+    if not settings.legacy_auth or not auth_header.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Authorization header missing or invalid")
     token = auth_header.split(" ", 1)[1]
     try:
@@ -329,13 +448,8 @@ async def verify_token(req: Request) -> dict[str, Any]:
     if not username:
         raise HTTPException(status_code=401, detail="Token missing username claim.")
     user = user_manager.get_user(username)
-    if not user:
+    if not user or not user.get("public_key"):
         raise HTTPException(status_code=401, detail="Invalid token.")
-
-    effective_settings = user_manager.get_effective_settings(username)
-    is_active = user.get("is_admin") or effective_settings.get("active", False)
-    if not is_active:
-        raise HTTPException(status_code=403, detail="User account is inactive.")
     try:
         jwt.decode(
             token,
@@ -344,17 +458,38 @@ async def verify_token(req: Request) -> dict[str, Any]:
             options={"require": ["exp"]},
             leeway=JWT_LEEWAY_SECONDS,
         )
-    except KeyError as exc:
-        raise HTTPException(
-            status_code=500, detail="Server configuration error for user."
-        ) from exc
     except jwt.PyJWTError as exc:
         raise HTTPException(status_code=401, detail="Invalid token signature or claims.") from exc
+    return _signed_in(username, "key")
 
-    user = dict(user)
-    user["effective_settings"] = effective_settings
-    user["group"] = effective_settings.get("group", "none")
-    return user
+
+async def verify_token(req: Request) -> dict[str, Any]:
+    """FastAPI dependency authenticating a request.
+
+    In order: another node acting for a user it signed in, the web sign-in a
+    cookie names, the user a trusted proxy names, and a key-file client's
+    token (`sub` names the user, `exp` is required, and the signature is
+    checked with the user's stored public key).
+
+    Args:
+        req: Incoming request.
+
+    Returns:
+        The user record with `is_admin`, `effective_settings`, `group`,
+        `groups`, `provider_groups`, and `via` (`key`, `root`, `oidc`,
+        `saml`, or `proxy`). `forwarded` marks a request another node sent
+        on, which this node answers itself.
+
+    Raises:
+        HTTPException: 401 for an invalid credential, 403 for an inactive
+            account or a request another origin made.
+    """
+    forwarded = await _peer_user(req)
+    if forwarded or cluster.on_peer_listener(req):
+        if not forwarded:
+            raise HTTPException(status_code=401, detail="The peer listener takes other nodes' requests alone.")
+        return forwarded
+    return await _web_user(req) or _proxy_user(req) or _key_user(req)
 
 
 async def verify_admin(user: dict[str, Any] = Depends(verify_token)) -> dict[str, Any]:
@@ -454,6 +589,25 @@ def verify_share_password(password: str, stored_hash: str) -> bool:
         password.encode("utf-8"), salt=salt, n=_SCRYPT_N, r=_SCRYPT_R, p=_SCRYPT_P, dklen=32
     )
     return secrets.compare_digest(candidate, expected)
+
+
+#: What a web sign-in's session answers when asked for anywhere but its own origin.
+OWN_ORIGIN_NEEDED = (
+    "A session of a web sign-in opens on its own origin, <session id>.<domain>, apart from the web app. "
+    "This server has no such name the browser reaches: it needs wildcard DNS and a certificate for it "
+    "(see SEALSKIN_SESSION_DOMAIN)."
+)
+
+
+def on_session_origin(request: Request, session_id: str) -> bool:
+    """Whether a request reached a session on the session's own origin, whose name starts with its id.
+
+    A session is served from one origin, the first its token was exchanged on:
+    its own where the browser reaches one, so its pages share no storage,
+    cookies, or service workers with the web app or other sessions, and the
+    server's shared origin otherwise.
+    """
+    return request.headers.get("host", "").split(".", 1)[0].lower() == session_id
 
 
 def token_matches(given: str | None, expected: str | None) -> bool:

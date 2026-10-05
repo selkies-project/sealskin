@@ -1,5 +1,5 @@
 /**
- * Connection page (bundled in every shell).
+ * Connection page (bundled in the extension and the mobile app).
  *
  * The only page that must work with no server: it collects the server
  * address, ports, username, and keys, tests the connection through the
@@ -9,7 +9,8 @@
  *
  * The stored `sealskinConfig` keeps its historical shape:
  * `{serverIp, apiPort, sessionPort, username, clientPrivateKey,
- *   serverPublicKey, searchEngineUrl, userSettings}`.
+ *   serverPublicKey, searchEngineUrl, userSettings}`. The web app frames no
+ * connection page: it signs in with the server's cookie (`ui/app.js`).
  */
 
 import { bridge, request } from '../lib/bridge.js';
@@ -185,7 +186,7 @@ async function exportConfig() {
 
 async function init() {
   info = await bridge.hello();
-  if (info.shell === 'mobile') document.documentElement.classList.add('shell-mobile');
+  document.documentElement.classList.add(`shell-${info.shell}`);
   t = await loadTranslator(info.locale || navigator.language);
   applyTranslations(document.body, t);
 
@@ -241,8 +242,12 @@ async function init() {
   });
 
   $('save').addEventListener('click', async () => {
-    await bridge.storageSet({ sealskinPendingConfig: formConfig() });
-    displayStatus(t('options.status.pendingConfigSaved'), false);
+    try {
+      await bridge.storageSet({ sealskinPendingConfig: formConfig() });
+      displayStatus(t('options.status.pendingConfigSaved'), false);
+    } catch (error) {
+      displayStatus(error.message, true);
+    }
   });
 
   $('login').addEventListener('click', handleLogin);

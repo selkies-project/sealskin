@@ -135,7 +135,15 @@
       "keyGeneration": "Tạo khóa",
       "keyGenDescription": "Nếu bạn không có cặp khóa, bạn có thể tạo một cặp ở đây. Khóa riêng sẽ được điền vào ở trên. Cung cấp khóa công khai cho quản trị viên của bạn.",
       "generateKeyButton": "Tạo cặp khóa mới",
-      "publicKeyForAdminLabel": "Khóa công khai của bạn (cho quản trị viên)"
+      "publicKeyForAdminLabel": "Khóa công khai của bạn (cho quản trị viên)",
+      "passphraseLabel": "Cụm mật khẩu",
+      "remember": "Giữ khóa của tôi trong trình duyệt này",
+      "rememberHelp": "Hãy tắt tùy chọn này trên máy tính dùng chung: khi đó SealSkin chỉ giữ khóa của bạn khi thẻ này còn mở, và lần sau bạn tải lại cấu hình.",
+      "passphraseHelp": "Khóa riêng của bạn được lưu trong trình duyệt này, mã hóa bằng cụm mật khẩu này; bạn nhập nó mỗi lần mở SealSkin tại đây.",
+      "signInTitle": "Đăng nhập một lần",
+      "signInHelp": "Đăng nhập bằng tài khoản do tổ chức của bạn quản lý thay cho tệp cấu hình. SealSkin chỉ giữ lần đăng nhập trong thẻ này, nên lần sau bạn sẽ đăng nhập lại.",
+      "signInOidc": "Đăng nhập bằng OpenID Connect",
+      "signInSaml": "Đăng nhập bằng SAML"
     },
     "home": {
       "title": "Các thư mục chính của bạn",
@@ -198,7 +206,8 @@
       "homesDisabledTooltip": "Lưu trữ lâu dài bị vô hiệu hóa cho người dùng này",
       "confirmDelete": "Bạn có chắc chắn muốn xóa người dùng '{username}' không? Thao tác này cũng sẽ xóa tất cả bộ nhớ lâu dài của họ và không thể hoàn tác.",
       "allowPublicSharing": "Cho phép chia sẻ tệp công khai",
-      "allowEditTemplates": "Cho phép chỉnh sửa mẫu ứng dụng"
+      "allowEditTemplates": "Cho phép chỉnh sửa mẫu ứng dụng",
+      "signInOnly": "Chỉ đăng nhập một lần"
     },
     "groups": {
       "title": "Quản lý nhóm",
@@ -1166,7 +1175,9 @@
       "pendingConfigSaved": "Đã lưu cấu hình đang chờ xử lý. Bây giờ bạn có thể cung cấp khóa công khai của mình cho quản trị viên.",
       "settingsSaved": "Đã lưu cài đặt.",
       "appCreated": "Đã tạo ứng dụng '{name}' thành công.",
-      "launchFailed": "Khởi chạy thất bại: {error}"
+      "launchFailed": "Khởi chạy thất bại: {error}",
+      "passphraseRequired": "Nhập cụm mật khẩu để bảo vệ khóa của bạn trong trình duyệt này.",
+      "passphraseTooShort": "Hãy dùng cụm mật khẩu dài ít nhất {count} ký tự."
     },
     "placeholders": {
       "noAdmins": "Không tìm thấy quản trị viên nào.",
@@ -1177,6 +1188,17 @@
       "noPinned": "Không tìm thấy hành vi đã ghim nào.",
       "errorLoading": "Lỗi khi tải thư mục.",
       "noInstalledApps": "Chưa có ứng dụng nào được cài đặt."
+    },
+    "web": {
+      "title": "SealSkin trong trình duyệt này",
+      "bookmarklet": "Gửi tới SealSkin",
+      "bookmarkletHelp": "Kéo liên kết này vào thanh dấu trang. Nhấp vào nó sẽ mở trang bạn đang xem trong SealSkin, hoặc tìm kiếm văn bản bạn đã chọn.",
+      "pick": "Chọn cho SealSkin",
+      "pickHelp": "Kéo cả liên kết này vào đó. Nhấp vào nó, rồi nhấp vào một liên kết để mở liên kết đó trong SealSkin, hoặc vào hình ảnh, video hay âm thanh để gửi tệp. Shift-nhấp vào một liên kết để gửi tệp mà nó trỏ tới, được tải bằng phiên đăng nhập của bạn trên trang đó.",
+      "pickHint": "SealSkin: nhấp vào một liên kết, hoặc hình ảnh, video hay âm thanh, để gửi; Shift-nhấp vào liên kết để gửi tệp của nó. Nhấn Esc để hủy.",
+      "protocol": "Mở liên kết web+sealskin: tại đây",
+      "protocolHelp": "Liên kết viết dạng web+sealskin: kèm theo một địa chỉ sẽ mở địa chỉ đó trong SealSkin.",
+      "install": "Nếu trình duyệt có thể cài đặt ứng dụng web, hãy cài SealSkin từ menu của trình duyệt để chia sẻ liên kết và tệp tới nó và mở tệp bằng nó."
     }
   },
   "popup": {
@@ -1348,6 +1370,25 @@
       "finalizing": "Đang hoàn tất...",
       "completed": "Hoàn thành",
       "error": "Lỗi"
+    }
+  },
+  "web": {
+    "unlockTitle": "Mở khóa SealSkin",
+    "unlockBody": "Nhập cụm mật khẩu bảo vệ khóa của bạn trong trình duyệt này.",
+    "passphrase": "Cụm mật khẩu",
+    "unlock": "Mở khóa",
+    "wrongPassphrase": "Cụm mật khẩu này không mở được khóa của bạn.",
+    "receiving": "Đang gửi tệp tới SealSkin…",
+    "signIn": {
+      "failed": "Đăng nhập chưa hoàn tất. Hãy thử lại hoặc hỏi quản trị viên của bạn.",
+      "refused": "Nhà cung cấp danh tính đã từ chối đăng nhập.",
+      "expired": "Đăng nhập mất quá lâu hoặc đã được dùng. Hãy đăng nhập lại.",
+      "browser": "Đăng nhập đã hoàn tất trong trình duyệt hoặc thẻ khác. Hãy bắt đầu lại tại đây.",
+      "invalidUsername": "Tên tài khoản của bạn không thể là tên người dùng SealSkin, vốn chỉ gồm chữ cái, chữ số, dấu gạch dưới và dấu gạch ngang. Hãy hỏi quản trị viên của bạn.",
+      "adminName": "Tên tài khoản của bạn thuộc về một quản trị viên SealSkin, người đăng nhập bằng tệp khóa. Hãy hỏi quản trị viên của bạn.",
+      "otherIdentity": "Một tài khoản khác của nhà cung cấp danh tính đã đăng nhập với tư cách người dùng SealSkin này. Hãy hỏi quản trị viên của bạn.",
+      "notConfigured": "Máy chủ này không cung cấp đăng nhập một lần.",
+      "ended": "Nhà cung cấp danh tính đã kết thúc lần đăng nhập của bạn. Hãy đăng nhập lại."
     }
   }
 }

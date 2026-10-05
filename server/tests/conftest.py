@@ -9,8 +9,19 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from app import cluster, docker_utils, quota, store  # noqa: E402
+from app.providers import provider_class  # noqa: E402
 from app.settings import settings  # noqa: E402
 from app.state import state  # noqa: E402
+
+PROXY_SECRET = "test-proxy-secret"
+#: Headers of a request that came through the node's proxy from the web app's own page.
+WEB = {"X-SealSkin-Secret": PROXY_SECRET, "Sec-Fetch-Site": "same-origin"}
+
+def _no_docker(*_args, **_kwargs):
+    """Stand in for `docker.from_env` in tests."""
+    raise RuntimeError("Tests do not talk to Docker.")
+
 
 PATH_SETTINGS = [
     "installed_apps_path",
@@ -28,6 +39,11 @@ PATH_SETTINGS = [
     "public_storage_path",
     "public_shares_metadata_path",
     "sessions_db_path",
+    "sso_keys_path",
+    "cluster_path",
+    "node_state_path",
+    "shared_files_path",
+    "root_token_path",
 ]
 
 
@@ -51,10 +67,26 @@ def isolated_settings(tmp_path, monkeypatch):
         "public_storage_path": tmp_path / "storage" / "public",
         "public_shares_metadata_path": base / "public_shares.yml",
         "sessions_db_path": base / "sessions.yml",
+        "sso_keys_path": base / "sso_keys.yml",
+        "cluster_path": base / "cluster",
+        "node_state_path": base / "node",
+        "shared_files_path": tmp_path / "storage" / "shared_store",
+        "root_token_path": base / "root_token",
     }
     for name, path in layout.items():
         monkeypatch.setattr(settings, name, str(path))
     monkeypatch.setattr(settings, "app_resource_path", "https://example.invalid/apps.yml")
+    monkeypatch.setattr(settings, "default_provider", "docker")
+    provider_class.cache_clear()
+    store.reset()
+    store.use_peer(None)
+    for table in (cluster.NODES, cluster.POOLS, cluster.PEERS, cluster.HOMES, quota.USAGE, quota._own):
+        table.clear()
+    quota._dirty.clear()
+    monkeypatch.setattr(state, "proxy_secret", PROXY_SECRET)
+    # Never the machine's real Docker: a server started by a test would take a live server's sessions for its own.
+    monkeypatch.setattr(docker_utils, "_CLIENT", None)
+    monkeypatch.setattr(docker_utils.docker, "from_env", _no_docker)
     state.installed_records.clear()
     state.installed_apps.clear()
     state.app_stores.clear()
