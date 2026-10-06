@@ -7,6 +7,8 @@ name: Mobile
 # with `upload: false` so builds land in the pre-release but never in a store.
 # The signing material is in the release environment, which only main and
 # tags reach, so a run by hand on another branch stops at the signing jobs.
+# A caller passes `secrets: inherit`, without which a called workflow's jobs
+# see none of their environment's secrets.
 
 on:
   workflow_dispatch:

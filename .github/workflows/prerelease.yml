@@ -14,6 +14,7 @@ jobs:
     uses: ./.github/workflows/mobile.yml
     with:
       upload: false
+    secrets: inherit
 
   prerelease:
     name: Pre-release
