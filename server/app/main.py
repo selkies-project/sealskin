@@ -6,6 +6,7 @@ import asyncio
 import logging
 import os
 import platform
+import re
 import shutil
 import signal
 import subprocess
@@ -40,6 +41,14 @@ def run_caddy() -> None:
     if not os.path.exists(template_path):
         logger.error("Caddyfile template not found at %s. Caddy will not be started.", template_path)
         return
+
+    for path_value in (settings.proxy_cert_path, settings.proxy_key_path):
+        if re.search(r"[\s{}\"'\\]", path_value):
+            logger.error(
+                "Invalid character in proxy certificate/key path %r. Caddy will not be started.",
+                path_value,
+            )
+            return
 
     try:
         logger.info("Generating Caddyfile from template: %s", template_path)
