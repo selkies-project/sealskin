@@ -142,9 +142,11 @@ the **controller**. The room page wraps the streamed application with:
 * **Chat**, with display names guests choose for themselves.
 * **Voice and video** between everyone in the room, with a designated speaker
   the controller can set.
-* **Gamepad slots**: the controller assigns a participant to one of the
-  container's gamepad slots and their local controller is forwarded into the
-  session.
+* **Gamepad slots**: the controller drags the container's gamepad slots onto
+  participants, and their local controllers are forwarded into the session. A
+  participant given several slots plays one with each of their controllers, in
+  the order the browser lists them: the first takes the lowest-numbered slot.
+  Dragging a slot back to the gamepad box frees that slot alone.
 * **Mouse and keyboard hand-over**: the controller can give one participant
   the mouse and keyboard, and take them back.
 * **Application switching**: the controller can open another installed app
@@ -154,7 +156,7 @@ the **controller**. The room page wraps the streamed application with:
 
 Under the hood the room's WebSocket relays chat and control messages, and the
 server pushes the current token table (who is controller, who holds which
-slot, who has the mouse and keyboard) into every container of the session.
+slots, who has the mouse and keyboard) into every container of the session.
 Stopping the session ends the room for everyone.
 
 ## On mobile

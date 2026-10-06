@@ -374,6 +374,37 @@ def write_autostart(app: InstalledApp, host_mount_path: str, wayland_mode: bool,
         logger.error("[%s] Failed to write autostart script: %s", session_id, exc)
 
 
+def held_slots(value: Any) -> list[int]:
+    """The gamepad slots a participant's `slot` holds: none, one, or a list.
+
+    Args:
+        value: The participant record's `slot` (`controller_slot` for the
+            controller).
+
+    Returns:
+        The slot numbers, empty for none.
+    """
+    items = value if isinstance(value, list) else [value]
+    return [s for s in items if isinstance(s, int) and not isinstance(s, bool)]
+
+
+def slot_value(slots: list[int]) -> int | list[int] | None:
+    """`slots` as a participant record and the token table keep them.
+
+    `None` for none, the number for one, and the list for several, which
+    Selkies gives one each to the participant's local controllers, in order.
+
+    Args:
+        slots: Slot numbers, as `held_slots` gives them.
+
+    Returns:
+        The value to store.
+    """
+    if not slots:
+        return None
+    return slots[0] if len(slots) == 1 else list(slots)
+
+
 def collaboration_initial_tokens(session: dict[str, Any]) -> dict[str, Any]:
     """Build the token table pushed to a collaboration container.
 
@@ -389,14 +420,14 @@ def collaboration_initial_tokens(session: dict[str, Any]) -> dict[str, Any]:
     tokens: dict[str, Any] = {
         controller_token: {
             "role": "controller",
-            "slot": session.get("controller_slot"),
+            "slot": slot_value(held_slots(session.get("controller_slot"))),
             "mk_control": (mk_owner == controller_token) if mk_owner else True,
         }
     }
     for viewer in session.get("viewers", []):
         tokens[viewer["token"]] = {
             "role": "viewer",
-            "slot": viewer.get("slot"),
+            "slot": slot_value(held_slots(viewer.get("slot"))),
             "mk_control": viewer["token"] == mk_owner,
         }
     return tokens

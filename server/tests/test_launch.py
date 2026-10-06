@@ -156,6 +156,21 @@ def test_collaboration_initial_tokens():
     assert tokens["v1"]["mk_control"] is True and tokens["v2"]["mk_control"] is False
 
 
+def test_collaboration_initial_tokens_slot_lists():
+    """A participant holding several slots hands Selkies the list, and one
+    holding one the number it always did."""
+    tokens = launch.collaboration_initial_tokens(
+        {
+            "controller_token": "c",
+            "controller_slot": [1],
+            "viewers": [{"token": "v1", "slot": [3, 4]}, {"token": "v2", "slot": []}],
+        }
+    )
+    assert tokens["c"]["slot"] == 1
+    assert tokens["v1"]["slot"] == [3, 4]
+    assert tokens["v2"]["slot"] is None
+
+
 def test_resolve_timezone_prefers_valid_client_zone(monkeypatch):
     monkeypatch.setenv("TZ", "Europe/Berlin")
     assert launch.resolve_timezone("America/New_York") == "America/New_York"
