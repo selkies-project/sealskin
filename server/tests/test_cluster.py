@@ -3,12 +3,13 @@
 import hashlib
 import time
 
+import httpx
 import pytest
 from cryptography.hazmat.primitives import serialization
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from fastapi.testclient import TestClient
 
-from app import cluster, persistence, quota, security, sso, store, user_manager
+from app import cluster, persistence, proxy_auth, quota, security, sso, store, user_manager
 from app.settings import settings
 from app.state import state
 from tests.conftest import PROXY_SECRET, WEB
@@ -217,17 +218,211 @@ def test_root_signs_in_with_the_token_and_the_plain_lane_needs_the_proxy_and_the
     assert store.get("cluster/root.yml")[0].count(b"a-root-token") == 0
 
 
-def test_a_trusted_proxy_signs_users_in_and_no_one_else_can_name_one(node, monkeypatch):
+def _entrance(monkeypatch, handler):
+    """Stand `handler` in for the node's public entrance, which the proxy check asks."""
     monkeypatch.setattr(settings, "proxy_auth_user_header", "Remote-User")
+    monkeypatch.setattr(settings, "proxy_auth_groups_header", "Remote-Groups")
     monkeypatch.setattr(settings, "trusted_proxies", "10.0.0.0/8")
+    monkeypatch.setattr(settings, "public_url", "https://sealskin.example")
+    monkeypatch.setattr(proxy_auth, "_transport", httpx.MockTransport(handler))
+    proxy_auth._result.clear()
+    proxy_auth._forged.clear()
+    monkeypatch.setattr(proxy_auth, "_cookies", "")
+
+
+def _signs_in(request):
+    """A proxy that sends a visitor with no sign-in to its own page."""
+    return httpx.Response(302, headers={"Location": "https://auth.example/"})
+
+
+NAMED = {**WEB, "Remote-User": "alice", "Remote-Groups": "staff, admins", "X-SealSkin-Remote": "10.1.2.3"}
+
+
+def test_a_trusted_proxy_signs_users_in_and_no_one_else_can_name_one(node, monkeypatch):
+    _entrance(monkeypatch, _signs_in)
     monkeypatch.setattr(settings, "sso_admin_group", "admins")
-    named = {**WEB, "Remote-User": "alice", "Remote-Groups": "staff, admins"}
-    assert node.post("/api/admin/status", json={}, headers={**named, "X-SealSkin-Remote": "203.0.113.9"}).status_code == 401
-    answer = node.post("/api/admin/status", json={}, headers={**named, "X-SealSkin-Remote": "10.1.2.3"})
+    assert node.post("/api/admin/status", json={}, headers={**NAMED, "X-SealSkin-Remote": "203.0.113.9"}).status_code == 401
+    answer = node.post("/api/admin/status", json={}, headers=NAMED)
     assert answer.status_code == 200 and answer.json()["username"] == "alice" and answer.json()["is_admin"] is True
+    assert answer.json()["via"] == "proxy"
     assert user_manager.get_user("alice")["settings"]["provider_groups"] == ["admins", "staff"]
-    forged = {k: v for k, v in named.items() if k != "X-SealSkin-Secret"}
-    assert node.post("/api/admin/status", json={}, headers={**forged, "X-SealSkin-Remote": "10.1.2.3"}).status_code in (400, 401)
+    forged = {k: v for k, v in NAMED.items() if k != "X-SealSkin-Secret"}
+    assert node.post("/api/admin/status", json={}, headers=forged).status_code in (400, 401)
+
+
+def test_a_proxy_that_passes_a_visitors_own_header_on_signs_nobody_in(node, monkeypatch):
+    def passes_on(request):
+        # What the node's own answer would be to the request the proxy passed on untouched.
+        assert request.headers["remote-user"] == request.headers["remote-groups"] == proxy_auth.FORGED
+        return httpx.Response(200, json={"sealskin": "proxy-check", "forged": ["Remote-User", "Remote-Groups"], "trusted": True})
+
+    _entrance(monkeypatch, passes_on)
+    assert node.post("/api/admin/status", json={}, headers=NAMED).status_code == 401
+    assert proxy_auth._result["state"] == "open"
+    monkeypatch.setattr(settings, "proxy_auth_unchecked", True)
+    assert node.post("/api/admin/status", json={}, headers=NAMED).status_code == 200
+
+
+def test_a_proxy_that_drops_the_header_of_a_request_it_lets_through_is_believed(node, monkeypatch):
+    _entrance(monkeypatch, lambda request: httpx.Response(200, json={"sealskin": "proxy-check", "forged": [], "trusted": True}))
+    assert node.post("/api/admin/status", json={}, headers=NAMED).status_code == 200
+
+
+def test_a_node_that_cannot_reach_its_entrance_believes_the_proxy_only_when_told_to(node, monkeypatch):
+    asked = []
+
+    def away(request):
+        asked.append(str(request.url))
+        raise httpx.ConnectError("no route")
+
+    _entrance(monkeypatch, away)
+    monkeypatch.setattr(settings, "trusted_proxies", "10.0.0.0/8, 10.1.2.3")
+    assert node.post("/api/admin/status", json={}, headers=NAMED).status_code == 401
+    assert proxy_auth._result["state"] == "unreachable"
+    # The public URL first, then the one address named alone, under the public name.
+    assert asked == ["https://sealskin.example/api/auth/proxy", "https://10.1.2.3/api/auth/proxy"]
+    monkeypatch.setattr(settings, "proxy_auth_unchecked", True)
+    assert node.post("/api/admin/status", json={}, headers=NAMED).status_code == 200
+
+
+def test_a_session_on_a_trusted_network_cannot_name_a_user(node, monkeypatch):
+    _entrance(monkeypatch, _signs_in)
+    monkeypatch.setitem(state.sessions, "123e4567-e89b-12d3-a456-426614174000", {"ip": "10.1.2.3"})
+    assert node.post("/api/admin/status", json={}, headers=NAMED).status_code == 401
+    assert node.post("/api/admin/status", json={}, headers={**NAMED, "X-SealSkin-Remote": "10.1.2.4"}).status_code == 200
+
+
+def test_a_proxys_groups_are_read_whichever_way_it_separates_them(node, monkeypatch):
+    _entrance(monkeypatch, _signs_in)
+    monkeypatch.setattr(settings, "sso_admin_group", "admins")
+    answer = node.post("/api/admin/status", json={}, headers={**NAMED, "Remote-Groups": "staff|admins"})
+    assert answer.status_code == 200 and answer.json()["is_admin"] is True
+    assert user_manager.get_user("alice")["settings"]["provider_groups"] == ["admins", "staff"]
+
+
+def test_a_proxys_user_is_told_where_signing_out_happens(node, monkeypatch):
+    _entrance(monkeypatch, _signs_in)
+    monkeypatch.setattr(settings, "proxy_auth_logout_url", "https://auth.example/logout")
+    assert node.post("/api/admin/status", json={}, headers=NAMED).json()["sign_out_url"] == "https://auth.example/logout"
+
+
+def test_the_address_of_a_request_is_what_this_nodes_proxy_resolved(node):
+    seen = {}
+
+    @node.app.get("/_address")
+    def address(request: Request):
+        seen["address"] = cluster.client_address(request)
+        return {}
+
+    node.get("/_address", headers={**WEB, "X-SealSkin-Client": "198.51.100.7", "X-Forwarded-For": "6.6.6.6"})
+    assert seen["address"] == "198.51.100.7"
+    # A session on a network trusted whole says nothing about where a request came from.
+    state.sessions["123e4567-e89b-12d3-a456-426614174000"] = {"ip": "10.1.2.3"}
+    node.get("/_address", headers={**WEB, "X-SealSkin-Remote": "10.1.2.3", "X-SealSkin-Client": "198.51.100.7"})
+    state.sessions.clear()
+    assert seen["address"] == "10.1.2.3"
+    # Past the proxy secret, the header is anyone's to write.
+    node.get("/_address", headers={"X-SealSkin-Client": "198.51.100.7"})
+    assert seen["address"] != "198.51.100.7"
+
+
+def test_the_http_listener_opens_only_for_trusted_proxies(monkeypatch):
+    from app import main
+
+    monkeypatch.setattr(settings, "http_port", 8080)
+    monkeypatch.setattr(settings, "trusted_proxies", "")
+    assert main.http_listener() is False
+    monkeypatch.setattr(settings, "trusted_proxies", "10.0.0.5")
+    assert main.http_listener() is True
+    site = main.HTTP_SITE.format(port=8080, networks="10.0.0.5", public="https://sealskin.example")
+    assert "not remote_ip 10.0.0.5" in site and "redir https://sealskin.example{uri} 308" in site
+    monkeypatch.setattr(settings, "http_port", 0)
+    assert main.http_listener() is False
+
+
+def test_the_check_path_says_what_arrived(node, monkeypatch):
+    _entrance(monkeypatch, _signs_in)
+    seen = node.get("/api/auth/proxy", headers={"Remote-User": "mallory", "X-SealSkin-Remote": "10.1.2.3"}).json()
+    assert seen == {
+        "sealskin": "proxy-check", "headers": ["Remote-User", "Remote-Groups"], "user": "mallory", "groups": "",
+        "forged": [], "trusted": True,
+    }  # fmt: skip
+    assert node.get("/api/auth/proxy", headers={"X-SealSkin-Remote": "203.0.113.9"}).json()["trusted"] is False
+
+
+def test_a_groups_header_the_proxy_leaves_to_the_browser_ends_header_sign_ins(node, monkeypatch):
+    _entrance(monkeypatch, _signs_in)
+    assert node.post("/api/admin/status", json={}, headers=NAMED).status_code == 200
+    # The web app's request from a signed-in browser: the proxy set the user and passed the groups on.
+    forged = {"Remote-User": "alice", "Remote-Groups": proxy_auth.FORGED, "X-SealSkin-Remote": "10.1.2.3"}
+    assert node.get("/api/auth/proxy", headers=forged).json()["forged"] == ["Remote-Groups"]
+    assert node.post("/api/admin/status", json={}, headers=NAMED).status_code == 401
+    # The same from anywhere but a trusted proxy says nothing about the proxy.
+    proxy_auth._forged.clear()
+    node.get("/api/auth/proxy", headers={**forged, "X-SealSkin-Remote": "203.0.113.9"})
+    assert node.post("/api/admin/status", json={}, headers=NAMED).status_code == 200
+
+
+async def test_a_test_counts_only_the_forged_headers_of_its_own_moment(node, monkeypatch):
+    _entrance(monkeypatch, _signs_in)
+    proxy_auth._forged["Remote-Groups"] = time.time() - 60
+    assert (await proxy_auth.check())["state"] == "open"
+    assert (await proxy_auth.check(fresh=True))["state"] == "guarded"
+    proxy_auth._forged["Remote-Groups"] = time.time()
+    assert (await proxy_auth.check(fresh=True))["state"] == "open"
+
+
+def test_the_first_request_a_proxy_signed_in_has_the_proxy_tried_with_its_cookies(node, monkeypatch):
+    def sets_the_user_alone(request):
+        # Guarded against a visitor with no sign-in; with one, the groups header goes through as sent.
+        if "cookie" not in request.headers:
+            return httpx.Response(401)
+        assert request.headers["cookie"] == "authelia_session=valid"
+        return httpx.Response(200, json={"sealskin": "proxy-check", "forged": ["Remote-Groups"], "trusted": True})
+
+    _entrance(monkeypatch, sets_the_user_alone)
+    claimed = {**NAMED, "Remote-Groups": "admins", "Cookie": "authelia_session=valid"}
+    assert node.post("/api/admin/status", json={}, headers=claimed).status_code == 401
+    assert proxy_auth._result["state"] == "open" and "Remote-Groups" in proxy_auth._result["detail"]
+
+
+def test_no_groups_are_taken_from_a_proxy_until_a_header_is_named(node, monkeypatch):
+    _entrance(monkeypatch, _signs_in)
+    monkeypatch.setattr(settings, "proxy_auth_groups_header", "")
+    monkeypatch.setattr(settings, "sso_admin_group", "admins")
+    answer = node.post("/api/admin/status", json={}, headers=NAMED)
+    assert answer.status_code == 200 and answer.json()["is_admin"] is False
+
+
+async def test_deleting_a_user_forgets_its_homes_here_and_on_the_nodes_that_hold_them(node, monkeypatch):
+    other, _key = _other_node("bravo")
+    cluster.record_home("alice", "work", cluster.NODE_ID)
+    cluster.record_home("alice", "games", other)
+    asked = []
+
+    async def call(node_id, method, path, **_kwargs):
+        asked.append((node_id, method, path))
+        return httpx.Response(204)
+
+    monkeypatch.setattr(cluster, "call", call)
+    await cluster.forget_user("alice")
+    assert asked == [(other, "DELETE", "/peer/users/alice")]
+    assert "alice" not in cluster.HOMES and not persistence.exists(f"{settings.cluster_path}/homes/alice.yml")
+
+
+def test_only_a_frontend_has_another_node_drop_a_users_storage(node):
+    import os
+
+    home = os.path.join(settings.storage_path, "alice", "games")
+    os.makedirs(home)
+
+    def drop(roles):
+        node_id, key = _other_node("charlie", roles=roles)
+        token = _signed(key, node_id, "DELETE", "/peer/users/alice")
+        return node.delete("/peer/users/alice", headers={**PEER, "Authorization": token}).status_code
+
+    assert drop(("runtime",)) == 403 and os.path.isdir(home)
+    assert drop(("frontend",)) == 204 and not os.path.exists(os.path.dirname(home))
 
 
 def test_a_frontend_hands_an_upload_over_file_by_file(node):

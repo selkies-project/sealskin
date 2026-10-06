@@ -31,6 +31,7 @@ import { callBackground } from '../lib/host-bridge.js';
 import { apiError } from '../lib/api-error.js';
 import { storePendingFile, takeShared } from '../lib/context-store.js';
 import { loadTranslator } from '../lib/i18n.js';
+import { sendForgedSignIn } from '../lib/proxy-check.js';
 
 const DEFAULT_SEARCH_ENGINE = 'https://google.com/search?q=';
 // Firefox stops a service worker 30 s after its last event, cutting a download short without an error.
@@ -60,8 +61,19 @@ const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => document.querySelectorAll(selector);
 
 /** Show who is signed in and the destinations open to them. */
+/** Where signing out sends a user a reverse proxy signed in. */
+let signOutUrl = '';
+/** How this page's user was last signed in; a reload forgets it. */
+let signedInVia = '';
+
 function showAccount(status) {
   document.body.classList.toggle('signed-out', !status);
+  signOutUrl = (status && status.sign_out_url) || '';
+  if (status) signedInVia = status.via;
+  // A proxy's sign-in ends at the proxy: with no page of its to open, there is nothing to offer.
+  $$('.sign-out').forEach((button) => { button.hidden = Boolean(status) && status.via === 'proxy' && !signOutUrl; });
+  // The root token is the way to an administrator where the proxy's provider names none.
+  $$('.root-sign-in').forEach((button) => { button.hidden = !status || status.via !== 'proxy'; });
   if (!status) return;
   const via = t(`options.via.${status.via}`);
   $$('.avatar').forEach((el) => { el.textContent = status.username.slice(0, 1); });
@@ -93,15 +105,20 @@ function showDestination(page, params = {}) {
 async function refreshBadge() {
   if (document.body.classList.contains('signed-out') || document.hidden) return;
   const sessions = await api('/api/sessions', { method: 'GET' }).catch(() => null);
-  if (!sessions) return;
+  if (!sessions) {
+    renewProxySignIn();
+    return;
+  }
   $('#sessions-badge').textContent = sessions.length;
   $('#sessions-badge').hidden = sessions.length === 0;
 }
 
 async function signOut() {
   $('#account-menu').hidden = true;
+  const leave = signOutUrl;
   await post('/api/auth/signout', {}).catch(() => {});
-  hostApi.openPage('connect');
+  if (leave) location.assign(leave);
+  else hostApi.openPage('connect');
 }
 
 function bindShell() {
@@ -114,6 +131,13 @@ function bindShell() {
   $$('.sign-out').forEach((button) => {
     button.querySelector('span').textContent = t('options.dashboard.signOut');
     button.addEventListener('click', signOut);
+  });
+  $$('.root-sign-in').forEach((button) => {
+    button.querySelector('span').textContent = t('web.rootToken');
+    button.addEventListener('click', () => {
+      location.hash = '#root';
+      location.reload();
+    });
   });
   const menu = $('#account-menu');
   $('#account-button').addEventListener('click', (event) => {
@@ -203,14 +227,45 @@ async function remember(status) {
   }
   await callBackground(pageTransport, 'saveConfig', { config });
   showAccount(status);
+  // A user the proxy signed in is whom the proxy passes on: the server sees what it does to the headers.
+  if (status && status.via === 'proxy') sendForgedSignIn();
   // Probed now, the session origin is known by the first launch.
   if (status) warmSessionOrigin();
+}
+
+/**
+ * Whether the reverse proxy in front answers for itself, with a redirect to
+ * its sign-in page or a refusal, where the server would answer anyone.
+ */
+async function proxyWantsSignIn() {
+  try {
+    const response = await fetch('/api/auth/config', { cache: 'no-store', redirect: 'manual' });
+    return response.type === 'opaqueredirect' || response.status === 401 || response.status === 403;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Reload where a reverse proxy signed this page's user in and now asks for its
+ * sign-in again: the navigation is what the proxy sends to its sign-in page.
+ * A sign-in that ran out shows to a fetch as a redirect it cannot follow, or
+ * as the proxy's refusal.
+ *
+ * @returns {Promise<boolean>} True when the page is reloading.
+ */
+async function renewProxySignIn() {
+  if (signedInVia !== 'proxy' || !(await proxyWantsSignIn())) return false;
+  location.reload();
+  return true;
 }
 
 /** The page transport; a call the server answers 401 means the sign-in ended. */
 async function transport(message) {
   const reply = await pageTransport(message);
-  if (message.type === 'secureFetch' && reply && reply.success === false && apiError(reply.error).status === 401 && !notice) {
+  const failed = message.type === 'secureFetch' && reply && reply.success === false ? apiError(reply.error).status : null;
+  if ((failed === 0 || failed === 401) && await renewProxySignIn()) return reply;
+  if (failed === 401 && !notice) {
     notice = 'ended';
     if (hostApi) hostApi.openPage('connect');
   }
@@ -348,6 +403,18 @@ async function connect() {
   } catch (e) {
     failure = apiError(e).detail;
   }
+  // `#root` asks for the root token although a reverse proxy already signs this browser in.
+  if (status && status.via === 'proxy' && location.hash === '#root') {
+    history.replaceState(null, '', location.pathname + location.search);
+    showAccount(null);
+    await signInPanel();
+    return;
+  }
+  // A proxy's sign-in that ran out is renewed by a navigation, which the proxy sends to its sign-in page.
+  if (!status && signedInVia === 'proxy') {
+    location.reload();
+    return;
+  }
   await remember(status);
   if (status) {
     notice = null;
@@ -433,8 +500,9 @@ async function start() {
   bindShell();
   await takeLaunchContext();
   await takeSignIn();
-  // The host frames a page for a stored user and asks `connect` otherwise.
-  await remember(await whoAmI().catch(() => null));
+  // The host frames a page for a stored user and asks `connect` otherwise, as `#root` has it do.
+  const status = await whoAmI().catch(() => null);
+  await remember(status && status.via === 'proxy' && location.hash === '#root' ? null : status);
   hostApi = initHost({
     shell: 'web',
     transport,

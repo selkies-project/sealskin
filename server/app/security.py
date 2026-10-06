@@ -33,8 +33,9 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from fastapi import Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
+from starlette.datastructures import URL
 
-from . import cluster, sso, user_manager
+from . import cluster, proxy_auth, sso, user_manager
 from .models import EncryptedPayload
 from .settings import settings
 from .state import CryptoSession, state
@@ -302,6 +303,8 @@ class EncryptedRoute(APIRoute):
                     except BaseException as exc:
                         if not future.done():
                             future.set_exception(exc)
+                            # Read here, so a failure no second request waited for is not logged as lost.
+                            future.exception()
                         _IDEMPOTENCY_INFLIGHT.pop(cache_key, None)
                         raise
                     _IDEMPOTENCY_INFLIGHT.pop(cache_key, None)
@@ -415,17 +418,20 @@ async def _web_user(req: Request) -> dict[str, Any] | None:
     )
 
 
-def _proxy_user(req: Request) -> dict[str, Any] | None:
-    """Return the user a trusted reverse proxy signed in and names in its header."""
-    header = settings.proxy_auth_user_header
-    if not header or not is_plain(req) or not cluster.trusted_proxy(req.headers.get("x-sealskin-remote", "")):
+async def _proxy_user(req: Request) -> dict[str, Any] | None:
+    """Return the user a reverse proxy signed in and names in its header, where the proxy is believed."""
+    header = settings.proxy_auth_user_header.strip()
+    if not header or not is_plain(req):
         return None
     username = req.headers.get(header, "").strip()
-    if not username:
+    if not username or not await proxy_auth.believed(req.headers.get("x-sealskin-remote", ""), req.headers.get("cookie", "")):
         return None
     if not same_origin(req):
         raise HTTPException(status_code=403, detail="Requests from other origins are refused.")
-    groups = [g.strip() for g in req.headers.get(settings.proxy_auth_groups_header, "").split(",") if g.strip()]
+    # Authelia separates groups with commas, Authentik with bars.
+    groups_header = settings.proxy_auth_groups_header.strip()
+    listed = req.headers.get(groups_header, "").replace("|", ",") if groups_header else ""
+    groups = [g.strip() for g in listed.split(",") if g.strip()]
     try:
         user_manager.ensure_user(username, "proxy", "", groups)
     except ValueError as exc:
@@ -489,7 +495,7 @@ async def verify_token(req: Request) -> dict[str, Any]:
         if not forwarded:
             raise HTTPException(status_code=401, detail="The peer listener takes other nodes' requests alone.")
         return forwarded
-    return await _web_user(req) or _proxy_user(req) or _key_user(req)
+    return await _web_user(req) or await _proxy_user(req) or _key_user(req)
 
 
 async def verify_admin(user: dict[str, Any] = Depends(verify_token)) -> dict[str, Any]:
@@ -608,6 +614,16 @@ def on_session_origin(request: Request, session_id: str) -> bool:
     server's shared origin otherwise.
     """
     return request.headers.get("host", "").split(".", 1)[0].lower() == session_id
+
+
+def relative(url: URL) -> str:
+    """Return the path and query of `url`, for a redirect that stays on the origin the browser used.
+
+    A reverse proxy in front of this node need not pass the browser's port in
+    `Host`, so an absolute URL built from the request can name a place the
+    browser never reached.
+    """
+    return url.path + (f"?{url.query}" if url.query else "")
 
 
 def token_matches(given: str | None, expected: str | None) -> bool:

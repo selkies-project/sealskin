@@ -471,6 +471,14 @@ def create_admin(username: str, public_key: str | None) -> tuple[dict[str, Any],
     return get_user(username), private_pem
 
 
+def delete_storage(username: str) -> None:
+    """Remove the storage this node holds for `username`, home directories included."""
+    path = safe_join(settings.storage_path, username)
+    if os.path.isdir(path):
+        shutil.rmtree(path)
+        logger.info("Deleted storage for '%s'.", username)
+
+
 def delete_admin(username: str) -> None:
     """Delete an administrator and their storage.
 
@@ -483,11 +491,7 @@ def delete_admin(username: str) -> None:
     if not user or not user.get("is_admin"):
         raise ValueError(f"Admin '{username}' not found.")
 
-    user_storage_path = safe_join(settings.storage_path, username)
-    if os.path.isdir(user_storage_path):
-        shutil.rmtree(user_storage_path)
-        logger.info("Deleted storage for admin '%s'.", username)
-
+    delete_storage(username)
     persistence.remove(safe_join(settings.keys_base_path, "admins", username))
     load_users_and_groups()
     logger.info("Deleted admin '%s'.", username)
@@ -534,11 +538,7 @@ def delete_user(username: str) -> None:
     if user.get("is_admin"):
         raise ValueError("Cannot delete an admin user.")
 
-    user_storage_path = safe_join(settings.storage_path, username)
-    if os.path.isdir(user_storage_path):
-        shutil.rmtree(user_storage_path)
-        logger.info("Deleted storage for user '%s'.", username)
-
+    delete_storage(username)
     persistence.remove(safe_join(settings.keys_base_path, "users", username))
     load_users_and_groups()
     logger.info("Deleted user '%s'.", username)

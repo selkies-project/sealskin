@@ -240,7 +240,10 @@ serves it, and only on the plain lane: its `secureFetch` is a same-origin
 It draws the sign-in panel itself (the provider buttons `/api/auth/config`
 offers and the root token field), exchanges the grant a finished provider
 flow leaves in the URL fragment, and shows the panel again whenever a call
-answers 401.
+answers 401. Where a reverse proxy signed the user in, there is no panel:
+the web app reloads when the proxy's sign-in runs out, so the proxy sends
+the browser to its own page, and `/ui/#root` asks for the root token
+regardless.
 
 The host draws the frame around the pages: the rail of destinations and the
 signed-in user. Its launcher is `home.html`, a full page, where the extension

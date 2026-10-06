@@ -14,7 +14,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel
 
-from .. import cluster, homes, store
+from .. import cluster, homes, store, user_manager
 from .uploads import upload_path
 
 logger = logging.getLogger(__name__)
@@ -160,6 +160,16 @@ async def take_home(
     _names(username, home_name)
     await homes.receive(username, home_name, request.stream())
     return {"status": "success"}
+
+
+@router.delete("/users/{username}", status_code=204)
+async def drop_user(username: str, node: dict[str, Any] = Depends(peer)) -> Response:
+    """Remove what this node holds of a user a frontend deleted."""
+    _names(username)
+    if "frontend" not in (node.get("roles") or []):
+        raise HTTPException(status_code=403, detail="This node may not delete users.")
+    user_manager.delete_storage(username)
+    return Response(status_code=204)
 
 
 @router.delete("/homes/{username}/{home_name}", status_code=204)

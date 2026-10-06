@@ -456,6 +456,24 @@ def via_proxy(request: Request) -> bool:
     )
 
 
+def session_address(address: str) -> bool:
+    """Whether `address` is that of a session this node runs.
+
+    Sessions sit on the node's own network, which `trusted_proxies` may name
+    whole, as on Kubernetes where the ingress controller's address is any of
+    the pod network's. Nothing a session says about a request is believed.
+    """
+    return bool(address) and any(session.get("ip") == address for session in state.sessions.values())
+
+
+def client_address(request: Request) -> str:
+    """Return the address a request came from, past this node's proxy and the reverse proxies it trusts."""
+    if not via_proxy(request):
+        return request.client.host if request.client else ""
+    remote = request.headers.get("x-sealskin-remote", "")
+    return remote if session_address(remote) else request.headers.get("x-sealskin-client", "")
+
+
 async def verify_request(request: Request, body: bytes | None = None, approved: bool = True) -> dict[str, Any]:
     """Authenticate a peer request and return `{"node": record, "claims": claims}`.
 
@@ -779,6 +797,28 @@ def record_home(username: str, home_name: str, node_id: str | None) -> None:
         except store.Conflict:
             continue
     HOMES[username] = {str(k): str(v) for k, v in (persistence.read_yaml(path, {}) or {}).items()}
+
+
+async def forget_user(username: str) -> None:
+    """Remove a deleted user's home directory records, and the storage other nodes hold for the name.
+
+    Left behind, a record offers the next user of that name a home directory
+    that is gone, and another node's storage would be theirs.
+    """
+    elsewhere = {node_id for node_id in HOMES.get(username, {}).values() if node_id != NODE_ID}
+    for node_id in sorted(elsewhere):
+        name = NODES.get(node_id, {}).get("name", node_id)
+        try:
+            answer = await call(node_id, "DELETE", f"/peer/users/{username}", timeout=120)
+            if answer.status_code >= 300:
+                logger.warning("Node '%s' kept the storage of deleted user '%s': %s", name, username, answer.status_code)
+        except httpx.HTTPError as exc:
+            logger.warning("Node '%s' did not answer to delete the storage of '%s': %s", name, username, exc)
+    try:
+        persistence.remove(os.path.join(settings.cluster_path, "homes", f"{username}.yml"))
+    except (OSError, store.StoreUnavailable) as exc:
+        logger.warning("Could not remove the home directory records of '%s': %s", username, exc)
+    HOMES.pop(username, None)
 
 
 def adopt_local_homes() -> None:

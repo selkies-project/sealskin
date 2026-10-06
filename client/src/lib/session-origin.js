@@ -30,7 +30,7 @@ async function reaches(suffix, port) {
  * @param {string} [domain] The server's session domain, tried first.
  * @returns {Promise<string|null>} The suffix, or null when none answers.
  */
-export async function probeSessionOrigin(host, port, domain = '') {
+export async function reachableSessionOrigin(host, port, domain = '') {
   const named = host && !host.includes(':') && !/^[\d.]+$/.test(host);
   const labels = named ? host.split('.') : [];
   const under = named ? (labels.length > 2 ? [host, labels.slice(1).join('.')] : [host]) : [];
@@ -38,4 +38,19 @@ export async function probeSessionOrigin(host, port, domain = '') {
   const probes = suffixes.map((suffix) => reaches(suffix, port));
   for (const [i, probe] of probes.entries()) if (await probe) return suffixes[i];
   return null;
+}
+
+/**
+ * The suffix a launch opens its session under: the one that answers
+ * (`reachableSessionOrigin`), else the domain the server names, taken as it
+ * is. A reverse proxy that signs users in turns the probe away, which
+ * carries no credentials, and lets the session's own navigation through.
+ *
+ * @param {string} host The server's host name.
+ * @param {string|number} port The session port.
+ * @param {string} [domain] The server's session domain.
+ * @returns {Promise<string|null>} The suffix, or null when none answers and the server names none.
+ */
+export async function probeSessionOrigin(host, port, domain = '') {
+  return (await reachableSessionOrigin(host, port, domain)) || domain || null;
 }

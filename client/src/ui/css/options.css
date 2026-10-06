@@ -409,6 +409,8 @@ input.masked { -webkit-text-security: disc; }
 .copy-row span { flex: 0 0 11rem; font-size: 0.85rem; color: var(--text-secondary); }
 .copy-row code, .signin-card p code { flex: 1; min-width: 0; padding: 0.35rem 0.6rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background-color: var(--bg-0); font-family: var(--font-mono); font-size: 0.8rem; overflow-wrap: anywhere; }
 .copy-row button { padding: 0.4rem 0.6rem; }
+.copy-rows .description { margin: 0 0 0.35rem 11.75rem; }
+.copy-rows .description.reach-bad { color: var(--color-danger-text, #f87171); }
 .signin-result { margin-top: 1rem; }
 .signin-result:empty { display: none; }
 .signin-ok { padding: 0.8rem 1rem; border: 1px solid rgba(16, 185, 129, 0.35); border-radius: var(--radius-sm); background-color: var(--color-success-soft); }
@@ -434,7 +436,7 @@ input.masked { -webkit-text-security: disc; }
 .lab-closing { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
 .lab-closing p { margin: 0; font-weight: 500; }
 .lab-closing p.error { color: var(--color-danger-text); }
-@media (max-width: 900px) { .lab-grid { grid-template-columns: 1fr; } .copy-row { flex-wrap: wrap; } .copy-row span { flex-basis: 100%; } }
+@media (max-width: 900px) { .lab-grid { grid-template-columns: 1fr; } .copy-row { flex-wrap: wrap; } .copy-row span { flex-basis: 100%; } .copy-rows .description { margin-left: 0; } }
 
 #Cluster td small { display: block; color: var(--text-muted); font-size: 0.8rem; }
 

@@ -11,6 +11,8 @@ import { secureFetch, fetchSchema, openPage } from '../lib/api.js';
 import { loadTranslator, applyTranslations } from '../lib/i18n.js';
 import { browserTimezone } from '../lib/timezone.js';
 import { supportedLangs } from '../lib/languages.js';
+import { sendForgedSignIn } from '../lib/proxy-check.js';
+import { reachableSessionOrigin } from '../lib/session-origin.js';
 import {
   announce, escapeHtml, formatBytes, formatDate, timeAgo, formatLogoSrc, hydrateLogos, showToast, tOr,
   addMobileSafeArea, addMobileBackButton, downloadBlob, currentLocale,
@@ -1271,6 +1273,8 @@ const CLUSTER_SETTINGS = {
   oidc_client_secret: 'secret',
   oidc_scopes: 'text',
   saml_metadata_url: 'text',
+  saml_username_attribute: 'text',
+  saml_groups_attribute: 'text',
   sso_username_claim: 'text',
   sso_groups_claim: 'text',
   sso_admin_group: 'text',
@@ -1279,20 +1283,24 @@ const CLUSTER_SETTINGS = {
   sso_create_users: 'bool',
   proxy_auth_user_header: 'text',
   proxy_auth_groups_header: 'text',
+  proxy_auth_logout_url: 'text',
   web_session_seconds: 'hours',
   files_sync: 'sync',
 };
 // What the web app's Sign In section shows, card by card; the other shells keep one form in the Cluster section.
 const SIGNIN_CARDS = {
   oidc: ['oidc_issuer', 'oidc_client_id', 'oidc_client_secret', 'oidc_scopes'],
-  saml: ['saml_metadata_url'],
-  proxy: ['proxy_auth_user_header', 'proxy_auth_groups_header'],
+  saml: ['saml_metadata_url', 'saml_username_attribute', 'saml_groups_attribute'],
+  proxy: ['proxy_auth_user_header', 'proxy_auth_groups_header', 'proxy_auth_logout_url'],
   who: ['sso_username_claim', 'sso_groups_claim', 'sso_admin_group', 'sso_max_age_seconds', 'web_session_seconds', 'sso_create_users', 'sso_force_login'],
 };
 // Issuer URL shapes of common OpenID Connect providers; a preset fills the hints and stores nothing.
 const OIDC_PRESETS = {
-  keycloak: 'https://<host>/realms/<realm>',
+  authelia: 'https://<host>',
   authentik: 'https://<host>/application/o/<slug>/',
+  keycloak: 'https://<host>/realms/<realm>',
+  pocketid: 'https://<host>',
+  tinyauth: 'https://<host>',
   entra: 'https://login.microsoftonline.com/<tenant>/v2.0',
   google: 'https://accounts.google.com',
   okta: 'https://<org>.okta.com',
@@ -1370,6 +1378,14 @@ function renderClusterSettings() {
   document.getElementById('cluster-settings-fields').innerHTML = names.map(settingField).join('');
 }
 
+// The headers and logout page of the proxies' identity providers; a preset fills the fields and stores nothing until saved.
+const PROXY_PRESETS = {
+  authelia: { user: 'Remote-User', groups: 'Remote-Groups', logout: 'https://<auth host>/logout' },
+  authentik: { user: 'X-authentik-username', groups: 'X-authentik-groups', logout: 'https://<this host>/outpost.goauthentik.io/sign_out' },
+  tinyauth: { user: 'Remote-User', groups: 'Remote-Groups', logout: 'https://<tinyauth host>/logout' },
+  oauth2proxy: { user: 'X-Auth-Request-Preferred-Username', groups: 'X-Auth-Request-Groups', logout: 'https://<this host>/oauth2/sign_out' },
+};
+
 function signInPill(state) {
   return `<span class="pill ${state}">${escapeHtml(t(`options.signin.pill.${state}`))}</span>`;
 }
@@ -1394,6 +1410,21 @@ function signInCard(kind, title, state, body, test) {
         </div>
         <div class="signin-result" id="signin-result-${kind}"></div>` : ''}
     </form>`;
+}
+
+/** What the node's check of the reverse proxy found, as the line under the proxy card's fields. */
+function proxyCheckLine(check) {
+  if (!check || check.state === 'off') return '';
+  if (check.unchecked) return `<p class="status-message error">${escapeHtml(t('options.signin.proxyCheck.unchecked'))}</p>`;
+  if (check.state === 'guarded') return `<div class="signin-ok"><p><i class="fas fa-check-circle"></i> ${escapeHtml(t('options.signin.proxyCheck.guarded'))}</p></div>`;
+  return `<p class="status-message error">${escapeHtml(t(`options.signin.proxyCheck.${check.state}`))} ${escapeHtml(check.detail || '')}</p>`;
+}
+
+/** The proxy card's pill: active only while the proxy's header is believed. */
+function proxyState(signin, settings) {
+  if (!settings.proxy_auth_user_header) return 'none';
+  const check = signin.proxy_check || {};
+  return signin.trusted_proxies && (check.unchecked || check.state === 'guarded') ? 'active' : 'off';
 }
 
 /** Draw the Sign In section: one card per way of signing in, each saved on its own. */
@@ -1425,17 +1456,24 @@ function renderSignIn() {
         ${copyRows([['options.signin.samlEntity', urls.saml_entity_id], ['options.signin.samlAcs', urls.saml_acs], ['options.signin.samlSlo', urls.saml_slo]])}
         ${urls.saml_entity_id ? `<p><a href="${escapeHtml(urls.saml_entity_id)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('options.signin.samlMetadata'))}</a></p>` : ''}`;
   const untrusted = settings.proxy_auth_user_header && !signin.trusted_proxies;
+  const proxyPresets = Object.keys(PROXY_PRESETS).map((preset) => `<option value="${preset}">${escapeHtml(t(`options.signin.proxyPresets.${preset}`))}</option>`).join('');
   const proxy = `
+        ${sentence('options.signin.proxyHelp')}
+        <div class="form-group">
+            <label for="signin-proxy-preset">${escapeHtml(t('options.signin.provider'))}</label>
+            <select id="signin-proxy-preset"><option value="">${escapeHtml(t('options.signin.proxyPresetChoose'))}</option>${proxyPresets}</select>
+        </div>
         ${fields('proxy')}
         <p><span>${escapeHtml(t('options.signin.trustedProxies'))}</span> <code>${escapeHtml(signin.trusted_proxies || t('common.none'))}</code></p>
         ${sentence('options.signin.trustedProxiesHelp')}
-        ${untrusted ? `<p class="status-message error">${escapeHtml(t('options.signin.noTrustedProxy'))}</p>` : ''}`;
+        ${untrusted ? `<p class="status-message error">${escapeHtml(t('options.signin.noTrustedProxy'))}</p>` : proxyCheckLine(signin.proxy_check)}`;
   const who = `${sentence('options.signin.whoHelp')}${fields('who')}`;
 
   container.innerHTML = [
+    reachCard(signin),
     signInCard('oidc', 'options.signin.oidcTitle', stateOf('oidc', settings.oidc_issuer), oidc, true),
     signInCard('saml', 'options.signin.samlTitle', stateOf('saml', settings.saml_metadata_url), saml, true),
-    signInCard('proxy', 'options.signin.proxyTitle', stateOf('proxy', settings.proxy_auth_user_header), proxy, false),
+    signInCard('proxy', 'options.signin.proxyTitle', proxyState(signin, settings), proxy, true),
     `<form class="card signin-card" data-card="who">
         <div class="card-header"><h3>${escapeHtml(t('options.signin.whoTitle'))}</h3></div>
         ${who}
@@ -1452,6 +1490,75 @@ function renderSignIn() {
     else control.value = value;
   });
   applyOidcPreset();
+  testSessionNames();
+}
+
+/** How browsers reach the server, as the server and this browser each see it: what a reverse proxy has to get right. */
+function reachCard(signin) {
+  const arrival = signin.arrival || {};
+  const row = (label, value, note = '', bad = false) => `
+        <div class="copy-row">
+            <span>${escapeHtml(t(label))}</span>
+            <code>${escapeHtml(value || t('common.none'))}</code>
+        </div>${note ? `<p class="description${bad ? ' reach-bad' : ''}">${escapeHtml(note)}</p>` : ''}`;
+  const publicUrl = clusterData.public_url || '';
+  const elsewhere = info.shell === 'web' && publicUrl && publicUrl.replace(/\/$/, '') !== location.origin;
+  const via = !arrival.remote ? ''
+    : arrival.trusted ? t('options.signin.reach.viaTrusted')
+      : t(signin.trusted_proxies ? 'options.signin.reach.viaOther' : 'options.signin.reach.viaDirect');
+  return `
+    <div class="card signin-card" data-card="reach">
+        <div class="card-header"><h3>${escapeHtml(t('options.signin.reach.title'))}</h3></div>
+        ${`<p class="description">${escapeHtml(t('options.signin.reach.help'))}</p>`}
+        <div class="copy-rows">
+            ${row('options.signin.reach.publicUrl', publicUrl, elsewhere ? t('options.signin.reach.publicUrlDiffers', { origin: location.origin }) : '', elsewhere)}
+            ${row('options.signin.reach.sessionDomain', clusterData.session_domain || t('options.cluster.sessionDomainUnset'))}
+            <div class="copy-row">
+                <span>${escapeHtml(t('options.signin.reach.sessionNames'))}</span>
+                <code id="reach-session-names">${escapeHtml(t('options.signin.testing'))}</code>
+            </div>
+            <p class="description" id="reach-session-note" hidden></p>
+            ${row('options.signin.reach.trustedProxies', signin.trusted_proxies)}
+            ${row('options.signin.reach.arrivedFrom', arrival.remote, via, Boolean(arrival.remote) && !arrival.trusted && Boolean(signin.trusted_proxies))}
+            ${row('options.signin.reach.yourAddress', arrival.client)}
+            ${row('options.signin.reach.httpPort', signin.http_port ? String(signin.http_port) : t('options.groups.off'))}
+        </div>
+    </div>`;
+}
+
+/** Ask a made-up session name for its answer, as a launch does, and say in the card whether one came. */
+async function testSessionNames() {
+  const target = document.getElementById('reach-session-names');
+  if (!target || info.shell !== 'web') {
+    if (target) target.closest('.copy-row').hidden = true;
+    return;
+  }
+  const named = clusterData.session_domain || '';
+  const found = await reachableSessionOrigin(location.hostname, location.port || '443', named);
+  const note = document.getElementById('reach-session-note');
+  if (!document.body.contains(target)) return;
+  if (found) {
+    target.textContent = `<session id>.${found}${location.port ? `:${location.port}` : ''}`;
+    if (named && named !== found) {
+      note.textContent = t('options.signin.reach.sessionNamesOther', { domain: named });
+      note.className = 'description reach-bad';
+      note.hidden = false;
+    }
+    return;
+  }
+  // A proxy that signs users in on the session names turns this test away and lets a real session through.
+  target.textContent = t('options.signin.reach.sessionNamesNone');
+  note.textContent = t(named ? 'options.signin.reach.sessionNamesGuarded' : 'options.signin.reach.sessionNamesHelp', { domain: named });
+  note.className = named ? 'description' : 'description reach-bad';
+  note.hidden = false;
+}
+
+function applyProxyPreset() {
+  const preset = PROXY_PRESETS[document.getElementById('signin-proxy-preset').value];
+  if (!preset) return;
+  document.getElementById('cluster-setting-proxy_auth_user_header').value = preset.user;
+  document.getElementById('cluster-setting-proxy_auth_groups_header').value = preset.groups;
+  document.getElementById('cluster-setting-proxy_auth_logout_url').placeholder = preset.logout;
 }
 
 function applyOidcPreset() {
@@ -1478,9 +1585,19 @@ async function testSignIn(kind) {
   result().innerHTML = `<p class="description"><span class="spinner-small" style="display: inline-block;"></span> ${escapeHtml(t('options.signin.testing'))}</p>`;
   let answer;
   try {
+    // The server counts, in its test, the forged headers that reach it from this browser now.
+    if (kind === 'proxy' && info.shell === 'web') await sendForgedSignIn();
     answer = await secureFetch('/api/admin/cluster/signin/test', { method: 'POST', body: JSON.stringify({ kind }) });
   } catch (error) {
     answer = { ok: false, error: error.message };
+  }
+  if (kind === 'proxy') {
+    // The card's own line says what the check found.
+    result().innerHTML = '';
+    if (clusterData.signin) clusterData.signin.proxy_check = { ...clusterData.signin.proxy_check, ...answer };
+    if (answer.state) renderSignIn();
+    else result().innerHTML = `<p class="status-message error">${escapeHtml(answer.error || t('options.signin.testFailed'))}</p>`;
+    return;
   }
   if (!answer.ok) {
     result().innerHTML = `<p class="status-message error">${escapeHtml(answer.error || t('options.signin.testFailed'))}</p>`;
@@ -1519,7 +1636,10 @@ function bindSignInEvents() {
     const test = e.target.closest('button[data-test]');
     if (test) testSignIn(test.dataset.test);
   });
-  container.addEventListener('change', (e) => { if (e.target.id === 'signin-oidc-preset') applyOidcPreset(); });
+  container.addEventListener('change', (e) => {
+    if (e.target.id === 'signin-oidc-preset') applyOidcPreset();
+    if (e.target.id === 'signin-proxy-preset') applyProxyPreset();
+  });
 }
 
 // --- AUDIT LOG ---

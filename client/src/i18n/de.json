@@ -78,7 +78,10 @@
       "installedApps": "Installierte Apps",
       "users": "Benutzer",
       "groups": "Gruppen",
-      "admins": "Admins"
+      "admins": "Admins",
+      "cluster": "Cluster",
+      "signIn": "Anmeldung",
+      "audit": "Audit-Protokoll"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -104,7 +107,14 @@
         "<strong>Um persistenten Speicher zu verwalten:</strong> Verwenden Sie den Tab \"Home-Verzeichnisse\" auf dieser Seite, um Speichervolumes zu erstellen und zu löschen, die über mehrere Sitzungen hinweg verwendet werden können.",
         "<strong>Um Startoptionen zu speichern:</strong> Aktivieren Sie das Kontrollkästchen \"Diese Startoptionen speichern\" im Popup, bevor Sie eine Anwendung für einen bestimmten Dateityp (z. B. .pdf) oder für alle URLs starten. Verwalten Sie diese gespeicherten Einstellungen im Tab \"Gepinntes Verhalten\"."
       ],
-      "confirmLogout": "Sind Sie sicher, dass Sie sich abmelden möchten? Dadurch wird Ihre gespeicherte Konfiguration aus diesem Browser gelöscht."
+      "confirmLogout": "Sind Sie sicher, dass Sie sich abmelden möchten? Dadurch wird Ihre gespeicherte Konfiguration aus diesem Browser gelöscht.",
+      "changeConnection": "Verbindung ändern",
+      "certExpired": "Das TLS-Zertifikat des Servers ist abgelaufen. HTTPS-Verbindungen schlagen fehl, bis es erneuert wird.",
+      "certExpiring": "Das TLS-Zertifikat des Servers läuft in {days} Tag(en) ab. Erneuern Sie es, um Verbindungsfehler zu vermeiden.",
+      "signOut": "Abmelden",
+      "signedInThrough": "Angemeldet über:",
+      "allowance": "Kontingent:",
+      "allowanceUsed": "{used} von {hours} Stunden pro {period}"
     },
     "config": {
       "quickSetup": "Schnelleinrichtung",
@@ -135,15 +145,7 @@
       "keyGeneration": "Schlüsselgenerierung",
       "keyGenDescription": "Wenn Sie kein Schlüsselpaar haben, können Sie hier eines generieren. Der private Schlüssel wird oben eingefügt. Geben Sie den öffentlichen Schlüssel an Ihren Administrator weiter.",
       "generateKeyButton": "Neues Schlüsselpaar generieren",
-      "publicKeyForAdminLabel": "Ihr öffentlicher Schlüssel (für den Admin)",
-      "passphraseLabel": "Passphrase",
-      "remember": "Meinen Schlüssel in diesem Browser behalten",
-      "rememberHelp": "Schalten Sie dies auf einem gemeinsam genutzten Computer aus: SealSkin behält Ihren Schlüssel dann nur, solange dieser Tab geöffnet ist, und Sie laden Ihre Konfiguration beim nächsten Mal erneut.",
-      "passphraseHelp": "Ihr privater Schlüssel wird in diesem Browser mit dieser Passphrase verschlüsselt gespeichert. Sie geben sie bei jedem Öffnen von SealSkin hier ein.",
-      "signInTitle": "Single Sign-On",
-      "signInHelp": "Melden Sie sich mit dem Konto an, das Ihre Organisation verwaltet, statt mit einer Konfigurationsdatei. SealSkin behält die Anmeldung nur in diesem Tab, sodass Sie sich beim nächsten Mal erneut anmelden.",
-      "signInOidc": "Mit OpenID Connect anmelden",
-      "signInSaml": "Mit SAML anmelden"
+      "publicKeyForAdminLabel": "Ihr öffentlicher Schlüssel (für den Admin)"
     },
     "home": {
       "title": "Ihre Home-Verzeichnisse",
@@ -153,9 +155,13 @@
       "namePlaceholder": "z.B. meine-projektdateien",
       "nameTitle": "Verwenden Sie nur Buchstaben, Zahlen, Unterstrich oder Bindestrich.",
       "createButton": "Verzeichnis erstellen",
-      "isLaboratory": "Dies ist eine Labor-App, die aus einem Basis-Image mit benutzerdefinierten Einstellungen erstellt wurde.",
-      "laboratory": "Labor",
-      "confirmDelete": "Sind Sie sicher, dass Sie die installierte App '{appName}' löschen möchten?"
+      "confirmDelete": "Sind Sie sicher, dass Sie das Home-Verzeichnis '{homeName}' löschen möchten? Alle darin enthaltenen Daten gehen dauerhaft verloren.",
+      "node": "Knoten",
+      "move": "Verschieben",
+      "moveTo": "Auf Knoten verschieben",
+      "moveHelp": "Das Home-Verzeichnis wird auf den Knoten kopiert und von dem Knoten entfernt, der es bisher hält. Sitzungen, die es verwenden, müssen zuerst beendet werden.",
+      "moveTitle": "'{homeName}' verschieben",
+      "noOtherNode": "Es gibt keinen anderen Knoten, auf den es verschoben werden könnte."
     },
     "sessions": {
       "title": "Aktive Sitzungen",
@@ -207,7 +213,21 @@
       "confirmDelete": "Sind Sie sicher, dass Sie den Benutzer '{username}' löschen möchten? Dadurch wird auch sein gesamter persistenter Speicher gelöscht und kann nicht rückgängig gemacht werden.",
       "allowPublicSharing": "Öffentliche Dateifreigabe zulassen",
       "allowEditTemplates": "Bearbeiten von App-Vorlagen zulassen",
-      "signInOnly": "Nur Single Sign-On"
+      "signInOnly": "Nur Single Sign-On",
+      "admin": "Administrator",
+      "gpuShare": "Teilen einer GPU mit anderen Sitzungen erlauben",
+      "homeMigration": "Verschieben von Home-Verzeichnissen zwischen Knoten erlauben",
+      "storageLimit": "Speicherlimit (GB pro Knoten)",
+      "sessionCpus": "CPUs pro Sitzung",
+      "sessionMemory": "Arbeitsspeicher pro Sitzung (MB)",
+      "sessionHours": "Stunden, die eine Sitzung laufen darf",
+      "allowanceHours": "Kontingent (gewichtete Sitzungsstunden)",
+      "allowancePeriod": "Kontingentzeitraum",
+      "pools": "Erlaubte eingeschränkte Pools (kommagetrennt)",
+      "poolsDenied": "Verweigerte Pools (kommagetrennt)",
+      "groupsHelp": "Halten Sie Strg oder die Befehlstaste gedrückt, um mehrere auszuwählen. Wo Gruppen sich widersprechen, gilt der einschränkende Wert.",
+      "providerGroups": "Gruppen, die der Identitätsanbieter bei der letzten Anmeldung genannt hat: {groups}",
+      "limitsHelp": "Ein Limit von -1 oder ein leeres Feld setzt keines."
     },
     "groups": {
       "title": "Gruppenverwaltung",
@@ -217,7 +237,14 @@
       "overrideTitle": "Gruppen-Überschreibungseinstellungen",
       "permissionsTitle": "Berechtigungs- & Härtungs-Überschreibungen",
       "createButton": "Gruppe erstellen",
-      "confirmDelete": "Sind Sie sicher, dass Sie die Gruppe '{groupName}' löschen möchten? Benutzer in dieser Gruppe werden auf ihre individuellen Einstellungen zurückgesetzt."
+      "confirmDelete": "Sind Sie sicher, dass Sie die Gruppe '{groupName}' löschen möchten? Benutzer in dieser Gruppe werden auf ihre individuellen Einstellungen zurückgesetzt.",
+      "notSet": "Nicht gesetzt",
+      "allow": "Erlauben",
+      "deny": "Verweigern",
+      "on": "Ein",
+      "off": "Aus",
+      "ssoGroups": "Gruppen des Identitätsanbieters, deren Mitglieder zu dieser Gruppe gehören (kommagetrennt)",
+      "overrideHelp": "Eine Gruppe bestimmt nur, was hier gesetzt ist; alles, was nicht gesetzt oder leer ist, bleibt die eigene Einstellung jedes Mitglieds."
     },
     "installedApps": {
       "title": "Installierte Anwendungen",
@@ -225,6 +252,8 @@
       "noAppsFound": "Keine installierten Apps gefunden.",
       "pulling": "Neues Image wird heruntergeladen...",
       "notLocal": "Image lokal nicht gefunden",
+      "isLaboratory": "Dies ist eine Labor-App, erstellt aus einem Basis-Image mit eigenen Einstellungen.",
+      "laboratory": "Labor",
       "confirmDelete": "Sind Sie sicher, dass Sie die installierte App '{appName}' löschen möchten?"
     },
     "appStore": {
@@ -1045,7 +1074,33 @@
       "closeButton": "Sitzung schließen & abschließen",
       "savingAndLaunching": "Speichern & Starten...",
       "placeholder": "Das App-Labor ermöglicht es Ihnen, das Basis-Home-Verzeichnis und das Startskript für eine Anwendung zu konfigurieren, die auf einer bestehenden installierten Anwendung basiert. Dieses Home-Verzeichnis wird bei der ersten Initialisierung für den Benutzer mit allen Dateien und Einstellungen kopiert, die Sie in dieser Sitzung einrichten. Sie können eine bestehende Labor-App erneut starten, um deren Inhalt weiter zu ändern.",
-      "formInvalid": "Bitte wählen Sie eine Basis-App aus und geben Sie einen Namen für die neue App an."
+      "formInvalid": "Bitte wählen Sie eine Basis-App aus und geben Sie einen Namen für die neue App an.",
+      "explainer": "Das App-Labor erstellt eine Meta-App: eine Variante einer installierten Anwendung mit eigenem Namen, eigenem Symbol, eigenem Autostart-Skript und einem bereits eingerichteten Home-Verzeichnis. Sie richten die Anwendung einmal in einer Anpassungssitzung ein, und der erste Start jedes Benutzers beginnt mit einer Kopie dieses Home-Verzeichnisses.",
+      "step1Title": "App beschreiben",
+      "step1": "Wählen Sie die Anwendung, auf der aufgebaut wird, und geben Sie der Meta-App einen Namen, ein Symbol und die Benutzer, die sie starten dürfen.",
+      "step2Title": "In einer Live-Sitzung anpassen",
+      "step2": "Eine Anpassungssitzung öffnet sich mit beschreibbarem Vorlagen-Home-Verzeichnis. Installieren Sie Erweiterungen, melden Sie sich an und richten Sie alles so ein, wie Benutzer es vorfinden sollen.",
+      "step3Title": "Sitzung schließen, um die Vorlage zu speichern",
+      "step3": "Wird die Sitzung von dieser Seite aus geschlossen, bleibt das Home-Verzeichnis als Vorlage erhalten.",
+      "openTitle": "Anpassungssitzung geöffnet",
+      "openStarted": "Gestartet {when}",
+      "openDescription": "Alles, was im Home-Verzeichnis dieser Sitzung geändert wird, wird zur Vorlage. Die Sitzung bleibt geöffnet, bis Sie sie hier schließen; sie erscheint nicht in der Liste Ihrer Sitzungen.",
+      "reopen": "Sitzung erneut öffnen",
+      "closeAndSave": "Schließen & Vorlage speichern",
+      "confirmClose": "Anpassungssitzung von '{name}' schließen? Die Sitzung wird beendet, und ihr Home-Verzeichnis bleibt als Vorlage erhalten.",
+      "templateSaved": "Sitzung geschlossen. Die Vorlage ist gespeichert.",
+      "busy": "Eine Anpassungssitzung für '{name}' ist geöffnet. Schließen Sie sie oben, bevor Sie eine Meta-App ändern oder eine weitere starten.",
+      "describeTitle": "1. Beschreiben",
+      "customizeTitle": "2. Anpassen",
+      "customizeDescription": "Die Anpassungssitzung startet mit diesen Optionen. Es kann jeweils nur eine Sitzung geöffnet sein.",
+      "advanced": "Erweitert",
+      "saveAndOpen": "Speichern & Anpassungssitzung öffnen",
+      "listTitle": "Ihre Meta-Apps",
+      "listNone": "Noch keine Meta-Apps.",
+      "closingStopping": "Sitzung wird beendet…",
+      "closingSaving": "Vorlage wird gespeichert…",
+      "closingSaved": "Vorlage gespeichert: {files} Dateien, {size}",
+      "closingFailed": "Schließen der Sitzung fehlgeschlagen."
     },
     "modals": {
       "editUserTitle": "Benutzer bearbeiten: {username}",
@@ -1062,6 +1117,8 @@
       "dirsForUser": "Verzeichnisse für Benutzer: {username}",
       "dirsForAdmin": "Verzeichnisse für Admin: {username}",
       "newDirForUser": "Neues Verzeichnis für Benutzer erstellen",
+      "customAutostartScriptLabel": "Benutzerdefiniertes Autostart-Skript",
+      "customAutostartScriptDescription": "Passen Sie die Autostart-Logik an. Lassen Sie das Feld leer, um die Standardeinstellung des Anwendungsanbieters zu verwenden.",
       "createDirButton": "Verzeichnis erstellen",
       "confirmDeleteDir": "Sind Sie sicher, dass Sie '{homeName}' für Benutzer '{username}' löschen möchten? Dies ist endgültig.",
       "installAppTitle": "{appName} installieren",
@@ -1080,8 +1137,6 @@
       "advancedSettings": "Erweiterte Einstellungen",
       "appTemplateLabel": "Anwendungsvorlage",
       "appTemplateDescription": "Wählen Sie eine vorkonfigurierte Vorlage für erweiterte Container-Starteinstellungen.",
-      "customAutostartScriptLabel": "Benutzerdefiniertes Autostart-Skript",
-      "customAutostartScriptDescription": "Passen Sie die Autostart-Logik an. Lassen Sie das Feld leer, um die Standardeinstellung des Anwendungsanbieters zu verwenden.",
       "saveInstallation": "Installation speichern",
       "updateStatusTitle": "Update-Status für {appName}",
       "checkingUpdates": "Suche nach Updates...",
@@ -1114,9 +1169,6 @@
       "loggedInUser": "Angemeldet als Standardbenutzer: {username}.",
       "loginFailed": "Anmeldung fehlgeschlagen: {error}",
       "adminDataRefreshFailed": "Aktualisieren der Admin-Daten fehlgeschlagen: {error}",
-      "closingSession": "Anpassungssitzung wird committet...",
-      "sessionClosed": "Anpassungssitzung geschlossen.",
-      "sessionCloseFailed": "Fehler beim Schließen der Anpassungssitzung: {error}",
       "logoutSuccess": "Abgemeldet und Konfiguration gelöscht.",
       "generateConfigFailed": "Konfiguration konnte nicht generiert werden, Benutzerdetails fehlen.",
       "copySuccess": "Konfiguration in die Zwischenablage kopiert!",
@@ -1153,6 +1205,9 @@
       "sessionStopError": "Fehler beim Beenden der Sitzung: {error}",
       "sessionStopped": "Sitzung erfolgreich beendet.",
       "appDataRefreshFailed": "Aktualisieren der App-Daten fehlgeschlagen: {error}",
+      "closingSession": "Anpassungssitzung wird committet...",
+      "sessionClosed": "Anpassungssitzung geschlossen.",
+      "sessionCloseFailed": "Fehler beim Schließen der Anpassungssitzung: {error}",
       "fetchingApps": "Apps aus dem Store werden abgerufen...",
       "fetchAppsFailed": "Abrufen der Apps aus dem Store fehlgeschlagen: {error}",
       "appStoreAddFailed": "Fehler beim Hinzufügen des Stores: {error}",
@@ -1176,8 +1231,16 @@
       "settingsSaved": "Einstellungen gespeichert.",
       "appCreated": "App '{name}' erfolgreich erstellt.",
       "launchFailed": "Start fehlgeschlagen: {error}",
-      "passphraseRequired": "Geben Sie eine Passphrase ein, um Ihren Schlüssel in diesem Browser zu schützen.",
-      "passphraseTooShort": "Verwenden Sie eine Passphrase mit mindestens {count} Zeichen."
+      "homedirMoving": "Home-Verzeichnis '{homeName}' wird verschoben...",
+      "homedirMoved": "Home-Verzeichnis '{homeName}' verschoben.",
+      "homedirMoveFailed": "Verschieben des Home-Verzeichnisses fehlgeschlagen: {error}",
+      "clusterLoadFailed": "Laden des Clusters fehlgeschlagen: {error}",
+      "clusterWriteFailed": "Speichern fehlgeschlagen: {error}",
+      "nodeUpdated": "Knoten aktualisiert.",
+      "nodeRemoved": "Knoten entfernt.",
+      "poolSaved": "Pool '{name}' gespeichert.",
+      "poolDeleted": "Pool '{name}' gelöscht.",
+      "nothingChanged": "Nichts geändert."
     },
     "placeholders": {
       "noAdmins": "Keine Admins gefunden.",
@@ -1199,6 +1262,238 @@
       "protocol": "web+sealskin:-Links hier öffnen",
       "protocolHelp": "Ein Link der Form web+sealskin: gefolgt von einer Adresse öffnet diese Adresse dann in SealSkin.",
       "install": "Wenn Ihr Browser Web-Apps installieren kann, installieren Sie SealSkin über sein Menü, um Links und Dateien daran zu teilen und Dateien damit zu öffnen."
+    },
+    "via": {
+      "root": "Root-Token",
+      "oidc": "OpenID Connect",
+      "saml": "SAML",
+      "proxy": "Reverse-Proxy",
+      "key": "Schlüsseldatei"
+    },
+    "periods": {
+      "day": "Tag",
+      "week": "Woche",
+      "month": "Monat"
+    },
+    "cluster": {
+      "nodesTitle": "Knoten",
+      "pool": "Pool",
+      "load": "Auslastung",
+      "online": "Online",
+      "offline": "Offline",
+      "waiting": "Wartet auf Freigabe",
+      "lastSeen": "zuletzt gesehen {when}",
+      "storeUnreachableNode": "erreicht die gemeinsamen Datensätze nicht",
+      "cpus": "{count} CPUs",
+      "gpus": "{count} GPUs",
+      "gpuSessions": "GPU: {used} / {slots}",
+      "thisNode": "dieser Knoten",
+      "approve": "Freigeben",
+      "suspend": "Sperren",
+      "remove": "Entfernen",
+      "confirmRemove": "Knoten '{name}' aus dem Cluster entfernen? Ein Knoten, der noch läuft, registriert sich erneut und wartet auf Freigabe.",
+      "joinTitle": "Knoten hinzufügen",
+      "joinDescription": "Erstellen Sie einen Beitrittscode, starten Sie den neuen Knoten mit den beiden Zeilen unten in seiner Umgebung und geben Sie ihn dann in der Tabelle oben frei. Ein Code lässt einen Knoten zu und gilt eine Stunde.",
+      "joinButton": "Beitrittscode erstellen",
+      "joinExpires": "Umgebung des neuen Knotens (der Code läuft {when} ab)",
+      "poolsTitle": "Pools",
+      "poolsDescription": "Ein Pool ist eine Gruppe von Knoten, auf denen Sitzungen starten. Ein eingeschränkter Pool steht nur den Benutzern und Gruppen offen, die hier genannt oder durch ihre Einstellungen zugelassen sind.",
+      "poolDomain": "Domain",
+      "poolAccess": "Zugriff",
+      "poolCost": "Kosten pro Stunde",
+      "poolCostWithGpu": "{cost} (GPU: {gpuCost})",
+      "poolOpen": "Offen",
+      "poolRestricted": "Eingeschränkt",
+      "poolNew": "Neuer Pool",
+      "poolEdit": "Pool '{name}' bearbeiten",
+      "poolDescriptionLabel": "Beschreibung",
+      "poolDomainLabel": "Domain, unter der die Knoten des Pools benannt werden",
+      "poolCostLabel": "Kontingent, das eine Sitzungsstunde kostet",
+      "poolGpuCostLabel": "Kontingent, das eine GPU-Sitzungsstunde kostet (leer: dasselbe)",
+      "poolUsersLabel": "Benutzer, denen er eingeschränkt offensteht (kommagetrennt)",
+      "poolGroupsLabel": "Gruppen, denen er eingeschränkt offensteht (kommagetrennt)",
+      "poolStopWhenSpent": "Sitzungen beenden, wenn das Kontingent aufgebraucht ist",
+      "poolSave": "Pool speichern",
+      "confirmDeletePool": "Pool '{name}' löschen?",
+      "storeTitle": "Gemeinsame Datensätze",
+      "storeDescription": "Wo die Knoten die Datensätze ablegen, die sie teilen: Benutzer, Gruppen, Apps, Pools und diese Einstellungen.",
+      "storeKept": "Ablageort:",
+      "storeKinds": {
+        "file": "Auf dem Datenträger dieses Knotens",
+        "s3": "In einem Objektspeicher-Bucket",
+        "peer": "Auf einem anderen Knoten"
+      },
+      "reachable": "Erreichbar",
+      "unreachable": "Nicht erreichbar",
+      "publicUrl": "Adresse der Web-App:",
+      "sessionDomain": "Sitzungsdomain:",
+      "sessionDomainUnset": "Nicht gesetzt (der Hostname der Web-App)",
+      "signInDescription": "Eine hier eingetragene Einstellung gilt für jeden Knoten und hat Vorrang vor der Umgebung eines Knotens. Leeren Sie ein Feld, um die Einstellung wieder der Umgebung jedes Knotens zu überlassen.",
+      "settingWritten": "Hier für jeden Knoten gesetzt.",
+      "settingFromEnvironment": "Aus der Umgebung jedes Knotens; angezeigt wird der Wert dieses Knotens.",
+      "settingInherit": "Aus der Umgebung jedes Knotens (hier: {value})",
+      "secretSet": "Ein Secret ist gesetzt; leer lassen, um es zu behalten",
+      "secretUnset": "Kein Secret gesetzt",
+      "secretClear": "Das hier gesetzte Secret entfernen",
+      "settings": {
+        "oidc_issuer": "OpenID Connect Issuer-URL",
+        "oidc_client_id": "OpenID Connect Client-ID",
+        "oidc_client_secret": "OpenID Connect Client-Secret",
+        "oidc_scopes": "OpenID Connect Scopes",
+        "saml_metadata_url": "SAML-Metadaten-URL",
+        "saml_username_attribute": "SAML-Attribut, das den Benutzer nennt (leer: der Benutzername-Claim unten)",
+        "saml_groups_attribute": "SAML-Attribut, das die Gruppen des Benutzers auflistet (leer: der Gruppen-Claim unten)",
+        "sso_username_claim": "Claim oder Attribut, das den Benutzer nennt",
+        "sso_groups_claim": "Claim oder Attribut, das die Gruppen des Benutzers auflistet",
+        "sso_admin_group": "Gruppe der Administratoren beim Identitätsanbieter",
+        "sso_max_age_seconds": "Maximale Dauer einer Anmeldung über den Identitätsanbieter (Stunden)",
+        "sso_force_login": "Bei jeder Anmeldung nach Zugangsdaten fragen",
+        "sso_create_users": "Benutzer bei der ersten Anmeldung anlegen",
+        "proxy_auth_user_header": "Header, in dem ein vertrauenswürdiger Proxy den Benutzer nennt",
+        "proxy_auth_groups_header": "Header, in dem ein vertrauenswürdiger Proxy die Gruppen des Benutzers auflistet",
+        "proxy_auth_logout_url": "Seite des Proxys, die seinen Benutzer abmeldet",
+        "web_session_seconds": "Maximale Dauer einer ungenutzten Root-Anmeldung (Stunden)",
+        "files_sync": "Freigegebene Dateien im Objektspeicher halten"
+      },
+      "usageTitle": "Nutzung",
+      "usageHours": "Gewichtete Stunden",
+      "usageNone": "Keine Nutzung in diesem Zeitraum.",
+      "settingsTitle": "Cluster-Einstellungen"
+    },
+    "audit": {
+      "title": "Audit-Protokoll",
+      "searchPlaceholder": "Ereignisse suchen...",
+      "range": "Zeitraum",
+      "pageSize": "Ereignisse pro Seite",
+      "today": "Heute",
+      "last7": "Letzte 7 Tage",
+      "last30": "Letzte 30 Tage",
+      "oneDay": "Ein Tag (UTC)",
+      "time": "Zeit",
+      "event": "Ereignis",
+      "details": "Details",
+      "none": "Keine passenden Ereignisse.",
+      "shown": "{from}–{to} von {total}",
+      "exportCsv": "CSV exportieren",
+      "exportJson": "JSON exportieren",
+      "exported": "{count} Ereignisse exportiert."
+    },
+    "signin": {
+      "pill": {
+        "active": "Aktiv",
+        "off": "Aus",
+        "none": "Nicht konfiguriert"
+      },
+      "test": "Testen",
+      "testing": "Gespeicherte Einstellungen werden getestet...",
+      "testOk": "Der Anbieter hat geantwortet.",
+      "testFailed": "Der Test ist fehlgeschlagen.",
+      "register": "Diese beim Anbieter registrieren",
+      "provider": "Anbieter",
+      "providerChoose": "Anbieter für Hinweise wählen",
+      "providerHelp": "Ein Anbieter füllt nur die Hinweise unten aus; über ihn wird nichts gespeichert.",
+      "proxyHelp": "Ein vorgeschalteter Reverse-Proxy meldet Benutzer an und nennt sie in einem Header. Das passt zu einem Proxy, der Ihre anderen Websites bereits auf dieselbe Weise schützt; andernfalls melden Sie Benutzer oben über OpenID Connect oder SAML an.",
+      "proxyPresetChoose": "Anbieter des Proxys wählen, um die Header auszufüllen",
+      "proxyPresets": {
+        "authelia": "Authelia",
+        "authentik": "Authentik",
+        "tinyauth": "Tinyauth",
+        "oauth2proxy": "oauth2-proxy"
+      },
+      "reach": {
+        "title": "Erreichbarkeit dieses Servers",
+        "help": "Wie Browser diesen Server erreichen, aus Sicht des Servers und dieses Browsers. Ein vorgeschalteter Reverse-Proxy muss jeden dieser Punkte richtig umsetzen.",
+        "publicUrl": "Öffentliche URL",
+        "publicUrlDiffers": "Diese Seite wurde von {origin} geladen. Setzen Sie SEALSKIN_PUBLIC_URL auf die Adresse, die Browser verwenden: Die Weiterleitungen des Identitätsanbieters werden daraus gebildet.",
+        "sessionDomain": "Sitzungsdomain",
+        "sessionNames": "Sitzungen öffnen sich unter",
+        "sessionNamesNone": "Kein Sitzungsname hat geantwortet",
+        "sessionNamesHelp": "Starts aus der Web-App werden fehlschlagen. Eine Sitzung öffnet sich unter einem eigenen Namen, <session id>.<domain>: Die Domain benötigt Wildcard-DNS, ein Wildcard-Zertifikat und eine Reverse-Proxy-Regel, die diese Namen hierher leitet.",
+        "sessionNamesGuarded": "Sitzungen öffnen sich unter {domain}, wie SEALSKIN_SESSION_DOMAIN es vorgibt. Das ist zu erwarten, wenn der Reverse-Proxy für die Sitzungsnamen eine Anmeldung verlangt; prüfen Sie andernfalls das Wildcard-DNS, das Zertifikat und die Proxy-Regel dafür.",
+        "sessionNamesOther": "SEALSKIN_SESSION_DOMAIN nennt {domain}, die nicht geantwortet hat.",
+        "trustedProxies": "Vertrauenswürdige Proxys",
+        "arrivedFrom": "Diese Anfrage kam von",
+        "viaTrusted": "Einem vertrauenswürdigen Proxy.",
+        "viaOther": "Keinem der vertrauenswürdigen Proxys. Wenn dies die Adresse Ihres Reverse-Proxys ist, fügen Sie sie zu SEALSKIN_TRUSTED_PROXIES hinzu.",
+        "viaDirect": "Keinem Reverse-Proxy wird vertraut. Wenn dies die Adresse eines Reverse-Proxys ist, setzen Sie SEALSKIN_TRUSTED_PROXIES darauf, damit der Server die eigene Adresse jedes Browsers sieht.",
+        "yourAddress": "Ihre Adresse, wie der Server sie sieht",
+        "httpPort": "Unverschlüsselter HTTP-Listener"
+      },
+      "presets": {
+        "authelia": {
+          "name": "Authelia",
+          "hint": "Der Issuer ist die eigene Adresse von Authelia, https://<host>. Fügen Sie unter identity_providers.oidc.clients einen Client mit der Redirect-URI unten und den Scopes openid profile groups email offline_access hinzu."
+        },
+        "pocketid": {
+          "name": "Pocket ID",
+          "hint": "Der Issuer ist die eigene Adresse von Pocket ID, https://<host>. Fügen Sie einen OIDC-Client mit der Callback-URL unten hinzu und setzen Sie die Scopes auf openid profile email groups."
+        },
+        "tinyauth": {
+          "name": "Tinyauth",
+          "hint": "Der Issuer ist die eigene Adresse von Tinyauth, https://<host>. Definieren Sie den Client mit den Variablen TINYAUTH_OIDC_CLIENTS_<NAME>_ und setzen Sie die Scopes auf openid profile email groups."
+        },
+        "keycloak": {
+          "name": "Keycloak",
+          "hint": "Der Issuer ist die Adresse des Realms, https://<host>/realms/<realm>. Erstellen Sie einen OpenID Connect-Client mit aktivierter Client-Authentifizierung und fügen Sie einen Gruppenmitgliedschafts-Mapper namens 'groups' hinzu, um die Gruppen des Benutzers zu senden."
+        },
+        "authentik": {
+          "name": "Authentik",
+          "hint": "Der Issuer ist die Adresse der Anwendung, https://<host>/application/o/<slug>/, mit dem abschließenden Schrägstrich. Erstellen Sie einen OAuth2/OpenID-Provider und eine Anwendung, die ihn verwendet."
+        },
+        "entra": {
+          "name": "Microsoft Entra ID",
+          "hint": "Der Issuer ist https://login.microsoftonline.com/<tenant>/v2.0. Registrieren Sie eine Anwendung, fügen Sie ein Client-Secret hinzu und fügen Sie unter Tokenkonfiguration den Gruppen-Claim hinzu."
+        },
+        "google": {
+          "name": "Google",
+          "hint": "Der Issuer ist https://accounts.google.com. Erstellen Sie eine OAuth-Client-ID vom Typ Webanwendung. Google sendet keine Gruppen."
+        },
+        "okta": {
+          "name": "Okta",
+          "hint": "Der Issuer ist die Adresse Ihrer Organisation, https://<org>.okta.com. Erstellen Sie eine OIDC-Webanwendung und fügen Sie ihrem ID-Token einen Gruppen-Claim hinzu."
+        },
+        "other": {
+          "name": "Andere",
+          "hint": "Der Issuer ist die Adresse, deren /.well-known/openid-configuration den Anbieter beschreibt."
+        }
+      },
+      "oidcTitle": "OpenID Connect",
+      "oidcRedirect": "Redirect-URI",
+      "oidcBackchannel": "Back-Channel-Logout-URL",
+      "oidcFrontchannel": "Front-Channel-Logout-URL",
+      "samlTitle": "SAML 2.0",
+      "samlEntity": "Entity-ID / Metadaten-URL",
+      "samlAcs": "ACS-URL",
+      "samlSlo": "Single-Logout-URL",
+      "samlMetadata": "Service-Provider-Metadaten dieses Servers öffnen",
+      "proxyTitle": "Reverse-Proxy",
+      "trustedProxies": "Vertrauenswürdige Proxys dieses Knotens:",
+      "trustedProxiesHelp": "Wird auf jedem Knoten mit SEALSKIN_TRUSTED_PROXIES gesetzt. Dem Header wird nur geglaubt, wenn die Anfrage von einer dieser Adressen kommt.",
+      "noTrustedProxy": "Ein Benutzer-Header ist gesetzt, aber dieser Knoten vertraut noch keinem Proxy, daher wird keine Proxy-Anmeldung akzeptiert.",
+      "proxyCheck": {
+        "guarded": "Geprüft: Der Proxy reicht die Anmelde-Header, die ein Besucher sendet, nicht weiter.",
+        "open": "Proxy-Anmeldungen werden abgelehnt.",
+        "unreachable": "Proxy-Anmeldungen werden abgelehnt: Dieser Knoten kann den Proxy nicht prüfen. Geben Sie ihm eine Route zu seiner öffentlichen URL, nennen Sie die eigene Adresse des Proxys in SEALSKIN_TRUSTED_PROXIES oder setzen Sie SEALSKIN_PROXY_AUTH_UNCHECKED=true auf dem Knoten, um dem Proxy ohne Prüfung zu glauben.",
+        "unchecked": "Die Prüfung des Proxys ist auf diesem Knoten abgeschaltet (SEALSKIN_PROXY_AUTH_UNCHECKED): Alles, was der Proxy weiterreicht, wird geglaubt."
+      },
+      "whoTitle": "Wer sich anmeldet",
+      "whoHelp": "Diese Einstellungen gelten für OpenID Connect, SAML und den Reverse-Proxy. Um die Mitglieder einer Gruppe des Identitätsanbieters in eine SealSkin-Gruppe aufzunehmen, tragen Sie sie unter Gruppen bei dieser Gruppe unter \"Gruppen des Identitätsanbieters\" ein.",
+      "rootTitle": "Root-Token",
+      "rootHelp": "Immer verfügbar. Das Token steht auf dem Server in /config/root_token, bis diese Datei gelöscht wird, und kann mit SEALSKIN_ROOT_TOKEN gesetzt werden.",
+      "keyTitle": "Schlüsseldateien",
+      "keyOn": "Dieser Knoten akzeptiert die Schlüsseldatei-Clients: die Browsererweiterung und die mobile App. Wird auf jedem Knoten mit SEALSKIN_LEGACY_AUTH gesetzt.",
+      "keyOff": "Dieser Knoten akzeptiert keine Schlüsseldatei-Clients. Wird auf jedem Knoten mit SEALSKIN_LEGACY_AUTH gesetzt.",
+      "resultIssuer": "Issuer:",
+      "resultAuthorization": "Autorisierungsendpunkt:",
+      "resultBackchannel": "Back-Channel-Logout unterstützt:",
+      "resultScopes": "Angebotene Scopes:",
+      "resultGroupsClaim": "Gruppen-Claim:",
+      "claimListed": "'{claim}' ist unter den Claims, die der Anbieter auflistet",
+      "claimNotListed": "'{claim}' ist nicht unter den Claims, die der Anbieter auflistet",
+      "resultEntity": "Entity-ID:",
+      "resultSso": "Sign-On-URL:",
+      "resultSlo": "Single Logout angeboten:",
+      "resultCertificates": "Signaturzertifikate:"
     }
   },
   "popup": {
@@ -1227,7 +1522,16 @@
       "uploadingButton": "Wird hochgeladen...",
       "autoHome": "Automatisch (pro-App-Persistenz)",
       "collaborationMode": "Kollaborative Sitzung",
-      "waylandMode": "Wayland-Modus"
+      "waylandMode": "Wayland-Modus",
+      "where": "Wo",
+      "whereAuto": "Automatisch",
+      "wherePools": "Pools",
+      "whereNodes": "Knoten",
+      "moveHome": "Speicher verschieben",
+      "moveHomeStay": "Auf {node}",
+      "moveHomeTo": "Auf {node} verschieben",
+      "moveHomeConfirm": "'{home}' auf {node} verschieben? Sitzungen, die es verwenden, müssen zuerst beendet werden.",
+      "allowance": "Kontingent: {used} von {hours} Stunden pro {period}"
     },
     "sessionsView": {
       "noSessions": "Keine aktiven Sitzungen gefunden."
@@ -1260,7 +1564,10 @@
       "noAppSelected": "Bitte wählen Sie eine Anwendung aus.",
       "noAppsAvailable": "Für Ihr Konto sind keine Anwendungen verfügbar.",
       "uploadSuccess": "Datei erfolgreich hochgeladen!",
-      "creatingAutoHome": "Automatisches Home-Verzeichnis wird erstellt..."
+      "creatingAutoHome": "Automatisches Home-Verzeichnis wird erstellt...",
+      "noSessionOrigin": "Dieser Browser kann keine eigene Adresse der Sitzung erreichen. Der Server benötigt Wildcard-DNS und ein Zertifikat für Sitzungsnamen; der Administrator setzt SEALSKIN_SESSION_DOMAIN.",
+      "movingHome": "'{home}' wird verschoben...",
+      "movedHome": "'{home}' auf {node} verschoben."
     },
     "languages": {
       "default": "Standard ({locale})"
@@ -1355,7 +1662,10 @@
       "sharesLoadFailed": "Fehler beim Laden der freigegebenen Dateien: {error}",
       "shareDeleteFailed": "Fehler beim Löschen der Freigabe: {error}",
       "shareDeleted": "Freigabe erfolgreich gelöscht.",
-      "urlCopied": "Öffentliche URL in die Zwischenablage kopiert."
+      "urlCopied": "Öffentliche URL in die Zwischenablage kopiert.",
+      "downloading": "{filename} wird heruntergeladen...",
+      "downloadSuccess": "Download abgeschlossen",
+      "downloadFailed": "Download fehlgeschlagen: {error}"
     },
     "placeholders": {
       "errorLoading": "Fehler beim Laden der Dateien.",
@@ -1370,15 +1680,39 @@
       "finalizing": "Wird abgeschlossen...",
       "completed": "Abgeschlossen",
       "error": "Fehler"
+    },
+    "files": {
+      "searchPlaceholder": "Dateien suchen..."
+    }
+  },
+  "shell": {
+    "host": {
+      "loading": "Verbindung zu Ihrem SealSkin-Server wird hergestellt…",
+      "unconfiguredTitle": "Nicht verbunden",
+      "unconfiguredBody": "SealSkin ist noch mit keinem Server verbunden.",
+      "setUp": "Verbindung einrichten",
+      "unreachableTitle": "Server nicht erreichbar",
+      "unreachableBody": "Der SealSkin-Server war nicht erreichbar, oder seine Weboberfläche wurde nicht geladen.",
+      "selfSigned": "Wenn der Server ein selbstsigniertes Zertifikat verwendet, öffnen Sie ihn einmal, akzeptieren Sie das Zertifikat und versuchen Sie es dann erneut.",
+      "retry": "Erneut versuchen",
+      "openServer": "Server öffnen",
+      "changeConnection": "Verbindung ändern",
+      "mismatchTitle": "Aktualisierung erforderlich",
+      "mismatchBody": "Diese App und die Weboberfläche des Servers verwenden unterschiedliche Bridge-Versionen. Aktualisieren Sie die Erweiterung oder App oder den Server, damit beide übereinstimmen."
     }
   },
   "web": {
-    "unlockTitle": "SealSkin entsperren",
-    "unlockBody": "Geben Sie die Passphrase ein, die Ihren Schlüssel in diesem Browser schützt.",
-    "passphrase": "Passphrase",
-    "unlock": "Entsperren",
-    "wrongPassphrase": "Diese Passphrase entsperrt Ihren Schlüssel nicht.",
     "receiving": "Datei wird an SealSkin gesendet…",
+    "signInTitle": "Bei SealSkin anmelden",
+    "signInWith": {
+      "oidc": "Mit OpenID Connect anmelden",
+      "saml": "Mit SAML anmelden"
+    },
+    "rootToken": "Root-Token",
+    "rootTokenHelp": "Das Token des Administrators, das der Server in seiner Datei /config/root_token aufbewahrt.",
+    "rootSignIn": "Als Root anmelden",
+    "rootRefused": "Das ist nicht das Root-Token des Servers.",
+    "rootLocked": "Zu viele Versuche. Warten Sie eine Weile und versuchen Sie es dann erneut.",
     "signIn": {
       "failed": "Die Anmeldung wurde nicht abgeschlossen. Versuchen Sie es erneut oder wenden Sie sich an Ihren Administrator.",
       "refused": "Der Identitätsanbieter hat die Anmeldung abgelehnt.",
@@ -1389,6 +1723,57 @@
       "otherIdentity": "Ein anderes Konto des Identitätsanbieters meldet sich bereits als dieser SealSkin-Benutzer an. Wenden Sie sich an Ihren Administrator.",
       "notConfigured": "Dieser Server bietet kein Single Sign-On an.",
       "ended": "Der Identitätsanbieter hat Ihre Anmeldung beendet. Melden Sie sich erneut an."
+    },
+    "nav": {
+      "home": "Start",
+      "sessions": "Sitzungen",
+      "files": "Dateien",
+      "settings": "Einstellungen"
+    },
+    "home": {
+      "searchPlaceholder": "Anwendungen suchen oder einen Link einfügen, um ihn isoliert zu öffnen",
+      "upload": "Datei hochladen",
+      "drop": "Datei ablegen, um sie in SealSkin zu öffnen",
+      "running": "Laufende Sitzungen",
+      "applications": "Anwendungen",
+      "allowance": "Kontingent",
+      "allowanceValue": "{used} / {hours} h pro {period}",
+      "room": "Raum",
+      "started": "Gestartet {when}",
+      "typeAll": "Alle",
+      "typeRecent": "Zuletzt verwendet",
+      "typeOther": "Andere",
+      "quickLaunch": "Mit den zuletzt verwendeten Optionen starten",
+      "wherePool": "Pool: {pool}",
+      "openingUrl": "Wählen Sie eine Anwendung, um {url} zu öffnen",
+      "openingFile": "Wählen Sie eine Anwendung, um {filename} zu öffnen",
+      "noApps": "Für Sie sind keine Anwendungen verfügbar. Bitten Sie Ihren Administrator, Anwendungen zu installieren.",
+      "noAppsAdmin": "Es sind noch keine Anwendungen installiert.",
+      "noMatch": "Keine passende Anwendung.",
+      "openAppStores": "App Stores öffnen",
+      "popupBlocked": "Der Browser hat den Tab der Sitzung blockiert. Erlauben Sie Pop-ups für diese Website und starten Sie dann erneut.",
+      "serverFileNeedsHome": "Eine auf dem Server abgelegte Datei kann im Cleanroom-Modus nicht geöffnet werden. Wählen Sie ein Speicherverzeichnis."
+    },
+    "launch": {
+      "title": "{app} wird gestartet",
+      "stages": {
+        "requesting": "Startanfrage wird gesendet",
+        "placing": "Limits werden geprüft und ein Knoten gewählt",
+        "forwarding": "Start wird an Knoten {node} übergeben",
+        "storage": "Home-Verzeichnis wird vorbereitet",
+        "files": "Freigegebene Dateien werden synchronisiert",
+        "image": "Anwendungs-Image wird heruntergeladen",
+        "starting": "Container wird erstellt",
+        "waiting": "Warten auf Antwort des Desktops",
+        "ready": "Sitzung wird geöffnet"
+      },
+      "uploading": "Datei wird hochgeladen ({done} von {total})",
+      "imageHint": "Beim ersten Start einer Anwendung auf einem Knoten wird sie heruntergeladen, was Minuten dauern kann. Spätere Starts sind schnell.",
+      "onNode": "Auf Knoten {node}",
+      "seconds": "{count} s",
+      "failed": "Der Start ist fehlgeschlagen",
+      "unseen": "Die Startanfrage hat den Server nicht erreicht. Prüfen Sie den SealSkin-Tab, der sie gestartet hat.",
+      "closeTab": "Der Browser hat diesen Tab offen gelassen. Schließen Sie ihn selbst."
     }
   }
 }

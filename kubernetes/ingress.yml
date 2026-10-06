@@ -1,0 +1,85 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# The SealSkin web app behind an ingress controller or a gateway:
+#   kubectl apply -n <namespace> -f ingress.yml
+# after setting, in sealskin.yml, SEALSKIN_PUBLIC_URL, SEALSKIN_SESSION_DOMAIN,
+# SEALSKIN_TRUSTED_PROXIES, and SEALSKIN_HTTP_PORT=8080.
+# https://docs.sealskin.app/kubernetes#exposing-the-server describes the rest.
+#
+# The web app lives on one name and opens every session on a name of its own,
+# <session id>.<session domain>, so there are two hosts and the certificate in
+# the secret covers both: sealskin.example.com and *.example.com.
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sealskin
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts: ["sealskin.example.com", "*.example.com"]
+    secretName: sealskin-tls
+  rules:
+  - host: "sealskin.example.com"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sealskin
+            port:
+              name: proxied
+  # Every name one label under the domain that no other Ingress names
+  - host: "*.example.com"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sealskin
+            port:
+              name: proxied
+
+# With the Gateway API instead of an Ingress. A listener's port is the one the
+# controller listens on, which is 8443 for Traefik's chart:
+#---
+#apiVersion: gateway.networking.k8s.io/v1
+#kind: Gateway
+#metadata:
+#  name: sealskin
+#spec:
+#  gatewayClassName: traefik
+#  listeners:
+#  - name: app
+#    hostname: "sealskin.example.com"
+#    port: 443
+#    protocol: HTTPS
+#    tls:
+#      mode: Terminate
+#      certificateRefs:
+#      - name: sealskin-tls
+#  - name: sessions
+#    hostname: "*.example.com"
+#    port: 443
+#    protocol: HTTPS
+#    tls:
+#      mode: Terminate
+#      certificateRefs:
+#      - name: sealskin-tls
+#---
+#apiVersion: gateway.networking.k8s.io/v1
+#kind: HTTPRoute
+#metadata:
+#  name: sealskin
+#spec:
+#  parentRefs:
+#  - name: sealskin
+#  hostnames: ["sealskin.example.com", "*.example.com"]
+#  rules:
+#  - backendRefs:
+#    - name: sealskin
+#      port: 8080

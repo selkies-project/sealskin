@@ -29,7 +29,7 @@ body { display: grid; grid-template: "rail stage" 100% / var(--rail) 1fr; height
 .rail-logo { width: 40px; height: 40px; filter: drop-shadow(0 6px 14px rgba(224, 79, 176, 0.3)); }
 .rail-links { display: flex; flex-direction: column; gap: 0.35rem; width: 100%; flex: 1; }
 
-.rail-links button, .sign-out {
+.rail-links button, .sign-out, .root-sign-in {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -47,10 +47,10 @@ body { display: grid; grid-template: "rail stage" 100% / var(--rail) 1fr; height
   cursor: pointer;
   transition: background-color var(--dur), color var(--dur), border-color var(--dur);
 }
-.rail-links button[hidden] { display: none; }
-.rail-links button i, .sign-out i { font-size: 1.15rem; }
-.rail-links button:hover, .sign-out:hover { background-color: var(--glass-strong); color: var(--text-primary); }
-.rail-links button:focus-visible, .sign-out:focus-visible, .avatar:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-soft), 0 0 0 1px var(--accent-primary); }
+.rail-links button[hidden], .sign-out[hidden], .root-sign-in[hidden] { display: none; }
+.rail-links button i, .sign-out i, .root-sign-in i { font-size: 1.15rem; }
+.rail-links button:hover, .sign-out:hover, .root-sign-in:hover { background-color: var(--glass-strong); color: var(--text-primary); }
+.rail-links button:focus-visible, .sign-out:focus-visible, .root-sign-in:focus-visible, .avatar:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-soft), 0 0 0 1px var(--accent-primary); }
 .rail-links button[aria-current="page"] { background-color: var(--accent-soft); border-color: rgba(139, 124, 246, 0.5); color: #cdc6ff; }
 
 #sessions-badge {
@@ -83,7 +83,7 @@ body { display: grid; grid-template: "rail stage" 100% / var(--rail) 1fr; height
 }
 .account-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.72rem; font-weight: 600; margin-top: 0.3rem; }
 .account-via { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.62rem; color: var(--text-muted); }
-.rail-account .sign-out { margin-top: 0.4rem; }
+.rail-account .sign-out, .rail-account .root-sign-in { margin-top: 0.4rem; }
 
 #account-menu {
   position: fixed;
@@ -100,7 +100,7 @@ body { display: grid; grid-template: "rail stage" 100% / var(--rail) 1fr; height
 #account-menu[hidden] { display: none; }
 #account-menu .account-name { font-size: 0.95rem; margin: 0; }
 #account-menu .account-via { font-size: 0.8rem; }
-#account-menu .sign-out { flex-direction: row; justify-content: center; gap: 0.5rem; margin-top: 0.75rem; font-size: 0.85rem; border-color: var(--border-color); color: var(--text-primary); }
+#account-menu .sign-out, #account-menu .root-sign-in { flex-direction: row; justify-content: center; gap: 0.5rem; margin-top: 0.75rem; font-size: 0.85rem; border-color: var(--border-color); color: var(--text-primary); }
 
 @media (max-width: 899px) {
   body { grid-template: "bar" calc(var(--bar) + env(safe-area-inset-top)) "stage" 1fr "rail" calc(var(--tabs) + env(safe-area-inset-bottom)) / 100%; }

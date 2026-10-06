@@ -13,6 +13,8 @@
         request_header -X-Upstream-Peer
         request_header X-SealSkin-Secret "{{PROXY_SECRET}}"
         request_header X-SealSkin-Remote {remote_host}
+        # The browser's address: the connection's, or what a trusted proxy says it took the request from.
+        request_header X-SealSkin-Client {client_ip}
 }
 
 # To the node that runs the session, on its peer listener, trusting the approved nodes' certificates alone.
@@ -28,6 +30,7 @@
                 header_up -X-Upstream-Peer
                 header_up -X-SealSkin-Secret
                 header_up -X-SealSkin-Remote
+                header_up -X-SealSkin-Client
                 # A config reload, as when a node joins, leaves running streams be.
                 stream_close_delay 24h
         }
@@ -108,6 +111,7 @@
                                                 header_up -X-Upstream-Auth
                                                 header_up -X-SealSkin-Secret
                                                 header_up -X-SealSkin-Remote
+                                                header_up -X-SealSkin-Client
 
                                                 # A session's service worker stays under its own path, off the web app at /ui/.
                                                 header_down -Service-Worker-Allowed
@@ -119,9 +123,8 @@
         }
 }
 
-https://:{{SESSION_PORT}} {
-        tls {{PROXY_CERT_PATH}} {{PROXY_KEY_PATH}}
-
+# What browsers reach: the web app, the API, and the sessions.
+(entrance) {
         import marks
         request_header -X-SealSkin-Listener
 
@@ -177,6 +180,13 @@ https://:{{SESSION_PORT}} {
         }
 }
 
+https://:{{SESSION_PORT}} {
+        tls {{PROXY_CERT_PATH}} {{PROXY_KEY_PATH}}
+
+        import entrance
+}
+
+{{HTTP_SITE}}
 # The peer listener: the other nodes' calls, and the session traffic the frontends proxy here.
 https://:{{PEER_PORT}} {
         tls {{PEER_CERT_PATH}} {{PEER_KEY_PATH}}

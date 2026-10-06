@@ -356,7 +356,6 @@ def create_app() -> FastAPI:
     app.include_router(shares.public_router)
     app.include_router(ui.router)
     app.include_router(sso_routes.router)
-    app.include_router(sso_routes.signed_in_router)
     app.include_router(peer.router)
     app.include_router(cluster_admin.router)
     app.include_router(cluster_admin.user_router)

@@ -69,7 +69,8 @@ validation, `500` for provider errors.
 | `GET /api/auth/oidc/login`, `GET /api/auth/saml/login` | Start a provider flow; it ends at `/ui/#sso=<grant>` or `/ui/#sso-error=<code>`. |
 | `POST /api/auth/register` | Body `{grant}`: start the sign-in and set its cookie. |
 | `POST /api/auth/root` | Body `{token}`: sign `root` in with the root token. |
-| `POST /api/auth/signout` | End the caller's sign-in. |
+| `POST /api/auth/signout` | End the sign-in the caller's cookie names and clear the cookie. |
+| `GET /api/auth/proxy` | What the request's [sign-in headers](reverse-proxy/sign-in.md) held when it arrived and whether a trusted proxy passed it on: the path the server asks through its own public address to check the proxy. It signs nobody in. |
 | `GET /api/auth/saml/metadata` | The service provider metadata to register with a SAML provider. |
 
 The provider's callbacks and logout notices (`/api/auth/oidc/callback`,
@@ -184,14 +185,14 @@ All *encrypted, admin*.
 | --- | --- | --- |
 | `GET /api/cluster` | user | The pools and nodes open to the caller, where their home directories are, and their limits. |
 | `POST /api/cluster/homedirs/{home}/move` | user | Body `{node}`: move one of the caller's home directories, where their settings allow. |
-| `GET /api/admin/cluster` | admin | Nodes with their load, pools, the store, and the cluster's sign-in settings. |
+| `GET /api/admin/cluster` | admin | Nodes with their load, pools, the store, the cluster's sign-in settings, the state of the reverse proxy check, and how this request reached the node (`signin.arrival`). |
 | `POST /api/admin/cluster/join_codes` | admin | Body `{pool?}`: a code one node joins with. |
 | `PUT`/`DELETE /api/admin/cluster/nodes/{id}` | admin | Approve or suspend a node (`approved`), move it (`pool`), or remove its record. |
 | `PUT`/`DELETE /api/admin/cluster/pools/{name}` | admin | Create, replace, or delete a pool. |
 | `PUT /api/admin/cluster/settings` | admin | Write sign-in settings for the whole cluster; an empty value hands one back to each node's environment. |
 | `GET /api/admin/cluster/usage?period=` | admin | Weighted hours per user this `day`, `week`, or `month`. |
 | `GET /api/admin/cluster/audit?day=&since=&q=&offset=&limit=` | admin | Audit events from every answering node, newest first: one `day`, or every day `since` one, containing every word of `q`; answers `total`, the page of `events`, and the `days` that have a log. |
-| `POST /api/admin/cluster/signin/test` | admin | Body `{kind}`, `oidc` or `saml`: fetch the configured provider's metadata and answer `ok` with what it published, or the `error`. |
+| `POST /api/admin/cluster/signin/test` | admin | Body `{kind}`: for `oidc` or `saml`, fetch the configured provider's metadata and answer `ok` with what it published, or the `error`; for `proxy`, run the check of the reverse proxy again and answer its `state` and `detail`. |
 | `GET`/`DELETE /api/admin/lab` | admin | The caller's open App Laboratory session, which no session list shows; deleting closes it and keeps its home directory as the template, answering its `files` and `bytes`, and with `progress_id` reports `stopping` and `saving` to the progress endpoint. |
 | `GET /api/admin/cluster/users/{username}/homes` | admin | Which node holds each of a user's home directories. |
 | `POST /api/admin/cluster/users/{username}/homedirs/{home}/move` | admin | Body `{node}`: move a user's home directory. |
@@ -213,4 +214,4 @@ the session.
 `/peer/*` is what nodes call on each other's peer listener, each request
 signed with the calling node's server key: status, change notices, joining,
 the shared records of a node that keeps them, uploads a frontend passes on,
-and home directories being moved.
+home directories being moved, and the storage of a user a frontend deleted.

@@ -130,12 +130,12 @@ container's `TZ` follows it; failing that, the server's own `TZ` applies. Set
 <details>
 <summary>Can I run SealSkin behind my existing reverse proxy?</summary>
 
-It is not designed for it. Caddy inside the container terminates TLS,
-authenticates every session request with `forward_auth`, and proxies
-WebSockets to the containers; another proxy in front has to pass all of that
-through untouched, including the `Upgrade` headers and the cookies scoped to
-each session path. Exposing the session port directly is the supported
-setup.
+Yes. The proxy terminates TLS for the web app's name and for the session
+names, `<session id>.<domain>`, which takes a wildcard certificate, and
+passes WebSockets; SealSkin's own Caddy stays behind it and keeps routing
+and authenticating every session request. The proxy can also sign users in.
+[Behind a reverse proxy](reverse-proxy/index.md) has configurations for
+SWAG, Traefik, Nginx Proxy Manager, and Caddy, with Authelia and Authentik.
 </details>
 
 <details>

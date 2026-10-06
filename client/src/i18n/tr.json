@@ -78,7 +78,10 @@
       "installedApps": "Yüklü Uygulamalar",
       "users": "Kullanıcılar",
       "groups": "Gruplar",
-      "admins": "Yöneticiler"
+      "admins": "Yöneticiler",
+      "cluster": "Küme",
+      "signIn": "Oturum Açma",
+      "audit": "Denetim Günlüğü"
     },
     "dashboard": {
       "title": "Kontrol Paneli",
@@ -104,7 +107,14 @@
         "<strong>Kalıcı depolamayı yönetmek için:</strong> Birden fazla oturumda kullanılabilecek depolama birimleri oluşturmak ve silmek için bu sayfadaki \"Ana Dizinler\" sekmesini kullanın.",
         "<strong>Başlatma seçeneklerini kaydetmek için:</strong> Belirli bir dosya türü (ör. .pdf) veya tüm URL'ler için bir uygulama başlatmadan önce açılır penceredeki \"Bu başlatma seçeneklerini kaydet\" kutusunu işaretleyin. Bu kaydedilmiş tercihleri \"Sabitlenmiş Davranış\" sekmesinde yönetin."
       ],
-      "confirmLogout": "Çıkış yapmak istediğinizden emin misiniz? Bu, kaydedilmiş yapılandırmanızı bu tarayıcıdan temizleyecektir."
+      "confirmLogout": "Çıkış yapmak istediğinizden emin misiniz? Bu, kaydedilmiş yapılandırmanızı bu tarayıcıdan temizleyecektir.",
+      "changeConnection": "Bağlantıyı değiştir",
+      "certExpired": "Sunucunun TLS sertifikasının süresi doldu. Yenilenene kadar HTTPS bağlantıları başarısız olacak.",
+      "certExpiring": "Sunucunun TLS sertifikasının süresi {days} gün içinde doluyor. Bağlantı hatalarını önlemek için yenileyin.",
+      "signOut": "Oturumu kapat",
+      "signedInThrough": "Oturum açma yöntemi:",
+      "allowance": "Kota:",
+      "allowanceUsed": "Bu {period} {used} / {hours} saat"
     },
     "config": {
       "quickSetup": "Hızlı Kurulum",
@@ -135,15 +145,7 @@
       "keyGeneration": "Anahtar Oluşturma",
       "keyGenDescription": "Bir anahtar çiftiniz yoksa, buradan bir tane oluşturabilirsiniz. Özel anahtar yukarıda doldurulacaktır. Açık anahtarı yöneticinize verin.",
       "generateKeyButton": "Yeni Anahtar Çifti Oluştur",
-      "publicKeyForAdminLabel": "Açık Anahtarınız (yönetici için)",
-      "passphraseLabel": "Parola İfadesi",
-      "remember": "Anahtarımı bu tarayıcıda sakla",
-      "rememberHelp": "Paylaşılan bir bilgisayarda bunu kapatın: SealSkin anahtarınızı yalnızca bu sekme açıkken tutar ve bir dahaki sefere yapılandırmanızı yeniden yüklersiniz.",
-      "passphraseHelp": "Özel anahtarınız bu tarayıcıda bu parola ifadesiyle şifrelenmiş olarak saklanır; SealSkin'i burada her açtığınızda onu girersiniz.",
-      "signInTitle": "Çoklu Oturum Açma",
-      "signInHelp": "Yapılandırma dosyası yerine kuruluşunuzun yönettiği hesapla oturum açın. SealSkin oturumu yalnızca bu sekmede tutar; bir dahaki sefere yeniden oturum açarsınız.",
-      "signInOidc": "OpenID Connect ile Oturum Aç",
-      "signInSaml": "SAML ile Oturum Aç"
+      "publicKeyForAdminLabel": "Açık Anahtarınız (yönetici için)"
     },
     "home": {
       "title": "Ana Dizinleriniz",
@@ -153,9 +155,13 @@
       "namePlaceholder": "örn. proje-dosyalarim",
       "nameTitle": "Sadece harf, rakam, alt çizgi veya tire kullanın.",
       "createButton": "Dizin Oluştur",
-      "isLaboratory": "Bu, temel bir imajdan özel ayarlarla oluşturulmuş bir Laboratuvar uygulamasıdır.",
-      "laboratory": "Laboratuvar",
-      "confirmDelete": "'{appName}' yüklü uygulamasını silmek istediğinizden emin misiniz?"
+      "confirmDelete": "'{homeName}' ana dizinini silmek istediğinizden emin misiniz? İçindeki tüm veriler kalıcı olarak kaybolacak.",
+      "node": "Düğüm",
+      "move": "Taşı",
+      "moveTo": "Düğüme taşı",
+      "moveHelp": "Ana dizin hedef düğüme kopyalanır ve bulunduğu düğümden kaldırılır. Onu kullanan oturumların önce durdurulması gerekir.",
+      "moveTitle": "'{homeName}' dizinini taşı",
+      "noOtherNode": "Taşınabileceği başka bir düğüm yok."
     },
     "sessions": {
       "title": "Aktif Oturumlar",
@@ -207,7 +213,21 @@
       "confirmDelete": "'{username}' kullanıcısını silmek istediğinizden emin misiniz? Bu, tüm kalıcı depolamasını da silecek ve geri alınamaz.",
       "allowPublicSharing": "Herkese Açık Dosya Paylaşımına İzin Ver",
       "allowEditTemplates": "Uygulama Şablonlarını Düzenlemeye İzin Ver",
-      "signInOnly": "Yalnızca çoklu oturum açma"
+      "signInOnly": "Yalnızca çoklu oturum açma",
+      "admin": "Yönetici",
+      "gpuShare": "GPU'yu Diğer Oturumlarla Paylaşmaya İzin Ver",
+      "homeMigration": "Ana Dizinleri Düğümler Arasında Taşımaya İzin Ver",
+      "storageLimit": "Depolama sınırı (düğüm başına GB)",
+      "sessionCpus": "Oturum başına CPU",
+      "sessionMemory": "Oturum başına bellek (MB)",
+      "sessionHours": "Bir oturumun çalışabileceği saat",
+      "allowanceHours": "Kota (ağırlıklı oturum saati)",
+      "allowancePeriod": "Kota dönemi",
+      "pools": "İzin verilen kısıtlı havuzlar (virgülle ayrılmış)",
+      "poolsDenied": "Reddedilen havuzlar (virgülle ayrılmış)",
+      "groupsHelp": "Birden fazla seçmek için Ctrl veya Command tuşunu basılı tutun. Gruplar çeliştiğinde kısıtlayıcı değer geçerli olur.",
+      "providerGroups": "Kimlik sağlayıcının son oturum açmada bildirdiği gruplar: {groups}",
+      "limitsHelp": "-1 değeri veya boş bırakılan alan sınır koymaz."
     },
     "groups": {
       "title": "Grup Yönetimi",
@@ -217,7 +237,14 @@
       "overrideTitle": "Grup Geçersiz Kılma Ayarları",
       "permissionsTitle": "İzinler ve Güvenlik Geçersiz Kılmaları",
       "createButton": "Grup Oluştur",
-      "confirmDelete": "'{groupName}' grubunu silmek istediğinizden emin misiniz? Bu gruptaki kullanıcılar bireysel ayarlarına geri dönecektir."
+      "confirmDelete": "'{groupName}' grubunu silmek istediğinizden emin misiniz? Bu gruptaki kullanıcılar bireysel ayarlarına geri dönecektir.",
+      "notSet": "Ayarlanmadı",
+      "allow": "İzin ver",
+      "deny": "Reddet",
+      "on": "Açık",
+      "off": "Kapalı",
+      "ssoGroups": "Üyeleri bu gruba dahil olan kimlik sağlayıcı grupları (virgülle ayrılmış)",
+      "overrideHelp": "Bir grup yalnızca burada ayarlananları belirler; ayarlanmayan veya boş bırakılan her şey üyenin kendi değerinde kalır."
     },
     "installedApps": {
       "title": "Yüklü Uygulamalar",
@@ -225,6 +252,8 @@
       "noAppsFound": "Yüklü uygulama bulunamadı.",
       "pulling": "Yeni imaj çekiliyor...",
       "notLocal": "İmaj yerel olarak bulunamadı",
+      "isLaboratory": "Bu, özel ayarlarla bir temel imajdan oluşturulmuş bir Laboratuvar uygulamasıdır.",
+      "laboratory": "Laboratuvar",
       "confirmDelete": "'{appName}' yüklü uygulamasını silmek istediğinizden emin misiniz?"
     },
     "appStore": {
@@ -1045,7 +1074,33 @@
       "closeButton": "Oturumu Kapat ve Sonlandır",
       "savingAndLaunching": "Kaydediliyor ve Başlatılıyor...",
       "placeholder": "Uygulama Laboratuvarı, mevcut yüklü bir uygulamaya dayalı bir uygulama için temel ana dizini ve başlatma betiğini yapılandırmanıza olanak tanır. Bu ana dizin, bu oturumda ayarladığınız tüm dosya ve ayarlarla birlikte kullanıcı için ilk başlatmada kopyalanacaktır. İçeriğini daha fazla değiştirmek için mevcut bir Laboratuvar Uygulamasını yeniden başlatabilirsiniz.",
-      "formInvalid": "Lütfen bir temel uygulama seçin ve yeni uygulama için bir ad sağlayın."
+      "formInvalid": "Lütfen bir temel uygulama seçin ve yeni uygulama için bir ad sağlayın.",
+      "explainer": "Uygulama Laboratuvarı bir meta uygulama oluşturur: yüklü bir uygulamanın kendi adı, simgesi, otomatik başlatma betiği ve önceden hazırlanmış ana dizini olan bir çeşidi. Uygulamayı bir özelleştirme oturumunda bir kez hazırlarsınız; her kullanıcının ilk başlatması bu ana dizinin bir kopyasıyla başlar.",
+      "step1Title": "Uygulamayı tanımlayın",
+      "step1": "Temel alınacak uygulamayı seçin; meta uygulamaya bir ad, bir simge ve onu başlatabilecek kullanıcıları verin.",
+      "step2Title": "Canlı bir oturumda özelleştirin",
+      "step2": "Şablon ana dizini yazılabilir olarak bir özelleştirme oturumu açılır. Uzantıları yükleyin, oturum açın ve kullanıcıların bulması gerektiği gibi düzenleyin.",
+      "step3Title": "Şablonu kaydetmek için oturumu kapatın",
+      "step3": "Oturumu bu sayfadan kapatmak, ana dizini şablon olarak saklar.",
+      "openTitle": "Özelleştirme oturumu açık",
+      "openStarted": "{when} başlatıldı",
+      "openDescription": "Bu oturumun ana dizininde değiştirilen her şey şablon olur. Oturum, siz burada kapatana kadar açık kalır; oturumlarınız arasında listelenmez.",
+      "reopen": "Oturumu yeniden aç",
+      "closeAndSave": "Kapat ve şablonu kaydet",
+      "confirmClose": "'{name}' özelleştirme oturumu kapatılsın mı? Oturum durur ve ana dizini şablon olarak saklanır.",
+      "templateSaved": "Oturum kapatıldı. Şablon kaydedildi.",
+      "busy": "'{name}' için bir özelleştirme oturumu açık. Bir meta uygulamayı değiştirmeden veya yenisini başlatmadan önce yukarıdan kapatın.",
+      "describeTitle": "1. Tanımla",
+      "customizeTitle": "2. Özelleştir",
+      "customizeDescription": "Özelleştirme oturumu bu seçeneklerle başlar. Aynı anda yalnızca bir oturum açık olabilir.",
+      "advanced": "Gelişmiş",
+      "saveAndOpen": "Kaydet ve özelleştirme oturumunu aç",
+      "listTitle": "Meta uygulamalarınız",
+      "listNone": "Henüz meta uygulama yok.",
+      "closingStopping": "Oturum durduruluyor…",
+      "closingSaving": "Şablon kaydediliyor…",
+      "closingSaved": "Şablon kaydedildi: {files} dosya, {size}",
+      "closingFailed": "Oturum kapatılamadı."
     },
     "modals": {
       "editUserTitle": "Kullanıcıyı Düzenle: {username}",
@@ -1062,6 +1117,8 @@
       "dirsForUser": "Kullanıcı için dizinler: {username}",
       "dirsForAdmin": "Yönetici için dizinler: {username}",
       "newDirForUser": "Kullanıcı için Yeni Dizin Oluştur",
+      "customAutostartScriptLabel": "Özel Otomatik Başlatma Betiği",
+      "customAutostartScriptDescription": "Otomatik başlatma mantığını özelleştirin, uygulama sağlayıcısından varsayılanı kullanmak için boş bırakın.",
       "createDirButton": "Dizin Oluştur",
       "confirmDeleteDir": "'{username}' kullanıcısı için '{homeName}' dizinini silmek istediğinizden emin misiniz? Bu işlem kalıcıdır.",
       "installAppTitle": "{appName} Yükle",
@@ -1080,8 +1137,6 @@
       "advancedSettings": "Gelişmiş Ayarlar",
       "appTemplateLabel": "Uygulama Şablonu",
       "appTemplateDescription": "Gelişmiş konteyner başlatma ayarları için önceden yapılandırılmış bir şablon seçin.",
-      "customAutostartScriptLabel": "Özel Otomatik Başlatma Betiği",
-      "customAutostartScriptDescription": "Otomatik başlatma mantığını özelleştirin, uygulama sağlayıcısından varsayılanı kullanmak için boş bırakın.",
       "saveInstallation": "Kurulumu Kaydet",
       "updateStatusTitle": "{appName} için Güncelleme Durumu",
       "checkingUpdates": "Güncellemeler kontrol ediliyor...",
@@ -1176,8 +1231,16 @@
       "settingsSaved": "Ayarlar kaydedildi.",
       "appCreated": "Uygulama '{name}' başarıyla oluşturuldu.",
       "launchFailed": "Başlatma başarısız: {error}",
-      "passphraseRequired": "Bu tarayıcıda anahtarınızı korumak için bir parola ifadesi girin.",
-      "passphraseTooShort": "En az {count} karakterlik bir parola ifadesi kullanın."
+      "homedirMoving": "'{homeName}' ana dizini taşınıyor...",
+      "homedirMoved": "'{homeName}' ana dizini taşındı.",
+      "homedirMoveFailed": "Ana dizin taşınamadı: {error}",
+      "clusterLoadFailed": "Küme yüklenemedi: {error}",
+      "clusterWriteFailed": "Kaydedilemedi: {error}",
+      "nodeUpdated": "Düğüm güncellendi.",
+      "nodeRemoved": "Düğüm kaldırıldı.",
+      "poolSaved": "'{name}' havuzu kaydedildi.",
+      "poolDeleted": "'{name}' havuzu silindi.",
+      "nothingChanged": "Hiçbir şey değişmedi."
     },
     "placeholders": {
       "noAdmins": "Yönetici bulunamadı.",
@@ -1199,6 +1262,238 @@
       "protocol": "web+sealskin: Bağlantılarını Burada Aç",
       "protocolHelp": "web+sealskin: ve ardından bir adres olarak yazılan bağlantı, o adresi SealSkin'de açar.",
       "install": "Tarayıcınız web uygulamalarını yükleyebiliyorsa, bağlantı ve dosya paylaşmak ve dosya açmak için SealSkin'i tarayıcının menüsünden yükleyin."
+    },
+    "via": {
+      "root": "Root belirteci",
+      "oidc": "OpenID Connect",
+      "saml": "SAML",
+      "proxy": "Ters proxy",
+      "key": "Anahtar dosyası"
+    },
+    "periods": {
+      "day": "Gün",
+      "week": "Hafta",
+      "month": "Ay"
+    },
+    "cluster": {
+      "nodesTitle": "Düğümler",
+      "pool": "Havuz",
+      "load": "Yük",
+      "online": "Çevrimiçi",
+      "offline": "Çevrimdışı",
+      "waiting": "Onay bekliyor",
+      "lastSeen": "son görülme: {when}",
+      "storeUnreachableNode": "paylaşılan kayıtlara ulaşamıyor",
+      "cpus": "{count} CPU",
+      "gpus": "{count} GPU",
+      "gpuSessions": "GPU: {used} / {slots}",
+      "thisNode": "bu düğüm",
+      "approve": "Onayla",
+      "suspend": "Askıya al",
+      "remove": "Kaldır",
+      "confirmRemove": "'{name}' düğümü kümeden kaldırılsın mı? Hâlâ çalışan bir düğüm yeniden kaydolur ve onay bekler.",
+      "joinTitle": "Düğüm Ekle",
+      "joinDescription": "Bir katılım kodu oluşturun, yeni düğümü ortamında aşağıdaki iki satırla başlatın, ardından yukarıdaki tabloda onaylayın. Bir kod tek bir düğümü kabul eder ve bir saat geçerlidir.",
+      "joinButton": "Katılım Kodu Oluştur",
+      "joinExpires": "Yeni düğümün ortamı (kodun son geçerlilik zamanı: {when})",
+      "poolsTitle": "Havuzlar",
+      "poolsDescription": "Havuz, oturumların üzerinde başlatıldığı düğümlerden oluşur. Kısıtlı bir havuz yalnızca burada adı geçen veya ayarları izin veren kullanıcılara ve gruplara açıktır.",
+      "poolDomain": "Alan adı",
+      "poolAccess": "Erişim",
+      "poolCost": "Saatlik maliyet",
+      "poolCostWithGpu": "{cost} (GPU: {gpuCost})",
+      "poolOpen": "Açık",
+      "poolRestricted": "Kısıtlı",
+      "poolNew": "Yeni Havuz",
+      "poolEdit": "'{name}' Havuzunu Düzenle",
+      "poolDescriptionLabel": "Açıklama",
+      "poolDomainLabel": "Havuzun düğümlerinin adlandırıldığı alan adı",
+      "poolCostLabel": "Bir oturum saatinin kotadan düştüğü miktar",
+      "poolGpuCostLabel": "Bir GPU oturum saatinin kotadan düştüğü miktar (boş: aynı)",
+      "poolUsersLabel": "Kısıtlıyken açık olduğu kullanıcılar (virgülle ayrılmış)",
+      "poolGroupsLabel": "Kısıtlıyken açık olduğu gruplar (virgülle ayrılmış)",
+      "poolStopWhenSpent": "Kota tükendiğinde oturumları sonlandır",
+      "poolSave": "Havuzu Kaydet",
+      "confirmDeletePool": "'{name}' havuzu silinsin mi?",
+      "storeTitle": "Paylaşılan Kayıtlar",
+      "storeDescription": "Düğümlerin paylaştıkları kayıtları tuttuğu yer: kullanıcılar, gruplar, uygulamalar, havuzlar ve bu ayarlar.",
+      "storeKept": "Saklandığı yer:",
+      "storeKinds": {
+        "file": "Bu düğümün diskinde",
+        "s3": "Bir nesne deposu bucket'ında",
+        "peer": "Başka bir düğümde"
+      },
+      "reachable": "Erişilebilir",
+      "unreachable": "Erişilemiyor",
+      "publicUrl": "Web uygulaması adresi:",
+      "sessionDomain": "Oturum alan adı:",
+      "sessionDomainUnset": "Ayarlanmadı (web uygulamasının ana bilgisayar adı)",
+      "signInDescription": "Buraya yazılan bir ayar her düğüm için geçerlidir ve düğümün ortamına üstün gelir. Ayarı her düğümün ortamına geri bırakmak için alanı temizleyin.",
+      "settingWritten": "Burada her düğüm için ayarlandı.",
+      "settingFromEnvironment": "Her düğümün ortamından; gösterilen değer bu düğümünkidir.",
+      "settingInherit": "Her düğümün ortamından (burada: {value})",
+      "secretSet": "Bir gizli anahtar ayarlı; korumak için boş bırakın",
+      "secretUnset": "Gizli anahtar ayarlı değil",
+      "secretClear": "Burada ayarlanan gizli anahtarı kaldır",
+      "settings": {
+        "oidc_issuer": "OpenID Connect issuer URL'si",
+        "oidc_client_id": "OpenID Connect istemci kimliği",
+        "oidc_client_secret": "OpenID Connect istemci gizli anahtarı",
+        "oidc_scopes": "OpenID Connect kapsamları",
+        "saml_metadata_url": "SAML meta veri URL'si",
+        "saml_username_attribute": "Kullanıcıyı adlandıran SAML özniteliği (boş: aşağıdaki kullanıcı adı claim'i)",
+        "saml_groups_attribute": "Kullanıcının gruplarını listeleyen SAML özniteliği (boş: aşağıdaki gruplar claim'i)",
+        "sso_username_claim": "Kullanıcıyı adlandıran claim veya öznitelik",
+        "sso_groups_claim": "Kullanıcının gruplarını listeleyen claim veya öznitelik",
+        "sso_admin_group": "Yöneticilerin kimlik sağlayıcı grubu",
+        "sso_max_age_seconds": "Kimlik sağlayıcı oturum açmasının en uzun süresi (saat)",
+        "sso_force_login": "Her oturum açmada kimlik bilgilerini iste",
+        "sso_create_users": "İlk oturum açmada kullanıcı oluştur",
+        "proxy_auth_user_header": "Güvenilen proxy'nin kullanıcıyı adlandırdığı üstbilgi",
+        "proxy_auth_groups_header": "Güvenilen proxy'nin kullanıcının gruplarını listelediği üstbilgi",
+        "proxy_auth_logout_url": "Proxy'nin kendi kullanıcısının oturumunu kapattığı sayfa",
+        "web_session_seconds": "Root oturum açmasının kullanılmadan en uzun süresi (saat)",
+        "files_sync": "Paylaşılan dosyaları nesne deposunda tut"
+      },
+      "usageTitle": "Kullanım",
+      "usageHours": "Ağırlıklı saat",
+      "usageNone": "Bu dönemde kullanım yok.",
+      "settingsTitle": "Küme Ayarları"
+    },
+    "audit": {
+      "title": "Denetim Günlüğü",
+      "searchPlaceholder": "Olayları ara...",
+      "range": "Aralık",
+      "pageSize": "Sayfa başına olay",
+      "today": "Bugün",
+      "last7": "Son 7 gün",
+      "last30": "Son 30 gün",
+      "oneDay": "Tek gün (UTC)",
+      "time": "Zaman",
+      "event": "Olay",
+      "details": "Ayrıntılar",
+      "none": "Eşleşen olay yok.",
+      "shown": "{from}–{to} / {total}",
+      "exportCsv": "CSV olarak dışa aktar",
+      "exportJson": "JSON olarak dışa aktar",
+      "exported": "{count} olay dışa aktarıldı."
+    },
+    "signin": {
+      "pill": {
+        "active": "Etkin",
+        "off": "Kapalı",
+        "none": "Yapılandırılmadı"
+      },
+      "test": "Test et",
+      "testing": "Kaydedilen ayarlar test ediliyor...",
+      "testOk": "Sağlayıcı yanıt verdi.",
+      "testFailed": "Test başarısız oldu.",
+      "register": "Bunları sağlayıcıya kaydedin",
+      "provider": "Sağlayıcı",
+      "providerChoose": "İpuçları için bir sağlayıcı seçin",
+      "providerHelp": "Sağlayıcı yalnızca aşağıdaki ipuçlarını doldurur; onunla ilgili hiçbir şey saklanmaz.",
+      "proxyHelp": "Öndeki bir ters proxy kullanıcıların oturumunu açar ve onları bir üstbilgide bildirir. Bu, diğer sitelerinizi zaten aynı şekilde koruyan bir proxy için uygundur; aksi halde kullanıcıların oturumunu yukarıda, OpenID Connect veya SAML üzerinden açın.",
+      "proxyPresetChoose": "Üstbilgileri doldurmak için proxy'nin sağlayıcısını seçin",
+      "proxyPresets": {
+        "authelia": "Authelia",
+        "authentik": "Authentik",
+        "tinyauth": "Tinyauth",
+        "oauth2proxy": "oauth2-proxy"
+      },
+      "reach": {
+        "title": "Bu Sunucuya Erişim",
+        "help": "Tarayıcıların bu sunucuya nasıl ulaştığı; sunucunun ve bu tarayıcının gördüğü şekliyle. Öndeki bir ters proxy bunların her birini doğru yapmalıdır.",
+        "publicUrl": "Genel URL",
+        "publicUrlDiffers": "Bu sayfa {origin} adresinden yüklendi. SEALSKIN_PUBLIC_URL değişkenini tarayıcıların kullandığı adrese ayarlayın: kimlik sağlayıcı yönlendirmeleri ondan oluşturulur.",
+        "sessionDomain": "Oturum alan adı",
+        "sessionNames": "Oturumların açıldığı yer",
+        "sessionNamesNone": "Hiçbir oturum adı yanıt vermedi",
+        "sessionNamesHelp": "Web uygulamasından yapılan başlatmalar başarısız olur. Her oturum kendi adında açılır, <session id>.<domain>: alan adı için wildcard DNS, wildcard sertifika ve bu adları buraya gönderen bir ters proxy kuralı gerekir.",
+        "sessionNamesGuarded": "Oturumlar, SEALSKIN_SESSION_DOMAIN değişkeninin belirttiği gibi {domain} altında açılacak. Ters proxy oturum adlarında oturum açma istiyorsa bu beklenen durumdur; aksi halde bu adlar için wildcard DNS'i, sertifikayı ve proxy kuralını kontrol edin.",
+        "sessionNamesOther": "SEALSKIN_SESSION_DOMAIN, yanıt vermeyen {domain} alan adını gösteriyor.",
+        "trustedProxies": "Güvenilen proxy'ler",
+        "arrivedFrom": "Bu isteğin geldiği adres",
+        "viaTrusted": "Güvenilen bir proxy.",
+        "viaOther": "Güvenilen proxy'lerden biri değil. Bu, ters proxy'nizin adresiyse SEALSKIN_TRUSTED_PROXIES değişkenine ekleyin.",
+        "viaDirect": "Hiçbir ters proxy'ye güvenilmiyor. Bu bir ters proxy'nin adresiyse, sunucunun her tarayıcının kendi adresini görmesi için SEALSKIN_TRUSTED_PROXIES değişkenini bu adrese ayarlayın.",
+        "yourAddress": "Sunucunun gördüğü şekliyle adresiniz",
+        "httpPort": "Düz HTTP dinleyicisi"
+      },
+      "presets": {
+        "authelia": {
+          "name": "Authelia",
+          "hint": "Issuer, Authelia'nın kendi adresidir: https://<host>. identity_providers.oidc.clients altına aşağıdaki redirect URI ile bir istemci ekleyin; kapsamlar openid profile groups email offline_access olmalıdır."
+        },
+        "pocketid": {
+          "name": "Pocket ID",
+          "hint": "Issuer, Pocket ID'nin kendi adresidir: https://<host>. Aşağıdaki callback URL'si ile bir OIDC istemcisi ekleyin ve kapsamları openid profile email groups olarak ayarlayın."
+        },
+        "tinyauth": {
+          "name": "Tinyauth",
+          "hint": "Issuer, Tinyauth'un kendi adresidir: https://<host>. İstemciyi TINYAUTH_OIDC_CLIENTS_<NAME>_ değişkenleriyle tanımlayın ve kapsamları openid profile email groups olarak ayarlayın."
+        },
+        "keycloak": {
+          "name": "Keycloak",
+          "hint": "Issuer, realm'in adresidir: https://<host>/realms/<realm>. Client authentication açık bir OpenID Connect istemcisi oluşturun ve kullanıcının gruplarını göndermek için 'groups' adlı bir group membership mapper ekleyin."
+        },
+        "authentik": {
+          "name": "Authentik",
+          "hint": "Issuer, uygulamanın adresidir: https://<host>/application/o/<slug>/ (sondaki eğik çizgiyle birlikte). Bir OAuth2/OpenID sağlayıcısı ve onu kullanan bir uygulama oluşturun."
+        },
+        "entra": {
+          "name": "Microsoft Entra ID",
+          "hint": "Issuer şudur: https://login.microsoftonline.com/<tenant>/v2.0. Bir uygulama kaydedin, bir istemci gizli anahtarı ekleyin ve Token configuration altında groups claim'ini ekleyin."
+        },
+        "google": {
+          "name": "Google",
+          "hint": "Issuer şudur: https://accounts.google.com. Web application türünde bir OAuth istemci kimliği oluşturun. Google grup göndermez."
+        },
+        "okta": {
+          "name": "Okta",
+          "hint": "Issuer, kuruluşunuzun adresidir: https://<org>.okta.com. Bir OIDC web uygulaması oluşturun ve ID belirtecine bir groups claim'i ekleyin."
+        },
+        "other": {
+          "name": "Diğer",
+          "hint": "Issuer, /.well-known/openid-configuration yolu sağlayıcıyı tanımlayan adrestir."
+        }
+      },
+      "oidcTitle": "OpenID Connect",
+      "oidcRedirect": "Redirect URI",
+      "oidcBackchannel": "Back-channel oturum kapatma URL'si",
+      "oidcFrontchannel": "Front-channel oturum kapatma URL'si",
+      "samlTitle": "SAML 2.0",
+      "samlEntity": "Entity ID / meta veri URL'si",
+      "samlAcs": "ACS URL'si",
+      "samlSlo": "Tekli oturum kapatma URL'si",
+      "samlMetadata": "Bu sunucunun servis sağlayıcı meta verisini aç",
+      "proxyTitle": "Ters Proxy",
+      "trustedProxies": "Bu düğümün güvendiği proxy'ler:",
+      "trustedProxiesHelp": "Her düğümde SEALSKIN_TRUSTED_PROXIES ile ayarlanır. Üstbilgiye yalnızca istek bu adreslerden birinden geldiğinde güvenilir.",
+      "noTrustedProxy": "Bir kullanıcı üstbilgisi ayarlı, ancak bu düğüm henüz hiçbir proxy'ye güvenmiyor; bu yüzden proxy üzerinden oturum açma kabul edilmiyor.",
+      "proxyCheck": {
+        "guarded": "Denetlendi: proxy, ziyaretçinin gönderdiği oturum açma üstbilgilerini iletmiyor.",
+        "open": "Proxy üzerinden oturum açmalar reddediliyor.",
+        "unreachable": "Proxy üzerinden oturum açmalar reddediliyor: bu düğüm proxy'yi denetleyemiyor. Düğüme genel URL'sine giden bir yol sağlayın, proxy'nin kendi adresini SEALSKIN_TRUSTED_PROXIES içinde belirtin veya denetim olmadan proxy'ye güvenmek için düğümde SEALSKIN_PROXY_AUTH_UNCHECKED=true ayarlayın.",
+        "unchecked": "Bu düğümde proxy denetimi kapalı (SEALSKIN_PROXY_AUTH_UNCHECKED): proxy'nin ilettiği her şeye güvenilir."
+      },
+      "whoTitle": "Kimler Oturum Açar",
+      "whoHelp": "Bunlar OpenID Connect, SAML ve ters proxy için geçerlidir. Bir kimlik sağlayıcı grubunun üyelerini bir SealSkin grubuna almak için, onu Gruplar bölümünde o grubun \"kimlik sağlayıcı grupları\" alanına yazın.",
+      "rootTitle": "Root Belirteci",
+      "rootHelp": "Her zaman kullanılabilir. Belirteç, dosya silinene kadar sunucuda /config/root_token içinde durur ve SEALSKIN_ROOT_TOKEN ile ayarlanabilir.",
+      "keyTitle": "Anahtar Dosyaları",
+      "keyOn": "Bu düğüm anahtar dosyası kullanan istemcileri kabul ediyor: tarayıcı uzantısı ve mobil uygulama. Her düğümde SEALSKIN_LEGACY_AUTH ile ayarlanır.",
+      "keyOff": "Bu düğüm anahtar dosyası kullanan istemcileri kabul etmiyor. Her düğümde SEALSKIN_LEGACY_AUTH ile ayarlanır.",
+      "resultIssuer": "Issuer:",
+      "resultAuthorization": "Yetkilendirme uç noktası:",
+      "resultBackchannel": "Back-channel oturum kapatma destekleniyor:",
+      "resultScopes": "Sunulan kapsamlar:",
+      "resultGroupsClaim": "Gruplar claim'i:",
+      "claimListed": "'{claim}', sağlayıcının listelediği claim'ler arasında",
+      "claimNotListed": "'{claim}', sağlayıcının listelediği claim'ler arasında değil",
+      "resultEntity": "Entity ID:",
+      "resultSso": "Oturum açma URL'si:",
+      "resultSlo": "Tekli oturum kapatma sunuluyor:",
+      "resultCertificates": "İmzalama sertifikaları:"
     }
   },
   "popup": {
@@ -1227,7 +1522,16 @@
       "uploadingButton": "Yükleniyor...",
       "autoHome": "Otomatik (uygulama başına kalıcılık)",
       "collaborationMode": "Ortak Oturum",
-      "waylandMode": "Wayland Modu"
+      "waylandMode": "Wayland Modu",
+      "where": "Konum",
+      "whereAuto": "Otomatik",
+      "wherePools": "Havuzlar",
+      "whereNodes": "Düğümler",
+      "moveHome": "Depolamayı taşı",
+      "moveHomeStay": "{node} üzerinde",
+      "moveHomeTo": "{node} düğümüne taşı",
+      "moveHomeConfirm": "'{home}' dizini {node} düğümüne taşınsın mı? Onu kullanan oturumların önce durdurulması gerekir.",
+      "allowance": "Kota: bu {period} {used} / {hours} saat"
     },
     "sessionsView": {
       "noSessions": "Aktif oturum bulunamadı."
@@ -1260,7 +1564,10 @@
       "noAppSelected": "Lütfen bir uygulama seçin.",
       "noAppsAvailable": "Hesabınız için uygun uygulama yok.",
       "uploadSuccess": "Dosya başarıyla yüklendi!",
-      "creatingAutoHome": "Otomatik ana dizin oluşturuluyor..."
+      "creatingAutoHome": "Otomatik ana dizin oluşturuluyor...",
+      "noSessionOrigin": "Bu tarayıcı oturumun kendi adresine ulaşamıyor. Sunucunun oturum adları için wildcard DNS ve bir sertifikaya ihtiyacı var; yönetici SEALSKIN_SESSION_DOMAIN değişkenini ayarlar.",
+      "movingHome": "'{home}' taşınıyor...",
+      "movedHome": "'{home}', {node} düğümüne taşındı."
     },
     "languages": {
       "default": "Varsayılan ({locale})"
@@ -1355,7 +1662,10 @@
       "sharesLoadFailed": "Paylaşılan dosyalar yüklenemedi: {error}",
       "shareDeleteFailed": "Paylaşım silinemedi: {error}",
       "shareDeleted": "Paylaşım başarıyla silindi.",
-      "urlCopied": "Genel URL panoya kopyalandı."
+      "urlCopied": "Genel URL panoya kopyalandı.",
+      "downloading": "{filename} indiriliyor...",
+      "downloadSuccess": "İndirme tamamlandı",
+      "downloadFailed": "İndirme başarısız: {error}"
     },
     "placeholders": {
       "errorLoading": "Dosyalar yüklenirken hata oluştu.",
@@ -1370,15 +1680,39 @@
       "finalizing": "Tamamlanıyor...",
       "completed": "Tamamlandı",
       "error": "Hata"
+    },
+    "files": {
+      "searchPlaceholder": "Dosyaları ara..."
+    }
+  },
+  "shell": {
+    "host": {
+      "loading": "SealSkin sunucunuza bağlanılıyor…",
+      "unconfiguredTitle": "Bağlı değil",
+      "unconfiguredBody": "SealSkin henüz bir sunucuya bağlı değil.",
+      "setUp": "Bağlantıyı kur",
+      "unreachableTitle": "Sunucuya ulaşılamıyor",
+      "unreachableBody": "SealSkin sunucusuna ulaşılamadı veya web arayüzü yüklenmedi.",
+      "selfSigned": "Sunucu kendinden imzalı bir sertifika kullanıyorsa, onu bir kez açıp sertifikayı kabul edin, ardından yeniden deneyin.",
+      "retry": "Yeniden dene",
+      "openServer": "Sunucuyu aç",
+      "changeConnection": "Bağlantıyı değiştir",
+      "mismatchTitle": "Güncelleme gerekli",
+      "mismatchBody": "Bu uygulama ile sunucunun web arayüzü farklı köprü sürümleri kullanıyor. İkisinin eşleşmesi için uzantıyı veya uygulamayı ya da sunucuyu güncelleyin."
     }
   },
   "web": {
-    "unlockTitle": "SealSkin Kilidini Aç",
-    "unlockBody": "Bu tarayıcıda anahtarınızı koruyan parola ifadesini girin.",
-    "passphrase": "Parola ifadesi",
-    "unlock": "Kilidi Aç",
-    "wrongPassphrase": "Bu parola ifadesi anahtarınızın kilidini açmıyor.",
     "receiving": "Dosya SealSkin'e gönderiliyor…",
+    "signInTitle": "SealSkin'de oturum açın",
+    "signInWith": {
+      "oidc": "OpenID Connect ile Oturum Aç",
+      "saml": "SAML ile Oturum Aç"
+    },
+    "rootToken": "Root belirteci",
+    "rootTokenHelp": "Sunucunun /config/root_token dosyasında tuttuğu yönetici belirteci.",
+    "rootSignIn": "Root Olarak Oturum Aç",
+    "rootRefused": "Bu, sunucunun root belirteci değil.",
+    "rootLocked": "Çok fazla deneme yapıldı. Bir süre bekleyip yeniden deneyin.",
     "signIn": {
       "failed": "Oturum açma tamamlanmadı. Yeniden deneyin veya yöneticinize danışın.",
       "refused": "Kimlik sağlayıcı oturum açmayı reddetti.",
@@ -1389,6 +1723,57 @@
       "otherIdentity": "Kimlik sağlayıcının başka bir hesabı zaten bu SealSkin kullanıcısı olarak oturum açıyor. Yöneticinize danışın.",
       "notConfigured": "Bu sunucu çoklu oturum açma sunmuyor.",
       "ended": "Kimlik sağlayıcı oturumunuzu sonlandırdı. Yeniden oturum açın."
+    },
+    "nav": {
+      "home": "Ana Sayfa",
+      "sessions": "Oturumlar",
+      "files": "Dosyalar",
+      "settings": "Ayarlar"
+    },
+    "home": {
+      "searchPlaceholder": "Uygulamaları arayın veya izole olarak açmak için bir bağlantı yapıştırın",
+      "upload": "Dosya yükle",
+      "drop": "SealSkin'de açmak için dosyayı bırakın",
+      "running": "Çalışan oturumlar",
+      "applications": "Uygulamalar",
+      "allowance": "Kota",
+      "allowanceValue": "{period} başına {used} / {hours} sa",
+      "room": "Oda",
+      "started": "{when} başlatıldı",
+      "typeAll": "Tümü",
+      "typeRecent": "Son kullanılanlar",
+      "typeOther": "Diğer",
+      "quickLaunch": "Son kullanılan seçeneklerle başlat",
+      "wherePool": "Havuz: {pool}",
+      "openingUrl": "{url} adresini açmak için bir uygulama seçin",
+      "openingFile": "{filename} dosyasını açmak için bir uygulama seçin",
+      "noApps": "Kullanabileceğiniz uygulama yok. Yöneticinizden uygulama yüklemesini isteyin.",
+      "noAppsAdmin": "Henüz yüklü uygulama yok.",
+      "noMatch": "Eşleşen uygulama yok.",
+      "openAppStores": "Uygulama Mağazalarını Aç",
+      "popupBlocked": "Tarayıcı oturumun sekmesini engelledi. Bu site için açılır pencerelere izin verin, ardından yeniden başlatın.",
+      "serverFileNeedsHome": "Sunucuda tutulan bir dosya Temiz Oda modunda açılamaz. Bir depolama dizini seçin."
+    },
+    "launch": {
+      "title": "{app} başlatılıyor",
+      "stages": {
+        "requesting": "Başlatma isteği gönderiliyor",
+        "placing": "Sınırlar denetleniyor ve düğüm seçiliyor",
+        "forwarding": "Başlatma {node} düğümüne aktarılıyor",
+        "storage": "Ana dizin hazırlanıyor",
+        "files": "Paylaşılan dosyalar eşitleniyor",
+        "image": "Uygulama imajı indiriliyor",
+        "starting": "Konteyner oluşturuluyor",
+        "waiting": "Masaüstünün yanıt vermesi bekleniyor",
+        "ready": "Oturum açılıyor"
+      },
+      "uploading": "Dosya yükleniyor ({done} / {total})",
+      "imageHint": "Bir uygulamanın bir düğümdeki ilk başlatması onu indirir; bu dakikalar sürebilir. Sonraki başlatmalar hızlıdır.",
+      "onNode": "{node} düğümünde",
+      "seconds": "{count} sn",
+      "failed": "Başlatma başarısız oldu",
+      "unseen": "Başlatma isteği sunucuya ulaşmadı. İsteği başlatan SealSkin sekmesini kontrol edin.",
+      "closeTab": "Tarayıcı bu sekmeyi açık tuttu. Kendiniz kapatın."
     }
   }
 }

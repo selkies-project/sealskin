@@ -54,7 +54,7 @@ then set `SEALSKIN_OIDC_ISSUER`, `SEALSKIN_OIDC_CLIENT_ID`, and
 `SEALSKIN_OIDC_CLIENT_SECRET`. SealSkin uses PKCE. Where the provider issues
 refresh tokens (the `offline_access` scope on some providers, set in
 `SEALSKIN_OIDC_SCOPES`), SealSkin checks the sign-in with it every minute
-while it is in use and takes the user's groups from each new ID token;
+while it is in use and takes the user's groups as the provider names them then;
 otherwise the sign-in ends when its ID token expires. Register
 `/api/auth/oidc/backchannel-logout` as the back-channel logout URL, or
 `/api/auth/oidc/frontchannel-logout` as the front-channel one, for a logout at
@@ -77,25 +77,32 @@ for credentials every time. Every sign-in ends after
 
 ## A reverse proxy that signs users in
 
-Where a proxy in front of SealSkin authenticates users, as Authentik,
-Authelia, or oauth2-proxy do in forward-auth mode, SealSkin takes the user
-from the header the proxy sets:
+Where a proxy in front of SealSkin authenticates users, as Authelia and
+Authentik do in forward-auth mode, SealSkin takes the user from the header
+the proxy sets:
 
 ```
-SEALSKIN_TRUSTED_PROXIES=10.0.0.5,172.16.0.0/12
+SEALSKIN_TRUSTED_PROXIES=10.0.0.5
 SEALSKIN_PROXY_AUTH_USER_HEADER=Remote-User
 SEALSKIN_PROXY_AUTH_GROUPS_HEADER=Remote-Groups
 ```
 
-The header is believed only on a connection from an address in
-`SEALSKIN_TRUSTED_PROXIES`, so the proxy has to be the only way in from those
-addresses, and it has to remove the headers from what clients send. There is
-no sign-in step: the web app opens signed in.
+There is no sign-in step: the web app opens signed in. The headers are
+believed only from an address in `SEALSKIN_TRUSTED_PROXIES`, and only while
+the server finds that the proxy sets them itself rather than passing on what
+a visitor sends, which it checks by asking its own public address.
+[A proxy that signs users in](reverse-proxy/sign-in.md) describes the check,
+what to let through, and signing out.
 
 ## Who a sign-in is
 
 The user is the value of `SEALSKIN_SSO_USERNAME_CLAIM` (`preferred_username`,
 or the SAML attribute `username`, else the NameID), or of the proxy's header.
+An OpenID Connect claim the ID token leaves out is read from the provider's
+UserInfo endpoint, and a SAML attribute is named by its `Name` or its
+`FriendlyName`. Where both protocols are set up and name them differently,
+`SEALSKIN_SAML_USERNAME_ATTRIBUTE` and `SEALSKIN_SAML_GROUPS_ATTRIBUTE` name
+the SAML attributes on their own.
 It has to be a valid SealSkin user name (letters, digits, `_`, `-`); choose a
 claim users cannot set for themselves at the provider.
 
@@ -113,8 +120,11 @@ claim users cannot set for themselves at the provider.
 
 These settings can also be written for the whole cluster, in the dashboard
 under **Sign In**, where they take precedence over each node's
-environment. The client secret is better left in the environment of the nodes
-that sign users in: what the dashboard writes goes to the shared store.
+environment. Each card there has a list of providers that fills in what
+is the same for everyone who uses that provider, and a **Test** that asks the
+provider, or checks the proxy, with what was saved. The client secret is
+better left in the environment of the nodes that sign users in: what the
+dashboard writes goes to the shared store.
 
 ## Groups, switches, and limits
 
@@ -144,23 +154,18 @@ A negative limit is no limit. Administrators are under none.
 
 ## Behind a reverse proxy
 
-Point the proxy at the session port over HTTPS (`https://<node>:8443`; the
-certificate there may be the self-signed one if the proxy does not verify
-it), pass WebSocket upgrades, and send the wildcard session names to the same
-place. Then tell SealSkin how browsers reach it:
+A proxy in front terminates TLS for the web app's name and the session
+names and passes WebSockets; SealSkin is told how browsers reach it:
 
 ```
 SEALSKIN_PUBLIC_URL=https://sealskin.example.com
-SEALSKIN_SESSION_DOMAIN=apps.example.com        # when sessions are not under sealskin.example.com
+SEALSKIN_SESSION_DOMAIN=example.com
 SEALSKIN_TRUSTED_PROXIES=10.0.0.5
 ```
 
-`SEALSKIN_PUBLIC_URL` is what identity provider redirects are built from.
-`SEALSKIN_TRUSTED_PROXIES` makes the server take the client's address from
-the proxy's `X-Forwarded-For`. The proxy has to pass the browser's `Host`,
-`Origin`, and `Sec-Fetch-*` headers unchanged: the server tells a session's
-origin by its host name and refuses requests the browser marks as coming from
-another origin.
+[Behind a reverse proxy](reverse-proxy/index.md) has the whole of it, with
+configurations for SWAG, Traefik, Nginx Proxy Manager, and Caddy, and for
+Authelia and Authentik as the identity provider.
 
 The API port, `8000`, serves key-file clients over plain HTTP and never the
 web sign-in; leave it unpublished where only the web app is used.

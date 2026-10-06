@@ -23,6 +23,7 @@ from ..security import (
     canonical_uuid,
     get_decrypted_request_body,
     on_session_origin,
+    relative,
     token_matches,
     verify_token,
 )
@@ -209,8 +210,7 @@ async def initial_session_auth(session_id: uuid.UUID, request: Request) -> Respo
     if bool(data.get("own_origin")) != own_origin:
         raise HTTPException(status_code=403, detail="Forbidden: the session is served from another origin.")
 
-    redirect_url = request.url.remove_query_params("access_token")
-    response = RedirectResponse(url=str(redirect_url), status_code=303)
+    response = RedirectResponse(url=relative(request.url.remove_query_params("access_token")), status_code=303)
     is_embedded = request.query_params.get("embedded") == "true"
     samesite_policy = "none" if is_embedded else "lax"
     logger.info(

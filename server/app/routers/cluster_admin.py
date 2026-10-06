@@ -11,7 +11,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, Field, ValidationError
 
-from .. import audit, cluster, homes, persistence, quota, routing, sso, store
+from .. import audit, cluster, homes, persistence, proxy_auth, quota, routing, sso, store
 from ..security import EncryptedRoute, get_decrypted_request_body, verify_admin, verify_token
 from ..settings import CLUSTER_SETTINGS, settings
 
@@ -124,8 +124,19 @@ def _node_view(node_id: str, record: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _arrival(request: Request) -> dict[str, Any]:
+    """Say how a request reached this node, for an administrator setting up a reverse proxy."""
+    remote = request.headers.get("x-sealskin-remote", "")
+    return {
+        "remote": remote,
+        "trusted": cluster.trusted_proxy(remote),
+        "client": cluster.client_address(request),
+        "host": request.headers.get("host", ""),
+    }
+
+
 @router.get("")
-async def overview() -> dict[str, Any]:
+async def overview(request: Request) -> dict[str, Any]:
     """Return the nodes, pools, store, and shared settings of the cluster."""
     await cluster.refresh_peers(timeout=3)
     written = persistence.read_yaml(os.path.join(settings.cluster_path, "settings.yml"), {}) or {}
@@ -146,6 +157,9 @@ async def overview() -> dict[str, Any]:
         "signin": {
             "enabled": sso.enabled(),
             "trusted_proxies": settings.trusted_proxies,
+            "http_port": settings.http_port if settings.trusted_proxies.strip() else 0,
+            "arrival": _arrival(request),
+            "proxy_check": await proxy_auth.check() | {"unchecked": bool(settings.proxy_auth_unchecked)},
             "urls": {
                 "oidc_redirect": f"{base}/api/auth/oidc/callback",
                 "oidc_backchannel_logout": f"{base}/api/auth/oidc/backchannel-logout",
@@ -292,11 +306,13 @@ async def audit_log(
 
 
 @router.post("/signin/test")
-async def test_sign_in(body: dict[str, Any] = Depends(get_decrypted_request_body)) -> dict[str, Any]:
+async def test_sign_in(request: Request, body: dict[str, Any] = Depends(get_decrypted_request_body)) -> dict[str, Any]:
     """Ask the configured identity provider for its metadata and say what came back.
 
-    Body `{"kind": "oidc" | "saml"}`. Answers `ok`, and either what the
-    provider published or the `error` reaching or reading it gave.
+    Body `{"kind": "oidc" | "saml" | "proxy"}`. Answers `ok`, and either what
+    the provider published or the `error` reaching or reading it gave. For
+    `proxy` it runs the check of the reverse proxy again (`proxy_auth.check`)
+    and answers with its `state` and `detail`.
     """
     kind = body.get("kind")
     try:
@@ -323,9 +339,14 @@ async def test_sign_in(body: dict[str, Any] = Depends(get_decrypted_request_body
                 "single_logout": bool(idp.get("slo")),
                 "certificates": len(idp.get("certs") or []),
             }
+        if kind == "proxy":
+            if not proxy_auth.enabled():
+                return {"ok": False, "error": "No user header is set."}
+            found = await proxy_auth.check(fresh=True, cookies=request.headers.get("cookie", ""))
+            return found | {"ok": found["state"] == "guarded", "error": found["detail"]}
     except Exception as exc:  # noqa: BLE001 - whatever went wrong is the answer
         return {"ok": False, "error": str(exc) or type(exc).__name__}
-    raise HTTPException(status_code=400, detail="The kind is oidc or saml.")
+    raise HTTPException(status_code=400, detail="The kind is oidc, saml, or proxy.")
 
 
 @router.get("/users/{username}/homes")

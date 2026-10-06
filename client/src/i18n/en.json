@@ -1341,6 +1341,8 @@
         "oidc_client_secret": "OpenID Connect client secret",
         "oidc_scopes": "OpenID Connect scopes",
         "saml_metadata_url": "SAML metadata URL",
+        "saml_username_attribute": "SAML attribute naming the user (empty: the username claim below)",
+        "saml_groups_attribute": "SAML attribute listing the user's groups (empty: the groups claim below)",
         "sso_username_claim": "Claim or attribute naming the user",
         "sso_groups_claim": "Claim or attribute listing the user's groups",
         "sso_admin_group": "Identity provider group of administrators",
@@ -1349,7 +1351,8 @@
         "sso_create_users": "Create a user at the first sign-in",
         "proxy_auth_user_header": "Header a trusted proxy names the user in",
         "proxy_auth_groups_header": "Header a trusted proxy lists the user's groups in",
-        "web_session_seconds": "Longest a root or proxy sign-in lasts unused (hours)",
+        "proxy_auth_logout_url": "Page of the proxy that signs its user out",
+        "web_session_seconds": "Longest a root sign-in lasts unused (hours)",
         "files_sync": "Keep shared files in the object store"
       },
       "usageTitle": "Usage",
@@ -1389,7 +1392,46 @@
       "provider": "Provider",
       "providerChoose": "Choose a provider for hints",
       "providerHelp": "A provider only fills the hints below; nothing about it is stored.",
+      "proxyHelp": "A reverse proxy in front signs users in and names them in a header. This suits a proxy that already guards your other sites the same way; otherwise sign users in above, over OpenID Connect or SAML.",
+      "proxyPresetChoose": "Choose the proxy's provider to fill the headers",
+      "proxyPresets": {
+        "authelia": "Authelia",
+        "authentik": "Authentik",
+        "tinyauth": "Tinyauth",
+        "oauth2proxy": "oauth2-proxy"
+      },
+      "reach": {
+        "title": "Reaching This Server",
+        "help": "How browsers reach this server, as the server and this browser see it. A reverse proxy in front has to get each of these right.",
+        "publicUrl": "Public URL",
+        "publicUrlDiffers": "This page was loaded from {origin}. Set SEALSKIN_PUBLIC_URL to the address browsers use: identity provider redirects are built from it.",
+        "sessionDomain": "Session domain",
+        "sessionNames": "Sessions open on",
+        "sessionNamesNone": "No session name answered",
+        "sessionNamesHelp": "Launches from the web app will fail. A session opens on a name of its own, <session id>.<domain>: the domain needs wildcard DNS, a wildcard certificate, and a reverse proxy rule that sends those names here.",
+        "sessionNamesGuarded": "Sessions will open under {domain} as SEALSKIN_SESSION_DOMAIN says. That is expected when the reverse proxy asks for a sign-in on the session names; otherwise check the wildcard DNS, the certificate, and the proxy rule for them.",
+        "sessionNamesOther": "SEALSKIN_SESSION_DOMAIN names {domain}, which did not answer.",
+        "trustedProxies": "Trusted proxies",
+        "arrivedFrom": "This request came from",
+        "viaTrusted": "A trusted proxy.",
+        "viaOther": "Not one of the trusted proxies. If this is your reverse proxy's address, add it to SEALSKIN_TRUSTED_PROXIES.",
+        "viaDirect": "No reverse proxy is trusted. If this is a reverse proxy's address, set SEALSKIN_TRUSTED_PROXIES to it, so the server sees each browser's own address.",
+        "yourAddress": "Your address, as the server sees it",
+        "httpPort": "Plain HTTP listener"
+      },
       "presets": {
+        "authelia": {
+          "name": "Authelia",
+          "hint": "The issuer is Authelia's own address, https://<host>. Add a client under identity_providers.oidc.clients with the redirect URI below, and the scopes openid profile groups email offline_access."
+        },
+        "pocketid": {
+          "name": "Pocket ID",
+          "hint": "The issuer is Pocket ID's own address, https://<host>. Add an OIDC client with the callback URL below, and set the scopes to openid profile email groups."
+        },
+        "tinyauth": {
+          "name": "Tinyauth",
+          "hint": "The issuer is Tinyauth's own address, https://<host>. Define the client with the TINYAUTH_OIDC_CLIENTS_<NAME>_ variables, and set the scopes to openid profile email groups."
+        },
         "keycloak": {
           "name": "Keycloak",
           "hint": "The issuer is the realm's address, https://<host>/realms/<realm>. Create an OpenID Connect client with client authentication on, and add a group membership mapper named 'groups' to send the user's groups."
@@ -1428,6 +1470,12 @@
       "trustedProxies": "Trusted proxies of this node:",
       "trustedProxiesHelp": "Set on each node with SEALSKIN_TRUSTED_PROXIES. The header is believed only when the request comes from one of those addresses.",
       "noTrustedProxy": "A user header is set, but this node trusts no proxy yet, so no proxy sign-in is accepted.",
+      "proxyCheck": {
+        "guarded": "Checked: the proxy does not pass on the sign-in headers a visitor sends.",
+        "open": "Proxy sign-ins are refused.",
+        "unreachable": "Proxy sign-ins are refused: this node cannot check the proxy. Give it a route to its public URL, name the proxy's own address in SEALSKIN_TRUSTED_PROXIES, or set SEALSKIN_PROXY_AUTH_UNCHECKED=true on the node to believe the proxy without the check.",
+        "unchecked": "The check of the proxy is switched off on this node (SEALSKIN_PROXY_AUTH_UNCHECKED): whatever the proxy passes on is believed."
+      },
       "whoTitle": "Who Signs In",
       "whoHelp": "These hold for OpenID Connect, SAML, and the reverse proxy. To put the members of an identity provider group into a SealSkin group, list it under \"Identity provider groups\" of that group in Groups.",
       "rootTitle": "Root Token",

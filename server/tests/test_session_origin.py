@@ -43,6 +43,11 @@ def test_the_first_exchange_settles_the_origin(app_client, first, other):
     assert resolve(app_client(other)).status_code == 403
 
 
+def test_the_exchange_redirects_within_the_origin_the_browser_used(app_client):
+    # A reverse proxy in front need not pass the browser's port on, so the redirect names none.
+    assert exchange(app_client(OWN)).headers["location"] == f"/{SID}/"
+
+
 def test_the_cookie_is_scoped_to_the_origin_it_was_set_on(app_client):
     cookie = exchange(app_client(OWN)).headers["set-cookie"]
     assert f"{settings.session_cookie_name}_{SID}=tok" in cookie

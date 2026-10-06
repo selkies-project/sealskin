@@ -27,9 +27,10 @@ session.
   the `nvidia-container-toolkit` (v1.20.1 or higher) and `nvidia-drm.modeset=1`;
   Intel and AMD need nothing beyond `/dev/dri`. See [Administration](administration.md#gpus).
 
-SealSkin is designed to be exposed directly on the internet rather than placed
-behind another reverse proxy: its own Caddy instance terminates TLS and
-authenticates every request to a session.
+SealSkin can be exposed directly on the internet: its own Caddy instance
+terminates TLS and authenticates every request to a session. It also runs
+[behind a reverse proxy](reverse-proxy/index.md) that holds the certificate
+or signs users in.
 
 ## Install the server
 

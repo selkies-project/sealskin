@@ -78,7 +78,10 @@
       "installedApps": "Ứng dụng đã cài đặt",
       "users": "Người dùng",
       "groups": "Nhóm",
-      "admins": "Quản trị viên"
+      "admins": "Quản trị viên",
+      "cluster": "Cụm",
+      "signIn": "Đăng nhập",
+      "audit": "Nhật ký kiểm toán"
     },
     "dashboard": {
       "title": "Bảng điều khiển",
@@ -104,7 +107,14 @@
         "<strong>Để quản lý lưu trữ lâu dài:</strong> Sử dụng tab \"Thư mục chính\" trên trang này để tạo và xóa các ổ đĩa lưu trữ có thể được sử dụng trên nhiều phiên.",
         "<strong>Để lưu các tùy chọn khởi chạy:</strong> Đánh dấu vào hộp \"Lưu các tùy chọn khởi chạy này\" trong cửa sổ bật lên trước khi khởi chạy ứng dụng cho một loại tệp cụ thể (ví dụ: .pdf) hoặc cho tất cả các URL. Quản lý các tùy chọn đã lưu này trong tab \"Hành vi đã ghim\"."
       ],
-      "confirmLogout": "Bạn có chắc chắn muốn đăng xuất không? Thao tác này sẽ xóa cấu hình đã lưu của bạn khỏi trình duyệt này."
+      "confirmLogout": "Bạn có chắc chắn muốn đăng xuất không? Thao tác này sẽ xóa cấu hình đã lưu của bạn khỏi trình duyệt này.",
+      "changeConnection": "Đổi kết nối",
+      "certExpired": "Chứng chỉ TLS của máy chủ đã hết hạn. Các kết nối HTTPS sẽ thất bại cho đến khi chứng chỉ được gia hạn.",
+      "certExpiring": "Chứng chỉ TLS của máy chủ sẽ hết hạn sau {days} ngày. Hãy gia hạn để tránh lỗi kết nối.",
+      "signOut": "Đăng xuất",
+      "signedInThrough": "Đăng nhập qua:",
+      "allowance": "Hạn mức:",
+      "allowanceUsed": "{used} trên {hours} giờ trong {period} này"
     },
     "config": {
       "quickSetup": "Thiết lập nhanh",
@@ -135,15 +145,7 @@
       "keyGeneration": "Tạo khóa",
       "keyGenDescription": "Nếu bạn không có cặp khóa, bạn có thể tạo một cặp ở đây. Khóa riêng sẽ được điền vào ở trên. Cung cấp khóa công khai cho quản trị viên của bạn.",
       "generateKeyButton": "Tạo cặp khóa mới",
-      "publicKeyForAdminLabel": "Khóa công khai của bạn (cho quản trị viên)",
-      "passphraseLabel": "Cụm mật khẩu",
-      "remember": "Giữ khóa của tôi trong trình duyệt này",
-      "rememberHelp": "Hãy tắt tùy chọn này trên máy tính dùng chung: khi đó SealSkin chỉ giữ khóa của bạn khi thẻ này còn mở, và lần sau bạn tải lại cấu hình.",
-      "passphraseHelp": "Khóa riêng của bạn được lưu trong trình duyệt này, mã hóa bằng cụm mật khẩu này; bạn nhập nó mỗi lần mở SealSkin tại đây.",
-      "signInTitle": "Đăng nhập một lần",
-      "signInHelp": "Đăng nhập bằng tài khoản do tổ chức của bạn quản lý thay cho tệp cấu hình. SealSkin chỉ giữ lần đăng nhập trong thẻ này, nên lần sau bạn sẽ đăng nhập lại.",
-      "signInOidc": "Đăng nhập bằng OpenID Connect",
-      "signInSaml": "Đăng nhập bằng SAML"
+      "publicKeyForAdminLabel": "Khóa công khai của bạn (cho quản trị viên)"
     },
     "home": {
       "title": "Các thư mục chính của bạn",
@@ -153,9 +155,13 @@
       "namePlaceholder": "ví dụ: my-project-files",
       "nameTitle": "Chỉ sử dụng chữ cái, số, dấu gạch dưới hoặc dấu gạch ngang.",
       "createButton": "Tạo thư mục",
-      "isLaboratory": "Đây là một ứng dụng Phòng thí nghiệm, được xây dựng từ một image cơ sở với các cài đặt tùy chỉnh.",
-      "laboratory": "Phòng thí nghiệm",
-      "confirmDelete": "Bạn có chắc chắn muốn xóa ứng dụng đã cài đặt '{appName}' không?"
+      "confirmDelete": "Bạn có chắc chắn muốn xóa thư mục chính '{homeName}' không? Tất cả dữ liệu bên trong sẽ bị mất vĩnh viễn.",
+      "node": "Nút",
+      "move": "Di chuyển",
+      "moveTo": "Di chuyển đến nút",
+      "moveHelp": "Thư mục chính được sao chép sang nút đích và bị xóa khỏi nút đang giữ nó. Phải dừng các phiên đang dùng thư mục này trước.",
+      "moveTitle": "Di chuyển '{homeName}'",
+      "noOtherNode": "Không có nút nào khác để di chuyển đến."
     },
     "sessions": {
       "title": "Phiên hoạt động",
@@ -207,7 +213,21 @@
       "confirmDelete": "Bạn có chắc chắn muốn xóa người dùng '{username}' không? Thao tác này cũng sẽ xóa tất cả bộ nhớ lâu dài của họ và không thể hoàn tác.",
       "allowPublicSharing": "Cho phép chia sẻ tệp công khai",
       "allowEditTemplates": "Cho phép chỉnh sửa mẫu ứng dụng",
-      "signInOnly": "Chỉ đăng nhập một lần"
+      "signInOnly": "Chỉ đăng nhập một lần",
+      "admin": "Quản trị viên",
+      "gpuShare": "Cho phép dùng chung GPU với các phiên khác",
+      "homeMigration": "Cho phép di chuyển thư mục chính giữa các nút",
+      "storageLimit": "Giới hạn lưu trữ (GB mỗi nút)",
+      "sessionCpus": "Số CPU mỗi phiên",
+      "sessionMemory": "Bộ nhớ mỗi phiên (MB)",
+      "sessionHours": "Số giờ một phiên được chạy",
+      "allowanceHours": "Hạn mức (giờ phiên có trọng số)",
+      "allowancePeriod": "Chu kỳ hạn mức",
+      "pools": "Pool hạn chế được phép (phân tách bằng dấu phẩy)",
+      "poolsDenied": "Pool bị từ chối (phân tách bằng dấu phẩy)",
+      "groupsHelp": "Giữ Ctrl hoặc Command để chọn nhiều mục. Khi các nhóm đặt khác nhau, giá trị hạn chế hơn sẽ được áp dụng.",
+      "providerGroups": "Các nhóm nhà cung cấp danh tính đã nêu ở lần đăng nhập gần nhất: {groups}",
+      "limitsHelp": "Giới hạn bằng -1 hoặc để trống nghĩa là không giới hạn."
     },
     "groups": {
       "title": "Quản lý nhóm",
@@ -217,7 +237,14 @@
       "overrideTitle": "Cài đặt ghi đè nhóm",
       "permissionsTitle": "Ghi đè quyền & Tăng cường bảo mật",
       "createButton": "Tạo nhóm",
-      "confirmDelete": "Bạn có chắc chắn muốn xóa nhóm '{groupName}' không? Người dùng trong nhóm này sẽ trở về cài đặt cá nhân của họ."
+      "confirmDelete": "Bạn có chắc chắn muốn xóa nhóm '{groupName}' không? Người dùng trong nhóm này sẽ trở về cài đặt cá nhân của họ.",
+      "notSet": "Chưa đặt",
+      "allow": "Cho phép",
+      "deny": "Từ chối",
+      "on": "Bật",
+      "off": "Tắt",
+      "ssoGroups": "Các nhóm của nhà cung cấp danh tính có thành viên thuộc nhóm này (phân tách bằng dấu phẩy)",
+      "overrideHelp": "Nhóm chỉ quyết định những gì được đặt ở đây; mọi thứ chưa đặt hoặc để trống vẫn theo thiết lập riêng của từng thành viên."
     },
     "installedApps": {
       "title": "Ứng dụng đã cài đặt",
@@ -225,6 +252,8 @@
       "noAppsFound": "Không tìm thấy ứng dụng đã cài đặt nào.",
       "pulling": "Đang kéo image mới...",
       "notLocal": "Không tìm thấy image cục bộ",
+      "isLaboratory": "Đây là ứng dụng Phòng thí nghiệm, được dựng từ một image cơ sở với các cài đặt tùy chỉnh.",
+      "laboratory": "Phòng thí nghiệm",
       "confirmDelete": "Bạn có chắc chắn muốn xóa ứng dụng đã cài đặt '{appName}' không?"
     },
     "appStore": {
@@ -1045,7 +1074,33 @@
       "closeButton": "Đóng Phiên & Hoàn tất",
       "savingAndLaunching": "Đang lưu & Khởi chạy...",
       "placeholder": "Phòng thí nghiệm ứng dụng cho phép bạn cấu hình thư mục chính cơ sở và tập lệnh khởi chạy cho một ứng dụng dựa trên một ứng dụng đã cài đặt hiện có. Thư mục chính này sẽ được sao chép khi khởi tạo lần đầu cho người dùng với tất cả các tệp và cài đặt bạn đã thiết lập trong phiên này. Bạn có thể khởi chạy lại một ứng dụng Phòng thí nghiệm hiện có để sửa đổi thêm nội dung của nó.",
-      "formInvalid": "Vui lòng chọn một ứng dụng cơ sở và cung cấp tên cho ứng dụng mới."
+      "formInvalid": "Vui lòng chọn một ứng dụng cơ sở và cung cấp tên cho ứng dụng mới.",
+      "explainer": "Phòng thí nghiệm ứng dụng tạo ra một meta-app: một biến thể của ứng dụng đã cài đặt, có tên, biểu tượng, tập lệnh tự khởi động riêng và một thư mục chính đã được thiết lập sẵn. Bạn thiết lập ứng dụng một lần trong phiên tùy chỉnh, và lần khởi chạy đầu tiên của mỗi người dùng bắt đầu từ một bản sao của thư mục chính đó.",
+      "step1Title": "Mô tả ứng dụng",
+      "step1": "Chọn ứng dụng làm nền, rồi đặt cho meta-app một cái tên, một biểu tượng và những người dùng được phép khởi chạy nó.",
+      "step2Title": "Tùy chỉnh trong một phiên trực tiếp",
+      "step2": "Một phiên tùy chỉnh mở ra với thư mục chính mẫu có thể ghi. Cài tiện ích mở rộng, đăng nhập và sắp xếp mọi thứ theo cách người dùng nên thấy.",
+      "step3Title": "Đóng phiên để lưu mẫu",
+      "step3": "Đóng phiên từ trang này sẽ giữ thư mục chính làm mẫu.",
+      "openTitle": "Phiên tùy chỉnh đang mở",
+      "openStarted": "Bắt đầu {when}",
+      "openDescription": "Mọi thay đổi trong thư mục chính của phiên này sẽ trở thành mẫu. Phiên vẫn mở cho đến khi bạn đóng nó tại đây; nó không xuất hiện trong danh sách phiên của bạn.",
+      "reopen": "Mở lại phiên",
+      "closeAndSave": "Đóng & lưu mẫu",
+      "confirmClose": "Đóng phiên tùy chỉnh của '{name}'? Phiên sẽ dừng và thư mục chính của nó được giữ làm mẫu.",
+      "templateSaved": "Đã đóng phiên. Mẫu đã được lưu.",
+      "busy": "Một phiên tùy chỉnh cho '{name}' đang mở. Hãy đóng nó ở trên trước khi thay đổi meta-app hoặc bắt đầu phiên khác.",
+      "describeTitle": "1. Mô tả",
+      "customizeTitle": "2. Tùy chỉnh",
+      "customizeDescription": "Phiên tùy chỉnh bắt đầu với các tùy chọn này. Mỗi lần chỉ mở được một phiên.",
+      "advanced": "Nâng cao",
+      "saveAndOpen": "Lưu & mở phiên tùy chỉnh",
+      "listTitle": "Các meta-app của bạn",
+      "listNone": "Chưa có meta-app nào.",
+      "closingStopping": "Đang dừng phiên…",
+      "closingSaving": "Đang lưu mẫu…",
+      "closingSaved": "Đã lưu mẫu: {files} tệp, {size}",
+      "closingFailed": "Đóng phiên thất bại."
     },
     "modals": {
       "editUserTitle": "Chỉnh sửa Người dùng: {username}",
@@ -1062,6 +1117,8 @@
       "dirsForUser": "Thư mục cho người dùng: {username}",
       "dirsForAdmin": "Thư mục cho quản trị viên: {username}",
       "newDirForUser": "Tạo thư mục mới cho người dùng",
+      "customAutostartScriptLabel": "Tập lệnh Tự khởi động Tùy chỉnh",
+      "customAutostartScriptDescription": "Tùy chỉnh logic tự khởi động, để trống để sử dụng mặc định từ nhà cung cấp ứng dụng.",
       "createDirButton": "Tạo thư mục",
       "confirmDeleteDir": "Bạn có chắc chắn muốn xóa '{homeName}' cho người dùng '{username}' không? Thao tác này là vĩnh viễn.",
       "installAppTitle": "Cài đặt {appName}",
@@ -1080,8 +1137,6 @@
       "advancedSettings": "Cài đặt nâng cao",
       "appTemplateLabel": "Mẫu ứng dụng",
       "appTemplateDescription": "Chọn một mẫu được cấu hình sẵn cho các cài đặt khởi chạy container nâng cao.",
-      "customAutostartScriptLabel": "Tập lệnh Tự khởi động Tùy chỉnh",
-      "customAutostartScriptDescription": "Tùy chỉnh logic tự khởi động, để trống để sử dụng mặc định từ nhà cung cấp ứng dụng.",
       "saveInstallation": "Lưu cài đặt",
       "updateStatusTitle": "Trạng thái cập nhật cho {appName}",
       "checkingUpdates": "Đang kiểm tra cập nhật...",
@@ -1176,8 +1231,16 @@
       "settingsSaved": "Đã lưu cài đặt.",
       "appCreated": "Đã tạo ứng dụng '{name}' thành công.",
       "launchFailed": "Khởi chạy thất bại: {error}",
-      "passphraseRequired": "Nhập cụm mật khẩu để bảo vệ khóa của bạn trong trình duyệt này.",
-      "passphraseTooShort": "Hãy dùng cụm mật khẩu dài ít nhất {count} ký tự."
+      "homedirMoving": "Đang di chuyển thư mục chính '{homeName}'...",
+      "homedirMoved": "Đã di chuyển thư mục chính '{homeName}'.",
+      "homedirMoveFailed": "Không thể di chuyển thư mục chính: {error}",
+      "clusterLoadFailed": "Không thể tải cụm: {error}",
+      "clusterWriteFailed": "Không thể lưu: {error}",
+      "nodeUpdated": "Đã cập nhật nút.",
+      "nodeRemoved": "Đã gỡ nút.",
+      "poolSaved": "Đã lưu pool '{name}'.",
+      "poolDeleted": "Đã xóa pool '{name}'.",
+      "nothingChanged": "Không có gì thay đổi."
     },
     "placeholders": {
       "noAdmins": "Không tìm thấy quản trị viên nào.",
@@ -1199,6 +1262,238 @@
       "protocol": "Mở liên kết web+sealskin: tại đây",
       "protocolHelp": "Liên kết viết dạng web+sealskin: kèm theo một địa chỉ sẽ mở địa chỉ đó trong SealSkin.",
       "install": "Nếu trình duyệt có thể cài đặt ứng dụng web, hãy cài SealSkin từ menu của trình duyệt để chia sẻ liên kết và tệp tới nó và mở tệp bằng nó."
+    },
+    "via": {
+      "root": "Token root",
+      "oidc": "OpenID Connect",
+      "saml": "SAML",
+      "proxy": "Reverse proxy",
+      "key": "Tệp khóa"
+    },
+    "periods": {
+      "day": "Ngày",
+      "week": "Tuần",
+      "month": "Tháng"
+    },
+    "cluster": {
+      "nodesTitle": "Nút",
+      "pool": "Pool",
+      "load": "Tải",
+      "online": "Trực tuyến",
+      "offline": "Ngoại tuyến",
+      "waiting": "Đang chờ phê duyệt",
+      "lastSeen": "thấy lần cuối {when}",
+      "storeUnreachableNode": "không truy cập được bản ghi dùng chung",
+      "cpus": "{count} CPU",
+      "gpus": "{count} GPU",
+      "gpuSessions": "GPU: {used} / {slots}",
+      "thisNode": "nút này",
+      "approve": "Phê duyệt",
+      "suspend": "Tạm ngưng",
+      "remove": "Gỡ",
+      "confirmRemove": "Gỡ nút '{name}' khỏi cụm? Nút vẫn đang chạy sẽ đăng ký lại và chờ phê duyệt.",
+      "joinTitle": "Thêm nút",
+      "joinDescription": "Tạo mã tham gia, khởi động nút mới với hai dòng bên dưới trong môi trường của nó, rồi phê duyệt nút trong bảng phía trên. Mỗi mã chỉ nhận một nút và có hiệu lực trong một giờ.",
+      "joinButton": "Tạo mã tham gia",
+      "joinExpires": "Môi trường của nút mới (mã hết hạn {when})",
+      "poolsTitle": "Pool",
+      "poolsDescription": "Pool là một tập hợp các nút nơi phiên được khởi chạy. Pool hạn chế chỉ mở cho những người dùng và nhóm được nêu ở đây hoặc được cài đặt của họ cho phép.",
+      "poolDomain": "Tên miền",
+      "poolAccess": "Truy cập",
+      "poolCost": "Chi phí mỗi giờ",
+      "poolCostWithGpu": "{cost} (GPU: {gpuCost})",
+      "poolOpen": "Mở",
+      "poolRestricted": "Hạn chế",
+      "poolNew": "Pool mới",
+      "poolEdit": "Chỉnh sửa pool '{name}'",
+      "poolDescriptionLabel": "Mô tả",
+      "poolDomainLabel": "Tên miền dùng để đặt tên cho các nút của pool",
+      "poolCostLabel": "Hạn mức tiêu tốn cho một giờ phiên",
+      "poolGpuCostLabel": "Hạn mức tiêu tốn cho một giờ phiên GPU (để trống: như trên)",
+      "poolUsersLabel": "Người dùng được truy cập khi hạn chế (phân tách bằng dấu phẩy)",
+      "poolGroupsLabel": "Nhóm được truy cập khi hạn chế (phân tách bằng dấu phẩy)",
+      "poolStopWhenSpent": "Kết thúc phiên khi dùng hết hạn mức",
+      "poolSave": "Lưu pool",
+      "confirmDeletePool": "Xóa pool '{name}'?",
+      "storeTitle": "Bản ghi dùng chung",
+      "storeDescription": "Nơi các nút lưu những bản ghi dùng chung: người dùng, nhóm, ứng dụng, pool và các cài đặt này.",
+      "storeKept": "Nơi lưu:",
+      "storeKinds": {
+        "file": "Trên đĩa của nút này",
+        "s3": "Trong bucket của kho đối tượng",
+        "peer": "Trên một nút khác"
+      },
+      "reachable": "Truy cập được",
+      "unreachable": "Không truy cập được",
+      "publicUrl": "Địa chỉ ứng dụng web:",
+      "sessionDomain": "Tên miền phiên:",
+      "sessionDomainUnset": "Chưa đặt (dùng tên máy chủ của ứng dụng web)",
+      "signInDescription": "Cài đặt được ghi ở đây áp dụng cho mọi nút và được ưu tiên hơn môi trường của nút. Xóa trống một trường để trả cài đặt đó về cho môi trường của từng nút.",
+      "settingWritten": "Được đặt ở đây cho mọi nút.",
+      "settingFromEnvironment": "Lấy từ môi trường của từng nút; giá trị hiển thị là của nút này.",
+      "settingInherit": "Lấy từ môi trường của từng nút (tại đây: {value})",
+      "secretSet": "Đã đặt secret; để trống để giữ nguyên",
+      "secretUnset": "Chưa đặt secret",
+      "secretClear": "Xóa secret đã đặt ở đây",
+      "settings": {
+        "oidc_issuer": "URL issuer của OpenID Connect",
+        "oidc_client_id": "Client ID của OpenID Connect",
+        "oidc_client_secret": "Client secret của OpenID Connect",
+        "oidc_scopes": "Scope của OpenID Connect",
+        "saml_metadata_url": "URL metadata của SAML",
+        "saml_username_attribute": "Thuộc tính SAML nêu tên người dùng (để trống: dùng claim tên người dùng bên dưới)",
+        "saml_groups_attribute": "Thuộc tính SAML liệt kê các nhóm của người dùng (để trống: dùng claim nhóm bên dưới)",
+        "sso_username_claim": "Claim hoặc thuộc tính nêu tên người dùng",
+        "sso_groups_claim": "Claim hoặc thuộc tính liệt kê các nhóm của người dùng",
+        "sso_admin_group": "Nhóm quản trị viên trên nhà cung cấp danh tính",
+        "sso_max_age_seconds": "Thời gian tối đa của một lần đăng nhập qua nhà cung cấp danh tính (giờ)",
+        "sso_force_login": "Yêu cầu thông tin xác thực ở mỗi lần đăng nhập",
+        "sso_create_users": "Tạo người dùng ở lần đăng nhập đầu tiên",
+        "proxy_auth_user_header": "Tiêu đề mà proxy tin cậy dùng để nêu tên người dùng",
+        "proxy_auth_groups_header": "Tiêu đề mà proxy tin cậy dùng để liệt kê các nhóm của người dùng",
+        "proxy_auth_logout_url": "Trang của proxy dùng để đăng xuất người dùng của nó",
+        "web_session_seconds": "Thời gian tối đa một lần đăng nhập root được giữ khi không dùng (giờ)",
+        "files_sync": "Lưu các tệp đã chia sẻ trong kho đối tượng"
+      },
+      "usageTitle": "Mức sử dụng",
+      "usageHours": "Giờ có trọng số",
+      "usageNone": "Không có mức sử dụng nào trong chu kỳ này.",
+      "settingsTitle": "Cài đặt cụm"
+    },
+    "audit": {
+      "title": "Nhật ký kiểm toán",
+      "searchPlaceholder": "Tìm kiếm sự kiện...",
+      "range": "Khoảng thời gian",
+      "pageSize": "Số sự kiện mỗi trang",
+      "today": "Hôm nay",
+      "last7": "7 ngày qua",
+      "last30": "30 ngày qua",
+      "oneDay": "Một ngày (UTC)",
+      "time": "Thời gian",
+      "event": "Sự kiện",
+      "details": "Chi tiết",
+      "none": "Không có sự kiện nào khớp.",
+      "shown": "{from}–{to} trên {total}",
+      "exportCsv": "Xuất CSV",
+      "exportJson": "Xuất JSON",
+      "exported": "Đã xuất {count} sự kiện."
+    },
+    "signin": {
+      "pill": {
+        "active": "Hoạt động",
+        "off": "Tắt",
+        "none": "Chưa cấu hình"
+      },
+      "test": "Kiểm tra",
+      "testing": "Đang kiểm tra các cài đặt đã lưu...",
+      "testOk": "Nhà cung cấp đã phản hồi.",
+      "testFailed": "Kiểm tra thất bại.",
+      "register": "Đăng ký các giá trị này với nhà cung cấp",
+      "provider": "Nhà cung cấp",
+      "providerChoose": "Chọn nhà cung cấp để xem gợi ý",
+      "providerHelp": "Nhà cung cấp chỉ dùng để điền các gợi ý bên dưới; không có thông tin nào về nó được lưu.",
+      "proxyHelp": "Một reverse proxy đứng trước sẽ đăng nhập cho người dùng và nêu tên họ trong một tiêu đề. Cách này phù hợp với proxy đã bảo vệ các trang khác của bạn theo cùng cách; nếu không, hãy cho người dùng đăng nhập ở trên qua OpenID Connect hoặc SAML.",
+      "proxyPresetChoose": "Chọn nhà cung cấp của proxy để điền các tiêu đề",
+      "proxyPresets": {
+        "authelia": "Authelia",
+        "authentik": "Authentik",
+        "tinyauth": "Tinyauth",
+        "oauth2proxy": "oauth2-proxy"
+      },
+      "reach": {
+        "title": "Truy cập máy chủ này",
+        "help": "Cách trình duyệt truy cập máy chủ này, theo góc nhìn của máy chủ và của trình duyệt này. Reverse proxy đứng trước phải thiết lập đúng từng mục dưới đây.",
+        "publicUrl": "URL công khai",
+        "publicUrlDiffers": "Trang này được tải từ {origin}. Hãy đặt SEALSKIN_PUBLIC_URL thành địa chỉ mà trình duyệt sử dụng: các chuyển hướng của nhà cung cấp danh tính được tạo từ địa chỉ đó.",
+        "sessionDomain": "Tên miền phiên",
+        "sessionNames": "Phiên mở tại",
+        "sessionNamesNone": "Không có tên phiên nào phản hồi",
+        "sessionNamesHelp": "Việc khởi chạy từ ứng dụng web sẽ thất bại. Mỗi phiên mở trên một tên riêng, <session id>.<domain>: tên miền này cần DNS wildcard, chứng chỉ wildcard và một quy tắc reverse proxy chuyển các tên đó về đây.",
+        "sessionNamesGuarded": "Các phiên sẽ mở dưới {domain} như SEALSKIN_SESSION_DOMAIN chỉ định. Điều này là bình thường khi reverse proxy yêu cầu đăng nhập trên các tên phiên; nếu không, hãy kiểm tra DNS wildcard, chứng chỉ và quy tắc proxy cho các tên đó.",
+        "sessionNamesOther": "SEALSKIN_SESSION_DOMAIN chỉ định {domain}, nhưng tên miền này không phản hồi.",
+        "trustedProxies": "Proxy tin cậy",
+        "arrivedFrom": "Yêu cầu này đến từ",
+        "viaTrusted": "Một proxy tin cậy.",
+        "viaOther": "Không phải một trong các proxy tin cậy. Nếu đây là địa chỉ reverse proxy của bạn, hãy thêm nó vào SEALSKIN_TRUSTED_PROXIES.",
+        "viaDirect": "Không có reverse proxy nào được tin cậy. Nếu đây là địa chỉ của một reverse proxy, hãy đặt SEALSKIN_TRUSTED_PROXIES thành địa chỉ đó để máy chủ thấy được địa chỉ thật của từng trình duyệt.",
+        "yourAddress": "Địa chỉ của bạn, theo góc nhìn của máy chủ",
+        "httpPort": "Cổng lắng nghe HTTP thường"
+      },
+      "presets": {
+        "authelia": {
+          "name": "Authelia",
+          "hint": "Issuer là địa chỉ của chính Authelia, https://<host>. Thêm một client trong identity_providers.oidc.clients với redirect URI bên dưới và các scope openid profile groups email offline_access."
+        },
+        "pocketid": {
+          "name": "Pocket ID",
+          "hint": "Issuer là địa chỉ của chính Pocket ID, https://<host>. Thêm một client OIDC với callback URL bên dưới và đặt scope thành openid profile email groups."
+        },
+        "tinyauth": {
+          "name": "Tinyauth",
+          "hint": "Issuer là địa chỉ của chính Tinyauth, https://<host>. Khai báo client bằng các biến TINYAUTH_OIDC_CLIENTS_<NAME>_ và đặt scope thành openid profile email groups."
+        },
+        "keycloak": {
+          "name": "Keycloak",
+          "hint": "Issuer là địa chỉ của realm, https://<host>/realms/<realm>. Tạo một client OpenID Connect có bật client authentication, và thêm một group membership mapper tên 'groups' để gửi các nhóm của người dùng."
+        },
+        "authentik": {
+          "name": "Authentik",
+          "hint": "Issuer là địa chỉ của ứng dụng, https://<host>/application/o/<slug>/, có cả dấu gạch chéo ở cuối. Tạo một nhà cung cấp OAuth2/OpenID và một ứng dụng sử dụng nó."
+        },
+        "entra": {
+          "name": "Microsoft Entra ID",
+          "hint": "Issuer là https://login.microsoftonline.com/<tenant>/v2.0. Đăng ký một ứng dụng, thêm client secret và thêm groups claim trong Token configuration."
+        },
+        "google": {
+          "name": "Google",
+          "hint": "Issuer là https://accounts.google.com. Tạo một OAuth client ID loại Web application. Google không gửi nhóm."
+        },
+        "okta": {
+          "name": "Okta",
+          "hint": "Issuer là địa chỉ của tổ chức bạn, https://<org>.okta.com. Tạo một ứng dụng web OIDC và thêm groups claim vào ID token của nó."
+        },
+        "other": {
+          "name": "Khác",
+          "hint": "Issuer là địa chỉ có /.well-known/openid-configuration mô tả nhà cung cấp."
+        }
+      },
+      "oidcTitle": "OpenID Connect",
+      "oidcRedirect": "Redirect URI",
+      "oidcBackchannel": "URL đăng xuất back-channel",
+      "oidcFrontchannel": "URL đăng xuất front-channel",
+      "samlTitle": "SAML 2.0",
+      "samlEntity": "Entity ID / URL metadata",
+      "samlAcs": "ACS URL",
+      "samlSlo": "URL đăng xuất một lần",
+      "samlMetadata": "Mở metadata service provider của máy chủ này",
+      "proxyTitle": "Reverse proxy",
+      "trustedProxies": "Proxy tin cậy của nút này:",
+      "trustedProxiesHelp": "Đặt trên từng nút bằng SEALSKIN_TRUSTED_PROXIES. Tiêu đề chỉ được tin khi yêu cầu đến từ một trong các địa chỉ đó.",
+      "noTrustedProxy": "Đã đặt tiêu đề người dùng, nhưng nút này chưa tin cậy proxy nào, nên không chấp nhận đăng nhập qua proxy.",
+      "proxyCheck": {
+        "guarded": "Đã kiểm tra: proxy không chuyển tiếp các tiêu đề đăng nhập do khách truy cập gửi.",
+        "open": "Đăng nhập qua proxy bị từ chối.",
+        "unreachable": "Đăng nhập qua proxy bị từ chối: nút này không thể kiểm tra proxy. Hãy cho nút một tuyến đến URL công khai của nó, nêu địa chỉ của chính proxy trong SEALSKIN_TRUSTED_PROXIES, hoặc đặt SEALSKIN_PROXY_AUTH_UNCHECKED=true trên nút để tin proxy mà không kiểm tra.",
+        "unchecked": "Việc kiểm tra proxy đã bị tắt trên nút này (SEALSKIN_PROXY_AUTH_UNCHECKED): mọi thứ proxy chuyển tiếp đều được tin."
+      },
+      "whoTitle": "Ai đăng nhập",
+      "whoHelp": "Các cài đặt này áp dụng cho OpenID Connect, SAML và reverse proxy. Để đưa thành viên của một nhóm trên nhà cung cấp danh tính vào một nhóm SealSkin, hãy liệt kê nhóm đó trong mục \"Các nhóm của nhà cung cấp danh tính\" của nhóm tương ứng ở trang Nhóm.",
+      "rootTitle": "Token root",
+      "rootHelp": "Luôn khả dụng. Token nằm trong /config/root_token trên máy chủ cho đến khi tệp đó bị xóa, và có thể đặt bằng SEALSKIN_ROOT_TOKEN.",
+      "keyTitle": "Tệp khóa",
+      "keyOn": "Nút này chấp nhận các máy khách dùng tệp khóa: tiện ích mở rộng trình duyệt và ứng dụng di động. Đặt trên từng nút bằng SEALSKIN_LEGACY_AUTH.",
+      "keyOff": "Nút này không chấp nhận các máy khách dùng tệp khóa. Đặt trên từng nút bằng SEALSKIN_LEGACY_AUTH.",
+      "resultIssuer": "Issuer:",
+      "resultAuthorization": "Authorization endpoint:",
+      "resultBackchannel": "Hỗ trợ đăng xuất back-channel:",
+      "resultScopes": "Scope được cung cấp:",
+      "resultGroupsClaim": "Claim nhóm:",
+      "claimListed": "'{claim}' có trong các claim mà nhà cung cấp liệt kê",
+      "claimNotListed": "'{claim}' không có trong các claim mà nhà cung cấp liệt kê",
+      "resultEntity": "Entity ID:",
+      "resultSso": "URL đăng nhập:",
+      "resultSlo": "Có đăng xuất một lần:",
+      "resultCertificates": "Chứng chỉ ký:"
     }
   },
   "popup": {
@@ -1227,7 +1522,16 @@
       "uploadingButton": "Đang tải lên...",
       "autoHome": "Tự động (lưu trữ theo ứng dụng)",
       "collaborationMode": "Phiên cộng tác",
-      "waylandMode": "Chế độ Wayland"
+      "waylandMode": "Chế độ Wayland",
+      "where": "Nơi chạy",
+      "whereAuto": "Tự động",
+      "wherePools": "Pool",
+      "whereNodes": "Nút",
+      "moveHome": "Di chuyển lưu trữ",
+      "moveHomeStay": "Trên {node}",
+      "moveHomeTo": "Di chuyển đến {node}",
+      "moveHomeConfirm": "Di chuyển '{home}' đến {node}? Phải dừng các phiên đang dùng nó trước.",
+      "allowance": "Hạn mức: {used} trên {hours} giờ trong {period} này"
     },
     "sessionsView": {
       "noSessions": "Không tìm thấy phiên hoạt động nào."
@@ -1260,7 +1564,10 @@
       "noAppSelected": "Vui lòng chọn một ứng dụng.",
       "noAppsAvailable": "Không có ứng dụng nào có sẵn cho tài khoản của bạn.",
       "uploadSuccess": "Tệp đã được tải lên thành công!",
-      "creatingAutoHome": "Đang tạo thư mục chính tự động..."
+      "creatingAutoHome": "Đang tạo thư mục chính tự động...",
+      "noSessionOrigin": "Trình duyệt này không truy cập được địa chỉ riêng của phiên. Máy chủ cần DNS wildcard và chứng chỉ cho các tên phiên; quản trị viên đặt SEALSKIN_SESSION_DOMAIN.",
+      "movingHome": "Đang di chuyển '{home}'...",
+      "movedHome": "Đã di chuyển '{home}' đến {node}."
     },
     "languages": {
       "default": "Mặc định ({locale})"
@@ -1355,7 +1662,10 @@
       "sharesLoadFailed": "Không thể tải các tệp đã chia sẻ: {error}",
       "shareDeleteFailed": "Không thể xóa chia sẻ: {error}",
       "shareDeleted": "Đã xóa chia sẻ thành công.",
-      "urlCopied": "Đã sao chép URL công khai vào clipboard."
+      "urlCopied": "Đã sao chép URL công khai vào clipboard.",
+      "downloading": "Đang tải xuống {filename}...",
+      "downloadSuccess": "Tải xuống hoàn tất",
+      "downloadFailed": "Tải xuống thất bại: {error}"
     },
     "placeholders": {
       "errorLoading": "Lỗi khi tải tệp.",
@@ -1370,15 +1680,39 @@
       "finalizing": "Đang hoàn tất...",
       "completed": "Hoàn thành",
       "error": "Lỗi"
+    },
+    "files": {
+      "searchPlaceholder": "Tìm kiếm tệp..."
+    }
+  },
+  "shell": {
+    "host": {
+      "loading": "Đang kết nối đến máy chủ SealSkin của bạn…",
+      "unconfiguredTitle": "Chưa kết nối",
+      "unconfiguredBody": "SealSkin chưa được kết nối với máy chủ nào.",
+      "setUp": "Thiết lập kết nối",
+      "unreachableTitle": "Không truy cập được máy chủ",
+      "unreachableBody": "Không thể truy cập máy chủ SealSkin hoặc giao diện web của nó không tải được.",
+      "selfSigned": "Nếu máy chủ dùng chứng chỉ tự ký, hãy mở máy chủ một lần và chấp nhận chứng chỉ, rồi thử lại.",
+      "retry": "Thử lại",
+      "openServer": "Mở máy chủ",
+      "changeConnection": "Đổi kết nối",
+      "mismatchTitle": "Cần cập nhật",
+      "mismatchBody": "Ứng dụng này và giao diện web của máy chủ dùng các phiên bản bridge khác nhau. Hãy cập nhật tiện ích mở rộng hoặc ứng dụng, hoặc cập nhật máy chủ, để cả hai khớp nhau."
     }
   },
   "web": {
-    "unlockTitle": "Mở khóa SealSkin",
-    "unlockBody": "Nhập cụm mật khẩu bảo vệ khóa của bạn trong trình duyệt này.",
-    "passphrase": "Cụm mật khẩu",
-    "unlock": "Mở khóa",
-    "wrongPassphrase": "Cụm mật khẩu này không mở được khóa của bạn.",
     "receiving": "Đang gửi tệp tới SealSkin…",
+    "signInTitle": "Đăng nhập vào SealSkin",
+    "signInWith": {
+      "oidc": "Đăng nhập bằng OpenID Connect",
+      "saml": "Đăng nhập bằng SAML"
+    },
+    "rootToken": "Token root",
+    "rootTokenHelp": "Token của quản trị viên, được máy chủ lưu trong tệp /config/root_token.",
+    "rootSignIn": "Đăng nhập với quyền root",
+    "rootRefused": "Đó không phải token root của máy chủ.",
+    "rootLocked": "Quá nhiều lần thử. Hãy chờ một lúc rồi thử lại.",
     "signIn": {
       "failed": "Đăng nhập chưa hoàn tất. Hãy thử lại hoặc hỏi quản trị viên của bạn.",
       "refused": "Nhà cung cấp danh tính đã từ chối đăng nhập.",
@@ -1389,6 +1723,57 @@
       "otherIdentity": "Một tài khoản khác của nhà cung cấp danh tính đã đăng nhập với tư cách người dùng SealSkin này. Hãy hỏi quản trị viên của bạn.",
       "notConfigured": "Máy chủ này không cung cấp đăng nhập một lần.",
       "ended": "Nhà cung cấp danh tính đã kết thúc lần đăng nhập của bạn. Hãy đăng nhập lại."
+    },
+    "nav": {
+      "home": "Trang chủ",
+      "sessions": "Phiên",
+      "files": "Tệp",
+      "settings": "Cài đặt"
+    },
+    "home": {
+      "searchPlaceholder": "Tìm kiếm ứng dụng, hoặc dán một liên kết để mở nó trong môi trường cách ly",
+      "upload": "Tải lên tệp",
+      "drop": "Thả tệp để mở trong SealSkin",
+      "running": "Phiên đang chạy",
+      "applications": "Ứng dụng",
+      "allowance": "Hạn mức",
+      "allowanceValue": "{used} / {hours} giờ mỗi {period}",
+      "room": "Phòng",
+      "started": "Bắt đầu {when}",
+      "typeAll": "Tất cả",
+      "typeRecent": "Gần đây",
+      "typeOther": "Khác",
+      "quickLaunch": "Khởi chạy với các tùy chọn dùng lần trước",
+      "wherePool": "Pool: {pool}",
+      "openingUrl": "Chọn một ứng dụng để mở {url}",
+      "openingFile": "Chọn một ứng dụng để mở {filename}",
+      "noApps": "Không có ứng dụng nào dành cho bạn. Hãy yêu cầu quản trị viên cài đặt ứng dụng.",
+      "noAppsAdmin": "Chưa có ứng dụng nào được cài đặt.",
+      "noMatch": "Không có ứng dụng nào khớp.",
+      "openAppStores": "Mở Cửa hàng ứng dụng",
+      "popupBlocked": "Trình duyệt đã chặn thẻ của phiên. Hãy cho phép cửa sổ bật lên cho trang này, rồi khởi chạy lại.",
+      "serverFileNeedsHome": "Không thể mở tệp lưu trên máy chủ ở chế độ Phòng sạch. Hãy chọn một thư mục lưu trữ."
+    },
+    "launch": {
+      "title": "Đang khởi chạy {app}",
+      "stages": {
+        "requesting": "Đang gửi yêu cầu khởi chạy",
+        "placing": "Đang kiểm tra giới hạn và chọn nút",
+        "forwarding": "Đang chuyển việc khởi chạy cho nút {node}",
+        "storage": "Đang chuẩn bị thư mục chính",
+        "files": "Đang đồng bộ các tệp đã chia sẻ",
+        "image": "Đang tải xuống image ứng dụng",
+        "starting": "Đang tạo container",
+        "waiting": "Đang chờ màn hình làm việc phản hồi",
+        "ready": "Đang mở phiên"
+      },
+      "uploading": "Đang tải lên tệp ({done} trên {total})",
+      "imageHint": "Lần khởi chạy đầu tiên của một ứng dụng trên một nút sẽ tải ứng dụng về, có thể mất vài phút. Các lần khởi chạy sau sẽ nhanh.",
+      "onNode": "Trên nút {node}",
+      "seconds": "{count} giây",
+      "failed": "Khởi chạy thất bại",
+      "unseen": "Yêu cầu khởi chạy chưa đến được máy chủ. Hãy kiểm tra thẻ SealSkin đã gửi yêu cầu.",
+      "closeTab": "Trình duyệt vẫn giữ thẻ này mở. Hãy tự đóng nó."
     }
   }
 }

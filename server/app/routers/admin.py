@@ -92,6 +92,7 @@ async def admin_status(user: dict[str, Any] = Depends(verify_token)) -> dict[str
         "username": user.get("username"),
         "settings": user.get("effective_settings"),
         "via": user.get("via") or "key",
+        "sign_out_url": settings.proxy_auth_logout_url if user.get("via") == "proxy" else "",
         "session_domain": settings.session_domain,
         "clustered": cluster.is_clustered(),
         "node_id": cluster.NODE_ID,
@@ -703,6 +704,7 @@ async def delete_admin(username: str) -> Response:
     """Delete an administrator."""
     try:
         user_manager.delete_admin(username)
+        await cluster.forget_user(username)
         return Response(status_code=204)
     except ValueError as exc:
         if "cannot be deleted" in str(exc).lower():
@@ -745,6 +747,7 @@ async def delete_user(username: str) -> Response:
     """Delete a user and their storage."""
     try:
         user_manager.delete_user(username)
+        await cluster.forget_user(username)
         await sso.end_sign_ins_of(username)
         return Response(status_code=204)
     except ValueError as exc:

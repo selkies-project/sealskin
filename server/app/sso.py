@@ -13,19 +13,25 @@ the provider named, and when it ends. `security.verify_token` asks
 * A sign-in lasts as long as the provider's: OpenID Connect ends at the ID
   token's expiry, or, with a refresh token, refreshes at most once every
   `CHECK_SECONDS` while in use and ends when the provider refuses, picking up
-  group changes from the new ID token; SAML ends at the assertion's
+  group changes as it does; SAML ends at the assertion's
   `SessionNotOnOrAfter`. A logout the provider announces ends the sign-in at
   once: an OpenID Connect back-channel logout token or front-channel request
   naming its session, or a signed SAML logout request. Every sign-in ends
   after `sso_max_age_seconds`. `sso_force_login` makes the provider ask for
   credentials every time.
+* The user name and groups are claims of the ID token, or of the provider's
+  UserInfo endpoint where the ID token leaves them out (`_with_userinfo`); a
+  SAML attribute is named by its `Name` or its `FriendlyName`, in
+  `saml_username_attribute` and `saml_groups_attribute` where the two
+  protocols name them differently.
 * The first sign-in as a SealSkin user through each protocol binds it to the
   provider's subject there (`user_manager.ensure_user`), and another subject
   is refused as that user later. A key-file administrator's name is refused,
   since administrators come from `sso_admin_group` alone.
 * The `root` administrator signs in with the root token (`check_root_token`),
-  of which the shared store keeps only a hash. Its sign-in, like one a proxy
-  vouches for, ends after `web_session_seconds` unused.
+  of which the shared store keeps only a hash. Its sign-in ends after
+  `web_session_seconds` unused. A user a reverse proxy names has no sign-in
+  here: the proxy's header is read on each request (`app.proxy_auth`).
 
 Sign-ins are this node's own (`sso_keys_path`, written 0600): an OpenID
 Connect one keeps its refresh token so a restarted server can still ask the
@@ -550,6 +556,31 @@ async def _token_request(doc: dict[str, Any], form: dict[str, str]) -> dict[str,
     return response.json()
 
 
+async def _with_userinfo(claims: dict[str, Any], tokens: dict[str, Any], doc: dict[str, Any]) -> dict[str, Any]:
+    """Return `claims` with the user name and groups the ID token left to the UserInfo endpoint.
+
+    A provider may keep an ID token to the claims that identify the sign-in
+    and serve the rest there, as Authelia does unless a claims policy says
+    otherwise. UserInfo is believed only for the account the ID token names.
+
+    Raises:
+        httpx.HTTPError: When the endpoint cannot be reached or refuses.
+        ValueError: When its answer is not that account's claims.
+    """
+    wanted = [settings.sso_username_claim or "preferred_username", settings.sso_groups_claim]
+    missing = [name for name in wanted if name and name not in claims]
+    endpoint, access_token = doc.get("userinfo_endpoint"), tokens.get("access_token")
+    if not missing or not endpoint or not access_token:
+        return claims
+    async with _client() as client:
+        response = await client.get(endpoint, headers={"Authorization": f"Bearer {access_token}", "Accept": "application/json"})
+    response.raise_for_status()
+    info = response.json()
+    if not isinstance(info, dict) or info.get("sub") != claims["sub"]:
+        raise ValueError("the UserInfo answer names another account than the ID token")
+    return claims | {name: info[name] for name in missing if name in info}
+
+
 def _oidc_expiry(tokens: dict[str, Any], claims: dict[str, Any]) -> float:
     """Return when an OpenID Connect sign-in ends by the provider's own account of it."""
     if tokens.get("refresh_expires_in"):
@@ -612,6 +643,10 @@ async def oidc_finish(state_token: str, code: str, binding: str) -> dict[str, An
     except (_Ended, httpx.HTTPError, ValueError) as exc:
         raise SignInError("failed", f"the code exchange failed: {exc}") from exc
     claims = await _verify_id_token(tokens.get("id_token"), doc, nonce=flow["nonce"])
+    try:
+        claims = await _with_userinfo(claims, tokens, doc)
+    except (httpx.HTTPError, ValueError) as exc:
+        raise SignInError("failed", f"the UserInfo request failed: {exc}") from exc
     return _identity(
         claims.get(settings.sso_username_claim or "preferred_username"),
         claims.get(settings.sso_groups_claim) if settings.sso_groups_claim else [],
@@ -625,7 +660,7 @@ async def oidc_finish(state_token: str, code: str, binding: str) -> dict[str, An
 
 
 async def _refresh(reg: dict[str, Any]) -> None:
-    """Refresh an OpenID Connect sign-in in place, taking the groups of a new ID token."""
+    """Refresh an OpenID Connect sign-in in place, taking the groups the provider names now."""
     doc = await _discovery()
     tokens = await _token_request(doc, {"grant_type": "refresh_token", "refresh_token": reg["refresh_token"]})
     reg["refresh_token"] = tokens.get("refresh_token") or reg["refresh_token"]
@@ -635,6 +670,7 @@ async def _refresh(reg: dict[str, Any]) -> None:
         if claims["sub"] != reg.get("oidc_sub"):
             raise _Ended("the refreshed ID token names another account")
         if settings.sso_groups_claim:
+            claims = await _with_userinfo(claims, tokens, doc)
             admin_group = settings.sso_admin_group.strip().lstrip("/")
             reg["groups"] = sorted(_groups(claims.get(settings.sso_groups_claim)))
             reg["admin"] = bool(admin_group) and admin_group in reg["groups"]
@@ -916,16 +952,23 @@ def _read_assertion(document: bytes, flow: dict[str, Any], idp: dict[str, Any]) 
         raise SignInError("failed", "the assertion was already used")
     _REPLAYS[assertion_id] = not_after + CLOCK_SKEW_SECONDS
     attributes: dict[str, list[str]] = {}
+    friendly_names: dict[str, list[str]] = {}
     for attribute in assertion.iter(f"{{{SAML}}}Attribute"):
         values = [v.text or "" for v in attribute.findall(f"{{{SAML}}}AttributeValue")]
         attributes.setdefault(attribute.get("Name", ""), []).extend(values)
+        friendly = attribute.get("FriendlyName")
+        if friendly:
+            friendly_names.setdefault(friendly, values)
+    # An attribute answers to its FriendlyName too, where no attribute has that Name.
+    attributes = friendly_names | attributes
     statement = assertion.find(f"{{{SAML}}}AuthnStatement")
     session_until = _parse_time(statement.get("SessionNotOnOrAfter")) if statement is not None else None
-    claim = settings.sso_username_claim
+    claim = settings.saml_username_attribute or settings.sso_username_claim
+    groups_claim = settings.saml_groups_attribute or settings.sso_groups_claim
     username = (attributes.get(claim) or [None])[0] if claim else (attributes.get("username") or [name_id])[0]
     return _identity(
         username,
-        attributes.get(settings.sso_groups_claim, []) if settings.sso_groups_claim else [],
+        attributes.get(groups_claim, []) if groups_claim else [],
         f"saml {idp['entity_id']} {name_id}",
         "saml",
         session_until or now + settings.sso_max_age_seconds,

@@ -140,8 +140,14 @@ async def web_app_manifest() -> JSONResponse:
 
 @router.get("/ui/opensearch.xml", include_in_schema=False)
 async def opensearch_description(request: Request) -> Response:
-    """Let the browser add a search engine that opens the terms in a session."""
-    app = str(request.url_for("ui", path="/"))
+    """Let the browser add a search engine that opens the terms in a session.
+
+    The template names `public_url` where it is set, and the address the
+    browser used otherwise: behind a reverse proxy the request need not carry
+    the browser's port.
+    """
+    public = settings.public_url.rstrip("/")
+    app = f"{public}/ui/" if public else str(request.url_for("ui", path="/"))
     body = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">'

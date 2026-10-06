@@ -78,7 +78,10 @@
       "installedApps": "App Installate",
       "users": "Utenti",
       "groups": "Gruppi",
-      "admins": "Amministratori"
+      "admins": "Amministratori",
+      "cluster": "Cluster",
+      "signIn": "Accesso",
+      "audit": "Registro di Audit"
     },
     "dashboard": {
       "title": "Pannello di Controllo",
@@ -104,7 +107,14 @@
         "<strong>Per gestire l'archiviazione persistente:</strong> Usa la scheda \"Cartelle Home\" in questa pagina per creare ed eliminare volumi di archiviazione che possono essere utilizzati in più sessioni.",
         "<strong>Per salvare le opzioni di avvio:</strong> Seleziona la casella \"Salva queste opzioni di avvio\" nel popup prima di avviare un'applicazione per un tipo di file specifico (es. .pdf) o per tutti gli URL. Gestisci queste preferenze salvate nella scheda \"Comportamento Fissato\"."
       ],
-      "confirmLogout": "Sei sicuro di voler effettuare il logout? Questo cancellerà la configurazione salvata da questo browser."
+      "confirmLogout": "Sei sicuro di voler effettuare il logout? Questo cancellerà la configurazione salvata da questo browser.",
+      "changeConnection": "Cambia connessione",
+      "certExpired": "Il certificato TLS del server è scaduto. Le connessioni HTTPS falliranno finché non verrà rinnovato.",
+      "certExpiring": "Il certificato TLS del server scade tra {days} giorno/i. Rinnovalo per evitare errori di connessione.",
+      "signOut": "Esci",
+      "signedInThrough": "Accesso effettuato tramite:",
+      "allowance": "Quota:",
+      "allowanceUsed": "{used} di {hours} ore per {period}"
     },
     "config": {
       "quickSetup": "Configurazione Rapida",
@@ -135,15 +145,7 @@
       "keyGeneration": "Generazione Chiave",
       "keyGenDescription": "Se non hai una coppia di chiavi, puoi generarne una qui. La chiave privata verrà inserita sopra. Fornisci la chiave pubblica al tuo amministratore.",
       "generateKeyButton": "Genera Nuova Coppia di Chiavi",
-      "publicKeyForAdminLabel": "La Tua Chiave Pubblica (per l'admin)",
-      "passphraseLabel": "Passphrase",
-      "remember": "Conserva la mia chiave in questo browser",
-      "rememberHelp": "Disattiva questa opzione su un computer condiviso: SealSkin conserva la tua chiave solo finché questa scheda è aperta, e la prossima volta caricherai di nuovo la configurazione.",
-      "passphraseHelp": "La tua chiave privata è conservata in questo browser cifrata con questa passphrase, da inserire ogni volta che apri SealSkin qui.",
-      "signInTitle": "Single sign-on",
-      "signInHelp": "Accedi con l'account gestito dalla tua organizzazione invece che con un file di configurazione. SealSkin conserva l'accesso solo in questa scheda, quindi la prossima volta accederai di nuovo.",
-      "signInOidc": "Accedi con OpenID Connect",
-      "signInSaml": "Accedi con SAML"
+      "publicKeyForAdminLabel": "La Tua Chiave Pubblica (per l'admin)"
     },
     "home": {
       "title": "Le Tue Cartelle Home",
@@ -153,9 +155,13 @@
       "namePlaceholder": "es. i-miei-file-di-progetto",
       "nameTitle": "Usa solo lettere, numeri, underscore o trattino.",
       "createButton": "Crea Cartella",
-      "isLaboratory": "Questa è un'app di Laboratorio, costruita da un'immagine di base con impostazioni personalizzate.",
-      "laboratory": "Laboratorio",
-      "confirmDelete": "Sei sicuro di voler eliminare l'app installata '{appName}'?"
+      "confirmDelete": "Sei sicuro di voler eliminare la cartella home '{homeName}'? Tutti i dati al suo interno andranno persi definitivamente.",
+      "node": "Nodo",
+      "move": "Sposta",
+      "moveTo": "Sposta sul nodo",
+      "moveHelp": "La cartella home viene copiata sul nodo e rimossa da quello che la ospita. Le sessioni che la usano devono prima essere fermate.",
+      "moveTitle": "Sposta '{homeName}'",
+      "noOtherNode": "Non c'è un altro nodo su cui spostarla."
     },
     "sessions": {
       "title": "Sessioni Attive",
@@ -207,7 +213,21 @@
       "confirmDelete": "Sei sicuro di voler eliminare l'utente '{username}'? Questo eliminerà anche tutta la sua archiviazione persistente e non potrà essere annullato.",
       "allowPublicSharing": "Consenti condivisione file pubblica",
       "allowEditTemplates": "Consenti modifica dei modelli app",
-      "signInOnly": "Solo single sign-on"
+      "signInOnly": "Solo single sign-on",
+      "admin": "Amministratore",
+      "gpuShare": "Consenti Condivisione di una GPU con Altre Sessioni",
+      "homeMigration": "Consenti Spostamento delle Cartelle Home tra Nodi",
+      "storageLimit": "Limite di archiviazione (GB per nodo)",
+      "sessionCpus": "CPU per sessione",
+      "sessionMemory": "Memoria per sessione (MB)",
+      "sessionHours": "Durata massima di una sessione (ore)",
+      "allowanceHours": "Quota (ore di sessione ponderate)",
+      "allowancePeriod": "Periodo della quota",
+      "pools": "Pool riservati consentiti (separati da virgola)",
+      "poolsDenied": "Pool negati (separati da virgola)",
+      "groupsHelp": "Tieni premuto Ctrl o Comando per selezionarne più di uno. Se i gruppi sono in disaccordo, prevale il valore più restrittivo.",
+      "providerGroups": "Gruppi indicati dal provider di identità all'ultimo accesso: {groups}",
+      "limitsHelp": "Un limite di -1, o lasciato vuoto, non ne imposta alcuno."
     },
     "groups": {
       "title": "Gestione Gruppi",
@@ -217,7 +237,14 @@
       "overrideTitle": "Impostazioni di Sovrascrittura del Gruppo",
       "permissionsTitle": "Sovrascritture Permessi e Rafforzamento",
       "createButton": "Crea Gruppo",
-      "confirmDelete": "Sei sicuro di voler eliminare il gruppo '{groupName}'? Gli utenti in questo gruppo torneranno alle loro impostazioni individuali."
+      "confirmDelete": "Sei sicuro di voler eliminare il gruppo '{groupName}'? Gli utenti in questo gruppo torneranno alle loro impostazioni individuali.",
+      "notSet": "Non impostato",
+      "allow": "Consenti",
+      "deny": "Nega",
+      "on": "Attivato",
+      "off": "Disattivato",
+      "ssoGroups": "Gruppi del provider di identità i cui membri fanno parte di questo gruppo (separati da virgola)",
+      "overrideHelp": "Un gruppo decide solo ciò che è impostato qui; tutto ciò che resta non impostato o vuoto rimane proprio di ciascun membro."
     },
     "installedApps": {
       "title": "Applicazioni Installate",
@@ -225,6 +252,8 @@
       "noAppsFound": "Nessuna app installata trovata.",
       "pulling": "Scaricamento nuova immagine...",
       "notLocal": "Immagine non trovata localmente",
+      "isLaboratory": "Questa è un'app di Laboratorio, costruita da un'immagine di base con impostazioni personalizzate.",
+      "laboratory": "Laboratorio",
       "confirmDelete": "Sei sicuro di voler eliminare l'app installata '{appName}'?"
     },
     "appStore": {
@@ -1045,7 +1074,33 @@
       "closeButton": "Chiudi Sessione e Finalizza",
       "savingAndLaunching": "Salvataggio e Avvio...",
       "placeholder": "Il Laboratorio App ti permette di configurare la directory home di base e lo script di avvio per un'applicazione basata su un'applicazione installata esistente. Questa directory home verrà copiata al primo avvio per l'utente con tutti i file e le impostazioni che hai configurato in questa sessione. Puoi riavviare un'App di Laboratorio esistente per modificarne ulteriormente i contenuti.",
-      "formInvalid": "Seleziona un'app di base e fornisci un nome per la nuova app."
+      "formInvalid": "Seleziona un'app di base e fornisci un nome per la nuova app.",
+      "explainer": "Il Laboratorio App crea una meta-app: una variante di un'applicazione installata con nome, icona e script di avvio automatico propri e una cartella home già configurata. Configuri l'applicazione una volta in una sessione di personalizzazione, e il primo avvio di ogni utente parte da una copia di quella cartella home.",
+      "step1Title": "Descrivi l'app",
+      "step1": "Scegli l'applicazione di base e assegna alla meta-app un nome, un'icona e gli utenti che possono avviarla.",
+      "step2Title": "Personalizzala in una sessione live",
+      "step2": "Si apre una sessione di personalizzazione con la cartella home del modello scrivibile. Installa estensioni, accedi, disponila come dovranno trovarla gli utenti.",
+      "step3Title": "Chiudi la sessione per salvare il modello",
+      "step3": "Chiudendo la sessione da questa pagina, la cartella home viene conservata come modello.",
+      "openTitle": "Sessione di personalizzazione aperta",
+      "openStarted": "Avviata {when}",
+      "openDescription": "Tutto ciò che cambia nella cartella home di questa sessione diventa il modello. La sessione resta aperta finché non la chiudi qui; non compare tra le tue sessioni.",
+      "reopen": "Riapri sessione",
+      "closeAndSave": "Chiudi e salva modello",
+      "confirmClose": "Chiudere la sessione di personalizzazione di '{name}'? La sessione si ferma e la sua cartella home viene conservata come modello.",
+      "templateSaved": "Sessione chiusa. Il modello è salvato.",
+      "busy": "È aperta una sessione di personalizzazione per '{name}'. Chiudila qui sopra prima di modificare una meta-app o avviarne un'altra.",
+      "describeTitle": "1. Descrivi",
+      "customizeTitle": "2. Personalizza",
+      "customizeDescription": "La sessione di personalizzazione si avvia con queste opzioni. Può essere aperta una sola sessione alla volta.",
+      "advanced": "Avanzate",
+      "saveAndOpen": "Salva e apri sessione di personalizzazione",
+      "listTitle": "Le tue meta-app",
+      "listNone": "Ancora nessuna meta-app.",
+      "closingStopping": "Arresto della sessione…",
+      "closingSaving": "Salvataggio del modello…",
+      "closingSaved": "Modello salvato: {files} file, {size}",
+      "closingFailed": "Chiusura della sessione non riuscita."
     },
     "modals": {
       "editUserTitle": "Modifica Utente: {username}",
@@ -1062,6 +1117,8 @@
       "dirsForUser": "Cartelle per l'utente: {username}",
       "dirsForAdmin": "Cartelle per l'amministratore: {username}",
       "newDirForUser": "Crea Nuova Cartella per l'Utente",
+      "customAutostartScriptLabel": "Script di Avvio Automatico Personalizzato",
+      "customAutostartScriptDescription": "Personalizza la logica di avvio automatico, lascia vuoto per usare quella predefinita del fornitore dell'applicazione.",
       "createDirButton": "Crea Cartella",
       "confirmDeleteDir": "Sei sicuro di voler eliminare '{homeName}' per l'utente '{username}'? L'azione è permanente.",
       "installAppTitle": "Installa {appName}",
@@ -1080,8 +1137,6 @@
       "advancedSettings": "Impostazioni Avanzate",
       "appTemplateLabel": "Modello Applicazione",
       "appTemplateDescription": "Seleziona un modello preconfigurato per impostazioni avanzate di avvio del container.",
-      "customAutostartScriptLabel": "Script di Avvio Automatico Personalizzato",
-      "customAutostartScriptDescription": "Personalizza la logica di avvio automatico, lascia vuoto per usare quella predefinita del fornitore dell'applicazione.",
       "saveInstallation": "Salva Installazione",
       "updateStatusTitle": "Stato Aggiornamento per {appName}",
       "checkingUpdates": "Verifica aggiornamenti in corso...",
@@ -1176,8 +1231,16 @@
       "settingsSaved": "Impostazioni salvate.",
       "appCreated": "App '{name}' creata con successo.",
       "launchFailed": "Avvio fallito: {error}",
-      "passphraseRequired": "Inserisci una passphrase per proteggere la tua chiave in questo browser.",
-      "passphraseTooShort": "Usa una passphrase di almeno {count} caratteri."
+      "homedirMoving": "Spostamento della cartella home '{homeName}'...",
+      "homedirMoved": "Cartella home '{homeName}' spostata.",
+      "homedirMoveFailed": "Impossibile spostare la cartella home: {error}",
+      "clusterLoadFailed": "Impossibile caricare il cluster: {error}",
+      "clusterWriteFailed": "Impossibile salvare: {error}",
+      "nodeUpdated": "Nodo aggiornato.",
+      "nodeRemoved": "Nodo rimosso.",
+      "poolSaved": "Pool '{name}' salvato.",
+      "poolDeleted": "Pool '{name}' eliminato.",
+      "nothingChanged": "Nessuna modifica."
     },
     "placeholders": {
       "noAdmins": "Nessun amministratore trovato.",
@@ -1199,6 +1262,238 @@
       "protocol": "Apri qui i link web+sealskin:",
       "protocolHelp": "Un link scritto come web+sealskin: seguito da un indirizzo apre poi quell'indirizzo in SealSkin.",
       "install": "Se il browser può installare app web, installa SealSkin dal suo menu per condividere link e file con esso e aprire file con esso."
+    },
+    "via": {
+      "root": "Token root",
+      "oidc": "OpenID Connect",
+      "saml": "SAML",
+      "proxy": "Reverse proxy",
+      "key": "File di chiave"
+    },
+    "periods": {
+      "day": "Giorno",
+      "week": "Settimana",
+      "month": "Mese"
+    },
+    "cluster": {
+      "nodesTitle": "Nodi",
+      "pool": "Pool",
+      "load": "Carico",
+      "online": "Online",
+      "offline": "Offline",
+      "waiting": "In attesa di approvazione",
+      "lastSeen": "visto l'ultima volta {when}",
+      "storeUnreachableNode": "non riesce a raggiungere i dati condivisi",
+      "cpus": "{count} CPU",
+      "gpus": "{count} GPU",
+      "gpuSessions": "GPU: {used} / {slots}",
+      "thisNode": "questo nodo",
+      "approve": "Approva",
+      "suspend": "Sospendi",
+      "remove": "Rimuovi",
+      "confirmRemove": "Rimuovere il nodo '{name}' dal cluster? Un nodo ancora in esecuzione si registra di nuovo e attende l'approvazione.",
+      "joinTitle": "Aggiungi un Nodo",
+      "joinDescription": "Crea un codice di adesione, avvia il nuovo nodo con le due righe qui sotto nel suo ambiente, poi approvalo nella tabella qui sopra. Un codice ammette un solo nodo e dura un'ora.",
+      "joinButton": "Crea Codice di Adesione",
+      "joinExpires": "Ambiente del nuovo nodo (il codice scade {when})",
+      "poolsTitle": "Pool",
+      "poolsDescription": "Un pool è un insieme di nodi su cui vengono avviate le sessioni. Un pool riservato è aperto solo agli utenti e ai gruppi indicati qui o autorizzati dalle loro impostazioni.",
+      "poolDomain": "Dominio",
+      "poolAccess": "Accesso",
+      "poolCost": "Costo orario",
+      "poolCostWithGpu": "{cost} (GPU: {gpuCost})",
+      "poolOpen": "Aperto",
+      "poolRestricted": "Riservato",
+      "poolNew": "Nuovo Pool",
+      "poolEdit": "Modifica Pool '{name}'",
+      "poolDescriptionLabel": "Descrizione",
+      "poolDomainLabel": "Dominio sotto cui prendono nome i nodi del pool",
+      "poolCostLabel": "Quota consumata da un'ora di sessione",
+      "poolGpuCostLabel": "Quota consumata da un'ora di sessione con GPU (vuoto: la stessa)",
+      "poolUsersLabel": "Utenti a cui è aperto quando è riservato (separati da virgola)",
+      "poolGroupsLabel": "Gruppi a cui è aperto quando è riservato (separati da virgola)",
+      "poolStopWhenSpent": "Termina le sessioni quando la quota è esaurita",
+      "poolSave": "Salva Pool",
+      "confirmDeletePool": "Eliminare il pool '{name}'?",
+      "storeTitle": "Dati Condivisi",
+      "storeDescription": "Dove i nodi conservano i dati che condividono: utenti, gruppi, app, pool e queste impostazioni.",
+      "storeKept": "Conservati:",
+      "storeKinds": {
+        "file": "Sul disco di questo nodo",
+        "s3": "In un bucket di object storage",
+        "peer": "Su un altro nodo"
+      },
+      "reachable": "Raggiungibile",
+      "unreachable": "Non raggiungibile",
+      "publicUrl": "Indirizzo dell'app web:",
+      "sessionDomain": "Dominio delle sessioni:",
+      "sessionDomainUnset": "Non impostato (il nome host dell'app web)",
+      "signInDescription": "Un'impostazione scritta qui vale per tutti i nodi e ha la precedenza sull'ambiente di un nodo. Svuota un campo per restituire l'impostazione all'ambiente di ciascun nodo.",
+      "settingWritten": "Impostato qui per tutti i nodi.",
+      "settingFromEnvironment": "Dall'ambiente di ciascun nodo; il valore mostrato è quello di questo nodo.",
+      "settingInherit": "Dall'ambiente di ciascun nodo (qui: {value})",
+      "secretSet": "Un segreto è impostato; lascia vuoto per mantenerlo",
+      "secretUnset": "Nessun segreto impostato",
+      "secretClear": "Rimuovi il segreto impostato qui",
+      "settings": {
+        "oidc_issuer": "URL dell'issuer OpenID Connect",
+        "oidc_client_id": "Client ID OpenID Connect",
+        "oidc_client_secret": "Client secret OpenID Connect",
+        "oidc_scopes": "Scope OpenID Connect",
+        "saml_metadata_url": "URL dei metadati SAML",
+        "saml_username_attribute": "Attributo SAML che indica l'utente (vuoto: il claim del nome utente qui sotto)",
+        "saml_groups_attribute": "Attributo SAML che elenca i gruppi dell'utente (vuoto: il claim dei gruppi qui sotto)",
+        "sso_username_claim": "Claim o attributo che indica l'utente",
+        "sso_groups_claim": "Claim o attributo che elenca i gruppi dell'utente",
+        "sso_admin_group": "Gruppo degli amministratori nel provider di identità",
+        "sso_max_age_seconds": "Durata massima di un accesso tramite provider di identità (ore)",
+        "sso_force_login": "Richiedi le credenziali a ogni accesso",
+        "sso_create_users": "Crea l'utente al primo accesso",
+        "proxy_auth_user_header": "Intestazione in cui un proxy attendibile indica l'utente",
+        "proxy_auth_groups_header": "Intestazione in cui un proxy attendibile elenca i gruppi dell'utente",
+        "proxy_auth_logout_url": "Pagina del proxy che disconnette il suo utente",
+        "web_session_seconds": "Durata massima di inattività di un accesso root (ore)",
+        "files_sync": "Conserva i file condivisi nell'object storage"
+      },
+      "usageTitle": "Utilizzo",
+      "usageHours": "Ore ponderate",
+      "usageNone": "Nessun utilizzo in questo periodo.",
+      "settingsTitle": "Impostazioni del Cluster"
+    },
+    "audit": {
+      "title": "Registro di Audit",
+      "searchPlaceholder": "Cerca eventi...",
+      "range": "Intervallo",
+      "pageSize": "Eventi per pagina",
+      "today": "Oggi",
+      "last7": "Ultimi 7 giorni",
+      "last30": "Ultimi 30 giorni",
+      "oneDay": "Un giorno (UTC)",
+      "time": "Ora",
+      "event": "Evento",
+      "details": "Dettagli",
+      "none": "Nessun evento corrisponde.",
+      "shown": "{from}–{to} di {total}",
+      "exportCsv": "Esporta CSV",
+      "exportJson": "Esporta JSON",
+      "exported": "Esportati {count} eventi."
+    },
+    "signin": {
+      "pill": {
+        "active": "Attivo",
+        "off": "Disattivato",
+        "none": "Non configurato"
+      },
+      "test": "Testa",
+      "testing": "Test delle impostazioni salvate in corso...",
+      "testOk": "Il provider ha risposto.",
+      "testFailed": "Il test non è riuscito.",
+      "register": "Registra questi dati presso il provider",
+      "provider": "Provider",
+      "providerChoose": "Scegli un provider per i suggerimenti",
+      "providerHelp": "Un provider compila solo i suggerimenti qui sotto; non viene memorizzato nulla al riguardo.",
+      "proxyHelp": "Un reverse proxy posto davanti fa accedere gli utenti e li indica in un'intestazione. È adatto a un proxy che protegge già allo stesso modo gli altri tuoi siti; altrimenti fai accedere gli utenti qui sopra, tramite OpenID Connect o SAML.",
+      "proxyPresetChoose": "Scegli il provider del proxy per compilare le intestazioni",
+      "proxyPresets": {
+        "authelia": "Authelia",
+        "authentik": "Authentik",
+        "tinyauth": "Tinyauth",
+        "oauth2proxy": "oauth2-proxy"
+      },
+      "reach": {
+        "title": "Raggiungere Questo Server",
+        "help": "Come i browser raggiungono questo server, così come lo vedono il server e questo browser. Un reverse proxy posto davanti deve gestire correttamente ciascuno di questi punti.",
+        "publicUrl": "URL pubblico",
+        "publicUrlDiffers": "Questa pagina è stata caricata da {origin}. Imposta SEALSKIN_PUBLIC_URL sull'indirizzo usato dai browser: i reindirizzamenti del provider di identità vengono costruiti a partire da esso.",
+        "sessionDomain": "Dominio delle sessioni",
+        "sessionNames": "Le sessioni si aprono su",
+        "sessionNamesNone": "Nessun nome di sessione ha risposto",
+        "sessionNamesHelp": "Gli avvii dall'app web falliranno. Una sessione si apre su un nome proprio, <session id>.<domain>: il dominio richiede un DNS wildcard, un certificato wildcard e una regola del reverse proxy che invii qui quei nomi.",
+        "sessionNamesGuarded": "Le sessioni si apriranno sotto {domain}, come indica SEALSKIN_SESSION_DOMAIN. È normale quando il reverse proxy richiede l'accesso sui nomi di sessione; altrimenti controlla il DNS wildcard, il certificato e la relativa regola del proxy.",
+        "sessionNamesOther": "SEALSKIN_SESSION_DOMAIN indica {domain}, che non ha risposto.",
+        "trustedProxies": "Proxy attendibili",
+        "arrivedFrom": "Questa richiesta è arrivata da",
+        "viaTrusted": "Un proxy attendibile.",
+        "viaOther": "Non è uno dei proxy attendibili. Se è l'indirizzo del tuo reverse proxy, aggiungilo a SEALSKIN_TRUSTED_PROXIES.",
+        "viaDirect": "Nessun reverse proxy è attendibile. Se questo è l'indirizzo di un reverse proxy, imposta SEALSKIN_TRUSTED_PROXIES su di esso, così il server vede l'indirizzo proprio di ciascun browser.",
+        "yourAddress": "Il tuo indirizzo, come lo vede il server",
+        "httpPort": "Porta di ascolto HTTP in chiaro"
+      },
+      "presets": {
+        "authelia": {
+          "name": "Authelia",
+          "hint": "L'issuer è l'indirizzo stesso di Authelia, https://<host>. Aggiungi un client sotto identity_providers.oidc.clients con l'URI di reindirizzamento qui sotto e gli scope openid profile groups email offline_access."
+        },
+        "pocketid": {
+          "name": "Pocket ID",
+          "hint": "L'issuer è l'indirizzo stesso di Pocket ID, https://<host>. Aggiungi un client OIDC con l'URL di callback qui sotto e imposta gli scope su openid profile email groups."
+        },
+        "tinyauth": {
+          "name": "Tinyauth",
+          "hint": "L'issuer è l'indirizzo stesso di Tinyauth, https://<host>. Definisci il client con le variabili TINYAUTH_OIDC_CLIENTS_<NAME>_ e imposta gli scope su openid profile email groups."
+        },
+        "keycloak": {
+          "name": "Keycloak",
+          "hint": "L'issuer è l'indirizzo del realm, https://<host>/realms/<realm>. Crea un client OpenID Connect con l'autenticazione del client attiva e aggiungi un mapper di appartenenza ai gruppi chiamato 'groups' per inviare i gruppi dell'utente."
+        },
+        "authentik": {
+          "name": "Authentik",
+          "hint": "L'issuer è l'indirizzo dell'applicazione, https://<host>/application/o/<slug>/, con la barra finale. Crea un provider OAuth2/OpenID e un'applicazione che lo usi."
+        },
+        "entra": {
+          "name": "Microsoft Entra ID",
+          "hint": "L'issuer è https://login.microsoftonline.com/<tenant>/v2.0. Registra un'applicazione, aggiungi un client secret e aggiungi il claim groups in Configurazione del token."
+        },
+        "google": {
+          "name": "Google",
+          "hint": "L'issuer è https://accounts.google.com. Crea un ID client OAuth di tipo Applicazione web. Google non invia gruppi."
+        },
+        "okta": {
+          "name": "Okta",
+          "hint": "L'issuer è l'indirizzo della tua organizzazione, https://<org>.okta.com. Crea un'applicazione web OIDC e aggiungi un claim groups al suo ID token."
+        },
+        "other": {
+          "name": "Altro",
+          "hint": "L'issuer è l'indirizzo il cui /.well-known/openid-configuration descrive il provider."
+        }
+      },
+      "oidcTitle": "OpenID Connect",
+      "oidcRedirect": "URI di reindirizzamento",
+      "oidcBackchannel": "URL di logout back-channel",
+      "oidcFrontchannel": "URL di logout front-channel",
+      "samlTitle": "SAML 2.0",
+      "samlEntity": "Entity ID / URL dei metadati",
+      "samlAcs": "URL ACS",
+      "samlSlo": "URL di single logout",
+      "samlMetadata": "Apri i metadati del service provider di questo server",
+      "proxyTitle": "Reverse Proxy",
+      "trustedProxies": "Proxy attendibili di questo nodo:",
+      "trustedProxiesHelp": "Si imposta su ciascun nodo con SEALSKIN_TRUSTED_PROXIES. L'intestazione viene creduta solo quando la richiesta proviene da uno di quegli indirizzi.",
+      "noTrustedProxy": "È impostata un'intestazione utente, ma questo nodo non considera ancora attendibile alcun proxy, quindi non viene accettato alcun accesso tramite proxy.",
+      "proxyCheck": {
+        "guarded": "Verificato: il proxy non inoltra le intestazioni di accesso inviate da un visitatore.",
+        "open": "Gli accessi tramite proxy vengono rifiutati.",
+        "unreachable": "Gli accessi tramite proxy vengono rifiutati: questo nodo non può verificare il proxy. Dagli una rotta verso il suo URL pubblico, indica l'indirizzo proprio del proxy in SEALSKIN_TRUSTED_PROXIES oppure imposta SEALSKIN_PROXY_AUTH_UNCHECKED=true sul nodo per credere al proxy senza la verifica.",
+        "unchecked": "La verifica del proxy è disattivata su questo nodo (SEALSKIN_PROXY_AUTH_UNCHECKED): viene creduto tutto ciò che il proxy inoltra."
+      },
+      "whoTitle": "Chi Accede",
+      "whoHelp": "Valgono per OpenID Connect, SAML e il reverse proxy. Per inserire i membri di un gruppo del provider di identità in un gruppo SealSkin, indicalo in \"Gruppi del provider di identità\" di quel gruppo in Gruppi.",
+      "rootTitle": "Token Root",
+      "rootHelp": "Sempre disponibile. Il token si trova in /config/root_token sul server finché quel file non viene eliminato, e può essere impostato con SEALSKIN_ROOT_TOKEN.",
+      "keyTitle": "File di Chiave",
+      "keyOn": "Questo nodo accetta i client con file di chiave: l'estensione del browser e l'app mobile. Si imposta su ciascun nodo con SEALSKIN_LEGACY_AUTH.",
+      "keyOff": "Questo nodo non accetta i client con file di chiave. Si imposta su ciascun nodo con SEALSKIN_LEGACY_AUTH.",
+      "resultIssuer": "Issuer:",
+      "resultAuthorization": "Endpoint di autorizzazione:",
+      "resultBackchannel": "Logout back-channel supportato:",
+      "resultScopes": "Scope offerti:",
+      "resultGroupsClaim": "Claim dei gruppi:",
+      "claimListed": "'{claim}' è tra i claim elencati dal provider",
+      "claimNotListed": "'{claim}' non è tra i claim elencati dal provider",
+      "resultEntity": "Entity ID:",
+      "resultSso": "URL di accesso:",
+      "resultSlo": "Single logout offerto:",
+      "resultCertificates": "Certificati di firma:"
     }
   },
   "popup": {
@@ -1227,7 +1522,16 @@
       "uploadingButton": "Caricamento...",
       "autoHome": "Automatico (persistenza per app)",
       "collaborationMode": "Sessione collaborativa",
-      "waylandMode": "Modalità Wayland"
+      "waylandMode": "Modalità Wayland",
+      "where": "Dove",
+      "whereAuto": "Automatico",
+      "wherePools": "Pool",
+      "whereNodes": "Nodi",
+      "moveHome": "Sposta archiviazione",
+      "moveHomeStay": "Su {node}",
+      "moveHomeTo": "Sposta su {node}",
+      "moveHomeConfirm": "Spostare '{home}' su {node}? Le sessioni che la usano devono prima essere fermate.",
+      "allowance": "Quota: {used} di {hours} ore per {period}"
     },
     "sessionsView": {
       "noSessions": "Nessuna sessione attiva trovata."
@@ -1260,7 +1564,10 @@
       "noAppSelected": "Seleziona un'applicazione.",
       "noAppsAvailable": "Nessuna applicazione disponibile per il tuo account.",
       "uploadSuccess": "File caricato con successo!",
-      "creatingAutoHome": "Creazione della directory home automatica in corso..."
+      "creatingAutoHome": "Creazione della directory home automatica in corso...",
+      "noSessionOrigin": "Questo browser non riesce a raggiungere un indirizzo proprio della sessione. Il server richiede un DNS wildcard e un certificato per i nomi di sessione; l'amministratore imposta SEALSKIN_SESSION_DOMAIN.",
+      "movingHome": "Spostamento di '{home}'...",
+      "movedHome": "'{home}' spostata su {node}."
     },
     "languages": {
       "default": "Predefinito ({locale})"
@@ -1355,7 +1662,10 @@
       "sharesLoadFailed": "Caricamento dei file condivisi fallito: {error}",
       "shareDeleteFailed": "Eliminazione della condivisione fallita: {error}",
       "shareDeleted": "Condivisione eliminata con successo.",
-      "urlCopied": "URL pubblico copiato negli appunti."
+      "urlCopied": "URL pubblico copiato negli appunti.",
+      "downloading": "Scaricamento di {filename}...",
+      "downloadSuccess": "Download completato",
+      "downloadFailed": "Download non riuscito: {error}"
     },
     "placeholders": {
       "errorLoading": "Errore nel caricamento dei file.",
@@ -1370,15 +1680,39 @@
       "finalizing": "Finalizzazione...",
       "completed": "Completato",
       "error": "Errore"
+    },
+    "files": {
+      "searchPlaceholder": "Cerca file..."
+    }
+  },
+  "shell": {
+    "host": {
+      "loading": "Connessione al tuo server SealSkin…",
+      "unconfiguredTitle": "Non connesso",
+      "unconfiguredBody": "SealSkin non è ancora connesso a un server.",
+      "setUp": "Configura connessione",
+      "unreachableTitle": "Server non raggiungibile",
+      "unreachableBody": "Impossibile raggiungere il server SealSkin oppure la sua interfaccia web non si è caricata.",
+      "selfSigned": "Se il server usa un certificato autofirmato, aprilo una volta e accetta il certificato, poi riprova.",
+      "retry": "Riprova",
+      "openServer": "Apri server",
+      "changeConnection": "Cambia connessione",
+      "mismatchTitle": "Aggiornamento richiesto",
+      "mismatchBody": "Questa app e l'interfaccia web del server usano versioni diverse del bridge. Aggiorna l'estensione o l'app, oppure il server, in modo che coincidano."
     }
   },
   "web": {
-    "unlockTitle": "Sblocca SealSkin",
-    "unlockBody": "Inserisci la passphrase che protegge la tua chiave in questo browser.",
-    "passphrase": "Passphrase",
-    "unlock": "Sblocca",
-    "wrongPassphrase": "Questa passphrase non sblocca la tua chiave.",
     "receiving": "Invio del file a SealSkin…",
+    "signInTitle": "Accedi a SealSkin",
+    "signInWith": {
+      "oidc": "Accedi con OpenID Connect",
+      "saml": "Accedi con SAML"
+    },
+    "rootToken": "Token root",
+    "rootTokenHelp": "Il token dell'amministratore, che il server conserva nel file /config/root_token.",
+    "rootSignIn": "Accedi come Root",
+    "rootRefused": "Questo non è il token root del server.",
+    "rootLocked": "Troppi tentativi. Attendi un po', poi riprova.",
     "signIn": {
       "failed": "L'accesso non è stato completato. Riprova o chiedi al tuo amministratore.",
       "refused": "Il provider di identità ha rifiutato l'accesso.",
@@ -1389,6 +1723,57 @@
       "otherIdentity": "Un altro account del provider di identità accede già come questo utente SealSkin. Chiedi al tuo amministratore.",
       "notConfigured": "Questo server non offre il single sign-on.",
       "ended": "Il provider di identità ha terminato il tuo accesso. Accedi di nuovo."
+    },
+    "nav": {
+      "home": "Home",
+      "sessions": "Sessioni",
+      "files": "File",
+      "settings": "Impostazioni"
+    },
+    "home": {
+      "searchPlaceholder": "Cerca applicazioni o incolla un link per aprirlo in isolamento",
+      "upload": "Carica un file",
+      "drop": "Rilascia il file per aprirlo in SealSkin",
+      "running": "Sessioni in esecuzione",
+      "applications": "Applicazioni",
+      "allowance": "Quota",
+      "allowanceValue": "{used} / {hours} h per {period}",
+      "room": "Stanza",
+      "started": "Avviata {when}",
+      "typeAll": "Tutte",
+      "typeRecent": "Recenti",
+      "typeOther": "Altre",
+      "quickLaunch": "Avvia con le ultime opzioni usate",
+      "wherePool": "Pool: {pool}",
+      "openingUrl": "Scegli un'applicazione per aprire {url}",
+      "openingFile": "Scegli un'applicazione per aprire {filename}",
+      "noApps": "Nessuna applicazione è disponibile per te. Chiedi al tuo amministratore di installarne.",
+      "noAppsAdmin": "Nessuna applicazione è ancora installata.",
+      "noMatch": "Nessuna applicazione corrisponde.",
+      "openAppStores": "Apri gli App Store",
+      "popupBlocked": "Il browser ha bloccato la scheda della sessione. Consenti i pop-up per questo sito, poi avvia di nuovo.",
+      "serverFileNeedsHome": "Un file conservato sul server non può essere aperto in modalità Cleanroom. Scegli una cartella di archiviazione."
+    },
+    "launch": {
+      "title": "Avvio di {app}",
+      "stages": {
+        "requesting": "Invio della richiesta di avvio",
+        "placing": "Controllo dei limiti e scelta di un nodo",
+        "forwarding": "Passaggio dell'avvio al nodo {node}",
+        "storage": "Preparazione della cartella home",
+        "files": "Sincronizzazione dei file condivisi",
+        "image": "Scaricamento dell'immagine dell'applicazione",
+        "starting": "Creazione del container",
+        "waiting": "In attesa della risposta del desktop",
+        "ready": "Apertura della sessione"
+      },
+      "uploading": "Caricamento del file ({done} di {total})",
+      "imageHint": "Il primo avvio di un'applicazione su un nodo la scarica, e può richiedere alcuni minuti. Gli avvii successivi sono rapidi.",
+      "onNode": "Sul nodo {node}",
+      "seconds": "{count} s",
+      "failed": "Avvio non riuscito",
+      "unseen": "La richiesta di avvio non ha raggiunto il server. Controlla la scheda di SealSkin che l'ha avviata.",
+      "closeTab": "Il browser ha tenuto aperta questa scheda. Chiudila tu."
     }
   }
 }

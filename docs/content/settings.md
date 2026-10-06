@@ -60,8 +60,10 @@ paths refer to.
 | `SEALSKIN_OIDC_CLIENT_SECRET` | `str` | _(empty)_ | Client secret of SealSkin at the OpenID Connect provider; empty for a public client. |
 | `SEALSKIN_OIDC_SCOPES` | `str` | `openid profile email` | Scopes requested from the OpenID Connect provider. |
 | `SEALSKIN_SAML_METADATA_URL` | `str` | _(empty)_ | Metadata URL of a SAML identity provider the web app offers sign-in with; empty offers none. |
-| `SEALSKIN_SSO_USERNAME_CLAIM` | `str` | _(empty)_ | Claim (OpenID Connect) or attribute (SAML) naming the SealSkin user; empty takes `preferred_username`, or the SAML attribute `username`, else the SAML NameID. |
+| `SEALSKIN_SSO_USERNAME_CLAIM` | `str` | _(empty)_ | Claim (OpenID Connect) or attribute (SAML, by its `Name` or `FriendlyName`) naming the SealSkin user; empty takes `preferred_username`, or the SAML attribute `username`, else the SAML NameID. |
 | `SEALSKIN_SSO_GROUPS_CLAIM` | `str` | `groups` | Claim or attribute listing the user's groups at the identity provider. |
+| `SEALSKIN_SAML_USERNAME_ATTRIBUTE` | `str` | _(empty)_ | SAML attribute naming the SealSkin user, by its `Name` or `FriendlyName`, where OpenID Connect is set up beside SAML and names its claim otherwise; empty takes `sso_username_claim`. |
+| `SEALSKIN_SAML_GROUPS_ATTRIBUTE` | `str` | _(empty)_ | SAML attribute listing the user's groups; empty takes `sso_groups_claim`. |
 | `SEALSKIN_SSO_ADMIN_GROUP` | `str` | _(empty)_ | Identity provider group whose members sign in as administrators; empty makes none. |
 | `SEALSKIN_SSO_MAX_AGE_SECONDS` | `int` | `43200` | Longest an identity provider sign-in lasts; one the provider ends sooner ends then. |
 | `SEALSKIN_STORE_URL` | `str` | `file` | Where the objects the nodes of a cluster share are kept: `file` for this server's own files, or `s3://<bucket>/<prefix>?endpoint=<url>&region=<region>` for a bucket of an S3-compatible service. |
@@ -85,10 +87,13 @@ paths refer to.
 | `SEALSKIN_SESSION_DOMAIN` | `str` | _(empty)_ | Domain whose every subdomain reaches this node, `apps.example.com`: a session of a signed-in web user opens on `<session id>.<domain>`, apart from the web app. Needs wildcard DNS and a certificate for `*.<domain>`; empty takes the host of `public_url`. |
 | `SEALSKIN_TRUSTED_PROXIES` | `str` | _(empty)_ | Comma-separated addresses or networks of the reverse proxies in front of this node, whose forwarded client address and sign-in headers are believed. |
 | `SEALSKIN_PROXY_AUTH_USER_HEADER` | `str` | _(empty)_ | Header a trusted proxy names the signed-in user in, `Remote-User`; empty takes no sign-in from a proxy. |
-| `SEALSKIN_PROXY_AUTH_GROUPS_HEADER` | `str` | `Remote-Groups` | Header a trusted proxy lists the user's groups in, comma-separated. |
+| `SEALSKIN_PROXY_AUTH_GROUPS_HEADER` | `str` | _(empty)_ | Header a trusted proxy lists the user's groups in, `Remote-Groups`, separated by commas or by `\|`; empty takes no groups from a proxy. Name only a header the proxy sets. |
+| `SEALSKIN_PROXY_AUTH_UNCHECKED` | `bool` | `false` | Believe the proxy's sign-in header although this node cannot check, by reaching its own `public_url` or a trusted proxy's address, that the proxy removes the header a visitor sends. Leave it off wherever the check can run. |
+| `SEALSKIN_PROXY_AUTH_LOGOUT_URL` | `str` | _(empty)_ | URL the web app opens to sign out a user a proxy signed in, as the proxy's or its identity provider's logout page; empty leaves signing out to the proxy. |
+| `SEALSKIN_HTTP_PORT` | `int` | `0` | Port of a plain HTTP listener for a reverse proxy that terminates TLS, serving what the session port does; 0 opens none. It answers the addresses in `trusted_proxies` alone, and only requests they say arrived over HTTPS. |
 | `SEALSKIN_ROOT_TOKEN` | `str` | _(empty)_ | Token the `root` administrator signs in to the web app with; empty generates one at first start and writes it to `root_token_path`. |
 | `SEALSKIN_ROOT_TOKEN_PATH` | `str` | `/config/root_token` | File the generated root token is written to, for the administrator to copy and delete. |
-| `SEALSKIN_WEB_SESSION_SECONDS` | `int` | `43200` | Longest a web sign-in with the root token or through a proxy lasts unused. |
+| `SEALSKIN_WEB_SESSION_SECONDS` | `int` | `43200` | Longest a web sign-in with the root token lasts unused. |
 | `SEALSKIN_SSO_FORCE_LOGIN` | `bool` | `false` | Make the identity provider ask for credentials at every sign-in instead of reusing its session. |
 | `SEALSKIN_SSO_CREATE_USERS` | `bool` | `true` | Create a user at the first sign-in an identity provider or a proxy vouches for. |
 | `SEALSKIN_USAGE_FLUSH_SECONDS` | `int` | `300` | How often a node adds the session time it ran to the cluster's usage records. |

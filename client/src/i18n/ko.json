@@ -78,7 +78,10 @@
       "installedApps": "설치된 앱",
       "users": "사용자",
       "groups": "그룹",
-      "admins": "관리자"
+      "admins": "관리자",
+      "cluster": "클러스터",
+      "signIn": "로그인",
+      "audit": "감사 로그"
     },
     "dashboard": {
       "title": "대시보드",
@@ -104,7 +107,14 @@
         "<strong>영구 스토리지 관리:</strong> 이 페이지의 \"홈 디렉터리\" 탭을 사용하여 여러 세션에서 사용할 수 있는 스토리지 볼륨을 생성하고 삭제하세요.",
         "<strong>시작 옵션 저장:</strong> 특정 파일 유형(예: .pdf) 또는 모든 URL에 대해 애플리케이션을 시작하기 전에 팝업에서 \"이 시작 옵션 저장\" 확인란을 선택하세요. \"고정된 동작\" 탭에서 저장된 기본 설정을 관리하세요."
       ],
-      "confirmLogout": "로그아웃하시겠습니까? 이 브라우저에 저장된 구성이 지워집니다."
+      "confirmLogout": "로그아웃하시겠습니까? 이 브라우저에 저장된 구성이 지워집니다.",
+      "changeConnection": "연결 변경",
+      "certExpired": "서버 TLS 인증서가 만료되었습니다. 갱신할 때까지 HTTPS 연결이 실패합니다.",
+      "certExpiring": "서버 TLS 인증서가 {days}일 후 만료됩니다. 연결 실패를 방지하려면 갱신하세요.",
+      "signOut": "로그아웃",
+      "signedInThrough": "로그인 방식:",
+      "allowance": "할당량:",
+      "allowanceUsed": "{period}간 {hours}시간 중 {used}시간 사용"
     },
     "config": {
       "quickSetup": "빠른 설정",
@@ -135,15 +145,7 @@
       "keyGeneration": "키 생성",
       "keyGenDescription": "키 쌍이 없는 경우 여기에서 생성할 수 있습니다. 개인 키는 위에 채워집니다. 관리자에게 공개 키를 제공하세요.",
       "generateKeyButton": "새 키 쌍 생성",
-      "publicKeyForAdminLabel": "공개 키 (관리자용)",
-      "passphraseLabel": "암호 문구",
-      "remember": "이 브라우저에 내 키 보관",
-      "rememberHelp": "여럿이 쓰는 컴퓨터에서는 끄세요. 그러면 SealSkin은 이 탭이 열려 있는 동안에만 키를 보관하고, 다음번에는 구성을 다시 불러와야 합니다.",
-      "passphraseHelp": "개인 키는 이 암호 문구로 암호화되어 이 브라우저에 저장되며, 여기서 SealSkin을 열 때마다 입력합니다.",
-      "signInTitle": "통합 인증(SSO)",
-      "signInHelp": "구성 파일 대신 조직에서 관리하는 계정으로 로그인합니다. SealSkin은 로그인을 이 탭에만 유지하므로 다음에는 다시 로그인합니다.",
-      "signInOidc": "OpenID Connect로 로그인",
-      "signInSaml": "SAML로 로그인"
+      "publicKeyForAdminLabel": "공개 키 (관리자용)"
     },
     "home": {
       "title": "내 홈 디렉터리",
@@ -153,7 +155,13 @@
       "namePlaceholder": "예: my-project-files",
       "nameTitle": "문자, 숫자, 밑줄 또는 하이픈만 사용하세요.",
       "createButton": "디렉터리 만들기",
-      "confirmDelete": "홈 디렉터리 '{homeName}'을(를) 삭제하시겠습니까? 내부의 모든 데이터가 영구적으로 손실됩니다."
+      "confirmDelete": "홈 디렉터리 '{homeName}'을(를) 삭제하시겠습니까? 내부의 모든 데이터가 영구적으로 손실됩니다.",
+      "node": "노드",
+      "move": "이동",
+      "moveTo": "이동할 노드",
+      "moveHelp": "홈 디렉터리는 대상 노드로 복사된 뒤 현재 보관 중인 노드에서 제거됩니다. 이를 사용하는 세션은 먼저 중지해야 합니다.",
+      "moveTitle": "'{homeName}' 이동",
+      "noOtherNode": "이동할 다른 노드가 없습니다."
     },
     "sessions": {
       "title": "활성 세션",
@@ -205,7 +213,21 @@
       "confirmDelete": "사용자 '{username}'을(를) 삭제하시겠습니까? 모든 영구 스토리지도 함께 삭제되며 되돌릴 수 없습니다.",
       "allowPublicSharing": "공개 파일 공유 허용",
       "allowEditTemplates": "앱 템플릿 편집 허용",
-      "signInOnly": "통합 인증만 사용"
+      "signInOnly": "통합 인증만 사용",
+      "admin": "관리자",
+      "gpuShare": "다른 세션과 GPU 공유 허용",
+      "homeMigration": "노드 간 홈 디렉터리 이동 허용",
+      "storageLimit": "스토리지 제한 (노드당 GB)",
+      "sessionCpus": "세션당 CPU 수",
+      "sessionMemory": "세션당 메모리 (MB)",
+      "sessionHours": "세션 최대 실행 시간 (시간)",
+      "allowanceHours": "할당량 (가중 세션 시간)",
+      "allowancePeriod": "할당량 기간",
+      "pools": "허용할 제한된 풀 (쉼표로 구분)",
+      "poolsDenied": "거부할 풀 (쉼표로 구분)",
+      "groupsHelp": "여러 개를 선택하려면 Ctrl 또는 Command 키를 누른 채 선택하세요. 그룹 간 설정이 다르면 더 제한적인 값이 적용됩니다.",
+      "providerGroups": "마지막 로그인 시 ID 공급자가 알려준 그룹: {groups}",
+      "limitsHelp": "-1이거나 비워두면 제한이 없습니다."
     },
     "groups": {
       "title": "그룹 관리",
@@ -215,7 +237,14 @@
       "overrideTitle": "그룹 재정의 설정",
       "permissionsTitle": "권한 및 보안 강화 재정의",
       "createButton": "그룹 만들기",
-      "confirmDelete": "그룹 '{groupName}'을(를) 삭제하시겠습니까? 이 그룹의 사용자들은 개별 설정으로 돌아갑니다."
+      "confirmDelete": "그룹 '{groupName}'을(를) 삭제하시겠습니까? 이 그룹의 사용자들은 개별 설정으로 돌아갑니다.",
+      "notSet": "설정 안 함",
+      "allow": "허용",
+      "deny": "거부",
+      "on": "켜짐",
+      "off": "꺼짐",
+      "ssoGroups": "구성원을 이 그룹에 포함할 ID 공급자 그룹 (쉼표로 구분)",
+      "overrideHelp": "그룹은 여기에서 설정한 항목만 결정합니다. 설정하지 않았거나 비워둔 항목은 각 구성원 자신의 설정을 따릅니다."
     },
     "installedApps": {
       "title": "설치된 애플리케이션",
@@ -1045,7 +1074,33 @@
       "closeButton": "세션 닫기 및 최종 확정",
       "savingAndLaunching": "저장 및 시작 중...",
       "placeholder": "앱 실험실을 사용하면 기존에 설치된 애플리케이션을 기반으로 애플리케이션의 기본 홈 디렉터리와 시작 스크립트를 구성할 수 있습니다. 이 홈 디렉터리는 이 세션에서 설정한 모든 파일 및 설정과 함께 사용자를 위해 처음 초기화될 때 복사됩니다. 기존 실험실 앱을 다시 시작하여 내용을 추가로 수정할 수 있습니다.",
-      "formInvalid": "기본 앱을 선택하고 새 앱의 이름을 입력하세요."
+      "formInvalid": "기본 앱을 선택하고 새 앱의 이름을 입력하세요.",
+      "explainer": "앱 실험실에서는 메타 앱을 만듭니다. 메타 앱은 설치된 애플리케이션에 고유한 이름, 아이콘, 자동 시작 스크립트, 미리 설정된 홈 디렉터리를 더한 변형입니다. 사용자 지정 세션에서 애플리케이션을 한 번 설정해 두면, 모든 사용자의 첫 시작은 그 홈 디렉터리의 복사본에서 출발합니다.",
+      "step1Title": "앱 설명하기",
+      "step1": "기반이 될 애플리케이션을 선택하고, 메타 앱의 이름과 아이콘, 시작할 수 있는 사용자를 지정합니다.",
+      "step2Title": "라이브 세션에서 사용자 지정하기",
+      "step2": "템플릿 홈 디렉터리에 쓸 수 있는 상태로 사용자 지정 세션이 열립니다. 확장 프로그램을 설치하고, 로그인하고, 사용자에게 제공할 상태로 정리하세요.",
+      "step3Title": "세션을 닫아 템플릿 저장하기",
+      "step3": "이 페이지에서 세션을 닫으면 홈 디렉터리가 템플릿으로 보관됩니다.",
+      "openTitle": "사용자 지정 세션이 열려 있음",
+      "openStarted": "{when} 시작됨",
+      "openDescription": "이 세션의 홈 디렉터리에서 변경한 모든 내용이 템플릿이 됩니다. 세션은 여기에서 닫을 때까지 열려 있으며, 내 세션 목록에는 표시되지 않습니다.",
+      "reopen": "세션 다시 열기",
+      "closeAndSave": "닫고 템플릿 저장",
+      "confirmClose": "'{name}'의 사용자 지정 세션을 닫으시겠습니까? 세션이 중지되고 홈 디렉터리는 템플릿으로 보관됩니다.",
+      "templateSaved": "세션이 닫혔습니다. 템플릿이 저장되었습니다.",
+      "busy": "'{name}'의 사용자 지정 세션이 열려 있습니다. 메타 앱을 변경하거나 다른 세션을 시작하려면 먼저 위에서 닫으세요.",
+      "describeTitle": "1. 설명",
+      "customizeTitle": "2. 사용자 지정",
+      "customizeDescription": "사용자 지정 세션은 이 옵션으로 시작됩니다. 한 번에 하나의 세션만 열 수 있습니다.",
+      "advanced": "고급",
+      "saveAndOpen": "저장 및 사용자 지정 세션 열기",
+      "listTitle": "내 메타 앱",
+      "listNone": "아직 메타 앱이 없습니다.",
+      "closingStopping": "세션 중지 중…",
+      "closingSaving": "템플릿 저장 중…",
+      "closingSaved": "템플릿 저장됨: 파일 {files}개, {size}",
+      "closingFailed": "세션을 닫지 못했습니다."
     },
     "modals": {
       "editUserTitle": "사용자 편집: {username}",
@@ -1062,6 +1117,8 @@
       "dirsForUser": "사용자 디렉터리: {username}",
       "dirsForAdmin": "관리자 디렉터리: {username}",
       "newDirForUser": "사용자를 위한 새 디렉터리 만들기",
+      "customAutostartScriptLabel": "사용자 지정 자동 시작 스크립트",
+      "customAutostartScriptDescription": "자동 시작 로직을 사용자 지정하고, 비워두면 애플리케이션 제공업체의 기본값을 사용합니다.",
       "createDirButton": "디렉터리 만들기",
       "confirmDeleteDir": "사용자 '{username}'의 '{homeName}'을(를) 삭제하시겠습니까? 이 작업은 영구적입니다.",
       "installAppTitle": "{appName} 설치",
@@ -1080,8 +1137,6 @@
       "advancedSettings": "고급 설정",
       "appTemplateLabel": "애플리케이션 템플릿",
       "appTemplateDescription": "고급 컨테이너 시작 설정을 위해 미리 구성된 템플릿을 선택하세요.",
-      "customAutostartScriptLabel": "사용자 지정 자동 시작 스크립트",
-      "customAutostartScriptDescription": "자동 시작 로직을 사용자 지정하고, 비워두면 애플리케이션 제공업체의 기본값을 사용합니다.",
       "saveInstallation": "설치 저장",
       "updateStatusTitle": "{appName} 업데이트 상태",
       "checkingUpdates": "업데이트 확인 중...",
@@ -1176,8 +1231,16 @@
       "settingsSaved": "설정이 저장되었습니다.",
       "appCreated": "앱 '{name}'이(가) 성공적으로 생성되었습니다.",
       "launchFailed": "시작 실패: {error}",
-      "passphraseRequired": "이 브라우저에서 키를 보호할 암호 문구를 입력하세요.",
-      "passphraseTooShort": "{count}자 이상의 암호 문구를 사용하세요."
+      "homedirMoving": "홈 디렉터리 '{homeName}' 이동 중...",
+      "homedirMoved": "홈 디렉터리 '{homeName}'이(가) 이동되었습니다.",
+      "homedirMoveFailed": "홈 디렉터리 이동 실패: {error}",
+      "clusterLoadFailed": "클러스터 로드 실패: {error}",
+      "clusterWriteFailed": "저장 실패: {error}",
+      "nodeUpdated": "노드가 업데이트되었습니다.",
+      "nodeRemoved": "노드가 제거되었습니다.",
+      "poolSaved": "풀 '{name}'이(가) 저장되었습니다.",
+      "poolDeleted": "풀 '{name}'이(가) 삭제되었습니다.",
+      "nothingChanged": "변경된 내용이 없습니다."
     },
     "placeholders": {
       "noAdmins": "관리자를 찾을 수 없습니다.",
@@ -1199,6 +1262,238 @@
       "protocol": "web+sealskin: 링크를 여기서 열기",
       "protocolHelp": "web+sealskin: 뒤에 주소를 붙인 링크는 해당 주소를 SealSkin에서 엽니다.",
       "install": "브라우저가 웹 앱 설치를 지원하면 메뉴에서 SealSkin을 설치하여 링크와 파일을 공유하고 파일을 열 수 있습니다."
+    },
+    "via": {
+      "root": "루트 토큰",
+      "oidc": "OpenID Connect",
+      "saml": "SAML",
+      "proxy": "리버스 프록시",
+      "key": "키 파일"
+    },
+    "periods": {
+      "day": "일",
+      "week": "주",
+      "month": "월"
+    },
+    "cluster": {
+      "nodesTitle": "노드",
+      "pool": "풀",
+      "load": "부하",
+      "online": "온라인",
+      "offline": "오프라인",
+      "waiting": "승인 대기 중",
+      "lastSeen": "마지막 확인: {when}",
+      "storeUnreachableNode": "공유 레코드에 연결할 수 없음",
+      "cpus": "CPU {count}개",
+      "gpus": "GPU {count}개",
+      "gpuSessions": "GPU: {used} / {slots}",
+      "thisNode": "이 노드",
+      "approve": "승인",
+      "suspend": "일시 중지",
+      "remove": "제거",
+      "confirmRemove": "노드 '{name}'을(를) 클러스터에서 제거하시겠습니까? 아직 실행 중인 노드는 다시 등록되어 승인을 기다립니다.",
+      "joinTitle": "노드 추가",
+      "joinDescription": "참가 코드를 만들고, 아래 두 줄을 환경 변수에 넣어 새 노드를 시작한 다음, 위 표에서 승인하세요. 코드 하나로 노드 하나만 참가할 수 있으며 한 시간 동안 유효합니다.",
+      "joinButton": "참가 코드 만들기",
+      "joinExpires": "새 노드의 환경 변수 (코드 만료: {when})",
+      "poolsTitle": "풀",
+      "poolsDescription": "풀은 세션이 시작되는 노드의 집합입니다. 제한된 풀은 여기에 지정한 사용자와 그룹, 또는 설정에서 허용된 사용자와 그룹만 사용할 수 있습니다.",
+      "poolDomain": "도메인",
+      "poolAccess": "접근",
+      "poolCost": "시간당 비용",
+      "poolCostWithGpu": "{cost} (GPU: {gpuCost})",
+      "poolOpen": "개방",
+      "poolRestricted": "제한됨",
+      "poolNew": "새 풀",
+      "poolEdit": "풀 '{name}' 편집",
+      "poolDescriptionLabel": "설명",
+      "poolDomainLabel": "풀의 노드 이름에 사용할 도메인",
+      "poolCostLabel": "세션 1시간당 차감되는 할당량",
+      "poolGpuCostLabel": "GPU 세션 1시간당 차감되는 할당량 (비워두면 동일)",
+      "poolUsersLabel": "제한된 경우 사용할 수 있는 사용자 (쉼표로 구분)",
+      "poolGroupsLabel": "제한된 경우 사용할 수 있는 그룹 (쉼표로 구분)",
+      "poolStopWhenSpent": "할당량을 모두 사용하면 세션 종료",
+      "poolSave": "풀 저장",
+      "confirmDeletePool": "풀 '{name}'을(를) 삭제하시겠습니까?",
+      "storeTitle": "공유 레코드",
+      "storeDescription": "노드들이 공유하는 레코드(사용자, 그룹, 앱, 풀 및 이 설정)를 보관하는 위치입니다.",
+      "storeKept": "보관 위치:",
+      "storeKinds": {
+        "file": "이 노드의 디스크",
+        "s3": "오브젝트 스토리지 버킷",
+        "peer": "다른 노드"
+      },
+      "reachable": "연결 가능",
+      "unreachable": "연결할 수 없음",
+      "publicUrl": "웹 앱 주소:",
+      "sessionDomain": "세션 도메인:",
+      "sessionDomainUnset": "설정 안 됨 (웹 앱의 호스트 이름)",
+      "signInDescription": "여기에 입력한 설정은 모든 노드에 적용되며 노드의 환경 변수보다 우선합니다. 필드를 비우면 해당 설정은 다시 각 노드의 환경 변수를 따릅니다.",
+      "settingWritten": "여기에서 모든 노드에 대해 설정되었습니다.",
+      "settingFromEnvironment": "각 노드의 환경 변수에서 가져옵니다. 표시된 값은 이 노드의 값입니다.",
+      "settingInherit": "각 노드의 환경 변수에서 가져옴 (이 노드: {value})",
+      "secretSet": "시크릿이 설정되어 있습니다. 유지하려면 비워두세요",
+      "secretUnset": "설정된 시크릿이 없습니다",
+      "secretClear": "여기에서 설정한 시크릿 제거",
+      "settings": {
+        "oidc_issuer": "OpenID Connect 발급자 URL",
+        "oidc_client_id": "OpenID Connect 클라이언트 ID",
+        "oidc_client_secret": "OpenID Connect 클라이언트 시크릿",
+        "oidc_scopes": "OpenID Connect 스코프",
+        "saml_metadata_url": "SAML 메타데이터 URL",
+        "saml_username_attribute": "사용자 이름을 나타내는 SAML 속성 (비워두면 아래의 사용자 이름 클레임)",
+        "saml_groups_attribute": "사용자의 그룹을 나열하는 SAML 속성 (비워두면 아래의 그룹 클레임)",
+        "sso_username_claim": "사용자 이름을 나타내는 클레임 또는 속성",
+        "sso_groups_claim": "사용자의 그룹을 나열하는 클레임 또는 속성",
+        "sso_admin_group": "관리자가 되는 ID 공급자 그룹",
+        "sso_max_age_seconds": "ID 공급자 로그인의 최대 유지 시간 (시간)",
+        "sso_force_login": "로그인할 때마다 자격 증명 요구",
+        "sso_create_users": "첫 로그인 시 사용자 생성",
+        "proxy_auth_user_header": "신뢰할 수 있는 프록시가 사용자 이름을 전달하는 헤더",
+        "proxy_auth_groups_header": "신뢰할 수 있는 프록시가 사용자의 그룹을 전달하는 헤더",
+        "proxy_auth_logout_url": "사용자를 로그아웃시키는 프록시의 페이지",
+        "web_session_seconds": "루트 로그인이 사용되지 않은 채 유지되는 최대 시간 (시간)",
+        "files_sync": "공유 파일을 오브젝트 스토리지에 보관"
+      },
+      "usageTitle": "사용량",
+      "usageHours": "가중 시간",
+      "usageNone": "이 기간에는 사용 내역이 없습니다.",
+      "settingsTitle": "클러스터 설정"
+    },
+    "audit": {
+      "title": "감사 로그",
+      "searchPlaceholder": "이벤트 검색...",
+      "range": "범위",
+      "pageSize": "페이지당 이벤트 수",
+      "today": "오늘",
+      "last7": "최근 7일",
+      "last30": "최근 30일",
+      "oneDay": "하루 (UTC)",
+      "time": "시간",
+      "event": "이벤트",
+      "details": "세부 정보",
+      "none": "일치하는 이벤트가 없습니다.",
+      "shown": "총 {total}개 중 {from}–{to}",
+      "exportCsv": "CSV 내보내기",
+      "exportJson": "JSON 내보내기",
+      "exported": "이벤트 {count}개를 내보냈습니다."
+    },
+    "signin": {
+      "pill": {
+        "active": "활성",
+        "off": "꺼짐",
+        "none": "구성되지 않음"
+      },
+      "test": "테스트",
+      "testing": "저장된 설정 테스트 중...",
+      "testOk": "공급자가 응답했습니다.",
+      "testFailed": "테스트에 실패했습니다.",
+      "register": "공급자에 다음 값을 등록하세요",
+      "provider": "공급자",
+      "providerChoose": "힌트를 볼 공급자 선택",
+      "providerHelp": "공급자를 선택하면 아래 힌트만 채워지며, 선택 내용은 저장되지 않습니다.",
+      "proxyHelp": "앞단의 리버스 프록시가 사용자를 로그인시키고 헤더로 사용자 이름을 전달합니다. 이미 다른 사이트를 같은 방식으로 보호하고 있는 프록시에 적합합니다. 그렇지 않다면 위의 OpenID Connect 또는 SAML로 사용자를 로그인시키세요.",
+      "proxyPresetChoose": "헤더를 채우려면 프록시의 공급자를 선택하세요",
+      "proxyPresets": {
+        "authelia": "Authelia",
+        "authentik": "Authentik",
+        "tinyauth": "Tinyauth",
+        "oauth2proxy": "oauth2-proxy"
+      },
+      "reach": {
+        "title": "이 서버에 대한 연결",
+        "help": "서버와 이 브라우저가 본, 브라우저가 이 서버에 도달하는 방식입니다. 앞단의 리버스 프록시는 이 항목들을 모두 올바르게 처리해야 합니다.",
+        "publicUrl": "공개 URL",
+        "publicUrlDiffers": "이 페이지는 {origin}에서 로드되었습니다. SEALSKIN_PUBLIC_URL 을 브라우저가 사용하는 주소로 설정하세요. ID 공급자 리디렉션이 이 값으로 만들어집니다.",
+        "sessionDomain": "세션 도메인",
+        "sessionNames": "세션이 열리는 도메인",
+        "sessionNamesNone": "응답한 세션 이름이 없음",
+        "sessionNamesHelp": "웹 앱에서의 시작이 실패합니다. 세션은 고유한 이름 <session id>.<domain> 에서 열립니다. 이 도메인에는 와일드카드 DNS, 와일드카드 인증서, 그리고 해당 이름을 이 서버로 보내는 리버스 프록시 규칙이 필요합니다.",
+        "sessionNamesGuarded": "SEALSKIN_SESSION_DOMAIN 에 지정된 대로 세션은 {domain} 아래에서 열립니다. 리버스 프록시가 세션 이름에 대해 로그인을 요구하는 경우라면 정상입니다. 그렇지 않다면 와일드카드 DNS, 인증서, 해당 이름에 대한 프록시 규칙을 확인하세요.",
+        "sessionNamesOther": "SEALSKIN_SESSION_DOMAIN 에 지정된 {domain}이(가) 응답하지 않았습니다.",
+        "trustedProxies": "신뢰할 수 있는 프록시",
+        "arrivedFrom": "이 요청의 출발지",
+        "viaTrusted": "신뢰할 수 있는 프록시입니다.",
+        "viaOther": "신뢰할 수 있는 프록시가 아닙니다. 이 주소가 리버스 프록시의 주소라면 SEALSKIN_TRUSTED_PROXIES 에 추가하세요.",
+        "viaDirect": "신뢰하는 리버스 프록시가 없습니다. 이 주소가 리버스 프록시의 주소라면 SEALSKIN_TRUSTED_PROXIES 를 이 주소로 설정하여 서버가 각 브라우저의 실제 주소를 볼 수 있게 하세요.",
+        "yourAddress": "서버가 보는 내 주소",
+        "httpPort": "일반 HTTP 리스너"
+      },
+      "presets": {
+        "authelia": {
+          "name": "Authelia",
+          "hint": "발급자는 Authelia 자체의 주소입니다: https://<host>. identity_providers.oidc.clients 아래에 아래의 리디렉션 URI와 스코프 openid profile groups email offline_access 를 가진 클라이언트를 추가하세요."
+        },
+        "pocketid": {
+          "name": "Pocket ID",
+          "hint": "발급자는 Pocket ID 자체의 주소입니다: https://<host>. 아래의 콜백 URL로 OIDC 클라이언트를 추가하고 스코프를 openid profile email groups 로 설정하세요."
+        },
+        "tinyauth": {
+          "name": "Tinyauth",
+          "hint": "발급자는 Tinyauth 자체의 주소입니다: https://<host>. TINYAUTH_OIDC_CLIENTS_<NAME>_ 변수로 클라이언트를 정의하고 스코프를 openid profile email groups 로 설정하세요."
+        },
+        "keycloak": {
+          "name": "Keycloak",
+          "hint": "발급자는 렐름의 주소입니다: https://<host>/realms/<realm>. 클라이언트 인증을 켠 OpenID Connect 클라이언트를 만들고, 사용자의 그룹을 보내도록 'groups'라는 이름의 그룹 멤버십 매퍼를 추가하세요."
+        },
+        "authentik": {
+          "name": "Authentik",
+          "hint": "발급자는 애플리케이션의 주소 https://<host>/application/o/<slug>/ 이며, 끝의 슬래시까지 포함합니다. OAuth2/OpenID 공급자와 이를 사용하는 애플리케이션을 만드세요."
+        },
+        "entra": {
+          "name": "Microsoft Entra ID",
+          "hint": "발급자는 다음과 같습니다: https://login.microsoftonline.com/<tenant>/v2.0. 애플리케이션을 등록하고 클라이언트 시크릿을 추가한 다음, 토큰 구성에서 groups 클레임을 추가하세요."
+        },
+        "google": {
+          "name": "Google",
+          "hint": "발급자는 다음과 같습니다: https://accounts.google.com. 웹 애플리케이션 유형의 OAuth 클라이언트 ID를 만드세요. Google은 그룹을 보내지 않습니다."
+        },
+        "okta": {
+          "name": "Okta",
+          "hint": "발급자는 조직의 주소입니다: https://<org>.okta.com. OIDC 웹 애플리케이션을 만들고 해당 ID 토큰에 groups 클레임을 추가하세요."
+        },
+        "other": {
+          "name": "기타",
+          "hint": "발급자는 /.well-known/openid-configuration 으로 공급자 정보를 제공하는 주소입니다."
+        }
+      },
+      "oidcTitle": "OpenID Connect",
+      "oidcRedirect": "리디렉션 URI",
+      "oidcBackchannel": "백채널 로그아웃 URL",
+      "oidcFrontchannel": "프런트채널 로그아웃 URL",
+      "samlTitle": "SAML 2.0",
+      "samlEntity": "엔터티 ID / 메타데이터 URL",
+      "samlAcs": "ACS URL",
+      "samlSlo": "단일 로그아웃 URL",
+      "samlMetadata": "이 서버의 서비스 공급자 메타데이터 열기",
+      "proxyTitle": "리버스 프록시",
+      "trustedProxies": "이 노드가 신뢰하는 프록시:",
+      "trustedProxiesHelp": "각 노드에서 SEALSKIN_TRUSTED_PROXIES 로 설정합니다. 요청이 이 주소 중 하나에서 온 경우에만 헤더를 신뢰합니다.",
+      "noTrustedProxy": "사용자 헤더는 설정되어 있지만 이 노드가 아직 어떤 프록시도 신뢰하지 않으므로 프록시 로그인은 허용되지 않습니다.",
+      "proxyCheck": {
+        "guarded": "확인됨: 프록시는 방문자가 보낸 로그인 헤더를 전달하지 않습니다.",
+        "open": "프록시 로그인이 거부됩니다.",
+        "unreachable": "프록시 로그인이 거부됩니다: 이 노드가 프록시를 확인할 수 없습니다. 노드가 공개 URL에 도달할 수 있는 경로를 제공하거나, 프록시 자체의 주소를 SEALSKIN_TRUSTED_PROXIES 에 지정하거나, 확인 없이 프록시를 신뢰하려면 노드에 SEALSKIN_PROXY_AUTH_UNCHECKED=true 를 설정하세요.",
+        "unchecked": "이 노드에서는 프록시 확인이 꺼져 있습니다 (SEALSKIN_PROXY_AUTH_UNCHECKED). 프록시가 전달하는 내용은 모두 신뢰됩니다."
+      },
+      "whoTitle": "로그인하는 사용자",
+      "whoHelp": "이 설정은 OpenID Connect, SAML, 리버스 프록시에 모두 적용됩니다. ID 공급자 그룹의 구성원을 SealSkin 그룹에 넣으려면, 그룹 메뉴에서 해당 그룹의 \"ID 공급자 그룹\" 항목에 지정하세요.",
+      "rootTitle": "루트 토큰",
+      "rootHelp": "항상 사용할 수 있습니다. 토큰은 서버의 /config/root_token 파일이 삭제될 때까지 그 파일에 있으며, SEALSKIN_ROOT_TOKEN 으로 설정할 수도 있습니다.",
+      "keyTitle": "키 파일",
+      "keyOn": "이 노드는 키 파일 클라이언트(브라우저 확장 프로그램과 모바일 앱)를 허용합니다. 각 노드에서 SEALSKIN_LEGACY_AUTH 로 설정합니다.",
+      "keyOff": "이 노드는 키 파일 클라이언트를 허용하지 않습니다. 각 노드에서 SEALSKIN_LEGACY_AUTH 로 설정합니다.",
+      "resultIssuer": "발급자:",
+      "resultAuthorization": "인가 엔드포인트:",
+      "resultBackchannel": "백채널 로그아웃 지원:",
+      "resultScopes": "제공되는 스코프:",
+      "resultGroupsClaim": "그룹 클레임:",
+      "claimListed": "'{claim}'은(는) 공급자가 나열한 클레임에 포함되어 있습니다",
+      "claimNotListed": "'{claim}'은(는) 공급자가 나열한 클레임에 포함되어 있지 않습니다",
+      "resultEntity": "엔터티 ID:",
+      "resultSso": "로그인 URL:",
+      "resultSlo": "단일 로그아웃 제공:",
+      "resultCertificates": "서명 인증서:"
     }
   },
   "popup": {
@@ -1227,7 +1522,16 @@
       "uploadingButton": "업로드 중...",
       "autoHome": "자동 (앱별 영속성)",
       "collaborationMode": "공동 작업 세션",
-      "waylandMode": "Wayland 모드"
+      "waylandMode": "Wayland 모드",
+      "where": "위치",
+      "whereAuto": "자동",
+      "wherePools": "풀",
+      "whereNodes": "노드",
+      "moveHome": "스토리지 이동",
+      "moveHomeStay": "{node}에 유지",
+      "moveHomeTo": "{node}(으)로 이동",
+      "moveHomeConfirm": "'{home}'을(를) {node}(으)로 이동하시겠습니까? 이를 사용하는 세션은 먼저 중지해야 합니다.",
+      "allowance": "할당량: {period}간 {hours}시간 중 {used}시간 사용"
     },
     "sessionsView": {
       "noSessions": "활성 세션이 없습니다."
@@ -1260,7 +1564,10 @@
       "noAppSelected": "애플리케이션을 선택하세요.",
       "noAppsAvailable": "계정에서 사용할 수 있는 애플리케이션이 없습니다.",
       "uploadSuccess": "파일이 성공적으로 업로드되었습니다!",
-      "creatingAutoHome": "자동 홈 디렉터리 생성 중..."
+      "creatingAutoHome": "자동 홈 디렉터리 생성 중...",
+      "noSessionOrigin": "이 브라우저는 세션 고유의 주소에 연결할 수 없습니다. 서버에는 세션 이름을 위한 와일드카드 DNS와 인증서가 필요하며, 관리자가 SEALSKIN_SESSION_DOMAIN 을 설정해야 합니다.",
+      "movingHome": "'{home}' 이동 중...",
+      "movedHome": "'{home}'을(를) {node}(으)로 이동했습니다."
     },
     "languages": {
       "default": "기본값 ({locale})"
@@ -1355,7 +1662,10 @@
       "sharesLoadFailed": "공유된 파일을 불러오지 못했습니다: {error}",
       "shareDeleteFailed": "공유 삭제 실패: {error}",
       "shareDeleted": "공유가 성공적으로 삭제되었습니다.",
-      "urlCopied": "공개 URL이 클립보드에 복사되었습니다."
+      "urlCopied": "공개 URL이 클립보드에 복사되었습니다.",
+      "downloading": "{filename} 다운로드 중...",
+      "downloadSuccess": "다운로드 완료",
+      "downloadFailed": "다운로드 실패: {error}"
     },
     "placeholders": {
       "errorLoading": "파일 로드 오류.",
@@ -1370,15 +1680,39 @@
       "finalizing": "마무리 중...",
       "completed": "완료됨",
       "error": "오류"
+    },
+    "files": {
+      "searchPlaceholder": "파일 검색..."
+    }
+  },
+  "shell": {
+    "host": {
+      "loading": "SealSkin 서버에 연결하는 중…",
+      "unconfiguredTitle": "연결되지 않음",
+      "unconfiguredBody": "SealSkin이 아직 서버에 연결되지 않았습니다.",
+      "setUp": "연결 설정",
+      "unreachableTitle": "서버에 연결할 수 없음",
+      "unreachableBody": "SealSkin 서버에 연결할 수 없거나 웹 인터페이스를 불러오지 못했습니다.",
+      "selfSigned": "서버가 자체 서명 인증서를 사용하는 경우, 서버를 한 번 열어 인증서를 수락한 다음 다시 시도하세요.",
+      "retry": "다시 시도",
+      "openServer": "서버 열기",
+      "changeConnection": "연결 변경",
+      "mismatchTitle": "업데이트 필요",
+      "mismatchBody": "이 앱과 서버 웹 인터페이스의 브리지 버전이 서로 다릅니다. 둘이 일치하도록 확장 프로그램이나 앱, 또는 서버를 업데이트하세요."
     }
   },
   "web": {
-    "unlockTitle": "SealSkin 잠금 해제",
-    "unlockBody": "이 브라우저에서 키를 보호하는 암호 문구를 입력하세요.",
-    "passphrase": "암호 문구",
-    "unlock": "잠금 해제",
-    "wrongPassphrase": "이 암호 문구로는 키의 잠금을 해제할 수 없습니다.",
     "receiving": "파일을 SealSkin으로 보내는 중…",
+    "signInTitle": "SealSkin에 로그인",
+    "signInWith": {
+      "oidc": "OpenID Connect로 로그인",
+      "saml": "SAML로 로그인"
+    },
+    "rootToken": "루트 토큰",
+    "rootTokenHelp": "관리자용 토큰으로, 서버의 /config/root_token 파일에 보관되어 있습니다.",
+    "rootSignIn": "루트로 로그인",
+    "rootRefused": "서버의 루트 토큰이 아닙니다.",
+    "rootLocked": "시도 횟수가 너무 많습니다. 잠시 기다린 후 다시 시도하세요.",
     "signIn": {
       "failed": "로그인을 완료하지 못했습니다. 다시 시도하거나 관리자에게 문의하세요.",
       "refused": "ID 공급자가 로그인을 거부했습니다.",
@@ -1389,6 +1723,57 @@
       "otherIdentity": "ID 공급자의 다른 계정이 이미 이 SealSkin 사용자로 로그인하고 있습니다. 관리자에게 문의하세요.",
       "notConfigured": "이 서버는 통합 인증을 제공하지 않습니다.",
       "ended": "ID 공급자가 로그인을 종료했습니다. 다시 로그인하세요."
+    },
+    "nav": {
+      "home": "홈",
+      "sessions": "세션",
+      "files": "파일",
+      "settings": "설정"
+    },
+    "home": {
+      "searchPlaceholder": "애플리케이션을 검색하거나, 링크를 붙여넣어 격리된 환경에서 열기",
+      "upload": "파일 업로드",
+      "drop": "파일을 놓아 SealSkin에서 열기",
+      "running": "실행 중인 세션",
+      "applications": "애플리케이션",
+      "allowance": "할당량",
+      "allowanceValue": "{used} / {hours}시간 ({period}간)",
+      "room": "룸",
+      "started": "{when} 시작됨",
+      "typeAll": "전체",
+      "typeRecent": "최근",
+      "typeOther": "기타",
+      "quickLaunch": "마지막으로 사용한 옵션으로 시작",
+      "wherePool": "풀: {pool}",
+      "openingUrl": "{url}을(를) 열 애플리케이션을 선택하세요",
+      "openingFile": "{filename}을(를) 열 애플리케이션을 선택하세요",
+      "noApps": "사용할 수 있는 애플리케이션이 없습니다. 관리자에게 애플리케이션 설치를 요청하세요.",
+      "noAppsAdmin": "아직 설치된 애플리케이션이 없습니다.",
+      "noMatch": "일치하는 애플리케이션이 없습니다.",
+      "openAppStores": "앱 스토어 열기",
+      "popupBlocked": "브라우저가 세션 탭을 차단했습니다. 이 사이트의 팝업을 허용한 다음 다시 시작하세요.",
+      "serverFileNeedsHome": "서버에 보관된 파일은 클린룸 모드에서 열 수 없습니다. 스토리지 디렉터리를 선택하세요."
+    },
+    "launch": {
+      "title": "{app} 시작 중",
+      "stages": {
+        "requesting": "시작 요청 전송 중",
+        "placing": "제한 확인 및 노드 선택 중",
+        "forwarding": "노드 {node}(으)로 시작 요청 전달 중",
+        "storage": "홈 디렉터리 준비 중",
+        "files": "공유 파일 동기화 중",
+        "image": "애플리케이션 이미지 다운로드 중",
+        "starting": "컨테이너 생성 중",
+        "waiting": "데스크톱 응답 대기 중",
+        "ready": "세션 여는 중"
+      },
+      "uploading": "파일 업로드 중 ({total}개 중 {done}개)",
+      "imageHint": "노드에서 애플리케이션을 처음 시작할 때는 다운로드가 필요해 몇 분 정도 걸릴 수 있습니다. 이후에는 빠르게 시작됩니다.",
+      "onNode": "노드 {node}",
+      "seconds": "{count}초",
+      "failed": "시작에 실패했습니다",
+      "unseen": "시작 요청이 서버에 도달하지 않았습니다. 시작을 요청한 SealSkin 탭을 확인하세요.",
+      "closeTab": "브라우저가 이 탭을 열어 둔 상태입니다. 직접 닫아 주세요."
     }
   }
 }

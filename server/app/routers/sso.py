@@ -1,11 +1,13 @@
 """Web sign-in routes (see `app.sso`).
 
 `router` is public: it starts and finishes the provider flows, serves this
-server's SAML metadata, takes the provider's logout notices, and turns the
+server's SAML metadata, takes the provider's logout notices, answers the
+check of a reverse proxy that signs users in (`app.proxy_auth`), and turns the
 grant of a finished flow, or the root token, into a sign-in the browser
 keeps in a cookie. A finished flow sends the browser to the web app with the
 grant, or the code of what went wrong, in the URL fragment, which reaches
-neither a server nor a Referer. `signed_in_router` ends the caller's sign-in.
+neither a server nor a Referer. Signing out is here too, outside the
+encrypted lane, whose answers carry no cookies.
 """
 
 from __future__ import annotations
@@ -16,17 +18,16 @@ import time
 from collections.abc import Awaitable, Callable
 from typing import Any
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Form, HTTPException, Request, Response
+from fastapi.responses import JSONResponse, RedirectResponse
 
-from .. import cluster, sso
+from .. import cluster, proxy_auth, sso
 from ..models import RootSignInRequest, SignInConfig, SignInRegistration, SignInRegistrationRequest
-from ..security import EncryptedRoute, same_origin, verify_token
+from ..security import same_origin
 from ..settings import settings
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-signed_in_router = APIRouter(route_class=EncryptedRoute)
 
 
 def _base(request: Request) -> str:
@@ -83,6 +84,12 @@ async def _begin(request: Request, start: Callable[[str, str], Awaitable[str]]) 
 async def sign_in_config() -> dict[str, bool]:
     """Return the identity provider sign-ins this server offers."""
     return sso.enabled()
+
+
+@router.get(proxy_auth.CHECK_PATH, include_in_schema=False)
+async def proxy_check(request: Request) -> Response:
+    """Say what a request carried when it arrived, for the check of the reverse proxy in front."""
+    return JSONResponse(proxy_auth.answer(request), headers={"Cache-Control": "no-store"})
 
 
 @router.get("/api/auth/oidc/login", include_in_schema=False)
@@ -187,19 +194,26 @@ async def root_sign_in(req: RootSignInRequest, request: Request, response: Respo
     """Sign the root administrator in with the root token."""
     _web_only(request)
     try:
-        token = await sso.root_sign_in(req.token, request.client.host if request.client else "")
+        token = await sso.root_sign_in(req.token, cluster.client_address(request))
     except sso.SignInError as exc:
-        logger.warning("Refused a root sign-in: %r", str(exc))
+        logger.warning("Refused a root sign-in from %s: %r", cluster.client_address(request) or "an unknown address", str(exc))
         raise HTTPException(status_code=429 if exc.code == "expired" else 403, detail=exc.code) from exc
     started = {"token": token, "username": "root", "via": "root", "expires": time.time() + settings.web_session_seconds}
     return _start_session(response, started)
 
 
-@signed_in_router.post("/api/auth/signout", status_code=204)
-async def sign_out(user: dict[str, Any] = Depends(verify_token)) -> Response:
-    """End the caller's web sign-in; a key-file login has none."""
-    if user.get("sid"):
-        await sso.revoke(user["sid"])
+@router.post("/api/auth/signout", status_code=204)
+async def sign_out(request: Request) -> Response:
+    """End the web sign-in the caller's cookie names and take the cookie back.
+
+    A key-file client has no sign-in to end, and a user a reverse proxy
+    signed in has none here either; both are answered the same.
+    """
+    token = request.cookies.get(sso.SESSION_COOKIE)
     response = Response(status_code=204)
-    response.delete_cookie(sso.SESSION_COOKIE, path="/", secure=True, httponly=True)
+    if token and cluster.via_proxy(request):
+        if not same_origin(request):
+            raise HTTPException(status_code=403, detail="Requests from other origins are refused.")
+        await sso.revoke(sso.session_id(token))
+        response.delete_cookie(sso.SESSION_COOKIE, path="/", secure=True, httponly=True)
     return response

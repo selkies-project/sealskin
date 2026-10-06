@@ -279,8 +279,9 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "type": "str",
         "default": "",
         "help": (
-            "Claim (OpenID Connect) or attribute (SAML) naming the SealSkin user; empty takes "
-            "`preferred_username`, or the SAML attribute `username`, else the SAML NameID."
+            "Claim (OpenID Connect) or attribute (SAML, by its `Name` or `FriendlyName`) naming the "
+            "SealSkin user; empty takes `preferred_username`, or the SAML attribute `username`, else "
+            "the SAML NameID."
         ),
     },
     {
@@ -288,6 +289,21 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "type": "str",
         "default": "groups",
         "help": "Claim or attribute listing the user's groups at the identity provider.",
+    },
+    {
+        "name": "saml_username_attribute",
+        "type": "str",
+        "default": "",
+        "help": (
+            "SAML attribute naming the SealSkin user, by its `Name` or `FriendlyName`, where OpenID "
+            "Connect is set up beside SAML and names its claim otherwise; empty takes `sso_username_claim`."
+        ),
+    },
+    {
+        "name": "saml_groups_attribute",
+        "type": "str",
+        "default": "",
+        "help": "SAML attribute listing the user's groups; empty takes `sso_groups_claim`.",
     },
     {
         "name": "sso_admin_group",
@@ -459,8 +475,40 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
     {
         "name": "proxy_auth_groups_header",
         "type": "str",
-        "default": "Remote-Groups",
-        "help": "Header a trusted proxy lists the user's groups in, comma-separated.",
+        "default": "",
+        "help": (
+            "Header a trusted proxy lists the user's groups in, `Remote-Groups`, separated by commas or "
+            "by `|`; empty takes no groups from a proxy. Name only a header the proxy sets."
+        ),
+    },
+    {
+        "name": "proxy_auth_unchecked",
+        "type": "bool",
+        "default": False,
+        "help": (
+            "Believe the proxy's sign-in header although this node cannot check, by reaching its own "
+            "`public_url` or a trusted proxy's address, that the proxy removes the header a visitor "
+            "sends. Leave it off wherever the check can run."
+        ),
+    },
+    {
+        "name": "proxy_auth_logout_url",
+        "type": "str",
+        "default": "",
+        "help": (
+            "URL the web app opens to sign out a user a proxy signed in, as the proxy's or its identity "
+            "provider's logout page; empty leaves signing out to the proxy."
+        ),
+    },
+    {
+        "name": "http_port",
+        "type": "int",
+        "default": 0,
+        "help": (
+            "Port of a plain HTTP listener for a reverse proxy that terminates TLS, serving what the "
+            "session port does; 0 opens none. It answers the addresses in `trusted_proxies` alone, and "
+            "only requests they say arrived over HTTPS."
+        ),
     },
     {
         "name": "root_token",
@@ -481,7 +529,7 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "name": "web_session_seconds",
         "type": "int",
         "default": 43200,
-        "help": "Longest a web sign-in with the root token or through a proxy lasts unused.",
+        "help": "Longest a web sign-in with the root token lasts unused.",
     },
     {
         "name": "sso_force_login",
@@ -607,6 +655,8 @@ CLUSTER_SETTINGS = (
     "oidc_client_secret",
     "oidc_scopes",
     "saml_metadata_url",
+    "saml_username_attribute",
+    "saml_groups_attribute",
     "sso_username_claim",
     "sso_groups_claim",
     "sso_admin_group",
@@ -615,6 +665,7 @@ CLUSTER_SETTINGS = (
     "sso_create_users",
     "proxy_auth_user_header",
     "proxy_auth_groups_header",
+    "proxy_auth_logout_url",
     "web_session_seconds",
     "files_sync",
 )

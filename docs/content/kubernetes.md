@@ -49,6 +49,18 @@ NetworkPolicy that lets only the server reach session pods where the network
 plugin enforces policies. Import `admin.json` into a client as described in
 [Getting Started](start.md#connect).
 
+For the web app, the server writes a root token at its first start instead;
+read it, sign in at `https://<host>/ui/`, and delete it:
+
+```bash
+kubectl -n <namespace> exec deployment/sealskin -- cat /config/root_token
+kubectl -n <namespace> exec deployment/sealskin -- rm /config/root_token
+```
+
+The web app needs a certificate browsers trust and a name for every
+session, which on a cluster means an ingress or a gateway:
+[Exposing the server](#exposing-the-server).
+
 The Role grants pods (get, list, create, delete), pod templates and events
 (get, list), claims and resource quotas (get, list), and ReplicaSets (get).
 Deleting the Deployment removes every session pod with it, since the
@@ -266,19 +278,63 @@ runs by its tag, pulled with the namespace's image pull secrets.
 
 ## Exposing the server
 
-The Service in the manifest is a `ClusterIP`. Clients need to reach `8443`,
-which carries the API and every session's WebSocket:
+The Service in the manifest is a `ClusterIP`. Clients reach the server one
+of two ways.
 
-* **A load balancer.** Set the Service's `type` to `LoadBalancer`. The server
-  terminates TLS itself with the certificate in `/config/ssl`, as on Docker,
-  and `HOST_URL` is the load balancer's address.
-* **An ingress or a gateway.** Forward all paths of a host to the Service's
-  `https` port with TLS to the backend (the server's certificate can stay
-  self-signed), WebSocket upgrades, and read timeouts of an hour or more,
-  since a session is one long-lived WebSocket and a launch can wait for an
-  image pull. Set `HOST_URL` to the host and the port it listens on, such as
-  `sealskin.example.com:443`, so the generated configuration files point
-  there. How backend TLS and timeouts are set depends on the controller.
+### A load balancer
 
-The API port `8000` is only needed by the Chrome self-signed certificate
-fallback and can stay inside the cluster.
+Set the Service's `type` to `LoadBalancer`. The server terminates TLS itself
+on `8443`, which carries the API and every session's WebSocket, with the
+certificate in `/config/ssl`, as on Docker, and `HOST_URL` is the load
+balancer's address. The API port `8000` is only needed by the Chrome
+self-signed certificate fallback and can stay inside the cluster.
+
+### An ingress or a gateway
+
+The controller holds the certificate and routes to the server's plain HTTP
+port, which answers the controller alone
+([the plain HTTP listener](reverse-proxy/index.md#the-plain-http-listener)).
+Uncomment the four settings in `sealskin.yml`:
+
+| Setting | Value |
+| --- | --- |
+| `SEALSKIN_PUBLIC_URL` | The web app's address, `https://sealskin.example.com`. Set `HOST_URL` to the same host, with the port when it is not 443. |
+| `SEALSKIN_SESSION_DOMAIN` | The domain sessions open under: `example.com` gives `<session id>.example.com`. |
+| `SEALSKIN_TRUSTED_PROXIES` | Where the controller's requests come from: the pod network (`10.244.0.0/16` on many clusters), or the node network for a controller on the host network. |
+| `SEALSKIN_HTTP_PORT` | `8080`, the Service's `proxied` port. |
+
+Then apply [`kubernetes/ingress.yml`](https://github.com/selkies-project/sealskin/blob/main/kubernetes/ingress.yml)
+with your names in it:
+
+```bash
+kubectl -n <namespace> create secret tls sealskin-tls --cert=fullchain.pem --key=privkey.pem
+kubectl -n <namespace> apply -f ingress.yml
+```
+
+The file is an Ingress with two hosts on the same backend, the web app's
+name and the wildcard `*.example.com` that every session's name falls
+under, and, commented, the same as a Gateway and an HTTPRoute. The
+certificate in the secret has to cover both hosts, so it is a wildcard one,
+which cert-manager issues over a DNS-01 challenge. A wildcard host takes the
+names one label under the domain that no other Ingress or route names, so
+other applications on the domain keep their own.
+
+Nothing in it is specific to a controller: the backend is plain HTTP, and a
+controller passes `Host`, WebSocket upgrades, and `X-Forwarded-Proto` as it
+does for any application. Set `ingressClassName` or `gatewayClassName` to
+your controller's. A session is one long-lived WebSocket; where the
+controller ends connections after a fixed time whatever passes over them,
+raise that limit.
+
+Sessions are pods on the pod network, which `SEALSKIN_TRUSTED_PROXIES`
+names whole here. The server knows its sessions' addresses and takes
+nothing a request from one says about itself: not a forwarded client
+address, and not a [sign-in header](reverse-proxy/sign-in.md).
+
+Signing users in works as behind any reverse proxy: at SealSkin itself over
+OpenID Connect or SAML, or by the controller's forward-auth, as
+[Behind a reverse proxy](reverse-proxy/index.md) describes.
+
+Run with Kubernetes 1.37 and Traefik 3.7 as the controller, through both
+the Ingress and the Gateway API, with sessions on the server's node
+(`ReadWriteOnce`) and on other nodes (`ReadWriteMany`).

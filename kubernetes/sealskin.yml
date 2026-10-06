@@ -110,11 +110,25 @@ spec:
         # port when it is not 8443, as behind an ingress (`sealskin.example.com:443`)
         - name: HOST_URL
           value: "sealskin.example.com"
+        # Behind an ingress or gateway (ingress.yml): how browsers reach the web
+        # app, the domain its sessions open under (<session id>.<domain>), the
+        # addresses the controller's requests come from, and the plain HTTP
+        # port it is routed to, which answers those addresses alone
+#        - name: SEALSKIN_PUBLIC_URL
+#          value: "https://sealskin.example.com"
+#        - name: SEALSKIN_SESSION_DOMAIN
+#          value: "example.com"
+#        - name: SEALSKIN_TRUSTED_PROXIES
+#          value: "10.244.0.0/16"
+#        - name: SEALSKIN_HTTP_PORT
+#          value: "8080"
         ports:
         - name: https
           containerPort: 8443
         - name: http
           containerPort: 8000
+        - name: proxied
+          containerPort: 8080
         # Caddy relays every session's stream: raise the CPU with the number of
         # concurrent sessions
         resources:
@@ -167,7 +181,8 @@ template:
 ---
 # Clients connect to 8443 (HTTPS, sessions and API) and, for a self-signed
 # certificate in Chrome, 8000. Expose it as a LoadBalancer, or behind an
-# ingress or gateway that forwards HTTPS and WebSockets to 8443.
+# ingress or gateway (ingress.yml), which is routed to `proxied` once
+# SEALSKIN_HTTP_PORT opens it.
 apiVersion: v1
 kind: Service
 metadata:
@@ -184,6 +199,9 @@ spec:
   - name: http
     port: 8000
     targetPort: http
+  - name: proxied
+    port: 8080
+    targetPort: proxied
 ---
 # Only the server reaches a session; enforced where the network plugin
 # supports NetworkPolicy

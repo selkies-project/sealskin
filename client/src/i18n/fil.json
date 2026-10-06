@@ -78,7 +78,10 @@
       "installedApps": "Mga Naka-install na App",
       "users": "Mga User",
       "groups": "Mga Grupo",
-      "admins": "Mga Admin"
+      "admins": "Mga Admin",
+      "cluster": "Cluster",
+      "signIn": "Sign In",
+      "audit": "Audit Log"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -104,7 +107,14 @@
         "<strong>Upang pamahalaan ang persistenteng imbakan:</strong> Gamitin ang tab na \"Mga Home Directory\" sa pahinang ito upang lumikha at magbura ng mga volume ng imbakan na maaaring gamitin sa maraming sesyon.",
         "<strong>Upang i-save ang mga opsyon sa paglunsad:</strong> Lagyan ng tsek ang kahon na \"I-save ang mga opsyon sa paglunsad na ito\" sa popup bago maglunsad ng aplikasyon para sa isang partikular na uri ng file (hal., .pdf) o para sa lahat ng URL. Pamahalaan ang mga naka-save na kagustuhan na ito sa tab na \"Naka-pin na Gawi\"."
       ],
-      "confirmLogout": "Sigurado ka bang gusto mong mag-logout? Ito ay maglilinis ng iyong naka-save na konfigurasyon mula sa browser na ito."
+      "confirmLogout": "Sigurado ka bang gusto mong mag-logout? Ito ay maglilinis ng iyong naka-save na konfigurasyon mula sa browser na ito.",
+      "changeConnection": "Palitan ang koneksyon",
+      "certExpired": "Nag-expire na ang TLS certificate ng server. Mabibigo ang mga koneksyong HTTPS hangga't hindi ito nare-renew.",
+      "certExpiring": "Mag-e-expire ang TLS certificate ng server sa loob ng {days} araw. I-renew ito upang maiwasan ang pagkabigo ng mga koneksyon.",
+      "signOut": "Mag-sign out",
+      "signedInThrough": "Naka-sign in sa pamamagitan ng:",
+      "allowance": "Allowance:",
+      "allowanceUsed": "{used} sa {hours} oras ngayong {period}"
     },
     "config": {
       "quickSetup": "Mabilis na Setup",
@@ -135,15 +145,7 @@
       "keyGeneration": "Pagbuo ng Key",
       "keyGenDescription": "Kung wala kang key pair, maaari kang bumuo ng isa dito. Ang pribadong key ay pupunan sa itaas. Ibigay ang pampublikong key sa iyong administrator.",
       "generateKeyButton": "Bumuo ng Bagong Key Pair",
-      "publicKeyForAdminLabel": "Iyong Pampublikong Key (para sa admin)",
-      "passphraseLabel": "Passphrase",
-      "remember": "Itago ang aking key sa browser na ito",
-      "rememberHelp": "I-off ito sa computer na may kahati ka: itatago lang ng SealSkin ang iyong key habang bukas ang tab na ito, at ilo-load mo ulit ang iyong configuration sa susunod.",
-      "passphraseHelp": "Nakatago ang iyong pribadong key sa browser na ito at naka-encrypt gamit ang passphrase na ito, na ilalagay mo tuwing bubuksan mo ang SealSkin dito.",
-      "signInTitle": "Single Sign-On",
-      "signInHelp": "Mag-sign in gamit ang account na pinamamahalaan ng iyong organisasyon sa halip na file ng konfigurasyon. Itinatago ng SealSkin ang sign-in sa tab na ito lamang, kaya magsa-sign in ka ulit sa susunod.",
-      "signInOidc": "Mag-sign in gamit ang OpenID Connect",
-      "signInSaml": "Mag-sign in gamit ang SAML"
+      "publicKeyForAdminLabel": "Iyong Pampublikong Key (para sa admin)"
     },
     "home": {
       "title": "Iyong mga Home Directory",
@@ -153,9 +155,13 @@
       "namePlaceholder": "hal., aking-mga-file-ng-proyekto",
       "nameTitle": "Gumamit lamang ng mga letra, numero, underscore, o gitling.",
       "createButton": "Gumawa ng Directory",
-      "isLaboratory": "Ito ay isang Laboratory app, na binuo mula sa isang base image na may mga custom na setting.",
-      "laboratory": "Laboratoryo",
-      "confirmDelete": "Sigurado ka bang gusto mong burahin ang naka-install na app na '{appName}'?"
+      "confirmDelete": "Sigurado ka bang gusto mong burahin ang home directory na '{homeName}'? Permanenteng mawawala ang lahat ng data sa loob nito.",
+      "node": "Node",
+      "move": "Ilipat",
+      "moveTo": "Ilipat sa node",
+      "moveHelp": "Kinokopya ang home directory sa node at inaalis sa node na may hawak nito. Kailangan munang itigil ang mga sesyong gumagamit nito.",
+      "moveTitle": "Ilipat ang '{homeName}'",
+      "noOtherNode": "Walang ibang node na mapaglilipatan nito."
     },
     "sessions": {
       "title": "Mga Aktibong Sesyon",
@@ -207,7 +213,21 @@
       "confirmDelete": "Sigurado ka bang gusto mong burahin ang user na si '{username}'? Mabubura rin nito ang lahat ng kanilang persistenteng imbakan at hindi na maibabalik.",
       "allowPublicSharing": "Pahintulutan ang Pampublikong Pagbabahagi ng File",
       "allowEditTemplates": "Pahintulutan ang Pag-edit ng mga Template ng App",
-      "signInOnly": "Single sign-on lamang"
+      "signInOnly": "Single sign-on lamang",
+      "admin": "Administrator",
+      "gpuShare": "Pahintulutan ang Pagbabahagi ng GPU sa Ibang mga Sesyon",
+      "homeMigration": "Pahintulutan ang Paglilipat ng mga Home Directory sa Pagitan ng mga Node",
+      "storageLimit": "Limitasyon ng imbakan (GB bawat node)",
+      "sessionCpus": "Mga CPU bawat sesyon",
+      "sessionMemory": "Memorya bawat sesyon (MB)",
+      "sessionHours": "Mga oras na maaaring tumakbo ang isang sesyon",
+      "allowanceHours": "Allowance (weighted na oras ng sesyon)",
+      "allowancePeriod": "Panahon ng allowance",
+      "pools": "Mga restricted na pool na pinapayagan (pinaghihiwalay ng kuwit)",
+      "poolsDenied": "Mga pool na ipinagbabawal (pinaghihiwalay ng kuwit)",
+      "groupsHelp": "Pindutin nang matagal ang Ctrl o Command upang pumili ng ilan. Kapag hindi nagkakasundo ang mga grupo, ang mas mahigpit na value ang mananaig.",
+      "providerGroups": "Mga grupong binanggit ng identity provider sa huling sign-in: {groups}",
+      "limitsHelp": "Ang limitasyong -1, o iniwang blangko, ay nangangahulugang walang limitasyon."
     },
     "groups": {
       "title": "Pamamahala ng Grupo",
@@ -217,7 +237,14 @@
       "overrideTitle": "Mga Setting ng Pag-override ng Grupo",
       "permissionsTitle": "Mga Pag-override sa Pahintulot at Pagpapatibay",
       "createButton": "Gumawa ng Grupo",
-      "confirmDelete": "Sigurado ka bang gusto mong burahin ang grupong '{groupName}'? Ang mga user sa grupong ito ay babalik sa kanilang indibidwal na mga setting."
+      "confirmDelete": "Sigurado ka bang gusto mong burahin ang grupong '{groupName}'? Ang mga user sa grupong ito ay babalik sa kanilang indibidwal na mga setting.",
+      "notSet": "Hindi nakatakda",
+      "allow": "Payagan",
+      "deny": "Tanggihan",
+      "on": "Naka-on",
+      "off": "Naka-off",
+      "ssoGroups": "Mga grupo ng identity provider na ang mga miyembro ay kasama sa grupong ito (pinaghihiwalay ng kuwit)",
+      "overrideHelp": "Ang grupo ay nagpapasya lamang sa mga nakatakda rito; ang lahat ng hindi itinakda o iniwang blangko ay nananatiling sa bawat miyembro."
     },
     "installedApps": {
       "title": "Mga Naka-install na Aplikasyon",
@@ -225,6 +252,8 @@
       "noAppsFound": "Walang nahanap na naka-install na app.",
       "pulling": "Hinihila ang bagong imahe...",
       "notLocal": "Hindi nahanap ang imahe nang lokal",
+      "isLaboratory": "Ito ay isang app ng Laboratoryo, na binuo mula sa isang base na imahe na may mga pasadyang setting.",
+      "laboratory": "Laboratoryo",
       "confirmDelete": "Sigurado ka bang gusto mong burahin ang naka-install na app na '{appName}'?"
     },
     "appStore": {
@@ -1045,7 +1074,33 @@
       "closeButton": "Isara ang Sesyon at I-finalize",
       "savingAndLaunching": "Nagse-save at Naglulunsad...",
       "placeholder": "Pinapayagan ka ng App Laboratory na i-configure ang base home directory at launch script para sa isang aplikasyon batay sa isang umiiral na naka-install na aplikasyon. Ang home directory na ito ay kokopyahin sa unang pag-init para sa user kasama ang lahat ng mga file at setting na iyong inayos sa sesyon na ito. Maaari mong muling ilunsad ang isang umiiral na Laboratory App upang higit pang baguhin ang mga nilalaman nito.",
-      "formInvalid": "Mangyaring pumili ng isang base app at magbigay ng pangalan para sa bagong app."
+      "formInvalid": "Mangyaring pumili ng isang base app at magbigay ng pangalan para sa bagong app.",
+      "explainer": "Ang Laboratoryo ng App ay bumubuo ng meta-app: isang bersyon ng naka-install na aplikasyon na may sariling pangalan, icon, autostart script, at home directory na naka-set up na. Isang beses mo lang ise-set up ang aplikasyon sa isang sesyon ng pagpapasadya, at ang unang paglunsad ng bawat user ay magsisimula sa kopya ng home directory na iyon.",
+      "step1Title": "Ilarawan ang app",
+      "step1": "Piliin ang aplikasyong pagbabatayan, at bigyan ang meta-app ng pangalan, icon, at mga user na maaaring maglunsad nito.",
+      "step2Title": "I-customize ito sa isang live na sesyon",
+      "step2": "Magbubukas ang isang sesyon ng pagpapasadya kung saan writable ang template na home directory. Mag-install ng mga extension, mag-sign in, at ayusin ito ayon sa dapat madatnan ng mga user.",
+      "step3Title": "Isara ang sesyon upang i-save ang template",
+      "step3": "Ang pagsasara ng sesyon mula sa pahinang ito ay nagpapanatili sa home directory bilang template.",
+      "openTitle": "Bukas ang sesyon ng pagpapasadya",
+      "openStarted": "Sinimulan {when}",
+      "openDescription": "Ang lahat ng binago sa home directory ng sesyong ito ay magiging template. Mananatiling bukas ang sesyon hanggang isara mo ito rito; hindi ito nakalista sa iyong mga sesyon.",
+      "reopen": "Buksan muli ang sesyon",
+      "closeAndSave": "Isara at i-save ang template",
+      "confirmClose": "Isara ang sesyon ng pagpapasadya ng '{name}'? Titigil ang sesyon, at pananatilihin ang home directory nito bilang template.",
+      "templateSaved": "Naisara ang sesyon. Na-save ang template.",
+      "busy": "May bukas na sesyon ng pagpapasadya para sa '{name}'. Isara ito sa itaas bago baguhin ang isang meta-app o magsimula ng iba.",
+      "describeTitle": "1. Ilarawan",
+      "customizeTitle": "2. I-customize",
+      "customizeDescription": "Magsisimula ang sesyon ng pagpapasadya gamit ang mga opsyong ito. Isang sesyon lang ang maaaring bukas sa isang pagkakataon.",
+      "advanced": "Advanced",
+      "saveAndOpen": "I-save at buksan ang sesyon ng pagpapasadya",
+      "listTitle": "Iyong mga meta-app",
+      "listNone": "Wala pang meta-app.",
+      "closingStopping": "Itinitigil ang sesyon…",
+      "closingSaving": "Sine-save ang template…",
+      "closingSaved": "Na-save ang template: {files} file, {size}",
+      "closingFailed": "Nabigo ang pagsasara ng sesyon."
     },
     "modals": {
       "editUserTitle": "I-edit ang User: {username}",
@@ -1062,6 +1117,8 @@
       "dirsForUser": "Mga direktoryo para sa user: {username}",
       "dirsForAdmin": "Mga direktoryo para sa admin: {username}",
       "newDirForUser": "Gumawa ng Bagong Directory para sa User",
+      "customAutostartScriptLabel": "Pasadyang Autostart Script",
+      "customAutostartScriptDescription": "I-customize ang lohika ng autostart, iwanang blangko upang gamitin ang default mula sa provider ng application.",
       "createDirButton": "Gumawa ng Directory",
       "confirmDeleteDir": "Sigurado ka bang gusto mong burahin ang '{homeName}' para sa user na si '{username}'? Ito ay permanente.",
       "installAppTitle": "I-install ang {appName}",
@@ -1080,8 +1137,6 @@
       "advancedSettings": "Mga Advanced na Setting",
       "appTemplateLabel": "Template ng Aplikasyon",
       "appTemplateDescription": "Pumili ng isang pre-configured na template para sa mga advanced na setting ng paglunsad ng container.",
-      "customAutostartScriptLabel": "Pasadyang Autostart Script",
-      "customAutostartScriptDescription": "I-customize ang lohika ng autostart, iwanang blangko upang gamitin ang default mula sa provider ng application.",
       "saveInstallation": "I-save ang Pag-install",
       "updateStatusTitle": "Katayuan ng Update para sa {appName}",
       "checkingUpdates": "Sinusuri ang mga update...",
@@ -1176,8 +1231,16 @@
       "settingsSaved": "Nai-save ang mga setting.",
       "appCreated": "Matagumpay na nagawa ang app na '{name}'.",
       "launchFailed": "Nabigo ang paglunsad: {error}",
-      "passphraseRequired": "Maglagay ng passphrase para protektahan ang iyong key sa browser na ito.",
-      "passphraseTooShort": "Gumamit ng passphrase na may hindi bababa sa {count} character."
+      "homedirMoving": "Inililipat ang home directory na '{homeName}'...",
+      "homedirMoved": "Nailipat ang home directory na '{homeName}'.",
+      "homedirMoveFailed": "Nabigong ilipat ang home directory: {error}",
+      "clusterLoadFailed": "Nabigong i-load ang cluster: {error}",
+      "clusterWriteFailed": "Nabigong i-save: {error}",
+      "nodeUpdated": "Na-update ang node.",
+      "nodeRemoved": "Naalis ang node.",
+      "poolSaved": "Na-save ang pool na '{name}'.",
+      "poolDeleted": "Nabura ang pool na '{name}'.",
+      "nothingChanged": "Walang nabago."
     },
     "placeholders": {
       "noAdmins": "Walang nahanap na admin.",
@@ -1199,6 +1262,238 @@
       "protocol": "Buksan dito ang mga web+sealskin: link",
       "protocolHelp": "Ang link na isinulat bilang web+sealskin: na sinusundan ng isang address ay magbubukas ng address na iyon sa SealSkin.",
       "install": "Kung kayang mag-install ng browser ng mga web app, i-install ang SealSkin mula sa menu nito para makapagbahagi ng mga link at file dito at makapagbukas ng mga file gamit ito."
+    },
+    "via": {
+      "root": "Root token",
+      "oidc": "OpenID Connect",
+      "saml": "SAML",
+      "proxy": "Reverse proxy",
+      "key": "Key file"
+    },
+    "periods": {
+      "day": "Araw",
+      "week": "Linggo",
+      "month": "Buwan"
+    },
+    "cluster": {
+      "nodesTitle": "Mga Node",
+      "pool": "Pool",
+      "load": "Load",
+      "online": "Online",
+      "offline": "Offline",
+      "waiting": "Naghihintay ng pag-apruba",
+      "lastSeen": "huling nakita {when}",
+      "storeUnreachableNode": "hindi maabot ang mga shared record",
+      "cpus": "{count} CPU",
+      "gpus": "{count} GPU",
+      "gpuSessions": "GPU: {used} / {slots}",
+      "thisNode": "ang node na ito",
+      "approve": "Aprubahan",
+      "suspend": "Suspindihin",
+      "remove": "Alisin",
+      "confirmRemove": "Alisin ang node na '{name}' mula sa cluster? Ang node na tumatakbo pa ay muling magrerehistro at maghihintay ng pag-apruba.",
+      "joinTitle": "Magdagdag ng Node",
+      "joinDescription": "Gumawa ng join code, simulan ang bagong node na may dalawang linya sa ibaba sa environment nito, pagkatapos ay aprubahan ito sa talahanayan sa itaas. Ang isang code ay tumatanggap ng isang node at tumatagal ng isang oras.",
+      "joinButton": "Gumawa ng Join Code",
+      "joinExpires": "Environment ng bagong node (mag-e-expire ang code sa {when})",
+      "poolsTitle": "Mga Pool",
+      "poolsDescription": "Ang pool ay isang hanay ng mga node kung saan nagsisimula ang mga sesyon. Ang restricted na pool ay bukas lamang sa mga user at grupong nakapangalan dito o pinapayagan ng kanilang mga setting.",
+      "poolDomain": "Domain",
+      "poolAccess": "Access",
+      "poolCost": "Halaga bawat oras",
+      "poolCostWithGpu": "{cost} (GPU: {gpuCost})",
+      "poolOpen": "Bukas",
+      "poolRestricted": "Restricted",
+      "poolNew": "Bagong Pool",
+      "poolEdit": "I-edit ang Pool na '{name}'",
+      "poolDescriptionLabel": "Paglalarawan",
+      "poolDomainLabel": "Domain kung saan pinapangalanan ang mga node ng pool",
+      "poolCostLabel": "Allowance na katumbas ng isang oras ng sesyon",
+      "poolGpuCostLabel": "Allowance na katumbas ng isang oras ng GPU na sesyon (blangko: pareho)",
+      "poolUsersLabel": "Mga user na maaaring gumamit nito kapag restricted (pinaghihiwalay ng kuwit)",
+      "poolGroupsLabel": "Mga grupong maaaring gumamit nito kapag restricted (pinaghihiwalay ng kuwit)",
+      "poolStopWhenSpent": "Tapusin ang mga sesyon kapag naubos na ang allowance",
+      "poolSave": "I-save ang Pool",
+      "confirmDeletePool": "Burahin ang pool na '{name}'?",
+      "storeTitle": "Mga Shared Record",
+      "storeDescription": "Kung saan itinatago ng mga node ang mga record na pinagsasaluhan nila: mga user, grupo, app, pool, at ang mga setting na ito.",
+      "storeKept": "Nakaimbak:",
+      "storeKinds": {
+        "file": "Sa disk ng node na ito",
+        "s3": "Sa isang bucket ng object store",
+        "peer": "Sa ibang node"
+      },
+      "reachable": "Naaabot",
+      "unreachable": "Hindi maabot",
+      "publicUrl": "Address ng web app:",
+      "sessionDomain": "Domain ng sesyon:",
+      "sessionDomainUnset": "Hindi nakatakda (ang host name ng web app)",
+      "signInDescription": "Kapag isinulat dito, ang setting ay umiiral para sa bawat node at nangingibabaw sa environment ng node. I-clear ang isang field upang ibalik ang setting sa environment ng bawat node.",
+      "settingWritten": "Nakatakda rito para sa bawat node.",
+      "settingFromEnvironment": "Mula sa environment ng bawat node; ang value na ipinapakita ay sa node na ito.",
+      "settingInherit": "Mula sa environment ng bawat node (dito: {value})",
+      "secretSet": "May nakatakdang secret; iwanang blangko upang panatilihin ito",
+      "secretUnset": "Walang nakatakdang secret",
+      "secretClear": "Alisin ang secret na nakatakda rito",
+      "settings": {
+        "oidc_issuer": "Issuer URL ng OpenID Connect",
+        "oidc_client_id": "Client ID ng OpenID Connect",
+        "oidc_client_secret": "Client secret ng OpenID Connect",
+        "oidc_scopes": "Mga scope ng OpenID Connect",
+        "saml_metadata_url": "Metadata URL ng SAML",
+        "saml_username_attribute": "SAML attribute na nagpapangalan sa user (blangko: ang username claim sa ibaba)",
+        "saml_groups_attribute": "SAML attribute na naglilista ng mga grupo ng user (blangko: ang groups claim sa ibaba)",
+        "sso_username_claim": "Claim o attribute na nagpapangalan sa user",
+        "sso_groups_claim": "Claim o attribute na naglilista ng mga grupo ng user",
+        "sso_admin_group": "Grupo ng identity provider para sa mga administrator",
+        "sso_max_age_seconds": "Pinakamatagal na itatagal ng sign-in sa identity provider (oras)",
+        "sso_force_login": "Humingi ng mga credential sa bawat sign-in",
+        "sso_create_users": "Gumawa ng user sa unang sign-in",
+        "proxy_auth_user_header": "Header kung saan pinapangalanan ng trusted na proxy ang user",
+        "proxy_auth_groups_header": "Header kung saan inililista ng trusted na proxy ang mga grupo ng user",
+        "proxy_auth_logout_url": "Pahina ng proxy na nagsa-sign out sa user nito",
+        "web_session_seconds": "Pinakamatagal na itatagal ng root sign-in nang hindi ginagamit (oras)",
+        "files_sync": "Panatilihin ang mga ibinahaging file sa object store"
+      },
+      "usageTitle": "Paggamit",
+      "usageHours": "Weighted na oras",
+      "usageNone": "Walang paggamit sa panahong ito.",
+      "settingsTitle": "Mga Setting ng Cluster"
+    },
+    "audit": {
+      "title": "Audit Log",
+      "searchPlaceholder": "Maghanap ng mga event...",
+      "range": "Saklaw",
+      "pageSize": "Mga event bawat pahina",
+      "today": "Ngayong araw",
+      "last7": "Huling 7 araw",
+      "last30": "Huling 30 araw",
+      "oneDay": "Isang araw (UTC)",
+      "time": "Oras",
+      "event": "Event",
+      "details": "Mga Detalye",
+      "none": "Walang tumutugmang event.",
+      "shown": "{from}–{to} sa {total}",
+      "exportCsv": "I-export ang CSV",
+      "exportJson": "I-export ang JSON",
+      "exported": "Na-export ang {count} event."
+    },
+    "signin": {
+      "pill": {
+        "active": "Aktibo",
+        "off": "Naka-off",
+        "none": "Hindi naka-configure"
+      },
+      "test": "Subukan",
+      "testing": "Sinusubukan ang mga naka-save na setting...",
+      "testOk": "Sumagot ang provider.",
+      "testFailed": "Nabigo ang pagsubok.",
+      "register": "Irehistro ang mga ito sa provider",
+      "provider": "Provider",
+      "providerChoose": "Pumili ng provider para sa mga pahiwatig",
+      "providerHelp": "Pinupunan lamang ng provider ang mga pahiwatig sa ibaba; walang anumang tungkol dito ang iniimbak.",
+      "proxyHelp": "Ang reverse proxy sa harap ang nagsa-sign in sa mga user at nagpapangalan sa kanila sa isang header. Angkop ito sa proxy na ganito na rin ang pagbabantay sa iba mong mga site; kung hindi, i-sign in ang mga user sa itaas, gamit ang OpenID Connect o SAML.",
+      "proxyPresetChoose": "Piliin ang provider ng proxy upang punan ang mga header",
+      "proxyPresets": {
+        "authelia": "Authelia",
+        "authentik": "Authentik",
+        "tinyauth": "Tinyauth",
+        "oauth2proxy": "oauth2-proxy"
+      },
+      "reach": {
+        "title": "Pag-abot sa Server na Ito",
+        "help": "Kung paano inaabot ng mga browser ang server na ito, ayon sa nakikita ng server at ng browser na ito. Kailangang tama ang bawat isa sa mga ito sa reverse proxy na nasa harap.",
+        "publicUrl": "Pampublikong URL",
+        "publicUrlDiffers": "Na-load ang pahinang ito mula sa {origin}. Itakda ang SEALSKIN_PUBLIC_URL sa address na ginagamit ng mga browser: mula rito binubuo ang mga redirect ng identity provider.",
+        "sessionDomain": "Domain ng sesyon",
+        "sessionNames": "Nagbubukas ang mga sesyon sa",
+        "sessionNamesNone": "Walang sumagot na pangalan ng sesyon",
+        "sessionNamesHelp": "Mabibigo ang mga paglunsad mula sa web app. Nagbubukas ang sesyon sa sarili nitong pangalan, <session id>.<domain>: kailangan ng domain ng wildcard DNS, wildcard certificate, at panuntunan sa reverse proxy na nagpapadala ng mga pangalang iyon dito.",
+        "sessionNamesGuarded": "Magbubukas ang mga sesyon sa ilalim ng {domain} gaya ng sinasabi ng SEALSKIN_SESSION_DOMAIN. Inaasahan iyon kapag humihingi ng sign-in ang reverse proxy sa mga pangalan ng sesyon; kung hindi, suriin ang wildcard DNS, ang certificate, at ang panuntunan ng proxy para sa mga ito.",
+        "sessionNamesOther": "Tinutukoy ng SEALSKIN_SESSION_DOMAIN ang {domain}, na hindi sumagot.",
+        "trustedProxies": "Mga trusted na proxy",
+        "arrivedFrom": "Nanggaling ang request na ito sa",
+        "viaTrusted": "Isang trusted na proxy.",
+        "viaOther": "Hindi isa sa mga trusted na proxy. Kung ito ang address ng iyong reverse proxy, idagdag ito sa SEALSKIN_TRUSTED_PROXIES.",
+        "viaDirect": "Walang trusted na reverse proxy. Kung address ito ng isang reverse proxy, itakda ang SEALSKIN_TRUSTED_PROXIES dito, upang makita ng server ang sariling address ng bawat browser.",
+        "yourAddress": "Ang iyong address, ayon sa nakikita ng server",
+        "httpPort": "Plain HTTP listener"
+      },
+      "presets": {
+        "authelia": {
+          "name": "Authelia",
+          "hint": "Ang issuer ay ang sariling address ng Authelia, https://<host>. Magdagdag ng client sa ilalim ng identity_providers.oidc.clients na may redirect URI sa ibaba, at mga scope na openid profile groups email offline_access."
+        },
+        "pocketid": {
+          "name": "Pocket ID",
+          "hint": "Ang issuer ay ang sariling address ng Pocket ID, https://<host>. Magdagdag ng OIDC client na may callback URL sa ibaba, at itakda ang mga scope sa openid profile email groups."
+        },
+        "tinyauth": {
+          "name": "Tinyauth",
+          "hint": "Ang issuer ay ang sariling address ng Tinyauth, https://<host>. Tukuyin ang client gamit ang mga variable na TINYAUTH_OIDC_CLIENTS_<NAME>_ at itakda ang mga scope sa openid profile email groups."
+        },
+        "keycloak": {
+          "name": "Keycloak",
+          "hint": "Ang issuer ay ang address ng realm, https://<host>/realms/<realm>. Gumawa ng OpenID Connect client na naka-on ang client authentication, at magdagdag ng group membership mapper na pinangalanang 'groups' upang ipadala ang mga grupo ng user."
+        },
+        "authentik": {
+          "name": "Authentik",
+          "hint": "Ang issuer ay ang address ng application, https://<host>/application/o/<slug>/, kasama ang trailing slash nito. Gumawa ng OAuth2/OpenID provider at ng application na gumagamit nito."
+        },
+        "entra": {
+          "name": "Microsoft Entra ID",
+          "hint": "Ang issuer ay https://login.microsoftonline.com/<tenant>/v2.0. Magrehistro ng application, magdagdag ng client secret, at idagdag ang groups claim sa ilalim ng Token configuration."
+        },
+        "google": {
+          "name": "Google",
+          "hint": "Ang issuer ay https://accounts.google.com. Gumawa ng OAuth client ID na may uring Web application. Hindi nagpapadala ng mga grupo ang Google."
+        },
+        "okta": {
+          "name": "Okta",
+          "hint": "Ang issuer ay ang address ng iyong organisasyon, https://<org>.okta.com. Gumawa ng OIDC web application at magdagdag ng groups claim sa ID token nito."
+        },
+        "other": {
+          "name": "Iba pa",
+          "hint": "Ang issuer ay ang address na ang /.well-known/openid-configuration ay naglalarawan sa provider."
+        }
+      },
+      "oidcTitle": "OpenID Connect",
+      "oidcRedirect": "Redirect URI",
+      "oidcBackchannel": "Back-channel logout URL",
+      "oidcFrontchannel": "Front-channel logout URL",
+      "samlTitle": "SAML 2.0",
+      "samlEntity": "Entity ID / metadata URL",
+      "samlAcs": "ACS URL",
+      "samlSlo": "Single logout URL",
+      "samlMetadata": "Buksan ang service provider metadata ng server na ito",
+      "proxyTitle": "Reverse Proxy",
+      "trustedProxies": "Mga trusted na proxy ng node na ito:",
+      "trustedProxiesHelp": "Itinatakda sa bawat node gamit ang SEALSKIN_TRUSTED_PROXIES. Pinaniniwalaan lamang ang header kapag ang request ay nanggaling sa isa sa mga address na iyon.",
+      "noTrustedProxy": "May nakatakdang user header, ngunit wala pang pinagkakatiwalaang proxy ang node na ito, kaya walang tinatanggap na proxy sign-in.",
+      "proxyCheck": {
+        "guarded": "Nasuri: hindi ipinapasa ng proxy ang mga sign-in header na ipinapadala ng bisita.",
+        "open": "Tinatanggihan ang mga proxy sign-in.",
+        "unreachable": "Tinatanggihan ang mga proxy sign-in: hindi masuri ng node na ito ang proxy. Bigyan ito ng ruta patungo sa pampublikong URL nito, ilagay ang sariling address ng proxy sa SEALSKIN_TRUSTED_PROXIES, o itakda ang SEALSKIN_PROXY_AUTH_UNCHECKED=true sa node upang paniwalaan ang proxy nang walang pagsusuri.",
+        "unchecked": "Naka-off ang pagsusuri ng proxy sa node na ito (SEALSKIN_PROXY_AUTH_UNCHECKED): pinaniniwalaan ang anumang ipinapasa ng proxy."
+      },
+      "whoTitle": "Sino ang Nagsa-sign In",
+      "whoHelp": "Umiiral ang mga ito para sa OpenID Connect, SAML, at reverse proxy. Upang ilagay ang mga miyembro ng isang grupo ng identity provider sa isang grupo ng SealSkin, ilista ito sa ilalim ng \"Mga grupo ng identity provider\" ng grupong iyon sa Mga Grupo.",
+      "rootTitle": "Root Token",
+      "rootHelp": "Laging magagamit. Ang token ay nasa /config/root_token sa server hanggang mabura ang file na iyon, at maaaring itakda gamit ang SEALSKIN_ROOT_TOKEN.",
+      "keyTitle": "Mga Key File",
+      "keyOn": "Tinatanggap ng node na ito ang mga key-file client: ang browser extension at ang mobile app. Itinatakda sa bawat node gamit ang SEALSKIN_LEGACY_AUTH.",
+      "keyOff": "Hindi tumatanggap ang node na ito ng mga key-file client. Itinatakda sa bawat node gamit ang SEALSKIN_LEGACY_AUTH.",
+      "resultIssuer": "Issuer:",
+      "resultAuthorization": "Authorization endpoint:",
+      "resultBackchannel": "Sinusuportahan ang back-channel logout:",
+      "resultScopes": "Mga scope na inaalok:",
+      "resultGroupsClaim": "Groups claim:",
+      "claimListed": "Ang '{claim}' ay kabilang sa mga claim na inililista ng provider",
+      "claimNotListed": "Ang '{claim}' ay hindi kabilang sa mga claim na inililista ng provider",
+      "resultEntity": "Entity ID:",
+      "resultSso": "Sign-on URL:",
+      "resultSlo": "Inaalok ang single logout:",
+      "resultCertificates": "Mga signing certificate:"
     }
   },
   "popup": {
@@ -1227,7 +1522,16 @@
       "uploadingButton": "Nag-a-upload...",
       "autoHome": "Awtomatiko (pananatili bawat app)",
       "collaborationMode": "Sesyon ng Pakikipagtulungan",
-      "waylandMode": "Wayland Mode"
+      "waylandMode": "Wayland Mode",
+      "where": "Saan",
+      "whereAuto": "Awtomatiko",
+      "wherePools": "Mga Pool",
+      "whereNodes": "Mga Node",
+      "moveHome": "Ilipat ang imbakan",
+      "moveHomeStay": "Sa {node}",
+      "moveHomeTo": "Ilipat sa {node}",
+      "moveHomeConfirm": "Ilipat ang '{home}' sa {node}? Kailangan munang itigil ang mga sesyong gumagamit nito.",
+      "allowance": "Allowance: {used} sa {hours} oras ngayong {period}"
     },
     "sessionsView": {
       "noSessions": "Walang nahanap na aktibong sesyon."
@@ -1260,7 +1564,10 @@
       "noAppSelected": "Mangyaring pumili ng isang aplikasyon.",
       "noAppsAvailable": "Walang magagamit na aplikasyon para sa iyong account.",
       "uploadSuccess": "Matagumpay na na-upload ang file!",
-      "creatingAutoHome": "Gumagawa ng awtomatikong home directory..."
+      "creatingAutoHome": "Gumagawa ng awtomatikong home directory...",
+      "noSessionOrigin": "Hindi maabot ng browser na ito ang sariling address ng sesyon. Kailangan ng server ng wildcard DNS at certificate para sa mga pangalan ng sesyon; itinatakda ng administrator ang SEALSKIN_SESSION_DOMAIN.",
+      "movingHome": "Inililipat ang '{home}'...",
+      "movedHome": "Nailipat ang '{home}' sa {node}."
     },
     "languages": {
       "default": "Default ({locale})"
@@ -1355,7 +1662,10 @@
       "sharesLoadFailed": "Nabigong i-load ang mga ibinahaging file: {error}",
       "shareDeleteFailed": "Nabigong burahin ang pagbabahagi: {error}",
       "shareDeleted": "Matagumpay na nabura ang pagbabahagi.",
-      "urlCopied": "Nakopya ang pampublikong URL sa clipboard."
+      "urlCopied": "Nakopya ang pampublikong URL sa clipboard.",
+      "downloading": "Dina-download ang {filename}...",
+      "downloadSuccess": "Tapos na ang pag-download",
+      "downloadFailed": "Nabigo ang pag-download: {error}"
     },
     "placeholders": {
       "errorLoading": "Error sa pag-load ng mga file.",
@@ -1370,15 +1680,39 @@
       "finalizing": "Tinatapos...",
       "completed": "Kumpleto",
       "error": "Error"
+    },
+    "files": {
+      "searchPlaceholder": "Maghanap ng mga file..."
+    }
+  },
+  "shell": {
+    "host": {
+      "loading": "Kumokonekta sa iyong SealSkin server…",
+      "unconfiguredTitle": "Hindi nakakonekta",
+      "unconfiguredBody": "Hindi pa nakakonekta ang SealSkin sa isang server.",
+      "setUp": "I-set up ang koneksyon",
+      "unreachableTitle": "Hindi maabot ang server",
+      "unreachableBody": "Hindi maabot ang SealSkin server o hindi nag-load ang web interface nito.",
+      "selfSigned": "Kung gumagamit ang server ng self-signed certificate, buksan ito nang isang beses at tanggapin ang certificate, pagkatapos ay subukan ulit.",
+      "retry": "Subukan ulit",
+      "openServer": "Buksan ang server",
+      "changeConnection": "Palitan ang koneksyon",
+      "mismatchTitle": "Kailangan ng update",
+      "mismatchBody": "Magkaiba ang bersyon ng bridge ng app na ito at ng web interface ng server. I-update ang extension o app, o i-update ang server, upang magtugma ang dalawa."
     }
   },
   "web": {
-    "unlockTitle": "I-unlock ang SealSkin",
-    "unlockBody": "Ilagay ang passphrase na nagpoprotekta sa iyong key sa browser na ito.",
-    "passphrase": "Passphrase",
-    "unlock": "I-unlock",
-    "wrongPassphrase": "Hindi nabubuksan ng passphrase na iyon ang iyong key.",
     "receiving": "Ipinapadala ang file sa SealSkin…",
+    "signInTitle": "Mag-sign in sa SealSkin",
+    "signInWith": {
+      "oidc": "Mag-sign In gamit ang OpenID Connect",
+      "saml": "Mag-sign In gamit ang SAML"
+    },
+    "rootToken": "Root token",
+    "rootTokenHelp": "Ang token ng administrator, na itinatago ng server sa file nitong /config/root_token.",
+    "rootSignIn": "Mag-sign In bilang Root",
+    "rootRefused": "Hindi iyan ang root token ng server.",
+    "rootLocked": "Masyadong maraming pagsubok. Maghintay sandali, pagkatapos ay subukan ulit.",
     "signIn": {
       "failed": "Hindi natapos ang sign-in. Subukan ulit, o magtanong sa iyong administrator.",
       "refused": "Tinanggihan ng identity provider ang sign-in.",
@@ -1389,6 +1723,57 @@
       "otherIdentity": "May ibang account ng identity provider na nagsa-sign in na bilang user na ito ng SealSkin. Magtanong sa iyong administrator.",
       "notConfigured": "Walang single sign-on ang server na ito.",
       "ended": "Tinapos ng identity provider ang iyong sign-in. Mag-sign in ulit."
+    },
+    "nav": {
+      "home": "Home",
+      "sessions": "Mga Sesyon",
+      "files": "Mga File",
+      "settings": "Mga Setting"
+    },
+    "home": {
+      "searchPlaceholder": "Maghanap ng mga aplikasyon, o mag-paste ng link upang buksan ito nang isolated",
+      "upload": "Mag-upload ng file",
+      "drop": "I-drop ang file upang buksan ito sa SealSkin",
+      "running": "Mga tumatakbong sesyon",
+      "applications": "Mga Aplikasyon",
+      "allowance": "Allowance",
+      "allowanceValue": "{used} / {hours} oras bawat {period}",
+      "room": "Room",
+      "started": "Sinimulan {when}",
+      "typeAll": "Lahat",
+      "typeRecent": "Kamakailan",
+      "typeOther": "Iba pa",
+      "quickLaunch": "Ilunsad gamit ang mga opsyong huling ginamit",
+      "wherePool": "Pool: {pool}",
+      "openingUrl": "Pumili ng aplikasyon upang buksan ang {url}",
+      "openingFile": "Pumili ng aplikasyon upang buksan ang {filename}",
+      "noApps": "Walang aplikasyong magagamit mo. Hilingin sa iyong administrator na mag-install ng mga aplikasyon.",
+      "noAppsAdmin": "Wala pang naka-install na aplikasyon.",
+      "noMatch": "Walang tumutugmang aplikasyon.",
+      "openAppStores": "Buksan ang mga Tindahan ng App",
+      "popupBlocked": "Hinarang ng browser ang tab ng sesyon. Payagan ang mga pop-up para sa site na ito, pagkatapos ay ilunsad muli.",
+      "serverFileNeedsHome": "Hindi mabubuksan sa Cleanroom mode ang file na nakatago sa server. Pumili ng directory ng imbakan."
+    },
+    "launch": {
+      "title": "Inilulunsad ang {app}",
+      "stages": {
+        "requesting": "Ipinapadala ang request sa paglunsad",
+        "placing": "Sinusuri ang mga limitasyon at pumipili ng node",
+        "forwarding": "Ipinapasa ang paglunsad sa node na {node}",
+        "storage": "Inihahanda ang home directory",
+        "files": "Sini-sync ang mga ibinahaging file",
+        "image": "Dina-download ang imahe ng aplikasyon",
+        "starting": "Ginagawa ang container",
+        "waiting": "Hinihintay na tumugon ang desktop",
+        "ready": "Binubuksan ang sesyon"
+      },
+      "uploading": "Ina-upload ang file ({done} sa {total})",
+      "imageHint": "Ang unang paglunsad ng isang aplikasyon sa isang node ay nagda-download nito, na maaaring abutin ng ilang minuto. Mabilis na ang mga susunod na paglunsad.",
+      "onNode": "Sa node na {node}",
+      "seconds": "{count} s",
+      "failed": "Nabigo ang paglunsad",
+      "unseen": "Hindi pa nakararating sa server ang request sa paglunsad. Tingnan ang tab ng SealSkin na nagsimula nito.",
+      "closeTab": "Pinanatiling bukas ng browser ang tab na ito. Ikaw na ang magsara nito."
     }
   }
 }

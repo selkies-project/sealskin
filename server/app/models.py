@@ -432,6 +432,7 @@ class AdminStatusResponse(BaseModel):
     username: str
     settings: UserSettings
     via: str = "key"
+    sign_out_url: str = ""
     session_domain: str = ""
     clustered: bool = False
     node_id: str = ""

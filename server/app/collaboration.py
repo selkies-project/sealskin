@@ -30,7 +30,7 @@ from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 from . import config_store, launch
 from .providers.base_provider import host_port
 from .routers.applications import user_can_access
-from .security import OWN_ORIGIN_NEEDED, canonical_uuid, on_session_origin, token_matches
+from .security import OWN_ORIGIN_NEEDED, canonical_uuid, on_session_origin, relative, token_matches
 from .settings import settings
 from .state import state
 
@@ -191,8 +191,7 @@ async def collaborative_room(
                 status_code=500, detail="Failed to register new viewer."
             ) from e
 
-        redirect_url = request.url.replace_query_params(token=new_viewer_token)
-        return RedirectResponse(url=str(redirect_url))
+        return RedirectResponse(url=relative(request.url.replace_query_params(token=new_viewer_token)))
     else:
         return HTMLResponse(
             content="<h1>Invalid or expired collaboration link.</h1>", status_code=403

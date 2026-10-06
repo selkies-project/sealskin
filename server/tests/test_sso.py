@@ -65,6 +65,8 @@ class Provider:
         self.codes = {}
         self.refresh = lambda form: httpx.Response(200, json={"refresh_token": "r2", "expires_in": 300})
         self.token_calls = []
+        #: What the UserInfo endpoint answers; the provider publishes none while this is None.
+        self.userinfo = None
 
     def id_token(self, claims, key=None, kid="k1"):
         now = int(time.time())
@@ -102,8 +104,12 @@ class Provider:
                     "token_endpoint": f"{ISSUER}/token",
                     "jwks_uri": f"{ISSUER}/certs",
                     "token_endpoint_auth_methods_supported": ["client_secret_basic"],
+                    **({"userinfo_endpoint": f"{ISSUER}/userinfo"} if self.userinfo is not None else {}),
                 },
             )
+        if url == f"{ISSUER}/userinfo":
+            assert request.headers["authorization"] == "Bearer at-1"
+            return httpx.Response(200, json=self.userinfo)
         if url == f"{ISSUER}/certs":
             jwk = jwt.algorithms.RSAAlgorithm.to_jwk(self.key.public_key(), as_dict=True)
             return httpx.Response(200, json={"keys": [{**jwk, "kid": "k1", "use": "sig", "alg": "RS256"}]})
@@ -239,6 +245,26 @@ def test_oidc_sign_in_creates_the_user_and_starts_a_web_sign_in(http, provider):
     assert os.stat(settings.sso_keys_path).st_mode & 0o777 == 0o600
 
 
+def test_the_user_and_groups_an_id_token_leaves_out_come_from_userinfo(http, provider):
+    provider.userinfo = {"sub": "b-1", "preferred_username": "bob", "groups": ["admins"]}
+    client = _sign_in_oidc(http, provider, {"sub": "b-1"}, access_token="at-1")
+    status, data = client.call("POST", "/api/admin/status", {})
+    assert status == 200 and data["username"] == "bob" and data["is_admin"] is True
+
+
+def test_userinfo_for_another_account_signs_nobody_in(http, provider):
+    provider.userinfo = {"sub": "someone-else", "preferred_username": "bob"}
+    kind, code = _fragment(_oidc_callback(http, provider, {"sub": "b-1"}, access_token="at-1"))
+    assert (kind, code) == ("sso-error", "failed")
+
+
+def test_an_id_token_that_names_the_user_is_not_checked_against_userinfo(http, provider):
+    provider.userinfo = {"sub": "a-1", "preferred_username": "mallory", "groups": ["admins"]}
+    client = _sign_in_oidc(http, provider, {"sub": "a-1", "preferred_username": "alice", "groups": []}, access_token="at-1")
+    status, data = client.call("POST", "/api/admin/status", {})
+    assert status == 200 and data["username"] == "alice" and data["is_admin"] is False
+
+
 def test_a_key_file_token_never_reaches_a_user_with_no_key(http, provider):
     client = _sign_in_oidc(http, provider, {"sub": "a-1", "preferred_username": "alice"})
     plain = Client(http, http.server_pub, "alice", _pem_pair()[1])
@@ -284,6 +310,19 @@ def test_sign_out_ends_the_sign_in(http, provider):
     client = _sign_in_oidc(http, provider, {"sub": "a-1", "preferred_username": "alice"})
     assert client.call("POST", "/api/auth/signout", {})[0] == 204
     assert client.call("POST", "/api/admin/status", {})[0] == 401
+
+
+def test_sign_out_takes_the_cookie_back(http, provider):
+    client = _sign_in_oidc(http, provider, {"sub": "a-1", "preferred_username": "alice"})
+    cookie = {"Cookie": f"{sso.SESSION_COOKIE}={client.token}"}
+    # Another site's page ends nobody's sign-in.
+    assert http.post("/api/auth/signout", headers={**WEB, **cookie, "Sec-Fetch-Site": "cross-site"}).status_code == 403
+    assert client.call("POST", "/api/admin/status", {})[0] == 200
+    answer = http.post("/api/auth/signout", headers={**WEB, **cookie})
+    assert answer.status_code == 204
+    cleared = answer.headers["set-cookie"]
+    assert cleared.startswith(f'{sso.SESSION_COOKIE}=""') and "Max-Age=0" in cleared and "Secure" in cleared
+    assert http.post("/api/auth/signout", headers=WEB).status_code == 204
 
 
 @pytest.mark.parametrize(
@@ -451,9 +490,10 @@ def _saml_start(http):
     return request, query["RelayState"][0]
 
 
-def _assertion(request_id, username="alice", groups=(), audience=SP_ENTITY, recipient=ACS, not_after=300, aid=None):
+def _assertion(request_id, username="alice", groups=(), audience=SP_ENTITY, recipient=ACS, not_after=300, aid=None, names=None):
+    names = names or {"username": 'Name="username"', "groups": 'Name="groups"'}
     attributes = "".join(
-        f'<saml:Attribute Name="{name}">'
+        f"<saml:Attribute {names[name]}>"
         + "".join(f"<saml:AttributeValue>{v}</saml:AttributeValue>" for v in values)
         + "</saml:Attribute>"
         for name, values in (("username", [username]), ("groups", list(groups)))
@@ -523,6 +563,35 @@ def test_saml_sign_in_asks_for_a_fresh_authentication_and_starts_a_web_sign_in(h
     client = SignedIn(http, response.json(), priv)
     status, data = client.call("POST", "/api/admin/status", {})
     assert status == 200 and data["username"] == "alice" and data["is_admin"] is True
+
+
+def test_a_saml_attribute_answers_to_its_friendly_name(http, provider, monkeypatch):
+    monkeypatch.setattr(settings, "sso_groups_claim", "memberOf")
+    request, relay = _saml_start(http)
+    names = {"username": 'Name="urn:oid:0.9.2342.19200300.100.1.1" FriendlyName="username"', "groups": 'Name="urn:oid:1.2.840.113556.1.2.102" FriendlyName="memberOf"'}
+    assertion = _assertion(request.get("ID"), username="carol", groups=["admins"], names=names)
+    kind, grant = _finish(http, _post(http, relay, _response(provider, request.get("ID"), assertion)))
+    assert kind == "sso", grant
+    response, priv = _register(http, grant)
+    status, data = SignedIn(http, response.json(), priv).call("POST", "/api/admin/status", {})
+    assert status == 200 and data["username"] == "carol" and data["is_admin"] is True
+
+
+def test_saml_names_its_attributes_apart_from_the_openid_connect_claims(http, provider, monkeypatch):
+    monkeypatch.setattr(settings, "sso_username_claim", "preferred_username")
+    monkeypatch.setattr(settings, "saml_username_attribute", "urn:example:user")
+    monkeypatch.setattr(settings, "saml_groups_attribute", "urn:example:groups")
+    request, relay = _saml_start(http)
+    names = {"username": 'Name="urn:example:user"', "groups": 'Name="urn:example:groups"'}
+    assertion = _assertion(request.get("ID"), username="dave", groups=["admins"], names=names)
+    kind, grant = _finish(http, _post(http, relay, _response(provider, request.get("ID"), assertion)))
+    assert kind == "sso", grant
+    response, priv = _register(http, grant)
+    status, data = SignedIn(http, response.json(), priv).call("POST", "/api/admin/status", {})
+    assert status == 200 and data["username"] == "dave" and data["is_admin"] is True
+    # The OpenID Connect sign-in beside it still reads its own claims.
+    client = _sign_in_oidc(http, provider, {"sub": "e-1", "preferred_username": "erin", "groups": ["users"]})
+    assert client.call("POST", "/api/admin/status", {})[1]["username"] == "erin"
 
 
 def _refused(http, provider, mutate=None, **kwargs):
