@@ -1711,7 +1711,7 @@
     },
     "rootToken": "Root token",
     "rootTokenHelp": "The administrator's token, which the server keeps in its /config/root_token file.",
-    "rootSignIn": "Sign In as Root",
+    "rootSignIn": "Root Login",
     "rootRefused": "That is not the server's root token.",
     "rootLocked": "Too many tries. Wait a while, then try again.",
     "signIn": {
@@ -1788,7 +1788,6 @@
       "notYours": "This application is not open to your account, or it does not exist.",
       "noHome": "The storage directory '{home}' this address names does not exist. Create it in SealSkin, or open the address without it.",
       "openSealSkin": "Open SealSkin"
-    },
-    "apps": "Also a browser extension and an app:"
+    }
   }
 }

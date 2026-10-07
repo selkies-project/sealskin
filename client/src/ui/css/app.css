@@ -130,11 +130,35 @@ body.signed-out #stage { height: 100%; }
 .host-field {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem;
   width: 100%;
   margin-top: 0.5rem;
 }
+.host-field-tight { margin-top: 0; }
 .host-field label { font-size: 0.9rem; font-weight: 600; }
+
+/* The sign-in button sits inside the token field, at its right edge. */
+.host-token { position: relative; width: 100%; }
+.host-token input.masked { padding-right: 2.9rem; }
+.host-token button {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  bottom: 0.3rem;
+  width: 2.3rem;
+  padding: 0;
+  border: none;
+  border-radius: calc(var(--radius-sm) - 2px);
+  font-size: 1rem;
+  cursor: pointer;
+  color: #fff;
+  background: var(--accent-gradient);
+  transition: filter var(--dur);
+}
+.host-token button.secondary { background: var(--bg-3); color: var(--text-primary); }
+.host-token button:hover:not(:disabled) { filter: brightness(1.12); }
+.host-token button:disabled { opacity: 0.6; cursor: default; }
+.host-token button:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--accent-primary); }
 
 /* Masked, but not a password field: a password manager would offer to save the root token. */
 .host-box input.masked {

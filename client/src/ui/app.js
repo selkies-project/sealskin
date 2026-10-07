@@ -354,7 +354,7 @@ async function takeSignIn() {
  * @param {string} [failure] Why the server could not be asked who is signed in.
  */
 async function signInPanel(failure) {
-  const offered = failure ? {} : await api('/api/auth/config', { method: 'GET' }).catch(() => ({ root: true }));
+  const offered = failure ? { root: true } : await api('/api/auth/config', { method: 'GET' }).catch(() => ({ root: true }));
   const panel = document.getElementById('host-panel');
   const form = document.createElement('form');
   form.className = 'host-box';
@@ -368,20 +368,19 @@ async function signInPanel(failure) {
     </div>
     <div class="host-field" data-part="root" hidden>
       <label for="root-token"></label>
-      <input type="text" id="root-token" name="token" class="masked" autocomplete="off" autocapitalize="off" spellcheck="false">
-      <p class="host-muted host-small"></p>
-      <div class="host-actions"><button type="submit"></button></div>
+      <div class="host-token">
+        <input type="text" id="root-token" name="token" class="masked" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button type="submit"><i class="fas fa-sign-in-alt" aria-hidden="true"></i></button>
+      </div>
     </div>
     <p class="host-muted" data-part="nothing" hidden></p>
-    <div class="host-actions" data-part="retry" hidden><button type="button" class="primary"></button></div>
-    <p class="host-muted host-small host-apps" data-part="apps">
-      <span></span>
-      <a href="https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk" target="_blank" rel="noopener">Chrome</a>
-      <a href="https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/" target="_blank" rel="noopener">Firefox</a>
-      <a href="https://play.google.com/store/apps/details?id=io.linuxserver.sealskin" target="_blank" rel="noopener">Android</a>
-      <a href="https://apps.apple.com/us/app/sealskin/id6758210210" target="_blank" rel="noopener">iOS</a>
-    </p>`;
-  const [error, providers, root, nothing, retry] = ['error', 'providers', 'root', 'nothing', 'retry']
+    <div class="host-store">
+      <a href="https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk" target="_blank" rel="noopener"><span class="logo logo-chrome"></span><span>Chrome Store</span></a>
+      <a href="https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/" target="_blank" rel="noopener"><span class="logo logo-firefox"></span><span>Firefox Add-ons</span></a>
+      <a href="https://play.google.com/store/apps/details?id=io.linuxserver.sealskin" target="_blank" rel="noopener"><span class="logo logo-android"></span><span>Play Store</span></a>
+      <a href="https://apps.apple.com/us/app/sealskin/id6758210210" target="_blank" rel="noopener"><span class="logo logo-ios"></span><span>App Store</span></a>
+    </div>`;
+  const [error, providers, root, nothing] = ['error', 'providers', 'root', 'nothing']
     .map((part) => form.querySelector(`[data-part="${part}"]`));
   const submit = root.querySelector('button');
   const say = (message) => {
@@ -389,14 +388,11 @@ async function signInPanel(failure) {
     error.hidden = !message;
   };
 
-  form.querySelector('h2').textContent = t(failure ? 'shell.host.unreachableTitle' : 'web.signInTitle');
+  form.querySelector('h2').textContent = t('web.signInTitle');
   root.querySelector('label').textContent = t('web.rootToken');
-  root.querySelector('p').textContent = t('web.rootTokenHelp');
-  submit.textContent = t('web.rootSignIn');
+  submit.title = t('web.rootSignIn');
+  submit.setAttribute('aria-label', t('web.rootSignIn'));
   nothing.textContent = t('web.signIn.notConfigured');
-  form.querySelector('.host-apps span').textContent = t('web.apps');
-  retry.querySelector('button').textContent = t('shell.host.retry');
-  retry.querySelector('button').addEventListener('click', () => connect());
 
   for (const button of providers.querySelectorAll('button')) {
     const { via } = button.dataset;
@@ -408,8 +404,10 @@ async function signInPanel(failure) {
   providers.hidden = !provided;
   root.hidden = !offered.root;
   submit.className = provided ? 'secondary' : 'primary';
+  // The providers' buttons come first; the root token sits close under the title otherwise.
+  root.classList.toggle('host-field-tight', !provided);
   nothing.hidden = Boolean(failure) || provided || Boolean(offered.root);
-  retry.hidden = !failure;
+  // A server that could not be asked still takes the root token; sending it is the retry.
   if (failure) say(failure);
   else if (notice) say(t(`web.signIn.${notice}`) === `web.signIn.${notice}` ? t('web.signIn.failed') : t(`web.signIn.${notice}`));
   notice = null;
