@@ -35,6 +35,7 @@ watcher only fires for edits made by someone else.
     app_stores.yml                 the catalogues to fetch
     app_stores_cache/              cached copy of each catalogue
     installed_apps.yml             installed applications (references + overrides)
+    proot_catalogs.yml             PRoot Apps catalogs: the apps each one holds
     app_templates/*.yml            application templates
     autostart_cache/               cached autostart scripts per app
     keys/admins/<name>             administrator public keys
@@ -47,7 +48,8 @@ watcher only fires for edits made by someone else.
     cluster/homes/<user>.yml       which node holds each home directory
     cluster/usage/<day>/<id>.yml   session time each node ran, per user
     node/                          this node's own: peer certificate and key, the trust
-                                   bundle, the cluster it joined, shared-file sync state
+                                   bundle, the cluster it joined, shared-file sync state,
+                                   and the state of its copy of each PRoot Apps catalog
     sso_keys.yml                   this node's web sign-ins
     sessions.yml                   live sessions, rewritten by the server
     public_shares.yml              public share metadata
@@ -61,6 +63,8 @@ watcher only fires for edits made by someone else.
   sealskin_public/                 files behind public share links
   sealskin_home_templates/         meta-app home templates
   sealskin_app_icons/              icons uploaded for meta-apps
+  sealskin_proot_apps/<id>/        this node's copy of each PRoot Apps catalog, mounted
+                                   read-only at /mnt/proot-apps in the sessions assigned to it
   sealskin_shared_store/<user>/    the users' shared files, on the node that holds the
                                    records of a cluster without a bucket
 ```
@@ -239,6 +243,35 @@ groups between apps. When `autostart` is true the server fetches the
 `autostart` (and `autostart-wayland`) script from the image's source
 repository and caches it under `autostart_cache/`, writing it into the
 session's home directory at launch so the application starts by itself.
+
+## PRoot Apps catalogs
+
+`proot_catalogs.yml` is the list of [catalogs](administration.md#proot-apps),
+shared by the nodes of a cluster. Each names its apps by remote (the GitHub
+`owner/repo` of a proot-apps repository) and name, which is the app's image
+tag under `ghcr.io/<owner>/<repo>`:
+
+```yaml
+- id: 7c1e2b9a-...                  # generated; the catalog's folder on every node
+  name: Office
+  auto_update: true                 # fetch changed packages on the auto-update interval
+  revision: 3                       # bumped by every change; a node whose copy is older syncs
+  apps:
+    - remote: linuxserver/proot-apps
+      name: libreoffice
+    - remote: linuxserver/proot-apps
+      name: gui
+    - remote: myorg/proot-apps
+      name: internal-tool
+```
+
+A node's copy lives under `sealskin_proot_apps/<id>/`: `metadata/metadata.yml`
+and `metadata/img/` for the graphical installer, and for each app a folder
+`ghcr.io_<owner>_<repo>_<name>/` holding `app.tar.gz`, the image's layer, and
+`SHALAYER`, its digest, exactly as `proot-apps localrepo get` would write
+them. Packages are fetched from the registry anonymously, for the node's own
+architecture, and only when their digest changed. Users and groups name a
+catalog in `proot_catalog` by its `id`.
 
 ## Installed applications
 

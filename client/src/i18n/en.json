@@ -79,6 +79,7 @@
       "appTemplates": "App Templates",
       "appLaboratory": "App Laboratory",
       "installedApps": "Installed Apps",
+      "prootApps": "PRoot Apps",
       "users": "Users",
       "groups": "Groups",
       "admins": "Admins",
@@ -233,6 +234,9 @@
       "allowancePeriod": "Allowance period",
       "pools": "Restricted pools allowed (comma-separated)",
       "poolsDenied": "Pools denied (comma-separated)",
+      "prootCatalog": "PRoot Apps catalog",
+      "prootCatalogNone": "None",
+      "prootCatalogHelp": "Mounted read-only into every session; proot-apps installs from it instead of a registry. Left at None, the first of the user's groups to choose one decides.",
       "groupsHelp": "Hold Ctrl or Command to select several. Where groups disagree, the restricting value wins.",
       "providerGroups": "Groups the identity provider named at the last sign-in: {groups}",
       "limitsHelp": "A limit of -1, or left blank, sets none."
@@ -1254,7 +1258,14 @@
       "nodeRemoved": "Node removed.",
       "poolSaved": "Pool '{name}' saved.",
       "poolDeleted": "Pool '{name}' deleted.",
-      "nothingChanged": "Nothing changed."
+      "nothingChanged": "Nothing changed.",
+      "catalogSaved": "Catalog '{name}' saved; every node is fetching its apps.",
+      "catalogSaveFailed": "Could not save the catalog: {error}",
+      "catalogDeleted": "Catalog '{name}' deleted.",
+      "catalogDeleteFailed": "Could not delete the catalog: {error}",
+      "catalogUpdateStarted": "Updating catalog '{name}' on every node.",
+      "catalogUpdateFailed": "Could not update the catalog: {error}",
+      "catalogsRefreshFailed": "Could not load the catalogs: {error}"
     },
     "placeholders": {
       "noAdmins": "No admins found.",
@@ -1264,7 +1275,8 @@
       "noSessions": "No active sessions found.",
       "noPinned": "No pinned behaviors found.",
       "errorLoading": "Error loading directories.",
-      "noInstalledApps": "No applications have been installed yet."
+      "noInstalledApps": "No applications have been installed yet.",
+      "noProotCatalogs": "No catalogs yet."
     },
     "web": {
       "title": "SealSkin in This Browser",
@@ -1512,6 +1524,39 @@
       "resultSso": "Sign-on URL:",
       "resultSlo": "Single logout offered:",
       "resultCertificates": "Signing certificates:"
+    },
+    "prootApps": {
+      "title": "PRoot Apps Catalogs",
+      "help": "A catalog is a folder of PRoot Apps packages kept on every node and mounted read-only into the sessions of the users and groups assigned to it. Inside a session, proot-apps and its graphical installer install and update from the folder and reach no registry.",
+      "newCatalog": "New Catalog",
+      "editCatalog": "Edit {name}",
+      "apps": "Apps",
+      "onThisNode": "On this node",
+      "nameLabel": "Catalog name",
+      "autoUpdate": "Auto update",
+      "autoUpdateHelp": "Fetch the apps again on the auto-update interval when their package changed.",
+      "selectedTitle": "Selected apps",
+      "selectedHelp": "Click an app below to add it or take it out. Apps from a remote other than the default one are installed by their full image name.",
+      "noneSelected": "No apps selected yet. Include \"gui\" to give users the graphical installer.",
+      "remoteTitle": "Available apps",
+      "searchPlaceholder": "Search apps...",
+      "remoteLabel": "Remote (GitHub owner/repo of a proot-apps repository)",
+      "load": "Load",
+      "refreshRemote": "Fetch the list again",
+      "noApps": "No apps found.",
+      "couldNotLoad": "Could not load the apps of {remote}: {error}",
+      "disabledHint": "Marked disabled by its remote; the graphical installer hides it.",
+      "fromRemote": "from {remote}",
+      "statePending": "Not synced yet",
+      "stateSyncing": "Syncing {done} of {total}",
+      "stateReady": "Ready",
+      "stateError": "Error",
+      "syncedAgo": "synced {ago}",
+      "autoUpdateOn": "auto update",
+      "update": "Update",
+      "updateTitle": "Fetch the apps again now, on every node, where their package changed",
+      "confirmDelete": "Delete catalog '{name}'? Every node removes its copy, and users assigned to it get no catalog.",
+      "deleteTitle": "Delete catalog"
     }
   },
   "popup": {

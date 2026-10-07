@@ -79,6 +79,7 @@
       "appTemplates": "Mẫu ứng dụng",
       "appLaboratory": "Phòng thí nghiệm ứng dụng",
       "installedApps": "Ứng dụng đã cài đặt",
+      "prootApps": "PRoot Apps",
       "users": "Người dùng",
       "groups": "Nhóm",
       "admins": "Quản trị viên",
@@ -233,6 +234,9 @@
       "allowancePeriod": "Chu kỳ hạn mức",
       "pools": "Pool hạn chế được phép (phân tách bằng dấu phẩy)",
       "poolsDenied": "Pool bị từ chối (phân tách bằng dấu phẩy)",
+      "prootCatalog": "Danh mục PRoot Apps",
+      "prootCatalogNone": "Không có",
+      "prootCatalogHelp": "Được gắn ở chế độ chỉ đọc vào mọi phiên; proot-apps cài đặt từ đó thay vì từ registry. Nếu để Không có, nhóm đầu tiên của người dùng có chọn danh mục sẽ quyết định.",
       "groupsHelp": "Giữ Ctrl hoặc Command để chọn nhiều mục. Khi các nhóm đặt khác nhau, giá trị hạn chế hơn sẽ được áp dụng.",
       "providerGroups": "Các nhóm nhà cung cấp danh tính đã nêu ở lần đăng nhập gần nhất: {groups}",
       "limitsHelp": "Giới hạn bằng -1 hoặc để trống nghĩa là không giới hạn."
@@ -1254,7 +1258,14 @@
       "nodeRemoved": "Đã gỡ nút.",
       "poolSaved": "Đã lưu pool '{name}'.",
       "poolDeleted": "Đã xóa pool '{name}'.",
-      "nothingChanged": "Không có gì thay đổi."
+      "nothingChanged": "Không có gì thay đổi.",
+      "catalogSaved": "Đã lưu danh mục '{name}'; mọi node đang kéo ứng dụng.",
+      "catalogSaveFailed": "Không thể lưu danh mục: {error}",
+      "catalogDeleted": "Đã xóa danh mục '{name}'.",
+      "catalogDeleteFailed": "Không thể xóa danh mục: {error}",
+      "catalogUpdateStarted": "Đang cập nhật danh mục '{name}' trên mọi node.",
+      "catalogUpdateFailed": "Không thể cập nhật danh mục: {error}",
+      "catalogsRefreshFailed": "Không thể tải các danh mục: {error}"
     },
     "placeholders": {
       "noAdmins": "Không tìm thấy quản trị viên nào.",
@@ -1264,7 +1275,8 @@
       "noSessions": "Không tìm thấy phiên hoạt động nào.",
       "noPinned": "Không tìm thấy hành vi đã ghim nào.",
       "errorLoading": "Lỗi khi tải thư mục.",
-      "noInstalledApps": "Chưa có ứng dụng nào được cài đặt."
+      "noInstalledApps": "Chưa có ứng dụng nào được cài đặt.",
+      "noProotCatalogs": "Chưa có danh mục nào."
     },
     "web": {
       "title": "SealSkin trong trình duyệt này",
@@ -1512,6 +1524,39 @@
       "resultSso": "URL đăng nhập:",
       "resultSlo": "Có đăng xuất một lần:",
       "resultCertificates": "Chứng chỉ ký:"
+    },
+    "prootApps": {
+      "title": "Danh mục PRoot Apps",
+      "help": "Danh mục là một thư mục chứa các gói PRoot Apps được lưu trên mọi node và gắn ở chế độ chỉ đọc vào các phiên của người dùng và nhóm được gán. Trong phiên, proot-apps và trình cài đặt đồ họa của nó cài đặt và cập nhật từ thư mục này mà không truy cập registry nào.",
+      "newCatalog": "Danh mục mới",
+      "editCatalog": "Chỉnh sửa {name}",
+      "apps": "Ứng dụng",
+      "onThisNode": "Trên node này",
+      "nameLabel": "Tên danh mục",
+      "autoUpdate": "Tự động cập nhật",
+      "autoUpdateHelp": "Kéo lại các ứng dụng theo chu kỳ tự động cập nhật khi gói của chúng thay đổi.",
+      "selectedTitle": "Ứng dụng đã chọn",
+      "selectedHelp": "Nhấp vào một ứng dụng bên dưới để thêm hoặc bỏ. Ứng dụng từ remote khác remote mặc định được cài đặt theo tên image đầy đủ.",
+      "noneSelected": "Chưa chọn ứng dụng nào. Thêm \"gui\" để cung cấp trình cài đặt đồ họa cho người dùng.",
+      "remoteTitle": "Ứng dụng có sẵn",
+      "searchPlaceholder": "Tìm ứng dụng...",
+      "remoteLabel": "Remote (GitHub owner/repo của một kho proot-apps)",
+      "load": "Tải",
+      "refreshRemote": "Kéo lại danh sách",
+      "noApps": "Không tìm thấy ứng dụng nào.",
+      "couldNotLoad": "Không thể tải ứng dụng của {remote}: {error}",
+      "disabledHint": "Bị remote đánh dấu là vô hiệu hóa; trình cài đặt đồ họa sẽ ẩn nó.",
+      "fromRemote": "từ {remote}",
+      "statePending": "Chưa đồng bộ",
+      "stateSyncing": "Đang đồng bộ {done} / {total}",
+      "stateReady": "Sẵn sàng",
+      "stateError": "Lỗi",
+      "syncedAgo": "đã đồng bộ {ago}",
+      "autoUpdateOn": "tự động cập nhật",
+      "update": "Cập nhật",
+      "updateTitle": "Kéo lại ngay các ứng dụng có gói thay đổi, trên mọi node",
+      "confirmDelete": "Xóa danh mục '{name}'? Mọi node sẽ xóa bản sao của mình và người dùng được gán danh mục này sẽ không có danh mục nào.",
+      "deleteTitle": "Xóa danh mục"
     }
   },
   "popup": {

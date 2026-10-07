@@ -79,6 +79,7 @@
       "appTemplates": "App-skabeloner",
       "appLaboratory": "App-laboratorium",
       "installedApps": "Installerede Apps",
+      "prootApps": "PRoot Apps",
       "users": "Brugere",
       "groups": "Grupper",
       "admins": "Administratorer",
@@ -233,6 +234,9 @@
       "allowancePeriod": "Kvoteperiode",
       "pools": "Tilladte begrænsede puljer (kommasepareret)",
       "poolsDenied": "Afviste puljer (kommasepareret)",
+      "prootCatalog": "PRoot Apps-katalog",
+      "prootCatalogNone": "Ingen",
+      "prootCatalogHelp": "Monteres skrivebeskyttet i hver session; proot-apps installerer fra det i stedet for et registry. Står det på Ingen, bestemmer den første af brugerens grupper, der vælger et.",
       "groupsHelp": "Hold Ctrl eller Kommando nede for at vælge flere. Hvor grupper er uenige, gælder den begrænsende værdi.",
       "providerGroups": "Grupper, som identitetsudbyderen angav ved seneste login: {groups}",
       "limitsHelp": "En grænse på -1, eller et tomt felt, sætter ingen."
@@ -1254,7 +1258,14 @@
       "nodeRemoved": "Knude fjernet.",
       "poolSaved": "Pulje '{name}' gemt.",
       "poolDeleted": "Pulje '{name}' slettet.",
-      "nothingChanged": "Intet ændret."
+      "nothingChanged": "Intet ændret.",
+      "catalogSaved": "Kataloget '{name}' er gemt; hver node henter dets apps.",
+      "catalogSaveFailed": "Kunne ikke gemme kataloget: {error}",
+      "catalogDeleted": "Kataloget '{name}' er slettet.",
+      "catalogDeleteFailed": "Kunne ikke slette kataloget: {error}",
+      "catalogUpdateStarted": "Opdaterer kataloget '{name}' på hver node.",
+      "catalogUpdateFailed": "Kunne ikke opdatere kataloget: {error}",
+      "catalogsRefreshFailed": "Kunne ikke indlæse katalogerne: {error}"
     },
     "placeholders": {
       "noAdmins": "Ingen administratorer fundet.",
@@ -1264,7 +1275,8 @@
       "noSessions": "Ingen aktive sessioner fundet.",
       "noPinned": "Ingen fastgjorte adfærd fundet.",
       "errorLoading": "Fejl ved indlæsning af mapper.",
-      "noInstalledApps": "Ingen applikationer er installeret endnu."
+      "noInstalledApps": "Ingen applikationer er installeret endnu.",
+      "noProotCatalogs": "Ingen kataloger endnu."
     },
     "web": {
       "title": "SealSkin i denne browser",
@@ -1512,6 +1524,39 @@
       "resultSso": "Sign-on-URL:",
       "resultSlo": "Single logout tilbudt:",
       "resultCertificates": "Signeringscertifikater:"
+    },
+    "prootApps": {
+      "title": "PRoot Apps-kataloger",
+      "help": "Et katalog er en mappe med PRoot Apps-pakker, der ligger på hver node og monteres skrivebeskyttet i sessionerne hos de brugere og grupper, der er tildelt det. Inde i en session installerer og opdaterer proot-apps og dets grafiske installationsprogram fra mappen og kontakter intet registry.",
+      "newCatalog": "Nyt katalog",
+      "editCatalog": "Rediger {name}",
+      "apps": "Apps",
+      "onThisNode": "På denne node",
+      "nameLabel": "Katalognavn",
+      "autoUpdate": "Automatisk opdatering",
+      "autoUpdateHelp": "Hent apps igen med det automatiske opdateringsinterval, når deres pakke er ændret.",
+      "selectedTitle": "Valgte apps",
+      "selectedHelp": "Klik på en app nedenfor for at tilføje eller fjerne den. Apps fra et andet remote end standarden installeres med deres fulde image-navn.",
+      "noneSelected": "Ingen apps valgt endnu. Medtag \"gui\" for at give brugerne det grafiske installationsprogram.",
+      "remoteTitle": "Tilgængelige apps",
+      "searchPlaceholder": "Søg i apps...",
+      "remoteLabel": "Remote (GitHub owner/repo for et proot-apps-repository)",
+      "load": "Indlæs",
+      "refreshRemote": "Hent listen igen",
+      "noApps": "Ingen apps fundet.",
+      "couldNotLoad": "Kunne ikke indlæse apps fra {remote}: {error}",
+      "disabledHint": "Markeret som deaktiveret af sit remote; det grafiske installationsprogram skjuler den.",
+      "fromRemote": "fra {remote}",
+      "statePending": "Ikke synkroniseret endnu",
+      "stateSyncing": "Synkroniserer {done} af {total}",
+      "stateReady": "Klar",
+      "stateError": "Fejl",
+      "syncedAgo": "synkroniseret {ago}",
+      "autoUpdateOn": "automatisk opdatering",
+      "update": "Opdater",
+      "updateTitle": "Hent apps igen nu, på hver node, hvor deres pakke er ændret",
+      "confirmDelete": "Slet kataloget '{name}'? Hver node fjerner sin kopi, og brugere tildelt det får intet katalog.",
+      "deleteTitle": "Slet katalog"
     }
   },
   "popup": {

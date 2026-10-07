@@ -51,6 +51,10 @@
                     <i class="fas fa-download fa-fw"></i>
                     <span data-i18n="options.sidebar.installedApps">Installed Apps</span>
                 </button>
+                <button class="nav-link admin-nav-link" style="display:none;" data-tabname="ProotApps">
+                    <i class="fas fa-box-open fa-fw"></i>
+                    <span data-i18n="options.sidebar.prootApps">PRoot Apps</span>
+                </button>
                 <button class="nav-link admin-nav-link" style="display:none;" data-tabname="Users">
                     <i class="fas fa-users fa-fw"></i>
                     <span data-i18n="options.sidebar.users">Users</span>
@@ -517,6 +521,60 @@
                     <div id="available-apps-container" class="app-grid-container">
                     </div>
                     <div class="pagination-controls" id="available-apps-pagination"></div>
+                </div>
+            </div>
+
+            <div id="ProotApps" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 data-i18n="options.prootApps.title">PRoot Apps Catalogs</h3>
+                        <div class="button-group">
+                            <button id="proot-new-catalog-btn" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.prootApps.newCatalog">New Catalog</span></button>
+                        </div>
+                    </div>
+                    <p class="description" data-i18n="options.prootApps.help">A catalog is a folder of PRoot Apps packages kept on every node and mounted read-only into the sessions of the users and groups assigned to it. Inside a session, proot-apps and its graphical installer install and update from the folder and reach no registry.</p>
+                    <div class="table-container">
+                        <table id="prootCatalogs-table">
+                            <thead><tr><th data-i18n="common.name">Name</th><th data-i18n="options.prootApps.apps">Apps</th><th data-i18n="options.prootApps.onThisNode">On this node</th><th class="actions-cell" data-i18n="common.actions">Actions</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-controls" id="prootCatalogs-pagination"></div>
+                </div>
+                <div class="card" id="proot-editor" style="display: none;">
+                    <div class="card-header">
+                        <h3 id="proot-editor-title" data-i18n="options.prootApps.newCatalog">New Catalog</h3>
+                        <div class="button-group">
+                            <button id="proot-cancel-btn" class="secondary" data-i18n="common.cancel">Cancel</button>
+                            <button id="proot-save-btn" class="primary"><i class="fas fa-save"></i> <span data-i18n="common.save">Save</span></button>
+                        </div>
+                    </div>
+                    <form id="proot-editor-form" class="form-grid" style="grid-template-columns: 2fr 1fr; align-items: end;">
+                        <div class="form-group">
+                            <label for="proot-catalog-name" data-i18n="options.prootApps.nameLabel">Catalog name</label>
+                            <input type="text" id="proot-catalog-name" required maxlength="80">
+                        </div>
+                        <div class="form-group">
+                            <label><input type="checkbox" id="proot-catalog-auto-update" checked> <span data-i18n="options.prootApps.autoUpdate">Auto update</span></label>
+                            <p class="description" data-i18n="options.prootApps.autoUpdateHelp">Fetch the apps again on the auto-update interval when their package changed.</p>
+                        </div>
+                    </form>
+                    <h4 data-i18n="options.prootApps.selectedTitle">Selected apps</h4>
+                    <p class="description" data-i18n="options.prootApps.selectedHelp">Click an app below to add it or take it out. Apps from a remote other than the default one are installed by their full image name.</p>
+                    <div id="proot-selected" class="proot-selected"></div>
+                    <div class="card-header" style="margin-top: 1rem;">
+                        <h4 data-i18n="options.prootApps.remoteTitle">Available apps</h4>
+                        <input type="text" id="proot-remote-search" class="search-input" data-i18n-placeholder="options.prootApps.searchPlaceholder" placeholder="Search apps...">
+                    </div>
+                    <form id="proot-remote-form" class="form-group">
+                        <label for="proot-remote" data-i18n="options.prootApps.remoteLabel">Remote (GitHub owner/repo of a proot-apps repository)</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="proot-remote" pattern="^[A-Za-z0-9_.\-]+/[A-Za-z0-9_.\-]+$" required style="flex: 1;">
+                            <button type="submit" class="secondary"><i class="fas fa-cloud-download-alt"></i> <span data-i18n="options.prootApps.load">Load</span></button>
+                            <button type="button" id="proot-remote-refresh" class="secondary" data-i18n-title="options.prootApps.refreshRemote" title="Fetch the list again"><i class="fas fa-sync-alt"></i></button>
+                        </div>
+                    </form>
+                    <div id="proot-remote-grid" class="proot-grid"></div>
                 </div>
             </div>
 

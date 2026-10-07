@@ -366,6 +366,7 @@ class UserSettings(BaseModel):
         allowance_period: `day`, `week`, or `month`.
         pools: Restricted pools open to the user.
         pools_denied: Pools closed to the user.
+        proot_catalog: Id of the PRoot Apps catalog the user's sessions install from, or `None`.
         provider_groups: Groups the identity provider named at the last sign-in.
     """
 
@@ -390,6 +391,7 @@ class UserSettings(BaseModel):
     allowance_period: str = Field(default="month", pattern=r"^(day|week|month)$")
     pools: list[str] = []
     pools_denied: list[str] = []
+    proot_catalog: str | None = None
     provider_groups: list[str] = []
 
 
@@ -400,6 +402,7 @@ class GroupSettings(BaseModel):
     wins and the smallest limit does (see `user_manager.get_effective_settings`).
 
     Attributes:
+        proot_catalog: Id of the PRoot Apps catalog the members' sessions install from.
         sso_groups: Identity provider groups whose members are in this group.
     """
 
@@ -422,6 +425,7 @@ class GroupSettings(BaseModel):
     allowance_period: str | None = Field(default=None, pattern=r"^(day|week|month)$")
     pools: list[str] = []
     pools_denied: list[str] = []
+    proot_catalog: str | None = None
     sso_groups: list[str] = []
 
 
@@ -443,6 +447,92 @@ class AdminStatusResponse(BaseModel):
     disk_total: int | None = None
     disk_used: int | None = None
     proxy_cert_expires_at: float | None = None
+
+
+class ProotCatalogApp(BaseModel):
+    """One app of a PRoot Apps catalog: a package of a remote.
+
+    Attributes:
+        remote: GitHub `owner/repo` the app is published from.
+        name: The app's name there, which is its image tag.
+    """
+
+    remote: str = Field(..., pattern=r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+    name: str = Field(..., pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
+
+
+class ProotCatalog(BaseModel):
+    """A PRoot Apps catalog: the apps an administrator picked for a folder sessions install from.
+
+    Attributes:
+        id: Generated identifier; the folder of the catalog on every node.
+        name: Name shown in the dashboard and the user and group settings.
+        apps: The apps in the catalog.
+        auto_update: Fetch the apps again on the auto-update interval when their package changed.
+        revision: Bumped by every change and by an update asked for by hand; a node whose copy
+            is of an older revision syncs it.
+    """
+
+    id: str = Field(..., pattern=r"^[A-Za-z0-9_-]{1,64}$")
+    name: str = Field(..., min_length=1, max_length=80)
+    apps: list[ProotCatalogApp] = []
+    auto_update: bool = True
+    revision: int = 1
+
+
+class ProotCatalogName(BaseModel):
+    """What a user or group setting picks a catalog by."""
+
+    id: str
+    name: str
+
+
+class ProotCatalogStatus(ProotCatalog):
+    """A catalog with the state of this node's copy of it.
+
+    Attributes:
+        state: `pending` before the first sync, `syncing`, `ready`, or `error`.
+        message: What the last sync reported, or the error that ended it.
+        synced_revision: The revision this node's copy was made from.
+        synced_at: Unix time the last sync finished.
+        done: Apps handled so far by a running sync.
+        total: Apps a running sync handles.
+        current: The app a running sync is on.
+        size: Bytes the copy takes on this node.
+        present: Apps whose package is in the copy, keyed by image folder.
+    """
+
+    state: str = "pending"
+    message: str = ""
+    synced_revision: int = 0
+    synced_at: float | None = None
+    done: int = 0
+    total: int = 0
+    current: str = ""
+    size: int = 0
+    present: dict[str, dict[str, Any]] = {}
+
+
+class ProotRemoteApp(BaseModel):
+    """An app a PRoot Apps remote publishes, as its metadata lists it.
+
+    Attributes:
+        remote: The remote.
+        name: The app's name, its image tag.
+        full_name: Display name.
+        description: What the app is.
+        arch: Comma-separated platforms the package is built for.
+        icon: URL of the app's icon.
+        disabled: The remote marks the app as not offered.
+    """
+
+    remote: str
+    name: str
+    full_name: str = ""
+    description: str = ""
+    arch: str = ""
+    icon: str = ""
+    disabled: bool = False
 
 
 class User(BaseModel):
@@ -471,6 +561,8 @@ class ManagementDataResponse(BaseModel):
     api_port: int
     session_port: int
     gpus: list[GPUInfo] = []
+    proot_catalogs: list[ProotCatalogName] = []
+    proot_remote: str = ""
 
 
 class CreateUserRequest(BaseModel):

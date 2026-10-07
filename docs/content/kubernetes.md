@@ -282,6 +282,14 @@ the cluster's pull policy, which for `:latest` is to pull on every start.
 Registries are asked anonymously, so a private image is not pinned and always
 runs by its tag, pulled with the namespace's image pull secrets.
 
+## PRoot Apps catalogs
+
+The server keeps the [catalogs](administration.md#proot-apps) under
+`/storage/sealskin_proot_apps`, on the storage claim, and a session pod mounts
+its catalog from there with a `subPath`, read-only, like its home directory.
+The packages are fetched for the architecture of the node the server pod runs
+on.
+
 ## Exposing the server
 
 The Service in the manifest is a `ClusterIP`. Clients reach the server one

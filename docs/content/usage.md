@@ -84,6 +84,12 @@ scoped to that session path and every later request is checked by the proxy
 against it. Nobody without the cookie reaches the container, and the
 container itself is never exposed.
 
+Inside a session, `proot-apps install <name>` and the graphical installer
+(`proot-apps install gui`) add applications to the home directory. When your
+administrator assigned you a [PRoot Apps catalog](administration.md#proot-apps),
+both offer the catalog's apps and install from it, so the session reaches no
+registry; otherwise they fetch from the public repository as the image ships.
+
 Sessions survive a server restart: they are recorded on disk and reattached
 on start-up, and records whose containers are gone are discarded. Stopping a
 session removes its containers and deletes any cleanroom storage. Sessions

@@ -90,6 +90,9 @@ let adminData = {
   availableApps: [],
   appTemplates: [],
   gpus: [],
+  prootCatalogs: [],
+  proot_catalogs: [],
+  proot_remote: 'linuxserver/proot-apps',
 };
 const tableStates = {
   users: { currentPage: 1, searchTerm: '' },
@@ -97,6 +100,7 @@ const tableStates = {
   admins: { currentPage: 1, searchTerm: '' },
   installedApps: { currentPage: 1, searchTerm: '' },
   availableApps: { currentPage: 1, searchTerm: '' },
+  prootCatalogs: { currentPage: 1, searchTerm: '' },
 };
 let labState = {
   isEditing: false,
@@ -114,6 +118,9 @@ let myCluster = null;
 let managedHomes = {};
 let currentAppForUpdateCheck = null;
 let installedAppsPollingInterval = null;
+let prootPoll = null;
+// The catalog open in the editor: its apps, and the remote whose apps the grid shows.
+const prootEditor = { id: null, apps: [], remote: '', remoteApps: [], search: '', icons: {} };
 
 // --- TEMPLATE EDITOR ---
 
@@ -1882,6 +1889,27 @@ const tableRenderConfig = {
                     </td>
                 </tr>`,
   },
+  prootCatalogs: {
+    tbody: document.querySelector('#prootCatalogs-table tbody'),
+    filter: (item, term) => item.name.toLowerCase().includes(term),
+    row: (item) => {
+      const id = escapeHtml(item.id);
+      const auto = item.auto_update ? ` <small>(${t('options.prootApps.autoUpdateOn')})</small>` : '';
+      return `
+                <tr>
+                    <td>${escapeHtml(item.name)}</td>
+                    <td>${item.apps.length}${auto}</td>
+                    <td>${prootStateHtml(item)}</td>
+                    <td class="actions-cell">
+                        <div class="cell-wrapper">
+                            <button class="secondary" data-catalogid="${id}" data-action="update" title="${escapeHtml(t('options.prootApps.updateTitle'))}" ${item.state === 'syncing' ? 'disabled' : ''}>${t('options.prootApps.update')}</button>
+                            <button class="warning" data-catalogid="${id}" data-action="edit">${t('common.edit')}</button>
+                            <button class="danger" data-catalogid="${id}" data-action="delete">${t('common.delete')}</button>
+                        </div>
+                    </td>
+                </tr>`;
+    },
+  },
   installedApps: {
     tbody: installedAppsTbody,
     filter: (item, term) => item.name.toLowerCase().includes(term) || item.provider_config.image.toLowerCase().includes(term),
@@ -1996,7 +2024,7 @@ const USER_DEFAULTS = {
   active: true, admin: false, persistent_storage: true, public_sharing: false, gpu: true, gpu_share: true,
   home_migration: false, edit_templates: false, harden_container: false, harden_openbox: false,
   session_limit: -1, storage_limit: -1, session_cpus: -1, session_memory_mb: -1, session_hours: -1,
-  allowance_hours: -1, allowance_period: 'month', groups: [], pools: [], pools_denied: [],
+  allowance_hours: -1, allowance_period: 'month', groups: [], pools: [], pools_denied: [], proot_catalog: null,
 };
 // The new-user form starts without a GPU, as it always has.
 const NEW_USER_SETTINGS = { ...USER_DEFAULTS, gpu: false };
@@ -2040,6 +2068,12 @@ function buildSettingsForm(prefix, kind) {
             <label for="${id(name)}">${escapeHtml(t(label))}</label>
             <input type="text" id="${id(name)}">
         </div>`).join('');
+  const catalog = `
+        <div class="form-group">
+            <label for="${id('proot_catalog')}">${escapeHtml(t('options.users.prootCatalog'))}</label>
+            <select id="${id('proot_catalog')}"><option value="">${isGroup ? notSet : escapeHtml(t('options.users.prootCatalogNone'))}</option></select>
+            <p class="description">${escapeHtml(t('options.users.prootCatalogHelp'))}</p>
+        </div>`;
   const switches = SETTING_SWITCHES.map(([name, label, restricting]) => (isGroup ? `
         <div class="form-group">
             <label for="${id(name)}">${escapeHtml(t(label))}</label>
@@ -2062,7 +2096,7 @@ function buildSettingsForm(prefix, kind) {
     <h4>${escapeHtml(t(isGroup ? 'options.groups.overrideTitle' : 'options.users.settingsTitle'))}</h4>
     <p class="description">${escapeHtml(t(isGroup ? 'options.groups.overrideHelp' : 'options.users.limitsHelp'))}</p>
     ${groups}
-    <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.5rem 2rem;">${limits}${period}${lists}</div>
+    <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.5rem 2rem;">${limits}${period}${lists}${catalog}</div>
     <h4>${escapeHtml(t(isGroup ? 'options.groups.permissionsTitle' : 'options.users.permissionsTitle'))}</h4>
     <div class="${isGroup ? 'form-grid' : 'settings-grid'}" style="grid-template-columns: repeat(auto-fit, minmax(${isGroup ? 220 : 250}px, 1fr));${isGroup ? ' gap: 0.5rem 2rem;' : ''}">${switches}</div>`;
 }
@@ -2080,6 +2114,7 @@ function readUserSettings(prefix) {
   settings.group = settings.groups[0] || 'none';
   settings.pools = splitList(field(prefix, 'pools').value);
   settings.pools_denied = splitList(field(prefix, 'pools_denied').value);
+  settings.proot_catalog = field(prefix, 'proot_catalog').value || null;
   return settings;
 }
 
@@ -2092,6 +2127,7 @@ function fillUserSettings(prefix, stored) {
   [...field(prefix, 'groups').options].forEach((option) => { option.selected = groups.includes(option.value); });
   field(prefix, 'pools').value = (settings.pools || []).join(', ');
   field(prefix, 'pools_denied').value = (settings.pools_denied || []).join(', ');
+  field(prefix, 'proot_catalog').value = settings.proot_catalog || '';
   const provided = field(prefix, 'provider_groups');
   const named = settings.provider_groups || [];
   provided.textContent = t('options.users.providerGroups', { groups: named.join(', ') });
@@ -2111,6 +2147,7 @@ function readGroupSettings(prefix) {
   });
   settings.allowance_period = field(prefix, 'allowance_period').value || null;
   SETTING_LISTS.forEach(([name]) => { settings[name] = splitList(field(prefix, name).value); });
+  settings.proot_catalog = field(prefix, 'proot_catalog').value || null;
   return settings;
 }
 
@@ -2119,6 +2156,7 @@ function fillGroupSettings(prefix, settings) {
   SETTING_LIMITS.forEach(([name]) => { field(prefix, name).value = typeof settings[name] === 'number' ? settings[name] : ''; });
   field(prefix, 'allowance_period').value = settings.allowance_period || '';
   SETTING_LISTS.forEach(([name]) => { field(prefix, name).value = (settings[name] || []).join(', '); });
+  field(prefix, 'proot_catalog').value = settings.proot_catalog || '';
 }
 
 /**
@@ -2151,7 +2189,21 @@ function calculateEffectiveSettings(user) {
   });
   effective.pools = [...new Set([...members.flatMap((g) => g.pools || []), ...(base.pools || [])])].sort();
   effective.pools_denied = [...new Set([...members.flatMap((g) => g.pools_denied || []), ...(base.pools_denied || [])])].sort();
+  // A catalog is a choice: the user's own, else the first group's that makes one.
+  effective.proot_catalog = base.proot_catalog || (members.find((g) => g.proot_catalog) || {}).proot_catalog || null;
   return effective;
+}
+
+function populateCatalogDropdowns() {
+  document.querySelectorAll('#newUser-proot_catalog, #editUser-proot_catalog, #newGroup-proot_catalog, #editGroup-proot_catalog').forEach((select) => {
+    const chosen = select.value;
+    const first = select.options[0];
+    select.innerHTML = '';
+    select.add(first);
+    (adminData.proot_catalogs || []).forEach((catalog) => select.add(new Option(catalog.name, catalog.id)));
+    select.value = chosen;
+    if (select.value !== chosen) select.value = '';
+  });
 }
 
 function populateGroupDropdowns() {
@@ -2209,6 +2261,7 @@ async function refreshAdminData() {
     renderTable('users');
     renderTable('groups');
     populateGroupDropdowns();
+    populateCatalogDropdowns();
     renderGpuInfo(adminData.gpus);
   } catch (error) {
     displayStatus(t('options.status.adminDataRefreshFailed', { error: error.message }), true);
@@ -2592,6 +2645,154 @@ function renderAvailableAppsGrid() {
   hydrateLogos(availableAppsContainer);
 }
 
+// --- PROOT APPS CATALOGS ---
+
+/** The state of this node's copy of a catalog, as a cell. */
+function prootStateHtml(item) {
+  const size = item.size ? ` · ${formatBytes(item.size, t, 1)}` : '';
+  if (item.state === 'syncing') {
+    return `<span class="proot-state"><div class="spinner-small"></div> ${t('options.prootApps.stateSyncing', { done: item.done, total: item.total })}${item.current ? ` (${escapeHtml(item.current)})` : ''}</span>`;
+  }
+  if (item.state === 'ready') {
+    const ago = item.synced_at ? ` · ${t('options.prootApps.syncedAgo', { ago: timeAgo(item.synced_at, t) })}` : '';
+    return `<span class="proot-state" title="${escapeHtml(item.message || '')}"><i class="fas fa-check-circle" style="color: var(--color-success);"></i> ${t('options.prootApps.stateReady')}${size}${ago}</span>`;
+  }
+  if (item.state === 'error') {
+    return `<span class="proot-state" title="${escapeHtml(item.message || '')}"><i class="fas fa-exclamation-circle" style="color: var(--color-danger);"></i> ${t('options.prootApps.stateError')}${size}<br><small>${escapeHtml(item.message || '')}</small></span>`;
+  }
+  return `<span class="proot-state">${t('options.prootApps.statePending')}</span>`;
+}
+
+/** Load the catalogs with this node's state of each, and poll while one is syncing. */
+async function refreshProotCatalogs() {
+  try {
+    adminData.prootCatalogs = await secureFetch('/api/admin/proot/catalogs', { method: 'GET' });
+    adminData.proot_catalogs = adminData.prootCatalogs.map(({ id, name }) => ({ id, name }));
+    renderTable('prootCatalogs');
+    populateCatalogDropdowns();
+    const syncing = adminData.prootCatalogs.some((c) => c.state === 'syncing');
+    if (syncing && !prootPoll) prootPoll = setInterval(refreshProotCatalogs, 3000);
+    if (!syncing && prootPoll) { clearInterval(prootPoll); prootPoll = null; }
+  } catch (error) {
+    clearInterval(prootPoll);
+    prootPoll = null;
+    displayStatus(t('options.status.catalogsRefreshFailed', { error: error.message }), true);
+  }
+}
+
+const prootKey = (remote, name) => `${remote.toLowerCase()}:${name}`;
+const prootSelected = (remote, name) => prootEditor.apps.some((a) => prootKey(a.remote, a.name) === prootKey(remote, name));
+
+/** Open the editor on a catalog, or empty for a new one. */
+async function openProotEditor(catalog) {
+  prootEditor.id = catalog ? catalog.id : null;
+  prootEditor.apps = catalog ? catalog.apps.map((a) => ({ remote: a.remote, name: a.name })) : [];
+  document.getElementById('proot-editor-title').textContent = catalog
+    ? t('options.prootApps.editCatalog', { name: catalog.name })
+    : t('options.prootApps.newCatalog');
+  document.getElementById('proot-catalog-name').value = catalog ? catalog.name : '';
+  document.getElementById('proot-catalog-auto-update').checked = catalog ? catalog.auto_update : true;
+  document.getElementById('proot-remote-search').value = '';
+  prootEditor.search = '';
+  const remote = (catalog && catalog.apps[0] && catalog.apps[0].remote) || adminData.proot_remote;
+  document.getElementById('proot-remote').value = remote;
+  document.getElementById('proot-editor').style.display = 'block';
+  renderProotSelected();
+  await loadProotRemote(remote, false);
+  document.getElementById('proot-editor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeProotEditor() {
+  document.getElementById('proot-editor').style.display = 'none';
+  prootEditor.id = null;
+  prootEditor.apps = [];
+}
+
+/** Fetch the apps a remote publishes and show them in the grid. */
+async function loadProotRemote(remote, refresh) {
+  const grid = document.getElementById('proot-remote-grid');
+  grid.innerHTML = '<div class="spinner-small"></div>';
+  try {
+    const apps = await secureFetch(`/api/admin/proot/remote?remote=${encodeURIComponent(remote)}&refresh=${refresh ? 'true' : 'false'}`, { method: 'GET' });
+    prootEditor.remote = remote;
+    prootEditor.remoteApps = apps;
+    apps.forEach((app) => { if (app.icon) prootEditor.icons[prootKey(remote, app.name)] = app.icon; });
+    renderProotRemoteGrid();
+    renderProotSelected();
+  } catch (error) {
+    prootEditor.remoteApps = [];
+    grid.innerHTML = `<p style="text-align: center; color: var(--text-muted); grid-column: 1 / -1;">${escapeHtml(t('options.prootApps.couldNotLoad', { remote, error: error.message }))}</p>`;
+  }
+}
+
+function renderProotRemoteGrid() {
+  const grid = document.getElementById('proot-remote-grid');
+  const term = prootEditor.search.toLowerCase();
+  const apps = prootEditor.remoteApps.filter((app) => !term || app.name.toLowerCase().includes(term) || app.full_name.toLowerCase().includes(term));
+  if (!apps.length) {
+    grid.innerHTML = `<p style="text-align: center; color: var(--text-muted); grid-column: 1 / -1;">${t('options.prootApps.noApps')}</p>`;
+    return;
+  }
+  grid.innerHTML = apps.map((app, i) => {
+    const classes = ['app-card-popup'];
+    if (prootSelected(prootEditor.remote, app.name)) classes.push('selected');
+    if (app.disabled) classes.push('disabled');
+    const title = app.disabled ? t('options.prootApps.disabledHint') : app.description;
+    return `
+      <div class="${classes.join(' ')}" style="--i: ${i}" data-name="${escapeHtml(app.name)}" title="${escapeHtml(title)}">
+        <img src="${escapeHtml(app.icon || 'icons/icon128.png')}" alt="">
+        <span>${escapeHtml(app.full_name || app.name)}</span>
+      </div>`;
+  }).join('');
+}
+
+function renderProotSelected() {
+  const box = document.getElementById('proot-selected');
+  if (!prootEditor.apps.length) {
+    box.innerHTML = `<span class="description">${t('options.prootApps.noneSelected')}</span>`;
+    return;
+  }
+  box.innerHTML = prootEditor.apps.map((app) => {
+    const icon = prootEditor.icons[prootKey(app.remote, app.name)];
+    const other = app.remote.toLowerCase() !== adminData.proot_remote.toLowerCase()
+      ? ` <small>${escapeHtml(t('options.prootApps.fromRemote', { remote: app.remote }))}</small>` : '';
+    return `<span class="chip">${icon ? `<img src="${escapeHtml(icon)}" alt="">` : ''}${escapeHtml(app.name)}${other}<button type="button" data-remote="${escapeHtml(app.remote)}" data-name="${escapeHtml(app.name)}" title="${t('common.delete')}">&times;</button></span>`;
+  }).join('');
+}
+
+function toggleProotApp(remote, name) {
+  const selected = !prootSelected(remote, name);
+  if (selected) {
+    prootEditor.apps.push({ remote, name });
+  } else {
+    prootEditor.apps = prootEditor.apps.filter((a) => prootKey(a.remote, a.name) !== prootKey(remote, name));
+  }
+  renderProotSelected();
+  // Flip the one card rather than rebuild the grid, which would animate every card again.
+  if (remote.toLowerCase() === prootEditor.remote.toLowerCase()) {
+    const card = [...document.querySelectorAll('#proot-remote-grid .app-card-popup[data-name]')].find((c) => c.dataset.name === name);
+    if (card) card.classList.toggle('selected', selected);
+  }
+}
+
+async function saveProotCatalog() {
+  const name = document.getElementById('proot-catalog-name').value.trim();
+  if (!name) return document.getElementById('proot-catalog-name').reportValidity();
+  const payload = { name, auto_update: document.getElementById('proot-catalog-auto-update').checked, apps: prootEditor.apps };
+  try {
+    await secureFetch(prootEditor.id ? `/api/admin/proot/catalogs/${prootEditor.id}` : '/api/admin/proot/catalogs', {
+      method: prootEditor.id ? 'PUT' : 'POST',
+      body: JSON.stringify(payload),
+    });
+    displayStatus(t('options.status.catalogSaved', { name }));
+    closeProotEditor();
+    await refreshProotCatalogs();
+  } catch (error) {
+    await writeFailed(error, t('options.status.catalogSaveFailed', { error: error.message }), refreshProotCatalogs);
+  }
+  return undefined;
+}
+
 function showInstallModal(appData, existingInstall = null, isManual = false) {
   const isEditing = !!existingInstall;
   document.getElementById('manual-install-note').style.display = isManual ? 'block' : 'none';
@@ -2756,6 +2957,8 @@ async function openTab(tabName) {
     installedAppsPollingInterval = null;
   }
   clearInterval(labPoll);
+  clearInterval(prootPoll);
+  prootPoll = null;
 
   const oldActiveTab = document.querySelector('.tab-content.active');
   if (oldActiveTab && oldActiveTab.id === 'InstalledApps' && tabName !== 'InstalledApps') {
@@ -2783,6 +2986,8 @@ async function openTab(tabName) {
     }
   } else if (tabName === 'AppStore') {
     if (adminData.appStores.length === 0) await refreshAppData();
+  } else if (tabName === 'ProotApps') {
+    await refreshProotCatalogs();
   } else if (tabName === 'PinnedBehavior') {
     await renderPinnedBehaviorTable();
   } else if (tabName === 'AppTemplates') {
@@ -2941,7 +3146,7 @@ function bindEvents() {
     downloadBlob(new Blob([generatedConfigText.value], { type: 'application/json' }), `${username}-sealskin-config.json`);
   });
 
-  ['users', 'groups', 'admins', 'installedApps'].forEach((dataType) => {
+  ['users', 'groups', 'admins', 'installedApps', 'prootCatalogs'].forEach((dataType) => {
     const searchInput = document.getElementById(`${dataType}-search`);
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
@@ -3326,6 +3531,63 @@ function bindEvents() {
     if (!card) return;
     const appData = adminData.availableApps.find((app) => app.id === card.dataset.appid);
     if (appData) showInstallModal(appData);
+  });
+
+  document.getElementById('proot-new-catalog-btn').addEventListener('click', () => openProotEditor(null));
+  document.getElementById('proot-cancel-btn').addEventListener('click', closeProotEditor);
+  document.getElementById('proot-save-btn').addEventListener('click', saveProotCatalog);
+  document.getElementById('proot-editor-form').addEventListener('submit', (e) => { e.preventDefault(); saveProotCatalog(); });
+  document.getElementById('proot-remote-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    loadProotRemote(document.getElementById('proot-remote').value.trim(), false);
+  });
+  document.getElementById('proot-remote-refresh').addEventListener('click', () => {
+    loadProotRemote(document.getElementById('proot-remote').value.trim(), true);
+  });
+  document.getElementById('proot-remote-search').addEventListener('input', (e) => {
+    prootEditor.search = e.target.value;
+    renderProotRemoteGrid();
+  });
+  document.getElementById('proot-remote-grid').addEventListener('click', (e) => {
+    const card = e.target.closest('.app-card-popup[data-name]');
+    if (card) toggleProotApp(prootEditor.remote, card.dataset.name);
+  });
+  document.getElementById('proot-selected').addEventListener('click', (e) => {
+    const button = e.target.closest('button[data-name]');
+    if (button) toggleProotApp(button.dataset.remote, button.dataset.name);
+  });
+  tableRenderConfig.prootCatalogs.tbody.addEventListener('click', async (e) => {
+    const button = e.target.closest('button[data-catalogid]');
+    if (!button || button.disabled) return;
+    const catalog = adminData.prootCatalogs.find((c) => c.id === button.dataset.catalogid);
+    if (!catalog) return;
+    if (button.dataset.action === 'edit') {
+      await openProotEditor(catalog);
+    } else if (button.dataset.action === 'update') {
+      try {
+        await secureFetch(`/api/admin/proot/catalogs/${catalog.id}/update`, { method: 'POST', body: JSON.stringify({}) });
+        displayStatus(t('options.status.catalogUpdateStarted', { name: catalog.name }));
+        await refreshProotCatalogs();
+      } catch (error) {
+        await writeFailed(error, t('options.status.catalogUpdateFailed', { error: error.message }), refreshProotCatalogs);
+      }
+    } else if (button.dataset.action === 'delete') {
+      const remove = await confirmDialog(t, {
+        title: t('options.prootApps.deleteTitle'),
+        message: t('options.prootApps.confirmDelete', { name: catalog.name }),
+        confirm: t('common.delete'),
+        danger: true,
+      });
+      if (!remove) return;
+      try {
+        await secureFetch(`/api/admin/proot/catalogs/${catalog.id}`, { method: 'DELETE' });
+        displayStatus(t('options.status.catalogDeleted', { name: catalog.name }));
+        if (prootEditor.id === catalog.id) closeProotEditor();
+        await refreshProotCatalogs();
+      } catch (error) {
+        await writeFailed(error, t('options.status.catalogDeleteFailed', { error: error.message }), refreshProotCatalogs);
+      }
+    }
   });
 
   appInstallForm.addEventListener('submit', async (e) => {

@@ -16,7 +16,17 @@ import yaml
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import ValidationError
 
-from .. import cluster, config_store, progress, quota, routing, sso, user_manager, webclient
+from .. import (
+    cluster,
+    config_store,
+    progress,
+    prootapps,
+    quota,
+    routing,
+    sso,
+    user_manager,
+    webclient,
+)
 from ..docker_utils import get_and_cache_image_metadata, get_system_stats, pull_and_cache_image
 from ..fsutil import safe_join, safe_rmtree
 from ..launch import launch_application, stop_session
@@ -43,6 +53,10 @@ from ..models import (
     LaunchMetaCustomizeRequest,
     LaunchResponse,
     ManagementDataResponse,
+    ProotCatalog,
+    ProotCatalogName,
+    ProotCatalogStatus,
+    ProotRemoteApp,
     UpdateGroupRequest,
     UpdateUserRequest,
     User,
@@ -118,6 +132,11 @@ async def get_management_data() -> dict[str, Any]:
         "api_port": state.discovered_api_port,
         "session_port": state.discovered_session_port,
         "gpus": await _gpu_list(),
+        "proot_catalogs": sorted(
+            (ProotCatalogName(id=c.id, name=c.name) for c in state.proot_catalogs.values()),
+            key=lambda c: c.name.lower(),
+        ),
+        "proot_remote": settings.proot_apps_remote,
     }
 
 
@@ -186,6 +205,105 @@ async def get_available_apps(
         ) from exc
     except (yaml.YAMLError, ValueError) as exc:
         raise HTTPException(status_code=500, detail=f"Failed to parse app store YAML: {exc}") from exc
+
+
+# --- PRoot Apps catalogs -----------------------------------------------------
+
+
+def _catalog_status(catalog: ProotCatalog) -> ProotCatalogStatus:
+    """Attach this node's sync state to a catalog."""
+    status = prootapps.status_of(catalog.id)
+    fields = {key: value for key, value in status.items() if key in ProotCatalogStatus.model_fields}
+    return ProotCatalogStatus(**catalog.model_dump(), **fields)
+
+
+def _catalog_from(body: dict[str, Any], catalog_id: str, revision: int) -> ProotCatalog:
+    """Validate the catalog the admin UI sent, without repeats among its apps."""
+    content = {key: body.get(key) for key in ("name", "apps", "auto_update") if key in body}
+    try:
+        catalog = ProotCatalog(id=catalog_id, revision=revision, **content)
+    except ValidationError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    seen: set[tuple[str, str]] = set()
+    apps = []
+    for app in catalog.apps:
+        if (app.remote.lower(), app.name) not in seen:
+            seen.add((app.remote.lower(), app.name))
+            apps.append(app)
+    catalog.apps = apps
+    for other in state.proot_catalogs.values():
+        if other.id != catalog.id and other.name.lower() == catalog.name.lower():
+            raise HTTPException(status_code=409, detail=f"A catalog named '{catalog.name}' already exists.")
+    return catalog
+
+
+@router.get("/proot/catalogs", response_model=list[ProotCatalogStatus])
+async def list_proot_catalogs() -> list[ProotCatalogStatus]:
+    """List the PRoot Apps catalogs with the state of this node's copy of each."""
+    return sorted((_catalog_status(c) for c in state.proot_catalogs.values()), key=lambda c: c.name.lower())
+
+
+@router.get("/proot/remote", response_model=list[ProotRemoteApp])
+async def list_proot_remote(remote: str, refresh: bool = False) -> list[ProotRemoteApp]:
+    """Return the apps a PRoot Apps remote (a GitHub `owner/repo`) publishes."""
+    try:
+        apps = await prootapps.fetch_remote(remote, refresh)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=400, detail=f"Could not fetch the apps of '{remote}': {exc}") from exc
+    return prootapps.remote_apps(remote, apps)
+
+
+@router.post("/proot/catalogs", response_model=ProotCatalogStatus, status_code=201)
+async def create_proot_catalog(
+    decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body),
+) -> ProotCatalogStatus:
+    """Create a catalog; every node starts fetching its apps."""
+    catalog = _catalog_from(decrypted_body, str(uuid.uuid4()), 1)
+    state.proot_catalogs[catalog.id] = catalog
+    await prootapps.save_catalogs()
+    prootapps.start_sync(catalog)
+    return _catalog_status(catalog)
+
+
+@router.put("/proot/catalogs/{catalog_id}", response_model=ProotCatalogStatus)
+async def update_proot_catalog(
+    catalog_id: str, decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body)
+) -> ProotCatalogStatus:
+    """Replace a catalog's name and apps; every node brings its copy along."""
+    existing = state.proot_catalogs.get(catalog_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Catalog not found.")
+    catalog = _catalog_from(decrypted_body, catalog_id, existing.revision + 1)
+    state.proot_catalogs[catalog_id] = catalog
+    await prootapps.save_catalogs()
+    prootapps.start_sync(catalog)
+    return _catalog_status(catalog)
+
+
+@router.post("/proot/catalogs/{catalog_id}/update", response_model=ProotCatalogStatus)
+async def refresh_proot_catalog(catalog_id: str) -> ProotCatalogStatus:
+    """Fetch the catalog's apps again now, on every node, where their packages changed."""
+    existing = state.proot_catalogs.get(catalog_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Catalog not found.")
+    catalog = existing.model_copy(update={"revision": existing.revision + 1})
+    state.proot_catalogs[catalog_id] = catalog
+    await prootapps.save_catalogs()
+    prootapps.start_sync(catalog)
+    return _catalog_status(catalog)
+
+
+@router.delete("/proot/catalogs/{catalog_id}", status_code=204)
+async def delete_proot_catalog(catalog_id: str) -> Response:
+    """Delete a catalog; every node removes its copy. Users assigned to it keep the setting, which then does nothing."""
+    if catalog_id not in state.proot_catalogs:
+        raise HTTPException(status_code=404, detail="Catalog not found.")
+    del state.proot_catalogs[catalog_id]
+    await prootapps.save_catalogs()
+    await prootapps.discard(catalog_id)
+    return Response(status_code=204)
 
 
 # --- Installed apps --------------------------------------------------------

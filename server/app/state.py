@@ -13,7 +13,7 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import Any
 
-from .models import AppStore, InstalledApp, InstalledAppRecord, PublicShareMetadata
+from .models import AppStore, InstalledApp, InstalledAppRecord, ProotCatalog, PublicShareMetadata
 
 
 @dataclass
@@ -51,6 +51,8 @@ class RuntimeState:
         image_metadata: Cached image digests keyed by image name.
         deletion_tasks: Background deletion task status keyed by task id.
         pull_status: Images currently being pulled keyed by image name.
+        proot_catalogs: PRoot Apps catalogs keyed by id, as shared.
+        proot_status: This node's sync state of each catalog keyed by id.
         system_stats_cache: Cached CPU and disk statistics.
         cpu_model: CPU model string read from `/proc/cpuinfo`.
         path_prefix_map: Container mount path to host path mapping.
@@ -82,6 +84,8 @@ class RuntimeState:
     image_metadata: dict[str, dict[str, Any]] = field(default_factory=dict)
     deletion_tasks: dict[str, dict[str, Any]] = field(default_factory=dict)
     pull_status: dict[str, str] = field(default_factory=dict)
+    proot_catalogs: dict[str, ProotCatalog] = field(default_factory=dict)
+    proot_status: dict[str, dict[str, Any]] = field(default_factory=dict)
     system_stats_cache: dict[str, Any] = field(
         default_factory=lambda: {"data": None, "timestamp": 0.0}
     )

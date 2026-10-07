@@ -79,6 +79,7 @@
       "appTemplates": "앱 템플릿",
       "appLaboratory": "앱 실험실",
       "installedApps": "설치된 앱",
+      "prootApps": "PRoot Apps",
       "users": "사용자",
       "groups": "그룹",
       "admins": "관리자",
@@ -233,6 +234,9 @@
       "allowancePeriod": "할당량 기간",
       "pools": "허용할 제한된 풀 (쉼표로 구분)",
       "poolsDenied": "거부할 풀 (쉼표로 구분)",
+      "prootCatalog": "PRoot Apps 카탈로그",
+      "prootCatalogNone": "없음",
+      "prootCatalogHelp": "모든 세션에 읽기 전용으로 마운트되며, proot-apps는 레지스트리 대신 여기에서 설치합니다. 없음으로 두면 사용자의 그룹 중 카탈로그를 먼저 선택한 그룹이 결정합니다.",
       "groupsHelp": "여러 개를 선택하려면 Ctrl 또는 Command 키를 누른 채 선택하세요. 그룹 간 설정이 다르면 더 제한적인 값이 적용됩니다.",
       "providerGroups": "마지막 로그인 시 ID 공급자가 알려준 그룹: {groups}",
       "limitsHelp": "-1이거나 비워두면 제한이 없습니다."
@@ -1254,7 +1258,14 @@
       "nodeRemoved": "노드가 제거되었습니다.",
       "poolSaved": "풀 '{name}'이(가) 저장되었습니다.",
       "poolDeleted": "풀 '{name}'이(가) 삭제되었습니다.",
-      "nothingChanged": "변경된 내용이 없습니다."
+      "nothingChanged": "변경된 내용이 없습니다.",
+      "catalogSaved": "카탈로그 '{name}'을(를) 저장했습니다. 모든 노드가 앱을 가져오는 중입니다.",
+      "catalogSaveFailed": "카탈로그를 저장할 수 없습니다: {error}",
+      "catalogDeleted": "카탈로그 '{name}'을(를) 삭제했습니다.",
+      "catalogDeleteFailed": "카탈로그를 삭제할 수 없습니다: {error}",
+      "catalogUpdateStarted": "모든 노드에서 카탈로그 '{name}'을(를) 업데이트하는 중입니다.",
+      "catalogUpdateFailed": "카탈로그를 업데이트할 수 없습니다: {error}",
+      "catalogsRefreshFailed": "카탈로그를 불러올 수 없습니다: {error}"
     },
     "placeholders": {
       "noAdmins": "관리자를 찾을 수 없습니다.",
@@ -1264,7 +1275,8 @@
       "noSessions": "활성 세션을 찾을 수 없습니다.",
       "noPinned": "고정된 동작을 찾을 수 없습니다.",
       "errorLoading": "디렉터리 로딩 중 오류 발생.",
-      "noInstalledApps": "아직 설치된 애플리케이션이 없습니다."
+      "noInstalledApps": "아직 설치된 애플리케이션이 없습니다.",
+      "noProotCatalogs": "아직 카탈로그가 없습니다."
     },
     "web": {
       "title": "이 브라우저의 SealSkin",
@@ -1512,6 +1524,39 @@
       "resultSso": "로그인 URL:",
       "resultSlo": "단일 로그아웃 제공:",
       "resultCertificates": "서명 인증서:"
+    },
+    "prootApps": {
+      "title": "PRoot Apps 카탈로그",
+      "help": "카탈로그는 모든 노드에 보관되고 할당된 사용자와 그룹의 세션에 읽기 전용으로 마운트되는 PRoot Apps 패키지 폴더입니다. 세션 안에서 proot-apps와 그래픽 설치 프로그램은 이 폴더에서 설치하고 업데이트하며 레지스트리에 접근하지 않습니다.",
+      "newCatalog": "새 카탈로그",
+      "editCatalog": "{name} 편집",
+      "apps": "앱",
+      "onThisNode": "이 노드에",
+      "nameLabel": "카탈로그 이름",
+      "autoUpdate": "자동 업데이트",
+      "autoUpdateHelp": "패키지가 변경된 경우 자동 업데이트 주기에 따라 앱을 다시 가져옵니다.",
+      "selectedTitle": "선택한 앱",
+      "selectedHelp": "아래 앱을 클릭하여 추가하거나 제외합니다. 기본 리모트가 아닌 리모트의 앱은 전체 이미지 이름으로 설치됩니다.",
+      "noneSelected": "아직 선택한 앱이 없습니다. 사용자에게 그래픽 설치 프로그램을 제공하려면 \"gui\"를 포함하세요.",
+      "remoteTitle": "사용 가능한 앱",
+      "searchPlaceholder": "앱 검색...",
+      "remoteLabel": "리모트 (proot-apps 저장소의 GitHub owner/repo)",
+      "load": "불러오기",
+      "refreshRemote": "목록 다시 가져오기",
+      "noApps": "앱을 찾을 수 없습니다.",
+      "couldNotLoad": "{remote}의 앱을 불러올 수 없습니다: {error}",
+      "disabledHint": "리모트에서 비활성화로 표시되어 그래픽 설치 프로그램에서 숨겨집니다.",
+      "fromRemote": "{remote}에서",
+      "statePending": "아직 동기화되지 않음",
+      "stateSyncing": "동기화 중 {done} / {total}",
+      "stateReady": "준비됨",
+      "stateError": "오류",
+      "syncedAgo": "{ago} 동기화됨",
+      "autoUpdateOn": "자동 업데이트",
+      "update": "업데이트",
+      "updateTitle": "패키지가 변경된 앱을 지금 모든 노드에서 다시 가져옵니다",
+      "confirmDelete": "카탈로그 '{name}'을(를) 삭제할까요? 모든 노드가 복사본을 제거하고, 할당된 사용자는 카탈로그를 받지 못합니다.",
+      "deleteTitle": "카탈로그 삭제"
     }
   },
   "popup": {

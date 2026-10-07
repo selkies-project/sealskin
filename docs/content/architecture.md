@@ -358,6 +358,7 @@ server/app/homes.py           moving a home directory between nodes
 server/app/filesync.py        the users' shared files kept in the store
 server/app/sso.py             web sign-ins: OpenID Connect, SAML, the root token
 server/app/config_store.py    stores, installed records and resolution, templates, sessions, shares
+server/app/prootapps.py       PRoot Apps catalogs: the shared records and this node's copies of them
 server/app/security.py        handshake, EncryptedRoute, the lanes and who a request is, password hashing
 server/app/launch.py          build_launch_spec(), launch_application(), stop and swap
 server/app/docker_utils.py    Docker client and self-inspection, render nodes, image cache

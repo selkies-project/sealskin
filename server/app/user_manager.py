@@ -60,6 +60,7 @@ DEFAULT_USER_SETTINGS: dict[str, Any] = {
     "allowance_period": "month",
     "pools": [],
     "pools_denied": [],
+    "proot_catalog": None,
 }
 
 #: Switches and the value of each that restricts: where groups disagree, that value wins.
@@ -342,20 +343,25 @@ def get_effective_settings(username: str, provider_groups: Any = ()) -> dict[str
     restricting value when any group gives it that (see `SWITCHES`), a limit
     the smallest any group sets, and the pools are those any group allows
     less those any denies. A setting no group sets stays the user's own.
-    Administrators always get the defaults.
+    Administrators always get the defaults, short of the PRoot Apps catalog,
+    which is the user's own or the first of their groups' to name one.
 
     Args:
         username: The user.
         provider_groups: See `groups_of`.
     """
     user = get_user(username)
-    if not user or user.get("is_admin"):
-        return dict(DEFAULT_USER_SETTINGS, admin=bool(user and user.get("is_admin")))
+    if not user:
+        return dict(DEFAULT_USER_SETTINGS)
     base = DEFAULT_USER_SETTINGS.copy()
     base.update(user.get("settings") or {})
     names = groups_of(username, provider_groups)
     members = [GROUP_DATA[name]["settings"] for name in names]
-    effective = dict(base, groups=names, group=names[0] if names else "none")
+    # A catalog is a choice, not a limit: the user's own, else the first group's that makes one.
+    catalog = base.get("proot_catalog") or next((g["proot_catalog"] for g in members if g.get("proot_catalog")), None)
+    if user.get("is_admin"):
+        return dict(DEFAULT_USER_SETTINGS, admin=True, proot_catalog=catalog)
+    effective = dict(base, groups=names, group=names[0] if names else "none", proot_catalog=catalog)
     for key, restricting in SWITCHES.items():
         chosen = [bool(g[key]) for g in members if g.get(key) is not None]
         if chosen:

@@ -79,6 +79,7 @@
       "appTemplates": "Modelli App",
       "appLaboratory": "Laboratorio App",
       "installedApps": "App Installate",
+      "prootApps": "PRoot Apps",
       "users": "Utenti",
       "groups": "Gruppi",
       "admins": "Amministratori",
@@ -233,6 +234,9 @@
       "allowancePeriod": "Periodo della quota",
       "pools": "Pool riservati consentiti (separati da virgola)",
       "poolsDenied": "Pool negati (separati da virgola)",
+      "prootCatalog": "Catalogo PRoot Apps",
+      "prootCatalogNone": "Nessuno",
+      "prootCatalogHelp": "Montato in sola lettura in ogni sessione; proot-apps installa da qui invece che da un registro. Lasciato su Nessuno, decide il primo dei gruppi dell'utente a sceglierne uno.",
       "groupsHelp": "Tieni premuto Ctrl o Comando per selezionarne più di uno. Se i gruppi sono in disaccordo, prevale il valore più restrittivo.",
       "providerGroups": "Gruppi indicati dal provider di identità all'ultimo accesso: {groups}",
       "limitsHelp": "Un limite di -1, o lasciato vuoto, non ne imposta alcuno."
@@ -1254,7 +1258,14 @@
       "nodeRemoved": "Nodo rimosso.",
       "poolSaved": "Pool '{name}' salvato.",
       "poolDeleted": "Pool '{name}' eliminato.",
-      "nothingChanged": "Nessuna modifica."
+      "nothingChanged": "Nessuna modifica.",
+      "catalogSaved": "Catalogo '{name}' salvato; ogni nodo sta scaricando le sue app.",
+      "catalogSaveFailed": "Impossibile salvare il catalogo: {error}",
+      "catalogDeleted": "Catalogo '{name}' eliminato.",
+      "catalogDeleteFailed": "Impossibile eliminare il catalogo: {error}",
+      "catalogUpdateStarted": "Aggiornamento del catalogo '{name}' su ogni nodo.",
+      "catalogUpdateFailed": "Impossibile aggiornare il catalogo: {error}",
+      "catalogsRefreshFailed": "Impossibile caricare i cataloghi: {error}"
     },
     "placeholders": {
       "noAdmins": "Nessun amministratore trovato.",
@@ -1264,7 +1275,8 @@
       "noSessions": "Nessuna sessione attiva trovata.",
       "noPinned": "Nessun comportamento fissato trovato.",
       "errorLoading": "Errore durante il caricamento delle cartelle.",
-      "noInstalledApps": "Nessuna applicazione è stata ancora installata."
+      "noInstalledApps": "Nessuna applicazione è stata ancora installata.",
+      "noProotCatalogs": "Nessun catalogo."
     },
     "web": {
       "title": "SealSkin in Questo Browser",
@@ -1512,6 +1524,39 @@
       "resultSso": "URL di accesso:",
       "resultSlo": "Single logout offerto:",
       "resultCertificates": "Certificati di firma:"
+    },
+    "prootApps": {
+      "title": "Cataloghi PRoot Apps",
+      "help": "Un catalogo è una cartella di pacchetti PRoot Apps conservata su ogni nodo e montata in sola lettura nelle sessioni degli utenti e dei gruppi a cui è assegnato. Dentro una sessione, proot-apps e il suo installer grafico installano e aggiornano dalla cartella senza raggiungere alcun registro.",
+      "newCatalog": "Nuovo catalogo",
+      "editCatalog": "Modifica {name}",
+      "apps": "App",
+      "onThisNode": "Su questo nodo",
+      "nameLabel": "Nome del catalogo",
+      "autoUpdate": "Aggiornamento automatico",
+      "autoUpdateHelp": "Scarica di nuovo le app a ogni intervallo di aggiornamento automatico quando il loro pacchetto è cambiato.",
+      "selectedTitle": "App selezionate",
+      "selectedHelp": "Fai clic su un'app qui sotto per aggiungerla o toglierla. Le app di un remote diverso da quello predefinito vengono installate con il loro nome immagine completo.",
+      "noneSelected": "Nessuna app selezionata. Includi \"gui\" per dare agli utenti l'installer grafico.",
+      "remoteTitle": "App disponibili",
+      "searchPlaceholder": "Cerca app...",
+      "remoteLabel": "Remote (GitHub owner/repo di un repository proot-apps)",
+      "load": "Carica",
+      "refreshRemote": "Scarica di nuovo l'elenco",
+      "noApps": "Nessuna app trovata.",
+      "couldNotLoad": "Impossibile caricare le app di {remote}: {error}",
+      "disabledHint": "Contrassegnata come disabilitata dal suo remote; l'installer grafico la nasconde.",
+      "fromRemote": "da {remote}",
+      "statePending": "Non ancora sincronizzato",
+      "stateSyncing": "Sincronizzazione {done} di {total}",
+      "stateReady": "Pronto",
+      "stateError": "Errore",
+      "syncedAgo": "sincronizzato {ago}",
+      "autoUpdateOn": "aggiornamento automatico",
+      "update": "Aggiorna",
+      "updateTitle": "Scarica di nuovo le app adesso, su ogni nodo, dove il loro pacchetto è cambiato",
+      "confirmDelete": "Eliminare il catalogo '{name}'? Ogni nodo rimuove la sua copia e gli utenti a cui è assegnato restano senza catalogo.",
+      "deleteTitle": "Elimina catalogo"
     }
   },
   "popup": {

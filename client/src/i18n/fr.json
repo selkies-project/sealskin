@@ -79,6 +79,7 @@
       "appTemplates": "Modèles d'applications",
       "appLaboratory": "Laboratoire d'applications",
       "installedApps": "Applications Installées",
+      "prootApps": "PRoot Apps",
       "users": "Utilisateurs",
       "groups": "Groupes",
       "admins": "Admins",
@@ -233,6 +234,9 @@
       "allowancePeriod": "Période du quota",
       "pools": "Pools restreints autorisés (séparés par des virgules)",
       "poolsDenied": "Pools refusés (séparés par des virgules)",
+      "prootCatalog": "Catalogue PRoot Apps",
+      "prootCatalogNone": "Aucun",
+      "prootCatalogHelp": "Monté en lecture seule dans chaque session ; proot-apps installe depuis ce catalogue au lieu d'un registre. Laissé sur Aucun, le premier des groupes de l'utilisateur à en choisir un décide.",
       "groupsHelp": "Maintenez Ctrl ou Commande pour en sélectionner plusieurs. Quand les groupes divergent, la valeur la plus restrictive l'emporte.",
       "providerGroups": "Groupes indiqués par le fournisseur d'identité à la dernière connexion : {groups}",
       "limitsHelp": "Une limite de -1, ou laissée vide, n'en fixe aucune."
@@ -1254,7 +1258,14 @@
       "nodeRemoved": "Nœud retiré.",
       "poolSaved": "Pool '{name}' enregistré.",
       "poolDeleted": "Pool '{name}' supprimé.",
-      "nothingChanged": "Aucun changement."
+      "nothingChanged": "Aucun changement.",
+      "catalogSaved": "Catalogue '{name}' enregistré ; chaque nœud récupère ses applications.",
+      "catalogSaveFailed": "Impossible d'enregistrer le catalogue : {error}",
+      "catalogDeleted": "Catalogue '{name}' supprimé.",
+      "catalogDeleteFailed": "Impossible de supprimer le catalogue : {error}",
+      "catalogUpdateStarted": "Mise à jour du catalogue '{name}' sur chaque nœud.",
+      "catalogUpdateFailed": "Impossible de mettre à jour le catalogue : {error}",
+      "catalogsRefreshFailed": "Impossible de charger les catalogues : {error}"
     },
     "placeholders": {
       "noAdmins": "Aucun admin trouvé.",
@@ -1264,7 +1275,8 @@
       "noSessions": "Aucune session active trouvée.",
       "noPinned": "Aucun comportement épinglé trouvé.",
       "errorLoading": "Erreur lors du chargement des dossiers.",
-      "noInstalledApps": "Aucune application n'a encore été installée."
+      "noInstalledApps": "Aucune application n'a encore été installée.",
+      "noProotCatalogs": "Aucun catalogue pour l'instant."
     },
     "web": {
       "title": "SealSkin dans ce Navigateur",
@@ -1512,6 +1524,39 @@
       "resultSso": "URL de connexion :",
       "resultSlo": "Déconnexion unique proposée :",
       "resultCertificates": "Certificats de signature :"
+    },
+    "prootApps": {
+      "title": "Catalogues PRoot Apps",
+      "help": "Un catalogue est un dossier de paquets PRoot Apps conservé sur chaque nœud et monté en lecture seule dans les sessions des utilisateurs et groupes qui lui sont assignés. Dans une session, proot-apps et son installateur graphique installent et mettent à jour depuis ce dossier sans contacter aucun registre.",
+      "newCatalog": "Nouveau catalogue",
+      "editCatalog": "Modifier {name}",
+      "apps": "Applications",
+      "onThisNode": "Sur ce nœud",
+      "nameLabel": "Nom du catalogue",
+      "autoUpdate": "Mise à jour automatique",
+      "autoUpdateHelp": "Récupérer à nouveau les applications à chaque intervalle de mise à jour automatique lorsque leur paquet a changé.",
+      "selectedTitle": "Applications sélectionnées",
+      "selectedHelp": "Cliquez sur une application ci-dessous pour l'ajouter ou la retirer. Les applications d'un dépôt distant autre que celui par défaut sont installées sous leur nom d'image complet.",
+      "noneSelected": "Aucune application sélectionnée pour l'instant. Incluez \"gui\" pour donner l'installateur graphique aux utilisateurs.",
+      "remoteTitle": "Applications disponibles",
+      "searchPlaceholder": "Rechercher des applications...",
+      "remoteLabel": "Dépôt distant (GitHub owner/repo d'un dépôt proot-apps)",
+      "load": "Charger",
+      "refreshRemote": "Récupérer à nouveau la liste",
+      "noApps": "Aucune application trouvée.",
+      "couldNotLoad": "Impossible de charger les applications de {remote} : {error}",
+      "disabledHint": "Marquée désactivée par son dépôt distant ; l'installateur graphique la masque.",
+      "fromRemote": "depuis {remote}",
+      "statePending": "Pas encore synchronisé",
+      "stateSyncing": "Synchronisation {done} sur {total}",
+      "stateReady": "Prêt",
+      "stateError": "Erreur",
+      "syncedAgo": "synchronisé {ago}",
+      "autoUpdateOn": "mise à jour automatique",
+      "update": "Mettre à jour",
+      "updateTitle": "Récupérer à nouveau les applications maintenant, sur chaque nœud, là où leur paquet a changé",
+      "confirmDelete": "Supprimer le catalogue '{name}' ? Chaque nœud supprime sa copie, et les utilisateurs qui lui sont assignés n'ont plus de catalogue.",
+      "deleteTitle": "Supprimer le catalogue"
     }
   },
   "popup": {

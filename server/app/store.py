@@ -47,6 +47,7 @@ logger = logging.getLogger(__name__)
 MOUNTS: dict[str, str] = {
     "installed_apps.yml": "installed_apps_path",
     "app_stores.yml": "app_stores_path",
+    "proot_catalogs.yml": "proot_catalogs_path",
     "app_templates/": "app_templates_path",
     "keys/": "keys_base_path",
     "groups/": "groups_base_path",

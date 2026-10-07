@@ -79,6 +79,7 @@
       "appTemplates": "App-Vorlagen",
       "appLaboratory": "App-Labor",
       "installedApps": "Installierte Apps",
+      "prootApps": "PRoot Apps",
       "users": "Benutzer",
       "groups": "Gruppen",
       "admins": "Admins",
@@ -233,6 +234,9 @@
       "allowancePeriod": "Kontingentzeitraum",
       "pools": "Erlaubte eingeschränkte Pools (kommagetrennt)",
       "poolsDenied": "Verweigerte Pools (kommagetrennt)",
+      "prootCatalog": "PRoot Apps-Katalog",
+      "prootCatalogNone": "Keiner",
+      "prootCatalogHelp": "Wird schreibgeschützt in jede Sitzung eingebunden; proot-apps installiert daraus statt aus einer Registry. Bleibt es auf Keiner, entscheidet die erste Gruppe des Benutzers, die einen wählt.",
       "groupsHelp": "Halten Sie Strg oder die Befehlstaste gedrückt, um mehrere auszuwählen. Wo Gruppen sich widersprechen, gilt der einschränkende Wert.",
       "providerGroups": "Gruppen, die der Identitätsanbieter bei der letzten Anmeldung genannt hat: {groups}",
       "limitsHelp": "Ein Limit von -1 oder ein leeres Feld setzt keines."
@@ -1254,7 +1258,14 @@
       "nodeRemoved": "Knoten entfernt.",
       "poolSaved": "Pool '{name}' gespeichert.",
       "poolDeleted": "Pool '{name}' gelöscht.",
-      "nothingChanged": "Nichts geändert."
+      "nothingChanged": "Nichts geändert.",
+      "catalogSaved": "Katalog '{name}' gespeichert; jeder Node holt seine Apps.",
+      "catalogSaveFailed": "Der Katalog konnte nicht gespeichert werden: {error}",
+      "catalogDeleted": "Katalog '{name}' gelöscht.",
+      "catalogDeleteFailed": "Der Katalog konnte nicht gelöscht werden: {error}",
+      "catalogUpdateStarted": "Katalog '{name}' wird auf jedem Node aktualisiert.",
+      "catalogUpdateFailed": "Der Katalog konnte nicht aktualisiert werden: {error}",
+      "catalogsRefreshFailed": "Die Kataloge konnten nicht geladen werden: {error}"
     },
     "placeholders": {
       "noAdmins": "Keine Admins gefunden.",
@@ -1264,7 +1275,8 @@
       "noSessions": "Keine aktiven Sitzungen gefunden.",
       "noPinned": "Keine gepinnten Verhalten gefunden.",
       "errorLoading": "Fehler beim Laden der Verzeichnisse.",
-      "noInstalledApps": "Es wurden noch keine Anwendungen installiert."
+      "noInstalledApps": "Es wurden noch keine Anwendungen installiert.",
+      "noProotCatalogs": "Noch keine Kataloge."
     },
     "web": {
       "title": "SealSkin in diesem Browser",
@@ -1512,6 +1524,39 @@
       "resultSso": "Sign-On-URL:",
       "resultSlo": "Single Logout angeboten:",
       "resultCertificates": "Signaturzertifikate:"
+    },
+    "prootApps": {
+      "title": "PRoot Apps-Kataloge",
+      "help": "Ein Katalog ist ein Ordner mit PRoot Apps-Paketen, der auf jedem Node vorgehalten und schreibgeschützt in die Sitzungen der ihm zugewiesenen Benutzer und Gruppen eingebunden wird. In einer Sitzung installieren und aktualisieren proot-apps und sein grafisches Installationsprogramm aus dem Ordner und erreichen keine Registry.",
+      "newCatalog": "Neuer Katalog",
+      "editCatalog": "{name} bearbeiten",
+      "apps": "Apps",
+      "onThisNode": "Auf diesem Node",
+      "nameLabel": "Katalogname",
+      "autoUpdate": "Automatische Aktualisierung",
+      "autoUpdateHelp": "Die Apps im Intervall der automatischen Aktualisierung erneut holen, wenn sich ihr Paket geändert hat.",
+      "selectedTitle": "Ausgewählte Apps",
+      "selectedHelp": "Klicken Sie unten auf eine App, um sie hinzuzufügen oder zu entfernen. Apps aus einem anderen Remote als dem Standard werden mit ihrem vollständigen Image-Namen installiert.",
+      "noneSelected": "Noch keine Apps ausgewählt. Nehmen Sie \"gui\" auf, um Benutzern das grafische Installationsprogramm zu geben.",
+      "remoteTitle": "Verfügbare Apps",
+      "searchPlaceholder": "Apps durchsuchen...",
+      "remoteLabel": "Remote (GitHub owner/repo eines proot-apps-Repositorys)",
+      "load": "Laden",
+      "refreshRemote": "Liste erneut holen",
+      "noApps": "Keine Apps gefunden.",
+      "couldNotLoad": "Die Apps von {remote} konnten nicht geladen werden: {error}",
+      "disabledHint": "Von seinem Remote als deaktiviert markiert; das grafische Installationsprogramm blendet sie aus.",
+      "fromRemote": "von {remote}",
+      "statePending": "Noch nicht synchronisiert",
+      "stateSyncing": "Synchronisiere {done} von {total}",
+      "stateReady": "Bereit",
+      "stateError": "Fehler",
+      "syncedAgo": "synchronisiert {ago}",
+      "autoUpdateOn": "automatische Aktualisierung",
+      "update": "Aktualisieren",
+      "updateTitle": "Die Apps jetzt auf jedem Node erneut holen, wo sich ihr Paket geändert hat",
+      "confirmDelete": "Katalog '{name}' löschen? Jeder Node entfernt seine Kopie, und ihm zugewiesene Benutzer erhalten keinen Katalog.",
+      "deleteTitle": "Katalog löschen"
     }
   },
   "popup": {

@@ -367,7 +367,12 @@ def _signed_in(username: str, via: str, provider_groups: Any = (), admin: bool =
     effective = user_manager.get_effective_settings(username, provider_groups)
     is_admin = is_admin or bool(effective.get("admin"))
     if is_admin:
-        effective = dict(user_manager.DEFAULT_USER_SETTINGS, admin=True, groups=effective.get("groups") or [])
+        effective = dict(
+            user_manager.DEFAULT_USER_SETTINGS,
+            admin=True,
+            groups=effective.get("groups") or [],
+            proot_catalog=effective.get("proot_catalog"),
+        )
     elif not effective.get("active", False):
         raise HTTPException(status_code=403, detail="User account is inactive.")
     return dict(

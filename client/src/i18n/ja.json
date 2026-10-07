@@ -79,6 +79,7 @@
       "appTemplates": "アプリテンプレート",
       "appLaboratory": "アプリラボ",
       "installedApps": "インストール済みアプリ",
+      "prootApps": "PRoot Apps",
       "users": "ユーザー",
       "groups": "グループ",
       "admins": "管理者",
@@ -233,6 +234,9 @@
       "allowancePeriod": "利用枠の期間",
       "pools": "許可する制限付きプール（カンマ区切り）",
       "poolsDenied": "拒否するプール（カンマ区切り）",
+      "prootCatalog": "PRoot Apps カタログ",
+      "prootCatalogNone": "なし",
+      "prootCatalogHelp": "すべてのセッションに読み取り専用でマウントされ、proot-apps はレジストリの代わりにここからインストールします。「なし」のままの場合は、ユーザーのグループのうち最初にカタログを選択しているものが決めます。",
       "groupsHelp": "CtrlキーまたはCommandキーを押しながら複数選択できます。グループ間で設定が異なる場合は、より制限の厳しい値が優先されます。",
       "providerGroups": "前回のサインイン時にIDプロバイダーが通知したグループ: {groups}",
       "limitsHelp": "-1または空欄にすると、制限なしになります。"
@@ -1254,7 +1258,14 @@
       "nodeRemoved": "ノードが削除されました。",
       "poolSaved": "プール '{name}' が保存されました。",
       "poolDeleted": "プール '{name}' が削除されました。",
-      "nothingChanged": "変更はありません。"
+      "nothingChanged": "変更はありません。",
+      "catalogSaved": "カタログ「{name}」を保存しました。すべてのノードがアプリを取得しています。",
+      "catalogSaveFailed": "カタログを保存できませんでした: {error}",
+      "catalogDeleted": "カタログ「{name}」を削除しました。",
+      "catalogDeleteFailed": "カタログを削除できませんでした: {error}",
+      "catalogUpdateStarted": "すべてのノードでカタログ「{name}」を更新しています。",
+      "catalogUpdateFailed": "カタログを更新できませんでした: {error}",
+      "catalogsRefreshFailed": "カタログを読み込めませんでした: {error}"
     },
     "placeholders": {
       "noAdmins": "管理が見つかりません。",
@@ -1264,7 +1275,8 @@
       "noSessions": "アクティブなセッションが見つかりません。",
       "noPinned": "ピン留めされた動作が見つかりません。",
       "errorLoading": "ディレクトリの読み込み中にエラーが発生しました。",
-      "noInstalledApps": "まだアプリケーションがインストールされていません。"
+      "noInstalledApps": "まだアプリケーションがインストールされていません。",
+      "noProotCatalogs": "カタログはまだありません。"
     },
     "web": {
       "title": "このブラウザーでのSealSkin",
@@ -1512,6 +1524,39 @@
       "resultSso": "サインオンURL:",
       "resultSlo": "シングルログアウトの提供:",
       "resultCertificates": "署名証明書:"
+    },
+    "prootApps": {
+      "title": "PRoot Apps カタログ",
+      "help": "カタログは、すべてのノードに保持され、割り当てられたユーザーとグループのセッションに読み取り専用でマウントされる PRoot Apps パッケージのフォルダーです。セッション内では、proot-apps とそのグラフィカルインストーラーはこのフォルダーからインストールと更新を行い、レジストリには接続しません。",
+      "newCatalog": "新しいカタログ",
+      "editCatalog": "{name} を編集",
+      "apps": "アプリ",
+      "onThisNode": "このノード上",
+      "nameLabel": "カタログ名",
+      "autoUpdate": "自動更新",
+      "autoUpdateHelp": "パッケージが変更された場合、自動更新の間隔でアプリを再取得します。",
+      "selectedTitle": "選択済みのアプリ",
+      "selectedHelp": "下のアプリをクリックして追加または削除します。デフォルト以外のリモートのアプリは、完全なイメージ名でインストールされます。",
+      "noneSelected": "まだアプリが選択されていません。ユーザーにグラフィカルインストーラーを提供するには \"gui\" を含めてください。",
+      "remoteTitle": "利用可能なアプリ",
+      "searchPlaceholder": "アプリを検索...",
+      "remoteLabel": "リモート（proot-apps リポジトリの GitHub owner/repo）",
+      "load": "読み込む",
+      "refreshRemote": "リストを再取得",
+      "noApps": "アプリが見つかりません。",
+      "couldNotLoad": "{remote} のアプリを読み込めませんでした: {error}",
+      "disabledHint": "リモートで無効とマークされています。グラフィカルインストーラーには表示されません。",
+      "fromRemote": "{remote} から",
+      "statePending": "未同期",
+      "stateSyncing": "同期中 {done} / {total}",
+      "stateReady": "準備完了",
+      "stateError": "エラー",
+      "syncedAgo": "{ago}に同期",
+      "autoUpdateOn": "自動更新",
+      "update": "更新",
+      "updateTitle": "パッケージが変更されたアプリを、すべてのノードで今すぐ再取得します",
+      "confirmDelete": "カタログ「{name}」を削除しますか？すべてのノードがコピーを削除し、割り当てられたユーザーはカタログを持たなくなります。",
+      "deleteTitle": "カタログを削除"
     }
   },
   "popup": {

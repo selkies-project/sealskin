@@ -79,6 +79,7 @@
       "appTemplates": "App Sjablonen",
       "appLaboratory": "App Laboratorium",
       "installedApps": "Geïnstalleerde Apps",
+      "prootApps": "PRoot Apps",
       "users": "Gebruikers",
       "groups": "Groepen",
       "admins": "Beheerders",
@@ -233,6 +234,9 @@
       "allowancePeriod": "Tegoedperiode",
       "pools": "Toegestane beperkte pools (door komma's gescheiden)",
       "poolsDenied": "Geweigerde pools (door komma's gescheiden)",
+      "prootCatalog": "PRoot Apps-catalogus",
+      "prootCatalogNone": "Geen",
+      "prootCatalogHelp": "Wordt alleen-lezen in elke sessie gemount; proot-apps installeert hieruit in plaats van uit een registry. Blijft dit op Geen, dan beslist de eerste groep van de gebruiker die er een kiest.",
       "groupsHelp": "Houd Ctrl of Command ingedrukt om er meerdere te selecteren. Waar groepen elkaar tegenspreken, wint de beperkende waarde.",
       "providerGroups": "Groepen die de identiteitsprovider bij de laatste aanmelding noemde: {groups}",
       "limitsHelp": "Een limiet van -1, of een leeg veld, stelt geen limiet in."
@@ -1254,7 +1258,14 @@
       "nodeRemoved": "Node verwijderd.",
       "poolSaved": "Pool '{name}' opgeslagen.",
       "poolDeleted": "Pool '{name}' verwijderd.",
-      "nothingChanged": "Niets gewijzigd."
+      "nothingChanged": "Niets gewijzigd.",
+      "catalogSaved": "Catalogus '{name}' opgeslagen; elke node haalt de apps op.",
+      "catalogSaveFailed": "Kon de catalogus niet opslaan: {error}",
+      "catalogDeleted": "Catalogus '{name}' verwijderd.",
+      "catalogDeleteFailed": "Kon de catalogus niet verwijderen: {error}",
+      "catalogUpdateStarted": "Catalogus '{name}' wordt op elke node geüpdatet.",
+      "catalogUpdateFailed": "Kon de catalogus niet updaten: {error}",
+      "catalogsRefreshFailed": "Kon de catalogi niet laden: {error}"
     },
     "placeholders": {
       "noAdmins": "Geen beheerders gevonden.",
@@ -1264,7 +1275,8 @@
       "noSessions": "Geen actieve sessies gevonden.",
       "noPinned": "Geen vastgezet gedrag gevonden.",
       "errorLoading": "Fout bij het laden van de mappen.",
-      "noInstalledApps": "Er zijn nog geen applicaties geïnstalleerd."
+      "noInstalledApps": "Er zijn nog geen applicaties geïnstalleerd.",
+      "noProotCatalogs": "Nog geen catalogi."
     },
     "web": {
       "title": "SealSkin in Deze Browser",
@@ -1512,6 +1524,39 @@
       "resultSso": "Aanmeld-URL:",
       "resultSlo": "Single logout aangeboden:",
       "resultCertificates": "Ondertekeningscertificaten:"
+    },
+    "prootApps": {
+      "title": "PRoot Apps-catalogi",
+      "help": "Een catalogus is een map met PRoot Apps-pakketten die op elke node wordt bewaard en alleen-lezen wordt gemount in de sessies van de gebruikers en groepen die eraan zijn toegewezen. In een sessie installeren en updaten proot-apps en het grafische installatieprogramma vanuit die map en maken ze geen verbinding met een registry.",
+      "newCatalog": "Nieuwe catalogus",
+      "editCatalog": "{name} bewerken",
+      "apps": "Apps",
+      "onThisNode": "Op deze node",
+      "nameLabel": "Catalogusnaam",
+      "autoUpdate": "Automatisch updaten",
+      "autoUpdateHelp": "Haal de apps op het auto-update-interval opnieuw op wanneer hun pakket is gewijzigd.",
+      "selectedTitle": "Geselecteerde apps",
+      "selectedHelp": "Klik hieronder op een app om die toe te voegen of te verwijderen. Apps van een andere remote dan de standaard worden geïnstalleerd met hun volledige imagenaam.",
+      "noneSelected": "Nog geen apps geselecteerd. Neem \"gui\" op om gebruikers het grafische installatieprogramma te geven.",
+      "remoteTitle": "Beschikbare apps",
+      "searchPlaceholder": "Apps zoeken...",
+      "remoteLabel": "Remote (GitHub owner/repo van een proot-apps-repository)",
+      "load": "Laden",
+      "refreshRemote": "Lijst opnieuw ophalen",
+      "noApps": "Geen apps gevonden.",
+      "couldNotLoad": "Kon de apps van {remote} niet laden: {error}",
+      "disabledHint": "Door de remote als uitgeschakeld gemarkeerd; het grafische installatieprogramma verbergt deze.",
+      "fromRemote": "van {remote}",
+      "statePending": "Nog niet gesynchroniseerd",
+      "stateSyncing": "{done} van {total} synchroniseren",
+      "stateReady": "Gereed",
+      "stateError": "Fout",
+      "syncedAgo": "gesynchroniseerd {ago}",
+      "autoUpdateOn": "automatisch updaten",
+      "update": "Updaten",
+      "updateTitle": "Haal de apps waarvan het pakket is gewijzigd nu opnieuw op, op elke node",
+      "confirmDelete": "Catalogus '{name}' verwijderen? Elke node verwijdert zijn kopie en de gebruikers die eraan zijn toegewezen krijgen geen catalogus.",
+      "deleteTitle": "Catalogus verwijderen"
     }
   },
   "popup": {

@@ -52,8 +52,8 @@ peer listener beyond the nodes.
 ## The shared store
 
 What the nodes share is a small set of objects: users and administrators
-(`keys/`), groups, installed applications, application stores, templates, and
-the cluster's own records (`cluster/`: nodes, pools, sign-in settings, home
+(`keys/`), groups, installed applications, application stores, templates,
+PRoot Apps catalogs, and the cluster's own records (`cluster/`: nodes, pools, sign-in settings, home
 directory locations, usage, and the hash of the root token). The store that
 holds them is the authority, and it holds no secret: public keys and hashes
 only.
@@ -189,6 +189,15 @@ changed when the session stops and every few minutes while it runs. The last
 writer of a file wins; when two nodes changed the same file, the losing
 version is kept beside it as `<name>.conflict-<node>`. Files over 512 MB stay
 on their node.
+
+## PRoot Apps catalogs
+
+The record of a [catalog](administration.md#proot-apps) is shared; its
+content is not. Every node fetches the packages itself, for its own
+architecture, when the record changes and, for a catalog with auto update,
+on the auto-update interval, so a session finds the same catalog on whichever
+node it starts, and a node that is away catches up when it is back. The
+dashboard shows the state of the copy on the node it is served from.
 
 ## Limits across nodes
 

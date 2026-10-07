@@ -49,6 +49,7 @@ Each user carries these settings, editable later:
 | **Harden Container**, **Harden Window Manager** | Force the base image presets `HARDEN_DESKTOP` and `HARDEN_OPENBOX` on every session the user starts, including apps a collaboration room swaps to. They are applied after the [app template](#app-templates) and the app's own environment overrides, so neither can switch them back off. Leave them off to let the template decide. |
 | **Limits** | Sessions at once, storage, CPUs and memory per session, session length, and a time allowance per day, week, or month; see [the limits](signin.md#groups-switches-and-limits). Blank or negative is no limit. |
 | **Pools** | Restricted [pools](cluster.md#pools) open to the user, and pools closed to them. |
+| **PRoot Apps catalog** | The [catalog](#proot-apps) the user's sessions install PRoot Apps from. Left at **None**, the first of the user's groups to choose one decides. |
 
 Deleting a user also deletes their storage on the node the dashboard is
 served from. A user with no key shows **Single sign-on only** in place of a
@@ -64,7 +65,9 @@ the rest alone: each switch is **Not set**, **Allow**, or **Deny**, and a
 blank limit is not set. A user in one group gets the group's value for
 everything the group sets. A user in several gets, for each setting, the
 restricting value if any of the groups gives it, and the smallest limit; the
-edit dialog shows the result as **Effective Settings**. **Identity provider
+edit dialog shows the result as **Effective Settings**. The **PRoot Apps
+catalog** is a choice rather than a limit: a member's own choice wins, then
+the first of their groups that makes one. **Identity provider
 groups** names the provider's groups whose members are in this group without
 being listed. Groups are also a permission target for applications and
 pools. Deleting a group leaves its members with what their other groups and
@@ -149,6 +152,45 @@ Installed apps are stored as a **reference to the store entry plus your
 overrides**, so when the store changes an image tag or an extension list, the
 change applies at the next cache refresh without reinstalling. Only the
 fields you changed stay pinned.
+
+## PRoot Apps
+
+[PRoot Apps](https://github.com/linuxserver/proot-apps) is the package
+manager inside every LinuxServer.io desktop image: `proot-apps install
+firefox` unpacks an application into the home directory, and its graphical
+installer (`gui`) offers the same list with icons. A **catalog** is a folder
+of those packages that SealSkin keeps on every node and mounts read-only into
+sessions, so the users assigned to it install and update from the folder and
+their sessions reach no registry: PRoot Apps finds the catalog through
+`PA_REPO_FOLDER`, which the session's environment points at the mount.
+
+**New Catalog** opens the editor. Give the catalog a name, then pick its apps
+from the grid, which lists what the **remote** publishes. A remote is the
+GitHub `owner/repo` of a proot-apps repository; the editor opens on
+`SEALSKIN_PROOT_APPS_REMOTE` (linuxserver/proot-apps) and takes any fork
+built the same way, whose apps are then installed by their full image name
+(`ghcr.io/<owner>/<repo>:<app>`), since the short names belong to the default
+remote. A catalog can mix apps from several remotes. Include `gui` to give
+the users the graphical installer, which the remote lists as disabled: it is
+installed like any app (`proot-apps install gui`) and shows the catalog,
+nothing more.
+
+The table shows the state of this node's copy of each catalog. Every node
+with sessions fetches the apps itself, for its own architecture, as soon as
+a catalog is saved; **Update** fetches again, on every node, the apps whose
+package changed, which **Auto update** also does on the auto-update interval.
+Apps a remote does not build for the node's architecture are skipped there
+and hidden by the installer. Deleting a catalog removes every node's copy;
+users assigned to it keep the setting, which then does nothing.
+
+Assign a catalog to a user or a group in their settings. A session mounts its
+catalog at `/mnt/proot-apps`, and a user with no catalog has PRoot Apps as
+the image ships it, fetching from the registry. The catalogs live under
+`SEALSKIN_PROOT_APPS_PATH` (`/storage/sealskin_proot_apps`), one folder per
+catalog, in the layout the [proot-apps
+README](https://github.com/linuxserver/proot-apps#for-administrators)
+describes for a local repository: `metadata/` for the installer and one
+`ghcr.io_<owner>_<repo>_<app>/` folder per package.
 
 ## App Templates
 

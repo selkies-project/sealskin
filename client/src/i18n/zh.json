@@ -79,6 +79,7 @@
       "appTemplates": "应用模板",
       "appLaboratory": "应用实验室",
       "installedApps": "已安装应用",
+      "prootApps": "PRoot Apps",
       "users": "用户",
       "groups": "群组",
       "admins": "管理员",
@@ -233,6 +234,9 @@
       "allowancePeriod": "额度周期",
       "pools": "允许使用的受限资源池（逗号分隔）",
       "poolsDenied": "禁止使用的资源池（逗号分隔）",
+      "prootCatalog": "PRoot Apps 目录",
+      "prootCatalogNone": "无",
+      "prootCatalogHelp": "以只读方式挂载到每个会话；proot-apps 从中安装，而不是从注册表安装。保持为“无”时，由用户所属的第一个选择了目录的组决定。",
       "groupsHelp": "按住 Ctrl 或 Command 可多选。群组之间设置不一致时，以限制更严格的值为准。",
       "providerGroups": "上次登录时身份提供方给出的群组: {groups}",
       "limitsHelp": "限制设为 -1 或留空表示不限制。"
@@ -1254,7 +1258,14 @@
       "nodeRemoved": "节点已移除。",
       "poolSaved": "资源池“{name}”已保存。",
       "poolDeleted": "资源池“{name}”已删除。",
-      "nothingChanged": "没有任何更改。"
+      "nothingChanged": "没有任何更改。",
+      "catalogSaved": "目录“{name}”已保存；每个节点正在拉取其应用。",
+      "catalogSaveFailed": "无法保存目录：{error}",
+      "catalogDeleted": "目录“{name}”已删除。",
+      "catalogDeleteFailed": "无法删除目录：{error}",
+      "catalogUpdateStarted": "正在每个节点上更新目录“{name}”。",
+      "catalogUpdateFailed": "无法更新目录：{error}",
+      "catalogsRefreshFailed": "无法加载目录列表：{error}"
     },
     "placeholders": {
       "noAdmins": "未找到管理员。",
@@ -1264,7 +1275,8 @@
       "noSessions": "未找到活跃会话。",
       "noPinned": "未找到固定行为。",
       "errorLoading": "加载目录时出错。",
-      "noInstalledApps": "尚未安装任何应用程序。"
+      "noInstalledApps": "尚未安装任何应用程序。",
+      "noProotCatalogs": "尚无目录。"
     },
     "web": {
       "title": "在此浏览器中使用 SealSkin",
@@ -1512,6 +1524,39 @@
       "resultSso": "登录 URL:",
       "resultSlo": "提供单点注销:",
       "resultCertificates": "签名证书:"
+    },
+    "prootApps": {
+      "title": "PRoot Apps 目录",
+      "help": "目录是保存在每个节点上的 PRoot Apps 软件包文件夹，以只读方式挂载到分配给它的用户和组的会话中。在会话内，proot-apps 及其图形安装器从该文件夹安装和更新，不访问任何注册表。",
+      "newCatalog": "新建目录",
+      "editCatalog": "编辑 {name}",
+      "apps": "应用",
+      "onThisNode": "本节点上",
+      "nameLabel": "目录名称",
+      "autoUpdate": "自动更新",
+      "autoUpdateHelp": "按自动更新间隔重新拉取软件包已变更的应用。",
+      "selectedTitle": "已选应用",
+      "selectedHelp": "点击下方的应用以添加或移除。来自非默认远程源的应用按完整镜像名称安装。",
+      "noneSelected": "尚未选择应用。加入 \"gui\" 可为用户提供图形安装器。",
+      "remoteTitle": "可用应用",
+      "searchPlaceholder": "搜索应用...",
+      "remoteLabel": "远程源（proot-apps 仓库的 GitHub owner/repo）",
+      "load": "加载",
+      "refreshRemote": "重新拉取列表",
+      "noApps": "未找到应用。",
+      "couldNotLoad": "无法加载 {remote} 的应用：{error}",
+      "disabledHint": "被其远程源标记为已禁用；图形安装器会隐藏它。",
+      "fromRemote": "来自 {remote}",
+      "statePending": "尚未同步",
+      "stateSyncing": "正在同步 {done} / {total}",
+      "stateReady": "就绪",
+      "stateError": "错误",
+      "syncedAgo": "同步于 {ago}",
+      "autoUpdateOn": "自动更新",
+      "update": "更新",
+      "updateTitle": "立即在每个节点上重新拉取软件包已变更的应用",
+      "confirmDelete": "删除目录“{name}”？每个节点都会删除其副本，分配给它的用户将没有目录。",
+      "deleteTitle": "删除目录"
     }
   },
   "popup": {

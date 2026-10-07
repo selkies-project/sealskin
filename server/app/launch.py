@@ -24,7 +24,17 @@ from typing import Any
 import docker
 from fastapi import HTTPException
 
-from . import audit, cluster, config_store, filesync, progress, quota, user_manager, webclient
+from . import (
+    audit,
+    cluster,
+    config_store,
+    filesync,
+    progress,
+    prootapps,
+    quota,
+    user_manager,
+    webclient,
+)
 from .fsutil import safe_copytree, safe_join, sanitize_for_filename, unique_filename
 from .models import InstalledApp
 from .providers import get_provider
@@ -446,6 +456,7 @@ def build_launch_spec(
     shared_files_path: str | None,
     collaboration: dict[str, Any] | None = None,
     forced_env: dict[str, str] | None = None,
+    proot_catalog_path: str | None = None,
 ) -> LaunchSpec:
     """Assemble the environment, volumes, and Docker options for a launch.
 
@@ -462,6 +473,8 @@ def build_launch_spec(
         collaboration: Extra provider kwargs for collaboration sessions.
         forced_env: Variables applied last, after the template and the app's
             own overrides; the user-level hardening from `hardening_env`.
+        proot_catalog_path: This node's folder of the user's PRoot Apps catalog,
+            mounted read-only at `prootapps.MOUNT_PATH`, or `None`.
 
     Returns:
         A `LaunchSpec`.
@@ -530,6 +543,10 @@ def build_launch_spec(
             "bind": os.path.join(settings.container_config_path, "Desktop", "files"),
             "mode": "rw",
         }
+    if proot_catalog_path:
+        # proot-apps installs from the folder PA_REPO_FOLDER names and reaches no registry.
+        volumes[proot_catalog_path] = {"bind": prootapps.MOUNT_PATH, "mode": "ro"}
+        env["PA_REPO_FOLDER"] = prootapps.MOUNT_PATH
 
     return LaunchSpec(
         env=env,
@@ -785,6 +802,7 @@ async def launch_application(
         shared_files_path=shared_files_path,
         collaboration=collaboration,
         forced_env=hardening_env(effective_settings),
+        proot_catalog_path=prootapps.mount_path_for(effective_settings),
     )
 
     quota.cap_resources(spec.app_config["provider_config"]["docker_overrides"], effective_settings)
@@ -959,6 +977,7 @@ async def ensure_container_for_session(
             "master_token": session.get("master_token"),
             "initial_tokens": collaboration_initial_tokens(session),
         }
+    user_settings = user_manager.get_effective_settings(session["username"]) if session.get("username") else None
 
     spec = build_launch_spec(
         app,
@@ -977,9 +996,8 @@ async def ensure_container_for_session(
         host_mount_path=new_home,
         shared_files_path=shared_files_path,
         collaboration=collaboration,
-        forced_env=hardening_env(
-            user_manager.get_effective_settings(session["username"]) if session.get("username") else None
-        ),
+        forced_env=hardening_env(user_settings),
+        proot_catalog_path=prootapps.mount_path_for(user_settings),
     )
 
     provider = get_provider(spec.app_config)

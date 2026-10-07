@@ -79,6 +79,7 @@
       "appTemplates": "Plantillas de Apps",
       "appLaboratory": "Laboratorio de Apps",
       "installedApps": "Apps Instaladas",
+      "prootApps": "PRoot Apps",
       "users": "Usuarios",
       "groups": "Grupos",
       "admins": "Administradores",
@@ -233,6 +234,9 @@
       "allowancePeriod": "Período de la cuota",
       "pools": "Pools restringidos permitidos (separados por comas)",
       "poolsDenied": "Pools denegados (separados por comas)",
+      "prootCatalog": "Catálogo de PRoot Apps",
+      "prootCatalogNone": "Ninguno",
+      "prootCatalogHelp": "Se monta de solo lectura en cada sesión; proot-apps instala desde él en lugar de un registro. Si se deja en Ninguno, decide el primero de los grupos del usuario que elija uno.",
       "groupsHelp": "Mantenga pulsado Ctrl o Comando para seleccionar varios. Si los grupos discrepan, prevalece el valor más restrictivo.",
       "providerGroups": "Grupos indicados por el proveedor de identidad en el último inicio de sesión: {groups}",
       "limitsHelp": "Un límite de -1, o en blanco, no fija ninguno."
@@ -1254,7 +1258,14 @@
       "nodeRemoved": "Nodo quitado.",
       "poolSaved": "Pool '{name}' guardado.",
       "poolDeleted": "Pool '{name}' eliminado.",
-      "nothingChanged": "No hubo cambios."
+      "nothingChanged": "No hubo cambios.",
+      "catalogSaved": "Catálogo '{name}' guardado; cada nodo está obteniendo sus apps.",
+      "catalogSaveFailed": "No se pudo guardar el catálogo: {error}",
+      "catalogDeleted": "Catálogo '{name}' eliminado.",
+      "catalogDeleteFailed": "No se pudo eliminar el catálogo: {error}",
+      "catalogUpdateStarted": "Actualizando el catálogo '{name}' en cada nodo.",
+      "catalogUpdateFailed": "No se pudo actualizar el catálogo: {error}",
+      "catalogsRefreshFailed": "No se pudieron cargar los catálogos: {error}"
     },
     "placeholders": {
       "noAdmins": "No se encontraron administradores.",
@@ -1264,7 +1275,8 @@
       "noSessions": "No se encontraron sesiones activas.",
       "noPinned": "No se encontraron comportamientos anclados.",
       "errorLoading": "Error al cargar los directorios.",
-      "noInstalledApps": "Aún no se han instalado aplicaciones."
+      "noInstalledApps": "Aún no se han instalado aplicaciones.",
+      "noProotCatalogs": "Aún no hay catálogos."
     },
     "web": {
       "title": "SealSkin en Este Navegador",
@@ -1512,6 +1524,39 @@
       "resultSso": "URL de inicio de sesión:",
       "resultSlo": "Cierre de sesión único ofrecido:",
       "resultCertificates": "Certificados de firma:"
+    },
+    "prootApps": {
+      "title": "Catálogos de PRoot Apps",
+      "help": "Un catálogo es una carpeta de paquetes de PRoot Apps que se guarda en cada nodo y se monta de solo lectura en las sesiones de los usuarios y grupos asignados a él. Dentro de una sesión, proot-apps y su instalador gráfico instalan y actualizan desde la carpeta sin acceder a ningún registro.",
+      "newCatalog": "Nuevo catálogo",
+      "editCatalog": "Editar {name}",
+      "apps": "Apps",
+      "onThisNode": "En este nodo",
+      "nameLabel": "Nombre del catálogo",
+      "autoUpdate": "Actualización automática",
+      "autoUpdateHelp": "Volver a obtener las apps en el intervalo de actualización automática cuando su paquete haya cambiado.",
+      "selectedTitle": "Apps seleccionadas",
+      "selectedHelp": "Haz clic en una app de abajo para añadirla o quitarla. Las apps de un remoto distinto del predeterminado se instalan por su nombre de imagen completo.",
+      "noneSelected": "Aún no hay apps seleccionadas. Incluye \"gui\" para dar a los usuarios el instalador gráfico.",
+      "remoteTitle": "Apps disponibles",
+      "searchPlaceholder": "Buscar apps...",
+      "remoteLabel": "Remoto (GitHub owner/repo de un repositorio proot-apps)",
+      "load": "Cargar",
+      "refreshRemote": "Volver a obtener la lista",
+      "noApps": "No se encontraron apps.",
+      "couldNotLoad": "No se pudieron cargar las apps de {remote}: {error}",
+      "disabledHint": "Marcada como deshabilitada por su remoto; el instalador gráfico la oculta.",
+      "fromRemote": "de {remote}",
+      "statePending": "Aún no sincronizado",
+      "stateSyncing": "Sincronizando {done} de {total}",
+      "stateReady": "Listo",
+      "stateError": "Error",
+      "syncedAgo": "sincronizado {ago}",
+      "autoUpdateOn": "actualización automática",
+      "update": "Actualizar",
+      "updateTitle": "Volver a obtener las apps ahora, en cada nodo, donde su paquete haya cambiado",
+      "confirmDelete": "¿Eliminar el catálogo '{name}'? Cada nodo elimina su copia y los usuarios asignados a él se quedan sin catálogo.",
+      "deleteTitle": "Eliminar catálogo"
     }
   },
   "popup": {

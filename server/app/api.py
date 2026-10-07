@@ -24,6 +24,7 @@ from . import (
     config_store,
     filesync,
     persistence,
+    prootapps,
     quota,
     routing,
     sso,
@@ -92,6 +93,7 @@ async def background_update_job() -> None:
         logger.info("Cleaning up dangling images...")
         await get_provider().prune_images()
         await asyncio.to_thread(webclient.prune, webclient.digests_in_use())
+        await prootapps.auto_update()
 
 
 async def background_share_cleanup_job() -> None:
@@ -121,6 +123,13 @@ async def _reload_templates(_path: str) -> None:
     await asyncio.to_thread(config_store.load_app_templates)
 
 
+async def _reload_proot_catalogs(_path: str) -> None:
+    """Watcher callback: reload the PRoot Apps catalogs and bring this node's copies along."""
+    logger.info("PRoot Apps catalogs changed; reloading.")
+    await asyncio.to_thread(prootapps.load_catalogs)
+    prootapps.reconcile()
+
+
 async def _reload_cluster(_path: str) -> None:
     """Watcher callback: reload the cluster's records after another node or an administrator changed them."""
     logger.info("Cluster records changed; reloading.")
@@ -148,6 +157,7 @@ def _catch_up() -> None:
     config_store.load_store_entries()
     config_store.load_app_templates()
     config_store.load_installed_apps()
+    prootapps.load_catalogs()
 
 
 async def background_peer_job() -> None:
@@ -198,6 +208,7 @@ def _watch_targets() -> dict[str, persistence.ReloadCallback]:
         settings.installed_apps_path: _reload_installed_apps,
         settings.app_stores_path: _reload_app_stores,
         settings.app_templates_path: _reload_templates,
+        settings.proot_catalogs_path: _reload_proot_catalogs,
         os.path.join(settings.keys_base_path, "users"): _reload_users,
         os.path.join(settings.keys_base_path, "admins"): _reload_users,
         settings.groups_base_path: _reload_users,
@@ -285,6 +296,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger.info("Performing initial population of autostart script cache...")
     await config_store.refresh_autostart_caches()
     config_store.load_installed_apps()
+    prootapps.load_catalogs()
+    prootapps.reconcile()
 
     logger.info("Populating initial image metadata cache...")
     for image_name in {app.provider_config.image for app in state.installed_apps.values()}:
@@ -317,6 +330,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         for task in tasks:
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
+        await prootapps.wait_for_syncs()
         quota.tick()
         await quota.flush()
         logger.info("Background tasks stopped.")

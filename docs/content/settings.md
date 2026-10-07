@@ -34,6 +34,9 @@ paths refer to.
 | `SEALSKIN_SESSION_COOKIE_NAME` | `str` | `sealskin_session_token` | Name of the session cookie. |
 | `SEALSKIN_AUTOSTART_CACHE_PATH` | `str` | `/config/.config/sealskin/autostart_cache` | Path to cache autostart scripts. |
 | `SEALSKIN_APP_STORE_CACHE_PATH` | `str` | `/config/.config/sealskin/app_stores_cache` | Path to cache app store YAML files. |
+| `SEALSKIN_PROOT_CATALOGS_PATH` | `str` | `/config/.config/sealskin/proot_catalogs.yml` | Path to the YAML file of the PRoot Apps catalogs, shared by the nodes of a cluster. |
+| `SEALSKIN_PROOT_APPS_PATH` | `str` | `/storage/sealskin_proot_apps` | Directory this node keeps the content of every PRoot Apps catalog in, one folder per catalog, mounted read-only into the sessions of the users assigned to it. |
+| `SEALSKIN_PROOT_APPS_REMOTE` | `str` | `linuxserver/proot-apps` | GitHub `owner/repo` of the PRoot Apps repository the catalog editor opens with; a fork lists its apps in `metadata/metadata.yml` and publishes them as tags of `ghcr.io/<owner>/<repo>`. |
 | `SEALSKIN_AUTO_UPDATE_APPS` | `bool` | `true` | Enable automatic pulling of the latest app images in the background. |
 | `SEALSKIN_AUTO_UPDATE_INTERVAL_SECONDS` | `int` | `3600` | How often to check for app image updates (in seconds). |
 | `SEALSKIN_PUID` | `int` | `1000` | Default User ID to run containers as. |

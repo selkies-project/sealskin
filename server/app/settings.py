@@ -113,6 +113,31 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "help": "Path to cache app store YAML files.",
     },
     {
+        "name": "proot_catalogs_path",
+        "type": "str",
+        "default": "/config/.config/sealskin/proot_catalogs.yml",
+        "help": "Path to the YAML file of the PRoot Apps catalogs, shared by the nodes of a cluster.",
+    },
+    {
+        "name": "proot_apps_path",
+        "type": "str",
+        "default": "/storage/sealskin_proot_apps",
+        "help": (
+            "Directory this node keeps the content of every PRoot Apps catalog in, one folder "
+            "per catalog, mounted read-only into the sessions of the users assigned to it."
+        ),
+    },
+    {
+        "name": "proot_apps_remote",
+        "type": "str",
+        "default": "linuxserver/proot-apps",
+        "help": (
+            "GitHub `owner/repo` of the PRoot Apps repository the catalog editor opens with; a "
+            "fork lists its apps in `metadata/metadata.yml` and publishes them as tags of "
+            "`ghcr.io/<owner>/<repo>`."
+        ),
+    },
+    {
         "name": "auto_update_apps",
         "type": "bool",
         "default": True,

@@ -79,6 +79,7 @@
       "appTemplates": "Mga Template ng App",
       "appLaboratory": "Laboratoryo ng App",
       "installedApps": "Mga Naka-install na App",
+      "prootApps": "PRoot Apps",
       "users": "Mga User",
       "groups": "Mga Grupo",
       "admins": "Mga Admin",
@@ -233,6 +234,9 @@
       "allowancePeriod": "Panahon ng allowance",
       "pools": "Mga restricted na pool na pinapayagan (pinaghihiwalay ng kuwit)",
       "poolsDenied": "Mga pool na ipinagbabawal (pinaghihiwalay ng kuwit)",
+      "prootCatalog": "Katalogo ng PRoot Apps",
+      "prootCatalogNone": "Wala",
+      "prootCatalogHelp": "Naka-mount nang read-only sa bawat session; mula rito nag-i-install ang proot-apps sa halip na mula sa registry. Kung iiwan sa Wala, ang unang grupo ng user na pumili ng isa ang magpapasya.",
       "groupsHelp": "Pindutin nang matagal ang Ctrl o Command upang pumili ng ilan. Kapag hindi nagkakasundo ang mga grupo, ang mas mahigpit na value ang mananaig.",
       "providerGroups": "Mga grupong binanggit ng identity provider sa huling sign-in: {groups}",
       "limitsHelp": "Ang limitasyong -1, o iniwang blangko, ay nangangahulugang walang limitasyon."
@@ -1254,7 +1258,14 @@
       "nodeRemoved": "Naalis ang node.",
       "poolSaved": "Na-save ang pool na '{name}'.",
       "poolDeleted": "Nabura ang pool na '{name}'.",
-      "nothingChanged": "Walang nabago."
+      "nothingChanged": "Walang nabago.",
+      "catalogSaved": "Na-save ang katalogong '{name}'; kinukuha ng bawat node ang mga app nito.",
+      "catalogSaveFailed": "Hindi ma-save ang katalogo: {error}",
+      "catalogDeleted": "Natanggal ang katalogong '{name}'.",
+      "catalogDeleteFailed": "Hindi matanggal ang katalogo: {error}",
+      "catalogUpdateStarted": "Ina-update ang katalogong '{name}' sa bawat node.",
+      "catalogUpdateFailed": "Hindi ma-update ang katalogo: {error}",
+      "catalogsRefreshFailed": "Hindi ma-load ang mga katalogo: {error}"
     },
     "placeholders": {
       "noAdmins": "Walang nahanap na admin.",
@@ -1264,7 +1275,8 @@
       "noSessions": "Walang nahanap na aktibong sesyon.",
       "noPinned": "Walang nahanap na naka-pin na gawi.",
       "errorLoading": "Error sa pag-load ng mga directory.",
-      "noInstalledApps": "Wala pang naka-install na mga application."
+      "noInstalledApps": "Wala pang naka-install na mga application.",
+      "noProotCatalogs": "Wala pang katalogo."
     },
     "web": {
       "title": "SealSkin sa Browser na Ito",
@@ -1512,6 +1524,39 @@
       "resultSso": "Sign-on URL:",
       "resultSlo": "Inaalok ang single logout:",
       "resultCertificates": "Mga signing certificate:"
+    },
+    "prootApps": {
+      "title": "Mga Katalogo ng PRoot Apps",
+      "help": "Ang katalogo ay isang folder ng mga package ng PRoot Apps na nakatago sa bawat node at naka-mount nang read-only sa mga session ng mga user at grupong nakatalaga rito. Sa loob ng session, ang proot-apps at ang graphical installer nito ay nag-i-install at nag-a-update mula sa folder at hindi umaabot sa anumang registry.",
+      "newCatalog": "Bagong Katalogo",
+      "editCatalog": "I-edit ang {name}",
+      "apps": "Mga App",
+      "onThisNode": "Sa node na ito",
+      "nameLabel": "Pangalan ng katalogo",
+      "autoUpdate": "Awtomatikong update",
+      "autoUpdateHelp": "Kunin muli ang mga app sa bawat interval ng awtomatikong update kapag nagbago ang package ng mga ito.",
+      "selectedTitle": "Mga napiling app",
+      "selectedHelp": "I-click ang isang app sa ibaba para idagdag o alisin ito. Ang mga app mula sa remote na hindi ang default ay ini-install gamit ang buong pangalan ng imahe ng mga ito.",
+      "noneSelected": "Wala pang napipiling app. Isama ang \"gui\" para mabigyan ang mga user ng graphical installer.",
+      "remoteTitle": "Mga available na app",
+      "searchPlaceholder": "Maghanap ng mga app...",
+      "remoteLabel": "Remote (GitHub owner/repo ng isang proot-apps repository)",
+      "load": "I-load",
+      "refreshRemote": "Kunin muli ang listahan",
+      "noApps": "Walang nahanap na app.",
+      "couldNotLoad": "Hindi ma-load ang mga app ng {remote}: {error}",
+      "disabledHint": "Minarkahang disabled ng remote nito; itinatago ito ng graphical installer.",
+      "fromRemote": "mula sa {remote}",
+      "statePending": "Hindi pa naka-sync",
+      "stateSyncing": "Sini-sync ang {done} sa {total}",
+      "stateReady": "Handa",
+      "stateError": "Error",
+      "syncedAgo": "na-sync {ago}",
+      "autoUpdateOn": "awtomatikong update",
+      "update": "I-update",
+      "updateTitle": "Kunin muli ngayon ang mga app, sa bawat node, kung saan nagbago ang package ng mga ito",
+      "confirmDelete": "Tanggalin ang katalogong '{name}'? Tatanggalin ng bawat node ang kopya nito, at mawawalan ng katalogo ang mga user na nakatalaga rito.",
+      "deleteTitle": "Tanggalin ang katalogo"
     }
   },
   "popup": {

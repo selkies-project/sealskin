@@ -1660,3 +1660,46 @@ body:has(.popup-container)::before { display: none; }
   }
   .popup-backdrop img { transition: none; }
 }
+
+/* --------------------------------------------------------------------------
+   PRoot Apps catalogs
+   -------------------------------------------------------------------------- */
+.proot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 0.55rem;
+  perspective: 900px;
+}
+.proot-grid .app-card-popup.disabled { opacity: 0.5; }
+.proot-selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  min-height: 2.2rem;
+  padding: 0.5rem;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-sm);
+}
+.proot-selected .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--accent-border);
+  border-radius: 999px;
+  background-color: var(--accent-soft);
+  font-size: 0.8rem;
+}
+.proot-selected .chip img { width: 18px; height: 18px; object-fit: contain; }
+.proot-selected .chip button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+.proot-selected .chip button:hover { color: var(--text-primary); }
+.proot-state { display: inline-flex; align-items: center; gap: 0.4rem; }
+.proot-state .spinner-small { margin: 0; }

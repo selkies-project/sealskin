@@ -79,6 +79,7 @@
       "appTemplates": "قوالب التطبيقات",
       "appLaboratory": "مختبر التطبيقات",
       "installedApps": "التطبيقات المثبتة",
+      "prootApps": "PRoot Apps",
       "users": "المستخدمون",
       "groups": "المجموعات",
       "admins": "المسؤولون",
@@ -233,6 +234,9 @@
       "allowancePeriod": "فترة الحصة",
       "pools": "المجمّعات المقيّدة المسموح بها (مفصولة بفاصلة)",
       "poolsDenied": "المجمّعات المرفوضة (مفصولة بفاصلة)",
+      "prootCatalog": "كتالوج PRoot Apps",
+      "prootCatalogNone": "لا شيء",
+      "prootCatalogHelp": "يُحمَّل للقراءة فقط في كل جلسة؛ يثبّت proot-apps منه بدلاً من السجل. إذا تُرك على لا شيء، تحدده أول مجموعة من مجموعات المستخدم تختار واحدًا.",
       "groupsHelp": "اضغط مع الاستمرار على Ctrl أو Command لتحديد عدة مجموعات. عند تعارض المجموعات، تسود القيمة الأكثر تقييدًا.",
       "providerGroups": "المجموعات التي ذكرها موفر الهوية عند آخر تسجيل دخول: {groups}",
       "limitsHelp": "الحد -1، أو تركه فارغًا، يعني عدم وجود حد."
@@ -1254,7 +1258,14 @@
       "nodeRemoved": "تمت إزالة العقدة.",
       "poolSaved": "تم حفظ المجمّع '{name}'.",
       "poolDeleted": "تم حذف المجمّع '{name}'.",
-      "nothingChanged": "لم يتغير شيء."
+      "nothingChanged": "لم يتغير شيء.",
+      "catalogSaved": "تم حفظ الكتالوج '{name}'؛ كل عقدة تجلب تطبيقاته.",
+      "catalogSaveFailed": "تعذّر حفظ الكتالوج: {error}",
+      "catalogDeleted": "تم حذف الكتالوج '{name}'.",
+      "catalogDeleteFailed": "تعذّر حذف الكتالوج: {error}",
+      "catalogUpdateStarted": "جاري تحديث الكتالوج '{name}' على كل عقدة.",
+      "catalogUpdateFailed": "تعذّر تحديث الكتالوج: {error}",
+      "catalogsRefreshFailed": "تعذّر تحميل الكتالوجات: {error}"
     },
     "placeholders": {
       "noAdmins": "لم يتم العثور على مسؤولين.",
@@ -1264,7 +1275,8 @@
       "noSessions": "لم يتم العثور على جلسات نشطة.",
       "noPinned": "لم يتم العثور على سلوكيات مثبتة.",
       "errorLoading": "خطأ في تحميل المجلدات.",
-      "noInstalledApps": "لم يتم تثبيت أي تطبيقات بعد."
+      "noInstalledApps": "لم يتم تثبيت أي تطبيقات بعد.",
+      "noProotCatalogs": "لا توجد كتالوجات بعد."
     },
     "web": {
       "title": "SealSkin في هذا المتصفح",
@@ -1512,6 +1524,39 @@
       "resultSso": "عنوان URL لتسجيل الدخول:",
       "resultSlo": "تسجيل الخروج الموحد معروض:",
       "resultCertificates": "شهادات التوقيع:"
+    },
+    "prootApps": {
+      "title": "كتالوجات PRoot Apps",
+      "help": "الكتالوج مجلد من حزم PRoot Apps يُحفظ على كل عقدة ويُحمَّل للقراءة فقط في جلسات المستخدمين والمجموعات المعيّنين له. داخل الجلسة، يثبّت proot-apps ومثبّته الرسومي التطبيقات ويحدّثانها من المجلد دون الوصول إلى أي سجل.",
+      "newCatalog": "كتالوج جديد",
+      "editCatalog": "تعديل {name}",
+      "apps": "التطبيقات",
+      "onThisNode": "على هذه العقدة",
+      "nameLabel": "اسم الكتالوج",
+      "autoUpdate": "تحديث تلقائي",
+      "autoUpdateHelp": "إعادة جلب التطبيقات على فترة التحديث التلقائي عندما تتغير حزمتها.",
+      "selectedTitle": "التطبيقات المحددة",
+      "selectedHelp": "انقر على تطبيق أدناه لإضافته أو إزالته. التطبيقات من مصدر بعيد غير الافتراضي تُثبَّت باسم صورتها الكامل.",
+      "noneSelected": "لم يتم تحديد تطبيقات بعد. أضف \"gui\" لمنح المستخدمين المثبّت الرسومي.",
+      "remoteTitle": "التطبيقات المتاحة",
+      "searchPlaceholder": "البحث في التطبيقات...",
+      "remoteLabel": "المصدر البعيد (GitHub owner/repo لمستودع proot-apps)",
+      "load": "تحميل",
+      "refreshRemote": "إعادة جلب القائمة",
+      "noApps": "لم يتم العثور على تطبيقات.",
+      "couldNotLoad": "تعذّر تحميل تطبيقات {remote}: {error}",
+      "disabledHint": "معطّل من قِبل مصدره البعيد؛ المثبّت الرسومي يخفيه.",
+      "fromRemote": "من {remote}",
+      "statePending": "لم تتم المزامنة بعد",
+      "stateSyncing": "جاري مزامنة {done} من {total}",
+      "stateReady": "جاهز",
+      "stateError": "خطأ",
+      "syncedAgo": "تمت المزامنة {ago}",
+      "autoUpdateOn": "تحديث تلقائي",
+      "update": "تحديث",
+      "updateTitle": "إعادة جلب التطبيقات الآن على كل عقدة حيث تغيرت حزمتها",
+      "confirmDelete": "حذف الكتالوج '{name}'؟ ستزيل كل عقدة نسختها، ولن يحصل المستخدمون المعيّنون له على أي كتالوج.",
+      "deleteTitle": "حذف الكتالوج"
     }
   },
   "popup": {

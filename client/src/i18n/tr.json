@@ -79,6 +79,7 @@
       "appTemplates": "Uygulama Şablonları",
       "appLaboratory": "Uygulama Laboratuvarı",
       "installedApps": "Yüklü Uygulamalar",
+      "prootApps": "PRoot Apps",
       "users": "Kullanıcılar",
       "groups": "Gruplar",
       "admins": "Yöneticiler",
@@ -233,6 +234,9 @@
       "allowancePeriod": "Kota dönemi",
       "pools": "İzin verilen kısıtlı havuzlar (virgülle ayrılmış)",
       "poolsDenied": "Reddedilen havuzlar (virgülle ayrılmış)",
+      "prootCatalog": "PRoot Apps kataloğu",
+      "prootCatalogNone": "Yok",
+      "prootCatalogHelp": "Her oturuma salt okunur olarak bağlanır; proot-apps bir kayıt defteri yerine buradan kurar. Yok bırakılırsa, kullanıcının katalog seçen ilk grubu belirler.",
       "groupsHelp": "Birden fazla seçmek için Ctrl veya Command tuşunu basılı tutun. Gruplar çeliştiğinde kısıtlayıcı değer geçerli olur.",
       "providerGroups": "Kimlik sağlayıcının son oturum açmada bildirdiği gruplar: {groups}",
       "limitsHelp": "-1 değeri veya boş bırakılan alan sınır koymaz."
@@ -1254,7 +1258,14 @@
       "nodeRemoved": "Düğüm kaldırıldı.",
       "poolSaved": "'{name}' havuzu kaydedildi.",
       "poolDeleted": "'{name}' havuzu silindi.",
-      "nothingChanged": "Hiçbir şey değişmedi."
+      "nothingChanged": "Hiçbir şey değişmedi.",
+      "catalogSaved": "'{name}' kataloğu kaydedildi; her düğüm uygulamalarını çekiyor.",
+      "catalogSaveFailed": "Katalog kaydedilemedi: {error}",
+      "catalogDeleted": "'{name}' kataloğu silindi.",
+      "catalogDeleteFailed": "Katalog silinemedi: {error}",
+      "catalogUpdateStarted": "'{name}' kataloğu her düğümde güncelleniyor.",
+      "catalogUpdateFailed": "Katalog güncellenemedi: {error}",
+      "catalogsRefreshFailed": "Kataloglar yüklenemedi: {error}"
     },
     "placeholders": {
       "noAdmins": "Yönetici bulunamadı.",
@@ -1264,7 +1275,8 @@
       "noSessions": "Aktif oturum bulunamadı.",
       "noPinned": "Sabitlenmiş davranış bulunamadı.",
       "errorLoading": "Dizinler yüklenirken hata oluştu.",
-      "noInstalledApps": "Henüz hiçbir uygulama yüklenmedi."
+      "noInstalledApps": "Henüz hiçbir uygulama yüklenmedi.",
+      "noProotCatalogs": "Henüz katalog yok."
     },
     "web": {
       "title": "Bu Tarayıcıda SealSkin",
@@ -1512,6 +1524,39 @@
       "resultSso": "Oturum açma URL'si:",
       "resultSlo": "Tekli oturum kapatma sunuluyor:",
       "resultCertificates": "İmzalama sertifikaları:"
+    },
+    "prootApps": {
+      "title": "PRoot Apps Katalogları",
+      "help": "Katalog, her düğümde tutulan ve kendisine atanan kullanıcıların ve grupların oturumlarına salt okunur olarak bağlanan bir PRoot Apps paketleri klasörüdür. Oturum içinde proot-apps ve grafik yükleyicisi bu klasörden kurar ve günceller, hiçbir kayıt defterine erişmez.",
+      "newCatalog": "Yeni Katalog",
+      "editCatalog": "{name} kataloğunu düzenle",
+      "apps": "Uygulamalar",
+      "onThisNode": "Bu düğümde",
+      "nameLabel": "Katalog adı",
+      "autoUpdate": "Otomatik güncelleme",
+      "autoUpdateHelp": "Paketleri değiştiğinde uygulamaları otomatik güncelleme aralığında yeniden çek.",
+      "selectedTitle": "Seçili uygulamalar",
+      "selectedHelp": "Eklemek veya çıkarmak için aşağıdan bir uygulamaya tıklayın. Varsayılan dışındaki bir uzak kaynaktan gelen uygulamalar tam imaj adlarıyla kurulur.",
+      "noneSelected": "Henüz uygulama seçilmedi. Kullanıcılara grafik yükleyiciyi vermek için \"gui\" ekleyin.",
+      "remoteTitle": "Kullanılabilir uygulamalar",
+      "searchPlaceholder": "Uygulama ara...",
+      "remoteLabel": "Uzak kaynak (bir proot-apps deposunun GitHub owner/repo adı)",
+      "load": "Yükle",
+      "refreshRemote": "Listeyi yeniden çek",
+      "noApps": "Uygulama bulunamadı.",
+      "couldNotLoad": "{remote} uygulamaları yüklenemedi: {error}",
+      "disabledHint": "Uzak kaynağı tarafından devre dışı olarak işaretlendi; grafik yükleyici bunu gizler.",
+      "fromRemote": "{remote} kaynağından",
+      "statePending": "Henüz eşitlenmedi",
+      "stateSyncing": "{done} / {total} eşitleniyor",
+      "stateReady": "Hazır",
+      "stateError": "Hata",
+      "syncedAgo": "{ago} eşitlendi",
+      "autoUpdateOn": "otomatik güncelleme",
+      "update": "Güncelle",
+      "updateTitle": "Paketleri değişen uygulamaları şimdi her düğümde yeniden çek",
+      "confirmDelete": "'{name}' kataloğu silinsin mi? Her düğüm kopyasını kaldırır ve ona atanan kullanıcılar katalogsuz kalır.",
+      "deleteTitle": "Kataloğu sil"
     }
   },
   "popup": {
