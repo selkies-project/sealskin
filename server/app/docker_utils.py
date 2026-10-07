@@ -294,6 +294,9 @@ async def pull_and_cache_image(image_name: str) -> None:
         await get_and_cache_image_metadata(image_name, force_refresh=True)
         state.image_metadata.setdefault(image_name, {})["last_checked_at"] = time.time()
         logger.info("Background pull for '%s' completed successfully.", image_name)
+        from . import webclient
+
+        await webclient.export_quietly(image_name)
     except Exception as exc:  # noqa: BLE001
         logger.error("Background pull for image '%s' failed: %s", image_name, exc)
     finally:

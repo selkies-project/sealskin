@@ -6,9 +6,15 @@ description: SealSkin behind LinuxServer's SWAG, with the proxy configuration fo
 Run with SWAG 5.8.0 (nginx 1.30). Read [Behind a reverse proxy](index.md)
 first for the settings on the SealSkin side.
 
+The session names, and the wildcard certificate that covers them, are for
+[session isolation](index.md#session-isolation); without it the web app's
+name is all SealSkin needs, and the rule for the session names is harmless
+and may be left out.
+
 ## Certificate
 
-Sessions need a wildcard certificate, which SWAG gets with DNS validation:
+With session isolation, sessions need a wildcard certificate, which SWAG
+gets with DNS validation:
 
 ```yaml
   swag:

@@ -35,7 +35,7 @@ in the environment for the first start, since the dashboard opens to
 administrators.
 
 The `root` token still signs in, once the browser is past the proxy: open
-`https://sealskin.example.com/ui/#root`, or choose **Root token** in the
+`https://sealskin.example.com/#root`, or choose **Root token** in the
 account menu. That is also how administrators are appointed where the
 provider names no groups: as `root`, give a user the administrator switch.
 Signing out as `root` returns to the proxy's user.
@@ -102,7 +102,8 @@ answer, for a visitor who is neither, is an open one.
 
 ## Which names to guard
 
-Guard the web app's name. For the session names there is a choice:
+Guard the web app's name. With [session isolation](index.md#session-isolation)
+there are session names too, and for those there is a choice:
 
 * **Left out of forward-auth.** A session answers nobody without the token
   it was launched with, which lives in a cookie of that one name, so the

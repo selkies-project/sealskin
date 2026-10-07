@@ -134,6 +134,33 @@ class DockerProvider(BaseProvider):
         """Remove dangling images left behind by pulls."""
         await prune_dangling_images()
 
+    async def export_web_client(self, image: str, path: str) -> bytes:
+        """Copy `path` out of a container of the image that never starts (see `BaseProvider`).
+
+        The archive comes through Docker's copy API, as `docker cp` takes
+        it: a container's logs are not binary-safe, so nothing is run.
+        """
+
+        def export() -> bytes:
+            container = self.client.containers.create(
+                image, entrypoint=["true"], network_disabled=True, labels={MANAGED_BY_LABEL: "sealskin-export"}
+            )
+            try:
+                chunks, _stat = container.get_archive(path)
+                return b"".join(chunks)
+            finally:
+                try:
+                    container.remove(force=True)
+                except (APIError, DockerException) as exc:
+                    logger.warning("Could not remove the export container of '%s': %s", image, exc)
+
+        try:
+            return await asyncio.to_thread(export)
+        except NotFound as exc:
+            raise RuntimeError(f"'{path}' is not in image '{image}': {exc.explanation or exc}") from exc
+        except (APIError, DockerException) as exc:
+            raise RuntimeError(f"Docker could not export '{path}' from '{image}': {exc}") from exc
+
     async def launch(
         self,
         session_id: str,

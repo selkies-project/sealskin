@@ -47,7 +47,7 @@ SEALSKIN_PROXY_AUTH_LOGOUT_URL=https://tinyauth.example.com/logout
 Tinyauth's own users have no groups, so `Remote-Groups` is empty for them
 and no group makes an administrator; groups come with its LDAP and OAuth
 users. To appoint administrators, open
-`https://sealskin.example.com/ui/#root`, sign in with the
+`https://sealskin.example.com/#root`, sign in with the
 [root token](../signin.md#the-root-administrator), and give the users the
 administrator switch, their own or a group's.
 

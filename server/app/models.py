@@ -434,6 +434,7 @@ class AdminStatusResponse(BaseModel):
     via: str = "key"
     sign_out_url: str = ""
     session_domain: str = ""
+    session_isolation: bool = False
     clustered: bool = False
     node_id: str = ""
     allowance: dict[str, Any] | None = None
@@ -562,6 +563,9 @@ class ActiveSessionInfo(BaseModel):
     node: str = ""
     home: str = ""
     gpu: bool = False
+    gpu_device: str = ""
+    language: str = ""
+    wayland_mode: bool = True
 
 
 class SendFileToSessionRequest(BaseModel):

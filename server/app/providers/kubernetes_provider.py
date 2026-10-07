@@ -17,11 +17,14 @@ sessions run that exact image.
 from __future__ import annotations
 
 import asyncio
+import base64
+import binascii
 import hashlib
 import logging
 import os
 import posixpath
 import re
+import shlex
 import socket
 import ssl
 import time
@@ -62,6 +65,8 @@ FATAL_WAITING_REASONS = {
     "RunContainerError",
 }
 PULL_WAITING_REASONS = {"ErrImagePull", "ImagePullBackOff"}
+#: Seconds an export pod may take to pull its image and write the client.
+EXPORT_TIMEOUT = PENDING_TIMEOUT
 #: Volume sources that belong to one pod and cannot back a session's storage.
 POD_LOCAL_VOLUMES = {"configMap", "csi", "downwardAPI", "emptyDir", "ephemeral", "gitRepo", "image", "projected", "secret"}
 #: Inline network volumes every node can mount at once.
@@ -168,6 +173,21 @@ class KubeClient:
                 message = response.text
             raise KubeError(response.status_code, message)
         return response.json()
+
+    async def text(self, method: str, path: str, **kwargs: Any) -> str:
+        """Send one request and return the body as text, for a pod's log.
+
+        Raises:
+            KubeError: When the API server answers with an error status.
+        """
+        with open(self.token_path, encoding="utf-8") as handle:
+            token = handle.read().strip()
+        response = await self.http.request(
+            method, path, headers={"Authorization": f"Bearer {token}"}, **kwargs
+        )
+        if response.status_code >= 400:
+            raise KubeError(response.status_code, response.text)
+        return response.text
 
     def path(self, resource: str, name: str = "", group: str = "") -> str:
         """Return the URL path of a namespaced resource (collection when `name` is empty)."""
@@ -616,6 +636,79 @@ class KubernetesProvider(BaseProvider):
 
     async def prune_images(self) -> None:
         """Leave unused images to the kubelet's image garbage collection."""
+
+    async def export_web_client(self, image: str, path: str) -> bytes:
+        """Run `tar` in a pod of the image and read what it wrote from the pod's log (see `BaseProvider`).
+
+        A log is text, so the pod writes the stream in base64. The pod takes
+        the session template's placement and pull secrets, nothing else.
+        """
+        api = kube()
+        template = (await self._pod_template() or {}).get("spec") or {}
+        reference = _session_image(image)
+        tag = "@" if "@" in reference else reference.rsplit("/", 1)[-1].partition(":")[2]
+        spec: dict[str, Any] = {
+            "restartPolicy": "Never",
+            "automountServiceAccountToken": False,
+            "enableServiceLinks": False,
+            "activeDeadlineSeconds": EXPORT_TIMEOUT,
+            "nodeSelector": template.get("nodeSelector") or {"kubernetes.io/os": "linux"},
+            "containers": [
+                {
+                    "name": "export",
+                    "image": reference,
+                    "imagePullPolicy": "Always" if tag in ("", "latest") else "IfNotPresent",
+                    "command": ["sh", "-c", f"tar -cz -C {shlex.quote(path)} . | base64 | tr -d '\\n'"],
+                    "resources": {"limits": {"memory": "256Mi"}},
+                    "securityContext": {"readOnlyRootFilesystem": True},
+                }
+            ],
+        }
+        for key in ("imagePullSecrets", "tolerations", "runtimeClassName"):
+            if template.get(key):
+                spec[key] = template[key]
+        metadata: dict[str, Any] = {
+            "generateName": "sealskin-web-",
+            "labels": {
+                "app.kubernetes.io/name": "sealskin",
+                "app.kubernetes.io/component": "web-export",
+                MANAGED_BY_LABEL: "sealskin",
+                INSTANCE_LABEL: state.instance_name,
+            },
+        }
+        if api.owner:
+            metadata["ownerReferences"] = [api.owner]
+        try:
+            pod = await api.request("POST", api.path("pods"), json={"apiVersion": "v1", "kind": "Pod", "metadata": metadata, "spec": spec})
+        except KubeError as exc:
+            raise RuntimeError(f"Kubernetes refused the export pod of '{image}': {exc.message}") from exc
+        name = pod["metadata"]["name"]
+        try:
+            deadline = time.monotonic() + EXPORT_TIMEOUT
+            phase = ""
+            while time.monotonic() < deadline:
+                status = (await api.request("GET", api.path("pods", name))).get("status", {})
+                phase = status.get("phase", "")
+                if phase in ("Succeeded", "Failed"):
+                    break
+                waiting = _container_state(status, "waiting")
+                if waiting.get("reason") in FATAL_WAITING_REASONS:
+                    raise RuntimeError(f"The export pod of '{image}' cannot start: {waiting.get('message') or waiting['reason']}")
+                await asyncio.sleep(2)
+            log = await api.text("GET", api.path("pods", name) + "/log")
+            if phase != "Succeeded":
+                raise RuntimeError(f"The export pod of '{image}' ended with {phase or 'a timeout'}: {log.strip()[-300:]}")
+            try:
+                return base64.b64decode(log.strip(), validate=True)
+            except (ValueError, binascii.Error) as exc:
+                raise RuntimeError(f"The export pod of '{image}' wrote no archive: {log.strip()[-300:]}") from exc
+        except KubeError as exc:
+            raise RuntimeError(f"Kubernetes error exporting '{image}': {exc.message}") from exc
+        finally:
+            try:
+                await api.request("DELETE", api.path("pods", name), params={"gracePeriodSeconds": 0})
+            except (KubeError, httpx.HTTPError):
+                pass
 
     def _pod_manifest(
         self,

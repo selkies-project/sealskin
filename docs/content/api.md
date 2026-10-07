@@ -66,7 +66,7 @@ validation, `500` for provider errors.
 | Method and path | Purpose |
 | --- | --- |
 | `GET /api/auth/config` | Which sign-ins the server offers: `oidc`, `saml`, `proxy`, `root`, `key`. |
-| `GET /api/auth/oidc/login`, `GET /api/auth/saml/login` | Start a provider flow; it ends at `/ui/#sso=<grant>` or `/ui/#sso-error=<code>`. |
+| `GET /api/auth/oidc/login`, `GET /api/auth/saml/login` | Start a provider flow; it ends at `/#sso=<grant>` or `/#sso-error=<code>`. |
 | `POST /api/auth/register` | Body `{grant}`: start the sign-in and set its cookie. |
 | `POST /api/auth/root` | Body `{token}`: sign `root` in with the root token. |
 | `POST /api/auth/signout` | End the sign-in the caller's cookie names and clear the cookie. |

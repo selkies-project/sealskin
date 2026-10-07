@@ -97,9 +97,10 @@ async def resolve_session(session_id: str, request: Request) -> Response:
 
     Returns:
         An empty 200 response with `X-Upstream-Host` and `X-Upstream-Auth`,
-        or with `X-Upstream-Peer` for a session another node runs, which
-        authorises the request itself; for a page load of a session that is
-        not running, `stopped_page`.
+        and `X-Web-Root` where this node serves the session's web client
+        itself (see `webclient`); or with `X-Upstream-Peer` for a session
+        another node runs, which authorises the request itself; for a page
+        load of a session that is not running, `stopped_page`.
 
     Raises:
         HTTPException: 404 for unknown sessions, 403 for bad tokens.
@@ -131,6 +132,9 @@ async def resolve_session(session_id: str, request: Request) -> Response:
         raise HTTPException(status_code=403, detail="Forbidden: the session is served from another origin.")
 
     headers = {"X-Upstream-Host": host_port(session["ip"], session["port"])}
+    web_root = session.get("web_root")
+    if web_root and os.path.isfile(os.path.join(web_root, "index.html")):
+        headers["X-Web-Root"] = web_root
     if "custom_user" in session and "password" in session:
         auth_b64 = base64.b64encode(f"{session['custom_user']}:{session['password']}".encode()).decode()
         headers["X-Upstream-Auth"] = f"Basic {auth_b64}"

@@ -13,6 +13,7 @@ the request runs. The launch reports each stage it reaches with `step`:
 | `image` | pulling the application image |
 | `starting` | creating the container |
 | `waiting` | waiting for the desktop to answer |
+| `client` | taking the application's web client from the image, the first time |
 | `ready` | done; the answer carries the session URL |
 | `failed` | done; the answer carries the reason |
 

@@ -7,11 +7,17 @@ Run with Nginx Proxy Manager 2.16. Read
 [Behind a reverse proxy](index.md) first for the settings on the SealSkin
 side.
 
+The session names, and the wildcard certificate that covers them, are for
+[session isolation](index.md#session-isolation); without it the web app's
+name is all SealSkin needs, and the rule for the session names is harmless
+and may be left out.
+
 ## Certificate
 
 Under **SSL Certificates**, add a Let's Encrypt certificate for
-`example.com` and `*.example.com` with **Use a DNS Challenge**, or upload a
-wildcard certificate as a custom one.
+`sealskin.example.com`; with session isolation, one for `example.com` and
+`*.example.com` with **Use a DNS Challenge**, or upload a wildcard
+certificate as a custom one.
 
 ## Two proxy hosts
 

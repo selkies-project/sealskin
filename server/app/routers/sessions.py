@@ -10,7 +10,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import ValidationError
 
 from .. import cluster, config_store, routing
@@ -19,6 +19,7 @@ from ..launch import ephemeral_base, stop_session
 from ..models import ActiveSessionInfo, SendFileToSessionRequest
 from ..security import (
     OWN_ORIGIN_NEEDED,
+    WEB_CLIENT_NEEDED,
     EncryptedRoute,
     canonical_uuid,
     get_decrypted_request_body,
@@ -29,6 +30,7 @@ from ..security import (
 )
 from ..settings import settings
 from ..state import state
+from . import entry
 from .uploads import reassemble_file
 
 logger = logging.getLogger(__name__)
@@ -75,6 +77,9 @@ def session_info(session_id: str, data: dict[str, Any], for_owner: bool = True) 
         node=cluster.node_name(),
         home=_home_of(data),
         gpu=bool(data.get("gpu_config")),
+        gpu_device=str(data.get("selected_gpu") or ""),
+        language=str(data.get("language") or ""),
+        wayland_mode=bool(data.get("wayland_mode", True)),
     )
 
 
@@ -165,6 +170,61 @@ async def send_file_to_session(
     return {"status": "success", "message": f"File '{safe_filename}' sent to session."}
 
 
+def _session_of_request(session_id: uuid.UUID, request: Request) -> tuple[str, dict[str, Any]]:
+    """Return a running session the request's cookie or token lets its page in to.
+
+    Raises:
+        HTTPException: 404 for an unknown session, 403 for a request without its cookie.
+    """
+    session_id_str = canonical_uuid(session_id)
+    data = state.sessions.get(session_id_str)
+    if not data:
+        raise HTTPException(status_code=404, detail="Session not found.")
+    token = request.cookies.get(f"{settings.session_cookie_name}_{session_id_str}")
+    collab = request.cookies.get(f"collab_token_{session_id_str}")
+    if not token_matches(token, data.get("access_token")) and not _known_collab_token(data, collab):
+        raise HTTPException(status_code=403, detail="Forbidden: Invalid session or token.")
+    return session_id_str, data
+
+
+@proxy_router.get("/{session_id:uuid}/manifest.json", include_in_schema=False)
+async def session_manifest(session_id: uuid.UUID, request: Request) -> JSONResponse:
+    """Describe a running session's application for installing it, as its own address does.
+
+    The page of a session served by this node asks for its manifest here, so
+    installing from inside a desktop installs the application's address with
+    the options the session runs with (see `entry.app_manifest`).
+    """
+    session_id_str, data = _session_of_request(session_id, request)
+    app = state.installed_apps.get(data.get("provider_app_id", ""))
+    if not app:
+        raise HTTPException(status_code=404, detail="Application not found.")
+    options = {
+        "home": data.get("home_name") or "",
+        "gpu": data.get("selected_gpu") or "",
+        "room": "1" if data.get("is_collaboration") else "",
+        "lang": data.get("language") or "",
+        "wayland": "" if data.get("wayland_mode", True) else "0",
+    }
+    return JSONResponse(
+        entry.manifest_for(app, options, icon=f"/{session_id_str}/icon.png"),
+        media_type="application/manifest+json",
+        headers={"Cache-Control": "no-cache"},
+    )
+
+
+@proxy_router.get("/{session_id:uuid}/icon.png", include_in_schema=False)
+@proxy_router.get("/{session_id:uuid}/icon-512.png", include_in_schema=False)
+@proxy_router.get("/{session_id:uuid}/favicon.ico", include_in_schema=False)
+async def session_icon(session_id: uuid.UUID, request: Request) -> Response:
+    """Answer a session page's icon with its application's."""
+    _session_id_str, data = _session_of_request(session_id, request)
+    app = state.installed_apps.get(data.get("provider_app_id", ""))
+    if not app:
+        raise HTTPException(status_code=404, detail="Application not found.")
+    return entry.icon_response(app)
+
+
 def _known_collab_token(data: dict[str, Any], token: str | None) -> str | None:
     """Return the stored copy of a collaboration token, or `None` if unknown.
 
@@ -192,8 +252,10 @@ async def initial_session_auth(session_id: uuid.UUID, request: Request) -> Respo
 
     The first exchange settles the origin the session is served from (see
     `on_session_origin`); a collaboration session of a key-file client stays
-    on the shared origin, where its room frames it. A session of a web
-    sign-in, room or not, is served on its own origin alone.
+    on the shared origin, where its room frames it. With `session_isolation`
+    a session of a web sign-in, room or not, is served on its own origin
+    alone; without, on the shared origin, by this node's copy of its web
+    client, and never by its container.
     """
     session_id_str = canonical_uuid(session_id)
     token = request.query_params.get("access_token")
@@ -203,7 +265,10 @@ async def initial_session_auth(session_id: uuid.UUID, request: Request) -> Respo
     token = data["access_token"]
     own_origin = on_session_origin(request, session_id_str)
     if data.get("native") and not own_origin:
-        raise HTTPException(status_code=403, detail=OWN_ORIGIN_NEEDED)
+        if settings.session_isolation:
+            raise HTTPException(status_code=403, detail=OWN_ORIGIN_NEEDED)
+        if not data.get("web_root"):
+            raise HTTPException(status_code=403, detail=WEB_CLIENT_NEEDED)
     if "own_origin" not in data and not (own_origin and data.get("is_collaboration")):
         data["own_origin"] = own_origin
         await config_store.save_sessions()

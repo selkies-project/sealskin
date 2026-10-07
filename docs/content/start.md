@@ -150,7 +150,7 @@ the proxy certificate is within 14 days of expiring.
 | Firefox | [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/) | Context menus and uploads. Requires a trusted certificate. |
 | iOS | [App Store](https://apps.apple.com/us/app/sealskin/id6758210210) | Launcher, files, and admin dashboard; sessions open in Safari. Requires a trusted certificate. |
 | Android | [Google Play](https://play.google.com/store/apps/details?id=io.linuxserver.sealskin) | Same as iOS; sessions open in a Custom Tab. Requires a trusted certificate. |
-| Any browser | `https://<server>:8443/ui/` | The web app: launcher, sessions, files, and dashboard, with a bookmarklet, `web+sealskin:` links, and a search engine in place of the context menu; installed from a Chromium browser it also receives shared links and files. Requires a trusted certificate. See [Usage](usage.md#in-a-browser-with-nothing-installed). |
+| Any browser | `https://<server>:8443/` | The web app: launcher, sessions, files, and dashboard, with a bookmarklet, `web+sealskin:` links, and a search engine in place of the context menu; installed from a Chromium browser it also receives shared links and files. Requires a trusted certificate. See [Usage](usage.md#in-a-browser-with-nothing-installed). |
 
 The zips, APK, and IPA on the
 [releases page](https://github.com/selkies-project/sealskin/releases) are the
@@ -165,7 +165,7 @@ with a small host around them.
 ## Connect
 
 Open the extension (toolbar icon or its options page), the app, or
-`https://<server>:8443/ui/`. With no server configured you land on the
+`https://<server>:8443/`. With no server configured you land on the
 **connection page**.
 
 1. Under **Quick Setup**, upload `admin.json` or paste its contents and click
@@ -189,7 +189,7 @@ session port, and when the browser refuses the certificate it falls back to
 plain `http://` on the API port for the encrypted API traffic (which is why
 port `8000` is in the compose file). The served UI still has to load over
 HTTPS: if the dashboard shows **Server unreachable**, click **Open server** to
-visit `https://<server>:8443/ui/` in a normal tab, accept the certificate,
+visit `https://<server>:8443/` in a normal tab, accept the certificate,
 then **Retry**. After that both the API and the sessions use HTTPS.
 
 **Firefox** does not let extensions talk to servers with untrusted

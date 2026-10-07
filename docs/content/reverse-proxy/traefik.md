@@ -6,6 +6,11 @@ description: SealSkin behind Traefik 3 with Docker labels, a router for the web 
 Run with Traefik 3.7. Read [Behind a reverse proxy](index.md) first for the
 settings on the SealSkin side.
 
+The session names, and the wildcard certificate that covers them, are for
+[session isolation](index.md#session-isolation); without it the web app's
+name is all SealSkin needs, and the rule for the session names is harmless
+and may be left out.
+
 ## Labels
 
 Two routers share one service: the web app's name, and every name that

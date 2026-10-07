@@ -321,12 +321,15 @@ const opensOnOwnOrigin = (sessionUrl) => SESSION_PATH.test(sessionUrl) || (WEB &
 
 // The web app keeps the session domain in memory: pages on its origin can rewrite its storage.
 let webSessionDomain = '';
+// Whether the server serves a web sign-in's sessions on origins of their own.
+let webSessionIsolation = false;
 
-/** Keep the session domain the server's status names, which the probe tries first. */
+/** Keep the session domain the server's status names, which the probe tries first, and whether sessions have their own origins. */
 async function noteSessionDomain(status) {
   if (!status || typeof status.session_domain !== 'string') return;
   if (WEB) {
     webSessionDomain = status.session_domain;
+    webSessionIsolation = Boolean(status.session_isolation);
     return;
   }
   const { sealskinSessionDomain } = await chrome.storage.local.get('sealskinSessionDomain');
@@ -408,7 +411,7 @@ const handlers = {
     if (url === '/api/admin/status') {
       await noteSessionDomain(data);
       // Probed while the user picks an application, the session origin is known by the launch.
-      getConfig().then(sessionOriginSuffix).catch(() => {});
+      if (!WEB || webSessionIsolation) getConfig().then(sessionOriginSuffix).catch(() => {});
     }
     return data;
   },
@@ -502,7 +505,7 @@ const handlers = {
 
   async createTabAndTrack({ sessionId, session_url }) {
     const config = await getConfig();
-    const own = opensOnOwnOrigin(session_url);
+    const own = WEB ? webSessionIsolation && opensOnOwnOrigin(session_url) : opensOnOwnOrigin(session_url);
     const suffix = own ? await sessionOriginSuffix(config) : null;
     // The server serves a web sign-in's session on its own origin alone.
     if (WEB && own && !suffix) throw new Error(NO_SESSION_ORIGIN);
@@ -534,7 +537,7 @@ const handlers = {
     }
 
     const config = await getConfig();
-    const own = WEB ? opensOnOwnOrigin(sess.session_url) : sess.own_origin;
+    const own = WEB ? webSessionIsolation && opensOnOwnOrigin(sess.session_url) : sess.own_origin;
     const probed = own ? await sessionOriginSuffix(config) : null;
     if (WEB && own && !probed) throw new Error(NO_SESSION_ORIGIN);
     const suffix = own ? probed || config.serverIp : null;

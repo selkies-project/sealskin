@@ -11,6 +11,7 @@
         request_header -X-Upstream-Host
         request_header -X-Upstream-Auth
         request_header -X-Upstream-Peer
+        request_header -X-Web-Root
         request_header X-SealSkin-Secret "{{PROXY_SECRET}}"
         request_header X-SealSkin-Remote {remote_host}
         # The browser's address: the connection's, or what a trusted proxy says it took the request from.
@@ -28,6 +29,7 @@
                 # The node tells a session's own origin by the name the browser asked for.
                 header_up Host {http.request.hostport}
                 header_up -X-Upstream-Peer
+                header_up -X-Web-Root
                 header_up -X-SealSkin-Secret
                 header_up -X-SealSkin-Remote
                 header_up -X-SealSkin-Client
@@ -92,7 +94,7 @@
                         route {
                                 forward_auth 127.0.0.1:{{API_PORT}} {
                                         uri /internal/resolve_session/{re.session_id.1}
-                                        copy_headers X-Upstream-Host X-Upstream-Auth X-Upstream-Peer
+                                        copy_headers X-Upstream-Host X-Upstream-Auth X-Upstream-Peer X-Web-Root
                                         header_up -Upgrade
                                         header_up -Connection
                                 }
@@ -102,24 +104,63 @@
                                         import to_peer
                                 }
 
-                                handle {
-                                        reverse_proxy {http.request.header.X-Upstream-Host} {
-                                                header_up Host {http.reverse_proxy.upstream.hostport}
-                                                header_up Authorization {http.request.header.X-Upstream-Auth}
-
-                                                header_up -X-Upstream-Host
-                                                header_up -X-Upstream-Auth
-                                                header_up -X-SealSkin-Secret
-                                                header_up -X-SealSkin-Remote
-                                                header_up -X-SealSkin-Client
-
-                                                # A session's service worker stays under its own path, off the web app at /ui/.
-                                                header_down -Service-Worker-Allowed
-                                                stream_close_delay 24h
+                                # The node serves the session's web client itself, from the copy it took out of
+                                # the image: the container answers its API alone, and nothing it answers may run
+                                # as a page of this origin.
+                                @served header X-Web-Root *
+                                handle @served {
+                                        @meta path_regexp ^/[0-9a-fA-F-]{36}/(manifest\.json|icon\.png|icon-512\.png|favicon\.ico)$
+                                        handle @meta {
+                                                reverse_proxy 127.0.0.1:{{API_PORT}}
                                         }
+                                        @upstream path_regexp ^/[0-9a-fA-F-]{36}/(api|pelorus)(/.*)?$
+                                        handle @upstream {
+                                                header {
+                                                        Content-Security-Policy "script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+                                                        X-Content-Type-Options nosniff
+                                                        defer
+                                                }
+                                                import to_container
+                                        }
+                                        handle {
+                                                uri strip_prefix /{re.session_id.1}
+                                                root {http.request.header.X-Web-Root}
+                                                @hashed path /assets/*
+                                                handle @hashed {
+                                                        header Cache-Control "public, max-age=31536000, immutable"
+                                                        file_server
+                                                }
+                                                handle {
+                                                        header Cache-Control "no-cache"
+                                                        file_server
+                                                }
+                                        }
+                                }
+
+                                handle {
+                                        import to_container
                                 }
                         }
                 }
+        }
+}
+
+# To the container that runs the session, as the session's resolution named it.
+(to_container) {
+        reverse_proxy {http.request.header.X-Upstream-Host} {
+                header_up Host {http.reverse_proxy.upstream.hostport}
+                header_up Authorization {http.request.header.X-Upstream-Auth}
+
+                header_up -X-Upstream-Host
+                header_up -X-Upstream-Auth
+                header_up -X-Web-Root
+                header_up -X-SealSkin-Secret
+                header_up -X-SealSkin-Remote
+                header_up -X-SealSkin-Client
+
+                # A session's service worker stays under its own path, off the web app at /ui/.
+                header_down -Service-Worker-Allowed
+                stream_close_delay 24h
         }
 }
 

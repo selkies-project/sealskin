@@ -50,19 +50,20 @@ plugin enforces policies. Import `admin.json` into a client as described in
 [Getting Started](start.md#connect).
 
 For the web app, the server writes a root token at its first start instead;
-read it, sign in at `https://<host>/ui/`, and delete it:
+read it, sign in at `https://<host>/`, and delete it:
 
 ```bash
 kubectl -n <namespace> exec deployment/sealskin -- cat /config/root_token
 kubectl -n <namespace> exec deployment/sealskin -- rm /config/root_token
 ```
 
-The web app needs a certificate browsers trust and a name for every
-session, which on a cluster means an ingress or a gateway:
+The web app needs a certificate browsers trust, and with session isolation
+a name for every session, which on a cluster means an ingress or a gateway:
 [Exposing the server](#exposing-the-server).
 
-The Role grants pods (get, list, create, delete), pod templates and events
-(get, list), claims and resource quotas (get, list), and ReplicaSets (get).
+The Role grants pods (get, list, create, delete) and their logs (get), pod
+templates and events (get, list), claims and resource quotas (get, list),
+and ReplicaSets (get).
 Deleting the Deployment removes every session pod with it, since the
 Deployment owns them; `kubectl delete -n <namespace> -f sealskin.yml` also
 deletes the claims and the data on them.
@@ -74,6 +75,11 @@ a service account token (`SEALSKIN_DEFAULT_PROVIDER` can force either
 backend). At start-up it reads its own pod: the volume behind each of its
 paths, the owner Deployment or StatefulSet, and whether each claim is
 `ReadWriteMany`.
+
+The server also takes each application's web client out of its image once
+per image, with a short-lived pod `sealskin-web-<id>` of that image whose
+log it reads and which it deletes at once; the Role grants `pods/log` for
+that.
 
 A session pod mounts its home directory and shared files from the storage
 claim with a `subPath`, exactly where a Docker session would find them, runs
@@ -299,7 +305,7 @@ Uncomment the four settings in `sealskin.yml`:
 | Setting | Value |
 | --- | --- |
 | `SEALSKIN_PUBLIC_URL` | The web app's address, `https://sealskin.example.com`. Set `HOST_URL` to the same host, with the port when it is not 443. |
-| `SEALSKIN_SESSION_DOMAIN` | The domain sessions open under: `example.com` gives `<session id>.example.com`. |
+| `SEALSKIN_SESSION_DOMAIN` | With session isolation, the domain sessions open under: `example.com` gives `<session id>.example.com`. |
 | `SEALSKIN_TRUSTED_PROXIES` | Where the controller's requests come from: the pod network (`10.244.0.0/16` on many clusters), or the node network for a controller on the host network. |
 | `SEALSKIN_HTTP_PORT` | `8080`, the Service's `proxied` port. |
 
@@ -313,11 +319,14 @@ kubectl -n <namespace> apply -f ingress.yml
 
 The file is an Ingress with two hosts on the same backend, the web app's
 name and the wildcard `*.example.com` that every session's name falls
-under, and, commented, the same as a Gateway and an HTTPRoute. The
-certificate in the secret has to cover both hosts, so it is a wildcard one,
-which cert-manager issues over a DNS-01 challenge. A wildcard host takes the
-names one label under the domain that no other Ingress or route names, so
-other applications on the domain keep their own.
+under with [session isolation](reverse-proxy/index.md#session-isolation),
+and, commented, the same as a Gateway and an HTTPRoute. Without session
+isolation the wildcard host may go, and the certificate need cover the web
+app's name alone; with it, the certificate in the secret has to cover both
+hosts, so it is a wildcard one, which cert-manager issues over a DNS-01
+challenge. A wildcard host takes the names one label under the domain that
+no other Ingress or route names, so other applications on the domain keep
+their own.
 
 Nothing in it is specific to a controller: the backend is plain HTTP, and a
 controller passes `Host`, WebSocket upgrades, and `X-Forwarded-Proto` as it

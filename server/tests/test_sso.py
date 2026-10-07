@@ -181,8 +181,8 @@ def _oidc_callback(http, provider, claims, **tokens):
 def _fragment(response):
     assert response.status_code == 303, response.text
     location = response.headers["location"]
-    assert location.startswith("/ui/#"), location
-    key, _, value = location[len("/ui/#") :].partition("=")
+    assert location.startswith("/#"), location
+    key, _, value = location[len("/#") :].partition("=")
     return key, value
 
 
@@ -544,7 +544,7 @@ def _post(http, relay, saml_response):
 def _finish(http, acs_response):
     assert acs_response.status_code == 303, acs_response.text
     location = acs_response.headers["location"]
-    if location.startswith("/ui/#"):
+    if location.startswith("/#"):
         return _fragment(acs_response)
     assert location.startswith("/api/auth/saml/done?ticket=")
     return _fragment(http.get(location, follow_redirects=False))

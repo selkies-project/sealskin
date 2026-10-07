@@ -21,6 +21,10 @@ rules:
 - apiGroups: [""]
   resources: ["pods"]
   verbs: ["get", "list", "create", "delete"]
+# The log of the pod that exports an image's web client
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get"]
 - apiGroups: [""]
   resources: ["podtemplates", "events"]
   verbs: ["get", "list"]

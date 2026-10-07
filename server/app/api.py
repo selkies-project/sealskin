@@ -29,6 +29,7 @@ from . import (
     sso,
     store,
     user_manager,
+    webclient,
 )
 from .docker_utils import get_and_cache_image_metadata, pull_and_cache_image, read_cpu_model
 from .launch import reconcile_sessions
@@ -37,6 +38,7 @@ from .routers import (
     admin,
     applications,
     cluster_admin,
+    entry,
     files,
     handshake,
     homedirs,
@@ -89,6 +91,7 @@ async def background_update_job() -> None:
 
         logger.info("Cleaning up dangling images...")
         await get_provider().prune_images()
+        await asyncio.to_thread(webclient.prune, webclient.digests_in_use())
 
 
 async def background_share_cleanup_job() -> None:
@@ -355,6 +358,7 @@ def create_app() -> FastAPI:
     app.include_router(sessions.proxy_router)
     app.include_router(shares.public_router)
     app.include_router(ui.router)
+    app.include_router(entry.router)
     app.include_router(sso_routes.router)
     app.include_router(peer.router)
     app.include_router(cluster_admin.router)

@@ -98,8 +98,8 @@ async def collaborative_room(
     session_data = state.sessions.get(session_id_str)
     if not session_data or not session_data.get("is_collaboration"):
         raise HTTPException(status_code=404, detail="Collaboration room not found.")
-    # A web sign-in's room stays off the web app's origin, like its session.
-    if session_data.get("native") and not on_session_origin(request, session_id_str):
+    # With session isolation, a web sign-in's room stays off the web app's origin, like its session.
+    if settings.session_isolation and session_data.get("native") and not on_session_origin(request, session_id_str):
         raise HTTPException(status_code=403, detail=OWN_ORIGIN_NEEDED)
 
     if (

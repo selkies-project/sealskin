@@ -176,7 +176,7 @@ Differences from the extension:
 
 ## In a browser, with nothing installed
 
-`https://<server>:8443/ui/` is the web app: the same launcher, file manager,
+`https://<server>:8443/` is the web app: the same launcher, file manager,
 and dashboard in an ordinary tab. It has no configuration file and keeps no
 key. [Sign in](signin.md) with what the administrator set up: **Sign In with
 OpenID Connect** or **Sign In with SAML** takes you to your organization's
@@ -195,15 +195,28 @@ options, which are remembered per application, or its play button to launch
 with them straight away. Drop a file anywhere on the page to open it in an
 application that takes it.
 
-Launching opens a tab at once that shows what the server is doing: choosing a
-node, preparing storage, downloading the application the first time a node
-runs it, starting it, and waiting for its desktop. The tab becomes the
-session when it is ready, or says why it could not start.
+Launching shows what the server is doing on the application's tile and in
+the sessions row: choosing a node, preparing storage, downloading the
+application the first time a node runs it, starting it, and waiting for its
+desktop. The session then takes the web app's place in the tab; the
+browser's back button is the way back. **Open in a new tab**, among the
+launch options, opens a tab at the click instead, which shows the same
+progress and becomes the session when it is ready, or says why it could not
+start.
 
-A session opens in a tab of its own, on an address of its own
-(`<session id>.<server name>`). If the launcher says the server has no such
-name the browser reaches, the administrator has to give it wildcard DNS and a
-certificate for it.
+**Copy link**, beside **Launch**, copies the application's address with the
+options chosen: `/app/<application id>/`, with the storage, the room, and the
+rest in its query. Opening the address signs you in if need be and takes you
+to your oldest running session of the application with that storage, room or
+not, or launches one. Bookmark it, or install it from the browser's menu as
+an app of its own, one per application; a session's own page offers the
+same install, for the session's options.
+
+Where the administrator turned session isolation on, a session has an
+address of its own (`<session id>.<session domain>`) and opens in a tab of
+its own. If the launcher then says the server has no such name the browser
+reaches, the administrator has to give it wildcard DNS and a certificate for
+it.
 
 On a [cluster](cluster.md) the launcher has a **Where** choice: leave it on
 **Automatic**, or pick a pool or a node. Each home directory shows the node
@@ -226,7 +239,7 @@ In place of the context menu:
   Edge, Firefox), a link such as `web+sealskin:https://example.com` opens
   its address in SealSkin.
 * **Search.** The web app offers itself to the browser as a search engine
-  (OpenSearch), and `…/ui/?q=terms` and `…/ui/?url=address` open the launcher
+  (OpenSearch), and `…/?q=terms` and `…/?url=address` open the launcher
   with that search or address.
 * **As an installed app** (Chrome and Edge, from the browser's install
   option): SealSkin becomes a target that other applications **share** links,

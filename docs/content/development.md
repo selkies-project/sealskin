@@ -137,7 +137,7 @@ SEALSKIN_BUILD_STRICT=1 npm run build # fail if any page or entry is missing
 
 | Output | Consumer | Hashed | Minified |
 | --- | --- | --- | --- |
-| `dist/ui` | served by the server under `/ui/`, the web app included | yes | yes |
+| `dist/ui` | served by the server under `/ui/`, the web app's page at `/` | yes | yes |
 | `dist/extension` | contents of the extension zip | no | no (store review friendly) |
 | `dist/mobile` | Capacitor web directory (`mobile/www`) | no | no |
 

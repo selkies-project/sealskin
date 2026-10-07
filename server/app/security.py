@@ -597,11 +597,16 @@ def verify_share_password(password: str, stored_hash: str) -> bool:
     return secrets.compare_digest(candidate, expected)
 
 
-#: What a web sign-in's session answers when asked for anywhere but its own origin.
+#: What a web sign-in's session answers, with session isolation, when asked for anywhere but its own origin.
 OWN_ORIGIN_NEEDED = (
     "A session of a web sign-in opens on its own origin, <session id>.<domain>, apart from the web app. "
     "This server has no such name the browser reaches: it needs wildcard DNS and a certificate for it "
-    "(see SEALSKIN_SESSION_DOMAIN)."
+    "(see SEALSKIN_SESSION_DOMAIN and SEALSKIN_SESSION_ISOLATION)."
+)
+#: What a web sign-in's session answers on the web app's origin when this node has no copy of its web client.
+WEB_CLIENT_NEEDED = (
+    "A session of a web sign-in on the web app's origin is served by the server's copy of the application's "
+    "web client, which this server could not export from the image (see SEALSKIN_WEB_CLIENT_PATH)."
 )
 
 
@@ -609,9 +614,11 @@ def on_session_origin(request: Request, session_id: str) -> bool:
     """Whether a request reached a session on the session's own origin, whose name starts with its id.
 
     A session is served from one origin, the first its token was exchanged on:
-    its own where the browser reaches one, so its pages share no storage,
-    cookies, or service workers with the web app or other sessions, and the
-    server's shared origin otherwise.
+    its own where the browser reaches one and `session_isolation` asks for
+    it, so its pages share no storage, cookies, or service workers with the
+    web app or other sessions, and the server's shared origin otherwise,
+    where the pages of a web sign-in's session are the server's own copy of
+    the web client (see `webclient`).
     """
     return request.headers.get("host", "").split(".", 1)[0].lower() == session_id
 

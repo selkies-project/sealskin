@@ -240,12 +240,12 @@ docker run -d --name alpha --hostname alpha --network sealskin-lab \
 cat lab/alpha/config/root_token
 ```
 
-`<your name>` is a name with wildcard DNS and a trusted certificate covering
-its subdomains, as the Duck DNS certificate the
-[installer](start.md#with-the-installer-recommended) makes; on a machine
-with no public name, `mkcert "*.localhost" localhost` after `mkcert -install`
-gives one for `localhost`, which browsers resolve together with its
-subdomains. Open `https://<your name>:8443/ui/`, sign in with the root
+`<your name>` is a name with a certificate browsers trust, as the Duck DNS
+certificate the [installer](start.md#with-the-installer-recommended) makes;
+on a machine with no public name, `mkcert localhost` after `mkcert -install`
+gives one for `localhost`. (Session isolation would also take wildcard DNS
+and a certificate covering the name's subdomains: `mkcert "*.localhost"
+localhost`.) Open `https://<your name>:8443/`, sign in with the root
 token, install an application under **App Stores**, and launch it.
 
 Then, in the dashboard, **Cluster → Add a node** gives a join code; start

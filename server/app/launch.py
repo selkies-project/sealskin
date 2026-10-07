@@ -24,7 +24,7 @@ from typing import Any
 import docker
 from fastapi import HTTPException
 
-from . import audit, cluster, config_store, filesync, progress, quota, user_manager
+from . import audit, cluster, config_store, filesync, progress, quota, user_manager, webclient
 from .fsutil import safe_copytree, safe_join, sanitize_for_filename, unique_filename
 from .models import InstalledApp
 from .providers import get_provider
@@ -715,8 +715,10 @@ async def launch_application(
         timezone: The browser's IANA zone; the container's `TZ` (see
             `resolve_timezone`).
         auth_user: The record of the user launching, when a user is: the app
-            must be open to them, a session of a web sign-in opens on an
-            origin of its own, and the user's storage limit applies.
+            must be open to them, a session of a web sign-in is served by
+            this node's copy of the application's web client (on an origin
+            of its own with `session_isolation`), and the user's storage
+            limit applies.
 
     Returns:
         `{"session_url": str, "session_id": str}`.
@@ -803,6 +805,14 @@ async def launch_application(
     try:
         provider = get_provider(spec.app_config)
         instance = await provider.launch(**spec.provider_kwargs(session_id))
+        progress.step("client")
+        try:
+            web_root = await webclient.root_for_session(
+                app.provider_config.image, spec.env, required=native and not settings.session_isolation
+            )
+        except HTTPException:
+            await provider.stop(instance["instance_id"])
+            raise
         now = time.time()
         session: dict[str, Any] = {
             "instance_id": instance["instance_id"],
@@ -823,6 +833,10 @@ async def launch_application(
             "gpu_exclusive": bool(gpu_config) and not effective_settings.get("gpu_share", True),
             "native": native,
             "lab": bool(forced_rw_mount) and native,
+            "web_root": web_root,
+            "home_name": home_name or "",
+            "language": language or "",
+            "selected_gpu": selected_gpu or "",
             "provider_groups": list((auth_user or {}).get("provider_groups") or []),
             "wayland_mode": wayland_mode,
             "timezone": timezone,
@@ -836,7 +850,7 @@ async def launch_application(
                 }
             },
         }
-        if native:
+        if native and settings.session_isolation:
             session["own_origin"] = True
         if launch_in_room_mode:
             session.update(

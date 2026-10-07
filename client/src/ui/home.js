@@ -4,16 +4,19 @@
  * launch panel, and its play button launches with the options last used.
  * `?view=sessions` shows the sessions alone.
  *
- * A launch takes a tab at the click, which shows `launching.html` until the
- * session is ready; this page follows the same progress on the tile and in
- * the sessions row. The launch logic mirrors `popup.js`, which the extension
- * and the mobile app keep.
+ * A launch shows its progress on the tile and in the sessions row, and the
+ * web app goes to the session when it is ready; asked to open in a new tab,
+ * the launch takes a tab at the click, which shows `launching.html` until
+ * then. The launch logic mirrors `popup.js`, which the extension and the
+ * mobile app keep. The drawer's copy-link control writes the application's
+ * address with the options chosen, `/app/<app id>/?<options>`, which opens
+ * the same session again from a bookmark or an installed web app.
  */
 
 import { bridge, request } from '../lib/bridge.js';
 import { secureFetch, getContextBlob, uploadInChunks, openPage } from '../lib/api.js';
 import { loadTranslator, applyTranslations } from '../lib/i18n.js';
-import { supportedLangs } from '../lib/languages.js';
+import { defaultLanguage as nearestLanguage, supportedLangs } from '../lib/languages.js';
 import { browserTimezone } from '../lib/timezone.js';
 import { announce, escapeHtml, formatLogoSrc, hydrateLogos, timeAgo, currentLocale, showToast } from '../lib/dom.js';
 
@@ -94,18 +97,7 @@ function saveMemory() {
 
 /** The session locale nearest the browser's, as the launcher has always picked it. */
 function defaultLanguage() {
-  const [lang, region = ''] = currentLocale().split('-');
-  const langCode = lang.toLowerCase();
-  const regionCode = region.toUpperCase();
-  const values = Object.values(supportedLangs);
-  const exact = `${langCode}_${regionCode}.UTF-8`;
-  if (values.includes(exact)) return exact;
-  const primary = {
-    es: 'ES', fr: 'FR', pt: 'BR', de: 'DE', it: 'IT', ru: 'RU', ja: 'JP', ko: 'KR', th: 'TH',
-    zh: regionCode === 'TW' || regionCode === 'HK' ? regionCode : 'CN',
-  }[langCode];
-  if (primary && values.includes(`${langCode}_${primary}.UTF-8`)) return `${langCode}_${primary}.UTF-8`;
-  return values.find((value) => value.startsWith(`${langCode}_`)) || 'en_US.UTF-8';
+  return nearestLanguage(currentLocale());
 }
 
 const nodeName = (id) => {
@@ -139,7 +131,30 @@ function optionsFor(app) {
     waylandMode: saved.waylandMode !== false,
     room: Boolean(saved.room),
     openFile: saved.openFile !== false,
+    newTab: Boolean(saved.newTab),
   };
+}
+
+/**
+ * The application's address with `options`, which opens the same session
+ * again: `home` names the storage (`auto` is left out, being the default),
+ * `room` marks a collaborative session, and the rest say how a new one
+ * starts.
+ *
+ * @param {object} app
+ * @param {object} options See `optionsFor`.
+ * @returns {string} An absolute URL.
+ */
+function addressFor(app, options) {
+  const query = new URLSearchParams();
+  if (hasStorage(app) && options.homeDir && options.homeDir !== 'auto') query.set('home', options.homeDir);
+  if (options.gpu) query.set('gpu', options.gpu);
+  if (options.room) query.set('room', '1');
+  if (options.language && options.language !== defaultLanguage()) query.set('lang', options.language);
+  if (!options.waylandMode) query.set('wayland', '0');
+  if (options.where) query.set('where', options.where);
+  const search = query.toString();
+  return `${location.origin}/app/${encodeURIComponent(app.id)}/${search ? `?${search}` : ''}`;
 }
 
 // --- Rendering ----------------------------------------------------------------
@@ -333,6 +348,7 @@ function openDrawer(app) {
   languageSelect.value = options.language;
   $('collaborationMode').checked = options.room;
   $('waylandMode').checked = options.waylandMode;
+  $('openInTab').checked = options.newTab;
   $('openFileOnLaunch').checked = options.openFile;
   $('open-file-group').hidden = !(context && context.action === 'file');
 
@@ -356,15 +372,17 @@ function drawerOptions() {
     waylandMode: $('waylandMode').checked,
     room: $('collaborationMode').checked,
     openFile: $('openFileOnLaunch').checked,
+    newTab: $('openInTab').checked,
   };
 }
 
 // --- Launching ----------------------------------------------------------------
 
 /**
- * Launch an application with what is being opened, if anything. The tab is
- * taken first, at the click; its launching page then follows the server's
- * progress, and is told here of a failure the server never saw.
+ * Launch an application with what is being opened, if anything. The web
+ * app goes to the session once it runs; for a session in a new tab, the
+ * tab is taken first, at the click, and its launching page then follows the
+ * server's progress, and is told here of a failure the server never saw.
  *
  * @param {object} app
  * @param {object} options See `optionsFor`.
@@ -372,11 +390,13 @@ function drawerOptions() {
 async function launch(app, options) {
   const id = crypto.randomUUID();
   const opening = context;
-  try {
-    await request('reserveTab', { reserve: true, launch: { id, app: app.name, logo: app.logo || '', room: options.room } });
-  } catch (error) {
-    notify(shellError(error), true);
-    return;
+  if (options.newTab) {
+    try {
+      await request('reserveTab', { reserve: true, launch: { id, app: app.name, logo: app.logo || '', room: options.room } });
+    } catch (error) {
+      notify(shellError(error), true);
+      return;
+    }
   }
 
   const flight = { id, app, stage: 'requesting', detail: {} };
@@ -456,11 +476,11 @@ async function launch(app, options) {
     tell({ posted: true });
     // The server answers once the session runs, which a first image pull can delay for minutes.
     const data = await secureFetch(endpoint, { method: 'POST', body: JSON.stringify(payload) }, { timeout: 0 });
-    await request('openSession', { sessionId: data.session_id, sessionUrl: data.session_url, launchId: id });
-
     memory.apps[app.id] = options;
     memory.recent = [app.id, ...memory.recent.filter((recent) => recent !== app.id)].slice(0, RECENT_MAX);
-    saveMemory();
+    await saveMemory();
+    // Opened in this tab, the session takes the web app's place now.
+    await request('openSession', { sessionId: data.session_id, sessionUrl: data.session_url, launchId: id });
     channel.close();
   } catch (error) {
     tell({ error: shellError(error) });
@@ -576,6 +596,16 @@ function bindEvents() {
     const options = drawerOptions();
     closeDrawer();
     launch(app, options);
+  });
+  $('copy-link-btn').addEventListener('click', async () => {
+    const address = addressFor(drawerApp, drawerOptions());
+    try {
+      await navigator.clipboard.writeText(address);
+      notify(t('web.home.linkCopied'));
+    } catch (error) {
+      // A browser that refuses the clipboard leaves the address to copy by hand.
+      prompt(t('web.home.copyLinkHelp'), address);
+    }
   });
 
   $('upload-button').addEventListener('click', () => $('file-input').click());

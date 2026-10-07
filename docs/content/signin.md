@@ -7,7 +7,7 @@ SealSkin takes two kinds of client.
 
 | | Web sign-in | Key file |
 | --- | --- | --- |
-| Clients | The web app at `https://<server>/ui/` | Browser extension and mobile app with a configuration file |
+| Clients | The web app at `https://<server>/` | Browser extension and mobile app with a configuration file |
 | Who the user is | The root token, an identity provider, or a reverse proxy says | The user's RSA key signs every request |
 | Transport | HTTPS, with a certificate the browser trusts | HTTPS, or encrypted payloads over HTTP on the API port |
 | Reaches | Every node of a [cluster](cluster.md) | The one server in the configuration file |
@@ -21,16 +21,27 @@ the web sign-in.
 
 * **A trusted certificate.** The web app signs in with a cookie, which a
   browser only keeps for an origin it trusts.
-* **Names for sessions.** A session of a web sign-in is served on an origin of
-  its own, `<session id>.<name>`, and nowhere else, so nothing a session's
-  page runs can use the cookie of the web app next to it. DNS has to resolve
-  every such name to the server and the certificate has to cover them:
-  `*.<server name>`, or `*.<parent name>` as the installer's Duck DNS
-  certificate does. The web app probes for a name it can reach before it
-  opens a session. `SEALSKIN_SESSION_DOMAIN` names the domain when sessions
-  live under another one than the web app.
+* **The application's web client, from its image.** A session's page is
+  the Selkies web client. Served by the container it would be code of the
+  image running on the web app's origin, next to the sign-in cookie, so the
+  server takes the client out of the image instead, once per image, after
+  each pull, and serves it at `/<session id>/` itself; the container answers
+  the session's API alone, and nothing it answers may run as a page. The
+  images of [linuxserver.io](https://www.linuxserver.io/) keep the client
+  under `/usr/share/selkies`; `SEALSKIN_WEB_CLIENT_PATH` names the directory
+  for an image that keeps it elsewhere. A session of a web sign-in whose
+  client the server could not export does not open.
 
-A collaboration room of a web sign-in opens on its session's origin too.
+Session isolation (`SEALSKIN_SESSION_ISOLATION=true`) goes further: every
+session of a web sign-in is then served on an origin of its own,
+`<session id>.<session domain>`, and nowhere else, so it shares no storage,
+cookies, or service workers with the web app or with other sessions. That
+takes DNS resolving every such name to the server and a certificate covering
+them, `*.<session domain>`, which a certificate authority issues over a DNS
+challenge; `SEALSKIN_SESSION_DOMAIN` names the domain when sessions live
+under another one than the web app. It is the setting for a server running
+images it does not vouch for. A collaboration room of a web sign-in opens on
+its session's origin too.
 
 ## The root administrator
 

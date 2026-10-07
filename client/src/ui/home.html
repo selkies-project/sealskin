@@ -76,10 +76,12 @@
             <div class="settings-grid" style="grid-template-columns: 1fr;">
                 <div class="form-group"><label><input type="checkbox" id="collaborationMode"> <span data-i18n="popup.launchView.collaborationMode">Collaborative Session</span></label></div>
                 <div class="form-group"><label><input type="checkbox" id="waylandMode" checked> <span data-i18n="popup.launchView.waylandMode">Wayland Mode</span></label></div>
+                <div class="form-group"><label><input type="checkbox" id="openInTab"> <span data-i18n="popup.launchView.newTab">Open in a new tab</span></label></div>
                 <div class="form-group" id="open-file-group"><label><input type="checkbox" id="openFileOnLaunch" checked> <span data-i18n="popup.launchView.openFile">Open file on launch</span></label></div>
             </div>
         </div>
         <footer class="drawer-foot">
+            <button type="button" id="copy-link-btn" class="secondary" data-i18n-title="web.home.copyLinkHelp" title="A link that opens this application with these options"><i class="fas fa-link"></i> <span data-i18n="web.home.copyLink">Copy link</span></button>
             <button type="button" id="launch-btn" class="primary"><i class="fas fa-play"></i> <span data-i18n="popup.launchView.launchButton">Launch</span></button>
         </footer>
     </aside>

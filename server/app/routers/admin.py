@@ -16,7 +16,7 @@ import yaml
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import ValidationError
 
-from .. import cluster, config_store, progress, quota, routing, sso, user_manager
+from .. import cluster, config_store, progress, quota, routing, sso, user_manager, webclient
 from ..docker_utils import get_and_cache_image_metadata, get_system_stats, pull_and_cache_image
 from ..fsutil import safe_join, safe_rmtree
 from ..launch import launch_application, stop_session
@@ -94,6 +94,7 @@ async def admin_status(user: dict[str, Any] = Depends(verify_token)) -> dict[str
         "via": user.get("via") or "key",
         "sign_out_url": settings.proxy_auth_logout_url if user.get("via") == "proxy" else "",
         "session_domain": settings.session_domain,
+        "session_isolation": settings.session_isolation,
         "clustered": cluster.is_clustered(),
         "node_id": cluster.NODE_ID,
         "allowance": quota.allowance(user),
@@ -396,6 +397,7 @@ async def pull_latest_app_image(app_id: str) -> ImagePullResponse:
         await get_provider().pull_image(image_name)
         await config_store.refresh_autostart_for_app(app)
         await get_and_cache_image_metadata(image_name, force_refresh=True)
+        await webclient.export_quietly(image_name)
         return ImagePullResponse(
             status="success", new_sha=state.image_metadata.get(image_name, {}).get("sha")
         )

@@ -1,16 +1,25 @@
-"""Serving the built web UI, the web app's manifest, the template schema, and the landing page."""
+"""Serving the web app at `/`, the built UI under `/ui/`, the web app's manifest, and the template schema.
+
+The web app's page is served at the root, so the server's address is the
+web app's and a sign-in lands there; its assets, the pages the extension and
+the mobile app frame, and its service worker stay under `/ui/`, where the
+worker's scope keeps it off the sessions of the origin. `/ui/` itself sends
+the browser to `/`, so an older link or a provider's return still arrives.
+"""
 
 from __future__ import annotations
 
 import logging
 import mimetypes
 import os
+import posixpath
+import re
 from typing import Any
 from xml.sax.saxutils import escape, quoteattr
 
 import yaml
 from fastapi import APIRouter, FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from starlette.staticfiles import StaticFiles
 
 from ..models import TemplateSchemaResponse, TemplateSchemaSetting, UiManifest
@@ -23,7 +32,38 @@ router = APIRouter()
 
 BRIDGE_VERSION = 1
 NO_CACHE_SUFFIXES = (".html", ".json", "/sw.js")
-WEB_APP_CSP = "frame-ancestors 'none'; script-src 'self'; object-src 'none'; base-uri 'none'"
+#: The web app runs only its own scripts, is never framed, and sets its own `<base>` alone.
+WEB_APP_CSP = "frame-ancestors 'none'; script-src 'self'; object-src 'none'; base-uri 'self'"
+_ASSET_RE = re.compile(r'(?P<attr>\b(?:src|href))="(?P<url>[^"]+)"')
+
+
+def absolutize(html: str, base: str) -> str:
+    """Point the relative `src` and `href` values of a built page at `base`, where its assets are served.
+
+    A value written `./<name>` is left as it is: it names what is served
+    beside the page itself, such as its manifest.
+    """
+
+    def rewrite(match: re.Match[str]) -> str:
+        url = match.group("url")
+        if url.startswith(("/", "./", "http://", "https://", "data:", "about:", "#", "?")):
+            return match.group(0)
+        return f'{match.group("attr")}="{posixpath.normpath(posixpath.join(base, url))}"'
+
+    return _ASSET_RE.sub(rewrite, html)
+
+
+def built_page(name: str, base: str = "/ui/") -> str:
+    """Return a page of the built UI with its assets pointed at `base`.
+
+    Raises:
+        HTTPException: 404 when the UI is not built.
+    """
+    try:
+        with open(os.path.join(settings.ui_path, name), encoding="utf-8") as handle:
+            return absolutize(handle.read(), base)
+    except OSError as exc:
+        raise HTTPException(status_code=404, detail="The web UI is not built.") from exc
 
 
 class UiStaticFiles(StaticFiles):
@@ -116,8 +156,8 @@ async def web_app_manifest() -> JSONResponse:
             accept.setdefault(mime, []).append(f".{extension}")
     manifest: dict[str, Any] = {
         "name": "SealSkin",
-        "start_url": "./",
-        "scope": "./",
+        "start_url": "/",
+        "scope": "/",
         "display": "standalone",
         "background_color": "#0d1117",
         "theme_color": "#0d1117",
@@ -131,10 +171,10 @@ async def web_app_manifest() -> JSONResponse:
             "enctype": "multipart/form-data",
             "params": {"title": "title", "text": "text", "url": "url", "files": [{"name": "file", "accept": ["*/*"]}]},
         },
-        "protocol_handlers": [{"protocol": "web+sealskin", "url": "./?url=%s"}],
+        "protocol_handlers": [{"protocol": "web+sealskin", "url": "/?url=%s"}],
     }
     if accept:
-        manifest["file_handlers"] = [{"action": "./", "accept": accept}]
+        manifest["file_handlers"] = [{"action": "/", "accept": accept}]
     return JSONResponse(manifest, media_type="application/manifest+json", headers={"Cache-Control": "no-cache"})
 
 
@@ -147,14 +187,14 @@ async def opensearch_description(request: Request) -> Response:
     the browser's port.
     """
     public = settings.public_url.rstrip("/")
-    app = f"{public}/ui/" if public else str(request.url_for("ui", path="/"))
+    app = f"{public}/" if public else str(request.base_url)
     body = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">'
         "<ShortName>SealSkin</ShortName>"
         "<Description>Search in an isolated SealSkin session</Description>"
         "<InputEncoding>UTF-8</InputEncoding>"
-        f'<Image width="192" height="192" type="image/png">{escape(app)}icons/icon128.png</Image>'
+        f'<Image width="192" height="192" type="image/png">{escape(app)}ui/icons/icon128.png</Image>'
         f'<Url type="text/html" method="get" template={quoteattr(app + "?q={searchTerms}")}/>'
         "</OpenSearchDescription>"
     )
@@ -168,10 +208,21 @@ async def get_ui_version() -> dict[str, Any]:
 
 
 @router.get("/", response_class=HTMLResponse, include_in_schema=False)
-async def read_root() -> HTMLResponse:
-    """Serve the landing page."""
-    html_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", "index.html")
-    if os.path.exists(html_path):
-        with open(html_path, encoding="utf-8") as handle:
-            return HTMLResponse(content=handle.read())
-    return HTMLResponse(content="<h1>SealSkin Server</h1>", status_code=404)
+async def web_app() -> HTMLResponse:
+    """Serve the web app's page, with the isolation its built copy under `/ui/` carries."""
+    return HTMLResponse(
+        built_page("index.html"),
+        headers={
+            "Cache-Control": "no-cache",
+            "Content-Security-Policy": WEB_APP_CSP,
+            "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+        },
+    )
+
+
+@router.get("/ui/", include_in_schema=False)
+@router.get("/ui/index.html", include_in_schema=False)
+async def web_app_moved(request: Request) -> RedirectResponse:
+    """Send the web app's old address to `/`, query kept; a browser keeps the fragment too."""
+    query = f"?{request.url.query}" if request.url.query else ""
+    return RedirectResponse(f"/{query}", status_code=308)

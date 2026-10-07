@@ -70,7 +70,9 @@ export function adoptLaunchTab(id, sessionId) {
 }
 
 /**
- * Open a session in a tab of its own, or bring forward the tab showing it.
+ * Open a session: bring forward the tab showing it, fill the tab taken for
+ * it at the click, or else take the browser there in this tab, in the web
+ * app's place.
  *
  * This page opens every session tab itself and keeps its handle: looking a
  * tab up by name would make this page its opener, and session content may
@@ -90,9 +92,12 @@ function openTab(url) {
   }
   let tab = sessionTabs.get(session);
   if (!tab || tab.closed) {
-    tab = reserved && !reserved.closed ? reserved : window.open();
+    tab = reserved && !reserved.closed ? reserved : null;
     reserved = null;
-    if (!tab) return;
+    if (!tab) {
+      location.assign(target.href);
+      return;
+    }
     tab.opener = null;
     tab.location.replace(target.href);
     sessionTabs.set(session, tab);

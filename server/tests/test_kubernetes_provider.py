@@ -1,5 +1,6 @@
 """Kubernetes provider against an in-memory API server."""
 
+import base64
 import json
 
 import httpx
@@ -57,6 +58,7 @@ class FakeApi:
         self.pod_templates = {}
         self.pod_templates_failure = None
         self.events = []
+        self.log = ""
 
     def handler(self, request: httpx.Request) -> httpx.Response:
         path = request.url.path
@@ -116,6 +118,8 @@ class FakeApi:
                 wanted = dict(pair.split("=") for pair in selector.split(","))
                 items = [p for p in items if wanted.items() <= p["metadata"].get("labels", {}).items()]
             return httpx.Response(200, json={"items": items})
+        if path.endswith("/log"):
+            return httpx.Response(200, text=self.log)
         if "/pods/" in path:
             name = path.rsplit("/", 1)[1]
             if request.method == "DELETE":
@@ -153,6 +157,32 @@ def _provider(**docker_overrides):
     return kp.KubernetesProvider(
         {"provider_config": {"image": "lscr.io/linuxserver/firefox:latest", "port": 3000, "docker_overrides": docker_overrides}}
     )
+
+
+async def test_the_web_client_is_exported_through_a_pod_log(api):
+    await kp.KubernetesProvider().inspect_self()
+    api.pod_status = {"phase": "Succeeded"}
+    api.log = base64.b64encode(b"tar bytes").decode()
+    state.image_metadata["lscr.io/linuxserver/firefox:latest"] = {"pinned": "sha256:" + "a" * 64}
+    data = await _provider().export_web_client("lscr.io/linuxserver/firefox:latest", "/usr/share/selkies")
+    assert data == b"tar bytes"
+    pod = api.posted[-1]
+    container = pod["spec"]["containers"][0]
+    assert pod["metadata"]["generateName"] == "sealskin-web-"
+    assert pod["metadata"]["labels"]["app.kubernetes.io/component"] == "web-export"
+    assert container["image"] == "lscr.io/linuxserver/firefox@sha256:" + "a" * 64
+    assert container["command"][-1] == "tar -cz -C /usr/share/selkies . | base64 | tr -d '\\n'"
+    assert pod["spec"]["restartPolicy"] == "Never" and pod["spec"]["automountServiceAccountToken"] is False
+    assert api.deleted == [pod["metadata"]["name"]]
+
+
+async def test_a_failed_export_pod_reports_its_log(api):
+    await kp.KubernetesProvider().inspect_self()
+    api.pod_status = {"phase": "Failed"}
+    api.log = "tar: /nope: No such file"
+    with pytest.raises(RuntimeError, match="No such file"):
+        await _provider().export_web_client("lscr.io/linuxserver/firefox:latest", "/nope")
+    assert len(api.deleted) == 1
 
 
 async def test_inspect_self_maps_volumes_owner_and_claims(api):

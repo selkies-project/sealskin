@@ -12,7 +12,7 @@ With a self-signed certificate the browser refuses the served UI until you
 have accepted the certificate once. Click **Open server**, accept it in the
 tab that opens, then **Retry**. If the address or ports are wrong, **Change
 connection** takes you back to the connection page. Check that the session
-port is reachable from where you are (`curl -k https://<server>:8443/ui/`).
+port is reachable from where you are (`curl -k https://<server>:8443/`).
 </details>
 
 <details>
@@ -130,10 +130,11 @@ container's `TZ` follows it; failing that, the server's own `TZ` applies. Set
 <details>
 <summary>Can I run SealSkin behind my existing reverse proxy?</summary>
 
-Yes. The proxy terminates TLS for the web app's name and for the session
-names, `<session id>.<domain>`, which takes a wildcard certificate, and
-passes WebSockets; SealSkin's own Caddy stays behind it and keeps routing
-and authenticating every session request. The proxy can also sign users in.
+Yes. The proxy terminates TLS for the web app's name and passes WebSockets;
+SealSkin's own Caddy stays behind it and keeps routing and authenticating
+every session request. With session isolation it also serves the session
+names, `<session id>.<domain>`, which takes a wildcard certificate. The
+proxy can also sign users in.
 [Behind a reverse proxy](reverse-proxy/index.md) has configurations for
 SWAG, Traefik, Nginx Proxy Manager, and Caddy, with Authelia and Authentik.
 </details>

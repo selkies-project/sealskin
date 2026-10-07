@@ -148,8 +148,10 @@ body.home [hidden] { display: none !important; }
 .drawer-context { margin: 0; font-size: 0.78rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .drawer-context:empty { display: none; }
 .drawer-body { flex: 1; overflow-y: auto; padding: 1.25rem; }
-.drawer-foot { padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom)); border-top: 1px solid var(--border-color); }
-.drawer-foot button { width: 100%; padding: 0.85rem; font-size: 1rem; justify-content: center; }
+.drawer-foot { display: flex; gap: 0.75rem; padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom)); border-top: 1px solid var(--border-color); }
+/* Both buttons the same height, whatever border each kind carries. */
+.drawer-foot button { flex: 1 1 0; box-sizing: border-box; min-height: 3rem; margin: 0; padding: 0.75rem 1rem; font-size: 1rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; white-space: nowrap; }
+.drawer-foot #launch-btn { flex-grow: 1.4; }
 
 #drop-overlay { position: fixed; inset: 0.75rem; z-index: 30; display: grid; place-items: center; border: 2px dashed var(--accent-primary); border-radius: var(--radius-lg); background-color: rgba(13, 17, 23, 0.88); color: var(--accent-text-strong); text-align: center; pointer-events: none; }
 #drop-overlay i { font-size: 3rem; }

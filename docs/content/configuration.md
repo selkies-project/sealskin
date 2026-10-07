@@ -97,19 +97,26 @@ the default `admin` account and `admin.json`.
 
 ### Session origins
 
-A session opens on an origin of its own, `<session id>.<name>`, wherever the
-browser reaches one, so its pages share no storage, cookies, or service
-workers with the web app or with other sessions. The certificate has to cover
-such names and be trusted by the browser, and DNS has to resolve them to the
-server: `*.<server name>`, or, as the installer's Duck DNS certificate does,
-`*.<parent name>`, which covers the server's own name and its siblings (Duck DNS
-resolves every name under a domain). The extension, the apps, and the web app
-probe a random name under each, and under `SEALSKIN_SESSION_DOMAIN` when it
-is set, before opening a session. For a key-file client, a session reached by
-IP address, one whose names do not resolve or are not covered, a
-collaboration room, and the extension's App Laboratory frame are served from
-the shared origin, as they always have been. A session of a
-[web sign-in](signin.md) is served on its own origin or not at all.
+A session opens at `/<session id>/` on the server's own origin. Its page is
+the server's copy of the application's web client, taken out of the image
+once per image (see [the web sign-in](signin.md#what-the-web-sign-in-needs)
+and `SEALSKIN_WEB_CLIENT_PATH`), and the container answers the session's API
+alone. The copies live under `<node state>/web/`, one directory per image
+digest, and go when no installed application runs the image any more.
+
+With `SEALSKIN_SESSION_ISOLATION=true`, a session of a [web sign-in](signin.md)
+opens on an origin of its own instead, `<session id>.<name>`, so its pages
+share no storage, cookies, or service workers with the web app or with other
+sessions. The certificate has to cover such names and be trusted by the
+browser, and DNS has to resolve them to the server: `*.<server name>`, or,
+as the installer's Duck DNS certificate does, `*.<parent name>`, which covers
+the server's own name and its siblings (Duck DNS resolves every name under a
+domain). The web app probes a random name under each, and under
+`SEALSKIN_SESSION_DOMAIN` when it is set, before opening a session, and a
+session of a web sign-in is then served on its own origin or not at all. A
+key-file client's session, a collaboration room of one, and the extension's
+App Laboratory frame are served from the shared origin either way, as they
+always have been.
 
 ## admin.json
 

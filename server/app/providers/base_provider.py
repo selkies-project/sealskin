@@ -141,6 +141,22 @@ class BaseProvider(ABC):
     async def prune_images(self) -> None:
         """Remove images no session can use any more."""
 
+    @abstractmethod
+    async def export_web_client(self, image: str, path: str) -> bytes:
+        """Return `path` of the image as a tar stream, gzipped or not, from a throwaway instance of it.
+
+        The entries may sit under one directory, the exported one, or not.
+        The instance runs nothing of the image, or `tar` alone, with no
+        network and nothing mounted, and is gone when this returns.
+
+        Args:
+            image: The image reference, as an application names it.
+            path: The directory inside the image to export.
+
+        Raises:
+            RuntimeError: When the image cannot be run or holds no such directory.
+        """
+
     async def _wait_until_ready(
         self,
         session_id: str,

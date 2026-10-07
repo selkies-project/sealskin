@@ -49,7 +49,7 @@ def _web_only(request: Request) -> None:
 
 def _to_app(fragment: str) -> RedirectResponse:
     """Send the browser to the web app with `fragment`."""
-    return RedirectResponse(f"/ui/#{fragment}", status_code=303)
+    return RedirectResponse(f"/#{fragment}", status_code=303)
 
 
 def _failed(exc: sso.SignInError) -> RedirectResponse:

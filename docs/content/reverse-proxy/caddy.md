@@ -7,6 +7,11 @@ Run with Caddy 2.11. Read [Behind a reverse proxy](index.md) first for the
 settings on the SealSkin side. This is a Caddy you run in front; the one
 inside the SealSkin container is not configured by hand.
 
+The session names, and the wildcard certificate that covers them, are for
+[session isolation](index.md#session-isolation); without it the web app's
+name is all SealSkin needs, and the rule for the session names is harmless
+and may be left out.
+
 ## Caddyfile
 
 One site takes the web app's name and the wildcard, and sends SealSkin the

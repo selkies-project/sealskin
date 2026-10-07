@@ -1,5 +1,7 @@
 /**
  * Web app: SealSkin in a browser tab or an installed app, with no extension.
+ * Served at `/`, the server's own address; its assets, the pages it frames,
+ * and its service worker live under `/ui/`, which is the worker's scope.
  *
  * This page runs the shells' background over the shared `chrome.*` polyfill
  * and frames the served pages, as the mobile app does, inside a frame of its
@@ -14,9 +16,15 @@
  * exchanges for the cookie. The server sends this page with a cross-origin
  * opener policy and no framing, and session tabs get no opener.
  *
- * A launch opens `launching.html` in a tab at the click; that page shows the
- * launch's progress and takes itself to the session's own origin, whose
- * suffix this page probes for ahead of time and hands it.
+ * A session opens in this tab, taking the web app's place, unless the
+ * launcher asked for a tab of its own: then a launch opens `launching.html`
+ * in a tab at the click, and that page shows the launch's progress and takes
+ * itself to the session. With session isolation a session has an origin of
+ * its own, whose suffix this page probes for ahead of time and hands it.
+ *
+ * `?next=/app/<app id>/...` is an application's address that sent the
+ * browser here to sign in; it is kept through the provider's round trip and
+ * taken up again once a sign-in holds.
  *
  * Launch contexts arrive through `?url=` (links, the bookmarklet, and
  * `web+sealskin:` addresses), `?q=` (OpenSearch and a selection sent by the
@@ -65,6 +73,40 @@ const $$ = (selector) => document.querySelectorAll(selector);
 let signOutUrl = '';
 /** How this page's user was last signed in; a reload forgets it. */
 let signedInVia = '';
+/** Whether the server serves sessions on origins of their own (see `session-origin.js`). */
+let isolated = false;
+const NEXT_KEY = 'sealskin-next';
+const NEXT_ADDRESS = /^\/app\/[A-Za-z0-9_-]+\/(\?[^#\s]*)?$/;
+
+/**
+ * The application's address this page is to go on to once signed in: from
+ * `?next=`, kept in the tab's session storage across the provider's round
+ * trip, and only ever an address under `/app/` of this origin.
+ *
+ * @returns {string|null}
+ */
+function nextAddress() {
+  const params = new URLSearchParams(location.search);
+  let next = params.get('next');
+  if (next !== null) {
+    params.delete('next');
+    const search = params.toString();
+    history.replaceState(null, '', location.pathname + (search ? `?${search}` : '') + location.hash);
+    try { sessionStorage.setItem(NEXT_KEY, next); } catch (e) { /* no storage */ }
+  } else {
+    try { next = sessionStorage.getItem(NEXT_KEY); } catch (e) { next = null; }
+  }
+  return next && NEXT_ADDRESS.test(next) ? next : null;
+}
+
+/** Go on to the application's address that sent the browser here, if one did. */
+function leaveForNext() {
+  const next = nextAddress();
+  if (!next) return false;
+  try { sessionStorage.removeItem(NEXT_KEY); } catch (e) { /* no storage */ }
+  location.replace(next);
+  return true;
+}
 
 function showAccount(status) {
   document.body.classList.toggle('signed-out', !status);
@@ -161,6 +203,10 @@ const sessionOrigin = () => callBackground(pageTransport, 'sessionOrigin').catch
 let knownSuffix;
 
 async function warmSessionOrigin() {
+  if (!isolated) {
+    knownSuffix = null;
+    return null;
+  }
   knownSuffix = undefined;
   knownSuffix = await sessionOrigin();
   return knownSuffix;
@@ -179,7 +225,7 @@ function reserveLaunchTab(reserve, launch) {
     reserveTab(reserve);
     return;
   }
-  if (knownSuffix === null) {
+  if (isolated && knownSuffix === null) {
     warmSessionOrigin();
     throw new Error('noSessionOrigin');
   }
@@ -189,6 +235,10 @@ function reserveLaunchTab(reserve, launch) {
   const channel = new BroadcastChannel(`sealskin-launch-${launch.id}`);
   const tell = async () => {
     channel.postMessage({ logo: launch.logo || '' });
+    if (!isolated) {
+      channel.postMessage({ shared: true });
+      return;
+    }
     const suffix = knownSuffix === undefined ? await warmSessionOrigin() : knownSuffix;
     channel.postMessage(suffix ? { suffix } : { error: 'noSessionOrigin' });
   };
@@ -228,6 +278,7 @@ async function remember(status) {
   }
   await callBackground(pageTransport, 'saveConfig', { config });
   showAccount(status);
+  isolated = Boolean(status && status.session_isolation);
   // A user the proxy signed in is whom the proxy passes on: the server sees what it does to the headers.
   if (status && status.via === 'proxy') sendForgedSignIn();
   // Probed now, the session origin is known by the first launch.
@@ -322,7 +373,14 @@ async function signInPanel(failure) {
       <div class="host-actions"><button type="submit"></button></div>
     </div>
     <p class="host-muted" data-part="nothing" hidden></p>
-    <div class="host-actions" data-part="retry" hidden><button type="button" class="primary"></button></div>`;
+    <div class="host-actions" data-part="retry" hidden><button type="button" class="primary"></button></div>
+    <p class="host-muted host-small host-apps" data-part="apps">
+      <span></span>
+      <a href="https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk" target="_blank" rel="noopener">Chrome</a>
+      <a href="https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/" target="_blank" rel="noopener">Firefox</a>
+      <a href="https://play.google.com/store/apps/details?id=io.linuxserver.sealskin" target="_blank" rel="noopener">Android</a>
+      <a href="https://apps.apple.com/us/app/sealskin/id6758210210" target="_blank" rel="noopener">iOS</a>
+    </p>`;
   const [error, providers, root, nothing, retry] = ['error', 'providers', 'root', 'nothing', 'retry']
     .map((part) => form.querySelector(`[data-part="${part}"]`));
   const submit = root.querySelector('button');
@@ -336,6 +394,7 @@ async function signInPanel(failure) {
   root.querySelector('p').textContent = t('web.rootTokenHelp');
   submit.textContent = t('web.rootSignIn');
   nothing.textContent = t('web.signIn.notConfigured');
+  form.querySelector('.host-apps span').textContent = t('web.apps');
   retry.querySelector('button').textContent = t('shell.host.retry');
   retry.querySelector('button').addEventListener('click', () => connect());
 
@@ -389,6 +448,7 @@ async function enter(page) {
   const status = await whoAmI();
   if (!status) throw new Error(t('web.signIn.failed'));
   await remember(status);
+  if (leaveForNext()) return;
   hostApi.openPage(page);
 }
 
@@ -419,6 +479,7 @@ async function connect() {
   await remember(status);
   if (status) {
     notice = null;
+    if (leaveForNext()) return;
     hostApi.openPage('home');
   } else {
     await signInPanel(failure);
@@ -470,7 +531,7 @@ async function streamDownload(home, path, filename) {
   // WebKit starts a download from a frame, not from a link.
   const frame = document.createElement('iframe');
   frame.hidden = true;
-  frame.src = `download/${id}`;
+  frame.src = `/ui/download/${id}`;
   document.body.append(frame);
 }
 
@@ -487,7 +548,8 @@ async function takeLaunchContext() {
 
 async function start() {
   // No worker registers on an untrusted certificate, and WebKit holds register() until the worker installs; downloads then go through memory.
-  const worker = 'serviceWorker' in navigator && Promise.race([navigator.serviceWorker.register('sw.js').then(() => true, () => false), new Promise((resolve) => setTimeout(resolve, WORKER_WAIT_MS, false))]);
+  // Scoped to /ui/, the worker takes the share target and the downloads there, and never a session's page.
+  const worker = 'serviceWorker' in navigator && Promise.race([navigator.serviceWorker.register('/ui/sw.js', { scope: '/ui/' }).then(() => true, () => false), new Promise((resolve) => setTimeout(resolve, WORKER_WAIT_MS, false))]);
   if ('launchQueue' in window) {
     window.launchQueue.setConsumer(async ({ files }) => {
       if (!files || !files.length) return;
@@ -504,6 +566,7 @@ async function start() {
   // The host frames a page for a stored user and asks `connect` otherwise, as `#root` has it do.
   const status = await whoAmI().catch(() => null);
   await remember(status && status.via === 'proxy' && location.hash === '#root' ? null : status);
+  if (status && location.hash !== '#root' && leaveForNext()) return;
   hostApi = initHost({
     shell: 'web',
     transport,

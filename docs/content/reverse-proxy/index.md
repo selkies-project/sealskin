@@ -31,14 +31,16 @@ terminates TLS, and not through one that asks for a sign-in of its own.
 
 ## In short
 
-1. Point two DNS names at the proxy: the web app's, `sealskin.example.com`,
-   and a wildcard for the sessions, `*.example.com`.
-2. Get a wildcard certificate for the proxy, which takes a DNS challenge.
-3. Give the proxy the rule from its page: both kinds of names to SealSkin,
-   with WebSockets.
-4. Set `SEALSKIN_PUBLIC_URL`, `SEALSKIN_SESSION_DOMAIN`, and
-   `SEALSKIN_TRUSTED_PROXIES` on SealSkin, and take its published ports
-   away.
+1. Point the web app's DNS name, `sealskin.example.com`, at the proxy; with
+   [session isolation](#session-isolation), a wildcard for the sessions too,
+   `*.example.com`.
+2. Get the proxy a certificate for the name; a wildcard one, which takes a
+   DNS challenge, with session isolation.
+3. Give the proxy the rule from its page: the name to SealSkin, with
+   WebSockets.
+4. Set `SEALSKIN_PUBLIC_URL` and `SEALSKIN_TRUSTED_PROXIES` on SealSkin, and
+   `SEALSKIN_SESSION_DOMAIN` with session isolation, and take its published
+   ports away.
 5. Open the web app, sign in with the
    [root token](../signin.md#the-root-administrator), and look at
    **Settings → Sign In → Reaching This Server**. It shows the address the
@@ -52,15 +54,18 @@ terminates TLS, and not through one that asks for a sign-in of its own.
 
 ## What the proxy has to do
 
-* **Serve two kinds of names.** The web app lives on one name,
-  `sealskin.example.com`. Every session of a web sign-in opens on a name of
-  its own, `<session id>.<session domain>`, so that nothing a session's page
-  runs can use the web app's cookie. The proxy sends both to SealSkin, which
-  takes DNS for `*.<session domain>` and a certificate that covers it: a
-  wildcard certificate, which a certificate authority issues over a DNS
-  challenge. A session id is 36 characters of hexadecimal and dashes, so a
-  rule can match those names alone and leave the rest of the domain to
-  other services, which every page here does.
+* **Serve the web app's name**, `sealskin.example.com`, where sessions open
+  too, at `/<session id>/`.
+* **Serve the session names as well, with session isolation.** Where
+  `SEALSKIN_SESSION_ISOLATION` is on, every session of a web sign-in opens
+  on a name of its own, `<session id>.<session domain>`. The proxy sends
+  those to SealSkin too, which takes DNS for `*.<session domain>` and a
+  certificate that covers it: a wildcard certificate, which a certificate
+  authority issues over a DNS challenge. A session id is 36 characters of
+  hexadecimal and dashes, so a rule can match those names alone and leave
+  the rest of the domain to other services, which every page here does. The
+  pages here each show the rule; without session isolation it is harmless
+  and may be left out.
 * **Pass the request as the browser sent it.** The `Host` header, the path,
   `Origin`, the `Sec-Fetch-*` headers, and cookies go through unchanged,
   which is what each proxy does unless told otherwise. SealSkin cannot be
@@ -69,6 +74,21 @@ terminates TLS, and not through one that asks for a sign-in of its own.
   collaboration room is another.
 * **Leave bodies alone.** No limit on the request size (uploads go up in
   chunks, and files are sent to sessions), and no response buffering.
+
+## Session isolation
+
+By default a session is served at `/<session id>/` on the web app's name by
+SealSkin's own copy of the application's web client, which it takes out of
+the image, and the container answers the session's API alone (see
+[the web sign-in](../signin.md#what-the-web-sign-in-needs)). One name, one
+certificate, and the proxy's one rule are all it takes.
+
+`SEALSKIN_SESSION_ISOLATION=true` serves every session of a web sign-in on a
+name of its own instead, `<session id>.<session domain>`, so that it shares
+no storage, cookies, or service workers with the web app or with other
+sessions. It is the setting for a server running images it does not vouch
+for, and it is what the wildcard name, the wildcard certificate, and the
+session rule on each proxy page are for.
 
 ## Telling SealSkin
 
@@ -92,7 +112,8 @@ services:
 | Setting | Meaning |
 | --- | --- |
 | `SEALSKIN_PUBLIC_URL` | The web app's address as browsers type it, with the port when it is not 443. Identity provider redirects are built from it. |
-| `SEALSKIN_SESSION_DOMAIN` | The domain sessions open under: `example.com` gives `<session id>.example.com`. Empty leaves the web app to try its own name and its parent's. Name it whenever the proxy signs users in on the session names too. |
+| `SEALSKIN_SESSION_ISOLATION` | `true` opens every session of a web sign-in on a name of its own, which the proxy then serves too (see [session isolation](#session-isolation)). Off, the default, sessions open on the web app's name. |
+| `SEALSKIN_SESSION_DOMAIN` | With session isolation, the domain sessions open under: `example.com` gives `<session id>.example.com`. Empty leaves the web app to try its own name and its parent's. Name it whenever the proxy signs users in on the session names too. |
 | `SEALSKIN_TRUSTED_PROXIES` | The proxy's address on the network it reaches SealSkin over. From that address the server takes the browser's address out of `X-Forwarded-For`, serves the [plain HTTP listener](#the-plain-http-listener), and believes a [sign-in header](sign-in.md). |
 
 Give the proxy a fixed address and list that address alone. Sessions are
@@ -168,7 +189,7 @@ do not know. Send them `$http_host`.
 | SealSkin learns the user from | The provider's signed answer | A header the proxy adds |
 | Key-file clients | Work | Are turned away by the proxy |
 | Public share links, room guests | Work | Need rules at the proxy |
-| Root token | Works | Works, once past the proxy's sign-in, at `/ui/#root` |
+| Root token | Works | Works, once past the proxy's sign-in, at `/#root` |
 
 The first column is the one to prefer: every provider in this section
 speaks OpenID Connect, a user signed in there goes straight through, and

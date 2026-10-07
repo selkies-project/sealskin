@@ -1,4 +1,8 @@
-"""A session is served from the first origin its token is exchanged on, its own or the shared one."""
+"""A session is served from the first origin its token is exchanged on, its own or the shared one.
+
+A web sign-in's session on the shared origin is served by the node's copy
+of its web client; with session isolation it is not served there at all.
+"""
 
 import pytest
 from fastapi import FastAPI
@@ -60,6 +64,31 @@ def test_a_room_stays_on_the_shared_origin(app_client):
     assert "own_origin" not in state.sessions[SID]
     assert exchange(app_client(SHARED)).status_code == 303
     assert state.sessions[SID]["own_origin"] is False
+
+
+def test_a_web_sign_in_session_needs_the_exported_client_on_the_shared_origin(app_client, tmp_path):
+    state.sessions[SID]["native"] = True
+    refused = exchange(app_client(SHARED))
+    assert refused.status_code == 403 and "web client" in refused.json()["detail"]
+    client_dir = tmp_path / "web" / "abc" / "selkies-dashboard"
+    client_dir.mkdir(parents=True)
+    (client_dir / "index.html").write_text("<html>")
+    state.sessions[SID]["web_root"] = str(client_dir)
+    assert exchange(app_client(SHARED)).status_code == 303
+    assert state.sessions[SID]["own_origin"] is False
+    resolved = resolve(app_client(SHARED))
+    assert resolved.status_code == 200 and resolved.headers["X-Web-Root"] == str(client_dir)
+
+
+def test_with_isolation_a_web_sign_in_session_stays_off_the_shared_origin(app_client, monkeypatch):
+    monkeypatch.setattr(settings, "session_isolation", True)
+    state.sessions[SID]["native"] = True
+    state.sessions[SID]["web_root"] = "/nowhere"
+    refused = exchange(app_client(SHARED))
+    assert refused.status_code == 403 and "own origin" in refused.json()["detail"]
+    assert exchange(app_client(OWN)).status_code == 303
+    # A client this node has none of leaves the container to serve its page.
+    assert "X-Web-Root" not in resolve(app_client(OWN)).headers
 
 
 def test_a_stopped_session_page_closes_its_tab(app_client, tmp_path, monkeypatch):

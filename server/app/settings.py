@@ -449,9 +449,32 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "type": "str",
         "default": "",
         "help": (
-            "Domain whose every subdomain reaches this node, `apps.example.com`: a session of a "
-            "signed-in web user opens on `<session id>.<domain>`, apart from the web app. Needs "
-            "wildcard DNS and a certificate for `*.<domain>`; empty takes the host of `public_url`."
+            "Domain whose every subdomain reaches this node, `apps.example.com`: with "
+            "`session_isolation`, a session of a signed-in web user opens on `<session id>.<domain>`, "
+            "apart from the web app. Needs wildcard DNS and a certificate for `*.<domain>`; empty "
+            "takes the host of `public_url`."
+        ),
+    },
+    {
+        "name": "session_isolation",
+        "type": "bool",
+        "default": False,
+        "help": (
+            "Serve each session of a signed-in web user on an origin of its own, "
+            "`<session id>.<session_domain>`, apart from the web app and the other sessions, "
+            "which needs wildcard DNS and a certificate for every such name. Off serves sessions "
+            "at `/<session id>/` on the web app's origin, where this node serves the "
+            "application's web client itself and the container answers its API alone."
+        ),
+    },
+    {
+        "name": "web_client_path",
+        "type": "str",
+        "default": "/usr/share/selkies",
+        "help": (
+            "Directory of an application image holding the Selkies web client, one dashboard per "
+            "subdirectory as the linuxserver images keep them, which this node exports once per "
+            "image and serves to browsers in place of the container's own copy."
         ),
     },
     {

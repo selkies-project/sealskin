@@ -58,9 +58,11 @@ carry. The web app's requests authenticate by the cookie of a sign-in
 signature of its server key. A cookie travels with any request the browser
 makes to the origin, so each of these routes also asks the browser's own
 account of where the request came from (`Sec-Fetch-Site`, else `Origin`) and
-refuses anything but the web app's pages; and a session of a web sign-in is
-served only on an origin of its own, so no session page is ever same-origin
-with the cookie.
+refuses anything but the web app's pages; and the page of a web sign-in's
+session is the server's own copy of the application's web client
+(`webclient.py`), never the container's, so no code of an image runs on the
+origin that holds the cookie. With `session_isolation` such a session is
+served only on an origin of its own as well.
 
 **The encrypted lane** is the key-file clients', described next. A request
 that names a crypto session takes it; a request to the API port always does.
@@ -104,8 +106,13 @@ redirects to the clean URL. From then on Caddy's `forward_auth` sends every
 request under that path to `/internal/resolve_session/<id>` on the loopback
 API port; the handler checks the cookie (or, for rooms, a collaboration
 token), and answers with the container's address and the HTTP basic-auth
-credentials the container was started with, which Caddy injects upstream.
-`/internal/*` is refused on the public listener. Other origins get CORS
+credentials the container was started with, which Caddy injects upstream,
+and, for a session whose web client the node exported, the directory of
+that client: Caddy then serves the client's files itself, answers the
+session's manifest and icon from the API, and sends the container only what
+is under `/<session id>/api/`, with a content security policy that lets
+nothing it answers run as a page. `/internal/*` is refused on the public
+listener. Other origins get CORS
 answers without `Access-Control-Allow-Credentials`, so no page elsewhere can
 read what the cookie authenticates.
 
@@ -152,7 +159,7 @@ seconds, and removes containers it labelled that no session references.
 
 Since 0.3.0 the launcher, options and admin dashboard, file manager, upload
 page, and collaboration room are one web application built from `client/` and
-served by the API server under `/ui/`. The browser extension and the mobile
+served by the API server under `/ui/`, the web app's own page at `/`. The browser extension and the mobile
 app bundle only what cannot be served:
 
 * the **connection page**, the one page that works with no server,
@@ -181,7 +188,7 @@ The host page owns one iframe and cycles through three states:
    port>` fallback), points the iframe at `<base>/ui/<page>.html` and waits
    for the page's `hello`.
 3. **No `hello` within eight seconds**, or the manifest fetch failed: the
-   unreachable panel, with **Retry**, **Open server** (opens `<base>/ui/` in
+   unreachable panel, with **Retry**, **Open server** (opens the web app at `<base>/` in
    a top-level tab so a self-signed certificate can be accepted), and
    **Change connection**.
 
@@ -232,7 +239,7 @@ requires a trusted certificate.
 
 ### Web app
 
-`/ui/` itself (`client/src/ui/index.html` and `app.js`) is a host: like the
+The web app at `/` (`client/src/ui/index.html` and `app.js`) is a host: like the
 mobile app it installs the `chrome.*` polyfill and runs the background script
 in the page, and frames the served pages. It talks only to the server that
 serves it, and only on the plain lane: its `secureFetch` is a same-origin
@@ -242,7 +249,7 @@ offers and the root token field), exchanges the grant a finished provider
 flow leaves in the URL fragment, and shows the panel again whenever a call
 answers 401. Where a reverse proxy signed the user in, there is no panel:
 the web app reloads when the proxy's sign-in runs out, so the proxy sends
-the browser to its own page, and `/ui/#root` asks for the root token
+the browser to its own page, and `/#root` asks for the root token
 regardless.
 
 The host draws the frame around the pages: the rail of destinations and the
@@ -278,7 +285,7 @@ that the browser does not mark as the web app's own.
   reconnect, and Caddy's check answers a page load of a session that is not
   running with a page that closes its tab (`internal.stopped_page`). Caddy
   drops `Service-Worker-Allowed` from session responses, so a session's
-  service worker cannot claim `/ui/`.
+  service worker cannot claim `/ui/`, and the web app's, registered with the scope `/ui/`, never claims a session.
 
 `/ui/manifest.webmanifest` makes it installable. Its share target posts to
 `/ui/share`, where the service worker (`sw.js`, which caches nothing) parks
