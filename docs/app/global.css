@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import 'fumadocs-ui/css/generated/spacious.css';
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 @import 'fumadocs-python/preset.css';
@@ -18,8 +19,14 @@
   --color-fd-ring: #9b8cff;
 }
 
-html {
-  scrollbar-gutter: stable;
+/*
+ * Below md the window scrolls, and keeps room for its scrollbar between pages;
+ * from md up the Spacious layout's page panel scrolls instead, with its own.
+ */
+@media (width < 48rem) {
+  html {
+    scrollbar-gutter: stable;
+  }
 }
 
 /*
