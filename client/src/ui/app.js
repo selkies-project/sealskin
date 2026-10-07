@@ -183,11 +183,12 @@ function reserveLaunchTab(reserve, launch) {
     warmSessionOrigin();
     throw new Error('noSessionOrigin');
   }
-  const params = new URLSearchParams({ id: launch.id, app: launch.app || '', logo: launch.logo || '', room: launch.room ? '1' : '0' });
-  if (knownSuffix) params.set('suffix', knownSuffix);
+  // The logo and the suffix go over the channel, never in the page's address (see launching.js).
+  const params = new URLSearchParams({ id: launch.id, app: launch.app || '', room: launch.room ? '1' : '0' });
   if (!openLaunchTab(launch.id, `launching.html?${params}`)) throw new Error('popupBlocked');
   const channel = new BroadcastChannel(`sealskin-launch-${launch.id}`);
   const tell = async () => {
+    channel.postMessage({ logo: launch.logo || '' });
     const suffix = knownSuffix === undefined ? await warmSessionOrigin() : knownSuffix;
     channel.postMessage(suffix ? { suffix } : { error: 'noSessionOrigin' });
   };

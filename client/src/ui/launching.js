@@ -1,14 +1,16 @@
 /**
  * Web app launching page. The web app opens it in a tab at the click that
  * launches a session, so the tab shows what the launch waits on instead of a
- * blank page: `?id=<launch id>&app=<name>&logo=<url>&room=<0|1>` and, where
- * the web app already knows it, `&suffix=<session-origin suffix>`.
+ * blank page: `?id=<launch id>&app=<name>&room=<0|1>`.
  *
  * It polls the launch's progress and, once the session is ready, takes this
  * tab to the session's own origin. The pages that started the launch talk to
  * it over a BroadcastChannel named by the launch id: the web app posts the
- * suffix, and the home page a failure the server never saw. Left without a
- * suffix, it probes for one itself.
+ * app's logo and the session-origin suffix, and the home page a failure the
+ * server never saw. Left without a suffix, it probes for one itself. Neither
+ * the logo nor the suffix is ever taken from this page's address, where a link
+ * made elsewhere could name an image to load or a host to send the session,
+ * and the access token its URL carries, to.
  */
 
 import { loadTranslator } from '../lib/i18n.js';
@@ -29,7 +31,8 @@ const started = Date.now();
 const seconds = () => Math.round((Date.now() - started) / 1000);
 
 let t = (key) => key;
-let suffix = params.get('suffix') || null;
+let suffix = null;
+let logoShown = false;
 let ownProbe = null;
 let done = false;
 // When the launch request last showed life: this page loading, an upload chunk, the request leaving.
@@ -160,7 +163,6 @@ async function start() {
     // A browser that refuses leaves the page here.
     setTimeout(() => { $('close-hint').hidden = false; }, 300);
   });
-  showLogo(params.get('logo') || '').catch(() => {});
   setInterval(() => {
     if (done) return;
     $('elapsed').textContent = t('web.launch.seconds', { count: seconds() });
@@ -174,6 +176,10 @@ async function start() {
   const channel = new BroadcastChannel(`sealskin-launch-${id}`);
   channel.onmessage = ({ data }) => {
     if (!data) return;
+    if (typeof data.logo === 'string' && !logoShown) {
+      logoShown = true;
+      showLogo(data.logo).catch(() => {});
+    }
     if (data.suffix) suffix = data.suffix;
     if (data.uploading) {
       lastSign = Date.now();
