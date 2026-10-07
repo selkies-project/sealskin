@@ -223,6 +223,8 @@
       "allowPublicSharing": "공개 파일 공유 허용",
       "allowEditTemplates": "앱 템플릿 편집 허용",
       "signInOnly": "통합 인증만 사용",
+      "awaitingGroup": "그룹 대기 중",
+      "approve": "승인",
       "admin": "관리자",
       "gpuShare": "다른 세션과 GPU 공유 허용",
       "homeMigration": "노드 간 홈 디렉터리 이동 허용",
@@ -1205,6 +1207,8 @@
       "userDeleteFailed": "사용자 삭제 오류: {error}",
       "userUpdated": "사용자 '{username}'이(가) 성공적으로 업데이트되었습니다.",
       "userUpdateFailed": "사용자 업데이트 오류: {error}",
+      "userApproved": "사용자 '{username}'이(가) 승인되었습니다.",
+      "userApproveFailed": "사용자 승인 오류: {error}",
       "creatingGroup": "그룹 생성 중...",
       "groupCreated": "그룹 '{groupName}'이(가) 생성되었습니다.",
       "groupCreateFailed": "그룹 생성 오류: {error}",
@@ -1378,6 +1382,7 @@
         "sso_max_age_seconds": "ID 공급자 로그인의 최대 유지 시간 (시간)",
         "sso_force_login": "로그인할 때마다 자격 증명 요구",
         "sso_create_users": "첫 로그인 시 사용자 생성",
+        "sso_hold_new_users": "그룹에 배정될 때까지 새 사용자 보류",
         "proxy_auth_user_header": "신뢰할 수 있는 프록시가 사용자 이름을 전달하는 헤더",
         "proxy_auth_groups_header": "신뢰할 수 있는 프록시가 사용자의 그룹을 전달하는 헤더",
         "proxy_auth_logout_url": "사용자를 로그아웃시키는 프록시의 페이지",
@@ -1776,6 +1781,11 @@
     "rootSignIn": "루트로 로그인",
     "rootRefused": "서버의 루트 토큰이 아닙니다.",
     "rootLocked": "시도 횟수가 너무 많습니다. 잠시 기다린 후 다시 시도하세요.",
+    "held": {
+      "title": "관리자를 기다리는 중",
+      "message": "{username}으로 로그인했지만 SealSkin을 사용하려면 관리자가 그룹에 배정해야 합니다. 배정이 끝나면 다시 확인하세요.",
+      "check": "다시 확인"
+    },
     "signIn": {
       "failed": "로그인을 완료하지 못했습니다. 다시 시도하거나 관리자에게 문의하세요.",
       "refused": "ID 공급자가 로그인을 거부했습니다.",
@@ -1784,6 +1794,7 @@
       "invalidUsername": "계정 이름은 SealSkin 사용자 이름이 될 수 없습니다. 사용자 이름에는 문자, 숫자, 밑줄, 하이픈만 쓸 수 있습니다. 관리자에게 문의하세요.",
       "adminName": "계정 이름이 키 파일로 로그인하는 SealSkin 관리자의 이름입니다. 관리자에게 문의하세요.",
       "otherIdentity": "ID 공급자의 다른 계정이 이미 이 SealSkin 사용자로 로그인하고 있습니다. 관리자에게 문의하세요.",
+      "noAccount": "아직 귀하의 이름으로 된 SealSkin 계정이 없습니다. 관리자에게 계정 생성을 요청하세요.",
       "notConfigured": "이 서버는 통합 인증을 제공하지 않습니다.",
       "ended": "ID 공급자가 로그인을 종료했습니다. 다시 로그인하세요."
     },

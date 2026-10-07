@@ -223,6 +223,8 @@
       "allowPublicSharing": "Autoriser le partage de fichiers public",
       "allowEditTemplates": "Autoriser la modification des modèles d'applications",
       "signInOnly": "Authentification unique seulement",
+      "awaitingGroup": "En attente d'un groupe",
+      "approve": "Approuver",
       "admin": "Administrateur",
       "gpuShare": "Autoriser le Partage d'un GPU avec d'Autres Sessions",
       "homeMigration": "Autoriser le Déplacement des Dossiers Personnels entre Nœuds",
@@ -1205,6 +1207,8 @@
       "userDeleteFailed": "Erreur lors de la suppression de l'utilisateur : {error}",
       "userUpdated": "Utilisateur '{username}' mis à jour avec succès.",
       "userUpdateFailed": "Erreur lors de la mise à jour de l'utilisateur : {error}",
+      "userApproved": "Utilisateur '{username}' approuvé.",
+      "userApproveFailed": "Erreur lors de l'approbation de l'utilisateur : {error}",
       "creatingGroup": "Création du groupe...",
       "groupCreated": "Groupe '{groupName}' créé.",
       "groupCreateFailed": "Erreur lors de la création du groupe : {error}",
@@ -1378,6 +1382,7 @@
         "sso_max_age_seconds": "Durée maximale d'une connexion via le fournisseur d'identité (heures)",
         "sso_force_login": "Demander les identifiants à chaque connexion",
         "sso_create_users": "Créer l'utilisateur à la première connexion",
+        "sso_hold_new_users": "Retenir les nouveaux utilisateurs jusqu'à leur placement dans un groupe",
         "proxy_auth_user_header": "En-tête dans lequel un proxy de confiance désigne l'utilisateur",
         "proxy_auth_groups_header": "En-tête dans lequel un proxy de confiance liste les groupes de l'utilisateur",
         "proxy_auth_logout_url": "Page du proxy qui déconnecte son utilisateur",
@@ -1776,6 +1781,11 @@
     "rootSignIn": "Se Connecter en tant que Root",
     "rootRefused": "Ce n'est pas le jeton root du serveur.",
     "rootLocked": "Trop de tentatives. Patientez un moment, puis réessayez.",
+    "held": {
+      "title": "En attente d'un administrateur",
+      "message": "Vous êtes connecté en tant que {username}, mais un administrateur doit vous placer dans un groupe avant que vous puissiez utiliser SealSkin. Revérifiez une fois que c'est fait.",
+      "check": "Revérifier"
+    },
     "signIn": {
       "failed": "La connexion n'a pas abouti. Réessayez ou contactez votre administrateur.",
       "refused": "Le fournisseur d'identité a refusé la connexion.",
@@ -1784,6 +1794,7 @@
       "invalidUsername": "Le nom de votre compte ne peut pas être un nom d'utilisateur SealSkin, qui n'admet que des lettres, des chiffres, des traits de soulignement et des traits d'union. Contactez votre administrateur.",
       "adminName": "Le nom de votre compte appartient à un administrateur SealSkin, qui se connecte avec un fichier de clé. Contactez votre administrateur.",
       "otherIdentity": "Un autre compte du fournisseur d'identité se connecte déjà sous cet utilisateur SealSkin. Contactez votre administrateur.",
+      "noAccount": "Aucun compte SealSkin ne porte encore votre nom. Demandez à votre administrateur d'en créer un.",
       "notConfigured": "Ce serveur ne propose pas d'authentification unique.",
       "ended": "Le fournisseur d'identité a mis fin à votre connexion. Reconnectez-vous."
     },

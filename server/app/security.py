@@ -358,14 +358,34 @@ def proxy_cert_not_after(cert_path: str) -> float | None:
         return None
 
 
+#: What a held user's sessions and requests would run under: nothing, until an administrator lets them in.
+HELD_SETTINGS = {
+    "persistent_storage": False,
+    "public_sharing": False,
+    "edit_templates": False,
+    "gpu": False,
+    "home_migration": False,
+    "session_limit": 0,
+    "pools": [],
+}
+#: The one route a held user may call, which tells the web app to show the holding page.
+STATUS_PATH = "/api/admin/status"
+
+
 def _signed_in(username: str, via: str, provider_groups: Any = (), admin: bool = False, **extra: Any) -> dict[str, Any]:
-    """Build the record of an authenticated user, or refuse an unknown or inactive one."""
+    """Build the record of an authenticated user, or refuse an unknown or inactive one.
+
+    A held user (`user_manager.held`) is signed in with `held` set and the
+    settings of `HELD_SETTINGS`; `verify_token` refuses every route but
+    `STATUS_PATH` for one.
+    """
     user = user_manager.get_user(username)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid token.")
     is_admin = bool(user.get("is_admin") or admin)
     effective = user_manager.get_effective_settings(username, provider_groups)
     is_admin = is_admin or bool(effective.get("admin"))
+    held = False
     if is_admin:
         effective = dict(
             user_manager.DEFAULT_USER_SETTINGS,
@@ -375,9 +395,13 @@ def _signed_in(username: str, via: str, provider_groups: Any = (), admin: bool =
         )
     elif not effective.get("active", False):
         raise HTTPException(status_code=403, detail="User account is inactive.")
+    elif user_manager.held(username, provider_groups):
+        held = True
+        effective = dict(effective, **HELD_SETTINGS)
     return dict(
         user,
         is_admin=is_admin,
+        held=held,
         effective_settings=effective,
         group=effective.get("group", "none"),
         groups=effective.get("groups") or [],
@@ -486,21 +510,26 @@ async def verify_token(req: Request) -> dict[str, Any]:
         req: Incoming request.
 
     Returns:
-        The user record with `is_admin`, `effective_settings`, `group`,
-        `groups`, `provider_groups`, and `via` (`key`, `root`, `oidc`,
-        `saml`, or `proxy`). `forwarded` marks a request another node sent
-        on, which this node answers itself.
+        The user record with `is_admin`, `held`, `effective_settings`,
+        `group`, `groups`, `provider_groups`, and `via` (`key`, `root`,
+        `oidc`, `saml`, or `proxy`). `forwarded` marks a request another node
+        sent on, which this node answers itself.
 
     Raises:
         HTTPException: 401 for an invalid credential, 403 for an inactive
-            account or a request another origin made.
+            account, a held user anywhere but `STATUS_PATH`, or a request
+            another origin made.
     """
     forwarded = await _peer_user(req)
     if forwarded or cluster.on_peer_listener(req):
         if not forwarded:
             raise HTTPException(status_code=401, detail="The peer listener takes other nodes' requests alone.")
-        return forwarded
-    return await _web_user(req) or await _proxy_user(req) or _key_user(req)
+        user = forwarded
+    else:
+        user = await _web_user(req) or await _proxy_user(req) or _key_user(req)
+    if user.get("held") and req.url.path != STATUS_PATH:
+        raise HTTPException(status_code=403, detail="This account waits for an administrator to place it in a group.")
+    return user
 
 
 async def verify_admin(user: dict[str, Any] = Depends(verify_token)) -> dict[str, Any]:

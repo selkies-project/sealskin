@@ -223,6 +223,8 @@
       "allowPublicSharing": "Herkese Açık Dosya Paylaşımına İzin Ver",
       "allowEditTemplates": "Uygulama Şablonlarını Düzenlemeye İzin Ver",
       "signInOnly": "Yalnızca çoklu oturum açma",
+      "awaitingGroup": "Grup bekleniyor",
+      "approve": "Onayla",
       "admin": "Yönetici",
       "gpuShare": "GPU'yu Diğer Oturumlarla Paylaşmaya İzin Ver",
       "homeMigration": "Ana Dizinleri Düğümler Arasında Taşımaya İzin Ver",
@@ -1205,6 +1207,8 @@
       "userDeleteFailed": "Kullanıcı silinirken hata: {error}",
       "userUpdated": "Kullanıcı '{username}' başarıyla güncellendi.",
       "userUpdateFailed": "Kullanıcı güncellenirken hata: {error}",
+      "userApproved": "'{username}' kullanıcısı onaylandı.",
+      "userApproveFailed": "Kullanıcı onaylanırken hata oluştu: {error}",
       "creatingGroup": "Grup oluşturuluyor...",
       "groupCreated": "Grup '{groupName}' oluşturuldu.",
       "groupCreateFailed": "Grup oluşturulurken hata: {error}",
@@ -1378,6 +1382,7 @@
         "sso_max_age_seconds": "Kimlik sağlayıcı oturum açmasının en uzun süresi (saat)",
         "sso_force_login": "Her oturum açmada kimlik bilgilerini iste",
         "sso_create_users": "İlk oturum açmada kullanıcı oluştur",
+        "sso_hold_new_users": "Yeni kullanıcıları bir gruba yerleştirilene kadar beklet",
         "proxy_auth_user_header": "Güvenilen proxy'nin kullanıcıyı adlandırdığı üstbilgi",
         "proxy_auth_groups_header": "Güvenilen proxy'nin kullanıcının gruplarını listelediği üstbilgi",
         "proxy_auth_logout_url": "Proxy'nin kendi kullanıcısının oturumunu kapattığı sayfa",
@@ -1776,6 +1781,11 @@
     "rootSignIn": "Root Olarak Oturum Aç",
     "rootRefused": "Bu, sunucunun root belirteci değil.",
     "rootLocked": "Çok fazla deneme yapıldı. Bir süre bekleyip yeniden deneyin.",
+    "held": {
+      "title": "Bir yönetici bekleniyor",
+      "message": "{username} olarak oturum açtınız, ancak SealSkin'i kullanabilmeniz için bir yöneticinin sizi bir gruba yerleştirmesi gerekiyor. Bu yapıldığında yeniden kontrol edin.",
+      "check": "Yeniden kontrol et"
+    },
     "signIn": {
       "failed": "Oturum açma tamamlanmadı. Yeniden deneyin veya yöneticinize danışın.",
       "refused": "Kimlik sağlayıcı oturum açmayı reddetti.",
@@ -1784,6 +1794,7 @@
       "invalidUsername": "Hesabınızın adı bir SealSkin kullanıcı adı olamaz; kullanıcı adları yalnızca harf, rakam, alt çizgi ve kısa çizgi içerebilir. Yöneticinize danışın.",
       "adminName": "Hesabınızın adı, bir anahtar dosyasıyla oturum açan bir SealSkin yöneticisine ait. Yöneticinize danışın.",
       "otherIdentity": "Kimlik sağlayıcının başka bir hesabı zaten bu SealSkin kullanıcısı olarak oturum açıyor. Yöneticinize danışın.",
+      "noAccount": "Henüz adınızla bir SealSkin hesabı yok. Yöneticinizden bir hesap oluşturmasını isteyin.",
       "notConfigured": "Bu sunucu çoklu oturum açma sunmuyor.",
       "ended": "Kimlik sağlayıcı oturumunuzu sonlandırdı. Yeniden oturum açın."
     },

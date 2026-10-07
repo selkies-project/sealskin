@@ -115,7 +115,7 @@ class SignInError(Exception):
     """A sign-in the server refuses, with the code the web app shows a message for.
 
     Codes: `notConfigured`, `failed`, `refused`, `expired`, `browser`,
-    `invalidUsername`, `adminName`, `otherIdentity`.
+    `invalidUsername`, `adminName`, `otherIdentity`, `noAccount`.
     """
 
     def __init__(self, code: str, detail: str = "") -> None:
@@ -394,6 +394,8 @@ async def register(grant: str, binding: str) -> dict[str, Any]:
     _admit(username, identity["subject"])
     try:
         user_manager.ensure_user(username, identity["via"], identity["subject"], identity.get("groups") or ())
+    except user_manager.NoAccount as exc:
+        raise SignInError("noAccount", str(exc)) from exc
     except ValueError as exc:
         raise SignInError("refused", str(exc)) from exc
     token = await open_session(identity)

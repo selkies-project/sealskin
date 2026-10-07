@@ -223,6 +223,8 @@
       "allowPublicSharing": "Permitir compartir archivos públicamente",
       "allowEditTemplates": "Permitir editar plantillas de apps",
       "signInOnly": "Solo inicio de sesión único",
+      "awaitingGroup": "Esperando un grupo",
+      "approve": "Aprobar",
       "admin": "Administrador",
       "gpuShare": "Permitir Compartir una GPU con Otras Sesiones",
       "homeMigration": "Permitir Mover Directorios Personales entre Nodos",
@@ -1205,6 +1207,8 @@
       "userDeleteFailed": "Error al eliminar usuario: {error}",
       "userUpdated": "Usuario '{username}' actualizado con éxito.",
       "userUpdateFailed": "Error al actualizar usuario: {error}",
+      "userApproved": "Usuario '{username}' aprobado.",
+      "userApproveFailed": "Error al aprobar el usuario: {error}",
       "creatingGroup": "Creando grupo...",
       "groupCreated": "Grupo '{groupName}' creado.",
       "groupCreateFailed": "Error al crear grupo: {error}",
@@ -1378,6 +1382,7 @@
         "sso_max_age_seconds": "Duración máxima de un inicio de sesión del proveedor de identidad (horas)",
         "sso_force_login": "Pedir credenciales en cada inicio de sesión",
         "sso_create_users": "Crear el usuario en el primer inicio de sesión",
+        "sso_hold_new_users": "Retener a los usuarios nuevos hasta asignarlos a un grupo",
         "proxy_auth_user_header": "Cabecera en la que un proxy de confianza indica el usuario",
         "proxy_auth_groups_header": "Cabecera en la que un proxy de confianza lista los grupos del usuario",
         "proxy_auth_logout_url": "Página del proxy que cierra la sesión de su usuario",
@@ -1776,6 +1781,11 @@
     "rootSignIn": "Iniciar Sesión como Root",
     "rootRefused": "Ese no es el token root del servidor.",
     "rootLocked": "Demasiados intentos. Espere un momento y vuelva a intentarlo.",
+    "held": {
+      "title": "Esperando a un administrador",
+      "message": "Has iniciado sesión como {username}, pero un administrador tiene que asignarte a un grupo antes de que puedas usar SealSkin. Vuelve a comprobarlo cuando lo haya hecho.",
+      "check": "Comprobar de nuevo"
+    },
     "signIn": {
       "failed": "El inicio de sesión no se completó. Inténtelo de nuevo o consulte a su administrador.",
       "refused": "El proveedor de identidad rechazó el inicio de sesión.",
@@ -1784,6 +1794,7 @@
       "invalidUsername": "El nombre de su cuenta no puede ser un nombre de usuario de SealSkin, que solo admite letras, dígitos, guiones bajos y guiones. Consulte a su administrador.",
       "adminName": "El nombre de su cuenta pertenece a un administrador de SealSkin, que inicia sesión con un archivo de clave. Consulte a su administrador.",
       "otherIdentity": "Otra cuenta del proveedor de identidad ya inicia sesión como este usuario de SealSkin. Consulte a su administrador.",
+      "noAccount": "Todavía no hay una cuenta de SealSkin con tu nombre. Pide a tu administrador que cree una.",
       "notConfigured": "Este servidor no ofrece inicio de sesión único.",
       "ended": "El proveedor de identidad terminó su sesión. Vuelva a iniciar sesión."
     },

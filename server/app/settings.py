@@ -592,6 +592,15 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "help": "Create a user at the first sign-in an identity provider or a proxy vouches for.",
     },
     {
+        "name": "sso_hold_new_users",
+        "type": "bool",
+        "default": True,
+        "help": (
+            "Hold a user a sign-in creates, who may do nothing here, until an administrator places them in "
+            "a group or approves them; a user the provider puts in a group is never held."
+        ),
+    },
+    {
         "name": "usage_flush_seconds",
         "type": "int",
         "default": 300,
@@ -711,6 +720,7 @@ CLUSTER_SETTINGS = (
     "sso_max_age_seconds",
     "sso_force_login",
     "sso_create_users",
+    "sso_hold_new_users",
     "proxy_auth_user_header",
     "proxy_auth_groups_header",
     "proxy_auth_logout_url",

@@ -182,10 +182,12 @@ pools_denied: []
 
 Missing settings take the defaults shown; an older file's single `group` is
 read as the first of `groups`. The public key block is empty for a user who
-signs in through the [web sign-in](signin.md) alone, and the server adds two
+signs in through the [web sign-in](signin.md) alone, and the server adds
 entries of its own to such a user: `auth`, the identity provider account the
-user is bound to, and `provider_groups`, the groups the provider last named.
-Remove `auth` to let another account sign in as the user.
+user is bound to, `provider_groups`, the groups the provider last named, and
+`approved: false` for a user the sign-in created while new users are held,
+which the dashboard's **Approve** turns true. Remove `auth` to let another
+account sign in as the user.
 
 A group is a file `groups/<name>` holding a YAML mapping of the switches and
 limits it sets, and nothing for those it leaves alone, plus `pools`,

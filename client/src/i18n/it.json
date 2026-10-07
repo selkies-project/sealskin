@@ -223,6 +223,8 @@
       "allowPublicSharing": "Consenti condivisione file pubblica",
       "allowEditTemplates": "Consenti modifica dei modelli app",
       "signInOnly": "Solo single sign-on",
+      "awaitingGroup": "In attesa di un gruppo",
+      "approve": "Approva",
       "admin": "Amministratore",
       "gpuShare": "Consenti Condivisione di una GPU con Altre Sessioni",
       "homeMigration": "Consenti Spostamento delle Cartelle Home tra Nodi",
@@ -1205,6 +1207,8 @@
       "userDeleteFailed": "Errore durante l'eliminazione dell'utente: {error}",
       "userUpdated": "Utente '{username}' aggiornato con successo.",
       "userUpdateFailed": "Errore durante l'aggiornamento dell'utente: {error}",
+      "userApproved": "Utente '{username}' approvato.",
+      "userApproveFailed": "Errore nell'approvazione dell'utente: {error}",
       "creatingGroup": "Creazione gruppo in corso...",
       "groupCreated": "Gruppo '{groupName}' creato.",
       "groupCreateFailed": "Errore durante la creazione del gruppo: {error}",
@@ -1378,6 +1382,7 @@
         "sso_max_age_seconds": "Durata massima di un accesso tramite provider di identità (ore)",
         "sso_force_login": "Richiedi le credenziali a ogni accesso",
         "sso_create_users": "Crea l'utente al primo accesso",
+        "sso_hold_new_users": "Trattieni i nuovi utenti finché non sono inseriti in un gruppo",
         "proxy_auth_user_header": "Intestazione in cui un proxy attendibile indica l'utente",
         "proxy_auth_groups_header": "Intestazione in cui un proxy attendibile elenca i gruppi dell'utente",
         "proxy_auth_logout_url": "Pagina del proxy che disconnette il suo utente",
@@ -1776,6 +1781,11 @@
     "rootSignIn": "Accedi come Root",
     "rootRefused": "Questo non è il token root del server.",
     "rootLocked": "Troppi tentativi. Attendi un po', poi riprova.",
+    "held": {
+      "title": "In attesa di un amministratore",
+      "message": "Hai effettuato l'accesso come {username}, ma un amministratore deve inserirti in un gruppo prima che tu possa usare SealSkin. Ricontrolla quando lo avrà fatto.",
+      "check": "Ricontrolla"
+    },
     "signIn": {
       "failed": "L'accesso non è stato completato. Riprova o chiedi al tuo amministratore.",
       "refused": "Il provider di identità ha rifiutato l'accesso.",
@@ -1784,6 +1794,7 @@
       "invalidUsername": "Il nome del tuo account non può essere un nome utente SealSkin, che ammette solo lettere, cifre, trattini bassi e trattini. Chiedi al tuo amministratore.",
       "adminName": "Il nome del tuo account appartiene a un amministratore SealSkin, che accede con un file di chiave. Chiedi al tuo amministratore.",
       "otherIdentity": "Un altro account del provider di identità accede già come questo utente SealSkin. Chiedi al tuo amministratore.",
+      "noAccount": "Non esiste ancora un account SealSkin con il tuo nome. Chiedi all'amministratore di crearne uno.",
       "notConfigured": "Questo server non offre il single sign-on.",
       "ended": "Il provider di identità ha terminato il tuo accesso. Accedi di nuovo."
     },

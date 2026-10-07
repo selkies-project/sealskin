@@ -223,6 +223,8 @@
       "allowPublicSharing": "公開ファイル共有を許可する",
       "allowEditTemplates": "アプリテンプレートの編集を許可する",
       "signInOnly": "シングルサインオンのみ",
+      "awaitingGroup": "グループ待ち",
+      "approve": "承認",
       "admin": "管理者",
       "gpuShare": "他のセッションとのGPU共有を許可",
       "homeMigration": "ノード間のホームディレクトリ移動を許可",
@@ -1205,6 +1207,8 @@
       "userDeleteFailed": "ユーザーの削除中にエラーが発生しました: {error}",
       "userUpdated": "ユーザー '{username}' が正常に更新されました。",
       "userUpdateFailed": "ユーザーの更新中にエラーが発生しました: {error}",
+      "userApproved": "ユーザー '{username}' を承認しました。",
+      "userApproveFailed": "ユーザーの承認に失敗しました: {error}",
       "creatingGroup": "グループを作成中...",
       "groupCreated": "グループ '{groupName}' が作成されました。",
       "groupCreateFailed": "グループの作成中にエラーが発生しました: {error}",
@@ -1378,6 +1382,7 @@
         "sso_max_age_seconds": "IDプロバイダーによるサインインの最長有効時間（時間）",
         "sso_force_login": "サインインのたびに認証情報を求める",
         "sso_create_users": "初回サインイン時にユーザーを作成する",
+        "sso_hold_new_users": "グループに追加されるまで新しいユーザーを保留する",
         "proxy_auth_user_header": "信頼するプロキシがユーザー名を渡すヘッダー",
         "proxy_auth_groups_header": "信頼するプロキシがユーザーのグループを渡すヘッダー",
         "proxy_auth_logout_url": "ユーザーをサインアウトさせるプロキシのページ",
@@ -1776,6 +1781,11 @@
     "rootSignIn": "ルートとしてサインイン",
     "rootRefused": "サーバーのルートトークンと一致しません。",
     "rootLocked": "試行回数が多すぎます。しばらく待ってから、もう一度お試しください。",
+    "held": {
+      "title": "管理者の対応をお待ちください",
+      "message": "{username} としてサインインしていますが、SealSkin を使うには管理者がグループに追加する必要があります。追加されたら再確認してください。",
+      "check": "再確認"
+    },
     "signIn": {
       "failed": "サインインが完了しませんでした。もう一度試すか、管理者に問い合わせてください。",
       "refused": "IDプロバイダーがサインインを拒否しました。",
@@ -1784,6 +1794,7 @@
       "invalidUsername": "アカウントの名前はSealSkinのユーザー名にできません。ユーザー名に使えるのは英字、数字、アンダースコア、ハイフンだけです。管理者に問い合わせてください。",
       "adminName": "アカウントの名前は、鍵ファイルでサインインするSealSkin管理者のものです。管理者に問い合わせてください。",
       "otherIdentity": "IDプロバイダーの別のアカウントが、すでにこのSealSkinユーザーとしてサインインしています。管理者に問い合わせてください。",
+      "noAccount": "あなたの名前の SealSkin アカウントはまだありません。管理者に作成を依頼してください。",
       "notConfigured": "このサーバーはシングルサインオンを提供していません。",
       "ended": "IDプロバイダーがサインインを終了しました。もう一度サインインしてください。"
     },

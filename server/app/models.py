@@ -368,6 +368,7 @@ class UserSettings(BaseModel):
         pools_denied: Pools closed to the user.
         proot_catalog: Id of the PRoot Apps catalog the user's sessions install from, or `None`.
         provider_groups: Groups the identity provider named at the last sign-in.
+        approved: False for a user a sign-in created who waits for an administrator; the server keeps it.
     """
 
     active: bool = True
@@ -393,6 +394,7 @@ class UserSettings(BaseModel):
     pools_denied: list[str] = []
     proot_catalog: str | None = None
     provider_groups: list[str] = []
+    approved: bool = True
 
 
 class GroupSettings(BaseModel):
@@ -430,9 +432,10 @@ class GroupSettings(BaseModel):
 
 
 class AdminStatusResponse(BaseModel):
-    """Status payload returned to every authenticated user."""
+    """Status payload returned to every authenticated user; `held` marks one who waits for an administrator."""
 
     is_admin: bool
+    held: bool = False
     username: str
     settings: UserSettings
     via: str = "key"

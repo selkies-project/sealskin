@@ -223,6 +223,8 @@
       "allowPublicSharing": "Allow Public File Sharing",
       "allowEditTemplates": "Allow Editing App Templates",
       "signInOnly": "Single sign-on only",
+      "awaitingGroup": "Awaiting a group",
+      "approve": "Approve",
       "admin": "Administrator",
       "gpuShare": "Allow Sharing a GPU with Other Sessions",
       "homeMigration": "Allow Moving Home Directories Between Nodes",
@@ -1205,6 +1207,8 @@
       "userDeleteFailed": "Error deleting user: {error}",
       "userUpdated": "User '{username}' updated successfully.",
       "userUpdateFailed": "Error updating user: {error}",
+      "userApproved": "User '{username}' approved.",
+      "userApproveFailed": "Error approving user: {error}",
       "creatingGroup": "Creating group...",
       "groupCreated": "Group '{groupName}' created.",
       "groupCreateFailed": "Error creating group: {error}",
@@ -1378,6 +1382,7 @@
         "sso_max_age_seconds": "Longest an identity provider sign-in lasts (hours)",
         "sso_force_login": "Ask for credentials at every sign-in",
         "sso_create_users": "Create a user at the first sign-in",
+        "sso_hold_new_users": "Hold new users until placed in a group",
         "proxy_auth_user_header": "Header a trusted proxy names the user in",
         "proxy_auth_groups_header": "Header a trusted proxy lists the user's groups in",
         "proxy_auth_logout_url": "Page of the proxy that signs its user out",
@@ -1777,6 +1782,11 @@
     "rootSignIn": "Root Login",
     "rootRefused": "That is not the server's root token.",
     "rootLocked": "Too many tries. Wait a while, then try again.",
+    "held": {
+      "title": "Waiting for an administrator",
+      "message": "You are signed in as {username}, but an administrator has to place you in a group before you can use SealSkin. Check again once they have.",
+      "check": "Check again"
+    },
     "signIn": {
       "failed": "The sign-in did not complete. Try again, or ask your administrator.",
       "refused": "The identity provider refused the sign-in.",
@@ -1785,6 +1795,7 @@
       "invalidUsername": "Your account's name cannot be a SealSkin user name, which takes only letters, digits, underscores, and hyphens. Ask your administrator.",
       "adminName": "Your account's name belongs to a SealSkin administrator, who signs in with a key file. Ask your administrator.",
       "otherIdentity": "Another account of the identity provider already signs in as this SealSkin user. Ask your administrator.",
+      "noAccount": "No SealSkin account has your name yet. Ask your administrator to create one.",
       "notConfigured": "This server offers no sign-in here. Ask your administrator.",
       "ended": "Your sign-in ended. Sign in again."
     },

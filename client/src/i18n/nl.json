@@ -223,6 +223,8 @@
       "allowPublicSharing": "Openbaar delen van bestanden toestaan",
       "allowEditTemplates": "Bewerken van app-sjablonen toestaan",
       "signInOnly": "Alleen eenmalige aanmelding",
+      "awaitingGroup": "Wacht op een groep",
+      "approve": "Goedkeuren",
       "admin": "Beheerder",
       "gpuShare": "Delen van een GPU met andere sessies toestaan",
       "homeMigration": "Verplaatsen van home directories tussen nodes toestaan",
@@ -1205,6 +1207,8 @@
       "userDeleteFailed": "Fout bij verwijderen gebruiker: {error}",
       "userUpdated": "Gebruiker '{username}' succesvol bijgewerkt.",
       "userUpdateFailed": "Fout bij bijwerken gebruiker: {error}",
+      "userApproved": "Gebruiker '{username}' goedgekeurd.",
+      "userApproveFailed": "Fout bij het goedkeuren van de gebruiker: {error}",
       "creatingGroup": "Groep aanmaken...",
       "groupCreated": "Groep '{groupName}' aangemaakt.",
       "groupCreateFailed": "Fout bij aanmaken groep: {error}",
@@ -1378,6 +1382,7 @@
         "sso_max_age_seconds": "Maximale duur van een aanmelding via de identiteitsprovider (uren)",
         "sso_force_login": "Bij elke aanmelding om inloggegevens vragen",
         "sso_create_users": "Bij de eerste aanmelding een gebruiker aanmaken",
+        "sso_hold_new_users": "Nieuwe gebruikers vasthouden tot ze in een groep zijn geplaatst",
         "proxy_auth_user_header": "Header waarin een vertrouwde proxy de gebruiker noemt",
         "proxy_auth_groups_header": "Header waarin een vertrouwde proxy de groepen van de gebruiker opsomt",
         "proxy_auth_logout_url": "Pagina van de proxy die de gebruiker afmeldt",
@@ -1776,6 +1781,11 @@
     "rootSignIn": "Aanmelden als root",
     "rootRefused": "Dat is niet het root-token van de server.",
     "rootLocked": "Te veel pogingen. Wacht even en probeer het dan opnieuw.",
+    "held": {
+      "title": "Wachten op een beheerder",
+      "message": "U bent aangemeld als {username}, maar een beheerder moet u eerst in een groep plaatsen voordat u SealSkin kunt gebruiken. Controleer het opnieuw zodra dat is gebeurd.",
+      "check": "Opnieuw controleren"
+    },
     "signIn": {
       "failed": "De aanmelding is niet voltooid. Probeer het opnieuw of vraag het uw beheerder.",
       "refused": "De identiteitsprovider heeft de aanmelding geweigerd.",
@@ -1784,6 +1794,7 @@
       "invalidUsername": "De naam van uw account kan geen SealSkin-gebruikersnaam zijn, die alleen letters, cijfers, onderstrepingstekens en koppeltekens toelaat. Vraag het uw beheerder.",
       "adminName": "De naam van uw account is die van een SealSkin-beheerder, die zich met een sleutelbestand aanmeldt. Vraag het uw beheerder.",
       "otherIdentity": "Een ander account van de identiteitsprovider meldt zich al aan als deze SealSkin-gebruiker. Vraag het uw beheerder.",
+      "noAccount": "Er is nog geen SealSkin-account met uw naam. Vraag uw beheerder om er een aan te maken.",
       "notConfigured": "Deze server biedt geen eenmalige aanmelding.",
       "ended": "De identiteitsprovider heeft uw aanmelding beëindigd. Meld u opnieuw aan."
     },

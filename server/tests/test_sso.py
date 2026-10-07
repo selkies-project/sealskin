@@ -245,6 +245,35 @@ def test_oidc_sign_in_creates_the_user_and_starts_a_web_sign_in(http, provider):
     assert os.stat(settings.sso_keys_path).st_mode & 0o777 == 0o600
 
 
+def test_a_held_user_is_told_so_and_may_do_nothing_else(http, provider):
+    client = _sign_in_oidc(http, provider, {"sub": "h-1", "preferred_username": "held", "groups": ["nobody"]})
+    status, data = client.call("POST", "/api/admin/status", {})
+    assert status == 200 and data["held"] is True and data["settings"]["session_limit"] == 0
+    assert data["settings"]["persistent_storage"] is False
+    status, data = client.call("GET", "/api/sessions")
+    assert status == 403 and "administrator" in data["detail"]
+    user_manager.write_group_file("staff", {"sso_groups": ["nobody"]})
+    status, data = client.call("POST", "/api/admin/status", {})
+    assert status == 200 and data["held"] is False and data["settings"]["groups"] == ["staff"]
+
+
+def test_approving_a_held_user_lets_them_in(http, provider):
+    client = _sign_in_oidc(http, provider, {"sub": "h-2", "preferred_username": "waiting"})
+    assert client.call("POST", "/api/admin/status", {})[1]["held"] is True
+    user_manager.approve("waiting")
+    status, data = client.call("POST", "/api/admin/status", {})
+    assert status == 200 and data["held"] is False and data["settings"]["approved"] is True
+    assert client.call("GET", "/api/sessions")[0] == 200
+
+
+def test_a_sign_in_for_a_user_nobody_created_names_the_missing_account(http, provider, monkeypatch):
+    monkeypatch.setattr(settings, "sso_create_users", False)
+    kind, grant = _fragment(_oidc_callback(http, provider, {"sub": "n-1", "preferred_username": "nobody"}))
+    assert kind == "sso"
+    response, token = _register(http, grant)
+    assert response.status_code == 400 and response.json()["detail"] == "noAccount" and token is None
+
+
 def test_the_user_and_groups_an_id_token_leaves_out_come_from_userinfo(http, provider):
     provider.userinfo = {"sub": "b-1", "preferred_username": "bob", "groups": ["admins"]}
     client = _sign_in_oidc(http, provider, {"sub": "b-1"}, access_token="at-1")

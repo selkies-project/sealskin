@@ -223,6 +223,8 @@
       "allowPublicSharing": "Permitir Compartilhamento Público de Arquivos",
       "allowEditTemplates": "Permitir Edição de Modelos de Aplicativos",
       "signInOnly": "Somente login único",
+      "awaitingGroup": "Aguardando um grupo",
+      "approve": "Aprovar",
       "admin": "Administrador",
       "gpuShare": "Permitir Compartilhar uma GPU com Outras Sessões",
       "homeMigration": "Permitir Mover Diretórios Home Entre Nós",
@@ -1205,6 +1207,8 @@
       "userDeleteFailed": "Erro ao excluir usuário: {error}",
       "userUpdated": "Usuário '{username}' atualizado com sucesso.",
       "userUpdateFailed": "Erro ao atualizar usuário: {error}",
+      "userApproved": "Usuário '{username}' aprovado.",
+      "userApproveFailed": "Erro ao aprovar o usuário: {error}",
       "creatingGroup": "Criando grupo...",
       "groupCreated": "Grupo '{groupName}' criado.",
       "groupCreateFailed": "Erro ao criar grupo: {error}",
@@ -1378,6 +1382,7 @@
         "sso_max_age_seconds": "Duração máxima de um login pelo provedor de identidade (horas)",
         "sso_force_login": "Pedir as credenciais a cada login",
         "sso_create_users": "Criar o usuário no primeiro login",
+        "sso_hold_new_users": "Reter novos usuários até serem colocados em um grupo",
         "proxy_auth_user_header": "Cabeçalho em que um proxy confiável informa o usuário",
         "proxy_auth_groups_header": "Cabeçalho em que um proxy confiável lista os grupos do usuário",
         "proxy_auth_logout_url": "Página do proxy que encerra a sessão do usuário nele",
@@ -1776,6 +1781,11 @@
     "rootSignIn": "Entrar como Root",
     "rootRefused": "Esse não é o token root do servidor.",
     "rootLocked": "Tentativas demais. Aguarde um pouco e tente de novo.",
+    "held": {
+      "title": "Aguardando um administrador",
+      "message": "Você está conectado como {username}, mas um administrador precisa colocá-lo em um grupo antes que possa usar o SealSkin. Verifique novamente quando isso tiver sido feito.",
+      "check": "Verificar novamente"
+    },
     "signIn": {
       "failed": "O login não foi concluído. Tente de novo ou fale com o seu administrador.",
       "refused": "O provedor de identidade recusou o login.",
@@ -1784,6 +1794,7 @@
       "invalidUsername": "O nome da sua conta não pode ser um nome de usuário do SealSkin, que só aceita letras, dígitos, sublinhados e hifens. Fale com o seu administrador.",
       "adminName": "O nome da sua conta pertence a um administrador do SealSkin, que entra com um arquivo de chave. Fale com o seu administrador.",
       "otherIdentity": "Outra conta do provedor de identidade já entra como este usuário do SealSkin. Fale com o seu administrador.",
+      "noAccount": "Ainda não existe uma conta SealSkin com o seu nome. Peça ao administrador para criar uma.",
       "notConfigured": "Este servidor não oferece login único.",
       "ended": "O provedor de identidade encerrou o seu login. Entre de novo."
     },

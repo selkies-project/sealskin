@@ -118,7 +118,11 @@ It has to be a valid SealSkin user name (letters, digits, `_`, `-`); choose a
 claim users cannot set for themselves at the provider.
 
 * A name with no user gets one, with the default settings, unless
-  `SEALSKIN_SSO_CREATE_USERS=false`.
+  `SEALSKIN_SSO_CREATE_USERS=false`, which refuses the sign-in and tells the
+  user to ask for an account. A user created this way is held until an
+  administrator places them in a group or approves them, unless
+  `SEALSKIN_SSO_HOLD_NEW_USERS=false` (see
+  [Groups from the provider](#groups-from-the-provider)).
 * The first sign-in through each protocol binds the user to the provider's
   account, and another account naming the same user is refused from then on.
 * Members of `SEALSKIN_SSO_ADMIN_GROUP` sign in as administrators. The names
@@ -127,7 +131,8 @@ claim users cannot set for themselves at the provider.
   groups header) put the user in the SealSkin groups of the same names, and in
   every group that lists one of them under **Identity provider groups**. They
   are read again at each sign-in and each refresh, so leaving a group at the
-  provider leaves it here.
+  provider leaves it here. [Groups from the provider](#groups-from-the-provider)
+  has the whole of it.
 
 These settings can also be written for the whole cluster, in the dashboard
 under **Sign In**, where they take precedence over each node's
@@ -136,6 +141,31 @@ is the same for everyone who uses that provider, and a **Test** that asks the
 provider, or checks the proxy, with what was saved. The client secret is
 better left in the environment of the nodes that sign users in: what the
 dashboard writes goes to the shared store.
+
+## Groups from the provider
+
+A SealSkin group carries the switches, limits, pools, app access, and PRoot
+Apps catalog its members get, and the provider's groups decide who is in it.
+With groups `devs` and `editor` made in the dashboard, a user the provider
+puts in `devs` is in SealSkin's `devs` at every sign-in with no further setup.
+Where the provider's names differ, each group's **Identity provider groups**
+field lists the provider groups whose members are in it, so `editor` can be
+fed by `okta-content-team`, and one provider group can feed several SealSkin
+groups. A group that sets **Administrator** makes its members administrators,
+beside `SEALSKIN_SSO_ADMIN_GROUP`. Groups an administrator attaches to the
+user by hand are kept and combined with the provider's, so membership can be
+granted here as well as there.
+
+A user the sign-in creates who lands in no group is **held**: signed in, but
+told to wait for an administrator and refused everything else. The dashboard
+marks such users **Awaiting a group** in the Users table, and either placing
+them in a group or pressing **Approve** lets them in, as does the provider
+naming a group of theirs from then on. Nothing is held while
+`SEALSKIN_SSO_HOLD_NEW_USERS=false`, which gives a new user the default
+settings at once. Where the provider sends no groups and every account should
+be looked at first, `SEALSKIN_SSO_CREATE_USERS=false` refuses unknown names
+instead, and the administrator creates each user in the dashboard, with no
+key, before their first sign-in binds the account.
 
 ## Groups, switches, and limits
 

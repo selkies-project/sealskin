@@ -62,3 +62,45 @@ def test_updating_a_user_keeps_the_provider_binding(users):
     user_manager.update_user_settings("dave", dict(user_manager.DEFAULT_USER_SETTINGS, session_limit=1))
     stored = user_manager.get_user("dave")["settings"]
     assert stored["auth"] == {"saml": "saml idp dave"} and stored["session_limit"] == 1
+
+
+def test_the_last_sign_ins_groups_count_where_a_caller_passes_none(users):
+    user_manager.ensure_user("dave", "oidc", "oidc https://idp sub-1", ["employees"])
+    assert user_manager.groups_of("dave") == ["staff"]
+    assert user_manager.groups_of("dave", ()) == []
+    assert user_manager.get_effective_settings("dave")["session_limit"] == 2
+
+
+def test_a_user_a_sign_in_creates_in_no_group_is_held_until_grouped_or_approved(users, monkeypatch):
+    user_manager.ensure_user("erin", "oidc", "oidc https://idp sub-9", ["nobody"])
+    assert user_manager.get_user("erin")["settings"]["approved"] is False
+    assert user_manager.held("erin", ["nobody"]) is True
+    # A group the provider names later lets the user in, as does one by mapping.
+    assert user_manager.held("erin", ["power"]) is False
+    assert user_manager.held("erin", ["employees"]) is False
+    user_manager.update_user_settings("erin", dict(user_manager.DEFAULT_USER_SETTINGS, groups=["power"]))
+    assert user_manager.held("erin") is False
+    user_manager.update_user_settings("erin", dict(user_manager.DEFAULT_USER_SETTINGS))
+    assert user_manager.held("erin") is True and user_manager.get_user("erin")["settings"]["approved"] is False
+    user_manager.approve("erin")
+    assert user_manager.held("erin") is False
+    assert user_manager.get_user("erin")["settings"]["approved"] is True
+    monkeypatch.setattr(user_manager.settings, "sso_hold_new_users", False)
+    user_manager.ensure_user("frank", "proxy")
+    assert "approved" not in user_manager.get_user("frank")["settings"]
+    assert user_manager.held("frank") is False
+
+
+def test_a_user_the_provider_puts_in_a_group_or_an_administrator_made_is_never_held(users):
+    user_manager.ensure_user("gina", "oidc", "oidc https://idp sub-2", ["employees"])
+    assert user_manager.get_user("gina")["settings"]["approved"] is False
+    assert user_manager.held("gina") is False
+    user_manager.create_user("hank", None, dict(user_manager.DEFAULT_USER_SETTINGS))
+    assert user_manager.held("hank") is False
+    assert user_manager.held("root") is False
+
+
+def test_a_sign_in_for_an_unknown_user_while_sign_ins_create_none_names_the_missing_account(users, monkeypatch):
+    monkeypatch.setattr(user_manager.settings, "sso_create_users", False)
+    with pytest.raises(user_manager.NoAccount):
+        user_manager.ensure_user("ivan", "oidc", "oidc https://idp sub-3")

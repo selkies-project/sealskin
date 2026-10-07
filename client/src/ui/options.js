@@ -1317,6 +1317,7 @@ const CLUSTER_SETTINGS = {
   sso_max_age_seconds: 'hours',
   sso_force_login: 'bool',
   sso_create_users: 'bool',
+  sso_hold_new_users: 'bool',
   proxy_auth_user_header: 'text',
   proxy_auth_groups_header: 'text',
   proxy_auth_logout_url: 'text',
@@ -1328,7 +1329,7 @@ const SIGNIN_CARDS = {
   oidc: ['oidc_issuer', 'oidc_client_id', 'oidc_client_secret', 'oidc_scopes'],
   saml: ['saml_metadata_url', 'saml_username_attribute', 'saml_groups_attribute'],
   proxy: ['proxy_auth_user_header', 'proxy_auth_groups_header', 'proxy_auth_logout_url'],
-  who: ['sso_username_claim', 'sso_groups_claim', 'sso_admin_group', 'sso_max_age_seconds', 'web_session_seconds', 'sso_create_users', 'sso_force_login'],
+  who: ['sso_username_claim', 'sso_groups_claim', 'sso_admin_group', 'sso_max_age_seconds', 'web_session_seconds', 'sso_create_users', 'sso_hold_new_users', 'sso_force_login'],
 };
 // Issuer URL shapes of common OpenID Connect providers; a preset fills the hints and stores nothing.
 const OIDC_PRESETS = {
@@ -1857,10 +1858,12 @@ const tableRenderConfig = {
       const homesDisabled = !effectiveSettings.persistent_storage;
       const username = escapeHtml(item.username);
       const pubkey = escapeHtml(item.public_key);
+      // A sign-in created the user held, and no group of theirs, named here or by the provider, has let them in yet.
+      const waiting = Boolean(item.settings) && item.settings.approved === false && !effectiveSettings.groups.length;
       return `
                 <tr>
                     <td>${username}</td>
-                    <td>${escapeHtml(groupsOf(item.settings).join(', ')) || t('common.none')}</td>
+                    <td>${escapeHtml(groupsOf(item.settings).join(', ')) || t('common.none')}${waiting ? ` <span class="pill off">${escapeHtml(t('options.users.awaitingGroup'))}</span>` : ''}</td>
                     <td class="pubkey-cell" title="${pubkey}">
                         <div class="cell-wrapper">
                             <span class="key-text">${item.public_key ? shortKey(item.public_key) : t('options.users.signInOnly')}</span>
@@ -1869,6 +1872,7 @@ const tableRenderConfig = {
                     </td>
                     <td class="actions-cell">
                         <div class="cell-wrapper">
+                            ${waiting ? `<button class="primary" data-action="approve" data-username="${username}">${t('options.users.approve')}</button>` : ''}
                             <button class="secondary" data-username="${username}" ${homesDisabled ? `disabled title="${t('options.users.homesDisabledTooltip')}"` : ''}>${t('common.homes')}</button>
                             <button class="warning" data-username="${username}">${t('common.edit')}</button>
                             <button class="danger" data-username="${username}">${t('common.delete')}</button>
@@ -3258,7 +3262,15 @@ function bindEvents() {
     }
     const username = button.dataset.username;
     if (!username) return;
-    if (button.classList.contains('danger')) {
+    if (button.dataset.action === 'approve') {
+      try {
+        await secureFetch(`/api/admin/users/${username}/approve`, { method: 'POST' });
+        displayStatus(t('options.status.userApproved', { username }));
+        await refreshAdminData();
+      } catch (error) {
+        await writeFailed(error, t('options.status.userApproveFailed', { error: error.message }), refreshAdminData);
+      }
+    } else if (button.classList.contains('danger')) {
       const remove = await confirmDialog(t, {
         title: t('options.users.deleteTitle'),
         message: t('options.users.confirmDelete', { username }),

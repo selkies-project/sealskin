@@ -103,6 +103,7 @@ async def admin_status(user: dict[str, Any] = Depends(verify_token)) -> dict[str
     """Return the caller's role, settings, and host statistics."""
     response: dict[str, Any] = {
         "is_admin": user.get("is_admin", False),
+        "held": user.get("held", False),
         "username": user.get("username"),
         "settings": user.get("effective_settings"),
         "via": user.get("via") or "key",
@@ -860,6 +861,15 @@ async def update_user(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {exc}") from exc
+
+
+@router.post("/users/{username}/approve", response_model=User)
+async def approve_user(username: str) -> dict[str, Any]:
+    """Let a held user in without placing them in a group."""
+    try:
+        return user_manager.approve(username)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.delete("/users/{username}", status_code=204)

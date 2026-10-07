@@ -223,6 +223,8 @@
       "allowPublicSharing": "Pahintulutan ang Pampublikong Pagbabahagi ng File",
       "allowEditTemplates": "Pahintulutan ang Pag-edit ng mga Template ng App",
       "signInOnly": "Single sign-on lamang",
+      "awaitingGroup": "Naghihintay ng grupo",
+      "approve": "Aprubahan",
       "admin": "Administrator",
       "gpuShare": "Pahintulutan ang Pagbabahagi ng GPU sa Ibang mga Sesyon",
       "homeMigration": "Pahintulutan ang Paglilipat ng mga Home Directory sa Pagitan ng mga Node",
@@ -1205,6 +1207,8 @@
       "userDeleteFailed": "Error sa pagbura ng user: {error}",
       "userUpdated": "Matagumpay na na-update ang user na si '{username}'.",
       "userUpdateFailed": "Error sa pag-update ng user: {error}",
+      "userApproved": "Naaprubahan ang user na '{username}'.",
+      "userApproveFailed": "Error sa pag-apruba ng user: {error}",
       "creatingGroup": "Gumagawa ng grupo...",
       "groupCreated": "Nilikha ang grupong '{groupName}'.",
       "groupCreateFailed": "Error sa paggawa ng grupo: {error}",
@@ -1378,6 +1382,7 @@
         "sso_max_age_seconds": "Pinakamatagal na itatagal ng sign-in sa identity provider (oras)",
         "sso_force_login": "Humingi ng mga credential sa bawat sign-in",
         "sso_create_users": "Gumawa ng user sa unang sign-in",
+        "sso_hold_new_users": "Pigilan ang mga bagong user hanggang mailagay sa isang grupo",
         "proxy_auth_user_header": "Header kung saan pinapangalanan ng trusted na proxy ang user",
         "proxy_auth_groups_header": "Header kung saan inililista ng trusted na proxy ang mga grupo ng user",
         "proxy_auth_logout_url": "Pahina ng proxy na nagsa-sign out sa user nito",
@@ -1776,6 +1781,11 @@
     "rootSignIn": "Mag-sign In bilang Root",
     "rootRefused": "Hindi iyan ang root token ng server.",
     "rootLocked": "Masyadong maraming pagsubok. Maghintay sandali, pagkatapos ay subukan ulit.",
+    "held": {
+      "title": "Naghihintay ng administrator",
+      "message": "Naka-sign in ka bilang {username}, pero kailangan ka munang ilagay ng administrator sa isang grupo bago mo magamit ang SealSkin. Tingnan muli kapag nagawa na nila ito.",
+      "check": "Tingnan muli"
+    },
     "signIn": {
       "failed": "Hindi natapos ang sign-in. Subukan ulit, o magtanong sa iyong administrator.",
       "refused": "Tinanggihan ng identity provider ang sign-in.",
@@ -1784,6 +1794,7 @@
       "invalidUsername": "Hindi maaaring maging username sa SealSkin ang pangalan ng iyong account, na tumatanggap lamang ng mga titik, numero, underscore, at gitling. Magtanong sa iyong administrator.",
       "adminName": "Pag-aari ng isang administrator ng SealSkin, na nagsa-sign in gamit ang key file, ang pangalan ng iyong account. Magtanong sa iyong administrator.",
       "otherIdentity": "May ibang account ng identity provider na nagsa-sign in na bilang user na ito ng SealSkin. Magtanong sa iyong administrator.",
+      "noAccount": "Wala pang SealSkin account sa iyong pangalan. Hilingin sa iyong administrator na gumawa ng isa.",
       "notConfigured": "Walang single sign-on ang server na ito.",
       "ended": "Tinapos ng identity provider ang iyong sign-in. Mag-sign in ulit."
     },

@@ -102,6 +102,7 @@ paths refer to.
 | `SEALSKIN_WEB_SESSION_SECONDS` | `int` | `43200` | Longest a web sign-in with the root token lasts unused. |
 | `SEALSKIN_SSO_FORCE_LOGIN` | `bool` | `false` | Make the identity provider ask for credentials at every sign-in instead of reusing its session. |
 | `SEALSKIN_SSO_CREATE_USERS` | `bool` | `true` | Create a user at the first sign-in an identity provider or a proxy vouches for. |
+| `SEALSKIN_SSO_HOLD_NEW_USERS` | `bool` | `true` | Hold a user a sign-in creates, who may do nothing here, until an administrator places them in a group or approves them; a user the provider puts in a group is never held. |
 | `SEALSKIN_USAGE_FLUSH_SECONDS` | `int` | `300` | How often a node adds the session time it ran to the cluster's usage records. |
 | `SEALSKIN_FILES_SYNC` | `str` | `auto` | Keep every user's shared files in the object store so each node a session starts on has them: `on`, `off`, or `auto`, which syncs once the cluster has a second node. |
 | `SEALSKIN_SHARED_FILES_PATH` | `str` | `/storage/sealskin_shared_store` | Directory a `file` store keeps the users' shared files in. |

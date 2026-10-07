@@ -223,6 +223,8 @@
       "allowPublicSharing": "Öffentliche Dateifreigabe zulassen",
       "allowEditTemplates": "Bearbeiten von App-Vorlagen zulassen",
       "signInOnly": "Nur Single Sign-On",
+      "awaitingGroup": "Wartet auf eine Gruppe",
+      "approve": "Freigeben",
       "admin": "Administrator",
       "gpuShare": "Teilen einer GPU mit anderen Sitzungen erlauben",
       "homeMigration": "Verschieben von Home-Verzeichnissen zwischen Knoten erlauben",
@@ -1205,6 +1207,8 @@
       "userDeleteFailed": "Fehler beim Löschen des Benutzers: {error}",
       "userUpdated": "Benutzer '{username}' erfolgreich aktualisiert.",
       "userUpdateFailed": "Fehler beim Aktualisieren des Benutzers: {error}",
+      "userApproved": "Benutzer '{username}' freigegeben.",
+      "userApproveFailed": "Fehler beim Freigeben des Benutzers: {error}",
       "creatingGroup": "Gruppe wird erstellt...",
       "groupCreated": "Gruppe '{groupName}' erstellt.",
       "groupCreateFailed": "Fehler beim Erstellen der Gruppe: {error}",
@@ -1378,6 +1382,7 @@
         "sso_max_age_seconds": "Maximale Dauer einer Anmeldung über den Identitätsanbieter (Stunden)",
         "sso_force_login": "Bei jeder Anmeldung nach Zugangsdaten fragen",
         "sso_create_users": "Benutzer bei der ersten Anmeldung anlegen",
+        "sso_hold_new_users": "Neue Benutzer zurückhalten, bis sie einer Gruppe zugewiesen sind",
         "proxy_auth_user_header": "Header, in dem ein vertrauenswürdiger Proxy den Benutzer nennt",
         "proxy_auth_groups_header": "Header, in dem ein vertrauenswürdiger Proxy die Gruppen des Benutzers auflistet",
         "proxy_auth_logout_url": "Seite des Proxys, die seinen Benutzer abmeldet",
@@ -1776,6 +1781,11 @@
     "rootSignIn": "Als Root anmelden",
     "rootRefused": "Das ist nicht das Root-Token des Servers.",
     "rootLocked": "Zu viele Versuche. Warten Sie eine Weile und versuchen Sie es dann erneut.",
+    "held": {
+      "title": "Warten auf einen Administrator",
+      "message": "Sie sind als {username} angemeldet, aber ein Administrator muss Sie erst einer Gruppe zuweisen, bevor Sie SealSkin nutzen können. Prüfen Sie es erneut, sobald das geschehen ist.",
+      "check": "Erneut prüfen"
+    },
     "signIn": {
       "failed": "Die Anmeldung wurde nicht abgeschlossen. Versuchen Sie es erneut oder wenden Sie sich an Ihren Administrator.",
       "refused": "Der Identitätsanbieter hat die Anmeldung abgelehnt.",
@@ -1784,6 +1794,7 @@
       "invalidUsername": "Der Name Ihres Kontos kann kein SealSkin-Benutzername sein; dieser besteht nur aus Buchstaben, Ziffern, Unterstrichen und Bindestrichen. Wenden Sie sich an Ihren Administrator.",
       "adminName": "Der Name Ihres Kontos gehört einem SealSkin-Administrator, der sich mit einer Schlüsseldatei anmeldet. Wenden Sie sich an Ihren Administrator.",
       "otherIdentity": "Ein anderes Konto des Identitätsanbieters meldet sich bereits als dieser SealSkin-Benutzer an. Wenden Sie sich an Ihren Administrator.",
+      "noAccount": "Es gibt noch kein SealSkin-Konto mit Ihrem Namen. Bitten Sie Ihren Administrator, eines anzulegen.",
       "notConfigured": "Dieser Server bietet kein Single Sign-On an.",
       "ended": "Der Identitätsanbieter hat Ihre Anmeldung beendet. Melden Sie sich erneut an."
     },

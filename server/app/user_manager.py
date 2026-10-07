@@ -6,6 +6,10 @@
   an identity provider (see `sso.py`).
 * `groups/<name>`: YAML settings its members get (see `get_effective_settings`).
 
+A user a sign-in created while `sso_hold_new_users` was on carries
+`approved: false` and is held (`held`) until placed in a group, approved by an
+administrator (`approve`), or named in a group by the provider.
+
 All three are objects of the shared store (`store.MOUNTS`), read into memory
 after every change here and whenever the store reports one made elsewhere or
 by hand. The `root` administrator has no file.
@@ -26,7 +30,7 @@ import yaml
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-from . import persistence, store
+from . import audit, persistence, store
 from .fsutil import safe_join
 from .settings import settings
 
@@ -37,6 +41,13 @@ GROUP_DATA: dict[str, dict[str, Any]] = {}
 
 #: Name of the administrator that signs in with the root token and has no file.
 ROOT = "root"
+
+#: Keys of a user record the server writes and an administrator's edit keeps.
+RECORD_KEYS = ("auth", "provider_groups", "approved")
+
+
+class NoAccount(ValueError):
+    """A sign-in for a user that does not exist while sign-ins create none."""
 
 DEFAULT_USER_SETTINGS: dict[str, Any] = {
     "active": True,
@@ -313,20 +324,24 @@ def get_user(username: str) -> dict[str, Any] | None:
     return USER_DATA.get(username)
 
 
-def groups_of(username: str, provider_groups: Any = ()) -> list[str]:
+def groups_of(username: str, provider_groups: Any = None) -> list[str]:
     """Return the groups a user is in: those the user file names, then those a sign-in brought.
 
     Args:
         username: The user.
         provider_groups: Groups an identity provider or proxy named at sign-in.
             Each admits the user to the group of that name and to every group
-            listing it under `sso_groups`.
+            listing it under `sso_groups`. `None` takes those of the last
+            sign-in, kept on the record.
 
     Returns:
         Names of existing groups, without repeats.
     """
     user = USER_DATA.get(username) or {}
-    names = [g for g in _groups_of(user.get("settings") or {}) if g in GROUP_DATA]
+    stored = user.get("settings") or {}
+    if provider_groups is None:
+        provider_groups = stored.get("provider_groups") or ()
+    names = [g for g in _groups_of(stored) if g in GROUP_DATA]
     brought = {str(g).strip().lstrip("/") for g in provider_groups or () if str(g).strip()}
     for name, group in GROUP_DATA.items():
         mapped = {str(g).strip().lstrip("/") for g in group["settings"].get("sso_groups") or []}
@@ -335,7 +350,21 @@ def groups_of(username: str, provider_groups: Any = ()) -> list[str]:
     return names
 
 
-def get_effective_settings(username: str, provider_groups: Any = ()) -> dict[str, Any]:
+def held(username: str, provider_groups: Any = None) -> bool:
+    """Return whether a user waits for an administrator: created held, in no group, and not approved.
+
+    Args:
+        username: The user.
+        provider_groups: See `groups_of`.
+    """
+    user = USER_DATA.get(username)
+    if not user or user.get("is_admin") or not settings.sso_hold_new_users:
+        return False
+    stored = user.get("settings") or {}
+    return stored.get("approved") is False and not stored.get("admin") and not groups_of(username, provider_groups)
+
+
+def get_effective_settings(username: str, provider_groups: Any = None) -> dict[str, Any]:
     """Return the settings a user's sessions and requests run under.
 
     A user in no group has the settings of the user file. In groups, each
@@ -389,6 +418,9 @@ def ensure_user(username: str, via: str, subject: str = "", provider_groups: Any
     `subject`, and the groups the provider named are kept on the record for
     the dashboard.
 
+    A user created while `sso_hold_new_users` is on is held until an
+    administrator places them in a group or approves them (see `held`).
+
     Args:
         username: Name the provider or proxy gave.
         via: `oidc`, `saml`, or `proxy`.
@@ -399,9 +431,9 @@ def ensure_user(username: str, via: str, subject: str = "", provider_groups: Any
         The user record.
 
     Raises:
+        NoAccount: For an unknown user while `sso_create_users` is off.
         ValueError: For a name SealSkin cannot use, a key-file
-            administrator's, an unknown user while `sso_create_users` is off,
-            or a user bound to another subject.
+            administrator's, or a user bound to another subject.
     """
     validate_name(username)
     if username == ROOT:
@@ -410,8 +442,10 @@ def ensure_user(username: str, via: str, subject: str = "", provider_groups: Any
     if user and user.get("is_admin"):
         raise ValueError(f"'{username}' is a key-file administrator.")
     if not user and not settings.sso_create_users:
-        raise ValueError(f"No user '{username}' exists and sign-ins create none.")
+        raise NoAccount(f"No user '{username}' exists and sign-ins create none.")
     current = dict(user["settings"]) if user else DEFAULT_USER_SETTINGS.copy()
+    if not user and settings.sso_hold_new_users:
+        current["approved"] = False
     bound = dict(current.get("auth") or {})
     if subject and bound.get(via, subject) != subject:
         raise ValueError(f"'{username}' is bound to another account of the provider.")
@@ -425,6 +459,26 @@ def ensure_user(username: str, via: str, subject: str = "", provider_groups: Any
     load_users_and_groups()
     if not user:
         logger.info("Created user '%s' at its first sign-in through %s.", username, via)
+        if held(username, provider_groups):
+            audit.record("user_held", username, via=via, groups=listed)
+            logger.info("'%s' is held until an administrator places the user in a group.", username)
+    return USER_DATA[username]
+
+
+def approve(username: str) -> dict[str, Any]:
+    """Let a held user in without a group.
+
+    Raises:
+        ValueError: For an unknown user.
+    """
+    user = USER_DATA.get(username)
+    if not user:
+        raise ValueError(f"User '{username}' not found.")
+    current = dict(user.get("settings") or {})
+    if current.get("approved") is not True:
+        current["approved"] = True
+        write_user_file(username, user["public_key"], current)
+        load_users_and_groups()
     return USER_DATA[username]
 
 
@@ -561,7 +615,7 @@ def update_user_settings(username: str, new_settings: dict[str, Any]) -> None:
         raise ValueError(f"User '{username}' not found.")
     if user["is_admin"]:
         raise ValueError("Cannot update settings for an admin user.")
-    kept = {k: v for k, v in (user.get("settings") or {}).items() if k in ("auth", "provider_groups")}
+    kept = {k: v for k, v in (user.get("settings") or {}).items() if k in RECORD_KEYS}
     write_user_file(username, user["public_key"], {**new_settings, **kept})
     load_users_and_groups()
 

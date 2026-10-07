@@ -437,6 +437,45 @@ async function signInPanel(failure) {
 }
 
 /**
+ * Show a user who waits for an administrator why nothing else opens: the
+ * server answers no route but the status for them until they are placed in a
+ * group or approved. Checking again is a reload.
+ *
+ * @param {object} status
+ */
+async function heldPanel(status) {
+  const panel = document.getElementById('host-panel');
+  const box = document.createElement('div');
+  box.className = 'host-box';
+  box.innerHTML = `
+    <img class="host-logo" src="icons/icon128.png" alt="SealSkin">
+    <h2></h2>
+    <p class="host-muted" data-part="message"></p>
+    <div class="host-actions">
+      <button type="button" class="primary" data-part="check"></button>
+      <button type="button" class="secondary" data-part="leave"></button>
+    </div>`;
+  const [message, check, leave] = ['message', 'check', 'leave'].map((part) => box.querySelector(`[data-part="${part}"]`));
+  box.querySelector('h2').textContent = t('web.held.title');
+  message.textContent = t('web.held.message', { username: status.username });
+  check.textContent = t('web.held.check');
+  check.addEventListener('click', () => location.reload());
+  leave.textContent = t('options.dashboard.signOut');
+  // A proxy's sign-in ends at the proxy: with no page of its to open, there is nothing to offer.
+  leave.hidden = status.via === 'proxy' && !status.sign_out_url;
+  leave.addEventListener('click', async () => {
+    await post('/api/auth/signout', {}).catch(() => {});
+    if (status.sign_out_url) location.assign(status.sign_out_url);
+    else location.reload();
+  });
+  await remember(null);
+  document.body.classList.add('signed-out');
+  document.getElementById('app-frame').hidden = true;
+  panel.replaceChildren(box);
+  panel.hidden = false;
+}
+
+/**
  * Open a served page as whoever the cookie signs in.
  *
  * @param {string} page
@@ -472,6 +511,10 @@ async function connect() {
   // A proxy's sign-in that ran out is renewed by a navigation, which the proxy sends to its sign-in page.
   if (!status && signedInVia === 'proxy') {
     location.reload();
+    return;
+  }
+  if (status && status.held) {
+    await heldPanel(status);
     return;
   }
   await remember(status);
@@ -563,6 +606,10 @@ async function start() {
   await takeSignIn();
   // The host frames a page for a stored user and asks `connect` otherwise, as `#root` has it do.
   const status = await whoAmI().catch(() => null);
+  if (status && status.held) {
+    await heldPanel(status);
+    return;
+  }
   await remember(status && status.via === 'proxy' && location.hash === '#root' ? null : status);
   if (status && location.hash !== '#root' && leaveForNext()) return;
   hostApi = initHost({

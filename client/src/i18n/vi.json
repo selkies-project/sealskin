@@ -223,6 +223,8 @@
       "allowPublicSharing": "Cho phép chia sẻ tệp công khai",
       "allowEditTemplates": "Cho phép chỉnh sửa mẫu ứng dụng",
       "signInOnly": "Chỉ đăng nhập một lần",
+      "awaitingGroup": "Đang chờ nhóm",
+      "approve": "Phê duyệt",
       "admin": "Quản trị viên",
       "gpuShare": "Cho phép dùng chung GPU với các phiên khác",
       "homeMigration": "Cho phép di chuyển thư mục chính giữa các nút",
@@ -1205,6 +1207,8 @@
       "userDeleteFailed": "Lỗi khi xóa người dùng: {error}",
       "userUpdated": "Đã cập nhật người dùng '{username}' thành công.",
       "userUpdateFailed": "Lỗi khi cập nhật người dùng: {error}",
+      "userApproved": "Đã phê duyệt người dùng '{username}'.",
+      "userApproveFailed": "Lỗi khi phê duyệt người dùng: {error}",
       "creatingGroup": "Đang tạo nhóm...",
       "groupCreated": "Đã tạo nhóm '{groupName}'.",
       "groupCreateFailed": "Lỗi khi tạo nhóm: {error}",
@@ -1378,6 +1382,7 @@
         "sso_max_age_seconds": "Thời gian tối đa của một lần đăng nhập qua nhà cung cấp danh tính (giờ)",
         "sso_force_login": "Yêu cầu thông tin xác thực ở mỗi lần đăng nhập",
         "sso_create_users": "Tạo người dùng ở lần đăng nhập đầu tiên",
+        "sso_hold_new_users": "Giữ người dùng mới cho đến khi được đưa vào nhóm",
         "proxy_auth_user_header": "Tiêu đề mà proxy tin cậy dùng để nêu tên người dùng",
         "proxy_auth_groups_header": "Tiêu đề mà proxy tin cậy dùng để liệt kê các nhóm của người dùng",
         "proxy_auth_logout_url": "Trang của proxy dùng để đăng xuất người dùng của nó",
@@ -1776,6 +1781,11 @@
     "rootSignIn": "Đăng nhập với quyền root",
     "rootRefused": "Đó không phải token root của máy chủ.",
     "rootLocked": "Quá nhiều lần thử. Hãy chờ một lúc rồi thử lại.",
+    "held": {
+      "title": "Đang chờ quản trị viên",
+      "message": "Bạn đã đăng nhập với tên {username}, nhưng quản trị viên cần đưa bạn vào một nhóm trước khi bạn có thể dùng SealSkin. Hãy kiểm tra lại sau khi họ đã làm xong.",
+      "check": "Kiểm tra lại"
+    },
     "signIn": {
       "failed": "Đăng nhập chưa hoàn tất. Hãy thử lại hoặc hỏi quản trị viên của bạn.",
       "refused": "Nhà cung cấp danh tính đã từ chối đăng nhập.",
@@ -1784,6 +1794,7 @@
       "invalidUsername": "Tên tài khoản của bạn không thể là tên người dùng SealSkin, vốn chỉ gồm chữ cái, chữ số, dấu gạch dưới và dấu gạch ngang. Hãy hỏi quản trị viên của bạn.",
       "adminName": "Tên tài khoản của bạn thuộc về một quản trị viên SealSkin, người đăng nhập bằng tệp khóa. Hãy hỏi quản trị viên của bạn.",
       "otherIdentity": "Một tài khoản khác của nhà cung cấp danh tính đã đăng nhập với tư cách người dùng SealSkin này. Hãy hỏi quản trị viên của bạn.",
+      "noAccount": "Chưa có tài khoản SealSkin nào mang tên bạn. Hãy yêu cầu quản trị viên tạo một tài khoản.",
       "notConfigured": "Máy chủ này không cung cấp đăng nhập một lần.",
       "ended": "Nhà cung cấp danh tính đã kết thúc lần đăng nhập của bạn. Hãy đăng nhập lại."
     },
