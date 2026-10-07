@@ -30,6 +30,33 @@
 }
 
 /*
+ * The page is let out to the width the Spacious layout gives a full page rather
+ * than held to its reading column, as on every selkies-project site: the
+ * reference tables are wide, and a page that scrolls sideways at full width is
+ * worse than one whose prose runs long. A table wider than its page still
+ * scrolls on its own.
+ */
+#fd-spacious-layout {
+  --fd-page-width: 1200px;
+}
+
+#nd-page table {
+  width: 100%;
+  table-layout: auto;
+  font-size: 0.875rem;
+}
+
+#nd-page td,
+#nd-page th {
+  vertical-align: top;
+  overflow-wrap: break-word;
+}
+
+#nd-page td:first-child code {
+  white-space: nowrap;
+}
+
+/*
  * Badges are written as a run of linked images on one line, which is a row on
  * GitHub. The typography defaults make every image a block, which would stack
  * them instead.
