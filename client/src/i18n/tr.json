@@ -14,6 +14,8 @@
     "cancel": "İptal",
     "manage": "Yönet",
     "delete": "Sil",
+    "remove": "Kaldır",
+    "move": "Taşı",
     "edit": "Düzenle",
     "save": "Kaydet",
     "none": "yok",
@@ -55,6 +57,7 @@
     "admins": "Yöneticiler",
     "yes": "Evet",
     "no": "Hayır",
+    "ok": "Tamam",
     "daysAgo": "{count} gün önce",
     "hoursAgo": "{count} saat önce",
     "minutesAgo": "{count} dakika önce",
@@ -98,6 +101,7 @@
       "storageUsage": "Depolama Kullanımı:",
       "detectedGpus": "Tespit Edilen GPU'lar:",
       "logout": "Çıkış Yap ve Yapılandırmayı Temizle",
+      "logoutTitle": "Çıkış yap",
       "howTo": "SealSkin Nasıl Kullanılır",
       "howToDescription": "Bu bölüm, uzantının nasıl kullanılacağına dair temel belgeleri içerir.",
       "howToList": [
@@ -156,6 +160,7 @@
       "nameTitle": "Sadece harf, rakam, alt çizgi veya tire kullanın.",
       "createButton": "Dizin Oluştur",
       "confirmDelete": "'{homeName}' ana dizinini silmek istediğinizden emin misiniz? İçindeki tüm veriler kalıcı olarak kaybolacak.",
+      "deleteTitle": "Ana dizini sil",
       "node": "Düğüm",
       "move": "Taşı",
       "moveTo": "Düğüme taşı",
@@ -169,12 +174,13 @@
       "started": "Başlatıldı",
       "noSessionsUser": "Aktif oturum bulunamadı.",
       "noSessionsAdmin": "Hiçbir kullanıcı için aktif oturum bulunamadı.",
-      "sessionsFor": "{username} için oturumlar ({count})",
-      "confirmStop": "Bu oturumu durdurmak istediğinizden emin misiniz? Konteyner yok edilecek."
+      "sessionsFor": "{username} için oturumlar ({count})"
     },
     "pinned": {
       "title": "Sabitlenmiş Uzantı Davranışı",
       "description": "Bu tablo, belirli dosya türleri veya tüm URL'ler için kaydettiğiniz başlatma seçeneklerini gösterir. Başlatma seçeneklerinin tekrar sorulması için sabitlenmiş bir davranışı kaldırabilirsiniz.",
+      "removeTitle": "Sabitlenmiş davranışı kaldır",
+      "confirmRemove": "'{name}' için sabitlenmiş davranış kaldırılsın mı?",
       "trigger": "Tetikleyici",
       "savedApp": "Kaydedilmiş Uygulama",
       "triggerSimple": "Basit Başlatma (Araç Çubuğu Düğmesi)",
@@ -191,7 +197,8 @@
       "publicKeyOptionalLabel": "Açık Anahtar (İsteğe Bağlı):",
       "publicKeyPlaceholder": "Açık anahtarı buraya yapıştırın veya bir tane oluşturmak için boş bırakın.",
       "createButton": "Yönetici Oluştur",
-      "confirmDelete": "'{username}' yöneticisini silmek istediğinizden emin misiniz? Bu, tüm kalıcı depolamasını da silecek ve geri alınamaz."
+      "confirmDelete": "'{username}' yöneticisini silmek istediğinizden emin misiniz? Bu, tüm kalıcı depolamasını da silecek ve geri alınamaz.",
+      "deleteTitle": "Yöneticiyi sil"
     },
     "users": {
       "title": "Kullanıcı Yönetimi",
@@ -211,6 +218,7 @@
       "createButton": "Kullanıcı Oluştur",
       "homesDisabledTooltip": "Bu kullanıcı için kalıcı depolama devre dışı bırakıldı",
       "confirmDelete": "'{username}' kullanıcısını silmek istediğinizden emin misiniz? Bu, tüm kalıcı depolamasını da silecek ve geri alınamaz.",
+      "deleteTitle": "Kullanıcıyı sil",
       "allowPublicSharing": "Herkese Açık Dosya Paylaşımına İzin Ver",
       "allowEditTemplates": "Uygulama Şablonlarını Düzenlemeye İzin Ver",
       "signInOnly": "Yalnızca çoklu oturum açma",
@@ -238,6 +246,7 @@
       "permissionsTitle": "İzinler ve Güvenlik Geçersiz Kılmaları",
       "createButton": "Grup Oluştur",
       "confirmDelete": "'{groupName}' grubunu silmek istediğinizden emin misiniz? Bu gruptaki kullanıcılar bireysel ayarlarına geri dönecektir.",
+      "deleteTitle": "Grubu sil",
       "notSet": "Ayarlanmadı",
       "allow": "İzin ver",
       "deny": "Reddet",
@@ -254,7 +263,8 @@
       "notLocal": "İmaj yerel olarak bulunamadı",
       "isLaboratory": "Bu, özel ayarlarla bir temel imajdan oluşturulmuş bir Laboratuvar uygulamasıdır.",
       "laboratory": "Laboratuvar",
-      "confirmDelete": "'{appName}' yüklü uygulamasını silmek istediğinizden emin misiniz?"
+      "confirmDelete": "'{appName}' yüklü uygulamasını silmek istediğinizden emin misiniz?",
+      "deleteTitle": "Yüklü uygulamayı sil"
     },
     "appStore": {
       "title": "Uygulama Mağazaları",
@@ -281,6 +291,7 @@
       "previewTitle": "Arayüz Önizlemesi",
       "contentArea": "Uygulama İçerik Alanı",
       "confirmDelete": "'{templateName}' şablonunu silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+      "deleteTitle": "Şablonu sil",
       "deleteDisabled": "Bu şablon silinemez.",
       "enterName": "Lütfen yeni şablon için bir isim girin.",
       "dockerAdminOnly": "Bu ayarları yalnızca bir yönetici değiştirebilir.",
@@ -1088,6 +1099,9 @@
       "reopen": "Oturumu yeniden aç",
       "closeAndSave": "Kapat ve şablonu kaydet",
       "confirmClose": "'{name}' özelleştirme oturumu kapatılsın mı? Oturum durur ve ana dizini şablon olarak saklanır.",
+      "closeTitle": "Özelleştirme oturumunu kapat",
+      "unsavedTitle": "Değişiklikler kaydedilmedi",
+      "unsavedClose": "Değişiklikler kaydedilemedi. Oturum yine de kapatılsın mı?",
       "templateSaved": "Oturum kapatıldı. Şablon kaydedildi.",
       "busy": "'{name}' için bir özelleştirme oturumu açık. Bir meta uygulamayı değiştirmeden veya yenisini başlatmadan önce yukarıdan kapatın.",
       "describeTitle": "1. Tanımla",
@@ -1292,6 +1306,7 @@
       "suspend": "Askıya al",
       "remove": "Kaldır",
       "confirmRemove": "'{name}' düğümü kümeden kaldırılsın mı? Hâlâ çalışan bir düğüm yeniden kaydolur ve onay bekler.",
+      "removeTitle": "Düğümü kaldır",
       "joinTitle": "Düğüm Ekle",
       "joinDescription": "Bir katılım kodu oluşturun, yeni düğümü ortamında aşağıdaki iki satırla başlatın, ardından yukarıdaki tabloda onaylayın. Bir kod tek bir düğümü kabul eder ve bir saat geçerlidir.",
       "joinButton": "Katılım Kodu Oluştur",
@@ -1315,6 +1330,7 @@
       "poolStopWhenSpent": "Kota tükendiğinde oturumları sonlandır",
       "poolSave": "Havuzu Kaydet",
       "confirmDeletePool": "'{name}' havuzu silinsin mi?",
+      "deletePoolTitle": "Havuzu sil",
       "storeTitle": "Paylaşılan Kayıtlar",
       "storeDescription": "Düğümlerin paylaştıkları kayıtları tuttuğu yer: kullanıcılar, gruplar, uygulamalar, havuzlar ve bu ayarlar.",
       "storeKept": "Saklandığı yer:",
@@ -1531,6 +1547,7 @@
       "moveHomeStay": "{node} üzerinde",
       "moveHomeTo": "{node} düğümüne taşı",
       "moveHomeConfirm": "'{home}' dizini {node} düğümüne taşınsın mı? Onu kullanan oturumların önce durdurulması gerekir.",
+      "moveHomeTitle": "Depolamayı taşı",
       "allowance": "Kota: bu {period} {used} / {hours} saat"
     },
     "sessionsView": {
@@ -1628,8 +1645,7 @@
       },
       "confirmDelete": {
         "title": "Silmeyi Onayla",
-        "message": "{count, plural, one {1 seçili öğeyi} other {{count} seçili öğeyi}} silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
-        "messageDefault": "Seçili öğeleri silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+        "message": "{count, plural, one {1 seçili öğeyi} other {{count} seçili öğeyi}} silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
       },
       "uploadProgress": {
         "title": "Yükleme İlerlemesi",
@@ -1752,7 +1768,8 @@
       "noMatch": "Eşleşen uygulama yok.",
       "openAppStores": "Uygulama Mağazalarını Aç",
       "popupBlocked": "Tarayıcı oturumun sekmesini engelledi. Bu site için açılır pencerelere izin verin, ardından yeniden başlatın.",
-      "serverFileNeedsHome": "Sunucuda tutulan bir dosya Temiz Oda modunda açılamaz. Bir depolama dizini seçin."
+      "serverFileNeedsHome": "Sunucuda tutulan bir dosya Temiz Oda modunda açılamaz. Bir depolama dizini seçin.",
+      "copyLinkManual": "Tarayıcı kopyalamaya izin vermedi. Aşağıdaki bağlantıyı seçip kopyalayın."
     },
     "launch": {
       "title": "{app} başlatılıyor",

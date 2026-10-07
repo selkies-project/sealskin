@@ -19,6 +19,7 @@ import { loadTranslator, applyTranslations } from '../lib/i18n.js';
 import { defaultLanguage as nearestLanguage, supportedLangs } from '../lib/languages.js';
 import { browserTimezone } from '../lib/timezone.js';
 import { announce, escapeHtml, formatLogoSrc, hydrateLogos, timeAgo, currentLocale, showToast } from '../lib/dom.js';
+import { noticeDialog } from '../lib/modal.js';
 
 const RECENT_MAX = 8;
 const SESSIONS_REFRESH_MS = 10000;
@@ -209,7 +210,7 @@ function renderSessions() {
             </div>
             <div class="session-actions">
                 <button class="primary" data-action="open">${escapeHtml(t('common.open'))}</button>
-                <button class="danger" data-action="stop" title="${escapeHtml(t('common.stop'))}"><i class="fas fa-stop"></i></button>
+                <button class="secondary" data-action="stop" title="${escapeHtml(t('common.stop'))}"><i class="fas fa-stop"></i></button>
             </div>
         </div>`;
   });
@@ -505,7 +506,6 @@ async function openSession(session) {
 }
 
 async function stopSession(sessionId, button) {
-  if (!confirm(t('options.sessions.confirmStop'))) return;
   button.disabled = true;
   button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
   try {
@@ -604,7 +604,7 @@ function bindEvents() {
       notify(t('web.home.linkCopied'));
     } catch (error) {
       // A browser that refuses the clipboard leaves the address to copy by hand.
-      prompt(t('web.home.copyLinkHelp'), address);
+      noticeDialog(t, { title: t('web.home.copyLink'), message: t('web.home.copyLinkManual'), value: address });
     }
   });
 

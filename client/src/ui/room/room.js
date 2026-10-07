@@ -1257,6 +1257,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsModalOverlay = document.getElementById('settings-modal-overlay');
     const settingsModalCloseBtn = document.getElementById('settings-modal-close');
     const usernameModalOverlay = document.getElementById('username-modal-overlay');
+    const noticeModalOverlay = document.getElementById('notice-modal-overlay');
+    const showNotice = (message, title = t('alerts.errorTitle')) => {
+        document.getElementById('notice-modal-title').textContent = title;
+        document.getElementById('notice-modal-message').textContent = message;
+        noticeModalOverlay.classList.remove('hidden');
+        document.getElementById('notice-modal-close').focus();
+    };
+    document.getElementById('notice-modal-close').addEventListener('click', () => noticeModalOverlay.classList.add('hidden'));
     const audioInputSelect = document.getElementById('audio-input-select');
     const videoInputSelect = document.getElementById('video-input-select');
     const reloadStreamBtn = document.getElementById('reload-stream-btn');
@@ -1484,7 +1492,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return true;
         } catch (err) {
             console.error("Error getting user media:", err);
-            alert(t('alerts.mediaAccessError', { message: err.message }));
+            showNotice(t('alerts.mediaAccessError', { message: err.message }));
             mediaInitialized = false;
             return false;
         }
@@ -2510,7 +2518,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     case 'error':
                         pendingActions.clear();
                         if (document.getElementById('start-menu-modal')) renderStartMenu();
-                        alert(data.message);
+                        showNotice(data.message);
                         break;
                 }
             };

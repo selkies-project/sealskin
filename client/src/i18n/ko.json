@@ -14,6 +14,8 @@
     "cancel": "취소",
     "manage": "관리",
     "delete": "삭제",
+    "remove": "제거",
+    "move": "이동",
     "edit": "편집",
     "save": "저장",
     "none": "없음",
@@ -55,6 +57,7 @@
     "admins": "관리자",
     "yes": "예",
     "no": "아니요",
+    "ok": "확인",
     "daysAgo": "{count}일 전",
     "hoursAgo": "{count}시간 전",
     "minutesAgo": "{count}분 전",
@@ -98,6 +101,7 @@
       "storageUsage": "스토리지 사용량:",
       "detectedGpus": "감지된 GPU:",
       "logout": "로그아웃 및 구성 지우기",
+      "logoutTitle": "로그아웃",
       "howTo": "SealSkin 사용 방법",
       "howToDescription": "이 섹션에는 확장 프로그램 사용 방법에 대한 기본 설명이 포함되어 있습니다.",
       "howToList": [
@@ -156,6 +160,7 @@
       "nameTitle": "문자, 숫자, 밑줄 또는 하이픈만 사용하세요.",
       "createButton": "디렉터리 만들기",
       "confirmDelete": "홈 디렉터리 '{homeName}'을(를) 삭제하시겠습니까? 내부의 모든 데이터가 영구적으로 손실됩니다.",
+      "deleteTitle": "홈 디렉터리 삭제",
       "node": "노드",
       "move": "이동",
       "moveTo": "이동할 노드",
@@ -169,12 +174,13 @@
       "started": "시작 시간",
       "noSessionsUser": "활성 세션이 없습니다.",
       "noSessionsAdmin": "어떤 사용자의 활성 세션도 찾을 수 없습니다.",
-      "sessionsFor": "{username}의 세션 ({count})",
-      "confirmStop": "이 세션을 중지하시겠습니까? 컨테이너가 파괴됩니다."
+      "sessionsFor": "{username}의 세션 ({count})"
     },
     "pinned": {
       "title": "고정된 확장 프로그램 동작",
       "description": "이 표는 특정 파일 유형 또는 모든 URL에 대해 저장한 시작 옵션을 보여줍니다. 고정된 동작을 제거하면 시작 옵션을 다시 묻게 됩니다.",
+      "removeTitle": "고정된 동작 제거",
+      "confirmRemove": "'{name}'에 대한 고정된 동작을 제거하시겠습니까?",
       "trigger": "트리거",
       "savedApp": "저장된 애플리케이션",
       "triggerSimple": "단순 실행 (도구 모음 버튼)",
@@ -191,7 +197,8 @@
       "publicKeyOptionalLabel": "공개 키 (선택 사항):",
       "publicKeyPlaceholder": "공개 키를 여기에 붙여넣거나, 비워두면 새로 생성됩니다.",
       "createButton": "관리자 만들기",
-      "confirmDelete": "관리자 '{username}'을(를) 삭제하시겠습니까? 모든 영구 스토리지도 함께 삭제되며 되돌릴 수 없습니다."
+      "confirmDelete": "관리자 '{username}'을(를) 삭제하시겠습니까? 모든 영구 스토리지도 함께 삭제되며 되돌릴 수 없습니다.",
+      "deleteTitle": "관리자 삭제"
     },
     "users": {
       "title": "사용자 관리",
@@ -211,6 +218,7 @@
       "createButton": "사용자 만들기",
       "homesDisabledTooltip": "이 사용자는 영구 스토리지가 비활성화되었습니다",
       "confirmDelete": "사용자 '{username}'을(를) 삭제하시겠습니까? 모든 영구 스토리지도 함께 삭제되며 되돌릴 수 없습니다.",
+      "deleteTitle": "사용자 삭제",
       "allowPublicSharing": "공개 파일 공유 허용",
       "allowEditTemplates": "앱 템플릿 편집 허용",
       "signInOnly": "통합 인증만 사용",
@@ -238,6 +246,7 @@
       "permissionsTitle": "권한 및 보안 강화 재정의",
       "createButton": "그룹 만들기",
       "confirmDelete": "그룹 '{groupName}'을(를) 삭제하시겠습니까? 이 그룹의 사용자들은 개별 설정으로 돌아갑니다.",
+      "deleteTitle": "그룹 삭제",
       "notSet": "설정 안 함",
       "allow": "허용",
       "deny": "거부",
@@ -254,7 +263,8 @@
       "notLocal": "로컬에서 이미지를 찾을 수 없음",
       "isLaboratory": "이것은 기본 이미지에 사용자 정의 설정을 더해 빌드된 실험실 앱입니다.",
       "laboratory": "실험실",
-      "confirmDelete": "설치된 앱 '{appName}'을(를) 삭제하시겠습니까?"
+      "confirmDelete": "설치된 앱 '{appName}'을(를) 삭제하시겠습니까?",
+      "deleteTitle": "설치된 앱 삭제"
     },
     "appStore": {
       "title": "앱 스토어",
@@ -281,6 +291,7 @@
       "previewTitle": "UI 미리보기",
       "contentArea": "애플리케이션 콘텐츠 영역",
       "confirmDelete": "템플릿 '{templateName}'을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+      "deleteTitle": "템플릿 삭제",
       "deleteDisabled": "이 템플릿은 삭제할 수 없습니다.",
       "enterName": "새 템플릿의 이름을 입력하세요.",
       "dockerAdminOnly": "이 설정은 관리자만 변경할 수 있습니다.",
@@ -1088,6 +1099,9 @@
       "reopen": "세션 다시 열기",
       "closeAndSave": "닫고 템플릿 저장",
       "confirmClose": "'{name}'의 사용자 지정 세션을 닫으시겠습니까? 세션이 중지되고 홈 디렉터리는 템플릿으로 보관됩니다.",
+      "closeTitle": "사용자 지정 세션 닫기",
+      "unsavedTitle": "변경 사항이 저장되지 않음",
+      "unsavedClose": "변경 사항을 저장할 수 없습니다. 그래도 세션을 닫으시겠습니까?",
       "templateSaved": "세션이 닫혔습니다. 템플릿이 저장되었습니다.",
       "busy": "'{name}'의 사용자 지정 세션이 열려 있습니다. 메타 앱을 변경하거나 다른 세션을 시작하려면 먼저 위에서 닫으세요.",
       "describeTitle": "1. 설명",
@@ -1292,6 +1306,7 @@
       "suspend": "일시 중지",
       "remove": "제거",
       "confirmRemove": "노드 '{name}'을(를) 클러스터에서 제거하시겠습니까? 아직 실행 중인 노드는 다시 등록되어 승인을 기다립니다.",
+      "removeTitle": "노드 제거",
       "joinTitle": "노드 추가",
       "joinDescription": "참가 코드를 만들고, 아래 두 줄을 환경 변수에 넣어 새 노드를 시작한 다음, 위 표에서 승인하세요. 코드 하나로 노드 하나만 참가할 수 있으며 한 시간 동안 유효합니다.",
       "joinButton": "참가 코드 만들기",
@@ -1315,6 +1330,7 @@
       "poolStopWhenSpent": "할당량을 모두 사용하면 세션 종료",
       "poolSave": "풀 저장",
       "confirmDeletePool": "풀 '{name}'을(를) 삭제하시겠습니까?",
+      "deletePoolTitle": "풀 삭제",
       "storeTitle": "공유 레코드",
       "storeDescription": "노드들이 공유하는 레코드(사용자, 그룹, 앱, 풀 및 이 설정)를 보관하는 위치입니다.",
       "storeKept": "보관 위치:",
@@ -1531,6 +1547,7 @@
       "moveHomeStay": "{node}에 유지",
       "moveHomeTo": "{node}(으)로 이동",
       "moveHomeConfirm": "'{home}'을(를) {node}(으)로 이동하시겠습니까? 이를 사용하는 세션은 먼저 중지해야 합니다.",
+      "moveHomeTitle": "스토리지 이동",
       "allowance": "할당량: {period}간 {hours}시간 중 {used}시간 사용"
     },
     "sessionsView": {
@@ -1628,8 +1645,7 @@
       },
       "confirmDelete": {
         "title": "삭제 확인",
-        "message": "선택한 {count, plural, one {1개 항목을} other {{count}개 항목을}} 정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-        "messageDefault": "선택한 항목을 정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+        "message": "선택한 {count, plural, one {1개 항목을} other {{count}개 항목을}} 정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
       },
       "uploadProgress": {
         "title": "업로드 진행률",
@@ -1752,7 +1768,8 @@
       "noMatch": "일치하는 애플리케이션이 없습니다.",
       "openAppStores": "앱 스토어 열기",
       "popupBlocked": "브라우저가 세션 탭을 차단했습니다. 이 사이트의 팝업을 허용한 다음 다시 시작하세요.",
-      "serverFileNeedsHome": "서버에 보관된 파일은 클린룸 모드에서 열 수 없습니다. 스토리지 디렉터리를 선택하세요."
+      "serverFileNeedsHome": "서버에 보관된 파일은 클린룸 모드에서 열 수 없습니다. 스토리지 디렉터리를 선택하세요.",
+      "copyLinkManual": "브라우저에서 복사를 허용하지 않았습니다. 아래 링크를 선택하여 복사하세요."
     },
     "launch": {
       "title": "{app} 시작 중",

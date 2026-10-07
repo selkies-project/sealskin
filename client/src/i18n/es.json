@@ -14,6 +14,8 @@
     "cancel": "Cancelar",
     "manage": "Gestionar",
     "delete": "Eliminar",
+    "remove": "Quitar",
+    "move": "Mover",
     "edit": "Editar",
     "save": "Guardar",
     "none": "ninguno",
@@ -55,6 +57,7 @@
     "admins": "Administradores",
     "yes": "Sí",
     "no": "No",
+    "ok": "Aceptar",
     "daysAgo": "{count, plural, one {hace 1 día} other {hace {count} días}}",
     "hoursAgo": "{count, plural, one {hace 1 hora} other {hace {count} horas}}",
     "minutesAgo": "{count, plural, one {hace 1 minuto} other {hace {count} minutos}}",
@@ -98,6 +101,7 @@
       "storageUsage": "Uso de Almacenamiento:",
       "detectedGpus": "GPUs Detectadas:",
       "logout": "Cerrar Sesión y Limpiar Config.",
+      "logoutTitle": "Cerrar sesión",
       "howTo": "Cómo Usar SealSkin",
       "howToDescription": "Esta sección contiene documentación básica sobre cómo usar la extensión.",
       "howToList": [
@@ -156,6 +160,7 @@
       "nameTitle": "Use solo letras, números, guion bajo o guion.",
       "createButton": "Crear Directorio",
       "confirmDelete": "¿Está seguro de que quiere eliminar el directorio personal '{homeName}'? Todos los datos que contiene se perderán de forma permanente.",
+      "deleteTitle": "Eliminar directorio personal",
       "node": "Nodo",
       "move": "Mover",
       "moveTo": "Mover al nodo",
@@ -169,12 +174,13 @@
       "started": "Iniciado",
       "noSessionsUser": "No se encontraron sesiones activas.",
       "noSessionsAdmin": "No se encontraron sesiones activas para ningún usuario.",
-      "sessionsFor": "Sesiones para {username} ({count})",
-      "confirmStop": "¿Está seguro de que quiere detener esta sesión? El contenedor será destruido."
+      "sessionsFor": "Sesiones para {username} ({count})"
     },
     "pinned": {
       "title": "Comportamiento Anclado de la Extensión",
       "description": "Esta tabla muestra las opciones de inicio que ha guardado para tipos de archivo específicos o para todas las URLs. Puede eliminar un comportamiento anclado para que se le vuelvan a solicitar las opciones de inicio.",
+      "removeTitle": "Quitar comportamiento anclado",
+      "confirmRemove": "¿Quitar el comportamiento anclado para '{name}'?",
       "trigger": "Activador",
       "savedApp": "Aplicación Guardada",
       "triggerSimple": "Inicio Simple (Botón de la Barra)",
@@ -191,7 +197,8 @@
       "publicKeyOptionalLabel": "Clave Pública (Opcional):",
       "publicKeyPlaceholder": "Pegue la clave pública aquí, o déjelo en blanco para generar una.",
       "createButton": "Crear Administrador",
-      "confirmDelete": "¿Está seguro de que quiere eliminar al administrador '{username}'? Esto también eliminará todo su almacenamiento persistente y no se puede deshacer."
+      "confirmDelete": "¿Está seguro de que quiere eliminar al administrador '{username}'? Esto también eliminará todo su almacenamiento persistente y no se puede deshacer.",
+      "deleteTitle": "Eliminar administrador"
     },
     "users": {
       "title": "Gestión de Usuarios",
@@ -211,6 +218,7 @@
       "createButton": "Crear Usuario",
       "homesDisabledTooltip": "Almacenamiento persistente deshabilitado para este usuario",
       "confirmDelete": "¿Está seguro de que quiere eliminar al usuario '{username}'? Esto también eliminará todo su almacenamiento persistente y no se puede deshacer.",
+      "deleteTitle": "Eliminar usuario",
       "allowPublicSharing": "Permitir compartir archivos públicamente",
       "allowEditTemplates": "Permitir editar plantillas de apps",
       "signInOnly": "Solo inicio de sesión único",
@@ -238,6 +246,7 @@
       "permissionsTitle": "Anulaciones de Permisos y Fortalecimiento",
       "createButton": "Crear Grupo",
       "confirmDelete": "¿Está seguro de que quiere eliminar el grupo '{groupName}'? Los usuarios en este grupo volverán a su configuración individual.",
+      "deleteTitle": "Eliminar grupo",
       "notSet": "Sin definir",
       "allow": "Permitir",
       "deny": "Denegar",
@@ -254,7 +263,8 @@
       "notLocal": "Imagen no encontrada localmente",
       "isLaboratory": "Esta es una aplicación de Laboratorio, creada a partir de una imagen base con configuraciones personalizadas.",
       "laboratory": "Laboratorio",
-      "confirmDelete": "¿Está seguro de que quiere eliminar la app instalada '{appName}'?"
+      "confirmDelete": "¿Está seguro de que quiere eliminar la app instalada '{appName}'?",
+      "deleteTitle": "Eliminar aplicación instalada"
     },
     "appStore": {
       "title": "Tiendas de Apps",
@@ -281,6 +291,7 @@
       "previewTitle": "Vista Previa de la UI",
       "contentArea": "Área de Contenido de la Aplicación",
       "confirmDelete": "¿Está seguro de que quiere eliminar la plantilla '{templateName}'? Esta acción no se puede deshacer.",
+      "deleteTitle": "Eliminar plantilla",
       "deleteDisabled": "Esta plantilla no se puede eliminar.",
       "enterName": "Por favor, ingrese un nombre para la nueva plantilla.",
       "dockerAdminOnly": "Solo un administrador puede cambiar estos ajustes.",
@@ -1088,6 +1099,9 @@
       "reopen": "Reabrir sesión",
       "closeAndSave": "Cerrar y guardar plantilla",
       "confirmClose": "¿Cerrar la sesión de personalización de '{name}'? La sesión se detiene y su directorio personal se conserva como plantilla.",
+      "closeTitle": "Cerrar la sesión de personalización",
+      "unsavedTitle": "Cambios sin guardar",
+      "unsavedClose": "No se pudieron guardar los cambios. ¿Cerrar la sesión de todos modos?",
       "templateSaved": "Sesión cerrada. La plantilla está guardada.",
       "busy": "Hay una sesión de personalización abierta para '{name}'. Ciérrela arriba antes de cambiar una meta-app o iniciar otra.",
       "describeTitle": "1. Describir",
@@ -1292,6 +1306,7 @@
       "suspend": "Suspender",
       "remove": "Quitar",
       "confirmRemove": "¿Quitar el nodo '{name}' del clúster? Un nodo que siga en ejecución se registra de nuevo y espera aprobación.",
+      "removeTitle": "Quitar nodo",
       "joinTitle": "Añadir un Nodo",
       "joinDescription": "Cree un código de unión, inicie el nuevo nodo con las dos líneas de abajo en su entorno y luego apruébelo en la tabla de arriba. Un código admite un solo nodo y dura una hora.",
       "joinButton": "Crear Código de Unión",
@@ -1315,6 +1330,7 @@
       "poolStopWhenSpent": "Finalizar las sesiones cuando se agote la cuota",
       "poolSave": "Guardar Pool",
       "confirmDeletePool": "¿Eliminar el pool '{name}'?",
+      "deletePoolTitle": "Eliminar pool",
       "storeTitle": "Registros Compartidos",
       "storeDescription": "Dónde guardan los nodos los registros que comparten: usuarios, grupos, apps, pools y esta configuración.",
       "storeKept": "Se guardan:",
@@ -1531,6 +1547,7 @@
       "moveHomeStay": "En {node}",
       "moveHomeTo": "Mover a {node}",
       "moveHomeConfirm": "¿Mover '{home}' a {node}? Antes hay que detener las sesiones que lo usan.",
+      "moveHomeTitle": "Mover almacenamiento",
       "allowance": "Cuota: {used} de {hours} horas por {period}"
     },
     "sessionsView": {
@@ -1628,8 +1645,7 @@
       },
       "confirmDelete": {
         "title": "Confirmar Eliminación",
-        "message": "¿Estás seguro de que quieres eliminar {count, plural, one {1 elemento seleccionado} other {{count} elementos seleccionados}}? Esta acción no se puede deshacer.",
-        "messageDefault": "¿Estás seguro de que quieres eliminar los elementos seleccionados? Esta acción no se puede deshacer."
+        "message": "¿Estás seguro de que quieres eliminar {count, plural, one {1 elemento seleccionado} other {{count} elementos seleccionados}}? Esta acción no se puede deshacer."
       },
       "uploadProgress": {
         "title": "Progreso de la Subida",
@@ -1752,7 +1768,8 @@
       "noMatch": "Ninguna aplicación coincide.",
       "openAppStores": "Abrir las Tiendas de Apps",
       "popupBlocked": "El navegador bloqueó la pestaña de la sesión. Permita las ventanas emergentes para este sitio y vuelva a iniciar.",
-      "serverFileNeedsHome": "Un archivo guardado en el servidor no se puede abrir en modo Sala Limpia. Elija un directorio de almacenamiento."
+      "serverFileNeedsHome": "Un archivo guardado en el servidor no se puede abrir en modo Sala Limpia. Elija un directorio de almacenamiento.",
+      "copyLinkManual": "El navegador no permitió copiar. Seleccione el enlace de abajo y cópielo."
     },
     "launch": {
       "title": "Iniciando {app}",

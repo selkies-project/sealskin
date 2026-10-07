@@ -14,6 +14,8 @@
     "cancel": "Kanselahin",
     "manage": "Pamahalaan",
     "delete": "Burahin",
+    "remove": "Alisin",
+    "move": "Ilipat",
     "edit": "I-edit",
     "save": "I-save",
     "none": "wala",
@@ -55,6 +57,7 @@
     "admins": "Mga Admin",
     "yes": "Oo",
     "no": "Hindi",
+    "ok": "OK",
     "daysAgo": "{count, plural, one {1 araw ang nakalipas} other {{count} na araw ang nakalipas}}",
     "hoursAgo": "{count, plural, one {1 oras ang nakalipas} other {{count} na oras ang nakalipas}}",
     "minutesAgo": "{count, plural, one {1 minuto ang nakalipas} other {{count} na minuto ang nakalipas}}",
@@ -98,6 +101,7 @@
       "storageUsage": "Paggamit ng Imbakan:",
       "detectedGpus": "Mga Natukoy na GPU:",
       "logout": "Mag-logout at Linisin ang Konfigurasyon",
+      "logoutTitle": "Mag-logout",
       "howTo": "Paano Gamitin ang SealSkin",
       "howToDescription": "Ang seksyon na ito ay naglalaman ng pangunahing dokumentasyon kung paano gamitin ang extension.",
       "howToList": [
@@ -156,6 +160,7 @@
       "nameTitle": "Gumamit lamang ng mga letra, numero, underscore, o gitling.",
       "createButton": "Gumawa ng Directory",
       "confirmDelete": "Sigurado ka bang gusto mong burahin ang home directory na '{homeName}'? Permanenteng mawawala ang lahat ng data sa loob nito.",
+      "deleteTitle": "Burahin ang home directory",
       "node": "Node",
       "move": "Ilipat",
       "moveTo": "Ilipat sa node",
@@ -169,12 +174,13 @@
       "started": "Sinimulan",
       "noSessionsUser": "Walang nahanap na aktibong sesyon.",
       "noSessionsAdmin": "Walang nahanap na aktibong sesyon para sa sinumang user.",
-      "sessionsFor": "Mga sesyon para kay {username} ({count})",
-      "confirmStop": "Sigurado ka bang gusto mong itigil ang sesyon na ito? Ang container ay masisira."
+      "sessionsFor": "Mga sesyon para kay {username} ({count})"
     },
     "pinned": {
       "title": "Naka-pin na Gawi ng Extension",
       "description": "Ipinapakita ng talahanayang ito ang mga opsyon sa paglunsad na iyong na-save para sa mga partikular na uri ng file o para sa lahat ng URL. Maaari mong alisin ang isang naka-pin na gawi upang muling hilingin sa iyo ang mga opsyon sa paglunsad.",
+      "removeTitle": "Alisin ang naka-pin na gawi",
+      "confirmRemove": "Alisin ang naka-pin na gawi para sa '{name}'?",
       "trigger": "Trigger",
       "savedApp": "Naka-save na Aplikasyon",
       "triggerSimple": "Simpleng Paglunsad (Toolbar Button)",
@@ -191,7 +197,8 @@
       "publicKeyOptionalLabel": "Pampublikong Key (Opsyonal):",
       "publicKeyPlaceholder": "I-paste ang pampublikong key dito, o iwanang blangko upang bumuo ng isa.",
       "createButton": "Gumawa ng Admin",
-      "confirmDelete": "Sigurado ka bang gusto mong burahin ang admin na si '{username}'? Mabubura rin nito ang lahat ng kanilang persistenteng imbakan at hindi na maibabalik."
+      "confirmDelete": "Sigurado ka bang gusto mong burahin ang admin na si '{username}'? Mabubura rin nito ang lahat ng kanilang persistenteng imbakan at hindi na maibabalik.",
+      "deleteTitle": "Burahin ang admin"
     },
     "users": {
       "title": "Pamamahala ng User",
@@ -211,6 +218,7 @@
       "createButton": "Gumawa ng User",
       "homesDisabledTooltip": "Ang persistenteng imbakan ay hindi pinagana para sa user na ito",
       "confirmDelete": "Sigurado ka bang gusto mong burahin ang user na si '{username}'? Mabubura rin nito ang lahat ng kanilang persistenteng imbakan at hindi na maibabalik.",
+      "deleteTitle": "Burahin ang user",
       "allowPublicSharing": "Pahintulutan ang Pampublikong Pagbabahagi ng File",
       "allowEditTemplates": "Pahintulutan ang Pag-edit ng mga Template ng App",
       "signInOnly": "Single sign-on lamang",
@@ -238,6 +246,7 @@
       "permissionsTitle": "Mga Pag-override sa Pahintulot at Pagpapatibay",
       "createButton": "Gumawa ng Grupo",
       "confirmDelete": "Sigurado ka bang gusto mong burahin ang grupong '{groupName}'? Ang mga user sa grupong ito ay babalik sa kanilang indibidwal na mga setting.",
+      "deleteTitle": "Burahin ang grupo",
       "notSet": "Hindi nakatakda",
       "allow": "Payagan",
       "deny": "Tanggihan",
@@ -254,7 +263,8 @@
       "notLocal": "Hindi nahanap ang imahe nang lokal",
       "isLaboratory": "Ito ay isang app ng Laboratoryo, na binuo mula sa isang base na imahe na may mga pasadyang setting.",
       "laboratory": "Laboratoryo",
-      "confirmDelete": "Sigurado ka bang gusto mong burahin ang naka-install na app na '{appName}'?"
+      "confirmDelete": "Sigurado ka bang gusto mong burahin ang naka-install na app na '{appName}'?",
+      "deleteTitle": "Burahin ang naka-install na app"
     },
     "appStore": {
       "title": "Mga Tindahan ng App",
@@ -281,6 +291,7 @@
       "previewTitle": "Preview ng UI",
       "contentArea": "Lugar ng Nilalaman ng Aplikasyon",
       "confirmDelete": "Sigurado ka bang gusto mong burahin ang template na '{templateName}'? Hindi na maibabalik ang aksyon na ito.",
+      "deleteTitle": "Burahin ang template",
       "deleteDisabled": "Hindi maaaring burahin ang template na ito.",
       "enterName": "Mangyaring maglagay ng pangalan para sa bagong template.",
       "dockerAdminOnly": "Isang administrator lamang ang makapagbabago ng mga setting na ito.",
@@ -1088,6 +1099,9 @@
       "reopen": "Buksan muli ang sesyon",
       "closeAndSave": "Isara at i-save ang template",
       "confirmClose": "Isara ang sesyon ng pagpapasadya ng '{name}'? Titigil ang sesyon, at pananatilihin ang home directory nito bilang template.",
+      "closeTitle": "Isara ang session ng pag-customize",
+      "unsavedTitle": "Hindi na-save ang mga pagbabago",
+      "unsavedClose": "Hindi ma-save ang mga pagbabago. Isara pa rin ang session?",
       "templateSaved": "Naisara ang sesyon. Na-save ang template.",
       "busy": "May bukas na sesyon ng pagpapasadya para sa '{name}'. Isara ito sa itaas bago baguhin ang isang meta-app o magsimula ng iba.",
       "describeTitle": "1. Ilarawan",
@@ -1292,6 +1306,7 @@
       "suspend": "Suspindihin",
       "remove": "Alisin",
       "confirmRemove": "Alisin ang node na '{name}' mula sa cluster? Ang node na tumatakbo pa ay muling magrerehistro at maghihintay ng pag-apruba.",
+      "removeTitle": "Alisin ang node",
       "joinTitle": "Magdagdag ng Node",
       "joinDescription": "Gumawa ng join code, simulan ang bagong node na may dalawang linya sa ibaba sa environment nito, pagkatapos ay aprubahan ito sa talahanayan sa itaas. Ang isang code ay tumatanggap ng isang node at tumatagal ng isang oras.",
       "joinButton": "Gumawa ng Join Code",
@@ -1315,6 +1330,7 @@
       "poolStopWhenSpent": "Tapusin ang mga sesyon kapag naubos na ang allowance",
       "poolSave": "I-save ang Pool",
       "confirmDeletePool": "Burahin ang pool na '{name}'?",
+      "deletePoolTitle": "Burahin ang pool",
       "storeTitle": "Mga Shared Record",
       "storeDescription": "Kung saan itinatago ng mga node ang mga record na pinagsasaluhan nila: mga user, grupo, app, pool, at ang mga setting na ito.",
       "storeKept": "Nakaimbak:",
@@ -1531,6 +1547,7 @@
       "moveHomeStay": "Sa {node}",
       "moveHomeTo": "Ilipat sa {node}",
       "moveHomeConfirm": "Ilipat ang '{home}' sa {node}? Kailangan munang itigil ang mga sesyong gumagamit nito.",
+      "moveHomeTitle": "Ilipat ang imbakan",
       "allowance": "Allowance: {used} sa {hours} oras ngayong {period}"
     },
     "sessionsView": {
@@ -1628,8 +1645,7 @@
       },
       "confirmDelete": {
         "title": "Kumpirmahin ang Pagbura",
-        "message": "Sigurado ka bang gusto mong burahin ang {count, plural, one {1 napiling item} other {{count} napiling item}}? Hindi na maibabalik ang aksyon na ito.",
-        "messageDefault": "Sigurado ka bang gusto mong burahin ang mga napiling item? Hindi na maibabalik ang aksyon na ito."
+        "message": "Sigurado ka bang gusto mong burahin ang {count, plural, one {1 napiling item} other {{count} napiling item}}? Hindi na maibabalik ang aksyon na ito."
       },
       "uploadProgress": {
         "title": "Progreso ng Pag-upload",
@@ -1752,7 +1768,8 @@
       "noMatch": "Walang tumutugmang aplikasyon.",
       "openAppStores": "Buksan ang mga Tindahan ng App",
       "popupBlocked": "Hinarang ng browser ang tab ng sesyon. Payagan ang mga pop-up para sa site na ito, pagkatapos ay ilunsad muli.",
-      "serverFileNeedsHome": "Hindi mabubuksan sa Cleanroom mode ang file na nakatago sa server. Pumili ng directory ng imbakan."
+      "serverFileNeedsHome": "Hindi mabubuksan sa Cleanroom mode ang file na nakatago sa server. Pumili ng directory ng imbakan.",
+      "copyLinkManual": "Hindi pinayagan ng browser ang pagkopya. Piliin ang link sa ibaba at kopyahin ito."
     },
     "launch": {
       "title": "Inilulunsad ang {app}",

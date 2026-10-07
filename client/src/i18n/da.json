@@ -14,6 +14,8 @@
     "cancel": "Annuller",
     "manage": "Administrer",
     "delete": "Slet",
+    "remove": "Fjern",
+    "move": "Flyt",
     "edit": "Rediger",
     "save": "Gem",
     "none": "ingen",
@@ -55,6 +57,7 @@
     "admins": "Administratorer",
     "yes": "Ja",
     "no": "Nej",
+    "ok": "OK",
     "daysAgo": "{count, plural, one {for 1 dag siden} other {for {count} dage siden}}",
     "hoursAgo": "{count, plural, one {for 1 time siden} other {for {count} timer siden}}",
     "minutesAgo": "{count, plural, one {for 1 minut siden} other {for {count} minutter siden}}",
@@ -98,6 +101,7 @@
       "storageUsage": "Lagerbrug:",
       "detectedGpus": "Registrerede GPU'er:",
       "logout": "Log ud & Ryd Konfiguration",
+      "logoutTitle": "Log ud",
       "howTo": "Sådan bruges SealSkin",
       "howToDescription": "Dette afsnit indeholder grundlæggende dokumentation om, hvordan du bruger udvidelsen.",
       "howToList": [
@@ -156,6 +160,7 @@
       "nameTitle": "Brug kun bogstaver, tal, understregning eller bindestreg.",
       "createButton": "Opret Mappe",
       "confirmDelete": "Er du sikker på, at du vil slette hjemmemappen '{homeName}'? Alle data i den går tabt permanent.",
+      "deleteTitle": "Slet hjemmemappe",
       "node": "Knude",
       "move": "Flyt",
       "moveTo": "Flyt til knude",
@@ -169,12 +174,13 @@
       "started": "Startet",
       "noSessionsUser": "Ingen aktive sessioner fundet.",
       "noSessionsAdmin": "Ingen aktive sessioner fundet for nogen bruger.",
-      "sessionsFor": "Sessioner for {username} ({count})",
-      "confirmStop": "Er du sikker på, at du vil stoppe denne session? Containeren vil blive ødelagt."
+      "sessionsFor": "Sessioner for {username} ({count})"
     },
     "pinned": {
       "title": "Fastgjort Udvidelsesadfærd",
       "description": "Denne tabel viser de startindstillinger, du har gemt for specifikke filtyper eller for alle URL'er. Du kan fjerne en fastgjort adfærd for at blive spurgt om startindstillinger igen.",
+      "removeTitle": "Fjern fastgjort adfærd",
+      "confirmRemove": "Fjern den fastgjorte adfærd for '{name}'?",
       "trigger": "Udløser",
       "savedApp": "Gemt Applikation",
       "triggerSimple": "Simpel Start (Værktøjslinjeknap)",
@@ -191,7 +197,8 @@
       "publicKeyOptionalLabel": "Offentlig Nøgle (Valgfri):",
       "publicKeyPlaceholder": "Indsæt offentlig nøgle her, eller lad feltet være tomt for at generere en.",
       "createButton": "Opret Administrator",
-      "confirmDelete": "Er du sikker på, at du vil slette administratoren '{username}'? Dette vil også slette alt deres vedvarende lager og kan ikke fortrydes."
+      "confirmDelete": "Er du sikker på, at du vil slette administratoren '{username}'? Dette vil også slette alt deres vedvarende lager og kan ikke fortrydes.",
+      "deleteTitle": "Slet administrator"
     },
     "users": {
       "title": "Brugeradministration",
@@ -211,6 +218,7 @@
       "createButton": "Opret Bruger",
       "homesDisabledTooltip": "Vedvarende lager deaktiveret for denne bruger",
       "confirmDelete": "Er du sikker på, at du vil slette brugeren '{username}'? Dette vil også slette alt deres vedvarende lager og kan ikke fortrydes.",
+      "deleteTitle": "Slet bruger",
       "allowPublicSharing": "Tillad offentlig fildeling",
       "allowEditTemplates": "Tillad redigering af app-skabeloner",
       "signInOnly": "Kun single sign-on",
@@ -238,6 +246,7 @@
       "permissionsTitle": "Tilsidesættelser for Tilladelser & Hærdning",
       "createButton": "Opret Gruppe",
       "confirmDelete": "Er du sikker på, at du vil slette gruppen '{groupName}'? Brugere i denne gruppe vil vende tilbage til deres individuelle indstillinger.",
+      "deleteTitle": "Slet gruppe",
       "notSet": "Ikke angivet",
       "allow": "Tillad",
       "deny": "Afvis",
@@ -254,7 +263,8 @@
       "notLocal": "Image ikke fundet lokalt",
       "isLaboratory": "Dette er en laboratorie-app, bygget fra et basis-image med tilpassede indstillinger.",
       "laboratory": "Laboratorium",
-      "confirmDelete": "Er du sikker på, at du vil slette den installerede app '{appName}'?"
+      "confirmDelete": "Er du sikker på, at du vil slette den installerede app '{appName}'?",
+      "deleteTitle": "Slet installeret app"
     },
     "appStore": {
       "title": "App Stores",
@@ -281,6 +291,7 @@
       "previewTitle": "UI-forhåndsvisning",
       "contentArea": "Applikationsindholdsområde",
       "confirmDelete": "Er du sikker på, at du vil slette skabelonen '{templateName}'? Handlingen kan ikke fortrydes.",
+      "deleteTitle": "Slet skabelon",
       "deleteDisabled": "Denne skabelon kan ikke slettes.",
       "enterName": "Indtast venligst et navn til den nye skabelon.",
       "dockerAdminOnly": "Kun en administrator kan ændre disse indstillinger.",
@@ -1088,6 +1099,9 @@
       "reopen": "Genåbn session",
       "closeAndSave": "Luk & gem skabelon",
       "confirmClose": "Luk tilpasningssessionen for '{name}'? Sessionen stopper, og dens hjemmemappe beholdes som skabelon.",
+      "closeTitle": "Luk tilpasningssession",
+      "unsavedTitle": "Ændringer ikke gemt",
+      "unsavedClose": "Ændringerne kunne ikke gemmes. Luk sessionen alligevel?",
       "templateSaved": "Session lukket. Skabelonen er gemt.",
       "busy": "En tilpasningssession for '{name}' er åben. Luk den ovenfor, før du ændrer en meta-app eller starter en ny.",
       "describeTitle": "1. Beskriv",
@@ -1292,6 +1306,7 @@
       "suspend": "Suspender",
       "remove": "Fjern",
       "confirmRemove": "Fjern knude '{name}' fra klyngen? En knude, der stadig kører, registrerer sig igen og venter på godkendelse.",
+      "removeTitle": "Fjern knude",
       "joinTitle": "Tilføj en Knude",
       "joinDescription": "Opret en tilslutningskode, start den nye knude med de to linjer nedenfor i dens miljø, og godkend den derefter i tabellen ovenfor. En kode giver adgang for én knude og gælder i en time.",
       "joinButton": "Opret Tilslutningskode",
@@ -1315,6 +1330,7 @@
       "poolStopWhenSpent": "Afslut sessioner, når kvoten er brugt",
       "poolSave": "Gem Pulje",
       "confirmDeletePool": "Slet pulje '{name}'?",
+      "deletePoolTitle": "Slet pulje",
       "storeTitle": "Fælles Poster",
       "storeDescription": "Hvor knuderne opbevarer de poster, de deler: brugere, grupper, apps, puljer og disse indstillinger.",
       "storeKept": "Opbevares:",
@@ -1531,6 +1547,7 @@
       "moveHomeStay": "På {node}",
       "moveHomeTo": "Flyt til {node}",
       "moveHomeConfirm": "Flyt '{home}' til {node}? Sessioner, der bruger den, skal stoppes først.",
+      "moveHomeTitle": "Flyt lager",
       "allowance": "Kvote: {used} af {hours} timer denne {period}"
     },
     "sessionsView": {
@@ -1628,8 +1645,7 @@
       },
       "confirmDelete": {
         "title": "Bekræft sletning",
-        "message": "Er du sikker på, at du vil slette {count, plural, one {1 valgt element} other {{count} valgte elementer}}? Handlingen kan ikke fortrydes.",
-        "messageDefault": "Er du sikker på, at du vil slette de valgte elementer? Handlingen kan ikke fortrydes."
+        "message": "Er du sikker på, at du vil slette {count, plural, one {1 valgt element} other {{count} valgte elementer}}? Handlingen kan ikke fortrydes."
       },
       "uploadProgress": {
         "title": "Upload-status",
@@ -1752,7 +1768,8 @@
       "noMatch": "Ingen applikation matcher.",
       "openAppStores": "Åbn App Stores",
       "popupBlocked": "Browseren blokerede sessionens fane. Tillad pop op-vinduer for dette websted, og start igen.",
-      "serverFileNeedsHome": "En fil, der ligger på serveren, kan ikke åbnes i Cleanroom-tilstand. Vælg en lagermappe."
+      "serverFileNeedsHome": "En fil, der ligger på serveren, kan ikke åbnes i Cleanroom-tilstand. Vælg en lagermappe.",
+      "copyLinkManual": "Browseren tillod ikke kopiering. Markér linket nedenfor, og kopiér det."
     },
     "launch": {
       "title": "Starter {app}",

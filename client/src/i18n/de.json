@@ -14,6 +14,8 @@
     "cancel": "Abbrechen",
     "manage": "Verwalten",
     "delete": "Löschen",
+    "remove": "Entfernen",
+    "move": "Verschieben",
     "edit": "Bearbeiten",
     "save": "Speichern",
     "none": "keine",
@@ -55,6 +57,7 @@
     "admins": "Admins",
     "yes": "Ja",
     "no": "Nein",
+    "ok": "OK",
     "daysAgo": "{count, plural, one {vor 1 Tag} other {vor {count} Tagen}}",
     "hoursAgo": "{count, plural, one {vor 1 Stunde} other {vor {count} Stunden}}",
     "minutesAgo": "{count, plural, one {vor 1 Minute} other {vor {count} Minuten}}",
@@ -98,6 +101,7 @@
       "storageUsage": "Speichernutzung:",
       "detectedGpus": "Erkannte GPUs:",
       "logout": "Abmelden & Konfig. löschen",
+      "logoutTitle": "Abmelden",
       "howTo": "Wie man SealSkin verwendet",
       "howToDescription": "Dieser Abschnitt enthält eine grundlegende Dokumentation zur Verwendung der Erweiterung.",
       "howToList": [
@@ -156,6 +160,7 @@
       "nameTitle": "Verwenden Sie nur Buchstaben, Zahlen, Unterstrich oder Bindestrich.",
       "createButton": "Verzeichnis erstellen",
       "confirmDelete": "Sind Sie sicher, dass Sie das Home-Verzeichnis '{homeName}' löschen möchten? Alle darin enthaltenen Daten gehen dauerhaft verloren.",
+      "deleteTitle": "Home-Verzeichnis löschen",
       "node": "Knoten",
       "move": "Verschieben",
       "moveTo": "Auf Knoten verschieben",
@@ -169,12 +174,13 @@
       "started": "Gestartet",
       "noSessionsUser": "Keine aktiven Sitzungen gefunden.",
       "noSessionsAdmin": "Keine aktiven Sitzungen für einen Benutzer gefunden.",
-      "sessionsFor": "Sitzungen für {username} ({count})",
-      "confirmStop": "Sind Sie sicher, dass Sie diese Sitzung beenden möchten? Der Container wird zerstört."
+      "sessionsFor": "Sitzungen für {username} ({count})"
     },
     "pinned": {
       "title": "Gepinntes Erweiterungsverhalten",
       "description": "Diese Tabelle zeigt die Startoptionen, die Sie für bestimmte Dateitypen oder für alle URLs gespeichert haben. Sie können ein gepinntes Verhalten entfernen, um erneut nach Startoptionen gefragt zu werden.",
+      "removeTitle": "Gepinntes Verhalten entfernen",
+      "confirmRemove": "Gepinntes Verhalten für '{name}' entfernen?",
       "trigger": "Auslöser",
       "savedApp": "Gespeicherte Anwendung",
       "triggerSimple": "Einfacher Start (Symbolleisten-Button)",
@@ -191,7 +197,8 @@
       "publicKeyOptionalLabel": "Öffentlicher Schlüssel (Optional):",
       "publicKeyPlaceholder": "Öffentlichen Schlüssel hier einfügen oder leer lassen, um einen zu generieren.",
       "createButton": "Admin erstellen",
-      "confirmDelete": "Sind Sie sicher, dass Sie den Admin '{username}' löschen möchten? Dadurch wird auch sein gesamter persistenter Speicher gelöscht und kann nicht rückgängig gemacht werden."
+      "confirmDelete": "Sind Sie sicher, dass Sie den Admin '{username}' löschen möchten? Dadurch wird auch sein gesamter persistenter Speicher gelöscht und kann nicht rückgängig gemacht werden.",
+      "deleteTitle": "Admin löschen"
     },
     "users": {
       "title": "Benutzerverwaltung",
@@ -211,6 +218,7 @@
       "createButton": "Benutzer erstellen",
       "homesDisabledTooltip": "Persistenter Speicher für diesen Benutzer deaktiviert",
       "confirmDelete": "Sind Sie sicher, dass Sie den Benutzer '{username}' löschen möchten? Dadurch wird auch sein gesamter persistenter Speicher gelöscht und kann nicht rückgängig gemacht werden.",
+      "deleteTitle": "Benutzer löschen",
       "allowPublicSharing": "Öffentliche Dateifreigabe zulassen",
       "allowEditTemplates": "Bearbeiten von App-Vorlagen zulassen",
       "signInOnly": "Nur Single Sign-On",
@@ -238,6 +246,7 @@
       "permissionsTitle": "Berechtigungs- & Härtungs-Überschreibungen",
       "createButton": "Gruppe erstellen",
       "confirmDelete": "Sind Sie sicher, dass Sie die Gruppe '{groupName}' löschen möchten? Benutzer in dieser Gruppe werden auf ihre individuellen Einstellungen zurückgesetzt.",
+      "deleteTitle": "Gruppe löschen",
       "notSet": "Nicht gesetzt",
       "allow": "Erlauben",
       "deny": "Verweigern",
@@ -254,7 +263,8 @@
       "notLocal": "Image lokal nicht gefunden",
       "isLaboratory": "Dies ist eine Labor-App, erstellt aus einem Basis-Image mit eigenen Einstellungen.",
       "laboratory": "Labor",
-      "confirmDelete": "Sind Sie sicher, dass Sie die installierte App '{appName}' löschen möchten?"
+      "confirmDelete": "Sind Sie sicher, dass Sie die installierte App '{appName}' löschen möchten?",
+      "deleteTitle": "Installierte App löschen"
     },
     "appStore": {
       "title": "App Stores",
@@ -281,6 +291,7 @@
       "previewTitle": "UI-Vorschau",
       "contentArea": "Anwendungsinhaltsbereich",
       "confirmDelete": "Sind Sie sicher, dass Sie die Vorlage '{templateName}' löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "deleteTitle": "Vorlage löschen",
       "deleteDisabled": "Diese Vorlage kann nicht gelöscht werden.",
       "enterName": "Bitte geben Sie einen Namen für die neue Vorlage ein.",
       "dockerAdminOnly": "Nur ein Administrator kann diese Einstellungen ändern.",
@@ -1088,6 +1099,9 @@
       "reopen": "Sitzung erneut öffnen",
       "closeAndSave": "Schließen & Vorlage speichern",
       "confirmClose": "Anpassungssitzung von '{name}' schließen? Die Sitzung wird beendet, und ihr Home-Verzeichnis bleibt als Vorlage erhalten.",
+      "closeTitle": "Anpassungssitzung schließen",
+      "unsavedTitle": "Änderungen nicht gespeichert",
+      "unsavedClose": "Die Änderungen konnten nicht gespeichert werden. Sitzung trotzdem schließen?",
       "templateSaved": "Sitzung geschlossen. Die Vorlage ist gespeichert.",
       "busy": "Eine Anpassungssitzung für '{name}' ist geöffnet. Schließen Sie sie oben, bevor Sie eine Meta-App ändern oder eine weitere starten.",
       "describeTitle": "1. Beschreiben",
@@ -1292,6 +1306,7 @@
       "suspend": "Sperren",
       "remove": "Entfernen",
       "confirmRemove": "Knoten '{name}' aus dem Cluster entfernen? Ein Knoten, der noch läuft, registriert sich erneut und wartet auf Freigabe.",
+      "removeTitle": "Knoten entfernen",
       "joinTitle": "Knoten hinzufügen",
       "joinDescription": "Erstellen Sie einen Beitrittscode, starten Sie den neuen Knoten mit den beiden Zeilen unten in seiner Umgebung und geben Sie ihn dann in der Tabelle oben frei. Ein Code lässt einen Knoten zu und gilt eine Stunde.",
       "joinButton": "Beitrittscode erstellen",
@@ -1315,6 +1330,7 @@
       "poolStopWhenSpent": "Sitzungen beenden, wenn das Kontingent aufgebraucht ist",
       "poolSave": "Pool speichern",
       "confirmDeletePool": "Pool '{name}' löschen?",
+      "deletePoolTitle": "Pool löschen",
       "storeTitle": "Gemeinsame Datensätze",
       "storeDescription": "Wo die Knoten die Datensätze ablegen, die sie teilen: Benutzer, Gruppen, Apps, Pools und diese Einstellungen.",
       "storeKept": "Ablageort:",
@@ -1531,6 +1547,7 @@
       "moveHomeStay": "Auf {node}",
       "moveHomeTo": "Auf {node} verschieben",
       "moveHomeConfirm": "'{home}' auf {node} verschieben? Sitzungen, die es verwenden, müssen zuerst beendet werden.",
+      "moveHomeTitle": "Speicher verschieben",
       "allowance": "Kontingent: {used} von {hours} Stunden pro {period}"
     },
     "sessionsView": {
@@ -1628,8 +1645,7 @@
       },
       "confirmDelete": {
         "title": "Löschen bestätigen",
-        "message": "Möchten Sie {count, plural, one {1 ausgewähltes Element} other {{count} ausgewählte Elemente}} wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
-        "messageDefault": "Möchten Sie die ausgewählten Elemente wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+        "message": "Möchten Sie {count, plural, one {1 ausgewähltes Element} other {{count} ausgewählte Elemente}} wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
       },
       "uploadProgress": {
         "title": "Upload-Fortschritt",
@@ -1752,7 +1768,8 @@
       "noMatch": "Keine passende Anwendung.",
       "openAppStores": "App Stores öffnen",
       "popupBlocked": "Der Browser hat den Tab der Sitzung blockiert. Erlauben Sie Pop-ups für diese Website und starten Sie dann erneut.",
-      "serverFileNeedsHome": "Eine auf dem Server abgelegte Datei kann im Cleanroom-Modus nicht geöffnet werden. Wählen Sie ein Speicherverzeichnis."
+      "serverFileNeedsHome": "Eine auf dem Server abgelegte Datei kann im Cleanroom-Modus nicht geöffnet werden. Wählen Sie ein Speicherverzeichnis.",
+      "copyLinkManual": "Der Browser hat das Kopieren nicht erlaubt. Markieren Sie den Link unten und kopieren Sie ihn."
     },
     "launch": {
       "title": "{app} wird gestartet",

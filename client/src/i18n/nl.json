@@ -14,6 +14,8 @@
     "cancel": "Annuleren",
     "manage": "Beheren",
     "delete": "Verwijderen",
+    "remove": "Verwijderen",
+    "move": "Verplaatsen",
     "edit": "Bewerken",
     "save": "Opslaan",
     "none": "geen",
@@ -55,6 +57,7 @@
     "admins": "Beheerders",
     "yes": "Ja",
     "no": "Nee",
+    "ok": "OK",
     "daysAgo": "{count, plural, one {1 dag geleden} other {{count} dagen geleden}}",
     "hoursAgo": "{count, plural, one {1 uur geleden} other {{count} uur geleden}}",
     "minutesAgo": "{count, plural, one {1 minuut geleden} other {{count} minuten geleden}}",
@@ -98,6 +101,7 @@
       "storageUsage": "Opslaggebruik:",
       "detectedGpus": "Gedetecteerde GPU's:",
       "logout": "Uitloggen & Configuratie Wissen",
+      "logoutTitle": "Uitloggen",
       "howTo": "Hoe SealSkin te Gebruiken",
       "howToDescription": "Deze sectie bevat basisdocumentatie over het gebruik van de extensie.",
       "howToList": [
@@ -156,6 +160,7 @@
       "nameTitle": "Gebruik alleen letters, cijfers, underscore of koppelteken.",
       "createButton": "Map Aanmaken",
       "confirmDelete": "Weet u zeker dat u de home directory '{homeName}' wilt verwijderen? Alle gegevens daarin gaan definitief verloren.",
+      "deleteTitle": "Home directory verwijderen",
       "node": "Node",
       "move": "Verplaatsen",
       "moveTo": "Verplaatsen naar node",
@@ -169,12 +174,13 @@
       "started": "Gestart",
       "noSessionsUser": "Geen actieve sessies gevonden.",
       "noSessionsAdmin": "Geen actieve sessies gevonden voor enige gebruiker.",
-      "sessionsFor": "Sessies voor {username} ({count})",
-      "confirmStop": "Weet u zeker dat u deze sessie wilt stoppen? De container wordt vernietigd."
+      "sessionsFor": "Sessies voor {username} ({count})"
     },
     "pinned": {
       "title": "Vastgezet Extensiegedrag",
       "description": "Deze tabel toont de startopties die u heeft opgeslagen voor specifieke bestandstypen of voor alle URL's. U kunt een vastgezet gedrag verwijderen om opnieuw om startopties gevraagd te worden.",
+      "removeTitle": "Vastgezet gedrag verwijderen",
+      "confirmRemove": "Vastgezet gedrag voor '{name}' verwijderen?",
       "trigger": "Trigger",
       "savedApp": "Opgeslagen Applicatie",
       "triggerSimple": "Simpele Start (Werkbalkknop)",
@@ -191,7 +197,8 @@
       "publicKeyOptionalLabel": "Publieke Sleutel (Optioneel):",
       "publicKeyPlaceholder": "Plak hier de publieke sleutel, of laat leeg om er een te genereren.",
       "createButton": "Beheerder Aanmaken",
-      "confirmDelete": "Weet u zeker dat u beheerder '{username}' wilt verwijderen? Dit verwijdert ook al hun persistente opslag en kan niet ongedaan worden gemaakt."
+      "confirmDelete": "Weet u zeker dat u beheerder '{username}' wilt verwijderen? Dit verwijdert ook al hun persistente opslag en kan niet ongedaan worden gemaakt.",
+      "deleteTitle": "Beheerder verwijderen"
     },
     "users": {
       "title": "Gebruikersbeheer",
@@ -211,6 +218,7 @@
       "createButton": "Gebruiker Aanmaken",
       "homesDisabledTooltip": "Persistente opslag uitgeschakeld voor deze gebruiker",
       "confirmDelete": "Weet u zeker dat u gebruiker '{username}' wilt verwijderen? Dit verwijdert ook al hun persistente opslag en kan niet ongedaan worden gemaakt.",
+      "deleteTitle": "Gebruiker verwijderen",
       "allowPublicSharing": "Openbaar delen van bestanden toestaan",
       "allowEditTemplates": "Bewerken van app-sjablonen toestaan",
       "signInOnly": "Alleen eenmalige aanmelding",
@@ -238,6 +246,7 @@
       "permissionsTitle": "Permissie & Beveiligingsoverschrijvingen",
       "createButton": "Groep Aanmaken",
       "confirmDelete": "Weet u zeker dat u groep '{groupName}' wilt verwijderen? Gebruikers in deze groep vallen terug op hun individuele instellingen.",
+      "deleteTitle": "Groep verwijderen",
       "notSet": "Niet ingesteld",
       "allow": "Toestaan",
       "deny": "Weigeren",
@@ -254,7 +263,8 @@
       "notLocal": "Image niet lokaal gevonden",
       "isLaboratory": "Dit is een Laboratorium-app, gebouwd op basis van een basisimage met aangepaste instellingen.",
       "laboratory": "Laboratorium",
-      "confirmDelete": "Weet u zeker dat u de geïnstalleerde app '{appName}' wilt verwijderen?"
+      "confirmDelete": "Weet u zeker dat u de geïnstalleerde app '{appName}' wilt verwijderen?",
+      "deleteTitle": "Geïnstalleerde app verwijderen"
     },
     "appStore": {
       "title": "App Stores",
@@ -281,6 +291,7 @@
       "previewTitle": "UI Voorbeeld",
       "contentArea": "Applicatie Inhoudsgebied",
       "confirmDelete": "Weet u zeker dat u het sjabloon '{templateName}' wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+      "deleteTitle": "Sjabloon verwijderen",
       "deleteDisabled": "Dit sjabloon kan niet worden verwijderd.",
       "enterName": "Voer een naam in voor het nieuwe sjabloon.",
       "dockerAdminOnly": "Alleen een beheerder kan deze instellingen wijzigen.",
@@ -1088,6 +1099,9 @@
       "reopen": "Sessie opnieuw openen",
       "closeAndSave": "Sluiten & sjabloon opslaan",
       "confirmClose": "De aanpassingssessie van '{name}' sluiten? De sessie stopt en de home directory blijft als sjabloon bewaard.",
+      "closeTitle": "Aanpassingssessie sluiten",
+      "unsavedTitle": "Wijzigingen niet opgeslagen",
+      "unsavedClose": "De wijzigingen konden niet worden opgeslagen. Sessie toch sluiten?",
       "templateSaved": "Sessie gesloten. Het sjabloon is opgeslagen.",
       "busy": "Er is een aanpassingssessie voor '{name}' geopend. Sluit die hierboven voordat u een meta-app wijzigt of een andere sessie start.",
       "describeTitle": "1. Beschrijven",
@@ -1292,6 +1306,7 @@
       "suspend": "Opschorten",
       "remove": "Verwijderen",
       "confirmRemove": "Node '{name}' uit het cluster verwijderen? Een node die nog draait, registreert zich opnieuw en wacht op goedkeuring.",
+      "removeTitle": "Node verwijderen",
       "joinTitle": "Een node toevoegen",
       "joinDescription": "Maak een koppelcode aan, start de nieuwe node met de twee regels hieronder in zijn omgeving en keur hem daarna goed in de tabel hierboven. Een code laat één node toe en is een uur geldig.",
       "joinButton": "Koppelcode aanmaken",
@@ -1315,6 +1330,7 @@
       "poolStopWhenSpent": "Sessies beëindigen wanneer het tegoed op is",
       "poolSave": "Pool opslaan",
       "confirmDeletePool": "Pool '{name}' verwijderen?",
+      "deletePoolTitle": "Pool verwijderen",
       "storeTitle": "Gedeelde gegevens",
       "storeDescription": "Waar de nodes de gegevens bewaren die ze delen: gebruikers, groepen, apps, pools en deze instellingen.",
       "storeKept": "Bewaard:",
@@ -1531,6 +1547,7 @@
       "moveHomeStay": "Op {node}",
       "moveHomeTo": "Verplaatsen naar {node}",
       "moveHomeConfirm": "'{home}' verplaatsen naar {node}? Sessies die deze opslag gebruiken, moeten eerst worden gestopt.",
+      "moveHomeTitle": "Opslag verplaatsen",
       "allowance": "Tegoed: {used} van {hours} uur deze {period}"
     },
     "sessionsView": {
@@ -1628,8 +1645,7 @@
       },
       "confirmDelete": {
         "title": "Verwijdering bevestigen",
-        "message": "Weet u zeker dat u {count, plural, one {1 geselecteerd item} other {{count} geselecteerde items}} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
-        "messageDefault": "Weet u zeker dat u de geselecteerde items wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt."
+        "message": "Weet u zeker dat u {count, plural, one {1 geselecteerd item} other {{count} geselecteerde items}} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt."
       },
       "uploadProgress": {
         "title": "Uploadvoortgang",
@@ -1752,7 +1768,8 @@
       "noMatch": "Geen overeenkomende applicatie.",
       "openAppStores": "App Stores openen",
       "popupBlocked": "De browser heeft het tabblad van de sessie geblokkeerd. Sta pop-ups toe voor deze site en start daarna opnieuw.",
-      "serverFileNeedsHome": "Een bestand dat op de server staat, kan niet in de Cleanroom-modus worden geopend. Kies een opslagmap."
+      "serverFileNeedsHome": "Een bestand dat op de server staat, kan niet in de Cleanroom-modus worden geopend. Kies een opslagmap.",
+      "copyLinkManual": "De browser stond kopiëren niet toe. Selecteer de link hieronder en kopieer deze."
     },
     "launch": {
       "title": "{app} starten",

@@ -14,6 +14,8 @@
     "cancel": "Hủy",
     "manage": "Quản lý",
     "delete": "Xóa",
+    "remove": "Gỡ",
+    "move": "Di chuyển",
     "edit": "Chỉnh sửa",
     "save": "Lưu",
     "none": "không có",
@@ -55,6 +57,7 @@
     "admins": "Quản trị viên",
     "yes": "Có",
     "no": "Không",
+    "ok": "OK",
     "daysAgo": "{count, plural, one {1 ngày trước} other {{count} ngày trước}}",
     "hoursAgo": "{count, plural, one {1 giờ trước} other {{count} giờ trước}}",
     "minutesAgo": "{count, plural, one {1 phút trước} other {{count} phút trước}}",
@@ -98,6 +101,7 @@
       "storageUsage": "Sử dụng lưu trữ:",
       "detectedGpus": "GPU được phát hiện:",
       "logout": "Đăng xuất & Xóa cấu hình",
+      "logoutTitle": "Đăng xuất",
       "howTo": "Cách sử dụng SealSkin",
       "howToDescription": "Phần này chứa tài liệu cơ bản về cách sử dụng tiện ích mở rộng.",
       "howToList": [
@@ -156,6 +160,7 @@
       "nameTitle": "Chỉ sử dụng chữ cái, số, dấu gạch dưới hoặc dấu gạch ngang.",
       "createButton": "Tạo thư mục",
       "confirmDelete": "Bạn có chắc chắn muốn xóa thư mục chính '{homeName}' không? Tất cả dữ liệu bên trong sẽ bị mất vĩnh viễn.",
+      "deleteTitle": "Xóa thư mục chính",
       "node": "Nút",
       "move": "Di chuyển",
       "moveTo": "Di chuyển đến nút",
@@ -169,12 +174,13 @@
       "started": "Đã bắt đầu",
       "noSessionsUser": "Không tìm thấy phiên hoạt động nào.",
       "noSessionsAdmin": "Không tìm thấy phiên hoạt động nào cho bất kỳ người dùng nào.",
-      "sessionsFor": "Phiên cho {username} ({count})",
-      "confirmStop": "Bạn có chắc chắn muốn dừng phiên này không? Container sẽ bị hủy."
+      "sessionsFor": "Phiên cho {username} ({count})"
     },
     "pinned": {
       "title": "Hành vi tiện ích mở rộng đã ghim",
       "description": "Bảng này hiển thị các tùy chọn khởi chạy bạn đã lưu cho các loại tệp cụ thể hoặc cho tất cả các URL. Bạn có thể xóa một hành vi đã ghim để được nhắc lại các tùy chọn khởi chạy.",
+      "removeTitle": "Gỡ hành vi đã ghim",
+      "confirmRemove": "Gỡ hành vi đã ghim cho '{name}'?",
       "trigger": "Kích hoạt",
       "savedApp": "Ứng dụng đã lưu",
       "triggerSimple": "Khởi chạy đơn giản (Nút thanh công cụ)",
@@ -191,7 +197,8 @@
       "publicKeyOptionalLabel": "Khóa công khai (Tùy chọn):",
       "publicKeyPlaceholder": "Dán khóa công khai vào đây, hoặc để trống để tạo một khóa mới.",
       "createButton": "Tạo quản trị viên",
-      "confirmDelete": "Bạn có chắc chắn muốn xóa quản trị viên '{username}' không? Thao tác này cũng sẽ xóa tất cả bộ nhớ lâu dài của họ và không thể hoàn tác."
+      "confirmDelete": "Bạn có chắc chắn muốn xóa quản trị viên '{username}' không? Thao tác này cũng sẽ xóa tất cả bộ nhớ lâu dài của họ và không thể hoàn tác.",
+      "deleteTitle": "Xóa quản trị viên"
     },
     "users": {
       "title": "Quản lý người dùng",
@@ -211,6 +218,7 @@
       "createButton": "Tạo người dùng",
       "homesDisabledTooltip": "Lưu trữ lâu dài bị vô hiệu hóa cho người dùng này",
       "confirmDelete": "Bạn có chắc chắn muốn xóa người dùng '{username}' không? Thao tác này cũng sẽ xóa tất cả bộ nhớ lâu dài của họ và không thể hoàn tác.",
+      "deleteTitle": "Xóa người dùng",
       "allowPublicSharing": "Cho phép chia sẻ tệp công khai",
       "allowEditTemplates": "Cho phép chỉnh sửa mẫu ứng dụng",
       "signInOnly": "Chỉ đăng nhập một lần",
@@ -238,6 +246,7 @@
       "permissionsTitle": "Ghi đè quyền & Tăng cường bảo mật",
       "createButton": "Tạo nhóm",
       "confirmDelete": "Bạn có chắc chắn muốn xóa nhóm '{groupName}' không? Người dùng trong nhóm này sẽ trở về cài đặt cá nhân của họ.",
+      "deleteTitle": "Xóa nhóm",
       "notSet": "Chưa đặt",
       "allow": "Cho phép",
       "deny": "Từ chối",
@@ -254,7 +263,8 @@
       "notLocal": "Không tìm thấy image cục bộ",
       "isLaboratory": "Đây là ứng dụng Phòng thí nghiệm, được dựng từ một image cơ sở với các cài đặt tùy chỉnh.",
       "laboratory": "Phòng thí nghiệm",
-      "confirmDelete": "Bạn có chắc chắn muốn xóa ứng dụng đã cài đặt '{appName}' không?"
+      "confirmDelete": "Bạn có chắc chắn muốn xóa ứng dụng đã cài đặt '{appName}' không?",
+      "deleteTitle": "Xóa ứng dụng đã cài"
     },
     "appStore": {
       "title": "Cửa hàng ứng dụng",
@@ -281,6 +291,7 @@
       "previewTitle": "Xem trước giao diện người dùng",
       "contentArea": "Khu vực nội dung ứng dụng",
       "confirmDelete": "Bạn có chắc chắn muốn xóa mẫu '{templateName}' không? Hành động này không thể được hoàn tác.",
+      "deleteTitle": "Xóa mẫu",
       "deleteDisabled": "Mẫu này không thể bị xóa.",
       "enterName": "Vui lòng nhập tên cho mẫu mới.",
       "dockerAdminOnly": "Chỉ quản trị viên mới có thể thay đổi các cài đặt này.",
@@ -1088,6 +1099,9 @@
       "reopen": "Mở lại phiên",
       "closeAndSave": "Đóng & lưu mẫu",
       "confirmClose": "Đóng phiên tùy chỉnh của '{name}'? Phiên sẽ dừng và thư mục chính của nó được giữ làm mẫu.",
+      "closeTitle": "Đóng phiên tùy chỉnh",
+      "unsavedTitle": "Thay đổi chưa được lưu",
+      "unsavedClose": "Không thể lưu các thay đổi. Vẫn đóng phiên?",
       "templateSaved": "Đã đóng phiên. Mẫu đã được lưu.",
       "busy": "Một phiên tùy chỉnh cho '{name}' đang mở. Hãy đóng nó ở trên trước khi thay đổi meta-app hoặc bắt đầu phiên khác.",
       "describeTitle": "1. Mô tả",
@@ -1292,6 +1306,7 @@
       "suspend": "Tạm ngưng",
       "remove": "Gỡ",
       "confirmRemove": "Gỡ nút '{name}' khỏi cụm? Nút vẫn đang chạy sẽ đăng ký lại và chờ phê duyệt.",
+      "removeTitle": "Gỡ nút",
       "joinTitle": "Thêm nút",
       "joinDescription": "Tạo mã tham gia, khởi động nút mới với hai dòng bên dưới trong môi trường của nó, rồi phê duyệt nút trong bảng phía trên. Mỗi mã chỉ nhận một nút và có hiệu lực trong một giờ.",
       "joinButton": "Tạo mã tham gia",
@@ -1315,6 +1330,7 @@
       "poolStopWhenSpent": "Kết thúc phiên khi dùng hết hạn mức",
       "poolSave": "Lưu pool",
       "confirmDeletePool": "Xóa pool '{name}'?",
+      "deletePoolTitle": "Xóa pool",
       "storeTitle": "Bản ghi dùng chung",
       "storeDescription": "Nơi các nút lưu những bản ghi dùng chung: người dùng, nhóm, ứng dụng, pool và các cài đặt này.",
       "storeKept": "Nơi lưu:",
@@ -1531,6 +1547,7 @@
       "moveHomeStay": "Trên {node}",
       "moveHomeTo": "Di chuyển đến {node}",
       "moveHomeConfirm": "Di chuyển '{home}' đến {node}? Phải dừng các phiên đang dùng nó trước.",
+      "moveHomeTitle": "Di chuyển lưu trữ",
       "allowance": "Hạn mức: {used} trên {hours} giờ trong {period} này"
     },
     "sessionsView": {
@@ -1628,8 +1645,7 @@
       },
       "confirmDelete": {
         "title": "Xác nhận xóa",
-        "message": "Bạn có chắc chắn muốn xóa {count, plural, one {1 mục đã chọn} other {{count} mục đã chọn}} không? Hành động này không thể hoàn tác.",
-        "messageDefault": "Bạn có chắc chắn muốn xóa các mục đã chọn không? Hành động này không thể hoàn tác."
+        "message": "Bạn có chắc chắn muốn xóa {count, plural, one {1 mục đã chọn} other {{count} mục đã chọn}} không? Hành động này không thể hoàn tác."
       },
       "uploadProgress": {
         "title": "Tiến trình tải lên",
@@ -1752,7 +1768,8 @@
       "noMatch": "Không có ứng dụng nào khớp.",
       "openAppStores": "Mở Cửa hàng ứng dụng",
       "popupBlocked": "Trình duyệt đã chặn thẻ của phiên. Hãy cho phép cửa sổ bật lên cho trang này, rồi khởi chạy lại.",
-      "serverFileNeedsHome": "Không thể mở tệp lưu trên máy chủ ở chế độ Phòng sạch. Hãy chọn một thư mục lưu trữ."
+      "serverFileNeedsHome": "Không thể mở tệp lưu trên máy chủ ở chế độ Phòng sạch. Hãy chọn một thư mục lưu trữ.",
+      "copyLinkManual": "Trình duyệt không cho phép sao chép. Hãy chọn liên kết bên dưới và sao chép."
     },
     "launch": {
       "title": "Đang khởi chạy {app}",

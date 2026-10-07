@@ -14,6 +14,8 @@
     "cancel": "Cancelar",
     "manage": "Gerenciar",
     "delete": "Excluir",
+    "remove": "Remover",
+    "move": "Mover",
     "edit": "Editar",
     "save": "Salvar",
     "none": "nenhum",
@@ -55,6 +57,7 @@
     "admins": "Admins",
     "yes": "Sim",
     "no": "Não",
+    "ok": "OK",
     "daysAgo": "{count, plural, one {há 1 dia} other {há {count} dias}}",
     "hoursAgo": "{count, plural, one {há 1 hora} other {há {count} horas}}",
     "minutesAgo": "{count, plural, one {há 1 minuto} other {há {count} minutos}}",
@@ -98,6 +101,7 @@
       "storageUsage": "Uso de Armazenamento:",
       "detectedGpus": "GPUs Detectadas:",
       "logout": "Sair e Limpar Configuração",
+      "logoutTitle": "Sair",
       "howTo": "Como Usar o SealSkin",
       "howToDescription": "Esta seção contém documentação básica sobre como usar a extensão.",
       "howToList": [
@@ -156,6 +160,7 @@
       "nameTitle": "Use apenas letras, números, sublinhado ou hífen.",
       "createButton": "Criar Diretório",
       "confirmDelete": "Tem certeza de que deseja excluir o diretório home '{homeName}'? Todos os dados contidos nele serão perdidos permanentemente.",
+      "deleteTitle": "Excluir diretório home",
       "node": "Nó",
       "move": "Mover",
       "moveTo": "Mover para o nó",
@@ -169,12 +174,13 @@
       "started": "Iniciado",
       "noSessionsUser": "Nenhuma sessão ativa encontrada.",
       "noSessionsAdmin": "Nenhuma sessão ativa encontrada para nenhum usuário.",
-      "sessionsFor": "Sessões para {username} ({count})",
-      "confirmStop": "Tem certeza de que deseja parar esta sessão? O contêiner será destruído."
+      "sessionsFor": "Sessões para {username} ({count})"
     },
     "pinned": {
       "title": "Comportamento Fixo da Extensão",
       "description": "Esta tabela mostra as opções de inicialização que você salvou para tipos de arquivo específicos ou para todas as URLs. Você pode remover um comportamento fixo para ser solicitado novamente pelas opções de inicialização.",
+      "removeTitle": "Remover comportamento fixo",
+      "confirmRemove": "Remover o comportamento fixo de '{name}'?",
       "trigger": "Gatilho",
       "savedApp": "Aplicativo Salvo",
       "triggerSimple": "Inicialização Simples (Botão da Barra de Ferramentas)",
@@ -191,7 +197,8 @@
       "publicKeyOptionalLabel": "Chave Pública (Opcional):",
       "publicKeyPlaceholder": "Cole a chave pública aqui, ou deixe em branco para gerar uma.",
       "createButton": "Criar Admin",
-      "confirmDelete": "Tem certeza de que deseja excluir o admin '{username}'? Isso também excluirá todo o seu armazenamento persistente e não pode ser desfeito."
+      "confirmDelete": "Tem certeza de que deseja excluir o admin '{username}'? Isso também excluirá todo o seu armazenamento persistente e não pode ser desfeito.",
+      "deleteTitle": "Excluir administrador"
     },
     "users": {
       "title": "Gerenciamento de Usuários",
@@ -211,6 +218,7 @@
       "createButton": "Criar Usuário",
       "homesDisabledTooltip": "Armazenamento persistente desativado para este usuário",
       "confirmDelete": "Tem certeza de que deseja excluir o usuário '{username}'? Isso também excluirá todo o seu armazenamento persistente e não pode ser desfeito.",
+      "deleteTitle": "Excluir usuário",
       "allowPublicSharing": "Permitir Compartilhamento Público de Arquivos",
       "allowEditTemplates": "Permitir Edição de Modelos de Aplicativos",
       "signInOnly": "Somente login único",
@@ -238,6 +246,7 @@
       "permissionsTitle": "Sobrescritas de Permissões e Reforço",
       "createButton": "Criar Grupo",
       "confirmDelete": "Tem certeza de que deseja excluir o grupo '{groupName}'? Os usuários neste grupo reverterão para suas configurações individuais.",
+      "deleteTitle": "Excluir grupo",
       "notSet": "Não definido",
       "allow": "Permitir",
       "deny": "Negar",
@@ -254,7 +263,8 @@
       "notLocal": "Imagem não encontrada localmente",
       "isLaboratory": "Este é um aplicativo de Laboratório, construído a partir de uma imagem base com configurações personalizadas.",
       "laboratory": "Laboratório",
-      "confirmDelete": "Tem certeza de que deseja excluir o aplicativo instalado '{appName}'?"
+      "confirmDelete": "Tem certeza de que deseja excluir o aplicativo instalado '{appName}'?",
+      "deleteTitle": "Excluir aplicativo instalado"
     },
     "appStore": {
       "title": "Lojas de Aplicativos",
@@ -281,6 +291,7 @@
       "previewTitle": "Pré-visualização da UI",
       "contentArea": "Área de Conteúdo do Aplicativo",
       "confirmDelete": "Tem certeza de que deseja excluir o modelo '{templateName}'? Esta ação não pode ser desfeita.",
+      "deleteTitle": "Excluir modelo",
       "deleteDisabled": "Este modelo não pode ser excluído.",
       "enterName": "Por favor, insira um nome para o novo modelo.",
       "dockerAdminOnly": "Somente um administrador pode alterar estas configurações.",
@@ -1088,6 +1099,9 @@
       "reopen": "Reabrir sessão",
       "closeAndSave": "Fechar e salvar modelo",
       "confirmClose": "Fechar a sessão de personalização de '{name}'? A sessão é parada e seu diretório home é mantido como modelo.",
+      "closeTitle": "Fechar sessão de personalização",
+      "unsavedTitle": "Alterações não salvas",
+      "unsavedClose": "Não foi possível salvar as alterações. Fechar a sessão mesmo assim?",
       "templateSaved": "Sessão fechada. O modelo foi salvo.",
       "busy": "Há uma sessão de personalização de '{name}' aberta. Feche-a acima antes de alterar um meta-aplicativo ou iniciar outra.",
       "describeTitle": "1. Descrever",
@@ -1292,6 +1306,7 @@
       "suspend": "Suspender",
       "remove": "Remover",
       "confirmRemove": "Remover o nó '{name}' do cluster? Um nó que ainda esteja em execução se registra de novo e aguarda aprovação.",
+      "removeTitle": "Remover nó",
       "joinTitle": "Adicionar um Nó",
       "joinDescription": "Crie um código de ingresso, inicie o novo nó com as duas linhas abaixo no ambiente dele e depois aprove-o na tabela acima. Um código admite um único nó e vale por uma hora.",
       "joinButton": "Criar Código de Ingresso",
@@ -1315,6 +1330,7 @@
       "poolStopWhenSpent": "Encerrar as sessões quando a cota acabar",
       "poolSave": "Salvar Pool",
       "confirmDeletePool": "Excluir o pool '{name}'?",
+      "deletePoolTitle": "Excluir pool",
       "storeTitle": "Registros Compartilhados",
       "storeDescription": "Onde os nós guardam os registros que compartilham: usuários, grupos, aplicativos, pools e estas configurações.",
       "storeKept": "Guardados:",
@@ -1531,6 +1547,7 @@
       "moveHomeStay": "Em {node}",
       "moveHomeTo": "Mover para {node}",
       "moveHomeConfirm": "Mover '{home}' para {node}? As sessões que o usam precisam ser paradas antes.",
+      "moveHomeTitle": "Mover armazenamento",
       "allowance": "Cota: {used} de {hours} horas por {period}"
     },
     "sessionsView": {
@@ -1628,8 +1645,7 @@
       },
       "confirmDelete": {
         "title": "Confirmar Exclusão",
-        "message": "Tem certeza de que deseja excluir {count, plural, one {1 item selecionado} other {{count} itens selecionados}}? Esta ação não pode ser desfeita.",
-        "messageDefault": "Tem certeza de que deseja excluir os itens selecionados? Esta ação não pode ser desfeita."
+        "message": "Tem certeza de que deseja excluir {count, plural, one {1 item selecionado} other {{count} itens selecionados}}? Esta ação não pode ser desfeita."
       },
       "uploadProgress": {
         "title": "Progresso do Upload",
@@ -1752,7 +1768,8 @@
       "noMatch": "Nenhum aplicativo corresponde.",
       "openAppStores": "Abrir as Lojas de Aplicativos",
       "popupBlocked": "O navegador bloqueou a aba da sessão. Permita pop-ups para este site e inicie de novo.",
-      "serverFileNeedsHome": "Um arquivo guardado no servidor não pode ser aberto no modo Sala Limpa. Escolha um diretório de armazenamento."
+      "serverFileNeedsHome": "Um arquivo guardado no servidor não pode ser aberto no modo Sala Limpa. Escolha um diretório de armazenamento.",
+      "copyLinkManual": "O navegador não permitiu copiar. Selecione o link abaixo e copie-o."
     },
     "launch": {
       "title": "Iniciando {app}",

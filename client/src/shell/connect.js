@@ -16,6 +16,7 @@
 import { bridge, request } from '../lib/bridge.js';
 import { loadTranslator, applyTranslations } from '../lib/i18n.js';
 import { generateRsaKeyPair } from '../lib/crypto-utils.js';
+import { confirmDialog } from '../lib/modal.js';
 
 const DEFAULT_SEARCH_ENGINE = 'https://google.com/search?q=';
 
@@ -206,7 +207,13 @@ async function init() {
   $('edit-connection').addEventListener('click', () => showView('advanced'));
   $('export-config-button').addEventListener('click', exportConfig);
   $('logout-button').addEventListener('click', async () => {
-    if (!confirm(t('options.dashboard.confirmLogout'))) return;
+    const logout = await confirmDialog(t, {
+      title: t('options.dashboard.logoutTitle'),
+      message: t('options.dashboard.confirmLogout'),
+      confirm: t('options.dashboard.logout'),
+      danger: true,
+    });
+    if (!logout) return;
     await request('clearConfig');
     currentConfig = null;
     fillForm({ apiPort: '8000', sessionPort: '8443' });

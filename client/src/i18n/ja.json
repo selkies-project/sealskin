@@ -14,6 +14,8 @@
     "cancel": "キャンセル",
     "manage": "管理",
     "delete": "削除",
+    "remove": "削除",
+    "move": "移動",
     "edit": "編集",
     "save": "保存",
     "none": "なし",
@@ -55,6 +57,7 @@
     "admins": "管理者",
     "yes": "はい",
     "no": "いいえ",
+    "ok": "OK",
     "daysAgo": "{count}日前",
     "hoursAgo": "{count}時間前",
     "minutesAgo": "{count}分前",
@@ -98,6 +101,7 @@
       "storageUsage": "ストレージ使用量:",
       "detectedGpus": "検出されたGPU:",
       "logout": "ログアウトして設定をクリア",
+      "logoutTitle": "ログアウト",
       "howTo": "SealSkinの使い方",
       "howToDescription": "このセクションには、拡張機能の基本的な使い方に関するドキュメントが含まれています。",
       "howToList": [
@@ -156,6 +160,7 @@
       "nameTitle": "文字、数字、アンダースコア、ハイフンのみを使用してください。",
       "createButton": "ディレクトリを作成",
       "confirmDelete": "ホームディレクトリ '{homeName}' を本当に削除しますか？内部のすべてのデータは完全に失われます。",
+      "deleteTitle": "ホームディレクトリを削除",
       "node": "ノード",
       "move": "移動",
       "moveTo": "移動先のノード",
@@ -169,12 +174,13 @@
       "started": "開始日時",
       "noSessionsUser": "アクティブなセッションが見つかりません。",
       "noSessionsAdmin": "どのユーザーにもアクティブなセッションが見つかりません。",
-      "sessionsFor": "{username}のセッション ({count})",
-      "confirmStop": "このセッションを本当に停止しますか？コンテナは破棄されます。"
+      "sessionsFor": "{username}のセッション ({count})"
     },
     "pinned": {
       "title": "ピン留めされた拡張機能の動作",
       "description": "この表は、特定のファイルタイプまたはすべてのURLに対して保存した起動オプションを示しています。ピン留めされた動作を削除すると、再度起動オプションを尋ねられるようになります。",
+      "removeTitle": "ピン留めされた動作を削除",
+      "confirmRemove": "'{name}' のピン留めされた動作を削除しますか？",
       "trigger": "トリガー",
       "savedApp": "保存されたアプリケーション",
       "triggerSimple": "シンプル起動（ツールバーボタン）",
@@ -191,7 +197,8 @@
       "publicKeyOptionalLabel": "公開鍵（オプション）:",
       "publicKeyPlaceholder": "ここに公開鍵を貼り付けるか、空欄にして生成します。",
       "createButton": "管理者を作成",
-      "confirmDelete": "管理者 '{username}' を本当に削除しますか？これを行うと、その管理者の永続ストレージもすべて削除され、元に戻すことはできません。"
+      "confirmDelete": "管理者 '{username}' を本当に削除しますか？これを行うと、その管理者の永続ストレージもすべて削除され、元に戻すことはできません。",
+      "deleteTitle": "管理者を削除"
     },
     "users": {
       "title": "ユーザー管理",
@@ -211,6 +218,7 @@
       "createButton": "ユーザーを作成",
       "homesDisabledTooltip": "このユーザーの永続ストレージは無効です",
       "confirmDelete": "ユーザー '{username}' を本当に削除しますか？これを行うと、そのユーザーの永続ストレージもすべて削除され、元に戻すことはできません。",
+      "deleteTitle": "ユーザーを削除",
       "allowPublicSharing": "公開ファイル共有を許可する",
       "allowEditTemplates": "アプリテンプレートの編集を許可する",
       "signInOnly": "シングルサインオンのみ",
@@ -238,6 +246,7 @@
       "permissionsTitle": "権限と強化の上書き",
       "createButton": "グループを作成",
       "confirmDelete": "グループ '{groupName}' を本当に削除しますか？このグループのユーザーは個々の設定に戻ります。",
+      "deleteTitle": "グループを削除",
       "notSet": "未設定",
       "allow": "許可",
       "deny": "拒否",
@@ -254,7 +263,8 @@
       "notLocal": "イメージがローカルに見つかりません",
       "isLaboratory": "これは、基本イメージにカスタム設定を加えて構築されたラボアプリです。",
       "laboratory": "ラボ",
-      "confirmDelete": "インストール済みのアプリ '{appName}' を本当に削除しますか？"
+      "confirmDelete": "インストール済みのアプリ '{appName}' を本当に削除しますか？",
+      "deleteTitle": "インストール済みアプリを削除"
     },
     "appStore": {
       "title": "アプリストア",
@@ -281,6 +291,7 @@
       "previewTitle": "UIプレビュー",
       "contentArea": "アプリケーションコンテンツエリア",
       "confirmDelete": "テンプレート '{templateName}' を本当に削除しますか？この操作は元に戻せません。",
+      "deleteTitle": "テンプレートを削除",
       "deleteDisabled": "このテンプレートは削除できません。",
       "enterName": "新しいテンプレートの名前を入力してください。",
       "dockerAdminOnly": "これらの設定を変更できるのは管理者だけです。",
@@ -1088,6 +1099,9 @@
       "reopen": "セッションを再開",
       "closeAndSave": "閉じてテンプレートを保存",
       "confirmClose": "'{name}' のカスタマイズセッションを閉じますか？セッションは停止し、ホームディレクトリはテンプレートとして保持されます。",
+      "closeTitle": "カスタマイズセッションを閉じる",
+      "unsavedTitle": "変更が保存されていません",
+      "unsavedClose": "変更を保存できませんでした。それでもセッションを閉じますか？",
       "templateSaved": "セッションを閉じました。テンプレートが保存されました。",
       "busy": "'{name}' のカスタマイズセッションが開いています。メタアプリを変更したり別のセッションを開始したりする前に、上で閉じてください。",
       "describeTitle": "1. 説明",
@@ -1292,6 +1306,7 @@
       "suspend": "一時停止",
       "remove": "削除",
       "confirmRemove": "ノード '{name}' をクラスターから削除しますか？稼働中のノードは再登録され、承認待ちになります。",
+      "removeTitle": "ノードを削除",
       "joinTitle": "ノードを追加",
       "joinDescription": "参加コードを作成し、下の2行を環境変数に設定して新しいノードを起動してから、上の表で承認します。1つのコードで参加できるノードは1つで、有効期間は1時間です。",
       "joinButton": "参加コードを作成",
@@ -1315,6 +1330,7 @@
       "poolStopWhenSpent": "利用枠を使い切ったらセッションを終了する",
       "poolSave": "プールを保存",
       "confirmDeletePool": "プール '{name}' を削除しますか？",
+      "deletePoolTitle": "プールを削除",
       "storeTitle": "共有レコード",
       "storeDescription": "ノード間で共有するレコード（ユーザー、グループ、アプリ、プール、およびこれらの設定）の保管場所です。",
       "storeKept": "保管場所:",
@@ -1531,6 +1547,7 @@
       "moveHomeStay": "{node} 上",
       "moveHomeTo": "{node} に移動",
       "moveHomeConfirm": "'{home}' を {node} に移動しますか？使用中のセッションは先に停止する必要があります。",
+      "moveHomeTitle": "ストレージを移動",
       "allowance": "利用枠: 今{period} {hours}時間中 {used}時間使用"
     },
     "sessionsView": {
@@ -1628,8 +1645,7 @@
       },
       "confirmDelete": {
         "title": "削除の確認",
-        "message": "選択した{count, plural, one {1個のアイテム} other {{count}個のアイテム}}を本当に削除しますか？この操作は元に戻せません。",
-        "messageDefault": "選択したアイテムを本当に削除しますか？この操作は元に戻せません。"
+        "message": "選択した{count, plural, one {1個のアイテム} other {{count}個のアイテム}}を本当に削除しますか？この操作は元に戻せません。"
       },
       "uploadProgress": {
         "title": "アップロードの進捗",
@@ -1752,7 +1768,8 @@
       "noMatch": "一致するアプリケーションがありません。",
       "openAppStores": "アプリストアを開く",
       "popupBlocked": "ブラウザーがセッションのタブをブロックしました。このサイトのポップアップを許可してから、もう一度起動してください。",
-      "serverFileNeedsHome": "サーバーに保存されているファイルはクリーンルームモードでは開けません。ストレージディレクトリを選択してください。"
+      "serverFileNeedsHome": "サーバーに保存されているファイルはクリーンルームモードでは開けません。ストレージディレクトリを選択してください。",
+      "copyLinkManual": "ブラウザーがコピーを許可しませんでした。下のリンクを選択してコピーしてください。"
     },
     "launch": {
       "title": "{app} を起動中",

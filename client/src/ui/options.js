@@ -13,6 +13,7 @@ import { browserTimezone } from '../lib/timezone.js';
 import { supportedLangs } from '../lib/languages.js';
 import { sendForgedSignIn } from '../lib/proxy-check.js';
 import { reachableSessionOrigin } from '../lib/session-origin.js';
+import { confirmDialog } from '../lib/modal.js';
 import {
   announce, escapeHtml, formatBytes, formatDate, timeAgo, formatLogoSrc, hydrateLogos, showToast, tOr,
   addMobileSafeArea, addMobileBackButton, downloadBlob, currentLocale,
@@ -285,7 +286,13 @@ async function deleteTemplateProfile() {
     displayStatus(t('options.appTemplates.deleteDisabled'), true);
     return;
   }
-  if (!confirm(t('options.appTemplates.confirmDelete', { templateName }))) return;
+  const remove = await confirmDialog(t, {
+    title: t('options.appTemplates.deleteTitle'),
+    message: t('options.appTemplates.confirmDelete', { templateName }),
+    confirm: t('common.delete'),
+    danger: true,
+  });
+  if (!remove) return;
 
   try {
     await secureFetch(`/api/admin/apps/templates/${encodeURIComponent(templateName)}`, { method: 'DELETE' });
@@ -544,7 +551,12 @@ function initializeAppLaboratoryTab() {
       try {
         if (labState.isDirty) {
           const success = await handleLabUpdate();
-          if (!success && !confirm('Failed to save changes. Close anyway?')) return;
+          if (!success && !await confirmDialog(t, {
+            title: t('options.appLaboratory.unsavedTitle'),
+            message: t('options.appLaboratory.unsavedClose'),
+            confirm: t('common.close'),
+            danger: true,
+          })) return;
         }
         displayStatus(t('options.status.closingSession'));
         if (info.shell === 'web') await bridge.closeSession(labState.currentSessionId);
@@ -969,9 +981,13 @@ function bindWebLabEvents() {
       displayStatus(escapeHtml(error.message === 'noSessionOrigin' ? t('popup.status.noSessionOrigin') : error.message), true);
     }
   });
-  wlab('close-btn').addEventListener('click', () => {
-    if (!confirm(t('options.appLaboratory.confirmClose', { name: labSession.app_name }))) return;
-    closeLab();
+  wlab('close-btn').addEventListener('click', async () => {
+    const close = await confirmDialog(t, {
+      title: t('options.appLaboratory.closeTitle'),
+      message: t('options.appLaboratory.confirmClose', { name: labSession.app_name }),
+      confirm: t('options.appLaboratory.closeAndSave'),
+    });
+    if (close) closeLab();
   });
   wlab('close-retry').addEventListener('click', closeLab);
   document.querySelector('#wlab-apps-table tbody').addEventListener('click', (e) => {
@@ -1193,14 +1209,20 @@ function bindClusterEvents() {
     if (!select) return;
     clusterWrite(`/api/admin/cluster/nodes/${select.dataset.node}`, { method: 'PUT', body: JSON.stringify({ pool: select.value }) }, t('options.status.nodeUpdated'));
   });
-  nodes.addEventListener('click', (e) => {
+  nodes.addEventListener('click', async (e) => {
     const button = e.target.closest('button[data-action]');
     if (!button) return;
     const url = `/api/admin/cluster/nodes/${button.dataset.node}`;
     const node = clusterData.nodes.find((n) => n.id === button.dataset.node);
     const { action } = button.dataset;
     if (action === 'remove') {
-      if (confirm(t('options.cluster.confirmRemove', { name: nodeLabel(node) }))) clusterWrite(url, { method: 'DELETE' }, t('options.status.nodeRemoved'));
+      const remove = await confirmDialog(t, {
+        title: t('options.cluster.removeTitle'),
+        message: t('options.cluster.confirmRemove', { name: nodeLabel(node) }),
+        confirm: t('common.remove'),
+        danger: true,
+      });
+      if (remove) clusterWrite(url, { method: 'DELETE' }, t('options.status.nodeRemoved'));
     } else {
       clusterWrite(url, { method: 'PUT', body: JSON.stringify({ approved: action === 'approve' }) }, t('options.status.nodeUpdated'));
     }
@@ -1222,16 +1244,22 @@ function bindClusterEvents() {
   document.getElementById('cluster-join-copy').addEventListener('click', () => navigator.clipboard.writeText(document.getElementById('cluster-join-env').value)
     .then(() => displayStatus(t('options.status.copySuccess')), () => displayStatus(t('options.status.copyFailed'), true)));
 
-  document.querySelector('#cluster-pools-table tbody').addEventListener('click', (e) => {
+  document.querySelector('#cluster-pools-table tbody').addEventListener('click', async (e) => {
     const button = e.target.closest('button[data-pool]');
     if (!button) return;
     const name = button.dataset.pool;
     if (button.classList.contains('warning')) {
       editPool(name);
       document.getElementById('cluster-pool-form').scrollIntoView({ block: 'nearest' });
-    } else if (confirm(t('options.cluster.confirmDeletePool', { name }))) {
-      clusterWrite(`/api/admin/cluster/pools/${encodeURIComponent(name)}`, { method: 'DELETE' }, t('options.status.poolDeleted', { name }));
+      return;
     }
+    const remove = await confirmDialog(t, {
+      title: t('options.cluster.deletePoolTitle'),
+      message: t('options.cluster.confirmDeletePool', { name }),
+      confirm: t('common.delete'),
+      danger: true,
+    });
+    if (remove) clusterWrite(`/api/admin/cluster/pools/${encodeURIComponent(name)}`, { method: 'DELETE' }, t('options.status.poolDeleted', { name }));
   });
   document.getElementById('cluster-pool-reset').addEventListener('click', () => editPool(null));
   document.getElementById('cluster-pool-form').addEventListener('submit', async (e) => {
@@ -2414,7 +2442,7 @@ function sessionRowHtml(s) {
                             </td>
                             <td>${timeAgo(s.created_at, t)}</td>
                             <td class="actions-cell">
-                                <button class="danger stop-session-btn" data-session-id="${escapeHtml(s.session_id)}">${t('common.stop')}</button>
+                                <button class="secondary stop-session-btn" data-session-id="${escapeHtml(s.session_id)}">${t('common.stop')}</button>
                             </td>
                         </tr>
                     `;
@@ -2965,7 +2993,13 @@ function bindEvents() {
     const username = button.dataset.adminname;
     if (!username) return;
     if (button.classList.contains('danger')) {
-      if (confirm(t('options.admins.confirmDelete', { username }))) {
+      const remove = await confirmDialog(t, {
+        title: t('options.admins.deleteTitle'),
+        message: t('options.admins.confirmDelete', { username }),
+        confirm: t('common.delete'),
+        danger: true,
+      });
+      if (remove) {
         try {
           await secureFetch(`/api/admin/admins/${username}`, { method: 'DELETE' });
           displayStatus(t('options.status.adminDeleted', { username }));
@@ -3014,7 +3048,13 @@ function bindEvents() {
     const username = button.dataset.username;
     if (!username) return;
     if (button.classList.contains('danger')) {
-      if (confirm(t('options.users.confirmDelete', { username }))) {
+      const remove = await confirmDialog(t, {
+        title: t('options.users.deleteTitle'),
+        message: t('options.users.confirmDelete', { username }),
+        confirm: t('common.delete'),
+        danger: true,
+      });
+      if (remove) {
         try {
           await secureFetch(`/api/admin/users/${username}`, { method: 'DELETE' });
           displayStatus(t('options.status.userDeleted', { username }));
@@ -3084,7 +3124,13 @@ function bindEvents() {
     const groupName = button.dataset.groupname;
     if (!groupName) return;
     if (button.classList.contains('danger')) {
-      if (confirm(t('options.groups.confirmDelete', { groupName }))) {
+      const remove = await confirmDialog(t, {
+        title: t('options.groups.deleteTitle'),
+        message: t('options.groups.confirmDelete', { groupName }),
+        confirm: t('common.delete'),
+        danger: true,
+      });
+      if (remove) {
         try {
           await secureFetch(`/api/admin/groups/${groupName}`, { method: 'DELETE' });
           displayStatus(t('options.status.groupDeleted', { groupName }));
@@ -3146,7 +3192,13 @@ function bindEvents() {
       const elsewhere = myCluster.nodes.filter((node) => node.id !== myCluster.homes[homeName]);
       await moveHome(`/api/cluster/homedirs/${encodeURIComponent(homeName)}/move`, homeName, elsewhere, refreshHomeDirs);
     } else if (button.classList.contains('danger')) {
-      if (confirm(t('options.home.confirmDelete', { homeName }))) {
+      const remove = await confirmDialog(t, {
+        title: t('options.home.deleteTitle'),
+        message: t('options.home.confirmDelete', { homeName }),
+        confirm: t('common.delete'),
+        danger: true,
+      });
+      if (remove) {
         try {
           await secureFetch(`/api/homedirs/${homeName}`, { method: 'DELETE' });
           displayStatus(t('options.status.homedirDeleted', { homeName }));
@@ -3186,7 +3238,12 @@ function bindEvents() {
       const nodes = clusterData ? clusterData.nodes.filter((node) => node.approved && node.id !== managedHomes[homeName]) : [];
       const url = `/api/admin/cluster/users/${encodeURIComponent(username)}/homedirs/${encodeURIComponent(homeName)}/move`;
       await moveHome(url, homeName, nodes, () => refreshAdminUserHomeDirs(username, isAdminUser));
-    } else if (confirm(t('options.modals.confirmDeleteDir', { homeName, username }))) {
+    } else if (await confirmDialog(t, {
+      title: t('options.home.deleteTitle'),
+      message: t('options.modals.confirmDeleteDir', { homeName, username }),
+      confirm: t('common.delete'),
+      danger: true,
+    })) {
       try {
         const path = isAdminUser ? 'admins' : 'users';
         await secureFetch(`/api/admin/${path}/${username}/homedirs/${homeName}`, { method: 'DELETE' });
@@ -3206,17 +3263,15 @@ function bindEvents() {
     const sessionId = button.dataset.sessionId;
     const endpoint = isAdmin ? `/api/admin/sessions/${sessionId}` : `/api/sessions/${sessionId}`;
 
-    if (confirm(t('options.sessions.confirmStop'))) {
-      button.disabled = true;
-      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-      try {
-        await secureFetch(endpoint, { method: 'DELETE' });
-        displayStatus(t('options.status.sessionStopped'));
-      } catch (error) {
-        displayStatus(t('options.status.sessionStopError', { error: error.message }), true);
-      }
-      await refreshSessions();
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    try {
+      await secureFetch(endpoint, { method: 'DELETE' });
+      displayStatus(t('options.status.sessionStopped'));
+    } catch (error) {
+      displayStatus(t('options.status.sessionStopError', { error: error.message }), true);
     }
+    await refreshSessions();
   });
 
   appStoreSelect.addEventListener('change', (e) => fetchAndRenderAvailableApps(e.target.value));
@@ -3342,7 +3397,13 @@ function bindEvents() {
     if (!app) return;
 
     if (button.classList.contains('danger')) {
-      if (confirm(t('options.installedApps.confirmDelete', { appName: app.name }))) {
+      const remove = await confirmDialog(t, {
+        title: t('options.installedApps.deleteTitle'),
+        message: t('options.installedApps.confirmDelete', { appName: app.name }),
+        confirm: t('common.delete'),
+        danger: true,
+      });
+      if (remove) {
         try {
           await secureFetch(`/api/admin/apps/installed/${appId}`, { method: 'DELETE' });
           displayStatus(t('options.status.appDeleted', { name: app.name }));
@@ -3388,7 +3449,13 @@ function bindEvents() {
     if (!button) return;
     const key = button.dataset.storageKey;
     const prettyKey = key.replace('workflow_profile_', '');
-    if (confirm(`Are you sure you want to remove the pinned behavior for "${prettyKey}"?`)) {
+    const remove = await confirmDialog(t, {
+      title: t('options.pinned.removeTitle'),
+      message: t('options.pinned.confirmRemove', { name: prettyKey }),
+      confirm: t('common.remove'),
+      danger: true,
+    });
+    if (remove) {
       await bridge.storageRemove([key]);
       displayStatus(t('options.status.pinRemoved'));
       await renderPinnedBehaviorTable();

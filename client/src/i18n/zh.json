@@ -14,6 +14,8 @@
     "cancel": "取消",
     "manage": "管理",
     "delete": "删除",
+    "remove": "移除",
+    "move": "移动",
     "edit": "编辑",
     "save": "保存",
     "none": "无",
@@ -55,6 +57,7 @@
     "admins": "管理员",
     "yes": "是",
     "no": "否",
+    "ok": "确定",
     "daysAgo": "{count}天前",
     "hoursAgo": "{count}小时前",
     "minutesAgo": "{count}分钟前",
@@ -98,6 +101,7 @@
       "storageUsage": "存储使用情况:",
       "detectedGpus": "检测到的GPU:",
       "logout": "登出并清除配置",
+      "logoutTitle": "登出",
       "howTo": "如何使用SealSkin",
       "howToDescription": "本节包含有关如何使用此扩展程序的基本文档。",
       "howToList": [
@@ -156,6 +160,7 @@
       "nameTitle": "只能使用字母、数字、下划线或连字符。",
       "createButton": "创建目录",
       "confirmDelete": "您确定要删除主目录“{homeName}”吗？其中的所有数据将永久丢失。",
+      "deleteTitle": "删除主目录",
       "node": "节点",
       "move": "移动",
       "moveTo": "移动到节点",
@@ -169,12 +174,13 @@
       "started": "开始时间",
       "noSessionsUser": "未找到活跃会话。",
       "noSessionsAdmin": "未找到任何用户的活跃会话。",
-      "sessionsFor": "用户 {username} 的会话 ({count})",
-      "confirmStop": "您确定要停止此会话吗？容器将被销毁。"
+      "sessionsFor": "用户 {username} 的会话 ({count})"
     },
     "pinned": {
       "title": "固定的扩展行为",
       "description": "此表显示了您为特定文件类型或所有URL保存的启动选项。您可以删除一个固定行为，以便再次提示您选择启动选项。",
+      "removeTitle": "移除固定行为",
+      "confirmRemove": "要移除“{name}”的固定行为吗？",
       "trigger": "触发器",
       "savedApp": "已保存的应用",
       "triggerSimple": "简单启动（工具栏按钮）",
@@ -191,7 +197,8 @@
       "publicKeyOptionalLabel": "公钥（可选）:",
       "publicKeyPlaceholder": "在此处粘贴公钥，或留空以生成一个。",
       "createButton": "创建管理员",
-      "confirmDelete": "您确定要删除管理员“{username}”吗？此操作还将删除其所有持久性存储，且无法撤销。"
+      "confirmDelete": "您确定要删除管理员“{username}”吗？此操作还将删除其所有持久性存储，且无法撤销。",
+      "deleteTitle": "删除管理员"
     },
     "users": {
       "title": "用户管理",
@@ -211,6 +218,7 @@
       "createButton": "创建用户",
       "homesDisabledTooltip": "此用户的持久性存储已禁用",
       "confirmDelete": "您确定要删除用户“{username}”吗？此操作还将删除其所有持久性存储，且无法撤销。",
+      "deleteTitle": "删除用户",
       "allowPublicSharing": "允许公开文件共享",
       "allowEditTemplates": "允许编辑应用模板",
       "signInOnly": "仅单点登录",
@@ -238,6 +246,7 @@
       "permissionsTitle": "权限与安全加固覆盖",
       "createButton": "创建群组",
       "confirmDelete": "您确定要删除群组“{groupName}”吗？此群组中的用户将恢复其个人设置。",
+      "deleteTitle": "删除组",
       "notSet": "未设置",
       "allow": "允许",
       "deny": "拒绝",
@@ -254,7 +263,8 @@
       "notLocal": "本地未找到镜像",
       "isLaboratory": "这是一个实验室应用，基于基础镜像并使用自定义设置构建。",
       "laboratory": "实验室",
-      "confirmDelete": "您确定要删除已安装的应用“{appName}”吗？"
+      "confirmDelete": "您确定要删除已安装的应用“{appName}”吗？",
+      "deleteTitle": "删除已安装的应用"
     },
     "appStore": {
       "title": "应用商店",
@@ -281,6 +291,7 @@
       "previewTitle": "UI预览",
       "contentArea": "应用程序内容区域",
       "confirmDelete": "您确定要删除模板“{templateName}”吗？此操作无法撤销。",
+      "deleteTitle": "删除模板",
       "deleteDisabled": "此模板无法删除。",
       "enterName": "请输入新模板的名称。",
       "dockerAdminOnly": "只有管理员可以更改这些设置。",
@@ -1088,6 +1099,9 @@
       "reopen": "重新打开会话",
       "closeAndSave": "关闭并保存模板",
       "confirmClose": "要关闭“{name}”的自定义会话吗？会话将停止，其主目录将保留为模板。",
+      "closeTitle": "关闭自定义会话",
+      "unsavedTitle": "更改未保存",
+      "unsavedClose": "无法保存更改。仍要关闭会话吗？",
       "templateSaved": "会话已关闭。模板已保存。",
       "busy": "“{name}”的自定义会话正处于打开状态。请先在上方将其关闭，再更改元应用或启动其他会话。",
       "describeTitle": "1. 描述",
@@ -1292,6 +1306,7 @@
       "suspend": "暂停",
       "remove": "移除",
       "confirmRemove": "要将节点“{name}”从集群中移除吗？仍在运行的节点会重新注册并等待批准。",
+      "removeTitle": "移除节点",
       "joinTitle": "添加节点",
       "joinDescription": "创建一个加入码，在新节点的环境变量中加入下面两行后启动该节点，然后在上方表格中批准它。一个加入码只能接纳一个节点，有效期为一小时。",
       "joinButton": "创建加入码",
@@ -1315,6 +1330,7 @@
       "poolStopWhenSpent": "额度用尽时结束会话",
       "poolSave": "保存资源池",
       "confirmDeletePool": "要删除资源池“{name}”吗？",
+      "deletePoolTitle": "删除资源池",
       "storeTitle": "共享记录",
       "storeDescription": "各节点保存其共享记录的位置：用户、群组、应用、资源池以及这些设置。",
       "storeKept": "保存位置:",
@@ -1531,6 +1547,7 @@
       "moveHomeStay": "保留在 {node}",
       "moveHomeTo": "移动到 {node}",
       "moveHomeConfirm": "要将“{home}”移动到 {node} 吗？必须先停止正在使用它的会话。",
+      "moveHomeTitle": "移动存储",
       "allowance": "额度: 本{period}已用 {used} / {hours} 小时"
     },
     "sessionsView": {
@@ -1628,8 +1645,7 @@
       },
       "confirmDelete": {
         "title": "确认删除",
-        "message": "您确定要删除{count, plural, one {1 个选定项目} other {{count} 个选定项目}}吗？此操作无法撤销。",
-        "messageDefault": "您确定要删除所选项目吗？此操作无法撤销。"
+        "message": "您确定要删除{count, plural, one {1 个选定项目} other {{count} 个选定项目}}吗？此操作无法撤销。"
       },
       "uploadProgress": {
         "title": "上传进度",
@@ -1752,7 +1768,8 @@
       "noMatch": "没有匹配的应用程序。",
       "openAppStores": "打开应用商店",
       "popupBlocked": "浏览器拦截了会话的标签页。请允许此站点弹出窗口，然后重新启动。",
-      "serverFileNeedsHome": "保存在服务器上的文件无法在无尘室模式下打开。请选择一个存储目录。"
+      "serverFileNeedsHome": "保存在服务器上的文件无法在无尘室模式下打开。请选择一个存储目录。",
+      "copyLinkManual": "浏览器不允许复制。请选中下方的链接并复制。"
     },
     "launch": {
       "title": "正在启动 {app}",

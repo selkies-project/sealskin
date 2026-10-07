@@ -14,6 +14,8 @@
     "cancel": "Annuler",
     "manage": "Gérer",
     "delete": "Supprimer",
+    "remove": "Retirer",
+    "move": "Déplacer",
     "edit": "Modifier",
     "save": "Enregistrer",
     "none": "aucun",
@@ -55,6 +57,7 @@
     "admins": "Admins",
     "yes": "Oui",
     "no": "Non",
+    "ok": "OK",
     "daysAgo": "{count, plural, one {il y a 1 jour} other {il y a {count} jours}}",
     "hoursAgo": "{count, plural, one {il y a 1 heure} other {il y a {count} heures}}",
     "minutesAgo": "{count, plural, one {il y a 1 minute} other {il y a {count} minutes}}",
@@ -98,6 +101,7 @@
       "storageUsage": "Utilisation du Stockage :",
       "detectedGpus": "GPUs Détectés :",
       "logout": "Déconnexion & Effacer Config",
+      "logoutTitle": "Déconnexion",
       "howTo": "Comment Utiliser SealSkin",
       "howToDescription": "Cette section contient la documentation de base sur l'utilisation de l'extension.",
       "howToList": [
@@ -156,6 +160,7 @@
       "nameTitle": "Utilisez uniquement des lettres, des chiffres, des underscores ou des tirets.",
       "createButton": "Créer le Dossier",
       "confirmDelete": "Êtes-vous sûr de vouloir supprimer le dossier personnel '{homeName}' ? Toutes les données qu'il contient seront définitivement perdues.",
+      "deleteTitle": "Supprimer le dossier personnel",
       "node": "Nœud",
       "move": "Déplacer",
       "moveTo": "Déplacer vers le nœud",
@@ -169,12 +174,13 @@
       "started": "Démarrée",
       "noSessionsUser": "Aucune session active trouvée.",
       "noSessionsAdmin": "Aucune session active trouvée pour aucun utilisateur.",
-      "sessionsFor": "Sessions pour {username} ({count})",
-      "confirmStop": "Êtes-vous sûr de vouloir arrêter cette session ? Le conteneur sera détruit."
+      "sessionsFor": "Sessions pour {username} ({count})"
     },
     "pinned": {
       "title": "Comportement Épinglé de l'Extension",
       "description": "Ce tableau montre les options de lancement que vous avez enregistrées pour des types de fichiers spécifiques ou pour toutes les URL. Vous pouvez supprimer un comportement épinglé pour être à nouveau invité à choisir les options de lancement.",
+      "removeTitle": "Retirer le comportement épinglé",
+      "confirmRemove": "Retirer le comportement épinglé pour '{name}' ?",
       "trigger": "Déclencheur",
       "savedApp": "Application Enregistrée",
       "triggerSimple": "Lancement Simple (Bouton de la barre d'outils)",
@@ -191,7 +197,8 @@
       "publicKeyOptionalLabel": "Clé Publique (Optionnel) :",
       "publicKeyPlaceholder": "Collez la clé publique ici, ou laissez vide pour en générer une.",
       "createButton": "Créer l'Admin",
-      "confirmDelete": "Êtes-vous sûr de vouloir supprimer l'admin '{username}' ? Cela supprimera également tout son stockage persistant et ne pourra pas être annulé."
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer l'admin '{username}' ? Cela supprimera également tout son stockage persistant et ne pourra pas être annulé.",
+      "deleteTitle": "Supprimer l'administrateur"
     },
     "users": {
       "title": "Gestion des Utilisateurs",
@@ -211,6 +218,7 @@
       "createButton": "Créer l'Utilisateur",
       "homesDisabledTooltip": "Stockage persistant désactivé pour cet utilisateur",
       "confirmDelete": "Êtes-vous sûr de vouloir supprimer l'utilisateur '{username}' ? Cela supprimera également tout son stockage persistant et ne pourra pas être annulé.",
+      "deleteTitle": "Supprimer l'utilisateur",
       "allowPublicSharing": "Autoriser le partage de fichiers public",
       "allowEditTemplates": "Autoriser la modification des modèles d'applications",
       "signInOnly": "Authentification unique seulement",
@@ -238,6 +246,7 @@
       "permissionsTitle": "Surcharges des Permissions & Renforcement",
       "createButton": "Créer le Groupe",
       "confirmDelete": "Êtes-vous sûr de vouloir supprimer le groupe '{groupName}' ? Les utilisateurs de ce groupe reviendront à leurs paramètres individuels.",
+      "deleteTitle": "Supprimer le groupe",
       "notSet": "Non défini",
       "allow": "Autoriser",
       "deny": "Refuser",
@@ -254,7 +263,8 @@
       "notLocal": "Image non trouvée localement",
       "isLaboratory": "Ceci est une application de Laboratoire, construite à partir d'une image de base avec des paramètres personnalisés.",
       "laboratory": "Laboratoire",
-      "confirmDelete": "Êtes-vous sûr de vouloir supprimer l'application installée '{appName}' ?"
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer l'application installée '{appName}' ?",
+      "deleteTitle": "Supprimer l'application installée"
     },
     "appStore": {
       "title": "Magasins d'Applications",
@@ -281,6 +291,7 @@
       "previewTitle": "Aperçu de l'UI",
       "contentArea": "Zone de Contenu de l'Application",
       "confirmDelete": "Êtes-vous sûr de vouloir supprimer le modèle '{templateName}' ? Cette action ne peut pas être annulée.",
+      "deleteTitle": "Supprimer le modèle",
       "deleteDisabled": "Ce modèle ne peut pas être supprimé.",
       "enterName": "Veuillez entrer un nom pour le nouveau modèle.",
       "dockerAdminOnly": "Seul un administrateur peut modifier ces paramètres.",
@@ -1088,6 +1099,9 @@
       "reopen": "Rouvrir la session",
       "closeAndSave": "Fermer et enregistrer le modèle",
       "confirmClose": "Fermer la session de personnalisation de '{name}' ? La session s'arrête et son dossier personnel est conservé comme modèle.",
+      "closeTitle": "Fermer la session de personnalisation",
+      "unsavedTitle": "Modifications non enregistrées",
+      "unsavedClose": "Les modifications n'ont pas pu être enregistrées. Fermer la session quand même ?",
       "templateSaved": "Session fermée. Le modèle est enregistré.",
       "busy": "Une session de personnalisation pour '{name}' est ouverte. Fermez-la ci-dessus avant de modifier une méta-application ou d'en démarrer une autre.",
       "describeTitle": "1. Décrire",
@@ -1292,6 +1306,7 @@
       "suspend": "Suspendre",
       "remove": "Retirer",
       "confirmRemove": "Retirer le nœud '{name}' du cluster ? Un nœud encore en fonctionnement s'enregistre à nouveau et attend l'approbation.",
+      "removeTitle": "Retirer le nœud",
       "joinTitle": "Ajouter un Nœud",
       "joinDescription": "Créez un code d'adhésion, démarrez le nouveau nœud avec les deux lignes ci-dessous dans son environnement, puis approuvez-le dans le tableau ci-dessus. Un code admet un seul nœud et dure une heure.",
       "joinButton": "Créer un Code d'Adhésion",
@@ -1315,6 +1330,7 @@
       "poolStopWhenSpent": "Terminer les sessions quand le quota est épuisé",
       "poolSave": "Enregistrer le Pool",
       "confirmDeletePool": "Supprimer le pool '{name}' ?",
+      "deletePoolTitle": "Supprimer le pool",
       "storeTitle": "Données Partagées",
       "storeDescription": "L'endroit où les nœuds conservent les données qu'ils partagent : utilisateurs, groupes, applications, pools et ces paramètres.",
       "storeKept": "Conservées :",
@@ -1531,6 +1547,7 @@
       "moveHomeStay": "Sur {node}",
       "moveHomeTo": "Déplacer vers {node}",
       "moveHomeConfirm": "Déplacer '{home}' vers {node} ? Les sessions qui l'utilisent doivent d'abord être arrêtées.",
+      "moveHomeTitle": "Déplacer le stockage",
       "allowance": "Quota : {used} sur {hours} heures par {period}"
     },
     "sessionsView": {
@@ -1628,8 +1645,7 @@
       },
       "confirmDelete": {
         "title": "Confirmer la Suppression",
-        "message": "Êtes-vous sûr de vouloir supprimer {count, plural, one {1 élément sélectionné} other {{count} éléments sélectionnés}} ? Cette action est irréversible.",
-        "messageDefault": "Êtes-vous sûr de vouloir supprimer les éléments sélectionnés ? Cette action est irréversible."
+        "message": "Êtes-vous sûr de vouloir supprimer {count, plural, one {1 élément sélectionné} other {{count} éléments sélectionnés}} ? Cette action est irréversible."
       },
       "uploadProgress": {
         "title": "Progression du Téléversement",
@@ -1752,7 +1768,8 @@
       "noMatch": "Aucune application ne correspond.",
       "openAppStores": "Ouvrir les Magasins d'Applications",
       "popupBlocked": "Le navigateur a bloqué l'onglet de la session. Autorisez les fenêtres pop-up pour ce site, puis relancez.",
-      "serverFileNeedsHome": "Un fichier conservé sur le serveur ne peut pas être ouvert en mode Salle Blanche. Choisissez un dossier de stockage."
+      "serverFileNeedsHome": "Un fichier conservé sur le serveur ne peut pas être ouvert en mode Salle Blanche. Choisissez un dossier de stockage.",
+      "copyLinkManual": "Le navigateur n'a pas autorisé la copie. Sélectionnez le lien ci-dessous et copiez-le."
     },
     "launch": {
       "title": "Lancement de {app}",

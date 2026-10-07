@@ -14,6 +14,8 @@
     "cancel": "Cancel",
     "manage": "Manage",
     "delete": "Delete",
+    "remove": "Remove",
+    "move": "Move",
     "edit": "Edit",
     "save": "Save",
     "none": "none",
@@ -55,6 +57,7 @@
     "admins": "Admins",
     "yes": "Yes",
     "no": "No",
+    "ok": "OK",
     "daysAgo": "{count, plural, one {1 day ago} other {{count} days ago}}",
     "hoursAgo": "{count, plural, one {1 hour ago} other {{count} hours ago}}",
     "minutesAgo": "{count, plural, one {1 minute ago} other {{count} minutes ago}}",
@@ -98,6 +101,7 @@
       "storageUsage": "Storage Usage:",
       "detectedGpus": "Detected GPUs:",
       "logout": "Logout & Clear Config",
+      "logoutTitle": "Log out",
       "howTo": "How to Use SealSkin",
       "howToDescription": "This section contains basic documentation on how to use the extension.",
       "howToList": [
@@ -156,6 +160,7 @@
       "nameTitle": "Use only letters, numbers, underscore, or hyphen.",
       "createButton": "Create Directory",
       "confirmDelete": "Are you sure you want to delete the home directory '{homeName}'? All data within it will be permanently lost.",
+      "deleteTitle": "Delete home directory",
       "node": "Node",
       "move": "Move",
       "moveTo": "Move to node",
@@ -169,12 +174,13 @@
       "started": "Started",
       "noSessionsUser": "No active sessions found.",
       "noSessionsAdmin": "No active sessions found for any user.",
-      "sessionsFor": "Sessions for {username} ({count})",
-      "confirmStop": "Are you sure you want to stop this session? The container will be destroyed."
+      "sessionsFor": "Sessions for {username} ({count})"
     },
     "pinned": {
       "title": "Pinned Extension Behavior",
       "description": "This table shows the launch options you have saved for specific file types or for all URLs. You can remove a pinned behavior to be prompted for launch options again.",
+      "removeTitle": "Remove pinned behavior",
+      "confirmRemove": "Remove the pinned behavior for '{name}'?",
       "trigger": "Trigger",
       "savedApp": "Saved Application",
       "triggerSimple": "Simple Launch (Toolbar Button)",
@@ -191,7 +197,8 @@
       "publicKeyOptionalLabel": "Public Key (Optional):",
       "publicKeyPlaceholder": "Paste public key here, or leave blank to generate one.",
       "createButton": "Create Admin",
-      "confirmDelete": "Are you sure you want to delete admin '{username}'? This will also delete all their persistent storage and cannot be undone."
+      "confirmDelete": "Are you sure you want to delete admin '{username}'? This will also delete all their persistent storage and cannot be undone.",
+      "deleteTitle": "Delete admin"
     },
     "users": {
       "title": "User Management",
@@ -211,6 +218,7 @@
       "createButton": "Create User",
       "homesDisabledTooltip": "Persistent storage disabled for this user",
       "confirmDelete": "Are you sure you want to delete user '{username}'? This will also delete all their persistent storage and cannot be undone.",
+      "deleteTitle": "Delete user",
       "allowPublicSharing": "Allow Public File Sharing",
       "allowEditTemplates": "Allow Editing App Templates",
       "signInOnly": "Single sign-on only",
@@ -238,6 +246,7 @@
       "permissionsTitle": "Permissions & Hardening Overrides",
       "createButton": "Create Group",
       "confirmDelete": "Are you sure you want to delete group '{groupName}'? Users in this group will revert to their individual settings.",
+      "deleteTitle": "Delete group",
       "notSet": "Not set",
       "allow": "Allow",
       "deny": "Deny",
@@ -254,7 +263,8 @@
       "notLocal": "Image not found locally",
       "isLaboratory": "This is a Laboratory app, built from a base image with custom settings.",
       "laboratory": "Laboratory",
-      "confirmDelete": "Are you sure you want to delete the installed app '{appName}'?"
+      "confirmDelete": "Are you sure you want to delete the installed app '{appName}'?",
+      "deleteTitle": "Delete installed app"
     },
     "appStore": {
       "title": "App Stores",
@@ -281,6 +291,7 @@
       "previewTitle": "UI Preview",
       "contentArea": "Application Content Area",
       "confirmDelete": "Are you sure you want to delete the template '{templateName}'? This action cannot be undone.",
+      "deleteTitle": "Delete template",
       "deleteDisabled": "This template cannot be deleted.",
       "enterName": "Please enter a name for the new template.",
       "dockerAdminOnly": "Only an administrator can change these settings.",
@@ -1088,6 +1099,9 @@
       "reopen": "Re-open session",
       "closeAndSave": "Close & save template",
       "confirmClose": "Close the customization session of '{name}'? The session stops, and its home directory is kept as the template.",
+      "closeTitle": "Close customization session",
+      "unsavedTitle": "Changes not saved",
+      "unsavedClose": "The changes could not be saved. Close the session anyway?",
       "templateSaved": "Session closed. The template is saved.",
       "busy": "A customization session for '{name}' is open. Close it above before changing a meta-app or starting another.",
       "describeTitle": "1. Describe",
@@ -1292,6 +1306,7 @@
       "suspend": "Suspend",
       "remove": "Remove",
       "confirmRemove": "Remove node '{name}' from the cluster? A node that is still running registers again and waits for approval.",
+      "removeTitle": "Remove node",
       "joinTitle": "Add a Node",
       "joinDescription": "Create a join code, start the new node with the two lines below in its environment, then approve it in the table above. A code admits one node and lasts an hour.",
       "joinButton": "Create Join Code",
@@ -1315,6 +1330,7 @@
       "poolStopWhenSpent": "End sessions when the allowance is spent",
       "poolSave": "Save Pool",
       "confirmDeletePool": "Delete pool '{name}'?",
+      "deletePoolTitle": "Delete pool",
       "storeTitle": "Shared Records",
       "storeDescription": "Where the nodes keep the records they share: users, groups, apps, pools, and these settings.",
       "storeKept": "Kept:",
@@ -1531,6 +1547,7 @@
       "moveHomeStay": "On {node}",
       "moveHomeTo": "Move to {node}",
       "moveHomeConfirm": "Move '{home}' to {node}? Sessions using it must be stopped first.",
+      "moveHomeTitle": "Move storage",
       "allowance": "Allowance: {used} of {hours} hours this {period}",
       "newTab": "Open in a new tab"
     },
@@ -1629,8 +1646,7 @@
       },
       "confirmDelete": {
         "title": "Confirm Deletion",
-        "message": "Are you sure you want to delete {count, plural, one {1 selected item} other {{count} selected items}}? This action cannot be undone.",
-        "messageDefault": "Are you sure you want to delete the selected items? This action cannot be undone."
+        "message": "Are you sure you want to delete {count, plural, one {1 selected item} other {{count} selected items}}? This action cannot be undone."
       },
       "uploadProgress": {
         "title": "Upload Progress",
@@ -1756,6 +1772,7 @@
       "serverFileNeedsHome": "A file kept on the server cannot be opened in Cleanroom mode. Choose a storage directory.",
       "copyLink": "Copy link",
       "copyLinkHelp": "A link that opens this application with these options: bookmark it, or install it as an app",
+      "copyLinkManual": "The browser did not allow copying. Select the link below and copy it.",
       "linkCopied": "Link copied."
     },
     "launch": {

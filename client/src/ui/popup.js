@@ -9,6 +9,7 @@ import { loadTranslator, applyTranslations } from '../lib/i18n.js';
 import { supportedLangs } from '../lib/languages.js';
 import { browserTimezone } from '../lib/timezone.js';
 import { announce, escapeHtml, formatLogoSrc, hydrateLogos, timeAgo, currentLocale } from '../lib/dom.js';
+import { confirmDialog } from '../lib/modal.js';
 
 let t;
 let info;
@@ -446,7 +447,12 @@ async function handleMoveHome() {
   const home = homeDirSelect.value;
   const node = moveHomeSelect.value;
   if (!node) return;
-  if (!confirm(t('popup.launchView.moveHomeConfirm', { home, node: nodeName(node) }))) {
+  const move = await confirmDialog(t, {
+    title: t('popup.launchView.moveHomeTitle'),
+    message: t('popup.launchView.moveHomeConfirm', { home, node: nodeName(node) }),
+    confirm: t('common.move'),
+  });
+  if (!move) {
     moveHomeSelect.value = '';
     return;
   }

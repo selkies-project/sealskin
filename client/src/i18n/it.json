@@ -14,6 +14,8 @@
     "cancel": "Annulla",
     "manage": "Gestisci",
     "delete": "Elimina",
+    "remove": "Rimuovi",
+    "move": "Sposta",
     "edit": "Modifica",
     "save": "Salva",
     "none": "nessuno",
@@ -55,6 +57,7 @@
     "admins": "Amministratori",
     "yes": "Sì",
     "no": "No",
+    "ok": "OK",
     "daysAgo": "{count, plural, one {1 giorno fa} other {{count} giorni fa}}",
     "hoursAgo": "{count, plural, one {1 ora fa} other {{count} ore fa}}",
     "minutesAgo": "{count, plural, one {1 minuto fa} other {{count} minuti fa}}",
@@ -98,6 +101,7 @@
       "storageUsage": "Utilizzo Archiviazione:",
       "detectedGpus": "GPU Rilevate:",
       "logout": "Logout e Pulisci Config.",
+      "logoutTitle": "Esci",
       "howTo": "Come Usare SealSkin",
       "howToDescription": "Questa sezione contiene la documentazione di base su come utilizzare l'estensione.",
       "howToList": [
@@ -156,6 +160,7 @@
       "nameTitle": "Usa solo lettere, numeri, underscore o trattino.",
       "createButton": "Crea Cartella",
       "confirmDelete": "Sei sicuro di voler eliminare la cartella home '{homeName}'? Tutti i dati al suo interno andranno persi definitivamente.",
+      "deleteTitle": "Elimina cartella home",
       "node": "Nodo",
       "move": "Sposta",
       "moveTo": "Sposta sul nodo",
@@ -169,12 +174,13 @@
       "started": "Avviata",
       "noSessionsUser": "Nessuna sessione attiva trovata.",
       "noSessionsAdmin": "Nessuna sessione attiva trovata per alcun utente.",
-      "sessionsFor": "Sessioni per {username} ({count})",
-      "confirmStop": "Sei sicuro di voler fermare questa sessione? Il container verrà distrutto."
+      "sessionsFor": "Sessioni per {username} ({count})"
     },
     "pinned": {
       "title": "Comportamento Fissato dell'Estensione",
       "description": "Questa tabella mostra le opzioni di avvio che hai salvato per tipi di file specifici o per tutti gli URL. Puoi rimuovere un comportamento fissato per visualizzare nuovamente le opzioni di avvio.",
+      "removeTitle": "Rimuovi comportamento fissato",
+      "confirmRemove": "Rimuovere il comportamento fissato per '{name}'?",
       "trigger": "Attivatore",
       "savedApp": "Applicazione Salvata",
       "triggerSimple": "Avvio Semplice (Pulsante Barra Strumenti)",
@@ -191,7 +197,8 @@
       "publicKeyOptionalLabel": "Chiave Pubblica (Opzionale):",
       "publicKeyPlaceholder": "Incolla qui la chiave pubblica, o lascia vuoto per generarne una.",
       "createButton": "Crea Amministratore",
-      "confirmDelete": "Sei sicuro di voler eliminare l'amministratore '{username}'? Questo eliminerà anche tutta la sua archiviazione persistente e non potrà essere annullato."
+      "confirmDelete": "Sei sicuro di voler eliminare l'amministratore '{username}'? Questo eliminerà anche tutta la sua archiviazione persistente e non potrà essere annullato.",
+      "deleteTitle": "Elimina amministratore"
     },
     "users": {
       "title": "Gestione Utenti",
@@ -211,6 +218,7 @@
       "createButton": "Crea Utente",
       "homesDisabledTooltip": "Archiviazione persistente disabilitata per questo utente",
       "confirmDelete": "Sei sicuro di voler eliminare l'utente '{username}'? Questo eliminerà anche tutta la sua archiviazione persistente e non potrà essere annullato.",
+      "deleteTitle": "Elimina utente",
       "allowPublicSharing": "Consenti condivisione file pubblica",
       "allowEditTemplates": "Consenti modifica dei modelli app",
       "signInOnly": "Solo single sign-on",
@@ -238,6 +246,7 @@
       "permissionsTitle": "Sovrascritture Permessi e Rafforzamento",
       "createButton": "Crea Gruppo",
       "confirmDelete": "Sei sicuro di voler eliminare il gruppo '{groupName}'? Gli utenti in questo gruppo torneranno alle loro impostazioni individuali.",
+      "deleteTitle": "Elimina gruppo",
       "notSet": "Non impostato",
       "allow": "Consenti",
       "deny": "Nega",
@@ -254,7 +263,8 @@
       "notLocal": "Immagine non trovata localmente",
       "isLaboratory": "Questa è un'app di Laboratorio, costruita da un'immagine di base con impostazioni personalizzate.",
       "laboratory": "Laboratorio",
-      "confirmDelete": "Sei sicuro di voler eliminare l'app installata '{appName}'?"
+      "confirmDelete": "Sei sicuro di voler eliminare l'app installata '{appName}'?",
+      "deleteTitle": "Elimina app installata"
     },
     "appStore": {
       "title": "App Store",
@@ -281,6 +291,7 @@
       "previewTitle": "Anteprima UI",
       "contentArea": "Area Contenuto Applicazione",
       "confirmDelete": "Sei sicuro di voler eliminare il modello '{templateName}'? Questa azione non può essere annullata.",
+      "deleteTitle": "Elimina modello",
       "deleteDisabled": "Questo modello non può essere eliminato.",
       "enterName": "Inserisci un nome per il nuovo modello.",
       "dockerAdminOnly": "Solo un amministratore può modificare queste impostazioni.",
@@ -1088,6 +1099,9 @@
       "reopen": "Riapri sessione",
       "closeAndSave": "Chiudi e salva modello",
       "confirmClose": "Chiudere la sessione di personalizzazione di '{name}'? La sessione si ferma e la sua cartella home viene conservata come modello.",
+      "closeTitle": "Chiudi la sessione di personalizzazione",
+      "unsavedTitle": "Modifiche non salvate",
+      "unsavedClose": "Impossibile salvare le modifiche. Chiudere comunque la sessione?",
       "templateSaved": "Sessione chiusa. Il modello è salvato.",
       "busy": "È aperta una sessione di personalizzazione per '{name}'. Chiudila qui sopra prima di modificare una meta-app o avviarne un'altra.",
       "describeTitle": "1. Descrivi",
@@ -1292,6 +1306,7 @@
       "suspend": "Sospendi",
       "remove": "Rimuovi",
       "confirmRemove": "Rimuovere il nodo '{name}' dal cluster? Un nodo ancora in esecuzione si registra di nuovo e attende l'approvazione.",
+      "removeTitle": "Rimuovi nodo",
       "joinTitle": "Aggiungi un Nodo",
       "joinDescription": "Crea un codice di adesione, avvia il nuovo nodo con le due righe qui sotto nel suo ambiente, poi approvalo nella tabella qui sopra. Un codice ammette un solo nodo e dura un'ora.",
       "joinButton": "Crea Codice di Adesione",
@@ -1315,6 +1330,7 @@
       "poolStopWhenSpent": "Termina le sessioni quando la quota è esaurita",
       "poolSave": "Salva Pool",
       "confirmDeletePool": "Eliminare il pool '{name}'?",
+      "deletePoolTitle": "Elimina pool",
       "storeTitle": "Dati Condivisi",
       "storeDescription": "Dove i nodi conservano i dati che condividono: utenti, gruppi, app, pool e queste impostazioni.",
       "storeKept": "Conservati:",
@@ -1531,6 +1547,7 @@
       "moveHomeStay": "Su {node}",
       "moveHomeTo": "Sposta su {node}",
       "moveHomeConfirm": "Spostare '{home}' su {node}? Le sessioni che la usano devono prima essere fermate.",
+      "moveHomeTitle": "Sposta archiviazione",
       "allowance": "Quota: {used} di {hours} ore per {period}"
     },
     "sessionsView": {
@@ -1628,8 +1645,7 @@
       },
       "confirmDelete": {
         "title": "Conferma Eliminazione",
-        "message": "Sei sicuro di voler eliminare {count, plural, one {1 elemento selezionato} other {{count} elementi selezionati}}? Questa azione non può essere annullata.",
-        "messageDefault": "Sei sicuro di voler eliminare gli elementi selezionati? Questa azione non può essere annullata."
+        "message": "Sei sicuro di voler eliminare {count, plural, one {1 elemento selezionato} other {{count} elementi selezionati}}? Questa azione non può essere annullata."
       },
       "uploadProgress": {
         "title": "Avanzamento Caricamento",
@@ -1752,7 +1768,8 @@
       "noMatch": "Nessuna applicazione corrisponde.",
       "openAppStores": "Apri gli App Store",
       "popupBlocked": "Il browser ha bloccato la scheda della sessione. Consenti i pop-up per questo sito, poi avvia di nuovo.",
-      "serverFileNeedsHome": "Un file conservato sul server non può essere aperto in modalità Cleanroom. Scegli una cartella di archiviazione."
+      "serverFileNeedsHome": "Un file conservato sul server non può essere aperto in modalità Cleanroom. Scegli una cartella di archiviazione.",
+      "copyLinkManual": "Il browser non ha consentito la copia. Seleziona il link qui sotto e copialo."
     },
     "launch": {
       "title": "Avvio di {app}",
