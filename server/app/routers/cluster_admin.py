@@ -154,6 +154,7 @@ async def overview(request: Request) -> dict[str, Any]:
         "secret_set": {name: bool(getattr(settings, name)) for name in SECRET_SETTINGS},
         "public_url": cluster.public_url(),
         "session_domain": settings.session_domain,
+        "session_isolation": settings.session_isolation,
         "signin": {
             "enabled": sso.enabled(),
             "trusted_proxies": settings.trusted_proxies,

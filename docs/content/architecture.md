@@ -263,15 +263,15 @@ shows it, and navigates itself to the session when it is ready. The tab is
 never navigated by the page that opened it, so nothing depends on keeping a
 handle to it.
 
-A session opens on an origin of its own (see
-[Session origins](configuration.md#session-origins)): the shells probe a
+A session opens at `/<id>/` on the web app's origin (see
+[Session origins](configuration.md#session-origins)). With session
+isolation it opens on an origin of its own instead: the shells probe a
 random `<id>.<session domain>`, `<id>.<server name>`, and `<id>.<parent
-name>`, and open the session under the first that answers. The server
-refuses the session anywhere else (`on_session_origin`), and the web app
-opens nothing on the shared origin. Caddy refuses other origins' requests and
-WebSockets on a session path, so sessions on sibling origins, which are
-same-site, cannot reach one another, and the API refuses a cookie's request
-that the browser does not mark as the web app's own.
+name>`, and open the session under the first that answers, and the server
+refuses the session anywhere else (`on_session_origin`). Caddy refuses other
+origins' requests and WebSockets on a session path, so sessions on sibling
+origins, which are same-site, cannot reach one another, and the API refuses
+a cookie's request that the browser does not mark as the web app's own.
 
 * **Isolation.** The page is sent with `Cross-Origin-Opener-Policy:
   same-origin-allow-popups` and `frame-ancestors 'none'`, so a session page

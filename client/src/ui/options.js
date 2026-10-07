@@ -1154,7 +1154,8 @@ function renderClusterStore() {
   document.getElementById('cluster-store-detail-row').style.display = store.detail ? 'block' : 'none';
   document.getElementById('cluster-store-reachable').textContent = t(store.reachable ? 'options.cluster.reachable' : 'options.cluster.unreachable');
   document.getElementById('cluster-public-url').textContent = clusterData.public_url || t('common.na');
-  document.getElementById('cluster-session-domain').textContent = clusterData.session_domain || t('options.cluster.sessionDomainUnset');
+  document.getElementById('cluster-session-domain').textContent = !clusterData.session_isolation ? t('options.cluster.sessionDomainOff')
+    : clusterData.session_domain || t('options.cluster.sessionDomainUnset');
 }
 
 async function refreshClusterUsage() {
@@ -1531,6 +1532,16 @@ function reachCard(signin) {
         </div>${note ? `<p class="description${bad ? ' reach-bad' : ''}">${escapeHtml(note)}</p>` : ''}`;
   const publicUrl = clusterData.public_url || '';
   const elsewhere = info.shell === 'web' && publicUrl && publicUrl.replace(/\/$/, '') !== location.origin;
+  // Without isolation a session is a path of the web app, and no name has to answer for it.
+  const shared = !clusterData.session_isolation;
+  const sessionRows = shared
+    ? row('options.signin.reach.sessionNames', `${(publicUrl || location.origin).replace(/\/$/, '')}/<session id>/`, t('options.signin.reach.sessionNamesShared'))
+    : `${row('options.signin.reach.sessionDomain', clusterData.session_domain || t('options.cluster.sessionDomainUnset'))}
+            <div class="copy-row">
+                <span>${escapeHtml(t('options.signin.reach.sessionNames'))}</span>
+                <code id="reach-session-names">${escapeHtml(t('options.signin.testing'))}</code>
+            </div>
+            <p class="description" id="reach-session-note" hidden></p>`;
   const via = !arrival.remote ? ''
     : arrival.trusted ? t('options.signin.reach.viaTrusted')
       : t(signin.trusted_proxies ? 'options.signin.reach.viaOther' : 'options.signin.reach.viaDirect');
@@ -1540,12 +1551,7 @@ function reachCard(signin) {
         ${`<p class="description">${escapeHtml(t('options.signin.reach.help'))}</p>`}
         <div class="copy-rows">
             ${row('options.signin.reach.publicUrl', publicUrl, elsewhere ? t('options.signin.reach.publicUrlDiffers', { origin: location.origin }) : '', elsewhere)}
-            ${row('options.signin.reach.sessionDomain', clusterData.session_domain || t('options.cluster.sessionDomainUnset'))}
-            <div class="copy-row">
-                <span>${escapeHtml(t('options.signin.reach.sessionNames'))}</span>
-                <code id="reach-session-names">${escapeHtml(t('options.signin.testing'))}</code>
-            </div>
-            <p class="description" id="reach-session-note" hidden></p>
+            ${sessionRows}
             ${row('options.signin.reach.trustedProxies', signin.trusted_proxies)}
             ${row('options.signin.reach.arrivedFrom', arrival.remote, via, Boolean(arrival.remote) && !arrival.trusted && Boolean(signin.trusted_proxies))}
             ${row('options.signin.reach.yourAddress', arrival.client)}
@@ -1554,7 +1560,7 @@ function reachCard(signin) {
     </div>`;
 }
 
-/** Ask a made-up session name for its answer, as a launch does, and say in the card whether one came. */
+/** With session isolation, ask a made-up session name for its answer, as a launch does, and say in the card whether one came. */
 async function testSessionNames() {
   const target = document.getElementById('reach-session-names');
   if (!target || info.shell !== 'web') {
