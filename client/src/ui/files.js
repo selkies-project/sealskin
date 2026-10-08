@@ -7,6 +7,7 @@
 import { bridge } from '../lib/bridge.js';
 import { secureFetch } from '../lib/api.js';
 import { loadTranslator, applyTranslations } from '../lib/i18n.js';
+import { confirmDialog } from '../lib/modal.js';
 import {
   announce, escapeHtml, formatBytes, timeUntil, formatDate, showToast, downloadBlob,
   addMobileSafeArea, addMobileBackButton,
@@ -58,8 +59,6 @@ const paginationControls = document.getElementById('pagination-controls');
 const fileManagerFooter = document.getElementById('file-manager-footer');
 const newFolderModal = document.getElementById('new-folder-modal');
 const newFolderForm = document.getElementById('new-folder-form');
-const confirmDeleteModal = document.getElementById('confirm-delete-modal');
-const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
 const fileContentArea = document.querySelector('.file-content-area');
 const shareFileModal = document.getElementById('share-file-modal');
 const shareFileInfo = document.getElementById('share-file-info');
@@ -404,13 +403,16 @@ async function downloadFile(home, path) {
   const caps = info.capabilities || {};
 
   if (caps.streamDownload) {
-    // Chrome extension: the service worker streams the chunks straight into a download.
+    // The Chrome extension and the web app: a service worker streams the chunks straight into a download.
     try {
       await bridge.downloadFile(home, path, filename);
+      return;
     } catch (error) {
-      displayStatus(t('files.status.downloadFailed', { error: error.message }), true);
+      if (error.message !== 'no-stream-worker') {
+        displayStatus(t('files.status.downloadFailed', { error: error.message }), true);
+        return;
+      }
     }
-    return;
   }
 
   displayStatus(t('files.status.downloading', { filename }) || `Downloading ${filename}...`);
@@ -429,8 +431,6 @@ async function downloadFile(home, path) {
 }
 
 async function handleDeleteSelected() {
-  confirmDeleteModal.style.display = 'none';
-
   let pathsToDelete = Array.from(state.selectedItems);
   if (state.currentHome !== SPECIAL_HOME) {
     const protectedPaths = ['/Desktop', '/Desktop/files'];
@@ -657,8 +657,8 @@ async function init() {
   info = await announce();
   t = await loadTranslator(info.locale);
 
+  if (info.shell === 'mobile') addMobileSafeArea();
   if (info.shell === 'mobile') {
-    addMobileSafeArea();
     const header = document.querySelector('.sidebar-header');
     if (header) addMobileBackButton(header, () => window.history.back());
   }
@@ -814,16 +814,17 @@ async function init() {
     newFolderForm.reset();
   });
 
-  deleteSelectedBtn.addEventListener('click', () => {
-    document.getElementById('confirm-delete-message').textContent = t('files.modals.confirmDelete.message', { count: state.selectedItems.size });
-    confirmDeleteModal.style.display = 'block';
+  const confirmDelete = (count) => confirmDialog(t, {
+    title: t('files.modals.confirmDelete.title'),
+    message: t('files.modals.confirmDelete.message', { count }),
+    confirm: t('common.delete'),
+    danger: true,
   });
-  confirmDeleteBtn.addEventListener('click', handleDeleteSelected);
-
-  deleteSelectedSharesBtn.addEventListener('click', () => {
-    if (confirm(t('files.modals.confirmDelete.message', { count: state.selectedShares.size }))) {
-      handleDeleteSelectedShares();
-    }
+  deleteSelectedBtn.addEventListener('click', async () => {
+    if (await confirmDelete(state.selectedItems.size)) handleDeleteSelected();
+  });
+  deleteSelectedSharesBtn.addEventListener('click', async () => {
+    if (await confirmDelete(state.selectedShares.size)) handleDeleteSelectedShares();
   });
 
   uploadFileBtn.addEventListener('click', () => fileUploadInput.click());

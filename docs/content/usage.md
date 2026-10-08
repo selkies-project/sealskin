@@ -1,13 +1,14 @@
 ---
 title: Usage
-description: The launcher, the right-click menu, downloads, sessions, storage, the file manager, and collaboration rooms.
+description: The launcher, the right-click menu, downloads, sessions, storage, the file manager, collaboration rooms, and the web app.
 ---
 
 Everything on this page happens in the client after it is
 [connected](start.md#connect). The browser extension has the full set of entry
-points; the mobile apps have the launcher, sessions, files, and the dashboard
-but no context menu or download interception, because those hooks only exist
-in a browser.
+points; the mobile apps and the web app have the launcher, sessions, files,
+and the dashboard but no context menu or download interception, because those
+hooks only exist in a browser extension. The web app has its own
+[entry points](#in-a-browser-with-nothing-installed) instead.
 
 ## The launcher
 
@@ -83,6 +84,12 @@ scoped to that session path and every later request is checked by the proxy
 against it. Nobody without the cookie reaches the container, and the
 container itself is never exposed.
 
+Inside a session, `proot-apps install <name>` and the graphical installer
+(`proot-apps install gui`) add applications to the home directory. When your
+administrator assigned you a [PRoot Apps catalog](administration.md#proot-apps),
+both offer the catalog's apps and install from it, so the session reaches no
+registry; otherwise they fetch from the public repository as the image ships.
+
 Sessions survive a server restart: they are recorded on disk and reattached
 on start-up, and records whose containers are gone are discarded. Stopping a
 session removes its containers and deletes any cleanroom storage. Sessions
@@ -141,9 +148,11 @@ the **controller**. The room page wraps the streamed application with:
 * **Chat**, with display names guests choose for themselves.
 * **Voice and video** between everyone in the room, with a designated speaker
   the controller can set.
-* **Gamepad slots**: the controller assigns a participant to one of the
-  container's gamepad slots and their local controller is forwarded into the
-  session.
+* **Gamepad slots**: the controller drags the container's gamepad slots onto
+  participants, and their local controllers are forwarded into the session. A
+  participant given several slots plays one with each of their controllers, in
+  the order the browser lists them: the first takes the lowest-numbered slot.
+  Dragging a slot back to the gamepad box frees that slot alone.
 * **Mouse and keyboard hand-over**: the controller can give one participant
   the mouse and keyboard, and take them back.
 * **Application switching**: the controller can open another installed app
@@ -153,7 +162,7 @@ the **controller**. The room page wraps the streamed application with:
 
 Under the hood the room's WebSocket relays chat and control messages, and the
 server pushes the current token table (who is controller, who holds which
-slot, who has the mouse and keyboard) into every container of the session.
+slots, who has the mouse and keyboard) into every container of the session.
 Stopping the session ends the room for everyone.
 
 ## On mobile
@@ -171,11 +180,115 @@ Differences from the extension:
 * A trusted TLS certificate is mandatory; the WebView refuses self-signed
   certificates and mixed content.
 
+## In a browser, with nothing installed
+
+`https://<server>:8443/` is the web app: the same launcher, file manager,
+and dashboard in an ordinary tab. It has no configuration file and keeps no
+key. [Sign in](signin.md) with what the administrator set up: **Sign In with
+OpenID Connect** or **Sign In with SAML** takes you to your organization's
+identity provider and back, a reverse proxy that signs you in opens the app
+signed in, and the administrator of the server uses the **Root token**. The
+dashboard shows who you are signed in as and has **Sign out**; a logout at
+the identity provider ends the sign-in as well.
+
+The web app fills the window. A rail on the left (a tab bar at the bottom of
+a phone) moves between **Home**, **Files**, and the dashboard, and shows who
+is signed in. Your avatar opens your profile: how you are signed in and until
+when, the groups you are in and the ones your identity provider or proxy
+named, what your settings let you do, your limits with what is used of them,
+and the pools and catalog open to you, with **Sign out** at its foot. **Home** has a box that filters the applications as you type
+and takes a pasted link to open in isolation, the sessions you have running
+as cards that show their desktops, captured when you come to the page and
+refreshed now and then while you use it, with **Open** and **Stop**, and the
+applications as tiles, grouped by kind with your recent ones first. Opening a
+session in the same tab grows its card over the page into the desktop. A tile
+opens its application's launch options in a window that unfolds from the
+tile; the options are remembered per application, and the play button in the
+tile's corner launches with them straight away. Drop a file anywhere on the
+page to open it in an application that takes it.
+
+The page is yours to arrange. From the options panel an application can be
+starred as a favorite or hidden from the page. Favorites sit in a row of
+their own above the applications, in the order you drag them into (or move
+them from the panel), and hidden applications wait under the **Hidden** chip
+until shown again. The brush beside the search box sets the page's
+background: a color, from the presets or your own, painted solid or as
+one of several gradients, or a picture of your own, filled, fitted,
+stretched, or centered, with blur and dim to taste. The sidebar folds away from the chevron at its foot and
+comes back from the tab left at the window's edge. All of this is kept in
+the browser, so each browser has its own arrangement.
+
+Launching shows what the server is doing on the application's tile and in
+the sessions row: choosing a node, preparing storage, downloading the
+application the first time a node runs it, starting it, and waiting for its
+desktop. The session then takes the web app's place in the tab; the
+browser's back button is the way back. **Open in a new tab**, among the
+launch options, opens a tab at the click instead, which shows the same
+progress and becomes the session when it is ready, or says why it could not
+start.
+
+**Copy link**, beside **Launch**, copies the application's address with the
+options chosen: `/app/<application id>/`, with the storage, the room, and the
+rest in its query. Opening the address signs you in if need be and takes you
+to your oldest running session of the application with that storage, room or
+not, or launches one. Bookmark it, or install it from the browser's menu as
+an app of its own, one per application; a session's own page offers the
+same install, for the session's options.
+
+Where the administrator turned session isolation on, a session has an
+address of its own (`<session id>.<session domain>`) and opens in a tab of
+its own. If the launcher then says the server has no such name the browser
+reaches, the administrator has to give it wildcard DNS and a certificate for
+it.
+
+On a [cluster](cluster.md) the launcher has a **Where** choice: leave it on
+**Automatic**, or pick a pool or a node. Each home directory shows the node
+that holds it, and a session using it starts there. Where the administrator
+allows, **Move storage** moves a home directory to another node once no
+session is using it. A line under the launcher shows what is left of a time
+allowance.
+
+In place of the context menu:
+
+* **The bookmarklets.** The dashboard's **SealSkin in This Browser** card has
+  two links to drag to your bookmarks bar. **Send to SealSkin** opens the page
+  you are on in SealSkin, or searches for the text you selected. **Pick for
+  SealSkin** waits for your next click: click a link to open that link in
+  SealSkin, or an image, video, or audio to send the file; Shift-click a link
+  to send the file it leads to. A picked file is fetched by the page you are
+  on, with your sign-in on that site, so it works for files only that site can
+  read; anything the page cannot fetch opens as a link instead.
+* **`web+sealskin:` links.** After **Open web+sealskin: Links Here** (Chrome,
+  Edge, Firefox), a link such as `web+sealskin:https://example.com` opens
+  its address in SealSkin.
+* **Search.** The web app offers itself to the browser as a search engine
+  (OpenSearch), and `…/?q=terms` and `…/?url=address` open the launcher
+  with that search or address.
+* **As an installed app** (Chrome and Edge, from the browser's install
+  option): SealSkin becomes a target that other applications **share** links,
+  text, and files to, and on a desktop it is offered to **open** the file types
+  your installed applications open.
+
+Sessions open in tabs of their own. While the web app's tab stays open,
+**Re-open** brings a session's tab forward and **Stop** closes it; after the
+web app is reloaded, and always in Safari, which lets the web app keep no
+hold on the tab, **Re-open** opens the session in a new tab. Where the web app
+cannot close the tab (Safari, and Chrome for a session at an address of its
+own), the tab closes itself a few seconds after **Stop**, when its page
+reconnects to the stopped session, or says the session stopped where the
+browser does not let a page close its tab.
+
+Each session opens at an address of its own (see
+[Session origins](configuration.md#session-origins)), which keeps its pages
+away from the web app and from other sessions altogether: session tabs get no
+link back to the web app, it cannot be framed, and nothing a session's page
+does can use your sign-in.
+
 ## The options page
 
-The extension's options page (and the app's dashboard) is where the client
-configuration lives, alongside the account-level views: **Configuration**
-(connection, export your config file for another device, log out), **Home
-Directories**, **Active Sessions**, and **Pinned Behavior**. Administrators see
-the management panels described in [Administration](administration.md) in the
-same place.
+The extension's options page (and the dashboard of the app and the web app)
+is where the client configuration lives, alongside the account-level views:
+**Configuration** (connection, export your config file for another device,
+log out), **Home Directories**, **Active Sessions**, and **Pinned Behavior**.
+Administrators see the management panels described in
+[Administration](administration.md) in the same place.

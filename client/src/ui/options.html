@@ -12,7 +12,7 @@
     <div class="options-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <img src="icons/icon128.png" alt="SealSkin Logo" class="logo">
+                <img src="icons/icon128.png" alt="" class="logo">
                 <h1>SealSkin</h1>
             </div>
             <nav class="sidebar-nav">
@@ -51,6 +51,10 @@
                     <i class="fas fa-download fa-fw"></i>
                     <span data-i18n="options.sidebar.installedApps">Installed Apps</span>
                 </button>
+                <button class="nav-link admin-nav-link" style="display:none;" data-tabname="ProotApps">
+                    <i class="fas fa-box-open fa-fw"></i>
+                    <span data-i18n="options.sidebar.prootApps">PRoot Apps</span>
+                </button>
                 <button class="nav-link admin-nav-link" style="display:none;" data-tabname="Users">
                     <i class="fas fa-users fa-fw"></i>
                     <span data-i18n="options.sidebar.users">Users</span>
@@ -63,6 +67,22 @@
                     <i class="fas fa-user-shield fa-fw"></i>
                     <span data-i18n="options.sidebar.admins">Admins</span>
                 </button>
+                <button class="nav-link admin-nav-link" style="display:none;" data-tabname="Cluster">
+                    <i class="fas fa-sitemap fa-fw"></i>
+                    <span data-i18n="options.sidebar.cluster">Cluster</span>
+                </button>
+                <button class="nav-link admin-nav-link" style="display:none;" data-tabname="Branding">
+                    <i class="fas fa-palette fa-fw"></i>
+                    <span data-i18n="options.sidebar.branding">Branding</span>
+                </button>
+                <button class="nav-link admin-nav-link" style="display:none;" data-tabname="SignIn">
+                    <i class="fas fa-id-badge fa-fw"></i>
+                    <span data-i18n="options.sidebar.signIn">Sign In</span>
+                </button>
+                <button class="nav-link admin-nav-link" style="display:none;" data-tabname="Audit">
+                    <i class="fas fa-clipboard-list fa-fw"></i>
+                    <span data-i18n="options.sidebar.audit">Audit Log</span>
+                </button>
             </nav>
         </aside>
 
@@ -73,12 +93,15 @@
                         <div class="card-header">
                             <h3 data-i18n="options.dashboard.title"><i class="fas fa-tachometer-alt"></i> Dashboard</h3>
                             <button id="change-connection-button" class="secondary"><i class="fas fa-exchange-alt"></i> <span id="change-connection-label">Change connection</span></button>
+                            <button id="sign-out-button" class="secondary" style="display: none;"><i class="fas fa-sign-out-alt"></i> <span data-i18n="options.dashboard.signOut">Sign out</span></button>
                         </div>
                         <div class="status-grid">
                             <div>
                                 <h4 data-i18n="options.dashboard.userStatus"><i class="fas fa-user-check"></i> User Status</h4>
                                 <p><span data-i18n="options.dashboard.loggedInAs">Logged in as:</span> <strong id="dashboard-username"></strong></p>
                                 <p><span data-i18n="options.dashboard.role">Role:</span> <strong id="dashboard-role"></strong></p>
+                                <p id="dashboard-via-row" style="display: none;"><span data-i18n="options.dashboard.signedInThrough">Signed in through:</span> <strong id="dashboard-via"></strong></p>
+                                <p id="dashboard-allowance-row" style="display: none;"><span data-i18n="options.dashboard.allowance">Allowance:</span> <strong id="dashboard-allowance"></strong></p>
                             </div>
                             <div>
                                 <h4 data-i18n="options.dashboard.serverInfo"><i class="fas fa-server"></i> Server Info</h4>
@@ -110,6 +133,20 @@
                             </div>
                         </div>
                     </div>
+                    <div class="card" id="web-card" style="display: none;">
+                        <div class="card-header">
+                            <h3 data-i18n="options.web.title"><i class="fas fa-globe"></i> SealSkin in This Browser</h3>
+                        </div>
+                        <p><a id="web-bookmarklet" class="bookmarklet" href="#" data-i18n="options.web.bookmarklet">Send to SealSkin</a></p>
+                        <p class="muted" data-i18n="options.web.bookmarkletHelp">Drag this link to your bookmarks bar. Clicking it opens the page you are on in SealSkin, or searches for the text you selected.</p>
+                        <p><a id="web-pick" class="bookmarklet" href="#" data-i18n="options.web.pick">Pick for SealSkin</a></p>
+                        <p class="muted" data-i18n="options.web.pickHelp">Drag this one there too. Click it, then click a link to open that link in SealSkin, or an image, video, or audio to send the file. Shift-click a link to send the file it leads to, fetched with your sign-in on that site.</p>
+                        <div id="web-protocol">
+                            <p><button id="web-protocol-button" class="secondary" data-i18n="options.web.protocol">Open web+sealskin: Links Here</button></p>
+                            <p class="muted" data-i18n="options.web.protocolHelp">A link written as web+sealskin: followed by an address then opens that address in SealSkin.</p>
+                        </div>
+                        <p class="muted" data-i18n="options.web.install">Where the browser can install web apps, install SealSkin from its menu to share links and files to it and to open files with it.</p>
+                    </div>
                     <div class="card" id="how-to-card">
                         <div class="card-header">
                             <h3 data-i18n="options.dashboard.howTo"><i class="fas fa-book"></i> How to Use SealSkin</h3>
@@ -129,7 +166,7 @@
                     <p data-i18n="options.home.description">Create persistent storage directories to use across sessions. These will be mounted into your applications as your configuration directory.</p>
                     <div class="table-container">
                         <table id="homedirs-table">
-                            <thead><tr><th data-i18n="common.name">Name</th><th class="actions-cell" data-i18n="common.actions">Actions</th></tr></thead>
+                            <thead><tr><th data-i18n="common.name">Name</th><th id="homedirs-node-header" style="display: none;" data-i18n="options.home.node">Node</th><th class="actions-cell" data-i18n="common.actions">Actions</th></tr></thead>
                             <tbody></tbody>
                         </table>
                     </div>
@@ -139,11 +176,13 @@
                         <h3 data-i18n="options.home.newTitle">Create New Home Directory</h3>
                     </div>
                     <form id="add-homedir-form">
-                        <div class="form-group">
-                            <label for="newHomeDirName" data-i18n="options.home.nameLabel">Directory Name:</label>
-                            <input type="text" id="newHomeDirName" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen." data-i18n-placeholder="options.home.namePlaceholder" placeholder="e.g., my-project-files">
+                        <div class="field-list single">
+                        <div class="field">
+                            <div class="field-text"><label for="newHomeDirName" data-i18n="options.home.nameLabel">Directory Name:</label></div>
+                            <div class="field-control"><input type="text" id="newHomeDirName" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen." data-i18n-placeholder="options.home.namePlaceholder" placeholder="e.g., my-project-files"></div>
                         </div>
-                        <button type="submit" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.home.createButton">Create Directory</span></button>
+                        </div>
+                        <div class="button-group"><button type="submit" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.home.createButton">Create Directory</span></button></div>
                     </form>
                 </div>
             </div>
@@ -186,10 +225,8 @@
                     <div class="card-header">
                         <h3 data-i18n="options.admins.serverKeyTitle">Server Public Key</h3>
                     </div>
-                    <div class="form-group">
-                        <label data-i18n="options.admins.serverKeyDescription">This is the public key that user configuration files will need to connect to this server.</label>
-                        <textarea id="server-public-key-display" readonly rows="6"></textarea>
-                    </div>
+                    <p class="description" data-i18n="options.admins.serverKeyDescription">This is the public key that user configuration files will need to connect to this server.</p>
+                    <textarea id="server-public-key-display" readonly rows="6"></textarea>
                 </div>
 
                 <div class="card">
@@ -208,10 +245,354 @@
                  <div class="card" id="create-admin-section">
                     <div class="card-header"><h3 data-i18n="options.admins.newTitle">Create New Admin</h3></div>
                     <form id="add-admin-form">
-                        <div class="form-group"><label for="newAdminUsername"><span data-i18n="common.username">Username</span>:</label><input type="text" id="newAdminUsername" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen."></div>
-                        <div class="form-group"><label for="newAdminPublicKey" data-i18n="options.admins.publicKeyOptionalLabel">Public Key (Optional):</label><textarea id="newAdminPublicKey" rows="4" data-i18n-placeholder="options.admins.publicKeyPlaceholder" placeholder="Paste public key here, or leave blank to generate one."></textarea></div>
-                        <br><button type="submit" class="primary"><i class="fas fa-user-plus"></i> <span data-i18n="options.admins.createButton">Create Admin</span></button>
+                        <div class="field-list single">
+                        <div class="field">
+                            <div class="field-text"><label for="newAdminUsername"><span data-i18n="common.username">Username</span>:</label></div>
+                            <div class="field-control"><input type="text" id="newAdminUsername" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen."></div>
+                        </div>
+                        <div class="field wide">
+                            <div class="field-text"><label for="newAdminPublicKey" data-i18n="options.admins.publicKeyOptionalLabel">Public Key (Optional):</label></div>
+                            <div class="field-control"><textarea id="newAdminPublicKey" rows="4" data-i18n-placeholder="options.admins.publicKeyPlaceholder" placeholder="Paste public key here, or leave blank to generate one."></textarea></div>
+                        </div>
+                        </div>
+                        <div class="button-group"><button type="submit" class="primary"><i class="fas fa-user-plus"></i> <span data-i18n="options.admins.createButton">Create Admin</span></button></div>
                     </form>
+                </div>
+            </div>
+
+            <div id="Cluster" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 data-i18n="options.cluster.nodesTitle">Nodes</h3>
+                        <button id="cluster-refresh-btn" class="secondary"><i class="fas fa-sync-alt"></i> <span data-i18n="common.refresh">Refresh</span></button>
+                    </div>
+                    <div class="table-container">
+                        <table id="cluster-nodes-table">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="common.name">Name</th>
+                                    <th data-i18n="options.cluster.pool">Pool</th>
+                                    <th data-i18n="common.status">Status</th>
+                                    <th data-i18n="options.cluster.load">Load</th>
+                                    <th data-i18n="common.sessions">Sessions</th>
+                                    <th data-i18n="common.version">Version</th>
+                                    <th class="actions-cell" data-i18n="common.actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3 data-i18n="options.cluster.joinTitle">Add a Node</h3></div>
+                    <p class="description" data-i18n="options.cluster.joinDescription">Create a join code, start the new node with the two lines below in its environment, then approve it in the table above. A code admits one node and lasts an hour.</p>
+                    <form id="cluster-join-form">
+                        <div class="field-list single">
+                        <div class="field">
+                            <div class="field-text"><label for="cluster-join-pool" data-i18n="options.cluster.pool">Pool</label></div>
+                            <div class="field-control"><select id="cluster-join-pool"></select></div>
+                        </div>
+                        </div>
+                        <div class="button-group"><button type="submit" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.cluster.joinButton">Create Join Code</span></button></div>
+                    </form>
+                    <div id="cluster-join-result" style="display: none; margin-top: 1.5rem;">
+                        <div class="form-group">
+                            <label for="cluster-join-env" id="cluster-join-expires"></label>
+                            <textarea id="cluster-join-env" readonly rows="2"></textarea>
+                        </div>
+                        <button type="button" id="cluster-join-copy" class="secondary"><i class="fas fa-copy"></i> <span data-i18n="common.copy">Copy</span></button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3 data-i18n="options.cluster.poolsTitle">Pools</h3></div>
+                    <p class="description" data-i18n="options.cluster.poolsDescription">A pool is a set of nodes sessions start on. A restricted pool is open only to the users and groups named here or allowed by their settings.</p>
+                    <div class="table-container">
+                        <table id="cluster-pools-table">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="common.name">Name</th>
+                                    <th data-i18n="options.cluster.poolDomain">Domain</th>
+                                    <th data-i18n="options.cluster.poolAccess">Access</th>
+                                    <th data-i18n="options.cluster.poolCost">Cost per hour</th>
+                                    <th data-i18n="options.cluster.nodesTitle">Nodes</th>
+                                    <th class="actions-cell" data-i18n="common.actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <h5 id="cluster-pool-form-title" class="field-group" data-i18n="options.cluster.poolNew">New Pool</h5>
+                    <form id="cluster-pool-form">
+                        <div class="field-list single">
+                        <div class="field">
+                            <div class="field-text"><label for="cluster-pool-name" data-i18n="common.name">Name</label></div>
+                            <div class="field-control"><input type="text" id="cluster-pool-name" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen."></div>
+                        </div>
+                        <div class="field">
+                            <div class="field-text"><label for="cluster-pool-description" data-i18n="options.cluster.poolDescriptionLabel">Description</label></div>
+                            <div class="field-control"><input type="text" id="cluster-pool-description"></div>
+                        </div>
+                        <div class="field">
+                            <div class="field-text"><label for="cluster-pool-domain" data-i18n="options.cluster.poolDomainLabel">Domain the pool's nodes are named under</label></div>
+                            <div class="field-control"><input type="text" id="cluster-pool-domain"></div>
+                        </div>
+                        <div class="field">
+                            <div class="field-text"><label for="cluster-pool-cost" data-i18n="options.cluster.poolCostLabel">Allowance an hour of session costs</label></div>
+                            <div class="field-control"><input type="number" id="cluster-pool-cost" min="0" step="any" value="1"></div>
+                        </div>
+                        <div class="field">
+                            <div class="field-text"><label for="cluster-pool-gpu-cost" data-i18n="options.cluster.poolGpuCostLabel">Allowance an hour of GPU session costs (blank: the same)</label></div>
+                            <div class="field-control"><input type="number" id="cluster-pool-gpu-cost" min="0" step="any"></div>
+                        </div>
+                        <div class="field">
+                            <div class="field-text"><label for="cluster-pool-users" data-i18n="options.cluster.poolUsersLabel">Users it is open to when restricted (comma-separated)</label></div>
+                            <div class="field-control"><input type="text" id="cluster-pool-users"></div>
+                        </div>
+                        <div class="field">
+                            <div class="field-text"><label for="cluster-pool-groups" data-i18n="options.cluster.poolGroupsLabel">Groups it is open to when restricted (comma-separated)</label></div>
+                            <div class="field-control"><input type="text" id="cluster-pool-groups"></div>
+                        </div>
+                        <div class="field switch">
+                            <div class="field-text"><label for="cluster-pool-restricted" data-i18n="options.cluster.poolRestricted">Restricted</label></div>
+                            <div class="field-control"><input type="checkbox" id="cluster-pool-restricted"></div>
+                        </div>
+                        <div class="field switch">
+                            <div class="field-text"><label for="cluster-pool-stop" data-i18n="options.cluster.poolStopWhenSpent">End sessions when the allowance is spent</label></div>
+                            <div class="field-control"><input type="checkbox" id="cluster-pool-stop"></div>
+                        </div>
+                        </div>
+                        <div class="button-group">
+                            <button type="submit" class="primary"><i class="fas fa-save"></i> <span data-i18n="options.cluster.poolSave">Save Pool</span></button>
+                            <button type="button" id="cluster-pool-reset" class="secondary" data-i18n="common.cancel">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3 data-i18n="options.cluster.storeTitle">Shared Records</h3></div>
+                    <p class="description" data-i18n="options.cluster.storeDescription">Where the nodes keep the records they share: users, groups, apps, pools, and these settings.</p>
+                    <div class="status-grid">
+                        <div>
+                            <p><span data-i18n="options.cluster.storeKept">Kept:</span> <strong id="cluster-store-kind"></strong></p>
+                            <p id="cluster-store-detail-row" style="display: none;"><strong id="cluster-store-detail"></strong></p>
+                            <p><span data-i18n="common.status">Status</span>: <strong id="cluster-store-reachable"></strong></p>
+                        </div>
+                        <div>
+                            <p><span data-i18n="options.cluster.publicUrl">Web app address:</span> <strong id="cluster-public-url"></strong></p>
+                            <p><span data-i18n="options.cluster.sessionDomain">Session domain:</span> <strong id="cluster-session-domain"></strong></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3 data-i18n="options.cluster.settingsTitle">Cluster Settings</h3></div>
+                    <p class="description" data-i18n="options.cluster.signInDescription">Written here, a setting holds for every node and takes precedence over a node's environment. Clear a field to hand the setting back to each node's environment.</p>
+                    <form id="cluster-settings-form" data-settings="files_sync">
+                        <div id="cluster-settings-fields" class="field-list single"></div>
+                        <div class="button-group"><button type="submit" class="primary"><i class="fas fa-save"></i> <span data-i18n="options.modals.saveChanges">Save Changes</span></button></div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 data-i18n="options.cluster.usageTitle">Usage</h3>
+                        <select id="cluster-usage-period" style="width: auto;">
+                            <option value="day" data-i18n="options.periods.day">Day</option>
+                            <option value="week" data-i18n="options.periods.week">Week</option>
+                            <option value="month" selected data-i18n="options.periods.month">Month</option>
+                        </select>
+                    </div>
+                    <div class="table-container">
+                        <table id="cluster-usage-table">
+                            <thead><tr><th data-i18n="common.username">Username</th><th data-i18n="options.cluster.usageHours">Weighted hours</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="Branding" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 data-i18n="options.branding.title">Branding</h3>
+                        <div class="button-group">
+                            <button type="button" id="branding-reset-btn" class="secondary"><i class="fas fa-undo"></i> <span data-i18n="options.branding.reset">Back to defaults</span></button>
+                            <button type="button" id="branding-save-btn" class="primary"><i class="fas fa-save"></i> <span data-i18n="options.branding.save">Save branding</span></button>
+                        </div>
+                    </div>
+                    <p class="description" data-i18n="options.branding.help">Give the web app your organization's name, logo, colors, wallpaper, and links.</p>
+                    <div class="branding-layout">
+                        <form id="branding-form" class="branding-form" autocomplete="off">
+                            <h5 class="field-group" data-i18n="options.branding.identity">Identity</h5>
+                            <div class="field-list single">
+                                <div class="field">
+                                    <div class="field-text"><label for="brand-name" data-i18n="options.branding.name">Product name</label><p class="description" data-i18n="options.branding.nameHelp"></p></div>
+                                    <div class="field-control"><input type="text" id="brand-name" maxlength="60" required></div>
+                                </div>
+                                <div class="field">
+                                    <div class="field-text"><label data-i18n="options.branding.logo">Logo</label><p class="description" data-i18n="options.branding.logoHelp"></p></div>
+                                    <div class="field-control brand-picture">
+                                        <img id="brand-logo-preview" class="brand-logo-preview" src="icons/icon128.png" alt="">
+                                        <button type="button" class="secondary" data-pick="logo"><i class="fas fa-upload"></i> <span data-i18n="options.branding.upload">Upload</span></button>
+                                        <button type="button" class="secondary" data-clear="logo" hidden><i class="fas fa-times"></i> <span data-i18n="options.branding.remove">Remove</span></button>
+                                        <input type="file" id="brand-logo-file" accept="image/png,image/jpeg,image/webp" hidden>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <div class="field-text"><label for="brand-logo-link" data-i18n="options.branding.logoLink">The logo links to</label><p class="description" data-i18n="options.branding.logoLinkHelp"></p></div>
+                                    <div class="field-control"><input type="url" id="brand-logo-link" placeholder="https://" maxlength="2000"></div>
+                                </div>
+                                <div class="field">
+                                    <div class="field-text"><label for="brand-accent" data-i18n="options.branding.accent">Accent color</label><p class="description" data-i18n="options.branding.accentHelp"></p></div>
+                                    <div class="field-control brand-accent">
+                                        <input type="color" id="brand-accent" value="#8b7cf6">
+                                        <input type="text" id="brand-accent-text" class="brand-accent-text" maxlength="7" placeholder="#8b7cf6" pattern="^#[0-9a-fA-F]{6}$">
+                                        <button type="button" class="secondary" id="brand-accent-clear"><i class="fas fa-undo"></i> <span data-i18n="options.branding.accentDefault">Default</span></button>
+                                    </div>
+                                </div>
+                                <div class="field switch">
+                                    <div class="field-text"><label for="brand-store-links" data-i18n="options.branding.storeLinks">Show the extension and app store links on the sign-in page</label></div>
+                                    <div class="field-control"><input type="checkbox" id="brand-store-links"></div>
+                                </div>
+                            </div>
+
+                            <h5 class="field-group" data-i18n="options.branding.wallpaper">Wallpaper</h5>
+                            <p class="description" data-i18n="options.branding.wallpaperHelp"></p>
+                            <div class="field-list single">
+                                <div class="field">
+                                    <div class="field-text"><label data-i18n="options.branding.wallpaper">Wallpaper</label></div>
+                                    <div class="field-control brand-picture">
+                                        <div id="brand-wallpaper-preview" class="brand-wallpaper-preview"></div>
+                                        <button type="button" class="secondary" data-pick="wallpaper"><i class="fas fa-image"></i> <span data-i18n="options.branding.upload">Upload</span></button>
+                                        <button type="button" class="secondary" data-clear="wallpaper" hidden><i class="fas fa-times"></i> <span data-i18n="options.branding.remove">Remove</span></button>
+                                        <input type="file" id="brand-wallpaper-file" accept="image/png,image/jpeg,image/webp" hidden>
+                                    </div>
+                                </div>
+                                <div class="field" data-wallpaper-only>
+                                    <div class="field-text"><label for="brand-wallpaper-fit" data-i18n="options.branding.fit">Position</label></div>
+                                    <div class="field-control">
+                                        <select id="brand-wallpaper-fit">
+                                            <option value="cover" data-i18n="web.home.fitFill">Fill</option>
+                                            <option value="contain" data-i18n="web.home.fitFit">Fit</option>
+                                            <option value="stretch" data-i18n="web.home.fitStretch">Stretch</option>
+                                            <option value="center" data-i18n="web.home.fitCenter">Center</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="field" data-wallpaper-only>
+                                    <div class="field-text"><label for="brand-wallpaper-blur"><span data-i18n="options.branding.blur">Blur</span> <output id="brand-wallpaper-blur-value"></output></label></div>
+                                    <div class="field-control"><input type="range" id="brand-wallpaper-blur" min="0" max="24" step="1"></div>
+                                </div>
+                                <div class="field" data-wallpaper-only>
+                                    <div class="field-text"><label for="brand-wallpaper-dim"><span data-i18n="options.branding.dim">Dim</span> <output id="brand-wallpaper-dim-value"></output></label></div>
+                                    <div class="field-control"><input type="range" id="brand-wallpaper-dim" min="0" max="90" step="5"></div>
+                                </div>
+                                <div class="field switch" data-wallpaper-only>
+                                    <div class="field-text"><label for="brand-wallpaper-forced" data-i18n="options.branding.wallpaperForced">Force this wallpaper on every user</label><p class="description" data-i18n="options.branding.wallpaperForcedHelp"></p></div>
+                                    <div class="field-control"><input type="checkbox" id="brand-wallpaper-forced"></div>
+                                </div>
+                            </div>
+
+                            <h5 class="field-group" data-i18n="options.branding.links">Home page links</h5>
+                            <p class="description" data-i18n="options.branding.linksHelp"></p>
+                            <div class="table-container">
+                                <table id="brand-links-table">
+                                    <thead>
+                                        <tr>
+                                            <th data-i18n="options.branding.linkName">Name</th>
+                                            <th data-i18n="options.branding.linkUrl">Address</th>
+                                            <th data-i18n="options.branding.linkIcon">Icon</th>
+                                            <th data-i18n="options.branding.linkOpen">Opens</th>
+                                            <th class="actions-cell" data-i18n="common.actions">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <p class="description" data-i18n="options.branding.linkIconHelp"></p>
+                            <div class="button-group"><button type="button" id="brand-add-link" class="secondary"><i class="fas fa-plus"></i> <span data-i18n="options.branding.addLink">Add a link</span></button></div>
+                        </form>
+
+                        <div class="branding-preview">
+                            <h5 class="field-group" data-i18n="options.branding.preview">Preview</h5>
+                            <p class="description" data-i18n="options.branding.previewHelp"></p>
+                            <div class="preview-browser-window brand-window" id="brand-mock">
+                                <div class="preview-browser-header">
+                                    <span class="preview-browser-dots"></span>
+                                    <div class="preview-browser-address-bar brand-address"><img id="mock-favicon" src="icons/icon128.png" alt=""><span id="mock-title">SealSkin</span></div>
+                                </div>
+                                <div class="mock-body">
+                                    <div class="mock-rail">
+                                        <img id="mock-logo" class="mock-logo" src="icons/icon128.png" alt="">
+                                        <span class="mock-nav active"><i class="fas fa-th-large"></i><small data-i18n="web.nav.home">Home</small></span>
+                                        <span class="mock-nav"><i class="fas fa-folder"></i><small data-i18n="web.nav.files">Files</small></span>
+                                        <span class="mock-nav"><i class="fas fa-sliders-h"></i><small data-i18n="web.nav.settings">Settings</small></span>
+                                        <span class="mock-account"><span class="mock-avatar">A</span><small data-i18n="options.branding.previewUser">A user</small></span>
+                                    </div>
+                                    <div class="mock-page">
+                                        <div class="mock-backdrop" id="mock-backdrop"></div>
+                                        <div class="mock-content">
+                                            <div class="mock-hero">
+                                                <span class="mock-search"><i class="fas fa-search"></i><span data-i18n="web.home.searchPlaceholder">Search applications, or paste a link to open it in isolation</span></span>
+                                                <span class="mock-btn"><i class="fas fa-upload"></i></span>
+                                                <span class="mock-btn" id="mock-customize"><i class="fas fa-paint-brush"></i></span>
+                                            </div>
+                                            <div class="mock-section" id="mock-links-section" hidden>
+                                                <h4 data-i18n="web.home.links">Links</h4>
+                                                <div class="mock-tiles" id="mock-links"></div>
+                                            </div>
+                                            <div class="mock-section">
+                                                <h4 data-i18n="web.home.applications">Applications</h4>
+                                                <div class="mock-tiles" id="mock-apps"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="SignIn" class="tab-content">
+                <div id="signin-cards"></div>
+            </div>
+
+            <div id="Audit" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 data-i18n="options.audit.title">Audit Log</h3>
+                        <input type="text" id="audit-search" class="search-input" data-i18n-placeholder="options.audit.searchPlaceholder" placeholder="Search events...">
+                    </div>
+                    <div class="audit-toolbar">
+                        <select id="audit-range" data-i18n-title="options.audit.range" title="Range"></select>
+                        <select id="audit-page-size" data-i18n-title="options.audit.pageSize" title="Events per page">
+                            <option value="25">25</option>
+                            <option value="50" selected>50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <button type="button" id="audit-refresh" class="secondary"><i class="fas fa-sync-alt"></i> <span data-i18n="common.refresh">Refresh</span></button>
+                        <span class="audit-spacer"></span>
+                        <button type="button" class="secondary audit-export" data-format="csv"><i class="fas fa-file-csv"></i> <span data-i18n="options.audit.exportCsv">Export CSV</span></button>
+                        <button type="button" class="secondary audit-export" data-format="json"><i class="fas fa-file-code"></i> <span data-i18n="options.audit.exportJson">Export JSON</span></button>
+                    </div>
+                    <div class="table-container">
+                        <table id="audit-table">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="options.audit.time">Time</th>
+                                    <th data-i18n="options.home.node">Node</th>
+                                    <th data-i18n="options.audit.event">Event</th>
+                                    <th data-i18n="common.username">Username</th>
+                                    <th data-i18n="options.audit.details">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-controls" id="audit-pagination"></div>
                 </div>
             </div>
 
@@ -223,7 +604,7 @@
                     </div>
                     <div class="table-container">
                         <table id="users-table">
-                            <thead><tr><th data-i18n="common.username">Username</th><th data-i18n="common.group">Group</th><th data-i18n="common.publicKey">Public Key</th><th class="actions-cell" data-i18n="common.actions">Actions</th></tr></thead>
+                            <thead><tr><th data-i18n="common.username">Username</th><th data-i18n="common.groups">Groups</th><th data-i18n="common.publicKey">Public Key</th><th class="actions-cell" data-i18n="common.actions">Actions</th></tr></thead>
                             <tbody></tbody>
                         </table>
                     </div>
@@ -232,32 +613,18 @@
                  <div class="card" id="create-user-section">
                     <div class="card-header"><h3 data-i18n="options.users.newTitle">Create New User</h3></div>
                     <form id="add-user-form">
-                        <div class="form-group"><label for="newUsername"><span data-i18n="common.username">Username</span>:</label><input type="text" id="newUsername" required></div>
-                        <div class="form-group"><label for="newUserPublicKey" data-i18n="options.users.publicKeyOptionalLabel">Public Key (Optional):</label><textarea id="newUserPublicKey" rows="4" data-i18n-placeholder="options.users.publicKeyPlaceholder" placeholder="Paste user's public key here, or leave blank to generate one."></textarea></div>
-
-                        <h4 data-i18n="options.users.settingsTitle">User Settings</h4>
-                        <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem 2rem;">
-                            <div class="form-group">
-                                <label for="newUserGroup"><span data-i18n="common.group">Group</span>:</label>
-                                <select id="newUserGroup"></select>
-                            </div>
-                            <div class="form-group">
-                                <label for="newUserSessionLimit" data-i18n="options.users.sessionLimitLabel">Sessions limit</label>
-                                <input type="number" id="newUserSessionLimit" value="-1" data-i18n-title="options.users.sessionLimitTitle" title="Number of active sessions a user can have. -1 for unlimited.">
-                            </div>
+                        <div class="field-list single">
+                        <div class="field">
+                            <div class="field-text"><label for="newUsername"><span data-i18n="common.username">Username</span>:</label></div>
+                            <div class="field-control"><input type="text" id="newUsername" required></div>
                         </div>
-
-                        <h4 data-i18n="options.users.permissionsTitle">Permissions & Hardening</h4>
-                        <div class="settings-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-                            <div class="form-group"><label><input type="checkbox" id="newUserActive" checked> <span data-i18n="options.users.activeAccount">Active Account</span></label></div>
-                            <div class="form-group"><label><input type="checkbox" id="newUserPersistentStorage" checked> <span data-i18n="options.users.allowStorage">Allow Persistent Storage</span></label></div>
-                            <div class="form-group"><label><input type="checkbox" id="newUserPublicSharing"> <span data-i18n="options.users.allowPublicSharing">Allow Public File Sharing</span></label></div>
-                            <div class="form-group"><label><input type="checkbox" id="newUserGpu"> <span data-i18n="options.users.allowGpu">Allow GPU Access</span></label></div>
-                            <div class="form-group"><label><input type="checkbox" id="newUserHardenContainer"> <span data-i18n="options.users.hardenContainer">Harden Container</span></label></div>
-                            <div class="form-group"><label><input type="checkbox" id="newUserHardenOpenbox"> <span data-i18n="options.users.hardenWm">Harden Window Manager</span></label></div>
-                            <div class="form-group"><label><input type="checkbox" id="newUserEditTemplates"> <span data-i18n="options.users.allowEditTemplates">Allow Editing App Templates</span></label></div>
+                        <div class="field wide" id="newUserKeyGroup">
+                            <div class="field-text"><label for="newUserPublicKey" data-i18n="options.users.publicKeyOptionalLabel">Public Key (Optional):</label></div>
+                            <div class="field-control"><textarea id="newUserPublicKey" rows="4" data-i18n-placeholder="options.users.publicKeyPlaceholder" placeholder="Paste user's public key here, or leave blank to generate one."></textarea></div>
                         </div>
-                        <br><button type="submit" class="primary"><i class="fas fa-user-plus"></i> <span data-i18n="options.users.createButton">Create User</span></button>
+                        </div>
+                        <div id="newUserSettings"></div>
+                        <div class="button-group"><button type="submit" class="primary"><i class="fas fa-user-plus"></i> <span data-i18n="options.users.createButton">Create User</span></button></div>
                     </form>
                 </div>
             </div>
@@ -279,27 +646,14 @@
                 <div class="card" id="create-group-section">
                     <div class="card-header"><h3 data-i18n="options.groups.newTitle">Create New Group</h3></div>
                     <form id="add-group-form">
-                        <div class="form-group"><label for="newGroupName" data-i18n="options.groups.nameLabel">Group Name:</label><input type="text" id="newGroupName" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen."></div>
-                        <h4 data-i18n="options.groups.overrideTitle">Group Override Settings</h4>
-
-                        <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem 2rem; margin-bottom: 1.5rem;">
-                             <div class="form-group">
-                                <label for="newGroupSessionLimit" data-i18n="options.users.sessionLimitLabel">Sessions limit</label>
-                                <input type="number" id="newGroupSessionLimit" value="-1" data-i18n-title="options.users.sessionLimitTitle" title="Number of active sessions a user can have. -1 for unlimited.">
-                            </div>
+                        <div class="field-list single">
+                        <div class="field">
+                            <div class="field-text"><label for="newGroupName" data-i18n="options.groups.nameLabel">Group Name:</label></div>
+                            <div class="field-control"><input type="text" id="newGroupName" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen."></div>
                         </div>
-
-                        <h4 data-i18n="options.groups.permissionsTitle">Permissions & Hardening Overrides</h4>
-                        <div class="settings-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-                            <div class="form-group"><label><input type="checkbox" id="newGroupActive" checked> <span data-i18n="options.users.activeAccount">Active Accounts</span></label></div>
-                            <div class="form-group"><label><input type="checkbox" id="newGroupPersistentStorage" checked> <span data-i18n="options.users.allowStorage">Allow Persistent Storage</span></label></div>
-                            <div class="form-group"><label><input type="checkbox" id="newGroupPublicSharing"> <span data-i18n="options.users.allowPublicSharing">Allow Public File Sharing</span></label></div>
-                            <div class="form-group"><label><input type="checkbox" id="newGroupGpu" checked> <span data-i18n="options.users.allowGpu">Allow GPU Access</span></label></div>
-                            <div class="form-group"><label><input type="checkbox" id="newGroupHardenContainer"> <span data-i18n="options.users.hardenContainer">Harden Container</span></label></div>
-                            <div class="form-group"><label><input type="checkbox" id="newGroupHardenOpenbox"> <span data-i18n="options.users.hardenWm">Harden Window Manager</span></label></div>
-                            <div class="form-group"><label><input type="checkbox" id="newGroupEditTemplates"> <span data-i18n="options.users.allowEditTemplates">Allow Editing App Templates</span></label></div>
                         </div>
-                        <br><button type="submit" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.groups.createButton">Create Group</span></button>
+                        <div id="newGroupSettings"></div>
+                        <div class="button-group"><button type="submit" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.groups.createButton">Create Group</span></button></div>
                     </form>
                 </div>
             </div>
@@ -362,6 +716,60 @@
                 </div>
             </div>
 
+            <div id="ProotApps" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 data-i18n="options.prootApps.title">PRoot Apps Catalogs</h3>
+                        <div class="button-group">
+                            <button id="proot-new-catalog-btn" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.prootApps.newCatalog">New Catalog</span></button>
+                        </div>
+                    </div>
+                    <p class="description" data-i18n="options.prootApps.help">A catalog is a folder of PRoot Apps packages kept on every node and mounted read-only into the sessions of the users and groups assigned to it. Inside a session, proot-apps and its graphical installer install and update from the folder and reach no registry.</p>
+                    <div class="table-container">
+                        <table id="prootCatalogs-table">
+                            <thead><tr><th data-i18n="common.name">Name</th><th data-i18n="options.prootApps.apps">Apps</th><th data-i18n="options.prootApps.onThisNode">On this node</th><th class="actions-cell" data-i18n="common.actions">Actions</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-controls" id="prootCatalogs-pagination"></div>
+                </div>
+                <div class="card" id="proot-editor" style="display: none;">
+                    <div class="card-header">
+                        <h3 id="proot-editor-title" data-i18n="options.prootApps.newCatalog">New Catalog</h3>
+                        <div class="button-group">
+                            <button id="proot-cancel-btn" class="secondary" data-i18n="common.cancel">Cancel</button>
+                            <button id="proot-save-btn" class="primary"><i class="fas fa-save"></i> <span data-i18n="common.save">Save</span></button>
+                        </div>
+                    </div>
+                    <form id="proot-editor-form" class="field-list">
+                        <div class="field">
+                            <div class="field-text"><label for="proot-catalog-name" data-i18n="options.prootApps.nameLabel">Catalog name</label></div>
+                            <div class="field-control"><input type="text" id="proot-catalog-name" required maxlength="80"></div>
+                        </div>
+                        <div class="field switch">
+                            <div class="field-text"><label for="proot-catalog-auto-update" data-i18n="options.prootApps.autoUpdate">Auto update</label><p class="description" data-i18n="options.prootApps.autoUpdateHelp">Fetch the apps again on the auto-update interval when their package changed.</p></div>
+                            <div class="field-control"><input type="checkbox" id="proot-catalog-auto-update" checked></div>
+                        </div>
+                    </form>
+                    <h4 data-i18n="options.prootApps.selectedTitle">Selected apps</h4>
+                    <p class="description" data-i18n="options.prootApps.selectedHelp">Click an app below to add it or take it out. Apps from a remote other than the default one are installed by their full image name.</p>
+                    <div id="proot-selected" class="proot-selected"></div>
+                    <div class="card-header" style="margin-top: 1rem;">
+                        <h4 data-i18n="options.prootApps.remoteTitle">Available apps</h4>
+                        <input type="text" id="proot-remote-search" class="search-input" data-i18n-placeholder="options.prootApps.searchPlaceholder" placeholder="Search apps...">
+                    </div>
+                    <form id="proot-remote-form" class="form-group">
+                        <label for="proot-remote" data-i18n="options.prootApps.remoteLabel">Remote (GitHub owner/repo of a proot-apps repository)</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="proot-remote" pattern="^[A-Za-z0-9_.\-]+/[A-Za-z0-9_.\-]+$" required style="flex: 1;">
+                            <button type="submit" class="secondary"><i class="fas fa-cloud-download-alt"></i> <span data-i18n="options.prootApps.load">Load</span></button>
+                            <button type="button" id="proot-remote-refresh" class="secondary" data-i18n-title="options.prootApps.refreshRemote" title="Fetch the list again"><i class="fas fa-sync-alt"></i></button>
+                        </div>
+                    </form>
+                    <div id="proot-remote-grid" class="proot-grid"></div>
+                </div>
+            </div>
+
             <div id="AppTemplates" class="tab-content">
                 <div class="card">
                     <div class="card-header">
@@ -385,11 +793,15 @@
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <h3 data-i18n="options.appTemplates.previewTitle">UI Preview</h3>
+                <form id="app-template-form">
+                    <div class="template-toolbar">
+                        <input type="search" id="template-filter" class="search-input" data-i18n-placeholder="options.appTemplates.filterPlaceholder" placeholder="Filter settings…">
+                        <label class="template-toggle" for="template-changed-only"><input type="checkbox" id="template-changed-only"><span data-i18n="options.appTemplates.changedOnly">Changed only</span></label>
                     </div>
-                    <div class="preview-container">
+                    <div id="template-sections"></div>
+                    <div id="template-preview" hidden>
+                        <h5 class="template-group" data-i18n="options.appTemplates.previewTitle">UI Preview</h5>
+                        <div class="preview-container">
                         <div class="preview-browser-window">
                             <div class="preview-browser-header">
                                 <span class="preview-browser-dots"></span>
@@ -421,39 +833,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <form id="app-template-form">
-                    <div class="card">
-                        <h4 class="form-section-header" data-i18n="options.modals.features">UI Settings</h4>
-                        <div id="template-form-ui" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
-
-                        <h4 class="form-section-header" data-i18n="options.modals.advancedSettings">App Settings</h4>
-                        <div id="template-form-app" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
-                    </div>
-                    <hr class="nav-separator">
-                    <div class="card">
-                        <div class="card-header"><h3 data-i18n="options.users.permissionsTitle">Hardening Settings</h3></div>
-                        <div id="template-form-hardening" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
-                    </div>
-                    <hr class="nav-separator">
-                    <div class="card">
-                        <div class="card-header"><h3 data-i18n="options.modals.generalTitle">General & Performance Settings</h3></div>
-                        <div id="template-form-general" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
-                    </div>
-                    <hr class="nav-separator">
-                    <div class="card">
-                        <div class="card-header"><h3 data-i18n="options.modals.webrtcTitle">WebRTC &amp; TURN Settings</h3></div>
-                        <p class="description" style="margin-bottom: 1rem;" data-i18n="options.modals.webrtcDescription">Sessions stream over WebSockets by default. Setting any STUN, TURN, Cloudflare, or public IP value below, or choosing WebRTC mode, switches the container to WebRTC with dual mode enabled so users can still fall back to WebSockets.</p>
-                        <div id="template-form-webrtc" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
-                    </div>
-                    <hr class="nav-separator">
-                    <div class="card">
-                        <div class="card-header"><h3 data-i18n="options.modals.dockerTitle">Docker Advanced Overrides</h3></div>
-                        <p class="description" style="margin-bottom: 1rem;" data-i18n="options.modals.dockerDescription">These settings override the default container configuration. Use with caution and only if you know what you are doing.</p>
-                        <p id="template-docker-admin-only" class="description" style="display: none; margin-bottom: 1rem;" data-i18n="options.appTemplates.dockerAdminOnly">Only an administrator can change these settings.</p>
-                        <div id="template-form-docker" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -525,6 +905,118 @@
                 </div>
             </div>
 
+            <div id="WebLaboratory" class="tab-content">
+                <div class="card">
+                    <div class="card-header"><h3 data-i18n="options.appLaboratory.title">App Laboratory</h3></div>
+                    <p data-i18n="options.appLaboratory.explainer">The App Laboratory builds a meta-app: a variant of an installed application with its own name, icon, autostart script, and a home directory that is already set up. You set the application up once in a customization session, and every user's first launch starts from a copy of that home directory.</p>
+                    <ol class="lab-steps">
+                        <li><strong data-i18n="options.appLaboratory.step1Title">Describe the app</strong><span data-i18n="options.appLaboratory.step1">Pick the application to build on, and give the meta-app a name, an icon, and the users who may launch it.</span></li>
+                        <li><strong data-i18n="options.appLaboratory.step2Title">Customize it in a live session</strong><span data-i18n="options.appLaboratory.step2">A customization session opens with the template home directory writable. Install extensions, sign in, arrange it as users should find it.</span></li>
+                        <li><strong data-i18n="options.appLaboratory.step3Title">Close the session to save the template</strong><span data-i18n="options.appLaboratory.step3">Closing the session from this page keeps the home directory as the template.</span></li>
+                    </ol>
+                </div>
+
+                <div class="card lab-open" id="wlab-open-panel" style="display: none;">
+                    <div class="card-header"><h3><i class="fas fa-flask"></i> <span data-i18n="options.appLaboratory.openTitle">Customization session open</span></h3></div>
+                    <div class="lab-open-app">
+                        <img id="wlab-open-logo" src="icons/icon128.png" alt="" class="lab-icon-preview">
+                        <div>
+                            <strong id="wlab-open-name"></strong>
+                            <p id="wlab-open-started" class="description"></p>
+                        </div>
+                    </div>
+                    <p data-i18n="options.appLaboratory.openDescription">Everything changed in this session's home directory becomes the template. The session stays open until you close it here; it is not listed among your sessions.</p>
+                    <div class="button-group" id="wlab-open-actions">
+                        <button type="button" id="wlab-reopen-btn" class="primary"><i class="fas fa-external-link-alt"></i> <span data-i18n="options.appLaboratory.reopen">Re-open session</span></button>
+                        <button type="button" id="wlab-close-btn" class="warning"><i class="fas fa-save"></i> <span data-i18n="options.appLaboratory.closeAndSave">Close &amp; save template</span></button>
+                    </div>
+                    <div id="wlab-closing" class="lab-closing" style="display: none;">
+                        <div id="wlab-closing-spinner" class="spinner-small"></div>
+                        <p id="wlab-closing-status"></p>
+                        <button type="button" id="wlab-close-retry" class="secondary" style="display: none;"><i class="fas fa-redo"></i> <span data-i18n="shell.host.retry">Retry</span></button>
+                    </div>
+                </div>
+
+                <form id="wlab-form" class="lab-grid">
+                    <div class="card">
+                        <div class="card-header"><h3 data-i18n="options.appLaboratory.describeTitle">1. Describe</h3></div>
+                        <div class="field-list single">
+                        <div class="field">
+                            <div class="field-text"><label for="wlab-app-select" data-i18n="options.appLaboratory.selectApp">Select App to Customize</label></div>
+                            <div class="field-control"><select id="wlab-app-select"><option value="new" data-i18n="options.appLaboratory.createNew">-- Create New --</option></select></div>
+                        </div>
+                        <div class="field">
+                            <div class="field-text"><label for="wlab-base-app-select" data-i18n="options.appLaboratory.baseApp">Base Application</label><p class="description" data-i18n="options.appLaboratory.baseAppDescription">The new app will inherit the image and provider settings from this app.</p></div>
+                            <div class="field-control"><select id="wlab-base-app-select" required></select></div>
+                        </div>
+                        <div class="field">
+                            <div class="field-text"><label for="wlab-app-name" data-i18n="options.appLaboratory.appName">App Name</label></div>
+                            <div class="field-control"><input type="text" id="wlab-app-name" required></div>
+                        </div>
+                        <div class="field icon">
+                            <div class="field-text"><label data-i18n="options.appLaboratory.appIcon">App Icon (PNG, 192x192 recommended)</label></div>
+                            <div class="field-control"><img id="wlab-icon-preview" src="icons/icon128.png" alt="Icon Preview" class="lab-icon-preview"><label for="wlab-icon-upload" class="button secondary"><i class="fas fa-upload"></i> <span data-i18n="options.appLaboratory.uploadIcon">Upload</span></label><input type="file" id="wlab-icon-upload" accept="image/png" style="display: none;"></div>
+                        </div>
+                        <div class="field">
+                            <div class="field-text"><label for="wlab-app-users" data-i18n="options.modals.allowedUsersLabel">Allowed Users</label></div>
+                            <div class="field-control"><input type="text" id="wlab-app-users" value="all"></div>
+                        </div>
+                        <div class="field">
+                            <div class="field-text"><label for="wlab-app-groups" data-i18n="options.modals.allowedGroupsLabel">Allowed Groups</label></div>
+                            <div class="field-control"><input type="text" id="wlab-app-groups" value="all"></div>
+                        </div>
+                        </div>
+                        <details class="collapsible-section">
+                            <summary><h4 data-i18n="options.appLaboratory.advanced">Advanced</h4></summary>
+                            <div class="field-list single">
+                            <div class="field wide">
+                            <div class="field-text"><label for="wlab-autostart-script" data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</label></div>
+                            <div class="field-control"><textarea id="wlab-autostart-script" rows="4" placeholder="program ${SEALSKIN_FILE:+&quot;$SEALSKIN_FILE&quot;} ${SEALSKIN_URL:+&quot;$SEALSKIN_URL&quot;}"></textarea></div>
+                        </div>
+                            <div class="field wide">
+                            <div class="field-text"><label for="wlab-autostart-wayland-script"><span data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</span> (Wayland)</label></div>
+                            <div class="field-control"><textarea id="wlab-autostart-wayland-script" rows="4" placeholder="program ${SEALSKIN_FILE:+&quot;$SEALSKIN_FILE&quot;} ${SEALSKIN_URL:+&quot;$SEALSKIN_URL&quot;}"></textarea></div>
+                        </div>
+                            </div>
+                        </details>
+                        <div class="button-group"><button type="button" id="wlab-update-btn" class="secondary"><i class="fas fa-save"></i> <span data-i18n="common.save">Save</span></button></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><h3 data-i18n="options.appLaboratory.customizeTitle">2. Customize</h3></div>
+                        <p class="description" data-i18n="options.appLaboratory.customizeDescription">The customization session starts with these options. One session can be open at a time.</p>
+                        <div class="field-list single">
+                        <div class="field">
+                            <div class="field-text"><label for="wlab-language" data-i18n="common.language">Language</label></div>
+                            <div class="field-control"><select id="wlab-language"></select></div>
+                        </div>
+                        <div class="field" id="wlab-gpu-group">
+                            <div class="field-text"><label for="wlab-gpu" data-i18n="common.gpu">GPU</label></div>
+                            <div class="field-control"><select id="wlab-gpu"></select></div>
+                        </div>
+                        <div class="field switch">
+                            <div class="field-text"><label for="wlab-launch-wayland" data-i18n="popup.launchView.waylandMode">Wayland Mode</label></div>
+                            <div class="field-control"><input type="checkbox" id="wlab-launch-wayland" checked></div>
+                        </div>
+                        </div>
+                        <p id="wlab-busy-note" class="status-message error" style="display: none;"></p>
+                        <button type="button" id="wlab-launch-btn" class="primary" style="width: 100%;">
+                            <span id="wlab-launch-btn-text" data-i18n="options.appLaboratory.saveAndOpen">Save &amp; open customization session</span>
+                            <div id="wlab-spinner" class="spinner-small" style="border-top-color: currentColor; display: none;"></div>
+                        </button>
+                    </div>
+                </form>
+
+                <div class="card">
+                    <div class="card-header"><h3 data-i18n="options.appLaboratory.listTitle">Your meta-apps</h3></div>
+                    <div class="table-container">
+                        <table id="wlab-apps-table">
+                            <thead><tr><th data-i18n="common.name">Name</th><th data-i18n="options.appLaboratory.baseApp">Base Application</th><th class="actions-cell" data-i18n="common.actions">Actions</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -536,30 +1028,8 @@
             </div>
             <form id="user-edit-form">
                 <input type="hidden" id="editUsername">
-                <h4 data-i18n="options.users.settingsTitle">User Settings</h4>
-                 <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem 2rem;">
-                    <div class="form-group">
-                        <label for="editUserGroup"><span data-i18n="common.group">Group</span>:</label>
-                        <select id="editUserGroup"></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="editUserSessionLimit" data-i18n="options.users.sessionLimitLabel">Sessions limit</label>
-                        <input type="number" id="editUserSessionLimit">
-                    </div>
-                </div>
-
-                <h4 data-i18n="options.users.permissionsTitle">Permissions & Hardening</h4>
-                <div class="settings-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-                    <div class="form-group"><label><input type="checkbox" id="editUserActive"> <span data-i18n="options.users.activeAccount">Active Account</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="editUserPersistentStorage"> <span data-i18n="options.users.allowStorage">Allow Persistent Storage</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="editUserPublicSharing"> <span data-i18n="options.users.allowPublicSharing">Allow Public File Sharing</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="editUserGpu"> <span data-i18n="options.users.allowGpu">Allow GPU Access</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="editUserHardenContainer"> <span data-i18n="options.users.hardenContainer">Harden Container</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="editUserHardenOpenbox"> <span data-i18n="options.users.hardenWm">Harden Window Manager</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="editUserEditTemplates"> <span data-i18n="options.users.allowEditTemplates">Allow Editing App Templates</span></label></div>
-                </div>
-                <br>
-                <button type="submit" class="primary" data-i18n="options.modals.saveChanges">Save Changes</button>
+                <div id="editUserSettings"></div>
+                <div class="button-group"><button type="submit" class="primary" data-i18n="options.modals.saveChanges">Save Changes</button></div>
             </form>
             <div id="effective-settings" style="margin-top: 20px;">
                  <h4 data-i18n="options.modals.effectiveSettings">Effective Settings (with group overrides)</h4>
@@ -576,25 +1046,8 @@
             </div>
             <form id="group-edit-form">
                 <input type="hidden" id="editGroupName">
-                <h4 data-i18n="options.groups.overrideTitle">Group Override Settings</h4>
-                <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem 2rem; margin-bottom: 1.5rem;">
-                    <div class="form-group">
-                        <label for="editGroupSessionLimit" data-i18n="options.users.sessionLimitLabel">Sessions limit</label>
-                        <input type="number" id="editGroupSessionLimit" data-i18n-title="options.users.sessionLimitTitle" title="Number of active sessions a user can have. -1 for unlimited.">
-                    </div>
-                </div>
-                <h4 data-i18n="options.groups.permissionsTitle">Permissions & Hardening Overrides</h4>
-                <div class="settings-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-                    <div class="form-group"><label><input type="checkbox" id="editGroupActive"> <span data-i18n="options.users.activeAccount">Active Accounts</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="editGroupPersistentStorage"> <span data-i18n="options.users.allowStorage">Allow Persistent Storage</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="editGroupPublicSharing"> <span data-i18n="options.users.allowPublicSharing">Allow Public File Sharing</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="editGroupGpu"> <span data-i18n="options.users.allowGpu">Allow GPU Access</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="editGroupHardenContainer"> <span data-i18n="options.users.hardenContainer">Harden Container</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="editGroupHardenOpenbox"> <span data-i18n="options.users.hardenWm">Harden Window Manager</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="editGroupEditTemplates"> <span data-i18n="options.users.allowEditTemplates">Allow Editing App Templates</span></label></div>
-                </div>
-                <br>
-                <button type="submit" class="primary" data-i18n="options.modals.saveChanges">Save Changes</button>
+                <div id="editGroupSettings"></div>
+                <div class="button-group"><button type="submit" class="primary" data-i18n="options.modals.saveChanges">Save Changes</button></div>
             </form>
         </div>
     </div>
@@ -635,7 +1088,7 @@
                 </div>
                 <div class="table-container">
                     <table id="user-homedirs-table">
-                        <thead><tr><th data-i18n="common.name">Name</th><th class="actions-cell" data-i18n="common.actions">Actions</th></tr></thead>
+                        <thead><tr><th data-i18n="common.name">Name</th><th id="user-homedirs-node-header" style="display: none;" data-i18n="options.home.node">Node</th><th class="actions-cell" data-i18n="common.actions">Actions</th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
@@ -643,13 +1096,33 @@
             <div class="card">
                 <div class="card-header"><h3 data-i18n="options.modals.newDirForUser">Create New Directory for User</h3></div>
                 <form id="admin-add-homedir-form">
-                    <div class="form-group">
-                        <label for="adminNewHomeDirName"><span data-i18n="options.home.nameLabel">Directory Name</span>:</label>
-                        <input type="text" id="adminNewHomeDirName" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen.">
+                    <div class="field-list single">
+                    <div class="field">
+                            <div class="field-text"><label for="adminNewHomeDirName"><span data-i18n="options.home.nameLabel">Directory Name</span>:</label></div>
+                            <div class="field-control"><input type="text" id="adminNewHomeDirName" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen."></div>
+                        </div>
                     </div>
-                    <button type="submit" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.modals.createDirButton">Create Directory</span></button>
+                    <div class="button-group"><button type="submit" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.modals.createDirButton">Create Directory</span></button></div>
                 </form>
             </div>
+        </div>
+    </div>
+
+    <div id="node-pick-modal" class="modal">
+        <div class="modal-content" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3 id="node-pick-title"></h3>
+                <span class="close-button" data-modal-id="node-pick-modal">&times;</span>
+            </div>
+            <form id="node-pick-form">
+                <div class="field-list single">
+                <div class="field">
+                            <div class="field-text"><label for="node-pick-select" data-i18n="options.home.moveTo">Move to node</label><p class="description" data-i18n="options.home.moveHelp">The home directory is copied to the node and removed from the one that holds it. Sessions using it must be stopped first.</p></div>
+                            <div class="field-control"><select id="node-pick-select" required></select></div>
+                        </div>
+                </div>
+                <div class="button-group"><button type="submit" class="primary" data-i18n="options.home.move">Move</button></div>
+            </form>
         </div>
     </div>
 
@@ -664,58 +1137,65 @@
                 <input type="hidden" id="install-source-app-id">
                 <input type="hidden" id="install-source-name">
                 <p id="manual-install-note" class="description" style="display: none; color: var(--color-warning-text); border-left: 3px solid var(--color-warning); padding-left: 1rem; margin-bottom: 1.5rem;" data-i18n="options.modals.manualInstallNote">Note: Manually added images should be based on a selkies-baseimage compatible image.</p>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="install-app-name" data-i18n="options.modals.customNameLabel">Custom Name</label>
-                        <input type="text" id="install-app-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="install-app-image" data-i18n="options.modals.imageLabel">Container Image</label>
-                        <input type="text" id="install-app-image" required>
-                    </div>
+                <div class="field-list single">
+                    <div class="field">
+                            <div class="field-text"><label for="install-app-name" data-i18n="options.modals.customNameLabel">Custom Name</label></div>
+                            <div class="field-control"><input type="text" id="install-app-name" required></div>
+                        </div>
+                    <div class="field">
+                            <div class="field-text"><label for="install-app-image" data-i18n="options.modals.imageLabel">Container Image</label></div>
+                            <div class="field-control"><input type="text" id="install-app-image" required></div>
+                        </div>
                 </div>
-                <h4 data-i18n="options.modals.permissions">Permissions</h4>
-                <div class="settings-grid">
-                     <div class="form-group">
-                        <label for="install-app-users" data-i18n="options.modals.allowedUsersLabel">Allowed Users (comma-separated, 'all' for everyone)</label>
-                        <input type="text" id="install-app-users" value="all">
-                    </div>
-                     <div class="form-group">
-                        <label for="install-app-groups" data-i18n="options.modals.allowedGroupsLabel">Allowed Groups (comma-separated, 'all' for everyone)</label>
-                        <input type="text" id="install-app-groups" value="all">
-                    </div>
+                <h5 class="field-group" data-i18n="options.modals.permissions">Permissions</h5>
+                <div class="field-list single">
+                    <div class="field">
+                            <div class="field-text"><label for="install-app-users" data-i18n="options.modals.allowedUsersLabel">Allowed Users (comma-separated, 'all' for everyone)</label></div>
+                            <div class="field-control"><input type="text" id="install-app-users" value="all"></div>
+                        </div>
+                    <div class="field">
+                            <div class="field-text"><label for="install-app-groups" data-i18n="options.modals.allowedGroupsLabel">Allowed Groups (comma-separated, 'all' for everyone)</label></div>
+                            <div class="field-control"><input type="text" id="install-app-groups" value="all"></div>
+                        </div>
                 </div>
-                 <h4 data-i18n="options.modals.features">Features</h4>
-                <div class="settings-grid">
-                    <div class="form-group"><label><input type="checkbox" id="install-gpu-support"> <span data-i18n="options.modals.gpuSupport">GPU Support</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="install-home-support"> <span data-i18n="options.modals.homeMounting">Home Directory Mounting</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="install-url-support"> <span data-i18n="options.modals.urlSupport">URL Opening Support</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="install-open-support"> <span data-i18n="options.modals.fileSupport">File Opening Support</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="install-auto-update"> <span data-i18n="options.modals.autoUpdate">Auto Update Image</span></label></div>
+                <h5 class="field-group" data-i18n="options.modals.features">Features</h5>
+                <div class="field-list">
+                    <div class="field switch">
+                            <div class="field-text"><label for="install-gpu-support" data-i18n="options.modals.gpuSupport">GPU Support</label></div>
+                            <div class="field-control"><input type="checkbox" id="install-gpu-support"></div>
+                        </div>
+                    <div class="field switch">
+                            <div class="field-text"><label for="install-home-support" data-i18n="options.modals.homeMounting">Home Directory Mounting</label></div>
+                            <div class="field-control"><input type="checkbox" id="install-home-support"></div>
+                        </div>
+                    <div class="field switch">
+                            <div class="field-text"><label for="install-url-support" data-i18n="options.modals.urlSupport">URL Opening Support</label></div>
+                            <div class="field-control"><input type="checkbox" id="install-url-support"></div>
+                        </div>
+                    <div class="field switch">
+                            <div class="field-text"><label for="install-open-support" data-i18n="options.modals.fileSupport">File Opening Support</label></div>
+                            <div class="field-control"><input type="checkbox" id="install-open-support"></div>
+                        </div>
+                    <div class="field switch">
+                            <div class="field-text"><label for="install-auto-update" data-i18n="options.modals.autoUpdate">Auto Update Image</label></div>
+                            <div class="field-control"><input type="checkbox" id="install-auto-update"></div>
+                        </div>
                 </div>
-
-                <h4 style="margin-top: 2rem;" data-i18n="options.modals.advancedSettings">Advanced Settings</h4>
-                <div class="form-group">
-                    <label for="install-app-template" data-i18n="options.modals.appTemplateLabel">Application Template</label>
-                    <select id="install-app-template" required>
-                    </select>
-                    <p class="description" data-i18n="options.modals.appTemplateDescription">Select a pre-configured template for advanced container launch settings.</p>
+                <h5 class="field-group" data-i18n="options.modals.advancedSettings">Advanced Settings</h5>
+                <div class="field-list single">
+                    <div class="field">
+                            <div class="field-text"><label for="install-app-template" data-i18n="options.modals.appTemplateLabel">Application Template</label><p class="description" data-i18n="options.modals.appTemplateDescription">Select a pre-configured template for advanced container launch settings.</p></div>
+                            <div class="field-control"><select id="install-app-template" required></select></div>
+                        </div>
+                    <div class="field wide">
+                            <div class="field-text"><label for="install-autostart-script" data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</label><p class="description" data-i18n="options.modals.customAutostartScriptDescription">Customize autostart logic, leave blank to use default from application provider.</p></div>
+                            <div class="field-control"><textarea id="install-autostart-script" rows="4"></textarea></div>
+                        </div>
+                    <div class="field wide">
+                            <div class="field-text"><label for="install-autostart-wayland-script"><span data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</span> (Wayland)</label><p class="description" data-i18n="options.modals.customAutostartScriptDescription">Customize autostart logic, leave blank to use default from application provider.</p></div>
+                            <div class="field-control"><textarea id="install-autostart-wayland-script" rows="4"></textarea></div>
+                        </div>
                 </div>
-
-                <div class="form-group">
-                    <label for="install-autostart-script" data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</label>
-                    <textarea id="install-autostart-script" rows="4"></textarea>
-                    <p class="description" data-i18n="options.modals.customAutostartScriptDescription">Customize autostart logic, leave blank to use default from application provider.</p>
-                </div>
-
-                <div class="form-group">
-                    <label for="install-autostart-wayland-script">
-                        <span data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</span> (Wayland)
-                    </label>
-                    <textarea id="install-autostart-wayland-script" rows="4"></textarea>
-                    <p class="description" data-i18n="options.modals.customAutostartScriptDescription">Customize autostart logic, leave blank to use default from application provider.</p>
-                </div>
-
                 <div class="button-group">
                     <button type="submit" class="primary" data-i18n="options.modals.saveInstallation">Save Installation</button>
                 </div>

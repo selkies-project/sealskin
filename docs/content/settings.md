@@ -24,7 +24,7 @@ paths refer to.
 | `SEALSKIN_LOG_LEVEL` | `str` | `INFO` | Logging level (e.g., DEBUG, INFO, WARNING). |
 | `SEALSKIN_API_PORT` | `int` | `8000` | Port for the main API server. |
 | `SEALSKIN_SESSION_PORT` | `int` | `8443` | Port for the session proxy server. |
-| `SEALSKIN_DEFAULT_PROVIDER` | `str` | `docker` | The default application provider to use. |
+| `SEALSKIN_DEFAULT_PROVIDER` | `str` | `auto` | Backend that runs sessions: `docker`, `kubernetes`, or `auto`, which picks Kubernetes when the server runs in a Kubernetes pod and Docker otherwise. |
 | `SEALSKIN_APP_RESOURCE_PATH` | `str` | `https://raw.githubusercontent.com/linuxserver/sealskin-apps/refs/heads/master/apps.yml` | URL for the YAML file defining default available applications. |
 | `SEALSKIN_INSTALLED_APPS_PATH` | `str` | `/config/.config/sealskin/installed_apps.yml` | Path to the YAML file for installed application configurations. |
 | `SEALSKIN_APP_STORES_PATH` | `str` | `/config/.config/sealskin/app_stores.yml` | Path to the YAML file defining available app stores. |
@@ -34,6 +34,9 @@ paths refer to.
 | `SEALSKIN_SESSION_COOKIE_NAME` | `str` | `sealskin_session_token` | Name of the session cookie. |
 | `SEALSKIN_AUTOSTART_CACHE_PATH` | `str` | `/config/.config/sealskin/autostart_cache` | Path to cache autostart scripts. |
 | `SEALSKIN_APP_STORE_CACHE_PATH` | `str` | `/config/.config/sealskin/app_stores_cache` | Path to cache app store YAML files. |
+| `SEALSKIN_PROOT_CATALOGS_PATH` | `str` | `/config/.config/sealskin/proot_catalogs.yml` | Path to the YAML file of the PRoot Apps catalogs, shared by the nodes of a cluster. |
+| `SEALSKIN_PROOT_APPS_PATH` | `str` | `/storage/sealskin_proot_apps` | Directory this node keeps the content of every PRoot Apps catalog in, one folder per catalog, mounted read-only into the sessions of the users assigned to it. |
+| `SEALSKIN_PROOT_APPS_REMOTE` | `str` | `linuxserver/proot-apps` | GitHub `owner/repo` of the PRoot Apps repository the catalog editor opens with; a fork lists its apps in `metadata/metadata.yml` and publishes them as tags of `ghcr.io/<owner>/<repo>`. |
 | `SEALSKIN_AUTO_UPDATE_APPS` | `bool` | `true` | Enable automatic pulling of the latest app images in the background. |
 | `SEALSKIN_AUTO_UPDATE_INTERVAL_SECONDS` | `int` | `3600` | How often to check for app image updates (in seconds). |
 | `SEALSKIN_PUID` | `int` | `1000` | Default User ID to run containers as. |
@@ -42,6 +45,7 @@ paths refer to.
 | `SEALSKIN_GROUPS_BASE_PATH` | `str` | `/config/.config/sealskin/groups` | Base directory for group definition files. |
 | `SEALSKIN_STORAGE_PATH` | `str` | `/storage` | Base directory for user home directories. |
 | `SEALSKIN_APP_ICONS_PATH` | `str` | `/storage/sealskin_app_icons` | Directory for storing custom-uploaded application icons. |
+| `SEALSKIN_BRANDING_PATH` | `str` | `/config/.config/sealskin/branding` | Directory of the brand the web app wears: `branding.yml` and the logo and wallpaper an administrator uploads. Shared by every node of a cluster. |
 | `SEALSKIN_HOME_TEMPLATES_PATH` | `str` | `/storage/sealskin_home_templates` | Base directory for meta-app home directory templates. |
 | `SEALSKIN_CONTAINER_CONFIG_PATH` | `str` | `/config` | Mount point for home directories inside the container. |
 | `SEALSKIN_SERVER_PRIVATE_KEY_PATH` | `str` | `/config/ssl/server_key.pem` | Path to the server private key PEM file. |
@@ -55,4 +59,54 @@ paths refer to.
 | `SEALSKIN_UI_PATH` | `str` | `app/ui` inside the installed package, else `<repo>/client/dist/ui` | Directory holding the built web UI served under /ui. |
 | `SEALSKIN_TEMPLATE_SCHEMA_PATH` | `str` | `template_schema.yml` next to the server package | YAML file describing the environment variables editable in app templates. |
 | `SEALSKIN_CRYPTO_SESSION_TTL_SECONDS` | `int` | `86400` | Idle lifetime of an E2EE session key before it is discarded. |
+| `SEALSKIN_SSO_KEYS_PATH` | `str` | `/config/.config/sealskin/sso_keys.yml` | Path to the YAML file of browser keys registered by signing in through an identity provider. |
+| `SEALSKIN_OIDC_ISSUER` | `str` | _(empty)_ | Issuer URL of an OpenID Connect provider the web app offers sign-in with; empty offers none. |
+| `SEALSKIN_OIDC_CLIENT_ID` | `str` | _(empty)_ | Client ID of SealSkin at the OpenID Connect provider. |
+| `SEALSKIN_OIDC_CLIENT_SECRET` | `str` | _(empty)_ | Client secret of SealSkin at the OpenID Connect provider; empty for a public client. |
+| `SEALSKIN_OIDC_SCOPES` | `str` | `openid profile email` | Scopes requested from the OpenID Connect provider. |
+| `SEALSKIN_SAML_METADATA_URL` | `str` | _(empty)_ | Metadata URL of a SAML identity provider the web app offers sign-in with; empty offers none. |
+| `SEALSKIN_SSO_USERNAME_CLAIM` | `str` | _(empty)_ | Claim (OpenID Connect) or attribute (SAML, by its `Name` or `FriendlyName`) naming the SealSkin user; empty takes `preferred_username`, or the SAML attribute `username`, else the SAML NameID. |
+| `SEALSKIN_SSO_GROUPS_CLAIM` | `str` | `groups` | Claim or attribute listing the user's groups at the identity provider. |
+| `SEALSKIN_SAML_USERNAME_ATTRIBUTE` | `str` | _(empty)_ | SAML attribute naming the SealSkin user, by its `Name` or `FriendlyName`, where OpenID Connect is set up beside SAML and names its claim otherwise; empty takes `sso_username_claim`. |
+| `SEALSKIN_SAML_GROUPS_ATTRIBUTE` | `str` | _(empty)_ | SAML attribute listing the user's groups; empty takes `sso_groups_claim`. |
+| `SEALSKIN_SSO_ADMIN_GROUP` | `str` | _(empty)_ | Identity provider group whose members sign in as administrators; empty makes none. |
+| `SEALSKIN_SSO_MAX_AGE_SECONDS` | `int` | `43200` | Longest an identity provider sign-in lasts; one the provider ends sooner ends then. |
+| `SEALSKIN_STORE_URL` | `str` | `file` | Where the objects the nodes of a cluster share are kept: `file` for this server's own files, or `s3://<bucket>/<prefix>?endpoint=<url>&region=<region>` for a bucket of an S3-compatible service. |
+| `SEALSKIN_STORE_ACCESS_KEY` | `str` | _(empty)_ | Access key id for an S3 store. |
+| `SEALSKIN_STORE_SECRET_KEY` | `str` | _(empty)_ | Secret access key for an S3 store. |
+| `SEALSKIN_STORE_POLL_SECONDS` | `int` | `15` | How often a node looks for objects another node changed in a remote store. |
+| `SEALSKIN_CLUSTER_PATH` | `str` | `/config/.config/sealskin/cluster` | Directory of the cluster's shared records (nodes, pools, sign-in settings, home locations). |
+| `SEALSKIN_NODE_STATE_PATH` | `str` | `/config/.config/sealskin/node` | Directory of this node's own state: web sign-ins, its join record, and usage not yet reported. |
+| `SEALSKIN_NODE_NAME` | `str` | _(empty)_ | Name this node shows in the dashboard; empty takes the host name. |
+| `SEALSKIN_NODE_ROLES` | `str` | `frontend,runtime` | Comma-separated roles of this node: `frontend` signs users in and proxies their sessions, `runtime` runs sessions. |
+| `SEALSKIN_NODE_POOL` | `str` | `default` | Pool this node joins when it first registers; an administrator can move it later. |
+| `SEALSKIN_NODE_ADDRESS` | `str` | _(empty)_ | `host:port` other nodes reach this node's peer listener on; empty takes the host of `HOST_URL` and `peer_port`. |
+| `SEALSKIN_NODE_MAX_SESSIONS` | `int` | `0` | Most sessions this node runs at once; 0 sets no limit. |
+| `SEALSKIN_NODE_GPU_SLOTS` | `int` | `0` | Most GPU sessions this node runs at once; 0 sets no limit. |
+| `SEALSKIN_PEER_PORT` | `int` | `8444` | Port of the listener other nodes of the cluster reach this one on. |
+| `SEALSKIN_PEER_POLL_SECONDS` | `int` | `10` | How often a node asks every other node for its sessions and load. |
+| `SEALSKIN_JOIN_URL` | `str` | _(empty)_ | `host:port` of the peer listener of a node of the cluster to join; with `join_code`, the node asks to join at start and keeps the cluster's records on that node. |
+| `SEALSKIN_JOIN_CODE` | `str` | _(empty)_ | Join code an administrator of the cluster issued for this node. |
+| `SEALSKIN_LEGACY_AUTH` | `bool` | `true` | Accept the key-file clients (browser extension and mobile app configuration files) and their encrypted API; they reach this node alone, never the rest of a cluster. |
+| `SEALSKIN_PUBLIC_URL` | `str` | _(empty)_ | URL browsers reach the web app on, `https://sealskin.example.com`; empty takes `HOST_URL` and the session port. Set it behind a reverse proxy. |
+| `SEALSKIN_SESSION_DOMAIN` | `str` | _(empty)_ | Domain whose every subdomain reaches this node, `apps.example.com`: with `session_isolation`, a session of a signed-in web user opens on `<session id>.<domain>`, apart from the web app. Needs wildcard DNS and a certificate for `*.<domain>`; empty takes the host of `public_url`. |
+| `SEALSKIN_SESSION_ISOLATION` | `bool` | `false` | Serve each session of a signed-in web user on an origin of its own, `<session id>.<session_domain>`, apart from the web app and the other sessions, which needs wildcard DNS and a certificate for every such name. Off serves sessions at `/<session id>/` on the web app's origin, where this node serves the application's web client itself and the container answers its API alone. |
+| `SEALSKIN_WEB_CLIENT_PATH` | `str` | `/usr/share/selkies` | Directory of an application image holding the Selkies web client, one dashboard per subdirectory as the linuxserver images keep them, which this node exports once per image and serves to browsers in place of the container's own copy. |
+| `SEALSKIN_TRUSTED_PROXIES` | `str` | _(empty)_ | Comma-separated addresses or networks of the reverse proxies in front of this node, whose forwarded client address and sign-in headers are believed. |
+| `SEALSKIN_PROXY_AUTH_USER_HEADER` | `str` | _(empty)_ | Header a trusted proxy names the signed-in user in, `Remote-User`; empty takes no sign-in from a proxy. |
+| `SEALSKIN_PROXY_AUTH_GROUPS_HEADER` | `str` | _(empty)_ | Header a trusted proxy lists the user's groups in, `Remote-Groups`, separated by commas or by `\|`; empty takes no groups from a proxy. Name only a header the proxy sets. |
+| `SEALSKIN_PROXY_AUTH_UNCHECKED` | `bool` | `false` | Believe the proxy's sign-in header although this node cannot check, by reaching its own `public_url` or a trusted proxy's address, that the proxy removes the header a visitor sends. Leave it off wherever the check can run. |
+| `SEALSKIN_PROXY_AUTH_LOGOUT_URL` | `str` | _(empty)_ | URL the web app opens to sign out a user a proxy signed in, as the proxy's or its identity provider's logout page; empty leaves signing out to the proxy. |
+| `SEALSKIN_HTTP_PORT` | `int` | `0` | Port of a plain HTTP listener for a reverse proxy that terminates TLS, serving what the session port does; 0 opens none. It answers the addresses in `trusted_proxies` alone, and only requests they say arrived over HTTPS. |
+| `SEALSKIN_ROOT_TOKEN` | `str` | _(empty)_ | Token the `root` administrator signs in to the web app with; empty generates one at first start and writes it to `root_token_path`. |
+| `SEALSKIN_ROOT_TOKEN_PATH` | `str` | `/config/root_token` | File the generated root token is written to, for the administrator to copy and delete. |
+| `SEALSKIN_WEB_SESSION_SECONDS` | `int` | `43200` | Longest a web sign-in with the root token lasts unused. |
+| `SEALSKIN_ROOT_SIGN_IN` | `bool` | `true` | Accept the root token on this node's web sign-in. Turn it off once administrators sign in through an identity provider; a node restarted with it on takes the token again. |
+| `SEALSKIN_AUTO_SIGN_IN` | `str` | _(empty)_ | Identity provider, `oidc` or `saml`, the web app sends a signed-out browser to at once instead of showing its sign-in page; `#root` on the web app's address shows the page anyway. |
+| `SEALSKIN_SSO_FORCE_LOGIN` | `bool` | `false` | Make the identity provider ask for credentials at every sign-in instead of reusing its session. |
+| `SEALSKIN_SSO_CREATE_USERS` | `bool` | `true` | Create a user at the first sign-in an identity provider or a proxy vouches for. |
+| `SEALSKIN_SSO_HOLD_NEW_USERS` | `bool` | `true` | Hold a user a sign-in creates, who may do nothing here, until an administrator places them in a group or approves them; a user the provider puts in a group is never held. |
+| `SEALSKIN_USAGE_FLUSH_SECONDS` | `int` | `300` | How often a node adds the session time it ran to the cluster's usage records. |
+| `SEALSKIN_FILES_SYNC` | `str` | `auto` | Keep every user's shared files in the object store so each node a session starts on has them: `on`, `off`, or `auto`, which syncs once the cluster has a second node. |
+| `SEALSKIN_SHARED_FILES_PATH` | `str` | `/storage/sealskin_shared_store` | Directory a `file` store keeps the users' shared files in. |
 | `SEALSKIN_WATCH_CONFIG_FILES` | `bool` | `true` | Reload YAML configuration files automatically when they change on disk. |

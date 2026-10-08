@@ -13,14 +13,25 @@ from typing import Any
 
 import httpx
 import yaml
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import ValidationError
 
-from .. import config_store, user_manager
+from .. import (
+    cluster,
+    config_store,
+    progress,
+    prootapps,
+    quota,
+    routing,
+    sso,
+    user_manager,
+    webclient,
+)
 from ..docker_utils import get_and_cache_image_metadata, get_system_stats, pull_and_cache_image
 from ..fsutil import safe_join, safe_rmtree
 from ..launch import launch_application, stop_session
 from ..models import (
+    ActiveSessionInfo,
     AdminStatusResponse,
     AppStore,
     AppTemplate,
@@ -42,12 +53,16 @@ from ..models import (
     LaunchMetaCustomizeRequest,
     LaunchResponse,
     ManagementDataResponse,
+    ProotCatalog,
+    ProotCatalogName,
+    ProotCatalogStatus,
+    ProotRemoteApp,
     UpdateGroupRequest,
     UpdateUserRequest,
     User,
     UserSessionList,
 )
-from ..providers.docker_provider import DockerProvider
+from ..providers import get_provider
 from ..security import (
     EncryptedRoute,
     get_decrypted_request_body,
@@ -65,36 +80,57 @@ logger = logging.getLogger(__name__)
 status_router = APIRouter(route_class=EncryptedRoute)
 router = APIRouter(
     prefix="/api/admin",
-    dependencies=[Depends(verify_admin)],
+    dependencies=[Depends(verify_admin), Depends(routing.announce_changes)],
     route_class=EncryptedRoute,
 )
 # Templates are open to users granted `edit_templates` as well, short of the settings that
 # carry authority over the Docker host (`_docker_settings`).
 template_router = APIRouter(
     prefix="/api/admin",
-    dependencies=[Depends(verify_template_editor)],
+    dependencies=[Depends(verify_template_editor), Depends(routing.announce_changes)],
     route_class=EncryptedRoute,
 )
 
 
-def _gpu_list() -> list[GPUInfo]:
-    """Return the detected GPUs as API models."""
+async def _gpu_list() -> list[GPUInfo]:
+    """Return the GPUs sessions can request now, as API models."""
+    await get_provider().refresh_gpus()
     return [GPUInfo(device=gpu["device"], driver=gpu["driver"]) for gpu in state.available_gpus]
 
 
 @status_router.post("/api/admin/status", response_model=AdminStatusResponse)
 async def admin_status(user: dict[str, Any] = Depends(verify_token)) -> dict[str, Any]:
-    """Return the caller's role, settings, and host statistics."""
+    """Return the caller's role, settings, and host statistics.
+
+    `provider_groups` are the groups the identity provider or proxy named,
+    `expires` is when a web sign-in ends by the server's own clock, and
+    `storage_used` the bytes under the user's storage on this node, for a user
+    with persistent storage.
+    """
     response: dict[str, Any] = {
         "is_admin": user.get("is_admin", False),
+        "held": user.get("held", False),
         "username": user.get("username"),
         "settings": user.get("effective_settings"),
+        "via": user.get("via") or "key",
+        "sign_out_url": settings.proxy_auth_logout_url if user.get("via") == "proxy" else "",
+        "session_domain": settings.session_domain,
+        "session_isolation": settings.session_isolation,
+        "clustered": cluster.is_clustered(),
+        "node_id": cluster.NODE_ID,
+        "allowance": quota.allowance(user),
+        "provider_groups": user.get("provider_groups") or [],
+        "expires": user.get("expires"),
+        "storage_used": None,
         "gpus": [],
         "proxy_cert_expires_at": proxy_cert_not_after(settings.proxy_cert_path),
         **get_system_stats(),
     }
-    if user.get("effective_settings", {}).get("gpu", False):
-        response["gpus"] = _gpu_list()
+    effective = user.get("effective_settings") or {}
+    if effective.get("gpu", False):
+        response["gpus"] = await _gpu_list()
+    if effective.get("persistent_storage", False):
+        response["storage_used"] = await asyncio.to_thread(quota.storage_used, user["username"])
     return response
 
 
@@ -108,7 +144,12 @@ async def get_management_data() -> dict[str, Any]:
         "server_public_key": state.server_public_key_pem,
         "api_port": state.discovered_api_port,
         "session_port": state.discovered_session_port,
-        "gpus": _gpu_list(),
+        "gpus": await _gpu_list(),
+        "proot_catalogs": sorted(
+            (ProotCatalogName(id=c.id, name=c.name) for c in state.proot_catalogs.values()),
+            key=lambda c: c.name.lower(),
+        ),
+        "proot_remote": settings.proot_apps_remote,
     }
 
 
@@ -177,6 +218,105 @@ async def get_available_apps(
         ) from exc
     except (yaml.YAMLError, ValueError) as exc:
         raise HTTPException(status_code=500, detail=f"Failed to parse app store YAML: {exc}") from exc
+
+
+# --- PRoot Apps catalogs -----------------------------------------------------
+
+
+def _catalog_status(catalog: ProotCatalog) -> ProotCatalogStatus:
+    """Attach this node's sync state to a catalog."""
+    status = prootapps.status_of(catalog.id)
+    fields = {key: value for key, value in status.items() if key in ProotCatalogStatus.model_fields}
+    return ProotCatalogStatus(**catalog.model_dump(), **fields)
+
+
+def _catalog_from(body: dict[str, Any], catalog_id: str, revision: int) -> ProotCatalog:
+    """Validate the catalog the admin UI sent, without repeats among its apps."""
+    content = {key: body.get(key) for key in ("name", "apps", "auto_update") if key in body}
+    try:
+        catalog = ProotCatalog(id=catalog_id, revision=revision, **content)
+    except ValidationError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    seen: set[tuple[str, str]] = set()
+    apps = []
+    for app in catalog.apps:
+        if (app.remote.lower(), app.name) not in seen:
+            seen.add((app.remote.lower(), app.name))
+            apps.append(app)
+    catalog.apps = apps
+    for other in state.proot_catalogs.values():
+        if other.id != catalog.id and other.name.lower() == catalog.name.lower():
+            raise HTTPException(status_code=409, detail=f"A catalog named '{catalog.name}' already exists.")
+    return catalog
+
+
+@router.get("/proot/catalogs", response_model=list[ProotCatalogStatus])
+async def list_proot_catalogs() -> list[ProotCatalogStatus]:
+    """List the PRoot Apps catalogs with the state of this node's copy of each."""
+    return sorted((_catalog_status(c) for c in state.proot_catalogs.values()), key=lambda c: c.name.lower())
+
+
+@router.get("/proot/remote", response_model=list[ProotRemoteApp])
+async def list_proot_remote(remote: str, refresh: bool = False) -> list[ProotRemoteApp]:
+    """Return the apps a PRoot Apps remote (a GitHub `owner/repo`) publishes."""
+    try:
+        apps = await prootapps.fetch_remote(remote, refresh)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=400, detail=f"Could not fetch the apps of '{remote}': {exc}") from exc
+    return prootapps.remote_apps(remote, apps)
+
+
+@router.post("/proot/catalogs", response_model=ProotCatalogStatus, status_code=201)
+async def create_proot_catalog(
+    decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body),
+) -> ProotCatalogStatus:
+    """Create a catalog; every node starts fetching its apps."""
+    catalog = _catalog_from(decrypted_body, str(uuid.uuid4()), 1)
+    state.proot_catalogs[catalog.id] = catalog
+    await prootapps.save_catalogs()
+    prootapps.start_sync(catalog)
+    return _catalog_status(catalog)
+
+
+@router.put("/proot/catalogs/{catalog_id}", response_model=ProotCatalogStatus)
+async def update_proot_catalog(
+    catalog_id: str, decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body)
+) -> ProotCatalogStatus:
+    """Replace a catalog's name and apps; every node brings its copy along."""
+    existing = state.proot_catalogs.get(catalog_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Catalog not found.")
+    catalog = _catalog_from(decrypted_body, catalog_id, existing.revision + 1)
+    state.proot_catalogs[catalog_id] = catalog
+    await prootapps.save_catalogs()
+    prootapps.start_sync(catalog)
+    return _catalog_status(catalog)
+
+
+@router.post("/proot/catalogs/{catalog_id}/update", response_model=ProotCatalogStatus)
+async def refresh_proot_catalog(catalog_id: str) -> ProotCatalogStatus:
+    """Fetch the catalog's apps again now, on every node, where their packages changed."""
+    existing = state.proot_catalogs.get(catalog_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Catalog not found.")
+    catalog = existing.model_copy(update={"revision": existing.revision + 1})
+    state.proot_catalogs[catalog_id] = catalog
+    await prootapps.save_catalogs()
+    prootapps.start_sync(catalog)
+    return _catalog_status(catalog)
+
+
+@router.delete("/proot/catalogs/{catalog_id}", status_code=204)
+async def delete_proot_catalog(catalog_id: str) -> Response:
+    """Delete a catalog; every node removes its copy. Users assigned to it keep the setting, which then does nothing."""
+    if catalog_id not in state.proot_catalogs:
+        raise HTTPException(status_code=404, detail="Catalog not found.")
+    del state.proot_catalogs[catalog_id]
+    await prootapps.save_catalogs()
+    await prootapps.discard(catalog_id)
+    return Response(status_code=204)
 
 
 # --- Installed apps --------------------------------------------------------
@@ -362,7 +502,7 @@ async def check_app_update(app_id: str) -> ImageUpdateCheckResponse:
     if not app:
         raise HTTPException(status_code=404, detail="Installed app not found.")
     image_name = app.provider_config.image
-    provider = DockerProvider(app.model_dump())
+    provider = get_provider()
     local_info = await provider.get_local_image_info(image_name)
     remote_digest = await provider.get_remote_image_digest(image_name)
     if not remote_digest:
@@ -385,9 +525,10 @@ async def pull_latest_app_image(app_id: str) -> ImagePullResponse:
         raise HTTPException(status_code=404, detail="Installed app not found.")
     image_name = app.provider_config.image
     try:
-        await DockerProvider(app.model_dump()).pull_image(image_name)
+        await get_provider().pull_image(image_name)
         await config_store.refresh_autostart_for_app(app)
         await get_and_cache_image_metadata(image_name, force_refresh=True)
+        await webclient.export_quietly(image_name)
         return ImagePullResponse(
             status="success", new_sha=state.image_metadata.get(image_name, {}).get("sha")
         )
@@ -457,16 +598,89 @@ async def create_meta_app(decrypted_body: dict[str, Any] = Depends(get_decrypted
         ) from exc
 
 
-@router.post("/launch/meta_customize", response_model=LaunchResponse)
+def _lab_session(username: str) -> tuple[str, dict[str, Any]] | None:
+    """Return the App Laboratory session an administrator has open on this node, if any."""
+    for session_id, data in state.sessions.items():
+        if data.get("lab") and data.get("username") == username:
+            return session_id, data
+    return None
+
+
+@router.get("/lab")
+async def lab_session(auth_user: dict[str, Any] = Depends(verify_admin)) -> dict[str, Any]:
+    """Return the caller's open App Laboratory session, which no session list shows.
+
+    Returns:
+        `{"session": null}`, or the session with `app_id`, `app_name`,
+        `session_id`, `session_url`, and `created_at`.
+    """
+    found = _lab_session(auth_user["username"])
+    if not found:
+        return {"session": None}
+    return {"session": session_info(found[0], found[1]).model_dump()}
+
+
+def _measure(path: str) -> dict[str, int]:
+    """Return the file count and size of a directory."""
+    files = size = 0
+    for directory, _subdirs, names in os.walk(path):
+        for name in names:
+            try:
+                size += os.lstat(os.path.join(directory, name)).st_size
+                files += 1
+            except OSError:
+                continue
+    return {"files": files, "bytes": size}
+
+
+@router.delete("/lab")
+async def close_lab_session(progress_id: str = "", auth_user: dict[str, Any] = Depends(verify_admin)) -> dict[str, Any]:
+    """Stop the caller's App Laboratory session, which keeps what it changed as the meta-app's template.
+
+    With `progress_id`, a UUID the client chose, the closing reports its
+    stages to `GET /api/launch/progress/{progress_id}`: `stopping` the
+    session, then `saving`, which measures the template, then `ready` with
+    the template's `files` and `bytes`.
+
+    Returns:
+        `{"files": n, "bytes": n}` of the template kept, zeros when no
+        session was open.
+    """
+    progress.begin(progress_id, auth_user["username"])
+    found = _lab_session(auth_user["username"])
+    kept = {"files": 0, "bytes": 0}
+    if found:
+        progress.step("stopping", app=found[1].get("app_name"))
+        await stop_session(found[0])
+        template = found[1].get("host_mount_path") or ""
+        if os.path.isdir(template):
+            progress.step("saving", app=found[1].get("app_name"))
+            kept = await asyncio.to_thread(_measure, template)
+    progress.finish(kept)
+    return kept
+
+
+@router.post("/launch/meta_customize", response_model=LaunchResponse, dependencies=[Depends(routing.follow_launch)])
 async def launch_meta_for_customization(
     decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body),
     auth_user: dict[str, Any] = Depends(verify_admin),
 ) -> dict[str, str]:
-    """Launch a meta-app with its home template mounted read-write."""
+    """Launch a meta-app with its home template mounted read-write.
+
+    An administrator of a web sign-in has one such session at a time: a
+    second is refused with 409 until the first is closed.
+    """
     try:
         req = LaunchMetaCustomizeRequest(**decrypted_body)
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {exc}") from exc
+    # A key-file client frames its customization session and tracks it itself, as it always has.
+    open_already = _lab_session(auth_user["username"]) if auth_user.get("via") != "key" else None
+    if open_already:
+        raise HTTPException(
+            status_code=409,
+            detail=f"An App Laboratory session for '{open_already[1].get('app_name')}' is open. Close it before starting another.",
+        )
     app = state.installed_apps.get(req.application_id)
     if not app or not app.is_meta_app or not app.home_template_name:
         raise HTTPException(
@@ -484,6 +698,7 @@ async def launch_meta_for_customization(
         forced_rw_mount=template_path,
         wayland_mode=req.wayland_mode,
         timezone=req.timezone,
+        auth_user=auth_user,
     )
 
 
@@ -576,11 +791,15 @@ async def delete_app_template(
 
 
 @router.get("/sessions", response_model=list[UserSessionList])
-async def get_all_sessions() -> list[UserSessionList]:
-    """List every session grouped by user."""
+async def get_all_sessions(request: Request, user: dict[str, Any] = Depends(verify_admin)) -> list[UserSessionList]:
+    """List every session on every node grouped by user."""
     by_user: dict[str, list] = defaultdict(list)
     for sid, data in state.sessions.items():
-        by_user[data.get("username", "unknown")].append(session_info(sid, data, for_owner=False))
+        if not data.get("lab"):
+            by_user[data.get("username", "unknown")].append(session_info(sid, data, for_owner=False))
+    for answer in await routing.gather(request, user):
+        for entry in answer:
+            by_user[entry["username"]].extend(ActiveSessionInfo(**item) for item in entry["sessions"])
     response = [
         UserSessionList(username=name, sessions=sorted(items, key=lambda s: s.created_at, reverse=True))
         for name, items in by_user.items()
@@ -588,7 +807,7 @@ async def get_all_sessions() -> list[UserSessionList]:
     return sorted(response, key=lambda u: u.username)
 
 
-@router.delete("/sessions/{session_id}", status_code=204)
+@router.delete("/sessions/{session_id}", status_code=204, dependencies=[Depends(routing.session_node)])
 async def stop_any_session(session_id: str) -> Response:
     """Stop any user's session."""
     if session_id not in state.sessions:
@@ -618,6 +837,7 @@ async def delete_admin(username: str) -> Response:
     """Delete an administrator."""
     try:
         user_manager.delete_admin(username)
+        await cluster.forget_user(username)
         return Response(status_code=204)
     except ValueError as exc:
         if "cannot be deleted" in str(exc).lower():
@@ -655,11 +875,22 @@ async def update_user(
         raise HTTPException(status_code=422, detail=f"Invalid request body: {exc}") from exc
 
 
+@router.post("/users/{username}/approve", response_model=User)
+async def approve_user(username: str) -> dict[str, Any]:
+    """Let a held user in without placing them in a group."""
+    try:
+        return user_manager.approve(username)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
 @router.delete("/users/{username}", status_code=204)
 async def delete_user(username: str) -> Response:
     """Delete a user and their storage."""
     try:
         user_manager.delete_user(username)
+        await cluster.forget_user(username)
+        await sso.end_sign_ins_of(username)
         return Response(status_code=204)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -684,10 +915,10 @@ def _require_admin_user(username: str) -> None:
 async def list_user_home_dirs(username: str) -> dict[str, list[str]]:
     """List a user's home directories."""
     _require_storage_user(username)
-    return {"home_dirs": user_manager.get_home_dirs(username)}
+    return {"home_dirs": routing.homes_of(username)}
 
 
-@router.post("/users/{username}/homedirs", status_code=201)
+@router.post("/users/{username}/homedirs", status_code=201, dependencies=[Depends(routing.new_home_node)])
 async def create_user_home_dir(
     username: str, decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body)
 ) -> dict[str, str]:
@@ -695,7 +926,10 @@ async def create_user_home_dir(
     _require_storage_user(username)
     try:
         req = HomeDirectoryCreate(**decrypted_body)
+        if cluster.node_of_home(username, req.home_name):
+            raise ValueError(f"Home directory '{req.home_name}' already exists for user '{username}'.")
         user_manager.create_home_dir(username, req.home_name)
+        cluster.record_home(username, req.home_name, cluster.NODE_ID)
         return {"status": "success"}
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
@@ -703,12 +937,15 @@ async def create_user_home_dir(
         raise HTTPException(status_code=422, detail=f"Invalid request body: {exc}") from exc
 
 
-@router.delete("/users/{username}/homedirs/{home_name}", status_code=204)
+@router.delete(
+    "/users/{username}/homedirs/{home_name}", status_code=204, dependencies=[Depends(routing.home_node)]
+)
 async def delete_user_home_dir(username: str, home_name: str) -> Response:
     """Delete a user's home directory."""
     _require_storage_user(username)
     try:
         user_manager.delete_home_dir(username, home_name)
+        cluster.record_home(username, home_name, None)
         return Response(status_code=204)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -718,10 +955,10 @@ async def delete_user_home_dir(username: str, home_name: str) -> Response:
 async def list_admin_home_dirs(username: str) -> dict[str, list[str]]:
     """List an administrator's home directories."""
     _require_admin_user(username)
-    return {"home_dirs": user_manager.get_home_dirs(username)}
+    return {"home_dirs": routing.homes_of(username)}
 
 
-@router.post("/admins/{username}/homedirs", status_code=201)
+@router.post("/admins/{username}/homedirs", status_code=201, dependencies=[Depends(routing.new_home_node)])
 async def create_admin_home_dir(
     username: str, decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body)
 ) -> dict[str, str]:
@@ -729,7 +966,10 @@ async def create_admin_home_dir(
     _require_admin_user(username)
     try:
         req = HomeDirectoryCreate(**decrypted_body)
+        if cluster.node_of_home(username, req.home_name):
+            raise ValueError(f"Home directory '{req.home_name}' already exists for user '{username}'.")
         user_manager.create_home_dir(username, req.home_name)
+        cluster.record_home(username, req.home_name, cluster.NODE_ID)
         return {"status": "success"}
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
@@ -737,12 +977,15 @@ async def create_admin_home_dir(
         raise HTTPException(status_code=422, detail=f"Invalid request body: {exc}") from exc
 
 
-@router.delete("/admins/{username}/homedirs/{home_name}", status_code=204)
+@router.delete(
+    "/admins/{username}/homedirs/{home_name}", status_code=204, dependencies=[Depends(routing.home_node)]
+)
 async def delete_admin_home_dir(username: str, home_name: str) -> Response:
     """Delete an administrator's home directory."""
     _require_admin_user(username)
     try:
         user_manager.delete_home_dir(username, home_name)
+        cluster.record_home(username, home_name, None)
         return Response(status_code=204)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

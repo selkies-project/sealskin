@@ -9,6 +9,7 @@ import { loadTranslator, applyTranslations } from '../lib/i18n.js';
 import { supportedLangs } from '../lib/languages.js';
 import { browserTimezone } from '../lib/timezone.js';
 import { announce, escapeHtml, formatLogoSrc, hydrateLogos, timeAgo, currentLocale } from '../lib/dom.js';
+import { confirmDialog } from '../lib/modal.js';
 
 let t;
 let info;
@@ -24,6 +25,11 @@ const gpuSelect = document.getElementById('gpuSelect');
 const homeDirFormGroup = document.getElementById('homedir-form-group');
 const homeDirSelect = document.getElementById('homeDirectory');
 const languageSelect = document.getElementById('language');
+const whereFormGroup = document.getElementById('where-form-group');
+const whereSelect = document.getElementById('whereSelect');
+const moveHomeFormGroup = document.getElementById('move-home-form-group');
+const moveHomeSelect = document.getElementById('moveHomeSelect');
+const allowanceDiv = document.getElementById('allowance');
 const saveOptionsCheckbox = document.getElementById('saveOptions');
 const saveOptionsLabel = document.getElementById('saveOptionsLabel');
 const openFileContainer = document.getElementById('open-file-container');
@@ -57,12 +63,18 @@ let userSettings = {};
 let availableApps = [];
 let availableGpus = [];
 let homeDirs = [];
+// What the user may know of the cluster, or null on a server that is one node.
+let cluster = null;
 let activeSessions = [];
 let isSimpleLaunch = false;
 let selectedAppId = null;
 let launchProfileKey = 'workflow_profile_simple';
 
-const isMobile = () => info && info.shell === 'mobile';
+// The mobile and web shells keep the launcher in their frame; the extension closes its popup.
+const inFrame = () => info && info.shell !== 'extension';
+// The mobile layout, also for the web app wherever its launcher fills the window instead of floating as a card (css/app.css).
+const compact = () => info && (info.shell === 'mobile'
+  || (info.shell === 'web' && !window.top.matchMedia('(min-width: 600px) and (min-height: 640px)').matches));
 
 function setStatus(message, isError = false) {
   statusDiv.textContent = message;
@@ -335,6 +347,7 @@ function updateDynamicForms() {
   } else {
     homeDirFormGroup.classList.add('hidden');
   }
+  updateMoveHome();
 }
 
 function populateLanguageDropdown() {
@@ -380,23 +393,105 @@ function populateLanguageDropdown() {
   languageSelect.value = firstAvailable || 'en_US.UTF-8';
 }
 
+const nodeName = (id) => {
+  const node = cluster && cluster.nodes.find((n) => n.id === id);
+  return node ? node.name || node.id : id;
+};
+
 function populateHomeDirDropdown() {
+  const current = homeDirSelect.value;
   homeDirSelect.innerHTML = `
     <option value="auto">${t('popup.launchView.autoHome')}</option>
     <option value="cleanroom">${t('popup.launchView.cleanroom')}</option>
   `;
+  // In a cluster each home is named with the node that holds it.
+  const held = (dir) => (cluster && cluster.homes[dir] ? ` (${nodeName(cluster.homes[dir])})` : '');
   const optionsHtml = homeDirs
     .filter((dir) => dir !== '_sealskin_shared_files' && !dir.startsWith('auto-'))
-    .map((dir) => `<option value="${escapeHtml(dir)}">${escapeHtml(dir)}</option>`)
+    .map((dir) => `<option value="${escapeHtml(dir)}">${escapeHtml(dir + held(dir))}</option>`)
     .join('');
   homeDirSelect.insertAdjacentHTML('beforeend', optionsHtml);
+  if ([...homeDirSelect.options].some((o) => o.value === current)) homeDirSelect.value = current;
 }
+
+/** Offer where the session starts: wherever the server picks, a pool, or one node. */
+function populateWhereDropdown() {
+  const options = [`<option value="">${escapeHtml(t('popup.launchView.whereAuto'))}</option>`];
+  if (cluster.pools.length) {
+    options.push(`<optgroup label="${escapeHtml(t('popup.launchView.wherePools'))}">`
+      + cluster.pools.map((pool) => `<option value="pool:${escapeHtml(pool)}">${escapeHtml(pool)}</option>`).join('')
+      + '</optgroup>');
+  }
+  if (cluster.nodes.length) {
+    options.push(`<optgroup label="${escapeHtml(t('popup.launchView.whereNodes'))}">`
+      + cluster.nodes.map((node) => `<option value="node:${escapeHtml(node.id)}"${node.alive ? '' : ' disabled'}>${escapeHtml(node.name || node.id)}</option>`).join('')
+      + '</optgroup>');
+  }
+  whereSelect.innerHTML = options.join('');
+  whereFormGroup.classList.remove('hidden');
+}
+
+/** Offer to move the chosen home to another node, to who may move one. */
+function updateMoveHome() {
+  const home = homeDirSelect.value;
+  const holder = cluster && cluster.homes[home];
+  const elsewhere = cluster && cluster.can_move_homes && holder && !homeDirFormGroup.classList.contains('hidden')
+    ? cluster.nodes.filter((node) => node.id !== holder && node.alive)
+    : [];
+  moveHomeFormGroup.classList.toggle('hidden', elsewhere.length === 0);
+  moveHomeSelect.innerHTML = `<option value="">${escapeHtml(t('popup.launchView.moveHomeStay', { node: nodeName(holder) }))}</option>`
+    + elsewhere.map((node) => `<option value="${escapeHtml(node.id)}">${escapeHtml(t('popup.launchView.moveHomeTo', { node: node.name || node.id }))}</option>`).join('');
+}
+
+async function handleMoveHome() {
+  const home = homeDirSelect.value;
+  const node = moveHomeSelect.value;
+  if (!node) return;
+  const move = await confirmDialog(t, {
+    title: t('popup.launchView.moveHomeTitle'),
+    message: t('popup.launchView.moveHomeConfirm', { home, node: nodeName(node) }),
+    confirm: t('common.move'),
+  });
+  if (!move) {
+    moveHomeSelect.value = '';
+    return;
+  }
+  moveHomeSelect.disabled = true;
+  launchBtn.disabled = true;
+  setStatus(t('popup.status.movingHome', { home }));
+  try {
+    await secureFetch(`/api/cluster/homedirs/${encodeURIComponent(home)}/move`, { method: 'POST', body: JSON.stringify({ node }) }, { timeout: 0 });
+    cluster = await secureFetch('/api/cluster', { method: 'GET' });
+    setStatus(t('popup.status.movedHome', { home, node: nodeName(node) }));
+  } catch (error) {
+    setStatus(t('popup.status.error', { message: error.message }), true);
+  }
+  moveHomeSelect.disabled = false;
+  launchBtn.disabled = availableApps.length === 0;
+  populateHomeDirDropdown();
+  updateMoveHome();
+}
+
+function showAllowance(allowance) {
+  allowanceDiv.hidden = !allowance;
+  if (!allowance) return;
+  allowanceDiv.textContent = t('popup.launchView.allowance', {
+    used: Number(allowance.used).toFixed(1), hours: allowance.hours, period: t(`options.periods.${allowance.period}`).toLowerCase(),
+  });
+}
+
+// What a shell answers when it cannot open a session, in the user's words.
+const shellError = (error) => (error.message === 'noSessionOrigin' ? t('popup.status.noSessionOrigin') : error.message);
 
 async function reopenOrFocusSession(session) {
   try {
     await bridge.focusSession(session);
   } catch (error) {
     console.error('Failed to focus session:', error);
+    if (error.message === 'noSessionOrigin') {
+      setStatus(shellError(error), true);
+      return;
+    }
   }
   bridge.close();
 }
@@ -517,6 +612,8 @@ async function handleLaunch() {
 
   const collaborationMode = document.getElementById('collaborationMode').checked;
   const waylandMode = waylandModeCheckbox.checked;
+  // A tab opened once a long launch ends is blocked as a popup, so the web app takes it at the click.
+  if (info.shell === 'web') bridge.reserveTab();
 
   const profile = {
     appId: selectedAppId,
@@ -524,6 +621,7 @@ async function handleLaunch() {
     language: languageSelect.value,
     gpu: selectedGpuValue,
     waylandMode,
+    where: whereSelect.value,
   };
   if (isSimpleLaunch) {
     await bridge.storageSet({ simple_launch_profile: profile });
@@ -556,6 +654,9 @@ async function handleLaunch() {
       launch_in_room_mode: collaborationMode,
       wayland_mode: waylandMode,
     };
+    // Left out, the server picks where the session starts.
+    const [whereKind, whereName] = whereSelect.value.split(/:(.*)/);
+    if (whereKind) payload[whereKind] = whereName;
 
     if (isSimpleLaunch || !sealskinContext.action) {
       setStatus(t('popup.status.preparingSession'));
@@ -591,18 +692,20 @@ async function handleLaunch() {
       throw new Error(t('popup.status.unknownAction'));
     }
 
-    const data = await secureFetch(endpoint, { method: 'POST', body: JSON.stringify(payload) });
+    // The server answers once the session runs, which a first image pull can delay for minutes.
+    const data = await secureFetch(endpoint, { method: 'POST', body: JSON.stringify(payload) }, { timeout: 0 });
 
     await bridge.openSession(data.session_id, data.session_url);
 
-    if (isMobile()) {
+    if (inFrame()) {
       window.location.reload();
     } else {
       bridge.close();
     }
   } catch (error) {
+    if (info.shell === 'web') bridge.reserveTab(false);
     spinner.style.display = 'none';
-    setStatus(t('popup.status.error', { message: error.message }), true);
+    setStatus(t('popup.status.error', { message: shellError(error) }), true);
     launchBtnText.textContent = t('popup.launchView.launchButton');
     launchBtn.disabled = false;
     uploadProgressContainer.style.display = 'none';
@@ -662,18 +765,21 @@ async function init() {
   info = await announce();
   t = await loadTranslator(info.locale);
 
-  if (isMobile()) applyMobileLayout();
+  if (compact()) {
+    document.documentElement.classList.add('shell-mobile');
+    applyMobileLayout();
+  }
 
   applyTranslations(document.body, t);
   document.getElementById('options-gear-btn').addEventListener('click', () => {
     bridge.openPage('options');
-    if (!isMobile()) bridge.close();
+    if (!inFrame()) bridge.close();
   });
 
   try {
     sealskinConfig = info.config || {};
     if (!sealskinConfig.serverIp || !sealskinConfig.username) {
-      if (isMobile()) {
+      if (inFrame()) {
         bridge.openPage('connect');
         return;
       }
@@ -740,10 +846,16 @@ async function init() {
 
     userSettings = statusData.settings;
     availableGpus = statusData.gpus || [];
+    showAllowance(statusData.allowance);
+    if (statusData.clustered) {
+      const mine = await secureFetch('/api/cluster', { method: 'GET' }).catch(() => null);
+      cluster = mine && mine.clustered ? mine : null;
+    }
+    if (cluster) populateWhereDropdown();
     availableApps = appsData;
     activeSessions = sessionsData;
 
-    if (activeSessions.length === 0 && !isMobile()) {
+    if (activeSessions.length === 0 && !inFrame()) {
       sessionsTabBtn.style.display = 'none';
     }
 
@@ -754,7 +866,7 @@ async function init() {
       populateHomeDirDropdown();
     }
 
-    if (userSettings.persistent_storage && (isSimpleLaunch || isMobile())) {
+    if (userSettings.persistent_storage && (isSimpleLaunch || inFrame())) {
       manageFilesBtn.style.display = 'flex';
     }
 
@@ -763,6 +875,8 @@ async function init() {
     if (savedProfile) {
       if ([...homeDirSelect.options].some((o) => o.value === savedProfile.homeDir)) homeDirSelect.value = savedProfile.homeDir;
       if ([...languageSelect.options].some((o) => o.value === savedProfile.language)) languageSelect.value = savedProfile.language;
+      if (savedProfile.where && [...whereSelect.options].some((o) => o.value === savedProfile.where && !o.disabled)) whereSelect.value = savedProfile.where;
+      updateMoveHome();
       if (savedProfile.gpu) {
         setTimeout(() => {
           if ([...gpuSelect.options].some((o) => o.value === savedProfile.gpu)) gpuSelect.value = savedProfile.gpu;
@@ -786,7 +900,7 @@ async function init() {
     const isFileContext = sealskinContext.action === 'file';
 
     if (isFileContext) {
-      if (!isMobile()) uploadFilesTabBtn.style.display = 'none';
+      if (!inFrame()) uploadFilesTabBtn.style.display = 'none';
       if (userSettings.persistent_storage) {
         uploadStorageTabBtn.style.display = 'flex';
         const filename = sealskinContext.filename;
@@ -819,15 +933,17 @@ sessionsTabBtn.addEventListener('click', () => showView('sessions'));
 launchTabBtn.addEventListener('click', () => showView('launch'));
 manageFilesBtn.addEventListener('click', () => {
   bridge.openPage('files');
-  if (!isMobile()) bridge.close();
+  if (!inFrame()) bridge.close();
 });
 uploadFilesTabBtn.addEventListener('click', () => {
   bridge.openPage('upload');
-  if (!isMobile()) bridge.close();
+  if (!inFrame()) bridge.close();
 });
 uploadStorageTabBtn.addEventListener('click', () => showView('upload-storage'));
 uploadStorageBtn.addEventListener('click', handleUploadToStorage);
 launchBtn.addEventListener('click', handleLaunch);
+homeDirSelect.addEventListener('change', updateMoveHome);
+moveHomeSelect.addEventListener('change', handleMoveHome);
 
 sessionsListContainer.addEventListener('click', (e) => {
   const button = e.target.closest('button');

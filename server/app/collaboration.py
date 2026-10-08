@@ -28,8 +28,9 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
 from . import config_store, launch
+from .providers.base_provider import host_port
 from .routers.applications import user_can_access
-from .security import canonical_uuid, token_matches
+from .security import OWN_ORIGIN_NEEDED, canonical_uuid, on_session_origin, relative, token_matches
 from .settings import settings
 from .state import state
 
@@ -97,6 +98,9 @@ async def collaborative_room(
     session_data = state.sessions.get(session_id_str)
     if not session_data or not session_data.get("is_collaboration"):
         raise HTTPException(status_code=404, detail="Collaboration room not found.")
+    # With session isolation, a web sign-in's room stays off the web app's origin, like its session.
+    if settings.session_isolation and session_data.get("native") and not on_session_origin(request, session_id_str):
+        raise HTTPException(status_code=403, detail=OWN_ORIGIN_NEEDED)
 
     if (
         "viewer_token" in session_data
@@ -187,14 +191,13 @@ async def collaborative_room(
                 status_code=500, detail="Failed to register new viewer."
             ) from e
 
-        redirect_url = request.url.replace_query_params(token=new_viewer_token)
-        return RedirectResponse(url=str(redirect_url))
+        return RedirectResponse(url=relative(request.url.replace_query_params(token=new_viewer_token)))
     else:
         return HTMLResponse(
             content="<h1>Invalid or expired collaboration link.</h1>", status_code=403
         )
 
-    iframe_src = f"/{session_id_str}/?token={user_token}"
+    iframe_src = f"/{session_id_str}/#token={user_token}"
 
     client_data = {
         "sessionId": session_id_str,
@@ -287,8 +290,8 @@ async def broadcast_token_state(session_id: str, session_data: dict[str, Any]) -
         for ip, port in targets.items():
             urls = []
             if port:
-                urls.append(f"http://{ip}:{port}/{session_id}/api/tokens")
-            urls.append(f"http://{ip}:8083/tokens")
+                urls.append(f"http://{host_port(ip, port)}/{session_id}/api/tokens")
+            urls.append(f"http://{host_port(ip, 8083)}/tokens")
             cached = TOKEN_ENDPOINT_CACHE.get(ip)
             if cached in urls:
                 urls.remove(cached)
@@ -309,11 +312,11 @@ async def broadcast_token_state(session_id: str, session_data: dict[str, Any]) -
                     continue
 
 
-def _owner_group(username: str) -> str:
-    """Return the effective group of a user (`"none"` when unknown)."""
+def _owner_group(username: str) -> list[str]:
+    """Return the groups of a user."""
     from . import user_manager
 
-    return user_manager.get_effective_settings(username).get("group", "none")
+    return user_manager.get_effective_settings(username).get("groups") or []
 
 
 async def broadcast_to_room(session_id: str, payload: dict[str, Any]) -> None:
@@ -537,6 +540,8 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
                     viewer_token = data.get("viewer_token")
                     slot = data.get("slot")
                     await handle_assign_slot(session_id_str, viewer_token, slot)
+                elif action == "release_slot" and is_controller:
+                    await handle_release_slot(session_id_str, data.get("slot"))
                 elif action == "assign_mk" and is_controller:
                     target_token = data.get("token")
                     await handle_assign_mk(session_id_str, target_token)
@@ -710,8 +715,8 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
                     None,
                 )
                 if disconnected_viewer:
-                    assigned_slot = disconnected_viewer.get("slot")
-                    if assigned_slot:
+                    assigned_slots = launch.held_slots(disconnected_viewer.get("slot"))
+                    if assigned_slots:
                         disconnected_viewer["slot"] = None
                         state_changed = True
                         input_released = True
@@ -722,7 +727,7 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
                             session_id_str,
                             {
                                 "type": "gamepad_change",
-                                "message": f"{username_for_msg} disconnected and was unassigned from Gamepad {assigned_slot}.",
+                                "message": f"{username_for_msg} disconnected and was unassigned from {gamepads_text(assigned_slots)}.",
                                 "timestamp": int(time.time() * 1000),
                             },
                         )
@@ -816,88 +821,121 @@ async def broadcast_state(session_id: str) -> None:
     await broadcast_to_room(session_id, state_payload)
 
 
-async def handle_assign_slot(session_id: str, viewer_token: str, slot: int | None) -> None:
-    """Assign a gamepad slot to a participant (or clear it with `None`)."""
-    session_data = state.sessions.get(session_id)
-    if not session_data:
-        return
+#: Gamepad slots a session's container presents.
+GAMEPAD_SLOTS = 4
 
-    target_user = None
-    target_username = "Unknown"
-    old_slot_for_target = None
 
-    if viewer_token == session_data.get("controller_token"):
-        target_user = session_data
-        target_username = "Controller"
-        old_slot_for_target = session_data.get("controller_slot")
-    else:
-        for v in session_data.get("viewers", []):
-            if v["token"] == viewer_token:
-                target_user = v
-                target_username = v.get("username", "Unnamed")
-                old_slot_for_target = v.get("slot")
-                break
+def valid_slot(slot: Any) -> bool:
+    """Whether `slot` names one of the container's gamepad slots."""
+    return isinstance(slot, int) and not isinstance(slot, bool) and 1 <= slot <= GAMEPAD_SLOTS
 
-    if not target_user:
-        logger.warning(
-            f"[{session_id}] Attempted to assign slot to non-existent user token."
-        )
-        return
 
-    notifications = []
+def gamepads_text(slots: list[int]) -> str:
+    """Name slots for a room notice: "Gamepad 3", "Gamepads 3 and 4"."""
+    if len(slots) == 1:
+        return f"Gamepad {slots[0]}"
+    return f"Gamepads {', '.join(str(s) for s in slots[:-1])} and {slots[-1]}"
 
-    if slot is not None:
-        previous_owner_cleared = False
-        if (
-            session_data.get("controller_slot") == slot
-            and session_data.get("controller_token") != viewer_token
-        ):
-            session_data["controller_slot"] = None
-            notifications.append(f"Controller was unassigned from Gamepad {slot}.")
-            previous_owner_cleared = True
 
-        if not previous_owner_cleared:
-            for v in session_data.get("viewers", []):
-                if v.get("slot") == slot and v.get("token") != viewer_token:
-                    v["slot"] = None
-                    notifications.append(
-                        f"{v.get('username', 'Unnamed')} was unassigned from Gamepad {slot}."
-                    )
-                    break
+def _slot_holders(session_data: dict[str, Any]) -> list[tuple[dict[str, Any], str, str, Any]]:
+    """Every participant that can hold gamepad slots.
 
-    if "is_collaboration" in target_user:
-        target_user["controller_slot"] = slot
-    else:
-        target_user["slot"] = slot
+    Returns:
+        (record, key, name, token) for each: the controller's slots live under
+        the session record's `controller_slot`, a viewer's under its own `slot`.
+    """
+    holders = [
+        (session_data, "controller_slot", "Controller", session_data.get("controller_token"))
+    ]
+    for v in session_data.get("viewers", []):
+        holders.append((v, "slot", v.get("username", "Unnamed"), v.get("token")))
+    return holders
 
-    if slot is not None and old_slot_for_target != slot:
-        notifications.append(f"Gamepad {slot} was assigned to {target_username}.")
-    elif slot is None and old_slot_for_target is not None:
-        notifications.append(
-            f"{target_username} was unassigned from Gamepad {old_slot_for_target}."
-        )
 
+def _take_slot(session_data: dict[str, Any], slot: int, keep: Any = None) -> list[str]:
+    """Take `slot` from whoever holds it other than token `keep`.
+
+    Returns:
+        The room notices saying so.
+    """
+    notices = []
+    for record, key, name, token in _slot_holders(session_data):
+        held = launch.held_slots(record.get(key))
+        if slot in held and token != keep:
+            held.remove(slot)
+            record[key] = launch.slot_value(held)
+            notices.append(f"{name} was unassigned from Gamepad {slot}.")
+    return notices
+
+
+async def _push_slots(session_id: str, session_data: dict[str, Any], notices: list[str]) -> None:
+    """Push a slot change to the session's containers, keep it, and tell the room."""
     try:
         await broadcast_token_state(session_id, session_data)
         state.sessions[session_id] = session_data
         await config_store.save_sessions()
-        logger.info(
-            f"[{session_id}] Assigned slot {slot} and pushed update."
-        )
+        logger.info(f"[{session_id}] Gamepad slots changed and pushed.")
 
-        for msg in notifications:
+        for msg in notices:
             notification_payload = {
                 "type": "gamepad_change",
                 "message": msg,
                 "timestamp": int(time.time() * 1000),
             }
             await broadcast_to_room(session_id, notification_payload)
-
         await broadcast_state(session_id)
     except Exception as e:
         logger.error(
             f"[{session_id}] Failed to update downstream tokens for slot assignment: {e}"
         )
+
+
+async def handle_assign_slot(session_id: str, viewer_token: str, slot: int | None) -> None:
+    """Give a participant a gamepad slot beside those it holds.
+
+    The slot is taken from whoever held it, and `None` clears every slot the
+    participant holds. A participant holding several drives one with each of
+    its local controllers, in slot order: Selkies hands a token's list to the
+    page's pads in turn.
+    """
+    session_data = state.sessions.get(session_id)
+    if not session_data:
+        return
+    if slot is not None and not valid_slot(slot):
+        logger.warning(f"[{session_id}] Ignored assignment of invalid gamepad slot {slot!r}.")
+        return
+
+    target = next(
+        (h for h in _slot_holders(session_data) if viewer_token and h[3] == viewer_token), None
+    )
+    if not target:
+        logger.warning(
+            f"[{session_id}] Attempted to assign slot to non-existent user token."
+        )
+        return
+    record, key, name, _ = target
+    held = launch.held_slots(record.get(key))
+
+    notices = []
+    if slot is None:
+        record[key] = None
+        if held:
+            notices.append(f"{name} was unassigned from {gamepads_text(held)}.")
+    elif slot not in held:
+        notices = _take_slot(session_data, slot, keep=viewer_token)
+        record[key] = launch.slot_value(sorted(held + [slot]))
+        notices.append(f"Gamepad {slot} was assigned to {name}.")
+    await _push_slots(session_id, session_data, notices)
+
+
+async def handle_release_slot(session_id: str, slot: Any) -> None:
+    """Return a gamepad slot to the pool from whoever holds it."""
+    session_data = state.sessions.get(session_id)
+    if not session_data or not valid_slot(slot):
+        return
+    notices = _take_slot(session_data, slot)
+    if notices:
+        await _push_slots(session_id, session_data, notices)
 
 
 async def handle_assign_mk(session_id: str, target_token: str | None) -> None:

@@ -29,15 +29,15 @@ const SHELL_VERSION = typeof __UI_VERSION__ !== 'undefined' ? __UI_VERSION__ : '
  *
  * @returns {'chrome'|'firefox'|'android'|'ios'|'web'}
  */
-function detectPlatform() {
+function detectPlatform(shell) {
   const cap = typeof window !== 'undefined' && window.Capacitor;
   if (cap && typeof cap.getPlatform === 'function') {
     const p = cap.getPlatform();
     if (p === 'android' || p === 'ios') return p;
   }
   const ua = navigator.userAgent || '';
-  if (/Android/i.test(ua) && SHELL === 'mobile') return 'android';
-  if (/iPhone|iPad|iPod/i.test(ua) && SHELL === 'mobile') return 'ios';
+  if (/Android/i.test(ua) && shell === 'mobile') return 'android';
+  if (/iPhone|iPad|iPod/i.test(ua) && shell === 'mobile') return 'ios';
   if (typeof browser !== 'undefined' && /Firefox/.test(ua)) return 'firefox';
   if (/Firefox/.test(ua)) return 'firefox';
   if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) return 'chrome';
@@ -62,27 +62,34 @@ export async function callBackground(transport, type, payload = {}) {
  * Create the host bridge.
  *
  * @param {object} options
+ * @param {'extension'|'mobile'|'web'} [options.shell] defaults to the build target
  * @param {HTMLIFrameElement} options.iframe The single framed page.
  * @param {function} options.transport Sends a message to the background, resolves its reply.
  * @param {function} [options.onReady] Called with the page's hello payload the first time it arrives.
  * @param {function} [options.onHelloMismatch] Called when the page's bridge version differs.
  * @param {function} options.openPage `(page, params?) => void` implemented by the host page.
  * @param {function} [options.saveBlob] `(blob, filename) => Promise` for mobile native open.
+ * @param {function} [options.streamDownload] `(home, path, filename) => Promise`, the web app's streamed download.
+ * @param {function} [options.reserveTab] `(reserve, launch?) => void`, web app tab reservation; with
+ *   `launch` (`{id, app, logo, room}`) the tab shows the launching page, and a throw refuses the launch.
+ * @param {function} [options.adoptLaunch] `(launchId, sessionId) => boolean`, web app: the launch's tab is the session's.
+ * @param {function} [options.onLeave] `(leaving) => void`, web app: the framed page is growing a session over itself, or gave up.
  * @param {function} [options.close] Closes the popup (extension) or no-op.
  * @param {function} [options.isConnectPage] `() => boolean`, true while the bundled connect page is framed.
  * @returns {{setExpectedOrigin: function(string): void, destroy: function(): void}}
  */
 export function createHost(options) {
   const { iframe, transport } = options;
-  const platform = detectPlatform();
+  const shell = options.shell || SHELL;
+  const platform = detectPlatform(shell);
   let expectedOrigin = null;
   let helloSeen = false;
 
   const capabilities = {
-    streamDownload: SHELL === 'extension' && platform === 'chrome',
-    nativeFileOpen: SHELL === 'mobile',
-    contextMenus: SHELL === 'extension',
-    tabs: SHELL === 'extension',
+    streamDownload: Boolean(options.streamDownload) || (shell === 'extension' && platform === 'chrome'),
+    nativeFileOpen: shell === 'mobile',
+    contextMenus: shell === 'extension',
+    tabs: shell === 'extension',
   };
 
   const handlers = {
@@ -90,7 +97,7 @@ export function createHost(options) {
       const config = await callBackground(transport, 'getPublicConfig');
       const info = {
         bridge: BRIDGE_VERSION,
-        shell: SHELL,
+        shell,
         platform,
         shellVersion: SHELL_VERSION,
         locale: navigator.language || 'en-US',
@@ -115,6 +122,7 @@ export function createHost(options) {
       return info;
     },
 
+    // The web app's background answers this with a plain call under the sign-in cookie.
     secureFetch({ url, options: fetchOptions }) {
       return callBackground(transport, 'secureFetch', { url, options: fetchOptions || {} });
     },
@@ -138,7 +146,7 @@ export function createHost(options) {
       }
       await callBackground(transport, 'setContext', { context: toStore });
       if (openPopup) {
-        if (SHELL === 'mobile') {
+        if (shell !== 'extension') {
           options.openPage('popup');
         } else {
           await callBackground(transport, 'openPopup');
@@ -155,7 +163,9 @@ export function createHost(options) {
       return response.blob();
     },
 
-    openSession({ sessionId, sessionUrl }) {
+    openSession({ sessionId, sessionUrl, launchId }) {
+      // The web app's launching page takes its own tab to the session.
+      if (launchId && options.adoptLaunch && options.adoptLaunch(launchId, sessionId)) return {};
       return callBackground(transport, 'createTabAndTrack', { sessionId, session_url: sessionUrl });
     },
 
@@ -163,8 +173,18 @@ export function createHost(options) {
       return callBackground(transport, 'focusOrCreateTab', { session });
     },
 
+    async leaving({ leaving }) {
+      if (options.onLeave) options.onLeave(leaving !== false);
+      return {};
+    },
+
     closeSession({ sessionId }) {
       return callBackground(transport, 'closeSession', { sessionId });
+    },
+
+    async reserveTab({ reserve, launch }) {
+      if (options.reserveTab) await options.reserveTab(reserve !== false, launch);
+      return {};
     },
 
     async openPage({ page, params }) {
@@ -178,6 +198,10 @@ export function createHost(options) {
 
     async downloadFile({ home, path, filename }) {
       if (!capabilities.streamDownload) throw new Error('Streaming download is not available in this shell.');
+      if (options.streamDownload) {
+        await options.streamDownload(home, path, filename);
+        return {};
+      }
       const params = new URLSearchParams({ home, path, filename });
       const a = document.createElement('a');
       a.href = chrome.runtime.getURL(`/download-stream?${params.toString()}`);

@@ -14,6 +14,8 @@
     "cancel": "Annuler",
     "manage": "Gérer",
     "delete": "Supprimer",
+    "remove": "Retirer",
+    "move": "Déplacer",
     "edit": "Modifier",
     "save": "Enregistrer",
     "none": "aucun",
@@ -55,6 +57,7 @@
     "admins": "Admins",
     "yes": "Oui",
     "no": "Non",
+    "ok": "OK",
     "daysAgo": "{count, plural, one {il y a 1 jour} other {il y a {count} jours}}",
     "hoursAgo": "{count, plural, one {il y a 1 heure} other {il y a {count} heures}}",
     "minutesAgo": "{count, plural, one {il y a 1 minute} other {il y a {count} minutes}}",
@@ -76,9 +79,13 @@
       "appTemplates": "Modèles d'applications",
       "appLaboratory": "Laboratoire d'applications",
       "installedApps": "Applications Installées",
+      "prootApps": "PRoot Apps",
       "users": "Utilisateurs",
       "groups": "Groupes",
-      "admins": "Admins"
+      "admins": "Admins",
+      "cluster": "Cluster",
+      "signIn": "Connexion",
+      "audit": "Journal d'Audit"
     },
     "dashboard": {
       "title": "Tableau de Bord",
@@ -95,6 +102,7 @@
       "storageUsage": "Utilisation du Stockage :",
       "detectedGpus": "GPUs Détectés :",
       "logout": "Déconnexion & Effacer Config",
+      "logoutTitle": "Déconnexion",
       "howTo": "Comment Utiliser SealSkin",
       "howToDescription": "Cette section contient la documentation de base sur l'utilisation de l'extension.",
       "howToList": [
@@ -104,7 +112,14 @@
         "<strong>Pour gérer le stockage persistant :</strong> Utilisez l'onglet \"Dossiers Personnels\" sur cette page pour créer et supprimer des volumes de stockage pouvant être utilisés sur plusieurs sessions.",
         "<strong>Pour enregistrer les options de lancement :</strong> Cochez la case \"Enregistrer ces options de lancement\" dans la fenêtre contextuelle avant de lancer une application pour un type de fichier spécifique (par ex., .pdf) ou pour toutes les URL. Gérez ces préférences enregistrées dans l'onglet \"Comportement Épinglé\"."
       ],
-      "confirmLogout": "Êtes-vous sûr de vouloir vous déconnecter ? Cela effacera votre configuration enregistrée de ce navigateur."
+      "confirmLogout": "Êtes-vous sûr de vouloir vous déconnecter ? Cela effacera votre configuration enregistrée de ce navigateur.",
+      "changeConnection": "Changer de connexion",
+      "certExpired": "Le certificat TLS du serveur a expiré. Les connexions HTTPS échoueront jusqu'à son renouvellement.",
+      "certExpiring": "Le certificat TLS du serveur expire dans {days} jour(s). Renouvelez-le pour éviter les échecs de connexion.",
+      "signOut": "Se déconnecter",
+      "signedInThrough": "Connecté via :",
+      "allowance": "Quota :",
+      "allowanceUsed": "{used} sur {hours} heures par {period}"
     },
     "config": {
       "quickSetup": "Configuration Rapide",
@@ -145,9 +160,14 @@
       "namePlaceholder": "ex., mes-fichiers-projet",
       "nameTitle": "Utilisez uniquement des lettres, des chiffres, des underscores ou des tirets.",
       "createButton": "Créer le Dossier",
-      "isLaboratory": "Ceci est une application de Laboratoire, construite à partir d'une image de base avec des paramètres personnalisés.",
-      "laboratory": "Laboratoire",
-      "confirmDelete": "Êtes-vous sûr de vouloir supprimer l'application installée '{appName}' ?"
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer le dossier personnel '{homeName}' ? Toutes les données qu'il contient seront définitivement perdues.",
+      "deleteTitle": "Supprimer le dossier personnel",
+      "node": "Nœud",
+      "move": "Déplacer",
+      "moveTo": "Déplacer vers le nœud",
+      "moveHelp": "Le dossier personnel est copié sur le nœud puis supprimé de celui qui l'héberge. Les sessions qui l'utilisent doivent d'abord être arrêtées.",
+      "moveTitle": "Déplacer '{homeName}'",
+      "noOtherNode": "Il n'y a aucun autre nœud vers lequel le déplacer."
     },
     "sessions": {
       "title": "Sessions Actives",
@@ -155,12 +175,13 @@
       "started": "Démarrée",
       "noSessionsUser": "Aucune session active trouvée.",
       "noSessionsAdmin": "Aucune session active trouvée pour aucun utilisateur.",
-      "sessionsFor": "Sessions pour {username} ({count})",
-      "confirmStop": "Êtes-vous sûr de vouloir arrêter cette session ? Le conteneur sera détruit."
+      "sessionsFor": "Sessions pour {username} ({count})"
     },
     "pinned": {
       "title": "Comportement Épinglé de l'Extension",
       "description": "Ce tableau montre les options de lancement que vous avez enregistrées pour des types de fichiers spécifiques ou pour toutes les URL. Vous pouvez supprimer un comportement épinglé pour être à nouveau invité à choisir les options de lancement.",
+      "removeTitle": "Retirer le comportement épinglé",
+      "confirmRemove": "Retirer le comportement épinglé pour '{name}' ?",
       "trigger": "Déclencheur",
       "savedApp": "Application Enregistrée",
       "triggerSimple": "Lancement Simple (Bouton de la barre d'outils)",
@@ -177,7 +198,8 @@
       "publicKeyOptionalLabel": "Clé Publique (Optionnel) :",
       "publicKeyPlaceholder": "Collez la clé publique ici, ou laissez vide pour en générer une.",
       "createButton": "Créer l'Admin",
-      "confirmDelete": "Êtes-vous sûr de vouloir supprimer l'admin '{username}' ? Cela supprimera également tout son stockage persistant et ne pourra pas être annulé."
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer l'admin '{username}' ? Cela supprimera également tout son stockage persistant et ne pourra pas être annulé.",
+      "deleteTitle": "Supprimer l'administrateur"
     },
     "users": {
       "title": "Gestion des Utilisateurs",
@@ -197,8 +219,29 @@
       "createButton": "Créer l'Utilisateur",
       "homesDisabledTooltip": "Stockage persistant désactivé pour cet utilisateur",
       "confirmDelete": "Êtes-vous sûr de vouloir supprimer l'utilisateur '{username}' ? Cela supprimera également tout son stockage persistant et ne pourra pas être annulé.",
+      "deleteTitle": "Supprimer l'utilisateur",
       "allowPublicSharing": "Autoriser le partage de fichiers public",
-      "allowEditTemplates": "Autoriser la modification des modèles d'applications"
+      "allowEditTemplates": "Autoriser la modification des modèles d'applications",
+      "signInOnly": "Authentification unique seulement",
+      "awaitingGroup": "En attente d'un groupe",
+      "approve": "Approuver",
+      "admin": "Administrateur",
+      "gpuShare": "Autoriser le Partage d'un GPU avec d'Autres Sessions",
+      "homeMigration": "Autoriser le Déplacement des Dossiers Personnels entre Nœuds",
+      "storageLimit": "Limite de stockage (Go par nœud)",
+      "sessionCpus": "CPU par session",
+      "sessionMemory": "Mémoire par session (Mo)",
+      "sessionHours": "Durée maximale d'une session (heures)",
+      "allowanceHours": "Quota (heures de session pondérées)",
+      "allowancePeriod": "Période du quota",
+      "pools": "Pools restreints autorisés (séparés par des virgules)",
+      "poolsDenied": "Pools refusés (séparés par des virgules)",
+      "prootCatalog": "Catalogue PRoot Apps",
+      "prootCatalogNone": "Aucun",
+      "prootCatalogHelp": "Monté en lecture seule dans chaque session ; proot-apps installe depuis ce catalogue au lieu d'un registre. Laissé sur Aucun, le premier des groupes de l'utilisateur à en choisir un décide.",
+      "groupsHelp": "Maintenez Ctrl ou Commande pour en sélectionner plusieurs. Quand les groupes divergent, la valeur la plus restrictive l'emporte.",
+      "providerGroups": "Groupes indiqués par le fournisseur d'identité à la dernière connexion : {groups}",
+      "limitsHelp": "Une limite de -1, ou laissée vide, n'en fixe aucune."
     },
     "groups": {
       "title": "Gestion des Groupes",
@@ -208,7 +251,15 @@
       "overrideTitle": "Paramètres de Surcharge du Groupe",
       "permissionsTitle": "Surcharges des Permissions & Renforcement",
       "createButton": "Créer le Groupe",
-      "confirmDelete": "Êtes-vous sûr de vouloir supprimer le groupe '{groupName}' ? Les utilisateurs de ce groupe reviendront à leurs paramètres individuels."
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer le groupe '{groupName}' ? Les utilisateurs de ce groupe reviendront à leurs paramètres individuels.",
+      "deleteTitle": "Supprimer le groupe",
+      "notSet": "Non défini",
+      "allow": "Autoriser",
+      "deny": "Refuser",
+      "on": "Activé",
+      "off": "Désactivé",
+      "ssoGroups": "Groupes du fournisseur d'identité dont les membres font partie de ce groupe (séparés par des virgules)",
+      "overrideHelp": "Un groupe ne décide que de ce qui est défini ici ; tout ce qui reste non défini ou vide reste propre à chaque membre."
     },
     "installedApps": {
       "title": "Applications Installées",
@@ -216,7 +267,10 @@
       "noAppsFound": "Aucune application installée trouvée.",
       "pulling": "Téléchargement de la nouvelle image...",
       "notLocal": "Image non trouvée localement",
-      "confirmDelete": "Êtes-vous sûr de vouloir supprimer l'application installée '{appName}' ?"
+      "isLaboratory": "Ceci est une application de Laboratoire, construite à partir d'une image de base avec des paramètres personnalisés.",
+      "laboratory": "Laboratoire",
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer l'application installée '{appName}' ?",
+      "deleteTitle": "Supprimer l'application installée"
     },
     "appStore": {
       "title": "Magasins d'Applications",
@@ -243,9 +297,45 @@
       "previewTitle": "Aperçu de l'UI",
       "contentArea": "Zone de Contenu de l'Application",
       "confirmDelete": "Êtes-vous sûr de vouloir supprimer le modèle '{templateName}' ? Cette action ne peut pas être annulée.",
+      "deleteTitle": "Supprimer le modèle",
       "deleteDisabled": "Ce modèle ne peut pas être supprimé.",
       "enterName": "Veuillez entrer un nom pour le nouveau modèle.",
       "dockerAdminOnly": "Seul un administrateur peut modifier ces paramètres.",
+      "filterPlaceholder": "Filtrer les réglages par nom…",
+      "changedOnly": "Modifiés seulement",
+      "showMore": "Afficher plus",
+      "showLess": "Afficher moins",
+      "changedCount": "{count, plural, one {1 modifié} other {{count} modifiés}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC, mode double"
+      },
+      "sections": {
+        "appearance": "Apparence",
+        "display": "Affichage",
+        "input": "Saisie",
+        "audio": "Audio",
+        "webcam": "Webcam",
+        "performance": "Performance",
+        "gpu": "GPU",
+        "clipboard": "Presse-papiers et fichiers",
+        "sharing": "Partage",
+        "hardening": "Durcissement",
+        "lifecycle": "Cycle de vie",
+        "integrations": "Intégrations",
+        "webrtc": "WebRTC",
+        "container": "Conteneur"
+      },
+      "groups": {
+        "mode": "Mode",
+        "transport": "Transport",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "API REST TURN",
+        "cloudflare": "TURN Cloudflare",
+        "extra": "Diagnostic"
+      },
       "settings": {
         "TITLE": {
           "label": "Titre de la Page",
@@ -421,7 +511,7 @@
         },
         "SELKIES_ENABLE_COLLAB": {
           "label": "Activer la Collaboration",
-          "description": "Permettre à un spectateur détenant le jeton maître de la session d'agir comme collaborateur en lecture-écriture. Requis pour les salles SealSkin."
+          "description": "Permettre à un spectateur détenant le jeton maître de la session d'agir comme collaborateur en lecture-écriture. Requis pour les salles {brand}."
         },
         "SELKIES_ENABLE_PLAYER2": {
           "label": "Activer le Partage Joueur 2",
@@ -692,10 +782,6 @@
           "label": "Backend Wayland",
           "description": "Exécute la session sur le backend Wayland, un compositeur sans affichage avec labwc imbriqué pour la gestion des fenêtres, au lieu du serveur X11. Les applications X11 passent par XWayland."
         },
-        "MAX_RES": {
-          "label": "Résolution Maximale",
-          "description": "Résolution maximale pour le conteneur, la valeur par défaut est 16k."
-        },
         "START_DOCKER": {
           "label": "Démarrer Docker-in-Docker",
           "description": "Si faux, un conteneur privilégié ne démarrera pas DinD."
@@ -703,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "Désactiver IPv6",
           "description": "Si vrai, cela désactivera IPv6."
-        },
-        "DISABLE_ZINK": {
-          "label": "Désactiver Zink",
-          "description": "Ne pas définir les variables d'environnement Zink si une carte vidéo est détectée."
         },
         "DISABLE_DRI3": {
           "label": "Désactiver DRI3",
@@ -1036,7 +1118,36 @@
       "closeButton": "Fermer la Session et Finaliser",
       "savingAndLaunching": "Enregistrement et Lancement...",
       "placeholder": "Le Laboratoire d'applications vous permet de configurer le répertoire personnel de base et le script de lancement pour une application basée sur une application installée existante. Ce répertoire personnel sera copié lors de la première initialisation pour l'utilisateur avec tous les fichiers et paramètres que vous configurez dans cette session. Vous pouvez relancer une application de Laboratoire existante pour en modifier davantage le contenu.",
-      "formInvalid": "Veuillez sélectionner une application de base et fournir un nom pour la nouvelle application."
+      "formInvalid": "Veuillez sélectionner une application de base et fournir un nom pour la nouvelle application.",
+      "explainer": "Le Laboratoire d'applications crée une méta-application : une variante d'une application installée avec son propre nom, son icône, son script de démarrage automatique et un dossier personnel déjà configuré. Vous configurez l'application une fois dans une session de personnalisation, et le premier lancement de chaque utilisateur part d'une copie de ce dossier personnel.",
+      "step1Title": "Décrire l'application",
+      "step1": "Choisissez l'application de base, puis donnez à la méta-application un nom, une icône et les utilisateurs autorisés à la lancer.",
+      "step2Title": "La personnaliser dans une session en direct",
+      "step2": "Une session de personnalisation s'ouvre avec le dossier personnel du modèle accessible en écriture. Installez des extensions, connectez-vous, disposez tout comme les utilisateurs doivent le trouver.",
+      "step3Title": "Fermer la session pour enregistrer le modèle",
+      "step3": "Fermer la session depuis cette page conserve le dossier personnel comme modèle.",
+      "openTitle": "Session de personnalisation ouverte",
+      "openStarted": "Démarrée {when}",
+      "openDescription": "Tout ce qui change dans le dossier personnel de cette session devient le modèle. La session reste ouverte jusqu'à ce que vous la fermiez ici ; elle ne figure pas parmi vos sessions.",
+      "reopen": "Rouvrir la session",
+      "closeAndSave": "Fermer et enregistrer le modèle",
+      "confirmClose": "Fermer la session de personnalisation de '{name}' ? La session s'arrête et son dossier personnel est conservé comme modèle.",
+      "closeTitle": "Fermer la session de personnalisation",
+      "unsavedTitle": "Modifications non enregistrées",
+      "unsavedClose": "Les modifications n'ont pas pu être enregistrées. Fermer la session quand même ?",
+      "templateSaved": "Session fermée. Le modèle est enregistré.",
+      "busy": "Une session de personnalisation pour '{name}' est ouverte. Fermez-la ci-dessus avant de modifier une méta-application ou d'en démarrer une autre.",
+      "describeTitle": "1. Décrire",
+      "customizeTitle": "2. Personnaliser",
+      "customizeDescription": "La session de personnalisation démarre avec ces options. Une seule session peut être ouverte à la fois.",
+      "advanced": "Avancé",
+      "saveAndOpen": "Enregistrer et ouvrir la session de personnalisation",
+      "listTitle": "Vos méta-applications",
+      "listNone": "Aucune méta-application pour l'instant.",
+      "closingStopping": "Arrêt de la session…",
+      "closingSaving": "Enregistrement du modèle…",
+      "closingSaved": "Modèle enregistré : {files} fichiers, {size}",
+      "closingFailed": "La fermeture de la session a échoué."
     },
     "modals": {
       "editUserTitle": "Modifier l'Utilisateur : {username}",
@@ -1045,7 +1156,7 @@
       "editGroupTitle": "Modifier le Groupe : {groupName}",
       "userConfigTitle": "Configuration de l'Utilisateur",
       "warning": "C'est la seule fois que cette configuration sera affichée. Fournissez-la à l'utilisateur de manière sécurisée.",
-      "info": "Vous pouvez télécharger ce fichier de configuration pour configurer facilement SealSkin sur un autre appareil. Conservez ce fichier en lieu sûr car il contient votre clé privée.",
+      "info": "Vous pouvez télécharger ce fichier de configuration pour configurer facilement {brand} sur un autre appareil. Conservez ce fichier en lieu sûr car il contient votre clé privée.",
       "configDataLabel": "Données de Configuration (JSON)",
       "copyButton": "Copier le Texte",
       "downloadButton": "Télécharger le Fichier",
@@ -1053,6 +1164,8 @@
       "dirsForUser": "Dossiers pour l'utilisateur : {username}",
       "dirsForAdmin": "Dossiers pour l'admin : {username}",
       "newDirForUser": "Créer un Nouveau Dossier pour l'Utilisateur",
+      "customAutostartScriptLabel": "Script de Démarrage Automatique Personnalisé",
+      "customAutostartScriptDescription": "Personnalisez la logique de démarrage automatique, laissez vide pour utiliser celle par défaut du fournisseur de l'application.",
       "createDirButton": "Créer le Dossier",
       "confirmDeleteDir": "Êtes-vous sûr de vouloir supprimer '{homeName}' pour l'utilisateur '{username}' ? C'est permanent.",
       "installAppTitle": "Installer {appName}",
@@ -1071,8 +1184,6 @@
       "advancedSettings": "Paramètres Avancés",
       "appTemplateLabel": "Modèle d'Application",
       "appTemplateDescription": "Sélectionnez un modèle préconfiguré pour les paramètres de lancement avancés du conteneur.",
-      "customAutostartScriptLabel": "Script de Démarrage Automatique Personnalisé",
-      "customAutostartScriptDescription": "Personnalisez la logique de démarrage automatique, laissez vide pour utiliser celle par défaut du fournisseur de l'application.",
       "saveInstallation": "Enregistrer l'Installation",
       "updateStatusTitle": "Statut de la Mise à Jour pour {appName}",
       "checkingUpdates": "Vérification des mises à jour...",
@@ -1088,10 +1199,7 @@
       "newVersion": "Nouvelle version : {sha}",
       "errorPulling": "Erreur lors du téléchargement de l'image.",
       "manualInstallNote": "Note : Les images ajoutées manuellement doivent être basées sur une image compatible avec selkies-baseimage.",
-      "generalTitle": "Paramètres Généraux et de Performance",
-      "webrtcTitle": "Paramètres WebRTC et TURN",
       "webrtcDescription": "Les sessions sont diffusées via WebSockets par défaut. Définir une valeur STUN, TURN, Cloudflare ou d'IP publique ci-dessous, ou choisir le mode WebRTC, fait passer le conteneur en WebRTC avec le mode double activé afin que les utilisateurs puissent toujours se rabattre sur WebSockets.",
-      "dockerTitle": "Surcharges Avancées Docker",
       "dockerDescription": "Ces paramètres remplacent la configuration par défaut du conteneur. À utiliser avec prudence et seulement si vous savez ce que vous faites."
     },
     "status": {
@@ -1105,9 +1213,6 @@
       "loggedInUser": "Connecté en tant qu'utilisateur standard : {username}.",
       "loginFailed": "Échec de la connexion : {error}",
       "adminDataRefreshFailed": "Échec de l'actualisation des données admin : {error}",
-      "closingSession": "Validation de la session de personnalisation...",
-      "sessionClosed": "Session de personnalisation fermée.",
-      "sessionCloseFailed": "Échec de la fermeture de la session de personnalisation : {error}",
       "logoutSuccess": "Déconnecté et configuration effacée.",
       "generateConfigFailed": "Impossible de générer la config, les détails de l'utilisateur sont manquants.",
       "copySuccess": "Configuration copiée dans le presse-papiers !",
@@ -1126,6 +1231,8 @@
       "userDeleteFailed": "Erreur lors de la suppression de l'utilisateur : {error}",
       "userUpdated": "Utilisateur '{username}' mis à jour avec succès.",
       "userUpdateFailed": "Erreur lors de la mise à jour de l'utilisateur : {error}",
+      "userApproved": "Utilisateur '{username}' approuvé.",
+      "userApproveFailed": "Erreur lors de l'approbation de l'utilisateur : {error}",
       "creatingGroup": "Création du groupe...",
       "groupCreated": "Groupe '{groupName}' créé.",
       "groupCreateFailed": "Erreur lors de la création du groupe : {error}",
@@ -1144,6 +1251,9 @@
       "sessionStopError": "Erreur lors de l'arrêt de la session : {error}",
       "sessionStopped": "Session arrêtée avec succès.",
       "appDataRefreshFailed": "Échec de l'actualisation des données de l'app : {error}",
+      "closingSession": "Validation de la session de personnalisation...",
+      "sessionClosed": "Session de personnalisation fermée.",
+      "sessionCloseFailed": "Échec de la fermeture de la session de personnalisation : {error}",
       "fetchingApps": "Récupération des apps du magasin...",
       "fetchAppsFailed": "Échec de la récupération des apps du magasin : {error}",
       "appStoreAddFailed": "Erreur lors de l'ajout du magasin : {error}",
@@ -1166,7 +1276,24 @@
       "pendingConfigSaved": "Configuration en attente enregistrée. Vous pouvez maintenant fournir votre clé publique à l'administrateur.",
       "settingsSaved": "Paramètres enregistrés.",
       "appCreated": "Application '{name}' créée avec succès.",
-      "launchFailed": "Échec du lancement : {error}"
+      "launchFailed": "Échec du lancement : {error}",
+      "homedirMoving": "Déplacement du dossier personnel '{homeName}'...",
+      "homedirMoved": "Dossier personnel '{homeName}' déplacé.",
+      "homedirMoveFailed": "Échec du déplacement du dossier personnel : {error}",
+      "clusterLoadFailed": "Échec du chargement du cluster : {error}",
+      "clusterWriteFailed": "Échec de l'enregistrement : {error}",
+      "nodeUpdated": "Nœud mis à jour.",
+      "nodeRemoved": "Nœud retiré.",
+      "poolSaved": "Pool '{name}' enregistré.",
+      "poolDeleted": "Pool '{name}' supprimé.",
+      "nothingChanged": "Aucun changement.",
+      "catalogSaved": "Catalogue '{name}' enregistré ; chaque nœud récupère ses applications.",
+      "catalogSaveFailed": "Impossible d'enregistrer le catalogue : {error}",
+      "catalogDeleted": "Catalogue '{name}' supprimé.",
+      "catalogDeleteFailed": "Impossible de supprimer le catalogue : {error}",
+      "catalogUpdateStarted": "Mise à jour du catalogue '{name}' sur chaque nœud.",
+      "catalogUpdateFailed": "Impossible de mettre à jour le catalogue : {error}",
+      "catalogsRefreshFailed": "Impossible de charger les catalogues : {error}"
     },
     "placeholders": {
       "noAdmins": "Aucun admin trouvé.",
@@ -1176,7 +1303,289 @@
       "noSessions": "Aucune session active trouvée.",
       "noPinned": "Aucun comportement épinglé trouvé.",
       "errorLoading": "Erreur lors du chargement des dossiers.",
-      "noInstalledApps": "Aucune application n'a encore été installée."
+      "noInstalledApps": "Aucune application n'a encore été installée.",
+      "noProotCatalogs": "Aucun catalogue pour l'instant."
+    },
+    "web": {
+      "title": "{brand} dans ce Navigateur",
+      "bookmarklet": "Envoyer à {brand}",
+      "bookmarkletHelp": "Faites glisser ce lien dans votre barre de favoris. Un clic dessus ouvre la page en cours dans {brand}, ou recherche le texte sélectionné.",
+      "pick": "Choisir pour {brand}",
+      "pickHelp": "Faites aussi glisser ce lien dans la barre. Cliquez dessus, puis sur un lien pour l'ouvrir dans {brand}, ou sur une image, une vidéo ou un son pour envoyer le fichier. Maj+clic sur un lien envoie le fichier vers lequel il mène, récupéré avec votre connexion à ce site.",
+      "pickHint": "{brand} : cliquez sur un lien, ou sur une image, une vidéo ou un son, pour l'envoyer ; Maj+clic sur un lien envoie son fichier. Appuyez sur Échap pour annuler.",
+      "protocol": "Ouvrir ici les liens web+sealskin:",
+      "protocolHelp": "Un lien écrit web+sealskin: suivi d'une adresse ouvre alors cette adresse dans {brand}.",
+      "install": "Si votre navigateur sait installer des applications web, installez {brand} depuis son menu pour lui partager des liens et des fichiers et ouvrir des fichiers avec."
+    },
+    "via": {
+      "root": "Jeton root",
+      "oidc": "OpenID Connect",
+      "saml": "SAML",
+      "proxy": "Proxy inverse",
+      "key": "Fichier de clé"
+    },
+    "periods": {
+      "day": "Jour",
+      "week": "Semaine",
+      "month": "Mois"
+    },
+    "cluster": {
+      "nodesTitle": "Nœuds",
+      "pool": "Pool",
+      "load": "Charge",
+      "online": "En ligne",
+      "offline": "Hors ligne",
+      "waiting": "En attente d'approbation",
+      "lastSeen": "vu pour la dernière fois {when}",
+      "storeUnreachableNode": "ne peut pas joindre les données partagées",
+      "cpus": "{count} CPU",
+      "gpus": "{count} GPU",
+      "gpuSessions": "GPU : {used} / {slots}",
+      "thisNode": "ce nœud",
+      "approve": "Approuver",
+      "suspend": "Suspendre",
+      "remove": "Retirer",
+      "confirmRemove": "Retirer le nœud '{name}' du cluster ? Un nœud encore en fonctionnement s'enregistre à nouveau et attend l'approbation.",
+      "removeTitle": "Retirer le nœud",
+      "joinTitle": "Ajouter un Nœud",
+      "joinDescription": "Créez un code d'adhésion, démarrez le nouveau nœud avec les deux lignes ci-dessous dans son environnement, puis approuvez-le dans le tableau ci-dessus. Un code admet un seul nœud et dure une heure.",
+      "joinButton": "Créer un Code d'Adhésion",
+      "joinExpires": "Environnement du nouveau nœud (le code expire {when})",
+      "poolsTitle": "Pools",
+      "poolsDescription": "Un pool est un ensemble de nœuds sur lesquels les sessions démarrent. Un pool restreint n'est ouvert qu'aux utilisateurs et groupes nommés ici ou autorisés par leurs paramètres.",
+      "poolDomain": "Domaine",
+      "poolAccess": "Accès",
+      "poolCost": "Coût par heure",
+      "poolCostWithGpu": "{cost} (GPU : {gpuCost})",
+      "poolOpen": "Ouvert",
+      "poolRestricted": "Restreint",
+      "poolNew": "Nouveau Pool",
+      "poolEdit": "Modifier le Pool '{name}'",
+      "poolDescriptionLabel": "Description",
+      "poolDomainLabel": "Domaine sous lequel les nœuds du pool sont nommés",
+      "poolCostLabel": "Quota que coûte une heure de session",
+      "poolGpuCostLabel": "Quota que coûte une heure de session GPU (vide : identique)",
+      "poolUsersLabel": "Utilisateurs auxquels il est ouvert s'il est restreint (séparés par des virgules)",
+      "poolGroupsLabel": "Groupes auxquels il est ouvert s'il est restreint (séparés par des virgules)",
+      "poolStopWhenSpent": "Terminer les sessions quand le quota est épuisé",
+      "poolSave": "Enregistrer le Pool",
+      "confirmDeletePool": "Supprimer le pool '{name}' ?",
+      "deletePoolTitle": "Supprimer le pool",
+      "storeTitle": "Données Partagées",
+      "storeDescription": "L'endroit où les nœuds conservent les données qu'ils partagent : utilisateurs, groupes, applications, pools et ces paramètres.",
+      "storeKept": "Conservées :",
+      "storeKinds": {
+        "file": "Sur le disque de ce nœud",
+        "s3": "Dans un bucket de stockage objet",
+        "peer": "Sur un autre nœud"
+      },
+      "reachable": "Joignable",
+      "unreachable": "Injoignable",
+      "publicUrl": "Adresse de l'application web :",
+      "sessionDomain": "Domaine des sessions :",
+      "sessionDomainUnset": "Non défini (le nom d'hôte de l'application web)",
+      "sessionDomainOff": "Désactivé : les sessions s'ouvrent à l'adresse de l'application web",
+      "signInDescription": "Un paramètre écrit ici vaut pour tous les nœuds et prime sur l'environnement d'un nœud. Videz un champ pour rendre le paramètre à l'environnement de chaque nœud.",
+      "settingWritten": "Défini ici pour tous les nœuds.",
+      "settingFromEnvironment": "Issu de l'environnement de chaque nœud ; la valeur affichée est celle de ce nœud.",
+      "settingInherit": "Issu de l'environnement de chaque nœud (ici : {value})",
+      "secretSet": "Un secret est défini ; laissez vide pour le conserver",
+      "secretUnset": "Aucun secret n'est défini",
+      "secretClear": "Retirer le secret défini ici",
+      "settings": {
+        "oidc_issuer": "URL de l'émetteur OpenID Connect",
+        "oidc_client_id": "ID client OpenID Connect",
+        "oidc_client_secret": "Secret client OpenID Connect",
+        "oidc_scopes": "Scopes OpenID Connect",
+        "saml_metadata_url": "URL des métadonnées SAML",
+        "saml_username_attribute": "Attribut SAML désignant l'utilisateur (vide : le claim de nom d'utilisateur ci-dessous)",
+        "saml_groups_attribute": "Attribut SAML listant les groupes de l'utilisateur (vide : le claim de groupes ci-dessous)",
+        "sso_username_claim": "Claim ou attribut désignant l'utilisateur",
+        "sso_groups_claim": "Claim ou attribut listant les groupes de l'utilisateur",
+        "sso_admin_group": "Groupe d'administrateurs du fournisseur d'identité",
+        "sso_max_age_seconds": "Durée maximale d'une connexion via le fournisseur d'identité (heures)",
+        "sso_force_login": "Demander les identifiants à chaque connexion",
+        "sso_create_users": "Créer l'utilisateur à la première connexion",
+        "sso_hold_new_users": "Retenir les nouveaux utilisateurs jusqu'à leur placement dans un groupe",
+        "proxy_auth_user_header": "En-tête dans lequel un proxy de confiance désigne l'utilisateur",
+        "proxy_auth_groups_header": "En-tête dans lequel un proxy de confiance liste les groupes de l'utilisateur",
+        "proxy_auth_logout_url": "Page du proxy qui déconnecte son utilisateur",
+        "web_session_seconds": "Durée maximale d'inactivité d'une connexion root (heures)",
+        "files_sync": "Conserver les fichiers partagés dans le stockage objet"
+      },
+      "usageTitle": "Utilisation",
+      "usageHours": "Heures pondérées",
+      "usageNone": "Aucune utilisation sur cette période.",
+      "settingsTitle": "Paramètres du Cluster"
+    },
+    "audit": {
+      "title": "Journal d'Audit",
+      "searchPlaceholder": "Rechercher des événements...",
+      "range": "Période",
+      "pageSize": "Événements par page",
+      "today": "Aujourd'hui",
+      "last7": "7 derniers jours",
+      "last30": "30 derniers jours",
+      "oneDay": "Un jour (UTC)",
+      "time": "Heure",
+      "event": "Événement",
+      "details": "Détails",
+      "none": "Aucun événement ne correspond.",
+      "shown": "{from}–{to} sur {total}",
+      "exportCsv": "Exporter en CSV",
+      "exportJson": "Exporter en JSON",
+      "exported": "{count} événements exportés."
+    },
+    "signin": {
+      "pill": {
+        "active": "Actif",
+        "off": "Désactivé",
+        "none": "Non configuré"
+      },
+      "test": "Tester",
+      "testing": "Test des paramètres enregistrés...",
+      "testOk": "Le fournisseur a répondu.",
+      "testFailed": "Le test a échoué.",
+      "register": "À enregistrer auprès du fournisseur",
+      "provider": "Fournisseur",
+      "providerChoose": "Choisir un fournisseur pour obtenir des indications",
+      "providerHelp": "Un fournisseur ne fait que remplir les indications ci-dessous ; rien n'est enregistré à son sujet.",
+      "proxyHelp": "Un proxy inverse placé en amont connecte les utilisateurs et les désigne dans un en-tête. Cela convient à un proxy qui protège déjà vos autres sites de la même façon ; sinon, connectez les utilisateurs ci-dessus, via OpenID Connect ou SAML.",
+      "proxyPresetChoose": "Choisir le fournisseur du proxy pour remplir les en-têtes",
+      "proxyPresets": {
+        "authelia": "Authelia",
+        "authentik": "Authentik",
+        "tinyauth": "Tinyauth",
+        "oauth2proxy": "oauth2-proxy"
+      },
+      "reach": {
+        "title": "Accès à ce Serveur",
+        "help": "Comment les navigateurs atteignent ce serveur, tel que le voient le serveur et ce navigateur. Un proxy inverse placé en amont doit régler correctement chacun de ces points.",
+        "publicUrl": "URL publique",
+        "publicUrlDiffers": "Cette page a été chargée depuis {origin}. Définissez SEALSKIN_PUBLIC_URL sur l'adresse qu'utilisent les navigateurs : les redirections du fournisseur d'identité sont construites à partir d'elle.",
+        "sessionDomain": "Domaine des sessions",
+        "sessionNames": "Les sessions s'ouvrent sur",
+        "sessionNamesNone": "Aucun nom de session n'a répondu",
+        "sessionNamesShared": "Chaque session est un chemin de l'application web, aucun autre nom n'a donc à répondre. SEALSKIN_SESSION_ISOLATION=true donne à chacune un nom propre sous le domaine de session.",
+        "sessionNamesHelp": "Les lancements depuis l'application web échoueront. Une session s'ouvre sur un nom qui lui est propre, <session id>.<domain> : le domaine nécessite un DNS wildcard, un certificat wildcard et une règle de proxy inverse qui envoie ces noms ici.",
+        "sessionNamesGuarded": "Les sessions s'ouvriront sous {domain}, comme l'indique SEALSKIN_SESSION_DOMAIN. C'est normal lorsque le proxy inverse exige une connexion sur les noms de session ; sinon, vérifiez le DNS wildcard, le certificat et la règle de proxy qui les concernent.",
+        "sessionNamesOther": "SEALSKIN_SESSION_DOMAIN désigne {domain}, qui n'a pas répondu.",
+        "trustedProxies": "Proxys de confiance",
+        "arrivedFrom": "Cette requête est arrivée depuis",
+        "viaTrusted": "Un proxy de confiance.",
+        "viaOther": "Ne fait pas partie des proxys de confiance. S'il s'agit de l'adresse de votre proxy inverse, ajoutez-la à SEALSKIN_TRUSTED_PROXIES.",
+        "viaDirect": "Aucun proxy inverse n'est de confiance. S'il s'agit de l'adresse d'un proxy inverse, définissez SEALSKIN_TRUSTED_PROXIES sur celle-ci, afin que le serveur voie l'adresse propre à chaque navigateur.",
+        "yourAddress": "Votre adresse, telle que le serveur la voit",
+        "httpPort": "Port d'écoute HTTP en clair"
+      },
+      "presets": {
+        "authelia": {
+          "name": "Authelia",
+          "hint": "L'émetteur est l'adresse même d'Authelia, https://<host>. Ajoutez un client sous identity_providers.oidc.clients avec l'URI de redirection ci-dessous et les scopes openid profile groups email offline_access."
+        },
+        "pocketid": {
+          "name": "Pocket ID",
+          "hint": "L'émetteur est l'adresse même de Pocket ID, https://<host>. Ajoutez un client OIDC avec l'URL de rappel ci-dessous et définissez les scopes sur openid profile email groups."
+        },
+        "tinyauth": {
+          "name": "Tinyauth",
+          "hint": "L'émetteur est l'adresse même de Tinyauth, https://<host>. Définissez le client avec les variables TINYAUTH_OIDC_CLIENTS_<NAME>_ et définissez les scopes sur openid profile email groups."
+        },
+        "keycloak": {
+          "name": "Keycloak",
+          "hint": "L'émetteur est l'adresse du realm, https://<host>/realms/<realm>. Créez un client OpenID Connect avec l'authentification du client activée, et ajoutez un mapper d'appartenance aux groupes nommé 'groups' pour envoyer les groupes de l'utilisateur."
+        },
+        "authentik": {
+          "name": "Authentik",
+          "hint": "L'émetteur est l'adresse de l'application, https://<host>/application/o/<slug>/, avec sa barre oblique finale. Créez un fournisseur OAuth2/OpenID et une application qui l'utilise."
+        },
+        "entra": {
+          "name": "Microsoft Entra ID",
+          "hint": "L'émetteur est https://login.microsoftonline.com/<tenant>/v2.0. Inscrivez une application, ajoutez un secret client et ajoutez le claim groups dans Configuration du jeton."
+        },
+        "google": {
+          "name": "Google",
+          "hint": "L'émetteur est https://accounts.google.com. Créez un ID client OAuth de type Application Web. Google n'envoie aucun groupe."
+        },
+        "okta": {
+          "name": "Okta",
+          "hint": "L'émetteur est l'adresse de votre organisation, https://<org>.okta.com. Créez une application web OIDC et ajoutez un claim groups à son jeton d'ID."
+        },
+        "other": {
+          "name": "Autre",
+          "hint": "L'émetteur est l'adresse dont /.well-known/openid-configuration décrit le fournisseur."
+        }
+      },
+      "oidcTitle": "OpenID Connect",
+      "oidcRedirect": "URI de redirection",
+      "oidcBackchannel": "URL de déconnexion back-channel",
+      "oidcFrontchannel": "URL de déconnexion front-channel",
+      "samlTitle": "SAML 2.0",
+      "samlEntity": "ID d'entité / URL des métadonnées",
+      "samlAcs": "URL ACS",
+      "samlSlo": "URL de déconnexion unique",
+      "samlMetadata": "Ouvrir les métadonnées de fournisseur de services de ce serveur",
+      "proxyTitle": "Proxy Inverse",
+      "trustedProxies": "Proxys de confiance de ce nœud :",
+      "trustedProxiesHelp": "Défini sur chaque nœud avec SEALSKIN_TRUSTED_PROXIES. L'en-tête n'est pris en compte que si la requête vient de l'une de ces adresses.",
+      "noTrustedProxy": "Un en-tête utilisateur est défini, mais ce nœud ne fait encore confiance à aucun proxy : aucune connexion par proxy n'est donc acceptée.",
+      "proxyCheck": {
+        "guarded": "Vérifié : le proxy ne transmet pas les en-têtes de connexion envoyés par un visiteur.",
+        "open": "Les connexions par proxy sont refusées.",
+        "unreachable": "Les connexions par proxy sont refusées : ce nœud ne peut pas vérifier le proxy. Donnez-lui une route vers son URL publique, indiquez l'adresse propre du proxy dans SEALSKIN_TRUSTED_PROXIES, ou définissez SEALSKIN_PROXY_AUTH_UNCHECKED=true sur le nœud pour faire confiance au proxy sans vérification.",
+        "unchecked": "La vérification du proxy est désactivée sur ce nœud (SEALSKIN_PROXY_AUTH_UNCHECKED) : tout ce que le proxy transmet est pris en compte."
+      },
+      "whoTitle": "Qui se Connecte",
+      "whoHelp": "Ces paramètres valent pour OpenID Connect, SAML et le proxy inverse. Pour placer les membres d'un groupe du fournisseur d'identité dans un groupe {brand}, indiquez-le sous « Groupes du fournisseur d'identité » de ce groupe dans Groupes.",
+      "rootTitle": "Jeton Root",
+      "rootHelp": "Toujours disponible. Le jeton se trouve dans /config/root_token sur le serveur tant que ce fichier n'est pas supprimé, et peut être défini avec SEALSKIN_ROOT_TOKEN.",
+      "keyTitle": "Fichiers de Clé",
+      "keyOn": "Ce nœud accepte les clients à fichier de clé : l'extension de navigateur et l'application mobile. Défini sur chaque nœud avec SEALSKIN_LEGACY_AUTH.",
+      "keyOff": "Ce nœud n'accepte pas les clients à fichier de clé. Défini sur chaque nœud avec SEALSKIN_LEGACY_AUTH.",
+      "resultIssuer": "Émetteur :",
+      "resultAuthorization": "Point de terminaison d'autorisation :",
+      "resultBackchannel": "Déconnexion back-channel prise en charge :",
+      "resultScopes": "Scopes proposés :",
+      "resultGroupsClaim": "Claim de groupes :",
+      "claimListed": "'{claim}' figure parmi les claims que liste le fournisseur",
+      "claimNotListed": "'{claim}' ne figure pas parmi les claims que liste le fournisseur",
+      "resultEntity": "ID d'entité :",
+      "resultSso": "URL de connexion :",
+      "resultSlo": "Déconnexion unique proposée :",
+      "resultCertificates": "Certificats de signature :"
+    },
+    "prootApps": {
+      "title": "Catalogues PRoot Apps",
+      "help": "Un catalogue est un dossier de paquets PRoot Apps conservé sur chaque nœud et monté en lecture seule dans les sessions des utilisateurs et groupes qui lui sont assignés. Dans une session, proot-apps et son installateur graphique installent et mettent à jour depuis ce dossier sans contacter aucun registre.",
+      "newCatalog": "Nouveau catalogue",
+      "editCatalog": "Modifier {name}",
+      "apps": "Applications",
+      "onThisNode": "Sur ce nœud",
+      "nameLabel": "Nom du catalogue",
+      "autoUpdate": "Mise à jour automatique",
+      "autoUpdateHelp": "Récupérer à nouveau les applications à chaque intervalle de mise à jour automatique lorsque leur paquet a changé.",
+      "selectedTitle": "Applications sélectionnées",
+      "selectedHelp": "Cliquez sur une application ci-dessous pour l'ajouter ou la retirer. Les applications d'un dépôt distant autre que celui par défaut sont installées sous leur nom d'image complet.",
+      "noneSelected": "Aucune application sélectionnée pour l'instant. Incluez \"gui\" pour donner l'installateur graphique aux utilisateurs.",
+      "remoteTitle": "Applications disponibles",
+      "searchPlaceholder": "Rechercher des applications...",
+      "remoteLabel": "Dépôt distant (GitHub owner/repo d'un dépôt proot-apps)",
+      "load": "Charger",
+      "refreshRemote": "Récupérer à nouveau la liste",
+      "noApps": "Aucune application trouvée.",
+      "couldNotLoad": "Impossible de charger les applications de {remote} : {error}",
+      "disabledHint": "Marquée désactivée par son dépôt distant ; l'installateur graphique la masque.",
+      "fromRemote": "depuis {remote}",
+      "statePending": "Pas encore synchronisé",
+      "stateSyncing": "Synchronisation {done} sur {total}",
+      "stateReady": "Prêt",
+      "stateError": "Erreur",
+      "syncedAgo": "synchronisé {ago}",
+      "autoUpdateOn": "mise à jour automatique",
+      "update": "Mettre à jour",
+      "updateTitle": "Récupérer à nouveau les applications maintenant, sur chaque nœud, là où leur paquet a changé",
+      "confirmDelete": "Supprimer le catalogue '{name}' ? Chaque nœud supprime sa copie, et les utilisateurs qui lui sont assignés n'ont plus de catalogue.",
+      "deleteTitle": "Supprimer le catalogue"
     }
   },
   "popup": {
@@ -1205,7 +1614,17 @@
       "uploadingButton": "Téléversement...",
       "autoHome": "Auto (persistance par application)",
       "collaborationMode": "Session collaborative",
-      "waylandMode": "Mode Wayland"
+      "waylandMode": "Mode Wayland",
+      "where": "Où",
+      "whereAuto": "Automatique",
+      "wherePools": "Pools",
+      "whereNodes": "Nœuds",
+      "moveHome": "Déplacer le stockage",
+      "moveHomeStay": "Sur {node}",
+      "moveHomeTo": "Déplacer vers {node}",
+      "moveHomeConfirm": "Déplacer '{home}' vers {node} ? Les sessions qui l'utilisent doivent d'abord être arrêtées.",
+      "moveHomeTitle": "Déplacer le stockage",
+      "allowance": "Quota : {used} sur {hours} heures par {period}"
     },
     "sessionsView": {
       "noSessions": "Aucune session active trouvée."
@@ -1238,7 +1657,10 @@
       "noAppSelected": "Veuillez sélectionner une application.",
       "noAppsAvailable": "Aucune application n'est disponible pour votre compte.",
       "uploadSuccess": "Fichier téléversé avec succès !",
-      "creatingAutoHome": "Création du répertoire personnel automatique..."
+      "creatingAutoHome": "Création du répertoire personnel automatique...",
+      "noSessionOrigin": "Ce navigateur ne peut pas joindre une adresse propre à la session. Le serveur nécessite un DNS wildcard et un certificat pour les noms de session ; l'administrateur définit SEALSKIN_SESSION_DOMAIN.",
+      "movingHome": "Déplacement de '{home}'...",
+      "movedHome": "'{home}' déplacé vers {node}."
     },
     "languages": {
       "default": "Défaut ({locale})"
@@ -1258,7 +1680,7 @@
     }
   },
   "files": {
-    "title": "Fichiers SealSkin",
+    "title": "Fichiers {brand}",
     "header": {
       "title": "Fichiers",
       "newFolder": "Nouveau Dossier",
@@ -1266,7 +1688,7 @@
       "uploadFolder": "Téléverser un Dossier"
     },
     "sidebar": {
-      "sharedFiles": "Fichiers SealSkin",
+      "sharedFiles": "Fichiers {brand}",
       "publicShares": "Partages Publics"
     },
     "shares": {
@@ -1299,8 +1721,7 @@
       },
       "confirmDelete": {
         "title": "Confirmer la Suppression",
-        "message": "Êtes-vous sûr de vouloir supprimer {count, plural, one {1 élément sélectionné} other {{count} éléments sélectionnés}} ? Cette action est irréversible.",
-        "messageDefault": "Êtes-vous sûr de vouloir supprimer les éléments sélectionnés ? Cette action est irréversible."
+        "message": "Êtes-vous sûr de vouloir supprimer {count, plural, one {1 élément sélectionné} other {{count} éléments sélectionnés}} ? Cette action est irréversible."
       },
       "uploadProgress": {
         "title": "Progression du Téléversement",
@@ -1325,7 +1746,7 @@
       "deleteFailed": "Échec de la suppression : {error}",
       "preparingUpload": "Préparation du téléversement de {count, plural, one {1 fichier} other {{count} fichiers}}...",
       "uploadPrepFailed": "Erreur lors de la préparation du téléversement du dossier : {error}",
-      "notConfigured": "Erreur : SealSkin non configuré. Veuillez le configurer dans les options.",
+      "notConfigured": "Erreur : {brand} non configuré. Veuillez le configurer dans les options.",
       "folderCreated": "Dossier '{folderName}' créé.",
       "folderCreateFailed": "Erreur lors de la création du dossier : {error}",
       "shareCreated": "Partage créé avec succès ! Le lien a été copié dans votre presse-papiers.",
@@ -1333,7 +1754,10 @@
       "sharesLoadFailed": "Échec du chargement des fichiers partagés : {error}",
       "shareDeleteFailed": "Échec de la suppression du partage : {error}",
       "shareDeleted": "Partage supprimé avec succès.",
-      "urlCopied": "URL publique copiée dans le presse-papiers."
+      "urlCopied": "URL publique copiée dans le presse-papiers.",
+      "downloading": "Téléchargement de {filename}...",
+      "downloadSuccess": "Téléchargement terminé",
+      "downloadFailed": "Échec du téléchargement : {error}"
     },
     "placeholders": {
       "errorLoading": "Erreur lors du chargement des fichiers.",
@@ -1348,6 +1772,175 @@
       "finalizing": "Finalisation...",
       "completed": "Terminé",
       "error": "Erreur"
+    },
+    "files": {
+      "searchPlaceholder": "Rechercher des fichiers..."
+    }
+  },
+  "shell": {
+    "host": {
+      "loading": "Connexion à votre serveur SealSkin…",
+      "unconfiguredTitle": "Non connecté",
+      "unconfiguredBody": "SealSkin n'est pas encore connecté à un serveur.",
+      "setUp": "Configurer la connexion",
+      "unreachableTitle": "Serveur injoignable",
+      "unreachableBody": "Le serveur SealSkin est injoignable ou son interface web ne s'est pas chargée.",
+      "selfSigned": "Si le serveur utilise un certificat auto-signé, ouvrez-le une fois et acceptez le certificat, puis réessayez.",
+      "retry": "Réessayer",
+      "openServer": "Ouvrir le serveur",
+      "changeConnection": "Changer de connexion",
+      "mismatchTitle": "Mise à jour requise",
+      "mismatchBody": "Cette application et l'interface web du serveur utilisent des versions différentes du pont. Mettez à jour l'extension ou l'application, ou bien le serveur, pour qu'elles correspondent."
+    }
+  },
+  "web": {
+    "receiving": "Envoi du fichier à {brand}…",
+    "signInTitle": "Se connecter à {brand}",
+    "signInWith": {
+      "oidc": "Se Connecter avec OpenID Connect",
+      "saml": "Se Connecter avec SAML"
+    },
+    "rootToken": "Jeton root",
+    "rootTokenHelp": "Le jeton de l'administrateur, que le serveur conserve dans son fichier /config/root_token.",
+    "rootSignIn": "Se Connecter en tant que Root",
+    "rootRefused": "Ce n'est pas le jeton root du serveur.",
+    "rootLocked": "Trop de tentatives. Patientez un moment, puis réessayez.",
+    "held": {
+      "title": "En attente d'un administrateur",
+      "message": "Vous êtes connecté en tant que {username}, mais un administrateur doit vous placer dans un groupe avant que vous puissiez utiliser {brand}. Revérifiez une fois que c'est fait.",
+      "check": "Revérifier"
+    },
+    "signIn": {
+      "failed": "La connexion n'a pas abouti. Réessayez ou contactez votre administrateur.",
+      "refused": "Le fournisseur d'identité a refusé la connexion.",
+      "expired": "La connexion a pris trop de temps ou a déjà servi. Reconnectez-vous.",
+      "browser": "La connexion s'est terminée dans un autre navigateur ou onglet. Recommencez-la ici.",
+      "invalidUsername": "Le nom de votre compte ne peut pas être un nom d'utilisateur {brand}, qui n'admet que des lettres, des chiffres, des traits de soulignement et des traits d'union. Contactez votre administrateur.",
+      "adminName": "Le nom de votre compte appartient à un administrateur {brand}, qui se connecte avec un fichier de clé. Contactez votre administrateur.",
+      "otherIdentity": "Un autre compte du fournisseur d'identité se connecte déjà sous cet utilisateur {brand}. Contactez votre administrateur.",
+      "noAccount": "Aucun compte {brand} ne porte encore votre nom. Demandez à votre administrateur d'en créer un.",
+      "notConfigured": "Ce serveur ne propose pas d'authentification unique.",
+      "ended": "Le fournisseur d'identité a mis fin à votre connexion. Reconnectez-vous."
+    },
+    "nav": {
+      "home": "Accueil",
+      "files": "Fichiers",
+      "settings": "Paramètres",
+      "hideRail": "Masquer la barre latérale",
+      "showRail": "Afficher la barre latérale",
+      "project": "SealSkin sur GitHub : signaler un problème ou demander une fonctionnalité"
+    },
+    "profile": {
+      "open": "Votre profil",
+      "signIn": "Connexion",
+      "method": "Connecté via",
+      "until": "Connecté jusqu'au",
+      "proxyKeeps": "Tant que le proxy inverse vous garde connecté",
+      "node": "Nœud",
+      "groups": "Groupes",
+      "noGroups": "Aucun groupe : les valeurs par défaut du serveur s'appliquent.",
+      "providerGroups": "Indiqués par le fournisseur d'identité :",
+      "proxyGroups": "Indiqués par le proxy inverse :",
+      "access": "Accès",
+      "adminNote": "Les administrateurs ont toutes les capacités et aucune limite.",
+      "canStorage": "Stockage persistant",
+      "canShare": "Partage public",
+      "canGpu": "GPU",
+      "canTemplates": "Modification des modèles",
+      "canMigrate": "Migration du dossier personnel",
+      "limits": "Limites",
+      "unlimited": "Illimité",
+      "sessions": "Sessions",
+      "sessionsOf": "Jusqu'à {limit} à la fois",
+      "sessionsRunning": "{running} en cours",
+      "sessionsRunningOf": "{running} en cours sur {limit}",
+      "cpus": "CPU par session",
+      "memory": "Mémoire par session",
+      "hours": "Durée de session",
+      "hoursValue": "{hours} h",
+      "storage": "Stockage",
+      "pools": "Pools",
+      "anyPool": "Tout pool que le serveur propose.",
+      "poolsDenied": "Pas ceux-ci :",
+      "catalog": "Catalogue PRoot Apps"
+    },
+    "home": {
+      "searchPlaceholder": "Recherchez des applications, ou collez un lien pour l'ouvrir en isolation",
+      "upload": "Téléverser un fichier",
+      "drop": "Déposez le fichier pour l'ouvrir dans {brand}",
+      "running": "Sessions en cours",
+      "applications": "Applications",
+      "allowance": "Quota",
+      "allowanceValue": "{used} / {hours} h par {period}",
+      "room": "Salle",
+      "started": "Démarrée {when}",
+      "typeAll": "Toutes",
+      "typeRecent": "Récentes",
+      "typeOther": "Autres",
+      "quickLaunch": "Lancer avec les dernières options utilisées",
+      "wherePool": "Pool : {pool}",
+      "openingUrl": "Choisissez une application pour ouvrir {url}",
+      "openingFile": "Choisissez une application pour ouvrir {filename}",
+      "noApps": "Aucune application ne vous est accessible. Demandez à votre administrateur d'en installer.",
+      "noAppsAdmin": "Aucune application n'est encore installée.",
+      "noMatch": "Aucune application ne correspond.",
+      "openAppStores": "Ouvrir les Magasins d'Applications",
+      "popupBlocked": "Le navigateur a bloqué l'onglet de la session. Autorisez les fenêtres pop-up pour ce site, puis relancez.",
+      "serverFileNeedsHome": "Un fichier conservé sur le serveur ne peut pas être ouvert en mode Salle Blanche. Choisissez un dossier de stockage.",
+      "copyLinkManual": "Le navigateur n'a pas autorisé la copie. Sélectionnez le lien ci-dessous et copiez-le.",
+      "favorites": "Favoris",
+      "favoritesHint": "Glisser pour réordonner",
+      "addFavorite": "Ajouter aux favoris",
+      "removeFavorite": "Retirer des favoris",
+      "hideApp": "Masquer de la page",
+      "showApp": "Afficher de nouveau sur la page",
+      "typeHidden": "Masquées",
+      "options": "Options de lancement",
+      "moveEarlier": "Avancer",
+      "moveLater": "Reculer",
+      "customize": "Personnaliser la page",
+      "background": "Arrière-plan",
+      "bgColor": "Couleur",
+      "bgUpload": "Importer une image",
+      "blur": "Flou",
+      "dim": "Assombrir",
+      "reset": "Réinitialiser",
+      "pictureTooLarge": "L'image est trop lourde pour être gardée dans le navigateur. Choisissez-en une plus petite.",
+      "bgPicture": "Image",
+      "color": "Couleur",
+      "colorCustom": "Couleur personnalisée",
+      "style": "Style",
+      "styleSolid": "Uni",
+      "styleGlow": "Halo",
+      "styleDiagonal": "Diagonale",
+      "styleAurora": "Aurore",
+      "styleVignette": "Vignette",
+      "fit": "Position",
+      "fitFill": "Remplir",
+      "fitFit": "Ajuster",
+      "fitStretch": "Étirer",
+      "fitCenter": "Centrer"
+    },
+    "launch": {
+      "title": "Lancement de {app}",
+      "stages": {
+        "requesting": "Envoi de la demande de lancement",
+        "placing": "Vérification des limites et choix d'un nœud",
+        "forwarding": "Transmission du lancement au nœud {node}",
+        "storage": "Préparation du dossier personnel",
+        "files": "Synchronisation des fichiers partagés",
+        "image": "Téléchargement de l'image de l'application",
+        "starting": "Création du conteneur",
+        "waiting": "En attente de la réponse du bureau",
+        "ready": "Ouverture de la session"
+      },
+      "uploading": "Téléversement du fichier ({done} sur {total})",
+      "imageHint": "Le premier lancement d'une application sur un nœud la télécharge, ce qui peut prendre plusieurs minutes. Les lancements suivants sont rapides.",
+      "onNode": "Sur le nœud {node}",
+      "seconds": "{count} s",
+      "failed": "Le lancement a échoué",
+      "unseen": "La demande de lancement n'a pas atteint le serveur. Vérifiez l'onglet {brand} qui l'a émise.",
+      "closeTab": "Le navigateur a gardé cet onglet ouvert. Fermez-le vous-même."
     }
   }
 }

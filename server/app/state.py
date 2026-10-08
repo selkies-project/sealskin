@@ -13,7 +13,14 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import Any
 
-from .models import AppStore, InstalledApp, InstalledAppRecord, PublicShareMetadata
+from .models import (
+    AppStore,
+    Branding,
+    InstalledApp,
+    InstalledAppRecord,
+    ProotCatalog,
+    PublicShareMetadata,
+)
 
 
 @dataclass
@@ -51,16 +58,23 @@ class RuntimeState:
         image_metadata: Cached image digests keyed by image name.
         deletion_tasks: Background deletion task status keyed by task id.
         pull_status: Images currently being pulled keyed by image name.
+        proot_catalogs: PRoot Apps catalogs keyed by id, as shared.
+        proot_status: This node's sync state of each catalog keyed by id.
         system_stats_cache: Cached CPU and disk statistics.
         cpu_model: CPU model string read from `/proc/cpuinfo`.
         path_prefix_map: Container mount path to host path mapping.
         discovered_api_port: Externally mapped API port.
         discovered_session_port: Externally mapped session port.
         discovered_network: Docker network the server container is attached to.
+        instance_name: Name that labels this server's session instances: its
+            container's, or its Kubernetes Deployment's or StatefulSet's.
         download_tokens: One-shot public download tokens.
         share_password_failures: Recent failed password tries keyed by share id.
+        proxy_secret: Value the proxy adds to every request it passes on, which tells
+            them from requests made to the API port directly.
         server_private_key: The server's RSA private key object.
         server_public_key_pem: PEM encoding of the server's public key.
+        branding: The brand the web app wears (`app.branding`).
     """
 
     sessions: dict[str, dict[str, Any]] = field(default_factory=dict)
@@ -78,6 +92,8 @@ class RuntimeState:
     image_metadata: dict[str, dict[str, Any]] = field(default_factory=dict)
     deletion_tasks: dict[str, dict[str, Any]] = field(default_factory=dict)
     pull_status: dict[str, str] = field(default_factory=dict)
+    proot_catalogs: dict[str, ProotCatalog] = field(default_factory=dict)
+    proot_status: dict[str, dict[str, Any]] = field(default_factory=dict)
     system_stats_cache: dict[str, Any] = field(
         default_factory=lambda: {"data": None, "timestamp": 0.0}
     )
@@ -86,10 +102,13 @@ class RuntimeState:
     discovered_api_port: int = 0
     discovered_session_port: int = 0
     discovered_network: str | None = None
+    instance_name: str = ""
     download_tokens: dict[str, dict[str, Any]] = field(default_factory=dict)
     share_password_failures: dict[str, deque[float]] = field(default_factory=dict)
+    proxy_secret: str = ""
     server_private_key: Any = None
     server_public_key_pem: str = ""
+    branding: Branding = field(default_factory=Branding)
 
 
 state = RuntimeState()

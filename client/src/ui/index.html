@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0d1117">
+    <title>SealSkin</title>
+    <!-- Served at /, the page keeps its assets, translations, and the pages it opens under /ui/. -->
+    <base href="/ui/">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="search" type="application/opensearchdescription+xml" title="SealSkin" href="opensearch.xml">
+    <link rel="icon" href="icons/icon128.png">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css">
+</head>
+<body>
+    <header id="topbar">
+        <a class="project-link" href="https://github.com/selkies-project/sealskin" target="_blank" rel="noopener"><img src="icons/icon128.png" alt=""></a>
+        <span class="wordmark">SealSkin</span>
+        <button type="button" id="account-button" class="avatar" aria-haspopup="dialog"></button>
+    </header>
+    <nav id="rail">
+        <a class="project-link" href="https://github.com/selkies-project/sealskin" target="_blank" rel="noopener"><img class="rail-logo" src="icons/icon128.png" alt="SealSkin"></a>
+        <div class="rail-links">
+            <button type="button" data-dest="home"><i class="fas fa-th-large"></i><span></span></button>
+            <button type="button" data-dest="files" hidden><i class="fas fa-folder"></i><span></span></button>
+            <button type="button" data-dest="options"><i class="fas fa-sliders-h"></i><span></span></button>
+        </div>
+        <div class="rail-account">
+            <button type="button" class="avatar rail-avatar" aria-haspopup="dialog"></button>
+            <div class="account-name"></div>
+            <div class="account-via"></div>
+            <button type="button" class="root-sign-in" hidden><i class="fas fa-key"></i><span></span></button>
+            <button type="button" class="sign-out"><i class="fas fa-sign-out-alt"></i><span></span></button>
+        </div>
+        <button type="button" id="rail-hide" class="rail-hide"><i class="fas fa-chevron-left"></i></button>
+    </nav>
+    <button type="button" id="rail-peek" class="rail-peek" hidden><i class="fas fa-chevron-right"></i></button>
+    <div id="profile" hidden>
+        <div class="profile-card" role="dialog" aria-modal="true" aria-labelledby="profile-name">
+            <button type="button" id="profile-close" class="profile-close"><i class="fas fa-times"></i></button>
+            <div class="profile-head">
+                <div class="avatar avatar-large" aria-hidden="true"></div>
+                <div class="profile-who">
+                    <div class="account-name" id="profile-name"></div>
+                    <div class="account-via"></div>
+                </div>
+            </div>
+            <div id="profile-body" class="profile-body"></div>
+            <div class="profile-actions">
+                <button type="button" class="root-sign-in" hidden><i class="fas fa-key"></i><span></span></button>
+                <button type="button" class="sign-out"><i class="fas fa-sign-out-alt"></i><span></span></button>
+            </div>
+        </div>
+    </div>
+    <main id="stage">
+        <div id="host-panel" hidden></div>
+        <iframe id="app-frame" src="about:blank" hidden allow="clipboard-write"></iframe>
+    </main>
+    <script type="module" src="app.js"></script>
+</body>
+</html>

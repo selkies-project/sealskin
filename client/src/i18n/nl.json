@@ -14,6 +14,8 @@
     "cancel": "Annuleren",
     "manage": "Beheren",
     "delete": "Verwijderen",
+    "remove": "Verwijderen",
+    "move": "Verplaatsen",
     "edit": "Bewerken",
     "save": "Opslaan",
     "none": "geen",
@@ -55,6 +57,7 @@
     "admins": "Beheerders",
     "yes": "Ja",
     "no": "Nee",
+    "ok": "OK",
     "daysAgo": "{count, plural, one {1 dag geleden} other {{count} dagen geleden}}",
     "hoursAgo": "{count, plural, one {1 uur geleden} other {{count} uur geleden}}",
     "minutesAgo": "{count, plural, one {1 minuut geleden} other {{count} minuten geleden}}",
@@ -76,9 +79,13 @@
       "appTemplates": "App Sjablonen",
       "appLaboratory": "App Laboratorium",
       "installedApps": "Geïnstalleerde Apps",
+      "prootApps": "PRoot Apps",
       "users": "Gebruikers",
       "groups": "Groepen",
-      "admins": "Beheerders"
+      "admins": "Beheerders",
+      "cluster": "Cluster",
+      "signIn": "Aanmelding",
+      "audit": "Auditlog"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -95,6 +102,7 @@
       "storageUsage": "Opslaggebruik:",
       "detectedGpus": "Gedetecteerde GPU's:",
       "logout": "Uitloggen & Configuratie Wissen",
+      "logoutTitle": "Uitloggen",
       "howTo": "Hoe SealSkin te Gebruiken",
       "howToDescription": "Deze sectie bevat basisdocumentatie over het gebruik van de extensie.",
       "howToList": [
@@ -104,7 +112,14 @@
         "<strong>Om persistente opslag te beheren:</strong> Gebruik het tabblad \"Home Directories\" op deze pagina om opslagvolumes te maken en te verwijderen die in meerdere sessies kunnen worden gebruikt.",
         "<strong>Om startopties op te slaan:</strong> Vink het vakje \"Deze startopties opslaan\" aan in de pop-up voordat u een applicatie start voor een specifiek bestandstype (bijv. .pdf) of voor alle URL's. Beheer deze opgeslagen voorkeuren in het tabblad \"Vastgezet Gedrag\"."
       ],
-      "confirmLogout": "Weet u zeker dat u wilt uitloggen? Dit wist uw opgeslagen configuratie uit deze browser."
+      "confirmLogout": "Weet u zeker dat u wilt uitloggen? Dit wist uw opgeslagen configuratie uit deze browser.",
+      "changeConnection": "Verbinding wijzigen",
+      "certExpired": "Het TLS-certificaat van de server is verlopen. HTTPS-verbindingen mislukken totdat het is vernieuwd.",
+      "certExpiring": "Het TLS-certificaat van de server verloopt over {days} dag(en). Vernieuw het om verbindingsfouten te voorkomen.",
+      "signOut": "Afmelden",
+      "signedInThrough": "Aangemeld via:",
+      "allowance": "Tegoed:",
+      "allowanceUsed": "{used} van {hours} uur deze {period}"
     },
     "config": {
       "quickSetup": "Snelle Installatie",
@@ -145,9 +160,14 @@
       "namePlaceholder": "bijv., mijn-project-bestanden",
       "nameTitle": "Gebruik alleen letters, cijfers, underscore of koppelteken.",
       "createButton": "Map Aanmaken",
-      "isLaboratory": "Dit is een Laboratorium-app, gebouwd op basis van een basisimage met aangepaste instellingen.",
-      "laboratory": "Laboratorium",
-      "confirmDelete": "Weet u zeker dat u de geïnstalleerde app '{appName}' wilt verwijderen?"
+      "confirmDelete": "Weet u zeker dat u de home directory '{homeName}' wilt verwijderen? Alle gegevens daarin gaan definitief verloren.",
+      "deleteTitle": "Home directory verwijderen",
+      "node": "Node",
+      "move": "Verplaatsen",
+      "moveTo": "Verplaatsen naar node",
+      "moveHelp": "De home directory wordt naar de node gekopieerd en verwijderd van de node waar ze nu staat. Sessies die haar gebruiken, moeten eerst worden gestopt.",
+      "moveTitle": "'{homeName}' verplaatsen",
+      "noOtherNode": "Er is geen andere node om naartoe te verplaatsen."
     },
     "sessions": {
       "title": "Actieve Sessies",
@@ -155,12 +175,13 @@
       "started": "Gestart",
       "noSessionsUser": "Geen actieve sessies gevonden.",
       "noSessionsAdmin": "Geen actieve sessies gevonden voor enige gebruiker.",
-      "sessionsFor": "Sessies voor {username} ({count})",
-      "confirmStop": "Weet u zeker dat u deze sessie wilt stoppen? De container wordt vernietigd."
+      "sessionsFor": "Sessies voor {username} ({count})"
     },
     "pinned": {
       "title": "Vastgezet Extensiegedrag",
       "description": "Deze tabel toont de startopties die u heeft opgeslagen voor specifieke bestandstypen of voor alle URL's. U kunt een vastgezet gedrag verwijderen om opnieuw om startopties gevraagd te worden.",
+      "removeTitle": "Vastgezet gedrag verwijderen",
+      "confirmRemove": "Vastgezet gedrag voor '{name}' verwijderen?",
       "trigger": "Trigger",
       "savedApp": "Opgeslagen Applicatie",
       "triggerSimple": "Simpele Start (Werkbalkknop)",
@@ -177,7 +198,8 @@
       "publicKeyOptionalLabel": "Publieke Sleutel (Optioneel):",
       "publicKeyPlaceholder": "Plak hier de publieke sleutel, of laat leeg om er een te genereren.",
       "createButton": "Beheerder Aanmaken",
-      "confirmDelete": "Weet u zeker dat u beheerder '{username}' wilt verwijderen? Dit verwijdert ook al hun persistente opslag en kan niet ongedaan worden gemaakt."
+      "confirmDelete": "Weet u zeker dat u beheerder '{username}' wilt verwijderen? Dit verwijdert ook al hun persistente opslag en kan niet ongedaan worden gemaakt.",
+      "deleteTitle": "Beheerder verwijderen"
     },
     "users": {
       "title": "Gebruikersbeheer",
@@ -197,8 +219,29 @@
       "createButton": "Gebruiker Aanmaken",
       "homesDisabledTooltip": "Persistente opslag uitgeschakeld voor deze gebruiker",
       "confirmDelete": "Weet u zeker dat u gebruiker '{username}' wilt verwijderen? Dit verwijdert ook al hun persistente opslag en kan niet ongedaan worden gemaakt.",
+      "deleteTitle": "Gebruiker verwijderen",
       "allowPublicSharing": "Openbaar delen van bestanden toestaan",
-      "allowEditTemplates": "Bewerken van app-sjablonen toestaan"
+      "allowEditTemplates": "Bewerken van app-sjablonen toestaan",
+      "signInOnly": "Alleen eenmalige aanmelding",
+      "awaitingGroup": "Wacht op een groep",
+      "approve": "Goedkeuren",
+      "admin": "Beheerder",
+      "gpuShare": "Delen van een GPU met andere sessies toestaan",
+      "homeMigration": "Verplaatsen van home directories tussen nodes toestaan",
+      "storageLimit": "Opslaglimiet (GB per node)",
+      "sessionCpus": "CPU's per sessie",
+      "sessionMemory": "Geheugen per sessie (MB)",
+      "sessionHours": "Uren dat een sessie mag draaien",
+      "allowanceHours": "Tegoed (gewogen sessie-uren)",
+      "allowancePeriod": "Tegoedperiode",
+      "pools": "Toegestane beperkte pools (door komma's gescheiden)",
+      "poolsDenied": "Geweigerde pools (door komma's gescheiden)",
+      "prootCatalog": "PRoot Apps-catalogus",
+      "prootCatalogNone": "Geen",
+      "prootCatalogHelp": "Wordt alleen-lezen in elke sessie gemount; proot-apps installeert hieruit in plaats van uit een registry. Blijft dit op Geen, dan beslist de eerste groep van de gebruiker die er een kiest.",
+      "groupsHelp": "Houd Ctrl of Command ingedrukt om er meerdere te selecteren. Waar groepen elkaar tegenspreken, wint de beperkende waarde.",
+      "providerGroups": "Groepen die de identiteitsprovider bij de laatste aanmelding noemde: {groups}",
+      "limitsHelp": "Een limiet van -1, of een leeg veld, stelt geen limiet in."
     },
     "groups": {
       "title": "Groepsbeheer",
@@ -208,7 +251,15 @@
       "overrideTitle": "Groepsoverschrijvingsinstellingen",
       "permissionsTitle": "Permissie & Beveiligingsoverschrijvingen",
       "createButton": "Groep Aanmaken",
-      "confirmDelete": "Weet u zeker dat u groep '{groupName}' wilt verwijderen? Gebruikers in deze groep vallen terug op hun individuele instellingen."
+      "confirmDelete": "Weet u zeker dat u groep '{groupName}' wilt verwijderen? Gebruikers in deze groep vallen terug op hun individuele instellingen.",
+      "deleteTitle": "Groep verwijderen",
+      "notSet": "Niet ingesteld",
+      "allow": "Toestaan",
+      "deny": "Weigeren",
+      "on": "Aan",
+      "off": "Uit",
+      "ssoGroups": "Groepen van de identiteitsprovider waarvan de leden in deze groep zitten (door komma's gescheiden)",
+      "overrideHelp": "Een groep bepaalt alleen wat hier is ingesteld; alles wat niet is ingesteld of leeg blijft, blijft de eigen instelling van elk lid."
     },
     "installedApps": {
       "title": "Geïnstalleerde Applicaties",
@@ -216,7 +267,10 @@
       "noAppsFound": "Geen geïnstalleerde apps gevonden.",
       "pulling": "Nieuwe image wordt gedownload...",
       "notLocal": "Image niet lokaal gevonden",
-      "confirmDelete": "Weet u zeker dat u de geïnstalleerde app '{appName}' wilt verwijderen?"
+      "isLaboratory": "Dit is een Laboratorium-app, gebouwd op basis van een basisimage met aangepaste instellingen.",
+      "laboratory": "Laboratorium",
+      "confirmDelete": "Weet u zeker dat u de geïnstalleerde app '{appName}' wilt verwijderen?",
+      "deleteTitle": "Geïnstalleerde app verwijderen"
     },
     "appStore": {
       "title": "App Stores",
@@ -243,9 +297,45 @@
       "previewTitle": "UI Voorbeeld",
       "contentArea": "Applicatie Inhoudsgebied",
       "confirmDelete": "Weet u zeker dat u het sjabloon '{templateName}' wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+      "deleteTitle": "Sjabloon verwijderen",
       "deleteDisabled": "Dit sjabloon kan niet worden verwijderd.",
       "enterName": "Voer een naam in voor het nieuwe sjabloon.",
       "dockerAdminOnly": "Alleen een beheerder kan deze instellingen wijzigen.",
+      "filterPlaceholder": "Instellingen filteren op naam…",
+      "changedOnly": "Alleen gewijzigd",
+      "showMore": "Meer tonen",
+      "showLess": "Minder tonen",
+      "changedCount": "{count, plural, one {1 gewijzigd} other {{count} gewijzigd}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC, dual mode"
+      },
+      "sections": {
+        "appearance": "Uiterlijk",
+        "display": "Beeldscherm",
+        "input": "Invoer",
+        "audio": "Audio",
+        "webcam": "Webcam",
+        "performance": "Prestaties",
+        "gpu": "GPU",
+        "clipboard": "Klembord en bestanden",
+        "sharing": "Delen",
+        "hardening": "Hardening",
+        "lifecycle": "Levenscyclus",
+        "integrations": "Integraties",
+        "webrtc": "WebRTC",
+        "container": "Container"
+      },
+      "groups": {
+        "mode": "Modus",
+        "transport": "Transport",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "TURN REST-API",
+        "cloudflare": "Cloudflare TURN",
+        "extra": "Diagnostiek"
+      },
       "settings": {
         "TITLE": {
           "label": "Paginatitel",
@@ -421,7 +511,7 @@
         },
         "SELKIES_ENABLE_COLLAB": {
           "label": "Samenwerking Inschakelen",
-          "description": "Laat een kijker met het master-token van de sessie optreden als medewerker met lees- en schrijfrechten. Vereist voor SealSkin-rooms."
+          "description": "Laat een kijker met het master-token van de sessie optreden als medewerker met lees- en schrijfrechten. Vereist voor {brand}-rooms."
         },
         "SELKIES_ENABLE_PLAYER2": {
           "label": "Speler 2 Deling Inschakelen",
@@ -692,10 +782,6 @@
           "label": "Wayland-backend",
           "description": "Draait de sessie op de Wayland-backend, een headless compositor met geneste labwc voor vensterbeheer, in plaats van de X11-server. X11-toepassingen draaien via XWayland."
         },
-        "MAX_RES": {
-          "label": "Maximale Resolutie",
-          "description": "Max resolutie voor de container, standaard is 16k."
-        },
         "START_DOCKER": {
           "label": "Start Docker-in-Docker",
           "description": "Indien false, zal een geprivilegieerde container DinD niet starten."
@@ -703,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "IPv6 Uitschakelen",
           "description": "Indien true, wordt IPv6 uitgeschakeld."
-        },
-        "DISABLE_ZINK": {
-          "label": "Zink Uitschakelen",
-          "description": "Stel geen Zink-omgevingsvariabelen in als een videokaart wordt gedetecteerd."
         },
         "DISABLE_DRI3": {
           "label": "DRI3 Uitschakelen",
@@ -1036,7 +1118,36 @@
       "closeButton": "Sessie Sluiten & Afronden",
       "savingAndLaunching": "Opslaan & Starten...",
       "placeholder": "Het App Laboratorium stelt u in staat om de basis home directory en het startscript voor een applicatie te configureren op basis van een bestaande geïnstalleerde applicatie. Deze home directory wordt bij de eerste initialisatie voor de gebruiker gekopieerd met alle bestanden en instellingen die u in deze sessie instelt. U kunt een bestaande Laboratorium App opnieuw starten om de inhoud verder aan te passen.",
-      "formInvalid": "Selecteer een basis-app en geef een naam op voor de nieuwe app."
+      "formInvalid": "Selecteer een basis-app en geef een naam op voor de nieuwe app.",
+      "explainer": "Het App Laboratorium bouwt een meta-app: een variant van een geïnstalleerde applicatie met een eigen naam, icoon, autostartscript en een home directory die al is ingericht. U richt de applicatie één keer in tijdens een aanpassingssessie, en de eerste start van elke gebruiker begint met een kopie van die home directory.",
+      "step1Title": "Beschrijf de app",
+      "step1": "Kies de applicatie waarop u wilt bouwen en geef de meta-app een naam, een icoon en de gebruikers die hem mogen starten.",
+      "step2Title": "Pas hem aan in een live sessie",
+      "step2": "Er opent een aanpassingssessie waarin de home directory van het sjabloon schrijfbaar is. Installeer extensies, meld u aan en richt alles in zoals gebruikers het moeten aantreffen.",
+      "step3Title": "Sluit de sessie om het sjabloon op te slaan",
+      "step3": "Als u de sessie vanaf deze pagina sluit, blijft de home directory als sjabloon bewaard.",
+      "openTitle": "Aanpassingssessie geopend",
+      "openStarted": "Gestart {when}",
+      "openDescription": "Alles wat in de home directory van deze sessie verandert, wordt het sjabloon. De sessie blijft open totdat u haar hier sluit; ze staat niet tussen uw sessies.",
+      "reopen": "Sessie opnieuw openen",
+      "closeAndSave": "Sluiten & sjabloon opslaan",
+      "confirmClose": "De aanpassingssessie van '{name}' sluiten? De sessie stopt en de home directory blijft als sjabloon bewaard.",
+      "closeTitle": "Aanpassingssessie sluiten",
+      "unsavedTitle": "Wijzigingen niet opgeslagen",
+      "unsavedClose": "De wijzigingen konden niet worden opgeslagen. Sessie toch sluiten?",
+      "templateSaved": "Sessie gesloten. Het sjabloon is opgeslagen.",
+      "busy": "Er is een aanpassingssessie voor '{name}' geopend. Sluit die hierboven voordat u een meta-app wijzigt of een andere sessie start.",
+      "describeTitle": "1. Beschrijven",
+      "customizeTitle": "2. Aanpassen",
+      "customizeDescription": "De aanpassingssessie start met deze opties. Er kan één sessie tegelijk open zijn.",
+      "advanced": "Geavanceerd",
+      "saveAndOpen": "Opslaan & aanpassingssessie openen",
+      "listTitle": "Uw meta-apps",
+      "listNone": "Nog geen meta-apps.",
+      "closingStopping": "Sessie wordt gestopt…",
+      "closingSaving": "Sjabloon wordt opgeslagen…",
+      "closingSaved": "Sjabloon opgeslagen: {files} bestanden, {size}",
+      "closingFailed": "Het sluiten van de sessie is mislukt."
     },
     "modals": {
       "editUserTitle": "Bewerk Gebruiker: {username}",
@@ -1045,7 +1156,7 @@
       "editGroupTitle": "Bewerk Groep: {groupName}",
       "userConfigTitle": "Gebruikersconfiguratie",
       "warning": "Dit is de enige keer dat deze configuratie wordt getoond. Geef deze veilig aan de gebruiker.",
-      "info": "U kunt dit configuratiebestand downloaden om SealSkin eenvoudig op een ander apparaat in te stellen. Bewaar dit bestand veilig, want het bevat uw privésleutel.",
+      "info": "U kunt dit configuratiebestand downloaden om {brand} eenvoudig op een ander apparaat in te stellen. Bewaar dit bestand veilig, want het bevat uw privésleutel.",
       "configDataLabel": "Configuratiegegevens (JSON)",
       "copyButton": "Tekst Kopiëren",
       "downloadButton": "Bestand Downloaden",
@@ -1053,6 +1164,8 @@
       "dirsForUser": "Mappen voor gebruiker: {username}",
       "dirsForAdmin": "Mappen voor beheerder: {username}",
       "newDirForUser": "Nieuwe Map Maken voor Gebruiker",
+      "customAutostartScriptLabel": "Aangepast Autostart Script",
+      "customAutostartScriptDescription": "Pas de logica voor automatisch starten aan, laat leeg om de standaard van de applicatieprovider te gebruiken.",
       "createDirButton": "Map Aanmaken",
       "confirmDeleteDir": "Weet u zeker dat u '{homeName}' wilt verwijderen voor gebruiker '{username}'? Dit is permanent.",
       "installAppTitle": "Installeer {appName}",
@@ -1071,8 +1184,6 @@
       "advancedSettings": "Geavanceerde Instellingen",
       "appTemplateLabel": "Applicatiesjabloon",
       "appTemplateDescription": "Selecteer een voorgeconfigureerd sjabloon voor geavanceerde containerstartinstellingen.",
-      "customAutostartScriptLabel": "Aangepast Autostart Script",
-      "customAutostartScriptDescription": "Pas de logica voor automatisch starten aan, laat leeg om de standaard van de applicatieprovider te gebruiken.",
       "saveInstallation": "Installatie Opslaan",
       "updateStatusTitle": "Updatestatus voor {appName}",
       "checkingUpdates": "Controleren op updates...",
@@ -1088,10 +1199,7 @@
       "newVersion": "Nieuwe versie: {sha}",
       "errorPulling": "Fout bij het pullen van de image.",
       "manualInstallNote": "Opmerking: Handmatig toegevoegde images moeten gebaseerd zijn op een selkies-baseimage compatibele image.",
-      "generalTitle": "Algemene & Prestatie-instellingen",
-      "webrtcTitle": "WebRTC- en TURN-instellingen",
       "webrtcDescription": "Sessies streamen standaard over WebSockets. Als u hieronder een STUN-, TURN-, Cloudflare- of publieke IP-waarde instelt, of de WebRTC-modus kiest, schakelt de container over naar WebRTC met dual mode ingeschakeld, zodat gebruikers nog steeds kunnen terugvallen op WebSockets.",
-      "dockerTitle": "Docker Geavanceerde Overschrijvingen",
       "dockerDescription": "Deze instellingen overschrijven de standaard containerconfiguratie. Gebruik met voorzichtigheid en alleen als u weet wat u doet."
     },
     "status": {
@@ -1123,6 +1231,8 @@
       "userDeleteFailed": "Fout bij verwijderen gebruiker: {error}",
       "userUpdated": "Gebruiker '{username}' succesvol bijgewerkt.",
       "userUpdateFailed": "Fout bij bijwerken gebruiker: {error}",
+      "userApproved": "Gebruiker '{username}' goedgekeurd.",
+      "userApproveFailed": "Fout bij het goedkeuren van de gebruiker: {error}",
       "creatingGroup": "Groep aanmaken...",
       "groupCreated": "Groep '{groupName}' aangemaakt.",
       "groupCreateFailed": "Fout bij aanmaken groep: {error}",
@@ -1166,7 +1276,24 @@
       "pendingConfigSaved": "Wachtende configuratie opgeslagen. U kunt nu uw publieke sleutel aan de beheerder verstrekken.",
       "settingsSaved": "Instellingen opgeslagen.",
       "appCreated": "App '{name}' succesvol aangemaakt.",
-      "launchFailed": "Starten mislukt: {error}"
+      "launchFailed": "Starten mislukt: {error}",
+      "homedirMoving": "Home directory '{homeName}' wordt verplaatst...",
+      "homedirMoved": "Home directory '{homeName}' verplaatst.",
+      "homedirMoveFailed": "Kon home directory niet verplaatsen: {error}",
+      "clusterLoadFailed": "Kon het cluster niet laden: {error}",
+      "clusterWriteFailed": "Opslaan mislukt: {error}",
+      "nodeUpdated": "Node bijgewerkt.",
+      "nodeRemoved": "Node verwijderd.",
+      "poolSaved": "Pool '{name}' opgeslagen.",
+      "poolDeleted": "Pool '{name}' verwijderd.",
+      "nothingChanged": "Niets gewijzigd.",
+      "catalogSaved": "Catalogus '{name}' opgeslagen; elke node haalt de apps op.",
+      "catalogSaveFailed": "Kon de catalogus niet opslaan: {error}",
+      "catalogDeleted": "Catalogus '{name}' verwijderd.",
+      "catalogDeleteFailed": "Kon de catalogus niet verwijderen: {error}",
+      "catalogUpdateStarted": "Catalogus '{name}' wordt op elke node geüpdatet.",
+      "catalogUpdateFailed": "Kon de catalogus niet updaten: {error}",
+      "catalogsRefreshFailed": "Kon de catalogi niet laden: {error}"
     },
     "placeholders": {
       "noAdmins": "Geen beheerders gevonden.",
@@ -1176,7 +1303,289 @@
       "noSessions": "Geen actieve sessies gevonden.",
       "noPinned": "Geen vastgezet gedrag gevonden.",
       "errorLoading": "Fout bij het laden van de mappen.",
-      "noInstalledApps": "Er zijn nog geen applicaties geïnstalleerd."
+      "noInstalledApps": "Er zijn nog geen applicaties geïnstalleerd.",
+      "noProotCatalogs": "Nog geen catalogi."
+    },
+    "web": {
+      "title": "{brand} in Deze Browser",
+      "bookmarklet": "Naar {brand} sturen",
+      "bookmarkletHelp": "Sleep deze link naar uw bladwijzerbalk. Erop klikken opent de pagina waarop u bent in {brand}, of zoekt naar de tekst die u hebt geselecteerd.",
+      "pick": "Kiezen voor {brand}",
+      "pickHelp": "Sleep ook deze naar die balk. Klik erop en klik dan op een link om die in {brand} te openen, of op een afbeelding, video of audio om het bestand te sturen. Shift-klik op een link om het bestand te sturen waar die naartoe leidt, opgehaald met uw aanmelding op die site.",
+      "pickHint": "{brand}: klik op een link, of op een afbeelding, video of audio, om die te sturen; Shift-klik op een link stuurt het bestand. Druk op Esc om te annuleren.",
+      "protocol": "web+sealskin:-links hier openen",
+      "protocolHelp": "Een link geschreven als web+sealskin: gevolgd door een adres opent dat adres dan in {brand}.",
+      "install": "Als uw browser webapps kan installeren, installeer {brand} dan via het menu om er links en bestanden mee te delen en er bestanden mee te openen."
+    },
+    "via": {
+      "root": "Root-token",
+      "oidc": "OpenID Connect",
+      "saml": "SAML",
+      "proxy": "Reverse proxy",
+      "key": "Sleutelbestand"
+    },
+    "periods": {
+      "day": "Dag",
+      "week": "Week",
+      "month": "Maand"
+    },
+    "cluster": {
+      "nodesTitle": "Nodes",
+      "pool": "Pool",
+      "load": "Belasting",
+      "online": "Online",
+      "offline": "Offline",
+      "waiting": "Wacht op goedkeuring",
+      "lastSeen": "laatst gezien {when}",
+      "storeUnreachableNode": "kan de gedeelde gegevens niet bereiken",
+      "cpus": "{count} CPU's",
+      "gpus": "{count} GPU's",
+      "gpuSessions": "GPU: {used} / {slots}",
+      "thisNode": "deze node",
+      "approve": "Goedkeuren",
+      "suspend": "Opschorten",
+      "remove": "Verwijderen",
+      "confirmRemove": "Node '{name}' uit het cluster verwijderen? Een node die nog draait, registreert zich opnieuw en wacht op goedkeuring.",
+      "removeTitle": "Node verwijderen",
+      "joinTitle": "Een node toevoegen",
+      "joinDescription": "Maak een koppelcode aan, start de nieuwe node met de twee regels hieronder in zijn omgeving en keur hem daarna goed in de tabel hierboven. Een code laat één node toe en is een uur geldig.",
+      "joinButton": "Koppelcode aanmaken",
+      "joinExpires": "Omgeving van de nieuwe node (de code verloopt op {when})",
+      "poolsTitle": "Pools",
+      "poolsDescription": "Een pool is een verzameling nodes waarop sessies starten. Een beperkte pool staat alleen open voor de gebruikers en groepen die hier zijn genoemd of die via hun instellingen zijn toegelaten.",
+      "poolDomain": "Domein",
+      "poolAccess": "Toegang",
+      "poolCost": "Kosten per uur",
+      "poolCostWithGpu": "{cost} (GPU: {gpuCost})",
+      "poolOpen": "Open",
+      "poolRestricted": "Beperkt",
+      "poolNew": "Nieuwe pool",
+      "poolEdit": "Pool '{name}' bewerken",
+      "poolDescriptionLabel": "Beschrijving",
+      "poolDomainLabel": "Domein waaronder de nodes van de pool hun naam krijgen",
+      "poolCostLabel": "Tegoed dat een uur sessie kost",
+      "poolGpuCostLabel": "Tegoed dat een uur GPU-sessie kost (leeg: hetzelfde)",
+      "poolUsersLabel": "Gebruikers voor wie de pool openstaat als hij beperkt is (door komma's gescheiden)",
+      "poolGroupsLabel": "Groepen voor wie de pool openstaat als hij beperkt is (door komma's gescheiden)",
+      "poolStopWhenSpent": "Sessies beëindigen wanneer het tegoed op is",
+      "poolSave": "Pool opslaan",
+      "confirmDeletePool": "Pool '{name}' verwijderen?",
+      "deletePoolTitle": "Pool verwijderen",
+      "storeTitle": "Gedeelde gegevens",
+      "storeDescription": "Waar de nodes de gegevens bewaren die ze delen: gebruikers, groepen, apps, pools en deze instellingen.",
+      "storeKept": "Bewaard:",
+      "storeKinds": {
+        "file": "Op de schijf van deze node",
+        "s3": "In een bucket van een objectopslag",
+        "peer": "Op een andere node"
+      },
+      "reachable": "Bereikbaar",
+      "unreachable": "Onbereikbaar",
+      "publicUrl": "Adres van de webapp:",
+      "sessionDomain": "Sessiedomein:",
+      "sessionDomainUnset": "Niet ingesteld (de hostnaam van de webapp)",
+      "sessionDomainOff": "Uit: sessies openen op het adres van de webapp",
+      "signInDescription": "Een instelling die hier is ingevuld, geldt voor elke node en gaat vóór de omgeving van een node. Maak een veld leeg om de instelling weer aan de omgeving van elke node over te laten.",
+      "settingWritten": "Hier ingesteld voor elke node.",
+      "settingFromEnvironment": "Uit de omgeving van elke node; de getoonde waarde is die van deze node.",
+      "settingInherit": "Uit de omgeving van elke node (hier: {value})",
+      "secretSet": "Er is een geheim ingesteld; laat leeg om het te behouden",
+      "secretUnset": "Er is geen geheim ingesteld",
+      "secretClear": "Het hier ingestelde geheim verwijderen",
+      "settings": {
+        "oidc_issuer": "Issuer-URL van OpenID Connect",
+        "oidc_client_id": "Client-ID van OpenID Connect",
+        "oidc_client_secret": "Client secret van OpenID Connect",
+        "oidc_scopes": "Scopes van OpenID Connect",
+        "saml_metadata_url": "URL van de SAML-metadata",
+        "saml_username_attribute": "SAML-attribuut met de naam van de gebruiker (leeg: de gebruikersnaam-claim hieronder)",
+        "saml_groups_attribute": "SAML-attribuut met de groepen van de gebruiker (leeg: de groepen-claim hieronder)",
+        "sso_username_claim": "Claim of attribuut met de naam van de gebruiker",
+        "sso_groups_claim": "Claim of attribuut met de groepen van de gebruiker",
+        "sso_admin_group": "Groep van de identiteitsprovider voor beheerders",
+        "sso_max_age_seconds": "Maximale duur van een aanmelding via de identiteitsprovider (uren)",
+        "sso_force_login": "Bij elke aanmelding om inloggegevens vragen",
+        "sso_create_users": "Bij de eerste aanmelding een gebruiker aanmaken",
+        "sso_hold_new_users": "Nieuwe gebruikers vasthouden tot ze in een groep zijn geplaatst",
+        "proxy_auth_user_header": "Header waarin een vertrouwde proxy de gebruiker noemt",
+        "proxy_auth_groups_header": "Header waarin een vertrouwde proxy de groepen van de gebruiker opsomt",
+        "proxy_auth_logout_url": "Pagina van de proxy die de gebruiker afmeldt",
+        "web_session_seconds": "Maximale duur van een ongebruikte root-aanmelding (uren)",
+        "files_sync": "Gedeelde bestanden in de objectopslag bewaren"
+      },
+      "usageTitle": "Gebruik",
+      "usageHours": "Gewogen uren",
+      "usageNone": "Geen gebruik in deze periode.",
+      "settingsTitle": "Clusterinstellingen"
+    },
+    "audit": {
+      "title": "Auditlog",
+      "searchPlaceholder": "Zoek gebeurtenissen...",
+      "range": "Bereik",
+      "pageSize": "Gebeurtenissen per pagina",
+      "today": "Vandaag",
+      "last7": "Laatste 7 dagen",
+      "last30": "Laatste 30 dagen",
+      "oneDay": "Eén dag (UTC)",
+      "time": "Tijd",
+      "event": "Gebeurtenis",
+      "details": "Details",
+      "none": "Geen overeenkomende gebeurtenissen.",
+      "shown": "{from}–{to} van {total}",
+      "exportCsv": "CSV exporteren",
+      "exportJson": "JSON exporteren",
+      "exported": "{count} gebeurtenissen geëxporteerd."
+    },
+    "signin": {
+      "pill": {
+        "active": "Actief",
+        "off": "Uit",
+        "none": "Niet geconfigureerd"
+      },
+      "test": "Testen",
+      "testing": "De opgeslagen instellingen worden getest...",
+      "testOk": "De provider heeft geantwoord.",
+      "testFailed": "De test is mislukt.",
+      "register": "Registreer deze bij de provider",
+      "provider": "Provider",
+      "providerChoose": "Kies een provider voor aanwijzingen",
+      "providerHelp": "Een provider vult alleen de aanwijzingen hieronder in; er wordt niets over opgeslagen.",
+      "proxyHelp": "Een voorgeschakelde reverse proxy meldt gebruikers aan en noemt ze in een header. Dit past bij een proxy die uw andere sites al op dezelfde manier beveiligt; meld gebruikers anders hierboven aan, via OpenID Connect of SAML.",
+      "proxyPresetChoose": "Kies de provider van de proxy om de headers in te vullen",
+      "proxyPresets": {
+        "authelia": "Authelia",
+        "authentik": "Authentik",
+        "tinyauth": "Tinyauth",
+        "oauth2proxy": "oauth2-proxy"
+      },
+      "reach": {
+        "title": "Bereikbaarheid van deze server",
+        "help": "Hoe browsers deze server bereiken, zoals de server en deze browser het zien. Een voorgeschakelde reverse proxy moet elk van deze punten goed hebben.",
+        "publicUrl": "Publieke URL",
+        "publicUrlDiffers": "Deze pagina is geladen vanaf {origin}. Stel SEALSKIN_PUBLIC_URL in op het adres dat browsers gebruiken: de omleidingen van de identiteitsprovider worden daaruit opgebouwd.",
+        "sessionDomain": "Sessiedomein",
+        "sessionNames": "Sessies openen op",
+        "sessionNamesNone": "Geen sessienaam heeft geantwoord",
+        "sessionNamesShared": "Elke sessie is een pad van de webapp, dus geen andere naam hoeft te antwoorden. SEALSKIN_SESSION_ISOLATION=true geeft elke sessie een eigen naam onder het sessiedomein.",
+        "sessionNamesHelp": "Starten vanuit de webapp zal mislukken. Een sessie opent op een eigen naam, <session id>.<domain>: het domein heeft wildcard-DNS, een wildcardcertificaat en een reverse-proxyregel nodig die deze namen hierheen stuurt.",
+        "sessionNamesGuarded": "Sessies openen onder {domain}, zoals SEALSKIN_SESSION_DOMAIN aangeeft. Dat is te verwachten wanneer de reverse proxy op de sessienamen om een aanmelding vraagt; controleer anders de wildcard-DNS, het certificaat en de proxyregel ervoor.",
+        "sessionNamesOther": "SEALSKIN_SESSION_DOMAIN noemt {domain}, dat niet heeft geantwoord.",
+        "trustedProxies": "Vertrouwde proxy's",
+        "arrivedFrom": "Dit verzoek kwam van",
+        "viaTrusted": "Een vertrouwde proxy.",
+        "viaOther": "Geen van de vertrouwde proxy's. Als dit het adres van uw reverse proxy is, voeg het dan toe aan SEALSKIN_TRUSTED_PROXIES.",
+        "viaDirect": "Er wordt geen reverse proxy vertrouwd. Als dit het adres van een reverse proxy is, stel SEALSKIN_TRUSTED_PROXIES er dan op in, zodat de server het eigen adres van elke browser ziet.",
+        "yourAddress": "Uw adres, zoals de server het ziet",
+        "httpPort": "Listener voor onversleuteld HTTP"
+      },
+      "presets": {
+        "authelia": {
+          "name": "Authelia",
+          "hint": "De issuer is het eigen adres van Authelia, https://<host>. Voeg onder identity_providers.oidc.clients een client toe met de redirect-URI hieronder en de scopes openid profile groups email offline_access."
+        },
+        "pocketid": {
+          "name": "Pocket ID",
+          "hint": "De issuer is het eigen adres van Pocket ID, https://<host>. Voeg een OIDC-client toe met de callback-URL hieronder en stel de scopes in op openid profile email groups."
+        },
+        "tinyauth": {
+          "name": "Tinyauth",
+          "hint": "De issuer is het eigen adres van Tinyauth, https://<host>. Definieer de client met de variabelen TINYAUTH_OIDC_CLIENTS_<NAME>_ en stel de scopes in op openid profile email groups."
+        },
+        "keycloak": {
+          "name": "Keycloak",
+          "hint": "De issuer is het adres van de realm, https://<host>/realms/<realm>. Maak een OpenID Connect-client aan met clientauthenticatie ingeschakeld en voeg een group membership-mapper met de naam 'groups' toe om de groepen van de gebruiker mee te sturen."
+        },
+        "authentik": {
+          "name": "Authentik",
+          "hint": "De issuer is het adres van de applicatie, https://<host>/application/o/<slug>/, inclusief de afsluitende slash. Maak een OAuth2/OpenID-provider aan en een applicatie die deze gebruikt."
+        },
+        "entra": {
+          "name": "Microsoft Entra ID",
+          "hint": "De issuer is https://login.microsoftonline.com/<tenant>/v2.0. Registreer een applicatie, voeg een client secret toe en voeg onder Tokenconfiguratie de groups-claim toe."
+        },
+        "google": {
+          "name": "Google",
+          "hint": "De issuer is https://accounts.google.com. Maak een OAuth-client-ID van het type Webapplicatie aan. Google stuurt geen groepen mee."
+        },
+        "okta": {
+          "name": "Okta",
+          "hint": "De issuer is het adres van uw organisatie, https://<org>.okta.com. Maak een OIDC-webapplicatie aan en voeg een groups-claim toe aan het ID-token."
+        },
+        "other": {
+          "name": "Overig",
+          "hint": "De issuer is het adres waarvan /.well-known/openid-configuration de provider beschrijft."
+        }
+      },
+      "oidcTitle": "OpenID Connect",
+      "oidcRedirect": "Redirect-URI",
+      "oidcBackchannel": "Back-channel-afmeld-URL",
+      "oidcFrontchannel": "Front-channel-afmeld-URL",
+      "samlTitle": "SAML 2.0",
+      "samlEntity": "Entity-ID / metadata-URL",
+      "samlAcs": "ACS-URL",
+      "samlSlo": "Single-logout-URL",
+      "samlMetadata": "Open de serviceprovider-metadata van deze server",
+      "proxyTitle": "Reverse proxy",
+      "trustedProxies": "Vertrouwde proxy's van deze node:",
+      "trustedProxiesHelp": "Per node ingesteld met SEALSKIN_TRUSTED_PROXIES. De header wordt alleen geloofd wanneer het verzoek van een van die adressen komt.",
+      "noTrustedProxy": "Er is een gebruikersheader ingesteld, maar deze node vertrouwt nog geen proxy, dus wordt geen enkele proxy-aanmelding geaccepteerd.",
+      "proxyCheck": {
+        "guarded": "Gecontroleerd: de proxy geeft de aanmeldheaders die een bezoeker meestuurt niet door.",
+        "open": "Proxy-aanmeldingen worden geweigerd.",
+        "unreachable": "Proxy-aanmeldingen worden geweigerd: deze node kan de proxy niet controleren. Geef de node een route naar zijn publieke URL, vermeld het eigen adres van de proxy in SEALSKIN_TRUSTED_PROXIES, of stel SEALSKIN_PROXY_AUTH_UNCHECKED=true in op de node om de proxy zonder controle te geloven.",
+        "unchecked": "De controle van de proxy is op deze node uitgeschakeld (SEALSKIN_PROXY_AUTH_UNCHECKED): alles wat de proxy doorgeeft, wordt geloofd."
+      },
+      "whoTitle": "Wie zich aanmeldt",
+      "whoHelp": "Deze gelden voor OpenID Connect, SAML en de reverse proxy. Om de leden van een groep van de identiteitsprovider in een {brand}-groep te plaatsen, vermeldt u die onder \"Groepen van de identiteitsprovider\" van die groep in Groepen.",
+      "rootTitle": "Root-token",
+      "rootHelp": "Altijd beschikbaar. Het token staat in /config/root_token op de server totdat dat bestand wordt verwijderd, en kan worden ingesteld met SEALSKIN_ROOT_TOKEN.",
+      "keyTitle": "Sleutelbestanden",
+      "keyOn": "Deze node accepteert de clients met een sleutelbestand: de browserextensie en de mobiele app. Per node ingesteld met SEALSKIN_LEGACY_AUTH.",
+      "keyOff": "Deze node accepteert geen clients met een sleutelbestand. Per node ingesteld met SEALSKIN_LEGACY_AUTH.",
+      "resultIssuer": "Issuer:",
+      "resultAuthorization": "Autorisatie-endpoint:",
+      "resultBackchannel": "Back-channel-afmelding ondersteund:",
+      "resultScopes": "Aangeboden scopes:",
+      "resultGroupsClaim": "Groepen-claim:",
+      "claimListed": "'{claim}' staat tussen de claims die de provider opsomt",
+      "claimNotListed": "'{claim}' staat niet tussen de claims die de provider opsomt",
+      "resultEntity": "Entity-ID:",
+      "resultSso": "Aanmeld-URL:",
+      "resultSlo": "Single logout aangeboden:",
+      "resultCertificates": "Ondertekeningscertificaten:"
+    },
+    "prootApps": {
+      "title": "PRoot Apps-catalogi",
+      "help": "Een catalogus is een map met PRoot Apps-pakketten die op elke node wordt bewaard en alleen-lezen wordt gemount in de sessies van de gebruikers en groepen die eraan zijn toegewezen. In een sessie installeren en updaten proot-apps en het grafische installatieprogramma vanuit die map en maken ze geen verbinding met een registry.",
+      "newCatalog": "Nieuwe catalogus",
+      "editCatalog": "{name} bewerken",
+      "apps": "Apps",
+      "onThisNode": "Op deze node",
+      "nameLabel": "Catalogusnaam",
+      "autoUpdate": "Automatisch updaten",
+      "autoUpdateHelp": "Haal de apps op het auto-update-interval opnieuw op wanneer hun pakket is gewijzigd.",
+      "selectedTitle": "Geselecteerde apps",
+      "selectedHelp": "Klik hieronder op een app om die toe te voegen of te verwijderen. Apps van een andere remote dan de standaard worden geïnstalleerd met hun volledige imagenaam.",
+      "noneSelected": "Nog geen apps geselecteerd. Neem \"gui\" op om gebruikers het grafische installatieprogramma te geven.",
+      "remoteTitle": "Beschikbare apps",
+      "searchPlaceholder": "Apps zoeken...",
+      "remoteLabel": "Remote (GitHub owner/repo van een proot-apps-repository)",
+      "load": "Laden",
+      "refreshRemote": "Lijst opnieuw ophalen",
+      "noApps": "Geen apps gevonden.",
+      "couldNotLoad": "Kon de apps van {remote} niet laden: {error}",
+      "disabledHint": "Door de remote als uitgeschakeld gemarkeerd; het grafische installatieprogramma verbergt deze.",
+      "fromRemote": "van {remote}",
+      "statePending": "Nog niet gesynchroniseerd",
+      "stateSyncing": "{done} van {total} synchroniseren",
+      "stateReady": "Gereed",
+      "stateError": "Fout",
+      "syncedAgo": "gesynchroniseerd {ago}",
+      "autoUpdateOn": "automatisch updaten",
+      "update": "Updaten",
+      "updateTitle": "Haal de apps waarvan het pakket is gewijzigd nu opnieuw op, op elke node",
+      "confirmDelete": "Catalogus '{name}' verwijderen? Elke node verwijdert zijn kopie en de gebruikers die eraan zijn toegewezen krijgen geen catalogus.",
+      "deleteTitle": "Catalogus verwijderen"
     }
   },
   "popup": {
@@ -1205,7 +1614,17 @@
       "uploadingButton": "Uploaden...",
       "autoHome": "Automatisch (persistentie per app)",
       "collaborationMode": "Collaboratieve sessie",
-      "waylandMode": "Wayland-modus"
+      "waylandMode": "Wayland-modus",
+      "where": "Waar",
+      "whereAuto": "Automatisch",
+      "wherePools": "Pools",
+      "whereNodes": "Nodes",
+      "moveHome": "Opslag verplaatsen",
+      "moveHomeStay": "Op {node}",
+      "moveHomeTo": "Verplaatsen naar {node}",
+      "moveHomeConfirm": "'{home}' verplaatsen naar {node}? Sessies die deze opslag gebruiken, moeten eerst worden gestopt.",
+      "moveHomeTitle": "Opslag verplaatsen",
+      "allowance": "Tegoed: {used} van {hours} uur deze {period}"
     },
     "sessionsView": {
       "noSessions": "Geen actieve sessies gevonden."
@@ -1238,7 +1657,10 @@
       "noAppSelected": "Selecteer een applicatie.",
       "noAppsAvailable": "Er zijn geen applicaties beschikbaar voor uw account.",
       "uploadSuccess": "Bestand succesvol geüpload!",
-      "creatingAutoHome": "Automatische home directory aanmaken..."
+      "creatingAutoHome": "Automatische home directory aanmaken...",
+      "noSessionOrigin": "Deze browser kan geen eigen adres van de sessie bereiken. De server heeft wildcard-DNS en een certificaat voor sessienamen nodig; de beheerder stelt SEALSKIN_SESSION_DOMAIN in.",
+      "movingHome": "'{home}' wordt verplaatst...",
+      "movedHome": "'{home}' verplaatst naar {node}."
     },
     "languages": {
       "default": "Standaard ({locale})"
@@ -1258,7 +1680,7 @@
     }
   },
   "files": {
-    "title": "SealSkin-bestanden",
+    "title": "{brand}-bestanden",
     "header": {
       "title": "Bestanden",
       "newFolder": "Nieuwe map",
@@ -1266,7 +1688,7 @@
       "uploadFolder": "Map uploaden"
     },
     "sidebar": {
-      "sharedFiles": "SealSkin-bestanden",
+      "sharedFiles": "{brand}-bestanden",
       "publicShares": "Openbare Delingen"
     },
     "shares": {
@@ -1299,8 +1721,7 @@
       },
       "confirmDelete": {
         "title": "Verwijdering bevestigen",
-        "message": "Weet u zeker dat u {count, plural, one {1 geselecteerd item} other {{count} geselecteerde items}} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
-        "messageDefault": "Weet u zeker dat u de geselecteerde items wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt."
+        "message": "Weet u zeker dat u {count, plural, one {1 geselecteerd item} other {{count} geselecteerde items}} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt."
       },
       "uploadProgress": {
         "title": "Uploadvoortgang",
@@ -1325,7 +1746,7 @@
       "deleteFailed": "Verwijderen mislukt: {error}",
       "preparingUpload": "Voorbereiden om {count, plural, one {1 bestand} other {{count} bestanden}} te uploaden...",
       "uploadPrepFailed": "Fout tijdens voorbereiding van mapupload: {error}",
-      "notConfigured": "Fout: SealSkin niet geconfigureerd. Stel dit in bij de opties.",
+      "notConfigured": "Fout: {brand} niet geconfigureerd. Stel dit in bij de opties.",
       "folderCreated": "Map '{folderName}' gemaakt.",
       "folderCreateFailed": "Fout bij het maken van de map: {error}",
       "shareCreated": "Deellink succesvol aangemaakt! De link is naar je klembord gekopieerd.",
@@ -1333,7 +1754,10 @@
       "sharesLoadFailed": "Laden van gedeelde bestanden mislukt: {error}",
       "shareDeleteFailed": "Verwijderen van deellink mislukt: {error}",
       "shareDeleted": "Deellink succesvol verwijderd.",
-      "urlCopied": "Openbare URL naar klembord gekopieerd."
+      "urlCopied": "Openbare URL naar klembord gekopieerd.",
+      "downloading": "{filename} wordt gedownload...",
+      "downloadSuccess": "Download voltooid",
+      "downloadFailed": "Download mislukt: {error}"
     },
     "placeholders": {
       "errorLoading": "Fout bij het laden van bestanden.",
@@ -1348,6 +1772,175 @@
       "finalizing": "Afronden...",
       "completed": "Voltooid",
       "error": "Fout"
+    },
+    "files": {
+      "searchPlaceholder": "Zoek bestanden..."
+    }
+  },
+  "shell": {
+    "host": {
+      "loading": "Verbinden met uw SealSkin-server…",
+      "unconfiguredTitle": "Niet verbonden",
+      "unconfiguredBody": "SealSkin is nog niet met een server verbonden.",
+      "setUp": "Verbinding instellen",
+      "unreachableTitle": "Server onbereikbaar",
+      "unreachableBody": "De SealSkin-server was niet bereikbaar of de webinterface ervan is niet geladen.",
+      "selfSigned": "Als de server een zelfondertekend certificaat gebruikt, open de server dan één keer, accepteer het certificaat en probeer het opnieuw.",
+      "retry": "Opnieuw proberen",
+      "openServer": "Server openen",
+      "changeConnection": "Verbinding wijzigen",
+      "mismatchTitle": "Update vereist",
+      "mismatchBody": "Deze app en de webinterface van de server gebruiken verschillende bridge-versies. Werk de extensie of app bij, of werk de server bij, zodat beide overeenkomen."
+    }
+  },
+  "web": {
+    "receiving": "Bestand wordt naar {brand} gestuurd…",
+    "signInTitle": "Aanmelden bij {brand}",
+    "signInWith": {
+      "oidc": "Aanmelden met OpenID Connect",
+      "saml": "Aanmelden met SAML"
+    },
+    "rootToken": "Root-token",
+    "rootTokenHelp": "Het token van de beheerder, dat de server in het bestand /config/root_token bewaart.",
+    "rootSignIn": "Aanmelden als root",
+    "rootRefused": "Dat is niet het root-token van de server.",
+    "rootLocked": "Te veel pogingen. Wacht even en probeer het dan opnieuw.",
+    "held": {
+      "title": "Wachten op een beheerder",
+      "message": "U bent aangemeld als {username}, maar een beheerder moet u eerst in een groep plaatsen voordat u {brand} kunt gebruiken. Controleer het opnieuw zodra dat is gebeurd.",
+      "check": "Opnieuw controleren"
+    },
+    "signIn": {
+      "failed": "De aanmelding is niet voltooid. Probeer het opnieuw of vraag het uw beheerder.",
+      "refused": "De identiteitsprovider heeft de aanmelding geweigerd.",
+      "expired": "De aanmelding duurde te lang of is al gebruikt. Meld u opnieuw aan.",
+      "browser": "De aanmelding is in een andere browser of een ander tabblad voltooid. Begin hier opnieuw.",
+      "invalidUsername": "De naam van uw account kan geen {brand}-gebruikersnaam zijn, die alleen letters, cijfers, onderstrepingstekens en koppeltekens toelaat. Vraag het uw beheerder.",
+      "adminName": "De naam van uw account is die van een {brand}-beheerder, die zich met een sleutelbestand aanmeldt. Vraag het uw beheerder.",
+      "otherIdentity": "Een ander account van de identiteitsprovider meldt zich al aan als deze {brand}-gebruiker. Vraag het uw beheerder.",
+      "noAccount": "Er is nog geen {brand}-account met uw naam. Vraag uw beheerder om er een aan te maken.",
+      "notConfigured": "Deze server biedt geen eenmalige aanmelding.",
+      "ended": "De identiteitsprovider heeft uw aanmelding beëindigd. Meld u opnieuw aan."
+    },
+    "nav": {
+      "home": "Start",
+      "files": "Bestanden",
+      "settings": "Instellingen",
+      "hideRail": "Zijbalk verbergen",
+      "showRail": "Zijbalk tonen",
+      "project": "SealSkin op GitHub: problemen en functieverzoeken"
+    },
+    "profile": {
+      "open": "Je profiel",
+      "signIn": "Aanmelding",
+      "method": "Aangemeld via",
+      "until": "Aangemeld tot",
+      "proxyKeeps": "Zolang de reverse proxy je aangemeld houdt",
+      "node": "Node",
+      "groups": "Groepen",
+      "noGroups": "Geen groep: de standaardwaarden van de server gelden.",
+      "providerGroups": "Genoemd door de identiteitsprovider:",
+      "proxyGroups": "Genoemd door de reverse proxy:",
+      "access": "Toegang",
+      "adminNote": "Beheerders hebben alle mogelijkheden en geen limieten.",
+      "canStorage": "Permanente opslag",
+      "canShare": "Openbaar delen",
+      "canGpu": "GPU",
+      "canTemplates": "Sjablonen bewerken",
+      "canMigrate": "Home-migratie",
+      "limits": "Limieten",
+      "unlimited": "Onbeperkt",
+      "sessions": "Sessies",
+      "sessionsOf": "Maximaal {limit} tegelijk",
+      "sessionsRunning": "{running} actief",
+      "sessionsRunningOf": "{running} actief van {limit}",
+      "cpus": "CPU's per sessie",
+      "memory": "Geheugen per sessie",
+      "hours": "Sessieduur",
+      "hoursValue": "{hours} u",
+      "storage": "Opslag",
+      "pools": "Pools",
+      "anyPool": "Elke pool die de server aanbiedt.",
+      "poolsDenied": "Niet deze:",
+      "catalog": "PRoot Apps-catalogus"
+    },
+    "home": {
+      "searchPlaceholder": "Zoek applicaties, of plak een link om die geïsoleerd te openen",
+      "upload": "Een bestand uploaden",
+      "drop": "Laat het bestand los om het in {brand} te openen",
+      "running": "Actieve sessies",
+      "applications": "Applicaties",
+      "allowance": "Tegoed",
+      "allowanceValue": "{used} / {hours} u per {period}",
+      "room": "Room",
+      "started": "Gestart {when}",
+      "typeAll": "Alle",
+      "typeRecent": "Recent",
+      "typeOther": "Overig",
+      "quickLaunch": "Starten met de laatst gebruikte opties",
+      "wherePool": "Pool: {pool}",
+      "openingUrl": "Kies een applicatie om {url} te openen",
+      "openingFile": "Kies een applicatie om {filename} te openen",
+      "noApps": "Er zijn geen applicaties voor u beschikbaar. Vraag uw beheerder om applicaties te installeren.",
+      "noAppsAdmin": "Er zijn nog geen applicaties geïnstalleerd.",
+      "noMatch": "Geen overeenkomende applicatie.",
+      "openAppStores": "App Stores openen",
+      "popupBlocked": "De browser heeft het tabblad van de sessie geblokkeerd. Sta pop-ups toe voor deze site en start daarna opnieuw.",
+      "serverFileNeedsHome": "Een bestand dat op de server staat, kan niet in de Cleanroom-modus worden geopend. Kies een opslagmap.",
+      "copyLinkManual": "De browser stond kopiëren niet toe. Selecteer de link hieronder en kopieer deze.",
+      "favorites": "Favorieten",
+      "favoritesHint": "Sleep om te herschikken",
+      "addFavorite": "Aan favorieten toevoegen",
+      "removeFavorite": "Uit favorieten verwijderen",
+      "hideApp": "Van de pagina verbergen",
+      "showApp": "Weer op de pagina tonen",
+      "typeHidden": "Verborgen",
+      "options": "Startopties",
+      "moveEarlier": "Eerder",
+      "moveLater": "Later",
+      "customize": "Pagina aanpassen",
+      "background": "Achtergrond",
+      "bgColor": "Kleur",
+      "bgUpload": "Afbeelding uploaden",
+      "blur": "Vervaging",
+      "dim": "Dimmen",
+      "reset": "Herstellen",
+      "pictureTooLarge": "De afbeelding is te groot om in de browser te bewaren. Kies een kleinere.",
+      "bgPicture": "Afbeelding",
+      "color": "Kleur",
+      "colorCustom": "Eigen kleur",
+      "style": "Stijl",
+      "styleSolid": "Effen",
+      "styleGlow": "Gloed",
+      "styleDiagonal": "Diagonaal",
+      "styleAurora": "Aurora",
+      "styleVignette": "Vignet",
+      "fit": "Positie",
+      "fitFill": "Vullen",
+      "fitFit": "Passend",
+      "fitStretch": "Uitrekken",
+      "fitCenter": "Centreren"
+    },
+    "launch": {
+      "title": "{app} starten",
+      "stages": {
+        "requesting": "Startverzoek verzenden",
+        "placing": "Limieten controleren en een node kiezen",
+        "forwarding": "Start overdragen aan node {node}",
+        "storage": "Home directory voorbereiden",
+        "files": "Gedeelde bestanden synchroniseren",
+        "image": "Applicatie-image downloaden",
+        "starting": "Container aanmaken",
+        "waiting": "Wachten tot de desktop reageert",
+        "ready": "Sessie openen"
+      },
+      "uploading": "Bestand uploaden ({done} van {total})",
+      "imageHint": "Bij de eerste start van een applicatie op een node wordt deze gedownload, wat minuten kan duren. Latere starts zijn snel.",
+      "onNode": "Op node {node}",
+      "seconds": "{count} s",
+      "failed": "Het starten is mislukt",
+      "unseen": "Het startverzoek heeft de server niet bereikt. Controleer het {brand}-tabblad waarmee het is gestart.",
+      "closeTab": "De browser heeft dit tabblad opengehouden. Sluit het zelf."
     }
   }
 }

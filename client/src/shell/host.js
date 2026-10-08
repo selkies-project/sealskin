@@ -3,7 +3,7 @@
  *
  * Owns one iframe and decides what it shows:
  *
- *  1. no configuration      -> the bundled connect page
+ *  1. no configuration      -> the bundled connect page (the web app's sign-in panel)
  *  2. configuration present -> `<served base>/ui/<page>.html`
  *  3. server unreachable    -> the unreachable panel (retry / open server /
  *                              change connection)
@@ -15,7 +15,7 @@
  * can be accepted, after which https works for both the API and the iframe.
  *
  * On the extension this module runs on its own (see the bottom); the mobile
- * shell imports `initHost` and passes its native hooks.
+ * and web shells import `initHost` and pass their shell name and hooks.
  */
 
 import { createHost, callBackground } from '../lib/host-bridge.js';
@@ -26,7 +26,7 @@ import { loadTranslator } from '../lib/i18n.js';
 const SHELL = typeof __SHELL_TARGET__ !== 'undefined' ? __SHELL_TARGET__ : 'extension';
 const SHELL_VERSION = typeof __UI_VERSION__ !== 'undefined' ? __UI_VERSION__ : 'dev';
 const READY_TIMEOUT_MS = 8000;
-const SERVED_PAGES = new Set(['popup', 'options', 'files', 'upload']);
+const SERVED_PAGES = new Set(['popup', 'home', 'options', 'files', 'upload']);
 
 // English fallbacks; replaced by the shell i18n subset (`shell.host.*`) when it loads.
 const STRINGS = {
@@ -76,7 +76,12 @@ function extensionTransport(message) {
   });
 }
 
-function mobileTransport(message) {
+/**
+ * Relay to a background running in this window (mobile and web shells).
+ *
+ * @param {object} message
+ */
+export function pageTransport(message) {
   return new Promise((resolve, reject) => {
     if (typeof window.handleMessage !== 'function') {
       reject(new Error('Background is not loaded.'));
@@ -90,24 +95,34 @@ function mobileTransport(message) {
  * Start the host.
  *
  * @param {object} [overrides]
+ * @param {'extension'|'mobile'|'web'} [overrides.shell] defaults to the build target
  * @param {function} [overrides.transport]
  * @param {function} [overrides.saveBlob] mobile native file open
- * @param {function} [overrides.onPageChange] `(page) => void`, mobile back button bookkeeping
+ * @param {function} [overrides.reserveTab] web app tab reservation, see `bridge.reserveTab`
+ * @param {function} [overrides.streamDownload] web app streamed download, see `createHost`
+ * @param {function} [overrides.adoptLaunch] web app launch tab, see `createHost`
+ * @param {string} [overrides.launcher] page a shell shows as its launcher in place of `popup`
+ * @param {function} [overrides.connect] web app: shows its sign-in in the panel in place of the connect page
+ * @param {function} [overrides.onPageChange] `(page, params) => void`, mobile back button and web app address bookkeeping
+ * @param {function} [overrides.onLeave] `(leaving) => void`, web app: the framed page is growing a session over itself, see `createHost`
  * @returns {{openPage: function(string, object=): void, currentPage: function(): string, boot: function(): Promise<void>}}
  */
 export function initHost(overrides = {}) {
   const params = new URLSearchParams(location.search);
   const iframe = document.getElementById('app-frame');
   const panel = document.getElementById('host-panel');
-  const transport = overrides.transport || (SHELL === 'mobile' ? mobileTransport : extensionTransport);
+  const shell = overrides.shell || SHELL;
+  const transport = overrides.transport || (shell === 'extension' ? extensionTransport : pageTransport);
 
-  let page = document.body.dataset.page || params.get('page') || 'popup';
+  const launcher = overrides.launcher || 'popup';
+  let page = document.body.dataset.page || params.get('page') || launcher;
+  if (page === 'popup') page = launcher;
   // Extra query parameters (anything except page/tab) are forwarded to the served page.
   let pageParams = {};
   for (const [key, value] of params.entries()) {
     if (key !== 'page' && key !== 'tab') pageParams[key] = value;
   }
-  const isPopupWindow = SHELL === 'extension' && document.body.dataset.page === 'popup' && !params.has('tab');
+  const isPopupWindow = shell === 'extension' && document.body.dataset.page === 'popup' && !params.has('tab');
   let framedConnect = false;
   let readyTimer = null;
   let lastBase = null;
@@ -167,16 +182,19 @@ export function initHost(overrides = {}) {
         addText('code', `${lastConfig.serverIp}:${lastConfig.sessionPort || lastConfig.apiPort}`, 'host-server');
       }
       if (detail) addText('p', detail, 'host-error');
-      addText('p', STRINGS.selfSigned, 'host-muted host-small');
+      // The web app is on the server's own origin: nothing to open or to change.
+      if (!overrides.connect) addText('p', STRINGS.selfSigned, 'host-muted host-small');
       actions.appendChild(addButton(STRINGS.retry, 'primary', () => boot()));
-      actions.appendChild(addButton(STRINGS.openServer, 'secondary', () => openServer()));
-      actions.appendChild(addButton(STRINGS.changeConnection, 'secondary', () => openPage('connect')));
+      if (!overrides.connect) {
+        actions.appendChild(addButton(STRINGS.openServer, 'secondary', () => openServer()));
+        actions.appendChild(addButton(STRINGS.changeConnection, 'secondary', () => openPage('connect')));
+      }
     } else if (kind === 'mismatch') {
       addText('h2', STRINGS.mismatchTitle);
       addText('p', STRINGS.mismatchBody, 'host-muted');
       if (detail) addText('p', detail, 'host-error');
       actions.appendChild(addButton(STRINGS.retry, 'primary', () => boot()));
-      actions.appendChild(addButton(STRINGS.changeConnection, 'secondary', () => openPage('connect')));
+      if (!overrides.connect) actions.appendChild(addButton(STRINGS.changeConnection, 'secondary', () => openPage('connect')));
     }
     if (actions.childElementCount) box.appendChild(actions);
     panel.appendChild(box);
@@ -204,6 +222,15 @@ export function initHost(overrides = {}) {
   }
 
   function loadConnect() {
+    if (overrides.connect) {
+      framedConnect = false;
+      showPanel('loading');
+      iframe.src = 'about:blank';
+      page = 'connect';
+      if (overrides.onPageChange) overrides.onPageChange(page);
+      overrides.connect();
+      return;
+    }
     framedConnect = true;
     host.setExpectedOrigin(location.origin && location.origin !== 'null' ? location.origin : null);
     showPanel(null);
@@ -224,7 +251,7 @@ export function initHost(overrides = {}) {
       showPanel('unreachable', 'The web interface did not respond in time.');
     }, READY_TIMEOUT_MS);
     page = target;
-    if (overrides.onPageChange) overrides.onPageChange(page);
+    if (overrides.onPageChange) overrides.onPageChange(page, pageParams);
   }
 
   async function boot() {
@@ -252,7 +279,7 @@ export function initHost(overrides = {}) {
       showPanel('unreachable', e && e.message ? e.message : String(e));
       return;
     }
-    loadServed(base, SERVED_PAGES.has(page) ? page : 'popup');
+    loadServed(base, SERVED_PAGES.has(page) ? page : launcher);
   }
 
   /**
@@ -262,7 +289,7 @@ export function initHost(overrides = {}) {
    */
   function openPage(target, extraParams) {
     const nextParams = extraParams && typeof extraParams === 'object' ? { ...extraParams } : {};
-    if (SHELL === 'extension' && isPopupWindow) {
+    if (isPopupWindow) {
       if (target === 'popup') {
         pageParams = nextParams;
         boot();
@@ -274,18 +301,24 @@ export function initHost(overrides = {}) {
       return;
     }
     pageParams = nextParams;
-    page = target === 'connect' || SERVED_PAGES.has(target) ? target : 'popup';
+    page = target === 'connect' || SERVED_PAGES.has(target) ? target : launcher;
+    if (page === 'popup') page = launcher;
     boot();
   }
 
   const host = createHost({
+    shell,
     iframe,
     transport,
     openPage,
     saveBlob: overrides.saveBlob,
+    reserveTab: overrides.reserveTab,
+    adoptLaunch: overrides.adoptLaunch,
+    streamDownload: overrides.streamDownload,
+    onLeave: overrides.onLeave,
     isConnectPage: () => framedConnect,
     close: () => {
-      if (SHELL === 'extension' && isPopupWindow) window.close();
+      if (isPopupWindow) window.close();
     },
     onReady: () => {
       showPanel(null);
@@ -296,7 +329,7 @@ export function initHost(overrides = {}) {
     },
   });
 
-  document.documentElement.classList.add(`shell-${SHELL}`);
+  document.documentElement.classList.add(`shell-${shell}`);
   localizeStrings().finally(() => boot());
 
   return {
@@ -307,6 +340,6 @@ export function initHost(overrides = {}) {
   };
 }
 
-if (SHELL !== 'mobile') {
+if (SHELL === 'extension') {
   initHost();
 }

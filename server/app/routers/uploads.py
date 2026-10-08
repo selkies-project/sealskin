@@ -23,7 +23,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import ValidationError
 
-from .. import user_manager
+from .. import routing, user_manager
 from ..fsutil import safe_join, unique_filename
 from ..models import (
     UploadChunkRequest,
@@ -63,7 +63,7 @@ def validate_upload_id(upload_id: str) -> str:
     Raises:
         HTTPException: 400 when the id is malformed.
     """
-    if not upload_id or not _UPLOAD_ID_RE.match(upload_id):
+    if not upload_id or not _UPLOAD_ID_RE.fullmatch(upload_id):
         raise HTTPException(status_code=400, detail="Invalid upload id.")
     return upload_id
 
@@ -74,7 +74,7 @@ def user_upload_root(username: str) -> str:
     Raises:
         HTTPException: 400 when the username is not filesystem safe.
     """
-    if not _USERNAME_RE.match(username or ""):
+    if not _USERNAME_RE.fullmatch(username or ""):
         raise HTTPException(status_code=400, detail="Invalid username.")
     try:
         root = safe_join(settings.upload_dir, username)
@@ -180,7 +180,10 @@ async def upload_chunk(
     return {"status": "ok", "chunk_index": req.chunk_index}
 
 
-@router.post("/to_storage", dependencies=[Depends(verify_persistent_storage_enabled)])
+@router.post(
+    "/to_storage",
+    dependencies=[Depends(verify_persistent_storage_enabled), Depends(routing.body_home_node), Depends(routing.storage_room)],
+)
 async def upload_to_storage(
     decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body),
     user: dict[str, Any] = Depends(verify_persistent_storage_enabled),

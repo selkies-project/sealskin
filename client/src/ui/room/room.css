@@ -939,7 +939,7 @@ iframe {
 .video-container:not(#gamepad-source-box) .gamepad-icon {
   position: absolute;
   top: 5px;
-  left: 5px;
+  left: calc(5px + var(--slot-position, 0) * 36px);
   width: 32px;
   height: 32px;
   font-size: 1rem;

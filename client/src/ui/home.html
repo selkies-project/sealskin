@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SealSkin</title>
+    <link rel="stylesheet" href="css/options.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css">
+</head>
+<body class="home">
+    <div id="backdrop" aria-hidden="true"></div>
+    <div class="home-wrap">
+        <section class="hero" id="hero">
+            <div class="hero-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="hero-input" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-placeholder="web.home.searchPlaceholder" placeholder="Search applications, or paste a link to open it in isolation">
+                <button type="button" id="upload-button" class="secondary"><i class="fas fa-upload"></i> <span data-i18n="web.home.upload">Upload a file</span></button>
+                <button type="button" id="customize-button" class="secondary icon-only" data-i18n-title="web.home.customize" title="Customize"><i class="fas fa-paint-brush"></i></button>
+                <input type="file" id="file-input" hidden>
+            </div>
+            <div class="hero-chips" id="status-chips"></div>
+        </section>
+
+        <div id="context-bar" class="context-bar" hidden>
+            <i class="fas fa-link" id="context-icon"></i>
+            <span id="context-text"></span>
+            <button type="button" id="context-clear" class="secondary" data-i18n="common.cancel">Cancel</button>
+        </div>
+
+        <section id="sessions-section" hidden>
+            <h2 data-i18n="web.home.running">Running sessions</h2>
+            <div id="sessions-row" class="session-row"></div>
+        </section>
+
+        <section id="links-section" hidden>
+            <div class="section-head">
+                <h2 data-i18n="web.home.links">Links</h2>
+            </div>
+            <div id="links-grid" class="app-tiles"></div>
+        </section>
+
+        <section id="favorites-section" hidden>
+            <div class="section-head">
+                <h2 data-i18n="web.home.favorites">Favorites</h2>
+                <span class="home-hint" data-i18n="web.home.favoritesHint">Drag to reorder</span>
+            </div>
+            <div id="favorites-grid" class="app-tiles"></div>
+        </section>
+
+        <section id="apps-section">
+            <div class="section-head">
+                <h2 data-i18n="web.home.applications">Applications</h2>
+                <div id="type-chips" class="chip-row"></div>
+            </div>
+            <div id="app-grid" class="app-tiles"></div>
+            <div id="apps-empty" class="home-empty" hidden>
+                <i class="fas fa-box-open"></i>
+                <p id="apps-empty-text"></p>
+                <button type="button" id="apps-empty-admin" class="primary" hidden data-i18n="web.home.openAppStores">Open the App Stores</button>
+            </div>
+        </section>
+    </div>
+
+    <div id="drawer-backdrop" hidden></div>
+    <aside id="drawer" class="drawer" hidden aria-modal="true" role="dialog">
+        <header class="drawer-head">
+            <img id="drawer-logo" src="icons/icon128.png" alt="">
+            <div>
+                <h3 id="drawer-name"></h3>
+                <p id="drawer-context" class="drawer-context"></p>
+            </div>
+            <button type="button" id="favorite-btn" class="secondary icon-only" data-i18n-title="web.home.addFavorite" title="Add to favorites"><i class="far fa-star"></i></button>
+            <button type="button" id="hide-btn" class="secondary icon-only" data-i18n-title="web.home.hideApp" title="Hide"><i class="fas fa-eye-slash"></i></button>
+            <button type="button" id="drawer-close" class="secondary icon-only" data-i18n-title="common.close" title="Close"><i class="fas fa-times"></i></button>
+        </header>
+        <div id="favorite-order" class="favorite-order" hidden>
+            <button type="button" class="secondary" data-move="-1"><i class="fas fa-arrow-left"></i> <span data-i18n="web.home.moveEarlier">Earlier</span></button>
+            <button type="button" class="secondary" data-move="1"><span data-i18n="web.home.moveLater">Later</span> <i class="fas fa-arrow-right"></i></button>
+        </div>
+        <div class="drawer-body">
+            <div id="homedir-form-group" class="form-group">
+                <label for="homeDirectory" data-i18n="common.storage">Storage</label>
+                <select id="homeDirectory"></select>
+            </div>
+            <div id="gpu-form-group" class="form-group">
+                <label for="gpuSelect" data-i18n="common.gpu">GPU</label>
+                <select id="gpuSelect"></select>
+            </div>
+            <div id="where-form-group" class="form-group">
+                <label for="whereSelect" data-i18n="popup.launchView.where">Where</label>
+                <select id="whereSelect"></select>
+            </div>
+            <div class="form-group">
+                <label for="language" data-i18n="common.language">Language</label>
+                <select id="language"></select>
+            </div>
+            <div class="settings-grid" style="grid-template-columns: 1fr;">
+                <div class="form-group"><label><input type="checkbox" id="collaborationMode"> <span data-i18n="popup.launchView.collaborationMode">Collaborative Session</span></label></div>
+                <div class="form-group"><label><input type="checkbox" id="waylandMode" checked> <span data-i18n="popup.launchView.waylandMode">Wayland Mode</span></label></div>
+                <div class="form-group"><label><input type="checkbox" id="openInTab"> <span data-i18n="popup.launchView.newTab">Open in a new tab</span></label></div>
+                <div class="form-group" id="open-file-group"><label><input type="checkbox" id="openFileOnLaunch" checked> <span data-i18n="popup.launchView.openFile">Open file on launch</span></label></div>
+            </div>
+        </div>
+        <footer class="drawer-foot">
+            <button type="button" id="copy-link-btn" class="secondary" data-i18n-title="web.home.copyLinkHelp" title="A link that opens this application with these options"><i class="fas fa-link"></i> <span data-i18n="web.home.copyLink">Copy link</span></button>
+            <button type="button" id="launch-btn" class="primary"><i class="fas fa-play"></i> <span data-i18n="popup.launchView.launchButton">Launch</span></button>
+        </footer>
+    </aside>
+
+    <div id="customize-backdrop" hidden></div>
+    <aside id="customize" class="drawer customize" hidden aria-modal="true" role="dialog">
+        <header class="drawer-head">
+            <i class="fas fa-paint-brush drawer-icon"></i>
+            <div><h3 data-i18n="web.home.customize">Customize</h3></div>
+            <button type="button" id="customize-close" class="secondary icon-only" data-i18n-title="common.close" title="Close"><i class="fas fa-times"></i></button>
+        </header>
+        <div class="drawer-body">
+            <div class="form-group">
+                <label data-i18n="web.home.background">Background</label>
+                <div id="bg-kinds" class="seg">
+                    <button type="button" data-kind="color" data-i18n="web.home.bgColor">Color</button>
+                    <button type="button" data-kind="image" data-i18n="web.home.bgPicture">Picture</button>
+                </div>
+            </div>
+            <div id="bg-color-group" hidden>
+                <div class="form-group">
+                    <label data-i18n="web.home.color">Color</label>
+                    <div id="bg-swatches" class="swatches">
+                        <!-- First, so the browser's picker opens toward the page rather than off its right edge. -->
+                        <label class="swatch custom" data-i18n-title="web.home.colorCustom" title="Custom color"><input type="color" id="bg-color" value="#7c6cf0"><i class="fas fa-eye-dropper"></i></label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="web.home.style">Style</label>
+                    <div id="bg-styles" class="bg-choices">
+                        <button type="button" class="bg-choice paint style-solid" data-style="solid" data-i18n-title="web.home.styleSolid" title="Solid"></button>
+                        <button type="button" class="bg-choice paint style-glow" data-style="glow" data-i18n-title="web.home.styleGlow" title="Glow"></button>
+                        <button type="button" class="bg-choice paint style-diagonal" data-style="diagonal" data-i18n-title="web.home.styleDiagonal" title="Diagonal"></button>
+                        <button type="button" class="bg-choice paint style-aurora" data-style="aurora" data-i18n-title="web.home.styleAurora" title="Aurora"></button>
+                        <button type="button" class="bg-choice paint style-vignette" data-style="vignette" data-i18n-title="web.home.styleVignette" title="Vignette"></button>
+                    </div>
+                </div>
+            </div>
+            <div id="bg-image-group" hidden>
+                <div class="form-group">
+                    <div id="bg-preview" class="bg-preview">
+                        <button type="button" id="bg-pick" class="secondary"><i class="fas fa-image"></i> <span data-i18n="web.home.bgUpload">Upload a picture</span></button>
+                    </div>
+                    <input type="file" id="bg-file" accept="image/*" hidden>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="web.home.fit">Position</label>
+                    <div id="bg-fits" class="seg">
+                        <button type="button" data-fit="cover" data-i18n="web.home.fitFill">Fill</button>
+                        <button type="button" data-fit="contain" data-i18n="web.home.fitFit">Fit</button>
+                        <button type="button" data-fit="stretch" data-i18n="web.home.fitStretch">Stretch</button>
+                        <button type="button" data-fit="center" data-i18n="web.home.fitCenter">Center</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="bg-blur"><span data-i18n="web.home.blur">Blur</span> <output id="bg-blur-value"></output></label>
+                    <input type="range" id="bg-blur" min="0" max="24" step="1">
+                </div>
+            </div>
+            <div class="form-group" id="bg-dim-group" hidden>
+                <label for="bg-dim"><span data-i18n="web.home.dim">Dim</span> <output id="bg-dim-value"></output></label>
+                <input type="range" id="bg-dim" min="0" max="90" step="5">
+            </div>
+        </div>
+        <footer class="drawer-foot">
+            <button type="button" id="customize-reset" class="secondary"><i class="fas fa-undo"></i> <span data-i18n="web.home.reset">Reset</span></button>
+        </footer>
+    </aside>
+
+    <div id="drop-overlay" hidden><div><i class="fas fa-file-upload"></i><p data-i18n="web.home.drop">Drop the file to open it in SealSkin</p></div></div>
+
+    <script type="module" src="home.js"></script>
+</body>
+</html>

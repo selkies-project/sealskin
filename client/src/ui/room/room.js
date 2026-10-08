@@ -1257,6 +1257,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsModalOverlay = document.getElementById('settings-modal-overlay');
     const settingsModalCloseBtn = document.getElementById('settings-modal-close');
     const usernameModalOverlay = document.getElementById('username-modal-overlay');
+    const noticeModalOverlay = document.getElementById('notice-modal-overlay');
+    const showNotice = (message, title = t('alerts.errorTitle')) => {
+        document.getElementById('notice-modal-title').textContent = title;
+        document.getElementById('notice-modal-message').textContent = message;
+        noticeModalOverlay.classList.remove('hidden');
+        document.getElementById('notice-modal-close').focus();
+    };
+    document.getElementById('notice-modal-close').addEventListener('click', () => noticeModalOverlay.classList.add('hidden'));
     const audioInputSelect = document.getElementById('audio-input-select');
     const videoInputSelect = document.getElementById('video-input-select');
     const reloadStreamBtn = document.getElementById('reload-stream-btn');
@@ -1484,7 +1492,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return true;
         } catch (err) {
             console.error("Error getting user media:", err);
-            alert(t('alerts.mediaAccessError', { message: err.message }));
+            showNotice(t('alerts.mediaAccessError', { message: err.message }));
             mediaInitialized = false;
             return false;
         }
@@ -2510,7 +2518,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     case 'error':
                         pendingActions.clear();
                         if (document.getElementById('start-menu-modal')) renderStartMenu();
-                        alert(data.message);
+                        showNotice(data.message);
                         break;
                 }
             };
@@ -3154,17 +3162,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const assignedGamepadIds = new Set();
         let mkAssigned = false;
         users.forEach(user => {
-            if (user.slot) {
-                assignedGamepadIds.add(user.slot);
-                const icon = gamepadIcons[user.slot];
-                const container = user.token === COLLAB_DATA.userToken
-                    ? document.getElementById('local-user-container')
-                    : document.getElementById(`container-${user.token}`);
-
-                if (icon && container && icon.parentElement !== container) {
-                    container.appendChild(icon);
+            // One slot, or a list for a participant with several controllers.
+            const slots = Array.isArray(user.slot) ? user.slot : (user.slot ? [user.slot] : []);
+            const slotContainer = user.token === COLLAB_DATA.userToken
+                ? document.getElementById('local-user-container')
+                : document.getElementById(`container-${user.token}`);
+            slots.forEach((slot, position) => {
+                assignedGamepadIds.add(slot);
+                const icon = gamepadIcons[slot];
+                if (!icon || !slotContainer) return;
+                // Side by side in the order the participant's controllers take them.
+                icon.style.setProperty('--slot-position', position);
+                if (icon.parentElement !== slotContainer) {
+                    slotContainer.appendChild(icon);
                 }
-            }
+            });
 
             if (user.has_mk) {
                 mkAssigned = true;
@@ -3182,6 +3194,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!assignedGamepadIds.has(i)) {
                 const icon = gamepadIcons[i];
                 if (icon && icon.parentElement !== sourceBox) {
+                    icon.style.removeProperty('--slot-position');
                     sourceBox.appendChild(icon);
                 }
             }
@@ -3256,8 +3269,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (over.id === 'gamepad-source-box') {
             const parentContainer = source.parentElement;
             if (parentContainer && parentContainer.id !== 'gamepad-source-box') {
-                const userToken = parentContainer.dataset.userToken;
-                if (userToken) ws.send(JSON.stringify({ action: 'assign_slot', viewer_token: userToken, slot: null }));
+                // Only this slot: its holder keeps any others.
+                ws.send(JSON.stringify({ action: 'release_slot', slot: gamepadId }));
             }
         } else {
             const userToken = over.dataset.userToken;

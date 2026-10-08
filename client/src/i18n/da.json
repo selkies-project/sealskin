@@ -14,6 +14,8 @@
     "cancel": "Annuller",
     "manage": "Administrer",
     "delete": "Slet",
+    "remove": "Fjern",
+    "move": "Flyt",
     "edit": "Rediger",
     "save": "Gem",
     "none": "ingen",
@@ -55,6 +57,7 @@
     "admins": "Administratorer",
     "yes": "Ja",
     "no": "Nej",
+    "ok": "OK",
     "daysAgo": "{count, plural, one {for 1 dag siden} other {for {count} dage siden}}",
     "hoursAgo": "{count, plural, one {for 1 time siden} other {for {count} timer siden}}",
     "minutesAgo": "{count, plural, one {for 1 minut siden} other {for {count} minutter siden}}",
@@ -76,9 +79,13 @@
       "appTemplates": "App-skabeloner",
       "appLaboratory": "App-laboratorium",
       "installedApps": "Installerede Apps",
+      "prootApps": "PRoot Apps",
       "users": "Brugere",
       "groups": "Grupper",
-      "admins": "Administratorer"
+      "admins": "Administratorer",
+      "cluster": "Klynge",
+      "signIn": "Login",
+      "audit": "Revisionslog"
     },
     "dashboard": {
       "title": "Kontrolpanel",
@@ -95,6 +102,7 @@
       "storageUsage": "Lagerbrug:",
       "detectedGpus": "Registrerede GPU'er:",
       "logout": "Log ud & Ryd Konfiguration",
+      "logoutTitle": "Log ud",
       "howTo": "Sådan bruges SealSkin",
       "howToDescription": "Dette afsnit indeholder grundlæggende dokumentation om, hvordan du bruger udvidelsen.",
       "howToList": [
@@ -104,7 +112,14 @@
         "<strong>For at administrere vedvarende lager:</strong> Brug fanen \"Hjemmemapper\" på denne side til at oprette og slette lagervolumener, der kan bruges på tværs af flere sessioner.",
         "<strong>For at gemme startindstillinger:</strong> Marker afkrydsningsfeltet \"Gem disse startindstillinger\" i pop op-vinduet, før du starter en applikation for en bestemt filtype (f.eks. .pdf) eller for alle URL'er. Administrer disse gemte præferencer i fanen \"Fastgjort Adfærd\"."
       ],
-      "confirmLogout": "Er du sikker på, at du vil logge ud? Dette vil rydde din gemte konfiguration fra denne browser."
+      "confirmLogout": "Er du sikker på, at du vil logge ud? Dette vil rydde din gemte konfiguration fra denne browser.",
+      "changeConnection": "Skift forbindelse",
+      "certExpired": "Serverens TLS-certifikat er udløbet. HTTPS-forbindelser fejler, indtil det fornyes.",
+      "certExpiring": "Serverens TLS-certifikat udløber om {days} dag(e). Forny det for at undgå forbindelsesfejl.",
+      "signOut": "Log ud",
+      "signedInThrough": "Logget ind via:",
+      "allowance": "Kvote:",
+      "allowanceUsed": "{used} af {hours} timer denne {period}"
     },
     "config": {
       "quickSetup": "Hurtig Opsætning",
@@ -145,9 +160,14 @@
       "namePlaceholder": "f.eks., mine-projekt-filer",
       "nameTitle": "Brug kun bogstaver, tal, understregning eller bindestreg.",
       "createButton": "Opret Mappe",
-      "isLaboratory": "Dette er en Laboratorie-app, bygget fra et basis-image med brugerdefinerede indstillinger.",
-      "laboratory": "Laboratorium",
-      "confirmDelete": "Er du sikker på, at du vil slette den installerede app '{appName}'?"
+      "confirmDelete": "Er du sikker på, at du vil slette hjemmemappen '{homeName}'? Alle data i den går tabt permanent.",
+      "deleteTitle": "Slet hjemmemappe",
+      "node": "Knude",
+      "move": "Flyt",
+      "moveTo": "Flyt til knude",
+      "moveHelp": "Hjemmemappen kopieres til knuden og fjernes fra den knude, der har den. Sessioner, der bruger den, skal stoppes først.",
+      "moveTitle": "Flyt '{homeName}'",
+      "noOtherNode": "Der er ingen anden knude at flytte den til."
     },
     "sessions": {
       "title": "Aktive Sessioner",
@@ -155,12 +175,13 @@
       "started": "Startet",
       "noSessionsUser": "Ingen aktive sessioner fundet.",
       "noSessionsAdmin": "Ingen aktive sessioner fundet for nogen bruger.",
-      "sessionsFor": "Sessioner for {username} ({count})",
-      "confirmStop": "Er du sikker på, at du vil stoppe denne session? Containeren vil blive ødelagt."
+      "sessionsFor": "Sessioner for {username} ({count})"
     },
     "pinned": {
       "title": "Fastgjort Udvidelsesadfærd",
       "description": "Denne tabel viser de startindstillinger, du har gemt for specifikke filtyper eller for alle URL'er. Du kan fjerne en fastgjort adfærd for at blive spurgt om startindstillinger igen.",
+      "removeTitle": "Fjern fastgjort adfærd",
+      "confirmRemove": "Fjern den fastgjorte adfærd for '{name}'?",
       "trigger": "Udløser",
       "savedApp": "Gemt Applikation",
       "triggerSimple": "Simpel Start (Værktøjslinjeknap)",
@@ -177,7 +198,8 @@
       "publicKeyOptionalLabel": "Offentlig Nøgle (Valgfri):",
       "publicKeyPlaceholder": "Indsæt offentlig nøgle her, eller lad feltet være tomt for at generere en.",
       "createButton": "Opret Administrator",
-      "confirmDelete": "Er du sikker på, at du vil slette administratoren '{username}'? Dette vil også slette alt deres vedvarende lager og kan ikke fortrydes."
+      "confirmDelete": "Er du sikker på, at du vil slette administratoren '{username}'? Dette vil også slette alt deres vedvarende lager og kan ikke fortrydes.",
+      "deleteTitle": "Slet administrator"
     },
     "users": {
       "title": "Brugeradministration",
@@ -197,8 +219,29 @@
       "createButton": "Opret Bruger",
       "homesDisabledTooltip": "Vedvarende lager deaktiveret for denne bruger",
       "confirmDelete": "Er du sikker på, at du vil slette brugeren '{username}'? Dette vil også slette alt deres vedvarende lager og kan ikke fortrydes.",
+      "deleteTitle": "Slet bruger",
       "allowPublicSharing": "Tillad offentlig fildeling",
-      "allowEditTemplates": "Tillad redigering af app-skabeloner"
+      "allowEditTemplates": "Tillad redigering af app-skabeloner",
+      "signInOnly": "Kun single sign-on",
+      "awaitingGroup": "Afventer en gruppe",
+      "approve": "Godkend",
+      "admin": "Administrator",
+      "gpuShare": "Tillad Deling af en GPU med Andre Sessioner",
+      "homeMigration": "Tillad Flytning af Hjemmemapper Mellem Knuder",
+      "storageLimit": "Lagergrænse (GB pr. knude)",
+      "sessionCpus": "CPU'er pr. session",
+      "sessionMemory": "Hukommelse pr. session (MB)",
+      "sessionHours": "Timer en session må køre",
+      "allowanceHours": "Kvote (vægtede sessionstimer)",
+      "allowancePeriod": "Kvoteperiode",
+      "pools": "Tilladte begrænsede puljer (kommasepareret)",
+      "poolsDenied": "Afviste puljer (kommasepareret)",
+      "prootCatalog": "PRoot Apps-katalog",
+      "prootCatalogNone": "Ingen",
+      "prootCatalogHelp": "Monteres skrivebeskyttet i hver session; proot-apps installerer fra det i stedet for et registry. Står det på Ingen, bestemmer den første af brugerens grupper, der vælger et.",
+      "groupsHelp": "Hold Ctrl eller Kommando nede for at vælge flere. Hvor grupper er uenige, gælder den begrænsende værdi.",
+      "providerGroups": "Grupper, som identitetsudbyderen angav ved seneste login: {groups}",
+      "limitsHelp": "En grænse på -1, eller et tomt felt, sætter ingen."
     },
     "groups": {
       "title": "Gruppeadministration",
@@ -208,7 +251,15 @@
       "overrideTitle": "Gruppe Tilsidesættelsesindstillinger",
       "permissionsTitle": "Tilsidesættelser for Tilladelser & Hærdning",
       "createButton": "Opret Gruppe",
-      "confirmDelete": "Er du sikker på, at du vil slette gruppen '{groupName}'? Brugere i denne gruppe vil vende tilbage til deres individuelle indstillinger."
+      "confirmDelete": "Er du sikker på, at du vil slette gruppen '{groupName}'? Brugere i denne gruppe vil vende tilbage til deres individuelle indstillinger.",
+      "deleteTitle": "Slet gruppe",
+      "notSet": "Ikke angivet",
+      "allow": "Tillad",
+      "deny": "Afvis",
+      "on": "Til",
+      "off": "Fra",
+      "ssoGroups": "Identitetsudbydergrupper, hvis medlemmer er i denne gruppe (kommasepareret)",
+      "overrideHelp": "En gruppe bestemmer kun det, der er angivet her; alt, der ikke er angivet eller står tomt, forbliver hvert medlems eget."
     },
     "installedApps": {
       "title": "Installerede Applikationer",
@@ -216,7 +267,10 @@
       "noAppsFound": "Ingen installerede apps fundet.",
       "pulling": "Henter nyt image...",
       "notLocal": "Image ikke fundet lokalt",
-      "confirmDelete": "Er du sikker på, at du vil slette den installerede app '{appName}'?"
+      "isLaboratory": "Dette er en laboratorie-app, bygget fra et basis-image med tilpassede indstillinger.",
+      "laboratory": "Laboratorium",
+      "confirmDelete": "Er du sikker på, at du vil slette den installerede app '{appName}'?",
+      "deleteTitle": "Slet installeret app"
     },
     "appStore": {
       "title": "App Stores",
@@ -243,9 +297,45 @@
       "previewTitle": "UI-forhåndsvisning",
       "contentArea": "Applikationsindholdsområde",
       "confirmDelete": "Er du sikker på, at du vil slette skabelonen '{templateName}'? Handlingen kan ikke fortrydes.",
+      "deleteTitle": "Slet skabelon",
       "deleteDisabled": "Denne skabelon kan ikke slettes.",
       "enterName": "Indtast venligst et navn til den nye skabelon.",
       "dockerAdminOnly": "Kun en administrator kan ændre disse indstillinger.",
+      "filterPlaceholder": "Filtrer indstillinger efter navn…",
+      "changedOnly": "Kun ændrede",
+      "showMore": "Vis mere",
+      "showLess": "Vis mindre",
+      "changedCount": "{count, plural, one {1 ændret} other {{count} ændret}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC, dual mode"
+      },
+      "sections": {
+        "appearance": "Udseende",
+        "display": "Skærm",
+        "input": "Input",
+        "audio": "Lyd",
+        "webcam": "Webcam",
+        "performance": "Ydelse",
+        "gpu": "GPU",
+        "clipboard": "Udklipsholder og filer",
+        "sharing": "Deling",
+        "hardening": "Hærdning",
+        "lifecycle": "Livscyklus",
+        "integrations": "Integrationer",
+        "webrtc": "WebRTC",
+        "container": "Container"
+      },
+      "groups": {
+        "mode": "Tilstand",
+        "transport": "Transport",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "TURN REST-API",
+        "cloudflare": "Cloudflare TURN",
+        "extra": "Diagnostik"
+      },
       "settings": {
         "TITLE": {
           "label": "Sidetitel",
@@ -421,7 +511,7 @@
         },
         "SELKIES_ENABLE_COLLAB": {
           "label": "Aktiver Samarbejde",
-          "description": "Lad en seer med sessionens master-token fungere som samarbejdspartner med læse- og skriveadgang. Påkrævet for SealSkin-rum."
+          "description": "Lad en seer med sessionens master-token fungere som samarbejdspartner med læse- og skriveadgang. Påkrævet for {brand}-rum."
         },
         "SELKIES_ENABLE_PLAYER2": {
           "label": "Aktiver Deling for Spiller 2",
@@ -692,10 +782,6 @@
           "label": "Wayland-backend",
           "description": "Kører sessionen på Wayland-backenden, en hovedløs compositor med indlejret labwc til vindueshåndtering, i stedet for X11-serveren. X11-programmer kører via XWayland."
         },
-        "MAX_RES": {
-          "label": "Maksimal Opløsning",
-          "description": "Maksimal opløsning for containeren, standard er 16k."
-        },
         "START_DOCKER": {
           "label": "Start Docker-i-Docker",
           "description": "Hvis falsk, vil en privilegeret container ikke starte DinD."
@@ -703,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "Deaktiver IPv6",
           "description": "Hvis sand, vil dette deaktivere IPv6."
-        },
-        "DISABLE_ZINK": {
-          "label": "Deaktiver Zink",
-          "description": "Indstil ikke Zink-miljøvariabler, hvis et grafikkort registreres."
         },
         "DISABLE_DRI3": {
           "label": "Deaktiver DRI3",
@@ -1036,7 +1118,36 @@
       "closeButton": "Luk Session & Afslut",
       "savingAndLaunching": "Gemmer & Starter...",
       "placeholder": "App-laboratoriet giver dig mulighed for at konfigurere basis-hjemmemappen og start-scriptet for en applikation baseret på en eksisterende installeret applikation. Denne hjemmemappe vil blive kopieret ved første initialisering for brugeren med alle de filer og indstillinger, du opsætter i denne session. Du kan genstarte en eksisterende Laboratorie-app for yderligere at ændre dens indhold.",
-      "formInvalid": "Vælg venligst en basis-app og angiv et navn til den nye app."
+      "formInvalid": "Vælg venligst en basis-app og angiv et navn til den nye app.",
+      "explainer": "App-laboratoriet bygger en meta-app: en variant af en installeret applikation med sit eget navn, ikon, autostart-script og en hjemmemappe, der allerede er sat op. Du sætter applikationen op én gang i en tilpasningssession, og hver brugers første start begynder med en kopi af den hjemmemappe.",
+      "step1Title": "Beskriv appen",
+      "step1": "Vælg den applikation, der skal bygges på, og giv meta-appen et navn, et ikon og de brugere, der må starte den.",
+      "step2Title": "Tilpas den i en live-session",
+      "step2": "En tilpasningssession åbner med skabelonens hjemmemappe skrivbar. Installer udvidelser, log ind, og indret den, som brugerne skal finde den.",
+      "step3Title": "Luk sessionen for at gemme skabelonen",
+      "step3": "Når sessionen lukkes fra denne side, beholdes hjemmemappen som skabelon.",
+      "openTitle": "Tilpasningssession åben",
+      "openStarted": "Startet {when}",
+      "openDescription": "Alt, der ændres i denne sessions hjemmemappe, bliver til skabelonen. Sessionen forbliver åben, indtil du lukker den her; den vises ikke blandt dine sessioner.",
+      "reopen": "Genåbn session",
+      "closeAndSave": "Luk & gem skabelon",
+      "confirmClose": "Luk tilpasningssessionen for '{name}'? Sessionen stopper, og dens hjemmemappe beholdes som skabelon.",
+      "closeTitle": "Luk tilpasningssession",
+      "unsavedTitle": "Ændringer ikke gemt",
+      "unsavedClose": "Ændringerne kunne ikke gemmes. Luk sessionen alligevel?",
+      "templateSaved": "Session lukket. Skabelonen er gemt.",
+      "busy": "En tilpasningssession for '{name}' er åben. Luk den ovenfor, før du ændrer en meta-app eller starter en ny.",
+      "describeTitle": "1. Beskriv",
+      "customizeTitle": "2. Tilpas",
+      "customizeDescription": "Tilpasningssessionen starter med disse indstillinger. Kun én session kan være åben ad gangen.",
+      "advanced": "Avanceret",
+      "saveAndOpen": "Gem & åbn tilpasningssession",
+      "listTitle": "Dine meta-apps",
+      "listNone": "Ingen meta-apps endnu.",
+      "closingStopping": "Stopper sessionen…",
+      "closingSaving": "Gemmer skabelonen…",
+      "closingSaved": "Skabelon gemt: {files} filer, {size}",
+      "closingFailed": "Lukning af sessionen mislykkedes."
     },
     "modals": {
       "editUserTitle": "Rediger Bruger: {username}",
@@ -1045,7 +1156,7 @@
       "editGroupTitle": "Rediger Gruppe: {groupName}",
       "userConfigTitle": "Brugerkonfiguration",
       "warning": "Dette er den eneste gang, denne konfiguration vil blive vist. Giv den sikkert til brugeren.",
-      "info": "Du kan downloade denne konfigurationsfil for nemt at opsætte SealSkin på en anden enhed. Opbevar denne fil sikkert, da den indeholder din private nøgle.",
+      "info": "Du kan downloade denne konfigurationsfil for nemt at opsætte {brand} på en anden enhed. Opbevar denne fil sikkert, da den indeholder din private nøgle.",
       "configDataLabel": "Konfigurationsdata (JSON)",
       "copyButton": "Kopier Tekst",
       "downloadButton": "Download Fil",
@@ -1053,6 +1164,8 @@
       "dirsForUser": "Mapper for bruger: {username}",
       "dirsForAdmin": "Mapper for admin: {username}",
       "newDirForUser": "Opret Ny Mappe for Bruger",
+      "customAutostartScriptLabel": "Brugerdefineret Autostart Script",
+      "customAutostartScriptDescription": "Tilpas autostart-logik, lad feltet være tomt for at bruge standard fra applikationsudbyderen.",
       "createDirButton": "Opret Mappe",
       "confirmDeleteDir": "Er du sikker på, at du vil slette '{homeName}' for bruger '{username}'? Dette er permanent.",
       "installAppTitle": "Installer {appName}",
@@ -1071,8 +1184,6 @@
       "advancedSettings": "Avancerede Indstillinger",
       "appTemplateLabel": "Applikationsskabelon",
       "appTemplateDescription": "Vælg en forudkonfigureret skabelon for avancerede container-startindstillinger.",
-      "customAutostartScriptLabel": "Brugerdefineret Autostart Script",
-      "customAutostartScriptDescription": "Tilpas autostart-logik, lad feltet være tomt for at bruge standard fra applikationsudbyderen.",
       "saveInstallation": "Gem Installation",
       "updateStatusTitle": "Opdateringsstatus for {appName}",
       "checkingUpdates": "Søger efter opdateringer...",
@@ -1088,10 +1199,7 @@
       "newVersion": "Ny version: {sha}",
       "errorPulling": "Fejl under hentning af image.",
       "manualInstallNote": "Bemærk: Manuelt tilføjede billeder skal være baseret på et selkies-baseimage-kompatibelt billede.",
-      "generalTitle": "Generelle & Ydelsesindstillinger",
-      "webrtcTitle": "WebRTC- og TURN-indstillinger",
       "webrtcDescription": "Sessioner streames som standard over WebSockets. Angives en STUN-, TURN-, Cloudflare- eller offentlig IP-værdi nedenfor, eller vælges WebRTC-tilstand, skifter containeren til WebRTC med dobbelt tilstand aktiveret, så brugerne stadig kan falde tilbage til WebSockets.",
-      "dockerTitle": "Docker Avancerede Tilsidesættelser",
       "dockerDescription": "Disse indstillinger tilsidesætter standard containerkonfigurationen. Brug med forsigtighed og kun hvis du ved, hvad du gør."
     },
     "status": {
@@ -1123,6 +1231,8 @@
       "userDeleteFailed": "Fejl ved sletning af bruger: {error}",
       "userUpdated": "Bruger '{username}' opdateret med succes.",
       "userUpdateFailed": "Fejl ved opdatering af bruger: {error}",
+      "userApproved": "Brugeren '{username}' er godkendt.",
+      "userApproveFailed": "Fejl ved godkendelse af brugeren: {error}",
       "creatingGroup": "Opretter gruppe...",
       "groupCreated": "Gruppe '{groupName}' oprettet.",
       "groupCreateFailed": "Fejl ved oprettelse af gruppe: {error}",
@@ -1166,7 +1276,24 @@
       "pendingConfigSaved": "Ventende konfiguration gemt. Du kan nu give din offentlige nøgle til administratoren.",
       "settingsSaved": "Indstillinger gemt.",
       "appCreated": "Appen '{name}' blev oprettet med succes.",
-      "launchFailed": "Start mislykkedes: {error}"
+      "launchFailed": "Start mislykkedes: {error}",
+      "homedirMoving": "Flytter hjemmemappe '{homeName}'...",
+      "homedirMoved": "Hjemmemappe '{homeName}' flyttet.",
+      "homedirMoveFailed": "Kunne ikke flytte hjemmemappe: {error}",
+      "clusterLoadFailed": "Kunne ikke indlæse klyngen: {error}",
+      "clusterWriteFailed": "Kunne ikke gemme: {error}",
+      "nodeUpdated": "Knude opdateret.",
+      "nodeRemoved": "Knude fjernet.",
+      "poolSaved": "Pulje '{name}' gemt.",
+      "poolDeleted": "Pulje '{name}' slettet.",
+      "nothingChanged": "Intet ændret.",
+      "catalogSaved": "Kataloget '{name}' er gemt; hver node henter dets apps.",
+      "catalogSaveFailed": "Kunne ikke gemme kataloget: {error}",
+      "catalogDeleted": "Kataloget '{name}' er slettet.",
+      "catalogDeleteFailed": "Kunne ikke slette kataloget: {error}",
+      "catalogUpdateStarted": "Opdaterer kataloget '{name}' på hver node.",
+      "catalogUpdateFailed": "Kunne ikke opdatere kataloget: {error}",
+      "catalogsRefreshFailed": "Kunne ikke indlæse katalogerne: {error}"
     },
     "placeholders": {
       "noAdmins": "Ingen administratorer fundet.",
@@ -1176,7 +1303,289 @@
       "noSessions": "Ingen aktive sessioner fundet.",
       "noPinned": "Ingen fastgjorte adfærd fundet.",
       "errorLoading": "Fejl ved indlæsning af mapper.",
-      "noInstalledApps": "Ingen applikationer er installeret endnu."
+      "noInstalledApps": "Ingen applikationer er installeret endnu.",
+      "noProotCatalogs": "Ingen kataloger endnu."
+    },
+    "web": {
+      "title": "{brand} i denne browser",
+      "bookmarklet": "Send til {brand}",
+      "bookmarkletHelp": "Træk dette link til din bogmærkelinje. Et klik på det åbner den side, du er på, i {brand} eller søger efter den tekst, du har markeret.",
+      "pick": "Vælg til {brand}",
+      "pickHelp": "Træk også dette link derop. Klik på det, og klik derefter på et link for at åbne linket i {brand}, eller på et billede, en video eller lyd for at sende filen. Skift-klik på et link for at sende den fil, det fører til, hentet med dit login på det websted.",
+      "pickHint": "{brand}: klik på et link eller på et billede, en video eller lyd for at sende det; Skift-klik på et link for at sende dets fil. Tryk på Esc for at annullere.",
+      "protocol": "Åbn web+sealskin:-links her",
+      "protocolHelp": "Et link skrevet som web+sealskin: efterfulgt af en adresse åbner derefter adressen i {brand}.",
+      "install": "Hvis browseren kan installere webapps, så installer {brand} fra dens menu for at dele links og filer til den og åbne filer med den."
+    },
+    "via": {
+      "root": "Root-token",
+      "oidc": "OpenID Connect",
+      "saml": "SAML",
+      "proxy": "Reverse proxy",
+      "key": "Nøglefil"
+    },
+    "periods": {
+      "day": "Dag",
+      "week": "Uge",
+      "month": "Måned"
+    },
+    "cluster": {
+      "nodesTitle": "Knuder",
+      "pool": "Pulje",
+      "load": "Belastning",
+      "online": "Online",
+      "offline": "Offline",
+      "waiting": "Venter på godkendelse",
+      "lastSeen": "sidst set {when}",
+      "storeUnreachableNode": "kan ikke nå de fælles poster",
+      "cpus": "{count} CPU'er",
+      "gpus": "{count} GPU'er",
+      "gpuSessions": "GPU: {used} / {slots}",
+      "thisNode": "denne knude",
+      "approve": "Godkend",
+      "suspend": "Suspender",
+      "remove": "Fjern",
+      "confirmRemove": "Fjern knude '{name}' fra klyngen? En knude, der stadig kører, registrerer sig igen og venter på godkendelse.",
+      "removeTitle": "Fjern knude",
+      "joinTitle": "Tilføj en Knude",
+      "joinDescription": "Opret en tilslutningskode, start den nye knude med de to linjer nedenfor i dens miljø, og godkend den derefter i tabellen ovenfor. En kode giver adgang for én knude og gælder i en time.",
+      "joinButton": "Opret Tilslutningskode",
+      "joinExpires": "Den nye knudes miljø (koden udløber {when})",
+      "poolsTitle": "Puljer",
+      "poolsDescription": "En pulje er et sæt knuder, som sessioner starter på. En begrænset pulje er kun åben for de brugere og grupper, der er nævnt her eller tilladt af deres indstillinger.",
+      "poolDomain": "Domæne",
+      "poolAccess": "Adgang",
+      "poolCost": "Pris pr. time",
+      "poolCostWithGpu": "{cost} (GPU: {gpuCost})",
+      "poolOpen": "Åben",
+      "poolRestricted": "Begrænset",
+      "poolNew": "Ny Pulje",
+      "poolEdit": "Rediger Pulje '{name}'",
+      "poolDescriptionLabel": "Beskrivelse",
+      "poolDomainLabel": "Domæne, som puljens knuder navngives under",
+      "poolCostLabel": "Kvote, en sessionstime koster",
+      "poolGpuCostLabel": "Kvote, en GPU-sessionstime koster (tom: det samme)",
+      "poolUsersLabel": "Brugere, den er åben for, når den er begrænset (kommasepareret)",
+      "poolGroupsLabel": "Grupper, den er åben for, når den er begrænset (kommasepareret)",
+      "poolStopWhenSpent": "Afslut sessioner, når kvoten er brugt",
+      "poolSave": "Gem Pulje",
+      "confirmDeletePool": "Slet pulje '{name}'?",
+      "deletePoolTitle": "Slet pulje",
+      "storeTitle": "Fælles Poster",
+      "storeDescription": "Hvor knuderne opbevarer de poster, de deler: brugere, grupper, apps, puljer og disse indstillinger.",
+      "storeKept": "Opbevares:",
+      "storeKinds": {
+        "file": "På denne knudes disk",
+        "s3": "I en bucket i et objektlager",
+        "peer": "På en anden knude"
+      },
+      "reachable": "Tilgængelig",
+      "unreachable": "Utilgængelig",
+      "publicUrl": "Webappens adresse:",
+      "sessionDomain": "Sessionsdomæne:",
+      "sessionDomainUnset": "Ikke angivet (webappens værtsnavn)",
+      "sessionDomainOff": "Fra: sessioner åbner på webappens adresse",
+      "signInDescription": "En indstilling, der skrives her, gælder for alle knuder og har forrang for en knudes miljø. Ryd et felt for at overlade indstillingen til hver knudes miljø igen.",
+      "settingWritten": "Angivet her for alle knuder.",
+      "settingFromEnvironment": "Fra hver knudes miljø; den viste værdi er denne knudes.",
+      "settingInherit": "Fra hver knudes miljø (her: {value})",
+      "secretSet": "En hemmelighed er angivet; lad feltet være tomt for at beholde den",
+      "secretUnset": "Ingen hemmelighed er angivet",
+      "secretClear": "Fjern hemmeligheden, der er angivet her",
+      "settings": {
+        "oidc_issuer": "OpenID Connect issuer-URL",
+        "oidc_client_id": "OpenID Connect klient-ID",
+        "oidc_client_secret": "OpenID Connect client secret",
+        "oidc_scopes": "OpenID Connect scopes",
+        "saml_metadata_url": "SAML-metadata-URL",
+        "saml_username_attribute": "SAML-attribut, der navngiver brugeren (tom: brugernavn-claimet nedenfor)",
+        "saml_groups_attribute": "SAML-attribut, der oplister brugerens grupper (tom: gruppe-claimet nedenfor)",
+        "sso_username_claim": "Claim eller attribut, der navngiver brugeren",
+        "sso_groups_claim": "Claim eller attribut, der oplister brugerens grupper",
+        "sso_admin_group": "Identitetsudbyderens gruppe af administratorer",
+        "sso_max_age_seconds": "Længste varighed af et login via identitetsudbyderen (timer)",
+        "sso_force_login": "Bed om legitimationsoplysninger ved hvert login",
+        "sso_create_users": "Opret en bruger ved første login",
+        "sso_hold_new_users": "Tilbagehold nye brugere, indtil de er placeret i en gruppe",
+        "proxy_auth_user_header": "Header, som en betroet proxy navngiver brugeren i",
+        "proxy_auth_groups_header": "Header, som en betroet proxy oplister brugerens grupper i",
+        "proxy_auth_logout_url": "Proxyens side, der logger dens bruger ud",
+        "web_session_seconds": "Længste tid et root-login varer ubrugt (timer)",
+        "files_sync": "Opbevar delte filer i objektlageret"
+      },
+      "usageTitle": "Forbrug",
+      "usageHours": "Vægtede timer",
+      "usageNone": "Intet forbrug i denne periode.",
+      "settingsTitle": "Klyngeindstillinger"
+    },
+    "audit": {
+      "title": "Revisionslog",
+      "searchPlaceholder": "Søg efter hændelser...",
+      "range": "Periode",
+      "pageSize": "Hændelser pr. side",
+      "today": "I dag",
+      "last7": "Seneste 7 dage",
+      "last30": "Seneste 30 dage",
+      "oneDay": "Én dag (UTC)",
+      "time": "Tid",
+      "event": "Hændelse",
+      "details": "Detaljer",
+      "none": "Ingen hændelser matcher.",
+      "shown": "{from}–{to} af {total}",
+      "exportCsv": "Eksporter CSV",
+      "exportJson": "Eksporter JSON",
+      "exported": "{count} hændelser eksporteret."
+    },
+    "signin": {
+      "pill": {
+        "active": "Aktiv",
+        "off": "Fra",
+        "none": "Ikke konfigureret"
+      },
+      "test": "Test",
+      "testing": "Tester de gemte indstillinger...",
+      "testOk": "Udbyderen svarede.",
+      "testFailed": "Testen mislykkedes.",
+      "register": "Registrer disse hos udbyderen",
+      "provider": "Udbyder",
+      "providerChoose": "Vælg en udbyder for at få tip",
+      "providerHelp": "En udbyder udfylder kun tippene nedenfor; intet om den gemmes.",
+      "proxyHelp": "En foranstillet reverse proxy logger brugere ind og navngiver dem i en header. Det passer til en proxy, der allerede beskytter dine andre websteder på samme måde; ellers log brugere ind ovenfor via OpenID Connect eller SAML.",
+      "proxyPresetChoose": "Vælg proxyens udbyder for at udfylde headerne",
+      "proxyPresets": {
+        "authelia": "Authelia",
+        "authentik": "Authentik",
+        "tinyauth": "Tinyauth",
+        "oauth2proxy": "oauth2-proxy"
+      },
+      "reach": {
+        "title": "Adgang til Denne Server",
+        "help": "Hvordan browsere når denne server, som serveren og denne browser ser det. En foranstillet reverse proxy skal have hvert af disse punkter rigtigt.",
+        "publicUrl": "Offentlig URL",
+        "publicUrlDiffers": "Denne side blev indlæst fra {origin}. Sæt SEALSKIN_PUBLIC_URL til den adresse, browsere bruger: identitetsudbyderens omdirigeringer bygges ud fra den.",
+        "sessionDomain": "Sessionsdomæne",
+        "sessionNames": "Sessioner åbner på",
+        "sessionNamesNone": "Intet sessionsnavn svarede",
+        "sessionNamesShared": "Hver session er en sti i webappen, så intet andet navn skal svare. SEALSKIN_SESSION_ISOLATION=true giver hver sit eget navn under sessionsdomænet.",
+        "sessionNamesHelp": "Starter fra webappen vil mislykkes. En session åbner på sit eget navn, <session id>.<domain>: domænet kræver wildcard-DNS, et wildcard-certifikat og en reverse proxy-regel, der sender de navne hertil.",
+        "sessionNamesGuarded": "Sessioner åbner under {domain}, som SEALSKIN_SESSION_DOMAIN angiver. Det er forventet, når reverse proxyen kræver login på sessionsnavnene; ellers kontrollér wildcard-DNS, certifikatet og proxyreglen for dem.",
+        "sessionNamesOther": "SEALSKIN_SESSION_DOMAIN angiver {domain}, som ikke svarede.",
+        "trustedProxies": "Betroede proxyer",
+        "arrivedFrom": "Denne forespørgsel kom fra",
+        "viaTrusted": "En betroet proxy.",
+        "viaOther": "Ikke en af de betroede proxyer. Hvis dette er din reverse proxys adresse, så tilføj den til SEALSKIN_TRUSTED_PROXIES.",
+        "viaDirect": "Ingen reverse proxy er betroet. Hvis dette er en reverse proxys adresse, så sæt SEALSKIN_TRUSTED_PROXIES til den, så serveren ser hver browsers egen adresse.",
+        "yourAddress": "Din adresse, som serveren ser den",
+        "httpPort": "Ukrypteret HTTP-lytter"
+      },
+      "presets": {
+        "authelia": {
+          "name": "Authelia",
+          "hint": "Issueren er Authelias egen adresse, https://<host>. Tilføj en klient under identity_providers.oidc.clients med omdirigerings-URI'en nedenfor og scopes openid profile groups email offline_access."
+        },
+        "pocketid": {
+          "name": "Pocket ID",
+          "hint": "Issueren er Pocket ID's egen adresse, https://<host>. Tilføj en OIDC-klient med callback-URL'en nedenfor, og sæt scopes til openid profile email groups."
+        },
+        "tinyauth": {
+          "name": "Tinyauth",
+          "hint": "Issueren er Tinyauths egen adresse, https://<host>. Definer klienten med variablerne TINYAUTH_OIDC_CLIENTS_<NAME>_, og sæt scopes til openid profile email groups."
+        },
+        "keycloak": {
+          "name": "Keycloak",
+          "hint": "Issueren er realmets adresse, https://<host>/realms/<realm>. Opret en OpenID Connect-klient med klientgodkendelse slået til, og tilføj en gruppemedlemskabs-mapper med navnet 'groups' for at sende brugerens grupper."
+        },
+        "authentik": {
+          "name": "Authentik",
+          "hint": "Issueren er applikationens adresse, https://<host>/application/o/<slug>/, med den afsluttende skråstreg. Opret en OAuth2/OpenID-udbyder og en applikation, der bruger den."
+        },
+        "entra": {
+          "name": "Microsoft Entra ID",
+          "hint": "Issueren er https://login.microsoftonline.com/<tenant>/v2.0. Registrer en applikation, tilføj en client secret, og tilføj gruppe-claimet under Tokenkonfiguration."
+        },
+        "google": {
+          "name": "Google",
+          "hint": "Issueren er https://accounts.google.com. Opret et OAuth-klient-ID af typen Webapplikation. Google sender ingen grupper."
+        },
+        "okta": {
+          "name": "Okta",
+          "hint": "Issueren er din organisations adresse, https://<org>.okta.com. Opret en OIDC-webapplikation, og tilføj et gruppe-claim til dens ID-token."
+        },
+        "other": {
+          "name": "Anden",
+          "hint": "Issueren er den adresse, hvis /.well-known/openid-configuration beskriver udbyderen."
+        }
+      },
+      "oidcTitle": "OpenID Connect",
+      "oidcRedirect": "Omdirigerings-URI",
+      "oidcBackchannel": "Back-channel-logout-URL",
+      "oidcFrontchannel": "Front-channel-logout-URL",
+      "samlTitle": "SAML 2.0",
+      "samlEntity": "Entity-ID / metadata-URL",
+      "samlAcs": "ACS-URL",
+      "samlSlo": "Single logout-URL",
+      "samlMetadata": "Åbn denne servers service provider-metadata",
+      "proxyTitle": "Reverse Proxy",
+      "trustedProxies": "Denne knudes betroede proxyer:",
+      "trustedProxiesHelp": "Angives på hver knude med SEALSKIN_TRUSTED_PROXIES. Headeren tros kun, når forespørgslen kommer fra en af de adresser.",
+      "noTrustedProxy": "En brugerheader er angivet, men denne knude stoler endnu ikke på nogen proxy, så intet proxy-login accepteres.",
+      "proxyCheck": {
+        "guarded": "Kontrolleret: proxyen sender ikke de login-headere videre, som en besøgende sender.",
+        "open": "Proxy-logins afvises.",
+        "unreachable": "Proxy-logins afvises: denne knude kan ikke kontrollere proxyen. Giv den en rute til dens offentlige URL, angiv proxyens egen adresse i SEALSKIN_TRUSTED_PROXIES, eller sæt SEALSKIN_PROXY_AUTH_UNCHECKED=true på knuden for at tro proxyen uden kontrollen.",
+        "unchecked": "Kontrollen af proxyen er slået fra på denne knude (SEALSKIN_PROXY_AUTH_UNCHECKED): alt, hvad proxyen sender videre, tros."
+      },
+      "whoTitle": "Hvem Logger Ind",
+      "whoHelp": "Disse gælder for OpenID Connect, SAML og reverse proxyen. For at placere medlemmerne af en identitetsudbydergruppe i en {brand}-gruppe skal du angive den under \"Identitetsudbydergrupper\" for den gruppe i Grupper.",
+      "rootTitle": "Root-token",
+      "rootHelp": "Altid tilgængeligt. Tokenet ligger i /config/root_token på serveren, indtil den fil slettes, og kan angives med SEALSKIN_ROOT_TOKEN.",
+      "keyTitle": "Nøglefiler",
+      "keyOn": "Denne knude accepterer nøglefil-klienterne: browserudvidelsen og mobilappen. Angives på hver knude med SEALSKIN_LEGACY_AUTH.",
+      "keyOff": "Denne knude accepterer ikke nøglefil-klienter. Angives på hver knude med SEALSKIN_LEGACY_AUTH.",
+      "resultIssuer": "Issuer:",
+      "resultAuthorization": "Autorisationsendepunkt:",
+      "resultBackchannel": "Back-channel-logout understøttet:",
+      "resultScopes": "Tilbudte scopes:",
+      "resultGroupsClaim": "Gruppe-claim:",
+      "claimListed": "'{claim}' er blandt de claims, udbyderen oplister",
+      "claimNotListed": "'{claim}' er ikke blandt de claims, udbyderen oplister",
+      "resultEntity": "Entity-ID:",
+      "resultSso": "Sign-on-URL:",
+      "resultSlo": "Single logout tilbudt:",
+      "resultCertificates": "Signeringscertifikater:"
+    },
+    "prootApps": {
+      "title": "PRoot Apps-kataloger",
+      "help": "Et katalog er en mappe med PRoot Apps-pakker, der ligger på hver node og monteres skrivebeskyttet i sessionerne hos de brugere og grupper, der er tildelt det. Inde i en session installerer og opdaterer proot-apps og dets grafiske installationsprogram fra mappen og kontakter intet registry.",
+      "newCatalog": "Nyt katalog",
+      "editCatalog": "Rediger {name}",
+      "apps": "Apps",
+      "onThisNode": "På denne node",
+      "nameLabel": "Katalognavn",
+      "autoUpdate": "Automatisk opdatering",
+      "autoUpdateHelp": "Hent apps igen med det automatiske opdateringsinterval, når deres pakke er ændret.",
+      "selectedTitle": "Valgte apps",
+      "selectedHelp": "Klik på en app nedenfor for at tilføje eller fjerne den. Apps fra et andet remote end standarden installeres med deres fulde image-navn.",
+      "noneSelected": "Ingen apps valgt endnu. Medtag \"gui\" for at give brugerne det grafiske installationsprogram.",
+      "remoteTitle": "Tilgængelige apps",
+      "searchPlaceholder": "Søg i apps...",
+      "remoteLabel": "Remote (GitHub owner/repo for et proot-apps-repository)",
+      "load": "Indlæs",
+      "refreshRemote": "Hent listen igen",
+      "noApps": "Ingen apps fundet.",
+      "couldNotLoad": "Kunne ikke indlæse apps fra {remote}: {error}",
+      "disabledHint": "Markeret som deaktiveret af sit remote; det grafiske installationsprogram skjuler den.",
+      "fromRemote": "fra {remote}",
+      "statePending": "Ikke synkroniseret endnu",
+      "stateSyncing": "Synkroniserer {done} af {total}",
+      "stateReady": "Klar",
+      "stateError": "Fejl",
+      "syncedAgo": "synkroniseret {ago}",
+      "autoUpdateOn": "automatisk opdatering",
+      "update": "Opdater",
+      "updateTitle": "Hent apps igen nu, på hver node, hvor deres pakke er ændret",
+      "confirmDelete": "Slet kataloget '{name}'? Hver node fjerner sin kopi, og brugere tildelt det får intet katalog.",
+      "deleteTitle": "Slet katalog"
     }
   },
   "popup": {
@@ -1205,7 +1614,17 @@
       "uploadingButton": "Uploader...",
       "autoHome": "Automatisk (vedvarende pr. app)",
       "collaborationMode": "Samarbejdssession",
-      "waylandMode": "Wayland-tilstand"
+      "waylandMode": "Wayland-tilstand",
+      "where": "Hvor",
+      "whereAuto": "Automatisk",
+      "wherePools": "Puljer",
+      "whereNodes": "Knuder",
+      "moveHome": "Flyt lager",
+      "moveHomeStay": "På {node}",
+      "moveHomeTo": "Flyt til {node}",
+      "moveHomeConfirm": "Flyt '{home}' til {node}? Sessioner, der bruger den, skal stoppes først.",
+      "moveHomeTitle": "Flyt lager",
+      "allowance": "Kvote: {used} af {hours} timer denne {period}"
     },
     "sessionsView": {
       "noSessions": "Ingen aktive sessioner fundet."
@@ -1238,7 +1657,10 @@
       "noAppSelected": "Vælg venligst en applikation.",
       "noAppsAvailable": "Ingen applikationer er tilgængelige for din konto.",
       "uploadSuccess": "Fil uploadet med succes!",
-      "creatingAutoHome": "Opretter automatisk hjemmemappe..."
+      "creatingAutoHome": "Opretter automatisk hjemmemappe...",
+      "noSessionOrigin": "Denne browser kan ikke nå en adresse, der er sessionens egen. Serveren kræver wildcard-DNS og et certifikat til sessionsnavne; administratoren angiver SEALSKIN_SESSION_DOMAIN.",
+      "movingHome": "Flytter '{home}'...",
+      "movedHome": "'{home}' flyttet til {node}."
     },
     "languages": {
       "default": "Standard ({locale})"
@@ -1258,7 +1680,7 @@
     }
   },
   "files": {
-    "title": "SealSkin-filer",
+    "title": "{brand}-filer",
     "header": {
       "title": "Filer",
       "newFolder": "Ny mappe",
@@ -1266,7 +1688,7 @@
       "uploadFolder": "Upload mappe"
     },
     "sidebar": {
-      "sharedFiles": "SealSkin-filer",
+      "sharedFiles": "{brand}-filer",
       "publicShares": "Offentlige Delinger"
     },
     "shares": {
@@ -1299,8 +1721,7 @@
       },
       "confirmDelete": {
         "title": "Bekræft sletning",
-        "message": "Er du sikker på, at du vil slette {count, plural, one {1 valgt element} other {{count} valgte elementer}}? Handlingen kan ikke fortrydes.",
-        "messageDefault": "Er du sikker på, at du vil slette de valgte elementer? Handlingen kan ikke fortrydes."
+        "message": "Er du sikker på, at du vil slette {count, plural, one {1 valgt element} other {{count} valgte elementer}}? Handlingen kan ikke fortrydes."
       },
       "uploadProgress": {
         "title": "Upload-status",
@@ -1325,7 +1746,7 @@
       "deleteFailed": "Sletning mislykkedes: {error}",
       "preparingUpload": "Forbereder upload af {count, plural, one {1 fil} other {{count} filer}}...",
       "uploadPrepFailed": "Fejl under forberedelse af mappe-upload: {error}",
-      "notConfigured": "Fejl: SealSkin er ikke konfigureret. Konfigurer venligst i indstillinger.",
+      "notConfigured": "Fejl: {brand} er ikke konfigureret. Konfigurer venligst i indstillinger.",
       "folderCreated": "Mappen '{folderName}' blev oprettet.",
       "folderCreateFailed": "Fejl ved oprettelse af mappe: {error}",
       "shareCreated": "Deling oprettet med succes! Linket er blevet kopieret til din udklipsholder.",
@@ -1333,7 +1754,10 @@
       "sharesLoadFailed": "Kunne ikke indlæse delte filer: {error}",
       "shareDeleteFailed": "Kunne ikke slette deling: {error}",
       "shareDeleted": "Deling slettet med succes.",
-      "urlCopied": "Offentlig URL kopieret til udklipsholder."
+      "urlCopied": "Offentlig URL kopieret til udklipsholder.",
+      "downloading": "Downloader {filename}...",
+      "downloadSuccess": "Download fuldført",
+      "downloadFailed": "Download mislykkedes: {error}"
     },
     "placeholders": {
       "errorLoading": "Fejl ved indlæsning af filer.",
@@ -1348,6 +1772,175 @@
       "finalizing": "Afslutter...",
       "completed": "Fuldført",
       "error": "Fejl"
+    },
+    "files": {
+      "searchPlaceholder": "Søg efter filer..."
+    }
+  },
+  "shell": {
+    "host": {
+      "loading": "Opretter forbindelse til din SealSkin-server…",
+      "unconfiguredTitle": "Ikke forbundet",
+      "unconfiguredBody": "SealSkin er endnu ikke forbundet til en server.",
+      "setUp": "Opsæt forbindelse",
+      "unreachableTitle": "Serveren kan ikke nås",
+      "unreachableBody": "SealSkin-serveren kunne ikke nås, eller dens webgrænseflade blev ikke indlæst.",
+      "selfSigned": "Hvis serveren bruger et selvsigneret certifikat, så åbn den én gang, accepter certifikatet, og prøv igen.",
+      "retry": "Prøv igen",
+      "openServer": "Åbn server",
+      "changeConnection": "Skift forbindelse",
+      "mismatchTitle": "Opdatering påkrævet",
+      "mismatchBody": "Denne app og serverens webgrænseflade bruger forskellige bridge-versioner. Opdater udvidelsen eller appen, eller opdater serveren, så de to matcher."
+    }
+  },
+  "web": {
+    "receiving": "Sender filen til {brand}…",
+    "signInTitle": "Log ind på {brand}",
+    "signInWith": {
+      "oidc": "Log ind med OpenID Connect",
+      "saml": "Log ind med SAML"
+    },
+    "rootToken": "Root-token",
+    "rootTokenHelp": "Administratorens token, som serveren opbevarer i sin fil /config/root_token.",
+    "rootSignIn": "Log ind som Root",
+    "rootRefused": "Det er ikke serverens root-token.",
+    "rootLocked": "For mange forsøg. Vent et stykke tid, og prøv igen.",
+    "held": {
+      "title": "Venter på en administrator",
+      "message": "Du er logget ind som {username}, men en administrator skal placere dig i en gruppe, før du kan bruge {brand}. Tjek igen, når det er sket.",
+      "check": "Tjek igen"
+    },
+    "signIn": {
+      "failed": "Log ind blev ikke gennemført. Prøv igen, eller spørg din administrator.",
+      "refused": "Identitetsudbyderen afviste log ind.",
+      "expired": "Log ind tog for lang tid eller er allerede brugt. Log ind igen.",
+      "browser": "Log ind blev afsluttet i en anden browser eller fane. Start det igen her.",
+      "invalidUsername": "Din kontos navn kan ikke være et {brand}-brugernavn, som kun må indeholde bogstaver, tal, understregninger og bindestreger. Spørg din administrator.",
+      "adminName": "Din kontos navn tilhører en {brand}-administrator, som logger ind med en nøglefil. Spørg din administrator.",
+      "otherIdentity": "En anden konto hos identitetsudbyderen logger allerede ind som denne {brand}-bruger. Spørg din administrator.",
+      "noAccount": "Der findes endnu ingen {brand}-konto med dit navn. Bed din administrator om at oprette en.",
+      "notConfigured": "Denne server tilbyder ikke single sign-on.",
+      "ended": "Identitetsudbyderen afsluttede dit log ind. Log ind igen."
+    },
+    "nav": {
+      "home": "Hjem",
+      "files": "Filer",
+      "settings": "Indstillinger",
+      "hideRail": "Skjul sidepanelet",
+      "showRail": "Vis sidepanelet",
+      "project": "SealSkin på GitHub: fejl og ønsker til funktioner"
+    },
+    "profile": {
+      "open": "Din profil",
+      "signIn": "Login",
+      "method": "Logget ind via",
+      "until": "Logget ind indtil",
+      "proxyKeeps": "Så længe den omvendte proxy holder dig logget ind",
+      "node": "Node",
+      "groups": "Grupper",
+      "noGroups": "Ingen gruppe: serverens standarder gælder.",
+      "providerGroups": "Angivet af identitetsudbyderen:",
+      "proxyGroups": "Angivet af den omvendte proxy:",
+      "access": "Adgang",
+      "adminNote": "Administratorer har alle muligheder og ingen grænser.",
+      "canStorage": "Vedvarende lager",
+      "canShare": "Offentlig deling",
+      "canGpu": "GPU",
+      "canTemplates": "Redigering af skabeloner",
+      "canMigrate": "Flytning af hjemmemappe",
+      "limits": "Grænser",
+      "unlimited": "Ubegrænset",
+      "sessions": "Sessioner",
+      "sessionsOf": "Op til {limit} ad gangen",
+      "sessionsRunning": "{running} kører",
+      "sessionsRunningOf": "{running} kører af {limit}",
+      "cpus": "CPU'er pr. session",
+      "memory": "Hukommelse pr. session",
+      "hours": "Sessionslængde",
+      "hoursValue": "{hours} t",
+      "storage": "Lager",
+      "pools": "Puljer",
+      "anyPool": "Enhver pulje, serveren tilbyder.",
+      "poolsDenied": "Ikke disse:",
+      "catalog": "PRoot Apps-katalog"
+    },
+    "home": {
+      "searchPlaceholder": "Søg efter applikationer, eller indsæt et link for at åbne det isoleret",
+      "upload": "Upload en fil",
+      "drop": "Slip filen for at åbne den i {brand}",
+      "running": "Kørende sessioner",
+      "applications": "Applikationer",
+      "allowance": "Kvote",
+      "allowanceValue": "{used} / {hours} t pr. {period}",
+      "room": "Rum",
+      "started": "Startet {when}",
+      "typeAll": "Alle",
+      "typeRecent": "Seneste",
+      "typeOther": "Andre",
+      "quickLaunch": "Start med de senest brugte indstillinger",
+      "wherePool": "Pulje: {pool}",
+      "openingUrl": "Vælg en applikation til at åbne {url}",
+      "openingFile": "Vælg en applikation til at åbne {filename}",
+      "noApps": "Ingen applikationer er tilgængelige for dig. Bed din administrator om at installere applikationer.",
+      "noAppsAdmin": "Ingen applikationer er installeret endnu.",
+      "noMatch": "Ingen applikation matcher.",
+      "openAppStores": "Åbn App Stores",
+      "popupBlocked": "Browseren blokerede sessionens fane. Tillad pop op-vinduer for dette websted, og start igen.",
+      "serverFileNeedsHome": "En fil, der ligger på serveren, kan ikke åbnes i Cleanroom-tilstand. Vælg en lagermappe.",
+      "copyLinkManual": "Browseren tillod ikke kopiering. Markér linket nedenfor, og kopiér det.",
+      "favorites": "Favoritter",
+      "favoritesHint": "Træk for at ændre rækkefølgen",
+      "addFavorite": "Føj til favoritter",
+      "removeFavorite": "Fjern fra favoritter",
+      "hideApp": "Skjul fra siden",
+      "showApp": "Vis på siden igen",
+      "typeHidden": "Skjulte",
+      "options": "Startindstillinger",
+      "moveEarlier": "Tidligere",
+      "moveLater": "Senere",
+      "customize": "Tilpas siden",
+      "background": "Baggrund",
+      "bgColor": "Farve",
+      "bgUpload": "Upload et billede",
+      "blur": "Sløring",
+      "dim": "Dæmp",
+      "reset": "Nulstil",
+      "pictureTooLarge": "Billedet er for stort til at gemme i browseren. Vælg et mindre.",
+      "bgPicture": "Billede",
+      "color": "Farve",
+      "colorCustom": "Egen farve",
+      "style": "Stil",
+      "styleSolid": "Ensfarvet",
+      "styleGlow": "Skær",
+      "styleDiagonal": "Diagonal",
+      "styleAurora": "Aurora",
+      "styleVignette": "Vignet",
+      "fit": "Placering",
+      "fitFill": "Udfyld",
+      "fitFit": "Tilpas",
+      "fitStretch": "Stræk",
+      "fitCenter": "Centrer"
+    },
+    "launch": {
+      "title": "Starter {app}",
+      "stages": {
+        "requesting": "Sender startanmodningen",
+        "placing": "Kontrollerer grænser og vælger en knude",
+        "forwarding": "Overdrager starten til knude {node}",
+        "storage": "Forbereder hjemmemappen",
+        "files": "Synkroniserer delte filer",
+        "image": "Downloader applikationens image",
+        "starting": "Opretter containeren",
+        "waiting": "Venter på, at skrivebordet svarer",
+        "ready": "Åbner sessionen"
+      },
+      "uploading": "Uploader filen ({done} af {total})",
+      "imageHint": "Første start af en applikation på en knude downloader den, hvilket kan tage minutter. Senere starter er hurtige.",
+      "onNode": "På knude {node}",
+      "seconds": "{count} s",
+      "failed": "Starten mislykkedes",
+      "unseen": "Startanmodningen har ikke nået serveren. Tjek den {brand}-fane, der startede den.",
+      "closeTab": "Browseren holdt denne fane åben. Luk den selv."
     }
   }
 }

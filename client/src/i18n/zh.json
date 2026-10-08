@@ -14,6 +14,8 @@
     "cancel": "取消",
     "manage": "管理",
     "delete": "删除",
+    "remove": "移除",
+    "move": "移动",
     "edit": "编辑",
     "save": "保存",
     "none": "无",
@@ -55,6 +57,7 @@
     "admins": "管理员",
     "yes": "是",
     "no": "否",
+    "ok": "确定",
     "daysAgo": "{count}天前",
     "hoursAgo": "{count}小时前",
     "minutesAgo": "{count}分钟前",
@@ -76,9 +79,13 @@
       "appTemplates": "应用模板",
       "appLaboratory": "应用实验室",
       "installedApps": "已安装应用",
+      "prootApps": "PRoot Apps",
       "users": "用户",
       "groups": "群组",
-      "admins": "管理员"
+      "admins": "管理员",
+      "cluster": "集群",
+      "signIn": "登录",
+      "audit": "审计日志"
     },
     "dashboard": {
       "title": "仪表盘",
@@ -95,6 +102,7 @@
       "storageUsage": "存储使用情况:",
       "detectedGpus": "检测到的GPU:",
       "logout": "登出并清除配置",
+      "logoutTitle": "登出",
       "howTo": "如何使用SealSkin",
       "howToDescription": "本节包含有关如何使用此扩展程序的基本文档。",
       "howToList": [
@@ -104,7 +112,14 @@
         "<strong>管理持久性存储:</strong> 使用此页面上的“主目录”选项卡创建和删除可在多个会话中使用的存储卷。",
         "<strong>保存启动选项:</strong> 在启动应用程序之前，在弹出窗口中勾选“保存这些启动选项”框，可为特定文件类型（例如.pdf）或所有URL保存设置。在“固定行为”选项卡中管理这些已保存的首选项。"
       ],
-      "confirmLogout": "您确定要登出吗？这将清除此浏览器中保存的配置。"
+      "confirmLogout": "您确定要登出吗？这将清除此浏览器中保存的配置。",
+      "changeConnection": "更改连接",
+      "certExpired": "服务器 TLS 证书已过期。在续期之前，HTTPS 连接将会失败。",
+      "certExpiring": "服务器 TLS 证书将在 {days} 天后过期。请及时续期以避免连接失败。",
+      "signOut": "退出登录",
+      "signedInThrough": "登录方式:",
+      "allowance": "额度:",
+      "allowanceUsed": "本{period}已用 {used} / {hours} 小时"
     },
     "config": {
       "quickSetup": "快速设置",
@@ -145,9 +160,14 @@
       "namePlaceholder": "例如, my-project-files",
       "nameTitle": "只能使用字母、数字、下划线或连字符。",
       "createButton": "创建目录",
-      "isLaboratory": "这是一个实验室应用，基于基础镜像和自定义设置构建。",
-      "laboratory": "实验室",
-      "confirmDelete": "您确定要删除已安装的应用“{appName}”吗？"
+      "confirmDelete": "您确定要删除主目录“{homeName}”吗？其中的所有数据将永久丢失。",
+      "deleteTitle": "删除主目录",
+      "node": "节点",
+      "move": "移动",
+      "moveTo": "移动到节点",
+      "moveHelp": "主目录将被复制到目标节点，并从当前所在的节点上删除。必须先停止正在使用它的会话。",
+      "moveTitle": "移动“{homeName}”",
+      "noOtherNode": "没有可移动到的其他节点。"
     },
     "sessions": {
       "title": "活跃会话",
@@ -155,12 +175,13 @@
       "started": "开始时间",
       "noSessionsUser": "未找到活跃会话。",
       "noSessionsAdmin": "未找到任何用户的活跃会话。",
-      "sessionsFor": "用户 {username} 的会话 ({count})",
-      "confirmStop": "您确定要停止此会话吗？容器将被销毁。"
+      "sessionsFor": "用户 {username} 的会话 ({count})"
     },
     "pinned": {
       "title": "固定的扩展行为",
       "description": "此表显示了您为特定文件类型或所有URL保存的启动选项。您可以删除一个固定行为，以便再次提示您选择启动选项。",
+      "removeTitle": "移除固定行为",
+      "confirmRemove": "要移除“{name}”的固定行为吗？",
       "trigger": "触发器",
       "savedApp": "已保存的应用",
       "triggerSimple": "简单启动（工具栏按钮）",
@@ -177,7 +198,8 @@
       "publicKeyOptionalLabel": "公钥（可选）:",
       "publicKeyPlaceholder": "在此处粘贴公钥，或留空以生成一个。",
       "createButton": "创建管理员",
-      "confirmDelete": "您确定要删除管理员“{username}”吗？此操作还将删除其所有持久性存储，且无法撤销。"
+      "confirmDelete": "您确定要删除管理员“{username}”吗？此操作还将删除其所有持久性存储，且无法撤销。",
+      "deleteTitle": "删除管理员"
     },
     "users": {
       "title": "用户管理",
@@ -197,8 +219,29 @@
       "createButton": "创建用户",
       "homesDisabledTooltip": "此用户的持久性存储已禁用",
       "confirmDelete": "您确定要删除用户“{username}”吗？此操作还将删除其所有持久性存储，且无法撤销。",
+      "deleteTitle": "删除用户",
       "allowPublicSharing": "允许公开文件共享",
-      "allowEditTemplates": "允许编辑应用模板"
+      "allowEditTemplates": "允许编辑应用模板",
+      "signInOnly": "仅单点登录",
+      "awaitingGroup": "等待分组",
+      "approve": "批准",
+      "admin": "管理员",
+      "gpuShare": "允许与其他会话共享 GPU",
+      "homeMigration": "允许在节点之间移动主目录",
+      "storageLimit": "存储限制（每节点 GB）",
+      "sessionCpus": "每个会话的 CPU 数",
+      "sessionMemory": "每个会话的内存（MB）",
+      "sessionHours": "会话最长运行时间（小时）",
+      "allowanceHours": "额度（加权会话小时数）",
+      "allowancePeriod": "额度周期",
+      "pools": "允许使用的受限资源池（逗号分隔）",
+      "poolsDenied": "禁止使用的资源池（逗号分隔）",
+      "prootCatalog": "PRoot Apps 目录",
+      "prootCatalogNone": "无",
+      "prootCatalogHelp": "以只读方式挂载到每个会话；proot-apps 从中安装，而不是从注册表安装。保持为“无”时，由用户所属的第一个选择了目录的组决定。",
+      "groupsHelp": "按住 Ctrl 或 Command 可多选。群组之间设置不一致时，以限制更严格的值为准。",
+      "providerGroups": "上次登录时身份提供方给出的群组: {groups}",
+      "limitsHelp": "限制设为 -1 或留空表示不限制。"
     },
     "groups": {
       "title": "群组管理",
@@ -208,7 +251,15 @@
       "overrideTitle": "群组覆盖设置",
       "permissionsTitle": "权限与安全加固覆盖",
       "createButton": "创建群组",
-      "confirmDelete": "您确定要删除群组“{groupName}”吗？此群组中的用户将恢复其个人设置。"
+      "confirmDelete": "您确定要删除群组“{groupName}”吗？此群组中的用户将恢复其个人设置。",
+      "deleteTitle": "删除组",
+      "notSet": "未设置",
+      "allow": "允许",
+      "deny": "拒绝",
+      "on": "开",
+      "off": "关",
+      "ssoGroups": "其成员归入此群组的身份提供方群组（逗号分隔）",
+      "overrideHelp": "群组只决定此处已设置的项；未设置或留空的项仍沿用各成员自己的设置。"
     },
     "installedApps": {
       "title": "已安装应用",
@@ -216,7 +267,10 @@
       "noAppsFound": "未找到已安装的应用。",
       "pulling": "正在拉取新镜像...",
       "notLocal": "本地未找到镜像",
-      "confirmDelete": "您确定要删除已安装的应用“{appName}”吗？"
+      "isLaboratory": "这是一个实验室应用，基于基础镜像并使用自定义设置构建。",
+      "laboratory": "实验室",
+      "confirmDelete": "您确定要删除已安装的应用“{appName}”吗？",
+      "deleteTitle": "删除已安装的应用"
     },
     "appStore": {
       "title": "应用商店",
@@ -243,9 +297,45 @@
       "previewTitle": "UI预览",
       "contentArea": "应用程序内容区域",
       "confirmDelete": "您确定要删除模板“{templateName}”吗？此操作无法撤销。",
+      "deleteTitle": "删除模板",
       "deleteDisabled": "此模板无法删除。",
       "enterName": "请输入新模板的名称。",
       "dockerAdminOnly": "只有管理员可以更改这些设置。",
+      "filterPlaceholder": "按名称筛选设置…",
+      "changedOnly": "仅显示已更改",
+      "showMore": "显示更多",
+      "showLess": "收起",
+      "changedCount": "{count, plural, one {已更改 {count} 项} other {已更改 {count} 项}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC，双模式"
+      },
+      "sections": {
+        "appearance": "外观",
+        "display": "显示",
+        "input": "输入",
+        "audio": "音频",
+        "webcam": "摄像头",
+        "performance": "性能",
+        "gpu": "GPU",
+        "clipboard": "剪贴板与文件",
+        "sharing": "共享",
+        "hardening": "加固",
+        "lifecycle": "生命周期",
+        "integrations": "集成",
+        "webrtc": "WebRTC",
+        "container": "容器"
+      },
+      "groups": {
+        "mode": "模式",
+        "transport": "传输",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "TURN REST API",
+        "cloudflare": "Cloudflare TURN",
+        "extra": "诊断"
+      },
       "settings": {
         "TITLE": {
           "label": "页面标题",
@@ -421,7 +511,7 @@
         },
         "SELKIES_ENABLE_COLLAB": {
           "label": "启用协作",
-          "description": "允许持有会话主令牌的观看者作为可读写的协作者进行操作。SealSkin 房间需要此项。"
+          "description": "允许持有会话主令牌的观看者作为可读写的协作者进行操作。{brand} 房间需要此项。"
         },
         "SELKIES_ENABLE_PLAYER2": {
           "label": "启用玩家 2 共享",
@@ -692,10 +782,6 @@
           "label": "Wayland 后端",
           "description": "在 Wayland 后端（嵌套 labwc 进行窗口管理的无头合成器）而非 X11 服务器上运行会话。X11 应用通过 XWayland 运行。"
         },
-        "MAX_RES": {
-          "label": "最大分辨率",
-          "description": "容器的最大分辨率，默认为16k。"
-        },
         "START_DOCKER": {
           "label": "启动Docker-in-Docker",
           "description": "如果为false，特权容器将不会启动DinD。"
@@ -703,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "禁用IPv6",
           "description": "如果为true，将禁用IPv6。"
-        },
-        "DISABLE_ZINK": {
-          "label": "禁用Zink",
-          "description": "如果检测到显卡，则不设置Zink环境变量。"
         },
         "DISABLE_DRI3": {
           "label": "禁用DRI3",
@@ -1036,7 +1118,36 @@
       "closeButton": "关闭会话并最终确定",
       "savingAndLaunching": "正在保存并启动...",
       "placeholder": "应用实验室允许您基于现有的已安装应用程序配置基础主目录和启动脚本。此主目录将在用户首次初始化时复制，包含您在此会话中设置的所有文件和设置。您可以重新启动现有的实验室应用以进一步修改其内容。",
-      "formInvalid": "请选择一个基础应用并为新应用提供一个名称。"
+      "formInvalid": "请选择一个基础应用并为新应用提供一个名称。",
+      "explainer": "应用实验室用于构建元应用：即已安装应用程序的一个变体，拥有自己的名称、图标、自动启动脚本以及一个已配置好的主目录。您只需在自定义会话中将应用程序设置一次，每位用户首次启动时都会从该主目录的副本开始。",
+      "step1Title": "描述应用",
+      "step1": "选择作为基础的应用程序，并为元应用指定名称、图标以及可以启动它的用户。",
+      "step2Title": "在实时会话中进行自定义",
+      "step2": "自定义会话打开时，模板主目录可写入。安装扩展、登录账号，并将其整理成用户应当看到的样子。",
+      "step3Title": "关闭会话以保存模板",
+      "step3": "从此页面关闭会话后，主目录将保留为模板。",
+      "openTitle": "自定义会话已打开",
+      "openStarted": "开始于{when}",
+      "openDescription": "在此会话的主目录中所做的一切更改都会成为模板。会话会一直保持打开，直到您在此处将其关闭；它不会出现在您的会话列表中。",
+      "reopen": "重新打开会话",
+      "closeAndSave": "关闭并保存模板",
+      "confirmClose": "要关闭“{name}”的自定义会话吗？会话将停止，其主目录将保留为模板。",
+      "closeTitle": "关闭自定义会话",
+      "unsavedTitle": "更改未保存",
+      "unsavedClose": "无法保存更改。仍要关闭会话吗？",
+      "templateSaved": "会话已关闭。模板已保存。",
+      "busy": "“{name}”的自定义会话正处于打开状态。请先在上方将其关闭，再更改元应用或启动其他会话。",
+      "describeTitle": "1. 描述",
+      "customizeTitle": "2. 自定义",
+      "customizeDescription": "自定义会话将以这些选项启动。同一时间只能打开一个会话。",
+      "advanced": "高级",
+      "saveAndOpen": "保存并打开自定义会话",
+      "listTitle": "您的元应用",
+      "listNone": "还没有元应用。",
+      "closingStopping": "正在停止会话…",
+      "closingSaving": "正在保存模板…",
+      "closingSaved": "模板已保存: {files} 个文件，{size}",
+      "closingFailed": "关闭会话失败。"
     },
     "modals": {
       "editUserTitle": "编辑用户: {username}",
@@ -1045,7 +1156,7 @@
       "editGroupTitle": "编辑群组: {groupName}",
       "userConfigTitle": "用户配置",
       "warning": "此配置仅显示一次。请安全地提供给用户。",
-      "info": "您可以下载此配置文件，以便在另一台设备上轻松设置SealSkin。请妥善保管此文件，因为它包含您的私钥。",
+      "info": "您可以下载此配置文件，以便在另一台设备上轻松设置{brand}。请妥善保管此文件，因为它包含您的私钥。",
       "configDataLabel": "配置数据 (JSON)",
       "copyButton": "复制文本",
       "downloadButton": "下载文件",
@@ -1053,6 +1164,8 @@
       "dirsForUser": "用户目录: {username}",
       "dirsForAdmin": "管理员目录: {username}",
       "newDirForUser": "为用户创建新目录",
+      "customAutostartScriptLabel": "自定义自动启动脚本",
+      "customAutostartScriptDescription": "自定义自动启动逻辑，留空以使用应用程序提供商的默认设置。",
       "createDirButton": "创建目录",
       "confirmDeleteDir": "您确定要删除用户“{username}”的目录“{homeName}”吗？此操作是永久性的。",
       "installAppTitle": "安装 {appName}",
@@ -1071,8 +1184,6 @@
       "advancedSettings": "高级设置",
       "appTemplateLabel": "应用程序模板",
       "appTemplateDescription": "为高级容器启动设置选择一个预配置的模板。",
-      "customAutostartScriptLabel": "自定义自动启动脚本",
-      "customAutostartScriptDescription": "自定义自动启动逻辑，留空以使用应用程序提供商的默认设置。",
       "saveInstallation": "保存安装",
       "updateStatusTitle": "{appName}的更新状态",
       "checkingUpdates": "正在检查更新...",
@@ -1088,10 +1199,7 @@
       "newVersion": "新版本: {sha}",
       "errorPulling": "拉取镜像时出错。",
       "manualInstallNote": "注意：手动添加的镜像应基于与 selkies-baseimage 兼容的镜像。",
-      "generalTitle": "常规与性能设置",
-      "webrtcTitle": "WebRTC 与 TURN 设置",
       "webrtcDescription": "会话默认通过 WebSockets 进行流传输。在下方设置任意 STUN、TURN、Cloudflare 或公网 IP 值，或选择 WebRTC 模式，都会将容器切换到启用双模式的 WebRTC，使用户仍可回退到 WebSockets。",
-      "dockerTitle": "Docker 高级覆盖",
       "dockerDescription": "这些设置覆盖默认的容器配置。请谨慎使用，除非您知道自己在做什么。"
     },
     "status": {
@@ -1123,6 +1231,8 @@
       "userDeleteFailed": "删除用户时出错: {error}",
       "userUpdated": "用户“{username}”已成功更新。",
       "userUpdateFailed": "更新用户时出错: {error}",
+      "userApproved": "用户 '{username}' 已批准。",
+      "userApproveFailed": "批准用户时出错：{error}",
       "creatingGroup": "正在创建群组...",
       "groupCreated": "群组“{groupName}”已创建。",
       "groupCreateFailed": "创建群组时出错: {error}",
@@ -1166,7 +1276,24 @@
       "pendingConfigSaved": "待定配置已保存。您现在可以将您的公钥提供给管理员。",
       "settingsSaved": "设置已保存。",
       "appCreated": "应用“{name}”已成功创建。",
-      "launchFailed": "启动失败：{error}"
+      "launchFailed": "启动失败：{error}",
+      "homedirMoving": "正在移动主目录“{homeName}”...",
+      "homedirMoved": "主目录“{homeName}”已移动。",
+      "homedirMoveFailed": "移动主目录失败: {error}",
+      "clusterLoadFailed": "加载集群失败: {error}",
+      "clusterWriteFailed": "保存失败: {error}",
+      "nodeUpdated": "节点已更新。",
+      "nodeRemoved": "节点已移除。",
+      "poolSaved": "资源池“{name}”已保存。",
+      "poolDeleted": "资源池“{name}”已删除。",
+      "nothingChanged": "没有任何更改。",
+      "catalogSaved": "目录“{name}”已保存；每个节点正在拉取其应用。",
+      "catalogSaveFailed": "无法保存目录：{error}",
+      "catalogDeleted": "目录“{name}”已删除。",
+      "catalogDeleteFailed": "无法删除目录：{error}",
+      "catalogUpdateStarted": "正在每个节点上更新目录“{name}”。",
+      "catalogUpdateFailed": "无法更新目录：{error}",
+      "catalogsRefreshFailed": "无法加载目录列表：{error}"
     },
     "placeholders": {
       "noAdmins": "未找到管理员。",
@@ -1176,7 +1303,289 @@
       "noSessions": "未找到活跃会话。",
       "noPinned": "未找到固定行为。",
       "errorLoading": "加载目录时出错。",
-      "noInstalledApps": "尚未安装任何应用程序。"
+      "noInstalledApps": "尚未安装任何应用程序。",
+      "noProotCatalogs": "尚无目录。"
+    },
+    "web": {
+      "title": "在此浏览器中使用 {brand}",
+      "bookmarklet": "发送到 {brand}",
+      "bookmarkletHelp": "将此链接拖到书签栏。点击它会在 {brand} 中打开当前页面，或搜索您选中的文本。",
+      "pick": "为 {brand} 选取",
+      "pickHelp": "也把这个链接拖到那里。点击它，然后点击某个链接即可在 {brand} 中打开该链接，点击图片、视频或音频即可发送文件。按住 Shift 点击链接，会以您在该网站上的登录状态获取链接指向的文件并发送。",
+      "pickHint": "{brand}：点击链接，或图片、视频、音频即可发送；按住 Shift 点击链接可发送其文件。按 Esc 取消。",
+      "protocol": "在此打开 web+sealskin: 链接",
+      "protocolHelp": "以 web+sealskin: 开头、后接地址的链接会在 {brand} 中打开该地址。",
+      "install": "如果浏览器支持安装网页应用，请从其菜单安装 {brand}，以便向其分享链接和文件，并用它打开文件。"
+    },
+    "via": {
+      "root": "根令牌",
+      "oidc": "OpenID Connect",
+      "saml": "SAML",
+      "proxy": "反向代理",
+      "key": "密钥文件"
+    },
+    "periods": {
+      "day": "日",
+      "week": "周",
+      "month": "月"
+    },
+    "cluster": {
+      "nodesTitle": "节点",
+      "pool": "资源池",
+      "load": "负载",
+      "online": "在线",
+      "offline": "离线",
+      "waiting": "等待批准",
+      "lastSeen": "最后在线: {when}",
+      "storeUnreachableNode": "无法访问共享记录",
+      "cpus": "{count} 个 CPU",
+      "gpus": "{count} 个 GPU",
+      "gpuSessions": "GPU: {used} / {slots}",
+      "thisNode": "此节点",
+      "approve": "批准",
+      "suspend": "暂停",
+      "remove": "移除",
+      "confirmRemove": "要将节点“{name}”从集群中移除吗？仍在运行的节点会重新注册并等待批准。",
+      "removeTitle": "移除节点",
+      "joinTitle": "添加节点",
+      "joinDescription": "创建一个加入码，在新节点的环境变量中加入下面两行后启动该节点，然后在上方表格中批准它。一个加入码只能接纳一个节点，有效期为一小时。",
+      "joinButton": "创建加入码",
+      "joinExpires": "新节点的环境变量（加入码过期时间: {when}）",
+      "poolsTitle": "资源池",
+      "poolsDescription": "资源池是一组用于启动会话的节点。受限资源池仅对此处指定的用户和群组，或其设置允许的用户和群组开放。",
+      "poolDomain": "域名",
+      "poolAccess": "访问",
+      "poolCost": "每小时费用",
+      "poolCostWithGpu": "{cost}（GPU: {gpuCost}）",
+      "poolOpen": "开放",
+      "poolRestricted": "受限",
+      "poolNew": "新建资源池",
+      "poolEdit": "编辑资源池“{name}”",
+      "poolDescriptionLabel": "描述",
+      "poolDomainLabel": "资源池内节点命名所用的域名",
+      "poolCostLabel": "每小时会话消耗的额度",
+      "poolGpuCostLabel": "每小时 GPU 会话消耗的额度（留空: 相同）",
+      "poolUsersLabel": "受限时对其开放的用户（逗号分隔）",
+      "poolGroupsLabel": "受限时对其开放的群组（逗号分隔）",
+      "poolStopWhenSpent": "额度用尽时结束会话",
+      "poolSave": "保存资源池",
+      "confirmDeletePool": "要删除资源池“{name}”吗？",
+      "deletePoolTitle": "删除资源池",
+      "storeTitle": "共享记录",
+      "storeDescription": "各节点保存其共享记录的位置：用户、群组、应用、资源池以及这些设置。",
+      "storeKept": "保存位置:",
+      "storeKinds": {
+        "file": "此节点的磁盘上",
+        "s3": "对象存储的存储桶中",
+        "peer": "另一个节点上"
+      },
+      "reachable": "可访问",
+      "unreachable": "无法访问",
+      "publicUrl": "Web 应用地址:",
+      "sessionDomain": "会话域名:",
+      "sessionDomainUnset": "未设置（使用 Web 应用的主机名）",
+      "sessionDomainOff": "关闭：会话在 Web 应用的地址上打开",
+      "signInDescription": "在此处填写的设置对所有节点生效，并优先于节点的环境变量。清空某个字段即可将该设置交还给各节点的环境变量。",
+      "settingWritten": "已在此处为所有节点设置。",
+      "settingFromEnvironment": "来自各节点的环境变量；显示的是此节点的值。",
+      "settingInherit": "来自各节点的环境变量（此节点: {value}）",
+      "secretSet": "已设置密钥；留空则保持不变",
+      "secretUnset": "未设置密钥",
+      "secretClear": "移除在此处设置的密钥",
+      "settings": {
+        "oidc_issuer": "OpenID Connect 颁发者 URL",
+        "oidc_client_id": "OpenID Connect 客户端 ID",
+        "oidc_client_secret": "OpenID Connect 客户端密钥",
+        "oidc_scopes": "OpenID Connect 作用域",
+        "saml_metadata_url": "SAML 元数据 URL",
+        "saml_username_attribute": "表示用户名的 SAML 属性（留空: 使用下方的用户名声明）",
+        "saml_groups_attribute": "列出用户群组的 SAML 属性（留空: 使用下方的群组声明）",
+        "sso_username_claim": "表示用户名的声明或属性",
+        "sso_groups_claim": "列出用户群组的声明或属性",
+        "sso_admin_group": "作为管理员的身份提供方群组",
+        "sso_max_age_seconds": "身份提供方登录的最长有效时间（小时）",
+        "sso_force_login": "每次登录都要求输入凭据",
+        "sso_create_users": "首次登录时创建用户",
+        "sso_hold_new_users": "在加入组之前暂停新用户",
+        "proxy_auth_user_header": "受信任的代理用于传递用户名的请求头",
+        "proxy_auth_groups_header": "受信任的代理用于列出用户群组的请求头",
+        "proxy_auth_logout_url": "代理用于让其用户退出登录的页面",
+        "web_session_seconds": "根登录在未使用状态下的最长有效时间（小时）",
+        "files_sync": "将共享文件保存在对象存储中"
+      },
+      "usageTitle": "用量",
+      "usageHours": "加权小时数",
+      "usageNone": "此周期内没有用量。",
+      "settingsTitle": "集群设置"
+    },
+    "audit": {
+      "title": "审计日志",
+      "searchPlaceholder": "搜索事件...",
+      "range": "范围",
+      "pageSize": "每页事件数",
+      "today": "今天",
+      "last7": "最近 7 天",
+      "last30": "最近 30 天",
+      "oneDay": "某一天（UTC）",
+      "time": "时间",
+      "event": "事件",
+      "details": "详情",
+      "none": "没有匹配的事件。",
+      "shown": "第 {from}–{to} 条，共 {total} 条",
+      "exportCsv": "导出 CSV",
+      "exportJson": "导出 JSON",
+      "exported": "已导出 {count} 个事件。"
+    },
+    "signin": {
+      "pill": {
+        "active": "已启用",
+        "off": "关",
+        "none": "未配置"
+      },
+      "test": "测试",
+      "testing": "正在测试已保存的设置...",
+      "testOk": "提供方已响应。",
+      "testFailed": "测试失败。",
+      "register": "请在提供方处登记以下内容",
+      "provider": "提供方",
+      "providerChoose": "选择提供方以查看提示",
+      "providerHelp": "选择提供方只会填入下方的提示；不会保存任何与之相关的内容。",
+      "proxyHelp": "由前置的反向代理完成用户登录，并通过请求头传递用户名。这适用于已经以同样方式保护您其他站点的代理；否则请使用上方的 OpenID Connect 或 SAML 让用户登录。",
+      "proxyPresetChoose": "选择代理所用的提供方以填入请求头",
+      "proxyPresets": {
+        "authelia": "Authelia",
+        "authentik": "Authentik",
+        "tinyauth": "Tinyauth",
+        "oauth2proxy": "oauth2-proxy"
+      },
+      "reach": {
+        "title": "访问此服务器",
+        "help": "从服务器和此浏览器的角度看，浏览器是如何访问此服务器的。前置的反向代理必须把以下每一项都处理正确。",
+        "publicUrl": "公开 URL",
+        "publicUrlDiffers": "此页面是从 {origin} 加载的。请将 SEALSKIN_PUBLIC_URL 设置为浏览器使用的地址：身份提供方的重定向地址由它生成。",
+        "sessionDomain": "会话域名",
+        "sessionNames": "会话打开于",
+        "sessionNamesNone": "没有会话名称作出响应",
+        "sessionNamesShared": "每个会话都是 Web 应用的一个路径，因此无需其他名称应答。SEALSKIN_SESSION_ISOLATION=true 会为每个会话在会话域下分配独立的名称。",
+        "sessionNamesHelp": "从 Web 应用启动将会失败。每个会话都在自己的名称 <session id>.<domain> 上打开：该域名需要通配符 DNS、通配符证书，以及一条将这些名称转发到此处的反向代理规则。",
+        "sessionNamesGuarded": "会话将按 SEALSKIN_SESSION_DOMAIN 的设置在 {domain} 下打开。如果反向代理要求在访问会话名称时先登录，这属于正常情况；否则请检查通配符 DNS、证书以及针对这些名称的代理规则。",
+        "sessionNamesOther": "SEALSKIN_SESSION_DOMAIN 指定的 {domain} 没有响应。",
+        "trustedProxies": "受信任的代理",
+        "arrivedFrom": "此请求来自",
+        "viaTrusted": "受信任的代理。",
+        "viaOther": "不在受信任的代理之列。如果这是您的反向代理的地址，请将其添加到 SEALSKIN_TRUSTED_PROXIES 中。",
+        "viaDirect": "尚未信任任何反向代理。如果这是反向代理的地址，请将 SEALSKIN_TRUSTED_PROXIES 设置为该地址，以便服务器能看到每个浏览器自己的地址。",
+        "yourAddress": "服务器所看到的您的地址",
+        "httpPort": "明文 HTTP 监听器"
+      },
+      "presets": {
+        "authelia": {
+          "name": "Authelia",
+          "hint": "颁发者为 Authelia 自身的地址：https://<host>。在 identity_providers.oidc.clients 下添加一个客户端，使用下方的重定向 URI，作用域为 openid profile groups email offline_access。"
+        },
+        "pocketid": {
+          "name": "Pocket ID",
+          "hint": "颁发者为 Pocket ID 自身的地址：https://<host>。添加一个 OIDC 客户端，使用下方的回调 URL，并将作用域设置为 openid profile email groups。"
+        },
+        "tinyauth": {
+          "name": "Tinyauth",
+          "hint": "颁发者为 Tinyauth 自身的地址：https://<host>。使用 TINYAUTH_OIDC_CLIENTS_<NAME>_ 变量定义客户端，并将作用域设置为 openid profile email groups。"
+        },
+        "keycloak": {
+          "name": "Keycloak",
+          "hint": "颁发者为领域（realm）的地址：https://<host>/realms/<realm>。创建一个启用了客户端认证的 OpenID Connect 客户端，并添加一个名为 'groups' 的组成员身份映射器，以发送用户的群组。"
+        },
+        "authentik": {
+          "name": "Authentik",
+          "hint": "颁发者为应用程序的地址 https://<host>/application/o/<slug>/ ，需包含末尾的斜杠。创建一个 OAuth2/OpenID 提供程序以及一个使用它的应用程序。"
+        },
+        "entra": {
+          "name": "Microsoft Entra ID",
+          "hint": "颁发者为：https://login.microsoftonline.com/<tenant>/v2.0。注册一个应用程序，添加客户端密钥，并在“令牌配置”下添加 groups 声明。"
+        },
+        "google": {
+          "name": "Google",
+          "hint": "颁发者为：https://accounts.google.com。创建一个类型为“Web 应用”的 OAuth 客户端 ID。Google 不会发送群组。"
+        },
+        "okta": {
+          "name": "Okta",
+          "hint": "颁发者为您组织的地址：https://<org>.okta.com。创建一个 OIDC Web 应用程序，并在其 ID 令牌中添加 groups 声明。"
+        },
+        "other": {
+          "name": "其他",
+          "hint": "颁发者是通过 /.well-known/openid-configuration 描述该提供方的地址。"
+        }
+      },
+      "oidcTitle": "OpenID Connect",
+      "oidcRedirect": "重定向 URI",
+      "oidcBackchannel": "后端通道注销 URL",
+      "oidcFrontchannel": "前端通道注销 URL",
+      "samlTitle": "SAML 2.0",
+      "samlEntity": "实体 ID / 元数据 URL",
+      "samlAcs": "ACS URL",
+      "samlSlo": "单点注销 URL",
+      "samlMetadata": "打开此服务器的服务提供方元数据",
+      "proxyTitle": "反向代理",
+      "trustedProxies": "此节点受信任的代理:",
+      "trustedProxiesHelp": "在每个节点上通过 SEALSKIN_TRUSTED_PROXIES 设置。只有当请求来自这些地址之一时，才会采信该请求头。",
+      "noTrustedProxy": "已设置用户请求头，但此节点尚未信任任何代理，因此不接受任何代理登录。",
+      "proxyCheck": {
+        "guarded": "已检查: 代理不会转发访问者自行发送的登录请求头。",
+        "open": "代理登录已被拒绝。",
+        "unreachable": "代理登录已被拒绝: 此节点无法检查代理。请为它提供一条通往其公开 URL 的路由，或在 SEALSKIN_TRUSTED_PROXIES 中指定代理自身的地址，或在该节点上设置 SEALSKIN_PROXY_AUTH_UNCHECKED=true 以跳过检查直接信任代理。",
+        "unchecked": "此节点已关闭对代理的检查（SEALSKIN_PROXY_AUTH_UNCHECKED）：代理转发的任何内容都会被采信。"
+      },
+      "whoTitle": "谁可以登录",
+      "whoHelp": "这些设置适用于 OpenID Connect、SAML 和反向代理。要将某个身份提供方群组的成员归入 {brand} 群组，请在“群组”中该群组的“身份提供方群组”下列出它。",
+      "rootTitle": "根令牌",
+      "rootHelp": "始终可用。在该文件被删除之前，令牌保存在服务器的 /config/root_token 中，也可以通过 SEALSKIN_ROOT_TOKEN 设置。",
+      "keyTitle": "密钥文件",
+      "keyOn": "此节点接受密钥文件客户端：浏览器扩展和移动应用。在每个节点上通过 SEALSKIN_LEGACY_AUTH 设置。",
+      "keyOff": "此节点不接受密钥文件客户端。在每个节点上通过 SEALSKIN_LEGACY_AUTH 设置。",
+      "resultIssuer": "颁发者:",
+      "resultAuthorization": "授权端点:",
+      "resultBackchannel": "支持后端通道注销:",
+      "resultScopes": "提供的作用域:",
+      "resultGroupsClaim": "群组声明:",
+      "claimListed": "“{claim}”在提供方列出的声明之中",
+      "claimNotListed": "“{claim}”不在提供方列出的声明之中",
+      "resultEntity": "实体 ID:",
+      "resultSso": "登录 URL:",
+      "resultSlo": "提供单点注销:",
+      "resultCertificates": "签名证书:"
+    },
+    "prootApps": {
+      "title": "PRoot Apps 目录",
+      "help": "目录是保存在每个节点上的 PRoot Apps 软件包文件夹，以只读方式挂载到分配给它的用户和组的会话中。在会话内，proot-apps 及其图形安装器从该文件夹安装和更新，不访问任何注册表。",
+      "newCatalog": "新建目录",
+      "editCatalog": "编辑 {name}",
+      "apps": "应用",
+      "onThisNode": "本节点上",
+      "nameLabel": "目录名称",
+      "autoUpdate": "自动更新",
+      "autoUpdateHelp": "按自动更新间隔重新拉取软件包已变更的应用。",
+      "selectedTitle": "已选应用",
+      "selectedHelp": "点击下方的应用以添加或移除。来自非默认远程源的应用按完整镜像名称安装。",
+      "noneSelected": "尚未选择应用。加入 \"gui\" 可为用户提供图形安装器。",
+      "remoteTitle": "可用应用",
+      "searchPlaceholder": "搜索应用...",
+      "remoteLabel": "远程源（proot-apps 仓库的 GitHub owner/repo）",
+      "load": "加载",
+      "refreshRemote": "重新拉取列表",
+      "noApps": "未找到应用。",
+      "couldNotLoad": "无法加载 {remote} 的应用：{error}",
+      "disabledHint": "被其远程源标记为已禁用；图形安装器会隐藏它。",
+      "fromRemote": "来自 {remote}",
+      "statePending": "尚未同步",
+      "stateSyncing": "正在同步 {done} / {total}",
+      "stateReady": "就绪",
+      "stateError": "错误",
+      "syncedAgo": "同步于 {ago}",
+      "autoUpdateOn": "自动更新",
+      "update": "更新",
+      "updateTitle": "立即在每个节点上重新拉取软件包已变更的应用",
+      "confirmDelete": "删除目录“{name}”？每个节点都会删除其副本，分配给它的用户将没有目录。",
+      "deleteTitle": "删除目录"
     }
   },
   "popup": {
@@ -1205,7 +1614,17 @@
       "uploadingButton": "上传中...",
       "autoHome": "自动 (按应用持久化)",
       "collaborationMode": "协作会话",
-      "waylandMode": "Wayland 模式"
+      "waylandMode": "Wayland 模式",
+      "where": "位置",
+      "whereAuto": "自动",
+      "wherePools": "资源池",
+      "whereNodes": "节点",
+      "moveHome": "移动存储",
+      "moveHomeStay": "保留在 {node}",
+      "moveHomeTo": "移动到 {node}",
+      "moveHomeConfirm": "要将“{home}”移动到 {node} 吗？必须先停止正在使用它的会话。",
+      "moveHomeTitle": "移动存储",
+      "allowance": "额度: 本{period}已用 {used} / {hours} 小时"
     },
     "sessionsView": {
       "noSessions": "未找到活跃会话。"
@@ -1238,7 +1657,10 @@
       "noAppSelected": "请选择一个应用程序。",
       "noAppsAvailable": "您的账户没有可用的应用程序。",
       "uploadSuccess": "文件上传成功！",
-      "creatingAutoHome": "正在创建自动主目录..."
+      "creatingAutoHome": "正在创建自动主目录...",
+      "noSessionOrigin": "此浏览器无法访问会话自己的地址。服务器需要为会话名称配置通配符 DNS 和证书；由管理员设置 SEALSKIN_SESSION_DOMAIN。",
+      "movingHome": "正在移动“{home}”...",
+      "movedHome": "已将“{home}”移动到 {node}。"
     },
     "languages": {
       "default": "默认 ({locale})"
@@ -1258,7 +1680,7 @@
     }
   },
   "files": {
-    "title": "SealSkin 文件",
+    "title": "{brand} 文件",
     "header": {
       "title": "文件",
       "newFolder": "新建文件夹",
@@ -1266,7 +1688,7 @@
       "uploadFolder": "上传文件夹"
     },
     "sidebar": {
-      "sharedFiles": "SealSkin 文件",
+      "sharedFiles": "{brand} 文件",
       "publicShares": "公开分享"
     },
     "shares": {
@@ -1299,8 +1721,7 @@
       },
       "confirmDelete": {
         "title": "确认删除",
-        "message": "您确定要删除{count, plural, one {1 个选定项目} other {{count} 个选定项目}}吗？此操作无法撤销。",
-        "messageDefault": "您确定要删除所选项目吗？此操作无法撤销。"
+        "message": "您确定要删除{count, plural, one {1 个选定项目} other {{count} 个选定项目}}吗？此操作无法撤销。"
       },
       "uploadProgress": {
         "title": "上传进度",
@@ -1325,7 +1746,7 @@
       "deleteFailed": "删除失败：{error}",
       "preparingUpload": "准备上传 {count, plural, one {1 个文件} other {{count} 个文件}}...",
       "uploadPrepFailed": "文件夹上传准备过程中出错：{error}",
-      "notConfigured": "错误：SealSkin 未配置。请在选项中进行设置。",
+      "notConfigured": "错误：{brand} 未配置。请在选项中进行设置。",
       "folderCreated": "文件夹“{folderName}”已创建。",
       "folderCreateFailed": "创建文件夹时出错：{error}",
       "shareCreated": "分享链接创建成功！链接已复制到剪贴板。",
@@ -1333,7 +1754,10 @@
       "sharesLoadFailed": "加载分享文件失败: {error}",
       "shareDeleteFailed": "删除分享失败: {error}",
       "shareDeleted": "分享已成功删除。",
-      "urlCopied": "公开URL已复制到剪贴板。"
+      "urlCopied": "公开URL已复制到剪贴板。",
+      "downloading": "正在下载 {filename}...",
+      "downloadSuccess": "下载完成",
+      "downloadFailed": "下载失败：{error}"
     },
     "placeholders": {
       "errorLoading": "加载文件时出错。",
@@ -1348,6 +1772,175 @@
       "finalizing": "正在完成...",
       "completed": "已完成",
       "error": "错误"
+    },
+    "files": {
+      "searchPlaceholder": "搜索文件..."
+    }
+  },
+  "shell": {
+    "host": {
+      "loading": "正在连接到您的 SealSkin 服务器…",
+      "unconfiguredTitle": "未连接",
+      "unconfiguredBody": "SealSkin 尚未连接到服务器。",
+      "setUp": "设置连接",
+      "unreachableTitle": "无法访问服务器",
+      "unreachableBody": "无法访问 SealSkin 服务器，或其 Web 界面未能加载。",
+      "selfSigned": "如果服务器使用自签名证书，请先打开一次服务器并接受该证书，然后重试。",
+      "retry": "重试",
+      "openServer": "打开服务器",
+      "changeConnection": "更改连接",
+      "mismatchTitle": "需要更新",
+      "mismatchBody": "此应用与服务器 Web 界面使用的桥接版本不同。请更新扩展或应用，或更新服务器，使两者一致。"
+    }
+  },
+  "web": {
+    "receiving": "正在将文件发送到 {brand}…",
+    "signInTitle": "登录 {brand}",
+    "signInWith": {
+      "oidc": "使用 OpenID Connect 登录",
+      "saml": "使用 SAML 登录"
+    },
+    "rootToken": "根令牌",
+    "rootTokenHelp": "管理员的令牌，保存在服务器的 /config/root_token 文件中。",
+    "rootSignIn": "以根身份登录",
+    "rootRefused": "这不是该服务器的根令牌。",
+    "rootLocked": "尝试次数过多。请稍候再试。",
+    "held": {
+      "title": "等待管理员处理",
+      "message": "您已以 {username} 的身份登录，但管理员需要先将您加入某个组，您才能使用 {brand}。完成后请重新检查。",
+      "check": "重新检查"
+    },
+    "signIn": {
+      "failed": "登录未完成。请重试，或询问您的管理员。",
+      "refused": "身份提供方拒绝了登录。",
+      "expired": "登录耗时过长或已被使用。请重新登录。",
+      "browser": "登录在另一个浏览器或标签页中完成。请在此重新开始。",
+      "invalidUsername": "您的账户名称不能作为 {brand} 用户名，用户名只能包含字母、数字、下划线和连字符。请询问您的管理员。",
+      "adminName": "您的账户名称属于一位使用密钥文件登录的 {brand} 管理员。请询问您的管理员。",
+      "otherIdentity": "身份提供方的另一个账户已作为此 {brand} 用户登录。请询问您的管理员。",
+      "noAccount": "尚无以您的名字命名的 {brand} 账户。请联系管理员创建。",
+      "notConfigured": "此服务器不提供单点登录。",
+      "ended": "身份提供方结束了您的登录。请重新登录。"
+    },
+    "nav": {
+      "home": "首页",
+      "files": "文件",
+      "settings": "设置",
+      "hideRail": "隐藏侧栏",
+      "showRail": "显示侧栏",
+      "project": "GitHub 上的 SealSkin：问题反馈与功能请求"
+    },
+    "profile": {
+      "open": "你的个人资料",
+      "signIn": "登录",
+      "method": "登录方式",
+      "until": "登录有效期至",
+      "proxyKeeps": "只要反向代理保持你的登录状态",
+      "node": "节点",
+      "groups": "组",
+      "noGroups": "无组：应用服务器的默认设置。",
+      "providerGroups": "由身份提供者指定：",
+      "proxyGroups": "由反向代理指定：",
+      "access": "权限",
+      "adminNote": "管理员拥有全部功能，没有限制。",
+      "canStorage": "持久存储",
+      "canShare": "公开共享",
+      "canGpu": "GPU",
+      "canTemplates": "编辑模板",
+      "canMigrate": "主目录迁移",
+      "limits": "限制",
+      "unlimited": "无限制",
+      "sessions": "会话",
+      "sessionsOf": "同时最多 {limit} 个",
+      "sessionsRunning": "{running} 个运行中",
+      "sessionsRunningOf": "{limit} 个中有 {running} 个运行中",
+      "cpus": "每个会话的 CPU",
+      "memory": "每个会话的内存",
+      "hours": "会话时长",
+      "hoursValue": "{hours} 小时",
+      "storage": "存储",
+      "pools": "节点池",
+      "anyPool": "服务器提供的任何节点池。",
+      "poolsDenied": "不包括：",
+      "catalog": "PRoot Apps 目录"
+    },
+    "home": {
+      "searchPlaceholder": "搜索应用程序，或粘贴链接以在隔离环境中打开",
+      "upload": "上传文件",
+      "drop": "拖放文件以在 {brand} 中打开",
+      "running": "运行中的会话",
+      "applications": "应用程序",
+      "allowance": "额度",
+      "allowanceValue": "{used} / {hours} 小时（每{period}）",
+      "room": "房间",
+      "started": "开始于{when}",
+      "typeAll": "全部",
+      "typeRecent": "最近",
+      "typeOther": "其他",
+      "quickLaunch": "使用上次的选项启动",
+      "wherePool": "资源池: {pool}",
+      "openingUrl": "选择一个应用程序来打开 {url}",
+      "openingFile": "选择一个应用程序来打开 {filename}",
+      "noApps": "没有可供您使用的应用程序。请让您的管理员安装应用程序。",
+      "noAppsAdmin": "尚未安装任何应用程序。",
+      "noMatch": "没有匹配的应用程序。",
+      "openAppStores": "打开应用商店",
+      "popupBlocked": "浏览器拦截了会话的标签页。请允许此站点弹出窗口，然后重新启动。",
+      "serverFileNeedsHome": "保存在服务器上的文件无法在无尘室模式下打开。请选择一个存储目录。",
+      "copyLinkManual": "浏览器不允许复制。请选中下方的链接并复制。",
+      "favorites": "收藏",
+      "favoritesHint": "拖动以排序",
+      "addFavorite": "加入收藏",
+      "removeFavorite": "移出收藏",
+      "hideApp": "从页面隐藏",
+      "showApp": "重新显示在页面上",
+      "typeHidden": "已隐藏",
+      "options": "启动选项",
+      "moveEarlier": "前移",
+      "moveLater": "后移",
+      "customize": "自定义页面",
+      "background": "背景",
+      "bgColor": "颜色",
+      "bgUpload": "上传图片",
+      "blur": "模糊",
+      "dim": "变暗",
+      "reset": "重置",
+      "pictureTooLarge": "图片太大，无法保存在浏览器中。请选择小一些的图片。",
+      "bgPicture": "图片",
+      "color": "颜色",
+      "colorCustom": "自定义颜色",
+      "style": "样式",
+      "styleSolid": "纯色",
+      "styleGlow": "光晕",
+      "styleDiagonal": "斜向",
+      "styleAurora": "极光",
+      "styleVignette": "暗角",
+      "fit": "位置",
+      "fitFill": "填充",
+      "fitFit": "适应",
+      "fitStretch": "拉伸",
+      "fitCenter": "居中"
+    },
+    "launch": {
+      "title": "正在启动 {app}",
+      "stages": {
+        "requesting": "正在发送启动请求",
+        "placing": "正在检查限制并选择节点",
+        "forwarding": "正在将启动交给节点 {node}",
+        "storage": "正在准备主目录",
+        "files": "正在同步共享文件",
+        "image": "正在下载应用程序镜像",
+        "starting": "正在创建容器",
+        "waiting": "正在等待桌面响应",
+        "ready": "正在打开会话"
+      },
+      "uploading": "正在上传文件（{done} / {total}）",
+      "imageHint": "应用程序在某个节点上首次启动时需要下载，可能要花几分钟。之后的启动会很快。",
+      "onNode": "在节点 {node} 上",
+      "seconds": "{count} 秒",
+      "failed": "启动失败",
+      "unseen": "启动请求尚未到达服务器。请检查发起启动的 {brand} 标签页。",
+      "closeTab": "浏览器使此标签页保持打开状态。请自行关闭。"
     }
   }
 }

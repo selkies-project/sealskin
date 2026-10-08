@@ -17,6 +17,12 @@ const FILES = typeof __I18N_FILES__ !== 'undefined' ? __I18N_FILES__ : {};
 const cache = new Map();
 
 /**
+ * The product name `{brand}` stands for in the strings: the `application-name`
+ * meta a served page carries (`app.branding`), or SealSkin in a shell's own pages.
+ */
+export const BRAND = (typeof document !== 'undefined' && document.querySelector('meta[name="application-name"]')?.content) || 'SealSkin';
+
+/**
  * Reduce a locale to a supported language code.
  *
  * @param {string} locale e.g. 'pt-BR', 'en_US', 'fil'.
@@ -32,11 +38,18 @@ function lookup(dict, key) {
 }
 
 /**
- * Build the `t` function over one dictionary. Keeps the plural and placeholder
- * semantics of the former translations.js: `{count, plural, one {..} other {..}}`
- * then `{name}` substitution.
+ * Build the `t` function over one dictionary: `{count, plural, one {..} other {..}}`
+ * with the categories the language has (`few` and `many` in Russian, for one),
+ * `#` standing for the count, then `{name}` substitution.
+ *
+ * @param {object} dict The language's strings.
+ * @param {string} [lang] The language, whose plural rules pick the category.
  */
-function makeT(dict) {
+function makeT(dict, lang) {
+  let pluralRules = null;
+  try {
+    pluralRules = new Intl.PluralRules(lang || 'en');
+  } catch (e) { /* an unknown language tag: one and other */ }
   return (key, variables = {}) => {
     let value = lookup(dict, key);
     if (value === undefined) {
@@ -55,13 +68,17 @@ function makeT(dict) {
       while ((ruleMatch = ruleRegex.exec(rulesStr)) !== null) {
         rules[ruleMatch[1]] = ruleMatch[2];
       }
-      if (count === 1 && rules.one) return rules.one;
-      if (rules.other) return rules.other;
-      return match;
+      const category = pluralRules ? pluralRules.select(Number(count)) : 'other';
+      let chosen = rules[category];
+      // A `one` that spells its number out is for 1 alone, whatever else the language counts as one.
+      if (category === 'one' && count !== 1 && chosen !== undefined && !/#|\{/.test(chosen)) chosen = undefined;
+      chosen = chosen ?? (count === 1 ? rules.one : undefined) ?? rules.other ?? rules.many;
+      return chosen === undefined ? match : chosen.replace(/#/g, String(count));
     });
-    for (const placeholder in variables) {
+    const filled = { brand: BRAND, ...variables };
+    for (const placeholder in filled) {
       const regex = new RegExp(`\\{${placeholder}\\}`, 'g');
-      const substitution = String(variables[placeholder]);
+      const substitution = String(filled[placeholder]);
       processedText = processedText.replace(regex, () => substitution);
     }
     return processedText;
@@ -93,12 +110,12 @@ async function fetchLanguage(lang) {
 export async function loadTranslator(locale) {
   const lang = resolveLanguage(locale);
   try {
-    return makeT(await fetchLanguage(lang));
+    return makeT(await fetchLanguage(lang), lang);
   } catch (e) {
     console.error(e);
     if (lang !== 'en') {
       try {
-        return makeT(await fetchLanguage('en'));
+        return makeT(await fetchLanguage('en'), 'en');
       } catch (e2) {
         console.error(e2);
       }

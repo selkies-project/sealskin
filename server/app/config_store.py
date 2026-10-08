@@ -52,7 +52,7 @@ def is_safe_name(name: str) -> bool:
         `True` when the name only contains letters, digits, spaces, `_`,
         `.`, and `-` and does not reduce to `.` or `..`.
     """
-    return bool(name) and bool(SAFE_NAME_RE.match(name)) and name.strip(". ") != ""
+    return bool(name) and bool(SAFE_NAME_RE.fullmatch(name)) and name.strip(". ") != ""
 
 
 def deep_merge(base: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any]:
@@ -782,9 +782,7 @@ def migrate_legacy_template_settings(template_settings: dict[str, Any]) -> dict[
 
 def _load_templates_from(directory: str, source: str) -> None:
     """Load every YAML template in `directory` into state."""
-    if not os.path.isdir(directory):
-        return
-    for filename in sorted(os.listdir(directory)):
+    for filename in persistence.list_names(directory):
         if not filename.endswith((".yml", ".yaml")):
             continue
         path = os.path.join(directory, filename)

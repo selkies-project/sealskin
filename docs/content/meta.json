@@ -3,6 +3,10 @@
   "pages": [
     "README",
     "start",
+    "signin",
+    "reverse-proxy",
+    "cluster",
+    "kubernetes",
     "usage",
     "administration",
     "configuration",

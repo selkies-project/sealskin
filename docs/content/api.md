@@ -37,6 +37,15 @@ non-GET request to make a retry safe.
 private key whose claims include `sub` (the username) and `exp`. *admin*
 endpoints additionally require an administrator account.
 
+**The plain lane.** A request through Caddy that names no crypto session is
+taken and answered as plain JSON, with no envelope: it is how the web app and
+the nodes of a cluster call every endpoint below. It authenticates with the
+cookie of a [web sign-in](signin.md) or the header of a trusted proxy, both of
+which are honored only on a request the browser marks as coming from the web
+app's own pages (`Sec-Fetch-Site: same-origin`, else a matching `Origin`), or
+with another node's signature. `409` answers a write another node got in
+ahead of, and `503` one the shared store could not take.
+
 **Errors.** Standard HTTP status codes with a JSON `{"detail": ...}` body:
 `400` for a bad envelope or crypto session, `401` for a bad token, `403` for
 a permission the account lacks, `404`, `422` for a body that fails
@@ -52,6 +61,22 @@ validation, `500` for provider errors.
 | `GET /api/ui/version` | none | `{"version", "bridge"}`: server version and bridge protocol version. |
 | `GET /api/ui/template_schema` | none | The template editor's variable definitions. |
 
+## Web sign-in
+
+| Method and path | Purpose |
+| --- | --- |
+| `GET /api/auth/config` | Which sign-ins the server offers: `oidc`, `saml`, `proxy`, `root`, `key`; `auto` names the provider a signed-out browser is sent to at once, or is empty. |
+| `GET /api/auth/oidc/login`, `GET /api/auth/saml/login` | Start a provider flow; it ends at `/#sso=<grant>` or `/#sso-error=<code>`. |
+| `POST /api/auth/register` | Body `{grant}`: start the sign-in and set its cookie. |
+| `POST /api/auth/root` | Body `{token}`: sign `root` in with the root token; `403 disabled` where the node has `SEALSKIN_ROOT_SIGN_IN=false`. |
+| `POST /api/auth/signout` | End the sign-in the caller's cookie names and clear the cookie. |
+| `GET /api/auth/proxy` | What the request's [sign-in headers](reverse-proxy/sign-in.md) held when it arrived and whether a trusted proxy passed it on: the path the server asks through its own public address to check the proxy. It signs nobody in. |
+| `GET /api/auth/saml/metadata` | The service provider metadata to register with a SAML provider. |
+
+The provider's callbacks and logout notices (`/api/auth/oidc/callback`,
+`/api/auth/oidc/backchannel-logout`, `/api/auth/oidc/frontchannel-logout`,
+`/api/auth/saml/acs`, `/api/auth/saml/slo`) are for the provider.
+
 ## Applications and launching
 
 | Method and path | Auth | Purpose |
@@ -62,6 +87,7 @@ validation, `500` for provider errors.
 | `POST /api/launch/url` | encrypted, user | As above plus `url`; the container receives `SEALSKIN_URL`. |
 | `POST /api/launch/file` | encrypted, user | As above plus `filename`, `upload_id`, `total_chunks`, `open_file_on_launch?`; the uploaded file is placed in `Desktop/files` and, if requested, `SEALSKIN_FILE` points at it. |
 | `POST /api/launch/file_path` | encrypted, user, persistent storage | Launch with a file already in the caller's shared files (`filename`). |
+| `GET /api/launch/progress/{launch_id}` | encrypted, user | Where a launch is. Any launch request may carry `launch_id`, a UUID the client makes up; this answers `stage` (`placing`, `forwarding`, `storage`, `files`, `image`, `starting`, `waiting`, `ready`, or `failed`), `detail` (`node`, `image`), `elapsed`, and, at the end, `session_url` and `session_id` or `error`. |
 
 A launch returns `{"session_url", "session_id"}`; `session_url` is relative
 to the session port and contains the one-time access token.
@@ -72,6 +98,7 @@ to the session port and contains the one-time access token.
 | --- | --- | --- |
 | `GET /api/sessions` | encrypted, user | The caller's sessions, newest first. |
 | `DELETE /api/sessions/{session_id}` | encrypted, user | Stop one of the caller's sessions. |
+| `GET /api/sessions/{session_id}/screenshot` | encrypted, user | A thumbnail of the session's desktop, `{"image", "width", "height", "taken_at"}`, with `image` a JPEG data URI, a recent capture unless `?fresh=1` asks for a new one; 404 while the container has none to give. |
 | `POST /api/sessions/{session_id}/send_file` | encrypted, user | Move a finished upload (`filename`, `upload_id`, `total_chunks`) into the session's files directory. |
 | `GET /{session_id}/` | access token | Exchange `?access_token=` for the session cookie and redirect. Add `&embedded=true` for a `SameSite=None` cookie. |
 | `GET /room/{session_id}` | access or collaboration token | The collaboration room page. |
@@ -148,14 +175,59 @@ All *encrypted, admin*.
 | `POST /api/admin/apps/installed/{app_id}/check_update` | Compare the local image digest with the registry. |
 | `POST /api/admin/apps/installed/{app_id}/pull_latest` | Pull the newest image. |
 | `POST /api/admin/apps/meta` | Create a meta-app (`name`, `base_app_id`, `logo`, autostart scripts, `users`, `groups`). |
-| `POST /api/admin/launch/meta_customize` | Launch a meta-app with its template mounted read-write. |
+| `POST /api/admin/launch/meta_customize` | Launch a meta-app with its template mounted read-write; `409` while the caller has one open. |
 | `GET`/`POST /api/admin/apps/templates`, `DELETE /api/admin/apps/templates/{name}` | Templates; also open to a user allowed to edit app templates, short of their `DOCKER_*` settings. |
 | `GET /api/admin/sessions` | Every session grouped by user. |
 | `DELETE /api/admin/sessions/{session_id}` | Stop any session. |
+| `PUT /api/admin/branding` | Replace the brand's record (`name`, `logo_link`, `accent`, `store_links`, the `wallpaper_*` fields, `links`); the pictures stay. |
+| `DELETE /api/admin/branding` | Back to the defaults: the record and the pictures are removed. |
+| `POST`/`DELETE /api/admin/branding/{logo\|wallpaper}` | Body `{data}`, a base64 PNG, JPEG, or WebP (1 MB for the logo, 8 MB for the wallpaper): keep or remove a picture. |
+
+## Branding
+
+| Method and path | Auth | Purpose |
+| --- | --- | --- |
+| `GET /api/branding` | encrypted, user | The brand with its pictures, as the home page reads it: the record, `logo` and `wallpaper` (`url`, `width`, `height`, `type`, or `null`), and `is_default`. |
+| `GET /api/branding/logo`, `GET /api/branding/wallpaper` | none | The uploaded pictures, addressed with `?v=<hash>` and cached for a year; `404` where none was uploaded. |
+
+Every page the server serves carries the brand in its head: an
+`application-name` meta, a `sealskin-brand` meta holding the name, logo
+address, logo link, accent, and store-links switch as JSON, and a style rule
+deriving the accent palette.
+
+## Cluster
+
+| Method and path | Auth | Purpose |
+| --- | --- | --- |
+| `GET /api/cluster` | user | The pools and nodes open to the caller, where their home directories are, and their limits. |
+| `POST /api/cluster/homedirs/{home}/move` | user | Body `{node}`: move one of the caller's home directories, where their settings allow. |
+| `GET /api/admin/cluster` | admin | Nodes with their load, pools, the store, the cluster's sign-in settings, the state of the reverse proxy check, and how this request reached the node (`signin.arrival`). |
+| `POST /api/admin/cluster/join_codes` | admin | Body `{pool?}`: a code one node joins with. |
+| `PUT`/`DELETE /api/admin/cluster/nodes/{id}` | admin | Approve or suspend a node (`approved`), move it (`pool`), or remove its record. |
+| `PUT`/`DELETE /api/admin/cluster/pools/{name}` | admin | Create, replace, or delete a pool. |
+| `PUT /api/admin/cluster/settings` | admin | Write sign-in settings for the whole cluster; an empty value hands one back to each node's environment. |
+| `GET /api/admin/cluster/usage?period=` | admin | Weighted hours per user this `day`, `week`, or `month`. |
+| `GET /api/admin/cluster/audit?day=&since=&q=&offset=&limit=` | admin | Audit events from every answering node, newest first: one `day`, or every day `since` one, containing every word of `q`; answers `total`, the page of `events`, and the `days` that have a log. |
+| `POST /api/admin/cluster/signin/test` | admin | Body `{kind}`: for `oidc` or `saml`, fetch the configured provider's metadata and answer `ok` with what it published, or the `error`; for `proxy`, run the check of the reverse proxy again and answer its `state` and `detail`. |
+| `GET`/`DELETE /api/admin/lab` | admin | The caller's open App Laboratory session, which no session list shows; deleting closes it and keeps its home directory as the template, answering its `files` and `bytes`, and with `progress_id` reports `stopping` and `saving` to the progress endpoint. |
+| `GET /api/admin/cluster/users/{username}/homes` | admin | Which node holds each of a user's home directories. |
+| `POST /api/admin/cluster/users/{username}/homedirs/{home}/move` | admin | Body `{node}`: move a user's home directory. |
+
+A launch request may name a `pool` or a `node` to start on. A request about
+a session or a home directory on another node is forwarded there and answered
+with that node's answer.
 
 ## Internal
 
-`GET /internal/resolve_session/{session_id}` exists only for Caddy's
-`forward_auth`; Caddy refuses it on the public listener and the API server
-only receives it over loopback. It answers `200` with `X-Upstream-Host` and
-`X-Upstream-Auth` headers, or `403`/`404`.
+`GET /internal/resolve_session/{session_id}` and `GET
+/internal/route/{session_id}` exist only for Caddy's `forward_auth`; Caddy
+refuses them on its listeners and the API server only receives them over
+loopback. The first answers `200` with `X-Upstream-Host` and
+`X-Upstream-Auth` headers, or with `X-Upstream-Peer` for a session another
+node runs, or `403`/`404`; the second answers only whether another node runs
+the session.
+
+`/peer/*` is what nodes call on each other's peer listener, each request
+signed with the calling node's server key: status, change notices, joining,
+the shared records of a node that keeps them, uploads a frontend passes on,
+home directories being moved, and the storage of a user a frontend deleted.

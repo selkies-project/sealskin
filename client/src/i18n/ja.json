@@ -14,6 +14,8 @@
     "cancel": "キャンセル",
     "manage": "管理",
     "delete": "削除",
+    "remove": "削除",
+    "move": "移動",
     "edit": "編集",
     "save": "保存",
     "none": "なし",
@@ -55,6 +57,7 @@
     "admins": "管理者",
     "yes": "はい",
     "no": "いいえ",
+    "ok": "OK",
     "daysAgo": "{count}日前",
     "hoursAgo": "{count}時間前",
     "minutesAgo": "{count}分前",
@@ -76,9 +79,13 @@
       "appTemplates": "アプリテンプレート",
       "appLaboratory": "アプリラボ",
       "installedApps": "インストール済みアプリ",
+      "prootApps": "PRoot Apps",
       "users": "ユーザー",
       "groups": "グループ",
-      "admins": "管理者"
+      "admins": "管理者",
+      "cluster": "クラスター",
+      "signIn": "サインイン",
+      "audit": "監査ログ"
     },
     "dashboard": {
       "title": "ダッシュボード",
@@ -95,6 +102,7 @@
       "storageUsage": "ストレージ使用量:",
       "detectedGpus": "検出されたGPU:",
       "logout": "ログアウトして設定をクリア",
+      "logoutTitle": "ログアウト",
       "howTo": "SealSkinの使い方",
       "howToDescription": "このセクションには、拡張機能の基本的な使い方に関するドキュメントが含まれています。",
       "howToList": [
@@ -104,7 +112,14 @@
         "<strong>永続ストレージを管理するには:</strong> このページの「ホームディレクトリ」タブを使用して、複数のセッションで使用できるストレージボリュームを作成および削除します。",
         "<strong>起動オプションを保存するには:</strong> 特定のファイルタイプ（例：.pdf）またはすべてのURLに対してアプリケーションを起動する前に、ポップアップの「これらの起動オプションを保存する」チェックボックスをオンにします。これらの保存された設定は、「ピン留めされた動作」タブで管理します。"
       ],
-      "confirmLogout": "本当にログアウトしますか？このブラウザに保存されている設定がすべてクリアされます。"
+      "confirmLogout": "本当にログアウトしますか？このブラウザに保存されている設定がすべてクリアされます。",
+      "changeConnection": "接続を変更",
+      "certExpired": "サーバーのTLS証明書の有効期限が切れています。更新するまでHTTPS接続は失敗します。",
+      "certExpiring": "サーバーのTLS証明書はあと{days}日で期限切れになります。接続の失敗を避けるために更新してください。",
+      "signOut": "サインアウト",
+      "signedInThrough": "サインイン方法:",
+      "allowance": "利用枠:",
+      "allowanceUsed": "今{period}: {hours}時間中 {used}時間使用"
     },
     "config": {
       "quickSetup": "クイックセットアップ",
@@ -145,7 +160,14 @@
       "namePlaceholder": "例: my-project-files",
       "nameTitle": "文字、数字、アンダースコア、ハイフンのみを使用してください。",
       "createButton": "ディレクトリを作成",
-      "confirmDelete": "ホームディレクトリ '{homeName}' を本当に削除しますか？内部のすべてのデータは完全に失われます。"
+      "confirmDelete": "ホームディレクトリ '{homeName}' を本当に削除しますか？内部のすべてのデータは完全に失われます。",
+      "deleteTitle": "ホームディレクトリを削除",
+      "node": "ノード",
+      "move": "移動",
+      "moveTo": "移動先のノード",
+      "moveHelp": "ホームディレクトリは移動先のノードにコピーされ、現在保持しているノードから削除されます。使用中のセッションは先に停止する必要があります。",
+      "moveTitle": "'{homeName}' を移動",
+      "noOtherNode": "移動先となる他のノードがありません。"
     },
     "sessions": {
       "title": "アクティブなセッション",
@@ -153,12 +175,13 @@
       "started": "開始日時",
       "noSessionsUser": "アクティブなセッションが見つかりません。",
       "noSessionsAdmin": "どのユーザーにもアクティブなセッションが見つかりません。",
-      "sessionsFor": "{username}のセッション ({count})",
-      "confirmStop": "このセッションを本当に停止しますか？コンテナは破棄されます。"
+      "sessionsFor": "{username}のセッション ({count})"
     },
     "pinned": {
       "title": "ピン留めされた拡張機能の動作",
       "description": "この表は、特定のファイルタイプまたはすべてのURLに対して保存した起動オプションを示しています。ピン留めされた動作を削除すると、再度起動オプションを尋ねられるようになります。",
+      "removeTitle": "ピン留めされた動作を削除",
+      "confirmRemove": "'{name}' のピン留めされた動作を削除しますか？",
       "trigger": "トリガー",
       "savedApp": "保存されたアプリケーション",
       "triggerSimple": "シンプル起動（ツールバーボタン）",
@@ -175,7 +198,8 @@
       "publicKeyOptionalLabel": "公開鍵（オプション）:",
       "publicKeyPlaceholder": "ここに公開鍵を貼り付けるか、空欄にして生成します。",
       "createButton": "管理者を作成",
-      "confirmDelete": "管理者 '{username}' を本当に削除しますか？これを行うと、その管理者の永続ストレージもすべて削除され、元に戻すことはできません。"
+      "confirmDelete": "管理者 '{username}' を本当に削除しますか？これを行うと、その管理者の永続ストレージもすべて削除され、元に戻すことはできません。",
+      "deleteTitle": "管理者を削除"
     },
     "users": {
       "title": "ユーザー管理",
@@ -195,8 +219,29 @@
       "createButton": "ユーザーを作成",
       "homesDisabledTooltip": "このユーザーの永続ストレージは無効です",
       "confirmDelete": "ユーザー '{username}' を本当に削除しますか？これを行うと、そのユーザーの永続ストレージもすべて削除され、元に戻すことはできません。",
+      "deleteTitle": "ユーザーを削除",
       "allowPublicSharing": "公開ファイル共有を許可する",
-      "allowEditTemplates": "アプリテンプレートの編集を許可する"
+      "allowEditTemplates": "アプリテンプレートの編集を許可する",
+      "signInOnly": "シングルサインオンのみ",
+      "awaitingGroup": "グループ待ち",
+      "approve": "承認",
+      "admin": "管理者",
+      "gpuShare": "他のセッションとのGPU共有を許可",
+      "homeMigration": "ノード間のホームディレクトリ移動を許可",
+      "storageLimit": "ストレージ制限（ノードあたりGB）",
+      "sessionCpus": "セッションあたりのCPU数",
+      "sessionMemory": "セッションあたりのメモリ（MB）",
+      "sessionHours": "セッションの最大実行時間（時間）",
+      "allowanceHours": "利用枠（加重セッション時間）",
+      "allowancePeriod": "利用枠の期間",
+      "pools": "許可する制限付きプール（カンマ区切り）",
+      "poolsDenied": "拒否するプール（カンマ区切り）",
+      "prootCatalog": "PRoot Apps カタログ",
+      "prootCatalogNone": "なし",
+      "prootCatalogHelp": "すべてのセッションに読み取り専用でマウントされ、proot-apps はレジストリの代わりにここからインストールします。「なし」のままの場合は、ユーザーのグループのうち最初にカタログを選択しているものが決めます。",
+      "groupsHelp": "CtrlキーまたはCommandキーを押しながら複数選択できます。グループ間で設定が異なる場合は、より制限の厳しい値が優先されます。",
+      "providerGroups": "前回のサインイン時にIDプロバイダーが通知したグループ: {groups}",
+      "limitsHelp": "-1または空欄にすると、制限なしになります。"
     },
     "groups": {
       "title": "グループ管理",
@@ -206,7 +251,15 @@
       "overrideTitle": "グループの上書き設定",
       "permissionsTitle": "権限と強化の上書き",
       "createButton": "グループを作成",
-      "confirmDelete": "グループ '{groupName}' を本当に削除しますか？このグループのユーザーは個々の設定に戻ります。"
+      "confirmDelete": "グループ '{groupName}' を本当に削除しますか？このグループのユーザーは個々の設定に戻ります。",
+      "deleteTitle": "グループを削除",
+      "notSet": "未設定",
+      "allow": "許可",
+      "deny": "拒否",
+      "on": "オン",
+      "off": "オフ",
+      "ssoGroups": "メンバーをこのグループに含めるIDプロバイダーのグループ（カンマ区切り）",
+      "overrideHelp": "グループはここで設定した項目だけを決定します。未設定または空欄の項目は、各メンバー自身の設定のままです。"
     },
     "installedApps": {
       "title": "インストール済みアプリケーション",
@@ -216,7 +269,8 @@
       "notLocal": "イメージがローカルに見つかりません",
       "isLaboratory": "これは、基本イメージにカスタム設定を加えて構築されたラボアプリです。",
       "laboratory": "ラボ",
-      "confirmDelete": "インストール済みのアプリ '{appName}' を本当に削除しますか？"
+      "confirmDelete": "インストール済みのアプリ '{appName}' を本当に削除しますか？",
+      "deleteTitle": "インストール済みアプリを削除"
     },
     "appStore": {
       "title": "アプリストア",
@@ -243,9 +297,45 @@
       "previewTitle": "UIプレビュー",
       "contentArea": "アプリケーションコンテンツエリア",
       "confirmDelete": "テンプレート '{templateName}' を本当に削除しますか？この操作は元に戻せません。",
+      "deleteTitle": "テンプレートを削除",
       "deleteDisabled": "このテンプレートは削除できません。",
       "enterName": "新しいテンプレートの名前を入力してください。",
       "dockerAdminOnly": "これらの設定を変更できるのは管理者だけです。",
+      "filterPlaceholder": "設定を名前で絞り込む…",
+      "changedOnly": "変更済みのみ",
+      "showMore": "もっと見る",
+      "showLess": "閉じる",
+      "changedCount": "{count, plural, one {{count} 件変更} other {{count} 件変更}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC、デュアルモード"
+      },
+      "sections": {
+        "appearance": "外観",
+        "display": "ディスプレイ",
+        "input": "入力",
+        "audio": "オーディオ",
+        "webcam": "ウェブカメラ",
+        "performance": "パフォーマンス",
+        "gpu": "GPU",
+        "clipboard": "クリップボードとファイル",
+        "sharing": "共有",
+        "hardening": "ハードニング",
+        "lifecycle": "ライフサイクル",
+        "integrations": "連携",
+        "webrtc": "WebRTC",
+        "container": "コンテナ"
+      },
+      "groups": {
+        "mode": "モード",
+        "transport": "トランスポート",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "TURN REST API",
+        "cloudflare": "Cloudflare TURN",
+        "extra": "診断"
+      },
       "settings": {
         "TITLE": {
           "label": "ページタイトル",
@@ -421,7 +511,7 @@
         },
         "SELKIES_ENABLE_COLLAB": {
           "label": "コラボレーションを有効化",
-          "description": "セッションのマスタートークンを持つ閲覧者が読み書き可能なコラボレーターとして操作できるようにします。SealSkinのルームに必要です。"
+          "description": "セッションのマスタートークンを持つ閲覧者が読み書き可能なコラボレーターとして操作できるようにします。{brand}のルームに必要です。"
         },
         "SELKIES_ENABLE_PLAYER2": {
           "label": "プレイヤー2共有を有効化",
@@ -692,10 +782,6 @@
           "label": "Wayland バックエンド",
           "description": "X11 サーバーの代わりに Wayland バックエンド（ウィンドウ管理用に labwc をネストしたヘッドレスコンポジター）でセッションを実行します。X11 アプリケーションは XWayland 経由で動作します。"
         },
-        "MAX_RES": {
-          "label": "最大解像度",
-          "description": "コンテナの最大解像度、デフォルトは16kです。"
-        },
         "START_DOCKER": {
           "label": "Docker-in-Dockerを開始",
           "description": "falseの場合、特権コンテナはDinDを開始しません。"
@@ -703,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "IPv6を無効化",
           "description": "trueの場合、IPv6を無効にします。"
-        },
-        "DISABLE_ZINK": {
-          "label": "Zinkを無効化",
-          "description": "ビデオカードが検出された場合、Zink環境変数を設定しません。"
         },
         "DISABLE_DRI3": {
           "label": "DRI3を無効化",
@@ -1036,7 +1118,36 @@
       "closeButton": "セッションを閉じて確定",
       "savingAndLaunching": "保存して起動中...",
       "placeholder": "アプリラボでは、既存のインストール済みアプリケーションに基づいて、アプリケーションの基本ホームディレクトリと起動スクリプトを設定できます。このホームディレクトリは、このセッションで設定したすべてのファイルと設定とともに、ユーザーの初回初期化時にコピーされます。既存のラボアプリを再起動して、その内容をさらに変更することができます。",
-      "formInvalid": "基本アプリを選択し、新しいアプリの名前を入力してください。"
+      "formInvalid": "基本アプリを選択し、新しいアプリの名前を入力してください。",
+      "explainer": "アプリラボではメタアプリを作成します。メタアプリは、インストール済みアプリケーションに独自の名前、アイコン、自動起動スクリプト、設定済みのホームディレクトリを持たせたバリエーションです。カスタマイズセッションでアプリケーションを一度設定すれば、各ユーザーの初回起動はそのホームディレクトリのコピーから始まります。",
+      "step1Title": "アプリの内容を決める",
+      "step1": "ベースにするアプリケーションを選び、メタアプリの名前、アイコン、起動を許可するユーザーを指定します。",
+      "step2Title": "ライブセッションでカスタマイズする",
+      "step2": "テンプレートのホームディレクトリが書き込み可能な状態でカスタマイズセッションが開きます。拡張機能のインストールやサインインを行い、ユーザーに提供したい状態に整えます。",
+      "step3Title": "セッションを閉じてテンプレートを保存する",
+      "step3": "このページからセッションを閉じると、ホームディレクトリがテンプレートとして保持されます。",
+      "openTitle": "カスタマイズセッションが開いています",
+      "openStarted": "{when}に開始",
+      "openDescription": "このセッションのホームディレクトリで変更した内容はすべてテンプレートになります。セッションはここで閉じるまで開いたままで、あなたのセッション一覧には表示されません。",
+      "reopen": "セッションを再開",
+      "closeAndSave": "閉じてテンプレートを保存",
+      "confirmClose": "'{name}' のカスタマイズセッションを閉じますか？セッションは停止し、ホームディレクトリはテンプレートとして保持されます。",
+      "closeTitle": "カスタマイズセッションを閉じる",
+      "unsavedTitle": "変更が保存されていません",
+      "unsavedClose": "変更を保存できませんでした。それでもセッションを閉じますか？",
+      "templateSaved": "セッションを閉じました。テンプレートが保存されました。",
+      "busy": "'{name}' のカスタマイズセッションが開いています。メタアプリを変更したり別のセッションを開始したりする前に、上で閉じてください。",
+      "describeTitle": "1. 説明",
+      "customizeTitle": "2. カスタマイズ",
+      "customizeDescription": "カスタマイズセッションはこれらのオプションで開始されます。同時に開けるセッションは1つだけです。",
+      "advanced": "詳細設定",
+      "saveAndOpen": "保存してカスタマイズセッションを開く",
+      "listTitle": "あなたのメタアプリ",
+      "listNone": "メタアプリはまだありません。",
+      "closingStopping": "セッションを停止しています…",
+      "closingSaving": "テンプレートを保存しています…",
+      "closingSaved": "テンプレートを保存しました: {files}個のファイル、{size}",
+      "closingFailed": "セッションを閉じられませんでした。"
     },
     "modals": {
       "editUserTitle": "ユーザー編集: {username}",
@@ -1045,7 +1156,7 @@
       "editGroupTitle": "グループ編集: {groupName}",
       "userConfigTitle": "ユーザー設定",
       "warning": "この設定が表示されるのはこの一度きりです。ユーザーに安全に提供してください。",
-      "info": "この設定ファイルをダウンロードすると、他のデバイスでSealSkinを簡単にセットアップできます。このファイルには秘密鍵が含まれているため、安全に保管してください。",
+      "info": "この設定ファイルをダウンロードすると、他のデバイスで{brand}を簡単にセットアップできます。このファイルには秘密鍵が含まれているため、安全に保管してください。",
       "configDataLabel": "設定データ（JSON）",
       "copyButton": "テキストをコピー",
       "downloadButton": "ファイルをダウンロード",
@@ -1053,6 +1164,8 @@
       "dirsForUser": "ユーザーのディレクトリ: {username}",
       "dirsForAdmin": "管理者のディレクトリ: {username}",
       "newDirForUser": "ユーザー用の新しいディレクトリを作成",
+      "customAutostartScriptLabel": "カスタム自動起動スクリプト",
+      "customAutostartScriptDescription": "自動起動ロジックをカスタマイズします。空白のままにすると、アプリケーションプロバイダーのデフォルトが使用されます。",
       "createDirButton": "ディレクトリを作成",
       "confirmDeleteDir": "ユーザー '{username}' の '{homeName}' を本当に削除しますか？この操作は永続的です。",
       "installAppTitle": "{appName} をインストール",
@@ -1071,8 +1184,6 @@
       "advancedSettings": "詳細設定",
       "appTemplateLabel": "アプリケーションテンプレート",
       "appTemplateDescription": "詳細なコンテナ起動設定のために、事前設定されたテンプレートを選択します。",
-      "customAutostartScriptLabel": "カスタム自動起動スクリプト",
-      "customAutostartScriptDescription": "自動起動ロジックをカスタマイズします。空白のままにすると、アプリケーションプロバイダーのデフォルトが使用されます。",
       "saveInstallation": "インストールを保存",
       "updateStatusTitle": "{appName} の更新ステータス",
       "checkingUpdates": "更新を確認中...",
@@ -1088,10 +1199,7 @@
       "newVersion": "新しいバージョン: {sha}",
       "errorPulling": "イメージのプル中にエラーが発生しました。",
       "manualInstallNote": "注意：手動で追加されたイメージは、selkies-baseimage互換のイメージに基づいている必要があります。",
-      "generalTitle": "一般とパフォーマンス設定",
-      "webrtcTitle": "WebRTCおよびTURN設定",
       "webrtcDescription": "セッションはデフォルトでWebSocketsを介してストリーミングされます。以下でSTUN、TURN、CloudflareまたはパブリックIPの値を設定するか、WebRTCモードを選択すると、コンテナはデュアルモードを有効にしたWebRTCに切り替わり、ユーザーは引き続きWebSocketsにフォールバックできます。",
-      "dockerTitle": "Docker詳細オーバーライド",
       "dockerDescription": "これらの設定は、デフォルトのコンテナ構成を上書きします。注意して使用し、何をしているか理解している場合にのみ使用してください。"
     },
     "status": {
@@ -1123,6 +1231,8 @@
       "userDeleteFailed": "ユーザーの削除中にエラーが発生しました: {error}",
       "userUpdated": "ユーザー '{username}' が正常に更新されました。",
       "userUpdateFailed": "ユーザーの更新中にエラーが発生しました: {error}",
+      "userApproved": "ユーザー '{username}' を承認しました。",
+      "userApproveFailed": "ユーザーの承認に失敗しました: {error}",
       "creatingGroup": "グループを作成中...",
       "groupCreated": "グループ '{groupName}' が作成されました。",
       "groupCreateFailed": "グループの作成中にエラーが発生しました: {error}",
@@ -1166,7 +1276,24 @@
       "pendingConfigSaved": "保留中の設定が保存されました。管理者に公開鍵を提供できます。",
       "settingsSaved": "設定が保存されました。",
       "appCreated": "アプリ「{name}」が正常に作成されました。",
-      "launchFailed": "起動に失敗しました: {error}"
+      "launchFailed": "起動に失敗しました: {error}",
+      "homedirMoving": "ホームディレクトリ '{homeName}' を移動中...",
+      "homedirMoved": "ホームディレクトリ '{homeName}' が移動されました。",
+      "homedirMoveFailed": "ホームディレクトリの移動に失敗しました: {error}",
+      "clusterLoadFailed": "クラスターの読み込みに失敗しました: {error}",
+      "clusterWriteFailed": "保存に失敗しました: {error}",
+      "nodeUpdated": "ノードが更新されました。",
+      "nodeRemoved": "ノードが削除されました。",
+      "poolSaved": "プール '{name}' が保存されました。",
+      "poolDeleted": "プール '{name}' が削除されました。",
+      "nothingChanged": "変更はありません。",
+      "catalogSaved": "カタログ「{name}」を保存しました。すべてのノードがアプリを取得しています。",
+      "catalogSaveFailed": "カタログを保存できませんでした: {error}",
+      "catalogDeleted": "カタログ「{name}」を削除しました。",
+      "catalogDeleteFailed": "カタログを削除できませんでした: {error}",
+      "catalogUpdateStarted": "すべてのノードでカタログ「{name}」を更新しています。",
+      "catalogUpdateFailed": "カタログを更新できませんでした: {error}",
+      "catalogsRefreshFailed": "カタログを読み込めませんでした: {error}"
     },
     "placeholders": {
       "noAdmins": "管理が見つかりません。",
@@ -1176,7 +1303,289 @@
       "noSessions": "アクティブなセッションが見つかりません。",
       "noPinned": "ピン留めされた動作が見つかりません。",
       "errorLoading": "ディレクトリの読み込み中にエラーが発生しました。",
-      "noInstalledApps": "まだアプリケーションがインストールされていません。"
+      "noInstalledApps": "まだアプリケーションがインストールされていません。",
+      "noProotCatalogs": "カタログはまだありません。"
+    },
+    "web": {
+      "title": "このブラウザーでの{brand}",
+      "bookmarklet": "{brand}に送る",
+      "bookmarkletHelp": "このリンクをブックマークバーにドラッグしてください。クリックすると、表示中のページを{brand}で開くか、選択したテキストを検索します。",
+      "pick": "{brand}で選ぶ",
+      "pickHelp": "こちらもブックマークバーにドラッグしてください。クリックしてから、リンクをクリックするとそのリンクを{brand}で開き、画像・動画・音声をクリックするとファイルを送ります。Shiftを押しながらリンクをクリックすると、そのサイトへのログイン状態でリンク先のファイルを取得して送ります。",
+      "pickHint": "{brand}: 送るリンク、または画像・動画・音声をクリックしてください。Shift+クリックでリンク先のファイルを送ります。Escでキャンセルします。",
+      "protocol": "web+sealskin: リンクをここで開く",
+      "protocolHelp": "web+sealskin: の後にアドレスを続けたリンクは、そのアドレスを{brand}で開きます。",
+      "install": "ブラウザーがWebアプリのインストールに対応している場合は、メニューから{brand}をインストールすると、リンクやファイルを共有したり、ファイルを開いたりできます。"
+    },
+    "via": {
+      "root": "ルートトークン",
+      "oidc": "OpenID Connect",
+      "saml": "SAML",
+      "proxy": "リバースプロキシ",
+      "key": "キーファイル"
+    },
+    "periods": {
+      "day": "日",
+      "week": "週",
+      "month": "月"
+    },
+    "cluster": {
+      "nodesTitle": "ノード",
+      "pool": "プール",
+      "load": "負荷",
+      "online": "オンライン",
+      "offline": "オフライン",
+      "waiting": "承認待ち",
+      "lastSeen": "最終確認: {when}",
+      "storeUnreachableNode": "共有レコードに到達できません",
+      "cpus": "{count} CPU",
+      "gpus": "{count} GPU",
+      "gpuSessions": "GPU: {used} / {slots}",
+      "thisNode": "このノード",
+      "approve": "承認",
+      "suspend": "一時停止",
+      "remove": "削除",
+      "confirmRemove": "ノード '{name}' をクラスターから削除しますか？稼働中のノードは再登録され、承認待ちになります。",
+      "removeTitle": "ノードを削除",
+      "joinTitle": "ノードを追加",
+      "joinDescription": "参加コードを作成し、下の2行を環境変数に設定して新しいノードを起動してから、上の表で承認します。1つのコードで参加できるノードは1つで、有効期間は1時間です。",
+      "joinButton": "参加コードを作成",
+      "joinExpires": "新しいノードの環境変数（コードの有効期限: {when}）",
+      "poolsTitle": "プール",
+      "poolsDescription": "プールは、セッションを起動するノードの集まりです。制限付きプールは、ここで指定したユーザーとグループ、または設定で許可されたユーザーとグループだけが利用できます。",
+      "poolDomain": "ドメイン",
+      "poolAccess": "アクセス",
+      "poolCost": "1時間あたりのコスト",
+      "poolCostWithGpu": "{cost}（GPU: {gpuCost}）",
+      "poolOpen": "オープン",
+      "poolRestricted": "制限付き",
+      "poolNew": "新しいプール",
+      "poolEdit": "プール '{name}' を編集",
+      "poolDescriptionLabel": "説明",
+      "poolDomainLabel": "プールのノードの名前に使うドメイン",
+      "poolCostLabel": "セッション1時間あたりに消費する利用枠",
+      "poolGpuCostLabel": "GPUセッション1時間あたりに消費する利用枠（空欄: 同じ）",
+      "poolUsersLabel": "制限付きのときに利用できるユーザー（カンマ区切り）",
+      "poolGroupsLabel": "制限付きのときに利用できるグループ（カンマ区切り）",
+      "poolStopWhenSpent": "利用枠を使い切ったらセッションを終了する",
+      "poolSave": "プールを保存",
+      "confirmDeletePool": "プール '{name}' を削除しますか？",
+      "deletePoolTitle": "プールを削除",
+      "storeTitle": "共有レコード",
+      "storeDescription": "ノード間で共有するレコード（ユーザー、グループ、アプリ、プール、およびこれらの設定）の保管場所です。",
+      "storeKept": "保管場所:",
+      "storeKinds": {
+        "file": "このノードのディスク上",
+        "s3": "オブジェクトストレージのバケット内",
+        "peer": "別のノード上"
+      },
+      "reachable": "到達可能",
+      "unreachable": "到達不能",
+      "publicUrl": "Webアプリのアドレス:",
+      "sessionDomain": "セッションドメイン:",
+      "sessionDomainUnset": "未設定（Webアプリのホスト名）",
+      "sessionDomainOff": "オフ：セッションはウェブアプリのアドレスで開きます",
+      "signInDescription": "ここに書き込んだ設定はすべてのノードに適用され、各ノードの環境変数より優先されます。フィールドを空にすると、その設定は各ノードの環境変数に戻ります。",
+      "settingWritten": "ここですべてのノード向けに設定されています。",
+      "settingFromEnvironment": "各ノードの環境変数から取得されます。表示されている値はこのノードのものです。",
+      "settingInherit": "各ノードの環境変数から（このノード: {value}）",
+      "secretSet": "シークレットは設定済みです。維持するには空欄のままにします",
+      "secretUnset": "シークレットは設定されていません",
+      "secretClear": "ここで設定したシークレットを削除する",
+      "settings": {
+        "oidc_issuer": "OpenID Connect の Issuer URL",
+        "oidc_client_id": "OpenID Connect のクライアントID",
+        "oidc_client_secret": "OpenID Connect のクライアントシークレット",
+        "oidc_scopes": "OpenID Connect のスコープ",
+        "saml_metadata_url": "SAML メタデータURL",
+        "saml_username_attribute": "ユーザー名を示すSAML属性（空欄: 下のユーザー名クレーム）",
+        "saml_groups_attribute": "ユーザーのグループを列挙するSAML属性（空欄: 下のグループクレーム）",
+        "sso_username_claim": "ユーザー名を示すクレームまたは属性",
+        "sso_groups_claim": "ユーザーのグループを列挙するクレームまたは属性",
+        "sso_admin_group": "管理者となるIDプロバイダーのグループ",
+        "sso_max_age_seconds": "IDプロバイダーによるサインインの最長有効時間（時間）",
+        "sso_force_login": "サインインのたびに認証情報を求める",
+        "sso_create_users": "初回サインイン時にユーザーを作成する",
+        "sso_hold_new_users": "グループに追加されるまで新しいユーザーを保留する",
+        "proxy_auth_user_header": "信頼するプロキシがユーザー名を渡すヘッダー",
+        "proxy_auth_groups_header": "信頼するプロキシがユーザーのグループを渡すヘッダー",
+        "proxy_auth_logout_url": "ユーザーをサインアウトさせるプロキシのページ",
+        "web_session_seconds": "ルートサインインが未使用のまま有効な最長時間（時間）",
+        "files_sync": "共有ファイルをオブジェクトストレージに保持する"
+      },
+      "usageTitle": "使用状況",
+      "usageHours": "加重時間",
+      "usageNone": "この期間の使用はありません。",
+      "settingsTitle": "クラスター設定"
+    },
+    "audit": {
+      "title": "監査ログ",
+      "searchPlaceholder": "イベントを検索...",
+      "range": "範囲",
+      "pageSize": "1ページあたりのイベント数",
+      "today": "今日",
+      "last7": "過去7日間",
+      "last30": "過去30日間",
+      "oneDay": "1日（UTC）",
+      "time": "時刻",
+      "event": "イベント",
+      "details": "詳細",
+      "none": "一致するイベントはありません。",
+      "shown": "{total}件中 {from}–{to}",
+      "exportCsv": "CSVをエクスポート",
+      "exportJson": "JSONをエクスポート",
+      "exported": "{count}件のイベントをエクスポートしました。"
+    },
+    "signin": {
+      "pill": {
+        "active": "有効",
+        "off": "オフ",
+        "none": "未設定"
+      },
+      "test": "テスト",
+      "testing": "保存済みの設定をテスト中...",
+      "testOk": "プロバイダーが応答しました。",
+      "testFailed": "テストに失敗しました。",
+      "register": "これらをプロバイダーに登録してください",
+      "provider": "プロバイダー",
+      "providerChoose": "ヒントを表示するプロバイダーを選択",
+      "providerHelp": "プロバイダーを選んでも下のヒントが表示されるだけで、選択内容は保存されません。",
+      "proxyHelp": "前段のリバースプロキシがユーザーをサインインさせ、ヘッダーでユーザー名を渡します。すでに他のサイトを同じ方法で保護しているプロキシに適しています。それ以外の場合は、上の OpenID Connect または SAML でユーザーをサインインさせてください。",
+      "proxyPresetChoose": "プロキシのプロバイダーを選択してヘッダーを入力",
+      "proxyPresets": {
+        "authelia": "Authelia",
+        "authentik": "Authentik",
+        "tinyauth": "Tinyauth",
+        "oauth2proxy": "oauth2-proxy"
+      },
+      "reach": {
+        "title": "このサーバーへの到達",
+        "help": "サーバーとこのブラウザーから見た、ブラウザーがこのサーバーに到達する経路です。前段のリバースプロキシは、これらをすべて正しく処理する必要があります。",
+        "publicUrl": "公開URL",
+        "publicUrlDiffers": "このページは {origin} から読み込まれました。SEALSKIN_PUBLIC_URL にはブラウザーが使用するアドレスを設定してください。IDプロバイダーのリダイレクトはこの値から組み立てられます。",
+        "sessionDomain": "セッションドメイン",
+        "sessionNames": "セッションが開くドメイン",
+        "sessionNamesNone": "応答したセッション名がありません",
+        "sessionNamesShared": "各セッションはウェブアプリのパスなので、他の名前が応答する必要はありません。SEALSKIN_SESSION_ISOLATION=true にすると、各セッションにセッションドメイン配下の固有の名前が与えられます。",
+        "sessionNamesHelp": "Webアプリからの起動は失敗します。セッションは固有の名前 <session id>.<domain> で開きます。このドメインには、ワイルドカードDNS、ワイルドカード証明書、およびそれらの名前をここに転送するリバースプロキシのルールが必要です。",
+        "sessionNamesGuarded": "SEALSKIN_SESSION_DOMAIN の指定どおり、セッションは {domain} 配下で開きます。リバースプロキシがセッション名へのアクセスにサインインを求めている場合、これは想定どおりです。そうでない場合は、ワイルドカードDNS、証明書、およびそれらの名前に対するプロキシのルールを確認してください。",
+        "sessionNamesOther": "SEALSKIN_SESSION_DOMAIN が指定する {domain} は応答しませんでした。",
+        "trustedProxies": "信頼するプロキシ",
+        "arrivedFrom": "このリクエストの送信元",
+        "viaTrusted": "信頼するプロキシです。",
+        "viaOther": "信頼するプロキシのいずれでもありません。これがリバースプロキシのアドレスであれば、SEALSKIN_TRUSTED_PROXIES に追加してください。",
+        "viaDirect": "信頼するリバースプロキシがありません。これがリバースプロキシのアドレスであれば、SEALSKIN_TRUSTED_PROXIES に設定して、サーバーが各ブラウザー自身のアドレスを認識できるようにしてください。",
+        "yourAddress": "サーバーから見たあなたのアドレス",
+        "httpPort": "平文HTTPリスナー"
+      },
+      "presets": {
+        "authelia": {
+          "name": "Authelia",
+          "hint": "Issuer は Authelia 自身のアドレスです: https://<host>。identity_providers.oidc.clients に、下記のリダイレクトURIと、スコープ openid profile groups email offline_access を持つクライアントを追加してください。"
+        },
+        "pocketid": {
+          "name": "Pocket ID",
+          "hint": "Issuer は Pocket ID 自身のアドレスです: https://<host>。下記のコールバックURLで OIDC クライアントを追加し、スコープを openid profile email groups に設定してください。"
+        },
+        "tinyauth": {
+          "name": "Tinyauth",
+          "hint": "Issuer は Tinyauth 自身のアドレスです: https://<host>。TINYAUTH_OIDC_CLIENTS_<NAME>_ 変数でクライアントを定義し、スコープを openid profile email groups に設定してください。"
+        },
+        "keycloak": {
+          "name": "Keycloak",
+          "hint": "Issuer はレルムのアドレスです: https://<host>/realms/<realm>。クライアント認証を有効にした OpenID Connect クライアントを作成し、ユーザーのグループを送信するために 'groups' という名前のグループメンバーシップマッパーを追加してください。"
+        },
+        "authentik": {
+          "name": "Authentik",
+          "hint": "Issuer はアプリケーションのアドレス https://<host>/application/o/<slug>/ で、末尾のスラッシュも含みます。OAuth2/OpenID プロバイダーと、それを使用するアプリケーションを作成してください。"
+        },
+        "entra": {
+          "name": "Microsoft Entra ID",
+          "hint": "Issuer は次のとおりです: https://login.microsoftonline.com/<tenant>/v2.0。アプリケーションを登録してクライアントシークレットを追加し、「トークン構成」で groups クレームを追加してください。"
+        },
+        "google": {
+          "name": "Google",
+          "hint": "Issuer は次のとおりです: https://accounts.google.com。種類が「ウェブ アプリケーション」の OAuth クライアントIDを作成してください。Google はグループを送信しません。"
+        },
+        "okta": {
+          "name": "Okta",
+          "hint": "Issuer は組織のアドレスです: https://<org>.okta.com。OIDC ウェブアプリケーションを作成し、その ID トークンに groups クレームを追加してください。"
+        },
+        "other": {
+          "name": "その他",
+          "hint": "Issuer は、/.well-known/openid-configuration でプロバイダーの情報を公開しているアドレスです。"
+        }
+      },
+      "oidcTitle": "OpenID Connect",
+      "oidcRedirect": "リダイレクトURI",
+      "oidcBackchannel": "バックチャネルログアウトURL",
+      "oidcFrontchannel": "フロントチャネルログアウトURL",
+      "samlTitle": "SAML 2.0",
+      "samlEntity": "エンティティID / メタデータURL",
+      "samlAcs": "ACS URL",
+      "samlSlo": "シングルログアウトURL",
+      "samlMetadata": "このサーバーのサービスプロバイダーメタデータを開く",
+      "proxyTitle": "リバースプロキシ",
+      "trustedProxies": "このノードが信頼するプロキシ:",
+      "trustedProxiesHelp": "各ノードで SEALSKIN_TRUSTED_PROXIES により設定します。リクエストがこれらのアドレスのいずれかから届いた場合にのみ、ヘッダーを信頼します。",
+      "noTrustedProxy": "ユーザーヘッダーは設定されていますが、このノードはまだどのプロキシも信頼していないため、プロキシによるサインインは受け付けられません。",
+      "proxyCheck": {
+        "guarded": "確認済み: プロキシは、訪問者が送信したサインインヘッダーを転送しません。",
+        "open": "プロキシによるサインインは拒否されます。",
+        "unreachable": "プロキシによるサインインは拒否されます: このノードはプロキシを確認できません。ノードから公開URLへの経路を用意するか、プロキシ自身のアドレスを SEALSKIN_TRUSTED_PROXIES に指定するか、確認なしでプロキシを信頼する場合はノードに SEALSKIN_PROXY_AUTH_UNCHECKED=true を設定してください。",
+        "unchecked": "このノードではプロキシの確認が無効になっています（SEALSKIN_PROXY_AUTH_UNCHECKED）。プロキシが転送する内容はすべて信頼されます。"
+      },
+      "whoTitle": "サインインするユーザー",
+      "whoHelp": "これらは OpenID Connect、SAML、リバースプロキシのすべてに適用されます。IDプロバイダーのグループのメンバーを {brand} のグループに入れるには、「グループ」でそのグループの「IDプロバイダーのグループ」に指定してください。",
+      "rootTitle": "ルートトークン",
+      "rootHelp": "常に利用できます。トークンは、サーバー上の /config/root_token ファイルが削除されるまでそこに保存されており、SEALSKIN_ROOT_TOKEN で設定することもできます。",
+      "keyTitle": "キーファイル",
+      "keyOn": "このノードはキーファイルを使うクライアント（ブラウザー拡張機能とモバイルアプリ）を受け付けます。各ノードで SEALSKIN_LEGACY_AUTH により設定します。",
+      "keyOff": "このノードはキーファイルを使うクライアントを受け付けません。各ノードで SEALSKIN_LEGACY_AUTH により設定します。",
+      "resultIssuer": "Issuer:",
+      "resultAuthorization": "認可エンドポイント:",
+      "resultBackchannel": "バックチャネルログアウトのサポート:",
+      "resultScopes": "提供されるスコープ:",
+      "resultGroupsClaim": "グループクレーム:",
+      "claimListed": "'{claim}' はプロバイダーが公開しているクレームに含まれています",
+      "claimNotListed": "'{claim}' はプロバイダーが公開しているクレームに含まれていません",
+      "resultEntity": "エンティティID:",
+      "resultSso": "サインオンURL:",
+      "resultSlo": "シングルログアウトの提供:",
+      "resultCertificates": "署名証明書:"
+    },
+    "prootApps": {
+      "title": "PRoot Apps カタログ",
+      "help": "カタログは、すべてのノードに保持され、割り当てられたユーザーとグループのセッションに読み取り専用でマウントされる PRoot Apps パッケージのフォルダーです。セッション内では、proot-apps とそのグラフィカルインストーラーはこのフォルダーからインストールと更新を行い、レジストリには接続しません。",
+      "newCatalog": "新しいカタログ",
+      "editCatalog": "{name} を編集",
+      "apps": "アプリ",
+      "onThisNode": "このノード上",
+      "nameLabel": "カタログ名",
+      "autoUpdate": "自動更新",
+      "autoUpdateHelp": "パッケージが変更された場合、自動更新の間隔でアプリを再取得します。",
+      "selectedTitle": "選択済みのアプリ",
+      "selectedHelp": "下のアプリをクリックして追加または削除します。デフォルト以外のリモートのアプリは、完全なイメージ名でインストールされます。",
+      "noneSelected": "まだアプリが選択されていません。ユーザーにグラフィカルインストーラーを提供するには \"gui\" を含めてください。",
+      "remoteTitle": "利用可能なアプリ",
+      "searchPlaceholder": "アプリを検索...",
+      "remoteLabel": "リモート（proot-apps リポジトリの GitHub owner/repo）",
+      "load": "読み込む",
+      "refreshRemote": "リストを再取得",
+      "noApps": "アプリが見つかりません。",
+      "couldNotLoad": "{remote} のアプリを読み込めませんでした: {error}",
+      "disabledHint": "リモートで無効とマークされています。グラフィカルインストーラーには表示されません。",
+      "fromRemote": "{remote} から",
+      "statePending": "未同期",
+      "stateSyncing": "同期中 {done} / {total}",
+      "stateReady": "準備完了",
+      "stateError": "エラー",
+      "syncedAgo": "{ago}に同期",
+      "autoUpdateOn": "自動更新",
+      "update": "更新",
+      "updateTitle": "パッケージが変更されたアプリを、すべてのノードで今すぐ再取得します",
+      "confirmDelete": "カタログ「{name}」を削除しますか？すべてのノードがコピーを削除し、割り当てられたユーザーはカタログを持たなくなります。",
+      "deleteTitle": "カタログを削除"
     }
   },
   "popup": {
@@ -1205,7 +1614,17 @@
       "uploadingButton": "アップロード中...",
       "autoHome": "自動 (アプリごとの永続化)",
       "collaborationMode": "共同セッション",
-      "waylandMode": "Waylandモード"
+      "waylandMode": "Waylandモード",
+      "where": "起動先",
+      "whereAuto": "自動",
+      "wherePools": "プール",
+      "whereNodes": "ノード",
+      "moveHome": "ストレージを移動",
+      "moveHomeStay": "{node} 上",
+      "moveHomeTo": "{node} に移動",
+      "moveHomeConfirm": "'{home}' を {node} に移動しますか？使用中のセッションは先に停止する必要があります。",
+      "moveHomeTitle": "ストレージを移動",
+      "allowance": "利用枠: 今{period} {hours}時間中 {used}時間使用"
     },
     "sessionsView": {
       "noSessions": "アクティブなセッションが見つかりません。"
@@ -1238,7 +1657,10 @@
       "noAppSelected": "アプリケーションを選択してください。",
       "noAppsAvailable": "あなたのアカウントで利用可能なアプリケーションはありません。",
       "uploadSuccess": "ファイルが正常にアップロードされました！",
-      "creatingAutoHome": "自動ホームディレクトリを作成中..."
+      "creatingAutoHome": "自動ホームディレクトリを作成中...",
+      "noSessionOrigin": "このブラウザーはセッション固有のアドレスに到達できません。サーバーにはセッション名用のワイルドカードDNSと証明書が必要です。管理者が SEALSKIN_SESSION_DOMAIN を設定します。",
+      "movingHome": "'{home}' を移動中...",
+      "movedHome": "'{home}' を {node} に移動しました。"
     },
     "languages": {
       "default": "デフォルト ({locale})"
@@ -1258,7 +1680,7 @@
     }
   },
   "files": {
-    "title": "SealSkin ファイル",
+    "title": "{brand} ファイル",
     "header": {
       "title": "ファイル",
       "newFolder": "新しいフォルダー",
@@ -1266,7 +1688,7 @@
       "uploadFolder": "フォルダーをアップロード"
     },
     "sidebar": {
-      "sharedFiles": "SealSkin ファイル",
+      "sharedFiles": "{brand} ファイル",
       "publicShares": "公開共有"
     },
     "shares": {
@@ -1299,8 +1721,7 @@
       },
       "confirmDelete": {
         "title": "削除の確認",
-        "message": "選択した{count, plural, one {1個のアイテム} other {{count}個のアイテム}}を本当に削除しますか？この操作は元に戻せません。",
-        "messageDefault": "選択したアイテムを本当に削除しますか？この操作は元に戻せません。"
+        "message": "選択した{count, plural, one {1個のアイテム} other {{count}個のアイテム}}を本当に削除しますか？この操作は元に戻せません。"
       },
       "uploadProgress": {
         "title": "アップロードの進捗",
@@ -1325,7 +1746,7 @@
       "deleteFailed": "削除に失敗しました：{error}",
       "preparingUpload": "{count, plural, one {1個のファイル} other {{count}個のファイル}}のアップロードを準備しています...",
       "uploadPrepFailed": "フォルダーのアップロード準備中にエラーが発生しました：{error}",
-      "notConfigured": "エラー：SealSkinが設定されていません。オプションで設定してください。",
+      "notConfigured": "エラー：{brand}が設定されていません。オプションで設定してください。",
       "folderCreated": "フォルダー「{folderName}」が作成されました。",
       "folderCreateFailed": "フォルダーの作成中にエラーが発生しました：{error}",
       "shareCreated": "共有が正常に作成されました！リンクがクリップボードにコピーされました。",
@@ -1333,7 +1754,10 @@
       "sharesLoadFailed": "共有ファイルの読み込みに失敗しました: {error}",
       "shareDeleteFailed": "共有の削除に失敗しました: {error}",
       "shareDeleted": "共有が正常に削除されました。",
-      "urlCopied": "公開URLがクリップボードにコピーされました。"
+      "urlCopied": "公開URLがクリップボードにコピーされました。",
+      "downloading": "{filename} をダウンロード中...",
+      "downloadSuccess": "ダウンロード完了",
+      "downloadFailed": "ダウンロードに失敗しました：{error}"
     },
     "placeholders": {
       "errorLoading": "ファイルの読み込み中にエラーが発生しました。",
@@ -1348,6 +1772,175 @@
       "finalizing": "最終処理中...",
       "completed": "完了",
       "error": "エラー"
+    },
+    "files": {
+      "searchPlaceholder": "ファイルを検索..."
+    }
+  },
+  "shell": {
+    "host": {
+      "loading": "SealSkinサーバーに接続しています…",
+      "unconfiguredTitle": "未接続",
+      "unconfiguredBody": "SealSkinはまだサーバーに接続されていません。",
+      "setUp": "接続を設定",
+      "unreachableTitle": "サーバーに到達できません",
+      "unreachableBody": "SealSkinサーバーに到達できなかったか、Webインターフェースを読み込めませんでした。",
+      "selfSigned": "サーバーが自己署名証明書を使用している場合は、一度サーバーを開いて証明書を受け入れてから再試行してください。",
+      "retry": "再試行",
+      "openServer": "サーバーを開く",
+      "changeConnection": "接続を変更",
+      "mismatchTitle": "更新が必要です",
+      "mismatchBody": "このアプリとサーバーのWebインターフェースでブリッジのバージョンが異なります。両方が一致するように、拡張機能またはアプリ、あるいはサーバーを更新してください。"
+    }
+  },
+  "web": {
+    "receiving": "ファイルを{brand}に送信しています…",
+    "signInTitle": "{brand}にサインイン",
+    "signInWith": {
+      "oidc": "OpenID Connectでサインイン",
+      "saml": "SAMLでサインイン"
+    },
+    "rootToken": "ルートトークン",
+    "rootTokenHelp": "管理者用のトークンです。サーバーの /config/root_token ファイルに保存されています。",
+    "rootSignIn": "ルートとしてサインイン",
+    "rootRefused": "サーバーのルートトークンと一致しません。",
+    "rootLocked": "試行回数が多すぎます。しばらく待ってから、もう一度お試しください。",
+    "held": {
+      "title": "管理者の対応をお待ちください",
+      "message": "{username} としてサインインしていますが、{brand} を使うには管理者がグループに追加する必要があります。追加されたら再確認してください。",
+      "check": "再確認"
+    },
+    "signIn": {
+      "failed": "サインインが完了しませんでした。もう一度試すか、管理者に問い合わせてください。",
+      "refused": "IDプロバイダーがサインインを拒否しました。",
+      "expired": "サインインに時間がかかりすぎたか、すでに使用されています。もう一度サインインしてください。",
+      "browser": "サインインは別のブラウザーまたはタブで完了しました。ここでもう一度開始してください。",
+      "invalidUsername": "アカウントの名前は{brand}のユーザー名にできません。ユーザー名に使えるのは英字、数字、アンダースコア、ハイフンだけです。管理者に問い合わせてください。",
+      "adminName": "アカウントの名前は、鍵ファイルでサインインする{brand}管理者のものです。管理者に問い合わせてください。",
+      "otherIdentity": "IDプロバイダーの別のアカウントが、すでにこの{brand}ユーザーとしてサインインしています。管理者に問い合わせてください。",
+      "noAccount": "あなたの名前の {brand} アカウントはまだありません。管理者に作成を依頼してください。",
+      "notConfigured": "このサーバーはシングルサインオンを提供していません。",
+      "ended": "IDプロバイダーがサインインを終了しました。もう一度サインインしてください。"
+    },
+    "nav": {
+      "home": "ホーム",
+      "files": "ファイル",
+      "settings": "設定",
+      "hideRail": "サイドバーを隠す",
+      "showRail": "サイドバーを表示",
+      "project": "GitHub の SealSkin: 不具合報告と機能要望"
+    },
+    "profile": {
+      "open": "あなたのプロフィール",
+      "signIn": "サインイン",
+      "method": "サインイン方法",
+      "until": "サインインの有効期限",
+      "proxyKeeps": "リバースプロキシがサインインを保持している間",
+      "node": "ノード",
+      "groups": "グループ",
+      "noGroups": "グループなし: サーバーの既定値が適用されます。",
+      "providerGroups": "IDプロバイダーが指定:",
+      "proxyGroups": "リバースプロキシが指定:",
+      "access": "アクセス",
+      "adminNote": "管理者はすべての機能を使え、制限はありません。",
+      "canStorage": "永続ストレージ",
+      "canShare": "公開共有",
+      "canGpu": "GPU",
+      "canTemplates": "テンプレートの編集",
+      "canMigrate": "ホームの移行",
+      "limits": "制限",
+      "unlimited": "無制限",
+      "sessions": "セッション",
+      "sessionsOf": "同時に最大 {limit}",
+      "sessionsRunning": "{running} 件実行中",
+      "sessionsRunningOf": "{limit} 件中 {running} 件実行中",
+      "cpus": "セッションあたりのCPU",
+      "memory": "セッションあたりのメモリ",
+      "hours": "セッションの長さ",
+      "hoursValue": "{hours} 時間",
+      "storage": "ストレージ",
+      "pools": "プール",
+      "anyPool": "サーバーが提供するどのプールでも。",
+      "poolsDenied": "以下を除く:",
+      "catalog": "PRoot Apps カタログ"
+    },
+    "home": {
+      "searchPlaceholder": "アプリケーションを検索、またはリンクを貼り付けて隔離環境で開く",
+      "upload": "ファイルをアップロード",
+      "drop": "ファイルをドロップして{brand}で開く",
+      "running": "実行中のセッション",
+      "applications": "アプリケーション",
+      "allowance": "利用枠",
+      "allowanceValue": "{used} / {hours} 時間（{period}あたり）",
+      "room": "ルーム",
+      "started": "{when}に開始",
+      "typeAll": "すべて",
+      "typeRecent": "最近",
+      "typeOther": "その他",
+      "quickLaunch": "前回使用したオプションで起動",
+      "wherePool": "プール: {pool}",
+      "openingUrl": "{url} を開くアプリケーションを選択してください",
+      "openingFile": "{filename} を開くアプリケーションを選択してください",
+      "noApps": "利用できるアプリケーションがありません。管理者にアプリケーションのインストールを依頼してください。",
+      "noAppsAdmin": "アプリケーションはまだインストールされていません。",
+      "noMatch": "一致するアプリケーションがありません。",
+      "openAppStores": "アプリストアを開く",
+      "popupBlocked": "ブラウザーがセッションのタブをブロックしました。このサイトのポップアップを許可してから、もう一度起動してください。",
+      "serverFileNeedsHome": "サーバーに保存されているファイルはクリーンルームモードでは開けません。ストレージディレクトリを選択してください。",
+      "copyLinkManual": "ブラウザーがコピーを許可しませんでした。下のリンクを選択してコピーしてください。",
+      "favorites": "お気に入り",
+      "favoritesHint": "ドラッグして並べ替え",
+      "addFavorite": "お気に入りに追加",
+      "removeFavorite": "お気に入りから外す",
+      "hideApp": "ページから隠す",
+      "showApp": "ページに再び表示",
+      "typeHidden": "非表示",
+      "options": "起動オプション",
+      "moveEarlier": "前へ",
+      "moveLater": "後ろへ",
+      "customize": "ページをカスタマイズ",
+      "background": "背景",
+      "bgColor": "色",
+      "bgUpload": "画像をアップロード",
+      "blur": "ぼかし",
+      "dim": "暗さ",
+      "reset": "リセット",
+      "pictureTooLarge": "画像が大きすぎてブラウザに保存できません。小さい画像を選んでください。",
+      "bgPicture": "画像",
+      "color": "色",
+      "colorCustom": "カスタムカラー",
+      "style": "スタイル",
+      "styleSolid": "単色",
+      "styleGlow": "グロー",
+      "styleDiagonal": "斜め",
+      "styleAurora": "オーロラ",
+      "styleVignette": "ビネット",
+      "fit": "配置",
+      "fitFill": "全体に表示",
+      "fitFit": "画面に合わせる",
+      "fitStretch": "引き伸ばす",
+      "fitCenter": "中央"
+    },
+    "launch": {
+      "title": "{app} を起動中",
+      "stages": {
+        "requesting": "起動リクエストを送信中",
+        "placing": "制限を確認してノードを選択中",
+        "forwarding": "ノード {node} に起動を引き渡し中",
+        "storage": "ホームディレクトリを準備中",
+        "files": "共有ファイルを同期中",
+        "image": "アプリケーションイメージをダウンロード中",
+        "starting": "コンテナを作成中",
+        "waiting": "デスクトップの応答を待機中",
+        "ready": "セッションを開いています"
+      },
+      "uploading": "ファイルをアップロード中（{done} / {total}）",
+      "imageHint": "ノードでアプリケーションを初めて起動するときはダウンロードが行われるため、数分かかることがあります。2回目以降の起動は高速です。",
+      "onNode": "ノード {node} 上",
+      "seconds": "{count} 秒",
+      "failed": "起動に失敗しました",
+      "unseen": "起動リクエストがサーバーに届いていません。起動を開始した{brand}のタブを確認してください。",
+      "closeTab": "ブラウザーがこのタブを開いたままにしました。手動で閉じてください。"
     }
   }
 }
