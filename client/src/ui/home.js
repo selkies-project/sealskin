@@ -688,8 +688,12 @@ function bindFavoriteDrag() {
   grid.addEventListener('pointerdown', (event) => {
     const tile = event.target.closest('.app-tile');
     if (!tile || event.button !== 0 || event.pointerType === 'touch' || event.target.closest('.quick')) return;
+    // A selection left on the page would be what the browser drags instead of the tile.
+    const selection = window.getSelection();
+    if (selection && !selection.isCollapsed) selection.removeAllRanges();
     drag = { tile, x: event.clientX, y: event.clientY, ghost: null, id: event.pointerId };
   });
+  grid.addEventListener('dragstart', (event) => event.preventDefault());
 
   grid.addEventListener('pointermove', (event) => {
     if (!drag || event.pointerId !== drag.id) return;

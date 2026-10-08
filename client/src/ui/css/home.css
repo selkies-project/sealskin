@@ -189,7 +189,7 @@ body.zooming .home-wrap { opacity: 0.35; transition: opacity var(--dur-slow) var
 .app-tile.favorite::before { content: "\f005"; position: absolute; top: 0.55rem; left: 0.6rem; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 0.7rem; color: var(--color-warning-text); opacity: 0.85; }
 
 /* Favorites being reordered: the picked tile fades where it was, and a copy of it rides the pointer. */
-#favorites-grid .app-tile { touch-action: pan-y; }
+#favorites-grid .app-tile { touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 #favorites-grid.reordering .app-tile { cursor: grabbing; transition: none; }
 #favorites-grid.reordering .app-tile .quick { opacity: 0; }
 .app-tile.drag-source { opacity: 0.3; transform: none !important; box-shadow: none !important; }

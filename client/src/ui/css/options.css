@@ -217,6 +217,9 @@ h1, h2, h3, h4 { letter-spacing: -0.01em; }
   -webkit-text-fill-color: transparent;
 }
 
+/* The web app's rail already carries the logo, so a framed page shows no second one. */
+html.shell-web .sidebar-header { display: none; }
+
 .sidebar-nav {
   display: flex;
   flex-direction: column;

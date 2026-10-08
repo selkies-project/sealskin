@@ -1803,7 +1803,8 @@
       "files": "Filer",
       "settings": "Indstillinger",
       "hideRail": "Skjul sidepanelet",
-      "showRail": "Vis sidepanelet"
+      "showRail": "Vis sidepanelet",
+      "project": "SealSkin på GitHub: fejl og ønsker til funktioner"
     },
     "home": {
       "searchPlaceholder": "Søg efter applikationer, eller indsæt et link for at åbne det isoleret",

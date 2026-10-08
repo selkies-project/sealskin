@@ -1803,7 +1803,8 @@
       "files": "Mga File",
       "settings": "Mga Setting",
       "hideRail": "Itago ang sidebar",
-      "showRail": "Ipakita ang sidebar"
+      "showRail": "Ipakita ang sidebar",
+      "project": "SealSkin sa GitHub: mga isyu at kahilingang feature"
     },
     "home": {
       "searchPlaceholder": "Maghanap ng mga aplikasyon, o mag-paste ng link upang buksan ito nang isolated",

@@ -157,6 +157,7 @@ function bindShell() {
     if (labels[dest]) button.querySelector('span').textContent = t(labels[dest]);
     button.addEventListener('click', () => hostApi.openPage(...DESTINATIONS[dest]));
   });
+  $$('.project-link').forEach((link) => { link.title = t('web.nav.project'); });
   $$('.sign-out').forEach((button) => {
     button.querySelector('span').textContent = t('options.dashboard.signOut');
     button.addEventListener('click', signOut);

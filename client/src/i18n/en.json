@@ -1804,7 +1804,8 @@
       "files": "Files",
       "settings": "Settings",
       "hideRail": "Hide the sidebar",
-      "showRail": "Show the sidebar"
+      "showRail": "Show the sidebar",
+      "project": "SealSkin on GitHub: issues and feature requests"
     },
     "home": {
       "searchPlaceholder": "Search applications, or paste a link to open it in isolation",

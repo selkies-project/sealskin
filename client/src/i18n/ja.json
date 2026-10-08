@@ -1803,7 +1803,8 @@
       "files": "ファイル",
       "settings": "設定",
       "hideRail": "サイドバーを隠す",
-      "showRail": "サイドバーを表示"
+      "showRail": "サイドバーを表示",
+      "project": "GitHub の SealSkin: 不具合報告と機能要望"
     },
     "home": {
       "searchPlaceholder": "アプリケーションを検索、またはリンクを貼り付けて隔離環境で開く",

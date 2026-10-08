@@ -1803,7 +1803,8 @@
       "files": "文件",
       "settings": "设置",
       "hideRail": "隐藏侧栏",
-      "showRail": "显示侧栏"
+      "showRail": "显示侧栏",
+      "project": "GitHub 上的 SealSkin：问题反馈与功能请求"
     },
     "home": {
       "searchPlaceholder": "搜索应用程序，或粘贴链接以在隔离环境中打开",

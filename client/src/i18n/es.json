@@ -1803,7 +1803,8 @@
       "files": "Archivos",
       "settings": "Configuración",
       "hideRail": "Ocultar la barra lateral",
-      "showRail": "Mostrar la barra lateral"
+      "showRail": "Mostrar la barra lateral",
+      "project": "SealSkin en GitHub: incidencias y peticiones de funciones"
     },
     "home": {
       "searchPlaceholder": "Busque aplicaciones o pegue un enlace para abrirlo en aislamiento",

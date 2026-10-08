@@ -1803,7 +1803,8 @@
       "files": "Dateien",
       "settings": "Einstellungen",
       "hideRail": "Seitenleiste ausblenden",
-      "showRail": "Seitenleiste einblenden"
+      "showRail": "Seitenleiste einblenden",
+      "project": "SealSkin auf GitHub: Fehler und Funktionswünsche melden"
     },
     "home": {
       "searchPlaceholder": "Anwendungen suchen oder einen Link einfügen, um ihn isoliert zu öffnen",

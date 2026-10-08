@@ -7,7 +7,7 @@
   background-color: var(--bg-0);
 }
 
-#homedir-nav { overflow-y: auto; flex-grow: 1; min-height: 0; }
+#homedir-nav { overflow-y: auto; flex-grow: 0; min-height: 0; }
 
 .main-panel { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; min-width: 0; }
 
@@ -19,7 +19,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  padding: 0.85rem 1.5rem;
+  padding: 0.5rem 1.25rem;
   background-color: rgba(19, 24, 34, 0.8);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -27,8 +27,12 @@
   flex-shrink: 0;
 }
 
-.header-actions { display: flex; gap: 0.6rem; }
-.header-actions .default-actions { display: flex; gap: 0.6rem; }
+.file-manager-header h3 { margin: 0; font-size: 1rem; font-weight: 600; white-space: nowrap; }
+.header-actions { display: flex; align-items: center; gap: 0.5rem; }
+.header-actions .default-actions { display: flex; gap: 0.5rem; }
+/* The toolbar stays one line tall: the search box gives way before a button's label wraps. */
+.header-actions button { padding: 0.4rem 0.8rem; font-size: 0.82rem; white-space: nowrap; flex-shrink: 0; }
+.header-actions .search-input { flex: 0 1 300px; min-width: 140px; padding-top: 0.4rem; padding-bottom: 0.4rem; font-size: 0.85rem; }
 
 #breadcrumb-nav {
   display: flex;
@@ -69,6 +73,11 @@
 .col-date { width: 20%; }
 .col-password { width: 10%; text-align: center; }
 .col-url { width: 30%; }
+/* The shares table: the name takes the slack, every other column sits at its content's width on one line. */
+#shares-list-table th { white-space: nowrap; }
+#shares-list-table .col-name { width: auto; }
+#shares-list-table .col-size, #shares-list-table .col-date, #shares-list-table .col-password, #shares-list-table .col-url { width: 1%; white-space: nowrap; }
+#shares-list-table .col-url { text-align: center; }
 .col-actions { width: 1%; white-space: nowrap; text-align: right; }
 
 .file-item-name { display: flex; align-items: center; gap: 0.85rem; }

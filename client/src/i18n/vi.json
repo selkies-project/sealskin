@@ -1803,7 +1803,8 @@
       "files": "Tệp",
       "settings": "Cài đặt",
       "hideRail": "Ẩn thanh bên",
-      "showRail": "Hiện thanh bên"
+      "showRail": "Hiện thanh bên",
+      "project": "SealSkin trên GitHub: báo lỗi và yêu cầu tính năng"
     },
     "home": {
       "searchPlaceholder": "Tìm kiếm ứng dụng, hoặc dán một liên kết để mở nó trong môi trường cách ly",

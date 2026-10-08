@@ -1803,7 +1803,8 @@
       "files": "파일",
       "settings": "설정",
       "hideRail": "사이드바 숨기기",
-      "showRail": "사이드바 표시"
+      "showRail": "사이드바 표시",
+      "project": "GitHub의 SealSkin: 문제 신고 및 기능 요청"
     },
     "home": {
       "searchPlaceholder": "애플리케이션을 검색하거나, 링크를 붙여넣어 격리된 환경에서 열기",

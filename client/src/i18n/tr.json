@@ -1803,7 +1803,8 @@
       "files": "Dosyalar",
       "settings": "Ayarlar",
       "hideRail": "Kenar çubuğunu gizle",
-      "showRail": "Kenar çubuğunu göster"
+      "showRail": "Kenar çubuğunu göster",
+      "project": "GitHub’da SealSkin: sorunlar ve özellik istekleri"
     },
     "home": {
       "searchPlaceholder": "Uygulamaları arayın veya izole olarak açmak için bir bağlantı yapıştırın",

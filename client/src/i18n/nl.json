@@ -1803,7 +1803,8 @@
       "files": "Bestanden",
       "settings": "Instellingen",
       "hideRail": "Zijbalk verbergen",
-      "showRail": "Zijbalk tonen"
+      "showRail": "Zijbalk tonen",
+      "project": "SealSkin op GitHub: problemen en functieverzoeken"
     },
     "home": {
       "searchPlaceholder": "Zoek applicaties, of plak een link om die geïsoleerd te openen",
