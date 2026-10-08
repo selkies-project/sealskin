@@ -3,6 +3,29 @@ html { width: auto; height: 100%; overflow: auto; }
 body.home { min-height: 100%; }
 body.home [hidden] { display: none !important; }
 
+/* The user's background behind everything, blurred and dimmed as they set it; the cards go glassy over a picture. */
+#backdrop { position: fixed; inset: 0; z-index: -1; background-color: var(--bg-0); --bg-blur: 0px; --bg-dim: 0; --bg-color: #7c6cf0; }
+#backdrop::before { content: ""; position: absolute; inset: calc(-2 * var(--bg-blur)); background: inherit; filter: blur(var(--bg-blur)); }
+#backdrop::after { content: ""; position: absolute; inset: 0; background-color: rgba(5, 8, 13, var(--bg-dim)); }
+/* The color styles: gradients painted out of the chosen color, shared by the backdrop and the panel's previews. The shared button rules are specific, hence the ids. */
+.paint.style-solid { --paint: var(--bg-color); }
+.paint.style-glow { --paint: radial-gradient(70% 60% at 50% 0%, color-mix(in srgb, var(--bg-color) 70%, transparent), transparent 72%), color-mix(in srgb, var(--bg-color) 14%, #0d1117); }
+.paint.style-diagonal { --paint: linear-gradient(135deg, color-mix(in srgb, var(--bg-color) 55%, #0d1117) 0%, #0d1117 52%, color-mix(in srgb, var(--bg-color) 32%, #0d1117) 100%); }
+.paint.style-aurora { --paint: radial-gradient(45% 55% at 12% 18%, color-mix(in srgb, var(--bg-color) 65%, transparent), transparent 70%), radial-gradient(50% 45% at 88% 85%, color-mix(in srgb, var(--bg-color) 40%, #38bdf8 20%), transparent 70%), radial-gradient(35% 40% at 70% 10%, color-mix(in srgb, var(--bg-color) 30%, #f472b6 15%), transparent 70%), #0a0d14; }
+.paint.style-vignette { --paint: radial-gradient(ellipse 80% 70% at 50% 45%, color-mix(in srgb, var(--bg-color) 45%, #0d1117), #05070b 100%); }
+#backdrop.paint, #customize .bg-choice.paint { background: var(--paint); }
+/* A picture: filled, fitted, stretched, or centered at its own size; never tiled. */
+#backdrop.picture, .bg-preview.picture { background-color: #0a0d14; background-position: center; background-repeat: no-repeat; }
+.picture.fit-cover { background-size: cover; }
+.picture.fit-contain { background-size: contain; }
+.picture.fit-stretch { background-size: 100% 100%; }
+.picture.fit-center { background-size: auto; }
+body.has-backdrop { background-color: transparent; }
+body.has-picture .session-tile, body.has-picture .app-tile, body.has-picture .hero-search, body.has-picture .stat-chip { background-color: color-mix(in srgb, var(--bg-1) 82%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+body.has-picture .app-tile:hover, body.has-picture .app-tile:focus-within { background-color: color-mix(in srgb, var(--bg-2) 86%, transparent); }
+.home-hint { font-size: 0.78rem; color: var(--text-muted); }
+button.icon-only { width: 38px; height: 38px; padding: 0; display: inline-grid; place-items: center; flex-shrink: 0; }
+
 .home-wrap { max-width: 1400px; margin: 0 auto; padding: 2rem clamp(1rem, 3vw, 2.5rem) 4rem; display: flex; flex-direction: column; gap: 2rem; }
 .home h2 { margin: 0; font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; }
 .home section { display: flex; flex-direction: column; gap: 1rem; }
@@ -49,20 +72,48 @@ body.home [hidden] { display: none !important; }
 }
 .chip-row button.secondary.active { background-color: var(--accent-soft); border-color: var(--accent-border); color: var(--accent-text-strong); }
 
-/* Sessions */
-.session-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 0.9rem; }
+/* Sessions: a card per session, its desktop on top and its name, options, and actions below. */
+.session-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.9rem; }
 .session-tile {
   display: flex;
-  align-items: center;
-  gap: 0.9rem;
-  padding: 0.9rem 1rem;
+  flex-direction: column;
+  overflow: hidden;
   background-color: var(--bg-1);
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
   animation: riseIn var(--dur-slow) var(--ease-out) both;
+  transition: transform var(--dur-fast) var(--ease-out), border-color var(--dur), box-shadow var(--dur);
 }
-.session-tile:hover { border-color: var(--border-strong); }
-.session-tile img { width: 44px; height: 44px; object-fit: contain; flex-shrink: 0; }
+.session-tile:hover, .session-tile:focus-within { transform: translateY(-2px); border-color: var(--accent-border); box-shadow: var(--shadow-md); }
+/* A card on its way out is shrinking under its own animation, which the hover lift would fight. */
+.session-tile.stopping { pointer-events: none; transition: none; transform-origin: center; }
+/* The desktop, 16:9, with the application's logo over it until a screenshot comes, and small in a corner once one has. */
+.session-tile .shot {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 0;
+  background: radial-gradient(ellipse at 50% 120%, var(--bg-3), var(--bg-2) 70%);
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+}
+.session-tile .shot:focus-visible { outline: none; box-shadow: inset 0 0 0 3px var(--accent-primary); }
+.shot .preview { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity var(--dur-slow) var(--ease-out); }
+.session-tile.has-shot .preview { opacity: 1; }
+.shot .logo { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; object-fit: contain; transform: translate(-50%, -50%); filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5)); transition: left var(--dur-slow) var(--ease-out), top var(--dur-slow) var(--ease-out), width var(--dur-slow), height var(--dur-slow), transform var(--dur-slow) var(--ease-out); }
+.session-tile.has-shot .logo { left: 0.6rem; top: calc(100% - 0.6rem); width: 28px; height: 28px; transform: translateY(-100%); }
+/* A hint of what a click does, over the screenshot only. */
+.shot .play { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: 2rem; background-color: rgba(5, 8, 13, 0.35); opacity: 0; transition: opacity var(--dur); }
+.session-tile.has-shot .shot:hover .play, .session-tile.has-shot .shot:focus-visible .play { opacity: 1; }
+/* Without a pointer to hover, a small mark in the corner says the picture opens the session. */
+@media (hover: none) { .session-tile.has-shot .shot .play { opacity: 1; place-items: end; padding: 0.5rem; font-size: 1.1rem; background: none; filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.7)); } }
+.session-foot { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0.9rem; }
 .session-info { flex: 1; min-width: 0; }
 .session-info .name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .session-info .meta { font-size: 0.78rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -71,7 +122,29 @@ body.home [hidden] { display: none !important; }
 .badge i { margin-right: 0.25rem; }
 .session-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
 .session-actions button { padding: 0.45rem 0.8rem; font-size: 0.82rem; }
+/* A launch under way: the launching page's checklist of stages, in a card. */
 .session-tile.launching { border-style: dashed; border-color: var(--accent-border); }
+.launch-card { display: flex; flex-direction: column; gap: 0.6rem; padding: 0.9rem 1rem; }
+.launch-head { display: flex; align-items: center; gap: 0.75rem; }
+.launch-head .logo { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
+.launch-head .elapsed { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.launch-card .stage { margin: 0; font-size: 0.95rem; font-weight: 600; }
+.launch-card .hint { margin: 0; white-space: normal; }
+.launch-card .steps { list-style: none; margin: 0; padding: 0 0 0 0.3rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.launch-card .steps li { display: flex; align-items: baseline; gap: 0.6rem; font-size: 0.82rem; color: var(--text-muted); }
+.launch-card .steps li::before { content: ""; width: 0.5rem; height: 0.28rem; flex-shrink: 0; border-left: 2px solid #6ee7b7; border-bottom: 2px solid #6ee7b7; transform: rotate(-45deg) translateY(-0.2rem); }
+.launch-card .steps li.current { color: var(--text-primary); }
+.launch-card .steps li.current::before { width: 0.5rem; height: 0.5rem; border: none; border-radius: 50%; background-color: var(--accent-primary); transform: none; animation: stepPulse 1.2s ease-in-out infinite; }
+.launch-card .steps li span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.launch-card .steps li span:last-child { margin-left: auto; flex-shrink: 0; font-variant-numeric: tabular-nums; font-size: 0.75rem; }
+@keyframes stepPulse { 50% { opacity: 0.35; } }
+
+/* Opening a session in this tab: a copy of its desktop grows from the card over the page, which the session then replaces. */
+.zoom-ghost { position: fixed; z-index: 100; overflow: hidden; background-color: var(--bg-2); border: 1px solid var(--border-color); box-shadow: var(--shadow-lg); pointer-events: none; }
+.zoom-ghost img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.zoom-ghost .logo { inset: auto; left: 50%; top: 50%; width: 96px; height: 96px; object-fit: contain; transform: translate(-50%, -50%); filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5)); }
+body.zooming { overflow: hidden; }
+body.zooming .home-wrap { opacity: 0.35; transition: opacity var(--dur-slow) var(--ease-out); }
 
 .inline-spinner { display: inline-block; width: 0.9em; height: 0.9em; border: 2px solid var(--bg-3); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: -0.1em; margin-right: 0.35em; }
 
@@ -100,8 +173,8 @@ body.home [hidden] { display: none !important; }
 .app-tile .stage:empty { display: none; }
 .app-tile .quick {
   position: absolute;
-  top: 0.5rem;
   right: 0.5rem;
+  bottom: 0.5rem;
   width: 32px;
   height: 32px;
   padding: 0;
@@ -113,6 +186,15 @@ body.home [hidden] { display: none !important; }
 .app-tile:hover .quick, .app-tile:focus-within .quick, .app-tile .quick:focus-visible { opacity: 1; }
 @media (hover: none) { .app-tile .quick { opacity: 1; } }
 .app-tile.busy .quick { display: none; }
+.app-tile.favorite::before { content: "\f005"; position: absolute; top: 0.55rem; left: 0.6rem; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 0.7rem; color: var(--color-warning-text); opacity: 0.85; }
+
+/* Favorites being reordered: the picked tile fades where it was, and a copy of it rides the pointer. */
+#favorites-grid .app-tile { touch-action: pan-y; }
+#favorites-grid.reordering .app-tile { cursor: grabbing; transition: none; }
+#favorites-grid.reordering .app-tile .quick { opacity: 0; }
+.app-tile.drag-source { opacity: 0.3; transform: none !important; box-shadow: none !important; }
+.app-tile.drag-ghost { position: fixed; z-index: 60; margin: 0; pointer-events: none; transform: scale(1.04); box-shadow: var(--shadow-lg); border-color: var(--accent-border); background-color: var(--bg-2); }
+.app-tile.drag-ghost .quick { display: none; }
 
 .app-tile.skeleton { cursor: default; pointer-events: none; }
 .skeleton .bone { border-radius: var(--radius-sm); background: linear-gradient(90deg, var(--bg-2) 25%, var(--bg-3) 50%, var(--bg-2) 75%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
@@ -123,8 +205,14 @@ body.home [hidden] { display: none !important; }
 .home-empty i { font-size: 2.2rem; }
 .home-empty p { margin: 0; }
 
-/* Launch panel: a drawer on the right, a sheet from the bottom on a narrow window. */
-#drawer-backdrop { position: fixed; inset: 0; z-index: 20; background-color: rgba(5, 8, 13, 0.6); backdrop-filter: blur(2px); animation: fadeIn var(--dur) var(--ease-out); }
+/* Launch window: centered, unfolding from its tile (home.js animates it); a sheet from the bottom on a narrow window. The customize panel is a drawer on the right. */
+#drawer-backdrop, #customize-backdrop { position: fixed; inset: 0; z-index: 20; background-color: rgba(5, 8, 13, 0.6); backdrop-filter: blur(2px); animation: fadeIn var(--dur) var(--ease-out); }
+#drawer { right: auto; bottom: auto; width: min(440px, calc(100vw - 24px)); max-height: calc(100vh - 24px); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); animation: none; }
+.drawer-head .icon-only { margin-left: 0.1rem; }
+#favorite-btn.active { color: var(--color-warning-text); border-color: rgba(245, 158, 11, 0.4); background-color: var(--color-warning-soft); }
+.favorite-order { display: flex; gap: 0.5rem; padding: 0.75rem 1.25rem 0; }
+.favorite-order button { flex: 1; padding: 0.4rem 0.6rem; font-size: 0.82rem; }
+.favorite-order button:disabled { opacity: 0.4; }
 .drawer {
   position: fixed;
   z-index: 21;
@@ -156,6 +244,37 @@ body.home [hidden] { display: none !important; }
 #drop-overlay { position: fixed; inset: 0.75rem; z-index: 30; display: grid; place-items: center; border: 2px dashed var(--accent-primary); border-radius: var(--radius-lg); background-color: rgba(13, 17, 23, 0.88); color: var(--accent-text-strong); text-align: center; pointer-events: none; }
 #drop-overlay i { font-size: 3rem; }
 
+/* Customize panel */
+.customize .drawer-icon { width: 48px; height: 48px; display: grid; place-items: center; font-size: 1.3rem; color: var(--accent-text); }
+.customize .drawer-body { display: flex; flex-direction: column; gap: 0.25rem; }
+/* A row of choices of which one holds. */
+.seg { display: flex; padding: 0.2rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background-color: var(--bg-0); }
+#customize .seg button { flex: 1; margin: 0; padding: 0.45rem 0.5rem; border: none; border-radius: 6px; background: none; color: var(--text-secondary); font: inherit; font-size: 0.85rem; font-weight: 500; cursor: pointer; transform: none; transition: background-color var(--dur), color var(--dur); }
+#customize .seg button:hover { color: var(--text-primary); }
+#customize .seg button.active { background-color: var(--glass-strong); color: var(--text-primary); box-shadow: var(--shadow-sm); }
+.swatches { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem; }
+#customize .swatch { position: relative; display: grid; place-items: center; aspect-ratio: 1; margin: 0; padding: 0; border: 2px solid transparent; border-radius: 50%; background: var(--swatch, var(--bg-2)); color: var(--text-secondary); font-size: 0.85rem; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08); transition: transform var(--dur-fast) var(--ease-out), border-color var(--dur); }
+#customize .swatch:hover { transform: scale(1.08); }
+#customize .swatch.active { border-color: #fff; box-shadow: 0 0 0 3px var(--accent-soft); }
+#customize .swatch.custom { background: conic-gradient(#ef4444, #f59e0b, #22c55e, #06b6d4, #7c6cf0, #e04fb0, #ef4444); }
+#customize .swatch.custom i { color: #fff; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6)); }
+#customize .swatch.custom input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.bg-choices { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; }
+#customize .bg-choice { position: relative; display: grid; place-items: center; aspect-ratio: 4 / 3; margin: 0; padding: 0; border: 2px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-secondary); font-size: 1rem; cursor: pointer; transition: border-color var(--dur), transform var(--dur-fast) var(--ease-out); }
+#customize .bg-choice:hover { transform: translateY(-1px); border-color: var(--border-strong); }
+#customize .bg-choice.active { border-color: var(--accent-primary); box-shadow: 0 0 0 3px var(--accent-soft); }
+/* The picture as it will sit, with the upload over it. */
+.bg-preview { position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9; border: 1px dashed var(--border-strong); border-radius: var(--radius-sm); background-color: var(--bg-0); overflow: hidden; }
+.bg-preview.picture { border-style: solid; }
+.bg-preview button { position: relative; z-index: 1; }
+.bg-preview.picture button { opacity: 0; transition: opacity var(--dur); }
+.bg-preview.picture:hover button, .bg-preview.picture:focus-within button { opacity: 1; }
+.bg-preview.picture::after { content: ""; position: absolute; inset: 0; background-color: rgba(5, 8, 13, 0); transition: background-color var(--dur); }
+.bg-preview.picture:hover::after { background-color: rgba(5, 8, 13, 0.45); }
+.customize .form-group label output { float: right; color: var(--text-muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.customize input[type="range"] { width: 100%; margin: 0.4rem 0 0; accent-color: var(--accent-primary); }
+.customize input[type="range"]:disabled { opacity: 0.4; }
+
 @media (max-width: 700px) {
   .home-wrap { padding-top: 1rem; gap: 1.5rem; }
   .hero-search { flex-basis: 100%; padding-left: 0.9rem; }
@@ -164,6 +283,11 @@ body.home [hidden] { display: none !important; }
   .app-tiles { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 0.6rem; }
   .app-tile { padding: 1.1rem 0.5rem 0.9rem; }
   .app-tile img { width: 52px; height: 52px; }
-  .session-row { grid-template-columns: 1fr; }
-  .drawer { top: auto; left: 0; width: 100%; max-height: 88dvh; border-left: none; border-top: 1px solid var(--border-strong); border-radius: var(--radius-lg) var(--radius-lg) 0 0; animation-name: sheetIn; }
+  .session-row { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.6rem; }
+  .session-foot { padding: 0.6rem 0.7rem; }
+  /* The picture opens the session; the foot keeps the room for the name and the stop button. */
+  .session-actions [data-action="open"] { display: none; }
+  .session-actions button { padding: 0.4rem 0.6rem; }
+  .shot .logo { width: 44px; height: 44px; }
+  .drawer, #drawer { top: auto; right: 0; bottom: 0; left: 0; width: 100%; max-height: 88dvh; border: none; border-top: 1px solid var(--border-strong); border-radius: var(--radius-lg) var(--radius-lg) 0 0; animation: sheetIn var(--dur) var(--ease-out); }
 }

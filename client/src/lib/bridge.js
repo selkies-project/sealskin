@@ -262,6 +262,16 @@ export const bridge = {
     return request('focusSession', { session });
   },
 
+  /**
+   * Tell the host this page is growing a session over itself before the tab
+   * goes to it, so the host can fold its frame away, or that it gave up.
+   *
+   * @param {boolean} [leaving=true]
+   */
+  leaving(leaving = true) {
+    return request('leaving', { leaving }).catch(() => {});
+  },
+
   closeSession(sessionId) {
     return request('closeSession', { sessionId });
   },

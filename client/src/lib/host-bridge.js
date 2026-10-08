@@ -73,6 +73,7 @@ export async function callBackground(transport, type, payload = {}) {
  * @param {function} [options.reserveTab] `(reserve, launch?) => void`, web app tab reservation; with
  *   `launch` (`{id, app, logo, room}`) the tab shows the launching page, and a throw refuses the launch.
  * @param {function} [options.adoptLaunch] `(launchId, sessionId) => boolean`, web app: the launch's tab is the session's.
+ * @param {function} [options.onLeave] `(leaving) => void`, web app: the framed page is growing a session over itself, or gave up.
  * @param {function} [options.close] Closes the popup (extension) or no-op.
  * @param {function} [options.isConnectPage] `() => boolean`, true while the bundled connect page is framed.
  * @returns {{setExpectedOrigin: function(string): void, destroy: function(): void}}
@@ -170,6 +171,11 @@ export function createHost(options) {
 
     focusSession({ session }) {
       return callBackground(transport, 'focusOrCreateTab', { session });
+    },
+
+    async leaving({ leaving }) {
+      if (options.onLeave) options.onLeave(leaving !== false);
+      return {};
     },
 
     closeSession({ sessionId }) {

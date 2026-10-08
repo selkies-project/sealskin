@@ -44,7 +44,7 @@ let session = {
 };
 
 /** Storage keys the served pages may read and write through the bridge. */
-const STORAGE_ALLOWED_EXACT = new Set(['simple_launch_profile', 'sealskinPendingConfig']);
+const STORAGE_ALLOWED_EXACT = new Set(['simple_launch_profile', 'home_layout', 'sealskinPendingConfig']);
 const STORAGE_ALLOWED_PREFIX = 'workflow_profile_';
 
 function isAllowedStorageKey(key) {

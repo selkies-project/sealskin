@@ -13,7 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import ValidationError
 
-from .. import cluster, config_store, routing
+from .. import cluster, config_store, routing, screenshots
 from ..fsutil import resolve_within, safe_join, unique_filename
 from ..launch import ephemeral_base, stop_session
 from ..models import ActiveSessionInfo, SendFileToSessionRequest
@@ -106,6 +106,17 @@ async def stop_my_session(session_id: str, user: dict[str, Any] = Depends(verify
         raise HTTPException(status_code=404, detail="Session not found or permission denied.")
     await stop_session(session_id)
     return Response(status_code=204)
+
+
+@router.get("/{session_id}/screenshot", dependencies=[Depends(routing.session_node)])
+async def session_screenshot(
+    session_id: str, fresh: bool = False, user: dict[str, Any] = Depends(verify_token)
+) -> dict[str, Any]:
+    """A thumbnail of one of the calling user's sessions, as `screenshots.thumbnail` makes it; `fresh` takes a new one."""
+    data = state.sessions.get(session_id)
+    if not data or data.get("username") != user["username"]:
+        raise HTTPException(status_code=404, detail="Session not found or permission denied.")
+    return await screenshots.thumbnail(session_id, data, fresh=fresh)
 
 
 @router.post("/{session_id}/send_file", dependencies=[Depends(routing.session_node)])

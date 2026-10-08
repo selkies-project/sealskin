@@ -58,11 +58,9 @@ const post = (url, body) => api(url, { method: 'POST', body: JSON.stringify(body
 // The rail's destinations as the page and parameters the host frames.
 const DESTINATIONS = {
   home: ['home', {}],
-  sessions: ['home', { view: 'sessions' }],
   files: ['files', {}],
   options: ['options', {}],
 };
-const BADGE_REFRESH_MS = 15000;
 const LAUNCH_CHANNEL_MS = 30 * 60 * 1000;
 
 const $ = (selector) => document.querySelector(selector);
@@ -132,27 +130,16 @@ function showDestination(page, params = {}) {
     document.body.classList.add('signed-out');
     return;
   }
-  const current = page === 'home' && params.view === 'sessions' ? 'sessions' : page;
   $$('.rail-links button').forEach((button) => {
-    if (button.dataset.dest === current) button.setAttribute('aria-current', 'page');
+    if (button.dataset.dest === page) button.setAttribute('aria-current', 'page');
     else button.removeAttribute('aria-current');
   });
   const search = `?${new URLSearchParams({ page, ...params })}`;
   // Going back or forward arrives with the address already there; the first page takes the address it loaded at.
   if (search !== location.search) history[addressed ? 'pushState' : 'replaceState'](null, '', location.pathname + search);
   addressed = true;
-  refreshBadge();
-}
-
-async function refreshBadge() {
-  if (document.body.classList.contains('signed-out') || document.hidden) return;
-  const sessions = await api('/api/sessions', { method: 'GET' }).catch(() => null);
-  if (!sessions) {
-    renewProxySignIn();
-    return;
-  }
-  $('#sessions-badge').textContent = sessions.length;
-  $('#sessions-badge').hidden = sessions.length === 0;
+  // Back in the frame, the rail is back too.
+  document.body.classList.remove('leaving');
 }
 
 async function signOut() {
@@ -164,7 +151,7 @@ async function signOut() {
 }
 
 function bindShell() {
-  const labels = { home: 'web.nav.home', sessions: 'web.nav.sessions', files: 'web.nav.files', options: 'web.nav.settings' };
+  const labels = { home: 'web.nav.home', files: 'web.nav.files', options: 'web.nav.settings' };
   $$('.rail-links button').forEach((button) => {
     const { dest } = button.dataset;
     if (labels[dest]) button.querySelector('span').textContent = t(labels[dest]);
@@ -181,6 +168,20 @@ function bindShell() {
       location.reload();
     });
   });
+  // The rail folds away on request, leaving a tab at the window's edge to bring it back; the choice is kept per browser.
+  const RAIL_KEY = 'sealskin-rail';
+  const showRail = (shown) => {
+    document.body.classList.toggle('rail-hidden', !shown);
+    $('#rail-peek').hidden = shown;
+    $('#rail-hide').title = t('web.nav.hideRail');
+    $('#rail-peek').title = t('web.nav.showRail');
+    try { localStorage.setItem(RAIL_KEY, shown ? 'shown' : 'hidden'); } catch (e) { /* no storage */ }
+  };
+  let railShown = true;
+  try { railShown = localStorage.getItem(RAIL_KEY) !== 'hidden'; } catch (e) { /* no storage */ }
+  showRail(railShown);
+  $('#rail-hide').addEventListener('click', () => showRail(false));
+  $('#rail-peek').addEventListener('click', () => showRail(true));
   const menu = $('#account-menu');
   $('#account-button').addEventListener('click', (event) => {
     event.stopPropagation();
@@ -194,7 +195,8 @@ function bindShell() {
     const { page = 'home', ...params } = Object.fromEntries(new URLSearchParams(location.search));
     hostApi.openPage(page, params);
   });
-  setInterval(refreshBadge, BADGE_REFRESH_MS);
+  // Back from a session, the page may come out of the back-forward cache with its rail folded away.
+  window.addEventListener('pageshow', (event) => { if (event.persisted) document.body.classList.remove('leaving'); });
 }
 
 /** Ask the background for the session-origin suffix, which it probes for once. */
@@ -621,6 +623,8 @@ async function start() {
     connect,
     streamDownload: (await worker) && streamsTransfer() ? streamDownload : undefined,
     onPageChange: showDestination,
+    // The rail folds away while a session grows out of its card in the frame (see home.js).
+    onLeave: (leaving) => document.body.classList.toggle('leaving', leaving),
   });
   hooks.openPopup = () => hostApi.openPage('home');
 }

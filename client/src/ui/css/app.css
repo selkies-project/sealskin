@@ -53,21 +53,6 @@ body { display: grid; grid-template: "rail stage" 100% / var(--rail) 1fr; height
 .rail-links button:focus-visible, .sign-out:focus-visible, .root-sign-in:focus-visible, .avatar:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-soft), 0 0 0 1px var(--accent-primary); }
 .rail-links button[aria-current="page"] { background-color: var(--accent-soft); border-color: rgba(139, 124, 246, 0.5); color: #cdc6ff; }
 
-#sessions-badge {
-  position: absolute;
-  top: 0.3rem;
-  left: calc(50% + 0.45rem);
-  min-width: 1.1rem;
-  padding: 0 0.3rem;
-  border-radius: 999px;
-  background: var(--accent-gradient);
-  color: #fff;
-  font-size: 0.65rem;
-  line-height: 1.1rem;
-  text-align: center;
-}
-#sessions-badge[hidden] { display: none; }
-
 .rail-account { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; width: 100%; padding-top: 0.75rem; border-top: 1px solid var(--border-color); }
 .avatar {
   display: grid;
@@ -121,6 +106,38 @@ body { display: grid; grid-template: "rail stage" 100% / var(--rail) 1fr; height
   .rail-links { flex-direction: row; align-items: stretch; height: 100%; }
   .rail-links button { flex: 1; justify-content: center; padding: 0.3rem 0.2rem; }
 }
+
+/* A session growing out of its card in the frame: the frame takes the whole window, above the rail, which fades under it. */
+body.leaving #stage { position: fixed; inset: 0; z-index: 15; }
+body.leaving #rail, body.leaving #topbar, body.leaving .rail-peek { opacity: 0; pointer-events: none; transition: opacity var(--dur) var(--ease-out); }
+
+/* The rail hidden on request: a tab at the window's edge brings it back. */
+.rail-hide { width: 100%; padding: 0.4rem 0; border: none; background: none; color: var(--text-muted); font-size: 0.8rem; cursor: pointer; border-radius: var(--radius-sm); }
+.rail-hide:hover { background-color: var(--glass-strong); color: var(--text-primary); }
+body.rail-hidden { grid-template-columns: 0 1fr; }
+body.rail-hidden #rail { display: none; }
+.rail-peek {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  z-index: 10;
+  width: 18px;
+  height: 56px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-left: none;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background-color: var(--bg-1);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+  opacity: 0.55;
+  transform: translateY(-50%);
+  transition: opacity var(--dur), width var(--dur) var(--ease-out), color var(--dur);
+}
+.rail-peek:hover { width: 26px; opacity: 1; color: var(--text-primary); }
+.rail-peek[hidden] { display: none; }
+@media (max-width: 899px) { .rail-hide, .rail-peek { display: none !important; } body.rail-hidden { grid-template-columns: 100%; } body.rail-hidden #rail { display: flex; } }
 
 /* Signed out, the sign-in panel has the window. */
 body.signed-out { display: block; }

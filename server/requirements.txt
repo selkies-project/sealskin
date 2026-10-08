@@ -12,3 +12,4 @@ python-multipart==0.0.32
 watchfiles==1.3.0
 lxml==6.1.3
 signxml==5.1.0
+Pillow==12.3.0

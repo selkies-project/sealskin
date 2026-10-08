@@ -192,14 +192,28 @@ dashboard shows who you are signed in as and has **Sign out**; a logout at
 the identity provider ends the sign-in as well.
 
 The web app fills the window. A rail on the left (a tab bar at the bottom of
-a phone) moves between **Home**, **Sessions**, **Files**, and the dashboard,
-and shows who is signed in. **Home** has a box that filters the applications
-as you type and takes a pasted link to open in isolation, the sessions you
-have running with **Open** and **Stop**, and the applications as tiles,
-grouped by kind with your recent ones first. Click a tile for its launch
-options, which are remembered per application, or its play button to launch
-with them straight away. Drop a file anywhere on the page to open it in an
-application that takes it.
+a phone) moves between **Home**, **Files**, and the dashboard, and shows who
+is signed in. **Home** has a box that filters the applications as you type
+and takes a pasted link to open in isolation, the sessions you have running
+as cards that show their desktops, captured when you come to the page and
+refreshed now and then while you use it, with **Open** and **Stop**, and the
+applications as tiles, grouped by kind with your recent ones first. Opening a
+session in the same tab grows its card over the page into the desktop. A tile
+opens its application's launch options in a window that unfolds from the
+tile; the options are remembered per application, and the play button in the
+tile's corner launches with them straight away. Drop a file anywhere on the
+page to open it in an application that takes it.
+
+The page is yours to arrange. From the options panel an application can be
+starred as a favorite or hidden from the page. Favorites sit in a row of
+their own above the applications, in the order you drag them into (or move
+them from the panel), and hidden applications wait under the **Hidden** chip
+until shown again. The brush beside the search box sets the page's
+background: a color, from the presets or your own, painted solid or as
+one of several gradients, or a picture of your own, filled, fitted,
+stretched, or centered, with blur and dim to taste. The sidebar folds away from the chevron at its foot and
+comes back from the tab left at the window's edge. All of this is kept in
+the browser, so each browser has its own arrangement.
 
 Launching shows what the server is doing on the application's tile and in
 the sessions row: choosing a node, preparing storage, downloading the

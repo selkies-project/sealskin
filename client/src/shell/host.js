@@ -104,6 +104,7 @@ export function pageTransport(message) {
  * @param {string} [overrides.launcher] page a shell shows as its launcher in place of `popup`
  * @param {function} [overrides.connect] web app: shows its sign-in in the panel in place of the connect page
  * @param {function} [overrides.onPageChange] `(page, params) => void`, mobile back button and web app address bookkeeping
+ * @param {function} [overrides.onLeave] `(leaving) => void`, web app: the framed page is growing a session over itself, see `createHost`
  * @returns {{openPage: function(string, object=): void, currentPage: function(): string, boot: function(): Promise<void>}}
  */
 export function initHost(overrides = {}) {
@@ -314,6 +315,7 @@ export function initHost(overrides = {}) {
     reserveTab: overrides.reserveTab,
     adoptLaunch: overrides.adoptLaunch,
     streamDownload: overrides.streamDownload,
+    onLeave: overrides.onLeave,
     isConnectPage: () => framedConnect,
     close: () => {
       if (isPopupWindow) window.close();
