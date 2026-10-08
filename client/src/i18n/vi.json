@@ -301,6 +301,41 @@
       "deleteDisabled": "Mẫu này không thể bị xóa.",
       "enterName": "Vui lòng nhập tên cho mẫu mới.",
       "dockerAdminOnly": "Chỉ quản trị viên mới có thể thay đổi các cài đặt này.",
+      "filterPlaceholder": "Lọc cài đặt theo tên…",
+      "changedOnly": "Chỉ mục đã đổi",
+      "showMore": "Hiện thêm",
+      "showLess": "Ẩn bớt",
+      "changedCount": "{count, plural, one {1 đã đổi} other {{count} đã đổi}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC, chế độ kép"
+      },
+      "sections": {
+        "appearance": "Giao diện",
+        "display": "Hiển thị",
+        "input": "Nhập liệu",
+        "audio": "Âm thanh",
+        "webcam": "Webcam",
+        "performance": "Hiệu năng",
+        "gpu": "GPU",
+        "clipboard": "Bảng nhớ tạm và tệp",
+        "sharing": "Chia sẻ",
+        "hardening": "Tăng cường bảo mật",
+        "lifecycle": "Vòng đời",
+        "integrations": "Tích hợp",
+        "webrtc": "WebRTC",
+        "container": "Container"
+      },
+      "groups": {
+        "mode": "Chế độ",
+        "transport": "Truyền tải",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "TURN REST API",
+        "cloudflare": "Cloudflare TURN",
+        "extra": "Chẩn đoán"
+      },
       "settings": {
         "TITLE": {
           "label": "Tiêu đề trang",
@@ -747,10 +782,6 @@
           "label": "Backend Wayland",
           "description": "Chạy phiên trên backend Wayland, một trình tổng hợp không đầu với labwc lồng bên trong để quản lý cửa sổ, thay cho máy chủ X11. Các ứng dụng X11 chạy qua XWayland."
         },
-        "MAX_RES": {
-          "label": "Độ phân giải tối đa",
-          "description": "Độ phân giải tối đa cho container, mặc định là 16k."
-        },
         "START_DOCKER": {
           "label": "Khởi động Docker-in-Docker",
           "description": "Nếu sai, một container đặc quyền sẽ không khởi động DinD."
@@ -758,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "Vô hiệu hóa IPv6",
           "description": "Nếu đúng, điều này sẽ vô hiệu hóa IPv6."
-        },
-        "DISABLE_ZINK": {
-          "label": "Vô hiệu hóa Zink",
-          "description": "Không đặt các biến môi trường Zink nếu phát hiện có card màn hình."
         },
         "DISABLE_DRI3": {
           "label": "Vô hiệu hóa DRI3",
@@ -1172,10 +1199,7 @@
       "newVersion": "Phiên bản mới: {sha}",
       "errorPulling": "Lỗi khi kéo image.",
       "manualInstallNote": "Lưu ý: Các hình ảnh được thêm thủ công phải dựa trên một hình ảnh tương thích với selkies-baseimage.",
-      "generalTitle": "Cài đặt Chung & Hiệu suất",
-      "webrtcTitle": "Cài đặt WebRTC và TURN",
       "webrtcDescription": "Theo mặc định, các phiên truyền phát qua WebSockets. Việc đặt bất kỳ giá trị STUN, TURN, Cloudflare hoặc IP công khai nào bên dưới, hoặc chọn chế độ WebRTC, sẽ chuyển container sang WebRTC với chế độ kép được bật để người dùng vẫn có thể quay lại WebSockets.",
-      "dockerTitle": "Ghi đè nâng cao Docker",
       "dockerDescription": "Các cài đặt này ghi đè cấu hình container mặc định. Sử dụng thận trọng và chỉ khi bạn biết mình đang làm gì."
     },
     "status": {
@@ -1805,6 +1829,40 @@
       "hideRail": "Ẩn thanh bên",
       "showRail": "Hiện thanh bên",
       "project": "SealSkin trên GitHub: báo lỗi và yêu cầu tính năng"
+    },
+    "profile": {
+      "open": "Hồ sơ của bạn",
+      "signIn": "Đăng nhập",
+      "method": "Đăng nhập qua",
+      "until": "Đăng nhập đến",
+      "proxyKeeps": "Chừng nào reverse proxy còn giữ bạn đăng nhập",
+      "node": "Nút",
+      "groups": "Nhóm",
+      "noGroups": "Không có nhóm: áp dụng mặc định của máy chủ.",
+      "providerGroups": "Do nhà cung cấp danh tính nêu:",
+      "proxyGroups": "Do reverse proxy nêu:",
+      "access": "Quyền truy cập",
+      "adminNote": "Quản trị viên có mọi khả năng và không có giới hạn.",
+      "canStorage": "Lưu trữ lâu dài",
+      "canShare": "Chia sẻ công khai",
+      "canGpu": "GPU",
+      "canTemplates": "Sửa mẫu",
+      "canMigrate": "Di chuyển thư mục nhà",
+      "limits": "Giới hạn",
+      "unlimited": "Không giới hạn",
+      "sessions": "Phiên",
+      "sessionsOf": "Tối đa {limit} cùng lúc",
+      "sessionsRunning": "{running} đang chạy",
+      "sessionsRunningOf": "{running} đang chạy trên {limit}",
+      "cpus": "CPU mỗi phiên",
+      "memory": "Bộ nhớ mỗi phiên",
+      "hours": "Thời lượng phiên",
+      "hoursValue": "{hours} giờ",
+      "storage": "Lưu trữ",
+      "pools": "Pool",
+      "anyPool": "Bất kỳ pool nào máy chủ cung cấp.",
+      "poolsDenied": "Trừ những pool này:",
+      "catalog": "Danh mục PRoot Apps"
     },
     "home": {
       "searchPlaceholder": "Tìm kiếm ứng dụng, hoặc dán một liên kết để mở nó trong môi trường cách ly",

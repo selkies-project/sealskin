@@ -301,6 +301,41 @@
       "deleteDisabled": "Denne skabelon kan ikke slettes.",
       "enterName": "Indtast venligst et navn til den nye skabelon.",
       "dockerAdminOnly": "Kun en administrator kan ændre disse indstillinger.",
+      "filterPlaceholder": "Filtrer indstillinger efter navn…",
+      "changedOnly": "Kun ændrede",
+      "showMore": "Vis mere",
+      "showLess": "Vis mindre",
+      "changedCount": "{count, plural, one {1 ændret} other {{count} ændret}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC, dual mode"
+      },
+      "sections": {
+        "appearance": "Udseende",
+        "display": "Skærm",
+        "input": "Input",
+        "audio": "Lyd",
+        "webcam": "Webcam",
+        "performance": "Ydelse",
+        "gpu": "GPU",
+        "clipboard": "Udklipsholder og filer",
+        "sharing": "Deling",
+        "hardening": "Hærdning",
+        "lifecycle": "Livscyklus",
+        "integrations": "Integrationer",
+        "webrtc": "WebRTC",
+        "container": "Container"
+      },
+      "groups": {
+        "mode": "Tilstand",
+        "transport": "Transport",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "TURN REST-API",
+        "cloudflare": "Cloudflare TURN",
+        "extra": "Diagnostik"
+      },
       "settings": {
         "TITLE": {
           "label": "Sidetitel",
@@ -747,10 +782,6 @@
           "label": "Wayland-backend",
           "description": "Kører sessionen på Wayland-backenden, en hovedløs compositor med indlejret labwc til vindueshåndtering, i stedet for X11-serveren. X11-programmer kører via XWayland."
         },
-        "MAX_RES": {
-          "label": "Maksimal Opløsning",
-          "description": "Maksimal opløsning for containeren, standard er 16k."
-        },
         "START_DOCKER": {
           "label": "Start Docker-i-Docker",
           "description": "Hvis falsk, vil en privilegeret container ikke starte DinD."
@@ -758,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "Deaktiver IPv6",
           "description": "Hvis sand, vil dette deaktivere IPv6."
-        },
-        "DISABLE_ZINK": {
-          "label": "Deaktiver Zink",
-          "description": "Indstil ikke Zink-miljøvariabler, hvis et grafikkort registreres."
         },
         "DISABLE_DRI3": {
           "label": "Deaktiver DRI3",
@@ -1172,10 +1199,7 @@
       "newVersion": "Ny version: {sha}",
       "errorPulling": "Fejl under hentning af image.",
       "manualInstallNote": "Bemærk: Manuelt tilføjede billeder skal være baseret på et selkies-baseimage-kompatibelt billede.",
-      "generalTitle": "Generelle & Ydelsesindstillinger",
-      "webrtcTitle": "WebRTC- og TURN-indstillinger",
       "webrtcDescription": "Sessioner streames som standard over WebSockets. Angives en STUN-, TURN-, Cloudflare- eller offentlig IP-værdi nedenfor, eller vælges WebRTC-tilstand, skifter containeren til WebRTC med dobbelt tilstand aktiveret, så brugerne stadig kan falde tilbage til WebSockets.",
-      "dockerTitle": "Docker Avancerede Tilsidesættelser",
       "dockerDescription": "Disse indstillinger tilsidesætter standard containerkonfigurationen. Brug med forsigtighed og kun hvis du ved, hvad du gør."
     },
     "status": {
@@ -1805,6 +1829,40 @@
       "hideRail": "Skjul sidepanelet",
       "showRail": "Vis sidepanelet",
       "project": "SealSkin på GitHub: fejl og ønsker til funktioner"
+    },
+    "profile": {
+      "open": "Din profil",
+      "signIn": "Login",
+      "method": "Logget ind via",
+      "until": "Logget ind indtil",
+      "proxyKeeps": "Så længe den omvendte proxy holder dig logget ind",
+      "node": "Node",
+      "groups": "Grupper",
+      "noGroups": "Ingen gruppe: serverens standarder gælder.",
+      "providerGroups": "Angivet af identitetsudbyderen:",
+      "proxyGroups": "Angivet af den omvendte proxy:",
+      "access": "Adgang",
+      "adminNote": "Administratorer har alle muligheder og ingen grænser.",
+      "canStorage": "Vedvarende lager",
+      "canShare": "Offentlig deling",
+      "canGpu": "GPU",
+      "canTemplates": "Redigering af skabeloner",
+      "canMigrate": "Flytning af hjemmemappe",
+      "limits": "Grænser",
+      "unlimited": "Ubegrænset",
+      "sessions": "Sessioner",
+      "sessionsOf": "Op til {limit} ad gangen",
+      "sessionsRunning": "{running} kører",
+      "sessionsRunningOf": "{running} kører af {limit}",
+      "cpus": "CPU'er pr. session",
+      "memory": "Hukommelse pr. session",
+      "hours": "Sessionslængde",
+      "hoursValue": "{hours} t",
+      "storage": "Lager",
+      "pools": "Puljer",
+      "anyPool": "Enhver pulje, serveren tilbyder.",
+      "poolsDenied": "Ikke disse:",
+      "catalog": "PRoot Apps-katalog"
     },
     "home": {
       "searchPlaceholder": "Søg efter applikationer, eller indsæt et link for at åbne det isoleret",

@@ -129,6 +129,7 @@ def test_template_schema_is_public(api_client):
 def test_status_install_patch_flow(api_client, store_with_firefox):
     status, data = api_client.call("POST", "/api/admin/status", {})
     assert status == 200 and data["is_admin"] is True and data["username"] == "tester"
+    assert data["expires"] is None and data["provider_groups"] == [] and data["storage_used"] == 0
 
     status, available = api_client.call(
         "GET", "/api/admin/apps/available?url=https://example.invalid/apps.yml&store_name=Test%20Store"

@@ -301,6 +301,41 @@
       "deleteDisabled": "เทมเพลตนี้ไม่สามารถลบได้",
       "enterName": "กรุณาป้อนชื่อสำหรับเทมเพลตใหม่",
       "dockerAdminOnly": "มีเพียงผู้ดูแลระบบเท่านั้นที่เปลี่ยนการตั้งค่าเหล่านี้ได้",
+      "filterPlaceholder": "กรองการตั้งค่าตามชื่อ…",
+      "changedOnly": "เฉพาะที่เปลี่ยน",
+      "showMore": "แสดงเพิ่มเติม",
+      "showLess": "แสดงน้อยลง",
+      "changedCount": "{count, plural, one {เปลี่ยน {count} รายการ} other {เปลี่ยน {count} รายการ}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC, โหมดคู่"
+      },
+      "sections": {
+        "appearance": "ลักษณะ",
+        "display": "จอแสดงผล",
+        "input": "อินพุต",
+        "audio": "เสียง",
+        "webcam": "เว็บแคม",
+        "performance": "ประสิทธิภาพ",
+        "gpu": "GPU",
+        "clipboard": "คลิปบอร์ดและไฟล์",
+        "sharing": "การแชร์",
+        "hardening": "การเสริมความปลอดภัย",
+        "lifecycle": "วงจรชีวิต",
+        "integrations": "การเชื่อมต่อ",
+        "webrtc": "WebRTC",
+        "container": "คอนเทนเนอร์"
+      },
+      "groups": {
+        "mode": "โหมด",
+        "transport": "การขนส่ง",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "TURN REST API",
+        "cloudflare": "Cloudflare TURN",
+        "extra": "การวินิจฉัย"
+      },
       "settings": {
         "TITLE": {
           "label": "ชื่อหน้า",
@@ -747,10 +782,6 @@
           "label": "แบ็กเอนด์ Wayland",
           "description": "รันเซสชันบนแบ็กเอนด์ Wayland ซึ่งเป็นคอมโพสิเตอร์แบบไม่มีจอที่ซ้อน labwc ไว้จัดการหน้าต่าง แทนเซิร์ฟเวอร์ X11 แอปพลิเคชัน X11 ทำงานผ่าน XWayland"
         },
-        "MAX_RES": {
-          "label": "ความละเอียดสูงสุด",
-          "description": "ความละเอียดสูงสุดสำหรับคอนเทนเนอร์ ค่าเริ่มต้นคือ 16k"
-        },
         "START_DOCKER": {
           "label": "เริ่ม Docker-in-Docker",
           "description": "หากเป็นเท็จ คอนเทนเนอร์ที่มีสิทธิ์พิเศษจะไม่เริ่ม DinD"
@@ -758,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "ปิดใช้งาน IPv6",
           "description": "หากเป็นจริง จะปิดใช้งาน IPv6"
-        },
-        "DISABLE_ZINK": {
-          "label": "ปิดใช้งาน Zink",
-          "description": "ไม่ตั้งค่าตัวแปรสภาพแวดล้อม Zink หากตรวจพบการ์ดวิดีโอ"
         },
         "DISABLE_DRI3": {
           "label": "ปิดใช้งาน DRI3",
@@ -1172,10 +1199,7 @@
       "newVersion": "เวอร์ชันใหม่: {sha}",
       "errorPulling": "เกิดข้อผิดพลาดในการดึงอิมเมจ",
       "manualInstallNote": "หมายเหตุ: อิมเมจที่เพิ่มด้วยตนเองควรเป็นอิมเมจที่เข้ากันได้กับ selkies-baseimage",
-      "generalTitle": "การตั้งค่าทั่วไปและประสิทธิภาพ",
-      "webrtcTitle": "การตั้งค่า WebRTC และ TURN",
       "webrtcDescription": "เซสชันจะสตรีมผ่าน WebSockets ตามค่าเริ่มต้น การตั้งค่า STUN, TURN, Cloudflare หรือ IP สาธารณะใดๆ ด้านล่าง หรือการเลือกโหมด WebRTC จะเปลี่ยนคอนเทนเนอร์ไปใช้ WebRTC พร้อมเปิดใช้งานโหมดคู่ เพื่อให้ผู้ใช้ยังคงกลับไปใช้ WebSockets ได้",
-      "dockerTitle": "การแทนที่ขั้นสูงของ Docker",
       "dockerDescription": "การตั้งค่าเหล่านี้จะแทนที่การกำหนดค่าคอนเทนเนอร์เริ่มต้น โปรดใช้ด้วยความระมัดระวังและเฉพาะในกรณีที่คุณรู้ว่ากำลังทำอะไรอยู่"
     },
     "status": {
@@ -1805,6 +1829,40 @@
       "hideRail": "ซ่อนแถบด้านข้าง",
       "showRail": "แสดงแถบด้านข้าง",
       "project": "SealSkin บน GitHub: แจ้งปัญหาและขอฟีเจอร์"
+    },
+    "profile": {
+      "open": "โปรไฟล์ของคุณ",
+      "signIn": "การลงชื่อเข้าใช้",
+      "method": "ลงชื่อเข้าใช้ผ่าน",
+      "until": "ลงชื่อเข้าใช้จนถึง",
+      "proxyKeeps": "ตราบใดที่รีเวิร์สพร็อกซียังคงให้คุณลงชื่อเข้าใช้อยู่",
+      "node": "โหนด",
+      "groups": "กลุ่ม",
+      "noGroups": "ไม่มีกลุ่ม: ใช้ค่าเริ่มต้นของเซิร์ฟเวอร์",
+      "providerGroups": "ระบุโดยผู้ให้บริการข้อมูลประจำตัว:",
+      "proxyGroups": "ระบุโดยรีเวิร์สพร็อกซี:",
+      "access": "สิทธิ์",
+      "adminNote": "ผู้ดูแลระบบมีทุกความสามารถและไม่มีขีดจำกัด",
+      "canStorage": "พื้นที่เก็บข้อมูลถาวร",
+      "canShare": "การแชร์สาธารณะ",
+      "canGpu": "GPU",
+      "canTemplates": "แก้ไขเทมเพลต",
+      "canMigrate": "ย้ายโฮม",
+      "limits": "ขีดจำกัด",
+      "unlimited": "ไม่จำกัด",
+      "sessions": "เซสชัน",
+      "sessionsOf": "สูงสุด {limit} พร้อมกัน",
+      "sessionsRunning": "กำลังทำงาน {running}",
+      "sessionsRunningOf": "กำลังทำงาน {running} จาก {limit}",
+      "cpus": "CPU ต่อเซสชัน",
+      "memory": "หน่วยความจำต่อเซสชัน",
+      "hours": "ระยะเวลาเซสชัน",
+      "hoursValue": "{hours} ชม.",
+      "storage": "พื้นที่เก็บข้อมูล",
+      "pools": "พูล",
+      "anyPool": "พูลใดก็ได้ที่เซิร์ฟเวอร์มีให้",
+      "poolsDenied": "ยกเว้นเหล่านี้:",
+      "catalog": "แคตตาล็อก PRoot Apps"
     },
     "home": {
       "searchPlaceholder": "ค้นหาแอปพลิเคชัน หรือวางลิงก์เพื่อเปิดแบบแยก",

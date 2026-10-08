@@ -193,7 +193,10 @@ the identity provider ends the sign-in as well.
 
 The web app fills the window. A rail on the left (a tab bar at the bottom of
 a phone) moves between **Home**, **Files**, and the dashboard, and shows who
-is signed in. **Home** has a box that filters the applications as you type
+is signed in. Your avatar opens your profile: how you are signed in and until
+when, the groups you are in and the ones your identity provider or proxy
+named, what your settings let you do, your limits with what is used of them,
+and the pools and catalog open to you, with **Sign out** at its foot. **Home** has a box that filters the applications as you type
 and takes a pasted link to open in isolation, the sessions you have running
 as cards that show their desktops, captured when you come to the page and
 refreshed now and then while you use it, with **Open** and **Stop**, and the

@@ -124,15 +124,27 @@ const prootEditor = { id: null, apps: [], remote: '', remoteApps: [], search: ''
 
 // --- TEMPLATE EDITOR ---
 
+/** The editor's cards in the schema's order, each with its icon and translated label. */
+let TEMPLATE_SECTIONS = [];
+/** Values of the WebRTC block that switch a session to WebRTC once they differ from the default. */
+const WEBRTC_TRIGGERS = ['SELKIES_STUN_HOST', 'SELKIES_TURN_HOST', 'SELKIES_TURN_REST_URI', 'SELKIES_WEBRTC_PUBLIC_IP', 'SELKIES_ENABLE_CLOUDFLARE_TURN'];
+
 /**
  * Turn the server schema into editor definitions with translated labels.
  */
 function resolveTemplateSchema(schema) {
+  TEMPLATE_SECTIONS = (schema.sections || []).map((section) => ({
+    id: section.id,
+    icon: section.icon && section.icon.includes(' ') ? section.icon : `fas ${section.icon || 'fa-sliders-h'}`,
+    label: tOr(t, `options.appTemplates.sections.${section.id}`, section.id),
+  }));
   return (schema.settings || []).map((setting) => {
     const base = `options.appTemplates.settings.${setting.name}`;
     const def = {
       name: setting.name,
       category: setting.category,
+      section: setting.section || (TEMPLATE_SECTIONS[0] || {}).id,
+      group: setting.group || '',
       type: setting.type,
       default: setting.default === undefined || setting.default === null ? '' : String(setting.default),
       docker: !!setting.docker,
@@ -152,62 +164,195 @@ function resolveTemplateSchema(schema) {
   });
 }
 
-function buildTemplateForm() {
-  const containers = {
-    ui: document.getElementById('template-form-ui'),
-    app: document.getElementById('template-form-app'),
-    hardening: document.getElementById('template-form-hardening'),
-    general: document.getElementById('template-form-general'),
-    webrtc: document.getElementById('template-form-webrtc'),
-    docker: document.getElementById('template-form-docker'),
-  };
-  Object.values(containers).forEach((c) => { if (c) c.innerHTML = ''; });
+/**
+ * One row of a settings form: the label and description on the left, the
+ * control on the right. A `switch` row is a checkbox; a `wide` row puts the
+ * control under the text instead. `text` is what a filter box matches.
+ */
+function fieldHtml({ id = '', label, description = '', control, kind = '', text = '' }) {
+  const more = description ? `<button type="button" class="field-more" aria-expanded="false">${escapeHtml(t('options.appTemplates.showMore'))}</button>` : '';
+  return `<div class="field${kind ? ` ${kind}` : ''}" data-text="${escapeHtml((text || `${label} ${description}`).toLowerCase())}">
+    <div class="field-text">
+      <label${id ? ` for="${id}"` : ''}>${escapeHtml(label)}</label>
+      ${description ? `<p class="description">${escapeHtml(description)}${more}</p>` : ''}
+    </div>
+    <div class="field-control">${control}</div>
+  </div>`;
+}
 
-  APP_TEMPLATE_SETTINGS.forEach((setting) => {
-    let formElementHtml = '';
-    const inputId = `template-form-${setting.name}`;
-    const label = escapeHtml(setting.label);
-    const description = escapeHtml(setting.description);
-    const def = escapeHtml(setting.default);
-
-    switch (setting.type) {
-      case 'boolean':
-        formElementHtml = `
-                    <div class="form-group">
-                        <label for="${inputId}" style="flex-direction: row; align-items: center;">
-                            <input type="checkbox" id="${inputId}" data-name="${setting.name}" ${setting.default === 'true' ? 'checked' : ''}>
-                            ${label}
-                        </label>
-                        <p class="description">${description}</p>
-                    </div>`;
-        break;
-      case 'select': {
-        const optionsHtml = Object.entries(setting.options).map(([value, text]) =>
-          `<option value="${escapeHtml(value)}" ${value === setting.default ? 'selected' : ''}>${escapeHtml(text)}</option>`).join('');
-        formElementHtml = `
-                    <div class="form-group">
-                        <label for="${inputId}">${label}</label>
-                        <select id="${inputId}" data-name="${setting.name}">${optionsHtml}</select>
-                        <p class="description">${description}</p>
-                    </div>`;
-        break;
-      }
-      default:
-        formElementHtml = `
-                    <div class="form-group">
-                        <label for="${inputId}">${label}</label>
-                        <input type="text" id="${inputId}" data-name="${setting.name}" value="${def}" placeholder="${def}">
-                        <p class="description">${description}</p>
-                    </div>`;
-    }
-
-    const container = containers[setting.category];
-    if (container) container.insertAdjacentHTML('beforeend', formElementHtml);
-  });
-  if (!isAdmin) {
-    containers.docker?.querySelectorAll('input, select').forEach((el) => { el.disabled = true; });
-    document.getElementById('template-docker-admin-only').style.display = 'block';
+/** One row of the template form, filtered by its label, variable name, and description. */
+function templateFieldHtml(setting) {
+  const inputId = `template-form-${setting.name}`;
+  const def = escapeHtml(setting.default);
+  let control;
+  switch (setting.type) {
+    case 'boolean':
+      control = `<input type="checkbox" id="${inputId}" data-name="${setting.name}" ${setting.default === 'true' ? 'checked' : ''}>`;
+      break;
+    case 'select':
+      control = `<select id="${inputId}" data-name="${setting.name}">${Object.entries(setting.options).map(([value, name]) =>
+        `<option value="${escapeHtml(value)}" ${value === setting.default ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')}</select>`;
+      break;
+    default:
+      control = `<input type="text" id="${inputId}" data-name="${setting.name}" value="${def}" placeholder="${def}">`;
   }
+  return fieldHtml({
+    id: inputId,
+    label: setting.label,
+    description: setting.description,
+    control,
+    kind: setting.type === 'boolean' ? 'switch' : '',
+    text: `${setting.label} ${setting.name} ${setting.description}`,
+  });
+}
+
+/** A description is clamped to two lines; a click on the text or its "Show more" shows the whole of it, in any form. */
+function bindFieldLists() {
+  document.addEventListener('click', (event) => {
+    const text = event.target.closest('.field-text');
+    if (!text || event.target.closest('label')) return;
+    const field = text.closest('.field');
+    const more = field.querySelector('.field-more');
+    if (!more) return;
+    const expanded = field.classList.toggle('expanded');
+    more.textContent = t(expanded ? 'options.appTemplates.showLess' : 'options.appTemplates.showMore');
+    more.setAttribute('aria-expanded', String(expanded));
+  });
+  window.addEventListener('resize', () => markClampedDescriptions());
+}
+bindFieldLists();
+
+/**
+ * Mark the rows whose description the two-line clamp cuts, so they offer
+ * "Show more" at the end of the second line; a row in a closed card has no
+ * height, so those wait for the card to open.
+ */
+function markClampedDescriptions(scope = document) {
+  scope.querySelectorAll('.field:not(.expanded) .field-text .description').forEach((description) => {
+    if (!description.clientHeight) return;
+    description.closest('.field').classList.toggle('clamped', description.scrollHeight > description.clientHeight + 1);
+  });
+}
+
+/**
+ * Build the form: a collapsible card per section of the schema, the WebRTC
+ * block with its headings, and the UI preview inside the appearance card
+ * whose toggles it reflects. The first card starts open.
+ */
+function buildTemplateForm() {
+  const host = document.getElementById('template-sections');
+  host.innerHTML = '';
+  const bySection = new Map(TEMPLATE_SECTIONS.map((section) => [section.id, []]));
+  APP_TEMPLATE_SETTINGS.forEach((setting) => {
+    (bySection.get(setting.section) || bySection.get(TEMPLATE_SECTIONS[0].id)).push(setting);
+  });
+  const grid = (settings) => `<div class="field-list">${settings.map(templateFieldHtml).join('')}</div>`;
+  const heading = (key, fallback) => `<h5 class="field-group">${escapeHtml(tOr(t, key, fallback))}</h5>`;
+  TEMPLATE_SECTIONS.forEach((section, index) => {
+    const settings = bySection.get(section.id);
+    if (!settings.length) return;
+    let body;
+    if (section.id === 'webrtc') {
+      const groups = [];
+      settings.forEach((setting) => {
+        let group = groups.find((g) => g.id === setting.group);
+        if (!group) groups.push(group = { id: setting.group, settings: [] });
+        group.settings.push(setting);
+      });
+      body = `<p class="description">${escapeHtml(t('options.modals.webrtcDescription'))}</p>`
+        + groups.map((g) => heading(`options.appTemplates.groups.${g.id}`, g.id) + grid(g.settings)).join('');
+    } else if (section.id === 'container') {
+      body = `<p class="description">${escapeHtml(t('options.modals.dockerDescription'))}</p>`
+        + `<p id="template-docker-admin-only" class="description" hidden>${escapeHtml(t('options.appTemplates.dockerAdminOnly'))}</p>`
+        + grid(settings);
+    } else {
+      body = grid(settings);
+    }
+    const details = document.createElement('details');
+    details.className = `collapsible-section template-section${section.id === 'webrtc' ? ' template-webrtc' : ''}`;
+    details.dataset.section = section.id;
+    details.open = index === 0;
+    details.innerHTML = `<summary><i class="${escapeHtml(section.icon)}"></i><h4>${escapeHtml(section.label)}</h4><span class="template-badge" hidden></span></summary><div>${body}</div>`;
+    host.appendChild(details);
+  });
+  const appearance = host.querySelector('[data-section="appearance"] > div');
+  const preview = document.getElementById('template-preview');
+  if (appearance && preview) {
+    appearance.prepend(preview);
+    preview.hidden = false;
+  }
+  host.addEventListener('toggle', (event) => { if (event.target.open) markClampedDescriptions(event.target); }, true);
+  markClampedDescriptions(host);
+  if (!isAdmin) {
+    host.querySelectorAll('[data-section="container"] input, [data-section="container"] select').forEach((el) => { el.disabled = true; });
+    const note = document.getElementById('template-docker-admin-only');
+    if (note) note.hidden = false;
+  }
+}
+
+/** Whether a field of the form holds something other than the schema's default. */
+function templateFieldChanged(setting) {
+  const el = document.getElementById(`template-form-${setting.name}`);
+  if (!el) return false;
+  return (setting.type === 'boolean' ? (el.checked ? 'true' : 'false') : el.value) !== setting.default;
+}
+
+/**
+ * How the sessions of this template stream, as the base image decides it:
+ * WebRTC once the mode says so or a trigger value is set, with dual mode
+ * unless it is switched off.
+ */
+function templateStreaming() {
+  const value = (name) => document.getElementById(`template-form-${name}`);
+  const mode = value('SELKIES_MODE') ? value('SELKIES_MODE').value : '';
+  const triggered = APP_TEMPLATE_SETTINGS.some((setting) => WEBRTC_TRIGGERS.includes(setting.name) && templateFieldChanged(setting)
+    && (setting.type === 'boolean' ? value(setting.name).checked : value(setting.name).value));
+  if (mode === 'websockets' || (mode !== 'webrtc' && !triggered)) return 'websockets';
+  const dual = value('SELKIES_ENABLE_DUAL_MODE');
+  return dual && dual.value === 'false' ? 'webrtc' : 'webrtcDual';
+}
+
+/**
+ * Apply the filter box and the changed-only switch to the fields, and put on
+ * each card the count of its changed values; the WebRTC card shows the
+ * streaming its values amount to instead.
+ */
+function updateTemplateSections() {
+  const term = document.getElementById('template-filter').value.trim().toLowerCase();
+  const changedOnly = document.getElementById('template-changed-only').checked;
+  const filtering = Boolean(term) || changedOnly;
+  const changed = new Map();
+  APP_TEMPLATE_SETTINGS.forEach((setting) => {
+    const el = document.getElementById(`template-form-${setting.name}`);
+    const field = el && el.closest('.field');
+    if (!field) return;
+    const isChanged = templateFieldChanged(setting);
+    field.classList.toggle('changed', isChanged);
+    field.hidden = (term && !field.dataset.text.includes(term)) || (changedOnly && !isChanged);
+    if (isChanged) changed.set(setting.section, (changed.get(setting.section) || 0) + 1);
+  });
+  document.querySelectorAll('#template-sections .template-section').forEach((details) => {
+    const { section } = details.dataset;
+    const visible = details.querySelectorAll('.field:not([hidden])').length;
+    details.hidden = filtering && !visible;
+    if (filtering) details.open = visible > 0;
+    details.querySelectorAll('.field-list').forEach((g) => {
+      const head = g.previousElementSibling;
+      if (head && head.classList.contains('field-group')) head.hidden = !g.querySelector('.field:not([hidden])');
+    });
+    const badge = details.querySelector('.template-badge');
+    if (section === 'webrtc') {
+      const streaming = templateStreaming();
+      badge.textContent = t(`options.appTemplates.streaming.${streaming}`);
+      badge.classList.toggle('on', streaming !== 'websockets');
+      badge.hidden = false;
+    } else {
+      const count = changed.get(section) || 0;
+      badge.textContent = t('options.appTemplates.changedCount', { count });
+      badge.hidden = !count;
+    }
+  });
+  markClampedDescriptions();
 }
 
 /** Reload the template list alone, all a template editor who is not an administrator may read. */
@@ -226,7 +371,8 @@ function updateTemplatePreview() {
 
   const showSidebar = getVal('SELKIES_UI_SHOW_SIDEBAR', true);
   const sidebarEl = document.getElementById('preview-sidebar');
-  sidebarEl.style.width = showSidebar ? '30%' : '0';
+  // The real sidebar is 280px wide whatever the window is.
+  sidebarEl.style.width = showSidebar ? '280px' : '0';
   sidebarEl.style.padding = showSidebar ? '1rem' : '0';
   sidebarEl.style.borderRight = showSidebar ? '1px solid var(--border-color)' : 'none';
 
@@ -328,6 +474,7 @@ function loadTemplateIntoForm(templateName) {
     }
   });
   updateTemplatePreview();
+  updateTemplateSections();
 }
 
 function populateTemplateDropdowns() {
@@ -359,9 +506,13 @@ async function initializeAppTemplatesTab() {
 
   buildTemplateForm();
   updateTemplatePreview();
+  updateTemplateSections();
   populateTemplateDropdowns();
 
-  document.getElementById('app-template-form').addEventListener('input', updateTemplatePreview);
+  document.getElementById('app-template-form').addEventListener('input', () => {
+    updateTemplatePreview();
+    updateTemplateSections();
+  });
   document.getElementById('save-template-btn').addEventListener('click', saveTemplateProfile);
   document.getElementById('delete-template-btn').addEventListener('click', deleteTemplateProfile);
 
@@ -1354,7 +1505,7 @@ const shownSetting = (name) => {
   return CLUSTER_SETTINGS[name] === 'hours' ? hoursOf(value) : String(value ?? '');
 };
 
-/** The form group of one cluster setting, saying whether its value is written for the cluster or a node's own. */
+/** The row of one cluster setting, saying whether its value is written for the cluster or a node's own. */
 function settingField(name) {
   const kind = CLUSTER_SETTINGS[name];
   const id = `cluster-setting-${name}`;
@@ -1373,16 +1524,11 @@ function settingField(name) {
   } else if (kind === 'secret') {
     const set = clusterData.secret_set[name];
     control = `<input type="text" id="${id}" class="masked" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${escapeHtml(t(set ? 'options.cluster.secretSet' : 'options.cluster.secretUnset'))}">
-            ${written ? `<label><input type="checkbox" id="${id}-clear"> <span>${escapeHtml(t('options.cluster.secretClear'))}</span></label>` : ''}`;
+            ${written ? `<label class="field-aside"><input type="checkbox" id="${id}-clear"> <span>${escapeHtml(t('options.cluster.secretClear'))}</span></label>` : ''}`;
   } else {
     control = `<input type="${kind === 'hours' ? 'number' : 'text'}"${kind === 'hours' ? ' min="0" step="any"' : ''} id="${id}" value="${escapeHtml(shownSetting(name))}">`;
   }
-  return `
-        <div class="form-group${written ? ' setting-written' : ''}">
-            <label for="${id}">${escapeHtml(t(`options.cluster.settings.${name}`))}</label>
-            ${control}
-            <p class="description">${escapeHtml(hint)}</p>
-        </div>`;
+  return fieldHtml({ id, label: t(`options.cluster.settings.${name}`), description: hint, control, kind: written ? 'setting-written' : '' });
 }
 
 /** @returns {object} What the controls of `names` change; an empty string hands a setting back to the nodes. */
@@ -1413,6 +1559,7 @@ function renderClusterSettings() {
   const names = info.shell === 'web' ? ['files_sync'] : Object.keys(CLUSTER_SETTINGS);
   document.getElementById('cluster-settings-form').dataset.settings = names.join(',');
   document.getElementById('cluster-settings-fields').innerHTML = names.map(settingField).join('');
+  markClampedDescriptions(document.getElementById('cluster-settings-fields'));
 }
 
 // The headers and logout page of the proxies' identity providers; a preset fills the fields and stores nothing until saved.
@@ -1473,32 +1620,35 @@ function renderSignIn() {
   const typed = new Map([...container.querySelectorAll('input[id], select[id]')]
     .filter((control) => !control.classList.contains('masked') && control.closest('.signin-card').dataset.card !== savedSignInCard)
     .map((control) => [control.id, control.type === 'checkbox' ? control.checked : control.value]));
-  const fields = (kind) => `<div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.5rem 2rem;">${SIGNIN_CARDS[kind].map(settingField).join('')}</div>`;
+  const fields = (kind) => `<div class="field-list single">${SIGNIN_CARDS[kind].map(settingField).join('')}</div>`;
   const stateOf = (kind, configured) => (enabled[kind] ? 'active' : configured ? 'off' : 'none');
   const sentence = (key) => `<p class="description">${escapeHtml(t(key))}</p>`;
 
   const presets = Object.keys(OIDC_PRESETS).map((preset) => `<option value="${preset}">${escapeHtml(t(`options.signin.presets.${preset}.name`))}</option>`).join('');
   const oidc = `
-        <div class="form-group">
-            <label for="signin-oidc-preset">${escapeHtml(t('options.signin.provider'))}</label>
-            <select id="signin-oidc-preset"><option value="">${escapeHtml(t('options.signin.providerChoose'))}</option>${presets}</select>
-            <p class="description" id="signin-oidc-hint">${escapeHtml(t('options.signin.providerHelp'))}</p>
+        <div class="field-list single">
+            <div class="field">
+                <div class="field-text"><label for="signin-oidc-preset">${escapeHtml(t('options.signin.provider'))}</label><p class="description" id="signin-oidc-hint">${escapeHtml(t('options.signin.providerHelp'))}</p></div>
+                <div class="field-control"><select id="signin-oidc-preset"><option value="">${escapeHtml(t('options.signin.providerChoose'))}</option>${presets}</select></div>
+            </div>
         </div>
         ${fields('oidc')}
-        <h4>${escapeHtml(t('options.signin.register'))}</h4>
+        <h5 class="field-group">${escapeHtml(t('options.signin.register'))}</h5>
         ${copyRows([['options.signin.oidcRedirect', urls.oidc_redirect], ['options.signin.oidcBackchannel', urls.oidc_backchannel_logout], ['options.signin.oidcFrontchannel', urls.oidc_frontchannel_logout]])}`;
   const saml = `
         ${fields('saml')}
-        <h4>${escapeHtml(t('options.signin.register'))}</h4>
+        <h5 class="field-group">${escapeHtml(t('options.signin.register'))}</h5>
         ${copyRows([['options.signin.samlEntity', urls.saml_entity_id], ['options.signin.samlAcs', urls.saml_acs], ['options.signin.samlSlo', urls.saml_slo]])}
         ${urls.saml_entity_id ? `<p><a href="${escapeHtml(urls.saml_entity_id)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('options.signin.samlMetadata'))}</a></p>` : ''}`;
   const untrusted = settings.proxy_auth_user_header && !signin.trusted_proxies;
   const proxyPresets = Object.keys(PROXY_PRESETS).map((preset) => `<option value="${preset}">${escapeHtml(t(`options.signin.proxyPresets.${preset}`))}</option>`).join('');
   const proxy = `
         ${sentence('options.signin.proxyHelp')}
-        <div class="form-group">
-            <label for="signin-proxy-preset">${escapeHtml(t('options.signin.provider'))}</label>
-            <select id="signin-proxy-preset"><option value="">${escapeHtml(t('options.signin.proxyPresetChoose'))}</option>${proxyPresets}</select>
+        <div class="field-list single">
+            <div class="field">
+                <div class="field-text"><label for="signin-proxy-preset">${escapeHtml(t('options.signin.provider'))}</label></div>
+                <div class="field-control"><select id="signin-proxy-preset"><option value="">${escapeHtml(t('options.signin.proxyPresetChoose'))}</option>${proxyPresets}</select></div>
+            </div>
         </div>
         ${fields('proxy')}
         <p><span>${escapeHtml(t('options.signin.trustedProxies'))}</span> <code>${escapeHtml(signin.trusted_proxies || t('common.none'))}</code></p>
@@ -1528,6 +1678,7 @@ function renderSignIn() {
   });
   applyOidcPreset();
   testSessionNames();
+  markClampedDescriptions(container);
 }
 
 /** How browsers reach the server, as the server and this browser each see it: what a reverse proxy has to get right. */
@@ -2055,56 +2206,41 @@ function buildSettingsForm(prefix, kind) {
   const isGroup = kind === 'group';
   const notSet = escapeHtml(t('options.groups.notSet'));
   const id = (name) => `${prefix}-${name}`;
+  const row = (name, label, control, extra = {}) => fieldHtml({ id: id(name), label: t(label), control, ...extra });
 
-  const limits = SETTING_LIMITS.map(([name, label, whole]) => `
-        <div class="form-group">
-            <label for="${id(name)}">${escapeHtml(t(label))}</label>
-            <input type="number" id="${id(name)}" step="${whole ? '1' : 'any'}" ${isGroup ? `placeholder="${notSet}"` : `value="${NEW_USER_SETTINGS[name]}"`}>
-        </div>`).join('');
-  const period = `
-        <div class="form-group">
-            <label for="${id('allowance_period')}">${escapeHtml(t('options.users.allowancePeriod'))}</label>
-            <select id="${id('allowance_period')}">
+  const limits = SETTING_LIMITS.map(([name, label, whole]) => row(name, label,
+    `<input type="number" id="${id(name)}" step="${whole ? '1' : 'any'}" ${isGroup ? `placeholder="${notSet}"` : `value="${NEW_USER_SETTINGS[name]}"`}>`)).join('');
+  const period = row('allowance_period', 'options.users.allowancePeriod', `<select id="${id('allowance_period')}">
                 ${isGroup ? `<option value="" selected>${notSet}</option>` : ''}
                 ${PERIODS.map((p) => `<option value="${p}"${!isGroup && p === NEW_USER_SETTINGS.allowance_period ? ' selected' : ''}>${escapeHtml(t(`options.periods.${p}`))}</option>`).join('')}
-            </select>
-        </div>`;
-  const lists = SETTING_LISTS.filter(([name]) => isGroup || name !== 'sso_groups').map(([name, label]) => `
-        <div class="form-group">
-            <label for="${id(name)}">${escapeHtml(t(label))}</label>
-            <input type="text" id="${id(name)}">
-        </div>`).join('');
-  const catalog = `
-        <div class="form-group">
-            <label for="${id('proot_catalog')}">${escapeHtml(t('options.users.prootCatalog'))}</label>
-            <select id="${id('proot_catalog')}"><option value="">${isGroup ? notSet : escapeHtml(t('options.users.prootCatalogNone'))}</option></select>
-            <p class="description">${escapeHtml(t('options.users.prootCatalogHelp'))}</p>
-        </div>`;
-  const switches = SETTING_SWITCHES.map(([name, label, restricting]) => (isGroup ? `
-        <div class="form-group">
-            <label for="${id(name)}">${escapeHtml(t(label))}</label>
-            <select id="${id(name)}">
+            </select>`);
+  const lists = SETTING_LISTS.filter(([name]) => isGroup || name !== 'sso_groups').map(([name, label]) => row(name, label, `<input type="text" id="${id(name)}">`)).join('');
+  const catalog = row('proot_catalog', 'options.users.prootCatalog',
+    `<select id="${id('proot_catalog')}"><option value="">${isGroup ? notSet : escapeHtml(t('options.users.prootCatalogNone'))}</option></select>`,
+    { description: t('options.users.prootCatalogHelp') });
+  const switches = SETTING_SWITCHES.map(([name, label, restricting]) => (isGroup
+    ? row(name, label, `<select id="${id(name)}">
                 <option value="" selected>${notSet}</option>
                 <option value="true">${escapeHtml(t(restricting ? 'options.groups.on' : 'options.groups.allow'))}</option>
                 <option value="false">${escapeHtml(t(restricting ? 'options.groups.off' : 'options.groups.deny'))}</option>
-            </select>
-        </div>` : `
-        <div class="form-group"><label><input type="checkbox" id="${id(name)}"${NEW_USER_SETTINGS[name] ? ' checked' : ''}> <span>${escapeHtml(t(label))}</span></label></div>`)).join('');
-  const groups = isGroup ? '' : `
-        <div class="form-group">
-            <label for="${id('groups')}">${escapeHtml(t('common.groups'))}</label>
-            <select id="${id('groups')}" multiple size="4"></select>
-            <p class="description">${escapeHtml(t('options.users.groupsHelp'))}</p>
-            <p class="description" id="${id('provider_groups')}" style="display: none;"></p>
-        </div>`;
+            </select>`)
+    : row(name, label, `<input type="checkbox" id="${id(name)}"${NEW_USER_SETTINGS[name] ? ' checked' : ''}>`, { kind: 'switch' }))).join('');
+  const groups = isGroup ? '' : `<div class="field-list single">${fieldHtml({
+    id: id('groups'),
+    label: t('common.groups'),
+    description: t('options.users.groupsHelp'),
+    control: `<select id="${id('groups')}" multiple size="4"></select><p class="description" id="${id('provider_groups')}" style="display: none;"></p>`,
+  })}</div>`;
 
-  document.getElementById(`${prefix}Settings`).innerHTML = `
-    <h4>${escapeHtml(t(isGroup ? 'options.groups.overrideTitle' : 'options.users.settingsTitle'))}</h4>
+  const host = document.getElementById(`${prefix}Settings`);
+  host.innerHTML = `
+    <h5 class="field-group">${escapeHtml(t(isGroup ? 'options.groups.overrideTitle' : 'options.users.settingsTitle'))}</h5>
     <p class="description">${escapeHtml(t(isGroup ? 'options.groups.overrideHelp' : 'options.users.limitsHelp'))}</p>
     ${groups}
-    <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.5rem 2rem;">${limits}${period}${lists}${catalog}</div>
-    <h4>${escapeHtml(t(isGroup ? 'options.groups.permissionsTitle' : 'options.users.permissionsTitle'))}</h4>
-    <div class="${isGroup ? 'form-grid' : 'settings-grid'}" style="grid-template-columns: repeat(auto-fit, minmax(${isGroup ? 220 : 250}px, 1fr));${isGroup ? ' gap: 0.5rem 2rem;' : ''}">${switches}</div>`;
+    <div class="field-list">${limits}${period}${lists}${catalog}</div>
+    <h5 class="field-group">${escapeHtml(t(isGroup ? 'options.groups.permissionsTitle' : 'options.users.permissionsTitle'))}</h5>
+    <div class="field-list">${switches}</div>`;
+  markClampedDescriptions(host);
 }
 
 /** @returns {object} The user settings a form holds; a blank limit sets none. */
@@ -2855,6 +2991,7 @@ function showInstallModal(appData, existingInstall = null, isManual = false) {
   autostartWaylandTextArea.value = decodeB64(source.custom_autostart_wayland_script_b64, 'wayland autostart script');
 
   appInstallModal.style.display = 'block';
+  markClampedDescriptions(appInstallModal);
 }
 
 function showImageUpdateModal(app) {
@@ -2980,6 +3117,7 @@ async function openTab(tabName) {
   document.querySelectorAll('.nav-link').forEach((link) => link.classList.remove('active'));
   document.getElementById(tabName).classList.add('active');
   document.querySelector(`.nav-link[data-tabname="${tabName}"]`).classList.add('active');
+  markClampedDescriptions(document.getElementById(tabName));
 
   if (tabName === 'Home' && isLoggedIn) {
     await refreshHomeDirs();
@@ -3302,6 +3440,7 @@ function bindEvents() {
       userEditForm.oninput = updateEffectiveSettingsDisplay;
       updateEffectiveSettingsDisplay();
       userEditModal.style.display = 'block';
+      markClampedDescriptions(userEditModal);
     } else if (button.classList.contains('secondary')) {
       await refreshAdminUserHomeDirs(username, false);
       userHomeDirModal.style.display = 'block';
@@ -3371,6 +3510,7 @@ function bindEvents() {
       document.getElementById('editGroupName').value = groupName;
       fillGroupSettings('editGroup', group.settings || {});
       groupEditModal.style.display = 'block';
+      markClampedDescriptions(groupEditModal);
     }
   });
 

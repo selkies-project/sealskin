@@ -301,6 +301,41 @@
       "deleteDisabled": "لا يمكن حذف هذا القالب.",
       "enterName": "الرجاء إدخال اسم للقالب الجديد.",
       "dockerAdminOnly": "لا يمكن إلا للمسؤول تغيير هذه الإعدادات.",
+      "filterPlaceholder": "تصفية الإعدادات بالاسم…",
+      "changedOnly": "المعدّلة فقط",
+      "showMore": "عرض المزيد",
+      "showLess": "عرض أقل",
+      "changedCount": "{count, plural, one {تم تعديل 1} other {تم تعديل {count}}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC، الوضع المزدوج"
+      },
+      "sections": {
+        "appearance": "المظهر",
+        "display": "العرض",
+        "input": "الإدخال",
+        "audio": "الصوت",
+        "webcam": "كاميرا الويب",
+        "performance": "الأداء",
+        "gpu": "GPU",
+        "clipboard": "الحافظة والملفات",
+        "sharing": "المشاركة",
+        "hardening": "التحصين",
+        "lifecycle": "دورة الحياة",
+        "integrations": "التكاملات",
+        "webrtc": "WebRTC",
+        "container": "الحاوية"
+      },
+      "groups": {
+        "mode": "الوضع",
+        "transport": "النقل",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "واجهة TURN REST",
+        "cloudflare": "Cloudflare TURN",
+        "extra": "التشخيص"
+      },
       "settings": {
         "TITLE": {
           "label": "عنوان الصفحة",
@@ -747,10 +782,6 @@
           "label": "واجهة Wayland الخلفية",
           "description": "يشغّل الجلسة على واجهة Wayland الخلفية، وهي مركّب بلا شاشة مع labwc متداخل لإدارة النوافذ، بدلًا من خادم X11. تعمل تطبيقات X11 عبر XWayland."
         },
-        "MAX_RES": {
-          "label": "الدقة القصوى",
-          "description": "الدقة القصوى للحاوية، الافتراضي هو 16k."
-        },
         "START_DOCKER": {
           "label": "بدء Docker-in-Docker",
           "description": "إذا كان خطأ، فلن تبدأ الحاوية ذات الامتيازات DinD."
@@ -758,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "تعطيل IPv6",
           "description": "إذا كان صحيحًا، فسيؤدي هذا إلى تعطيل IPv6."
-        },
-        "DISABLE_ZINK": {
-          "label": "تعطيل Zink",
-          "description": "لا تقم بتعيين متغيرات بيئة Zink إذا تم اكتشاف بطاقة فيديو."
         },
         "DISABLE_DRI3": {
           "label": "تعطيل DRI3",
@@ -1172,10 +1199,7 @@
       "newVersion": "الإصدار الجديد: {sha}",
       "errorPulling": "خطأ في سحب الصورة.",
       "manualInstallNote": "ملاحظة: يجب أن تكون الصور المضافة يدويًا مبنية على صورة متوافقة مع selkies-baseimage.",
-      "generalTitle": "إعدادات عامة والأداء",
-      "webrtcTitle": "إعدادات WebRTC و TURN",
       "webrtcDescription": "تُبث الجلسات عبر WebSockets افتراضيًا. تعيين أي قيمة STUN أو TURN أو Cloudflare أو عنوان IP عام أدناه، أو اختيار وضع WebRTC، يحوّل الحاوية إلى WebRTC مع تمكين الوضع المزدوج حتى يتمكن المستخدمون من الرجوع إلى WebSockets.",
-      "dockerTitle": "تجاوزات Docker المتقدمة",
       "dockerDescription": "تتجاوز هذه الإعدادات التكوين الافتراضي للحاوية. استخدمها بحذر وفقط إذا كنت تعرف ما تفعله."
     },
     "status": {
@@ -1805,6 +1829,40 @@
       "hideRail": "إخفاء الشريط الجانبي",
       "showRail": "إظهار الشريط الجانبي",
       "project": "SealSkin على GitHub: المشكلات وطلبات الميزات"
+    },
+    "profile": {
+      "open": "ملفك الشخصي",
+      "signIn": "تسجيل الدخول",
+      "method": "تم تسجيل الدخول عبر",
+      "until": "تسجيل الدخول ساري حتى",
+      "proxyKeeps": "ما دام الوكيل العكسي يبقيك مسجّل الدخول",
+      "node": "العقدة",
+      "groups": "المجموعات",
+      "noGroups": "لا مجموعة: تنطبق إعدادات الخادم الافتراضية.",
+      "providerGroups": "حددها مزوّد الهوية:",
+      "proxyGroups": "حددها الوكيل العكسي:",
+      "access": "الصلاحيات",
+      "adminNote": "المسؤولون لديهم كل الإمكانيات ولا حدود عليهم.",
+      "canStorage": "تخزين دائم",
+      "canShare": "مشاركة عامة",
+      "canGpu": "GPU",
+      "canTemplates": "تحرير القوالب",
+      "canMigrate": "نقل المجلد الرئيسي",
+      "limits": "الحدود",
+      "unlimited": "غير محدود",
+      "sessions": "الجلسات",
+      "sessionsOf": "حتى {limit} في آن واحد",
+      "sessionsRunning": "{running} قيد التشغيل",
+      "sessionsRunningOf": "{running} قيد التشغيل من {limit}",
+      "cpus": "المعالجات لكل جلسة",
+      "memory": "الذاكرة لكل جلسة",
+      "hours": "مدة الجلسة",
+      "hoursValue": "{hours} س",
+      "storage": "التخزين",
+      "pools": "التجمعات",
+      "anyPool": "أي تجمع يوفره الخادم.",
+      "poolsDenied": "ليس هذه:",
+      "catalog": "كتالوج PRoot Apps"
     },
     "home": {
       "searchPlaceholder": "ابحث في التطبيقات، أو الصق رابطًا لفتحه بمعزل",

@@ -4,7 +4,8 @@ The editor renders whatever `template_schema.yml` serves, with labels looked
 up from the client's translations by variable name, so an entry added to one
 and not the other shows up as a raw variable name in some language, and a
 select whose default is not one of its options stores a value the editor
-cannot show. Both are checked here rather than found in the editor.
+cannot show. Both are checked here rather than found in the editor, as is
+every setting's place in one of the editor's sections.
 """
 import json
 import os
@@ -15,21 +16,30 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 I18N = os.path.join(REPO, "client", "src", "i18n")
 CATEGORIES = {"ui", "app", "hardening", "general", "webrtc", "docker"}
 TYPES = {"text", "boolean", "select"}
+WEBRTC_GROUPS = {"mode", "transport", "stun", "turn", "turnRest", "cloudflare", "extra"}
 
 
 def locale_strings():
     for name in sorted(os.listdir(I18N)):
         if name.endswith(".json"):
             with open(os.path.join(I18N, name), encoding="utf-8") as handle:
-                yield name, json.load(handle)["options"]["appTemplates"]["settings"]
+                yield name, json.load(handle)["options"]["appTemplates"]
 
 
 def test_schema_entries_are_well_formed():
-    entries = load_template_schema()
+    schema = load_template_schema()
+    entries = schema.settings
     names = [entry.name for entry in entries]
     assert len(names) == len(set(names)), "duplicate names"
+    sections = [section.id for section in schema.sections]
+    assert sections and len(sections) == len(set(sections)) and all(section.icon for section in schema.sections)
     for entry in entries:
         assert entry.category in CATEGORIES, entry.name
+        assert entry.section in sections, entry.name
+        # The WebRTC block alone has headings inside it; the Docker overrides alone fill the container card.
+        assert (entry.category == "webrtc") == (entry.section == "webrtc"), entry.name
+        assert (entry.category == "docker") == (entry.section == "container"), entry.name
+        assert (entry.group in WEBRTC_GROUPS) if entry.category == "webrtc" else not entry.group, entry.name
         assert entry.type in TYPES, entry.name
         if entry.type == "boolean":
             assert entry.default in ("true", "false"), entry.name
@@ -42,8 +52,12 @@ def test_schema_entries_are_well_formed():
 
 
 def test_every_locale_labels_every_setting():
-    entries = load_template_schema()
-    for locale, strings in locale_strings():
+    schema = load_template_schema()
+    entries = schema.settings
+    for locale, texts in locale_strings():
+        assert set(texts["sections"]) == {section.id for section in schema.sections}, locale
+        assert set(texts["groups"]) == WEBRTC_GROUPS, locale
+        strings = texts["settings"]
         assert set(strings) == {entry.name for entry in entries}, locale
         for entry in entries:
             text = strings[entry.name]

@@ -17,7 +17,7 @@
     <header id="topbar">
         <a class="project-link" href="https://github.com/selkies-project/sealskin" target="_blank" rel="noopener"><img src="icons/icon128.png" alt=""></a>
         <span class="wordmark">SealSkin</span>
-        <button type="button" id="account-button" class="avatar" aria-haspopup="true" aria-expanded="false"></button>
+        <button type="button" id="account-button" class="avatar" aria-haspopup="dialog"></button>
     </header>
     <nav id="rail">
         <a class="project-link" href="https://github.com/selkies-project/sealskin" target="_blank" rel="noopener"><img class="rail-logo" src="icons/icon128.png" alt="SealSkin"></a>
@@ -27,7 +27,7 @@
             <button type="button" data-dest="options"><i class="fas fa-sliders-h"></i><span></span></button>
         </div>
         <div class="rail-account">
-            <div class="avatar" aria-hidden="true"></div>
+            <button type="button" class="avatar rail-avatar" aria-haspopup="dialog"></button>
             <div class="account-name"></div>
             <div class="account-via"></div>
             <button type="button" class="root-sign-in" hidden><i class="fas fa-key"></i><span></span></button>
@@ -36,11 +36,22 @@
         <button type="button" id="rail-hide" class="rail-hide"><i class="fas fa-chevron-left"></i></button>
     </nav>
     <button type="button" id="rail-peek" class="rail-peek" hidden><i class="fas fa-chevron-right"></i></button>
-    <div id="account-menu" hidden>
-        <div class="account-name"></div>
-        <div class="account-via"></div>
-        <button type="button" class="root-sign-in" hidden><i class="fas fa-key"></i><span></span></button>
-        <button type="button" class="sign-out"><i class="fas fa-sign-out-alt"></i><span></span></button>
+    <div id="profile" hidden>
+        <div class="profile-card" role="dialog" aria-modal="true" aria-labelledby="profile-name">
+            <button type="button" id="profile-close" class="profile-close"><i class="fas fa-times"></i></button>
+            <div class="profile-head">
+                <div class="avatar avatar-large" aria-hidden="true"></div>
+                <div class="profile-who">
+                    <div class="account-name" id="profile-name"></div>
+                    <div class="account-via"></div>
+                </div>
+            </div>
+            <div id="profile-body" class="profile-body"></div>
+            <div class="profile-actions">
+                <button type="button" class="root-sign-in" hidden><i class="fas fa-key"></i><span></span></button>
+                <button type="button" class="sign-out"><i class="fas fa-sign-out-alt"></i><span></span></button>
+            </div>
+        </div>
     </div>
     <main id="stage">
         <div id="host-panel" hidden></div>

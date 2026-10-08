@@ -301,6 +301,41 @@
       "deleteDisabled": "Hindi maaaring burahin ang template na ito.",
       "enterName": "Mangyaring maglagay ng pangalan para sa bagong template.",
       "dockerAdminOnly": "Isang administrator lamang ang makapagbabago ng mga setting na ito.",
+      "filterPlaceholder": "I-filter ang mga setting ayon sa pangalan…",
+      "changedOnly": "Binago lang",
+      "showMore": "Ipakita pa",
+      "showLess": "Ipakita nang mas kaunti",
+      "changedCount": "{count, plural, one {1 ang binago} other {{count} ang binago}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC, dual mode"
+      },
+      "sections": {
+        "appearance": "Itsura",
+        "display": "Display",
+        "input": "Input",
+        "audio": "Audio",
+        "webcam": "Webcam",
+        "performance": "Performance",
+        "gpu": "GPU",
+        "clipboard": "Clipboard at mga file",
+        "sharing": "Pagbabahagi",
+        "hardening": "Hardening",
+        "lifecycle": "Lifecycle",
+        "integrations": "Mga integrasyon",
+        "webrtc": "WebRTC",
+        "container": "Container"
+      },
+      "groups": {
+        "mode": "Mode",
+        "transport": "Transport",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "TURN REST API",
+        "cloudflare": "Cloudflare TURN",
+        "extra": "Diagnostics"
+      },
       "settings": {
         "TITLE": {
           "label": "Pamagat ng Pahina",
@@ -747,10 +782,6 @@
           "label": "Wayland Backend",
           "description": "Pinapatakbo ang session sa Wayland backend, isang headless compositor na may nested na labwc para sa pamamahala ng mga window, sa halip na sa X11 server. Tumatakbo ang mga X11 application sa pamamagitan ng XWayland."
         },
-        "MAX_RES": {
-          "label": "Pinakamataas na Resolusyon",
-          "description": "Pinakamataas na resolusyon para sa container, default ay 16k."
-        },
         "START_DOCKER": {
           "label": "Simulan ang Docker-in-Docker",
           "description": "Kung false, hindi magsisimula ng DinD ang isang privileged container."
@@ -758,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "Huwag Paganahin ang IPv6",
           "description": "Kung true, hindi nito papaganahin ang IPv6."
-        },
-        "DISABLE_ZINK": {
-          "label": "Huwag Paganahin ang Zink",
-          "description": "Huwag itakda ang mga Zink env var kung may natukoy na video card."
         },
         "DISABLE_DRI3": {
           "label": "Huwag Paganahin ang DRI3",
@@ -1172,10 +1199,7 @@
       "newVersion": "Bagong bersyon: {sha}",
       "errorPulling": "Error sa paghila ng imahe.",
       "manualInstallNote": "Tandaan: Ang mga imaheng idinagdag nang manu-mano ay dapat batay sa isang imaheng tugma sa selkies-baseimage.",
-      "generalTitle": "Pangkalahatan at Pagganap na mga Setting",
-      "webrtcTitle": "Mga Setting ng WebRTC at TURN",
       "webrtcDescription": "Bilang default, nag-i-stream ang mga session sa pamamagitan ng WebSockets. Ang pagtatakda ng anumang halaga ng STUN, TURN, Cloudflare o pampublikong IP sa ibaba, o ang pagpili ng WebRTC mode, ay naglilipat ng container sa WebRTC na may pinaganang dual mode upang makabalik pa rin ang mga user sa WebSockets.",
-      "dockerTitle": "Mga Advanced na Pag-override ng Docker",
       "dockerDescription": "Ang mga setting na ito ay nag-o-override sa default na configuration ng container. Gamitin nang may pag-iingat at kung alam mo lang ang iyong ginagawa."
     },
     "status": {
@@ -1805,6 +1829,40 @@
       "hideRail": "Itago ang sidebar",
       "showRail": "Ipakita ang sidebar",
       "project": "SealSkin sa GitHub: mga isyu at kahilingang feature"
+    },
+    "profile": {
+      "open": "Ang iyong profile",
+      "signIn": "Pag-sign in",
+      "method": "Naka-sign in sa pamamagitan ng",
+      "until": "Naka-sign in hanggang",
+      "proxyKeeps": "Hangga't pinapanatili ka ng reverse proxy na naka-sign in",
+      "node": "Node",
+      "groups": "Mga grupo",
+      "noGroups": "Walang grupo: ang mga default ng server ang umiiral.",
+      "providerGroups": "Itinakda ng identity provider:",
+      "proxyGroups": "Itinakda ng reverse proxy:",
+      "access": "Access",
+      "adminNote": "Ang mga administrator ay may lahat ng kakayahan at walang limitasyon.",
+      "canStorage": "Persistent storage",
+      "canShare": "Pampublikong pagbabahagi",
+      "canGpu": "GPU",
+      "canTemplates": "Pag-edit ng template",
+      "canMigrate": "Paglipat ng home",
+      "limits": "Mga limitasyon",
+      "unlimited": "Walang limitasyon",
+      "sessions": "Mga session",
+      "sessionsOf": "Hanggang {limit} nang sabay",
+      "sessionsRunning": "{running} ang tumatakbo",
+      "sessionsRunningOf": "{running} sa {limit} ang tumatakbo",
+      "cpus": "CPU bawat session",
+      "memory": "Memory bawat session",
+      "hours": "Haba ng session",
+      "hoursValue": "{hours} oras",
+      "storage": "Storage",
+      "pools": "Mga pool",
+      "anyPool": "Anumang pool na inaalok ng server.",
+      "poolsDenied": "Hindi ang mga ito:",
+      "catalog": "Katalogo ng PRoot Apps"
     },
     "home": {
       "searchPlaceholder": "Maghanap ng mga aplikasyon, o mag-paste ng link upang buksan ito nang isolated",

@@ -172,11 +172,13 @@
                         <h3 data-i18n="options.home.newTitle">Create New Home Directory</h3>
                     </div>
                     <form id="add-homedir-form">
-                        <div class="form-group">
-                            <label for="newHomeDirName" data-i18n="options.home.nameLabel">Directory Name:</label>
-                            <input type="text" id="newHomeDirName" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen." data-i18n-placeholder="options.home.namePlaceholder" placeholder="e.g., my-project-files">
+                        <div class="field-list single">
+                        <div class="field">
+                            <div class="field-text"><label for="newHomeDirName" data-i18n="options.home.nameLabel">Directory Name:</label></div>
+                            <div class="field-control"><input type="text" id="newHomeDirName" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen." data-i18n-placeholder="options.home.namePlaceholder" placeholder="e.g., my-project-files"></div>
                         </div>
-                        <button type="submit" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.home.createButton">Create Directory</span></button>
+                        </div>
+                        <div class="button-group"><button type="submit" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.home.createButton">Create Directory</span></button></div>
                     </form>
                 </div>
             </div>
@@ -219,10 +221,8 @@
                     <div class="card-header">
                         <h3 data-i18n="options.admins.serverKeyTitle">Server Public Key</h3>
                     </div>
-                    <div class="form-group">
-                        <label data-i18n="options.admins.serverKeyDescription">This is the public key that user configuration files will need to connect to this server.</label>
-                        <textarea id="server-public-key-display" readonly rows="6"></textarea>
-                    </div>
+                    <p class="description" data-i18n="options.admins.serverKeyDescription">This is the public key that user configuration files will need to connect to this server.</p>
+                    <textarea id="server-public-key-display" readonly rows="6"></textarea>
                 </div>
 
                 <div class="card">
@@ -241,9 +241,17 @@
                  <div class="card" id="create-admin-section">
                     <div class="card-header"><h3 data-i18n="options.admins.newTitle">Create New Admin</h3></div>
                     <form id="add-admin-form">
-                        <div class="form-group"><label for="newAdminUsername"><span data-i18n="common.username">Username</span>:</label><input type="text" id="newAdminUsername" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen."></div>
-                        <div class="form-group"><label for="newAdminPublicKey" data-i18n="options.admins.publicKeyOptionalLabel">Public Key (Optional):</label><textarea id="newAdminPublicKey" rows="4" data-i18n-placeholder="options.admins.publicKeyPlaceholder" placeholder="Paste public key here, or leave blank to generate one."></textarea></div>
-                        <br><button type="submit" class="primary"><i class="fas fa-user-plus"></i> <span data-i18n="options.admins.createButton">Create Admin</span></button>
+                        <div class="field-list single">
+                        <div class="field">
+                            <div class="field-text"><label for="newAdminUsername"><span data-i18n="common.username">Username</span>:</label></div>
+                            <div class="field-control"><input type="text" id="newAdminUsername" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen."></div>
+                        </div>
+                        <div class="field wide">
+                            <div class="field-text"><label for="newAdminPublicKey" data-i18n="options.admins.publicKeyOptionalLabel">Public Key (Optional):</label></div>
+                            <div class="field-control"><textarea id="newAdminPublicKey" rows="4" data-i18n-placeholder="options.admins.publicKeyPlaceholder" placeholder="Paste public key here, or leave blank to generate one."></textarea></div>
+                        </div>
+                        </div>
+                        <div class="button-group"><button type="submit" class="primary"><i class="fas fa-user-plus"></i> <span data-i18n="options.admins.createButton">Create Admin</span></button></div>
                     </form>
                 </div>
             </div>
@@ -276,11 +284,13 @@
                     <div class="card-header"><h3 data-i18n="options.cluster.joinTitle">Add a Node</h3></div>
                     <p class="description" data-i18n="options.cluster.joinDescription">Create a join code, start the new node with the two lines below in its environment, then approve it in the table above. A code admits one node and lasts an hour.</p>
                     <form id="cluster-join-form">
-                        <div class="form-group">
-                            <label for="cluster-join-pool" data-i18n="options.cluster.pool">Pool</label>
-                            <select id="cluster-join-pool"></select>
+                        <div class="field-list single">
+                        <div class="field">
+                            <div class="field-text"><label for="cluster-join-pool" data-i18n="options.cluster.pool">Pool</label></div>
+                            <div class="field-control"><select id="cluster-join-pool"></select></div>
                         </div>
-                        <button type="submit" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.cluster.joinButton">Create Join Code</span></button>
+                        </div>
+                        <div class="button-group"><button type="submit" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.cluster.joinButton">Create Join Code</span></button></div>
                     </form>
                     <div id="cluster-join-result" style="display: none; margin-top: 1.5rem;">
                         <div class="form-group">
@@ -309,22 +319,46 @@
                             <tbody></tbody>
                         </table>
                     </div>
-                    <h4 id="cluster-pool-form-title" data-i18n="options.cluster.poolNew">New Pool</h4>
+                    <h5 id="cluster-pool-form-title" class="field-group" data-i18n="options.cluster.poolNew">New Pool</h5>
                     <form id="cluster-pool-form">
-                        <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem 2rem;">
-                            <div class="form-group"><label for="cluster-pool-name" data-i18n="common.name">Name</label><input type="text" id="cluster-pool-name" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen."></div>
-                            <div class="form-group"><label for="cluster-pool-description" data-i18n="options.cluster.poolDescriptionLabel">Description</label><input type="text" id="cluster-pool-description"></div>
-                            <div class="form-group"><label for="cluster-pool-domain" data-i18n="options.cluster.poolDomainLabel">Domain the pool's nodes are named under</label><input type="text" id="cluster-pool-domain"></div>
-                            <div class="form-group"><label for="cluster-pool-cost" data-i18n="options.cluster.poolCostLabel">Allowance an hour of session costs</label><input type="number" id="cluster-pool-cost" min="0" step="any" value="1"></div>
-                            <div class="form-group"><label for="cluster-pool-gpu-cost" data-i18n="options.cluster.poolGpuCostLabel">Allowance an hour of GPU session costs (blank: the same)</label><input type="number" id="cluster-pool-gpu-cost" min="0" step="any"></div>
-                            <div class="form-group"><label for="cluster-pool-users" data-i18n="options.cluster.poolUsersLabel">Users it is open to when restricted (comma-separated)</label><input type="text" id="cluster-pool-users"></div>
-                            <div class="form-group"><label for="cluster-pool-groups" data-i18n="options.cluster.poolGroupsLabel">Groups it is open to when restricted (comma-separated)</label><input type="text" id="cluster-pool-groups"></div>
+                        <div class="field-list single">
+                        <div class="field">
+                            <div class="field-text"><label for="cluster-pool-name" data-i18n="common.name">Name</label></div>
+                            <div class="field-control"><input type="text" id="cluster-pool-name" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen."></div>
                         </div>
-                        <div class="settings-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-                            <div class="form-group"><label><input type="checkbox" id="cluster-pool-restricted"> <span data-i18n="options.cluster.poolRestricted">Restricted</span></label></div>
-                            <div class="form-group"><label><input type="checkbox" id="cluster-pool-stop"> <span data-i18n="options.cluster.poolStopWhenSpent">End sessions when the allowance is spent</span></label></div>
+                        <div class="field">
+                            <div class="field-text"><label for="cluster-pool-description" data-i18n="options.cluster.poolDescriptionLabel">Description</label></div>
+                            <div class="field-control"><input type="text" id="cluster-pool-description"></div>
                         </div>
-                        <br>
+                        <div class="field">
+                            <div class="field-text"><label for="cluster-pool-domain" data-i18n="options.cluster.poolDomainLabel">Domain the pool's nodes are named under</label></div>
+                            <div class="field-control"><input type="text" id="cluster-pool-domain"></div>
+                        </div>
+                        <div class="field">
+                            <div class="field-text"><label for="cluster-pool-cost" data-i18n="options.cluster.poolCostLabel">Allowance an hour of session costs</label></div>
+                            <div class="field-control"><input type="number" id="cluster-pool-cost" min="0" step="any" value="1"></div>
+                        </div>
+                        <div class="field">
+                            <div class="field-text"><label for="cluster-pool-gpu-cost" data-i18n="options.cluster.poolGpuCostLabel">Allowance an hour of GPU session costs (blank: the same)</label></div>
+                            <div class="field-control"><input type="number" id="cluster-pool-gpu-cost" min="0" step="any"></div>
+                        </div>
+                        <div class="field">
+                            <div class="field-text"><label for="cluster-pool-users" data-i18n="options.cluster.poolUsersLabel">Users it is open to when restricted (comma-separated)</label></div>
+                            <div class="field-control"><input type="text" id="cluster-pool-users"></div>
+                        </div>
+                        <div class="field">
+                            <div class="field-text"><label for="cluster-pool-groups" data-i18n="options.cluster.poolGroupsLabel">Groups it is open to when restricted (comma-separated)</label></div>
+                            <div class="field-control"><input type="text" id="cluster-pool-groups"></div>
+                        </div>
+                        <div class="field switch">
+                            <div class="field-text"><label for="cluster-pool-restricted" data-i18n="options.cluster.poolRestricted">Restricted</label></div>
+                            <div class="field-control"><input type="checkbox" id="cluster-pool-restricted"></div>
+                        </div>
+                        <div class="field switch">
+                            <div class="field-text"><label for="cluster-pool-stop" data-i18n="options.cluster.poolStopWhenSpent">End sessions when the allowance is spent</label></div>
+                            <div class="field-control"><input type="checkbox" id="cluster-pool-stop"></div>
+                        </div>
+                        </div>
                         <div class="button-group">
                             <button type="submit" class="primary"><i class="fas fa-save"></i> <span data-i18n="options.cluster.poolSave">Save Pool</span></button>
                             <button type="button" id="cluster-pool-reset" class="secondary" data-i18n="common.cancel">Cancel</button>
@@ -352,9 +386,8 @@
                     <div class="card-header"><h3 data-i18n="options.cluster.settingsTitle">Cluster Settings</h3></div>
                     <p class="description" data-i18n="options.cluster.signInDescription">Written here, a setting holds for every node and takes precedence over a node's environment. Clear a field to hand the setting back to each node's environment.</p>
                     <form id="cluster-settings-form" data-settings="files_sync">
-                        <div id="cluster-settings-fields" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
-                        <br>
-                        <button type="submit" class="primary"><i class="fas fa-save"></i> <span data-i18n="options.modals.saveChanges">Save Changes</span></button>
+                        <div id="cluster-settings-fields" class="field-list single"></div>
+                        <div class="button-group"><button type="submit" class="primary"><i class="fas fa-save"></i> <span data-i18n="options.modals.saveChanges">Save Changes</span></button></div>
                     </form>
                 </div>
 
@@ -433,11 +466,18 @@
                  <div class="card" id="create-user-section">
                     <div class="card-header"><h3 data-i18n="options.users.newTitle">Create New User</h3></div>
                     <form id="add-user-form">
-                        <div class="form-group"><label for="newUsername"><span data-i18n="common.username">Username</span>:</label><input type="text" id="newUsername" required></div>
-                        <div class="form-group" id="newUserKeyGroup"><label for="newUserPublicKey" data-i18n="options.users.publicKeyOptionalLabel">Public Key (Optional):</label><textarea id="newUserPublicKey" rows="4" data-i18n-placeholder="options.users.publicKeyPlaceholder" placeholder="Paste user's public key here, or leave blank to generate one."></textarea></div>
-
+                        <div class="field-list single">
+                        <div class="field">
+                            <div class="field-text"><label for="newUsername"><span data-i18n="common.username">Username</span>:</label></div>
+                            <div class="field-control"><input type="text" id="newUsername" required></div>
+                        </div>
+                        <div class="field wide" id="newUserKeyGroup">
+                            <div class="field-text"><label for="newUserPublicKey" data-i18n="options.users.publicKeyOptionalLabel">Public Key (Optional):</label></div>
+                            <div class="field-control"><textarea id="newUserPublicKey" rows="4" data-i18n-placeholder="options.users.publicKeyPlaceholder" placeholder="Paste user's public key here, or leave blank to generate one."></textarea></div>
+                        </div>
+                        </div>
                         <div id="newUserSettings"></div>
-                        <br><button type="submit" class="primary"><i class="fas fa-user-plus"></i> <span data-i18n="options.users.createButton">Create User</span></button>
+                        <div class="button-group"><button type="submit" class="primary"><i class="fas fa-user-plus"></i> <span data-i18n="options.users.createButton">Create User</span></button></div>
                     </form>
                 </div>
             </div>
@@ -459,9 +499,14 @@
                 <div class="card" id="create-group-section">
                     <div class="card-header"><h3 data-i18n="options.groups.newTitle">Create New Group</h3></div>
                     <form id="add-group-form">
-                        <div class="form-group"><label for="newGroupName" data-i18n="options.groups.nameLabel">Group Name:</label><input type="text" id="newGroupName" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen."></div>
+                        <div class="field-list single">
+                        <div class="field">
+                            <div class="field-text"><label for="newGroupName" data-i18n="options.groups.nameLabel">Group Name:</label></div>
+                            <div class="field-control"><input type="text" id="newGroupName" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen."></div>
+                        </div>
+                        </div>
                         <div id="newGroupSettings"></div>
-                        <br><button type="submit" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.groups.createButton">Create Group</span></button>
+                        <div class="button-group"><button type="submit" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.groups.createButton">Create Group</span></button></div>
                     </form>
                 </div>
             </div>
@@ -549,14 +594,14 @@
                             <button id="proot-save-btn" class="primary"><i class="fas fa-save"></i> <span data-i18n="common.save">Save</span></button>
                         </div>
                     </div>
-                    <form id="proot-editor-form" class="form-grid" style="grid-template-columns: 2fr 1fr; align-items: end;">
-                        <div class="form-group">
-                            <label for="proot-catalog-name" data-i18n="options.prootApps.nameLabel">Catalog name</label>
-                            <input type="text" id="proot-catalog-name" required maxlength="80">
+                    <form id="proot-editor-form" class="field-list">
+                        <div class="field">
+                            <div class="field-text"><label for="proot-catalog-name" data-i18n="options.prootApps.nameLabel">Catalog name</label></div>
+                            <div class="field-control"><input type="text" id="proot-catalog-name" required maxlength="80"></div>
                         </div>
-                        <div class="form-group">
-                            <label><input type="checkbox" id="proot-catalog-auto-update" checked> <span data-i18n="options.prootApps.autoUpdate">Auto update</span></label>
-                            <p class="description" data-i18n="options.prootApps.autoUpdateHelp">Fetch the apps again on the auto-update interval when their package changed.</p>
+                        <div class="field switch">
+                            <div class="field-text"><label for="proot-catalog-auto-update" data-i18n="options.prootApps.autoUpdate">Auto update</label><p class="description" data-i18n="options.prootApps.autoUpdateHelp">Fetch the apps again on the auto-update interval when their package changed.</p></div>
+                            <div class="field-control"><input type="checkbox" id="proot-catalog-auto-update" checked></div>
                         </div>
                     </form>
                     <h4 data-i18n="options.prootApps.selectedTitle">Selected apps</h4>
@@ -601,11 +646,15 @@
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <h3 data-i18n="options.appTemplates.previewTitle">UI Preview</h3>
+                <form id="app-template-form">
+                    <div class="template-toolbar">
+                        <input type="search" id="template-filter" class="search-input" data-i18n-placeholder="options.appTemplates.filterPlaceholder" placeholder="Filter settings…">
+                        <label class="template-toggle" for="template-changed-only"><input type="checkbox" id="template-changed-only"><span data-i18n="options.appTemplates.changedOnly">Changed only</span></label>
                     </div>
-                    <div class="preview-container">
+                    <div id="template-sections"></div>
+                    <div id="template-preview" hidden>
+                        <h5 class="template-group" data-i18n="options.appTemplates.previewTitle">UI Preview</h5>
+                        <div class="preview-container">
                         <div class="preview-browser-window">
                             <div class="preview-browser-header">
                                 <span class="preview-browser-dots"></span>
@@ -637,39 +686,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <form id="app-template-form">
-                    <div class="card">
-                        <h4 class="form-section-header" data-i18n="options.modals.features">UI Settings</h4>
-                        <div id="template-form-ui" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
-
-                        <h4 class="form-section-header" data-i18n="options.modals.advancedSettings">App Settings</h4>
-                        <div id="template-form-app" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
-                    </div>
-                    <hr class="nav-separator">
-                    <div class="card">
-                        <div class="card-header"><h3 data-i18n="options.users.permissionsTitle">Hardening Settings</h3></div>
-                        <div id="template-form-hardening" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
-                    </div>
-                    <hr class="nav-separator">
-                    <div class="card">
-                        <div class="card-header"><h3 data-i18n="options.modals.generalTitle">General & Performance Settings</h3></div>
-                        <div id="template-form-general" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
-                    </div>
-                    <hr class="nav-separator">
-                    <div class="card">
-                        <div class="card-header"><h3 data-i18n="options.modals.webrtcTitle">WebRTC &amp; TURN Settings</h3></div>
-                        <p class="description" style="margin-bottom: 1rem;" data-i18n="options.modals.webrtcDescription">Sessions stream over WebSockets by default. Setting any STUN, TURN, Cloudflare, or public IP value below, or choosing WebRTC mode, switches the container to WebRTC with dual mode enabled so users can still fall back to WebSockets.</p>
-                        <div id="template-form-webrtc" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
-                    </div>
-                    <hr class="nav-separator">
-                    <div class="card">
-                        <div class="card-header"><h3 data-i18n="options.modals.dockerTitle">Docker Advanced Overrides</h3></div>
-                        <p class="description" style="margin-bottom: 1rem;" data-i18n="options.modals.dockerDescription">These settings override the default container configuration. Use with caution and only if you know what you are doing.</p>
-                        <p id="template-docker-admin-only" class="description" style="display: none; margin-bottom: 1rem;" data-i18n="options.appTemplates.dockerAdminOnly">Only an administrator can change these settings.</p>
-                        <div id="template-form-docker" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));"></div>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -776,66 +793,63 @@
                 <form id="wlab-form" class="lab-grid">
                     <div class="card">
                         <div class="card-header"><h3 data-i18n="options.appLaboratory.describeTitle">1. Describe</h3></div>
-                        <div class="form-group">
-                            <label for="wlab-app-select" data-i18n="options.appLaboratory.selectApp">Select App to Customize</label>
-                            <select id="wlab-app-select">
-                                <option value="new" data-i18n="options.appLaboratory.createNew">-- Create New --</option>
-                            </select>
+                        <div class="field-list single">
+                        <div class="field">
+                            <div class="field-text"><label for="wlab-app-select" data-i18n="options.appLaboratory.selectApp">Select App to Customize</label></div>
+                            <div class="field-control"><select id="wlab-app-select"><option value="new" data-i18n="options.appLaboratory.createNew">-- Create New --</option></select></div>
                         </div>
-                        <div class="form-group">
-                            <label for="wlab-base-app-select" data-i18n="options.appLaboratory.baseApp">Base Application</label>
-                            <select id="wlab-base-app-select" required></select>
-                            <p class="description" data-i18n="options.appLaboratory.baseAppDescription">The new app will inherit the image and provider settings from this app.</p>
+                        <div class="field">
+                            <div class="field-text"><label for="wlab-base-app-select" data-i18n="options.appLaboratory.baseApp">Base Application</label><p class="description" data-i18n="options.appLaboratory.baseAppDescription">The new app will inherit the image and provider settings from this app.</p></div>
+                            <div class="field-control"><select id="wlab-base-app-select" required></select></div>
                         </div>
-                        <div class="form-group">
-                            <label for="wlab-app-name" data-i18n="options.appLaboratory.appName">App Name</label>
-                            <input type="text" id="wlab-app-name" required>
+                        <div class="field">
+                            <div class="field-text"><label for="wlab-app-name" data-i18n="options.appLaboratory.appName">App Name</label></div>
+                            <div class="field-control"><input type="text" id="wlab-app-name" required></div>
                         </div>
-                        <div class="form-group">
-                            <label data-i18n="options.appLaboratory.appIcon">App Icon (PNG, 192x192 recommended)</label>
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <img id="wlab-icon-preview" src="icons/icon128.png" alt="Icon Preview" class="lab-icon-preview">
-                                <label for="wlab-icon-upload" class="button secondary"><i class="fas fa-upload"></i> <span data-i18n="options.appLaboratory.uploadIcon">Upload</span></label>
-                                <input type="file" id="wlab-icon-upload" accept="image/png" style="display: none;">
-                            </div>
+                        <div class="field icon">
+                            <div class="field-text"><label data-i18n="options.appLaboratory.appIcon">App Icon (PNG, 192x192 recommended)</label></div>
+                            <div class="field-control"><img id="wlab-icon-preview" src="icons/icon128.png" alt="Icon Preview" class="lab-icon-preview"><label for="wlab-icon-upload" class="button secondary"><i class="fas fa-upload"></i> <span data-i18n="options.appLaboratory.uploadIcon">Upload</span></label><input type="file" id="wlab-icon-upload" accept="image/png" style="display: none;"></div>
                         </div>
-                        <div class="form-group">
-                            <label for="wlab-app-users" data-i18n="options.modals.allowedUsersLabel">Allowed Users</label>
-                            <input type="text" id="wlab-app-users" value="all">
+                        <div class="field">
+                            <div class="field-text"><label for="wlab-app-users" data-i18n="options.modals.allowedUsersLabel">Allowed Users</label></div>
+                            <div class="field-control"><input type="text" id="wlab-app-users" value="all"></div>
                         </div>
-                        <div class="form-group">
-                            <label for="wlab-app-groups" data-i18n="options.modals.allowedGroupsLabel">Allowed Groups</label>
-                            <input type="text" id="wlab-app-groups" value="all">
+                        <div class="field">
+                            <div class="field-text"><label for="wlab-app-groups" data-i18n="options.modals.allowedGroupsLabel">Allowed Groups</label></div>
+                            <div class="field-control"><input type="text" id="wlab-app-groups" value="all"></div>
+                        </div>
                         </div>
                         <details class="collapsible-section">
                             <summary><h4 data-i18n="options.appLaboratory.advanced">Advanced</h4></summary>
-                            <div class="form-group">
-                                <label for="wlab-autostart-script" data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</label>
-                                <textarea id="wlab-autostart-script" rows="4" placeholder="program ${SEALSKIN_FILE:+&quot;$SEALSKIN_FILE&quot;} ${SEALSKIN_URL:+&quot;$SEALSKIN_URL&quot;}"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="wlab-autostart-wayland-script">
-                                    <span data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</span> (Wayland)
-                                </label>
-                                <textarea id="wlab-autostart-wayland-script" rows="4" placeholder="program ${SEALSKIN_FILE:+&quot;$SEALSKIN_FILE&quot;} ${SEALSKIN_URL:+&quot;$SEALSKIN_URL&quot;}"></textarea>
+                            <div class="field-list single">
+                            <div class="field wide">
+                            <div class="field-text"><label for="wlab-autostart-script" data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</label></div>
+                            <div class="field-control"><textarea id="wlab-autostart-script" rows="4" placeholder="program ${SEALSKIN_FILE:+&quot;$SEALSKIN_FILE&quot;} ${SEALSKIN_URL:+&quot;$SEALSKIN_URL&quot;}"></textarea></div>
+                        </div>
+                            <div class="field wide">
+                            <div class="field-text"><label for="wlab-autostart-wayland-script"><span data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</span> (Wayland)</label></div>
+                            <div class="field-control"><textarea id="wlab-autostart-wayland-script" rows="4" placeholder="program ${SEALSKIN_FILE:+&quot;$SEALSKIN_FILE&quot;} ${SEALSKIN_URL:+&quot;$SEALSKIN_URL&quot;}"></textarea></div>
+                        </div>
                             </div>
                         </details>
-                        <br>
-                        <button type="button" id="wlab-update-btn" class="secondary"><i class="fas fa-save"></i> <span data-i18n="common.save">Save</span></button>
+                        <div class="button-group"><button type="button" id="wlab-update-btn" class="secondary"><i class="fas fa-save"></i> <span data-i18n="common.save">Save</span></button></div>
                     </div>
                     <div class="card">
                         <div class="card-header"><h3 data-i18n="options.appLaboratory.customizeTitle">2. Customize</h3></div>
                         <p class="description" data-i18n="options.appLaboratory.customizeDescription">The customization session starts with these options. One session can be open at a time.</p>
-                        <div class="form-group">
-                            <label for="wlab-language" data-i18n="common.language">Language</label>
-                            <select id="wlab-language"></select>
+                        <div class="field-list single">
+                        <div class="field">
+                            <div class="field-text"><label for="wlab-language" data-i18n="common.language">Language</label></div>
+                            <div class="field-control"><select id="wlab-language"></select></div>
                         </div>
-                        <div class="form-group" id="wlab-gpu-group">
-                            <label for="wlab-gpu" data-i18n="common.gpu">GPU</label>
-                            <select id="wlab-gpu"></select>
+                        <div class="field" id="wlab-gpu-group">
+                            <div class="field-text"><label for="wlab-gpu" data-i18n="common.gpu">GPU</label></div>
+                            <div class="field-control"><select id="wlab-gpu"></select></div>
                         </div>
-                        <div class="form-group">
-                            <label><input type="checkbox" id="wlab-launch-wayland" checked> <span data-i18n="popup.launchView.waylandMode">Wayland Mode</span></label>
+                        <div class="field switch">
+                            <div class="field-text"><label for="wlab-launch-wayland" data-i18n="popup.launchView.waylandMode">Wayland Mode</label></div>
+                            <div class="field-control"><input type="checkbox" id="wlab-launch-wayland" checked></div>
+                        </div>
                         </div>
                         <p id="wlab-busy-note" class="status-message error" style="display: none;"></p>
                         <button type="button" id="wlab-launch-btn" class="primary" style="width: 100%;">
@@ -868,8 +882,7 @@
             <form id="user-edit-form">
                 <input type="hidden" id="editUsername">
                 <div id="editUserSettings"></div>
-                <br>
-                <button type="submit" class="primary" data-i18n="options.modals.saveChanges">Save Changes</button>
+                <div class="button-group"><button type="submit" class="primary" data-i18n="options.modals.saveChanges">Save Changes</button></div>
             </form>
             <div id="effective-settings" style="margin-top: 20px;">
                  <h4 data-i18n="options.modals.effectiveSettings">Effective Settings (with group overrides)</h4>
@@ -887,8 +900,7 @@
             <form id="group-edit-form">
                 <input type="hidden" id="editGroupName">
                 <div id="editGroupSettings"></div>
-                <br>
-                <button type="submit" class="primary" data-i18n="options.modals.saveChanges">Save Changes</button>
+                <div class="button-group"><button type="submit" class="primary" data-i18n="options.modals.saveChanges">Save Changes</button></div>
             </form>
         </div>
     </div>
@@ -937,11 +949,13 @@
             <div class="card">
                 <div class="card-header"><h3 data-i18n="options.modals.newDirForUser">Create New Directory for User</h3></div>
                 <form id="admin-add-homedir-form">
-                    <div class="form-group">
-                        <label for="adminNewHomeDirName"><span data-i18n="options.home.nameLabel">Directory Name</span>:</label>
-                        <input type="text" id="adminNewHomeDirName" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen.">
+                    <div class="field-list single">
+                    <div class="field">
+                            <div class="field-text"><label for="adminNewHomeDirName"><span data-i18n="options.home.nameLabel">Directory Name</span>:</label></div>
+                            <div class="field-control"><input type="text" id="adminNewHomeDirName" required pattern="^[a-zA-Z0-9_\-]+$" data-i18n-title="options.home.nameTitle" title="Use only letters, numbers, underscore, or hyphen."></div>
+                        </div>
                     </div>
-                    <button type="submit" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.modals.createDirButton">Create Directory</span></button>
+                    <div class="button-group"><button type="submit" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.modals.createDirButton">Create Directory</span></button></div>
                 </form>
             </div>
         </div>
@@ -954,12 +968,13 @@
                 <span class="close-button" data-modal-id="node-pick-modal">&times;</span>
             </div>
             <form id="node-pick-form">
-                <div class="form-group">
-                    <label for="node-pick-select" data-i18n="options.home.moveTo">Move to node</label>
-                    <select id="node-pick-select" required></select>
+                <div class="field-list single">
+                <div class="field">
+                            <div class="field-text"><label for="node-pick-select" data-i18n="options.home.moveTo">Move to node</label><p class="description" data-i18n="options.home.moveHelp">The home directory is copied to the node and removed from the one that holds it. Sessions using it must be stopped first.</p></div>
+                            <div class="field-control"><select id="node-pick-select" required></select></div>
+                        </div>
                 </div>
-                <p class="description" data-i18n="options.home.moveHelp">The home directory is copied to the node and removed from the one that holds it. Sessions using it must be stopped first.</p>
-                <button type="submit" class="primary" data-i18n="options.home.move">Move</button>
+                <div class="button-group"><button type="submit" class="primary" data-i18n="options.home.move">Move</button></div>
             </form>
         </div>
     </div>
@@ -975,58 +990,65 @@
                 <input type="hidden" id="install-source-app-id">
                 <input type="hidden" id="install-source-name">
                 <p id="manual-install-note" class="description" style="display: none; color: var(--color-warning-text); border-left: 3px solid var(--color-warning); padding-left: 1rem; margin-bottom: 1.5rem;" data-i18n="options.modals.manualInstallNote">Note: Manually added images should be based on a selkies-baseimage compatible image.</p>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="install-app-name" data-i18n="options.modals.customNameLabel">Custom Name</label>
-                        <input type="text" id="install-app-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="install-app-image" data-i18n="options.modals.imageLabel">Container Image</label>
-                        <input type="text" id="install-app-image" required>
-                    </div>
+                <div class="field-list single">
+                    <div class="field">
+                            <div class="field-text"><label for="install-app-name" data-i18n="options.modals.customNameLabel">Custom Name</label></div>
+                            <div class="field-control"><input type="text" id="install-app-name" required></div>
+                        </div>
+                    <div class="field">
+                            <div class="field-text"><label for="install-app-image" data-i18n="options.modals.imageLabel">Container Image</label></div>
+                            <div class="field-control"><input type="text" id="install-app-image" required></div>
+                        </div>
                 </div>
-                <h4 data-i18n="options.modals.permissions">Permissions</h4>
-                <div class="settings-grid">
-                     <div class="form-group">
-                        <label for="install-app-users" data-i18n="options.modals.allowedUsersLabel">Allowed Users (comma-separated, 'all' for everyone)</label>
-                        <input type="text" id="install-app-users" value="all">
-                    </div>
-                     <div class="form-group">
-                        <label for="install-app-groups" data-i18n="options.modals.allowedGroupsLabel">Allowed Groups (comma-separated, 'all' for everyone)</label>
-                        <input type="text" id="install-app-groups" value="all">
-                    </div>
+                <h5 class="field-group" data-i18n="options.modals.permissions">Permissions</h5>
+                <div class="field-list single">
+                    <div class="field">
+                            <div class="field-text"><label for="install-app-users" data-i18n="options.modals.allowedUsersLabel">Allowed Users (comma-separated, 'all' for everyone)</label></div>
+                            <div class="field-control"><input type="text" id="install-app-users" value="all"></div>
+                        </div>
+                    <div class="field">
+                            <div class="field-text"><label for="install-app-groups" data-i18n="options.modals.allowedGroupsLabel">Allowed Groups (comma-separated, 'all' for everyone)</label></div>
+                            <div class="field-control"><input type="text" id="install-app-groups" value="all"></div>
+                        </div>
                 </div>
-                 <h4 data-i18n="options.modals.features">Features</h4>
-                <div class="settings-grid">
-                    <div class="form-group"><label><input type="checkbox" id="install-gpu-support"> <span data-i18n="options.modals.gpuSupport">GPU Support</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="install-home-support"> <span data-i18n="options.modals.homeMounting">Home Directory Mounting</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="install-url-support"> <span data-i18n="options.modals.urlSupport">URL Opening Support</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="install-open-support"> <span data-i18n="options.modals.fileSupport">File Opening Support</span></label></div>
-                    <div class="form-group"><label><input type="checkbox" id="install-auto-update"> <span data-i18n="options.modals.autoUpdate">Auto Update Image</span></label></div>
+                <h5 class="field-group" data-i18n="options.modals.features">Features</h5>
+                <div class="field-list">
+                    <div class="field switch">
+                            <div class="field-text"><label for="install-gpu-support" data-i18n="options.modals.gpuSupport">GPU Support</label></div>
+                            <div class="field-control"><input type="checkbox" id="install-gpu-support"></div>
+                        </div>
+                    <div class="field switch">
+                            <div class="field-text"><label for="install-home-support" data-i18n="options.modals.homeMounting">Home Directory Mounting</label></div>
+                            <div class="field-control"><input type="checkbox" id="install-home-support"></div>
+                        </div>
+                    <div class="field switch">
+                            <div class="field-text"><label for="install-url-support" data-i18n="options.modals.urlSupport">URL Opening Support</label></div>
+                            <div class="field-control"><input type="checkbox" id="install-url-support"></div>
+                        </div>
+                    <div class="field switch">
+                            <div class="field-text"><label for="install-open-support" data-i18n="options.modals.fileSupport">File Opening Support</label></div>
+                            <div class="field-control"><input type="checkbox" id="install-open-support"></div>
+                        </div>
+                    <div class="field switch">
+                            <div class="field-text"><label for="install-auto-update" data-i18n="options.modals.autoUpdate">Auto Update Image</label></div>
+                            <div class="field-control"><input type="checkbox" id="install-auto-update"></div>
+                        </div>
                 </div>
-
-                <h4 style="margin-top: 2rem;" data-i18n="options.modals.advancedSettings">Advanced Settings</h4>
-                <div class="form-group">
-                    <label for="install-app-template" data-i18n="options.modals.appTemplateLabel">Application Template</label>
-                    <select id="install-app-template" required>
-                    </select>
-                    <p class="description" data-i18n="options.modals.appTemplateDescription">Select a pre-configured template for advanced container launch settings.</p>
+                <h5 class="field-group" data-i18n="options.modals.advancedSettings">Advanced Settings</h5>
+                <div class="field-list single">
+                    <div class="field">
+                            <div class="field-text"><label for="install-app-template" data-i18n="options.modals.appTemplateLabel">Application Template</label><p class="description" data-i18n="options.modals.appTemplateDescription">Select a pre-configured template for advanced container launch settings.</p></div>
+                            <div class="field-control"><select id="install-app-template" required></select></div>
+                        </div>
+                    <div class="field wide">
+                            <div class="field-text"><label for="install-autostart-script" data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</label><p class="description" data-i18n="options.modals.customAutostartScriptDescription">Customize autostart logic, leave blank to use default from application provider.</p></div>
+                            <div class="field-control"><textarea id="install-autostart-script" rows="4"></textarea></div>
+                        </div>
+                    <div class="field wide">
+                            <div class="field-text"><label for="install-autostart-wayland-script"><span data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</span> (Wayland)</label><p class="description" data-i18n="options.modals.customAutostartScriptDescription">Customize autostart logic, leave blank to use default from application provider.</p></div>
+                            <div class="field-control"><textarea id="install-autostart-wayland-script" rows="4"></textarea></div>
+                        </div>
                 </div>
-
-                <div class="form-group">
-                    <label for="install-autostart-script" data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</label>
-                    <textarea id="install-autostart-script" rows="4"></textarea>
-                    <p class="description" data-i18n="options.modals.customAutostartScriptDescription">Customize autostart logic, leave blank to use default from application provider.</p>
-                </div>
-
-                <div class="form-group">
-                    <label for="install-autostart-wayland-script">
-                        <span data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</span> (Wayland)
-                    </label>
-                    <textarea id="install-autostart-wayland-script" rows="4"></textarea>
-                    <p class="description" data-i18n="options.modals.customAutostartScriptDescription">Customize autostart logic, leave blank to use default from application provider.</p>
-                </div>
-
                 <div class="button-group">
                     <button type="submit" class="primary" data-i18n="options.modals.saveInstallation">Save Installation</button>
                 </div>

@@ -359,6 +359,7 @@ input[type="text"],
 input[type="password"],
 input[type="number"],
 input[type="url"],
+input[type="search"],
 select,
 textarea {
   width: 100%;
@@ -406,7 +407,7 @@ input.masked { -webkit-text-security: disc; }
 .pill.active { color: var(--color-success-text); background-color: var(--color-success-soft); border-color: rgba(16, 185, 129, 0.35); }
 .pill.off { color: var(--color-warning-text); background-color: var(--color-warning-soft); border-color: rgba(245, 158, 11, 0.35); }
 .signin-card h4 { margin: 1.25rem 0 0.6rem; font-size: 0.9rem; }
-.setting-written > label::after { content: ""; display: inline-block; width: 0.45rem; height: 0.45rem; margin-left: 0.45rem; border-radius: 50%; background-color: var(--accent-primary); }
+.setting-written .field-text label::after { content: ""; display: inline-block; width: 0.45rem; height: 0.45rem; margin-left: 0.45rem; border-radius: 50%; background-color: var(--accent-primary); }
 .copy-rows { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
 .copy-row { display: flex; align-items: center; gap: 0.75rem; }
 .copy-row span { flex: 0 0 11rem; font-size: 0.85rem; color: var(--text-secondary); }
@@ -497,25 +498,6 @@ input[type="checkbox"]:checked {
 input[type="checkbox"]:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
 input[type="checkbox"]:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.settings-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 0.75rem;
-  align-items: center;
-}
-.settings-grid .form-group { margin-bottom: 0; }
-.settings-grid label {
-  font-weight: normal;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  cursor: pointer;
-  padding: 0.55rem 0.75rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid transparent;
-  transition: background-color var(--dur), border-color var(--dur);
-}
-.settings-grid label:hover { background-color: var(--glass); border-color: var(--border-color); }
 
 input.search-input {
   padding: 0.55rem 0.75rem 0.55rem 2.4rem;
@@ -1106,7 +1088,8 @@ span.close-button:hover { transform: rotate(90deg); }
 }
 .preview-browser-content { display: flex; flex-grow: 1; min-height: 0; }
 .preview-sidebar {
-  width: 30%;
+  width: 280px;
+  flex-shrink: 0;
   background-color: var(--bg-0);
   border-right: 1px solid var(--border-color);
   padding: 1rem;
@@ -1144,21 +1127,115 @@ span.close-button:hover { transform: rotate(90deg); }
   box-shadow: var(--shadow-accent);
 }
 
-#app-template-form .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+#app-template-form .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0; }
 #app-template-form .form-group p.description { font-size: 0.82rem; color: var(--text-muted); margin: 0; }
 
-.form-section-header {
+/* The template editor: a toolbar that filters, then a collapsible card per section. */
+.template-toolbar { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.25rem; }
+.template-toolbar .search-input { flex: 1; min-width: 0; }
+.template-toggle { display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; cursor: pointer; }
+.template-section { margin-top: 0.75rem; }
+.template-section[hidden] { display: none; }
+.template-section summary { gap: 0.6rem; }
+.template-section summary i { width: 1.4rem; text-align: center; font-size: 0.95rem; color: var(--accent-primary); }
+.template-section > div { padding-top: 1rem; }
+.template-section > div > .description { margin-bottom: 1rem; font-size: 0.92rem; }
+.template-badge {
+  margin-right: 0.75rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background-color: var(--accent-soft);
+  color: #cdc6ff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.template-badge[hidden] { display: none; }
+/* The WebRTC badge names the streaming the values amount to, lit once that is WebRTC. */
+.template-webrtc .template-badge { background-color: var(--glass-strong); color: var(--text-muted); }
+.template-webrtc .template-badge.on { background-color: var(--color-success-soft); color: var(--color-success-text); }
+.field-group {
+  margin: 1.25rem 0 0.25rem;
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-top: 2rem;
-  margin-bottom: 1.25rem;
-  padding-bottom: 0.6rem;
+}
+.field-group[hidden] { display: none; }
+/* The fields of a form are rows of one list, which flows into two columns on a wide window; `single` keeps one column. */
+.field-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); column-gap: 2.5rem; align-items: start; }
+.field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 200px;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.65rem 0;
   border-bottom: 1px solid var(--border-color);
 }
-.form-section-header:first-of-type { margin-top: 0; }
+.field.switch { grid-template-columns: minmax(0, 1fr) auto; }
+/* In one column the label takes a column of its own and the control sits beside it, not across the card. */
+.field-list.single { grid-template-columns: 1fr; }
+.field-list.single .field { grid-template-columns: minmax(240px, 34%) minmax(0, 1fr); }
+.field-list.single .field.switch { grid-template-columns: minmax(240px, 34%) auto; }
+.field-list.single .field .field-control { justify-content: flex-start; }
+.field-list.single .field .field-control > input:not([type="checkbox"]), .field-list.single .field .field-control > select { max-width: 420px; }
+/* A wide row puts its control under the text: textareas, multi-selects, and keys. */
+.field.wide, .field-list.single .field.wide { grid-template-columns: 1fr; gap: 0.4rem; }
+.field.wide .field-control { flex-direction: column; align-items: stretch; }
+.field-control textarea { width: 100%; font-size: 0.9rem; }
+.field-control select[multiple] { height: auto; padding: 0.3rem; }
+.field-control select[multiple] option { padding: 0.15rem 0.4rem; }
+.field-control .description { margin: 0.35rem 0 0; font-size: 0.8rem; }
+.field-control .field-aside { display: flex; align-items: center; gap: 0.4rem; margin-left: 0.75rem; font-size: 0.8rem; white-space: nowrap; color: var(--text-secondary); }
+.field-control .field-aside input[type="checkbox"] { margin: 0; }
+.field-group + .description { margin-bottom: 0.5rem; }
+/* An icon row shows the picture beside its upload button. */
+.field.icon .field-control { justify-content: flex-start; gap: 1rem; }
+.field.icon .field-control .button { margin: 0; }
+.field[hidden] { display: none; }
+.field-text { min-width: 0; cursor: pointer; }
+.field-text label { display: block; font-size: 0.92rem; font-weight: 500; color: var(--text-primary); cursor: pointer; }
+/* Two lines of the description show; the rest is behind "Show more", which rides the end of the second line over a fade. */
+.field .field-text .description {
+  position: relative;
+  max-height: 2.8em;
+  overflow: hidden;
+  margin: 0.1rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+.field.expanded .field-text .description { max-height: none; }
+.field-more {
+  display: none;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 0 0 0 2.5rem;
+  border: none;
+  background: linear-gradient(90deg, transparent, var(--bg-1) 1.5rem);
+  font: inherit;
+  font-weight: 500;
+  line-height: inherit;
+  color: var(--accent-primary);
+  cursor: pointer;
+}
+.field.clamped .field-more, .field.expanded .field-more { display: inline-block; }
+.field.expanded .field-more { position: static; margin-left: 0.4rem; padding: 0; background: none; }
+.field-more:hover { text-decoration: underline; }
+.field-more:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 3px; }
+.field-control { display: flex; justify-content: flex-end; align-items: center; min-width: 0; }
+.field-control input[type="text"], .field-control input[type="number"], .field-control input[type="url"], .field-control select { width: 100%; padding: 0.45rem 0.65rem; font-size: 0.9rem; }
+.field-control input[type="checkbox"] { margin: 0; flex-shrink: 0; }
+/* A value that differs from the default shows as such, so a template reads at a glance. */
+.field.changed .field-text label::before { content: ''; display: inline-block; width: 6px; height: 6px; margin: 0 0.45rem 2px 0; border-radius: 50%; background-color: var(--accent-primary); }
+/* The preview heads the appearance card, above the rows whose toggles it follows. */
+#template-preview { margin: 0 0 0.5rem; }
+#template-preview .field-group { margin-top: 0.75rem; }
+#template-preview .preview-container { padding: 1rem; }
+#template-preview .preview-browser-window { max-width: none; aspect-ratio: auto; height: 440px; }
+@media (max-width: 640px) { .template-toolbar { flex-wrap: wrap; } }
 
 /* --------------------------------------------------------------------------
    Progress and spinners

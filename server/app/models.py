@@ -307,11 +307,20 @@ class TemplateSchemaOption(BaseModel):
     label_key: str | None = None
 
 
+class TemplateSchemaSection(BaseModel):
+    """One card of the template editor, in the order the editor shows them."""
+
+    id: str
+    icon: str = ""
+
+
 class TemplateSchemaSetting(BaseModel):
     """Definition of one environment variable editable in templates."""
 
     name: str
     category: str
+    section: str = ""
+    group: str = ""
     type: str
     default: str = ""
     docker: bool = False
@@ -331,6 +340,7 @@ class TemplateSchemaSetting(BaseModel):
 class TemplateSchemaResponse(BaseModel):
     """Payload of `GET /api/ui/template_schema`."""
 
+    sections: list[TemplateSchemaSection] = []
     settings: list[TemplateSchemaSetting]
 
 
@@ -445,6 +455,9 @@ class AdminStatusResponse(BaseModel):
     clustered: bool = False
     node_id: str = ""
     allowance: dict[str, Any] | None = None
+    provider_groups: list[str] = []
+    expires: float | None = None
+    storage_used: int | None = None
     gpus: list[GPUInfo] = []
     cpu_model: str | None = None
     disk_total: int | None = None

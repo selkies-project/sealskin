@@ -301,6 +301,41 @@
       "deleteDisabled": "이 템플릿은 삭제할 수 없습니다.",
       "enterName": "새 템플릿의 이름을 입력하세요.",
       "dockerAdminOnly": "이 설정은 관리자만 변경할 수 있습니다.",
+      "filterPlaceholder": "이름으로 설정 필터…",
+      "changedOnly": "변경된 항목만",
+      "showMore": "더 보기",
+      "showLess": "간략히",
+      "changedCount": "{count, plural, one {{count}개 변경됨} other {{count}개 변경됨}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC, 듀얼 모드"
+      },
+      "sections": {
+        "appearance": "외관",
+        "display": "디스플레이",
+        "input": "입력",
+        "audio": "오디오",
+        "webcam": "웹캠",
+        "performance": "성능",
+        "gpu": "GPU",
+        "clipboard": "클립보드 및 파일",
+        "sharing": "공유",
+        "hardening": "강화",
+        "lifecycle": "수명 주기",
+        "integrations": "통합",
+        "webrtc": "WebRTC",
+        "container": "컨테이너"
+      },
+      "groups": {
+        "mode": "모드",
+        "transport": "전송",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "TURN REST API",
+        "cloudflare": "Cloudflare TURN",
+        "extra": "진단"
+      },
       "settings": {
         "TITLE": {
           "label": "페이지 제목",
@@ -747,10 +782,6 @@
           "label": "Wayland 백엔드",
           "description": "X11 서버 대신 창 관리를 위해 labwc를 중첩한 헤드리스 컴포지터인 Wayland 백엔드에서 세션을 실행합니다. X11 애플리케이션은 XWayland를 통해 실행됩니다."
         },
-        "MAX_RES": {
-          "label": "최대 해상도",
-          "description": "컨테이너의 최대 해상도, 기본값은 16k입니다."
-        },
         "START_DOCKER": {
           "label": "Docker-in-Docker 시작",
           "description": "false인 경우, 권한 있는 컨테이너는 DinD를 시작하지 않습니다."
@@ -758,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "IPv6 비활성화",
           "description": "true인 경우, IPv6를 비활성화합니다."
-        },
-        "DISABLE_ZINK": {
-          "label": "Zink 비활성화",
-          "description": "비디오 카드가 감지되면 Zink 환경 변수를 설정하지 않습니다."
         },
         "DISABLE_DRI3": {
           "label": "DRI3 비활성화",
@@ -1172,10 +1199,7 @@
       "newVersion": "새 버전: {sha}",
       "errorPulling": "이미지를 가져오는 중 오류 발생.",
       "manualInstallNote": "참고: 수동으로 추가된 이미지는 selkies-baseimage 호환 이미지에 기반해야 합니다.",
-      "generalTitle": "일반 및 성능 설정",
-      "webrtcTitle": "WebRTC 및 TURN 설정",
       "webrtcDescription": "세션은 기본적으로 WebSockets를 통해 스트리밍됩니다. 아래에서 STUN, TURN, Cloudflare 또는 공용 IP 값을 설정하거나 WebRTC 모드를 선택하면 컨테이너가 듀얼 모드가 활성화된 WebRTC로 전환되어 사용자가 여전히 WebSockets로 폴백할 수 있습니다.",
-      "dockerTitle": "Docker 고급 재정의",
       "dockerDescription": "이 설정은 기본 컨테이너 구성을 재정의합니다. 주의해서 사용하고 수행 중인 작업을 알고 있는 경우에만 사용하십시오."
     },
     "status": {
@@ -1805,6 +1829,40 @@
       "hideRail": "사이드바 숨기기",
       "showRail": "사이드바 표시",
       "project": "GitHub의 SealSkin: 문제 신고 및 기능 요청"
+    },
+    "profile": {
+      "open": "내 프로필",
+      "signIn": "로그인",
+      "method": "로그인 방법",
+      "until": "로그인 유지 기한",
+      "proxyKeeps": "리버스 프록시가 로그인을 유지하는 동안",
+      "node": "노드",
+      "groups": "그룹",
+      "noGroups": "그룹 없음: 서버 기본값이 적용됩니다.",
+      "providerGroups": "ID 공급자가 지정:",
+      "proxyGroups": "리버스 프록시가 지정:",
+      "access": "접근",
+      "adminNote": "관리자는 모든 기능을 사용할 수 있으며 제한이 없습니다.",
+      "canStorage": "영구 저장소",
+      "canShare": "공개 공유",
+      "canGpu": "GPU",
+      "canTemplates": "템플릿 편집",
+      "canMigrate": "홈 이전",
+      "limits": "제한",
+      "unlimited": "무제한",
+      "sessions": "세션",
+      "sessionsOf": "동시에 최대 {limit}개",
+      "sessionsRunning": "{running}개 실행 중",
+      "sessionsRunningOf": "{limit}개 중 {running}개 실행 중",
+      "cpus": "세션당 CPU",
+      "memory": "세션당 메모리",
+      "hours": "세션 길이",
+      "hoursValue": "{hours}시간",
+      "storage": "저장소",
+      "pools": "풀",
+      "anyPool": "서버가 제공하는 모든 풀.",
+      "poolsDenied": "다음은 제외:",
+      "catalog": "PRoot Apps 카탈로그"
     },
     "home": {
       "searchPlaceholder": "애플리케이션을 검색하거나, 링크를 붙여넣어 격리된 환경에서 열기",

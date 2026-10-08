@@ -301,6 +301,41 @@
       "deleteDisabled": "Ce modèle ne peut pas être supprimé.",
       "enterName": "Veuillez entrer un nom pour le nouveau modèle.",
       "dockerAdminOnly": "Seul un administrateur peut modifier ces paramètres.",
+      "filterPlaceholder": "Filtrer les réglages par nom…",
+      "changedOnly": "Modifiés seulement",
+      "showMore": "Afficher plus",
+      "showLess": "Afficher moins",
+      "changedCount": "{count, plural, one {1 modifié} other {{count} modifiés}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC, mode double"
+      },
+      "sections": {
+        "appearance": "Apparence",
+        "display": "Affichage",
+        "input": "Saisie",
+        "audio": "Audio",
+        "webcam": "Webcam",
+        "performance": "Performance",
+        "gpu": "GPU",
+        "clipboard": "Presse-papiers et fichiers",
+        "sharing": "Partage",
+        "hardening": "Durcissement",
+        "lifecycle": "Cycle de vie",
+        "integrations": "Intégrations",
+        "webrtc": "WebRTC",
+        "container": "Conteneur"
+      },
+      "groups": {
+        "mode": "Mode",
+        "transport": "Transport",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "API REST TURN",
+        "cloudflare": "TURN Cloudflare",
+        "extra": "Diagnostic"
+      },
       "settings": {
         "TITLE": {
           "label": "Titre de la Page",
@@ -747,10 +782,6 @@
           "label": "Backend Wayland",
           "description": "Exécute la session sur le backend Wayland, un compositeur sans affichage avec labwc imbriqué pour la gestion des fenêtres, au lieu du serveur X11. Les applications X11 passent par XWayland."
         },
-        "MAX_RES": {
-          "label": "Résolution Maximale",
-          "description": "Résolution maximale pour le conteneur, la valeur par défaut est 16k."
-        },
         "START_DOCKER": {
           "label": "Démarrer Docker-in-Docker",
           "description": "Si faux, un conteneur privilégié ne démarrera pas DinD."
@@ -758,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "Désactiver IPv6",
           "description": "Si vrai, cela désactivera IPv6."
-        },
-        "DISABLE_ZINK": {
-          "label": "Désactiver Zink",
-          "description": "Ne pas définir les variables d'environnement Zink si une carte vidéo est détectée."
         },
         "DISABLE_DRI3": {
           "label": "Désactiver DRI3",
@@ -1172,10 +1199,7 @@
       "newVersion": "Nouvelle version : {sha}",
       "errorPulling": "Erreur lors du téléchargement de l'image.",
       "manualInstallNote": "Note : Les images ajoutées manuellement doivent être basées sur une image compatible avec selkies-baseimage.",
-      "generalTitle": "Paramètres Généraux et de Performance",
-      "webrtcTitle": "Paramètres WebRTC et TURN",
       "webrtcDescription": "Les sessions sont diffusées via WebSockets par défaut. Définir une valeur STUN, TURN, Cloudflare ou d'IP publique ci-dessous, ou choisir le mode WebRTC, fait passer le conteneur en WebRTC avec le mode double activé afin que les utilisateurs puissent toujours se rabattre sur WebSockets.",
-      "dockerTitle": "Surcharges Avancées Docker",
       "dockerDescription": "Ces paramètres remplacent la configuration par défaut du conteneur. À utiliser avec prudence et seulement si vous savez ce que vous faites."
     },
     "status": {
@@ -1805,6 +1829,40 @@
       "hideRail": "Masquer la barre latérale",
       "showRail": "Afficher la barre latérale",
       "project": "SealSkin sur GitHub : signaler un problème ou demander une fonctionnalité"
+    },
+    "profile": {
+      "open": "Votre profil",
+      "signIn": "Connexion",
+      "method": "Connecté via",
+      "until": "Connecté jusqu'au",
+      "proxyKeeps": "Tant que le proxy inverse vous garde connecté",
+      "node": "Nœud",
+      "groups": "Groupes",
+      "noGroups": "Aucun groupe : les valeurs par défaut du serveur s'appliquent.",
+      "providerGroups": "Indiqués par le fournisseur d'identité :",
+      "proxyGroups": "Indiqués par le proxy inverse :",
+      "access": "Accès",
+      "adminNote": "Les administrateurs ont toutes les capacités et aucune limite.",
+      "canStorage": "Stockage persistant",
+      "canShare": "Partage public",
+      "canGpu": "GPU",
+      "canTemplates": "Modification des modèles",
+      "canMigrate": "Migration du dossier personnel",
+      "limits": "Limites",
+      "unlimited": "Illimité",
+      "sessions": "Sessions",
+      "sessionsOf": "Jusqu'à {limit} à la fois",
+      "sessionsRunning": "{running} en cours",
+      "sessionsRunningOf": "{running} en cours sur {limit}",
+      "cpus": "CPU par session",
+      "memory": "Mémoire par session",
+      "hours": "Durée de session",
+      "hoursValue": "{hours} h",
+      "storage": "Stockage",
+      "pools": "Pools",
+      "anyPool": "Tout pool que le serveur propose.",
+      "poolsDenied": "Pas ceux-ci :",
+      "catalog": "Catalogue PRoot Apps"
     },
     "home": {
       "searchPlaceholder": "Recherchez des applications, ou collez un lien pour l'ouvrir en isolation",

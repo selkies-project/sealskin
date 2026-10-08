@@ -301,6 +301,41 @@
       "deleteDisabled": "Bu şablon silinemez.",
       "enterName": "Lütfen yeni şablon için bir isim girin.",
       "dockerAdminOnly": "Bu ayarları yalnızca bir yönetici değiştirebilir.",
+      "filterPlaceholder": "Ayarları ada göre filtrele…",
+      "changedOnly": "Yalnızca değişenler",
+      "showMore": "Daha fazla göster",
+      "showLess": "Daha az göster",
+      "changedCount": "{count, plural, one {1 değişti} other {{count} değişti}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC, çift mod"
+      },
+      "sections": {
+        "appearance": "Görünüm",
+        "display": "Ekran",
+        "input": "Giriş",
+        "audio": "Ses",
+        "webcam": "Web kamerası",
+        "performance": "Performans",
+        "gpu": "GPU",
+        "clipboard": "Pano ve dosyalar",
+        "sharing": "Paylaşım",
+        "hardening": "Sıkılaştırma",
+        "lifecycle": "Yaşam döngüsü",
+        "integrations": "Entegrasyonlar",
+        "webrtc": "WebRTC",
+        "container": "Konteyner"
+      },
+      "groups": {
+        "mode": "Mod",
+        "transport": "Taşıma",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "TURN REST API",
+        "cloudflare": "Cloudflare TURN",
+        "extra": "Tanılama"
+      },
       "settings": {
         "TITLE": {
           "label": "Sayfa Başlığı",
@@ -747,10 +782,6 @@
           "label": "Wayland Arka Ucu",
           "description": "Oturumu X11 sunucusu yerine Wayland arka ucunda, pencere yönetimi için iç içe labwc çalıştıran başsız bir birleştiricide çalıştırır. X11 uygulamaları XWayland üzerinden çalışır."
         },
-        "MAX_RES": {
-          "label": "Maksimum Çözünürlük",
-          "description": "Konteyner için maksimum çözünürlük, varsayılan 16k'dır."
-        },
         "START_DOCKER": {
           "label": "Docker-in-Docker'ı Başlat",
           "description": "Eğer yanlışsa, ayrıcalıklı bir konteyner DinD'yi başlatmaz."
@@ -758,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "IPv6'yı Devre Dışı Bırak",
           "description": "Eğer doğruysa, bu IPv6'yı devre dışı bırakacaktır."
-        },
-        "DISABLE_ZINK": {
-          "label": "Zink'i Devre Dışı Bırak",
-          "description": "Bir video kartı algılanırsa Zink ortam değişkenlerini ayarlama."
         },
         "DISABLE_DRI3": {
           "label": "DRI3'ü Devre Dışı Bırak",
@@ -1172,10 +1199,7 @@
       "newVersion": "Yeni versiyon: {sha}",
       "errorPulling": "İmaj çekilirken hata oluştu.",
       "manualInstallNote": "Not: Manuel olarak eklenen imajlar, selkies-baseimage uyumlu bir imaja dayanmalıdır.",
-      "generalTitle": "Genel ve Performans Ayarları",
-      "webrtcTitle": "WebRTC ve TURN Ayarları",
       "webrtcDescription": "Oturumlar varsayılan olarak WebSockets üzerinden akar. Aşağıdaki herhangi bir STUN, TURN, Cloudflare veya genel IP değerini ayarlamak ya da WebRTC modunu seçmek, kullanıcıların yine de WebSockets'e geri dönebilmesi için konteyneri çift mod etkin olacak şekilde WebRTC'ye geçirir.",
-      "dockerTitle": "Docker Gelişmiş Geçersiz Kılmalar",
       "dockerDescription": "Bu ayarlar varsayılan konteyner yapılandırmasını geçersiz kılar. Dikkatli kullanın ve yalnızca ne yaptığınızı biliyorsanız kullanın."
     },
     "status": {
@@ -1805,6 +1829,40 @@
       "hideRail": "Kenar çubuğunu gizle",
       "showRail": "Kenar çubuğunu göster",
       "project": "GitHub’da SealSkin: sorunlar ve özellik istekleri"
+    },
+    "profile": {
+      "open": "Profiliniz",
+      "signIn": "Oturum",
+      "method": "Oturum açma yolu",
+      "until": "Oturum şu zamana kadar açık",
+      "proxyKeeps": "Ters proxy sizi oturumda tuttuğu sürece",
+      "node": "Düğüm",
+      "groups": "Gruplar",
+      "noGroups": "Grup yok: sunucunun varsayılanları geçerli.",
+      "providerGroups": "Kimlik sağlayıcının bildirdiği:",
+      "proxyGroups": "Ters proxy'nin bildirdiği:",
+      "access": "Erişim",
+      "adminNote": "Yöneticilerin tüm yetkileri vardır ve sınırları yoktur.",
+      "canStorage": "Kalıcı depolama",
+      "canShare": "Herkese açık paylaşım",
+      "canGpu": "GPU",
+      "canTemplates": "Şablon düzenleme",
+      "canMigrate": "Ev dizini taşıma",
+      "limits": "Sınırlar",
+      "unlimited": "Sınırsız",
+      "sessions": "Oturumlar",
+      "sessionsOf": "Aynı anda en fazla {limit}",
+      "sessionsRunning": "{running} çalışıyor",
+      "sessionsRunningOf": "{limit} oturumdan {running} çalışıyor",
+      "cpus": "Oturum başına CPU",
+      "memory": "Oturum başına bellek",
+      "hours": "Oturum süresi",
+      "hoursValue": "{hours} sa",
+      "storage": "Depolama",
+      "pools": "Havuzlar",
+      "anyPool": "Sunucunun sunduğu herhangi bir havuz.",
+      "poolsDenied": "Bunlar hariç:",
+      "catalog": "PRoot Apps kataloğu"
     },
     "home": {
       "searchPlaceholder": "Uygulamaları arayın veya izole olarak açmak için bir bağlantı yapıştırın",

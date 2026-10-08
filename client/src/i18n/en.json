@@ -301,6 +301,41 @@
       "deleteDisabled": "This template cannot be deleted.",
       "enterName": "Please enter a name for the new template.",
       "dockerAdminOnly": "Only an administrator can change these settings.",
+      "filterPlaceholder": "Filter settings by name…",
+      "changedOnly": "Changed only",
+      "showMore": "Show more",
+      "showLess": "Show less",
+      "changedCount": "{count, plural, one {1 changed} other {{count} changed}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC, dual mode"
+      },
+      "sections": {
+        "appearance": "Appearance",
+        "display": "Display",
+        "input": "Input",
+        "audio": "Audio",
+        "webcam": "Webcam",
+        "performance": "Performance",
+        "gpu": "GPU",
+        "clipboard": "Clipboard and Files",
+        "sharing": "Sharing",
+        "hardening": "Hardening",
+        "lifecycle": "Lifecycle",
+        "integrations": "Integrations",
+        "webrtc": "WebRTC",
+        "container": "Container"
+      },
+      "groups": {
+        "mode": "Mode",
+        "transport": "Transport",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "TURN REST API",
+        "cloudflare": "Cloudflare TURN",
+        "extra": "Diagnostics"
+      },
       "settings": {
         "TITLE": {
           "label": "Page Title",
@@ -747,10 +782,6 @@
           "label": "Wayland Backend",
           "description": "Run the session on the Wayland backend, a headless compositor with labwc nested for window management, instead of the X11 server. X11 applications run through XWayland."
         },
-        "MAX_RES": {
-          "label": "Maximum Resolution",
-          "description": "Max resolution for the container, default is 16k."
-        },
         "START_DOCKER": {
           "label": "Start Docker-in-Docker",
           "description": "If false, a privileged container will not start DinD."
@@ -758,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "Disable IPv6",
           "description": "If true, this will disable IPv6."
-        },
-        "DISABLE_ZINK": {
-          "label": "Disable Zink",
-          "description": "Do not set Zink env vars if a video card is detected."
         },
         "DISABLE_DRI3": {
           "label": "Disable DRI3",
@@ -1172,10 +1199,7 @@
       "newVersion": "New version: {sha}",
       "errorPulling": "Error pulling image.",
       "manualInstallNote": "Note: Manually added images should be based on a selkies-baseimage compatible image.",
-      "generalTitle": "General & Performance Settings",
-      "webrtcTitle": "WebRTC & TURN Settings",
       "webrtcDescription": "Sessions stream over WebSockets by default. Setting any STUN, TURN, Cloudflare, or public IP value below, or choosing WebRTC mode, switches the container to WebRTC with dual mode enabled so users can still fall back to WebSockets.",
-      "dockerTitle": "Docker Advanced Overrides",
       "dockerDescription": "These settings override the default container configuration. Use with caution and only if you know what you are doing."
     },
     "status": {
@@ -1806,6 +1830,40 @@
       "hideRail": "Hide the sidebar",
       "showRail": "Show the sidebar",
       "project": "SealSkin on GitHub: issues and feature requests"
+    },
+    "profile": {
+      "open": "Your profile",
+      "signIn": "Sign-in",
+      "method": "Signed in through",
+      "until": "Signed in until",
+      "proxyKeeps": "As long as the reverse proxy keeps you signed in",
+      "node": "Node",
+      "groups": "Groups",
+      "noGroups": "No group: the server's defaults apply.",
+      "providerGroups": "Named by the identity provider:",
+      "proxyGroups": "Named by the reverse proxy:",
+      "access": "Access",
+      "adminNote": "Administrators have every capability and no limits.",
+      "canStorage": "Persistent storage",
+      "canShare": "Public sharing",
+      "canGpu": "GPU",
+      "canTemplates": "Template editing",
+      "canMigrate": "Home migration",
+      "limits": "Limits",
+      "unlimited": "Unlimited",
+      "sessions": "Sessions",
+      "sessionsOf": "Up to {limit} at once",
+      "sessionsRunning": "{running} running",
+      "sessionsRunningOf": "{running} running of {limit}",
+      "cpus": "CPUs per session",
+      "memory": "Memory per session",
+      "hours": "Session length",
+      "hoursValue": "{hours} h",
+      "storage": "Storage",
+      "pools": "Pools",
+      "anyPool": "Any pool the server offers.",
+      "poolsDenied": "Not these:",
+      "catalog": "PRoot Apps catalog"
     },
     "home": {
       "searchPlaceholder": "Search applications, or paste a link to open it in isolation",

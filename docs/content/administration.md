@@ -200,35 +200,46 @@ describes for a local repository: `metadata/` for the installer and one
 ## App Templates
 
 A template is a named set of environment variables applied to every session
-of the apps that use it. The **Application Template Editor** groups the
-variables by category:
+of the apps that use it. The **Application Template Editor** shows the
+variables as collapsible cards, each with a count of the values that differ
+from the default; a box above filters them by name, and **Changed only**
+leaves just the values a template sets. The cards:
 
-* **UI**: the Selkies sidebar, its sections and buttons, the page title,
-  watermark, and dashboard style.
-* **App**: audio, microphone, webcam, clipboard policy and seamless sync,
-  printing, gamepads and their kernel devices, file transfers and their
-  directory, sharing links, second screen, cursor handling, keyboard
-  shortcut and pointer options, what starts at connect, resolution and
-  scaling, then the audio and video encoding controls: encoders, frame rate,
-  CRF and bitrate ranges, rate control, keyframes, paint-over quality, and
-  the virtual webcam.
-* **General**: the Wayland backend, resolution limits, Docker-in-Docker,
-  IPv6, DRI3 and Zink, GPU selection and render nodes, window decorations,
-  gamepad, webcam, and Steam shims, connect and disconnect hooks, the
-  application ready file, the audit webhook, the Computer-Use server,
-  recording, metrics, debugging.
+* **Appearance**: the page title, logo, sidebar title, and dashboard style,
+  then whether the Selkies sidebar shows and which of its sections and
+  buttons it offers, with a preview that follows the toggles.
+* **Display**: manual resolution, dynamic resize, aligned resolution,
+  scaling and DPI, second screen, fullscreen, window decorations, and the
+  Wayland backend.
+* **Input**: keyboard shortcuts, cursors, pointer options, published input
+  devices, and gamepads with their kernel devices.
+* **Audio** and **Webcam**: enabling each, what starts at connect, and the
+  encoding of each.
+* **Performance**: encoders, frame rate, CRF and bitrate ranges, rate
+  control, keyframes, JPEG and paint-over quality, backpressure, and the
+  watermark on the stream.
+* **GPU**: GPU selection, render nodes, DRI3, and CPU encoding.
+* **Clipboard and Files**: clipboard policy and seamless sync, file
+  transfers and their directory, printing, and the command websocket.
+* **Sharing**: sharing links, view-only, collaboration, and players.
 * **Hardening**: the presets behind the user-level hardening switches and
   their individual components.
-* **WebRTC**: streaming mode, dual mode, pacing and congestion control,
-  ICE-lite, the port range and mux ports, the STUN, TURN, TURN REST, and
-  Cloudflare TURN credentials and headers, and statistics dumps. The base image
-  streams over WebSockets until one of these is set; any STUN, TURN,
-  Cloudflare, or public IP value switches the session to WebRTC with dual mode
-  on.
-* **Docker**: `DOCKER_*` settings that become container run options rather
+* **Lifecycle**: connect and disconnect hooks, the application ready file,
+  Docker-in-Docker, the Steam shim, and IPv6.
+* **Integrations**: the audit webhook, the Computer-Use server, recording,
+  metrics, and debugging.
+* **WebRTC**: a block of its own, since its values are one decision: the
+  base image streams over WebSockets until the mode says WebRTC or a STUN,
+  TURN, Cloudflare, or public IP value is set, and then streams over WebRTC
+  with dual mode on. The card's badge names which the template amounts to.
+  Inside it: mode and dual mode, transport (pacing, congestion control,
+  ICE-lite, ports), STUN, TURN credentials, the TURN REST API, Cloudflare
+  TURN, and diagnostics.
+* **Container**: `DOCKER_*` settings that become container run options rather
   than environment variables: privileged mode, capabilities, devices, extra
   bind mounts, memory and CPU limits, network, IPC and PID modes, DNS,
-  sysctls, ulimits, tmpfs, and extra groups.
+  sysctls, ulimits, tmpfs, and extra groups. Only an administrator edits
+  these.
 
 The list of variables comes from `template_schema.yml` on the server, so a
 new image option is a server change and never needs a client update. The

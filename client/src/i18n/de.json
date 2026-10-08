@@ -301,6 +301,41 @@
       "deleteDisabled": "Diese Vorlage kann nicht gelöscht werden.",
       "enterName": "Bitte geben Sie einen Namen für die neue Vorlage ein.",
       "dockerAdminOnly": "Nur ein Administrator kann diese Einstellungen ändern.",
+      "filterPlaceholder": "Einstellungen nach Name filtern…",
+      "changedOnly": "Nur Geänderte",
+      "showMore": "Mehr anzeigen",
+      "showLess": "Weniger anzeigen",
+      "changedCount": "{count, plural, one {1 geändert} other {{count} geändert}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC, Dual-Modus"
+      },
+      "sections": {
+        "appearance": "Erscheinungsbild",
+        "display": "Anzeige",
+        "input": "Eingabe",
+        "audio": "Audio",
+        "webcam": "Webcam",
+        "performance": "Leistung",
+        "gpu": "GPU",
+        "clipboard": "Zwischenablage und Dateien",
+        "sharing": "Freigabe",
+        "hardening": "Härtung",
+        "lifecycle": "Lebenszyklus",
+        "integrations": "Integrationen",
+        "webrtc": "WebRTC",
+        "container": "Container"
+      },
+      "groups": {
+        "mode": "Modus",
+        "transport": "Transport",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "TURN-REST-API",
+        "cloudflare": "Cloudflare TURN",
+        "extra": "Diagnose"
+      },
       "settings": {
         "TITLE": {
           "label": "Seitentitel",
@@ -747,10 +782,6 @@
           "label": "Wayland-Backend",
           "description": "Führt die Sitzung auf dem Wayland-Backend aus, einem headless Compositor mit verschachteltem labwc für die Fensterverwaltung, statt auf dem X11-Server. X11-Anwendungen laufen über XWayland."
         },
-        "MAX_RES": {
-          "label": "Maximale Auflösung",
-          "description": "Maximale Auflösung für den Container, Standard ist 16k."
-        },
         "START_DOCKER": {
           "label": "Docker-in-Docker starten",
           "description": "Wenn falsch, startet ein privilegierter Container DinD nicht."
@@ -758,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "IPv6 deaktivieren",
           "description": "Wenn wahr, wird IPv6 deaktiviert."
-        },
-        "DISABLE_ZINK": {
-          "label": "Zink deaktivieren",
-          "description": "Keine Zink-Umgebungsvariablen setzen, wenn eine Grafikkarte erkannt wird."
         },
         "DISABLE_DRI3": {
           "label": "DRI3 deaktivieren",
@@ -1172,10 +1199,7 @@
       "newVersion": "Neue Version: {sha}",
       "errorPulling": "Fehler beim Herunterladen des Images.",
       "manualInstallNote": "Hinweis: Manuell hinzugefügte Images sollten auf einem selkies-baseimage-kompatiblen Image basieren.",
-      "generalTitle": "Allgemein & Leistungseinstellungen",
-      "webrtcTitle": "WebRTC- und TURN-Einstellungen",
       "webrtcDescription": "Sitzungen werden standardmäßig über WebSockets gestreamt. Wird unten ein STUN-, TURN-, Cloudflare- oder öffentlicher IP-Wert gesetzt oder der WebRTC-Modus gewählt, wechselt der Container zu WebRTC mit aktiviertem Dual-Modus, sodass Benutzer weiterhin auf WebSockets zurückfallen können.",
-      "dockerTitle": "Docker Erweiterte Überschreibungen",
       "dockerDescription": "Diese Einstellungen überschreiben die Standard-Containerkonfiguration. Verwenden Sie sie mit Vorsicht und nur, wenn Sie wissen, was Sie tun."
     },
     "status": {
@@ -1805,6 +1829,40 @@
       "hideRail": "Seitenleiste ausblenden",
       "showRail": "Seitenleiste einblenden",
       "project": "SealSkin auf GitHub: Fehler und Funktionswünsche melden"
+    },
+    "profile": {
+      "open": "Dein Profil",
+      "signIn": "Anmeldung",
+      "method": "Angemeldet über",
+      "until": "Angemeldet bis",
+      "proxyKeeps": "Solange der Reverse-Proxy dich angemeldet hält",
+      "node": "Knoten",
+      "groups": "Gruppen",
+      "noGroups": "Keine Gruppe: Die Standardwerte des Servers gelten.",
+      "providerGroups": "Vom Identitätsanbieter genannt:",
+      "proxyGroups": "Vom Reverse-Proxy genannt:",
+      "access": "Zugriff",
+      "adminNote": "Administratoren haben alle Berechtigungen und keine Limits.",
+      "canStorage": "Dauerhafter Speicher",
+      "canShare": "Öffentliches Teilen",
+      "canGpu": "GPU",
+      "canTemplates": "Vorlagen bearbeiten",
+      "canMigrate": "Home-Migration",
+      "limits": "Limits",
+      "unlimited": "Unbegrenzt",
+      "sessions": "Sitzungen",
+      "sessionsOf": "Bis zu {limit} gleichzeitig",
+      "sessionsRunning": "{running} laufen",
+      "sessionsRunningOf": "{running} von {limit} laufen",
+      "cpus": "CPUs pro Sitzung",
+      "memory": "Arbeitsspeicher pro Sitzung",
+      "hours": "Sitzungsdauer",
+      "hoursValue": "{hours} h",
+      "storage": "Speicher",
+      "pools": "Pools",
+      "anyPool": "Jeder Pool, den der Server anbietet.",
+      "poolsDenied": "Nicht diese:",
+      "catalog": "PRoot-Apps-Katalog"
     },
     "home": {
       "searchPlaceholder": "Anwendungen suchen oder einen Link einfügen, um ihn isoliert zu öffnen",

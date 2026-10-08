@@ -241,6 +241,7 @@ def test_oidc_sign_in_creates_the_user_and_starts_a_web_sign_in(http, provider):
     client = _sign_in_oidc(http, provider, {"sub": "a-1", "preferred_username": "alice", "groups": ["users"]})
     status, data = client.call("POST", "/api/admin/status", {})
     assert status == 200 and data["username"] == "alice" and data["is_admin"] is False
+    assert data["provider_groups"] == ["users"] and data["expires"] > time.time()
     assert user_manager.get_user("alice")["public_key"] == ""
     assert os.stat(settings.sso_keys_path).st_mode & 0o777 == 0o600
 

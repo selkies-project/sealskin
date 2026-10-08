@@ -37,6 +37,7 @@ import '../shell/background.js';
 import { initHost, pageTransport } from '../shell/host.js';
 import { callBackground } from '../lib/host-bridge.js';
 import { apiError } from '../lib/api-error.js';
+import { escapeHtml, formatBytes, formatDate } from '../lib/format.js';
 import { storePendingFile, takeShared } from '../lib/context-store.js';
 import { loadTranslator } from '../lib/i18n.js';
 import { sendForgedSignIn } from '../lib/proxy-check.js';
@@ -73,6 +74,8 @@ let signOutUrl = '';
 let signedInVia = '';
 /** Whether the server serves sessions on origins of their own (see `session-origin.js`). */
 let isolated = false;
+/** The status of whoever is signed in, as the profile shows it. */
+let lastStatus = null;
 const NEXT_KEY = 'sealskin-next';
 const NEXT_ADDRESS = /^\/app\/[A-Za-z0-9_-]+\/(\?[^#\s]*)?$/;
 
@@ -107,6 +110,7 @@ function leaveForNext() {
 }
 
 function showAccount(status) {
+  lastStatus = status;
   document.body.classList.toggle('signed-out', !status);
   signOutUrl = (status && status.sign_out_url) || '';
   if (status) signedInVia = status.via;
@@ -120,6 +124,101 @@ function showAccount(status) {
   $$('.account-name').forEach((el) => { el.textContent = status.username; el.title = status.username; });
   $$('.account-via').forEach((el) => { el.textContent = via === `options.via.${status.via}` ? status.via : via; });
   $('[data-dest="files"]').hidden = !status.settings.persistent_storage;
+  if (!$('#profile').hidden) renderProfile(status);
+}
+
+const esc = escapeHtml;
+/** A limit of the settings as text: a negative value sets none. */
+const limitOf = (value, text) => (value === null || value === undefined || value < 0 ? t('web.profile.unlimited') : text(value));
+/** A chip of a switch of the settings, lit when it is on. */
+const chip = (on, label) => `<span class="profile-chip ${on ? 'on' : 'off'}"><i class="fas ${on ? 'fa-check' : 'fa-minus'}"></i>${esc(label)}</span>`;
+const chips = (names) => `<div class="profile-chips">${names.map((name) => `<span class="profile-chip">${esc(name)}</span>`).join('')}</div>`;
+const section = (title, body) => `<section class="profile-section"><h4>${esc(title)}</h4>${body}</section>`;
+const rows = (pairs) => `<dl class="profile-rows">${pairs.filter(Boolean).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('')}</dl>`;
+/** A used-of-limit row with a meter under it, where a limit is set. */
+const meter = (used, limit) => (limit > 0 ? `<progress class="profile-meter" max="100" value="${Math.min(100, (used / limit) * 100)}"></progress>` : '');
+
+/**
+ * Fill the profile with a status: how the user is signed in, the groups
+ * behind their settings, and what those settings let them do.
+ *
+ * @param {object} status The status response.
+ */
+function renderProfile(status) {
+  const { settings } = status;
+  const sections = [];
+  const signIn = [
+    [t('web.profile.method'), esc($('.account-via').textContent)],
+    status.expires ? [t('web.profile.until'), esc(formatDate(status.expires))] : null,
+    status.via === 'proxy' && !status.expires ? [t('web.profile.until'), esc(t('web.profile.proxyKeeps'))] : null,
+    status.clustered && status.node_id ? [t('web.profile.node'), esc(status.node_id)] : null,
+  ];
+  sections.push(section(t('web.profile.signIn'), rows(signIn)));
+  const groups = settings.groups || [];
+  let membership = groups.length ? chips(groups) : `<p class="profile-note">${esc(t('web.profile.noGroups'))}</p>`;
+  const provided = status.provider_groups || [];
+  if (provided.length) membership += `<p class="profile-note" style="margin-top: 0.5rem;">${esc(t(status.via === 'proxy' ? 'web.profile.proxyGroups' : 'web.profile.providerGroups'))}</p>${chips(provided)}`;
+  sections.push(section(t('web.profile.groups'), membership));
+  if (status.is_admin) {
+    sections.push(section(t('web.profile.access'), `<p class="profile-note">${esc(t('web.profile.adminNote'))}</p>`));
+  } else {
+    const can = [
+      ['persistent_storage', 'web.profile.canStorage'],
+      ['public_sharing', 'web.profile.canShare'],
+      ['gpu', 'web.profile.canGpu'],
+      ['edit_templates', 'web.profile.canTemplates'],
+      ['home_migration', 'web.profile.canMigrate'],
+    ];
+    sections.push(section(t('web.profile.access'), `<div class="profile-chips">${can.map(([key, label]) => chip(Boolean(settings[key]), t(label))).join('')}</div>`));
+    const { allowance } = status;
+    const storage = settings.storage_limit;
+    const limits = [
+      [t('web.profile.sessions'), `<span id="profile-sessions">${esc(limitOf(settings.session_limit, (n) => t('web.profile.sessionsOf', { limit: n })))}</span>`],
+      [t('web.profile.cpus'), esc(limitOf(settings.session_cpus, (n) => String(n)))],
+      [t('web.profile.memory'), esc(limitOf(settings.session_memory_mb, (n) => formatBytes(n * 1024 * 1024, t, 0)))],
+      [t('web.profile.hours'), esc(limitOf(settings.session_hours, (n) => t('web.profile.hoursValue', { hours: n })))],
+      settings.persistent_storage ? [
+        t('web.profile.storage'),
+        esc(formatBytes(status.storage_used || 0, t, 1) + (storage > 0 ? ` / ${storage} ${t('common.gb')}` : '')) + meter(status.storage_used || 0, storage * 1024 ** 3),
+      ] : null,
+      allowance ? [
+        t('web.home.allowance'),
+        esc(t('web.home.allowanceValue', { used: Number(allowance.used).toFixed(1), hours: allowance.hours, period: t(`options.periods.${allowance.period}`).toLowerCase() })) + meter(allowance.used, allowance.hours),
+      ] : null,
+    ];
+    sections.push(section(t('web.profile.limits'), rows(limits)));
+  }
+  if (status.clustered) {
+    const pools = settings.pools || [];
+    const denied = settings.pools_denied || [];
+    let where = pools.length ? chips(pools) : `<p class="profile-note">${esc(t('web.profile.anyPool'))}</p>`;
+    if (denied.length) where += `<p class="profile-note" style="margin-top: 0.5rem;">${esc(t('web.profile.poolsDenied'))}</p>${chips(denied)}`;
+    sections.push(section(t('web.profile.pools'), where));
+  }
+  if (settings.proot_catalog) sections.push(section(t('web.profile.catalog'), `<p class="profile-note">${esc(settings.proot_catalog)}</p>`));
+  $('#profile-body').innerHTML = sections.join('');
+}
+
+/** Open the profile and count the sessions running against their limit. */
+async function openProfile() {
+  if (!lastStatus) return;
+  renderProfile(lastStatus);
+  $('#profile').hidden = false;
+  $('#profile-close').focus();
+  if (lastStatus.is_admin) return;
+  try {
+    const sessions = await api('/api/sessions', { method: 'GET' });
+    const count = $('#profile-sessions');
+    if (!count) return;
+    const limit = lastStatus.settings.session_limit;
+    count.textContent = typeof limit === 'number' && limit >= 0
+      ? t('web.profile.sessionsRunningOf', { running: sessions.length, limit })
+      : t('web.profile.sessionsRunning', { running: sessions.length });
+  } catch (e) { /* the limit alone is shown */ }
+}
+
+function closeProfile() {
+  $('#profile').hidden = true;
 }
 
 let addressed = false;
@@ -143,7 +242,7 @@ function showDestination(page, params = {}) {
 }
 
 async function signOut() {
-  $('#account-menu').hidden = true;
+  closeProfile();
   const leave = signOutUrl;
   await post('/api/auth/signout', {}).catch(() => {});
   if (leave) location.assign(leave);
@@ -183,15 +282,16 @@ function bindShell() {
   showRail(railShown);
   $('#rail-hide').addEventListener('click', () => showRail(false));
   $('#rail-peek').addEventListener('click', () => showRail(true));
-  const menu = $('#account-menu');
-  $('#account-button').addEventListener('click', (event) => {
-    event.stopPropagation();
-    menu.hidden = !menu.hidden;
-    $('#account-button').setAttribute('aria-expanded', String(!menu.hidden));
+  $$('.avatar[aria-haspopup]').forEach((button) => {
+    button.title = t('web.profile.open');
+    button.setAttribute('aria-label', t('web.profile.open'));
+    button.addEventListener('click', openProfile);
   });
-  document.addEventListener('click', (event) => { if (!menu.contains(event.target)) menu.hidden = true; });
-  // A click in the frame never reaches this document.
-  window.addEventListener('blur', () => { menu.hidden = true; });
+  $('#profile-close').title = t('common.close');
+  $('#profile-close').setAttribute('aria-label', t('common.close'));
+  $('#profile-close').addEventListener('click', closeProfile);
+  $('#profile').addEventListener('click', (event) => { if (event.target === $('#profile')) closeProfile(); });
+  document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeProfile(); });
   window.addEventListener('popstate', () => {
     const { page = 'home', ...params } = Object.fromEntries(new URLSearchParams(location.search));
     hostApi.openPage(page, params);

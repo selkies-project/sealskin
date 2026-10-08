@@ -100,7 +100,13 @@ async def _gpu_list() -> list[GPUInfo]:
 
 @status_router.post("/api/admin/status", response_model=AdminStatusResponse)
 async def admin_status(user: dict[str, Any] = Depends(verify_token)) -> dict[str, Any]:
-    """Return the caller's role, settings, and host statistics."""
+    """Return the caller's role, settings, and host statistics.
+
+    `provider_groups` are the groups the identity provider or proxy named,
+    `expires` is when a web sign-in ends by the server's own clock, and
+    `storage_used` the bytes under the user's storage on this node, for a user
+    with persistent storage.
+    """
     response: dict[str, Any] = {
         "is_admin": user.get("is_admin", False),
         "held": user.get("held", False),
@@ -113,12 +119,18 @@ async def admin_status(user: dict[str, Any] = Depends(verify_token)) -> dict[str
         "clustered": cluster.is_clustered(),
         "node_id": cluster.NODE_ID,
         "allowance": quota.allowance(user),
+        "provider_groups": user.get("provider_groups") or [],
+        "expires": user.get("expires"),
+        "storage_used": None,
         "gpus": [],
         "proxy_cert_expires_at": proxy_cert_not_after(settings.proxy_cert_path),
         **get_system_stats(),
     }
-    if user.get("effective_settings", {}).get("gpu", False):
+    effective = user.get("effective_settings") or {}
+    if effective.get("gpu", False):
         response["gpus"] = await _gpu_list()
+    if effective.get("persistent_storage", False):
+        response["storage_used"] = await asyncio.to_thread(quota.storage_used, user["username"])
     return response
 
 

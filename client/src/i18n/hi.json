@@ -301,6 +301,41 @@
       "deleteDisabled": "यह टेम्पलेट हटाया नहीं जा सकता।",
       "enterName": "कृपया नए टेम्पलेट के लिए एक नाम दर्ज करें।",
       "dockerAdminOnly": "केवल प्रशासक ही इन सेटिंग्स को बदल सकता है।",
+      "filterPlaceholder": "नाम से सेटिंग छानें…",
+      "changedOnly": "केवल बदली हुई",
+      "showMore": "और दिखाएँ",
+      "showLess": "कम दिखाएँ",
+      "changedCount": "{count, plural, one {1 बदली गई} other {{count} बदली गईं}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC, डुअल मोड"
+      },
+      "sections": {
+        "appearance": "रूप",
+        "display": "डिस्प्ले",
+        "input": "इनपुट",
+        "audio": "ऑडियो",
+        "webcam": "वेबकैम",
+        "performance": "प्रदर्शन",
+        "gpu": "GPU",
+        "clipboard": "क्लिपबोर्ड और फ़ाइलें",
+        "sharing": "साझाकरण",
+        "hardening": "सख्ती",
+        "lifecycle": "जीवनचक्र",
+        "integrations": "एकीकरण",
+        "webrtc": "WebRTC",
+        "container": "कंटेनर"
+      },
+      "groups": {
+        "mode": "मोड",
+        "transport": "ट्रांसपोर्ट",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "TURN REST API",
+        "cloudflare": "Cloudflare TURN",
+        "extra": "निदान"
+      },
       "settings": {
         "TITLE": {
           "label": "पृष्ठ शीर्षक",
@@ -747,10 +782,6 @@
           "label": "Wayland बैकएंड",
           "description": "सत्र को X11 सर्वर के बजाय Wayland बैकएंड पर चलाता है, जो विंडो प्रबंधन के लिए नेस्टेड labwc वाला हेडलेस कंपोज़िटर है। X11 एप्लिकेशन XWayland के माध्यम से चलते हैं।"
         },
-        "MAX_RES": {
-          "label": "अधिकतम रिज़ॉल्यूशन",
-          "description": "कंटेनर के लिए अधिकतम रिज़ॉल्यूशन, डिफ़ॉल्ट 16k है।"
-        },
         "START_DOCKER": {
           "label": "डॉकर-इन-डॉकर प्रारंभ करें",
           "description": "यदि गलत है, तो एक विशेषाधिकार प्राप्त कंटेनर DinD प्रारंभ नहीं करेगा।"
@@ -758,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "IPv6 अक्षम करें",
           "description": "यदि सत्य है, तो यह IPv6 को अक्षम कर देगा।"
-        },
-        "DISABLE_ZINK": {
-          "label": "जिंक अक्षम करें",
-          "description": "यदि वीडियो कार्ड का पता चलता है तो जिंक पर्यावरण चर सेट न करें।"
         },
         "DISABLE_DRI3": {
           "label": "DRI3 अक्षम करें",
@@ -1172,10 +1199,7 @@
       "newVersion": "नया संस्करण: {sha}",
       "errorPulling": "छवि खींचने में त्रुटि।",
       "manualInstallNote": "ध्यान दें: मैन्युअल रूप से जोड़ी गई छवियां selkies-baseimage संगत छवि पर आधारित होनी चाहिए।",
-      "generalTitle": "सामान्य और प्रदर्शन सेटिंग्स",
-      "webrtcTitle": "WebRTC और TURN सेटिंग्स",
       "webrtcDescription": "सत्र डिफ़ॉल्ट रूप से WebSockets पर स्ट्रीम होते हैं। नीचे कोई भी STUN, TURN, Cloudflare या सार्वजनिक IP मान सेट करने, या WebRTC मोड चुनने पर कंटेनर ड्यूअल मोड सक्षम के साथ WebRTC पर स्विच हो जाता है, ताकि उपयोगकर्ता अभी भी WebSockets पर वापस जा सकें।",
-      "dockerTitle": "डॉकर उन्नत ओवरराइड",
       "dockerDescription": "ये सेटिंग्स डिफ़ॉल्ट कंटेनर कॉन्फ़िगरेशन को ओवरराइड करती हैं। सावधानी से उपयोग करें और केवल तभी जब आप जानते हों कि आप क्या कर रहे हैं।"
     },
     "status": {
@@ -1805,6 +1829,40 @@
       "hideRail": "साइडबार छिपाएँ",
       "showRail": "साइडबार दिखाएँ",
       "project": "GitHub पर SealSkin: समस्याएँ और फ़ीचर अनुरोध"
+    },
+    "profile": {
+      "open": "आपकी प्रोफ़ाइल",
+      "signIn": "साइन-इन",
+      "method": "साइन-इन का तरीका",
+      "until": "साइन-इन इस समय तक मान्य",
+      "proxyKeeps": "जब तक रिवर्स प्रॉक्सी आपको साइन-इन रखे",
+      "node": "नोड",
+      "groups": "समूह",
+      "noGroups": "कोई समूह नहीं: सर्वर की डिफ़ॉल्ट सेटिंग लागू हैं।",
+      "providerGroups": "पहचान प्रदाता द्वारा बताए गए:",
+      "proxyGroups": "रिवर्स प्रॉक्सी द्वारा बताए गए:",
+      "access": "पहुँच",
+      "adminNote": "व्यवस्थापकों के पास सभी क्षमताएँ हैं और कोई सीमा नहीं।",
+      "canStorage": "स्थायी संग्रहण",
+      "canShare": "सार्वजनिक साझाकरण",
+      "canGpu": "GPU",
+      "canTemplates": "टेम्पलेट संपादन",
+      "canMigrate": "होम स्थानांतरण",
+      "limits": "सीमाएँ",
+      "unlimited": "असीमित",
+      "sessions": "सत्र",
+      "sessionsOf": "एक साथ अधिकतम {limit}",
+      "sessionsRunning": "{running} चल रहे हैं",
+      "sessionsRunningOf": "{limit} में से {running} चल रहे हैं",
+      "cpus": "प्रति सत्र CPU",
+      "memory": "प्रति सत्र मेमोरी",
+      "hours": "सत्र की अवधि",
+      "hoursValue": "{hours} घंटे",
+      "storage": "संग्रहण",
+      "pools": "पूल",
+      "anyPool": "सर्वर द्वारा दिया गया कोई भी पूल।",
+      "poolsDenied": "ये नहीं:",
+      "catalog": "PRoot Apps कैटलॉग"
     },
     "home": {
       "searchPlaceholder": "एप्लिकेशन खोजें, या किसी लिंक को पृथक रूप से खोलने के लिए पेस्ट करें",

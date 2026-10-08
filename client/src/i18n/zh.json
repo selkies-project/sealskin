@@ -301,6 +301,41 @@
       "deleteDisabled": "此模板无法删除。",
       "enterName": "请输入新模板的名称。",
       "dockerAdminOnly": "只有管理员可以更改这些设置。",
+      "filterPlaceholder": "按名称筛选设置…",
+      "changedOnly": "仅显示已更改",
+      "showMore": "显示更多",
+      "showLess": "收起",
+      "changedCount": "{count, plural, one {已更改 {count} 项} other {已更改 {count} 项}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC，双模式"
+      },
+      "sections": {
+        "appearance": "外观",
+        "display": "显示",
+        "input": "输入",
+        "audio": "音频",
+        "webcam": "摄像头",
+        "performance": "性能",
+        "gpu": "GPU",
+        "clipboard": "剪贴板与文件",
+        "sharing": "共享",
+        "hardening": "加固",
+        "lifecycle": "生命周期",
+        "integrations": "集成",
+        "webrtc": "WebRTC",
+        "container": "容器"
+      },
+      "groups": {
+        "mode": "模式",
+        "transport": "传输",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "TURN REST API",
+        "cloudflare": "Cloudflare TURN",
+        "extra": "诊断"
+      },
       "settings": {
         "TITLE": {
           "label": "页面标题",
@@ -747,10 +782,6 @@
           "label": "Wayland 后端",
           "description": "在 Wayland 后端（嵌套 labwc 进行窗口管理的无头合成器）而非 X11 服务器上运行会话。X11 应用通过 XWayland 运行。"
         },
-        "MAX_RES": {
-          "label": "最大分辨率",
-          "description": "容器的最大分辨率，默认为16k。"
-        },
         "START_DOCKER": {
           "label": "启动Docker-in-Docker",
           "description": "如果为false，特权容器将不会启动DinD。"
@@ -758,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "禁用IPv6",
           "description": "如果为true，将禁用IPv6。"
-        },
-        "DISABLE_ZINK": {
-          "label": "禁用Zink",
-          "description": "如果检测到显卡，则不设置Zink环境变量。"
         },
         "DISABLE_DRI3": {
           "label": "禁用DRI3",
@@ -1172,10 +1199,7 @@
       "newVersion": "新版本: {sha}",
       "errorPulling": "拉取镜像时出错。",
       "manualInstallNote": "注意：手动添加的镜像应基于与 selkies-baseimage 兼容的镜像。",
-      "generalTitle": "常规与性能设置",
-      "webrtcTitle": "WebRTC 与 TURN 设置",
       "webrtcDescription": "会话默认通过 WebSockets 进行流传输。在下方设置任意 STUN、TURN、Cloudflare 或公网 IP 值，或选择 WebRTC 模式，都会将容器切换到启用双模式的 WebRTC，使用户仍可回退到 WebSockets。",
-      "dockerTitle": "Docker 高级覆盖",
       "dockerDescription": "这些设置覆盖默认的容器配置。请谨慎使用，除非您知道自己在做什么。"
     },
     "status": {
@@ -1805,6 +1829,40 @@
       "hideRail": "隐藏侧栏",
       "showRail": "显示侧栏",
       "project": "GitHub 上的 SealSkin：问题反馈与功能请求"
+    },
+    "profile": {
+      "open": "你的个人资料",
+      "signIn": "登录",
+      "method": "登录方式",
+      "until": "登录有效期至",
+      "proxyKeeps": "只要反向代理保持你的登录状态",
+      "node": "节点",
+      "groups": "组",
+      "noGroups": "无组：应用服务器的默认设置。",
+      "providerGroups": "由身份提供者指定：",
+      "proxyGroups": "由反向代理指定：",
+      "access": "权限",
+      "adminNote": "管理员拥有全部功能，没有限制。",
+      "canStorage": "持久存储",
+      "canShare": "公开共享",
+      "canGpu": "GPU",
+      "canTemplates": "编辑模板",
+      "canMigrate": "主目录迁移",
+      "limits": "限制",
+      "unlimited": "无限制",
+      "sessions": "会话",
+      "sessionsOf": "同时最多 {limit} 个",
+      "sessionsRunning": "{running} 个运行中",
+      "sessionsRunningOf": "{limit} 个中有 {running} 个运行中",
+      "cpus": "每个会话的 CPU",
+      "memory": "每个会话的内存",
+      "hours": "会话时长",
+      "hoursValue": "{hours} 小时",
+      "storage": "存储",
+      "pools": "节点池",
+      "anyPool": "服务器提供的任何节点池。",
+      "poolsDenied": "不包括：",
+      "catalog": "PRoot Apps 目录"
     },
     "home": {
       "searchPlaceholder": "搜索应用程序，或粘贴链接以在隔离环境中打开",

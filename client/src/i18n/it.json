@@ -301,6 +301,41 @@
       "deleteDisabled": "Questo modello non può essere eliminato.",
       "enterName": "Inserisci un nome per il nuovo modello.",
       "dockerAdminOnly": "Solo un amministratore può modificare queste impostazioni.",
+      "filterPlaceholder": "Filtra le impostazioni per nome…",
+      "changedOnly": "Solo modificate",
+      "showMore": "Mostra altro",
+      "showLess": "Mostra meno",
+      "changedCount": "{count, plural, one {1 modificata} other {{count} modificate}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC, modalità doppia"
+      },
+      "sections": {
+        "appearance": "Aspetto",
+        "display": "Schermo",
+        "input": "Input",
+        "audio": "Audio",
+        "webcam": "Webcam",
+        "performance": "Prestazioni",
+        "gpu": "GPU",
+        "clipboard": "Appunti e file",
+        "sharing": "Condivisione",
+        "hardening": "Hardening",
+        "lifecycle": "Ciclo di vita",
+        "integrations": "Integrazioni",
+        "webrtc": "WebRTC",
+        "container": "Container"
+      },
+      "groups": {
+        "mode": "Modalità",
+        "transport": "Trasporto",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "API REST TURN",
+        "cloudflare": "TURN Cloudflare",
+        "extra": "Diagnostica"
+      },
       "settings": {
         "TITLE": {
           "label": "Titolo Pagina",
@@ -747,10 +782,6 @@
           "label": "Backend Wayland",
           "description": "Esegue la sessione sul backend Wayland, un compositore headless con labwc annidato per la gestione delle finestre, invece del server X11. Le applicazioni X11 girano tramite XWayland."
         },
-        "MAX_RES": {
-          "label": "Risoluzione Massima",
-          "description": "Risoluzione massima per il container, il valore predefinito è 16k."
-        },
         "START_DOCKER": {
           "label": "Avvia Docker-in-Docker",
           "description": "Se falso, un container privilegiato non avvierà DinD."
@@ -758,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "Disabilita IPv6",
           "description": "Se vero, questo disabiliterà IPv6."
-        },
-        "DISABLE_ZINK": {
-          "label": "Disabilita Zink",
-          "description": "Non impostare le variabili d'ambiente Zink se viene rilevata una scheda video."
         },
         "DISABLE_DRI3": {
           "label": "Disabilita DRI3",
@@ -1172,10 +1199,7 @@
       "newVersion": "Nuova versione: {sha}",
       "errorPulling": "Errore durante lo scaricamento dell'immagine.",
       "manualInstallNote": "Nota: Le immagini aggiunte manualmente dovrebbero essere basate su un'immagine compatibile con selkies-baseimage.",
-      "generalTitle": "Impostazioni Generali e Prestazioni",
-      "webrtcTitle": "Impostazioni WebRTC e TURN",
       "webrtcDescription": "Le sessioni vengono trasmesse tramite WebSockets per impostazione predefinita. Impostare qualsiasi valore STUN, TURN, Cloudflare o IP pubblico qui sotto, oppure scegliere la modalità WebRTC, passa il container a WebRTC con la modalità doppia abilitata così che gli utenti possano comunque tornare a WebSockets.",
-      "dockerTitle": "Sovrascritture Avanzate Docker",
       "dockerDescription": "Queste impostazioni sovrascrivono la configurazione predefinita del container. Usa con cautela e solo se sai cosa stai facendo."
     },
     "status": {
@@ -1805,6 +1829,40 @@
       "hideRail": "Nascondi la barra laterale",
       "showRail": "Mostra la barra laterale",
       "project": "SealSkin su GitHub: segnalazioni e richieste di funzionalità"
+    },
+    "profile": {
+      "open": "Il tuo profilo",
+      "signIn": "Accesso",
+      "method": "Accesso tramite",
+      "until": "Connesso fino a",
+      "proxyKeeps": "Finché il proxy inverso ti mantiene connesso",
+      "node": "Nodo",
+      "groups": "Gruppi",
+      "noGroups": "Nessun gruppo: valgono le impostazioni predefinite del server.",
+      "providerGroups": "Indicati dal provider di identità:",
+      "proxyGroups": "Indicati dal proxy inverso:",
+      "access": "Accesso",
+      "adminNote": "Gli amministratori hanno tutte le capacità e nessun limite.",
+      "canStorage": "Archiviazione persistente",
+      "canShare": "Condivisione pubblica",
+      "canGpu": "GPU",
+      "canTemplates": "Modifica dei modelli",
+      "canMigrate": "Migrazione della home",
+      "limits": "Limiti",
+      "unlimited": "Illimitato",
+      "sessions": "Sessioni",
+      "sessionsOf": "Fino a {limit} alla volta",
+      "sessionsRunning": "{running} in esecuzione",
+      "sessionsRunningOf": "{running} in esecuzione su {limit}",
+      "cpus": "CPU per sessione",
+      "memory": "Memoria per sessione",
+      "hours": "Durata della sessione",
+      "hoursValue": "{hours} h",
+      "storage": "Archiviazione",
+      "pools": "Pool",
+      "anyPool": "Qualsiasi pool offerto dal server.",
+      "poolsDenied": "Non questi:",
+      "catalog": "Catalogo PRoot Apps"
     },
     "home": {
       "searchPlaceholder": "Cerca applicazioni o incolla un link per aprirlo in isolamento",

@@ -22,7 +22,12 @@ from fastapi import APIRouter, FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from starlette.staticfiles import StaticFiles
 
-from ..models import TemplateSchemaResponse, TemplateSchemaSetting, UiManifest
+from ..models import (
+    TemplateSchemaResponse,
+    TemplateSchemaSection,
+    TemplateSchemaSetting,
+    UiManifest,
+)
 from ..settings import settings
 from ..state import state
 from ..version import __version__
@@ -111,11 +116,11 @@ def mount_ui(app: FastAPI) -> None:
     logger.info("Serving web UI from %s", settings.ui_path)
 
 
-def load_template_schema() -> list[TemplateSchemaSetting]:
+def load_template_schema() -> TemplateSchemaResponse:
     """Read and validate the template schema file.
 
     Returns:
-        The list of settings, or an empty list when the file is missing.
+        The editor's sections and settings, both empty when the file is missing.
 
     Raises:
         ValueError: If the file is not a mapping with a `settings` list.
@@ -127,14 +132,17 @@ def load_template_schema() -> list[TemplateSchemaSetting]:
     entries = data.get("settings") if isinstance(data, dict) else None
     if entries is None:
         raise ValueError("template_schema.yml must contain a 'settings' list.")
-    return [TemplateSchemaSetting(**entry) for entry in entries]
+    return TemplateSchemaResponse(
+        sections=[TemplateSchemaSection(**section) for section in data.get("sections") or []],
+        settings=[TemplateSchemaSetting(**entry) for entry in entries],
+    )
 
 
 @router.get("/api/ui/template_schema", response_model=TemplateSchemaResponse)
 async def get_template_schema() -> dict[str, Any]:
     """Return the environment variable definitions for the template editor."""
     try:
-        return {"settings": load_template_schema()}
+        return load_template_schema().model_dump()
     except Exception as exc:  # noqa: BLE001
         logger.error("Failed to load template schema: %s", exc)
         raise HTTPException(status_code=500, detail="Template schema is invalid.") from exc

@@ -301,6 +301,41 @@
       "deleteDisabled": "このテンプレートは削除できません。",
       "enterName": "新しいテンプレートの名前を入力してください。",
       "dockerAdminOnly": "これらの設定を変更できるのは管理者だけです。",
+      "filterPlaceholder": "設定を名前で絞り込む…",
+      "changedOnly": "変更済みのみ",
+      "showMore": "もっと見る",
+      "showLess": "閉じる",
+      "changedCount": "{count, plural, one {{count} 件変更} other {{count} 件変更}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC、デュアルモード"
+      },
+      "sections": {
+        "appearance": "外観",
+        "display": "ディスプレイ",
+        "input": "入力",
+        "audio": "オーディオ",
+        "webcam": "ウェブカメラ",
+        "performance": "パフォーマンス",
+        "gpu": "GPU",
+        "clipboard": "クリップボードとファイル",
+        "sharing": "共有",
+        "hardening": "ハードニング",
+        "lifecycle": "ライフサイクル",
+        "integrations": "連携",
+        "webrtc": "WebRTC",
+        "container": "コンテナ"
+      },
+      "groups": {
+        "mode": "モード",
+        "transport": "トランスポート",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "TURN REST API",
+        "cloudflare": "Cloudflare TURN",
+        "extra": "診断"
+      },
       "settings": {
         "TITLE": {
           "label": "ページタイトル",
@@ -747,10 +782,6 @@
           "label": "Wayland バックエンド",
           "description": "X11 サーバーの代わりに Wayland バックエンド（ウィンドウ管理用に labwc をネストしたヘッドレスコンポジター）でセッションを実行します。X11 アプリケーションは XWayland 経由で動作します。"
         },
-        "MAX_RES": {
-          "label": "最大解像度",
-          "description": "コンテナの最大解像度、デフォルトは16kです。"
-        },
         "START_DOCKER": {
           "label": "Docker-in-Dockerを開始",
           "description": "falseの場合、特権コンテナはDinDを開始しません。"
@@ -758,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "IPv6を無効化",
           "description": "trueの場合、IPv6を無効にします。"
-        },
-        "DISABLE_ZINK": {
-          "label": "Zinkを無効化",
-          "description": "ビデオカードが検出された場合、Zink環境変数を設定しません。"
         },
         "DISABLE_DRI3": {
           "label": "DRI3を無効化",
@@ -1172,10 +1199,7 @@
       "newVersion": "新しいバージョン: {sha}",
       "errorPulling": "イメージのプル中にエラーが発生しました。",
       "manualInstallNote": "注意：手動で追加されたイメージは、selkies-baseimage互換のイメージに基づいている必要があります。",
-      "generalTitle": "一般とパフォーマンス設定",
-      "webrtcTitle": "WebRTCおよびTURN設定",
       "webrtcDescription": "セッションはデフォルトでWebSocketsを介してストリーミングされます。以下でSTUN、TURN、CloudflareまたはパブリックIPの値を設定するか、WebRTCモードを選択すると、コンテナはデュアルモードを有効にしたWebRTCに切り替わり、ユーザーは引き続きWebSocketsにフォールバックできます。",
-      "dockerTitle": "Docker詳細オーバーライド",
       "dockerDescription": "これらの設定は、デフォルトのコンテナ構成を上書きします。注意して使用し、何をしているか理解している場合にのみ使用してください。"
     },
     "status": {
@@ -1805,6 +1829,40 @@
       "hideRail": "サイドバーを隠す",
       "showRail": "サイドバーを表示",
       "project": "GitHub の SealSkin: 不具合報告と機能要望"
+    },
+    "profile": {
+      "open": "あなたのプロフィール",
+      "signIn": "サインイン",
+      "method": "サインイン方法",
+      "until": "サインインの有効期限",
+      "proxyKeeps": "リバースプロキシがサインインを保持している間",
+      "node": "ノード",
+      "groups": "グループ",
+      "noGroups": "グループなし: サーバーの既定値が適用されます。",
+      "providerGroups": "IDプロバイダーが指定:",
+      "proxyGroups": "リバースプロキシが指定:",
+      "access": "アクセス",
+      "adminNote": "管理者はすべての機能を使え、制限はありません。",
+      "canStorage": "永続ストレージ",
+      "canShare": "公開共有",
+      "canGpu": "GPU",
+      "canTemplates": "テンプレートの編集",
+      "canMigrate": "ホームの移行",
+      "limits": "制限",
+      "unlimited": "無制限",
+      "sessions": "セッション",
+      "sessionsOf": "同時に最大 {limit}",
+      "sessionsRunning": "{running} 件実行中",
+      "sessionsRunningOf": "{limit} 件中 {running} 件実行中",
+      "cpus": "セッションあたりのCPU",
+      "memory": "セッションあたりのメモリ",
+      "hours": "セッションの長さ",
+      "hoursValue": "{hours} 時間",
+      "storage": "ストレージ",
+      "pools": "プール",
+      "anyPool": "サーバーが提供するどのプールでも。",
+      "poolsDenied": "以下を除く:",
+      "catalog": "PRoot Apps カタログ"
     },
     "home": {
       "searchPlaceholder": "アプリケーションを検索、またはリンクを貼り付けて隔離環境で開く",

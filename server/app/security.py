@@ -444,6 +444,7 @@ async def _web_user(req: Request) -> dict[str, Any] | None:
         signed_in.get("groups") or (),
         bool(signed_in.get("admin")),
         sid=sso.session_id(token),
+        expires=signed_in.get("expires"),
     )
 
 

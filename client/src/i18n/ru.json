@@ -301,6 +301,41 @@
       "deleteDisabled": "Этот шаблон не может быть удалён.",
       "enterName": "Пожалуйста, введите имя для нового шаблона.",
       "dockerAdminOnly": "Изменять эти настройки может только администратор.",
+      "filterPlaceholder": "Фильтр настроек по имени…",
+      "changedOnly": "Только изменённые",
+      "showMore": "Показать больше",
+      "showLess": "Показать меньше",
+      "changedCount": "{count, plural, one {Изменено: 1} other {Изменено: {count}}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC, двойной режим"
+      },
+      "sections": {
+        "appearance": "Внешний вид",
+        "display": "Экран",
+        "input": "Ввод",
+        "audio": "Звук",
+        "webcam": "Веб-камера",
+        "performance": "Производительность",
+        "gpu": "GPU",
+        "clipboard": "Буфер обмена и файлы",
+        "sharing": "Общий доступ",
+        "hardening": "Усиление защиты",
+        "lifecycle": "Жизненный цикл",
+        "integrations": "Интеграции",
+        "webrtc": "WebRTC",
+        "container": "Контейнер"
+      },
+      "groups": {
+        "mode": "Режим",
+        "transport": "Транспорт",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "REST API TURN",
+        "cloudflare": "Cloudflare TURN",
+        "extra": "Диагностика"
+      },
       "settings": {
         "TITLE": {
           "label": "Заголовок страницы",
@@ -747,10 +782,6 @@
           "label": "Бэкенд Wayland",
           "description": "Запускает сеанс на бэкенде Wayland — безголовом композиторе с вложенным labwc для управления окнами — вместо сервера X11. Приложения X11 работают через XWayland."
         },
-        "MAX_RES": {
-          "label": "Максимальное разрешение",
-          "description": "Максимальное разрешение для контейнера, по умолчанию 16k."
-        },
         "START_DOCKER": {
           "label": "Запускать Docker-in-Docker",
           "description": "Если false, привилегированный контейнер не будет запускать DinD."
@@ -758,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "Отключить IPv6",
           "description": "Если true, это отключит IPv6."
-        },
-        "DISABLE_ZINK": {
-          "label": "Отключить Zink",
-          "description": "Не устанавливать переменные окружения Zink при обнаружении видеокарты."
         },
         "DISABLE_DRI3": {
           "label": "Отключить DRI3",
@@ -1172,10 +1199,7 @@
       "newVersion": "Новая версия: {sha}",
       "errorPulling": "Ошибка при загрузке образа.",
       "manualInstallNote": "Примечание: Образы, добавленные вручную, должны быть основаны на образе, совместимом с selkies-baseimage.",
-      "generalTitle": "Общие настройки и производительность",
-      "webrtcTitle": "Настройки WebRTC и TURN",
       "webrtcDescription": "По умолчанию сеансы передаются через WebSockets. Указание любого значения STUN, TURN, Cloudflare или публичного IP ниже либо выбор режима WebRTC переключает контейнер на WebRTC с включённым двойным режимом, чтобы пользователи по-прежнему могли вернуться к WebSockets.",
-      "dockerTitle": "Расширенные переопределения Docker",
       "dockerDescription": "Эти настройки переопределяют конфигурацию контейнера по умолчанию. Используйте с осторожностью и только если понимаете, что делаете."
     },
     "status": {
@@ -1805,6 +1829,40 @@
       "hideRail": "Скрыть боковую панель",
       "showRail": "Показать боковую панель",
       "project": "SealSkin на GitHub: ошибки и предложения функций"
+    },
+    "profile": {
+      "open": "Ваш профиль",
+      "signIn": "Вход",
+      "method": "Выполнен вход через",
+      "until": "Вход действует до",
+      "proxyKeeps": "Пока обратный прокси держит вас в системе",
+      "node": "Узел",
+      "groups": "Группы",
+      "noGroups": "Без группы: действуют настройки сервера по умолчанию.",
+      "providerGroups": "Указаны поставщиком удостоверений:",
+      "proxyGroups": "Указаны обратным прокси:",
+      "access": "Доступ",
+      "adminNote": "У администраторов есть все возможности и нет ограничений.",
+      "canStorage": "Постоянное хранилище",
+      "canShare": "Публичный доступ",
+      "canGpu": "GPU",
+      "canTemplates": "Редактирование шаблонов",
+      "canMigrate": "Перенос домашнего каталога",
+      "limits": "Ограничения",
+      "unlimited": "Без ограничений",
+      "sessions": "Сеансы",
+      "sessionsOf": "До {limit} одновременно",
+      "sessionsRunning": "Запущено: {running}",
+      "sessionsRunningOf": "Запущено {running} из {limit}",
+      "cpus": "CPU на сеанс",
+      "memory": "Память на сеанс",
+      "hours": "Длительность сеанса",
+      "hoursValue": "{hours} ч",
+      "storage": "Хранилище",
+      "pools": "Пулы",
+      "anyPool": "Любой пул, который предлагает сервер.",
+      "poolsDenied": "Кроме этих:",
+      "catalog": "Каталог PRoot Apps"
     },
     "home": {
       "searchPlaceholder": "Найдите приложение или вставьте ссылку, чтобы открыть её в изоляции",

@@ -301,6 +301,41 @@
       "deleteDisabled": "Dit sjabloon kan niet worden verwijderd.",
       "enterName": "Voer een naam in voor het nieuwe sjabloon.",
       "dockerAdminOnly": "Alleen een beheerder kan deze instellingen wijzigen.",
+      "filterPlaceholder": "Instellingen filteren op naam…",
+      "changedOnly": "Alleen gewijzigd",
+      "showMore": "Meer tonen",
+      "showLess": "Minder tonen",
+      "changedCount": "{count, plural, one {1 gewijzigd} other {{count} gewijzigd}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC, dual mode"
+      },
+      "sections": {
+        "appearance": "Uiterlijk",
+        "display": "Beeldscherm",
+        "input": "Invoer",
+        "audio": "Audio",
+        "webcam": "Webcam",
+        "performance": "Prestaties",
+        "gpu": "GPU",
+        "clipboard": "Klembord en bestanden",
+        "sharing": "Delen",
+        "hardening": "Hardening",
+        "lifecycle": "Levenscyclus",
+        "integrations": "Integraties",
+        "webrtc": "WebRTC",
+        "container": "Container"
+      },
+      "groups": {
+        "mode": "Modus",
+        "transport": "Transport",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "TURN REST-API",
+        "cloudflare": "Cloudflare TURN",
+        "extra": "Diagnostiek"
+      },
       "settings": {
         "TITLE": {
           "label": "Paginatitel",
@@ -747,10 +782,6 @@
           "label": "Wayland-backend",
           "description": "Draait de sessie op de Wayland-backend, een headless compositor met geneste labwc voor vensterbeheer, in plaats van de X11-server. X11-toepassingen draaien via XWayland."
         },
-        "MAX_RES": {
-          "label": "Maximale Resolutie",
-          "description": "Max resolutie voor de container, standaard is 16k."
-        },
         "START_DOCKER": {
           "label": "Start Docker-in-Docker",
           "description": "Indien false, zal een geprivilegieerde container DinD niet starten."
@@ -758,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "IPv6 Uitschakelen",
           "description": "Indien true, wordt IPv6 uitgeschakeld."
-        },
-        "DISABLE_ZINK": {
-          "label": "Zink Uitschakelen",
-          "description": "Stel geen Zink-omgevingsvariabelen in als een videokaart wordt gedetecteerd."
         },
         "DISABLE_DRI3": {
           "label": "DRI3 Uitschakelen",
@@ -1172,10 +1199,7 @@
       "newVersion": "Nieuwe versie: {sha}",
       "errorPulling": "Fout bij het pullen van de image.",
       "manualInstallNote": "Opmerking: Handmatig toegevoegde images moeten gebaseerd zijn op een selkies-baseimage compatibele image.",
-      "generalTitle": "Algemene & Prestatie-instellingen",
-      "webrtcTitle": "WebRTC- en TURN-instellingen",
       "webrtcDescription": "Sessies streamen standaard over WebSockets. Als u hieronder een STUN-, TURN-, Cloudflare- of publieke IP-waarde instelt, of de WebRTC-modus kiest, schakelt de container over naar WebRTC met dual mode ingeschakeld, zodat gebruikers nog steeds kunnen terugvallen op WebSockets.",
-      "dockerTitle": "Docker Geavanceerde Overschrijvingen",
       "dockerDescription": "Deze instellingen overschrijven de standaard containerconfiguratie. Gebruik met voorzichtigheid en alleen als u weet wat u doet."
     },
     "status": {
@@ -1805,6 +1829,40 @@
       "hideRail": "Zijbalk verbergen",
       "showRail": "Zijbalk tonen",
       "project": "SealSkin op GitHub: problemen en functieverzoeken"
+    },
+    "profile": {
+      "open": "Je profiel",
+      "signIn": "Aanmelding",
+      "method": "Aangemeld via",
+      "until": "Aangemeld tot",
+      "proxyKeeps": "Zolang de reverse proxy je aangemeld houdt",
+      "node": "Node",
+      "groups": "Groepen",
+      "noGroups": "Geen groep: de standaardwaarden van de server gelden.",
+      "providerGroups": "Genoemd door de identiteitsprovider:",
+      "proxyGroups": "Genoemd door de reverse proxy:",
+      "access": "Toegang",
+      "adminNote": "Beheerders hebben alle mogelijkheden en geen limieten.",
+      "canStorage": "Permanente opslag",
+      "canShare": "Openbaar delen",
+      "canGpu": "GPU",
+      "canTemplates": "Sjablonen bewerken",
+      "canMigrate": "Home-migratie",
+      "limits": "Limieten",
+      "unlimited": "Onbeperkt",
+      "sessions": "Sessies",
+      "sessionsOf": "Maximaal {limit} tegelijk",
+      "sessionsRunning": "{running} actief",
+      "sessionsRunningOf": "{running} actief van {limit}",
+      "cpus": "CPU's per sessie",
+      "memory": "Geheugen per sessie",
+      "hours": "Sessieduur",
+      "hoursValue": "{hours} u",
+      "storage": "Opslag",
+      "pools": "Pools",
+      "anyPool": "Elke pool die de server aanbiedt.",
+      "poolsDenied": "Niet deze:",
+      "catalog": "PRoot Apps-catalogus"
     },
     "home": {
       "searchPlaceholder": "Zoek applicaties, of plak een link om die geïsoleerd te openen",

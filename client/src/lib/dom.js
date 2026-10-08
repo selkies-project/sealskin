@@ -5,15 +5,7 @@
 import { bridge } from './bridge.js';
 import { secureFetch } from './api.js';
 
-/** Escape a value for insertion into HTML text or attribute context. */
-export function escapeHtml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
+export { escapeHtml, formatBytes, formatDate } from './format.js';
 
 /** Locale reported by the shell, falling back to the browser's. */
 export function currentLocale() {
@@ -30,22 +22,6 @@ export function currentLocale() {
 export function tOr(t, key, fallback) {
   const value = t(key);
   return value === key ? fallback : value;
-}
-
-/**
- * Human readable size.
- *
- * @param {number} bytes
- * @param {function} t Translator (uses common.bytes .. common.pb).
- * @param {number} [decimals]
- */
-export function formatBytes(bytes, t, decimals = 2) {
-  if (!bytes || bytes === 0) return `0 ${t('common.bytes')}`;
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = [t('common.bytes'), t('common.kb'), t('common.mb'), t('common.gb'), t('common.tb'), t('common.pb')];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
 /**
@@ -78,11 +54,6 @@ export function timeUntil(timestamp, t) {
   const days = Math.round(seconds / 86400);
   if (Math.abs(days) > 0) return rtf.format(days, 'day');
   return rtf.format(Math.round(seconds / 3600), 'hour');
-}
-
-/** Absolute date and time for a unix-seconds timestamp. */
-export function formatDate(timestamp) {
-  return new Date(timestamp * 1000).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 }
 
 /**

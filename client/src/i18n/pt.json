@@ -301,6 +301,41 @@
       "deleteDisabled": "Este modelo não pode ser excluído.",
       "enterName": "Por favor, insira um nome para o novo modelo.",
       "dockerAdminOnly": "Somente um administrador pode alterar estas configurações.",
+      "filterPlaceholder": "Filtrar configurações por nome…",
+      "changedOnly": "Só alteradas",
+      "showMore": "Mostrar mais",
+      "showLess": "Mostrar menos",
+      "changedCount": "{count, plural, one {1 alterada} other {{count} alteradas}}",
+      "streaming": {
+        "websockets": "WebSockets",
+        "webrtc": "WebRTC",
+        "webrtcDual": "WebRTC, modo duplo"
+      },
+      "sections": {
+        "appearance": "Aparência",
+        "display": "Tela",
+        "input": "Entrada",
+        "audio": "Áudio",
+        "webcam": "Webcam",
+        "performance": "Desempenho",
+        "gpu": "GPU",
+        "clipboard": "Área de transferência e arquivos",
+        "sharing": "Compartilhamento",
+        "hardening": "Hardening",
+        "lifecycle": "Ciclo de vida",
+        "integrations": "Integrações",
+        "webrtc": "WebRTC",
+        "container": "Contêiner"
+      },
+      "groups": {
+        "mode": "Modo",
+        "transport": "Transporte",
+        "stun": "STUN",
+        "turn": "TURN",
+        "turnRest": "API REST do TURN",
+        "cloudflare": "TURN da Cloudflare",
+        "extra": "Diagnóstico"
+      },
       "settings": {
         "TITLE": {
           "label": "Título da Página",
@@ -747,10 +782,6 @@
           "label": "Backend Wayland",
           "description": "Executa a sessão no backend Wayland, um compositor headless com labwc aninhado para gerenciar janelas, em vez do servidor X11. Aplicativos X11 rodam via XWayland."
         },
-        "MAX_RES": {
-          "label": "Resolução Máxima",
-          "description": "Resolução máxima para o contêiner, o padrão é 16k."
-        },
         "START_DOCKER": {
           "label": "Iniciar Docker-in-Docker",
           "description": "Se falso, um contêiner privilegiado não iniciará o DinD."
@@ -758,10 +789,6 @@
         "DISABLE_IPV6": {
           "label": "Desabilitar IPv6",
           "description": "Se verdadeiro, isso desabilitará o IPv6."
-        },
-        "DISABLE_ZINK": {
-          "label": "Desabilitar Zink",
-          "description": "Não definir variáveis de ambiente Zink se uma placa de vídeo for detectada."
         },
         "DISABLE_DRI3": {
           "label": "Desabilitar DRI3",
@@ -1172,10 +1199,7 @@
       "newVersion": "Nova versão: {sha}",
       "errorPulling": "Erro ao puxar a imagem.",
       "manualInstallNote": "Nota: Imagens adicionadas manualmente devem ser baseadas em uma imagem compatível com selkies-baseimage.",
-      "generalTitle": "Configurações Gerais e de Desempenho",
-      "webrtcTitle": "Configurações de WebRTC e TURN",
       "webrtcDescription": "As sessões são transmitidas por WebSockets por padrão. Definir qualquer valor de STUN, TURN, Cloudflare ou IP público abaixo, ou escolher o modo WebRTC, muda o contêiner para WebRTC com o modo duplo habilitado para que os usuários ainda possam voltar para WebSockets.",
-      "dockerTitle": "Sobrescritas Avançadas do Docker",
       "dockerDescription": "Essas configurações substituem a configuração padrão do contêiner. Use com cuidado e apenas se souber o que está fazendo."
     },
     "status": {
@@ -1805,6 +1829,40 @@
       "hideRail": "Ocultar a barra lateral",
       "showRail": "Mostrar a barra lateral",
       "project": "SealSkin no GitHub: problemas e pedidos de funcionalidades"
+    },
+    "profile": {
+      "open": "Seu perfil",
+      "signIn": "Login",
+      "method": "Conectado por",
+      "until": "Conectado até",
+      "proxyKeeps": "Enquanto o proxy reverso mantiver você conectado",
+      "node": "Nó",
+      "groups": "Grupos",
+      "noGroups": "Sem grupo: valem os padrões do servidor.",
+      "providerGroups": "Indicados pelo provedor de identidade:",
+      "proxyGroups": "Indicados pelo proxy reverso:",
+      "access": "Acesso",
+      "adminNote": "Administradores têm todas as capacidades e nenhum limite.",
+      "canStorage": "Armazenamento persistente",
+      "canShare": "Compartilhamento público",
+      "canGpu": "GPU",
+      "canTemplates": "Edição de modelos",
+      "canMigrate": "Migração da pasta pessoal",
+      "limits": "Limites",
+      "unlimited": "Ilimitado",
+      "sessions": "Sessões",
+      "sessionsOf": "Até {limit} ao mesmo tempo",
+      "sessionsRunning": "{running} em execução",
+      "sessionsRunningOf": "{running} em execução de {limit}",
+      "cpus": "CPUs por sessão",
+      "memory": "Memória por sessão",
+      "hours": "Duração da sessão",
+      "hoursValue": "{hours} h",
+      "storage": "Armazenamento",
+      "pools": "Pools",
+      "anyPool": "Qualquer pool que o servidor ofereça.",
+      "poolsDenied": "Estes não:",
+      "catalog": "Catálogo PRoot Apps"
     },
     "home": {
       "searchPlaceholder": "Pesquise aplicativos ou cole um link para abri-lo em isolamento",
