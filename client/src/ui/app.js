@@ -51,6 +51,16 @@ let t = (key) => key;
 let hostApi = null;
 // Why the sign-in panel is showing, as a `web.signIn` key.
 let notice = null;
+/** The brand the page wears, from the meta the server put in its head (`app.branding`). */
+const brand = (() => {
+  try {
+    return JSON.parse(document.querySelector('meta[name="sealskin-brand"]')?.content || '{}');
+  } catch (e) {
+    return {};
+  }
+})();
+const brandName = brand.name || 'SealSkin';
+const brandLogo = brand.logo || 'icons/icon128.png';
 
 const fromBase64 = (value) => (Uint8Array.fromBase64 ? Uint8Array.fromBase64(value) : Uint8Array.from(atob(value), (c) => c.charCodeAt(0)));
 const api = (url, options) => callBackground(pageTransport, 'secureFetch', { url, options });
@@ -256,7 +266,19 @@ function bindShell() {
     if (labels[dest]) button.querySelector('span').textContent = t(labels[dest]);
     button.addEventListener('click', () => hostApi.openPage(...DESTINATIONS[dest]));
   });
-  $$('.project-link').forEach((link) => { link.title = t('web.nav.project'); });
+  // The logo leads where the brand points it, to the project by default, or nowhere.
+  $$('.project-link').forEach((link) => {
+    link.querySelector('img').src = brandLogo;
+    if (brand.logoLink) {
+      link.href = brand.logoLink;
+      link.title = brand.projectLink ? t('web.nav.project') : brandName;
+    } else {
+      link.removeAttribute('href');
+      link.removeAttribute('target');
+      link.classList.add('plain');
+    }
+  });
+  $$('.wordmark').forEach((mark) => { mark.textContent = brandName; });
   $$('.sign-out').forEach((button) => {
     button.querySelector('span').textContent = t('options.dashboard.signOut');
     button.addEventListener('click', signOut);
@@ -450,19 +472,64 @@ async function takeSignIn() {
 }
 
 /**
+ * The sign-ins the server offers, or the root token alone when it cannot be asked.
+ *
+ * @returns {Promise<object>}
+ */
+const offeredSignIns = () => api('/api/auth/config', { method: 'GET' }).catch(() => ({ root: true }));
+
+/**
+ * Send the browser to the identity provider the server names in `auto`,
+ * showing where it is going meanwhile. `#root` on the address keeps the
+ * browser here, as does a notice from a provider flow that just failed, so a
+ * provider that refuses never bounces the browser back and forth.
+ *
+ * @param {object} offered The server's sign-in config.
+ * @returns {boolean} True when the browser is leaving.
+ */
+function autoSignIn(offered) {
+  if (!offered.auto || !offered[offered.auto] || notice || location.hash === '#root') return false;
+  const panel = document.getElementById('host-panel');
+  const box = document.createElement('div');
+  box.className = 'host-box';
+  box.innerHTML = `
+    <img class="host-logo" src="${escapeHtml(brandLogo)}" alt="${escapeHtml(brandName)}">
+    <p class="host-wait"><span class="inline-spinner"></span><span></span></p>
+    <p class="host-alt" hidden><a href="#root"></a></p>`;
+  box.querySelector('.host-wait span:last-child').textContent = t('web.signIn.redirecting');
+  const alternative = box.querySelector('.host-alt');
+  if (offered.root) {
+    alternative.hidden = false;
+    alternative.querySelector('a').textContent = t('web.signIn.useRoot');
+    alternative.querySelector('a').addEventListener('click', (event) => {
+      event.preventDefault();
+      location.hash = '#root';
+      location.reload();
+    });
+  }
+  document.body.classList.add('signed-out');
+  document.getElementById('app-frame').hidden = true;
+  panel.replaceChildren(box);
+  panel.hidden = false;
+  location.assign(`/api/auth/${offered.auto}/login`);
+  return true;
+}
+
+/**
  * Show the sign-in panel in place of the frame: the server's identity
  * providers and the root token. The token is typed into a masked text field
  * rather than a password field, so browsers do not offer to save it.
  *
  * @param {string} [failure] Why the server could not be asked who is signed in.
+ * @param {object} [known] The server's sign-in config, where it was already asked.
  */
-async function signInPanel(failure) {
-  const offered = failure ? { root: true } : await api('/api/auth/config', { method: 'GET' }).catch(() => ({ root: true }));
+async function signInPanel(failure, known) {
+  const offered = failure ? { root: true } : known || await offeredSignIns();
   const panel = document.getElementById('host-panel');
   const form = document.createElement('form');
   form.className = 'host-box';
   form.innerHTML = `
-    <img class="host-logo" src="icons/icon128.png" alt="SealSkin">
+    <img class="host-logo" src="${escapeHtml(brandLogo)}" alt="${escapeHtml(brandName)}">
     <h2></h2>
     <p class="host-error" data-part="error" hidden></p>
     <div class="host-actions" data-part="providers" hidden>
@@ -477,7 +544,7 @@ async function signInPanel(failure) {
       </div>
     </div>
     <p class="host-muted" data-part="nothing" hidden></p>
-    <div class="host-store">
+    <div class="host-store"${brand.storeLinks === false ? ' hidden' : ''}>
       <a href="https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk" target="_blank" rel="noopener"><span class="logo logo-chrome"></span><span>Chrome Store</span></a>
       <a href="https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/" target="_blank" rel="noopener"><span class="logo logo-firefox"></span><span>Firefox Add-ons</span></a>
       <a href="https://play.google.com/store/apps/details?id=io.linuxserver.sealskin" target="_blank" rel="noopener"><span class="logo logo-android"></span><span>Play Store</span></a>
@@ -526,7 +593,8 @@ async function signInPanel(failure) {
       await enter('home');
     } catch (e) {
       const { status, detail } = apiError(e);
-      say(status === 403 ? t('web.rootRefused') : status === 429 ? t('web.rootLocked') : detail);
+      if (status === 403) say(t(detail === 'disabled' ? 'web.rootDisabled' : 'web.rootRefused'));
+      else say(status === 429 ? t('web.rootLocked') : detail);
       form.token.select();
     }
     submit.disabled = false;
@@ -609,6 +677,15 @@ async function connect() {
     history.replaceState(null, '', location.pathname + location.search);
     showAccount(null);
     await signInPanel();
+    return;
+  }
+  // Signed out, the browser may go straight to the identity provider; `#root` keeps it on the panel.
+  if (!status && !failure && signedInVia !== 'proxy') {
+    const offered = await offeredSignIns();
+    if (autoSignIn(offered)) return;
+    if (location.hash === '#root') history.replaceState(null, '', location.pathname + location.search);
+    await remember(status);
+    await signInPanel(undefined, offered);
     return;
   }
   // A proxy's sign-in that ran out is renewed by a navigation, which the proxy sends to its sign-in page.

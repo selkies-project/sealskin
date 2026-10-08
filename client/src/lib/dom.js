@@ -63,9 +63,18 @@ export function timeUntil(timestamp, t) {
  * @param {string} logoData URL, `/api/app_icon/...` path, or empty.
  * @returns {Promise<string>}
  */
+/** The picture standing for an application without one: the brand's logo where one was uploaded, else SealSkin's. */
+export const FALLBACK_LOGO = (() => {
+  try {
+    return JSON.parse(document.querySelector('meta[name="sealskin-brand"]')?.content || '{}').logo || 'icons/icon128.png';
+  } catch (e) {
+    return 'icons/icon128.png';
+  }
+})();
+
 export async function formatLogoSrc(logoData) {
-  if (!logoData) return 'icons/icon128.png';
-  if (logoData.startsWith('http')) return logoData;
+  if (!logoData) return FALLBACK_LOGO;
+  if (logoData.startsWith('http') || logoData.startsWith('/api/branding/')) return logoData;
   if (logoData.startsWith('/api/app_icon/')) {
     try {
       const response = await secureFetch(logoData, { method: 'GET' });
@@ -76,7 +85,7 @@ export async function formatLogoSrc(logoData) {
       console.error(`Failed to fetch secure icon for ${logoData}:`, error);
     }
   }
-  return 'icons/icon128.png';
+  return FALLBACK_LOGO;
 }
 
 /** Swap every `img[data-logo-src]` under `scope` for its resolved logo. */

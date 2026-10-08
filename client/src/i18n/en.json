@@ -85,7 +85,8 @@
       "admins": "Admins",
       "cluster": "Cluster",
       "signIn": "Sign In",
-      "audit": "Audit Log"
+      "audit": "Audit Log",
+      "branding": "Branding"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -511,7 +512,7 @@
         },
         "SELKIES_ENABLE_COLLAB": {
           "label": "Enable Collaboration",
-          "description": "Let a viewer holding the session's master token act as a read-write collaborator. Required for SealSkin rooms."
+          "description": "Let a viewer holding the session's master token act as a read-write collaborator. Required for {brand} rooms."
         },
         "SELKIES_ENABLE_PLAYER2": {
           "label": "Enable Player 2 Sharing",
@@ -1156,7 +1157,7 @@
       "editGroupTitle": "Edit Group: {groupName}",
       "userConfigTitle": "User Configuration",
       "warning": "This is the only time this configuration will be shown. Provide it to the user securely.",
-      "info": "You can download this configuration file to easily set up SealSkin on another device. Keep this file safe as it contains your private key.",
+      "info": "You can download this configuration file to easily set up {brand} on another device. Keep this file safe as it contains your private key.",
       "configDataLabel": "Configuration Data (JSON)",
       "copyButton": "Copy Text",
       "downloadButton": "Download File",
@@ -1307,15 +1308,15 @@
       "noProotCatalogs": "No catalogs yet."
     },
     "web": {
-      "title": "SealSkin in This Browser",
-      "bookmarklet": "Send to SealSkin",
-      "bookmarkletHelp": "Drag this link to your bookmarks bar. Clicking it opens the page you are on in SealSkin, or searches for the text you selected.",
-      "pick": "Pick for SealSkin",
-      "pickHelp": "Drag this one there too. Click it, then click a link to open that link in SealSkin, or an image, video, or audio to send the file. Shift-click a link to send the file it leads to, fetched with your sign-in on that site.",
-      "pickHint": "SealSkin: click a link, or an image, video, or audio, to send it; Shift-click a link to send its file. Press Esc to cancel.",
+      "title": "{brand} in This Browser",
+      "bookmarklet": "Send to {brand}",
+      "bookmarkletHelp": "Drag this link to your bookmarks bar. Clicking it opens the page you are on in {brand}, or searches for the text you selected.",
+      "pick": "Pick for {brand}",
+      "pickHelp": "Drag this one there too. Click it, then click a link to open that link in {brand}, or an image, video, or audio to send the file. Shift-click a link to send the file it leads to, fetched with your sign-in on that site.",
+      "pickHint": "{brand}: click a link, or an image, video, or audio, to send it; Shift-click a link to send its file. Press Esc to cancel.",
       "protocol": "Open web+sealskin: Links Here",
-      "protocolHelp": "A link written as web+sealskin: followed by an address then opens that address in SealSkin.",
-      "install": "Where the browser can install web apps, install SealSkin from its menu to share links and files to it and to open files with it."
+      "protocolHelp": "A link written as web+sealskin: followed by an address then opens that address in {brand}.",
+      "install": "Where the browser can install web apps, install {brand} from its menu to share links and files to it and to open files with it."
     },
     "via": {
       "root": "Root token",
@@ -1411,7 +1412,8 @@
         "proxy_auth_groups_header": "Header a trusted proxy lists the user's groups in",
         "proxy_auth_logout_url": "Page of the proxy that signs its user out",
         "web_session_seconds": "Longest a root sign-in lasts unused (hours)",
-        "files_sync": "Keep shared files in the object store"
+        "files_sync": "Keep shared files in the object store",
+        "auto_sign_in": "Send a signed-out browser straight to"
       },
       "usageTitle": "Usage",
       "usageHours": "Weighted hours",
@@ -1536,7 +1538,7 @@
         "unchecked": "The check of the proxy is switched off on this node (SEALSKIN_PROXY_AUTH_UNCHECKED): whatever the proxy passes on is believed."
       },
       "whoTitle": "Who Signs In",
-      "whoHelp": "These hold for OpenID Connect, SAML, and the reverse proxy. To put the members of an identity provider group into a SealSkin group, list it under \"Identity provider groups\" of that group in Groups.",
+      "whoHelp": "These hold for OpenID Connect, SAML, and the reverse proxy. To put the members of an identity provider group into a {brand} group, list it under \"Identity provider groups\" of that group in Groups.",
       "rootTitle": "Root Token",
       "rootHelp": "Always available. The token is in /config/root_token on the server until that file is deleted, and can be set with SEALSKIN_ROOT_TOKEN.",
       "keyTitle": "Key Files",
@@ -1552,7 +1554,14 @@
       "resultEntity": "Entity ID:",
       "resultSso": "Sign-on URL:",
       "resultSlo": "Single logout offered:",
-      "resultCertificates": "Signing certificates:"
+      "resultCertificates": "Signing certificates:",
+      "landingTitle": "Landing",
+      "landingHelp": "With a provider chosen, a signed-out browser goes to it at once instead of this server's sign-in page. Add #root to the web app's address to see the page anyway, as for the root token.",
+      "autoNone": "This server's sign-in page",
+      "autoOidc": "OpenID Connect",
+      "autoSaml": "SAML",
+      "rootOff": "Switched off on this node with SEALSKIN_ROOT_SIGN_IN=false. To get back in with the token, restart the node with it on.",
+      "rootNoAdminGroup": "No identity provider group names administrators (see Who Signs In). With the root token off, nobody can administer this server."
     },
     "prootApps": {
       "title": "PRoot Apps Catalogs",
@@ -1586,6 +1595,52 @@
       "updateTitle": "Fetch the apps again now, on every node, where their package changed",
       "confirmDelete": "Delete catalog '{name}'? Every node removes its copy, and users assigned to it get no catalog.",
       "deleteTitle": "Delete catalog"
+    },
+    "branding": {
+      "title": "Branding",
+      "help": "Give the web app your organization's name, logo, colors, wallpaper, and links. The preview shows the home page as users will see it; nothing changes until you save.",
+      "identity": "Identity",
+      "name": "Product name",
+      "nameHelp": "Stands wherever the interface would say SealSkin: the title, the sidebar, the installed web app, and the sign-in page.",
+      "logo": "Logo",
+      "logoHelp": "A square PNG, JPEG, or WebP up to 1 MB. It is the sidebar logo, the favicon, and the icon of the installed web app.",
+      "logoLink": "The logo links to",
+      "logoLinkHelp": "An address the logo opens in a new tab, such as your intranet. Leave it empty for no link.",
+      "accent": "Accent color",
+      "accentHelp": "The color of buttons, highlights, and the wordmark. Clear it for the default violet.",
+      "accentDefault": "Default",
+      "storeLinks": "Show the extension and app store links on the sign-in page",
+      "wallpaper": "Wallpaper",
+      "wallpaperHelp": "A picture behind the home page, up to 8 MB. Users start from it and may still pick their own, unless it is forced.",
+      "wallpaperForced": "Force this wallpaper on every user",
+      "wallpaperForcedHelp": "Users lose the Customize button on the home page and all see this wallpaper.",
+      "fit": "Position",
+      "blur": "Blur",
+      "dim": "Dim",
+      "upload": "Upload",
+      "remove": "Remove",
+      "links": "Home page links",
+      "linksHelp": "Tiles the home page shows above the applications, for your own sites and tools. A link opens in a new tab, or in an isolated session of an application the user picks.",
+      "linkName": "Name",
+      "linkUrl": "Address",
+      "linkIcon": "Icon",
+      "linkIconHelp": "A Font Awesome class such as fa-book or fab fa-github, or an https address of a picture.",
+      "linkOpen": "Opens",
+      "openTab": "In a new tab",
+      "openIsolated": "In isolation",
+      "addLink": "Add a link",
+      "noLinks": "No links yet.",
+      "preview": "Preview",
+      "previewHelp": "The home page as a user sees it, with what you have entered here.",
+      "previewUser": "A user",
+      "save": "Save branding",
+      "reset": "Back to defaults",
+      "resetConfirm": "Remove the name, logo, colors, wallpaper, and links, back to the SealSkin defaults?",
+      "saved": "Branding saved. Reload the page to see the title and sidebar change.",
+      "resetDone": "Branding reset to the defaults.",
+      "saveFailed": "Could not save the branding: {error}",
+      "pictureTooLarge": "The picture is too large, and could not be made smaller. Choose another.",
+      "notAPicture": "Choose a PNG, JPEG, or WebP picture."
     }
   },
   "popup": {
@@ -1681,7 +1736,7 @@
     }
   },
   "files": {
-    "title": "SealSkin Files",
+    "title": "{brand} Files",
     "header": {
       "title": "Files",
       "newFolder": "New Folder",
@@ -1689,7 +1744,7 @@
       "uploadFolder": "Upload Folder"
     },
     "sidebar": {
-      "sharedFiles": "SealSkin Files",
+      "sharedFiles": "{brand} Files",
       "publicShares": "Public Shares"
     },
     "shares": {
@@ -1747,7 +1802,7 @@
       "deleteFailed": "Deletion failed: {error}",
       "preparingUpload": "Preparing to upload {count, plural, one {1 file} other {{count} files}}...",
       "uploadPrepFailed": "Error during folder upload preparation: {error}",
-      "notConfigured": "Error: SealSkin not configured. Please set up in options.",
+      "notConfigured": "Error: {brand} not configured. Please set up in options.",
       "folderCreated": "Folder '{folderName}' created.",
       "folderCreateFailed": "Error creating folder: {error}",
       "shareCreated": "Share created successfully! The link has been copied to your clipboard.",
@@ -1795,8 +1850,8 @@
     }
   },
   "web": {
-    "receiving": "Sending the file to SealSkin…",
-    "signInTitle": "Sign in to SealSkin",
+    "receiving": "Sending the file to {brand}…",
+    "signInTitle": "Sign in to {brand}",
     "signInWith": {
       "oidc": "Sign In with OpenID Connect",
       "saml": "Sign In with SAML"
@@ -1808,7 +1863,7 @@
     "rootLocked": "Too many tries. Wait a while, then try again.",
     "held": {
       "title": "Waiting for an administrator",
-      "message": "You are signed in as {username}, but an administrator has to place you in a group before you can use SealSkin. Check again once they have.",
+      "message": "You are signed in as {username}, but an administrator has to place you in a group before you can use {brand}. Check again once they have.",
       "check": "Check again"
     },
     "signIn": {
@@ -1816,12 +1871,14 @@
       "refused": "The identity provider refused the sign-in.",
       "expired": "The sign-in took too long or was already used. Sign in again.",
       "browser": "The sign-in finished in another browser or tab. Start it again here.",
-      "invalidUsername": "Your account's name cannot be a SealSkin user name, which takes only letters, digits, underscores, and hyphens. Ask your administrator.",
-      "adminName": "Your account's name belongs to a SealSkin administrator, who signs in with a key file. Ask your administrator.",
-      "otherIdentity": "Another account of the identity provider already signs in as this SealSkin user. Ask your administrator.",
-      "noAccount": "No SealSkin account has your name yet. Ask your administrator to create one.",
+      "invalidUsername": "Your account's name cannot be a {brand} user name, which takes only letters, digits, underscores, and hyphens. Ask your administrator.",
+      "adminName": "Your account's name belongs to a {brand} administrator, who signs in with a key file. Ask your administrator.",
+      "otherIdentity": "Another account of the identity provider already signs in as this {brand} user. Ask your administrator.",
+      "noAccount": "No {brand} account has your name yet. Ask your administrator to create one.",
       "notConfigured": "This server offers no sign-in here. Ask your administrator.",
-      "ended": "Your sign-in ended. Sign in again."
+      "ended": "Your sign-in ended. Sign in again.",
+      "redirecting": "Taking you to sign in…",
+      "useRoot": "Use the root token instead"
     },
     "nav": {
       "home": "Home",
@@ -1868,7 +1925,7 @@
     "home": {
       "searchPlaceholder": "Search applications, or paste a link to open it in isolation",
       "upload": "Upload a file",
-      "drop": "Drop the file to open it in SealSkin",
+      "drop": "Drop the file to open it in {brand}",
       "running": "Running sessions",
       "applications": "Applications",
       "allowance": "Allowance",
@@ -1923,7 +1980,8 @@
       "fitFill": "Fill",
       "fitFit": "Fit",
       "fitStretch": "Stretch",
-      "fitCenter": "Center"
+      "fitCenter": "Center",
+      "links": "Links"
     },
     "launch": {
       "title": "Launching {app}",
@@ -1944,7 +2002,7 @@
       "onNode": "On node {node}",
       "seconds": "{count} s",
       "failed": "The launch failed",
-      "unseen": "The launch request has not reached the server. Check the SealSkin tab that started it.",
+      "unseen": "The launch request has not reached the server. Check the {brand} tab that started it.",
       "closeTab": "The browser kept this tab open. Close it yourself."
     },
     "open": {
@@ -1953,8 +2011,9 @@
       "looking": "Looking for a running session",
       "attaching": "Opening the running session",
       "notYours": "This application is not open to your account, or it does not exist.",
-      "noHome": "The storage directory '{home}' this address names does not exist. Create it in SealSkin, or open the address without it.",
-      "openSealSkin": "Open SealSkin"
-    }
+      "noHome": "The storage directory '{home}' this address names does not exist. Create it in {brand}, or open the address without it.",
+      "openSealSkin": "Open {brand}"
+    },
+    "rootDisabled": "The root token is switched off on this server."
   }
 }

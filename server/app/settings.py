@@ -186,6 +186,15 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "help": "Directory for storing custom-uploaded application icons.",
     },
     {
+        "name": "branding_path",
+        "type": "str",
+        "default": "/config/.config/sealskin/branding",
+        "help": (
+            "Directory of the brand the web app wears: `branding.yml` and the logo and wallpaper "
+            "an administrator uploads. Shared by every node of a cluster."
+        ),
+    },
+    {
         "name": "home_templates_path",
         "type": "str",
         "default": "/storage/sealskin_home_templates",
@@ -580,6 +589,24 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "help": "Longest a web sign-in with the root token lasts unused.",
     },
     {
+        "name": "root_sign_in",
+        "type": "bool",
+        "default": True,
+        "help": (
+            "Accept the root token on this node's web sign-in. Turn it off once administrators sign in "
+            "through an identity provider; a node restarted with it on takes the token again."
+        ),
+    },
+    {
+        "name": "auto_sign_in",
+        "type": "str",
+        "default": "",
+        "help": (
+            "Identity provider, `oidc` or `saml`, the web app sends a signed-out browser to at once "
+            "instead of showing its sign-in page; `#root` on the web app's address shows the page anyway."
+        ),
+    },
+    {
         "name": "sso_force_login",
         "type": "bool",
         "default": False,
@@ -725,6 +752,7 @@ CLUSTER_SETTINGS = (
     "proxy_auth_groups_header",
     "proxy_auth_logout_url",
     "web_session_seconds",
+    "auto_sign_in",
     "files_sync",
 )
 

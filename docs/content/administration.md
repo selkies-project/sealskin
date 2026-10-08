@@ -84,14 +84,56 @@ Shown to administrators; [Clusters](cluster.md) explains each part.
 * **Store**: where the shared records are kept and whether it answers.
 * **Usage**: the weighted hours each user spent this day, week, or month.
 
+## Branding
+
+The web app can wear your organization's name instead of SealSkin's. The
+panel is a form beside a mock of the home page, which repaints as you type;
+nothing changes until **Save branding**, and **Back to defaults** removes it
+all.
+
+* **Product name**: stands wherever the interface would say SealSkin, in
+  every language: the page title, the sidebar, the sign-in page, the
+  installed web app, and the browser's search engine entry.
+* **Logo**: a square PNG, JPEG, or WebP up to 1 MB. It is the sidebar logo,
+  the favicon, the icon of the installed web app, and the picture of an
+  application that has none. **The logo links to** an address of your own,
+  opened in a new tab; empty, the logo links nowhere. By default it leads to
+  the SealSkin project on GitHub.
+* **Accent color**: one color, from which the buttons, highlights, focus
+  rings, and the wordmark take their shades. Clear it for the default violet.
+* The **extension and app store links** on the sign-in page can be hidden.
+* **Wallpaper**: a picture behind the home page, up to 8 MB (a larger one is
+  scaled down in the browser before it is uploaded), with the same position,
+  blur, and dim controls users have. Users start from it and may still pick
+  their own background, unless **Force this wallpaper on every user** is on,
+  which also takes the Customize button off the home page.
+* **Home page links**: tiles the home page shows above the applications, for
+  your own sites and tools, in the order given. Each has a name, an address,
+  an icon (a [Font Awesome](https://fontawesome.com/search?ic=free-collection) class such as `fa-book` or `fab fa-github`, or an
+  `https` address of a picture), and opens either in a new tab or, marked
+  **In isolation**, in a session of an application the user picks, as a
+  pasted link does.
+
+The brand is kept in `branding/` beside the other shared records, as
+`branding.yml` with the logo and wallpaper files next to it, so every node of
+a cluster serves it and a deployment can seed it from a volume (see
+[Configuration](configuration.md)). The browser extension and the mobile app
+show their own name until they connect; what they frame then is the branded
+web app. With [auto sign-in](signin.md#landing-on-the-provider) on, the sign-in
+page is the identity provider's own, so there is nothing of SealSkin's to
+brand there.
+
 ## Sign In
 
 One card for each [way of signing in](signin.md), written for the whole
 cluster: OpenID Connect and SAML with the addresses to register at the
 provider and a **Test** that asks the provider for its metadata and shows
-what came back; the reverse proxy headers; and who a sign-in is (the username
+what came back; the reverse proxy headers; **Landing**, which sends a
+signed-out browser straight to a provider; and who a sign-in is (the username
 and groups claims, the administrator group, and how long a sign-in lasts). A
-field left empty is taken from each node's environment.
+field left empty is taken from each node's environment. The **Root Token**
+card says whether this node still takes the token, and warns when it does not
+and no identity provider group names administrators.
 
 ## Audit Log
 

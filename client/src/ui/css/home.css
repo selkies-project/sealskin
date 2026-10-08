@@ -168,6 +168,11 @@ body.zooming .home-wrap { opacity: 0.35; transition: opacity var(--dur-slow) var
 .app-tile:hover, .app-tile:focus-within { transform: translateY(-2px); border-color: var(--accent-border); background-color: var(--bg-2); box-shadow: var(--shadow-md); }
 .app-tile:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .app-tile img { width: 64px; height: 64px; object-fit: contain; }
+/* A link the administrator put on the page: a tile that leads out, or opens the address in a session. */
+.link-tile { color: inherit; text-decoration: none; font: inherit; }
+.link-tile:hover, .link-tile:focus-visible { color: inherit; text-decoration: none; }
+.link-tile i { display: grid; place-items: center; width: 64px; height: 64px; font-size: 2rem; color: var(--accent-text); }
+.link-tile .where { position: absolute; top: 0.55rem; right: 0.6rem; font-size: 0.7rem; color: var(--text-muted); }
 .app-tile .name { font-size: 0.88rem; font-weight: 500; line-height: 1.3; max-width: 100%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .app-tile .stage { font-size: 0.72rem; color: var(--accent-text); min-height: 1em; }
 .app-tile .stage:empty { display: none; }

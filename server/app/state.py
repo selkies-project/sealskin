@@ -13,7 +13,14 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import Any
 
-from .models import AppStore, InstalledApp, InstalledAppRecord, ProotCatalog, PublicShareMetadata
+from .models import (
+    AppStore,
+    Branding,
+    InstalledApp,
+    InstalledAppRecord,
+    ProotCatalog,
+    PublicShareMetadata,
+)
 
 
 @dataclass
@@ -67,6 +74,7 @@ class RuntimeState:
             them from requests made to the API port directly.
         server_private_key: The server's RSA private key object.
         server_public_key_pem: PEM encoding of the server's public key.
+        branding: The brand the web app wears (`app.branding`).
     """
 
     sessions: dict[str, dict[str, Any]] = field(default_factory=dict)
@@ -100,6 +108,7 @@ class RuntimeState:
     proxy_secret: str = ""
     server_private_key: Any = None
     server_public_key_pem: str = ""
+    branding: Branding = field(default_factory=Branding)
 
 
 state = RuntimeState()

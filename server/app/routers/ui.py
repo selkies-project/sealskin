@@ -22,6 +22,7 @@ from fastapi import APIRouter, FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from starlette.staticfiles import StaticFiles
 
+from .. import branding
 from ..models import (
     TemplateSchemaResponse,
     TemplateSchemaSection,
@@ -59,14 +60,14 @@ def absolutize(html: str, base: str) -> str:
 
 
 def built_page(name: str, base: str = "/ui/") -> str:
-    """Return a page of the built UI with its assets pointed at `base`.
+    """Return a page of the built UI wearing the brand, with its assets pointed at `base`.
 
     Raises:
         HTTPException: 404 when the UI is not built.
     """
     try:
         with open(os.path.join(settings.ui_path, name), encoding="utf-8") as handle:
-            return absolutize(handle.read(), base)
+            return branding.brand_page(absolutize(handle.read(), base))
     except OSError as exc:
         raise HTTPException(status_code=404, detail="The web UI is not built.") from exc
 
@@ -76,15 +77,20 @@ class UiStaticFiles(StaticFiles):
 
     HTML entry points, JSON manifests, and the service worker are served with
     `no-cache` so a new build is picked up immediately; every other asset
-    carries a content hash in its name and is cached for a year. The web app's
+    carries a content hash in its name and is cached for a year. A page is
+    read and served wearing the brand (`branding.brand_page`). The web app's
     page holds the unlocked private key, so it runs only its own scripts, is
     never framed, and gives a page that opens it, such as a session's, no
     handle on it.
     """
 
     def file_response(self, full_path: Any, stat_result: os.stat_result, scope: Any, status_code: int = 200) -> Response:
-        """Add `Cache-Control`, and the web app's isolation, to the response Starlette builds."""
-        response = super().file_response(full_path, stat_result, scope, status_code)
+        """Add `Cache-Control`, the brand, and the web app's isolation to the response Starlette builds."""
+        if str(full_path).endswith(".html"):
+            with open(full_path, encoding="utf-8") as handle:
+                response: Response = HTMLResponse(branding.brand_page(handle.read()), status_code=status_code)
+        else:
+            response = super().file_response(full_path, stat_result, scope, status_code)
         if str(full_path).endswith(NO_CACHE_SUFFIXES):
             response.headers["Cache-Control"] = "no-cache"
         else:
@@ -162,17 +168,23 @@ async def web_app_manifest() -> JSONResponse:
         mime = mimetypes.guess_type(f"file.{extension}")[0]
         if mime:
             accept.setdefault(mime, []).append(f".{extension}")
+    logo = branding.image("logo")
+    icons = (
+        [{"src": logo.url, "sizes": f"{logo.width}x{logo.height}", "type": logo.type}]
+        if logo
+        else [
+            {"src": "icons/icon128.png", "sizes": "192x192", "type": "image/png"},
+            {"src": "icons/logo.png", "sizes": "1024x1024", "type": "image/png"},
+        ]
+    )
     manifest: dict[str, Any] = {
-        "name": "SealSkin",
+        "name": state.branding.name,
         "start_url": "/",
         "scope": "/",
         "display": "standalone",
         "background_color": "#0d1117",
         "theme_color": "#0d1117",
-        "icons": [
-            {"src": "icons/icon128.png", "sizes": "192x192", "type": "image/png"},
-            {"src": "icons/logo.png", "sizes": "1024x1024", "type": "image/png"},
-        ],
+        "icons": icons,
         "share_target": {
             "action": "share",
             "method": "POST",
@@ -196,13 +208,20 @@ async def opensearch_description(request: Request) -> Response:
     """
     public = settings.public_url.rstrip("/")
     app = f"{public}/" if public else str(request.base_url)
+    name = state.branding.name
+    logo = branding.image("logo")
+    picture = (
+        f'<Image width="{logo.width}" height="{logo.height}" type="{logo.type}">{escape(app.rstrip("/") + logo.url)}</Image>'
+        if logo
+        else f'<Image width="192" height="192" type="image/png">{escape(app)}ui/icons/icon128.png</Image>'
+    )
     body = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">'
-        "<ShortName>SealSkin</ShortName>"
-        "<Description>Search in an isolated SealSkin session</Description>"
+        f"<ShortName>{escape(name)}</ShortName>"
+        f"<Description>Search in an isolated {escape(name)} session</Description>"
         "<InputEncoding>UTF-8</InputEncoding>"
-        f'<Image width="192" height="192" type="image/png">{escape(app)}ui/icons/icon128.png</Image>'
+        f"{picture}"
         f'<Url type="text/html" method="get" template={quoteattr(app + "?q={searchTerms}")}/>'
         "</OpenSearchDescription>"
     )

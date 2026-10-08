@@ -24,6 +24,10 @@
  * folds its rail away (`bridge.leaving`), and the tab then goes to the
  * session.
  *
+ * The brand (`/api/branding`) puts links of the administrator's on the page
+ * as tiles of their own, and may give it a wallpaper: the look users start
+ * from, or, forced, the look they all have, the customize button withheld.
+ *
  * A launch shows its progress on the tile and as a card in the sessions
  * row with the launching page's checklist of stages (`launch-view.js`), and the
  * web app goes to the session when it is ready; asked to open in a new tab,
@@ -103,6 +107,8 @@ let memory = { apps: {}, recent: [] };
 // `{favorites: [<id>], hidden: [<id>], background}`, kept in the shell under `home_layout`.
 let layout = { favorites: [], hidden: [], background: { ...DEFAULT_BACKGROUND } };
 let activeType = 'all';
+/** The brand as the server keeps it, with the wallpaper and the links it puts on the page. */
+let brandInfo = null;
 let drawerApp = null;
 // The tile the launch window opened from, which it folds back into, and the fold under way.
 let anchorTile = null;
@@ -461,6 +467,22 @@ function renderApps() {
   }
 }
 
+/** The administrator's links as tiles: a new tab, or the address opened in a session of an application the user picks. */
+function renderLinks() {
+  const links = (brandInfo && brandInfo.links) || [];
+  const icon = (link) => {
+    if (link.icon.startsWith('https://')) return `<img src="${escapeHtml(link.icon)}" alt="" draggable="false">`;
+    const classes = link.icon ? (link.icon.includes(' ') ? link.icon : `fas ${link.icon}`) : 'fas fa-link';
+    return `<i class="${escapeHtml(classes)}"></i>`;
+  };
+  $('links-grid').innerHTML = links.map((link) => (link.open === 'isolated'
+    ? `<button type="button" class="app-tile link-tile" data-link="${escapeHtml(link.url)}" title="${escapeHtml(link.url)}">
+            ${icon(link)}<span class="name">${escapeHtml(link.name)}</span><i class="fas fa-shield-alt where"></i></button>`
+    : `<a class="app-tile link-tile" href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(link.url)}">
+            ${icon(link)}<span class="name">${escapeHtml(link.name)}</span><i class="fas fa-external-link-alt where"></i></a>`)).join('');
+  $('links-section').hidden = links.length === 0;
+}
+
 function renderSkeleton() {
   appGrid.innerHTML = Array.from({ length: 12 }, () => '<div class="app-tile skeleton"><div class="bone icon"></div><div class="bone line"></div></div>').join('');
 }
@@ -769,20 +791,37 @@ function normalizeBackground(kept = {}) {
   return bg;
 }
 
+/**
+ * The background the page shows: the brand's wallpaper where it is forced
+ * or where the user kept the default, the user's own otherwise.
+ */
+function shownBackground() {
+  const wall = brandInfo && brandInfo.wallpaper;
+  if (wall && (brandInfo.wallpaper_forced || layout.background.kind === 'default')) {
+    return { kind: 'image', image: wall.url, fit: brandInfo.wallpaper_fit, blur: brandInfo.wallpaper_blur, dim: brandInfo.wallpaper_dim, color: layout.background.color };
+  }
+  return layout.background;
+}
+
 /** Paint the chosen background behind the page, and show the choice in the panel. */
 function applyBackground() {
-  const bg = layout.background;
+  const shown = shownBackground();
   const backdrop = $('backdrop');
-  const paint = bg.kind === 'color' ? `paint style-${bg.style}` : bg.kind === 'image' ? `picture fit-${bg.fit}` : '';
+  const paint = shown.kind === 'color' ? `paint style-${shown.style}` : shown.kind === 'image' ? `picture fit-${shown.fit}` : '';
   backdrop.className = paint;
-  backdrop.style.setProperty('--bg-color', bg.color);
-  backdrop.style.backgroundImage = bg.kind === 'image' ? `url("${bg.image}")` : '';
-  backdrop.style.setProperty('--bg-blur', `${bg.kind === 'image' ? bg.blur : 0}px`);
-  backdrop.style.setProperty('--bg-dim', String(bg.kind === 'default' ? 0 : bg.dim / 100));
-  document.body.classList.toggle('has-backdrop', bg.kind !== 'default');
-  document.body.classList.toggle('has-picture', bg.kind === 'image');
+  backdrop.style.setProperty('--bg-color', shown.color);
+  backdrop.style.backgroundImage = shown.kind === 'image' ? `url("${shown.image}")` : '';
+  backdrop.style.setProperty('--bg-blur', `${shown.kind === 'image' ? shown.blur : 0}px`);
+  backdrop.style.setProperty('--bg-dim', String(shown.kind === 'default' ? 0 : shown.dim / 100));
+  document.body.classList.toggle('has-backdrop', shown.kind !== 'default');
+  document.body.classList.toggle('has-picture', shown.kind === 'image');
+  showBackgroundChoice();
+}
 
-  // The panel opens on the color tab; with the default background nothing on it is marked chosen.
+/** Show the user's own choice in the panel; with the default background nothing on it is marked chosen. */
+function showBackgroundChoice() {
+  const bg = layout.background;
+  // The panel opens on the color tab.
   const tab = bg.kind === 'image' ? 'image' : 'color';
   $('bg-kinds').querySelectorAll('button').forEach((button) => button.classList.toggle('active', button.dataset.kind === tab));
   $('bg-color-group').hidden = tab !== 'color';
@@ -1187,6 +1226,14 @@ function bindEvents() {
     if (!context && list.length === 0) setContext(typedContext(true));
     else if (list.length === 1) openDrawer(list[0]);
   });
+  // A link marked for isolation is opened the way a pasted address is: in an application the user picks.
+  $('links-grid').addEventListener('click', (event) => {
+    const tile = event.target.closest('button[data-link]');
+    if (!tile) return;
+    heroInput.value = '';
+    setContext({ action: 'url', targetUrl: tile.dataset.link });
+    $('apps-section').scrollIntoView({ block: 'nearest' });
+  });
   $('context-clear').addEventListener('click', () => {
     if (context && context.typed) heroInput.value = '';
     setContext(null);
@@ -1340,7 +1387,16 @@ async function init() {
   bindEvents();
 
   try {
-    const [pending, stored] = await Promise.all([bridge.getContext(), bridge.storageGet(['simple_launch_profile', LAYOUT_KEY]), loadAll()]);
+    const [pending, stored, , brandData] = await Promise.all([
+      bridge.getContext(),
+      bridge.storageGet(['simple_launch_profile', LAYOUT_KEY]),
+      loadAll(),
+      secureFetch('/api/branding', { method: 'GET' }).catch(() => null),
+    ]);
+    brandInfo = brandData;
+    // The page's own gradients start from the brand's accent; a forced wallpaper takes the customize button away.
+    if (brandInfo && brandInfo.accent) DEFAULT_BACKGROUND.color = brandInfo.accent;
+    $('customize-button').hidden = Boolean(brandInfo && brandInfo.wallpaper && brandInfo.wallpaper_forced);
     const saved = stored.simple_launch_profile || {};
     memory = { apps: saved.apps || {}, recent: saved.recent || [] };
     const kept = stored[LAYOUT_KEY] || {};
@@ -1363,6 +1419,7 @@ async function init() {
   }
   renderStatusChips();
   renderSessions();
+  renderLinks();
   renderTypeChips();
   renderContext();
   renderApps();

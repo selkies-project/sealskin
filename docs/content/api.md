@@ -65,10 +65,10 @@ validation, `500` for provider errors.
 
 | Method and path | Purpose |
 | --- | --- |
-| `GET /api/auth/config` | Which sign-ins the server offers: `oidc`, `saml`, `proxy`, `root`, `key`. |
+| `GET /api/auth/config` | Which sign-ins the server offers: `oidc`, `saml`, `proxy`, `root`, `key`; `auto` names the provider a signed-out browser is sent to at once, or is empty. |
 | `GET /api/auth/oidc/login`, `GET /api/auth/saml/login` | Start a provider flow; it ends at `/#sso=<grant>` or `/#sso-error=<code>`. |
 | `POST /api/auth/register` | Body `{grant}`: start the sign-in and set its cookie. |
-| `POST /api/auth/root` | Body `{token}`: sign `root` in with the root token. |
+| `POST /api/auth/root` | Body `{token}`: sign `root` in with the root token; `403 disabled` where the node has `SEALSKIN_ROOT_SIGN_IN=false`. |
 | `POST /api/auth/signout` | End the sign-in the caller's cookie names and clear the cookie. |
 | `GET /api/auth/proxy` | What the request's [sign-in headers](reverse-proxy/sign-in.md) held when it arrived and whether a trusted proxy passed it on: the path the server asks through its own public address to check the proxy. It signs nobody in. |
 | `GET /api/auth/saml/metadata` | The service provider metadata to register with a SAML provider. |
@@ -179,6 +179,21 @@ All *encrypted, admin*.
 | `GET`/`POST /api/admin/apps/templates`, `DELETE /api/admin/apps/templates/{name}` | Templates; also open to a user allowed to edit app templates, short of their `DOCKER_*` settings. |
 | `GET /api/admin/sessions` | Every session grouped by user. |
 | `DELETE /api/admin/sessions/{session_id}` | Stop any session. |
+| `PUT /api/admin/branding` | Replace the brand's record (`name`, `logo_link`, `accent`, `store_links`, the `wallpaper_*` fields, `links`); the pictures stay. |
+| `DELETE /api/admin/branding` | Back to the defaults: the record and the pictures are removed. |
+| `POST`/`DELETE /api/admin/branding/{logo\|wallpaper}` | Body `{data}`, a base64 PNG, JPEG, or WebP (1 MB for the logo, 8 MB for the wallpaper): keep or remove a picture. |
+
+## Branding
+
+| Method and path | Auth | Purpose |
+| --- | --- | --- |
+| `GET /api/branding` | encrypted, user | The brand with its pictures, as the home page reads it: the record, `logo` and `wallpaper` (`url`, `width`, `height`, `type`, or `null`), and `is_default`. |
+| `GET /api/branding/logo`, `GET /api/branding/wallpaper` | none | The uploaded pictures, addressed with `?v=<hash>` and cached for a year; `404` where none was uploaded. |
+
+Every page the server serves carries the brand in its head: an
+`application-name` meta, a `sealskin-brand` meta holding the name, logo
+address, logo link, accent, and store-links switch as JSON, and a style rule
+deriving the accent palette.
 
 ## Cluster
 

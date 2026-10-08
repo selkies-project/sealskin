@@ -1473,6 +1473,7 @@ const CLUSTER_SETTINGS = {
   proxy_auth_groups_header: 'text',
   proxy_auth_logout_url: 'text',
   web_session_seconds: 'hours',
+  auto_sign_in: 'provider',
   files_sync: 'sync',
 };
 // What the web app's Sign In section shows, card by card; the other shells keep one form in the Cluster section.
@@ -1480,6 +1481,7 @@ const SIGNIN_CARDS = {
   oidc: ['oidc_issuer', 'oidc_client_id', 'oidc_client_secret', 'oidc_scopes'],
   saml: ['saml_metadata_url', 'saml_username_attribute', 'saml_groups_attribute'],
   proxy: ['proxy_auth_user_header', 'proxy_auth_groups_header', 'proxy_auth_logout_url'],
+  landing: ['auto_sign_in'],
   who: ['sso_username_claim', 'sso_groups_claim', 'sso_admin_group', 'sso_max_age_seconds', 'web_session_seconds', 'sso_create_users', 'sso_hold_new_users', 'sso_force_login'],
 };
 // Issuer URL shapes of common OpenID Connect providers; a preset fills the hints and stores nothing.
@@ -1512,14 +1514,18 @@ function settingField(name) {
   const written = clusterData.written_settings.includes(name);
   const hint = t(written ? 'options.cluster.settingWritten' : 'options.cluster.settingFromEnvironment');
   let control;
-  if (kind === 'bool' || kind === 'sync') {
+  if (kind === 'bool' || kind === 'sync' || kind === 'provider') {
     const choices = kind === 'bool'
       ? [['true', t('options.groups.on')], ['false', t('options.groups.off')]]
-      : ['auto', 'on', 'off'].map((choice) => [choice, choice]);
+      : kind === 'provider'
+        ? [['', t('options.signin.autoNone')], ['oidc', t('options.signin.autoOidc')], ['saml', t('options.signin.autoSaml')]]
+        : ['auto', 'on', 'off'].map((choice) => [choice, choice]);
     const current = written ? String(clusterData.settings[name]) : '';
+    // The provider choice has no empty value of its own: the empty option is the nodes' environment, as everywhere.
+    const inherited = kind === 'provider' && !clusterData.settings[name] ? t('options.signin.autoNone') : String(clusterData.settings[name]);
     control = `<select id="${id}">
-                <option value="">${escapeHtml(t('options.cluster.settingInherit', { value: String(clusterData.settings[name]) }))}</option>
-                ${choices.map(([choice, label]) => `<option value="${choice}"${choice === current ? ' selected' : ''}>${escapeHtml(label)}</option>`).join('')}
+                <option value="">${escapeHtml(t('options.cluster.settingInherit', { value: inherited }))}</option>
+                ${choices.filter(([choice]) => choice !== '').map(([choice, label]) => `<option value="${choice}"${choice === current ? ' selected' : ''}>${escapeHtml(label)}</option>`).join('')}
             </select>`;
   } else if (kind === 'secret') {
     const set = clusterData.secret_set[name];
@@ -1544,7 +1550,7 @@ function changedSettings(names) {
       const clear = document.getElementById(`cluster-setting-${name}-clear`);
       if (value) body[name] = value;
       else if (clear && clear.checked) body[name] = '';
-    } else if (kind === 'bool' || kind === 'sync') {
+    } else if (kind === 'bool' || kind === 'sync' || kind === 'provider') {
       const current = written.has(name) ? String(clusterData.settings[name]) : '';
       if (value !== current) body[name] = kind === 'bool' && value ? value === 'true' : value;
     } else if (value !== shownSetting(name)) {
@@ -1655,18 +1661,24 @@ function renderSignIn() {
         ${sentence('options.signin.trustedProxiesHelp')}
         ${untrusted ? `<p class="status-message error">${escapeHtml(t('options.signin.noTrustedProxy'))}</p>` : proxyCheckLine(signin.proxy_check)}`;
   const who = `${sentence('options.signin.whoHelp')}${fields('who')}`;
+  const landing = `${sentence('options.signin.landingHelp')}${fields('landing')}`;
+  // With the token off and no provider group of administrators, nobody can administer; warn rather than refuse.
+  const rootOff = enabled.root === false;
+  const root = sentence(rootOff ? 'options.signin.rootOff' : 'options.signin.rootHelp')
+    + (rootOff && !settings.sso_admin_group ? `<p class="status-message error">${escapeHtml(t('options.signin.rootNoAdminGroup'))}</p>` : '');
 
   container.innerHTML = [
     reachCard(signin),
     signInCard('oidc', 'options.signin.oidcTitle', stateOf('oidc', settings.oidc_issuer), oidc, true),
     signInCard('saml', 'options.signin.samlTitle', stateOf('saml', settings.saml_metadata_url), saml, true),
     signInCard('proxy', 'options.signin.proxyTitle', proxyState(signin, settings), proxy, true),
+    signInCard('landing', 'options.signin.landingTitle', enabled.auto ? 'active' : 'off', landing, false),
     `<form class="card signin-card" data-card="who">
         <div class="card-header"><h3>${escapeHtml(t('options.signin.whoTitle'))}</h3></div>
         ${who}
         <div class="button-group"><button type="submit" class="primary"><i class="fas fa-save"></i> ${escapeHtml(t('common.save'))}</button></div>
     </form>`,
-    signInCard('root', 'options.signin.rootTitle', enabled.root === false ? 'off' : 'active', sentence('options.signin.rootHelp'), false),
+    signInCard('root', 'options.signin.rootTitle', rootOff ? 'off' : 'active', root, false),
     signInCard('key', 'options.signin.keyTitle', enabled.key ? 'active' : 'off', sentence(enabled.key ? 'options.signin.keyOn' : 'options.signin.keyOff'), false),
   ].join('');
 
@@ -1832,6 +1844,340 @@ function bindSignInEvents() {
   container.addEventListener('change', (e) => {
     if (e.target.id === 'signin-oidc-preset') applyOidcPreset();
     if (e.target.id === 'signin-proxy-preset') applyProxyPreset();
+  });
+}
+
+// --- BRANDING ---
+
+/** The picture limits of `app.branding`, in bytes. */
+const BRAND_LIMITS = { logo: 1_000_000, wallpaper: 8_000_000 };
+const BRAND_DEFAULT_ACCENT = '#8b7cf6';
+const BRAND_PROJECT_URL = 'https://github.com/selkies-project/sealskin';
+/** The brand as saved, and the draft being edited: the record's fields and, per picture, a data URL to upload, `null` to remove, or `undefined` to keep. */
+let brandSaved = null;
+let brandDraft = null;
+
+const brandField = (id) => document.getElementById(id);
+
+/**
+ * The accent palette the stylesheets take from one color, as `app.branding.accent_css` derives it
+ * on the server; the mock paints it before the brand is saved.
+ *
+ * @param {string} accent `#rrggbb`
+ * @returns {object} CSS variables.
+ */
+function accentVars(accent) {
+  const rgb = [1, 3, 5].map((at) => parseInt(accent.slice(at, at + 2), 16));
+  const hex = (channels) => `#${channels.map((c) => Math.max(0, Math.min(255, Math.round(c))).toString(16).padStart(2, '0')).join('')}`;
+  const mix = (other, amount) => hex(rgb.map((c, i) => c + (other[i] - c) * amount));
+  const linear = (c) => ((c /= 255) <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  const light = 0.2126 * linear(rgb[0]) + 0.7152 * linear(rgb[1]) + 0.0722 * linear(rgb[2]) > 0.45;
+  const white = [255, 255, 255];
+  return {
+    '--accent-primary': accent,
+    '--accent-primary-hover': mix(white, 0.1),
+    '--accent-text': mix(white, 0.35),
+    '--accent-text-strong': mix(white, 0.5),
+    '--accent-contrast': light ? '#0d1117' : '#ffffff',
+    '--accent-soft': `rgba(${rgb.join(', ')}, 0.14)`,
+    '--accent-border': `rgba(${rgb.join(', ')}, 0.5)`,
+    '--accent-glow': `rgba(${rgb.join(', ')}, 0.35)`,
+    '--accent-gradient': `linear-gradient(135deg, ${accent} 0%, ${mix([0, 0, 0], 0.18)} 100%)`,
+    '--brand-from': mix(white, 0.25),
+    '--brand-to': accent,
+  };
+}
+
+/** The address a draft picture shows at: the pending upload, the saved picture, or nothing. */
+function brandPicture(kind) {
+  const pending = brandDraft.pictures[kind];
+  if (pending === null) return '';
+  if (pending) return pending;
+  return brandSaved[kind] ? brandSaved[kind].url : '';
+}
+
+async function loadBranding() {
+  try {
+    brandSaved = await secureFetch('/api/branding', { method: 'GET' });
+  } catch (error) {
+    displayStatus(t('options.branding.saveFailed', { error: error.message }), true);
+    return;
+  }
+  const record = { ...brandSaved };
+  ['logo', 'wallpaper', 'is_default'].forEach((key) => delete record[key]);
+  brandDraft = { ...record, links: record.links.map((link) => ({ ...link })), pictures: {} };
+  brandField('brand-name').value = record.name;
+  brandField('brand-logo-link').value = record.logo_link;
+  brandField('brand-store-links').checked = record.store_links;
+  brandField('brand-wallpaper-fit').value = record.wallpaper_fit;
+  brandField('brand-wallpaper-blur').value = record.wallpaper_blur;
+  brandField('brand-wallpaper-dim').value = record.wallpaper_dim;
+  brandField('brand-wallpaper-forced').checked = record.wallpaper_forced;
+  showAccentControls();
+  renderBrandLinks();
+  renderBrandingPreview();
+}
+
+function showAccentControls() {
+  const accent = brandDraft.accent || '';
+  brandField('brand-accent').value = accent || BRAND_DEFAULT_ACCENT;
+  brandField('brand-accent-text').value = accent;
+  brandField('brand-accent-clear').hidden = !accent;
+}
+
+/** Draw the links table from the draft; what is typed goes back into the draft on input. */
+function renderBrandLinks() {
+  const tbody = document.querySelector('#brand-links-table tbody');
+  if (!brandDraft.links.length) {
+    tbody.innerHTML = `<tr><td colspan="5" class="empty">${escapeHtml(t('options.branding.noLinks'))}</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = brandDraft.links.map((link, at) => `
+    <tr data-at="${at}">
+        <td><input type="text" data-field="name" maxlength="60" value="${escapeHtml(link.name)}" placeholder="${escapeHtml(t('options.branding.linkName'))}"></td>
+        <td><input type="url" data-field="url" maxlength="2000" value="${escapeHtml(link.url)}" placeholder="https://"></td>
+        <td><input type="text" data-field="icon" maxlength="300" value="${escapeHtml(link.icon || '')}" placeholder="fa-link"></td>
+        <td><select data-field="open">
+            <option value="tab"${link.open !== 'isolated' ? ' selected' : ''}>${escapeHtml(t('options.branding.openTab'))}</option>
+            <option value="isolated"${link.open === 'isolated' ? ' selected' : ''}>${escapeHtml(t('options.branding.openIsolated'))}</option>
+        </select></td>
+        <td class="actions-cell">
+            <button type="button" class="secondary" data-move="-1" title="${escapeHtml(t('web.home.moveEarlier'))}"${at === 0 ? ' disabled' : ''}><i class="fas fa-arrow-up"></i></button>
+            <button type="button" class="secondary" data-move="1" title="${escapeHtml(t('web.home.moveLater'))}"${at === brandDraft.links.length - 1 ? ' disabled' : ''}><i class="fas fa-arrow-down"></i></button>
+            <button type="button" class="danger" data-remove title="${escapeHtml(t('common.delete'))}"><i class="fas fa-trash"></i></button>
+        </td>
+    </tr>`).join('');
+}
+
+/** A tile of the mock, for an application or a link. */
+function mockTile(name, picture) {
+  return `<div class="mock-tile">${picture}<span class="name">${escapeHtml(name)}</span></div>`;
+}
+
+/** Paint the mock from the draft: title and favicon, rail logo, accent, wallpaper, links, and the customize button. */
+function renderBrandingPreview() {
+  if (!brandDraft) return;
+  const mock = brandField('brand-mock');
+  const logo = brandPicture('logo') || 'icons/icon128.png';
+  const wallpaper = brandPicture('wallpaper');
+  const name = brandDraft.name.trim() || 'SealSkin';
+  brandField('mock-title').textContent = name;
+  brandField('mock-favicon').src = logo;
+  brandField('mock-logo').src = logo;
+  brandField('brand-logo-preview').src = logo;
+  brandField('brand-wallpaper-preview').style.backgroundImage = wallpaper ? `url("${wallpaper}")` : '';
+  document.querySelector('[data-clear="logo"]').hidden = !brandPicture('logo');
+  document.querySelector('[data-clear="wallpaper"]').hidden = !wallpaper;
+  document.querySelectorAll('[data-wallpaper-only]').forEach((field) => { field.hidden = !wallpaper; });
+  brandField('brand-wallpaper-blur-value').value = `${brandDraft.wallpaper_blur}px`;
+  brandField('brand-wallpaper-dim-value').value = `${brandDraft.wallpaper_dim}%`;
+
+  const vars = brandDraft.accent ? accentVars(brandDraft.accent) : {};
+  ['--accent-primary', '--accent-primary-hover', '--accent-text', '--accent-text-strong', '--accent-contrast', '--accent-soft', '--accent-border', '--accent-glow', '--accent-gradient', '--brand-from', '--brand-to']
+    .forEach((variable) => { if (vars[variable]) mock.style.setProperty(variable, vars[variable]); else mock.style.removeProperty(variable); });
+
+  const backdrop = brandField('mock-backdrop');
+  backdrop.className = `mock-backdrop${wallpaper ? ` picture fit-${brandDraft.wallpaper_fit}` : ''}`;
+  backdrop.style.backgroundImage = wallpaper ? `url("${wallpaper}")` : '';
+  backdrop.style.setProperty('--bg-blur', `${wallpaper ? brandDraft.wallpaper_blur : 0}px`);
+  backdrop.style.setProperty('--bg-dim', String(wallpaper ? brandDraft.wallpaper_dim / 100 : 0));
+  backdrop.parentElement.classList.toggle('has-picture', Boolean(wallpaper));
+  brandField('mock-customize').hidden = Boolean(wallpaper && brandDraft.wallpaper_forced);
+
+  const links = brandDraft.links.filter((link) => link.name.trim());
+  brandField('mock-links-section').hidden = links.length === 0;
+  brandField('mock-links').innerHTML = links.map((link) => {
+    const icon = link.icon.trim();
+    const picture = icon.startsWith('https://')
+      ? `<img src="${escapeHtml(icon)}" alt="">`
+      : `<i class="${escapeHtml(icon ? (icon.includes(' ') ? icon : `fas ${icon}`) : 'fas fa-link')}"></i>`;
+    return mockTile(link.name, picture);
+  }).join('');
+
+  const apps = (adminData.installedApps || []).slice(0, 8);
+  const tiles = brandField('mock-apps');
+  tiles.innerHTML = apps.length
+    ? apps.map((app) => mockTile(app.name, `<img data-logo-src="${escapeHtml(app.logo || '')}" src="${escapeHtml(logo)}" alt="">`)).join('')
+    : Array.from({ length: 6 }, () => `<div class="mock-tile bone"><img src="${escapeHtml(logo)}" alt=""><span class="name"></span></div>`).join('');
+  if (apps.length) hydrateLogos(tiles);
+}
+
+/**
+ * A picked picture as a data URL small enough for its kind: as it is when
+ * it fits, otherwise scaled down and re-encoded as JPEG until it does.
+ *
+ * @param {File} file
+ * @param {string} kind
+ * @returns {Promise<string>}
+ */
+async function brandPictureData(file, kind) {
+  if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) throw new Error(t('options.branding.notAPicture'));
+  const limit = BRAND_LIMITS[kind];
+  const asDataUrl = (blob) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+  if (file.size <= limit) return asDataUrl(file);
+  const bitmap = await createImageBitmap(file);
+  const canvas = document.createElement('canvas');
+  for (const edge of [2560, 1920, 1280]) {
+    const scale = Math.min(1, edge / Math.max(bitmap.width, bitmap.height));
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    for (const quality of [0.85, 0.7]) {
+      const data = canvas.toDataURL('image/jpeg', quality);
+      // A data URL carries four characters for every three bytes.
+      if (data.length * 0.75 <= limit) {
+        bitmap.close();
+        return data;
+      }
+    }
+  }
+  bitmap.close();
+  throw new Error(t('options.branding.pictureTooLarge'));
+}
+
+async function saveBranding() {
+  const button = brandField('branding-save-btn');
+  button.disabled = true;
+  try {
+    const { pictures, ...record } = brandDraft;
+    record.name = record.name.trim() || 'SealSkin';
+    record.links = record.links.filter((link) => link.name.trim() && link.url.trim()).map((link) => ({ ...link, name: link.name.trim(), url: link.url.trim(), icon: link.icon.trim() }));
+    await secureFetch('/api/admin/branding', { method: 'PUT', body: JSON.stringify(record) });
+    for (const kind of Object.keys(BRAND_LIMITS)) {
+      if (pictures[kind] === null) await secureFetch(`/api/admin/branding/${kind}`, { method: 'DELETE' });
+      else if (pictures[kind]) await secureFetch(`/api/admin/branding/${kind}`, { method: 'POST', body: JSON.stringify({ data: pictures[kind].split(',')[1] }) });
+    }
+    displayStatus(t('options.branding.saved'));
+    await loadBranding();
+  } catch (error) {
+    displayStatus(t('options.branding.saveFailed', { error: error.message }), true);
+  }
+  button.disabled = false;
+}
+
+async function resetBranding() {
+  const reset = await confirmDialog(t, {
+    title: t('options.branding.reset'),
+    message: t('options.branding.resetConfirm'),
+    confirm: t('options.branding.reset'),
+    danger: true,
+  });
+  if (!reset) return;
+  try {
+    await secureFetch('/api/admin/branding', { method: 'DELETE' });
+    displayStatus(t('options.branding.resetDone'));
+    await loadBranding();
+  } catch (error) {
+    displayStatus(t('options.branding.saveFailed', { error: error.message }), true);
+  }
+}
+
+function bindBrandingEvents() {
+  const form = brandField('branding-form');
+  form.addEventListener('submit', (event) => event.preventDefault());
+  brandField('branding-save-btn').addEventListener('click', saveBranding);
+  brandField('branding-reset-btn').addEventListener('click', resetBranding);
+
+  // Every field repaints the mock as it changes.
+  const take = () => {
+    brandDraft.name = brandField('brand-name').value;
+    brandDraft.logo_link = brandField('brand-logo-link').value.trim();
+    brandDraft.store_links = brandField('brand-store-links').checked;
+    brandDraft.wallpaper_fit = brandField('brand-wallpaper-fit').value;
+    brandDraft.wallpaper_blur = Number(brandField('brand-wallpaper-blur').value);
+    brandDraft.wallpaper_dim = Number(brandField('brand-wallpaper-dim').value);
+    brandDraft.wallpaper_forced = brandField('brand-wallpaper-forced').checked;
+    renderBrandingPreview();
+  };
+  form.addEventListener('input', (event) => {
+    if (event.target.closest('#brand-links-table')) {
+      const row = event.target.closest('tr[data-at]');
+      const link = brandDraft.links[Number(row.dataset.at)];
+      if (link && event.target.dataset.field) link[event.target.dataset.field] = event.target.value;
+      renderBrandingPreview();
+      return;
+    }
+    if (event.target.id === 'brand-accent') {
+      brandDraft.accent = event.target.value.toLowerCase();
+      showAccentControls();
+    } else if (event.target.id === 'brand-accent-text') {
+      const typed = event.target.value.trim().toLowerCase();
+      if (/^#[0-9a-f]{6}$/.test(typed)) brandDraft.accent = typed;
+      else if (!typed) brandDraft.accent = '';
+      else return;
+      brandField('brand-accent').value = brandDraft.accent || BRAND_DEFAULT_ACCENT;
+      brandField('brand-accent-clear').hidden = !brandDraft.accent;
+    }
+    take();
+  });
+  form.addEventListener('change', (event) => {
+    if (event.target.closest('#brand-links-table select')) {
+      const row = event.target.closest('tr[data-at]');
+      brandDraft.links[Number(row.dataset.at)].open = event.target.value;
+      renderBrandingPreview();
+      return;
+    }
+    if (event.target.type === 'file') return;
+    take();
+  });
+  brandField('brand-accent-clear').addEventListener('click', () => {
+    brandDraft.accent = '';
+    showAccentControls();
+    renderBrandingPreview();
+  });
+  brandField('brand-logo-link').placeholder = BRAND_PROJECT_URL;
+
+  form.addEventListener('click', async (event) => {
+    const pick = event.target.closest('button[data-pick]');
+    if (pick) {
+      brandField(`brand-${pick.dataset.pick}-file`).click();
+      return;
+    }
+    const clear = event.target.closest('button[data-clear]');
+    if (clear) {
+      brandDraft.pictures[clear.dataset.clear] = brandSaved[clear.dataset.clear] ? null : undefined;
+      renderBrandingPreview();
+      return;
+    }
+    const row = event.target.closest('tr[data-at]');
+    if (!row) return;
+    const at = Number(row.dataset.at);
+    const move = event.target.closest('button[data-move]');
+    if (move) {
+      const to = at + Number(move.dataset.move);
+      if (to < 0 || to >= brandDraft.links.length) return;
+      [brandDraft.links[at], brandDraft.links[to]] = [brandDraft.links[to], brandDraft.links[at]];
+    } else if (event.target.closest('button[data-remove]')) {
+      brandDraft.links.splice(at, 1);
+    } else {
+      return;
+    }
+    renderBrandLinks();
+    renderBrandingPreview();
+  });
+  brandField('brand-add-link').addEventListener('click', () => {
+    brandDraft.links.push({ name: '', url: '', icon: '', open: 'tab' });
+    renderBrandLinks();
+    const rows = document.querySelectorAll('#brand-links-table tbody tr');
+    rows[rows.length - 1].querySelector('input').focus();
+  });
+  Object.keys(BRAND_LIMITS).forEach((kind) => {
+    brandField(`brand-${kind}-file`).addEventListener('change', async (event) => {
+      const [file] = event.target.files;
+      event.target.value = '';
+      if (!file) return;
+      try {
+        brandDraft.pictures[kind] = await brandPictureData(file, kind);
+        renderBrandingPreview();
+      } catch (error) {
+        displayStatus(error.message, true);
+      }
+    });
   });
 }
 
@@ -3142,6 +3488,8 @@ async function openTab(tabName) {
     await openWebLab();
   } else if (tabName === 'Cluster' || tabName === 'SignIn') {
     await refreshCluster();
+  } else if (tabName === 'Branding') {
+    await loadBranding();
   } else if (tabName === 'Audit') {
     await refreshAudit();
   }
@@ -3886,6 +4234,7 @@ function bindEvents() {
 
   bindClusterEvents();
   bindSignInEvents();
+  bindBrandingEvents();
   bindAuditEvents();
   bindWebLabEvents();
 }

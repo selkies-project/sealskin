@@ -511,7 +511,7 @@
         },
         "SELKIES_ENABLE_COLLAB": {
           "label": "Paganahin ang Kolaborasyon",
-          "description": "Payagan ang isang viewer na may hawak ng master token ng session na kumilos bilang read-write na collaborator. Kinakailangan para sa mga room ng SealSkin."
+          "description": "Payagan ang isang viewer na may hawak ng master token ng session na kumilos bilang read-write na collaborator. Kinakailangan para sa mga room ng {brand}."
         },
         "SELKIES_ENABLE_PLAYER2": {
           "label": "Paganahin ang Pagbabahagi ng Player 2",
@@ -1156,7 +1156,7 @@
       "editGroupTitle": "I-edit ang Grupo: {groupName}",
       "userConfigTitle": "Konfigurasyon ng User",
       "warning": "Ito lamang ang pagkakataon na ipapakita ang konfigurasyong ito. Ibigay ito sa user nang ligtas.",
-      "info": "Maaari mong i-download ang configuration file na ito upang madaling i-set up ang SealSkin sa ibang device. Itago ang file na ito nang ligtas dahil naglalaman ito ng iyong pribadong key.",
+      "info": "Maaari mong i-download ang configuration file na ito upang madaling i-set up ang {brand} sa ibang device. Itago ang file na ito nang ligtas dahil naglalaman ito ng iyong pribadong key.",
       "configDataLabel": "Data ng Konfigurasyon (JSON)",
       "copyButton": "Kopyahin ang Teksto",
       "downloadButton": "I-download ang File",
@@ -1307,15 +1307,15 @@
       "noProotCatalogs": "Wala pang katalogo."
     },
     "web": {
-      "title": "SealSkin sa Browser na Ito",
-      "bookmarklet": "Ipadala sa SealSkin",
-      "bookmarkletHelp": "I-drag ang link na ito sa iyong bookmarks bar. Kapag kinlik ito, bubuksan nito sa SealSkin ang pahinang kinaroroonan mo, o hahanapin ang tekstong pinili mo.",
-      "pick": "Pumili para sa SealSkin",
-      "pickHelp": "I-drag din doon ang link na ito. I-click ito, pagkatapos ay i-click ang isang link para buksan ang link na iyon sa SealSkin, o ang isang larawan, video, o audio para ipadala ang file. Mag-Shift-click sa isang link para ipadala ang file na tinuturo nito, na kinukuha gamit ang pag-sign in mo sa site na iyon.",
-      "pickHint": "SealSkin: mag-click sa isang link, o sa larawan, video, o audio, para ipadala ito; mag-Shift-click sa isang link para ipadala ang file nito. Pindutin ang Esc para kanselahin.",
+      "title": "{brand} sa Browser na Ito",
+      "bookmarklet": "Ipadala sa {brand}",
+      "bookmarkletHelp": "I-drag ang link na ito sa iyong bookmarks bar. Kapag kinlik ito, bubuksan nito sa {brand} ang pahinang kinaroroonan mo, o hahanapin ang tekstong pinili mo.",
+      "pick": "Pumili para sa {brand}",
+      "pickHelp": "I-drag din doon ang link na ito. I-click ito, pagkatapos ay i-click ang isang link para buksan ang link na iyon sa {brand}, o ang isang larawan, video, o audio para ipadala ang file. Mag-Shift-click sa isang link para ipadala ang file na tinuturo nito, na kinukuha gamit ang pag-sign in mo sa site na iyon.",
+      "pickHint": "{brand}: mag-click sa isang link, o sa larawan, video, o audio, para ipadala ito; mag-Shift-click sa isang link para ipadala ang file nito. Pindutin ang Esc para kanselahin.",
       "protocol": "Buksan dito ang mga web+sealskin: link",
-      "protocolHelp": "Ang link na isinulat bilang web+sealskin: na sinusundan ng isang address ay magbubukas ng address na iyon sa SealSkin.",
-      "install": "Kung kayang mag-install ng browser ng mga web app, i-install ang SealSkin mula sa menu nito para makapagbahagi ng mga link at file dito at makapagbukas ng mga file gamit ito."
+      "protocolHelp": "Ang link na isinulat bilang web+sealskin: na sinusundan ng isang address ay magbubukas ng address na iyon sa {brand}.",
+      "install": "Kung kayang mag-install ng browser ng mga web app, i-install ang {brand} mula sa menu nito para makapagbahagi ng mga link at file dito at makapagbukas ng mga file gamit ito."
     },
     "via": {
       "root": "Root token",
@@ -1536,7 +1536,7 @@
         "unchecked": "Naka-off ang pagsusuri ng proxy sa node na ito (SEALSKIN_PROXY_AUTH_UNCHECKED): pinaniniwalaan ang anumang ipinapasa ng proxy."
       },
       "whoTitle": "Sino ang Nagsa-sign In",
-      "whoHelp": "Umiiral ang mga ito para sa OpenID Connect, SAML, at reverse proxy. Upang ilagay ang mga miyembro ng isang grupo ng identity provider sa isang grupo ng SealSkin, ilista ito sa ilalim ng \"Mga grupo ng identity provider\" ng grupong iyon sa Mga Grupo.",
+      "whoHelp": "Umiiral ang mga ito para sa OpenID Connect, SAML, at reverse proxy. Upang ilagay ang mga miyembro ng isang grupo ng identity provider sa isang grupo ng {brand}, ilista ito sa ilalim ng \"Mga grupo ng identity provider\" ng grupong iyon sa Mga Grupo.",
       "rootTitle": "Root Token",
       "rootHelp": "Laging magagamit. Ang token ay nasa /config/root_token sa server hanggang mabura ang file na iyon, at maaaring itakda gamit ang SEALSKIN_ROOT_TOKEN.",
       "keyTitle": "Mga Key File",
@@ -1680,7 +1680,7 @@
     }
   },
   "files": {
-    "title": "Mga File ng SealSkin",
+    "title": "Mga File ng {brand}",
     "header": {
       "title": "Mga File",
       "newFolder": "Bagong Folder",
@@ -1688,7 +1688,7 @@
       "uploadFolder": "Mag-upload ng Folder"
     },
     "sidebar": {
-      "sharedFiles": "Mga File ng SealSkin",
+      "sharedFiles": "Mga File ng {brand}",
       "publicShares": "Mga Pampublikong Pagbabahagi"
     },
     "shares": {
@@ -1746,7 +1746,7 @@
       "deleteFailed": "Nabigo ang pagbura: {error}",
       "preparingUpload": "Naghahanda para i-upload ang {count, plural, one {1 file} other {{count} file}}...",
       "uploadPrepFailed": "Error sa paghahanda ng pag-upload ng folder: {error}",
-      "notConfigured": "Error: Hindi naka-configure ang SealSkin. Paki-set up sa mga opsyon.",
+      "notConfigured": "Error: Hindi naka-configure ang {brand}. Paki-set up sa mga opsyon.",
       "folderCreated": "Nagawa ang folder na '{folderName}'.",
       "folderCreateFailed": "Error sa paggawa ng folder: {error}",
       "shareCreated": "Matagumpay na nagawa ang pagbabahagi! Ang link ay nakopya sa iyong clipboard.",
@@ -1794,8 +1794,8 @@
     }
   },
   "web": {
-    "receiving": "Ipinapadala ang file sa SealSkin…",
-    "signInTitle": "Mag-sign in sa SealSkin",
+    "receiving": "Ipinapadala ang file sa {brand}…",
+    "signInTitle": "Mag-sign in sa {brand}",
     "signInWith": {
       "oidc": "Mag-sign In gamit ang OpenID Connect",
       "saml": "Mag-sign In gamit ang SAML"
@@ -1807,7 +1807,7 @@
     "rootLocked": "Masyadong maraming pagsubok. Maghintay sandali, pagkatapos ay subukan ulit.",
     "held": {
       "title": "Naghihintay ng administrator",
-      "message": "Naka-sign in ka bilang {username}, pero kailangan ka munang ilagay ng administrator sa isang grupo bago mo magamit ang SealSkin. Tingnan muli kapag nagawa na nila ito.",
+      "message": "Naka-sign in ka bilang {username}, pero kailangan ka munang ilagay ng administrator sa isang grupo bago mo magamit ang {brand}. Tingnan muli kapag nagawa na nila ito.",
       "check": "Tingnan muli"
     },
     "signIn": {
@@ -1815,10 +1815,10 @@
       "refused": "Tinanggihan ng identity provider ang sign-in.",
       "expired": "Masyadong natagalan ang sign-in o nagamit na ito. Mag-sign in ulit.",
       "browser": "Natapos ang sign-in sa ibang browser o tab. Simulan ito ulit dito.",
-      "invalidUsername": "Hindi maaaring maging username sa SealSkin ang pangalan ng iyong account, na tumatanggap lamang ng mga titik, numero, underscore, at gitling. Magtanong sa iyong administrator.",
-      "adminName": "Pag-aari ng isang administrator ng SealSkin, na nagsa-sign in gamit ang key file, ang pangalan ng iyong account. Magtanong sa iyong administrator.",
-      "otherIdentity": "May ibang account ng identity provider na nagsa-sign in na bilang user na ito ng SealSkin. Magtanong sa iyong administrator.",
-      "noAccount": "Wala pang SealSkin account sa iyong pangalan. Hilingin sa iyong administrator na gumawa ng isa.",
+      "invalidUsername": "Hindi maaaring maging username sa {brand} ang pangalan ng iyong account, na tumatanggap lamang ng mga titik, numero, underscore, at gitling. Magtanong sa iyong administrator.",
+      "adminName": "Pag-aari ng isang administrator ng {brand}, na nagsa-sign in gamit ang key file, ang pangalan ng iyong account. Magtanong sa iyong administrator.",
+      "otherIdentity": "May ibang account ng identity provider na nagsa-sign in na bilang user na ito ng {brand}. Magtanong sa iyong administrator.",
+      "noAccount": "Wala pang {brand} account sa iyong pangalan. Hilingin sa iyong administrator na gumawa ng isa.",
       "notConfigured": "Walang single sign-on ang server na ito.",
       "ended": "Tinapos ng identity provider ang iyong sign-in. Mag-sign in ulit."
     },
@@ -1867,7 +1867,7 @@
     "home": {
       "searchPlaceholder": "Maghanap ng mga aplikasyon, o mag-paste ng link upang buksan ito nang isolated",
       "upload": "Mag-upload ng file",
-      "drop": "I-drop ang file upang buksan ito sa SealSkin",
+      "drop": "I-drop ang file upang buksan ito sa {brand}",
       "running": "Mga tumatakbong sesyon",
       "applications": "Mga Aplikasyon",
       "allowance": "Allowance",
@@ -1939,7 +1939,7 @@
       "onNode": "Sa node na {node}",
       "seconds": "{count} s",
       "failed": "Nabigo ang paglunsad",
-      "unseen": "Hindi pa nakararating sa server ang request sa paglunsad. Tingnan ang tab ng SealSkin na nagsimula nito.",
+      "unseen": "Hindi pa nakararating sa server ang request sa paglunsad. Tingnan ang tab ng {brand} na nagsimula nito.",
       "closeTab": "Pinanatiling bukas ng browser ang tab na ito. Ikaw na ang magsara nito."
     }
   }

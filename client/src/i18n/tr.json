@@ -511,7 +511,7 @@
         },
         "SELKIES_ENABLE_COLLAB": {
           "label": "İş Birliğini Etkinleştir",
-          "description": "Oturumun ana belirtecine sahip bir izleyicinin okuma-yazma yetkili bir iş birlikçi olarak hareket etmesine izin ver. SealSkin odaları için gereklidir."
+          "description": "Oturumun ana belirtecine sahip bir izleyicinin okuma-yazma yetkili bir iş birlikçi olarak hareket etmesine izin ver. {brand} odaları için gereklidir."
         },
         "SELKIES_ENABLE_PLAYER2": {
           "label": "2. Oyuncu Paylaşımını Etkinleştir",
@@ -1156,7 +1156,7 @@
       "editGroupTitle": "Grubu Düzenle: {groupName}",
       "userConfigTitle": "Kullanıcı Yapılandırması",
       "warning": "Bu yapılandırma sadece bu sefer gösterilecektir. Kullanıcıya güvenli bir şekilde sağlayın.",
-      "info": "Bu yapılandırma dosyasını indirerek SealSkin'i başka bir cihazda kolayca kurabilirsiniz. Bu dosya özel anahtarınızı içerdiği için güvende tutun.",
+      "info": "Bu yapılandırma dosyasını indirerek {brand}'i başka bir cihazda kolayca kurabilirsiniz. Bu dosya özel anahtarınızı içerdiği için güvende tutun.",
       "configDataLabel": "Yapılandırma Verisi (JSON)",
       "copyButton": "Metni Kopyala",
       "downloadButton": "Dosyayı İndir",
@@ -1307,15 +1307,15 @@
       "noProotCatalogs": "Henüz katalog yok."
     },
     "web": {
-      "title": "Bu Tarayıcıda SealSkin",
-      "bookmarklet": "SealSkin'e Gönder",
-      "bookmarkletHelp": "Bu bağlantıyı yer imleri çubuğunuza sürükleyin. Tıkladığınızda bulunduğunuz sayfayı SealSkin'de açar veya seçtiğiniz metni arar.",
-      "pick": "SealSkin İçin Seç",
-      "pickHelp": "Bunu da oraya sürükleyin. Tıklayın, ardından bir bağlantıyı SealSkin'de açmak için ona, dosyayı göndermek için bir resme, videoya veya sese tıklayın. Bir bağlantıya Shift ile tıklamak, o sitedeki oturumunuzla alınan ve bağlantının götürdüğü dosyayı gönderir.",
-      "pickHint": "SealSkin: göndermek için bir bağlantıya ya da bir resme, videoya veya sese tıklayın; bağlantının dosyası için Shift ile tıklayın. İptal için Esc'ye basın.",
+      "title": "Bu Tarayıcıda {brand}",
+      "bookmarklet": "{brand}'e Gönder",
+      "bookmarkletHelp": "Bu bağlantıyı yer imleri çubuğunuza sürükleyin. Tıkladığınızda bulunduğunuz sayfayı {brand}'de açar veya seçtiğiniz metni arar.",
+      "pick": "{brand} İçin Seç",
+      "pickHelp": "Bunu da oraya sürükleyin. Tıklayın, ardından bir bağlantıyı {brand}'de açmak için ona, dosyayı göndermek için bir resme, videoya veya sese tıklayın. Bir bağlantıya Shift ile tıklamak, o sitedeki oturumunuzla alınan ve bağlantının götürdüğü dosyayı gönderir.",
+      "pickHint": "{brand}: göndermek için bir bağlantıya ya da bir resme, videoya veya sese tıklayın; bağlantının dosyası için Shift ile tıklayın. İptal için Esc'ye basın.",
       "protocol": "web+sealskin: Bağlantılarını Burada Aç",
-      "protocolHelp": "web+sealskin: ve ardından bir adres olarak yazılan bağlantı, o adresi SealSkin'de açar.",
-      "install": "Tarayıcınız web uygulamalarını yükleyebiliyorsa, bağlantı ve dosya paylaşmak ve dosya açmak için SealSkin'i tarayıcının menüsünden yükleyin."
+      "protocolHelp": "web+sealskin: ve ardından bir adres olarak yazılan bağlantı, o adresi {brand}'de açar.",
+      "install": "Tarayıcınız web uygulamalarını yükleyebiliyorsa, bağlantı ve dosya paylaşmak ve dosya açmak için {brand}'i tarayıcının menüsünden yükleyin."
     },
     "via": {
       "root": "Root belirteci",
@@ -1536,7 +1536,7 @@
         "unchecked": "Bu düğümde proxy denetimi kapalı (SEALSKIN_PROXY_AUTH_UNCHECKED): proxy'nin ilettiği her şeye güvenilir."
       },
       "whoTitle": "Kimler Oturum Açar",
-      "whoHelp": "Bunlar OpenID Connect, SAML ve ters proxy için geçerlidir. Bir kimlik sağlayıcı grubunun üyelerini bir SealSkin grubuna almak için, onu Gruplar bölümünde o grubun \"kimlik sağlayıcı grupları\" alanına yazın.",
+      "whoHelp": "Bunlar OpenID Connect, SAML ve ters proxy için geçerlidir. Bir kimlik sağlayıcı grubunun üyelerini bir {brand} grubuna almak için, onu Gruplar bölümünde o grubun \"kimlik sağlayıcı grupları\" alanına yazın.",
       "rootTitle": "Root Belirteci",
       "rootHelp": "Her zaman kullanılabilir. Belirteç, dosya silinene kadar sunucuda /config/root_token içinde durur ve SEALSKIN_ROOT_TOKEN ile ayarlanabilir.",
       "keyTitle": "Anahtar Dosyaları",
@@ -1680,7 +1680,7 @@
     }
   },
   "files": {
-    "title": "SealSkin Dosyaları",
+    "title": "{brand} Dosyaları",
     "header": {
       "title": "Dosyalar",
       "newFolder": "Yeni Klasör",
@@ -1688,7 +1688,7 @@
       "uploadFolder": "Klasör Yükle"
     },
     "sidebar": {
-      "sharedFiles": "SealSkin Dosyaları",
+      "sharedFiles": "{brand} Dosyaları",
       "publicShares": "Genel Paylaşımlar"
     },
     "shares": {
@@ -1746,7 +1746,7 @@
       "deleteFailed": "Silme başarısız: {error}",
       "preparingUpload": "{count, plural, one {1 dosya} other {{count} dosya}} yüklemeye hazırlanıyor...",
       "uploadPrepFailed": "Klasör yükleme hazırlığı sırasında hata: {error}",
-      "notConfigured": "Hata: SealSkin yapılandırılmamış. Lütfen seçeneklerden ayarlayın.",
+      "notConfigured": "Hata: {brand} yapılandırılmamış. Lütfen seçeneklerden ayarlayın.",
       "folderCreated": "'{folderName}' klasörü oluşturuldu.",
       "folderCreateFailed": "Klasör oluşturulurken hata: {error}",
       "shareCreated": "Paylaşım başarıyla oluşturuldu! Bağlantı panonuza kopyalandı.",
@@ -1794,8 +1794,8 @@
     }
   },
   "web": {
-    "receiving": "Dosya SealSkin'e gönderiliyor…",
-    "signInTitle": "SealSkin'de oturum açın",
+    "receiving": "Dosya {brand}'e gönderiliyor…",
+    "signInTitle": "{brand}'de oturum açın",
     "signInWith": {
       "oidc": "OpenID Connect ile Oturum Aç",
       "saml": "SAML ile Oturum Aç"
@@ -1807,7 +1807,7 @@
     "rootLocked": "Çok fazla deneme yapıldı. Bir süre bekleyip yeniden deneyin.",
     "held": {
       "title": "Bir yönetici bekleniyor",
-      "message": "{username} olarak oturum açtınız, ancak SealSkin'i kullanabilmeniz için bir yöneticinin sizi bir gruba yerleştirmesi gerekiyor. Bu yapıldığında yeniden kontrol edin.",
+      "message": "{username} olarak oturum açtınız, ancak {brand}'i kullanabilmeniz için bir yöneticinin sizi bir gruba yerleştirmesi gerekiyor. Bu yapıldığında yeniden kontrol edin.",
       "check": "Yeniden kontrol et"
     },
     "signIn": {
@@ -1815,10 +1815,10 @@
       "refused": "Kimlik sağlayıcı oturum açmayı reddetti.",
       "expired": "Oturum açma çok uzun sürdü veya zaten kullanıldı. Yeniden oturum açın.",
       "browser": "Oturum açma başka bir tarayıcıda veya sekmede tamamlandı. Burada yeniden başlatın.",
-      "invalidUsername": "Hesabınızın adı bir SealSkin kullanıcı adı olamaz; kullanıcı adları yalnızca harf, rakam, alt çizgi ve kısa çizgi içerebilir. Yöneticinize danışın.",
-      "adminName": "Hesabınızın adı, bir anahtar dosyasıyla oturum açan bir SealSkin yöneticisine ait. Yöneticinize danışın.",
-      "otherIdentity": "Kimlik sağlayıcının başka bir hesabı zaten bu SealSkin kullanıcısı olarak oturum açıyor. Yöneticinize danışın.",
-      "noAccount": "Henüz adınızla bir SealSkin hesabı yok. Yöneticinizden bir hesap oluşturmasını isteyin.",
+      "invalidUsername": "Hesabınızın adı bir {brand} kullanıcı adı olamaz; kullanıcı adları yalnızca harf, rakam, alt çizgi ve kısa çizgi içerebilir. Yöneticinize danışın.",
+      "adminName": "Hesabınızın adı, bir anahtar dosyasıyla oturum açan bir {brand} yöneticisine ait. Yöneticinize danışın.",
+      "otherIdentity": "Kimlik sağlayıcının başka bir hesabı zaten bu {brand} kullanıcısı olarak oturum açıyor. Yöneticinize danışın.",
+      "noAccount": "Henüz adınızla bir {brand} hesabı yok. Yöneticinizden bir hesap oluşturmasını isteyin.",
       "notConfigured": "Bu sunucu çoklu oturum açma sunmuyor.",
       "ended": "Kimlik sağlayıcı oturumunuzu sonlandırdı. Yeniden oturum açın."
     },
@@ -1867,7 +1867,7 @@
     "home": {
       "searchPlaceholder": "Uygulamaları arayın veya izole olarak açmak için bir bağlantı yapıştırın",
       "upload": "Dosya yükle",
-      "drop": "SealSkin'de açmak için dosyayı bırakın",
+      "drop": "{brand}'de açmak için dosyayı bırakın",
       "running": "Çalışan oturumlar",
       "applications": "Uygulamalar",
       "allowance": "Kota",
@@ -1939,7 +1939,7 @@
       "onNode": "{node} düğümünde",
       "seconds": "{count} sn",
       "failed": "Başlatma başarısız oldu",
-      "unseen": "Başlatma isteği sunucuya ulaşmadı. İsteği başlatan SealSkin sekmesini kontrol edin.",
+      "unseen": "Başlatma isteği sunucuya ulaşmadı. İsteği başlatan {brand} sekmesini kontrol edin.",
       "closeTab": "Tarayıcı bu sekmeyi açık tuttu. Kendiniz kapatın."
     }
   }

@@ -220,10 +220,22 @@ def _sign_in_oidc(http, provider, claims, **tokens):
 
 
 def test_config_names_the_configured_sign_ins(http, monkeypatch):
-    offered = {"proxy": False, "root": True, "key": True}
+    offered = {"proxy": False, "root": True, "key": True, "auto": ""}
     assert http.get("/api/auth/config").json() == {"oidc": True, "saml": True, **offered}
     monkeypatch.setattr(settings, "saml_metadata_url", "")
     assert http.get("/api/auth/config").json() == {"oidc": True, "saml": False, **offered}
+    # The browser is sent to a provider at once only while that provider is configured.
+    monkeypatch.setattr(settings, "auto_sign_in", "saml")
+    assert http.get("/api/auth/config").json()["auto"] == ""
+    monkeypatch.setattr(settings, "auto_sign_in", "oidc")
+    assert http.get("/api/auth/config").json()["auto"] == "oidc"
+
+
+def test_the_root_token_is_refused_where_root_sign_in_is_off(http, monkeypatch):
+    monkeypatch.setattr(settings, "root_sign_in", False)
+    assert http.get("/api/auth/config").json()["root"] is False
+    refused = http.post("/api/auth/root", json={"token": "anything"}, headers=WEB)
+    assert refused.status_code == 403 and refused.json()["detail"] == "disabled"
 
 
 def test_oidc_login_asks_for_a_fresh_authentication_with_pkce(http, monkeypatch):

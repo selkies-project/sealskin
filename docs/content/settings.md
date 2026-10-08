@@ -45,6 +45,7 @@ paths refer to.
 | `SEALSKIN_GROUPS_BASE_PATH` | `str` | `/config/.config/sealskin/groups` | Base directory for group definition files. |
 | `SEALSKIN_STORAGE_PATH` | `str` | `/storage` | Base directory for user home directories. |
 | `SEALSKIN_APP_ICONS_PATH` | `str` | `/storage/sealskin_app_icons` | Directory for storing custom-uploaded application icons. |
+| `SEALSKIN_BRANDING_PATH` | `str` | `/config/.config/sealskin/branding` | Directory of the brand the web app wears: `branding.yml` and the logo and wallpaper an administrator uploads. Shared by every node of a cluster. |
 | `SEALSKIN_HOME_TEMPLATES_PATH` | `str` | `/storage/sealskin_home_templates` | Base directory for meta-app home directory templates. |
 | `SEALSKIN_CONTAINER_CONFIG_PATH` | `str` | `/config` | Mount point for home directories inside the container. |
 | `SEALSKIN_SERVER_PRIVATE_KEY_PATH` | `str` | `/config/ssl/server_key.pem` | Path to the server private key PEM file. |
@@ -100,6 +101,8 @@ paths refer to.
 | `SEALSKIN_ROOT_TOKEN` | `str` | _(empty)_ | Token the `root` administrator signs in to the web app with; empty generates one at first start and writes it to `root_token_path`. |
 | `SEALSKIN_ROOT_TOKEN_PATH` | `str` | `/config/root_token` | File the generated root token is written to, for the administrator to copy and delete. |
 | `SEALSKIN_WEB_SESSION_SECONDS` | `int` | `43200` | Longest a web sign-in with the root token lasts unused. |
+| `SEALSKIN_ROOT_SIGN_IN` | `bool` | `true` | Accept the root token on this node's web sign-in. Turn it off once administrators sign in through an identity provider; a node restarted with it on takes the token again. |
+| `SEALSKIN_AUTO_SIGN_IN` | `str` | _(empty)_ | Identity provider, `oidc` or `saml`, the web app sends a signed-out browser to at once instead of showing its sign-in page; `#root` on the web app's address shows the page anyway. |
 | `SEALSKIN_SSO_FORCE_LOGIN` | `bool` | `false` | Make the identity provider ask for credentials at every sign-in instead of reusing its session. |
 | `SEALSKIN_SSO_CREATE_USERS` | `bool` | `true` | Create a user at the first sign-in an identity provider or a proxy vouches for. |
 | `SEALSKIN_SSO_HOLD_NEW_USERS` | `bool` | `true` | Hold a user a sign-in creates, who may do nothing here, until an administrator places them in a group or approves them; a user the provider puts in a group is never held. |

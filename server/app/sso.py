@@ -128,15 +128,18 @@ class _Ended(Exception):
     """The provider refused a refresh: the sign-in is over."""
 
 
-def enabled() -> dict[str, bool]:
-    """Return which sign-ins the settings configure."""
-    return {
+def enabled() -> dict[str, Any]:
+    """Return which sign-ins the settings configure, and the provider a signed-out browser goes to at once."""
+    offered = {
         "oidc": bool(settings.oidc_issuer and settings.oidc_client_id),
         "saml": bool(settings.saml_metadata_url),
         "proxy": bool(settings.proxy_auth_user_header),
-        "root": True,
+        "root": settings.root_sign_in,
         "key": bool(settings.legacy_auth),
     }
+    auto = settings.auto_sign_in.strip().lower()
+    offered["auto"] = auto if auto in ("oidc", "saml") and offered[auto] else ""
+    return offered
 
 
 def load() -> None:

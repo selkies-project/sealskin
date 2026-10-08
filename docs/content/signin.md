@@ -56,6 +56,30 @@ secret manager; changing it there replaces the hash at the next start. Five wron
 address until the oldest ages out. A root
 sign-in ends after `SEALSKIN_WEB_SESSION_SECONDS` unused.
 
+Once your administrators sign in through a provider (`SEALSKIN_SSO_ADMIN_GROUP`
+or a group with the **Administrator** switch), `SEALSKIN_ROOT_SIGN_IN=false`
+switches the token off on a node: its sign-in page no longer offers it and
+the server refuses it. Hiding the field is not what protects the token, the
+hash and the lockout are; the switch is for a deployment that wants no
+password-like sign-in at all. It is set per node, so if the provider is ever
+gone, restart the node with the variable unset and sign in with the token
+again. The Sign In panel warns when the token is off and no provider group
+names administrators.
+
+## Landing on the provider
+
+With one provider configured, the web app can skip its own sign-in page: set
+`SEALSKIN_AUTO_SIGN_IN=oidc` or `saml`, or choose the provider under
+**Landing** in the Sign In panel, and a signed-out browser is sent to the
+provider at once. The page a user sees to sign in is then the provider's
+own. A provider that refuses or fails sends the browser back with the reason,
+and the page shows it with the sign-in page instead of going to the provider
+again, so a broken provider never bounces the browser back and forth.
+
+To reach the server's own sign-in page anyway, as for the root token, add
+`#root` to the web app's address: `https://<server>/#root`. The same fragment
+asks for the root token where a reverse proxy already signs the browser in.
+
 ## OpenID Connect
 
 Register SealSkin with the provider as a confidential client (a public one

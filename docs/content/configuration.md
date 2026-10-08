@@ -41,6 +41,9 @@ watcher only fires for edits made by someone else.
     keys/admins/<name>             administrator public keys
     keys/users/<name>              user settings and public keys
     groups/<name>                  group settings
+    branding/branding.yml          the brand the web app wears: name, logo link, accent, wallpaper, links
+    branding/logo.<ext>            the uploaded logo and wallpaper (png, jpg, or webp)
+    branding/wallpaper.<ext>
     cluster/root.yml               hash of the root token
     cluster/nodes/<id>.yml         one record per node: key, address, roles, pool, approval
     cluster/pools/<name>.yml       pools of nodes

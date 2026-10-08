@@ -17,6 +17,12 @@ const FILES = typeof __I18N_FILES__ !== 'undefined' ? __I18N_FILES__ : {};
 const cache = new Map();
 
 /**
+ * The product name `{brand}` stands for in the strings: the `application-name`
+ * meta a served page carries (`app.branding`), or SealSkin in a shell's own pages.
+ */
+export const BRAND = (typeof document !== 'undefined' && document.querySelector('meta[name="application-name"]')?.content) || 'SealSkin';
+
+/**
  * Reduce a locale to a supported language code.
  *
  * @param {string} locale e.g. 'pt-BR', 'en_US', 'fil'.
@@ -69,9 +75,10 @@ function makeT(dict, lang) {
       chosen = chosen ?? (count === 1 ? rules.one : undefined) ?? rules.other ?? rules.many;
       return chosen === undefined ? match : chosen.replace(/#/g, String(count));
     });
-    for (const placeholder in variables) {
+    const filled = { brand: BRAND, ...variables };
+    for (const placeholder in filled) {
       const regex = new RegExp(`\\{${placeholder}\\}`, 'g');
-      const substitution = String(variables[placeholder]);
+      const substitution = String(filled[placeholder]);
       processedText = processedText.replace(regex, () => substitution);
     }
     return processedText;

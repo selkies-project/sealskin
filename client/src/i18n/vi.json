@@ -511,7 +511,7 @@
         },
         "SELKIES_ENABLE_COLLAB": {
           "label": "Bật cộng tác",
-          "description": "Cho phép người xem giữ token chính của phiên hoạt động như một cộng tác viên có quyền đọc-ghi. Bắt buộc đối với các phòng SealSkin."
+          "description": "Cho phép người xem giữ token chính của phiên hoạt động như một cộng tác viên có quyền đọc-ghi. Bắt buộc đối với các phòng {brand}."
         },
         "SELKIES_ENABLE_PLAYER2": {
           "label": "Bật chia sẻ người chơi 2",
@@ -1156,7 +1156,7 @@
       "editGroupTitle": "Chỉnh sửa Nhóm: {groupName}",
       "userConfigTitle": "Cấu hình người dùng",
       "warning": "Đây là lần duy nhất cấu hình này sẽ được hiển thị. Cung cấp nó cho người dùng một cách an toàn.",
-      "info": "Bạn có thể tải xuống tệp cấu hình này để dễ dàng thiết lập SealSkin trên một thiết bị khác. Giữ tệp này an toàn vì nó chứa khóa riêng của bạn.",
+      "info": "Bạn có thể tải xuống tệp cấu hình này để dễ dàng thiết lập {brand} trên một thiết bị khác. Giữ tệp này an toàn vì nó chứa khóa riêng của bạn.",
       "configDataLabel": "Dữ liệu cấu hình (JSON)",
       "copyButton": "Sao chép văn bản",
       "downloadButton": "Tải xuống tệp",
@@ -1307,15 +1307,15 @@
       "noProotCatalogs": "Chưa có danh mục nào."
     },
     "web": {
-      "title": "SealSkin trong trình duyệt này",
-      "bookmarklet": "Gửi tới SealSkin",
-      "bookmarkletHelp": "Kéo liên kết này vào thanh dấu trang. Nhấp vào nó sẽ mở trang bạn đang xem trong SealSkin, hoặc tìm kiếm văn bản bạn đã chọn.",
-      "pick": "Chọn cho SealSkin",
-      "pickHelp": "Kéo cả liên kết này vào đó. Nhấp vào nó, rồi nhấp vào một liên kết để mở liên kết đó trong SealSkin, hoặc vào hình ảnh, video hay âm thanh để gửi tệp. Shift-nhấp vào một liên kết để gửi tệp mà nó trỏ tới, được tải bằng phiên đăng nhập của bạn trên trang đó.",
-      "pickHint": "SealSkin: nhấp vào một liên kết, hoặc hình ảnh, video hay âm thanh, để gửi; Shift-nhấp vào liên kết để gửi tệp của nó. Nhấn Esc để hủy.",
+      "title": "{brand} trong trình duyệt này",
+      "bookmarklet": "Gửi tới {brand}",
+      "bookmarkletHelp": "Kéo liên kết này vào thanh dấu trang. Nhấp vào nó sẽ mở trang bạn đang xem trong {brand}, hoặc tìm kiếm văn bản bạn đã chọn.",
+      "pick": "Chọn cho {brand}",
+      "pickHelp": "Kéo cả liên kết này vào đó. Nhấp vào nó, rồi nhấp vào một liên kết để mở liên kết đó trong {brand}, hoặc vào hình ảnh, video hay âm thanh để gửi tệp. Shift-nhấp vào một liên kết để gửi tệp mà nó trỏ tới, được tải bằng phiên đăng nhập của bạn trên trang đó.",
+      "pickHint": "{brand}: nhấp vào một liên kết, hoặc hình ảnh, video hay âm thanh, để gửi; Shift-nhấp vào liên kết để gửi tệp của nó. Nhấn Esc để hủy.",
       "protocol": "Mở liên kết web+sealskin: tại đây",
-      "protocolHelp": "Liên kết viết dạng web+sealskin: kèm theo một địa chỉ sẽ mở địa chỉ đó trong SealSkin.",
-      "install": "Nếu trình duyệt có thể cài đặt ứng dụng web, hãy cài SealSkin từ menu của trình duyệt để chia sẻ liên kết và tệp tới nó và mở tệp bằng nó."
+      "protocolHelp": "Liên kết viết dạng web+sealskin: kèm theo một địa chỉ sẽ mở địa chỉ đó trong {brand}.",
+      "install": "Nếu trình duyệt có thể cài đặt ứng dụng web, hãy cài {brand} từ menu của trình duyệt để chia sẻ liên kết và tệp tới nó và mở tệp bằng nó."
     },
     "via": {
       "root": "Token root",
@@ -1536,7 +1536,7 @@
         "unchecked": "Việc kiểm tra proxy đã bị tắt trên nút này (SEALSKIN_PROXY_AUTH_UNCHECKED): mọi thứ proxy chuyển tiếp đều được tin."
       },
       "whoTitle": "Ai đăng nhập",
-      "whoHelp": "Các cài đặt này áp dụng cho OpenID Connect, SAML và reverse proxy. Để đưa thành viên của một nhóm trên nhà cung cấp danh tính vào một nhóm SealSkin, hãy liệt kê nhóm đó trong mục \"Các nhóm của nhà cung cấp danh tính\" của nhóm tương ứng ở trang Nhóm.",
+      "whoHelp": "Các cài đặt này áp dụng cho OpenID Connect, SAML và reverse proxy. Để đưa thành viên của một nhóm trên nhà cung cấp danh tính vào một nhóm {brand}, hãy liệt kê nhóm đó trong mục \"Các nhóm của nhà cung cấp danh tính\" của nhóm tương ứng ở trang Nhóm.",
       "rootTitle": "Token root",
       "rootHelp": "Luôn khả dụng. Token nằm trong /config/root_token trên máy chủ cho đến khi tệp đó bị xóa, và có thể đặt bằng SEALSKIN_ROOT_TOKEN.",
       "keyTitle": "Tệp khóa",
@@ -1680,7 +1680,7 @@
     }
   },
   "files": {
-    "title": "Tệp SealSkin",
+    "title": "Tệp {brand}",
     "header": {
       "title": "Tệp",
       "newFolder": "Thư mục mới",
@@ -1688,7 +1688,7 @@
       "uploadFolder": "Tải lên thư mục"
     },
     "sidebar": {
-      "sharedFiles": "Tệp SealSkin",
+      "sharedFiles": "Tệp {brand}",
       "publicShares": "Chia sẻ công khai"
     },
     "shares": {
@@ -1746,7 +1746,7 @@
       "deleteFailed": "Xóa thất bại: {error}",
       "preparingUpload": "Đang chuẩn bị tải lên {count, plural, one {1 tệp} other {{count} tệp}}...",
       "uploadPrepFailed": "Lỗi trong quá trình chuẩn bị tải lên thư mục: {error}",
-      "notConfigured": "Lỗi: SealSkin chưa được cấu hình. Vui lòng thiết lập trong tùy chọn.",
+      "notConfigured": "Lỗi: {brand} chưa được cấu hình. Vui lòng thiết lập trong tùy chọn.",
       "folderCreated": "Đã tạo thư mục '{folderName}'.",
       "folderCreateFailed": "Lỗi khi tạo thư mục: {error}",
       "shareCreated": "Chia sẻ đã được tạo thành công! Liên kết đã được sao chép vào clipboard của bạn.",
@@ -1794,8 +1794,8 @@
     }
   },
   "web": {
-    "receiving": "Đang gửi tệp tới SealSkin…",
-    "signInTitle": "Đăng nhập vào SealSkin",
+    "receiving": "Đang gửi tệp tới {brand}…",
+    "signInTitle": "Đăng nhập vào {brand}",
     "signInWith": {
       "oidc": "Đăng nhập bằng OpenID Connect",
       "saml": "Đăng nhập bằng SAML"
@@ -1807,7 +1807,7 @@
     "rootLocked": "Quá nhiều lần thử. Hãy chờ một lúc rồi thử lại.",
     "held": {
       "title": "Đang chờ quản trị viên",
-      "message": "Bạn đã đăng nhập với tên {username}, nhưng quản trị viên cần đưa bạn vào một nhóm trước khi bạn có thể dùng SealSkin. Hãy kiểm tra lại sau khi họ đã làm xong.",
+      "message": "Bạn đã đăng nhập với tên {username}, nhưng quản trị viên cần đưa bạn vào một nhóm trước khi bạn có thể dùng {brand}. Hãy kiểm tra lại sau khi họ đã làm xong.",
       "check": "Kiểm tra lại"
     },
     "signIn": {
@@ -1815,10 +1815,10 @@
       "refused": "Nhà cung cấp danh tính đã từ chối đăng nhập.",
       "expired": "Đăng nhập mất quá lâu hoặc đã được dùng. Hãy đăng nhập lại.",
       "browser": "Đăng nhập đã hoàn tất trong trình duyệt hoặc thẻ khác. Hãy bắt đầu lại tại đây.",
-      "invalidUsername": "Tên tài khoản của bạn không thể là tên người dùng SealSkin, vốn chỉ gồm chữ cái, chữ số, dấu gạch dưới và dấu gạch ngang. Hãy hỏi quản trị viên của bạn.",
-      "adminName": "Tên tài khoản của bạn thuộc về một quản trị viên SealSkin, người đăng nhập bằng tệp khóa. Hãy hỏi quản trị viên của bạn.",
-      "otherIdentity": "Một tài khoản khác của nhà cung cấp danh tính đã đăng nhập với tư cách người dùng SealSkin này. Hãy hỏi quản trị viên của bạn.",
-      "noAccount": "Chưa có tài khoản SealSkin nào mang tên bạn. Hãy yêu cầu quản trị viên tạo một tài khoản.",
+      "invalidUsername": "Tên tài khoản của bạn không thể là tên người dùng {brand}, vốn chỉ gồm chữ cái, chữ số, dấu gạch dưới và dấu gạch ngang. Hãy hỏi quản trị viên của bạn.",
+      "adminName": "Tên tài khoản của bạn thuộc về một quản trị viên {brand}, người đăng nhập bằng tệp khóa. Hãy hỏi quản trị viên của bạn.",
+      "otherIdentity": "Một tài khoản khác của nhà cung cấp danh tính đã đăng nhập với tư cách người dùng {brand} này. Hãy hỏi quản trị viên của bạn.",
+      "noAccount": "Chưa có tài khoản {brand} nào mang tên bạn. Hãy yêu cầu quản trị viên tạo một tài khoản.",
       "notConfigured": "Máy chủ này không cung cấp đăng nhập một lần.",
       "ended": "Nhà cung cấp danh tính đã kết thúc lần đăng nhập của bạn. Hãy đăng nhập lại."
     },
@@ -1867,7 +1867,7 @@
     "home": {
       "searchPlaceholder": "Tìm kiếm ứng dụng, hoặc dán một liên kết để mở nó trong môi trường cách ly",
       "upload": "Tải lên tệp",
-      "drop": "Thả tệp để mở trong SealSkin",
+      "drop": "Thả tệp để mở trong {brand}",
       "running": "Phiên đang chạy",
       "applications": "Ứng dụng",
       "allowance": "Hạn mức",
@@ -1939,7 +1939,7 @@
       "onNode": "Trên nút {node}",
       "seconds": "{count} giây",
       "failed": "Khởi chạy thất bại",
-      "unseen": "Yêu cầu khởi chạy chưa đến được máy chủ. Hãy kiểm tra thẻ SealSkin đã gửi yêu cầu.",
+      "unseen": "Yêu cầu khởi chạy chưa đến được máy chủ. Hãy kiểm tra thẻ {brand} đã gửi yêu cầu.",
       "closeTab": "Trình duyệt vẫn giữ thẻ này mở. Hãy tự đóng nó."
     }
   }

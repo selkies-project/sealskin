@@ -511,7 +511,7 @@
         },
         "SELKIES_ENABLE_COLLAB": {
           "label": "Activer la Collaboration",
-          "description": "Permettre à un spectateur détenant le jeton maître de la session d'agir comme collaborateur en lecture-écriture. Requis pour les salles SealSkin."
+          "description": "Permettre à un spectateur détenant le jeton maître de la session d'agir comme collaborateur en lecture-écriture. Requis pour les salles {brand}."
         },
         "SELKIES_ENABLE_PLAYER2": {
           "label": "Activer le Partage Joueur 2",
@@ -1156,7 +1156,7 @@
       "editGroupTitle": "Modifier le Groupe : {groupName}",
       "userConfigTitle": "Configuration de l'Utilisateur",
       "warning": "C'est la seule fois que cette configuration sera affichée. Fournissez-la à l'utilisateur de manière sécurisée.",
-      "info": "Vous pouvez télécharger ce fichier de configuration pour configurer facilement SealSkin sur un autre appareil. Conservez ce fichier en lieu sûr car il contient votre clé privée.",
+      "info": "Vous pouvez télécharger ce fichier de configuration pour configurer facilement {brand} sur un autre appareil. Conservez ce fichier en lieu sûr car il contient votre clé privée.",
       "configDataLabel": "Données de Configuration (JSON)",
       "copyButton": "Copier le Texte",
       "downloadButton": "Télécharger le Fichier",
@@ -1307,15 +1307,15 @@
       "noProotCatalogs": "Aucun catalogue pour l'instant."
     },
     "web": {
-      "title": "SealSkin dans ce Navigateur",
-      "bookmarklet": "Envoyer à SealSkin",
-      "bookmarkletHelp": "Faites glisser ce lien dans votre barre de favoris. Un clic dessus ouvre la page en cours dans SealSkin, ou recherche le texte sélectionné.",
-      "pick": "Choisir pour SealSkin",
-      "pickHelp": "Faites aussi glisser ce lien dans la barre. Cliquez dessus, puis sur un lien pour l'ouvrir dans SealSkin, ou sur une image, une vidéo ou un son pour envoyer le fichier. Maj+clic sur un lien envoie le fichier vers lequel il mène, récupéré avec votre connexion à ce site.",
-      "pickHint": "SealSkin : cliquez sur un lien, ou sur une image, une vidéo ou un son, pour l'envoyer ; Maj+clic sur un lien envoie son fichier. Appuyez sur Échap pour annuler.",
+      "title": "{brand} dans ce Navigateur",
+      "bookmarklet": "Envoyer à {brand}",
+      "bookmarkletHelp": "Faites glisser ce lien dans votre barre de favoris. Un clic dessus ouvre la page en cours dans {brand}, ou recherche le texte sélectionné.",
+      "pick": "Choisir pour {brand}",
+      "pickHelp": "Faites aussi glisser ce lien dans la barre. Cliquez dessus, puis sur un lien pour l'ouvrir dans {brand}, ou sur une image, une vidéo ou un son pour envoyer le fichier. Maj+clic sur un lien envoie le fichier vers lequel il mène, récupéré avec votre connexion à ce site.",
+      "pickHint": "{brand} : cliquez sur un lien, ou sur une image, une vidéo ou un son, pour l'envoyer ; Maj+clic sur un lien envoie son fichier. Appuyez sur Échap pour annuler.",
       "protocol": "Ouvrir ici les liens web+sealskin:",
-      "protocolHelp": "Un lien écrit web+sealskin: suivi d'une adresse ouvre alors cette adresse dans SealSkin.",
-      "install": "Si votre navigateur sait installer des applications web, installez SealSkin depuis son menu pour lui partager des liens et des fichiers et ouvrir des fichiers avec."
+      "protocolHelp": "Un lien écrit web+sealskin: suivi d'une adresse ouvre alors cette adresse dans {brand}.",
+      "install": "Si votre navigateur sait installer des applications web, installez {brand} depuis son menu pour lui partager des liens et des fichiers et ouvrir des fichiers avec."
     },
     "via": {
       "root": "Jeton root",
@@ -1536,7 +1536,7 @@
         "unchecked": "La vérification du proxy est désactivée sur ce nœud (SEALSKIN_PROXY_AUTH_UNCHECKED) : tout ce que le proxy transmet est pris en compte."
       },
       "whoTitle": "Qui se Connecte",
-      "whoHelp": "Ces paramètres valent pour OpenID Connect, SAML et le proxy inverse. Pour placer les membres d'un groupe du fournisseur d'identité dans un groupe SealSkin, indiquez-le sous « Groupes du fournisseur d'identité » de ce groupe dans Groupes.",
+      "whoHelp": "Ces paramètres valent pour OpenID Connect, SAML et le proxy inverse. Pour placer les membres d'un groupe du fournisseur d'identité dans un groupe {brand}, indiquez-le sous « Groupes du fournisseur d'identité » de ce groupe dans Groupes.",
       "rootTitle": "Jeton Root",
       "rootHelp": "Toujours disponible. Le jeton se trouve dans /config/root_token sur le serveur tant que ce fichier n'est pas supprimé, et peut être défini avec SEALSKIN_ROOT_TOKEN.",
       "keyTitle": "Fichiers de Clé",
@@ -1680,7 +1680,7 @@
     }
   },
   "files": {
-    "title": "Fichiers SealSkin",
+    "title": "Fichiers {brand}",
     "header": {
       "title": "Fichiers",
       "newFolder": "Nouveau Dossier",
@@ -1688,7 +1688,7 @@
       "uploadFolder": "Téléverser un Dossier"
     },
     "sidebar": {
-      "sharedFiles": "Fichiers SealSkin",
+      "sharedFiles": "Fichiers {brand}",
       "publicShares": "Partages Publics"
     },
     "shares": {
@@ -1746,7 +1746,7 @@
       "deleteFailed": "Échec de la suppression : {error}",
       "preparingUpload": "Préparation du téléversement de {count, plural, one {1 fichier} other {{count} fichiers}}...",
       "uploadPrepFailed": "Erreur lors de la préparation du téléversement du dossier : {error}",
-      "notConfigured": "Erreur : SealSkin non configuré. Veuillez le configurer dans les options.",
+      "notConfigured": "Erreur : {brand} non configuré. Veuillez le configurer dans les options.",
       "folderCreated": "Dossier '{folderName}' créé.",
       "folderCreateFailed": "Erreur lors de la création du dossier : {error}",
       "shareCreated": "Partage créé avec succès ! Le lien a été copié dans votre presse-papiers.",
@@ -1794,8 +1794,8 @@
     }
   },
   "web": {
-    "receiving": "Envoi du fichier à SealSkin…",
-    "signInTitle": "Se connecter à SealSkin",
+    "receiving": "Envoi du fichier à {brand}…",
+    "signInTitle": "Se connecter à {brand}",
     "signInWith": {
       "oidc": "Se Connecter avec OpenID Connect",
       "saml": "Se Connecter avec SAML"
@@ -1807,7 +1807,7 @@
     "rootLocked": "Trop de tentatives. Patientez un moment, puis réessayez.",
     "held": {
       "title": "En attente d'un administrateur",
-      "message": "Vous êtes connecté en tant que {username}, mais un administrateur doit vous placer dans un groupe avant que vous puissiez utiliser SealSkin. Revérifiez une fois que c'est fait.",
+      "message": "Vous êtes connecté en tant que {username}, mais un administrateur doit vous placer dans un groupe avant que vous puissiez utiliser {brand}. Revérifiez une fois que c'est fait.",
       "check": "Revérifier"
     },
     "signIn": {
@@ -1815,10 +1815,10 @@
       "refused": "Le fournisseur d'identité a refusé la connexion.",
       "expired": "La connexion a pris trop de temps ou a déjà servi. Reconnectez-vous.",
       "browser": "La connexion s'est terminée dans un autre navigateur ou onglet. Recommencez-la ici.",
-      "invalidUsername": "Le nom de votre compte ne peut pas être un nom d'utilisateur SealSkin, qui n'admet que des lettres, des chiffres, des traits de soulignement et des traits d'union. Contactez votre administrateur.",
-      "adminName": "Le nom de votre compte appartient à un administrateur SealSkin, qui se connecte avec un fichier de clé. Contactez votre administrateur.",
-      "otherIdentity": "Un autre compte du fournisseur d'identité se connecte déjà sous cet utilisateur SealSkin. Contactez votre administrateur.",
-      "noAccount": "Aucun compte SealSkin ne porte encore votre nom. Demandez à votre administrateur d'en créer un.",
+      "invalidUsername": "Le nom de votre compte ne peut pas être un nom d'utilisateur {brand}, qui n'admet que des lettres, des chiffres, des traits de soulignement et des traits d'union. Contactez votre administrateur.",
+      "adminName": "Le nom de votre compte appartient à un administrateur {brand}, qui se connecte avec un fichier de clé. Contactez votre administrateur.",
+      "otherIdentity": "Un autre compte du fournisseur d'identité se connecte déjà sous cet utilisateur {brand}. Contactez votre administrateur.",
+      "noAccount": "Aucun compte {brand} ne porte encore votre nom. Demandez à votre administrateur d'en créer un.",
       "notConfigured": "Ce serveur ne propose pas d'authentification unique.",
       "ended": "Le fournisseur d'identité a mis fin à votre connexion. Reconnectez-vous."
     },
@@ -1867,7 +1867,7 @@
     "home": {
       "searchPlaceholder": "Recherchez des applications, ou collez un lien pour l'ouvrir en isolation",
       "upload": "Téléverser un fichier",
-      "drop": "Déposez le fichier pour l'ouvrir dans SealSkin",
+      "drop": "Déposez le fichier pour l'ouvrir dans {brand}",
       "running": "Sessions en cours",
       "applications": "Applications",
       "allowance": "Quota",
@@ -1939,7 +1939,7 @@
       "onNode": "Sur le nœud {node}",
       "seconds": "{count} s",
       "failed": "Le lancement a échoué",
-      "unseen": "La demande de lancement n'a pas atteint le serveur. Vérifiez l'onglet SealSkin qui l'a émise.",
+      "unseen": "La demande de lancement n'a pas atteint le serveur. Vérifiez l'onglet {brand} qui l'a émise.",
       "closeTab": "Le navigateur a gardé cet onglet ouvert. Fermez-le vous-même."
     }
   }

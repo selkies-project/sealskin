@@ -1783,3 +1783,61 @@ body:has(.popup-container)::before { display: none; }
 .proot-selected .chip button:hover { color: var(--text-primary); }
 .proot-state { display: inline-flex; align-items: center; gap: 0.4rem; }
 .proot-state .spinner-small { margin: 0; }
+
+/* --- Branding: the form beside a mock of the home page, painted as the brand is edited. --- */
+.branding-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; align-items: start; }
+@media (max-width: 1200px) { .branding-layout { grid-template-columns: 1fr; } }
+.branding-form .field-group:first-child { margin-top: 0; }
+.branding-preview { position: sticky; top: 1rem; }
+.brand-picture { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.brand-picture button { margin: 0; }
+.brand-logo-preview { width: 48px; height: 48px; object-fit: contain; border-radius: var(--radius-sm); background-color: var(--bg-0); border: 1px solid var(--border-color); padding: 4px; }
+.brand-wallpaper-preview { width: 96px; height: 54px; border-radius: var(--radius-sm); background-color: var(--bg-0); border: 1px solid var(--border-color); background-size: cover; background-position: center; }
+.brand-wallpaper-preview:empty:not([style*="url"])::after { content: "\f03e"; font-family: "Font Awesome 6 Free"; font-weight: 900; color: var(--text-muted); display: grid; place-items: center; height: 100%; }
+.brand-accent { display: flex; align-items: center; gap: 0.6rem; }
+.brand-accent input[type="color"] { width: 44px; height: 36px; padding: 2px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-0); cursor: pointer; }
+.brand-accent-text { width: 7.5em !important; font-family: var(--font-mono); }
+.brand-accent button { margin: 0; }
+.field[data-wallpaper-only][hidden] { display: none; }
+#brand-links-table input, #brand-links-table select { width: 100%; min-width: 0; margin: 0; font-size: 0.85rem; padding: 0.4rem 0.5rem; }
+#brand-links-table td { vertical-align: middle; }
+#brand-links-table .actions-cell { white-space: nowrap; }
+#brand-links-table .actions-cell button { margin: 0 0.15rem 0 0; padding: 0.35rem 0.5rem; }
+#brand-links-table .empty { text-align: center; color: var(--text-muted); }
+
+/* The mock: the web app's rail and home page, at a fraction of their size, in the stylesheets' own colors. */
+.brand-window { max-width: none; aspect-ratio: 16 / 10; font-size: 0.62rem; }
+.brand-address { display: flex; align-items: center; gap: 0.4rem; }
+.brand-address img { width: 14px; height: 14px; object-fit: contain; }
+.mock-body { display: flex; flex: 1; min-height: 0; }
+.mock-rail { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; width: 54px; padding: 0.7rem 0.3rem; background-color: var(--bg-1); border-right: 1px solid var(--border-color); flex-shrink: 0; }
+.mock-logo { width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 4px 10px var(--accent-glow)); }
+.mock-nav { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; width: 100%; padding: 0.35rem 0.1rem; border: 1px solid transparent; border-radius: var(--radius-sm); color: var(--text-muted); font-size: 0.5rem; font-weight: 600; }
+.mock-nav i { font-size: 0.85rem; }
+.mock-nav.active { background-color: var(--accent-soft); border-color: var(--accent-border); color: var(--accent-text-strong); }
+.mock-account { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 0.15rem; padding-top: 0.5rem; border-top: 1px solid var(--border-color); width: 100%; color: var(--text-muted); font-size: 0.5rem; }
+.mock-avatar { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-gradient); color: var(--accent-contrast); font-weight: 700; font-size: 0.6rem; }
+.mock-page { position: relative; flex: 1; min-width: 0; overflow: hidden; background-color: var(--bg-0); }
+.mock-backdrop { position: absolute; inset: 0; background-color: var(--bg-0); --bg-blur: 0px; --bg-dim: 0; }
+.mock-backdrop::before { content: ""; position: absolute; inset: calc(-2 * var(--bg-blur)); background: inherit; filter: blur(var(--bg-blur)); }
+.mock-backdrop::after { content: ""; position: absolute; inset: 0; background-color: rgba(5, 8, 13, var(--bg-dim)); }
+.mock-backdrop.picture { background-position: center; background-repeat: no-repeat; }
+.mock-backdrop.fit-cover { background-size: cover; }
+.mock-backdrop.fit-contain { background-size: contain; }
+.mock-backdrop.fit-stretch { background-size: 100% 100%; }
+.mock-backdrop.fit-center { background-size: auto; }
+.mock-content { position: relative; display: flex; flex-direction: column; gap: 0.9rem; padding: 1rem; }
+.mock-hero { display: flex; align-items: center; gap: 0.4rem; }
+.mock-search { flex: 1; display: flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.6rem; border: 1px solid var(--border-color); border-radius: var(--radius-pill); background-color: var(--bg-1); color: var(--text-muted); white-space: nowrap; overflow: hidden; }
+.mock-search span { overflow: hidden; text-overflow: ellipsis; }
+.mock-btn { display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background-color: var(--bg-1); color: var(--text-secondary); flex-shrink: 0; }
+.mock-btn[hidden] { display: none; }
+.mock-section h4 { margin: 0 0 0.4rem; font-size: 0.7rem; font-weight: 600; color: var(--text-primary); }
+.mock-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 0.4rem; }
+.mock-tile { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; padding: 0.5rem 0.3rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background-color: var(--bg-1); text-align: center; }
+.mock-page.has-picture .mock-tile, .mock-page.has-picture .mock-search, .mock-page.has-picture .mock-btn { background-color: color-mix(in srgb, var(--bg-1) 82%, transparent); }
+.mock-tile img { width: 26px; height: 26px; object-fit: contain; }
+.mock-tile i { display: grid; place-items: center; width: 26px; height: 26px; font-size: 0.95rem; color: var(--accent-text); }
+.mock-tile .name { font-size: 0.52rem; line-height: 1.2; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mock-tile.bone .name { width: 70%; height: 0.5rem; border-radius: 3px; background-color: var(--bg-3); }
+.mock-tile.bone img { opacity: 0.35; }

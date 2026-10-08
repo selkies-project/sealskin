@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import uuid
 from typing import Any
 
@@ -118,13 +119,106 @@ class HandshakeExchangeResponse(BaseModel):
 
 
 class SignInConfig(BaseModel):
-    """The sign-ins the web app offers."""
+    """The sign-ins the web app offers; `auto` names the provider a signed-out browser is sent to at once."""
 
     oidc: bool
     saml: bool
     proxy: bool = False
     root: bool = True
     key: bool = True
+    auto: str = ""
+
+
+PROJECT_URL = "https://github.com/selkies-project/sealskin"
+WALLPAPER_FITS = ("cover", "contain", "stretch", "center")
+
+
+class BrandLink(BaseModel):
+    """A link the home page shows beside the applications.
+
+    Attributes:
+        name: The tile's label.
+        url: Where it leads, `http` or `https`.
+        icon: Font Awesome classes such as `fa-book` or `fab fa-github`, an `https` image address, or empty for a link icon.
+        open: `tab` opens the address in a new tab, `isolated` in a session of an application the user picks.
+    """
+
+    name: str = Field(min_length=1, max_length=60)
+    url: str = Field(max_length=2000, pattern=r"^https?://\S+$")
+    icon: str = Field(default="", max_length=300)
+    open: str = Field(default="tab", pattern=r"^(tab|isolated)$")
+
+    @field_validator("icon")
+    @classmethod
+    def _icon_shape(cls, value: str) -> str:
+        """Keep an icon to Font Awesome classes or an `https` image."""
+        value = " ".join(value.split())
+        if value and not (re.fullmatch(r"(fa[sbrl]? )?fa-[a-z0-9-]+", value) or value.startswith("https://")):
+            raise ValueError("An icon is a Font Awesome class or an https address.")
+        return value
+
+
+class Branding(BaseModel):
+    """The brand the web app wears, as `branding/branding.yml` keeps it.
+
+    Attributes:
+        name: The product name, which stands wherever the interface would say SealSkin.
+        logo_link: Where the logo leads; empty for nowhere.
+        accent: The accent color as `#rrggbb`, or empty for the default violet.
+        store_links: Show the extension and app store links on the sign-in page.
+        wallpaper_fit: How the wallpaper sits on the home page.
+        wallpaper_blur: Pixels of blur over the wallpaper.
+        wallpaper_dim: Percent the wallpaper is darkened.
+        wallpaper_forced: Every user sees the wallpaper, and the page's own customization is withheld.
+        links: Links the home page shows beside the applications.
+    """
+
+    name: str = Field(default="SealSkin", min_length=1, max_length=60)
+    logo_link: str = Field(default=PROJECT_URL, max_length=2000)
+    accent: str = Field(default="", pattern=r"^(#[0-9a-fA-F]{6})?$")
+    store_links: bool = True
+    wallpaper_fit: str = Field(default="cover", pattern=r"^(cover|contain|stretch|center)$")
+    wallpaper_blur: int = Field(default=0, ge=0, le=24)
+    wallpaper_dim: int = Field(default=30, ge=0, le=90)
+    wallpaper_forced: bool = False
+    links: list[BrandLink] = Field(default_factory=list, max_length=40)
+
+    @field_validator("name", "logo_link")
+    @classmethod
+    def _stripped(cls, value: str) -> str:
+        """Trim the text fields."""
+        return value.strip()
+
+    @field_validator("logo_link")
+    @classmethod
+    def _link_shape(cls, value: str) -> str:
+        """Allow an `http` or `https` address, or none."""
+        if value and not re.fullmatch(r"https?://\S+", value):
+            raise ValueError("The logo's link is an http or https address, or empty.")
+        return value
+
+
+class BrandImage(BaseModel):
+    """An uploaded brand picture as the pages address it."""
+
+    url: str
+    width: int
+    height: int
+    type: str
+
+
+class BrandingView(Branding):
+    """The brand with its pictures, as `GET /api/branding` returns it."""
+
+    logo: BrandImage | None = None
+    wallpaper: BrandImage | None = None
+    is_default: bool = True
+
+
+class BrandImageUpload(BaseModel):
+    """A brand picture, base64 encoded, as the dashboard uploads it."""
+
+    data: str = Field(max_length=12_000_000)
 
 
 class SignInRegistrationRequest(BaseModel):

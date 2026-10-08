@@ -511,7 +511,7 @@
         },
         "SELKIES_ENABLE_COLLAB": {
           "label": "Samenwerking Inschakelen",
-          "description": "Laat een kijker met het master-token van de sessie optreden als medewerker met lees- en schrijfrechten. Vereist voor SealSkin-rooms."
+          "description": "Laat een kijker met het master-token van de sessie optreden als medewerker met lees- en schrijfrechten. Vereist voor {brand}-rooms."
         },
         "SELKIES_ENABLE_PLAYER2": {
           "label": "Speler 2 Deling Inschakelen",
@@ -1156,7 +1156,7 @@
       "editGroupTitle": "Bewerk Groep: {groupName}",
       "userConfigTitle": "Gebruikersconfiguratie",
       "warning": "Dit is de enige keer dat deze configuratie wordt getoond. Geef deze veilig aan de gebruiker.",
-      "info": "U kunt dit configuratiebestand downloaden om SealSkin eenvoudig op een ander apparaat in te stellen. Bewaar dit bestand veilig, want het bevat uw privésleutel.",
+      "info": "U kunt dit configuratiebestand downloaden om {brand} eenvoudig op een ander apparaat in te stellen. Bewaar dit bestand veilig, want het bevat uw privésleutel.",
       "configDataLabel": "Configuratiegegevens (JSON)",
       "copyButton": "Tekst Kopiëren",
       "downloadButton": "Bestand Downloaden",
@@ -1307,15 +1307,15 @@
       "noProotCatalogs": "Nog geen catalogi."
     },
     "web": {
-      "title": "SealSkin in Deze Browser",
-      "bookmarklet": "Naar SealSkin sturen",
-      "bookmarkletHelp": "Sleep deze link naar uw bladwijzerbalk. Erop klikken opent de pagina waarop u bent in SealSkin, of zoekt naar de tekst die u hebt geselecteerd.",
-      "pick": "Kiezen voor SealSkin",
-      "pickHelp": "Sleep ook deze naar die balk. Klik erop en klik dan op een link om die in SealSkin te openen, of op een afbeelding, video of audio om het bestand te sturen. Shift-klik op een link om het bestand te sturen waar die naartoe leidt, opgehaald met uw aanmelding op die site.",
-      "pickHint": "SealSkin: klik op een link, of op een afbeelding, video of audio, om die te sturen; Shift-klik op een link stuurt het bestand. Druk op Esc om te annuleren.",
+      "title": "{brand} in Deze Browser",
+      "bookmarklet": "Naar {brand} sturen",
+      "bookmarkletHelp": "Sleep deze link naar uw bladwijzerbalk. Erop klikken opent de pagina waarop u bent in {brand}, of zoekt naar de tekst die u hebt geselecteerd.",
+      "pick": "Kiezen voor {brand}",
+      "pickHelp": "Sleep ook deze naar die balk. Klik erop en klik dan op een link om die in {brand} te openen, of op een afbeelding, video of audio om het bestand te sturen. Shift-klik op een link om het bestand te sturen waar die naartoe leidt, opgehaald met uw aanmelding op die site.",
+      "pickHint": "{brand}: klik op een link, of op een afbeelding, video of audio, om die te sturen; Shift-klik op een link stuurt het bestand. Druk op Esc om te annuleren.",
       "protocol": "web+sealskin:-links hier openen",
-      "protocolHelp": "Een link geschreven als web+sealskin: gevolgd door een adres opent dat adres dan in SealSkin.",
-      "install": "Als uw browser webapps kan installeren, installeer SealSkin dan via het menu om er links en bestanden mee te delen en er bestanden mee te openen."
+      "protocolHelp": "Een link geschreven als web+sealskin: gevolgd door een adres opent dat adres dan in {brand}.",
+      "install": "Als uw browser webapps kan installeren, installeer {brand} dan via het menu om er links en bestanden mee te delen en er bestanden mee te openen."
     },
     "via": {
       "root": "Root-token",
@@ -1536,7 +1536,7 @@
         "unchecked": "De controle van de proxy is op deze node uitgeschakeld (SEALSKIN_PROXY_AUTH_UNCHECKED): alles wat de proxy doorgeeft, wordt geloofd."
       },
       "whoTitle": "Wie zich aanmeldt",
-      "whoHelp": "Deze gelden voor OpenID Connect, SAML en de reverse proxy. Om de leden van een groep van de identiteitsprovider in een SealSkin-groep te plaatsen, vermeldt u die onder \"Groepen van de identiteitsprovider\" van die groep in Groepen.",
+      "whoHelp": "Deze gelden voor OpenID Connect, SAML en de reverse proxy. Om de leden van een groep van de identiteitsprovider in een {brand}-groep te plaatsen, vermeldt u die onder \"Groepen van de identiteitsprovider\" van die groep in Groepen.",
       "rootTitle": "Root-token",
       "rootHelp": "Altijd beschikbaar. Het token staat in /config/root_token op de server totdat dat bestand wordt verwijderd, en kan worden ingesteld met SEALSKIN_ROOT_TOKEN.",
       "keyTitle": "Sleutelbestanden",
@@ -1680,7 +1680,7 @@
     }
   },
   "files": {
-    "title": "SealSkin-bestanden",
+    "title": "{brand}-bestanden",
     "header": {
       "title": "Bestanden",
       "newFolder": "Nieuwe map",
@@ -1688,7 +1688,7 @@
       "uploadFolder": "Map uploaden"
     },
     "sidebar": {
-      "sharedFiles": "SealSkin-bestanden",
+      "sharedFiles": "{brand}-bestanden",
       "publicShares": "Openbare Delingen"
     },
     "shares": {
@@ -1746,7 +1746,7 @@
       "deleteFailed": "Verwijderen mislukt: {error}",
       "preparingUpload": "Voorbereiden om {count, plural, one {1 bestand} other {{count} bestanden}} te uploaden...",
       "uploadPrepFailed": "Fout tijdens voorbereiding van mapupload: {error}",
-      "notConfigured": "Fout: SealSkin niet geconfigureerd. Stel dit in bij de opties.",
+      "notConfigured": "Fout: {brand} niet geconfigureerd. Stel dit in bij de opties.",
       "folderCreated": "Map '{folderName}' gemaakt.",
       "folderCreateFailed": "Fout bij het maken van de map: {error}",
       "shareCreated": "Deellink succesvol aangemaakt! De link is naar je klembord gekopieerd.",
@@ -1794,8 +1794,8 @@
     }
   },
   "web": {
-    "receiving": "Bestand wordt naar SealSkin gestuurd…",
-    "signInTitle": "Aanmelden bij SealSkin",
+    "receiving": "Bestand wordt naar {brand} gestuurd…",
+    "signInTitle": "Aanmelden bij {brand}",
     "signInWith": {
       "oidc": "Aanmelden met OpenID Connect",
       "saml": "Aanmelden met SAML"
@@ -1807,7 +1807,7 @@
     "rootLocked": "Te veel pogingen. Wacht even en probeer het dan opnieuw.",
     "held": {
       "title": "Wachten op een beheerder",
-      "message": "U bent aangemeld als {username}, maar een beheerder moet u eerst in een groep plaatsen voordat u SealSkin kunt gebruiken. Controleer het opnieuw zodra dat is gebeurd.",
+      "message": "U bent aangemeld als {username}, maar een beheerder moet u eerst in een groep plaatsen voordat u {brand} kunt gebruiken. Controleer het opnieuw zodra dat is gebeurd.",
       "check": "Opnieuw controleren"
     },
     "signIn": {
@@ -1815,10 +1815,10 @@
       "refused": "De identiteitsprovider heeft de aanmelding geweigerd.",
       "expired": "De aanmelding duurde te lang of is al gebruikt. Meld u opnieuw aan.",
       "browser": "De aanmelding is in een andere browser of een ander tabblad voltooid. Begin hier opnieuw.",
-      "invalidUsername": "De naam van uw account kan geen SealSkin-gebruikersnaam zijn, die alleen letters, cijfers, onderstrepingstekens en koppeltekens toelaat. Vraag het uw beheerder.",
-      "adminName": "De naam van uw account is die van een SealSkin-beheerder, die zich met een sleutelbestand aanmeldt. Vraag het uw beheerder.",
-      "otherIdentity": "Een ander account van de identiteitsprovider meldt zich al aan als deze SealSkin-gebruiker. Vraag het uw beheerder.",
-      "noAccount": "Er is nog geen SealSkin-account met uw naam. Vraag uw beheerder om er een aan te maken.",
+      "invalidUsername": "De naam van uw account kan geen {brand}-gebruikersnaam zijn, die alleen letters, cijfers, onderstrepingstekens en koppeltekens toelaat. Vraag het uw beheerder.",
+      "adminName": "De naam van uw account is die van een {brand}-beheerder, die zich met een sleutelbestand aanmeldt. Vraag het uw beheerder.",
+      "otherIdentity": "Een ander account van de identiteitsprovider meldt zich al aan als deze {brand}-gebruiker. Vraag het uw beheerder.",
+      "noAccount": "Er is nog geen {brand}-account met uw naam. Vraag uw beheerder om er een aan te maken.",
       "notConfigured": "Deze server biedt geen eenmalige aanmelding.",
       "ended": "De identiteitsprovider heeft uw aanmelding beëindigd. Meld u opnieuw aan."
     },
@@ -1867,7 +1867,7 @@
     "home": {
       "searchPlaceholder": "Zoek applicaties, of plak een link om die geïsoleerd te openen",
       "upload": "Een bestand uploaden",
-      "drop": "Laat het bestand los om het in SealSkin te openen",
+      "drop": "Laat het bestand los om het in {brand} te openen",
       "running": "Actieve sessies",
       "applications": "Applicaties",
       "allowance": "Tegoed",
@@ -1939,7 +1939,7 @@
       "onNode": "Op node {node}",
       "seconds": "{count} s",
       "failed": "Het starten is mislukt",
-      "unseen": "Het startverzoek heeft de server niet bereikt. Controleer het SealSkin-tabblad waarmee het is gestart.",
+      "unseen": "Het startverzoek heeft de server niet bereikt. Controleer het {brand}-tabblad waarmee het is gestart.",
       "closeTab": "De browser heeft dit tabblad opengehouden. Sluit het zelf."
     }
   }

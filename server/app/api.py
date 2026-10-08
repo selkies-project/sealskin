@@ -19,6 +19,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from . import (
+    branding,
     cluster,
     collaboration,
     config_store,
@@ -51,6 +52,7 @@ from .routers import (
     ui,
     uploads,
 )
+from .routers import branding as branding_routes
 from .routers import sso as sso_routes
 from .security import init_server_keys, proxy_cert_not_after, prune_crypto_sessions
 from .settings import settings
@@ -202,6 +204,12 @@ async def _reload_users(_path: str) -> None:
     await asyncio.to_thread(user_manager.load_users_and_groups)
 
 
+async def _reload_branding(_path: str) -> None:
+    """Watcher callback: take up the brand after an edit."""
+    logger.info("The brand changed; reloading.")
+    await asyncio.to_thread(branding.load)
+
+
 def _watch_targets() -> dict[str, persistence.ReloadCallback]:
     """Return the configuration paths to watch and their reload callbacks."""
     return {
@@ -213,6 +221,7 @@ def _watch_targets() -> dict[str, persistence.ReloadCallback]:
         os.path.join(settings.keys_base_path, "admins"): _reload_users,
         settings.groups_base_path: _reload_users,
         settings.cluster_path: _reload_cluster,
+        settings.branding_path: _reload_branding,
     }
 
 
@@ -274,6 +283,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     user_manager.set_external_ports(state.discovered_api_port, state.discovered_session_port)
     user_manager.load_users_and_groups()
     sso.load()
+    branding.load()
     global _records_pending
     try:
         _sync_records()
@@ -374,6 +384,9 @@ def create_app() -> FastAPI:
     app.include_router(ui.router)
     app.include_router(entry.router)
     app.include_router(sso_routes.router)
+    app.include_router(branding_routes.router)
+    app.include_router(branding_routes.user_router)
+    app.include_router(branding_routes.admin_router)
     app.include_router(peer.router)
     app.include_router(cluster_admin.router)
     app.include_router(cluster_admin.user_router)

@@ -81,8 +81,8 @@ async def _begin(request: Request, start: Callable[[str, str], Awaitable[str]]) 
 
 
 @router.get("/api/auth/config", response_model=SignInConfig)
-async def sign_in_config() -> dict[str, bool]:
-    """Return the identity provider sign-ins this server offers."""
+async def sign_in_config() -> dict[str, Any]:
+    """Return the sign-ins this server offers, and the provider it sends a signed-out browser to at once."""
     return sso.enabled()
 
 
@@ -191,8 +191,10 @@ async def register(req: SignInRegistrationRequest, request: Request, response: R
 
 @router.post("/api/auth/root", response_model=SignInRegistration)
 async def root_sign_in(req: RootSignInRequest, request: Request, response: Response) -> dict[str, Any]:
-    """Sign the root administrator in with the root token."""
+    """Sign the root administrator in with the root token; refused where `root_sign_in` is off."""
     _web_only(request)
+    if not settings.root_sign_in:
+        raise HTTPException(status_code=403, detail="disabled")
     try:
         token = await sso.root_sign_in(req.token, cluster.client_address(request))
     except sso.SignInError as exc:

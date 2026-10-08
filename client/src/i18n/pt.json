@@ -511,7 +511,7 @@
         },
         "SELKIES_ENABLE_COLLAB": {
           "label": "Habilitar Colaboração",
-          "description": "Permitir que um espectador com o token mestre da sessão atue como colaborador com leitura e escrita. Necessário para as salas do SealSkin."
+          "description": "Permitir que um espectador com o token mestre da sessão atue como colaborador com leitura e escrita. Necessário para as salas do {brand}."
         },
         "SELKIES_ENABLE_PLAYER2": {
           "label": "Habilitar Compartilhamento do Jogador 2",
@@ -1156,7 +1156,7 @@
       "editGroupTitle": "Editar Grupo: {groupName}",
       "userConfigTitle": "Configuração do Usuário",
       "warning": "Esta é a única vez que esta configuração será mostrada. Forneça-a ao usuário de forma segura.",
-      "info": "Você pode baixar este arquivo de configuração para configurar facilmente o SealSkin em outro dispositivo. Mantenha este arquivo seguro, pois ele contém sua chave privada.",
+      "info": "Você pode baixar este arquivo de configuração para configurar facilmente o {brand} em outro dispositivo. Mantenha este arquivo seguro, pois ele contém sua chave privada.",
       "configDataLabel": "Dados de Configuração (JSON)",
       "copyButton": "Copiar Texto",
       "downloadButton": "Baixar Arquivo",
@@ -1307,15 +1307,15 @@
       "noProotCatalogs": "Nenhum catálogo ainda."
     },
     "web": {
-      "title": "SealSkin Neste Navegador",
-      "bookmarklet": "Enviar ao SealSkin",
-      "bookmarkletHelp": "Arraste este link para a barra de favoritos. Clicar nele abre a página em que você está no SealSkin ou pesquisa o texto selecionado.",
-      "pick": "Escolher para o SealSkin",
-      "pickHelp": "Arraste este também para lá. Clique nele e depois em um link para abri-lo no SealSkin, ou em uma imagem, um vídeo ou um áudio para enviar o arquivo. Shift+clique em um link envia o arquivo para o qual ele leva, obtido com o seu login nesse site.",
-      "pickHint": "SealSkin: clique em um link, ou em uma imagem, um vídeo ou um áudio, para enviá-lo; Shift+clique em um link envia o arquivo dele. Pressione Esc para cancelar.",
+      "title": "{brand} Neste Navegador",
+      "bookmarklet": "Enviar ao {brand}",
+      "bookmarkletHelp": "Arraste este link para a barra de favoritos. Clicar nele abre a página em que você está no {brand} ou pesquisa o texto selecionado.",
+      "pick": "Escolher para o {brand}",
+      "pickHelp": "Arraste este também para lá. Clique nele e depois em um link para abri-lo no {brand}, ou em uma imagem, um vídeo ou um áudio para enviar o arquivo. Shift+clique em um link envia o arquivo para o qual ele leva, obtido com o seu login nesse site.",
+      "pickHint": "{brand}: clique em um link, ou em uma imagem, um vídeo ou um áudio, para enviá-lo; Shift+clique em um link envia o arquivo dele. Pressione Esc para cancelar.",
       "protocol": "Abrir links web+sealskin: aqui",
-      "protocolHelp": "Um link escrito como web+sealskin: seguido de um endereço abre esse endereço no SealSkin.",
-      "install": "Se o navegador puder instalar aplicativos web, instale o SealSkin pelo menu dele para compartilhar links e arquivos com ele e abrir arquivos com ele."
+      "protocolHelp": "Um link escrito como web+sealskin: seguido de um endereço abre esse endereço no {brand}.",
+      "install": "Se o navegador puder instalar aplicativos web, instale o {brand} pelo menu dele para compartilhar links e arquivos com ele e abrir arquivos com ele."
     },
     "via": {
       "root": "Token root",
@@ -1536,7 +1536,7 @@
         "unchecked": "A verificação do proxy está desativada neste nó (SEALSKIN_PROXY_AUTH_UNCHECKED): tudo o que o proxy repassar é aceito."
       },
       "whoTitle": "Quem Faz Login",
-      "whoHelp": "Valem para OpenID Connect, SAML e o proxy reverso. Para colocar os membros de um grupo do provedor de identidade em um grupo do SealSkin, liste-o em \"Grupos do provedor de identidade\" desse grupo, em Grupos.",
+      "whoHelp": "Valem para OpenID Connect, SAML e o proxy reverso. Para colocar os membros de um grupo do provedor de identidade em um grupo do {brand}, liste-o em \"Grupos do provedor de identidade\" desse grupo, em Grupos.",
       "rootTitle": "Token Root",
       "rootHelp": "Sempre disponível. O token fica em /config/root_token no servidor até que esse arquivo seja excluído, e pode ser definido com SEALSKIN_ROOT_TOKEN.",
       "keyTitle": "Arquivos de Chave",
@@ -1680,7 +1680,7 @@
     }
   },
   "files": {
-    "title": "Arquivos SealSkin",
+    "title": "Arquivos {brand}",
     "header": {
       "title": "Arquivos",
       "newFolder": "Nova Pasta",
@@ -1688,7 +1688,7 @@
       "uploadFolder": "Carregar Pasta"
     },
     "sidebar": {
-      "sharedFiles": "Arquivos SealSkin",
+      "sharedFiles": "Arquivos {brand}",
       "publicShares": "Compartilhamentos Públicos"
     },
     "shares": {
@@ -1746,7 +1746,7 @@
       "deleteFailed": "Falha na exclusão: {error}",
       "preparingUpload": "Preparando para carregar {count, plural, one {1 arquivo} other {{count} arquivos}}...",
       "uploadPrepFailed": "Erro durante a preparação do upload da pasta: {error}",
-      "notConfigured": "Erro: SealSkin não configurado. Por favor, configure nas opções.",
+      "notConfigured": "Erro: {brand} não configurado. Por favor, configure nas opções.",
       "folderCreated": "Pasta '{folderName}' criada.",
       "folderCreateFailed": "Erro ao criar pasta: {error}",
       "shareCreated": "Compartilhamento criado com sucesso! O link foi copiado para sua área de transferência.",
@@ -1794,8 +1794,8 @@
     }
   },
   "web": {
-    "receiving": "Enviando o arquivo ao SealSkin…",
-    "signInTitle": "Entrar no SealSkin",
+    "receiving": "Enviando o arquivo ao {brand}…",
+    "signInTitle": "Entrar no {brand}",
     "signInWith": {
       "oidc": "Entrar com OpenID Connect",
       "saml": "Entrar com SAML"
@@ -1807,7 +1807,7 @@
     "rootLocked": "Tentativas demais. Aguarde um pouco e tente de novo.",
     "held": {
       "title": "Aguardando um administrador",
-      "message": "Você está conectado como {username}, mas um administrador precisa colocá-lo em um grupo antes que possa usar o SealSkin. Verifique novamente quando isso tiver sido feito.",
+      "message": "Você está conectado como {username}, mas um administrador precisa colocá-lo em um grupo antes que possa usar o {brand}. Verifique novamente quando isso tiver sido feito.",
       "check": "Verificar novamente"
     },
     "signIn": {
@@ -1815,10 +1815,10 @@
       "refused": "O provedor de identidade recusou o login.",
       "expired": "O login demorou demais ou já foi usado. Entre de novo.",
       "browser": "O login terminou em outro navegador ou aba. Comece de novo aqui.",
-      "invalidUsername": "O nome da sua conta não pode ser um nome de usuário do SealSkin, que só aceita letras, dígitos, sublinhados e hifens. Fale com o seu administrador.",
-      "adminName": "O nome da sua conta pertence a um administrador do SealSkin, que entra com um arquivo de chave. Fale com o seu administrador.",
-      "otherIdentity": "Outra conta do provedor de identidade já entra como este usuário do SealSkin. Fale com o seu administrador.",
-      "noAccount": "Ainda não existe uma conta SealSkin com o seu nome. Peça ao administrador para criar uma.",
+      "invalidUsername": "O nome da sua conta não pode ser um nome de usuário do {brand}, que só aceita letras, dígitos, sublinhados e hifens. Fale com o seu administrador.",
+      "adminName": "O nome da sua conta pertence a um administrador do {brand}, que entra com um arquivo de chave. Fale com o seu administrador.",
+      "otherIdentity": "Outra conta do provedor de identidade já entra como este usuário do {brand}. Fale com o seu administrador.",
+      "noAccount": "Ainda não existe uma conta {brand} com o seu nome. Peça ao administrador para criar uma.",
       "notConfigured": "Este servidor não oferece login único.",
       "ended": "O provedor de identidade encerrou o seu login. Entre de novo."
     },
@@ -1867,7 +1867,7 @@
     "home": {
       "searchPlaceholder": "Pesquise aplicativos ou cole um link para abri-lo em isolamento",
       "upload": "Enviar um arquivo",
-      "drop": "Solte o arquivo para abri-lo no SealSkin",
+      "drop": "Solte o arquivo para abri-lo no {brand}",
       "running": "Sessões em execução",
       "applications": "Aplicativos",
       "allowance": "Cota",
@@ -1939,7 +1939,7 @@
       "onNode": "No nó {node}",
       "seconds": "{count} s",
       "failed": "A inicialização falhou",
-      "unseen": "O pedido de inicialização não chegou ao servidor. Verifique a aba do SealSkin que o iniciou.",
+      "unseen": "O pedido de inicialização não chegou ao servidor. Verifique a aba do {brand} que o iniciou.",
       "closeTab": "O navegador manteve esta aba aberta. Feche-a você mesmo."
     }
   }

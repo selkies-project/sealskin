@@ -9,7 +9,7 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app import cluster, docker_utils, quota, store  # noqa: E402
+from app import branding, cluster, docker_utils, quota, store  # noqa: E402
 from app.providers import provider_class  # noqa: E402
 from app.settings import settings  # noqa: E402
 from app.state import state  # noqa: E402
@@ -37,6 +37,7 @@ PATH_SETTINGS = [
     "groups_base_path",
     "storage_path",
     "app_icons_path",
+    "branding_path",
     "home_templates_path",
     "public_storage_path",
     "public_shares_metadata_path",
@@ -67,6 +68,7 @@ def isolated_settings(tmp_path, monkeypatch):
         "groups_base_path": base / "groups",
         "storage_path": tmp_path / "storage",
         "app_icons_path": tmp_path / "storage" / "icons",
+        "branding_path": base / "branding",
         "home_templates_path": tmp_path / "storage" / "home_templates",
         "public_storage_path": tmp_path / "storage" / "public",
         "public_shares_metadata_path": base / "public_shares.yml",
@@ -88,6 +90,7 @@ def isolated_settings(tmp_path, monkeypatch):
         table.clear()
     quota._dirty.clear()
     monkeypatch.setattr(state, "proxy_secret", PROXY_SECRET)
+    branding.load()
     # Never the machine's real Docker: a server started by a test would take a live server's sessions for its own.
     monkeypatch.setattr(docker_utils, "_CLIENT", None)
     monkeypatch.setattr(docker_utils.docker, "from_env", _no_docker)

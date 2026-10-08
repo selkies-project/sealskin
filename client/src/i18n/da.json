@@ -511,7 +511,7 @@
         },
         "SELKIES_ENABLE_COLLAB": {
           "label": "Aktiver Samarbejde",
-          "description": "Lad en seer med sessionens master-token fungere som samarbejdspartner med læse- og skriveadgang. Påkrævet for SealSkin-rum."
+          "description": "Lad en seer med sessionens master-token fungere som samarbejdspartner med læse- og skriveadgang. Påkrævet for {brand}-rum."
         },
         "SELKIES_ENABLE_PLAYER2": {
           "label": "Aktiver Deling for Spiller 2",
@@ -1156,7 +1156,7 @@
       "editGroupTitle": "Rediger Gruppe: {groupName}",
       "userConfigTitle": "Brugerkonfiguration",
       "warning": "Dette er den eneste gang, denne konfiguration vil blive vist. Giv den sikkert til brugeren.",
-      "info": "Du kan downloade denne konfigurationsfil for nemt at opsætte SealSkin på en anden enhed. Opbevar denne fil sikkert, da den indeholder din private nøgle.",
+      "info": "Du kan downloade denne konfigurationsfil for nemt at opsætte {brand} på en anden enhed. Opbevar denne fil sikkert, da den indeholder din private nøgle.",
       "configDataLabel": "Konfigurationsdata (JSON)",
       "copyButton": "Kopier Tekst",
       "downloadButton": "Download Fil",
@@ -1307,15 +1307,15 @@
       "noProotCatalogs": "Ingen kataloger endnu."
     },
     "web": {
-      "title": "SealSkin i denne browser",
-      "bookmarklet": "Send til SealSkin",
-      "bookmarkletHelp": "Træk dette link til din bogmærkelinje. Et klik på det åbner den side, du er på, i SealSkin eller søger efter den tekst, du har markeret.",
-      "pick": "Vælg til SealSkin",
-      "pickHelp": "Træk også dette link derop. Klik på det, og klik derefter på et link for at åbne linket i SealSkin, eller på et billede, en video eller lyd for at sende filen. Skift-klik på et link for at sende den fil, det fører til, hentet med dit login på det websted.",
-      "pickHint": "SealSkin: klik på et link eller på et billede, en video eller lyd for at sende det; Skift-klik på et link for at sende dets fil. Tryk på Esc for at annullere.",
+      "title": "{brand} i denne browser",
+      "bookmarklet": "Send til {brand}",
+      "bookmarkletHelp": "Træk dette link til din bogmærkelinje. Et klik på det åbner den side, du er på, i {brand} eller søger efter den tekst, du har markeret.",
+      "pick": "Vælg til {brand}",
+      "pickHelp": "Træk også dette link derop. Klik på det, og klik derefter på et link for at åbne linket i {brand}, eller på et billede, en video eller lyd for at sende filen. Skift-klik på et link for at sende den fil, det fører til, hentet med dit login på det websted.",
+      "pickHint": "{brand}: klik på et link eller på et billede, en video eller lyd for at sende det; Skift-klik på et link for at sende dets fil. Tryk på Esc for at annullere.",
       "protocol": "Åbn web+sealskin:-links her",
-      "protocolHelp": "Et link skrevet som web+sealskin: efterfulgt af en adresse åbner derefter adressen i SealSkin.",
-      "install": "Hvis browseren kan installere webapps, så installer SealSkin fra dens menu for at dele links og filer til den og åbne filer med den."
+      "protocolHelp": "Et link skrevet som web+sealskin: efterfulgt af en adresse åbner derefter adressen i {brand}.",
+      "install": "Hvis browseren kan installere webapps, så installer {brand} fra dens menu for at dele links og filer til den og åbne filer med den."
     },
     "via": {
       "root": "Root-token",
@@ -1536,7 +1536,7 @@
         "unchecked": "Kontrollen af proxyen er slået fra på denne knude (SEALSKIN_PROXY_AUTH_UNCHECKED): alt, hvad proxyen sender videre, tros."
       },
       "whoTitle": "Hvem Logger Ind",
-      "whoHelp": "Disse gælder for OpenID Connect, SAML og reverse proxyen. For at placere medlemmerne af en identitetsudbydergruppe i en SealSkin-gruppe skal du angive den under \"Identitetsudbydergrupper\" for den gruppe i Grupper.",
+      "whoHelp": "Disse gælder for OpenID Connect, SAML og reverse proxyen. For at placere medlemmerne af en identitetsudbydergruppe i en {brand}-gruppe skal du angive den under \"Identitetsudbydergrupper\" for den gruppe i Grupper.",
       "rootTitle": "Root-token",
       "rootHelp": "Altid tilgængeligt. Tokenet ligger i /config/root_token på serveren, indtil den fil slettes, og kan angives med SEALSKIN_ROOT_TOKEN.",
       "keyTitle": "Nøglefiler",
@@ -1680,7 +1680,7 @@
     }
   },
   "files": {
-    "title": "SealSkin-filer",
+    "title": "{brand}-filer",
     "header": {
       "title": "Filer",
       "newFolder": "Ny mappe",
@@ -1688,7 +1688,7 @@
       "uploadFolder": "Upload mappe"
     },
     "sidebar": {
-      "sharedFiles": "SealSkin-filer",
+      "sharedFiles": "{brand}-filer",
       "publicShares": "Offentlige Delinger"
     },
     "shares": {
@@ -1746,7 +1746,7 @@
       "deleteFailed": "Sletning mislykkedes: {error}",
       "preparingUpload": "Forbereder upload af {count, plural, one {1 fil} other {{count} filer}}...",
       "uploadPrepFailed": "Fejl under forberedelse af mappe-upload: {error}",
-      "notConfigured": "Fejl: SealSkin er ikke konfigureret. Konfigurer venligst i indstillinger.",
+      "notConfigured": "Fejl: {brand} er ikke konfigureret. Konfigurer venligst i indstillinger.",
       "folderCreated": "Mappen '{folderName}' blev oprettet.",
       "folderCreateFailed": "Fejl ved oprettelse af mappe: {error}",
       "shareCreated": "Deling oprettet med succes! Linket er blevet kopieret til din udklipsholder.",
@@ -1794,8 +1794,8 @@
     }
   },
   "web": {
-    "receiving": "Sender filen til SealSkin…",
-    "signInTitle": "Log ind på SealSkin",
+    "receiving": "Sender filen til {brand}…",
+    "signInTitle": "Log ind på {brand}",
     "signInWith": {
       "oidc": "Log ind med OpenID Connect",
       "saml": "Log ind med SAML"
@@ -1807,7 +1807,7 @@
     "rootLocked": "For mange forsøg. Vent et stykke tid, og prøv igen.",
     "held": {
       "title": "Venter på en administrator",
-      "message": "Du er logget ind som {username}, men en administrator skal placere dig i en gruppe, før du kan bruge SealSkin. Tjek igen, når det er sket.",
+      "message": "Du er logget ind som {username}, men en administrator skal placere dig i en gruppe, før du kan bruge {brand}. Tjek igen, når det er sket.",
       "check": "Tjek igen"
     },
     "signIn": {
@@ -1815,10 +1815,10 @@
       "refused": "Identitetsudbyderen afviste log ind.",
       "expired": "Log ind tog for lang tid eller er allerede brugt. Log ind igen.",
       "browser": "Log ind blev afsluttet i en anden browser eller fane. Start det igen her.",
-      "invalidUsername": "Din kontos navn kan ikke være et SealSkin-brugernavn, som kun må indeholde bogstaver, tal, understregninger og bindestreger. Spørg din administrator.",
-      "adminName": "Din kontos navn tilhører en SealSkin-administrator, som logger ind med en nøglefil. Spørg din administrator.",
-      "otherIdentity": "En anden konto hos identitetsudbyderen logger allerede ind som denne SealSkin-bruger. Spørg din administrator.",
-      "noAccount": "Der findes endnu ingen SealSkin-konto med dit navn. Bed din administrator om at oprette en.",
+      "invalidUsername": "Din kontos navn kan ikke være et {brand}-brugernavn, som kun må indeholde bogstaver, tal, understregninger og bindestreger. Spørg din administrator.",
+      "adminName": "Din kontos navn tilhører en {brand}-administrator, som logger ind med en nøglefil. Spørg din administrator.",
+      "otherIdentity": "En anden konto hos identitetsudbyderen logger allerede ind som denne {brand}-bruger. Spørg din administrator.",
+      "noAccount": "Der findes endnu ingen {brand}-konto med dit navn. Bed din administrator om at oprette en.",
       "notConfigured": "Denne server tilbyder ikke single sign-on.",
       "ended": "Identitetsudbyderen afsluttede dit log ind. Log ind igen."
     },
@@ -1867,7 +1867,7 @@
     "home": {
       "searchPlaceholder": "Søg efter applikationer, eller indsæt et link for at åbne det isoleret",
       "upload": "Upload en fil",
-      "drop": "Slip filen for at åbne den i SealSkin",
+      "drop": "Slip filen for at åbne den i {brand}",
       "running": "Kørende sessioner",
       "applications": "Applikationer",
       "allowance": "Kvote",
@@ -1939,7 +1939,7 @@
       "onNode": "På knude {node}",
       "seconds": "{count} s",
       "failed": "Starten mislykkedes",
-      "unseen": "Startanmodningen har ikke nået serveren. Tjek den SealSkin-fane, der startede den.",
+      "unseen": "Startanmodningen har ikke nået serveren. Tjek den {brand}-fane, der startede den.",
       "closeTab": "Browseren holdt denne fane åben. Luk den selv."
     }
   }

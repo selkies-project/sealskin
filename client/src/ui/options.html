@@ -12,7 +12,7 @@
     <div class="options-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <img src="icons/icon128.png" alt="SealSkin Logo" class="logo">
+                <img src="icons/icon128.png" alt="" class="logo">
                 <h1>SealSkin</h1>
             </div>
             <nav class="sidebar-nav">
@@ -70,6 +70,10 @@
                 <button class="nav-link admin-nav-link" style="display:none;" data-tabname="Cluster">
                     <i class="fas fa-sitemap fa-fw"></i>
                     <span data-i18n="options.sidebar.cluster">Cluster</span>
+                </button>
+                <button class="nav-link admin-nav-link" style="display:none;" data-tabname="Branding">
+                    <i class="fas fa-palette fa-fw"></i>
+                    <span data-i18n="options.sidebar.branding">Branding</span>
                 </button>
                 <button class="nav-link admin-nav-link" style="display:none;" data-tabname="SignIn">
                     <i class="fas fa-id-badge fa-fw"></i>
@@ -405,6 +409,149 @@
                             <thead><tr><th data-i18n="common.username">Username</th><th data-i18n="options.cluster.usageHours">Weighted hours</th></tr></thead>
                             <tbody></tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="Branding" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 data-i18n="options.branding.title">Branding</h3>
+                        <div class="button-group">
+                            <button type="button" id="branding-reset-btn" class="secondary"><i class="fas fa-undo"></i> <span data-i18n="options.branding.reset">Back to defaults</span></button>
+                            <button type="button" id="branding-save-btn" class="primary"><i class="fas fa-save"></i> <span data-i18n="options.branding.save">Save branding</span></button>
+                        </div>
+                    </div>
+                    <p class="description" data-i18n="options.branding.help">Give the web app your organization's name, logo, colors, wallpaper, and links.</p>
+                    <div class="branding-layout">
+                        <form id="branding-form" class="branding-form" autocomplete="off">
+                            <h5 class="field-group" data-i18n="options.branding.identity">Identity</h5>
+                            <div class="field-list single">
+                                <div class="field">
+                                    <div class="field-text"><label for="brand-name" data-i18n="options.branding.name">Product name</label><p class="description" data-i18n="options.branding.nameHelp"></p></div>
+                                    <div class="field-control"><input type="text" id="brand-name" maxlength="60" required></div>
+                                </div>
+                                <div class="field">
+                                    <div class="field-text"><label data-i18n="options.branding.logo">Logo</label><p class="description" data-i18n="options.branding.logoHelp"></p></div>
+                                    <div class="field-control brand-picture">
+                                        <img id="brand-logo-preview" class="brand-logo-preview" src="icons/icon128.png" alt="">
+                                        <button type="button" class="secondary" data-pick="logo"><i class="fas fa-upload"></i> <span data-i18n="options.branding.upload">Upload</span></button>
+                                        <button type="button" class="secondary" data-clear="logo" hidden><i class="fas fa-times"></i> <span data-i18n="options.branding.remove">Remove</span></button>
+                                        <input type="file" id="brand-logo-file" accept="image/png,image/jpeg,image/webp" hidden>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <div class="field-text"><label for="brand-logo-link" data-i18n="options.branding.logoLink">The logo links to</label><p class="description" data-i18n="options.branding.logoLinkHelp"></p></div>
+                                    <div class="field-control"><input type="url" id="brand-logo-link" placeholder="https://" maxlength="2000"></div>
+                                </div>
+                                <div class="field">
+                                    <div class="field-text"><label for="brand-accent" data-i18n="options.branding.accent">Accent color</label><p class="description" data-i18n="options.branding.accentHelp"></p></div>
+                                    <div class="field-control brand-accent">
+                                        <input type="color" id="brand-accent" value="#8b7cf6">
+                                        <input type="text" id="brand-accent-text" class="brand-accent-text" maxlength="7" placeholder="#8b7cf6" pattern="^#[0-9a-fA-F]{6}$">
+                                        <button type="button" class="secondary" id="brand-accent-clear"><i class="fas fa-undo"></i> <span data-i18n="options.branding.accentDefault">Default</span></button>
+                                    </div>
+                                </div>
+                                <div class="field switch">
+                                    <div class="field-text"><label for="brand-store-links" data-i18n="options.branding.storeLinks">Show the extension and app store links on the sign-in page</label></div>
+                                    <div class="field-control"><input type="checkbox" id="brand-store-links"></div>
+                                </div>
+                            </div>
+
+                            <h5 class="field-group" data-i18n="options.branding.wallpaper">Wallpaper</h5>
+                            <p class="description" data-i18n="options.branding.wallpaperHelp"></p>
+                            <div class="field-list single">
+                                <div class="field">
+                                    <div class="field-text"><label data-i18n="options.branding.wallpaper">Wallpaper</label></div>
+                                    <div class="field-control brand-picture">
+                                        <div id="brand-wallpaper-preview" class="brand-wallpaper-preview"></div>
+                                        <button type="button" class="secondary" data-pick="wallpaper"><i class="fas fa-image"></i> <span data-i18n="options.branding.upload">Upload</span></button>
+                                        <button type="button" class="secondary" data-clear="wallpaper" hidden><i class="fas fa-times"></i> <span data-i18n="options.branding.remove">Remove</span></button>
+                                        <input type="file" id="brand-wallpaper-file" accept="image/png,image/jpeg,image/webp" hidden>
+                                    </div>
+                                </div>
+                                <div class="field" data-wallpaper-only>
+                                    <div class="field-text"><label for="brand-wallpaper-fit" data-i18n="options.branding.fit">Position</label></div>
+                                    <div class="field-control">
+                                        <select id="brand-wallpaper-fit">
+                                            <option value="cover" data-i18n="web.home.fitFill">Fill</option>
+                                            <option value="contain" data-i18n="web.home.fitFit">Fit</option>
+                                            <option value="stretch" data-i18n="web.home.fitStretch">Stretch</option>
+                                            <option value="center" data-i18n="web.home.fitCenter">Center</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="field" data-wallpaper-only>
+                                    <div class="field-text"><label for="brand-wallpaper-blur"><span data-i18n="options.branding.blur">Blur</span> <output id="brand-wallpaper-blur-value"></output></label></div>
+                                    <div class="field-control"><input type="range" id="brand-wallpaper-blur" min="0" max="24" step="1"></div>
+                                </div>
+                                <div class="field" data-wallpaper-only>
+                                    <div class="field-text"><label for="brand-wallpaper-dim"><span data-i18n="options.branding.dim">Dim</span> <output id="brand-wallpaper-dim-value"></output></label></div>
+                                    <div class="field-control"><input type="range" id="brand-wallpaper-dim" min="0" max="90" step="5"></div>
+                                </div>
+                                <div class="field switch" data-wallpaper-only>
+                                    <div class="field-text"><label for="brand-wallpaper-forced" data-i18n="options.branding.wallpaperForced">Force this wallpaper on every user</label><p class="description" data-i18n="options.branding.wallpaperForcedHelp"></p></div>
+                                    <div class="field-control"><input type="checkbox" id="brand-wallpaper-forced"></div>
+                                </div>
+                            </div>
+
+                            <h5 class="field-group" data-i18n="options.branding.links">Home page links</h5>
+                            <p class="description" data-i18n="options.branding.linksHelp"></p>
+                            <div class="table-container">
+                                <table id="brand-links-table">
+                                    <thead>
+                                        <tr>
+                                            <th data-i18n="options.branding.linkName">Name</th>
+                                            <th data-i18n="options.branding.linkUrl">Address</th>
+                                            <th data-i18n="options.branding.linkIcon">Icon</th>
+                                            <th data-i18n="options.branding.linkOpen">Opens</th>
+                                            <th class="actions-cell" data-i18n="common.actions">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <p class="description" data-i18n="options.branding.linkIconHelp"></p>
+                            <div class="button-group"><button type="button" id="brand-add-link" class="secondary"><i class="fas fa-plus"></i> <span data-i18n="options.branding.addLink">Add a link</span></button></div>
+                        </form>
+
+                        <div class="branding-preview">
+                            <h5 class="field-group" data-i18n="options.branding.preview">Preview</h5>
+                            <p class="description" data-i18n="options.branding.previewHelp"></p>
+                            <div class="preview-browser-window brand-window" id="brand-mock">
+                                <div class="preview-browser-header">
+                                    <span class="preview-browser-dots"></span>
+                                    <div class="preview-browser-address-bar brand-address"><img id="mock-favicon" src="icons/icon128.png" alt=""><span id="mock-title">SealSkin</span></div>
+                                </div>
+                                <div class="mock-body">
+                                    <div class="mock-rail">
+                                        <img id="mock-logo" class="mock-logo" src="icons/icon128.png" alt="">
+                                        <span class="mock-nav active"><i class="fas fa-th-large"></i><small data-i18n="web.nav.home">Home</small></span>
+                                        <span class="mock-nav"><i class="fas fa-folder"></i><small data-i18n="web.nav.files">Files</small></span>
+                                        <span class="mock-nav"><i class="fas fa-sliders-h"></i><small data-i18n="web.nav.settings">Settings</small></span>
+                                        <span class="mock-account"><span class="mock-avatar">A</span><small data-i18n="options.branding.previewUser">A user</small></span>
+                                    </div>
+                                    <div class="mock-page">
+                                        <div class="mock-backdrop" id="mock-backdrop"></div>
+                                        <div class="mock-content">
+                                            <div class="mock-hero">
+                                                <span class="mock-search"><i class="fas fa-search"></i><span data-i18n="web.home.searchPlaceholder">Search applications, or paste a link to open it in isolation</span></span>
+                                                <span class="mock-btn"><i class="fas fa-upload"></i></span>
+                                                <span class="mock-btn" id="mock-customize"><i class="fas fa-paint-brush"></i></span>
+                                            </div>
+                                            <div class="mock-section" id="mock-links-section" hidden>
+                                                <h4 data-i18n="web.home.links">Links</h4>
+                                                <div class="mock-tiles" id="mock-links"></div>
+                                            </div>
+                                            <div class="mock-section">
+                                                <h4 data-i18n="web.home.applications">Applications</h4>
+                                                <div class="mock-tiles" id="mock-apps"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

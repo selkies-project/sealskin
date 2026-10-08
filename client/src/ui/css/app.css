@@ -7,7 +7,13 @@
   --bar: 52px;
   --tabs: 58px;
   --text-secondary: #b8c2d2;
-  --brand-gradient: linear-gradient(100deg, #e04fb0 10%, #7c6cf0 90%);
+  --accent-text: #b9b0ff;
+  --accent-text-strong: #cdc6ff;
+  --accent-border: rgba(139, 124, 246, 0.5);
+  /* The wordmark's pink and violet; a brand's accent replaces both (`app.branding`). */
+  --brand-from: #e04fb0;
+  --brand-to: #7c6cf0;
+  --brand-gradient: linear-gradient(100deg, var(--brand-from) 10%, var(--brand-to) 90%);
 }
 
 body { display: grid; grid-template: "rail stage" 100% / var(--rail) 1fr; height: 100dvh; overflow: hidden; }
@@ -26,11 +32,21 @@ body { display: grid; grid-template: "rail stage" 100% / var(--rail) 1fr; height
   border-right: 1px solid var(--border-color);
   min-height: 0;
 }
-.rail-logo { width: 40px; height: 40px; filter: drop-shadow(0 6px 14px rgba(224, 79, 176, 0.3)); }
-/* The logo is the way to the project: its issues and feature requests. */
+.rail-logo { width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 6px 14px var(--accent-glow)); }
+/* The logo is the way to the project, or wherever the brand points it; without a link it is just the logo. */
 .project-link { display: inline-flex; border-radius: var(--radius-sm); transition: transform var(--dur) var(--ease-out); }
 .project-link:hover { transform: scale(1.06); }
 .project-link:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.project-link.plain, .project-link.plain:hover { transform: none; cursor: default; }
+.rail-links button[aria-current="page"] { border-color: var(--accent-border); color: var(--accent-text-strong); }
+.profile-chip.on { border-color: var(--accent-border); color: var(--accent-text-strong); }
+.host-logo { object-fit: contain; }
+.host-store[hidden] { display: none; }
+.host-wait { display: flex; align-items: center; gap: 0.6rem; color: var(--text-secondary); font-size: 0.95rem; }
+.host-wait .inline-spinner { display: inline-block; width: 0.9em; height: 0.9em; border: 2px solid var(--bg-3); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+.host-alt { margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-muted); }
+.host-alt a { color: var(--accent-text); }
+@keyframes spin { to { transform: rotate(360deg); } }
 .rail-links { display: flex; flex-direction: column; gap: 0.35rem; width: 100%; flex: 1; }
 
 .rail-links button, .sign-out, .root-sign-in {
@@ -161,7 +177,7 @@ body { display: grid; grid-template: "rail stage" 100% / var(--rail) 1fr; height
     background-color: var(--bg-1);
     border-bottom: 1px solid var(--border-color);
   }
-  #topbar img { width: 28px; height: 28px; }
+  #topbar img { width: 28px; height: 28px; object-fit: contain; }
   #topbar .wordmark { flex: 1; font-weight: 700; letter-spacing: -0.01em; background: var(--brand-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
   #topbar .avatar { width: 32px; height: 32px; cursor: pointer; }
   #rail { flex-direction: row; gap: 0; padding: 0 0.3rem env(safe-area-inset-bottom); border-right: none; border-top: 1px solid var(--border-color); }
