@@ -1858,12 +1858,14 @@ const tableRenderConfig = {
       const homesDisabled = !effectiveSettings.persistent_storage;
       const username = escapeHtml(item.username);
       const pubkey = escapeHtml(item.public_key);
-      // A sign-in created the user held, and no group of theirs, named here or by the provider, has let them in yet.
-      const waiting = Boolean(item.settings) && item.settings.approved === false && !effectiveSettings.groups.length;
+      // The server says who still waits: a held sign-in no group, admin group, or approval has let in.
+      const waiting = item.held === true;
+      const marks = (item.admin ? ` <span class="pill active">${escapeHtml(t('options.users.admin'))}</span>` : '')
+        + (waiting ? ` <span class="pill off">${escapeHtml(t('options.users.awaitingGroup'))}</span>` : '');
       return `
                 <tr>
                     <td>${username}</td>
-                    <td>${escapeHtml(groupsOf(item.settings).join(', ')) || t('common.none')}${waiting ? ` <span class="pill off">${escapeHtml(t('options.users.awaitingGroup'))}</span>` : ''}</td>
+                    <td>${escapeHtml(groupsOf(item.settings).join(', ')) || t('common.none')}${marks}</td>
                     <td class="pubkey-cell" title="${pubkey}">
                         <div class="cell-wrapper">
                             <span class="key-text">${item.public_key ? shortKey(item.public_key) : t('options.users.signInOnly')}</span>

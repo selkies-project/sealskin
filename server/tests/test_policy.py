@@ -91,10 +91,17 @@ def test_a_user_a_sign_in_creates_in_no_group_is_held_until_grouped_or_approved(
     assert user_manager.held("frank") is False
 
 
-def test_a_user_the_provider_puts_in_a_group_or_an_administrator_made_is_never_held(users):
+def test_a_user_the_provider_puts_in_a_group_or_an_administrator_made_is_never_held(users, monkeypatch):
     user_manager.ensure_user("gina", "oidc", "oidc https://idp sub-2", ["employees"])
     assert user_manager.get_user("gina")["settings"]["approved"] is False
     assert user_manager.held("gina") is False
+    # The provider's administrator group counts as a group, with no SealSkin group of that name.
+    monkeypatch.setattr(user_manager.settings, "sso_admin_group", "/sealskin-admins")
+    user_manager.ensure_user("greg", "oidc", "oidc https://idp sub-4", ["sealskin-admins"])
+    assert user_manager.held("greg") is False and user_manager.held("greg", ["sealskin-admins"]) is False
+    assert user_manager.held("greg", ["nobody"]) is True
+    listed = {u["username"]: (u["held"], u["admin"]) for u in user_manager.get_all_users()}
+    assert listed["gina"] == (False, False) and listed["greg"] == (False, True)
     user_manager.create_user("hank", None, dict(user_manager.DEFAULT_USER_SETTINGS))
     assert user_manager.held("hank") is False
     assert user_manager.held("root") is False

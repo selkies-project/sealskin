@@ -334,11 +334,10 @@ def _identity(username: Any, groups: Any, subject: str, via: str, expires: float
         SignInError: See `_admit`.
     """
     _admit(username, subject)
-    admin_group = settings.sso_admin_group.strip().lstrip("/")
     cap = time.time() + settings.sso_max_age_seconds
     return {
         "username": username,
-        "admin": bool(admin_group) and admin_group in _groups(groups),
+        "admin": user_manager.in_admin_group(_groups(groups)),
         "groups": sorted(_groups(groups)),
         "subject": subject,
         "via": via,
@@ -673,9 +672,8 @@ async def _refresh(reg: dict[str, Any]) -> None:
             raise _Ended("the refreshed ID token names another account")
         if settings.sso_groups_claim:
             claims = await _with_userinfo(claims, tokens, doc)
-            admin_group = settings.sso_admin_group.strip().lstrip("/")
             reg["groups"] = sorted(_groups(claims.get(settings.sso_groups_claim)))
-            reg["admin"] = bool(admin_group) and admin_group in reg["groups"]
+            reg["admin"] = user_manager.in_admin_group(reg["groups"])
     if tokens.get("refresh_expires_in"):
         reg["expires"] = min(time.time() + float(tokens["refresh_expires_in"]), reg["created"] + settings.sso_max_age_seconds)
 

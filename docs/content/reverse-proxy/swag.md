@@ -136,3 +136,15 @@ add the same two lines there and set `SEALSKIN_SESSION_DOMAIN`.
 
 Authelia's and Authentik's own proxy configurations ship with SWAG as
 `authelia.subdomain.conf.sample` and `authentik.subdomain.conf.sample`.
+
+## On a port other than 443
+
+Published on another port, as `8443`, SWAG's `proxy.conf` sends the
+provider a `Host` without it (see
+[A port other than 443](index.md#a-port-other-than-443)); SealSkin does not
+mind, Authelia and Authentik do. Copy `proxy.conf` to
+`/config/nginx/proxy-port.conf`, change its two lines to
+`proxy_set_header Host $http_host;` and
+`proxy_set_header X-Forwarded-Host $http_host;`, and include the copy in
+the provider's own `*.subdomain.conf` in place of `proxy.conf`. Leave
+`proxy.conf` itself alone, so SWAG's updates keep applying to it.

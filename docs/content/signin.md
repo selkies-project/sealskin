@@ -125,8 +125,9 @@ claim users cannot set for themselves at the provider.
   [Groups from the provider](#groups-from-the-provider)).
 * The first sign-in through each protocol binds the user to the provider's
   account, and another account naming the same user is refused from then on.
-* Members of `SEALSKIN_SSO_ADMIN_GROUP` sign in as administrators. The names
-  of key-file administrators and `root` are refused.
+* Members of `SEALSKIN_SSO_ADMIN_GROUP` sign in as administrators, and the
+  Users table marks them **Administrator**. The names of key-file
+  administrators and `root` are refused.
 * The groups the provider names (`SEALSKIN_SSO_GROUPS_CLAIM`, or the proxy's
   groups header) put the user in the SealSkin groups of the same names, and in
   every group that lists one of them under **Identity provider groups**. They
@@ -160,7 +161,7 @@ A user the sign-in creates who lands in no group is **held**: signed in, but
 told to wait for an administrator and refused everything else. The dashboard
 marks such users **Awaiting a group** in the Users table, and either placing
 them in a group or pressing **Approve** lets them in, as does the provider
-naming a group of theirs from then on. Nothing is held while
+naming a group of theirs, or `SEALSKIN_SSO_ADMIN_GROUP`, from then on. Nothing is held while
 `SEALSKIN_SSO_HOLD_NEW_USERS=false`, which gives a new user the default
 settings at once. Where the provider sends no groups and every account should
 be looked at first, `SEALSKIN_SSO_CREATE_USERS=false` refuses unknown names

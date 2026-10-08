@@ -33,8 +33,12 @@ SEALSKIN_SSO_ADMIN_GROUP=admins
 ```
 
 The issuer ends in a slash. The user is `preferred_username`, the Authentik
-user name, and `groups` comes with the `profile` scope. A logout at
-Authentik ends the SealSkin sign-in at once through the back-channel URI.
+user name, and `groups` comes with the `profile` scope. The groups are
+Authentik's, however Authentik fills them: a user it signs in through a
+source of its own, as GitHub or Google, has the groups the source's property
+mappings give them, and `SEALSKIN_SSO_ADMIN_GROUP` names one of those. A
+logout at Authentik ends the SealSkin sign-in at once through the
+back-channel URI.
 
 A provider made through Authentik's API starts with no grant types, and
 answers every sign-in with `invalid_request` until the two above are set;

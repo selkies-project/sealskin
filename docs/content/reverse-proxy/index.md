@@ -181,6 +181,28 @@ may: nginx's `$host`, which SWAG's `proxy.conf` and Nginx Proxy Manager
 send, carries no port, and Authelia and Authentik then answer for a URL they
 do not know. Send them `$http_host`.
 
+## SealSkin reaches the provider itself
+
+Over OpenID Connect and SAML the browser is not the only one talking to
+the provider: the server fetches the provider's configuration or metadata,
+exchanges the code, and refreshes, at the address in `SEALSKIN_OIDC_ISSUER`
+or `SEALSKIN_SAML_METADATA_URL`, which is the provider's public one. From
+inside the container that name resolves to the router's public address,
+which a router that does not turn its own address around (hairpin NAT)
+drops. **Sign In → Test** then says the provider's configuration could not
+be read, every connection attempt failed. Give the container the name
+yourself, pointed at the address the proxy is published on:
+
+```yaml
+  sealskin:
+    extra_hosts:
+      - authentik.example.com:192.168.1.10   # the proxy host's LAN address
+```
+
+On a port other than 443 that is the host's address, not the proxy
+container's: the proxy listens on 443 inside its network and on the
+published port only on the host.
+
 ## Signing users in
 
 | | The proxy only terminates TLS | The proxy signs users in |

@@ -105,6 +105,11 @@ Creates and deletes administrators, with the same key handling as users. The
 panel also shows the **server public key** that every configuration file
 carries; a user who configures the client by hand needs it.
 
+A user an identity provider or a proxy signs in as an administrator, through
+`SEALSKIN_SSO_ADMIN_GROUP` or a group with the **Administrator** switch, is
+not listed here: they stay under [Users](#users), marked **Administrator**,
+since the rights come from the provider at each sign-in.
+
 ## App Stores
 
 An app store is a YAML catalogue at a URL. The default store is

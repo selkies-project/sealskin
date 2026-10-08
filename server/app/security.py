@@ -465,8 +465,7 @@ async def _proxy_user(req: Request) -> dict[str, Any] | None:
         user_manager.ensure_user(username, "proxy", "", groups)
     except ValueError as exc:
         raise HTTPException(status_code=403, detail=str(exc)) from exc
-    admin_group = settings.sso_admin_group.strip().lstrip("/")
-    return _signed_in(username, "proxy", groups, bool(admin_group) and admin_group in groups)
+    return _signed_in(username, "proxy", groups, user_manager.in_admin_group(groups))
 
 
 def _key_user(req: Request) -> dict[str, Any]:

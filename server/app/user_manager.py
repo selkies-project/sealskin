@@ -350,8 +350,36 @@ def groups_of(username: str, provider_groups: Any = None) -> list[str]:
     return names
 
 
+def in_admin_group(provider_groups: Any) -> bool:
+    """Return whether the groups a provider or proxy named include `sso_admin_group`.
+
+    Args:
+        provider_groups: Group names, a leading `/` of a group path dropped.
+    """
+    admin_group = settings.sso_admin_group.strip().lstrip("/")
+    return bool(admin_group) and admin_group in {str(g).strip().lstrip("/") for g in provider_groups or ()}
+
+
+def administers(username: str) -> bool:
+    """Return whether a user signs in as an administrator.
+
+    A key-file administrator does; so does a user whose last sign-in named
+    `sso_admin_group` or put them in a group that sets `admin`.
+
+    Args:
+        username: The user.
+    """
+    user = USER_DATA.get(username) or {}
+    if user.get("is_admin"):
+        return True
+    stored = user.get("settings") or {}
+    return in_admin_group(stored.get("provider_groups")) or bool(get_effective_settings(username).get("admin"))
+
+
 def held(username: str, provider_groups: Any = None) -> bool:
-    """Return whether a user waits for an administrator: created held, in no group, and not approved.
+    """Return whether a user waits for an administrator: created held, in no group, not approved.
+
+    A user the provider names in `sso_admin_group` is in a group for this purpose.
 
     Args:
         username: The user.
@@ -361,7 +389,12 @@ def held(username: str, provider_groups: Any = None) -> bool:
     if not user or user.get("is_admin") or not settings.sso_hold_new_users:
         return False
     stored = user.get("settings") or {}
-    return stored.get("approved") is False and not stored.get("admin") and not groups_of(username, provider_groups)
+    if stored.get("approved") is not False or stored.get("admin"):
+        return False
+    if provider_groups is None:
+        provider_groups = stored.get("provider_groups") or ()
+    # The provider's administrator group admits like any group of its naming.
+    return not in_admin_group(provider_groups) and not groups_of(username, provider_groups)
 
 
 def get_effective_settings(username: str, provider_groups: Any = None) -> dict[str, Any]:
@@ -483,8 +516,8 @@ def approve(username: str) -> dict[str, Any]:
 
 
 def get_all_users() -> list[dict[str, Any]]:
-    """Return every non-admin user."""
-    return [u for u in USER_DATA.values() if not u["is_admin"]]
+    """Return every non-admin user, each with `held` and `admin` as `held` and `administers` find them now."""
+    return [dict(u, held=held(u["username"]), admin=administers(u["username"])) for u in USER_DATA.values() if not u["is_admin"]]
 
 
 def get_all_admins() -> list[dict[str, Any]]:

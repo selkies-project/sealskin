@@ -545,6 +545,10 @@ class User(BaseModel):
     public_key: str
     is_admin: bool
     settings: UserSettings | None = None
+    #: Waiting for an administrator (see `user_manager.held`); set in the dashboard's listing.
+    held: bool = False
+    #: Signs in as an administrator (see `user_manager.administers`); set in the dashboard's listing.
+    admin: bool = False
 
 
 class Group(BaseModel):
