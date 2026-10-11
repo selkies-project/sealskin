@@ -47,10 +47,13 @@ _ROOM_ASSET_RE = re.compile(r'(?P<attr>\b(?:src|href))="(?P<url>[^"]+)"')
 
 
 def _absolutize_room_assets(html: str) -> str:
-    """Rewrite relative asset references in the room template to `/ui/room/`.
+    """Rewrite relative asset references in the room template to `/companion/ui/room/`.
 
     The page is served at `/room/<session_id>` while its hashed assets live
     under the static `/ui/room/` mount, so relative references would 404.
+    They are addressed through the companion lane, which a reverse proxy that
+    signs users in passes raw, so a guest with an invite link, who has no
+    account at the proxy's provider, gets the page whole.
 
     Args:
         html: Raw room template.
@@ -63,7 +66,7 @@ def _absolutize_room_assets(html: str) -> str:
         url = match.group("url")
         if url.startswith(("/", "http://", "https://", "data:", "about:", "#", "{{", "ws")):
             return match.group(0)
-        absolute = posixpath.normpath(posixpath.join("/ui/room/", url))
+        absolute = posixpath.normpath(posixpath.join("/companion/ui/room/", url))
         return f'{match.group("attr")}="{absolute}"'
 
     return _ROOM_ASSET_RE.sub(_rewrite, html)
@@ -197,7 +200,8 @@ async def collaborative_room(
             content="<h1>Invalid or expired collaboration link.</h1>", status_code=403
         )
 
-    iframe_src = f"/{session_id_str}/#token={user_token}"
+    # The Selkies client takes its token from the page's query or, in newer images, from the fragment; both are given.
+    iframe_src = f"/{session_id_str}/?token={user_token}#token={user_token}"
 
     client_data = {
         "sessionId": session_id_str,

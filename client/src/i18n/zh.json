@@ -85,7 +85,9 @@
       "admins": "管理员",
       "cluster": "集群",
       "signIn": "登录",
-      "audit": "审计日志"
+      "audit": "审计日志",
+      "branding": "品牌定制",
+      "keys": "应用密钥"
     },
     "dashboard": {
       "title": "仪表盘",
@@ -150,7 +152,16 @@
       "keyGeneration": "密钥生成",
       "keyGenDescription": "如果您没有密钥对，可以在此处生成一个。私钥将自动填写在上方。请将公钥提供给您的管理员。",
       "generateKeyButton": "生成新密钥对",
-      "publicKeyForAdminLabel": "您的公钥（提供给管理员）"
+      "publicKeyForAdminLabel": "您的公钥（提供给管理员）",
+      "keyTitle": "使用应用密钥连接",
+      "keyDescription": "在 Web 应用的“设置 → 应用密钥”中为此设备创建一个密钥，然后粘贴到这里。",
+      "keyLabel": "应用密钥",
+      "keyPlaceholder": "ssk_…@sealskin.example.com:8443",
+      "keyConnectButton": "连接",
+      "useKeyFileLink": "改用密钥文件",
+      "useKeyLink": "使用应用密钥",
+      "connectedWithKey": "已使用应用密钥登录。",
+      "connectedWithKeyFile": "已使用密钥文件登录。"
     },
     "home": {
       "title": "您的主目录",
@@ -241,7 +252,37 @@
       "prootCatalogHelp": "以只读方式挂载到每个会话；proot-apps 从中安装，而不是从注册表安装。保持为“无”时，由用户所属的第一个选择了目录的组决定。",
       "groupsHelp": "按住 Ctrl 或 Command 可多选。群组之间设置不一致时，以限制更严格的值为准。",
       "providerGroups": "上次登录时身份提供方给出的群组: {groups}",
-      "limitsHelp": "限制设为 -1 或留空表示不限制。"
+      "limitsHelp": "限制设为 -1 或留空表示不限制。",
+      "applicationKeys": "允许应用密钥（浏览器扩展和移动应用）",
+      "appKeyClients": "可使用应用密钥的应用",
+      "appKeyClientsHelp": "每个应用向服务器自报名称；这只是一种便利，并非锁定手段。",
+      "appKeyDays": "应用密钥的有效天数",
+      "appKeyDormantHours": "最近一次 Web 登录后多少小时应用密钥进入休眠",
+      "appKeyFollowSignIn": "Web 登录结束时应用密钥进入休眠",
+      "keys": "密钥",
+      "keysTitle": "{username} 的应用密钥",
+      "noKeys": "没有应用密钥。",
+      "revokeAll": "全部撤销",
+      "keyRevoked": "密钥已撤销。",
+      "keyRevokeFailed": "无法撤销密钥：{error}",
+      "keysLoadFailed": "无法加载密钥：{error}",
+      "keyState": {
+        "active": "活跃",
+        "dormant": "休眠",
+        "expired": "已过期"
+      },
+      "clients": {
+        "chrome": "Chrome 扩展",
+        "firefox": "Firefox 附加组件",
+        "android": "Android 应用",
+        "ios": "iOS 应用",
+        "other": "其他客户端"
+      },
+      "keyLastUsed": "上次使用",
+      "keyExpires": "到期",
+      "keyNever": "永不",
+      "keyNeverUsed": "从未使用",
+      "revokeAllConfirm": "要撤销“{username}”的所有应用密钥吗？其扩展和应用的登录将立即失效。"
     },
     "groups": {
       "title": "群组管理",
@@ -259,7 +300,8 @@
       "on": "开",
       "off": "关",
       "ssoGroups": "其成员归入此群组的身份提供方群组（逗号分隔）",
-      "overrideHelp": "群组只决定此处已设置的项；未设置或留空的项仍沿用各成员自己的设置。"
+      "overrideHelp": "群组只决定此处已设置的项；未设置或留空的项仍沿用各成员自己的设置。",
+      "chosen": "仅限下方勾选的应用"
     },
     "installedApps": {
       "title": "已安装应用",
@@ -1293,7 +1335,16 @@
       "catalogDeleteFailed": "无法删除目录：{error}",
       "catalogUpdateStarted": "正在每个节点上更新目录“{name}”。",
       "catalogUpdateFailed": "无法更新目录：{error}",
-      "catalogsRefreshFailed": "无法加载目录列表：{error}"
+      "catalogsRefreshFailed": "无法加载目录列表：{error}",
+      "keyNoServer": "此密钥未指定服务器。请在 Web 应用的“设置 → 应用密钥”中创建一个。",
+      "keyMissing": "请粘贴您的应用密钥。",
+      "keyRefused": {
+        "unknown": "服务器不认识此密钥。请在 Web 应用的个人资料中创建一个。",
+        "expired": "密钥已过期。请在 Web 应用的个人资料中创建一个新密钥。",
+        "disabled": "您的管理员不允许您的账户使用应用密钥。",
+        "client": "您的管理员不允许此应用使用应用密钥。",
+        "dormant": "您的密钥处于休眠状态。请先在 Web 应用上登录，然后重试。"
+      }
     },
     "placeholders": {
       "noAdmins": "未找到管理员。",
@@ -1322,7 +1373,8 @@
       "oidc": "OpenID Connect",
       "saml": "SAML",
       "proxy": "反向代理",
-      "key": "密钥文件"
+      "key": "密钥文件",
+      "app_key": "应用密钥"
     },
     "periods": {
       "day": "日",
@@ -1411,7 +1463,9 @@
         "proxy_auth_groups_header": "受信任的代理用于列出用户群组的请求头",
         "proxy_auth_logout_url": "代理用于让其用户退出登录的页面",
         "web_session_seconds": "根登录在未使用状态下的最长有效时间（小时）",
-        "files_sync": "将共享文件保存在对象存储中"
+        "files_sync": "将共享文件保存在对象存储中",
+        "auto_sign_in": "将未登录的浏览器直接转到",
+        "legacy_auth": "接受密钥文件客户端"
       },
       "usageTitle": "用量",
       "usageHours": "加权小时数",
@@ -1552,7 +1606,14 @@
       "resultEntity": "实体 ID:",
       "resultSso": "登录 URL:",
       "resultSlo": "提供单点注销:",
-      "resultCertificates": "签名证书:"
+      "resultCertificates": "签名证书:",
+      "landingTitle": "落地页",
+      "landingHelp": "选择了提供方后，未登录的浏览器会直接转到该提供方，而不是此服务器的登录页。在 Web 应用地址后加上 #root 仍可查看该页面，例如使用根令牌时。",
+      "autoNone": "此服务器的登录页",
+      "autoOidc": "OpenID Connect",
+      "autoSaml": "SAML",
+      "rootOff": "此节点已通过 SEALSKIN_ROOT_SIGN_IN=false 关闭。要再次使用该密钥登录，请在开启此项的情况下重启节点。",
+      "rootNoAdminGroup": "没有任何身份提供方群组被指定为管理员（见“谁可以登录”）。根密钥关闭后，将没有人能管理此服务器。"
     },
     "prootApps": {
       "title": "PRoot Apps 目录",
@@ -1586,6 +1647,83 @@
       "updateTitle": "立即在每个节点上重新拉取软件包已变更的应用",
       "confirmDelete": "删除目录“{name}”？每个节点都会删除其副本，分配给它的用户将没有目录。",
       "deleteTitle": "删除目录"
+    },
+    "branding": {
+      "title": "品牌定制",
+      "help": "为 Web 应用设置贵组织的名称、徽标、颜色、壁纸和链接。预览显示用户将看到的主页；保存之前不会有任何更改。",
+      "identity": "标识",
+      "name": "产品名称",
+      "nameHelp": "替代界面中所有出现 SealSkin 的位置：标题、侧边栏、已安装的 Web 应用以及登录页。",
+      "logo": "徽标",
+      "logoHelp": "不超过 1 MB 的正方形 PNG、JPEG 或 WebP 图片。它将用作侧边栏徽标、网站图标以及已安装 Web 应用的图标。",
+      "logoLink": "徽标链接到",
+      "logoLinkHelp": "点击徽标时在新标签页中打开的地址，例如贵公司的内网。留空则不设链接。",
+      "accent": "主题色",
+      "accentHelp": "按钮、高亮和字标的颜色。清空则使用默认的紫色。",
+      "accentDefault": "默认",
+      "wallpaper": "壁纸",
+      "wallpaperHelp": "主页背后的图片，不超过 8 MB。用户以它为起点，仍可自行选择，除非强制使用。",
+      "wallpaperForced": "对所有用户强制使用此壁纸",
+      "wallpaperForcedHelp": "用户主页上的“自定义”按钮将消失，所有人都看到这张壁纸。",
+      "fit": "位置",
+      "blur": "模糊",
+      "dim": "变暗",
+      "upload": "上传",
+      "remove": "移除",
+      "links": "主页链接",
+      "linksHelp": "主页在应用程序上方显示的磁贴，用于您自己的站点和工具。链接可在新标签页中打开，也可在用户所选应用程序的隔离会话中打开。",
+      "linkName": "名称",
+      "linkUrl": "地址",
+      "linkIcon": "图标",
+      "linkIconHelp": "Font Awesome 类名，例如 fa-book 或 fab fa-github，或者一个图片的 https 地址。",
+      "linkOpen": "打开方式",
+      "openTab": "在新标签页中",
+      "openIsolated": "在隔离环境中",
+      "addLink": "添加链接",
+      "noLinks": "尚无链接。",
+      "preview": "预览",
+      "previewHelp": "用户所看到的主页，使用您在此输入的内容。",
+      "previewUser": "某位用户",
+      "save": "保存品牌定制",
+      "reset": "恢复默认",
+      "resetConfirm": "要移除名称、徽标、颜色、壁纸、应用链接和链接，恢复为 SealSkin 的默认设置吗？",
+      "saved": "品牌定制已保存。重新加载页面即可看到标题和侧边栏的变化。",
+      "resetDone": "品牌定制已恢复为默认设置。",
+      "saveFailed": "无法保存品牌定制：{error}",
+      "pictureTooLarge": "图片过大，且无法缩小。请选择另一张。",
+      "notAPicture": "请选择 PNG、JPEG 或 WebP 图片。",
+      "apps": "配套应用",
+      "appsHelp": "用户获取扩展和应用的位置，会在登录页以及个人资料中应用密钥旁边显示链接。可将链接指向您自己的构建版本，或将其隐藏。",
+      "appShow": "显示",
+      "appUrl": "地址",
+      "appClient": "应用"
+    },
+    "keys": {
+      "title": "应用密钥",
+      "intro": "使用在此创建的密钥登录浏览器扩展和移动应用，而无需密钥文件。每台设备拥有自己的密钥；在此撤销某个密钥，对应设备即被登出。",
+      "none": "尚无密钥。",
+      "name": "名称",
+      "nameHelp": "密钥的用途，例如所用的设备。",
+      "namePlaceholder": "例如：工作笔记本",
+      "made": "创建时间",
+      "lifetime": "到期",
+      "days": "{count, plural, one {1 天} other {{count} 天}}",
+      "create": "创建密钥",
+      "revoke": "撤销",
+      "revoked": "密钥已撤销。",
+      "shownOnce": "请立即复制此密钥：它只显示这一次。将其粘贴到扩展或应用的连接页面。",
+      "copied": "密钥已复制。",
+      "copyFailed": "浏览器不允许复制。请选中密钥后手动复制。",
+      "notAllowed": "您的管理员不允许您的账户使用应用密钥。",
+      "clients": "允许的应用：{clients}。",
+      "dormantHours": "密钥在您最近一次 Web 登录后 {hours} 小时进入休眠；在此登录可唤醒它们。",
+      "followSignIn": "密钥在您的 Web 登录结束时进入休眠；在此登录可唤醒它们。",
+      "maxDays": "密钥最长有效 {count, plural, one {1 天} other {{count} 天}}。",
+      "get": "获取应用",
+      "getHelp": "安装其中一个，然后在其连接页面输入服务器地址和您的密钥。",
+      "loadFailed": "无法加载您的密钥：{error}",
+      "createFailed": "无法创建密钥：{error}",
+      "tooLong": "超出了管理员允许的最长期限。"
     }
   },
   "popup": {
@@ -1624,7 +1762,8 @@
       "moveHomeTo": "移动到 {node}",
       "moveHomeConfirm": "要将“{home}”移动到 {node} 吗？必须先停止正在使用它的会话。",
       "moveHomeTitle": "移动存储",
-      "allowance": "额度: 本{period}已用 {used} / {hours} 小时"
+      "allowance": "额度: 本{period}已用 {used} / {hours} 小时",
+      "newTab": "在新标签页中打开"
     },
     "sessionsView": {
       "noSessions": "未找到活跃会话。"
@@ -1689,7 +1828,10 @@
     },
     "sidebar": {
       "sharedFiles": "{brand} 文件",
-      "publicShares": "公开分享"
+      "publicShares": "公开分享",
+      "sharedHelp": "您在所有节点上的文件：每个会话都可在 Desktop/files 中访问。",
+      "allNodes": "所有节点",
+      "homeHelp": "此主目录位于节点 {node}；使用它的会话在该节点上运行。可在启动器中移动它以在其他节点运行。"
     },
     "shares": {
       "title": "公开分享的文件",
@@ -1790,7 +1932,15 @@
       "openServer": "打开服务器",
       "changeConnection": "更改连接",
       "mismatchTitle": "需要更新",
-      "mismatchBody": "此应用与服务器 Web 界面使用的桥接版本不同。请更新扩展或应用，或更新服务器，使两者一致。"
+      "mismatchBody": "此应用与服务器 Web 界面使用的桥接版本不同。请更新扩展或应用，或更新服务器，使两者一致。",
+      "dormantTitle": "请在 Web 上登录以继续",
+      "dormantBody": "您的应用密钥处于休眠状态：您的管理员要求定期在 Web 上登录。在那里登录后，此应用即可恢复使用。",
+      "signInWeb": "在 Web 上登录",
+      "keyTitle": "此密钥已无法登录",
+      "keyUnknown": "该密钥已被撤销或从未存在。请在 Web 上的个人资料中创建一个新密钥。",
+      "keyExpired": "该密钥已过期。请在 Web 上的个人资料中创建一个新密钥。",
+      "keyDisabled": "您的管理员不允许您的账户使用应用密钥。",
+      "keyClient": "您的管理员不允许此应用使用应用密钥。"
     }
   },
   "web": {
@@ -1800,11 +1950,6 @@
       "oidc": "使用 OpenID Connect 登录",
       "saml": "使用 SAML 登录"
     },
-    "rootToken": "根令牌",
-    "rootTokenHelp": "管理员的令牌，保存在服务器的 /config/root_token 文件中。",
-    "rootSignIn": "以根身份登录",
-    "rootRefused": "这不是该服务器的根令牌。",
-    "rootLocked": "尝试次数过多。请稍候再试。",
     "held": {
       "title": "等待管理员处理",
       "message": "您已以 {username} 的身份登录，但管理员需要先将您加入某个组，您才能使用 {brand}。完成后请重新检查。",
@@ -1820,7 +1965,8 @@
       "otherIdentity": "身份提供方的另一个账户已作为此 {brand} 用户登录。请询问您的管理员。",
       "noAccount": "尚无以您的名字命名的 {brand} 账户。请联系管理员创建。",
       "notConfigured": "此服务器不提供单点登录。",
-      "ended": "身份提供方结束了您的登录。请重新登录。"
+      "ended": "身份提供方结束了您的登录。请重新登录。",
+      "redirecting": "正在带您前往登录…"
     },
     "nav": {
       "home": "首页",
@@ -1887,7 +2033,10 @@
       "openAppStores": "打开应用商店",
       "popupBlocked": "浏览器拦截了会话的标签页。请允许此站点弹出窗口，然后重新启动。",
       "serverFileNeedsHome": "保存在服务器上的文件无法在无尘室模式下打开。请选择一个存储目录。",
+      "copyLink": "复制链接",
+      "copyLinkHelp": "以这些选项打开此应用程序的链接：可将其加入书签，或安装为应用",
       "copyLinkManual": "浏览器不允许复制。请选中下方的链接并复制。",
+      "linkCopied": "链接已复制。",
       "favorites": "收藏",
       "favoritesHint": "拖动以排序",
       "addFavorite": "加入收藏",
@@ -1919,7 +2068,8 @@
       "fitFill": "填充",
       "fitFit": "适应",
       "fitStretch": "拉伸",
-      "fitCenter": "居中"
+      "fitCenter": "居中",
+      "links": "链接"
     },
     "launch": {
       "title": "正在启动 {app}",
@@ -1932,7 +2082,8 @@
         "image": "正在下载应用程序镜像",
         "starting": "正在创建容器",
         "waiting": "正在等待桌面响应",
-        "ready": "正在打开会话"
+        "ready": "正在打开会话",
+        "client": "正在准备应用程序的 Web 客户端"
       },
       "uploading": "正在上传文件（{done} / {total}）",
       "imageHint": "应用程序在某个节点上首次启动时需要下载，可能要花几分钟。之后的启动会很快。",
@@ -1941,6 +2092,37 @@
       "failed": "启动失败",
       "unseen": "启动请求尚未到达服务器。请检查发起启动的 {brand} 标签页。",
       "closeTab": "浏览器使此标签页保持打开状态。请自行关闭。"
-    }
+    },
+    "open": {
+      "title": "正在打开 {app}",
+      "signingIn": "正在检查登录身份",
+      "looking": "正在查找运行中的会话",
+      "attaching": "正在打开运行中的会话",
+      "notYours": "此应用程序未对您的账户开放，或者它不存在。",
+      "noHome": "此地址指定的存储目录“{home}”不存在。请在 {brand} 中创建它，或去掉该参数后打开地址。",
+      "openSealSkin": "打开 {brand}"
+    },
+    "keyRefused": "该密钥无法登录任何账户。",
+    "keyNotRoot": "此处只有 root 可以使用密钥登录。请通过您的身份提供方登录。",
+    "keyExpired": "该密钥已过期。",
+    "keyLocked": "尝试次数过多。请稍候再试。",
+    "keyDisabled": "此服务器不接受在 Web 登录时使用 root 的应用密钥。",
+    "apps": {
+      "chrome": "Chrome 扩展",
+      "firefox": "Firefox 附加组件",
+      "android": "Android 应用",
+      "ios": "iOS 应用",
+      "other": "其他客户端"
+    },
+    "rootKey": "根密钥",
+    "rootKeyHelp": "管理员的应用密钥，由服务器在首次启动时写入 /config/root_key。",
+    "keys": {
+      "wakeTitle": "您的应用密钥已重新激活",
+      "wakeBody": "您现在可以返回应用，也可以继续留在这里。",
+      "wakeClose": "关闭",
+      "wakeContinue": "继续前往 {brand}",
+      "wakeFailed": "无法唤醒您的密钥：{error}"
+    },
+    "rootSignIn": "以根身份登录"
   }
 }

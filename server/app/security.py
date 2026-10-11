@@ -4,9 +4,10 @@
   can verify it, then the client sends an RSA-OAEP wrapped AES-256-GCM key.
 * `EncryptedRoute` encrypts every JSON response with the session key and
   `get_decrypted_request_body` decrypts request bodies.
-* `verify_token` validates client-signed RS256 JWTs against the public
-  key stored for the user, or the browser key their identity provider
-  sign-in registered, which the token names by `kid`.
+* `verify_token` authenticates a request: another node acting for a user,
+  the cookie of a web sign-in, a companion app's application key as a bearer
+  (`app.application_keys`), a trusted proxy's header, or a key-file client's
+  RS256 JWT, verified against the public key stored for the user.
 * Password hashing for public shares.
 """
 
@@ -35,7 +36,7 @@ from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from starlette.datastructures import URL
 
-from . import cluster, proxy_auth, sso, user_manager
+from . import application_keys, cluster, proxy_auth, sso, user_manager
 from .models import EncryptedPayload
 from .settings import settings
 from .state import CryptoSession, state
@@ -392,6 +393,7 @@ def _signed_in(username: str, via: str, provider_groups: Any = (), admin: bool =
             admin=True,
             groups=effective.get("groups") or [],
             proot_catalog=effective.get("proot_catalog"),
+            **{k: effective[k] for k in user_manager.APP_KEY_SETTINGS if k in effective},
         )
     elif not effective.get("active", False):
         raise HTTPException(status_code=403, detail="User account is inactive.")
@@ -438,6 +440,8 @@ async def _web_user(req: Request) -> dict[str, Any] | None:
         raise HTTPException(status_code=401, detail="This sign-in ended.")
     if not same_origin(req):
         raise HTTPException(status_code=403, detail="Requests from other origins are refused.")
+    if signed_in.get("expires"):
+        await asyncio.to_thread(user_manager.note_web_sign_in, signed_in["username"], float(signed_in["expires"]))
     return _signed_in(
         signed_in["username"],
         signed_in["via"],
@@ -466,7 +470,43 @@ async def _proxy_user(req: Request) -> dict[str, Any] | None:
         user_manager.ensure_user(username, "proxy", "", groups)
     except ValueError as exc:
         raise HTTPException(status_code=403, detail=str(exc)) from exc
+    # The proxy keeps no sign-in here: a user seen after the last stamp ran out is signing in anew.
+    await asyncio.to_thread(user_manager.note_web_sign_in, username, time.time() + settings.web_session_seconds)
     return _signed_in(username, "proxy", groups, user_manager.in_admin_group(groups))
+
+
+async def _app_key_user(req: Request) -> dict[str, Any] | None:
+    """Return the user of the application key a companion app presents as a bearer, on the plain lane alone.
+
+    The key names the user; the app names itself in
+    `application_keys.CLIENT_HEADER`. A refusal answers 401 with the code the
+    app reads: `unknown`, `expired`, `disabled`, `client`, or `dormant`.
+    """
+    header = req.headers.get("Authorization", "")
+    if not header.startswith("Bearer "):
+        return None
+    key = header[7:].strip()
+    # A key-file client's token, three dot-separated parts, is the key-file check's; anything else here is a key.
+    if not application_keys.is_key(key) and not cluster.companion_lane(req) and settings.legacy_auth and key.count(".") == 2:
+        return None
+    if not is_plain(req):
+        raise HTTPException(status_code=401, detail="Application keys are taken over HTTPS through the proxy alone.")
+    client = req.headers.get(application_keys.CLIENT_HEADER, "")
+    try:
+        record = await asyncio.to_thread(application_keys.authenticate, key, client)
+    except application_keys.KeyRefused as exc:
+        application_keys.refuse(key, client, cluster.client_address(req), exc.code)
+        raise HTTPException(status_code=401, detail=exc.code) from exc
+    username = str(record["user"])
+    stored = (user_manager.get_user(username) or {}).get("settings") or {}
+    provider_groups = stored.get("provider_groups") or ()
+    return _signed_in(
+        username,
+        "app_key",
+        provider_groups,
+        username == user_manager.ROOT or user_manager.in_admin_group(provider_groups),
+        key_id=record["id"],
+    )
 
 
 def _key_user(req: Request) -> dict[str, Any]:
@@ -502,18 +542,20 @@ async def verify_token(req: Request) -> dict[str, Any]:
     """FastAPI dependency authenticating a request.
 
     In order: another node acting for a user it signed in, the web sign-in a
-    cookie names, the user a trusted proxy names, and a key-file client's
-    token (`sub` names the user, `exp` is required, and the signature is
-    checked with the user's stored public key).
+    cookie names, the application key a companion app presents, the user a
+    trusted proxy names, and a key-file client's token (`sub` names the user,
+    `exp` is required, and the signature is checked with the user's stored
+    public key). A request under `/companion/`, the lane a reverse proxy in
+    front leaves unguarded, is taken on an application key alone.
 
     Args:
         req: Incoming request.
 
     Returns:
         The user record with `is_admin`, `held`, `effective_settings`,
-        `group`, `groups`, `provider_groups`, and `via` (`key`, `root`,
-        `oidc`, `saml`, or `proxy`). `forwarded` marks a request another node
-        sent on, which this node answers itself.
+        `group`, `groups`, `provider_groups`, and `via` (`key`, `app_key`,
+        `root`, `oidc`, `saml`, or `proxy`). `forwarded` marks a request
+        another node sent on, which this node answers itself.
 
     Raises:
         HTTPException: 401 for an invalid credential, 403 for an inactive
@@ -525,8 +567,13 @@ async def verify_token(req: Request) -> dict[str, Any]:
         if not forwarded:
             raise HTTPException(status_code=401, detail="The peer listener takes other nodes' requests alone.")
         user = forwarded
+    elif cluster.companion_lane(req):
+        # Under `/companion/` a cookie or a proxy's header counts for nothing: a reverse proxy lets the lane through unguarded.
+        user = await _app_key_user(req)
+        if not user:
+            raise HTTPException(status_code=401, detail="The companion lane takes application keys alone.")
     else:
-        user = await _web_user(req) or await _proxy_user(req) or _key_user(req)
+        user = await _web_user(req) or await _app_key_user(req) or await _proxy_user(req) or _key_user(req)
     if user.get("held") and req.url.path != STATUS_PATH:
         raise HTTPException(status_code=403, detail="This account waits for an administrator to place it in a group.")
     return user

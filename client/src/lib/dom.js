@@ -63,10 +63,16 @@ export function timeUntil(timestamp, t) {
  * @param {string} logoData URL, `/api/app_icon/...` path, or empty.
  * @returns {Promise<string>}
  */
+/** The prefix this page is served under: `/companion` on the companion apps' lane, which the browser's own loads of the API need too. */
+export const PAGE_PREFIX = typeof location !== 'undefined' && location.pathname.startsWith('/companion/') ? '/companion' : '';
+
+/** An absolute API address as this page reaches it, under the lane's prefix where there is one. */
+export const apiUrl = (path) => (PAGE_PREFIX && typeof path === 'string' && path.startsWith('/api/') ? PAGE_PREFIX + path : path);
+
 /** The picture standing for an application without one: the brand's logo where one was uploaded, else SealSkin's. */
 export const FALLBACK_LOGO = (() => {
   try {
-    return JSON.parse(document.querySelector('meta[name="sealskin-brand"]')?.content || '{}').logo || 'icons/icon128.png';
+    return apiUrl(JSON.parse(document.querySelector('meta[name="sealskin-brand"]')?.content || '{}').logo || 'icons/icon128.png');
   } catch (e) {
     return 'icons/icon128.png';
   }
@@ -74,7 +80,7 @@ export const FALLBACK_LOGO = (() => {
 
 export async function formatLogoSrc(logoData) {
   if (!logoData) return FALLBACK_LOGO;
-  if (logoData.startsWith('http') || logoData.startsWith('/api/branding/')) return logoData;
+  if (logoData.startsWith('http') || logoData.startsWith('/api/branding/')) return apiUrl(logoData);
   if (logoData.startsWith('/api/app_icon/')) {
     try {
       const response = await secureFetch(logoData, { method: 'GET' });

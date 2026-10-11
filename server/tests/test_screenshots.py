@@ -80,7 +80,7 @@ async def test_a_container_without_screenshots_is_left_alone_for_a_while(monkeyp
 
 def test_only_the_owner_is_shown_a_sessions_thumbnail(node, monkeypatch):  # noqa: F811
     _container(monkeypatch, lambda _r: httpx.Response(200, content=_png(800, 600), headers={"content-type": "image/png"}))
-    signed_in = node.post("/api/auth/root", json={"token": "a-root-token-for-the-tests"}, headers=WEB)
+    signed_in = node.post("/api/auth/key", json={"key": "a-root-key-for-the-tests"}, headers=WEB)
     cookie = {**WEB, "Cookie": signed_in.headers["set-cookie"].split(";", 1)[0]}
     state.sessions[SESSION] = {"username": "root", "ip": "10.0.0.5", "port": 3000, "custom_user": "u", "password": "p"}
     other = SESSION.replace("1111", "9999")

@@ -187,7 +187,7 @@ and dashboard in an ordinary tab. It has no configuration file and keeps no
 key. [Sign in](signin.md) with what the administrator set up: **Sign In with
 OpenID Connect** or **Sign In with SAML** takes you to your organization's
 identity provider and back, a reverse proxy that signs you in opens the app
-signed in, and the administrator of the server uses the **Root token**. The
+signed in, and the administrator of the server uses the root key at `/#root`. The
 dashboard shows who you are signed in as and has **Sign out**; a logout at
 the identity provider ends the sign-in as well.
 
@@ -290,5 +290,7 @@ The extension's options page (and the dashboard of the app and the web app)
 is where the client configuration lives, alongside the account-level views:
 **Configuration** (connection, export your config file for another device,
 log out), **Home Directories**, **Active Sessions**, and **Pinned Behavior**.
+A connection made with an application key exports a file that carries the
+key, which another device imports on its connection page.
 Administrators see the management panels described in
 [Administration](administration.md) in the same place.

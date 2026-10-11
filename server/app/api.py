@@ -19,6 +19,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from . import (
+    application_keys,
     branding,
     cluster,
     collaboration,
@@ -52,6 +53,7 @@ from .routers import (
     ui,
     uploads,
 )
+from .routers import application_keys as key_routes
 from .routers import branding as branding_routes
 from .routers import sso as sso_routes
 from .security import init_server_keys, proxy_cert_not_after, prune_crypto_sessions
@@ -137,14 +139,15 @@ async def _reload_cluster(_path: str) -> None:
     logger.info("Cluster records changed; reloading.")
     await asyncio.to_thread(cluster.apply_registry)
     await asyncio.to_thread(quota.load)
+    await asyncio.to_thread(application_keys.load)
 
 
 _records_pending = False
 
 
 def _sync_records() -> None:
-    """Bring this node and the shared records together: the root token, its own record, and the registry."""
-    sso.ensure_root_token()
+    """Bring this node and the shared records together: the root key, its own record, and the registry."""
+    application_keys.ensure_root_key()
     cluster.register_self()
     cluster.apply_registry()
     cluster.adopt_local_homes()
@@ -284,6 +287,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     user_manager.load_users_and_groups()
     sso.load()
     branding.load()
+    try:
+        application_keys.load()
+    except store.StoreUnavailable:
+        pass
     global _records_pending
     try:
         _sync_records()
@@ -384,6 +391,8 @@ def create_app() -> FastAPI:
     app.include_router(ui.router)
     app.include_router(entry.router)
     app.include_router(sso_routes.router)
+    app.include_router(key_routes.router)
+    app.include_router(key_routes.admin_router)
     app.include_router(branding_routes.router)
     app.include_router(branding_routes.user_router)
     app.include_router(branding_routes.admin_router)

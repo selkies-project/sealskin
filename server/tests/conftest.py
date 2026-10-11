@@ -46,7 +46,7 @@ PATH_SETTINGS = [
     "cluster_path",
     "node_state_path",
     "shared_files_path",
-    "root_token_path",
+    "root_key_path",
 ]
 
 
@@ -77,7 +77,7 @@ def isolated_settings(tmp_path, monkeypatch):
         "cluster_path": base / "cluster",
         "node_state_path": base / "node",
         "shared_files_path": tmp_path / "storage" / "shared_store",
-        "root_token_path": base / "root_token",
+        "root_key_path": base / "root_key",
     }
     for name, path in layout.items():
         monkeypatch.setattr(settings, name, str(path))

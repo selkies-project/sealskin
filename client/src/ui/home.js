@@ -46,6 +46,7 @@ import { browserTimezone } from '../lib/timezone.js';
 import { announce, escapeHtml, formatLogoSrc, hydrateLogos, timeAgo, currentLocale, showToast } from '../lib/dom.js';
 import { noticeDialog } from '../lib/modal.js';
 import { createLaunchView } from '../lib/launch-view.js';
+import { autoHomeName, bestHome, homeAllowed, nodesFor } from '../lib/homes.js';
 
 const RECENT_MAX = 8;
 const SESSIONS_REFRESH_MS = 10000;
@@ -516,8 +517,30 @@ function setContext(next) {
 // --- Launch panel -------------------------------------------------------------
 
 function fillSelect(select, choices, value) {
-  select.innerHTML = choices.map(([choice, label]) => `<option value="${escapeHtml(choice)}">${escapeHtml(label)}</option>`).join('');
+  select.innerHTML = choices.map(([choice, label, disabled]) => `<option value="${escapeHtml(choice)}"${disabled ? ' disabled' : ''}>${escapeHtml(label)}</option>`).join('');
   select.value = value;
+}
+
+/**
+ * Offer the homes a launch of `app` can use where the Where field sends it,
+ * the others grayed out, and select `wanted` or the next best.
+ *
+ * @param {object} app
+ * @param {string} wanted The home to select if it is allowed.
+ */
+function fillHomes(app, wanted) {
+  const nodes = nodesFor(cluster, whereSelect.value);
+  const autoName = autoHomeName(app.name);
+  const allowed = (choice) => homeAllowed(cluster, nodes, choice, autoName);
+  // In a cluster each home is named with the node that holds it.
+  const held = (dir) => (cluster && cluster.homes[dir] ? ` (${nodeName(cluster.homes[dir])})` : '');
+  const homes = app.is_meta_app ? [] : namedHomes();
+  const saved = (memory.apps[app.id] || {}).homeDir;
+  fillSelect(homeDirSelect, [
+    ['auto', t('popup.launchView.autoHome') + (cluster && cluster.homes[autoName] ? held(autoName) : ''), !allowed('auto')],
+    ['cleanroom', t('popup.launchView.cleanroom')],
+    ...homes.map((dir) => [dir, dir + held(dir), !allowed(dir)]),
+  ], bestHome(allowed, wanted, saved));
 }
 
 const isSheet = () => matchMedia('(max-width: 700px)').matches;
@@ -578,14 +601,13 @@ function openDrawer(app, anchor = null) {
   $('drawer-logo').src = 'icons/icon128.png';
   formatLogoSrc(app.logo).then((src) => { if (drawerApp === app) $('drawer-logo').src = src; });
 
-  // In a cluster each home is named with the node that holds it.
-  const held = (dir) => (cluster && cluster.homes[dir] ? ` (${nodeName(cluster.homes[dir])})` : '');
-  const homes = app.is_meta_app ? [] : namedHomes();
-  fillSelect(homeDirSelect, [
-    ['auto', t('popup.launchView.autoHome')],
-    ['cleanroom', t('popup.launchView.cleanroom')],
-    ...homes.map((dir) => [dir, dir + held(dir)]),
-  ], options.homeDir);
+  fillSelect(whereSelect, [
+    ['', t('popup.launchView.whereAuto')],
+    ...(cluster ? cluster.pools.map((pool) => [`pool:${pool}`, t('web.home.wherePool', { pool })]) : []),
+    ...(cluster ? cluster.nodes.filter((node) => node.alive).map((node) => [`node:${node.id}`, node.name || node.id]) : []),
+  ], options.where);
+  $('where-form-group').hidden = !cluster;
+  fillHomes(app, options.homeDir);
   $('homedir-form-group').hidden = !hasStorage(app);
 
   const gpus = gpusFor(app);
@@ -594,13 +616,6 @@ function openDrawer(app, anchor = null) {
     ...gpus.map((gpu) => [gpu.device, `${gpu.device.split('/').pop()} (${gpu.driver})`]),
   ], options.gpu || '');
   $('gpu-form-group').hidden = gpus.length === 0;
-
-  fillSelect(whereSelect, [
-    ['', t('popup.launchView.whereAuto')],
-    ...(cluster ? cluster.pools.map((pool) => [`pool:${pool}`, t('web.home.wherePool', { pool })]) : []),
-    ...(cluster ? cluster.nodes.filter((node) => node.alive).map((node) => [`node:${node.id}`, node.name || node.id]) : []),
-  ], options.where);
-  $('where-form-group').hidden = !cluster;
 
   languageSelect.value = options.language;
   $('collaborationMode').checked = options.room;
@@ -1006,7 +1021,7 @@ async function launch(app, options) {
   try {
     let homeName = options.homeDir;
     if (homeName === 'auto') {
-      homeName = `auto-${app.name.toLowerCase().replace(/[\s_]+/g, '-').replace(/[^a-z0-9-]/g, '')}`;
+      homeName = autoHomeName(app.name);
       if (!homeDirs.includes(homeName) && !app.is_meta_app) {
         await secureFetch('/api/homedirs', { method: 'POST', body: JSON.stringify({ home_name: homeName }) });
         homeDirs.push(homeName);
@@ -1214,6 +1229,8 @@ function takeFile(file) {
 }
 
 function bindEvents() {
+  // Another destination changes which homes can start there; the chosen one is kept where it still can.
+  whereSelect.addEventListener('change', () => { if (drawerApp) fillHomes(drawerApp, homeDirSelect.value); });
   heroInput.addEventListener('input', () => {
     const typed = typedContext(false);
     if (typed || (context && context.typed)) setContext(typed);

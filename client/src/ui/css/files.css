@@ -165,3 +165,6 @@
 .sidebar-nav .nav-link.special-homedir.active { background-color: var(--color-warning-soft); color: var(--color-warning-text); }
 .sidebar-nav .nav-link.special-homedir.active::before { background: var(--color-warning); }
 .sidebar-nav .nav-link.special-homedir:hover:not(.active) { background-color: var(--glass); color: var(--color-warning-text); }
+
+/* Where a directory lives, in a cluster: a tag on each entry of the sidebar. */
+.sidebar-nav .node-chip { margin-left: auto; padding: 0.05rem 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-pill); font-size: 0.68rem; font-weight: 600; color: var(--text-muted); background-color: var(--glass); white-space: nowrap; cursor: help; }

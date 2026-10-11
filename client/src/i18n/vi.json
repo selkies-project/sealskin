@@ -85,7 +85,9 @@
       "admins": "Quản trị viên",
       "cluster": "Cụm",
       "signIn": "Đăng nhập",
-      "audit": "Nhật ký kiểm toán"
+      "audit": "Nhật ký kiểm toán",
+      "branding": "Thương hiệu",
+      "keys": "Khóa ứng dụng"
     },
     "dashboard": {
       "title": "Bảng điều khiển",
@@ -150,7 +152,16 @@
       "keyGeneration": "Tạo khóa",
       "keyGenDescription": "Nếu bạn không có cặp khóa, bạn có thể tạo một cặp ở đây. Khóa riêng sẽ được điền vào ở trên. Cung cấp khóa công khai cho quản trị viên của bạn.",
       "generateKeyButton": "Tạo cặp khóa mới",
-      "publicKeyForAdminLabel": "Khóa công khai của bạn (cho quản trị viên)"
+      "publicKeyForAdminLabel": "Khóa công khai của bạn (cho quản trị viên)",
+      "keyTitle": "Kết nối bằng khóa ứng dụng",
+      "keyDescription": "Trong ứng dụng web, vào Cài đặt → Khóa ứng dụng, tạo một khóa cho thiết bị này và dán vào đây.",
+      "keyLabel": "Khóa ứng dụng",
+      "keyPlaceholder": "ssk_…@sealskin.example.com:8443",
+      "keyConnectButton": "Kết nối",
+      "useKeyFileLink": "Dùng tệp khóa thay thế",
+      "useKeyLink": "Dùng khóa ứng dụng",
+      "connectedWithKey": "Đã đăng nhập bằng khóa ứng dụng.",
+      "connectedWithKeyFile": "Đã đăng nhập bằng tệp khóa."
     },
     "home": {
       "title": "Các thư mục chính của bạn",
@@ -241,7 +252,37 @@
       "prootCatalogHelp": "Được gắn ở chế độ chỉ đọc vào mọi phiên; proot-apps cài đặt từ đó thay vì từ registry. Nếu để Không có, nhóm đầu tiên của người dùng có chọn danh mục sẽ quyết định.",
       "groupsHelp": "Giữ Ctrl hoặc Command để chọn nhiều mục. Khi các nhóm đặt khác nhau, giá trị hạn chế hơn sẽ được áp dụng.",
       "providerGroups": "Các nhóm nhà cung cấp danh tính đã nêu ở lần đăng nhập gần nhất: {groups}",
-      "limitsHelp": "Giới hạn bằng -1 hoặc để trống nghĩa là không giới hạn."
+      "limitsHelp": "Giới hạn bằng -1 hoặc để trống nghĩa là không giới hạn.",
+      "applicationKeys": "Cho phép khóa ứng dụng (tiện ích mở rộng trình duyệt và ứng dụng di động)",
+      "appKeyClients": "Các ứng dụng được dùng khóa ứng dụng",
+      "appKeyClientsHelp": "Mỗi ứng dụng tự xưng tên với máy chủ; đây là một tiện ích, không phải một khóa chặn.",
+      "appKeyDays": "Số ngày một khóa ứng dụng tồn tại",
+      "appKeyDormantHours": "Số giờ sau lần đăng nhập web gần nhất thì khóa ứng dụng ngủ",
+      "appKeyFollowSignIn": "Khóa ứng dụng ngủ khi phiên đăng nhập web kết thúc",
+      "keys": "Khóa",
+      "keysTitle": "Khóa ứng dụng của {username}",
+      "noKeys": "Không có khóa ứng dụng nào.",
+      "revokeAll": "Thu hồi tất cả",
+      "keyRevoked": "Đã thu hồi khóa.",
+      "keyRevokeFailed": "Không thể thu hồi khóa: {error}",
+      "keysLoadFailed": "Không thể tải các khóa: {error}",
+      "keyState": {
+        "active": "Hoạt động",
+        "dormant": "Đang ngủ",
+        "expired": "Đã hết hạn"
+      },
+      "clients": {
+        "chrome": "Tiện ích mở rộng Chrome",
+        "firefox": "Tiện ích Firefox",
+        "android": "Ứng dụng Android",
+        "ios": "Ứng dụng iOS",
+        "other": "Máy khách khác"
+      },
+      "keyLastUsed": "Dùng lần cuối",
+      "keyExpires": "Hết hạn",
+      "keyNever": "Không bao giờ",
+      "keyNeverUsed": "Chưa dùng",
+      "revokeAllConfirm": "Thu hồi mọi khóa ứng dụng của '{username}'? Các đăng nhập từ tiện ích mở rộng và ứng dụng của họ sẽ dừng ngay lập tức."
     },
     "groups": {
       "title": "Quản lý nhóm",
@@ -259,7 +300,8 @@
       "on": "Bật",
       "off": "Tắt",
       "ssoGroups": "Các nhóm của nhà cung cấp danh tính có thành viên thuộc nhóm này (phân tách bằng dấu phẩy)",
-      "overrideHelp": "Nhóm chỉ quyết định những gì được đặt ở đây; mọi thứ chưa đặt hoặc để trống vẫn theo thiết lập riêng của từng thành viên."
+      "overrideHelp": "Nhóm chỉ quyết định những gì được đặt ở đây; mọi thứ chưa đặt hoặc để trống vẫn theo thiết lập riêng của từng thành viên.",
+      "chosen": "Chỉ các ứng dụng được đánh dấu bên dưới"
     },
     "installedApps": {
       "title": "Ứng dụng đã cài đặt",
@@ -1293,7 +1335,16 @@
       "catalogDeleteFailed": "Không thể xóa danh mục: {error}",
       "catalogUpdateStarted": "Đang cập nhật danh mục '{name}' trên mọi node.",
       "catalogUpdateFailed": "Không thể cập nhật danh mục: {error}",
-      "catalogsRefreshFailed": "Không thể tải các danh mục: {error}"
+      "catalogsRefreshFailed": "Không thể tải các danh mục: {error}",
+      "keyNoServer": "Khóa này không nêu máy chủ nào. Hãy tạo một khóa trong ứng dụng web, tại Cài đặt → Khóa ứng dụng.",
+      "keyMissing": "Hãy dán khóa ứng dụng của bạn.",
+      "keyRefused": {
+        "unknown": "Máy chủ không biết khóa này. Hãy tạo một khóa trong hồ sơ của bạn trên ứng dụng web.",
+        "expired": "Khóa đã hết hạn. Hãy tạo khóa mới trong hồ sơ của bạn trên ứng dụng web.",
+        "disabled": "Quản trị viên không cho phép tài khoản của bạn dùng khóa ứng dụng.",
+        "client": "Quản trị viên không cho phép ứng dụng này dùng khóa ứng dụng.",
+        "dormant": "Khóa của bạn đang ngủ. Hãy đăng nhập trên ứng dụng web, rồi thử lại."
+      }
     },
     "placeholders": {
       "noAdmins": "Không tìm thấy quản trị viên nào.",
@@ -1322,7 +1373,8 @@
       "oidc": "OpenID Connect",
       "saml": "SAML",
       "proxy": "Reverse proxy",
-      "key": "Tệp khóa"
+      "key": "Tệp khóa",
+      "app_key": "Khóa ứng dụng"
     },
     "periods": {
       "day": "Ngày",
@@ -1411,7 +1463,9 @@
         "proxy_auth_groups_header": "Tiêu đề mà proxy tin cậy dùng để liệt kê các nhóm của người dùng",
         "proxy_auth_logout_url": "Trang của proxy dùng để đăng xuất người dùng của nó",
         "web_session_seconds": "Thời gian tối đa một lần đăng nhập root được giữ khi không dùng (giờ)",
-        "files_sync": "Lưu các tệp đã chia sẻ trong kho đối tượng"
+        "files_sync": "Lưu các tệp đã chia sẻ trong kho đối tượng",
+        "auto_sign_in": "Đưa trình duyệt chưa đăng nhập thẳng đến",
+        "legacy_auth": "Chấp nhận máy khách dùng tệp khóa"
       },
       "usageTitle": "Mức sử dụng",
       "usageHours": "Giờ có trọng số",
@@ -1552,7 +1606,14 @@
       "resultEntity": "Entity ID:",
       "resultSso": "URL đăng nhập:",
       "resultSlo": "Có đăng xuất một lần:",
-      "resultCertificates": "Chứng chỉ ký:"
+      "resultCertificates": "Chứng chỉ ký:",
+      "landingTitle": "Trang đích",
+      "landingHelp": "Khi đã chọn nhà cung cấp, trình duyệt chưa đăng nhập sẽ được đưa ngay đến đó thay vì trang đăng nhập của máy chủ này. Thêm #root vào địa chỉ của ứng dụng web để vẫn xem được trang này, chẳng hạn để dùng token root.",
+      "autoNone": "Trang đăng nhập của máy chủ này",
+      "autoOidc": "OpenID Connect",
+      "autoSaml": "SAML",
+      "rootOff": "Đã tắt trên nút này bằng SEALSKIN_ROOT_SIGN_IN=false. Để đăng nhập lại bằng khóa, hãy khởi động lại nút với tùy chọn này được bật.",
+      "rootNoAdminGroup": "Không có nhóm nào của nhà cung cấp danh tính chỉ định quản trị viên (xem Ai đăng nhập). Khi khóa root bị tắt, không ai có thể quản trị máy chủ này."
     },
     "prootApps": {
       "title": "Danh mục PRoot Apps",
@@ -1586,6 +1647,83 @@
       "updateTitle": "Kéo lại ngay các ứng dụng có gói thay đổi, trên mọi node",
       "confirmDelete": "Xóa danh mục '{name}'? Mọi node sẽ xóa bản sao của mình và người dùng được gán danh mục này sẽ không có danh mục nào.",
       "deleteTitle": "Xóa danh mục"
+    },
+    "branding": {
+      "title": "Thương hiệu",
+      "help": "Đặt cho ứng dụng web tên, logo, màu sắc, hình nền và liên kết của tổ chức bạn. Bản xem trước hiển thị trang chủ như người dùng sẽ thấy; không có gì thay đổi cho đến khi bạn lưu.",
+      "identity": "Nhận diện",
+      "name": "Tên sản phẩm",
+      "nameHelp": "Xuất hiện ở mọi nơi giao diện vốn ghi SealSkin: tiêu đề, thanh bên, ứng dụng web đã cài đặt và trang đăng nhập.",
+      "logo": "Logo",
+      "logoHelp": "Ảnh vuông PNG, JPEG hoặc WebP tối đa 1 MB. Đây là logo trên thanh bên, favicon và biểu tượng của ứng dụng web đã cài đặt.",
+      "logoLink": "Logo liên kết đến",
+      "logoLinkHelp": "Địa chỉ mà logo mở trong thẻ mới, chẳng hạn mạng nội bộ của bạn. Để trống nếu không cần liên kết.",
+      "accent": "Màu nhấn",
+      "accentHelp": "Màu của các nút, phần tô sáng và tên thương hiệu. Xóa để dùng màu tím mặc định.",
+      "accentDefault": "Mặc định",
+      "wallpaper": "Hình nền",
+      "wallpaperHelp": "Ảnh đặt sau trang chủ, tối đa 8 MB. Người dùng bắt đầu với ảnh này và vẫn có thể chọn ảnh riêng, trừ khi bị bắt buộc.",
+      "wallpaperForced": "Bắt buộc hình nền này cho mọi người dùng",
+      "wallpaperForcedHelp": "Người dùng mất nút Tùy chỉnh trên trang chủ và tất cả đều thấy hình nền này.",
+      "fit": "Vị trí",
+      "blur": "Làm mờ",
+      "dim": "Làm tối",
+      "upload": "Tải lên",
+      "remove": "Gỡ bỏ",
+      "links": "Liên kết trang chủ",
+      "linksHelp": "Các ô trang chủ hiển thị phía trên ứng dụng, dành cho trang web và công cụ của riêng bạn. Liên kết mở trong thẻ mới, hoặc trong một phiên cách ly của ứng dụng mà người dùng chọn.",
+      "linkName": "Tên",
+      "linkUrl": "Địa chỉ",
+      "linkIcon": "Biểu tượng",
+      "linkIconHelp": "Một lớp Font Awesome như fa-book hoặc fab fa-github, hoặc địa chỉ https của một ảnh.",
+      "linkOpen": "Mở",
+      "openTab": "Trong thẻ mới",
+      "openIsolated": "Trong môi trường cách ly",
+      "addLink": "Thêm liên kết",
+      "noLinks": "Chưa có liên kết nào.",
+      "preview": "Xem trước",
+      "previewHelp": "Trang chủ như người dùng thấy, với những gì bạn đã nhập ở đây.",
+      "previewUser": "Một người dùng",
+      "save": "Lưu thương hiệu",
+      "reset": "Về mặc định",
+      "resetConfirm": "Gỡ tên, logo, màu sắc, hình nền, liên kết ứng dụng và liên kết, trở về mặc định của SealSkin?",
+      "saved": "Đã lưu thương hiệu. Tải lại trang để thấy tiêu đề và thanh bên thay đổi.",
+      "resetDone": "Đã đặt lại thương hiệu về mặc định.",
+      "saveFailed": "Không thể lưu thương hiệu: {error}",
+      "pictureTooLarge": "Ảnh quá lớn và không thể thu nhỏ. Hãy chọn ảnh khác.",
+      "notAPicture": "Hãy chọn ảnh PNG, JPEG hoặc WebP.",
+      "apps": "Ứng dụng đi kèm",
+      "appsHelp": "Nơi người dùng tải tiện ích mở rộng và các ứng dụng, được liên kết từ trang đăng nhập và bên cạnh khóa ứng dụng trong hồ sơ. Trỏ liên kết đến bản dựng riêng của bạn, hoặc ẩn đi.",
+      "appShow": "Hiển thị",
+      "appUrl": "Địa chỉ",
+      "appClient": "Ứng dụng"
+    },
+    "keys": {
+      "title": "Khóa ứng dụng",
+      "intro": "Đăng nhập tiện ích mở rộng trình duyệt và ứng dụng di động bằng khóa tạo tại đây, thay cho tệp khóa. Mỗi thiết bị có một khóa riêng; thu hồi khóa ở đây và thiết bị đó sẽ bị đăng xuất.",
+      "none": "Chưa có khóa nào.",
+      "name": "Tên",
+      "nameHelp": "Khóa dùng để làm gì, chẳng hạn tên thiết bị sẽ dùng nó.",
+      "namePlaceholder": "ví dụ: Laptop công việc",
+      "made": "Đã tạo",
+      "lifetime": "Hết hạn",
+      "days": "{count, plural, one {1 ngày} other {{count} ngày}}",
+      "create": "Tạo khóa",
+      "revoke": "Thu hồi",
+      "revoked": "Đã thu hồi khóa.",
+      "shownOnce": "Hãy sao chép khóa này ngay: nó chỉ hiển thị một lần. Dán vào trang kết nối của tiện ích mở rộng hoặc ứng dụng.",
+      "copied": "Đã sao chép khóa.",
+      "copyFailed": "Trình duyệt không cho phép sao chép. Hãy chọn khóa và sao chép thủ công.",
+      "notAllowed": "Quản trị viên không cho phép tài khoản của bạn dùng khóa ứng dụng.",
+      "clients": "Ứng dụng được phép: {clients}.",
+      "dormantHours": "Khóa ngủ sau {hours} giờ kể từ lần đăng nhập web gần nhất; đăng nhập tại đây sẽ đánh thức chúng.",
+      "followSignIn": "Khóa ngủ khi phiên đăng nhập web của bạn kết thúc; đăng nhập tại đây sẽ đánh thức chúng.",
+      "maxDays": "Một khóa tồn tại tối đa {count, plural, one {1 ngày} other {{count} ngày}}.",
+      "get": "Tải các ứng dụng",
+      "getHelp": "Cài một trong số này, rồi nhập địa chỉ máy chủ và khóa của bạn trên trang kết nối của nó.",
+      "loadFailed": "Không thể tải các khóa của bạn: {error}",
+      "createFailed": "Không thể tạo khóa: {error}",
+      "tooLong": "Thời hạn này dài hơn mức quản trị viên cho phép."
     }
   },
   "popup": {
@@ -1624,7 +1762,8 @@
       "moveHomeTo": "Di chuyển đến {node}",
       "moveHomeConfirm": "Di chuyển '{home}' đến {node}? Phải dừng các phiên đang dùng nó trước.",
       "moveHomeTitle": "Di chuyển lưu trữ",
-      "allowance": "Hạn mức: {used} trên {hours} giờ trong {period} này"
+      "allowance": "Hạn mức: {used} trên {hours} giờ trong {period} này",
+      "newTab": "Mở trong thẻ mới"
     },
     "sessionsView": {
       "noSessions": "Không tìm thấy phiên hoạt động nào."
@@ -1689,7 +1828,10 @@
     },
     "sidebar": {
       "sharedFiles": "Tệp {brand}",
-      "publicShares": "Chia sẻ công khai"
+      "publicShares": "Chia sẻ công khai",
+      "sharedHelp": "Tệp của bạn trên mọi nút: mọi phiên đều có chúng tại Desktop/files.",
+      "allNodes": "mọi nút",
+      "homeHelp": "Thư mục chính này nằm trên nút {node}; các phiên dùng nó sẽ chạy ở đó. Di chuyển nó từ trình khởi chạy để chạy ở nơi khác."
     },
     "shares": {
       "title": "Các tệp được chia sẻ công khai",
@@ -1790,7 +1932,15 @@
       "openServer": "Mở máy chủ",
       "changeConnection": "Đổi kết nối",
       "mismatchTitle": "Cần cập nhật",
-      "mismatchBody": "Ứng dụng này và giao diện web của máy chủ dùng các phiên bản bridge khác nhau. Hãy cập nhật tiện ích mở rộng hoặc ứng dụng, hoặc cập nhật máy chủ, để cả hai khớp nhau."
+      "mismatchBody": "Ứng dụng này và giao diện web của máy chủ dùng các phiên bản bridge khác nhau. Hãy cập nhật tiện ích mở rộng hoặc ứng dụng, hoặc cập nhật máy chủ, để cả hai khớp nhau.",
+      "dormantTitle": "Đăng nhập trên web để tiếp tục",
+      "dormantBody": "Khóa ứng dụng của bạn đang ngủ: quản trị viên yêu cầu bạn đăng nhập trên web định kỳ. Đăng nhập ở đó, và ứng dụng này sẽ hoạt động lại.",
+      "signInWeb": "Đăng nhập trên web",
+      "keyTitle": "Khóa này không còn đăng nhập được",
+      "keyUnknown": "Khóa đã bị thu hồi hoặc chưa từng tồn tại. Hãy tạo khóa mới trong hồ sơ của bạn trên web.",
+      "keyExpired": "Khóa đã hết hạn. Hãy tạo khóa mới trong hồ sơ của bạn trên web.",
+      "keyDisabled": "Quản trị viên không cho phép tài khoản của bạn dùng khóa ứng dụng.",
+      "keyClient": "Quản trị viên không cho phép ứng dụng này dùng khóa ứng dụng."
     }
   },
   "web": {
@@ -1800,11 +1950,6 @@
       "oidc": "Đăng nhập bằng OpenID Connect",
       "saml": "Đăng nhập bằng SAML"
     },
-    "rootToken": "Token root",
-    "rootTokenHelp": "Token của quản trị viên, được máy chủ lưu trong tệp /config/root_token.",
-    "rootSignIn": "Đăng nhập với quyền root",
-    "rootRefused": "Đó không phải token root của máy chủ.",
-    "rootLocked": "Quá nhiều lần thử. Hãy chờ một lúc rồi thử lại.",
     "held": {
       "title": "Đang chờ quản trị viên",
       "message": "Bạn đã đăng nhập với tên {username}, nhưng quản trị viên cần đưa bạn vào một nhóm trước khi bạn có thể dùng {brand}. Hãy kiểm tra lại sau khi họ đã làm xong.",
@@ -1820,7 +1965,8 @@
       "otherIdentity": "Một tài khoản khác của nhà cung cấp danh tính đã đăng nhập với tư cách người dùng {brand} này. Hãy hỏi quản trị viên của bạn.",
       "noAccount": "Chưa có tài khoản {brand} nào mang tên bạn. Hãy yêu cầu quản trị viên tạo một tài khoản.",
       "notConfigured": "Máy chủ này không cung cấp đăng nhập một lần.",
-      "ended": "Nhà cung cấp danh tính đã kết thúc lần đăng nhập của bạn. Hãy đăng nhập lại."
+      "ended": "Nhà cung cấp danh tính đã kết thúc lần đăng nhập của bạn. Hãy đăng nhập lại.",
+      "redirecting": "Đang đưa bạn đến trang đăng nhập…"
     },
     "nav": {
       "home": "Trang chủ",
@@ -1887,7 +2033,10 @@
       "openAppStores": "Mở Cửa hàng ứng dụng",
       "popupBlocked": "Trình duyệt đã chặn thẻ của phiên. Hãy cho phép cửa sổ bật lên cho trang này, rồi khởi chạy lại.",
       "serverFileNeedsHome": "Không thể mở tệp lưu trên máy chủ ở chế độ Phòng sạch. Hãy chọn một thư mục lưu trữ.",
+      "copyLink": "Sao chép liên kết",
+      "copyLinkHelp": "Liên kết mở ứng dụng này với các tùy chọn này: đánh dấu nó, hoặc cài đặt như một ứng dụng",
       "copyLinkManual": "Trình duyệt không cho phép sao chép. Hãy chọn liên kết bên dưới và sao chép.",
+      "linkCopied": "Đã sao chép liên kết.",
       "favorites": "Yêu thích",
       "favoritesHint": "Kéo để sắp xếp lại",
       "addFavorite": "Thêm vào yêu thích",
@@ -1919,7 +2068,8 @@
       "fitFill": "Lấp đầy",
       "fitFit": "Vừa khít",
       "fitStretch": "Kéo giãn",
-      "fitCenter": "Căn giữa"
+      "fitCenter": "Căn giữa",
+      "links": "Liên kết"
     },
     "launch": {
       "title": "Đang khởi chạy {app}",
@@ -1932,7 +2082,8 @@
         "image": "Đang tải xuống image ứng dụng",
         "starting": "Đang tạo container",
         "waiting": "Đang chờ màn hình làm việc phản hồi",
-        "ready": "Đang mở phiên"
+        "ready": "Đang mở phiên",
+        "client": "Đang chuẩn bị máy khách web của ứng dụng"
       },
       "uploading": "Đang tải lên tệp ({done} trên {total})",
       "imageHint": "Lần khởi chạy đầu tiên của một ứng dụng trên một nút sẽ tải ứng dụng về, có thể mất vài phút. Các lần khởi chạy sau sẽ nhanh.",
@@ -1941,6 +2092,37 @@
       "failed": "Khởi chạy thất bại",
       "unseen": "Yêu cầu khởi chạy chưa đến được máy chủ. Hãy kiểm tra thẻ {brand} đã gửi yêu cầu.",
       "closeTab": "Trình duyệt vẫn giữ thẻ này mở. Hãy tự đóng nó."
-    }
+    },
+    "open": {
+      "title": "Đang mở {app}",
+      "signingIn": "Đang kiểm tra ai đã đăng nhập",
+      "looking": "Đang tìm phiên đang chạy",
+      "attaching": "Đang mở phiên đang chạy",
+      "notYours": "Ứng dụng này không mở cho tài khoản của bạn, hoặc không tồn tại.",
+      "noHome": "Thư mục lưu trữ '{home}' mà địa chỉ này nêu không tồn tại. Hãy tạo nó trong {brand}, hoặc mở địa chỉ mà không có nó.",
+      "openSealSkin": "Mở {brand}"
+    },
+    "keyRefused": "Khóa này không đăng nhập được cho ai.",
+    "keyNotRoot": "Chỉ root đăng nhập tại đây bằng khóa. Hãy đăng nhập qua nhà cung cấp danh tính của bạn.",
+    "keyExpired": "Khóa này đã hết hạn.",
+    "keyLocked": "Thử quá nhiều lần. Hãy đợi một lúc rồi thử lại.",
+    "keyDisabled": "Máy chủ này không chấp nhận khóa ứng dụng của root tại trang đăng nhập web.",
+    "apps": {
+      "chrome": "Tiện ích mở rộng Chrome",
+      "firefox": "Tiện ích Firefox",
+      "android": "Ứng dụng Android",
+      "ios": "Ứng dụng iOS",
+      "other": "Máy khách khác"
+    },
+    "rootKey": "Khóa root",
+    "rootKeyHelp": "Khóa ứng dụng của quản trị viên, được máy chủ ghi vào /config/root_key khi khởi động lần đầu.",
+    "keys": {
+      "wakeTitle": "Khóa ứng dụng của bạn đã hoạt động lại",
+      "wakeBody": "Bạn có thể quay lại ứng dụng ngay, hoặc tiếp tục ở đây.",
+      "wakeClose": "Đóng",
+      "wakeContinue": "Tiếp tục đến {brand}",
+      "wakeFailed": "Không thể đánh thức các khóa của bạn: {error}"
+    },
+    "rootSignIn": "Đăng nhập với quyền root"
   }
 }

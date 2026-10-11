@@ -85,7 +85,9 @@
       "admins": "Admins",
       "cluster": "Cluster",
       "signIn": "Login",
-      "audit": "Log de Auditoria"
+      "audit": "Log de Auditoria",
+      "branding": "Marca",
+      "keys": "Chaves de Aplicação"
     },
     "dashboard": {
       "title": "Painel",
@@ -150,7 +152,16 @@
       "keyGeneration": "Geração de Chave",
       "keyGenDescription": "Se você não tiver um par de chaves, pode gerar um aqui. A chave privada será preenchida acima. Forneça a chave pública ao seu administrador.",
       "generateKeyButton": "Gerar Novo Par de Chaves",
-      "publicKeyForAdminLabel": "Sua Chave Pública (para o admin)"
+      "publicKeyForAdminLabel": "Sua Chave Pública (para o admin)",
+      "keyTitle": "Conectar com uma chave de aplicação",
+      "keyDescription": "No aplicativo web, em Configurações → Chaves de Aplicação, crie uma chave para este dispositivo e cole-a aqui.",
+      "keyLabel": "Chave de aplicação",
+      "keyPlaceholder": "ssk_…@sealskin.example.com:8443",
+      "keyConnectButton": "Conectar",
+      "useKeyFileLink": "Usar um arquivo de chave",
+      "useKeyLink": "Usar uma chave de aplicação",
+      "connectedWithKey": "Logado com uma chave de aplicação.",
+      "connectedWithKeyFile": "Logado com um arquivo de chave."
     },
     "home": {
       "title": "Seus Diretórios Home",
@@ -241,7 +252,37 @@
       "prootCatalogHelp": "Montado somente leitura em todas as sessões; o proot-apps instala a partir dele em vez de um registro. Se ficar em Nenhum, o primeiro grupo do usuário que escolher um decide.",
       "groupsHelp": "Segure Ctrl ou Command para selecionar vários. Quando os grupos divergem, vale o valor mais restritivo.",
       "providerGroups": "Grupos informados pelo provedor de identidade no último login: {groups}",
-      "limitsHelp": "Um limite de -1, ou deixado em branco, não define limite algum."
+      "limitsHelp": "Um limite de -1, ou deixado em branco, não define limite algum.",
+      "applicationKeys": "Permitir Chaves de Aplicação (Extensão do Navegador e Aplicativo Móvel)",
+      "appKeyClients": "Aplicativos que podem usar chaves de aplicação",
+      "appKeyClientsHelp": "Cada aplicativo se identifica ao servidor; isto é uma conveniência, não uma trava.",
+      "appKeyDays": "Dias de validade de uma chave de aplicação",
+      "appKeyDormantHours": "Horas após o último login na web até as chaves de aplicação adormecerem",
+      "appKeyFollowSignIn": "As Chaves de Aplicação Adormecem Quando o Login na Web Termina",
+      "keys": "Chaves",
+      "keysTitle": "Chaves de aplicação de {username}",
+      "noKeys": "Nenhuma chave de aplicação.",
+      "revokeAll": "Revogar todas",
+      "keyRevoked": "Chave revogada.",
+      "keyRevokeFailed": "Não foi possível revogar a chave: {error}",
+      "keysLoadFailed": "Não foi possível carregar as chaves: {error}",
+      "keyState": {
+        "active": "Ativa",
+        "dormant": "Adormecida",
+        "expired": "Expirada"
+      },
+      "clients": {
+        "chrome": "Extensão do Chrome",
+        "firefox": "Complemento do Firefox",
+        "android": "Aplicativo Android",
+        "ios": "Aplicativo iOS",
+        "other": "Outros clientes"
+      },
+      "keyLastUsed": "Último uso",
+      "keyExpires": "Expira",
+      "keyNever": "Nunca",
+      "keyNeverUsed": "Nunca usada",
+      "revokeAllConfirm": "Revogar todas as chaves de aplicação de '{username}'? Os logins da extensão e do aplicativo dele terminam imediatamente."
     },
     "groups": {
       "title": "Gerenciamento de Grupos",
@@ -259,7 +300,8 @@
       "on": "Ligado",
       "off": "Desligado",
       "ssoGroups": "Grupos do provedor de identidade cujos membros estão neste grupo (separados por vírgula)",
-      "overrideHelp": "Um grupo decide apenas o que está definido aqui; tudo o que ficar sem definição ou em branco continua sendo o de cada membro."
+      "overrideHelp": "Um grupo decide apenas o que está definido aqui; tudo o que ficar sem definição ou em branco continua sendo o de cada membro.",
+      "chosen": "Somente os aplicativos marcados abaixo"
     },
     "installedApps": {
       "title": "Aplicativos Instalados",
@@ -1293,7 +1335,16 @@
       "catalogDeleteFailed": "Não foi possível excluir o catálogo: {error}",
       "catalogUpdateStarted": "Atualizando o catálogo '{name}' em todos os nós.",
       "catalogUpdateFailed": "Não foi possível atualizar o catálogo: {error}",
-      "catalogsRefreshFailed": "Não foi possível carregar os catálogos: {error}"
+      "catalogsRefreshFailed": "Não foi possível carregar os catálogos: {error}",
+      "keyNoServer": "Esta chave não indica um servidor. Crie uma no aplicativo web, em Configurações → Chaves de Aplicação.",
+      "keyMissing": "Cole sua chave de aplicação.",
+      "keyRefused": {
+        "unknown": "O servidor não conhece essa chave. Crie uma no seu perfil no aplicativo web.",
+        "expired": "A chave expirou. Crie uma nova no seu perfil no aplicativo web.",
+        "disabled": "Seu administrador não permite chaves de aplicação para a sua conta.",
+        "client": "Seu administrador não permite que este aplicativo use chaves de aplicação.",
+        "dormant": "Sua chave está adormecida. Faça login no aplicativo web e tente de novo."
+      }
     },
     "placeholders": {
       "noAdmins": "Nenhum admin encontrado.",
@@ -1322,7 +1373,8 @@
       "oidc": "OpenID Connect",
       "saml": "SAML",
       "proxy": "Proxy reverso",
-      "key": "Arquivo de chave"
+      "key": "Arquivo de chave",
+      "app_key": "Chave de aplicação"
     },
     "periods": {
       "day": "Dia",
@@ -1411,7 +1463,9 @@
         "proxy_auth_groups_header": "Cabeçalho em que um proxy confiável lista os grupos do usuário",
         "proxy_auth_logout_url": "Página do proxy que encerra a sessão do usuário nele",
         "web_session_seconds": "Tempo máximo que um login root dura sem uso (horas)",
-        "files_sync": "Manter os arquivos compartilhados no armazenamento de objetos"
+        "files_sync": "Manter os arquivos compartilhados no armazenamento de objetos",
+        "auto_sign_in": "Enviar um navegador sem login diretamente para",
+        "legacy_auth": "Aceitar clientes com arquivo de chave"
       },
       "usageTitle": "Uso",
       "usageHours": "Horas ponderadas",
@@ -1552,7 +1606,14 @@
       "resultEntity": "ID da entidade:",
       "resultSso": "URL de login:",
       "resultSlo": "Logout único oferecido:",
-      "resultCertificates": "Certificados de assinatura:"
+      "resultCertificates": "Certificados de assinatura:",
+      "landingTitle": "Entrada",
+      "landingHelp": "Com um provedor escolhido, um navegador sem login vai direto para ele, em vez da página de login deste servidor. Adicione #root ao endereço do aplicativo web para ver a página mesmo assim, como para o token root.",
+      "autoNone": "A página de login deste servidor",
+      "autoOidc": "OpenID Connect",
+      "autoSaml": "SAML",
+      "rootOff": "Desativado neste nó com SEALSKIN_ROOT_SIGN_IN=false. Para entrar de novo com a chave, reinicie o nó com essa opção ativada.",
+      "rootNoAdminGroup": "Nenhum grupo do provedor de identidade designa administradores (veja Quem Faz Login). Com a chave do root desativada, ninguém pode administrar este servidor."
     },
     "prootApps": {
       "title": "Catálogos PRoot Apps",
@@ -1586,6 +1647,83 @@
       "updateTitle": "Buscar agora, em todos os nós, os aplicativos cujo pacote mudou",
       "confirmDelete": "Excluir o catálogo '{name}'? Todos os nós removem sua cópia, e os usuários atribuídos a ele ficam sem catálogo.",
       "deleteTitle": "Excluir catálogo"
+    },
+    "branding": {
+      "title": "Marca",
+      "help": "Dê ao aplicativo web o nome, o logotipo, as cores, o papel de parede e os links da sua organização. A prévia mostra a página inicial como os usuários a verão; nada muda até você salvar.",
+      "identity": "Identidade",
+      "name": "Nome do produto",
+      "nameHelp": "Aparece onde a interface diria SealSkin: o título, a barra lateral, o aplicativo web instalado e a página de login.",
+      "logo": "Logotipo",
+      "logoHelp": "Um PNG, JPEG ou WebP quadrado de até 1 MB. É o logotipo da barra lateral, o favicon e o ícone do aplicativo web instalado.",
+      "logoLink": "O logotipo leva a",
+      "logoLinkHelp": "Um endereço que o logotipo abre em uma nova aba, como a sua intranet. Deixe vazio para não ter link.",
+      "accent": "Cor de destaque",
+      "accentHelp": "A cor dos botões, dos realces e da marca. Limpe para usar o violeta padrão.",
+      "accentDefault": "Padrão",
+      "wallpaper": "Papel de parede",
+      "wallpaperHelp": "Uma imagem atrás da página inicial, de até 8 MB. Os usuários começam com ela e ainda podem escolher a sua própria, a menos que seja forçada.",
+      "wallpaperForced": "Forçar este papel de parede para todos os usuários",
+      "wallpaperForcedHelp": "Os usuários perdem o botão Personalizar na página inicial e todos veem este papel de parede.",
+      "fit": "Posição",
+      "blur": "Desfoque",
+      "dim": "Escurecer",
+      "upload": "Enviar",
+      "remove": "Remover",
+      "links": "Links da página inicial",
+      "linksHelp": "Blocos que a página inicial mostra acima dos aplicativos, para os seus próprios sites e ferramentas. Um link abre em uma nova aba ou em uma sessão isolada de um aplicativo que o usuário escolhe.",
+      "linkName": "Nome",
+      "linkUrl": "Endereço",
+      "linkIcon": "Ícone",
+      "linkIconHelp": "Uma classe do Font Awesome, como fa-book ou fab fa-github, ou um endereço https de uma imagem.",
+      "linkOpen": "Abre",
+      "openTab": "Em uma nova aba",
+      "openIsolated": "Em isolamento",
+      "addLink": "Adicionar um link",
+      "noLinks": "Nenhum link ainda.",
+      "preview": "Prévia",
+      "previewHelp": "A página inicial como um usuário a vê, com o que você inseriu aqui.",
+      "previewUser": "Um usuário",
+      "save": "Salvar marca",
+      "reset": "Voltar aos padrões",
+      "resetConfirm": "Remover o nome, o logotipo, as cores, o papel de parede, os links de aplicativos e os links, voltando aos padrões do SealSkin?",
+      "saved": "Marca salva. Recarregue a página para ver o título e a barra lateral mudarem.",
+      "resetDone": "Marca redefinida para os padrões.",
+      "saveFailed": "Não foi possível salvar a marca: {error}",
+      "pictureTooLarge": "A imagem é grande demais e não pôde ser reduzida. Escolha outra.",
+      "notAPicture": "Escolha uma imagem PNG, JPEG ou WebP.",
+      "apps": "Aplicativos complementares",
+      "appsHelp": "Onde os usuários obtêm a extensão e os aplicativos, com links na página de login e ao lado das chaves de aplicação no perfil. Aponte um link para a sua própria versão ou oculte-o.",
+      "appShow": "Exibido",
+      "appUrl": "Endereço",
+      "appClient": "Aplicativo"
+    },
+    "keys": {
+      "title": "Chaves de Aplicação",
+      "intro": "Faça login na extensão do navegador e no aplicativo móvel com uma chave criada aqui, em vez de um arquivo de chave. Cada dispositivo recebe a sua própria chave; revogue uma aqui e esse dispositivo é desconectado.",
+      "none": "Nenhuma chave ainda.",
+      "name": "Nome",
+      "nameHelp": "Para que serve a chave, como o dispositivo em que ela ficará.",
+      "namePlaceholder": "ex., Notebook do trabalho",
+      "made": "Criada",
+      "lifetime": "Expira",
+      "days": "{count, plural, one {1 dia} other {{count} dias}}",
+      "create": "Criar uma chave",
+      "revoke": "Revogar",
+      "revoked": "Chave revogada.",
+      "shownOnce": "Copie esta chave agora: ela é mostrada só desta vez. Cole-a na página de conexão da extensão ou do aplicativo.",
+      "copied": "Chave copiada.",
+      "copyFailed": "O navegador não permitiu copiar. Selecione a chave e copie-a.",
+      "notAllowed": "Seu administrador não permite chaves de aplicação para a sua conta.",
+      "clients": "Aplicativos permitidos: {clients}.",
+      "dormantHours": "As chaves adormecem {hours} horas após o seu último login na web; fazer login aqui as acorda.",
+      "followSignIn": "As chaves adormecem quando o seu login na web termina; fazer login aqui as acorda.",
+      "maxDays": "Uma chave vale no máximo {count, plural, one {1 dia} other {{count} dias}}.",
+      "get": "Obter os aplicativos",
+      "getHelp": "Instale um destes e, na página de conexão dele, informe o endereço do servidor e a sua chave.",
+      "loadFailed": "Não foi possível carregar suas chaves: {error}",
+      "createFailed": "Não foi possível criar a chave: {error}",
+      "tooLong": "Isso é mais do que o seu administrador permite."
     }
   },
   "popup": {
@@ -1624,7 +1762,8 @@
       "moveHomeTo": "Mover para {node}",
       "moveHomeConfirm": "Mover '{home}' para {node}? As sessões que o usam precisam ser paradas antes.",
       "moveHomeTitle": "Mover armazenamento",
-      "allowance": "Cota: {used} de {hours} horas por {period}"
+      "allowance": "Cota: {used} de {hours} horas por {period}",
+      "newTab": "Abrir em uma nova aba"
     },
     "sessionsView": {
       "noSessions": "Nenhuma sessão ativa encontrada."
@@ -1689,7 +1828,10 @@
     },
     "sidebar": {
       "sharedFiles": "Arquivos {brand}",
-      "publicShares": "Compartilhamentos Públicos"
+      "publicShares": "Compartilhamentos Públicos",
+      "sharedHelp": "Seus arquivos em todos os nós: toda sessão os tem em Desktop/files.",
+      "allNodes": "todos os nós",
+      "homeHelp": "Este diretório home fica no nó {node}; as sessões que o usam rodam lá. Mova-o pelo iniciador para rodar em outro lugar."
     },
     "shares": {
       "title": "Arquivos Compartilhados Publicamente",
@@ -1790,7 +1932,15 @@
       "openServer": "Abrir servidor",
       "changeConnection": "Alterar conexão",
       "mismatchTitle": "Atualização necessária",
-      "mismatchBody": "Este aplicativo e a interface web do servidor usam versões diferentes da ponte. Atualize a extensão ou o aplicativo, ou atualize o servidor, para que os dois coincidam."
+      "mismatchBody": "Este aplicativo e a interface web do servidor usam versões diferentes da ponte. Atualize a extensão ou o aplicativo, ou atualize o servidor, para que os dois coincidam.",
+      "dormantTitle": "Faça login na web para continuar",
+      "dormantBody": "Sua chave de aplicação está adormecida: seu administrador pede um login na web de tempos em tempos. Faça login lá e este aplicativo volta a funcionar.",
+      "signInWeb": "Fazer login na web",
+      "keyTitle": "Esta chave não faz mais o seu login",
+      "keyUnknown": "A chave foi revogada ou nunca existiu. Crie uma nova no seu perfil na web.",
+      "keyExpired": "A chave expirou. Crie uma nova no seu perfil na web.",
+      "keyDisabled": "Seu administrador não permite chaves de aplicação para a sua conta.",
+      "keyClient": "Seu administrador não permite que este aplicativo use chaves de aplicação."
     }
   },
   "web": {
@@ -1800,11 +1950,6 @@
       "oidc": "Entrar com OpenID Connect",
       "saml": "Entrar com SAML"
     },
-    "rootToken": "Token root",
-    "rootTokenHelp": "O token do administrador, que o servidor guarda no arquivo /config/root_token.",
-    "rootSignIn": "Entrar como Root",
-    "rootRefused": "Esse não é o token root do servidor.",
-    "rootLocked": "Tentativas demais. Aguarde um pouco e tente de novo.",
     "held": {
       "title": "Aguardando um administrador",
       "message": "Você está conectado como {username}, mas um administrador precisa colocá-lo em um grupo antes que possa usar o {brand}. Verifique novamente quando isso tiver sido feito.",
@@ -1820,7 +1965,8 @@
       "otherIdentity": "Outra conta do provedor de identidade já entra como este usuário do {brand}. Fale com o seu administrador.",
       "noAccount": "Ainda não existe uma conta {brand} com o seu nome. Peça ao administrador para criar uma.",
       "notConfigured": "Este servidor não oferece login único.",
-      "ended": "O provedor de identidade encerrou o seu login. Entre de novo."
+      "ended": "O provedor de identidade encerrou o seu login. Entre de novo.",
+      "redirecting": "Levando você ao login…"
     },
     "nav": {
       "home": "Início",
@@ -1887,7 +2033,10 @@
       "openAppStores": "Abrir as Lojas de Aplicativos",
       "popupBlocked": "O navegador bloqueou a aba da sessão. Permita pop-ups para este site e inicie de novo.",
       "serverFileNeedsHome": "Um arquivo guardado no servidor não pode ser aberto no modo Sala Limpa. Escolha um diretório de armazenamento.",
+      "copyLink": "Copiar link",
+      "copyLinkHelp": "Um link que abre este aplicativo com estas opções: salve-o nos favoritos ou instale-o como aplicativo",
       "copyLinkManual": "O navegador não permitiu copiar. Selecione o link abaixo e copie-o.",
+      "linkCopied": "Link copiado.",
       "favorites": "Favoritos",
       "favoritesHint": "Arraste para reordenar",
       "addFavorite": "Adicionar aos favoritos",
@@ -1919,7 +2068,8 @@
       "fitFill": "Preencher",
       "fitFit": "Ajustar",
       "fitStretch": "Esticar",
-      "fitCenter": "Centralizar"
+      "fitCenter": "Centralizar",
+      "links": "Links"
     },
     "launch": {
       "title": "Iniciando {app}",
@@ -1932,7 +2082,8 @@
         "image": "Baixando a imagem do aplicativo",
         "starting": "Criando o contêiner",
         "waiting": "Aguardando a área de trabalho responder",
-        "ready": "Abrindo a sessão"
+        "ready": "Abrindo a sessão",
+        "client": "Preparando o cliente web do aplicativo"
       },
       "uploading": "Enviando o arquivo ({done} de {total})",
       "imageHint": "A primeira inicialização de um aplicativo em um nó faz o download dele, o que pode levar minutos. As seguintes são rápidas.",
@@ -1941,6 +2092,37 @@
       "failed": "A inicialização falhou",
       "unseen": "O pedido de inicialização não chegou ao servidor. Verifique a aba do {brand} que o iniciou.",
       "closeTab": "O navegador manteve esta aba aberta. Feche-a você mesmo."
-    }
+    },
+    "open": {
+      "title": "Abrindo {app}",
+      "signingIn": "Verificando quem está logado",
+      "looking": "Procurando uma sessão em execução",
+      "attaching": "Abrindo a sessão em execução",
+      "notYours": "Este aplicativo não está disponível para a sua conta, ou não existe.",
+      "noHome": "O diretório de armazenamento '{home}' indicado neste endereço não existe. Crie-o no {brand} ou abra o endereço sem ele.",
+      "openSealSkin": "Abrir o {brand}"
+    },
+    "keyRefused": "Essa chave não faz login de ninguém.",
+    "keyNotRoot": "Só o root faz login aqui com uma chave. Entre pelo seu provedor de identidade.",
+    "keyExpired": "Essa chave expirou.",
+    "keyLocked": "Tentativas demais. Aguarde um pouco e tente de novo.",
+    "keyDisabled": "Este servidor não aceita a chave de aplicação do root no login da web.",
+    "apps": {
+      "chrome": "Extensão do Chrome",
+      "firefox": "Complemento do Firefox",
+      "android": "Aplicativo Android",
+      "ios": "Aplicativo iOS",
+      "other": "Outros clientes"
+    },
+    "rootKey": "Chave do root",
+    "rootKeyHelp": "A chave de aplicação do administrador, que o servidor gravou em /config/root_key na primeira inicialização.",
+    "keys": {
+      "wakeTitle": "Sua chave de aplicação está ativa de novo",
+      "wakeBody": "Você já pode voltar ao aplicativo ou continuar aqui.",
+      "wakeClose": "Fechar",
+      "wakeContinue": "Continuar para o {brand}",
+      "wakeFailed": "Não foi possível acordar suas chaves: {error}"
+    },
+    "rootSignIn": "Entrar como Root"
   }
 }

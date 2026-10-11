@@ -85,7 +85,9 @@
       "admins": "Yöneticiler",
       "cluster": "Küme",
       "signIn": "Oturum Açma",
-      "audit": "Denetim Günlüğü"
+      "audit": "Denetim Günlüğü",
+      "branding": "Markalama",
+      "keys": "Uygulama Anahtarları"
     },
     "dashboard": {
       "title": "Kontrol Paneli",
@@ -150,7 +152,16 @@
       "keyGeneration": "Anahtar Oluşturma",
       "keyGenDescription": "Bir anahtar çiftiniz yoksa, buradan bir tane oluşturabilirsiniz. Özel anahtar yukarıda doldurulacaktır. Açık anahtarı yöneticinize verin.",
       "generateKeyButton": "Yeni Anahtar Çifti Oluştur",
-      "publicKeyForAdminLabel": "Açık Anahtarınız (yönetici için)"
+      "publicKeyForAdminLabel": "Açık Anahtarınız (yönetici için)",
+      "keyTitle": "Uygulama anahtarıyla bağlan",
+      "keyDescription": "Web uygulamasında Ayarlar → Uygulama Anahtarları altında bu cihaz için bir anahtar oluşturup buraya yapıştırın.",
+      "keyLabel": "Uygulama anahtarı",
+      "keyPlaceholder": "ssk_…@sealskin.example.com:8443",
+      "keyConnectButton": "Bağlan",
+      "useKeyFileLink": "Bunun yerine anahtar dosyası kullan",
+      "useKeyLink": "Uygulama anahtarı kullan",
+      "connectedWithKey": "Uygulama anahtarıyla giriş yapıldı.",
+      "connectedWithKeyFile": "Anahtar dosyasıyla giriş yapıldı."
     },
     "home": {
       "title": "Ana Dizinleriniz",
@@ -241,7 +252,37 @@
       "prootCatalogHelp": "Her oturuma salt okunur olarak bağlanır; proot-apps bir kayıt defteri yerine buradan kurar. Yok bırakılırsa, kullanıcının katalog seçen ilk grubu belirler.",
       "groupsHelp": "Birden fazla seçmek için Ctrl veya Command tuşunu basılı tutun. Gruplar çeliştiğinde kısıtlayıcı değer geçerli olur.",
       "providerGroups": "Kimlik sağlayıcının son oturum açmada bildirdiği gruplar: {groups}",
-      "limitsHelp": "-1 değeri veya boş bırakılan alan sınır koymaz."
+      "limitsHelp": "-1 değeri veya boş bırakılan alan sınır koymaz.",
+      "applicationKeys": "Uygulama Anahtarlarına İzin Ver (Tarayıcı Uzantısı ve Mobil Uygulama)",
+      "appKeyClients": "Uygulama anahtarı kullanabilecek uygulamalar",
+      "appKeyClientsHelp": "Her uygulama sunucuya kendi adını bildirir; bu bir kolaylıktır, kilit değildir.",
+      "appKeyDays": "Bir uygulama anahtarının geçerli olduğu gün sayısı",
+      "appKeyDormantHours": "Son web girişinden kaç saat sonra uygulama anahtarlarının uykuya geçeceği",
+      "appKeyFollowSignIn": "Web Girişi Bitince Uygulama Anahtarları Uykuya Geçer",
+      "keys": "Anahtarlar",
+      "keysTitle": "{username} kullanıcısının uygulama anahtarları",
+      "noKeys": "Uygulama anahtarı yok.",
+      "revokeAll": "Tümünü iptal et",
+      "keyRevoked": "Anahtar iptal edildi.",
+      "keyRevokeFailed": "Anahtar iptal edilemedi: {error}",
+      "keysLoadFailed": "Anahtarlar yüklenemedi: {error}",
+      "keyState": {
+        "active": "Etkin",
+        "dormant": "Uykuda",
+        "expired": "Süresi doldu"
+      },
+      "clients": {
+        "chrome": "Chrome uzantısı",
+        "firefox": "Firefox eklentisi",
+        "android": "Android uygulaması",
+        "ios": "iOS uygulaması",
+        "other": "Diğer istemciler"
+      },
+      "keyLastUsed": "Son kullanım",
+      "keyExpires": "Son geçerlilik",
+      "keyNever": "Hiç",
+      "keyNeverUsed": "Hiç kullanılmadı",
+      "revokeAllConfirm": "'{username}' kullanıcısının tüm uygulama anahtarları iptal edilsin mi? Uzantı ve uygulama girişleri hemen sona erer."
     },
     "groups": {
       "title": "Grup Yönetimi",
@@ -259,7 +300,8 @@
       "on": "Açık",
       "off": "Kapalı",
       "ssoGroups": "Üyeleri bu gruba dahil olan kimlik sağlayıcı grupları (virgülle ayrılmış)",
-      "overrideHelp": "Bir grup yalnızca burada ayarlananları belirler; ayarlanmayan veya boş bırakılan her şey üyenin kendi değerinde kalır."
+      "overrideHelp": "Bir grup yalnızca burada ayarlananları belirler; ayarlanmayan veya boş bırakılan her şey üyenin kendi değerinde kalır.",
+      "chosen": "Yalnızca aşağıda işaretli uygulamalar"
     },
     "installedApps": {
       "title": "Yüklü Uygulamalar",
@@ -1293,7 +1335,16 @@
       "catalogDeleteFailed": "Katalog silinemedi: {error}",
       "catalogUpdateStarted": "'{name}' kataloğu her düğümde güncelleniyor.",
       "catalogUpdateFailed": "Katalog güncellenemedi: {error}",
-      "catalogsRefreshFailed": "Kataloglar yüklenemedi: {error}"
+      "catalogsRefreshFailed": "Kataloglar yüklenemedi: {error}",
+      "keyNoServer": "Bu anahtar bir sunucu belirtmiyor. Web uygulamasında Ayarlar → Uygulama Anahtarları altında bir tane oluşturun.",
+      "keyMissing": "Uygulama anahtarınızı yapıştırın.",
+      "keyRefused": {
+        "unknown": "Sunucu böyle bir anahtar tanımıyor. Web uygulamasındaki profilinizden bir tane oluşturun.",
+        "expired": "Anahtarın süresi doldu. Web uygulamasındaki profilinizden yeni bir tane oluşturun.",
+        "disabled": "Yöneticiniz hesabınız için uygulama anahtarlarına izin vermiyor.",
+        "client": "Yöneticiniz bu uygulamanın uygulama anahtarı kullanmasına izin vermiyor.",
+        "dormant": "Anahtarınız uykuda. Web uygulamasında giriş yapıp yeniden deneyin."
+      }
     },
     "placeholders": {
       "noAdmins": "Yönetici bulunamadı.",
@@ -1322,7 +1373,8 @@
       "oidc": "OpenID Connect",
       "saml": "SAML",
       "proxy": "Ters proxy",
-      "key": "Anahtar dosyası"
+      "key": "Anahtar dosyası",
+      "app_key": "Uygulama anahtarı"
     },
     "periods": {
       "day": "Gün",
@@ -1411,7 +1463,9 @@
         "proxy_auth_groups_header": "Güvenilen proxy'nin kullanıcının gruplarını listelediği üstbilgi",
         "proxy_auth_logout_url": "Proxy'nin kendi kullanıcısının oturumunu kapattığı sayfa",
         "web_session_seconds": "Root oturum açmasının kullanılmadan en uzun süresi (saat)",
-        "files_sync": "Paylaşılan dosyaları nesne deposunda tut"
+        "files_sync": "Paylaşılan dosyaları nesne deposunda tut",
+        "auto_sign_in": "Oturumu kapalı tarayıcıyı doğrudan şuraya gönder",
+        "legacy_auth": "Anahtar dosyası kullanan istemcileri kabul et"
       },
       "usageTitle": "Kullanım",
       "usageHours": "Ağırlıklı saat",
@@ -1552,7 +1606,14 @@
       "resultEntity": "Entity ID:",
       "resultSso": "Oturum açma URL'si:",
       "resultSlo": "Tekli oturum kapatma sunuluyor:",
-      "resultCertificates": "İmzalama sertifikaları:"
+      "resultCertificates": "İmzalama sertifikaları:",
+      "landingTitle": "Açılış",
+      "landingHelp": "Bir sağlayıcı seçildiğinde, oturumu kapalı bir tarayıcı bu sunucunun giriş sayfası yerine doğrudan sağlayıcıya gider. Sayfayı yine de görmek için, root belirtecinde olduğu gibi, web uygulamasının adresine #root ekleyin.",
+      "autoNone": "Bu sunucunun giriş sayfası",
+      "autoOidc": "OpenID Connect",
+      "autoSaml": "SAML",
+      "rootOff": "Bu düğümde SEALSKIN_ROOT_SIGN_IN=false ile kapatıldı. Anahtarla yeniden giriş yapmak için düğümü bu ayar açık olarak yeniden başlatın.",
+      "rootNoAdminGroup": "Hiçbir kimlik sağlayıcı grubu yöneticileri belirtmiyor (bkz. Kim Giriş Yapar). Root anahtarı kapalıyken bu sunucuyu kimse yönetemez."
     },
     "prootApps": {
       "title": "PRoot Apps Katalogları",
@@ -1586,6 +1647,83 @@
       "updateTitle": "Paketleri değişen uygulamaları şimdi her düğümde yeniden çek",
       "confirmDelete": "'{name}' kataloğu silinsin mi? Her düğüm kopyasını kaldırır ve ona atanan kullanıcılar katalogsuz kalır.",
       "deleteTitle": "Kataloğu sil"
+    },
+    "branding": {
+      "title": "Markalama",
+      "help": "Web uygulamasına kuruluşunuzun adını, logosunu, renklerini, duvar kağıdını ve bağlantılarını verin. Önizleme, ana sayfayı kullanıcıların göreceği gibi gösterir; kaydetmeden hiçbir şey değişmez.",
+      "identity": "Kimlik",
+      "name": "Ürün adı",
+      "nameHelp": "Arayüzün SealSkin dediği her yerde görünür: başlıkta, kenar çubuğunda, yüklenen web uygulamasında ve giriş sayfasında.",
+      "logo": "Logo",
+      "logoHelp": "En fazla 1 MB boyutunda kare bir PNG, JPEG veya WebP. Kenar çubuğu logosu, favicon ve yüklenen web uygulamasının simgesi olur.",
+      "logoLink": "Logonun bağlantısı",
+      "logoLinkHelp": "Logonun yeni sekmede açacağı adres, örneğin intranetiniz. Bağlantı istemiyorsanız boş bırakın.",
+      "accent": "Vurgu rengi",
+      "accentHelp": "Düğmelerin, vurguların ve yazı logosunun rengi. Varsayılan mor için temizleyin.",
+      "accentDefault": "Varsayılan",
+      "wallpaper": "Duvar kağıdı",
+      "wallpaperHelp": "Ana sayfanın arkasındaki resim, en fazla 8 MB. Kullanıcılar bununla başlar ve zorunlu kılınmadıysa kendilerininkini seçebilir.",
+      "wallpaperForced": "Bu duvar kağıdını tüm kullanıcılara zorunlu kıl",
+      "wallpaperForcedHelp": "Kullanıcılar ana sayfadaki Özelleştir düğmesini kaybeder ve herkes bu duvar kağıdını görür.",
+      "fit": "Konum",
+      "blur": "Bulanıklık",
+      "dim": "Karartma",
+      "upload": "Yükle",
+      "remove": "Kaldır",
+      "links": "Ana sayfa bağlantıları",
+      "linksHelp": "Ana sayfanın uygulamaların üstünde gösterdiği karolar; kendi siteleriniz ve araçlarınız için. Bir bağlantı yeni sekmede ya da kullanıcının seçtiği bir uygulamanın yalıtılmış oturumunda açılır.",
+      "linkName": "Ad",
+      "linkUrl": "Adres",
+      "linkIcon": "Simge",
+      "linkIconHelp": "fa-book veya fab fa-github gibi bir Font Awesome sınıfı ya da bir resmin https adresi.",
+      "linkOpen": "Açılma yeri",
+      "openTab": "Yeni sekmede",
+      "openIsolated": "Yalıtılmış olarak",
+      "addLink": "Bağlantı ekle",
+      "noLinks": "Henüz bağlantı yok.",
+      "preview": "Önizleme",
+      "previewHelp": "Buraya girdiklerinizle, ana sayfanın bir kullanıcıya göründüğü hali.",
+      "previewUser": "Bir kullanıcı",
+      "save": "Markalamayı kaydet",
+      "reset": "Varsayılanlara dön",
+      "resetConfirm": "Ad, logo, renkler, duvar kağıdı, uygulama bağlantıları ve bağlantılar kaldırılıp SealSkin varsayılanlarına dönülsün mü?",
+      "saved": "Markalama kaydedildi. Başlık ve kenar çubuğu değişikliğini görmek için sayfayı yenileyin.",
+      "resetDone": "Markalama varsayılanlara sıfırlandı.",
+      "saveFailed": "Markalama kaydedilemedi: {error}",
+      "pictureTooLarge": "Resim çok büyük ve küçültülemedi. Başka bir resim seçin.",
+      "notAPicture": "Bir PNG, JPEG veya WebP resmi seçin.",
+      "apps": "Yardımcı uygulamalar",
+      "appsHelp": "Kullanıcıların uzantıyı ve uygulamaları edineceği yerler; giriş sayfasından ve profildeki uygulama anahtarlarının yanından bağlanır. Bir bağlantıyı kendi derlemenize yönlendirin veya gizleyin.",
+      "appShow": "Gösterilir",
+      "appUrl": "Adres",
+      "appClient": "Uygulama"
+    },
+    "keys": {
+      "title": "Uygulama Anahtarları",
+      "intro": "Tarayıcı uzantısına ve mobil uygulamaya anahtar dosyası yerine burada oluşturulan bir anahtarla giriş yapın. Her cihaz kendi anahtarını alır; burada birini iptal ettiğinizde o cihazın oturumu kapanır.",
+      "none": "Henüz anahtar yok.",
+      "name": "Ad",
+      "nameHelp": "Anahtarın ne için olduğu, örneğin gideceği cihaz.",
+      "namePlaceholder": "örn. İş dizüstü",
+      "made": "Oluşturuldu",
+      "lifetime": "Son geçerlilik",
+      "days": "{count, plural, one {1 gün} other {{count} gün}}",
+      "create": "Anahtar oluştur",
+      "revoke": "İptal et",
+      "revoked": "Anahtar iptal edildi.",
+      "shownOnce": "Bu anahtarı şimdi kopyalayın: yalnızca bu kez gösterilir. Uzantının veya uygulamanın bağlantı sayfasına yapıştırın.",
+      "copied": "Anahtar kopyalandı.",
+      "copyFailed": "Tarayıcı kopyalamaya izin vermedi. Anahtarı seçip kopyalayın.",
+      "notAllowed": "Yöneticiniz hesabınız için uygulama anahtarlarına izin vermiyor.",
+      "clients": "İzin verilen uygulamalar: {clients}.",
+      "dormantHours": "Anahtarlar son web girişinizden {hours} saat sonra uykuya geçer; burada giriş yapmak onları uyandırır.",
+      "followSignIn": "Web girişiniz bitince anahtarlar uykuya geçer; burada giriş yapmak onları uyandırır.",
+      "maxDays": "Bir anahtar en fazla {count, plural, one {1 gün} other {{count} gün}} geçerlidir.",
+      "get": "Uygulamaları edinin",
+      "getHelp": "Bunlardan birini kurun, ardından bağlantı sayfasına sunucu adresini ve anahtarınızı girin.",
+      "loadFailed": "Anahtarlarınız yüklenemedi: {error}",
+      "createFailed": "Anahtar oluşturulamadı: {error}",
+      "tooLong": "Bu, yöneticinizin izin verdiğinden daha uzun."
     }
   },
   "popup": {
@@ -1624,7 +1762,8 @@
       "moveHomeTo": "{node} düğümüne taşı",
       "moveHomeConfirm": "'{home}' dizini {node} düğümüne taşınsın mı? Onu kullanan oturumların önce durdurulması gerekir.",
       "moveHomeTitle": "Depolamayı taşı",
-      "allowance": "Kota: bu {period} {used} / {hours} saat"
+      "allowance": "Kota: bu {period} {used} / {hours} saat",
+      "newTab": "Yeni sekmede aç"
     },
     "sessionsView": {
       "noSessions": "Aktif oturum bulunamadı."
@@ -1689,7 +1828,10 @@
     },
     "sidebar": {
       "sharedFiles": "{brand} Dosyaları",
-      "publicShares": "Genel Paylaşımlar"
+      "publicShares": "Genel Paylaşımlar",
+      "sharedHelp": "Her düğümdeki dosyalarınız: her oturum bunlara Desktop/files konumundan erişir.",
+      "allNodes": "tüm düğümler",
+      "homeHelp": "Bu ana dizin {node} düğümünde bulunur; onu kullanan oturumlar orada çalışır. Başka yerde çalıştırmak için başlatıcıdan taşıyın."
     },
     "shares": {
       "title": "Genel Paylaşılan Dosyalar",
@@ -1790,7 +1932,15 @@
       "openServer": "Sunucuyu aç",
       "changeConnection": "Bağlantıyı değiştir",
       "mismatchTitle": "Güncelleme gerekli",
-      "mismatchBody": "Bu uygulama ile sunucunun web arayüzü farklı köprü sürümleri kullanıyor. İkisinin eşleşmesi için uzantıyı veya uygulamayı ya da sunucuyu güncelleyin."
+      "mismatchBody": "Bu uygulama ile sunucunun web arayüzü farklı köprü sürümleri kullanıyor. İkisinin eşleşmesi için uzantıyı veya uygulamayı ya da sunucuyu güncelleyin.",
+      "dormantTitle": "Devam etmek için web üzerinden giriş yapın",
+      "dormantBody": "Uygulama anahtarınız uykuda: yöneticiniz zaman zaman web üzerinden giriş yapmanızı istiyor. Orada giriş yapın, bu uygulama yeniden çalışır.",
+      "signInWeb": "Web üzerinden giriş yap",
+      "keyTitle": "Bu anahtar artık sizi giriş yaptırmıyor",
+      "keyUnknown": "Anahtar iptal edildi veya hiç var olmadı. Web'deki profilinizden yeni bir tane oluşturun.",
+      "keyExpired": "Anahtarın süresi doldu. Web'deki profilinizden yeni bir tane oluşturun.",
+      "keyDisabled": "Yöneticiniz hesabınız için uygulama anahtarlarına izin vermiyor.",
+      "keyClient": "Yöneticiniz bu uygulamanın uygulama anahtarı kullanmasına izin vermiyor."
     }
   },
   "web": {
@@ -1800,11 +1950,6 @@
       "oidc": "OpenID Connect ile Oturum Aç",
       "saml": "SAML ile Oturum Aç"
     },
-    "rootToken": "Root belirteci",
-    "rootTokenHelp": "Sunucunun /config/root_token dosyasında tuttuğu yönetici belirteci.",
-    "rootSignIn": "Root Olarak Oturum Aç",
-    "rootRefused": "Bu, sunucunun root belirteci değil.",
-    "rootLocked": "Çok fazla deneme yapıldı. Bir süre bekleyip yeniden deneyin.",
     "held": {
       "title": "Bir yönetici bekleniyor",
       "message": "{username} olarak oturum açtınız, ancak {brand}'i kullanabilmeniz için bir yöneticinin sizi bir gruba yerleştirmesi gerekiyor. Bu yapıldığında yeniden kontrol edin.",
@@ -1820,7 +1965,8 @@
       "otherIdentity": "Kimlik sağlayıcının başka bir hesabı zaten bu {brand} kullanıcısı olarak oturum açıyor. Yöneticinize danışın.",
       "noAccount": "Henüz adınızla bir {brand} hesabı yok. Yöneticinizden bir hesap oluşturmasını isteyin.",
       "notConfigured": "Bu sunucu çoklu oturum açma sunmuyor.",
-      "ended": "Kimlik sağlayıcı oturumunuzu sonlandırdı. Yeniden oturum açın."
+      "ended": "Kimlik sağlayıcı oturumunuzu sonlandırdı. Yeniden oturum açın.",
+      "redirecting": "Giriş sayfasına yönlendiriliyorsunuz…"
     },
     "nav": {
       "home": "Ana Sayfa",
@@ -1887,7 +2033,10 @@
       "openAppStores": "Uygulama Mağazalarını Aç",
       "popupBlocked": "Tarayıcı oturumun sekmesini engelledi. Bu site için açılır pencerelere izin verin, ardından yeniden başlatın.",
       "serverFileNeedsHome": "Sunucuda tutulan bir dosya Temiz Oda modunda açılamaz. Bir depolama dizini seçin.",
+      "copyLink": "Bağlantıyı kopyala",
+      "copyLinkHelp": "Bu uygulamayı bu seçeneklerle açan bir bağlantı: yer imlerine ekleyin veya uygulama olarak yükleyin",
       "copyLinkManual": "Tarayıcı kopyalamaya izin vermedi. Aşağıdaki bağlantıyı seçip kopyalayın.",
+      "linkCopied": "Bağlantı kopyalandı.",
       "favorites": "Favoriler",
       "favoritesHint": "Sıralamak için sürükleyin",
       "addFavorite": "Favorilere ekle",
@@ -1919,7 +2068,8 @@
       "fitFill": "Doldur",
       "fitFit": "Sığdır",
       "fitStretch": "Uzat",
-      "fitCenter": "Ortala"
+      "fitCenter": "Ortala",
+      "links": "Bağlantılar"
     },
     "launch": {
       "title": "{app} başlatılıyor",
@@ -1932,7 +2082,8 @@
         "image": "Uygulama imajı indiriliyor",
         "starting": "Konteyner oluşturuluyor",
         "waiting": "Masaüstünün yanıt vermesi bekleniyor",
-        "ready": "Oturum açılıyor"
+        "ready": "Oturum açılıyor",
+        "client": "Uygulamanın web istemcisi hazırlanıyor"
       },
       "uploading": "Dosya yükleniyor ({done} / {total})",
       "imageHint": "Bir uygulamanın bir düğümdeki ilk başlatması onu indirir; bu dakikalar sürebilir. Sonraki başlatmalar hızlıdır.",
@@ -1941,6 +2092,37 @@
       "failed": "Başlatma başarısız oldu",
       "unseen": "Başlatma isteği sunucuya ulaşmadı. İsteği başlatan {brand} sekmesini kontrol edin.",
       "closeTab": "Tarayıcı bu sekmeyi açık tuttu. Kendiniz kapatın."
-    }
+    },
+    "open": {
+      "title": "{app} açılıyor",
+      "signingIn": "Kimin giriş yaptığı denetleniyor",
+      "looking": "Çalışan bir oturum aranıyor",
+      "attaching": "Çalışan oturum açılıyor",
+      "notYours": "Bu uygulama hesabınıza açık değil veya mevcut değil.",
+      "noHome": "Bu adresin belirttiği '{home}' depolama dizini mevcut değil. {brand} içinde oluşturun veya adresi onsuz açın.",
+      "openSealSkin": "{brand} uygulamasını aç"
+    },
+    "keyRefused": "Bu anahtar kimseyi giriş yaptırmıyor.",
+    "keyNotRoot": "Buradan anahtarla yalnızca root giriş yapar. Kimlik sağlayıcınız üzerinden giriş yapın.",
+    "keyExpired": "Bu anahtarın süresi doldu.",
+    "keyLocked": "Çok fazla deneme. Bir süre bekleyip yeniden deneyin.",
+    "keyDisabled": "Bu sunucu web girişinde root'un uygulama anahtarını kabul etmiyor.",
+    "apps": {
+      "chrome": "Chrome uzantısı",
+      "firefox": "Firefox eklentisi",
+      "android": "Android uygulaması",
+      "ios": "iOS uygulaması",
+      "other": "Diğer istemciler"
+    },
+    "rootKey": "Root anahtarı",
+    "rootKeyHelp": "Sunucunun ilk başlatılışında /config/root_key dosyasına yazdığı yönetici uygulama anahtarı.",
+    "keys": {
+      "wakeTitle": "Uygulama anahtarınız yeniden etkin",
+      "wakeBody": "Artık uygulamaya dönebilir veya buradan devam edebilirsiniz.",
+      "wakeClose": "Kapat",
+      "wakeContinue": "{brand} ile devam et",
+      "wakeFailed": "Anahtarlarınız uyandırılamadı: {error}"
+    },
+    "rootSignIn": "Root Olarak Oturum Aç"
   }
 }

@@ -90,3 +90,15 @@ SEALSKIN_SSO_ADMIN_GROUP=admins
 See [A proxy that signs users in](sign-in.md) for the SealSkin side. A
 single-application provider guards the web app's name; leave the session
 names out of the proxy's sign-in.
+
+The browser extension and the mobile app reach the node on raw paths the
+sign-in must leave alone ([why](sign-in.md#the-companion-apps); leave this out for a web-only deployment). In the
+provider's **Advanced protocol settings**, under **Unauthenticated Paths**,
+one regular expression per line:
+
+```
+^/companion/.*
+^/(ws/)?room/[0-9a-fA-F-]{36}(/.*)?$
+^/[0-9a-fA-F-]{36}/.*
+^/public/.*
+```

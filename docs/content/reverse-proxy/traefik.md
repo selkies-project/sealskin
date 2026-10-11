@@ -123,3 +123,16 @@ refuses.
 
 To guard the session names too, add the same middleware to
 `sealskin-sessions` and set `SEALSKIN_SESSION_DOMAIN`.
+
+The browser extension and the mobile app reach the node on raw paths the
+sign-in must leave alone ([why](sign-in.md#the-companion-apps); leave this out for a web-only deployment): a second
+router for the web app's name, with a higher priority, the same service,
+and no middleware:
+
+```yaml
+      - traefik.http.routers.sealskin-raw.rule=Host(`sealskin.example.com`) && (PathPrefix(`/companion/`) || PathPrefix(`/public/`) || PathRegexp(`^/((ws/)?room/)?[0-9a-fA-F-]{36}(/|$)`))
+      - traefik.http.routers.sealskin-raw.priority=100
+      - traefik.http.routers.sealskin-raw.entrypoints=websecure
+      - traefik.http.routers.sealskin-raw.tls=true
+      - traefik.http.routers.sealskin-raw.service=sealskin
+```

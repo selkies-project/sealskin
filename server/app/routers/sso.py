@@ -3,8 +3,8 @@
 `router` is public: it starts and finishes the provider flows, serves this
 server's SAML metadata, takes the provider's logout notices, answers the
 check of a reverse proxy that signs users in (`app.proxy_auth`), and turns the
-grant of a finished flow, or the root token, into a sign-in the browser
-keeps in a cookie. A finished flow sends the browser to the web app with the
+grant of a finished flow, or root's application key, into a sign-in the
+browser keeps in a cookie. A finished flow sends the browser to the web app with the
 grant, or the code of what went wrong, in the URL fragment, which reaches
 neither a server nor a Referer. Signing out is here too, outside the
 encrypted lane, whose answers carry no cookies.
@@ -12,17 +12,17 @@ encrypted lane, whose answers carry no cookies.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import secrets
-import time
 from collections.abc import Awaitable, Callable
 from typing import Any
 
 from fastapi import APIRouter, Form, HTTPException, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse
 
-from .. import cluster, proxy_auth, sso
-from ..models import RootSignInRequest, SignInConfig, SignInRegistration, SignInRegistrationRequest
+from .. import application_keys, cluster, proxy_auth, sso
+from ..models import KeySignInRequest, SignInConfig, SignInRegistration, SignInRegistrationRequest
 from ..security import same_origin
 from ..settings import settings
 
@@ -189,18 +189,24 @@ async def register(req: SignInRegistrationRequest, request: Request, response: R
         raise HTTPException(status_code=400, detail=exc.code) from exc
 
 
-@router.post("/api/auth/root", response_model=SignInRegistration)
-async def root_sign_in(req: RootSignInRequest, request: Request, response: Response) -> dict[str, Any]:
-    """Sign the root administrator in with the root token; refused where `root_sign_in` is off."""
+@router.post("/api/auth/key", response_model=SignInRegistration)
+async def key_sign_in(req: KeySignInRequest, request: Request, response: Response) -> dict[str, Any]:
+    """Sign the root administrator in with one of root's application keys; refused where `root_sign_in` is off.
+
+    Another user's key answers `403 notRoot`: it signs the companion apps in,
+    the web is for the identity provider.
+    """
     _web_only(request)
     if not settings.root_sign_in:
         raise HTTPException(status_code=403, detail="disabled")
+    address = cluster.client_address(request)
     try:
-        token = await sso.root_sign_in(req.token, cluster.client_address(request))
-    except sso.SignInError as exc:
-        logger.warning("Refused a root sign-in from %s: %r", cluster.client_address(request) or "an unknown address", str(exc))
-        raise HTTPException(status_code=429 if exc.code == "expired" else 403, detail=exc.code) from exc
-    started = {"token": token, "username": "root", "via": "root", "expires": time.time() + settings.web_session_seconds}
+        identity = await asyncio.to_thread(application_keys.web_sign_in, req.key, address)
+    except application_keys.KeyRefused as exc:
+        logger.warning("Refused a key at the web sign-in from %s: %r", address or "an unknown address", str(exc))
+        raise HTTPException(status_code=429 if exc.code == "locked" else 403, detail=exc.code) from exc
+    token = await sso.open_session(identity)
+    started = {"token": token, "username": identity["username"], "via": identity["via"], "expires": identity["expires"]}
     return _start_session(response, started)
 
 

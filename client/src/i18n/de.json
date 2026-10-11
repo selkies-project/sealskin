@@ -85,7 +85,9 @@
       "admins": "Admins",
       "cluster": "Cluster",
       "signIn": "Anmeldung",
-      "audit": "Audit-Protokoll"
+      "audit": "Audit-Protokoll",
+      "branding": "Branding",
+      "keys": "Anwendungsschlüssel"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -150,7 +152,16 @@
       "keyGeneration": "Schlüsselgenerierung",
       "keyGenDescription": "Wenn Sie kein Schlüsselpaar haben, können Sie hier eines generieren. Der private Schlüssel wird oben eingefügt. Geben Sie den öffentlichen Schlüssel an Ihren Administrator weiter.",
       "generateKeyButton": "Neues Schlüsselpaar generieren",
-      "publicKeyForAdminLabel": "Ihr öffentlicher Schlüssel (für den Admin)"
+      "publicKeyForAdminLabel": "Ihr öffentlicher Schlüssel (für den Admin)",
+      "keyTitle": "Mit einem Anwendungsschlüssel verbinden",
+      "keyDescription": "Erstellen Sie in der Web-App unter Einstellungen → Anwendungsschlüssel einen Schlüssel für dieses Gerät und fügen Sie ihn hier ein.",
+      "keyLabel": "Anwendungsschlüssel",
+      "keyPlaceholder": "ssk_…@sealskin.example.com:8443",
+      "keyConnectButton": "Verbinden",
+      "useKeyFileLink": "Stattdessen eine Schlüsseldatei verwenden",
+      "useKeyLink": "Einen Anwendungsschlüssel verwenden",
+      "connectedWithKey": "Mit einem Anwendungsschlüssel angemeldet.",
+      "connectedWithKeyFile": "Mit einer Schlüsseldatei angemeldet."
     },
     "home": {
       "title": "Ihre Home-Verzeichnisse",
@@ -241,7 +252,37 @@
       "prootCatalogHelp": "Wird schreibgeschützt in jede Sitzung eingebunden; proot-apps installiert daraus statt aus einer Registry. Bleibt es auf Keiner, entscheidet die erste Gruppe des Benutzers, die einen wählt.",
       "groupsHelp": "Halten Sie Strg oder die Befehlstaste gedrückt, um mehrere auszuwählen. Wo Gruppen sich widersprechen, gilt der einschränkende Wert.",
       "providerGroups": "Gruppen, die der Identitätsanbieter bei der letzten Anmeldung genannt hat: {groups}",
-      "limitsHelp": "Ein Limit von -1 oder ein leeres Feld setzt keines."
+      "limitsHelp": "Ein Limit von -1 oder ein leeres Feld setzt keines.",
+      "applicationKeys": "Anwendungsschlüssel erlauben (Browsererweiterung und mobile App)",
+      "appKeyClients": "Apps, die Anwendungsschlüssel verwenden dürfen",
+      "appKeyClientsHelp": "Jede App nennt dem Server selbst ihren Namen; dies ist eine Bequemlichkeit, keine Sperre.",
+      "appKeyDays": "Tage, die ein Anwendungsschlüssel gilt",
+      "appKeyDormantHours": "Stunden nach der letzten Web-Anmeldung, nach denen Anwendungsschlüssel ruhen",
+      "appKeyFollowSignIn": "Anwendungsschlüssel ruhen, wenn die Web-Anmeldung endet",
+      "keys": "Schlüssel",
+      "keysTitle": "Anwendungsschlüssel von {username}",
+      "noKeys": "Keine Anwendungsschlüssel.",
+      "revokeAll": "Alle widerrufen",
+      "keyRevoked": "Schlüssel widerrufen.",
+      "keyRevokeFailed": "Der Schlüssel konnte nicht widerrufen werden: {error}",
+      "keysLoadFailed": "Die Schlüssel konnten nicht geladen werden: {error}",
+      "keyState": {
+        "active": "Aktiv",
+        "dormant": "Ruht",
+        "expired": "Abgelaufen"
+      },
+      "clients": {
+        "chrome": "Chrome-Erweiterung",
+        "firefox": "Firefox-Add-on",
+        "android": "Android-App",
+        "ios": "iOS-App",
+        "other": "Andere Clients"
+      },
+      "keyLastUsed": "Zuletzt verwendet",
+      "keyExpires": "Läuft ab",
+      "keyNever": "Nie",
+      "keyNeverUsed": "Nie verwendet",
+      "revokeAllConfirm": "Alle Anwendungsschlüssel von '{username}' widerrufen? Die Anmeldungen in Erweiterung und App enden sofort."
     },
     "groups": {
       "title": "Gruppenverwaltung",
@@ -259,7 +300,8 @@
       "on": "Ein",
       "off": "Aus",
       "ssoGroups": "Gruppen des Identitätsanbieters, deren Mitglieder zu dieser Gruppe gehören (kommagetrennt)",
-      "overrideHelp": "Eine Gruppe bestimmt nur, was hier gesetzt ist; alles, was nicht gesetzt oder leer ist, bleibt die eigene Einstellung jedes Mitglieds."
+      "overrideHelp": "Eine Gruppe bestimmt nur, was hier gesetzt ist; alles, was nicht gesetzt oder leer ist, bleibt die eigene Einstellung jedes Mitglieds.",
+      "chosen": "Nur die unten angehakten Apps"
     },
     "installedApps": {
       "title": "Installierte Anwendungen",
@@ -1293,7 +1335,16 @@
       "catalogDeleteFailed": "Der Katalog konnte nicht gelöscht werden: {error}",
       "catalogUpdateStarted": "Katalog '{name}' wird auf jedem Node aktualisiert.",
       "catalogUpdateFailed": "Der Katalog konnte nicht aktualisiert werden: {error}",
-      "catalogsRefreshFailed": "Die Kataloge konnten nicht geladen werden: {error}"
+      "catalogsRefreshFailed": "Die Kataloge konnten nicht geladen werden: {error}",
+      "keyNoServer": "Dieser Schlüssel nennt keinen Server. Erstellen Sie einen in der Web-App unter Einstellungen → Anwendungsschlüssel.",
+      "keyMissing": "Fügen Sie Ihren Anwendungsschlüssel ein.",
+      "keyRefused": {
+        "unknown": "Der Server kennt diesen Schlüssel nicht. Erstellen Sie einen in Ihrem Profil in der Web-App.",
+        "expired": "Der Schlüssel ist abgelaufen. Erstellen Sie einen neuen in Ihrem Profil in der Web-App.",
+        "disabled": "Ihr Administrator erlaubt für Ihr Konto keine Anwendungsschlüssel.",
+        "client": "Ihr Administrator erlaubt dieser App nicht, Anwendungsschlüssel zu verwenden.",
+        "dormant": "Ihr Schlüssel ruht. Melden Sie sich in der Web-App an und versuchen Sie es dann erneut."
+      }
     },
     "placeholders": {
       "noAdmins": "Keine Admins gefunden.",
@@ -1322,7 +1373,8 @@
       "oidc": "OpenID Connect",
       "saml": "SAML",
       "proxy": "Reverse-Proxy",
-      "key": "Schlüsseldatei"
+      "key": "Schlüsseldatei",
+      "app_key": "Anwendungsschlüssel"
     },
     "periods": {
       "day": "Tag",
@@ -1411,7 +1463,9 @@
         "proxy_auth_groups_header": "Header, in dem ein vertrauenswürdiger Proxy die Gruppen des Benutzers auflistet",
         "proxy_auth_logout_url": "Seite des Proxys, die seinen Benutzer abmeldet",
         "web_session_seconds": "Maximale Dauer einer ungenutzten Root-Anmeldung (Stunden)",
-        "files_sync": "Freigegebene Dateien im Objektspeicher halten"
+        "files_sync": "Freigegebene Dateien im Objektspeicher halten",
+        "auto_sign_in": "Einen abgemeldeten Browser direkt weiterleiten zu",
+        "legacy_auth": "Schlüsseldatei-Clients akzeptieren"
       },
       "usageTitle": "Nutzung",
       "usageHours": "Gewichtete Stunden",
@@ -1552,7 +1606,14 @@
       "resultEntity": "Entity-ID:",
       "resultSso": "Sign-On-URL:",
       "resultSlo": "Single Logout angeboten:",
-      "resultCertificates": "Signaturzertifikate:"
+      "resultCertificates": "Signaturzertifikate:",
+      "landingTitle": "Startseite",
+      "landingHelp": "Ist ein Anbieter gewählt, geht ein abgemeldeter Browser sofort zu ihm statt zur Anmeldeseite dieses Servers. Hängen Sie #root an die Adresse der Web-App an, um die Seite trotzdem zu sehen, etwa für das Root-Token.",
+      "autoNone": "Die Anmeldeseite dieses Servers",
+      "autoOidc": "OpenID Connect",
+      "autoSaml": "SAML",
+      "rootOff": "Auf diesem Knoten mit SEALSKIN_ROOT_SIGN_IN=false ausgeschaltet. Um wieder mit dem Schlüssel hineinzukommen, starten Sie den Knoten mit eingeschalteter Option neu.",
+      "rootNoAdminGroup": "Keine Gruppe des Identitätsanbieters benennt Administratoren (siehe Wer sich anmeldet). Mit ausgeschaltetem Root-Schlüssel kann niemand diesen Server verwalten."
     },
     "prootApps": {
       "title": "PRoot Apps-Kataloge",
@@ -1586,6 +1647,83 @@
       "updateTitle": "Die Apps jetzt auf jedem Node erneut holen, wo sich ihr Paket geändert hat",
       "confirmDelete": "Katalog '{name}' löschen? Jeder Node entfernt seine Kopie, und ihm zugewiesene Benutzer erhalten keinen Katalog.",
       "deleteTitle": "Katalog löschen"
+    },
+    "branding": {
+      "title": "Branding",
+      "help": "Geben Sie der Web-App den Namen, das Logo, die Farben, das Hintergrundbild und die Links Ihrer Organisation. Die Vorschau zeigt die Startseite so, wie Benutzer sie sehen; nichts ändert sich, bis Sie speichern.",
+      "identity": "Identität",
+      "name": "Produktname",
+      "nameHelp": "Steht überall dort, wo die Oberfläche SealSkin sagen würde: im Titel, in der Seitenleiste, in der installierten Web-App und auf der Anmeldeseite.",
+      "logo": "Logo",
+      "logoHelp": "Ein quadratisches PNG, JPEG oder WebP bis 1 MB. Es ist das Logo in der Seitenleiste, das Favicon und das Symbol der installierten Web-App.",
+      "logoLink": "Das Logo verweist auf",
+      "logoLinkHelp": "Eine Adresse, die das Logo in einem neuen Tab öffnet, etwa Ihr Intranet. Leer lassen für keinen Link.",
+      "accent": "Akzentfarbe",
+      "accentHelp": "Die Farbe von Schaltflächen, Hervorhebungen und der Wortmarke. Leeren Sie sie für das standardmäßige Violett.",
+      "accentDefault": "Standard",
+      "wallpaper": "Hintergrundbild",
+      "wallpaperHelp": "Ein Bild hinter der Startseite, bis 8 MB. Benutzer beginnen damit und können weiterhin ein eigenes wählen, sofern es nicht erzwungen wird.",
+      "wallpaperForced": "Dieses Hintergrundbild für alle Benutzer erzwingen",
+      "wallpaperForcedHelp": "Benutzer verlieren die Schaltfläche „Seite anpassen“ auf der Startseite und sehen alle dieses Hintergrundbild.",
+      "fit": "Position",
+      "blur": "Unschärfe",
+      "dim": "Abdunkeln",
+      "upload": "Hochladen",
+      "remove": "Entfernen",
+      "links": "Links auf der Startseite",
+      "linksHelp": "Kacheln, die die Startseite über den Anwendungen zeigt, für Ihre eigenen Websites und Werkzeuge. Ein Link öffnet sich in einem neuen Tab oder in einer isolierten Sitzung einer Anwendung, die der Benutzer wählt.",
+      "linkName": "Name",
+      "linkUrl": "Adresse",
+      "linkIcon": "Symbol",
+      "linkIconHelp": "Eine Font-Awesome-Klasse wie fa-book oder fab fa-github, oder eine https-Adresse eines Bildes.",
+      "linkOpen": "Öffnet sich",
+      "openTab": "In einem neuen Tab",
+      "openIsolated": "Isoliert",
+      "addLink": "Link hinzufügen",
+      "noLinks": "Noch keine Links.",
+      "preview": "Vorschau",
+      "previewHelp": "Die Startseite, wie ein Benutzer sie sieht, mit dem, was Sie hier eingegeben haben.",
+      "previewUser": "Ein Benutzer",
+      "save": "Branding speichern",
+      "reset": "Zurück zu den Standardwerten",
+      "resetConfirm": "Name, Logo, Farben, Hintergrundbild, App-Links und Links entfernen und zu den SealSkin-Standardwerten zurückkehren?",
+      "saved": "Branding gespeichert. Laden Sie die Seite neu, um die Änderung an Titel und Seitenleiste zu sehen.",
+      "resetDone": "Branding auf die Standardwerte zurückgesetzt.",
+      "saveFailed": "Das Branding konnte nicht gespeichert werden: {error}",
+      "pictureTooLarge": "Das Bild ist zu groß und konnte nicht verkleinert werden. Wählen Sie ein anderes.",
+      "notAPicture": "Wählen Sie ein Bild im Format PNG, JPEG oder WebP.",
+      "apps": "Begleit-Apps",
+      "appsHelp": "Wo Benutzer die Erweiterung und die Apps erhalten; verlinkt von der Anmeldeseite und neben den Anwendungsschlüsseln im Profil. Richten Sie einen Link auf Ihren eigenen Build oder blenden Sie ihn aus.",
+      "appShow": "Angezeigt",
+      "appUrl": "Adresse",
+      "appClient": "App"
+    },
+    "keys": {
+      "title": "Anwendungsschlüssel",
+      "intro": "Melden Sie die Browsererweiterung und die mobile App mit einem hier erstellten Schlüssel an, statt mit einer Schlüsseldatei. Jedes Gerät erhält einen eigenen Schlüssel; widerrufen Sie ihn hier, und dieses Gerät ist abgemeldet.",
+      "none": "Noch keine Schlüssel.",
+      "name": "Name",
+      "nameHelp": "Wofür der Schlüssel ist, etwa das Gerät, auf das er kommt.",
+      "namePlaceholder": "z.B. Arbeits-Laptop",
+      "made": "Erstellt",
+      "lifetime": "Läuft ab",
+      "days": "{count, plural, one {1 Tag} other {{count} Tage}}",
+      "create": "Schlüssel erstellen",
+      "revoke": "Widerrufen",
+      "revoked": "Schlüssel widerrufen.",
+      "shownOnce": "Kopieren Sie diesen Schlüssel jetzt: Er wird nur dieses eine Mal angezeigt. Fügen Sie ihn auf der Verbindungsseite der Erweiterung oder der App ein.",
+      "copied": "Schlüssel kopiert.",
+      "copyFailed": "Der Browser hat das Kopieren nicht erlaubt. Markieren Sie den Schlüssel und kopieren Sie ihn.",
+      "notAllowed": "Ihr Administrator erlaubt für Ihr Konto keine Anwendungsschlüssel.",
+      "clients": "Erlaubte Apps: {clients}.",
+      "dormantHours": "Schlüssel ruhen {hours} Stunden nach Ihrer letzten Web-Anmeldung; eine Anmeldung hier weckt sie.",
+      "followSignIn": "Schlüssel ruhen, wenn Ihre Web-Anmeldung endet; eine Anmeldung hier weckt sie.",
+      "maxDays": "Ein Schlüssel gilt höchstens {count, plural, one {1 Tag} other {{count} Tage}}.",
+      "get": "Die Apps herunterladen",
+      "getHelp": "Installieren Sie eine davon und geben Sie dann auf ihrer Verbindungsseite die Adresse des Servers und Ihren Schlüssel ein.",
+      "loadFailed": "Ihre Schlüssel konnten nicht geladen werden: {error}",
+      "createFailed": "Der Schlüssel konnte nicht erstellt werden: {error}",
+      "tooLong": "Das ist länger, als Ihr Administrator erlaubt."
     }
   },
   "popup": {
@@ -1624,7 +1762,8 @@
       "moveHomeTo": "Auf {node} verschieben",
       "moveHomeConfirm": "'{home}' auf {node} verschieben? Sitzungen, die es verwenden, müssen zuerst beendet werden.",
       "moveHomeTitle": "Speicher verschieben",
-      "allowance": "Kontingent: {used} von {hours} Stunden pro {period}"
+      "allowance": "Kontingent: {used} von {hours} Stunden pro {period}",
+      "newTab": "In einem neuen Tab öffnen"
     },
     "sessionsView": {
       "noSessions": "Keine aktiven Sitzungen gefunden."
@@ -1689,7 +1828,10 @@
     },
     "sidebar": {
       "sharedFiles": "{brand}-Dateien",
-      "publicShares": "Öffentliche Freigaben"
+      "publicShares": "Öffentliche Freigaben",
+      "sharedHelp": "Ihre Dateien auf jedem Knoten: Jede Sitzung hat sie unter Desktop/files.",
+      "allNodes": "alle Knoten",
+      "homeHelp": "Dieses Home-Verzeichnis liegt auf Knoten {node}; Sitzungen, die es verwenden, laufen dort. Verschieben Sie es im Starter, um es anderswo auszuführen."
     },
     "shares": {
       "title": "Öffentlich freigegebene Dateien",
@@ -1790,7 +1932,15 @@
       "openServer": "Server öffnen",
       "changeConnection": "Verbindung ändern",
       "mismatchTitle": "Aktualisierung erforderlich",
-      "mismatchBody": "Diese App und die Weboberfläche des Servers verwenden unterschiedliche Bridge-Versionen. Aktualisieren Sie die Erweiterung oder App oder den Server, damit beide übereinstimmen."
+      "mismatchBody": "Diese App und die Weboberfläche des Servers verwenden unterschiedliche Bridge-Versionen. Aktualisieren Sie die Erweiterung oder App oder den Server, damit beide übereinstimmen.",
+      "dormantTitle": "Melden Sie sich im Web an, um fortzufahren",
+      "dormantBody": "Ihr Anwendungsschlüssel ruht: Ihr Administrator verlangt von Zeit zu Zeit eine Anmeldung im Web. Melden Sie sich dort an, und diese App funktioniert wieder.",
+      "signInWeb": "Im Web anmelden",
+      "keyTitle": "Dieser Schlüssel meldet Sie nicht mehr an",
+      "keyUnknown": "Der Schlüssel wurde widerrufen oder hat nie existiert. Erstellen Sie einen neuen in Ihrem Profil im Web.",
+      "keyExpired": "Der Schlüssel ist abgelaufen. Erstellen Sie einen neuen in Ihrem Profil im Web.",
+      "keyDisabled": "Ihr Administrator erlaubt für Ihr Konto keine Anwendungsschlüssel.",
+      "keyClient": "Ihr Administrator erlaubt dieser App nicht, Anwendungsschlüssel zu verwenden."
     }
   },
   "web": {
@@ -1800,11 +1950,6 @@
       "oidc": "Mit OpenID Connect anmelden",
       "saml": "Mit SAML anmelden"
     },
-    "rootToken": "Root-Token",
-    "rootTokenHelp": "Das Token des Administrators, das der Server in seiner Datei /config/root_token aufbewahrt.",
-    "rootSignIn": "Als Root anmelden",
-    "rootRefused": "Das ist nicht das Root-Token des Servers.",
-    "rootLocked": "Zu viele Versuche. Warten Sie eine Weile und versuchen Sie es dann erneut.",
     "held": {
       "title": "Warten auf einen Administrator",
       "message": "Sie sind als {username} angemeldet, aber ein Administrator muss Sie erst einer Gruppe zuweisen, bevor Sie {brand} nutzen können. Prüfen Sie es erneut, sobald das geschehen ist.",
@@ -1820,7 +1965,8 @@
       "otherIdentity": "Ein anderes Konto des Identitätsanbieters meldet sich bereits als dieser {brand}-Benutzer an. Wenden Sie sich an Ihren Administrator.",
       "noAccount": "Es gibt noch kein {brand}-Konto mit Ihrem Namen. Bitten Sie Ihren Administrator, eines anzulegen.",
       "notConfigured": "Dieser Server bietet kein Single Sign-On an.",
-      "ended": "Der Identitätsanbieter hat Ihre Anmeldung beendet. Melden Sie sich erneut an."
+      "ended": "Der Identitätsanbieter hat Ihre Anmeldung beendet. Melden Sie sich erneut an.",
+      "redirecting": "Sie werden zur Anmeldung weitergeleitet…"
     },
     "nav": {
       "home": "Start",
@@ -1887,7 +2033,10 @@
       "openAppStores": "App Stores öffnen",
       "popupBlocked": "Der Browser hat den Tab der Sitzung blockiert. Erlauben Sie Pop-ups für diese Website und starten Sie dann erneut.",
       "serverFileNeedsHome": "Eine auf dem Server abgelegte Datei kann im Cleanroom-Modus nicht geöffnet werden. Wählen Sie ein Speicherverzeichnis.",
+      "copyLink": "Link kopieren",
+      "copyLinkHelp": "Ein Link, der diese Anwendung mit diesen Optionen öffnet: Setzen Sie ein Lesezeichen oder installieren Sie ihn als App",
       "copyLinkManual": "Der Browser hat das Kopieren nicht erlaubt. Markieren Sie den Link unten und kopieren Sie ihn.",
+      "linkCopied": "Link kopiert.",
       "favorites": "Favoriten",
       "favoritesHint": "Zum Sortieren ziehen",
       "addFavorite": "Zu den Favoriten",
@@ -1919,7 +2068,8 @@
       "fitFill": "Ausfüllen",
       "fitFit": "Anpassen",
       "fitStretch": "Strecken",
-      "fitCenter": "Zentrieren"
+      "fitCenter": "Zentrieren",
+      "links": "Links"
     },
     "launch": {
       "title": "{app} wird gestartet",
@@ -1932,7 +2082,8 @@
         "image": "Anwendungs-Image wird heruntergeladen",
         "starting": "Container wird erstellt",
         "waiting": "Warten auf Antwort des Desktops",
-        "ready": "Sitzung wird geöffnet"
+        "ready": "Sitzung wird geöffnet",
+        "client": "Web-Client der Anwendung wird vorbereitet"
       },
       "uploading": "Datei wird hochgeladen ({done} von {total})",
       "imageHint": "Beim ersten Start einer Anwendung auf einem Knoten wird sie heruntergeladen, was Minuten dauern kann. Spätere Starts sind schnell.",
@@ -1941,6 +2092,37 @@
       "failed": "Der Start ist fehlgeschlagen",
       "unseen": "Die Startanfrage hat den Server nicht erreicht. Prüfen Sie den {brand}-Tab, der sie gestartet hat.",
       "closeTab": "Der Browser hat diesen Tab offen gelassen. Schließen Sie ihn selbst."
-    }
+    },
+    "open": {
+      "title": "{app} wird geöffnet",
+      "signingIn": "Es wird geprüft, wer angemeldet ist",
+      "looking": "Es wird nach einer laufenden Sitzung gesucht",
+      "attaching": "Die laufende Sitzung wird geöffnet",
+      "notYours": "Diese Anwendung steht Ihrem Konto nicht offen, oder sie existiert nicht.",
+      "noHome": "Das Speicherverzeichnis '{home}', das diese Adresse nennt, existiert nicht. Erstellen Sie es in {brand} oder öffnen Sie die Adresse ohne es.",
+      "openSealSkin": "{brand} öffnen"
+    },
+    "keyRefused": "Dieser Schlüssel meldet niemanden an.",
+    "keyNotRoot": "Nur root meldet sich hier mit einem Schlüssel an. Melden Sie sich über Ihren Identitätsanbieter an.",
+    "keyExpired": "Dieser Schlüssel ist abgelaufen.",
+    "keyLocked": "Zu viele Versuche. Warten Sie eine Weile und versuchen Sie es dann erneut.",
+    "keyDisabled": "Dieser Server nimmt den Anwendungsschlüssel von root bei der Web-Anmeldung nicht an.",
+    "apps": {
+      "chrome": "Chrome-Erweiterung",
+      "firefox": "Firefox-Add-on",
+      "android": "Android-App",
+      "ios": "iOS-App",
+      "other": "Andere Clients"
+    },
+    "rootKey": "Root-Schlüssel",
+    "rootKeyHelp": "Der Anwendungsschlüssel des Administrators, den der Server beim ersten Start nach /config/root_key geschrieben hat.",
+    "keys": {
+      "wakeTitle": "Ihr Anwendungsschlüssel ist wieder aktiv",
+      "wakeBody": "Sie können jetzt zur App zurückkehren oder hier weitermachen.",
+      "wakeClose": "Schließen",
+      "wakeContinue": "Weiter zu {brand}",
+      "wakeFailed": "Ihre Schlüssel konnten nicht geweckt werden: {error}"
+    },
+    "rootSignIn": "Als Root anmelden"
   }
 }

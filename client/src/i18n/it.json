@@ -85,7 +85,9 @@
       "admins": "Amministratori",
       "cluster": "Cluster",
       "signIn": "Accesso",
-      "audit": "Registro di Audit"
+      "audit": "Registro di Audit",
+      "branding": "Branding",
+      "keys": "Chiavi Applicazione"
     },
     "dashboard": {
       "title": "Pannello di Controllo",
@@ -150,7 +152,16 @@
       "keyGeneration": "Generazione Chiave",
       "keyGenDescription": "Se non hai una coppia di chiavi, puoi generarne una qui. La chiave privata verrà inserita sopra. Fornisci la chiave pubblica al tuo amministratore.",
       "generateKeyButton": "Genera Nuova Coppia di Chiavi",
-      "publicKeyForAdminLabel": "La Tua Chiave Pubblica (per l'admin)"
+      "publicKeyForAdminLabel": "La Tua Chiave Pubblica (per l'admin)",
+      "keyTitle": "Connettiti con una chiave applicazione",
+      "keyDescription": "Nell'app web, in Impostazioni → Chiavi Applicazione, crea una chiave per questo dispositivo e incollala qui.",
+      "keyLabel": "Chiave applicazione",
+      "keyPlaceholder": "ssk_…@sealskin.example.com:8443",
+      "keyConnectButton": "Connetti",
+      "useKeyFileLink": "Usa invece un file di chiave",
+      "useKeyLink": "Usa una chiave applicazione",
+      "connectedWithKey": "Accesso effettuato con una chiave applicazione.",
+      "connectedWithKeyFile": "Accesso effettuato con un file di chiave."
     },
     "home": {
       "title": "Le Tue Cartelle Home",
@@ -241,7 +252,37 @@
       "prootCatalogHelp": "Montato in sola lettura in ogni sessione; proot-apps installa da qui invece che da un registro. Lasciato su Nessuno, decide il primo dei gruppi dell'utente a sceglierne uno.",
       "groupsHelp": "Tieni premuto Ctrl o Comando per selezionarne più di uno. Se i gruppi sono in disaccordo, prevale il valore più restrittivo.",
       "providerGroups": "Gruppi indicati dal provider di identità all'ultimo accesso: {groups}",
-      "limitsHelp": "Un limite di -1, o lasciato vuoto, non ne imposta alcuno."
+      "limitsHelp": "Un limite di -1, o lasciato vuoto, non ne imposta alcuno.",
+      "applicationKeys": "Consenti Chiavi Applicazione (Estensione Browser e App Mobile)",
+      "appKeyClients": "App che possono usare le chiavi applicazione",
+      "appKeyClientsHelp": "Ogni app dichiara da sé il proprio nome al server; è una comodità, non un blocco.",
+      "appKeyDays": "Giorni di validità di una chiave applicazione",
+      "appKeyDormantHours": "Ore dall'ultimo accesso web dopo le quali le chiavi applicazione si addormentano",
+      "appKeyFollowSignIn": "Le Chiavi Applicazione si Addormentano al Termine dell'Accesso Web",
+      "keys": "Chiavi",
+      "keysTitle": "Chiavi applicazione di {username}",
+      "noKeys": "Nessuna chiave applicazione.",
+      "revokeAll": "Revoca tutte",
+      "keyRevoked": "Chiave revocata.",
+      "keyRevokeFailed": "Impossibile revocare la chiave: {error}",
+      "keysLoadFailed": "Impossibile caricare le chiavi: {error}",
+      "keyState": {
+        "active": "Attiva",
+        "dormant": "Addormentata",
+        "expired": "Scaduta"
+      },
+      "clients": {
+        "chrome": "Estensione Chrome",
+        "firefox": "Componente aggiuntivo Firefox",
+        "android": "App Android",
+        "ios": "App iOS",
+        "other": "Altri client"
+      },
+      "keyLastUsed": "Ultimo uso",
+      "keyExpires": "Scade",
+      "keyNever": "Mai",
+      "keyNeverUsed": "Mai usata",
+      "revokeAllConfirm": "Revocare tutte le chiavi applicazione di '{username}'? Gli accessi della sua estensione e della sua app si interrompono subito."
     },
     "groups": {
       "title": "Gestione Gruppi",
@@ -259,7 +300,8 @@
       "on": "Attivato",
       "off": "Disattivato",
       "ssoGroups": "Gruppi del provider di identità i cui membri fanno parte di questo gruppo (separati da virgola)",
-      "overrideHelp": "Un gruppo decide solo ciò che è impostato qui; tutto ciò che resta non impostato o vuoto rimane proprio di ciascun membro."
+      "overrideHelp": "Un gruppo decide solo ciò che è impostato qui; tutto ciò che resta non impostato o vuoto rimane proprio di ciascun membro.",
+      "chosen": "Solo le app selezionate qui sotto"
     },
     "installedApps": {
       "title": "Applicazioni Installate",
@@ -1293,7 +1335,16 @@
       "catalogDeleteFailed": "Impossibile eliminare il catalogo: {error}",
       "catalogUpdateStarted": "Aggiornamento del catalogo '{name}' su ogni nodo.",
       "catalogUpdateFailed": "Impossibile aggiornare il catalogo: {error}",
-      "catalogsRefreshFailed": "Impossibile caricare i cataloghi: {error}"
+      "catalogsRefreshFailed": "Impossibile caricare i cataloghi: {error}",
+      "keyNoServer": "Questa chiave non indica alcun server. Creane una nell'app web, in Impostazioni → Chiavi Applicazione.",
+      "keyMissing": "Incolla la tua chiave applicazione.",
+      "keyRefused": {
+        "unknown": "Il server non conosce questa chiave. Creane una nel tuo profilo sull'app web.",
+        "expired": "La chiave è scaduta. Creane una nuova nel tuo profilo sull'app web.",
+        "disabled": "Il tuo amministratore non consente le chiavi applicazione per il tuo account.",
+        "client": "Il tuo amministratore non consente a questa app di usare le chiavi applicazione.",
+        "dormant": "La tua chiave è addormentata. Accedi all'app web, poi riprova."
+      }
     },
     "placeholders": {
       "noAdmins": "Nessun amministratore trovato.",
@@ -1322,7 +1373,8 @@
       "oidc": "OpenID Connect",
       "saml": "SAML",
       "proxy": "Reverse proxy",
-      "key": "File di chiave"
+      "key": "File di chiave",
+      "app_key": "Chiave applicazione"
     },
     "periods": {
       "day": "Giorno",
@@ -1411,7 +1463,9 @@
         "proxy_auth_groups_header": "Intestazione in cui un proxy attendibile elenca i gruppi dell'utente",
         "proxy_auth_logout_url": "Pagina del proxy che disconnette il suo utente",
         "web_session_seconds": "Durata massima di inattività di un accesso root (ore)",
-        "files_sync": "Conserva i file condivisi nell'object storage"
+        "files_sync": "Conserva i file condivisi nell'object storage",
+        "auto_sign_in": "Invia subito un browser non autenticato a",
+        "legacy_auth": "Accetta i client con file di chiave"
       },
       "usageTitle": "Utilizzo",
       "usageHours": "Ore ponderate",
@@ -1552,7 +1606,14 @@
       "resultEntity": "Entity ID:",
       "resultSso": "URL di accesso:",
       "resultSlo": "Single logout offerto:",
-      "resultCertificates": "Certificati di firma:"
+      "resultCertificates": "Certificati di firma:",
+      "landingTitle": "Pagina di Arrivo",
+      "landingHelp": "Scelto un provider, un browser non autenticato viene inviato subito a esso invece che alla pagina di accesso di questo server. Aggiungi #root all'indirizzo dell'app web per vedere comunque la pagina, come per il token root.",
+      "autoNone": "La pagina di accesso di questo server",
+      "autoOidc": "OpenID Connect",
+      "autoSaml": "SAML",
+      "rootOff": "Disattivato su questo nodo con SEALSKIN_ROOT_SIGN_IN=false. Per rientrare con la chiave, riavvia il nodo con l'opzione attiva.",
+      "rootNoAdminGroup": "Nessun gruppo del provider di identità indica gli amministratori (vedi Chi Accede). Con la chiave di root disattivata, nessuno può amministrare questo server."
     },
     "prootApps": {
       "title": "Cataloghi PRoot Apps",
@@ -1586,6 +1647,83 @@
       "updateTitle": "Scarica di nuovo le app adesso, su ogni nodo, dove il loro pacchetto è cambiato",
       "confirmDelete": "Eliminare il catalogo '{name}'? Ogni nodo rimuove la sua copia e gli utenti a cui è assegnato restano senza catalogo.",
       "deleteTitle": "Elimina catalogo"
+    },
+    "branding": {
+      "title": "Branding",
+      "help": "Dai all'app web il nome, il logo, i colori, lo sfondo e i link della tua organizzazione. L'anteprima mostra la pagina iniziale come la vedranno gli utenti; nulla cambia finché non salvi.",
+      "identity": "Identità",
+      "name": "Nome del prodotto",
+      "nameHelp": "Compare ovunque l'interfaccia direbbe SealSkin: il titolo, la barra laterale, l'app web installata e la pagina di accesso.",
+      "logo": "Logo",
+      "logoHelp": "Un'immagine quadrata PNG, JPEG o WebP fino a 1 MB. È il logo della barra laterale, la favicon e l'icona dell'app web installata.",
+      "logoLink": "Il logo rimanda a",
+      "logoLinkHelp": "Un indirizzo che il logo apre in una nuova scheda, ad esempio la tua intranet. Lascia vuoto per nessun link.",
+      "accent": "Colore di accento",
+      "accentHelp": "Il colore dei pulsanti, delle evidenziazioni e del logotipo. Cancellalo per il viola predefinito.",
+      "accentDefault": "Predefinito",
+      "wallpaper": "Sfondo",
+      "wallpaperHelp": "Un'immagine dietro la pagina iniziale, fino a 8 MB. Gli utenti partono da questa e possono comunque sceglierne una propria, a meno che non sia forzata.",
+      "wallpaperForced": "Forza questo sfondo per tutti gli utenti",
+      "wallpaperForcedHelp": "Gli utenti perdono il pulsante Personalizza nella pagina iniziale e vedono tutti questo sfondo.",
+      "fit": "Posizione",
+      "blur": "Sfocatura",
+      "dim": "Oscuramento",
+      "upload": "Carica",
+      "remove": "Rimuovi",
+      "links": "Link della pagina iniziale",
+      "linksHelp": "Riquadri che la pagina iniziale mostra sopra le applicazioni, per i tuoi siti e strumenti. Un link si apre in una nuova scheda, oppure in una sessione isolata di un'applicazione scelta dall'utente.",
+      "linkName": "Nome",
+      "linkUrl": "Indirizzo",
+      "linkIcon": "Icona",
+      "linkIconHelp": "Una classe Font Awesome come fa-book o fab fa-github, oppure un indirizzo https di un'immagine.",
+      "linkOpen": "Si apre",
+      "openTab": "In una nuova scheda",
+      "openIsolated": "In isolamento",
+      "addLink": "Aggiungi un link",
+      "noLinks": "Nessun link per ora.",
+      "preview": "Anteprima",
+      "previewHelp": "La pagina iniziale come la vede un utente, con quanto hai inserito qui.",
+      "previewUser": "Un utente",
+      "save": "Salva branding",
+      "reset": "Ripristina i valori predefiniti",
+      "resetConfirm": "Rimuovere nome, logo, colori, sfondo, link alle app e link, tornando ai valori predefiniti di SealSkin?",
+      "saved": "Branding salvato. Ricarica la pagina per vedere cambiare il titolo e la barra laterale.",
+      "resetDone": "Branding ripristinato ai valori predefiniti.",
+      "saveFailed": "Impossibile salvare il branding: {error}",
+      "pictureTooLarge": "L'immagine è troppo grande e non è stato possibile ridurla. Scegline un'altra.",
+      "notAPicture": "Scegli un'immagine PNG, JPEG o WebP.",
+      "apps": "App companion",
+      "appsHelp": "Dove gli utenti ottengono l'estensione e le app, con link dalla pagina di accesso e accanto alle chiavi applicazione nel profilo. Fai puntare un link alla tua build, oppure nascondilo.",
+      "appShow": "Mostrata",
+      "appUrl": "Indirizzo",
+      "appClient": "App"
+    },
+    "keys": {
+      "title": "Chiavi Applicazione",
+      "intro": "Fai accedere l'estensione del browser e l'app mobile con una chiave creata qui, invece che con un file di chiave. Ogni dispositivo ha una chiave propria; revocala qui e quel dispositivo viene disconnesso.",
+      "none": "Nessuna chiave per ora.",
+      "name": "Nome",
+      "nameHelp": "A cosa serve la chiave, ad esempio il dispositivo su cui va.",
+      "namePlaceholder": "es. Portatile di lavoro",
+      "made": "Creata",
+      "lifetime": "Scade",
+      "days": "{count, plural, one {1 giorno} other {{count} giorni}}",
+      "create": "Crea una chiave",
+      "revoke": "Revoca",
+      "revoked": "Chiave revocata.",
+      "shownOnce": "Copia subito questa chiave: viene mostrata solo questa volta. Incollala nella pagina di connessione dell'estensione o dell'app.",
+      "copied": "Chiave copiata.",
+      "copyFailed": "Il browser non ha consentito la copia. Seleziona la chiave e copiala.",
+      "notAllowed": "Il tuo amministratore non consente le chiavi applicazione per il tuo account.",
+      "clients": "App consentite: {clients}.",
+      "dormantHours": "Le chiavi si addormentano {hours} ore dopo il tuo ultimo accesso web; accedere qui le risveglia.",
+      "followSignIn": "Le chiavi si addormentano al termine del tuo accesso web; accedere qui le risveglia.",
+      "maxDays": "Una chiave vale al massimo {count, plural, one {1 giorno} other {{count} giorni}}.",
+      "get": "Scarica le app",
+      "getHelp": "Installane una, poi inserisci l'indirizzo del server e la tua chiave nella sua pagina di connessione.",
+      "loadFailed": "Impossibile caricare le tue chiavi: {error}",
+      "createFailed": "Impossibile creare la chiave: {error}",
+      "tooLong": "È più lunga di quanto il tuo amministratore consenta."
     }
   },
   "popup": {
@@ -1624,7 +1762,8 @@
       "moveHomeTo": "Sposta su {node}",
       "moveHomeConfirm": "Spostare '{home}' su {node}? Le sessioni che la usano devono prima essere fermate.",
       "moveHomeTitle": "Sposta archiviazione",
-      "allowance": "Quota: {used} di {hours} ore per {period}"
+      "allowance": "Quota: {used} di {hours} ore per {period}",
+      "newTab": "Apri in una nuova scheda"
     },
     "sessionsView": {
       "noSessions": "Nessuna sessione attiva trovata."
@@ -1689,7 +1828,10 @@
     },
     "sidebar": {
       "sharedFiles": "File di {brand}",
-      "publicShares": "Condivisioni Pubbliche"
+      "publicShares": "Condivisioni Pubbliche",
+      "sharedHelp": "I tuoi file su ogni nodo: ogni sessione li trova in Desktop/files.",
+      "allNodes": "tutti i nodi",
+      "homeHelp": "Questa cartella home si trova sul nodo {node}; le sessioni che la usano vengono eseguite lì. Spostala dal launcher per eseguirle altrove."
     },
     "shares": {
       "title": "File Condivisi Pubblicamente",
@@ -1790,7 +1932,15 @@
       "openServer": "Apri server",
       "changeConnection": "Cambia connessione",
       "mismatchTitle": "Aggiornamento richiesto",
-      "mismatchBody": "Questa app e l'interfaccia web del server usano versioni diverse del bridge. Aggiorna l'estensione o l'app, oppure il server, in modo che coincidano."
+      "mismatchBody": "Questa app e l'interfaccia web del server usano versioni diverse del bridge. Aggiorna l'estensione o l'app, oppure il server, in modo che coincidano.",
+      "dormantTitle": "Accedi sul web per continuare",
+      "dormantBody": "La tua chiave applicazione è addormentata: il tuo amministratore richiede di tanto in tanto un accesso sul web. Accedi lì e questa app tornerà a funzionare.",
+      "signInWeb": "Accedi sul web",
+      "keyTitle": "Questa chiave non ti fa più accedere",
+      "keyUnknown": "La chiave è stata revocata o non è mai esistita. Creane una nuova nel tuo profilo sul web.",
+      "keyExpired": "La chiave è scaduta. Creane una nuova nel tuo profilo sul web.",
+      "keyDisabled": "Il tuo amministratore non consente le chiavi applicazione per il tuo account.",
+      "keyClient": "Il tuo amministratore non consente a questa app di usare le chiavi applicazione."
     }
   },
   "web": {
@@ -1800,11 +1950,6 @@
       "oidc": "Accedi con OpenID Connect",
       "saml": "Accedi con SAML"
     },
-    "rootToken": "Token root",
-    "rootTokenHelp": "Il token dell'amministratore, che il server conserva nel file /config/root_token.",
-    "rootSignIn": "Accedi come Root",
-    "rootRefused": "Questo non è il token root del server.",
-    "rootLocked": "Troppi tentativi. Attendi un po', poi riprova.",
     "held": {
       "title": "In attesa di un amministratore",
       "message": "Hai effettuato l'accesso come {username}, ma un amministratore deve inserirti in un gruppo prima che tu possa usare {brand}. Ricontrolla quando lo avrà fatto.",
@@ -1820,7 +1965,8 @@
       "otherIdentity": "Un altro account del provider di identità accede già come questo utente {brand}. Chiedi al tuo amministratore.",
       "noAccount": "Non esiste ancora un account {brand} con il tuo nome. Chiedi all'amministratore di crearne uno.",
       "notConfigured": "Questo server non offre il single sign-on.",
-      "ended": "Il provider di identità ha terminato il tuo accesso. Accedi di nuovo."
+      "ended": "Il provider di identità ha terminato il tuo accesso. Accedi di nuovo.",
+      "redirecting": "Ti stiamo portando alla pagina di accesso…"
     },
     "nav": {
       "home": "Home",
@@ -1887,7 +2033,10 @@
       "openAppStores": "Apri gli App Store",
       "popupBlocked": "Il browser ha bloccato la scheda della sessione. Consenti i pop-up per questo sito, poi avvia di nuovo.",
       "serverFileNeedsHome": "Un file conservato sul server non può essere aperto in modalità Cleanroom. Scegli una cartella di archiviazione.",
+      "copyLink": "Copia link",
+      "copyLinkHelp": "Un link che apre questa applicazione con queste opzioni: aggiungilo ai segnalibri o installalo come app",
       "copyLinkManual": "Il browser non ha consentito la copia. Seleziona il link qui sotto e copialo.",
+      "linkCopied": "Link copiato.",
       "favorites": "Preferiti",
       "favoritesHint": "Trascina per riordinare",
       "addFavorite": "Aggiungi ai preferiti",
@@ -1919,7 +2068,8 @@
       "fitFill": "Riempi",
       "fitFit": "Adatta",
       "fitStretch": "Estendi",
-      "fitCenter": "Centra"
+      "fitCenter": "Centra",
+      "links": "Link"
     },
     "launch": {
       "title": "Avvio di {app}",
@@ -1932,7 +2082,8 @@
         "image": "Scaricamento dell'immagine dell'applicazione",
         "starting": "Creazione del container",
         "waiting": "In attesa della risposta del desktop",
-        "ready": "Apertura della sessione"
+        "ready": "Apertura della sessione",
+        "client": "Preparazione del client web dell'applicazione"
       },
       "uploading": "Caricamento del file ({done} di {total})",
       "imageHint": "Il primo avvio di un'applicazione su un nodo la scarica, e può richiedere alcuni minuti. Gli avvii successivi sono rapidi.",
@@ -1941,6 +2092,37 @@
       "failed": "Avvio non riuscito",
       "unseen": "La richiesta di avvio non ha raggiunto il server. Controlla la scheda di {brand} che l'ha avviata.",
       "closeTab": "Il browser ha tenuto aperta questa scheda. Chiudila tu."
-    }
+    },
+    "open": {
+      "title": "Apertura di {app}",
+      "signingIn": "Verifica di chi ha effettuato l'accesso",
+      "looking": "Ricerca di una sessione in esecuzione",
+      "attaching": "Apertura della sessione in esecuzione",
+      "notYours": "Questa applicazione non è disponibile per il tuo account, oppure non esiste.",
+      "noHome": "La cartella di archiviazione '{home}' indicata da questo indirizzo non esiste. Creala in {brand}, oppure apri l'indirizzo senza di essa.",
+      "openSealSkin": "Apri {brand}"
+    },
+    "keyRefused": "Questa chiave non fa accedere nessuno.",
+    "keyNotRoot": "Qui solo root accede con una chiave. Accedi tramite il tuo provider di identità.",
+    "keyExpired": "Questa chiave è scaduta.",
+    "keyLocked": "Troppi tentativi. Attendi un po', poi riprova.",
+    "keyDisabled": "Questo server non accetta la chiave applicazione di root all'accesso web.",
+    "apps": {
+      "chrome": "Estensione Chrome",
+      "firefox": "Componente aggiuntivo Firefox",
+      "android": "App Android",
+      "ios": "App iOS",
+      "other": "Altri client"
+    },
+    "rootKey": "Chiave root",
+    "rootKeyHelp": "La chiave applicazione dell'amministratore, che il server ha scritto in /config/root_key al primo avvio.",
+    "keys": {
+      "wakeTitle": "La tua chiave applicazione è di nuovo attiva",
+      "wakeBody": "Ora puoi tornare all'app, oppure continuare qui.",
+      "wakeClose": "Chiudi",
+      "wakeContinue": "Continua su {brand}",
+      "wakeFailed": "Impossibile risvegliare le tue chiavi: {error}"
+    },
+    "rootSignIn": "Accedi come Root"
   }
 }

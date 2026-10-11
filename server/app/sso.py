@@ -28,10 +28,14 @@ the provider named, and when it ends. `security.verify_token` asks
   provider's subject there (`user_manager.ensure_user`), and another subject
   is refused as that user later. A key-file administrator's name is refused,
   since administrators come from `sso_admin_group` alone.
-* The `root` administrator signs in with the root token (`check_root_token`),
-  of which the shared store keeps only a hash. Its sign-in ends after
-  `web_session_seconds` unused. A user a reverse proxy names has no sign-in
-  here: the proxy's header is read on each request (`app.proxy_auth`).
+* The `root` administrator signs in with one of root's application keys
+  (`app.application_keys.web_sign_in`), which starts a sign-in here like a
+  provider's; it ends after `web_session_seconds` unused. A user a reverse
+  proxy names has no sign-in here: the proxy's header is read on each request
+  (`app.proxy_auth`).
+* Each sign-in through a provider is stamped on the user's record
+  (`user_manager.note_web_sign_in`), and a logout the provider announces ends
+  the stamp, which is what the application keys' dormancy rules read.
 
 Sign-ins are this node's own (`sso_keys_path`, written 0600): an OpenID
 Connect one keeps its refresh token so a restarted server can still ask the
@@ -78,7 +82,6 @@ MAX_PENDING = 10000
 COOKIE = "sealskin_sso"
 #: Cookie holding a web sign-in; the `__Host-` prefix keeps a session's origin from setting it.
 SESSION_COOKIE = "__Host-sealskin"
-ROOT_TRIES = 5
 BACKCHANNEL_LOGOUT_EVENT = "http://schemas.openid.net/event/backchannel-logout"
 ASYMMETRIC_ALGORITHMS = {"RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512", "EdDSA"}
 
@@ -101,7 +104,6 @@ REDIRECT_SIGNATURES = {
 _PARSER = etree.XMLParser(resolve_entities=False, no_network=True, load_dtd=False, huge_tree=False)
 
 _KEYS: dict[str, dict[str, Any]] = {}
-_ROOT_FAILURES: dict[str, list[float]] = {}
 _FLOWS: dict[str, dict[str, Any]] = {}
 _TICKETS: dict[str, dict[str, Any]] = {}
 _GRANTS: dict[str, dict[str, Any]] = {}
@@ -181,83 +183,6 @@ async def open_session(identity: dict[str, Any]) -> str:
         "'%s' signed in through %s%s.", identity["username"], identity["via"], " as an administrator" if identity["admin"] else ""
     )
     return token
-
-
-def _root_hash(token: str) -> str:
-    """Return the hash the store keeps of a root token."""
-    return hashlib.sha256(f"sealskin-root {token}".encode()).hexdigest()
-
-
-def ensure_root_token() -> None:
-    """Make sure the cluster has a root token, generating and writing one out the first time.
-
-    `SEALSKIN_ROOT_TOKEN` sets it; otherwise a generated one is written to
-    `root_token_path` for the administrator to copy and delete. The store
-    keeps the hash alone.
-    """
-    path = os.path.join(settings.cluster_path, "root.yml")
-    known = persistence.read_yaml(path, None)
-    given = settings.root_token.strip()
-    if given:
-        if not known or known.get("hash") != _root_hash(given):
-            persistence.write_yaml_sync(path, {"hash": _root_hash(given)})
-        return
-    if known:
-        return
-    token = secrets.token_urlsafe(48)
-    try:
-        persistence.write_yaml_sync(path, {"hash": _root_hash(token)})
-    except Exception as exc:  # noqa: BLE001 - another node wrote it first
-        logger.info("The root token was set elsewhere: %s", exc)
-        return
-    try:
-        fd = os.open(settings.root_token_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-        with os.fdopen(fd, "w", encoding="utf-8") as handle:
-            handle.write(token + "\n")
-        logger.warning(
-            "Generated the root token; sign in to the web app as 'root' with the content of %s, then delete that file.",
-            settings.root_token_path,
-        )
-    except OSError as exc:
-        logger.error("Could not write the root token to %s: %s", settings.root_token_path, exc)
-
-
-async def root_sign_in(token: str, address: str = "") -> str:
-    """Sign `root` in with the root token and return the sign-in's token.
-
-    Args:
-        token: The token offered.
-        address: The client's address, which wrong tokens are counted by.
-
-    Raises:
-        SignInError: `refused` for a wrong token, `expired` after too many
-            wrong ones from `address` within a minute.
-    """
-    now = time.time()
-    for source in list(_ROOT_FAILURES):
-        _ROOT_FAILURES[source] = [stamp for stamp in _ROOT_FAILURES[source] if now - stamp < 60]
-        if not _ROOT_FAILURES[source]:
-            del _ROOT_FAILURES[source]
-    # Counted per address, so wrong tokens from elsewhere never keep the administrator out.
-    if len(_ROOT_FAILURES.get(address, [])) >= ROOT_TRIES:
-        raise SignInError("expired", "too many wrong root tokens; try again in a minute")
-    known = persistence.read_yaml(os.path.join(settings.cluster_path, "root.yml"), None) or {}
-    expected = str(known.get("hash") or "")
-    if not expected or not secrets.compare_digest(_root_hash(token.strip()), expected):
-        if len(_ROOT_FAILURES) < MAX_PENDING:
-            _ROOT_FAILURES.setdefault(address, []).append(now)
-        audit.record("sign_in_refused", user_manager.ROOT, via="root", address=address)
-        raise SignInError("refused", "the root token is wrong")
-    return await open_session(
-        {
-            "username": user_manager.ROOT,
-            "admin": True,
-            "groups": [],
-            "subject": "root",
-            "via": "root",
-            "expires": now + settings.web_session_seconds,
-        }
-    )
 
 
 def _prune() -> None:
@@ -401,6 +326,7 @@ async def register(grant: str, binding: str) -> dict[str, Any]:
     except ValueError as exc:
         raise SignInError("refused", str(exc)) from exc
     token = await open_session(identity)
+    user_manager.note_web_sign_in(username, float(identity["expires"]), renew=True)
     return {"token": token, "username": username, "via": identity["via"], "expires": identity["expires"]}
 
 
@@ -695,6 +621,7 @@ async def _end_oidc(issuer: str, sid: str | None, sub: str | None) -> int:
         and (reg.get("oidc_sid") == sid if sid and reg.get("oidc_sid") else bool(sub))
     ]
     for kid in ended:
+        user_manager.end_web_sign_in(_KEYS[kid]["username"])
         del _KEYS[kid]
     if ended:
         await _save()
@@ -1076,6 +1003,7 @@ async def saml_logout(base_url: str, raw_query: str, form: dict[str, str]) -> st
         and (not sessions or reg.get("session_index") in sessions)
     ]
     for kid in ended:
+        user_manager.end_web_sign_in(_KEYS[kid]["username"])
         del _KEYS[kid]
     if ended:
         await _save()

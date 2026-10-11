@@ -9,7 +9,17 @@ from cryptography.hazmat.primitives import serialization
 from fastapi import HTTPException, Request
 from fastapi.testclient import TestClient
 
-from app import cluster, persistence, proxy_auth, quota, security, sso, store, user_manager
+from app import (
+    application_keys,
+    cluster,
+    persistence,
+    proxy_auth,
+    quota,
+    security,
+    sso,
+    store,
+    user_manager,
+)
 from app.settings import settings
 from app.state import state
 from tests.conftest import PROXY_SECRET, WEB
@@ -28,12 +38,12 @@ def node(tmp_path, monkeypatch):
     monkeypatch.setattr(settings, "auto_update_apps", False)
     monkeypatch.setattr(settings, "watch_config_files", False)
     monkeypatch.setattr(settings, "ui_path", str(tmp_path / "no-ui"))
-    monkeypatch.setattr(settings, "root_token", "a-root-token-for-the-tests")
+    monkeypatch.setattr(settings, "root_key", "a-root-key-for-the-tests")
     import app.api as api_module
 
     security.init_server_keys()
     sso._KEYS.clear()
-    sso._ROOT_FAILURES.clear()
+    application_keys._FAILURES.clear()
     with TestClient(api_module.api_app) as client:
         yield client
 
@@ -127,7 +137,7 @@ def test_the_keeper_serves_shared_objects_to_peers_within_what_each_may_write(no
         token = _signed(key, node_id, method, path, body)
         return node.request(method, path, content=body, headers={**PEER, "Authorization": token, **(headers or {})})
 
-    assert send("GET", "/peer/store/cluster/root.yml").status_code == 200
+    assert send("GET", "/peer/store/cluster/application_keys.yml").status_code == 200
     assert send("GET", "/peer/store/sessions.yml").status_code == 400
     assert f"cluster/nodes/{cluster.NODE_ID}.yml" in send("GET", "/peer/store/", headers={"x-sealskin-list": "cluster/"}).json()
     assert send("PUT", "/peer/store/keys/users/mallory", b"x").status_code == 403
@@ -149,6 +159,11 @@ def test_placement_follows_the_home_then_pool_access_then_room_and_load(node):
     assert cluster.choose_node(_user()) == cluster.NODE_ID
     cluster.HOMES["alice"] = {"work": bravo}
     assert cluster.choose_node(_user(), home_name="work") == bravo
+    assert cluster.choose_node(_user(), home_name="work", node=bravo) == bravo
+    # A node or pool named against the home's is refused.
+    with pytest.raises(HTTPException) as elsewhere:
+        cluster.choose_node(_user(), home_name="work", node=cluster.NODE_ID)
+    assert elsewhere.value.status_code == 409 and "work" in elsewhere.value.detail
     cluster.PEERS[bravo]["missed"] = cluster.MISSED_POLLS
     with pytest.raises(HTTPException) as away:
         cluster.choose_node(_user(), home_name="work")
@@ -199,10 +214,10 @@ def test_session_resources_are_capped_below_what_the_app_asks():
     assert small == {"mem_limit": 512 * 1024 * 1024}
 
 
-def test_root_signs_in_with_the_token_and_the_plain_lane_needs_the_proxy_and_the_apps_own_origin(node):
-    assert node.post("/api/auth/root", json={"token": "a-root-token-for-the-tests"}).status_code == 403
-    assert node.post("/api/auth/root", json={"token": "wrong"}, headers=WEB).status_code == 403
-    signed_in = node.post("/api/auth/root", json={"token": "a-root-token-for-the-tests"}, headers=WEB)
+def test_root_signs_in_with_the_key_and_the_plain_lane_needs_the_proxy_and_the_apps_own_origin(node):
+    assert node.post("/api/auth/key", json={"key": "a-root-key-for-the-tests"}).status_code == 403
+    assert node.post("/api/auth/key", json={"key": "wrong"}, headers=WEB).status_code == 403
+    signed_in = node.post("/api/auth/key", json={"key": "a-root-key-for-the-tests"}, headers=WEB)
     assert signed_in.status_code == 200 and "HttpOnly" in signed_in.headers["set-cookie"]
     assert signed_in.headers["set-cookie"].startswith(f"{sso.SESSION_COOKIE}=")
     cookie = {"Cookie": signed_in.headers["set-cookie"].split(";", 1)[0]}
@@ -215,7 +230,7 @@ def test_root_signs_in_with_the_token_and_the_plain_lane_needs_the_proxy_and_the
     assert node.get("/api/admin/cluster", headers={**WEB, **cookie}).json()["store"]["kind"] == "file"
     assert node.post("/api/auth/signout", json={}, headers={**WEB, **cookie}).status_code == 204
     assert node.post("/api/admin/status", json={}, headers={**WEB, **cookie}).status_code == 401
-    assert store.get("cluster/root.yml")[0].count(b"a-root-token") == 0
+    assert store.get("cluster/application_keys.yml")[0].count(b"a-root-key") == 0
 
 
 def _entrance(monkeypatch, handler):
@@ -463,7 +478,7 @@ def test_a_launch_reports_its_stages_to_the_user_who_started_it(node):
 
 
 def test_a_refused_launch_is_reported_as_failed_and_only_to_its_owner(node):
-    signed_in = node.post("/api/auth/root", json={"token": "a-root-token-for-the-tests"}, headers=WEB)
+    signed_in = node.post("/api/auth/key", json={"key": "a-root-key-for-the-tests"}, headers=WEB)
     cookie = {**WEB, "Cookie": signed_in.headers["set-cookie"].split(";", 1)[0]}
     launch = "123e4567-e89b-12d3-a456-426614174abe"
     assert node.get(f"/api/launch/progress/{launch}", headers=cookie).status_code == 404
@@ -480,7 +495,7 @@ def test_the_audit_log_is_searched_and_paged_newest_first(node):
     for n in range(7):
         audit.record("launch", "alice" if n % 2 else "bob", session=f"s{n}", app="Firefox")
     audit.record("admin", "root", method="PUT", path="/api/admin/groups/staff")
-    signed_in = node.post("/api/auth/root", json={"token": "a-root-token-for-the-tests"}, headers=WEB)
+    signed_in = node.post("/api/auth/key", json={"key": "a-root-key-for-the-tests"}, headers=WEB)
     cookie = {**WEB, "Cookie": signed_in.headers["set-cookie"].split(";", 1)[0]}
     page = node.get("/api/admin/cluster/audit?limit=3", headers=cookie).json()
     assert page["total"] == 9 and len(page["events"]) == 3 and page["events"][0]["event"] == "sign_in"
@@ -494,7 +509,7 @@ def test_the_audit_log_is_searched_and_paged_newest_first(node):
 
 
 def test_an_app_laboratory_session_is_one_per_admin_and_in_no_session_list(node):
-    signed_in = node.post("/api/auth/root", json={"token": "a-root-token-for-the-tests"}, headers=WEB)
+    signed_in = node.post("/api/auth/key", json={"key": "a-root-key-for-the-tests"}, headers=WEB)
     cookie = {**WEB, "Cookie": signed_in.headers["set-cookie"].split(";", 1)[0]}
     assert node.get("/api/admin/lab", headers=cookie).json() == {"session": None}
     state.sessions["11111111-1111-4111-8111-111111111111"] = {

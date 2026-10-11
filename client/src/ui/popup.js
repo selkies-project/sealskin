@@ -10,6 +10,7 @@ import { supportedLangs } from '../lib/languages.js';
 import { browserTimezone } from '../lib/timezone.js';
 import { announce, escapeHtml, formatLogoSrc, hydrateLogos, timeAgo, currentLocale } from '../lib/dom.js';
 import { confirmDialog } from '../lib/modal.js';
+import { autoHomeName, bestHome, homeAllowed, nodesFor } from '../lib/homes.js';
 
 let t;
 let info;
@@ -65,6 +66,8 @@ let availableGpus = [];
 let homeDirs = [];
 // What the user may know of the cluster, or null on a server that is one node.
 let cluster = null;
+/** The launch options last saved, which the home selection falls back to. */
+let lastProfile = null;
 let activeSessions = [];
 let isSimpleLaunch = false;
 let selectedAppId = null;
@@ -114,6 +117,23 @@ function showView(viewName) {
     launchView.classList.add('active');
     launchTabBtn.classList.add('active');
   }
+}
+
+/** The sessions tab is there while sessions run; with none, the launcher is the whole view. */
+function updateSessionsTab() {
+  sessionsTabBtn.style.display = activeSessions.length ? '' : 'none';
+  if (!activeSessions.length && sessionsView.classList.contains('active')) showView('launch');
+}
+
+/** Ask the server for the sessions again, as when the launcher comes back into view after a session. */
+async function refreshActiveSessions() {
+  try {
+    activeSessions = await secureFetch('/api/sessions', { method: 'GET' });
+  } catch (error) {
+    return;
+  }
+  renderActiveSessions(sealskinContext.action === 'file');
+  updateSessionsTab();
 }
 
 function renderActiveSessions(isFileContext) {
@@ -398,20 +418,27 @@ const nodeName = (id) => {
   return node ? node.name || node.id : id;
 };
 
+/**
+ * Offer the homes a launch can use where the Where field sends it, the
+ * others grayed out, and keep the chosen one where it still can.
+ */
 function populateHomeDirDropdown() {
   const current = homeDirSelect.value;
-  homeDirSelect.innerHTML = `
-    <option value="auto">${t('popup.launchView.autoHome')}</option>
-    <option value="cleanroom">${t('popup.launchView.cleanroom')}</option>
-  `;
+  const app = availableApps.find((a) => a.id === selectedAppId);
+  const autoName = app ? autoHomeName(app.name) : '';
+  const nodes = nodesFor(cluster, whereSelect.value);
+  const allowed = (choice) => homeAllowed(cluster, nodes, choice, autoName);
   // In a cluster each home is named with the node that holds it.
   const held = (dir) => (cluster && cluster.homes[dir] ? ` (${nodeName(cluster.homes[dir])})` : '');
-  const optionsHtml = homeDirs
-    .filter((dir) => dir !== '_sealskin_shared_files' && !dir.startsWith('auto-'))
-    .map((dir) => `<option value="${escapeHtml(dir)}">${escapeHtml(dir + held(dir))}</option>`)
-    .join('');
-  homeDirSelect.insertAdjacentHTML('beforeend', optionsHtml);
-  if ([...homeDirSelect.options].some((o) => o.value === current)) homeDirSelect.value = current;
+  const option = (value, label) => `<option value="${escapeHtml(value)}"${allowed(value) ? '' : ' disabled'}>${escapeHtml(label)}</option>`;
+  homeDirSelect.innerHTML = option('auto', t('popup.launchView.autoHome') + (autoName && cluster && cluster.homes[autoName] ? held(autoName) : ''))
+    + option('cleanroom', t('popup.launchView.cleanroom'))
+    + homeDirs
+      .filter((dir) => dir !== '_sealskin_shared_files' && !dir.startsWith('auto-'))
+      .map((dir) => option(dir, dir + held(dir)))
+      .join('');
+  const known = (choice) => [...homeDirSelect.options].some((o) => o.value === choice);
+  homeDirSelect.value = bestHome((choice) => known(choice) && allowed(choice), current, lastProfile && lastProfile.homeDir);
 }
 
 /** Offer where the session starts: wherever the server picks, a pool, or one node. */
@@ -510,6 +537,7 @@ async function closeSession(sessionId) {
     activeSessions = activeSessions.filter((s) => s.session_id !== sessionId);
     if (activeSessions.length === 0) {
       renderActiveSessions(sealskinContext.action === 'file');
+      updateSessionsTab();
     }
   } catch (error) {
     console.error('Failed to close session:', error);
@@ -812,6 +840,7 @@ async function init() {
     if (isSimpleLaunch) {
       const data = await bridge.storageGet(['simple_launch_profile']);
       savedProfile = data.simple_launch_profile;
+      lastProfile = savedProfile;
       saveOptionsContainer.style.display = 'none';
     } else if (sealskinContext.action === 'url') {
       launchProfileKey = 'workflow_profile_url';
@@ -855,9 +884,7 @@ async function init() {
     availableApps = appsData;
     activeSessions = sessionsData;
 
-    if (activeSessions.length === 0 && !inFrame()) {
-      sessionsTabBtn.style.display = 'none';
-    }
+    updateSessionsTab();
 
     populateLanguageDropdown();
     if (userSettings.persistent_storage) {
@@ -930,6 +957,10 @@ async function init() {
 }
 
 sessionsTabBtn.addEventListener('click', () => showView('sessions'));
+// Back from a session in the framed launcher, the sessions shown are the server's, not the page's memory.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && inFrame() && availableApps.length) refreshActiveSessions();
+});
 launchTabBtn.addEventListener('click', () => showView('launch'));
 manageFilesBtn.addEventListener('click', () => {
   bridge.openPage('files');
@@ -944,6 +975,10 @@ uploadStorageBtn.addEventListener('click', handleUploadToStorage);
 launchBtn.addEventListener('click', handleLaunch);
 homeDirSelect.addEventListener('change', updateMoveHome);
 moveHomeSelect.addEventListener('change', handleMoveHome);
+whereSelect.addEventListener('change', () => {
+  if (!homeDirFormGroup.classList.contains('hidden')) populateHomeDirDropdown();
+  updateMoveHome();
+});
 
 sessionsListContainer.addEventListener('click', (e) => {
   const button = e.target.closest('button');

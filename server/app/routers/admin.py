@@ -17,6 +17,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import ValidationError
 
 from .. import (
+    application_keys,
     cluster,
     config_store,
     progress,
@@ -113,6 +114,7 @@ async def admin_status(user: dict[str, Any] = Depends(verify_token)) -> dict[str
         "username": user.get("username"),
         "settings": user.get("effective_settings"),
         "via": user.get("via") or "key",
+        "key_files": bool(settings.legacy_auth),
         "sign_out_url": settings.proxy_auth_logout_url if user.get("via") == "proxy" else "",
         "session_domain": settings.session_domain,
         "session_isolation": settings.session_isolation,
@@ -821,7 +823,12 @@ async def stop_any_session(session_id: str) -> Response:
 
 @router.post("/admins", response_model=CreateUserResponse, status_code=201)
 async def create_admin(decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body)) -> dict[str, Any]:
-    """Create an administrator."""
+    """Create a key-file administrator; refused where key files are off, since administrators then come from the provider."""
+    if not settings.legacy_auth:
+        raise HTTPException(
+            status_code=400,
+            detail="Key-file clients are off: administrators come from the identity provider's group or a group's Administrator switch.",
+        )
     try:
         req = CreateAdminRequest(**decrypted_body)
         user, private_key = user_manager.create_admin(req.username, req.public_key)
@@ -838,6 +845,7 @@ async def delete_admin(username: str) -> Response:
     try:
         user_manager.delete_admin(username)
         await cluster.forget_user(username)
+        await asyncio.to_thread(application_keys.revoke_all, username)
         return Response(status_code=204)
     except ValueError as exc:
         if "cannot be deleted" in str(exc).lower():
@@ -847,11 +855,11 @@ async def delete_admin(username: str) -> Response:
 
 @router.post("/users", response_model=CreateUserResponse, status_code=201)
 async def create_user(decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body)) -> dict[str, Any]:
-    """Create a user."""
+    """Create a user; with key files off, a sign-in-only user, whatever key the request carries."""
     try:
         req = CreateUserRequest(**decrypted_body)
         user, private_key = user_manager.create_user(
-            req.username, req.public_key, req.settings.model_dump()
+            req.username, req.public_key if settings.legacy_auth else "", req.settings.model_dump()
         )
         return {"user": user, "private_key": private_key}
     except ValueError as exc:
@@ -891,6 +899,7 @@ async def delete_user(username: str) -> Response:
         user_manager.delete_user(username)
         await cluster.forget_user(username)
         await sso.end_sign_ins_of(username)
+        await asyncio.to_thread(application_keys.revoke_all, username)
         return Response(status_code=204)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

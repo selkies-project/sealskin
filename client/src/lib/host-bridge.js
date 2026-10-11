@@ -16,6 +16,7 @@
  */
 
 import { storePendingFile, takePendingFile } from './context-store.js';
+import { detectPlatform } from './platform.js';
 
 export const BRIDGE_VERSION = 1;
 
@@ -23,26 +24,6 @@ export const BRIDGE_VERSION = 1;
 
 const SHELL = typeof __SHELL_TARGET__ !== 'undefined' ? __SHELL_TARGET__ : 'extension';
 const SHELL_VERSION = typeof __UI_VERSION__ !== 'undefined' ? __UI_VERSION__ : 'dev';
-
-/**
- * Detect the platform the host runs on.
- *
- * @returns {'chrome'|'firefox'|'android'|'ios'|'web'}
- */
-function detectPlatform(shell) {
-  const cap = typeof window !== 'undefined' && window.Capacitor;
-  if (cap && typeof cap.getPlatform === 'function') {
-    const p = cap.getPlatform();
-    if (p === 'android' || p === 'ios') return p;
-  }
-  const ua = navigator.userAgent || '';
-  if (/Android/i.test(ua) && shell === 'mobile') return 'android';
-  if (/iPhone|iPad|iPod/i.test(ua) && shell === 'mobile') return 'ios';
-  if (typeof browser !== 'undefined' && /Firefox/.test(ua)) return 'firefox';
-  if (/Firefox/.test(ua)) return 'firefox';
-  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) return 'chrome';
-  return 'web';
-}
 
 /**
  * Call the background through the transport and unwrap its reply.

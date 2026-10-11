@@ -54,7 +54,7 @@ peer listener beyond the nodes.
 What the nodes share is a small set of objects: users and administrators
 (`keys/`), groups, installed applications, application stores, templates,
 PRoot Apps catalogs, and the cluster's own records (`cluster/`: nodes, pools, sign-in settings, home
-directory locations, usage, and the hash of the root token). The store that
+directory locations, usage, and the hashes of the application keys). The store that
 holds them is the authority, and it holds no secret: public keys and hashes
 only.
 
@@ -144,7 +144,10 @@ A pool is a named group of nodes. Each node is in one, `default` unless
 A launch goes to one node:
 
 1. A persistent home directory decides: the session starts on the node that
-   holds it, or not at all while that node is away.
+   holds it, or not at all while that node is away. A node or pool chosen
+   against it is refused with the reason. The `auto-<app>` directory of a
+   first launch lives where that launch landed; move the directory, or
+   choose another, to start elsewhere.
 2. Otherwise the candidates are the answering `runtime` nodes in pools open
    to the user, under their session cap (`SEALSKIN_NODE_MAX_SESSIONS`), and,
    for a GPU session, with a GPU free.
@@ -183,9 +186,11 @@ has all of it does the record change and the original go.
 
 Each user's shared files, mounted at `Desktop/files` in every persistent
 session, are the same on every node. With a second node in the cluster
-(`SEALSKIN_FILES_SYNC=auto`), the store holds them under `files/<user>/`: a
-node brings its copy up to date before a session starts, and sends what
-changed when the session stops and every few minutes while it runs. The last
+(`SEALSKIN_FILES_SYNC=auto`), the store holds them under `files/<user>/`. A
+session starts at once over the node's copy, which catches up from the store
+in the background as the session comes up; a launch that opens a file from
+the directory fetches that one file first. A node sends what changed when
+the session stops and every few minutes while it runs. The last
 writer of a file wins; when two nodes changed the same file, the losing
 version is kept beside it as `<name>.conflict-<node>`. Files over 512 MB stay
 on their node.
@@ -223,8 +228,9 @@ a search, a day or a range, and an export as CSV or JSON; the
 * A runtime node behind NAT, reached through a relay, and sessions that
   bypass the frontend. Today every frontend has to reach every runtime node's
   peer listener.
-* Web sign-in in the browser extension and mobile app, which use key files
-  and one node.
+* Key-file clients that reach more than the one node in their configuration
+  file. The browser extension and the mobile app reach every node with an
+  [application key](signin.md#application-keys) instead.
 * Public share links for files on a node other than the one the link names.
 * Application icons and meta-app home templates, which stay on the node they
   were uploaded to.
@@ -246,7 +252,7 @@ docker run -d --name alpha --hostname alpha --network sealskin-lab \
   -e SEALSKIN_NODE_NAME=alpha -e SEALSKIN_NODE_ADDRESS=alpha:8444 \
   -p 8443:8443 -v $PWD/lab/alpha/config:/config -v $PWD/lab/alpha/storage:/storage \
   -v /var/run/docker.sock:/var/run/docker.sock lscr.io/linuxserver/sealskin:latest
-cat lab/alpha/config/root_token
+cat lab/alpha/config/root_key
 ```
 
 `<your name>` is a name with a certificate browsers trust, as the Duck DNS
@@ -254,8 +260,8 @@ certificate the [installer](start.md#with-the-installer-recommended) makes;
 on a machine with no public name, `mkcert localhost` after `mkcert -install`
 gives one for `localhost`. (Session isolation would also take wildcard DNS
 and a certificate covering the name's subdomains: `mkcert "*.localhost"
-localhost`.) Open `https://<your name>:8443/`, sign in with the root
-token, install an application under **App Stores**, and launch it.
+localhost`.) Open `https://<your name>:8443/`, sign in with root's
+application key, install an application under **App Stores**, and launch it.
 
 Then, in the dashboard, **Cluster → Add a node** gives a join code; start
 the second node with it:

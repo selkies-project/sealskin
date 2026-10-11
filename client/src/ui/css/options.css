@@ -1841,3 +1841,24 @@ body:has(.popup-container)::before { display: none; }
 .mock-tile .name { font-size: 0.52rem; line-height: 1.2; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mock-tile.bone .name { width: 70%; height: 0.5rem; border-radius: 3px; background-color: var(--bg-3); }
 .mock-tile.bone img { opacity: 0.35; }
+
+/* The apps that may use application keys, and the brand's links to them. */
+.client-boxes { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; margin-top: 0.4rem; }
+.client-box { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer; }
+.client-box input:disabled + * , .client-box:has(input:disabled) { opacity: 0.5; cursor: default; }
+.client-mode { margin-bottom: 0.25rem; }
+.brand-app-name { white-space: nowrap; }
+#brand-apps-table input[type="url"] { width: 100%; min-width: 14rem; }
+
+/* The user's own application keys: the key shown once, and the links to the apps. */
+.keys-form { margin-top: 1rem; }
+.keys-reveal { margin-top: 1rem; padding: 1rem; border: 1px solid var(--accent-border); border-radius: var(--radius-sm); background-color: var(--accent-soft); }
+.keys-reveal[hidden] { display: none; }
+.keys-secret { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem; }
+.keys-secret code { flex: 1; min-width: 0; padding: 0.6rem 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background-color: var(--bg-0); font-size: 0.85rem; overflow-wrap: anywhere; user-select: all; }
+.keys-secret button { flex: none; }
+.keys-apps { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.keys-apps .button { text-decoration: none; }
+
+/* Without key-file clients, a user has no public key to show. */
+#users-table.no-key-files th:nth-child(3), #users-table.no-key-files td.pubkey-cell { display: none; }

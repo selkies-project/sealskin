@@ -34,16 +34,24 @@ non-GET request to make a retry safe.
 
 **Authentication.** Endpoints marked *user* or *admin* require
 `Authorization: Bearer <jwt>`, an `RS256` token signed with the user's
-private key whose claims include `sub` (the username) and `exp`. *admin*
-endpoints additionally require an administrator account.
+private key whose claims include `sub` (the username) and `exp`, or, on the
+plain lane, `Authorization: Bearer ssk_<id>_<secret>`, an
+[application key](signin.md#application-keys) with the client's name in
+`X-SealSkin-Client` (`chrome`, `firefox`, `android`, `ios`, else `other`).
+A refused key answers `401` with the code in `detail`: `unknown`, `expired`,
+`disabled`, `client`, or `dormant`. The companion apps call every endpoint
+under `/companion/`, as `/companion/api/...`, where a key is the one
+credential taken. *admin* endpoints additionally require
+an administrator account.
 
 **The plain lane.** A request through Caddy that names no crypto session is
-taken and answered as plain JSON, with no envelope: it is how the web app and
-the nodes of a cluster call every endpoint below. It authenticates with the
-cookie of a [web sign-in](signin.md) or the header of a trusted proxy, both of
-which are honored only on a request the browser marks as coming from the web
-app's own pages (`Sec-Fetch-Site: same-origin`, else a matching `Origin`), or
-with another node's signature. `409` answers a write another node got in
+taken and answered as plain JSON, with no envelope: it is how the web app,
+the companion apps with an application key, and the nodes of a cluster call
+every endpoint below. It authenticates with the cookie of a
+[web sign-in](signin.md) or the header of a trusted proxy, both of which are
+honored only on a request the browser marks as coming from the web app's own
+pages (`Sec-Fetch-Site: same-origin`, else a matching `Origin`), with an
+application key, or with another node's signature. `409` answers a write another node got in
 ahead of, and `503` one the shared store could not take.
 
 **Errors.** Standard HTTP status codes with a JSON `{"detail": ...}` body:
@@ -65,10 +73,10 @@ validation, `500` for provider errors.
 
 | Method and path | Purpose |
 | --- | --- |
-| `GET /api/auth/config` | Which sign-ins the server offers: `oidc`, `saml`, `proxy`, `root`, `key`; `auto` names the provider a signed-out browser is sent to at once, or is empty. |
+| `GET /api/auth/config` | Which sign-ins the server offers: `oidc`, `saml`, `proxy`, `root` (root's application key), `key` (key files); `auto` names the provider a signed-out browser is sent to at once, or is empty. |
 | `GET /api/auth/oidc/login`, `GET /api/auth/saml/login` | Start a provider flow; it ends at `/#sso=<grant>` or `/#sso-error=<code>`. |
 | `POST /api/auth/register` | Body `{grant}`: start the sign-in and set its cookie. |
-| `POST /api/auth/root` | Body `{token}`: sign `root` in with the root token; `403 disabled` where the node has `SEALSKIN_ROOT_SIGN_IN=false`. |
+| `POST /api/auth/key` | Body `{key}`: sign `root` in with one of root's application keys; `403 disabled` where the node has `SEALSKIN_ROOT_SIGN_IN=false`, `403 notRoot` for another user's key, `403 refused`, `429 locked` after five wrong keys from one address within a minute. |
 | `POST /api/auth/signout` | End the sign-in the caller's cookie names and clear the cookie. |
 | `GET /api/auth/proxy` | What the request's [sign-in headers](reverse-proxy/sign-in.md) held when it arrived and whether a trusted proxy passed it on: the path the server asks through its own public address to check the proxy. It signs nobody in. |
 | `GET /api/auth/saml/metadata` | The service provider metadata to register with a SAML provider. |
@@ -76,6 +84,20 @@ validation, `500` for provider errors.
 The provider's callbacks and logout notices (`/api/auth/oidc/callback`,
 `/api/auth/oidc/backchannel-logout`, `/api/auth/oidc/frontchannel-logout`,
 `/api/auth/saml/acs`, `/api/auth/saml/slo`) are for the provider.
+
+## Application keys
+
+The user's own routes answer a web sign-in alone, the cookie's or the
+proxy's: a key, or a key-file client, cannot manage keys.
+
+| Method and path | Auth | Purpose |
+| --- | --- | --- |
+| `GET /api/keys` | web | The caller's keys (`id`, `name`, `created`, `expires`, `last_used`, `client`, `state` of `active`, `dormant`, or `expired`) and the `policy` over them: `allowed`, `clients`, `max_days`, `dormant_hours`, `follow_sign_in`, `web_sign_in`. |
+| `POST /api/keys` | web | Body `{name, days?}`: make a key, returned once as `key`, `ssk_<id>_<secret>@<host>:<port>` with the node's public address for the app to read, with its `record`; `403 disabled`, `400 days` over the longest lifetime. |
+| `DELETE /api/keys/{id}` | web | Revoke one of the caller's keys. |
+| `POST /api/keys/wake` | web | Count the caller's sign-in as happening now, which wakes dormant keys; returns the listing. |
+| `GET /api/admin/users/{username}/keys` | admin | A user's keys. |
+| `DELETE /api/admin/users/{username}/keys/{id}`, `DELETE /api/admin/users/{username}/keys` | admin | Revoke one, or every, key of a user. |
 
 ## Applications and launching
 
@@ -179,7 +201,7 @@ All *encrypted, admin*.
 | `GET`/`POST /api/admin/apps/templates`, `DELETE /api/admin/apps/templates/{name}` | Templates; also open to a user allowed to edit app templates, short of their `DOCKER_*` settings. |
 | `GET /api/admin/sessions` | Every session grouped by user. |
 | `DELETE /api/admin/sessions/{session_id}` | Stop any session. |
-| `PUT /api/admin/branding` | Replace the brand's record (`name`, `logo_link`, `accent`, `store_links`, the `wallpaper_*` fields, `links`); the pictures stay. |
+| `PUT /api/admin/branding` | Replace the brand's record (`name`, `logo_link`, `accent`, `apps` with a `client`, `url`, and `enabled` per companion app, the `wallpaper_*` fields, `links`); the pictures stay. |
 | `DELETE /api/admin/branding` | Back to the defaults: the record and the pictures are removed. |
 | `POST`/`DELETE /api/admin/branding/{logo\|wallpaper}` | Body `{data}`, a base64 PNG, JPEG, or WebP (1 MB for the logo, 8 MB for the wallpaper): keep or remove a picture. |
 

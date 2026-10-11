@@ -10,7 +10,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import ValidationError
 
-from .. import cluster, progress, routing
+from .. import cluster, filesync, progress, routing
 from ..fsutil import safe_join
 from ..launch import launch_application
 from ..models import (
@@ -167,6 +167,10 @@ async def launch_file_path(
         file_path = safe_join(shared_files_path, safe_filename)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail="Invalid file name.") from exc
+    # The one file the session opens is fetched before it starts; the rest of the directory follows behind.
+    if not os.path.exists(file_path):
+        progress.step("files")
+        await filesync.pull_file(username, shared_files_path, safe_filename)
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail=f"File '{safe_filename}' not found.")
 

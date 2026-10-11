@@ -449,6 +449,11 @@ def on_peer_listener(request: Request) -> bool:
     )
 
 
+def companion_lane(request: Request) -> bool:
+    """Whether a request came in under `/companion/`, the companion apps' lane, as the proxy marks it."""
+    return request.headers.get("x-sealskin-lane") == "companion" and via_proxy(request)
+
+
 def via_proxy(request: Request) -> bool:
     """Whether a request came through this node's own proxy, so over TLS."""
     return bool(state.proxy_secret) and hmac.compare_digest(
@@ -865,7 +870,8 @@ def choose_node(
 ) -> str:
     """Pick the node a new session of `user` starts on.
 
-    A named home directory fixes the node that holds it. Otherwise the
+    A named home directory fixes the node that holds it, and a node or pool
+    named against it is refused. Otherwise the
     candidates are the answering runtime nodes in pools the user may use,
     with room for the session, and the one with the lowest load per CPU wins,
     this node on a tie.
@@ -879,13 +885,20 @@ def choose_node(
 
     Raises:
         HTTPException: 503 when the home's node is away or no node has room,
-            403 when the pool is closed to the user.
+            403 when the pool is closed to the user, 409 when the named node
+            or pool is not the home's.
     """
     held_by = node_of_home(user["username"], home_name) if home_name else None
     if held_by and held_by in NODES:
+        name = NODES[held_by].get("name", held_by)
         if not is_alive(held_by):
-            name = NODES[held_by].get("name", held_by)
             raise HTTPException(status_code=503, detail=f"Home directory '{home_name}' is on node '{name}', which is not answering.")
+        # A choice the home contradicts is refused.
+        if (node and node != held_by) or (pool and pool_of(held_by) != pool):
+            raise HTTPException(
+                status_code=409,
+                detail=f"Home directory '{home_name}' is on node '{name}', so a session with it starts there. Pick that node, move the directory, or use another.",
+            )
         return held_by
     if pool and not may_use_pool(user, pool):
         raise HTTPException(status_code=403, detail=f"Pool '{pool}' is not open to this account.")

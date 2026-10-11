@@ -25,13 +25,18 @@ Config** wipes the client.
 ## Users
 
 **Create New User** takes a username (letters, digits, `_`, and `-`). In the
-web app that is all: the user signs in through the
-[identity provider or proxy](signin.md), and one who signs in before being
-created is created then, with the default settings. In the extension and the
-mobile app the form also takes a public key: leave it blank and the server
+web app, and wherever key files are off, that is all: the user signs in
+through the [identity provider or proxy](signin.md), and one who signs in
+before being created is created then, with the default settings; creating
+the name first is for a provider that is not to create accounts
+(`SEALSKIN_SSO_CREATE_USERS=false`). With key files on, in the extension and
+the mobile app the form also takes a public key: leave it blank and the server
 generates an RSA key pair, shows the resulting configuration file **once**,
 and forgets the private key; paste a key when the user generated their own
-pair on the connection page and sent you the public half.
+pair on the connection page and sent you the public half. The Admins tab,
+which makes key-file administrators, is there while key files are on;
+otherwise administrators come from the provider's group or a group's
+**Administrator** switch.
 
 Each user carries these settings, editable later:
 
@@ -44,10 +49,11 @@ Each user carries these settings, editable later:
 | **Allow Public File Sharing** | Enables share links from the file manager. Requires persistent storage. |
 | **Allow GPU Access** | Whether the launcher offers GPUs to this user. |
 | **Share GPUs** | Off gives each of the user's GPU sessions a GPU no other session is on. |
-| **Move Home Directories** | The user may move their own home directories between the nodes of a [cluster](cluster.md). |
+| **Move Home Directories** | The user may move their own home directories between the nodes of a [cluster](cluster.md), from the launcher. On by default: a user who has home directories can take them where they launch. |
 | **Allow Editing App Templates** | Opens the [App Templates](#app-templates) editor to a user who is not an administrator. They create, change, and delete templates, except for the `DOCKER_*` settings, which grant authority over the Docker host: those keep the values an administrator gave them, and only an administrator deletes a template that carries any. |
 | **Harden Container**, **Harden Window Manager** | Force the base image presets `HARDEN_DESKTOP` and `HARDEN_OPENBOX` on every session the user starts, including apps a collaboration room swaps to. They are applied after the [app template](#app-templates) and the app's own environment overrides, so neither can switch them back off. Leave them off to let the template decide. |
 | **Limits** | Sessions at once, storage, CPUs and memory per session, session length, and a time allowance per day, week, or month; see [the limits](signin.md#groups-switches-and-limits). Blank or negative is no limit. |
+| **Application keys** | Whether the user may sign the extension and the mobile app in with [application keys](signin.md#application-keys), which apps may use them, how long a key lives, and the dormancy rules that send the user back to the web to sign in. These bind administrators too. |
 | **Pools** | Restricted [pools](cluster.md#pools) open to the user, and pools closed to them. |
 | **PRoot Apps catalog** | The [catalog](#proot-apps) the user's sessions install PRoot Apps from. Left at **None**, the first of the user's groups to choose one decides. |
 
@@ -56,7 +62,9 @@ served from. A user with no key shows **Single sign-on only** in place of a
 public key.
 
 **Manage Home Directories** in a user's row lists, creates, deletes, and, on a
-cluster, moves home directories on their behalf.
+cluster, moves home directories on their behalf. **Keys** lists the user's
+application keys, with the app each was last used from, and revokes one or
+all of them; the user makes new ones under **Application Keys** in Settings.
 
 ## Groups
 
@@ -101,7 +109,10 @@ all.
   the SealSkin project on GitHub.
 * **Accent color**: one color, from which the buttons, highlights, focus
   rings, and the wordmark take their shades. Clear it for the default violet.
-* The **extension and app store links** on the sign-in page can be hidden.
+* **Companion apps**: where users get the Chrome extension, the Firefox
+  add-on, the Android app, and the iOS app, linked from the sign-in page and
+  beside the application keys in the profile. Each link can point at a build
+  of your own, or be hidden, as when an organization ships one of them only.
 * **Wallpaper**: a picture behind the home page, up to 8 MB (a larger one is
   scaled down in the browser before it is uploaded), with the same position,
   blur, and dim controls users have. Users start from it and may still pick

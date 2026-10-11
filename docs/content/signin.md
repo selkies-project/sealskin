@@ -1,21 +1,27 @@
 ---
 title: Signing in
-description: The web sign-in (root token, OpenID Connect, SAML, or a reverse proxy), the key-file clients, groups and limits, and running behind a proxy.
+description: The web sign-in (root's application key, OpenID Connect, SAML, or a reverse proxy), the application keys of the companion apps, the key-file clients, groups and limits, and running behind a proxy.
 ---
 
-SealSkin takes two kinds of client.
+SealSkin takes three kinds of client.
 
-| | Web sign-in | Key file |
-| --- | --- | --- |
-| Clients | The web app at `https://<server>/` | Browser extension and mobile app with a configuration file |
-| Who the user is | The root token, an identity provider, or a reverse proxy says | The user's RSA key signs every request |
-| Transport | HTTPS, with a certificate the browser trusts | HTTPS, or encrypted payloads over HTTP on the API port |
-| Reaches | Every node of a [cluster](cluster.md) | The one server in the configuration file |
+| | Web sign-in | Application key | Key file |
+| --- | --- | --- | --- |
+| Clients | The web app at `https://<server>/` | Browser extension and mobile app, as companions of the web app | Browser extension and mobile app with a configuration file |
+| Who the user is | Root's application key, an identity provider, or a reverse proxy says | A key the user made in the web app names them | The user's RSA key signs every request |
+| Transport | HTTPS, with a certificate the browser trusts | HTTPS, with a certificate the device trusts | HTTPS, or encrypted payloads over HTTP on the API port |
+| Reaches | Every node of a [cluster](cluster.md) | Every node of a cluster | The one server in the configuration file |
 
 The key-file clients work as they always have and are described in
-[Getting started](start.md). `SEALSKIN_LEGACY_AUTH=false` turns them off, with
-their encrypted API and the generated `admin.json`. The rest of this page is
-the web sign-in.
+[Getting started](start.md). **Key Files** under Sign In in the dashboard, or
+`SEALSKIN_LEGACY_AUTH=false` on every node, turns them off, with their
+encrypted API and the generated `admin.json`; the companion apps then connect
+with [application keys](#application-keys), a user made in the dashboard is
+sign-in-only, and administrators come from the provider's group or a group's
+Administrator switch, with root's key as the way in without one. Setting up
+a server is therefore: sign in with root's key, configure the provider under
+Sign In, sign in through it as an administrator, then switch key files off
+there. The rest of this page is the web sign-in and the keys.
 
 ## What the web sign-in needs
 
@@ -45,26 +51,77 @@ its session's origin too.
 
 ## The root administrator
 
-The first start of a server writes a root token to `/config/root_token`. Open
-the web app, choose **Root token**, and paste it: you are signed in as `root`,
-an administrator with no file and no settings. Then delete the file; the
-server keeps only a hash of the token, in `cluster/root.yml`.
+The first start of a server writes root's application key to
+`/config/root_key`. Open the web app and paste it into the **Root key**
+field: you are signed in as `root`, an administrator with no file and no
+settings. Then delete the file; the server keeps only a hash of the key, with
+every other application key in `cluster/application_keys.yml`. Root has no
+identity provider, so root's keys are the one kind the web sign-in takes;
+any other user's key answers that it signs the companion apps in alone.
 
 `root` is for setting the server up and for when the identity provider is
-away. Set `SEALSKIN_ROOT_TOKEN` to choose the token yourself, as from a
-secret manager; changing it there replaces the hash at the next start. Five wrong tokens from one address within a minute close the form to that
-address until the oldest ages out. A root
-sign-in ends after `SEALSKIN_WEB_SESSION_SECONDS` unused.
+away: once a provider is configured, the sign-in page offers the providers
+alone, and the key field is reached by adding `#root` to the web app's
+address, `https://<server>/#root`. Set `SEALSKIN_ROOT_KEY` to choose the key yourself, as from a secret
+manager; it is kept as root's key named `environment`, replaced there when
+the value changes and dropped when the variable goes. Five wrong keys from
+one address within a minute close the form to that address until the oldest
+ages out. A root sign-in ends after `SEALSKIN_WEB_SESSION_SECONDS` unused.
+Signed in, root can make further keys under **Application Keys** in Settings
+like any user, and those sign in both the web app and the companion apps.
 
 Once your administrators sign in through a provider (`SEALSKIN_SSO_ADMIN_GROUP`
 or a group with the **Administrator** switch), `SEALSKIN_ROOT_SIGN_IN=false`
-switches the token off on a node: its sign-in page no longer offers it and
-the server refuses it. Hiding the field is not what protects the token, the
-hash and the lockout are; the switch is for a deployment that wants no
-password-like sign-in at all. It is set per node, so if the provider is ever
-gone, restart the node with the variable unset and sign in with the token
-again. The Sign In panel warns when the token is off and no provider group
+switches root's key off on a node's web sign-in: its sign-in page no longer
+offers it and the server refuses it. Hiding the field is not what protects
+the key, the hash and the lockout are; the switch is for a deployment that
+wants no password-like sign-in at all. It is set per node, so if the provider
+is ever gone, restart the node with the variable unset and sign in with the
+key again. The Sign In panel warns when the key is off and no provider group
 names administrators.
+
+## Application keys
+
+The browser extension and the mobile app are companions of the web app: a
+user signs in on the web, opens Settings, and under **Application Keys**
+makes a key for each device, named after it, which the server shows once:
+`ssk_<id>_<secret>@<host>:<port>`, the server's address after the `@`. The
+app's connection page takes that key and is signed in as the user, with everything the web app allows them, on every node
+of a cluster. The tab lists each key with when it was made, when it expires,
+and when and from which app it was last used, and revokes it; the
+Users table of the dashboard shows an administrator every user's keys with
+the same. Deleting a user deletes the keys. The server keeps only a hash of
+each key, so a key that is lost is made again, never recovered.
+
+A key is a bearer: the app sends it in the `Authorization` header over HTTPS
+to the session port, with no handshake and no encrypted envelope, so the
+device has to trust the server's certificate. The apps reach the node under
+`/companion/`, where the pages and the API are the web app's own and nothing
+but a key signs in, so a reverse proxy that signs users in
+[passes that path raw](reverse-proxy/sign-in.md#the-companion-apps), or
+does not, where the deployment is to be web only.
+Key management stays on the web: a key cannot make or revoke keys, so a key
+that leaks cannot spread, and revoking it from the web always wins.
+
+What the keys may do is set per user and group, under the same rules as the
+[other settings](#groups-switches-and-limits), and binds administrators too:
+
+| Setting | Effect |
+| --- | --- |
+| **Allow Application Keys** | Off, the user can neither make nor use keys; the apps are refused with `disabled`. |
+| **Apps that may use application keys** | Which of the Chrome extension, the Firefox add-on, the Android app, the iOS app, and anything else may use the user's keys. Each app names itself in the `X-SealSkin-Client` header and nothing checks the name: this is a convenience, not a lock. A group that names any apps narrows the user's own list to those. |
+| **Days an application key lives** | The longest lifetime a user may choose when making a key; the default sets none, and a key then never expires. |
+| **Hours after the last web sign-in at which application keys sleep** | A dormancy rule: when the user's last web sign-in is older than this, their keys sleep until they sign in on the web again. |
+| **Application Keys Sleep When the Web Sign-In Ends** | The other dormancy rule: the keys work while the web sign-in the provider or the proxy granted lasts, by its own clock, and sleep as soon as it ends, as when the provider announces a logout. |
+
+A sleeping key answers `dormant`. The app shows **Sign in on the web** and
+opens the web app with `?wake=1`; the sign-in there, or the browser's
+sign-in that still holds, counts as the user's sign-in now, which wakes the
+keys, and the web app says so over its home page with a way back to the app.
+Both rules read the user's web sign-ins as the server records them on the
+user: the time of the sign-in and until when it lasts, which an OpenID
+Connect refresh moves on. Root's keys never sleep, since root's sign-in is a
+key.
 
 ## Landing on the provider
 
@@ -76,9 +133,9 @@ own. A provider that refuses or fails sends the browser back with the reason,
 and the page shows it with the sign-in page instead of going to the provider
 again, so a broken provider never bounces the browser back and forth.
 
-To reach the server's own sign-in page anyway, as for the root token, add
+To reach the server's own sign-in page anyway, with the root key field, add
 `#root` to the web app's address: `https://<server>/#root`. The same fragment
-asks for the root token where a reverse proxy already signs the browser in.
+asks for root's key where a reverse proxy already signs the browser in.
 
 ## OpenID Connect
 

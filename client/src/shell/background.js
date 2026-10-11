@@ -7,7 +7,9 @@
  *
  *  - the E2EE handshake and encrypted fetch (`secureFetchInBackground`)
  *  - JWT signing with the stored private key
- *  - in the web app, in their place, plain same-origin calls under the sign-in cookie
+ *  - with an application key, in their place, plain HTTPS calls to the
+ *    session port carrying the key as a bearer and this client's name (`keyFetch`)
+ *  - in the web app, plain same-origin calls under the sign-in cookie
  *  - context menus, "send next download" interception, badge
  *  - the session-to-tab map and tab focus/close, and the origin a session opens on
  *  - the pending launch context handed to the popup
@@ -20,6 +22,7 @@
 
 import { pemToArrayBuffer, arrayBufferToBase64, generateJwtNative } from '../lib/crypto-utils.js';
 import { probeSessionOrigin } from '../lib/session-origin.js';
+import { detectPlatform } from '../lib/platform.js';
 // Context menu titles per language. The build generates this module from
 // `background.contextMenu` of src/i18n/*.json (see build.mjs); it is bundled
 // because the menus are registered before any page could fetch a language file.
@@ -29,6 +32,8 @@ import { contextMenuTitles } from 'sealskin-i18n/context-menu';
 
 // The web app signs in with a cookie and calls the plain API of its own origin.
 const WEB = typeof __SHELL_TARGET__ !== 'undefined' && __SHELL_TARGET__ === 'ui';
+// What this shell calls itself to the server when it signs in with an application key.
+const CLIENT = detectPlatform(typeof __SHELL_TARGET__ !== 'undefined' ? __SHELL_TARGET__ : 'extension');
 // Thrown where the web app cannot reach a session's own origin; the pages translate it.
 const NO_SESSION_ORIGIN = 'noSessionOrigin';
 
@@ -231,8 +236,42 @@ async function plainFetch(url, options = {}) {
   }
 }
 
+/**
+ * The address a configuration with an application key reaches the server at: HTTPS on the session
+ * port, under `/companion/`, the lane a reverse proxy that signs users in lets through for the apps.
+ */
+const keyBase = (config) => `https://${config.serverIp}:${config.sessionPort || config.apiPort || '443'}/companion`;
+
+/**
+ * The companion apps' API call with an application key: JSON as it is over
+ * HTTPS to the session port, the key as a bearer, this client's name beside
+ * it. No handshake and no envelope; TLS alone protects it, so the plain
+ * `http://` fallback of the key-file clients does not exist here.
+ */
+async function keyFetch(url, options, config) {
+  const headers = { ...options.headers, Authorization: `Bearer ${config.applicationKey}`, 'X-SealSkin-Client': CLIENT };
+  // One key per logical request so a retried POST is executed once server-side.
+  if ((options.method || 'GET').toUpperCase() !== 'GET') headers['X-Idempotency-Key'] = crypto.randomUUID();
+  if (options.body) headers['Content-Type'] = 'application/json';
+  const base = keyBase(config);
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const response = await fetch(`${base}${url}`, { ...options, headers, credentials: 'omit' });
+      const text = response.status === 204 ? '' : await response.text();
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status} - ${text}`);
+      return text ? JSON.parse(text) : null;
+    } catch (error) {
+      if (!isNetworkError(error)) throw error;
+      if (attempt >= NETWORK_RETRY_DELAYS_MS.length) throw new Error(describeNetworkError(base, error));
+      await sleep(NETWORK_RETRY_DELAYS_MS[attempt]);
+    }
+  }
+}
+
 async function secureFetchInBackground(url, options = {}) {
   if (WEB) return plainFetch(url, options);
+  const keyConfig = await getConfig();
+  if (keyConfig && keyConfig.applicationKey) return keyFetch(url, options, keyConfig);
   // One key per logical request so a retried POST is executed once server-side.
   const idempotencyKey = (options.method || 'GET').toUpperCase() === 'GET' ? null : crypto.randomUUID();
   let sessionRetried = false;
@@ -418,6 +457,12 @@ const handlers = {
 
   async getUiBase() {
     if (WEB) return location.origin;
+    const config = await getConfig();
+    if (config && config.applicationKey) {
+      // The key is tried first, so the host learns of a dormant or revoked key before any page does.
+      await keyFetch('/api/admin/status', { method: 'POST', body: '{}' }, config);
+      return keyBase(config);
+    }
     const currentSession = await ensureSession();
     return currentSession.baseUrl;
   },
@@ -430,8 +475,9 @@ const handlers = {
   async getPublicConfig() {
     const config = await getConfig();
     if (!config) return null;
-    const { clientPrivateKey, ...publicConfig } = config;
-    return publicConfig;
+    const { clientPrivateKey, applicationKey, ...publicConfig } = config;
+    // The host learns that a key is held, never the key.
+    return { ...publicConfig, applicationKeyHeld: Boolean(applicationKey) };
   },
 
   async getFullConfig() {

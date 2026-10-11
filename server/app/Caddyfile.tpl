@@ -12,6 +12,7 @@
         request_header -X-Upstream-Auth
         request_header -X-Upstream-Peer
         request_header -X-Web-Root
+        request_header -X-SealSkin-Lane
         request_header X-SealSkin-Secret "{{PROXY_SECRET}}"
         request_header X-SealSkin-Remote {remote_host}
         # The browser's address: the connection's, or what a trusted proxy says it took the request from.
@@ -212,6 +213,24 @@
 
         handle /public/* {
                 reverse_proxy 127.0.0.1:{{API_PORT}}
+        }
+
+        # The companion apps' lane: their pages and API under one prefix, which a reverse proxy in
+        # front lets through unguarded, since only an application key signs in here. The web sign-in
+        # and the key-file handshake are not the apps', so they are not reachable this way.
+        handle_path /companion/* {
+                request_header X-SealSkin-Lane "companion"
+                @closed path /api/auth/* /api/handshake/*
+                handle @closed {
+                        respond 404
+                }
+                @open path /api/* /ui/*
+                handle @open {
+                        reverse_proxy 127.0.0.1:{{API_PORT}}
+                }
+                handle {
+                        respond 404
+                }
         }
 
         import session_routes

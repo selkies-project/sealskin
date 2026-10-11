@@ -93,3 +93,17 @@ which is why it repeats the WebSocket lines and the include. The two
 `proxy_set_header Remote-` lines keep a visitor's own headers out. Leave the
 wildcard host for the sessions as it is, and set the sign-in headers on
 SealSkin as [A proxy that signs users in](sign-in.md) describes.
+
+The browser extension and the mobile app reach the node on raw paths the
+sign-in must leave alone ([why](sign-in.md#the-companion-apps); leave this out for a web-only deployment); add this
+location to the same Advanced tab, above `location /`:
+
+```nginx
+# The companion apps, the sessions they open, and public share links: SealSkin signs these in itself.
+location ~ "^/(companion/|public/|(ws/)?room/[0-9a-fA-F-]{36}|[0-9a-fA-F-]{36}/)" {
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection $http_connection;
+    proxy_http_version 1.1;
+    include conf.d/include/proxy.conf;
+}
+```

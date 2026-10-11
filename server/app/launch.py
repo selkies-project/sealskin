@@ -778,9 +778,9 @@ async def launch_application(
     persistent = bool(host_mount_path) and not host_mount_path.startswith(ephemeral_base()) and not forced_rw_mount
     if persistent and auth_user:
         await quota.check_storage(auth_user)
+    # The session starts over the node's copy; the store's newer files arrive under it as it comes up.
     if persistent and shared_files_path and filesync.enabled():
-        progress.step("files")
-        await filesync.pull(username, shared_files_path)
+        filesync.pull_later(username, shared_files_path)
 
     collaboration: dict[str, Any] = {}
     if launch_in_room_mode:

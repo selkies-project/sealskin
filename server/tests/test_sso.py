@@ -231,10 +231,10 @@ def test_config_names_the_configured_sign_ins(http, monkeypatch):
     assert http.get("/api/auth/config").json()["auto"] == "oidc"
 
 
-def test_the_root_token_is_refused_where_root_sign_in_is_off(http, monkeypatch):
+def test_the_root_key_is_refused_where_root_sign_in_is_off(http, monkeypatch):
     monkeypatch.setattr(settings, "root_sign_in", False)
     assert http.get("/api/auth/config").json()["root"] is False
-    refused = http.post("/api/auth/root", json={"token": "anything"}, headers=WEB)
+    refused = http.post("/api/auth/key", json={"key": "anything"}, headers=WEB)
     assert refused.status_code == 403 and refused.json()["detail"] == "disabled"
 
 

@@ -466,7 +466,9 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "default": True,
         "help": (
             "Accept the key-file clients (browser extension and mobile app configuration files) and "
-            "their encrypted API; they reach this node alone, never the rest of a cluster."
+            "their encrypted API; they reach this node alone, never the rest of a cluster. Off, the "
+            "dashboard makes sign-in-only users and no administrators. Also written for the whole "
+            "cluster under Sign In."
         ),
     },
     {
@@ -568,33 +570,33 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         ),
     },
     {
-        "name": "root_token",
+        "name": "root_key",
         "type": "str",
         "default": "",
         "help": (
-            "Token the `root` administrator signs in to the web app with; empty generates one at "
-            "first start and writes it to `root_token_path`."
+            "Application key the `root` administrator signs in to the web app with, kept as root's key "
+            "named `environment`; empty generates one at first start and writes it to `root_key_path`."
         ),
     },
     {
-        "name": "root_token_path",
+        "name": "root_key_path",
         "type": "str",
-        "default": "/config/root_token",
-        "help": "File the generated root token is written to, for the administrator to copy and delete.",
+        "default": "/config/root_key",
+        "help": "File the generated root application key is written to, for the administrator to copy and delete.",
     },
     {
         "name": "web_session_seconds",
         "type": "int",
         "default": 43200,
-        "help": "Longest a web sign-in with the root token lasts unused.",
+        "help": "Longest a web sign-in with root's application key, or a reverse proxy's sign-in, lasts unused.",
     },
     {
         "name": "root_sign_in",
         "type": "bool",
         "default": True,
         "help": (
-            "Accept the root token on this node's web sign-in. Turn it off once administrators sign in "
-            "through an identity provider; a node restarted with it on takes the token again."
+            "Accept root's application key on this node's web sign-in. Turn it off once administrators sign in "
+            "through an identity provider; a node restarted with it on takes the key again."
         ),
     },
     {
@@ -754,6 +756,7 @@ CLUSTER_SETTINGS = (
     "web_session_seconds",
     "auto_sign_in",
     "files_sync",
+    "legacy_auth",
 )
 
 settings = AppSettings()

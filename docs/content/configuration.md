@@ -44,9 +44,9 @@ watcher only fires for edits made by someone else.
     branding/branding.yml          the brand the web app wears: name, logo link, accent, wallpaper, links
     branding/logo.<ext>            the uploaded logo and wallpaper (png, jpg, or webp)
     branding/wallpaper.<ext>
-    cluster/root.yml               hash of the root token
     cluster/nodes/<id>.yml         one record per node: key, address, roles, pool, approval
     cluster/pools/<name>.yml       pools of nodes
+    cluster/application_keys.yml   the application keys, hashed, root's among them
     cluster/settings.yml           sign-in settings written for the whole cluster
     cluster/homes/<user>.yml       which node holds each home directory
     cluster/usage/<day>/<id>.yml   session time each node ran, per user
@@ -56,7 +56,7 @@ watcher only fires for edits made by someone else.
     sso_keys.yml                   this node's web sign-ins
     sessions.yml                   live sessions, rewritten by the server
     public_shares.yml              public share metadata
-  root_token                       first-run root token, delete after signing in
+  root_key                         root's first-run application key, delete after signing in
 
 /storage
   <username>/<home>/               home directories, mounted at /config in sessions
@@ -167,7 +167,7 @@ harden_openbox: false
 edit_templates: false
 gpu: true
 gpu_share: true
-home_migration: false
+home_migration: true
 storage_limit: -1
 session_limit: -1
 session_cpus: -1

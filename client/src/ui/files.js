@@ -33,6 +33,8 @@ const state = {
   isLoading: false,
   currentView: 'files',
   uploadQueue: new Map(),
+  /** The `/api/cluster` answer in a cluster: which node holds each home. */
+  cluster: null,
 };
 
 // --- DOM ELEMENTS ---
@@ -129,16 +131,28 @@ async function fetchPublicShares() {
 
 // --- RENDER FUNCTIONS ---
 
+/** The name of the node that holds a home directory, or '' outside a cluster or for a home with no record. */
+function holderName(dir) {
+  const { cluster } = state;
+  const id = cluster && cluster.homes[dir];
+  if (!id) return '';
+  const node = cluster.nodes.find((n) => n.id === id);
+  return node ? node.name || node.id : id;
+}
+
 function renderSidebar() {
   homeDirNav.innerHTML = '';
 
   const normalHomeDirs = state.homeDirs.filter((d) => d !== SPECIAL_HOME).sort();
+  const clustered = Boolean(state.cluster);
 
   const specialBtn = document.createElement('button');
   specialBtn.className = `nav-link special-homedir ${state.currentView === 'files' && state.currentHome === SPECIAL_HOME ? 'active' : ''}`;
   specialBtn.dataset.homedir = SPECIAL_HOME;
   specialBtn.dataset.view = 'files';
-  specialBtn.innerHTML = `<i class="fas fa-star fa-fw"></i> <span>${t('files.sidebar.sharedFiles')}</span>`;
+  // In a cluster each directory is tagged with where it lives; the tag's tooltip says what that means.
+  const chip = (label, help) => `<span class="node-chip" title="${escapeHtml(help)}">${escapeHtml(label)}</span>`;
+  specialBtn.innerHTML = `<i class="fas fa-star fa-fw"></i> <span>${t('files.sidebar.sharedFiles')}</span>${clustered ? chip(t('files.sidebar.allNodes'), t('files.sidebar.sharedHelp')) : ''}`;
   homeDirNav.appendChild(specialBtn);
 
   normalHomeDirs.forEach((dir) => {
@@ -146,7 +160,8 @@ function renderSidebar() {
     button.className = `nav-link ${state.currentView === 'files' && state.currentHome === dir ? 'active' : ''}`;
     button.dataset.homedir = dir;
     button.dataset.view = 'files';
-    button.innerHTML = `<i class="fas fa-hdd fa-fw"></i> <span>${escapeHtml(dir)}</span>`;
+    const node = holderName(dir);
+    button.innerHTML = `<i class="fas fa-hdd fa-fw"></i> <span>${escapeHtml(dir)}</span>${node ? chip(node, t('files.sidebar.homeHelp', { node })) : ''}`;
     homeDirNav.appendChild(button);
   });
 
@@ -689,6 +704,14 @@ async function init() {
       const separator = navContainer.previousElementSibling;
       if (separator && separator.classList.contains('nav-separator')) separator.style.display = 'none';
     }
+  }
+
+  // Where each home lives, in a cluster: the sidebar tags say so.
+  try {
+    const mine = await secureFetch('/api/cluster', { method: 'GET' });
+    state.cluster = mine && mine.clustered ? mine : null;
+  } catch (error) {
+    state.cluster = null;
   }
 
   const homeDirs = await fetchHomeDirs();

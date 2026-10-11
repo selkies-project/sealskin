@@ -23,6 +23,7 @@ import os
 import re
 import shutil
 import tempfile
+import time
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -32,6 +33,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 
 from . import audit, persistence, store
 from .fsutil import safe_join
+from .models import APP_KEY_CLIENTS
 from .settings import settings
 
 logger = logging.getLogger(__name__)
@@ -43,7 +45,7 @@ GROUP_DATA: dict[str, dict[str, Any]] = {}
 ROOT = "root"
 
 #: Keys of a user record the server writes and an administrator's edit keeps.
-RECORD_KEYS = ("auth", "provider_groups", "approved")
+RECORD_KEYS = ("auth", "provider_groups", "approved", "web_sign_in")
 
 
 class NoAccount(ValueError):
@@ -61,7 +63,7 @@ DEFAULT_USER_SETTINGS: dict[str, Any] = {
     "edit_templates": False,
     "gpu": True,
     "gpu_share": True,
-    "home_migration": False,
+    "home_migration": True,
     "storage_limit": -1,
     "session_limit": -1,
     "session_cpus": -1,
@@ -72,6 +74,11 @@ DEFAULT_USER_SETTINGS: dict[str, Any] = {
     "pools": [],
     "pools_denied": [],
     "proot_catalog": None,
+    "application_keys": True,
+    "application_key_clients": list(APP_KEY_CLIENTS),
+    "application_key_days": -1,
+    "application_key_dormant_hours": -1,
+    "application_key_follow_sign_in": False,
 }
 
 #: Switches and the value of each that restricts: where groups disagree, that value wins.
@@ -86,10 +93,31 @@ SWITCHES: dict[str, bool] = {
     "home_migration": False,
     "harden_container": True,
     "harden_openbox": True,
+    "application_keys": False,
+    "application_key_follow_sign_in": True,
 }
 
 #: Limits, where a negative value sets none and the smallest set by any group wins.
-LIMITS = ("storage_limit", "session_limit", "session_cpus", "session_memory_mb", "session_hours", "allowance_hours")
+LIMITS = (
+    "storage_limit",
+    "session_limit",
+    "session_cpus",
+    "session_memory_mb",
+    "session_hours",
+    "allowance_hours",
+    "application_key_days",
+    "application_key_dormant_hours",
+)
+#: The settings of the application keys (`app.application_keys`), which bind administrators too.
+APP_KEY_SETTINGS = (
+    "application_keys",
+    "application_key_clients",
+    "application_key_days",
+    "application_key_dormant_hours",
+    "application_key_follow_sign_in",
+)
+#: Seconds before a web sign-in's end within which its record on the user is renewed.
+WEB_SIGN_IN_RENEW_SECONDS = 600
 
 SERVER_PUBLIC_KEY_PEM: str | None = None
 EXTERNAL_API_PORT: int = getattr(settings, "api_port", 8000)
@@ -403,10 +431,12 @@ def get_effective_settings(username: str, provider_groups: Any = None) -> dict[s
     A user in no group has the settings of the user file. In groups, each
     setting is taken from the groups that set it: a switch takes its
     restricting value when any group gives it that (see `SWITCHES`), a limit
-    the smallest any group sets, and the pools are those any group allows
-    less those any denies. A setting no group sets stays the user's own.
+    the smallest any group sets, the pools are those any group allows less
+    those any denies, and the application keys' clients are those every
+    group that names any allows. A setting no group sets stays the user's own.
     Administrators always get the defaults, short of the PRoot Apps catalog,
-    which is the user's own or the first of their groups' to name one.
+    which is the user's own or the first of their groups' to name one, and
+    the application key settings (`APP_KEY_SETTINGS`), which bind them too.
 
     Args:
         username: The user.
@@ -421,8 +451,6 @@ def get_effective_settings(username: str, provider_groups: Any = None) -> dict[s
     members = [GROUP_DATA[name]["settings"] for name in names]
     # A catalog is a choice, not a limit: the user's own, else the first group's that makes one.
     catalog = base.get("proot_catalog") or next((g["proot_catalog"] for g in members if g.get("proot_catalog")), None)
-    if user.get("is_admin"):
-        return dict(DEFAULT_USER_SETTINGS, admin=True, proot_catalog=catalog)
     effective = dict(base, groups=names, group=names[0] if names else "none", proot_catalog=catalog)
     for key, restricting in SWITCHES.items():
         chosen = [bool(g[key]) for g in members if g.get(key) is not None]
@@ -435,6 +463,15 @@ def get_effective_settings(username: str, provider_groups: Any = None) -> dict[s
             if key == "allowance_hours":
                 source = next(g for g in members if g.get(key) == effective[key])
                 effective["allowance_period"] = source.get("allowance_period") or base["allowance_period"]
+    # The apps a key may come from: the user's own list, narrowed by every group that sets one.
+    clients = {str(c) for c in base.get("application_key_clients") or []}
+    for group in members:
+        if isinstance(group.get("application_key_clients"), list):
+            clients &= {str(c) for c in group["application_key_clients"]}
+    effective["application_key_clients"] = sorted(clients)
+    if user.get("is_admin"):
+        # An administrator's keys are bound like anyone's: the rules guard a lost device, not a quota.
+        return dict(DEFAULT_USER_SETTINGS, admin=True, proot_catalog=catalog, **{k: effective[k] for k in APP_KEY_SETTINGS})
     allowed = {str(p) for g in members for p in g.get("pools") or []}
     effective["pools"] = sorted(allowed | {str(p) for p in base.get("pools") or []})
     effective["pools_denied"] = sorted(
@@ -513,6 +550,57 @@ def approve(username: str) -> dict[str, Any]:
         write_user_file(username, user["public_key"], current)
         load_users_and_groups()
     return USER_DATA[username]
+
+
+def web_sign_in_of(username: str) -> dict[str, Any] | None:
+    """Return when a user last signed in on the web (`at`) and until when that sign-in lasts (`until`), if ever."""
+    user = USER_DATA.get(username)
+    stamp = (user or {}).get("settings", {}).get("web_sign_in") if user else None
+    return dict(stamp) if isinstance(stamp, dict) else None
+
+
+def _write_web_sign_in(username: str, stamp: dict[str, Any] | None) -> None:
+    """Keep a user's web sign-in stamp on the record, and in memory without reading every user again."""
+    user = USER_DATA.get(username)
+    if not user or user.get("is_admin"):
+        return
+    current = dict(user.get("settings") or {})
+    if stamp is None:
+        current.pop("web_sign_in", None)
+    else:
+        current["web_sign_in"] = stamp
+    write_user_file(username, user["public_key"], current)
+    user["settings"] = current
+
+
+def note_web_sign_in(username: str, until: float, renew: bool = False) -> None:
+    """Record that a user is signed in on the web until `until`, as the application keys' dormancy rules read it.
+
+    A fresh sign-in (`renew`), or one found where the last had ended, sets
+    `at` to now. A sign-in that goes on only moves `until`, and only once it
+    is within `WEB_SIGN_IN_RENEW_SECONDS` of ending, so a user at work on the
+    web writes the record about once per sign-in lifetime, not per request.
+
+    Args:
+        username: The user; `root` and key-file administrators have no record and are skipped.
+        until: When the sign-in ends by the server's clock.
+        renew: Whether this is a sign-in happening now.
+    """
+    if username == ROOT or username not in USER_DATA:
+        return
+    now = time.time()
+    stamp = web_sign_in_of(username)
+    if renew or not stamp or float(stamp.get("until") or 0) <= now:
+        _write_web_sign_in(username, {"at": now, "until": until})
+    elif until > float(stamp["until"]) and float(stamp["until"]) - now < WEB_SIGN_IN_RENEW_SECONDS:
+        _write_web_sign_in(username, {"at": stamp["at"], "until": until})
+
+
+def end_web_sign_in(username: str) -> None:
+    """Record that the identity provider ended a user's web sign-in, which puts keys that follow it to sleep."""
+    stamp = web_sign_in_of(username)
+    if stamp and float(stamp.get("until") or 0) > time.time():
+        _write_web_sign_in(username, {"at": stamp["at"], "until": time.time()})
 
 
 def get_all_users() -> list[dict[str, Any]]:

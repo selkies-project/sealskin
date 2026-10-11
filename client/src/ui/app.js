@@ -11,10 +11,15 @@
  * server signs the browser in with an `HttpOnly` cookie, and every API call
  * is a plain request to this origin under it. The page asks the server who is
  * signed in, and shows the sign-in panel when nobody is: the identity
- * providers the server configures, and the root token. A provider sends the
- * browser back with a one-time grant in the URL fragment, which this page
- * exchanges for the cookie. The server sends this page with a cross-origin
- * opener policy and no framing, and session tabs get no opener.
+ * providers the server configures, and root's application key. A provider
+ * sends the browser back with a one-time grant in the URL fragment, which
+ * this page exchanges for the cookie. The server sends this page with a
+ * cross-origin opener policy and no framing, and session tabs get no opener.
+ *
+ * The settings page holds the user's application keys, which sign the
+ * browser extension and the mobile app in. An app whose key went dormant
+ * sends its user here with `?wake=1`: once signed in, the page wakes the
+ * keys and says so over the home page (`wakeSplash`).
  *
  * A session opens in this tab, taking the web app's place, unless the
  * launcher asked for a tab of its own: then a launch opens `launching.html`
@@ -88,6 +93,9 @@ let isolated = false;
 let lastStatus = null;
 const NEXT_KEY = 'sealskin-next';
 const NEXT_ADDRESS = /^\/app\/[A-Za-z0-9_-]+\/(\?[^#\s]*)?$/;
+const WAKE_KEY = 'sealskin-wake';
+// The web sign-ins, whose user may manage application keys; a key-file or key sign-in may not.
+const WEB_SIGN_INS = new Set(['root', 'oidc', 'saml', 'proxy']);
 
 /**
  * The application's address this page is to go on to once signed in: from
@@ -110,6 +118,59 @@ function nextAddress() {
   return next && NEXT_ADDRESS.test(next) ? next : null;
 }
 
+/**
+ * Whether a companion app sent the browser here to wake a dormant key
+ * (`?wake=1`), kept in the tab's session storage across the provider's round trip.
+ *
+ * @returns {boolean}
+ */
+function takeWakeRequest() {
+  const params = new URLSearchParams(location.search);
+  if (params.has('wake')) {
+    params.delete('wake');
+    const search = params.toString();
+    history.replaceState(null, '', location.pathname + (search ? `?${search}` : '') + location.hash);
+    try { sessionStorage.setItem(WAKE_KEY, '1'); } catch (e) { /* no storage */ }
+  }
+  try { return sessionStorage.getItem(WAKE_KEY) === '1'; } catch (e) { return false; }
+}
+
+/**
+ * Count this sign-in as happening now, which wakes the user's dormant keys,
+ * and say so over the page: the app that sent the user here works again.
+ *
+ * @param {object} status The signed-in status.
+ */
+async function wakeSplash(status) {
+  if (!takeWakeRequest() || !status || status.held) return;
+  try { sessionStorage.removeItem(WAKE_KEY); } catch (e) { /* no storage */ }
+  let failure = '';
+  if (WEB_SIGN_INS.has(status.via)) {
+    try {
+      await post('/api/keys/wake', {});
+    } catch (e) {
+      failure = apiError(e).detail;
+    }
+  }
+  const overlay = $('#wake');
+  overlay.querySelector('img').src = brandLogo;
+  overlay.querySelector('img').alt = brandName;
+  overlay.querySelector('h2').textContent = failure ? t('web.keys.wakeFailed', { error: failure }) : t('web.keys.wakeTitle');
+  overlay.querySelector('p').textContent = t('web.keys.wakeBody');
+  const [close, go] = overlay.querySelectorAll('button');
+  close.textContent = t('web.keys.wakeClose');
+  go.textContent = t('web.keys.wakeContinue', { brand: brandName });
+  const dismiss = () => { overlay.hidden = true; };
+  close.addEventListener('click', () => {
+    // A tab the app opened may let the page close it; otherwise the page stays, with the home behind the splash.
+    window.close();
+    setTimeout(dismiss, 150);
+  });
+  go.addEventListener('click', dismiss);
+  overlay.hidden = false;
+  go.focus();
+}
+
 /** Go on to the application's address that sent the browser here, if one did. */
 function leaveForNext() {
   const next = nextAddress();
@@ -126,8 +187,6 @@ function showAccount(status) {
   if (status) signedInVia = status.via;
   // A proxy's sign-in ends at the proxy: with no page of its to open, there is nothing to offer.
   $$('.sign-out').forEach((button) => { button.hidden = Boolean(status) && status.via === 'proxy' && !signOutUrl; });
-  // The root token is the way to an administrator where the proxy's provider names none.
-  $$('.root-sign-in').forEach((button) => { button.hidden = !status || status.via !== 'proxy'; });
   if (!status) return;
   const via = t(`options.via.${status.via}`);
   $$('.avatar').forEach((el) => { el.textContent = status.username.slice(0, 1); });
@@ -209,6 +268,13 @@ function renderProfile(status) {
   $('#profile-body').innerHTML = sections.join('');
 }
 
+/** The links to the companion apps the brand shows, or an empty string where it shows none. */
+function appLinks(className) {
+  const apps = Array.isArray(brand.apps) ? brand.apps : [];
+  if (!apps.length) return '';
+  return `<div class="host-store ${className}">${apps.map((app) => `<a href="${esc(app.url)}" target="_blank" rel="noopener"><span class="logo logo-${esc(app.client)}"></span><span>${esc(t(`web.apps.${app.client}`))}</span></a>`).join('')}</div>`;
+}
+
 /** Open the profile and count the sessions running against their limit. */
 async function openProfile() {
   if (!lastStatus) return;
@@ -282,13 +348,6 @@ function bindShell() {
   $$('.sign-out').forEach((button) => {
     button.querySelector('span').textContent = t('options.dashboard.signOut');
     button.addEventListener('click', signOut);
-  });
-  $$('.root-sign-in').forEach((button) => {
-    button.querySelector('span').textContent = t('web.rootToken');
-    button.addEventListener('click', () => {
-      location.hash = '#root';
-      location.reload();
-    });
   });
   // The rail folds away on request, leaving a tab at the window's edge to bring it back; the choice is kept per browser.
   const RAIL_KEY = 'sealskin-rail';
@@ -408,6 +467,7 @@ async function remember(status) {
   if (status && status.via === 'proxy') sendForgedSignIn();
   // Probed now, the session origin is known by the first launch.
   if (status) warmSessionOrigin();
+  if (status) await wakeSplash(status);
 }
 
 /**
@@ -472,7 +532,7 @@ async function takeSignIn() {
 }
 
 /**
- * The sign-ins the server offers, or the root token alone when it cannot be asked.
+ * The sign-ins the server offers, or root's key alone when it cannot be asked.
  *
  * @returns {Promise<object>}
  */
@@ -494,19 +554,8 @@ function autoSignIn(offered) {
   box.className = 'host-box';
   box.innerHTML = `
     <img class="host-logo" src="${escapeHtml(brandLogo)}" alt="${escapeHtml(brandName)}">
-    <p class="host-wait"><span class="inline-spinner"></span><span></span></p>
-    <p class="host-alt" hidden><a href="#root"></a></p>`;
+    <p class="host-wait"><span class="inline-spinner"></span><span></span></p>`;
   box.querySelector('.host-wait span:last-child').textContent = t('web.signIn.redirecting');
-  const alternative = box.querySelector('.host-alt');
-  if (offered.root) {
-    alternative.hidden = false;
-    alternative.querySelector('a').textContent = t('web.signIn.useRoot');
-    alternative.querySelector('a').addEventListener('click', (event) => {
-      event.preventDefault();
-      location.hash = '#root';
-      location.reload();
-    });
-  }
   document.body.classList.add('signed-out');
   document.getElementById('app-frame').hidden = true;
   panel.replaceChildren(box);
@@ -517,8 +566,10 @@ function autoSignIn(offered) {
 
 /**
  * Show the sign-in panel in place of the frame: the server's identity
- * providers and the root token. The token is typed into a masked text field
- * rather than a password field, so browsers do not offer to save it.
+ * providers, or, with none configured or `#root` on the address, root's key,
+ * which is break glass and never offered beside a provider. The key is
+ * typed into a masked text field rather than a password field, so browsers
+ * do not offer to save it.
  *
  * @param {string} [failure] Why the server could not be asked who is signed in.
  * @param {object} [known] The server's sign-in config, where it was already asked.
@@ -544,12 +595,7 @@ async function signInPanel(failure, known) {
       </div>
     </div>
     <p class="host-muted" data-part="nothing" hidden></p>
-    <div class="host-store"${brand.storeLinks === false ? ' hidden' : ''}>
-      <a href="https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk" target="_blank" rel="noopener"><span class="logo logo-chrome"></span><span>Chrome Store</span></a>
-      <a href="https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/" target="_blank" rel="noopener"><span class="logo logo-firefox"></span><span>Firefox Add-ons</span></a>
-      <a href="https://play.google.com/store/apps/details?id=io.linuxserver.sealskin" target="_blank" rel="noopener"><span class="logo logo-android"></span><span>Play Store</span></a>
-      <a href="https://apps.apple.com/us/app/sealskin/id6758210210" target="_blank" rel="noopener"><span class="logo logo-ios"></span><span>App Store</span></a>
-    </div>`;
+    ${appLinks('')}`;
   const [error, providers, root, nothing] = ['error', 'providers', 'root', 'nothing']
     .map((part) => form.querySelector(`[data-part="${part}"]`));
   const submit = root.querySelector('button');
@@ -559,7 +605,7 @@ async function signInPanel(failure, known) {
   };
 
   form.querySelector('h2').textContent = t('web.signInTitle');
-  root.querySelector('label').textContent = t('web.rootToken');
+  root.querySelector('label').textContent = t('web.rootKey');
   submit.title = t('web.rootSignIn');
   submit.setAttribute('aria-label', t('web.rootSignIn'));
   nothing.textContent = t('web.signIn.notConfigured');
@@ -572,12 +618,12 @@ async function signInPanel(failure, known) {
   }
   const provided = Boolean(offered.oidc || offered.saml);
   providers.hidden = !provided;
-  root.hidden = !offered.root;
+  root.hidden = !offered.root || (provided && location.hash !== '#root');
   submit.className = provided ? 'secondary' : 'primary';
-  // The providers' buttons come first; the root token sits close under the title otherwise.
+  // The providers' buttons come first; the key sits close under the title otherwise.
   root.classList.toggle('host-field-tight', !provided);
-  nothing.hidden = Boolean(failure) || provided || Boolean(offered.root);
-  // A server that could not be asked still takes the root token; sending it is the retry.
+  nothing.hidden = Boolean(failure) || provided || !root.hidden;
+  // A server that could not be asked still takes root's key; sending it is the retry.
   if (failure) say(failure);
   else if (notice) say(t(`web.signIn.${notice}`) === `web.signIn.${notice}` ? t('web.signIn.failed') : t(`web.signIn.${notice}`));
   notice = null;
@@ -588,13 +634,14 @@ async function signInPanel(failure, known) {
     if (!token) return;
     submit.disabled = true;
     try {
-      await post('/api/auth/root', { token });
+      await post('/api/auth/key', { key: token });
       form.token.value = '';
       await enter('home');
     } catch (e) {
       const { status, detail } = apiError(e);
-      if (status === 403) say(t(detail === 'disabled' ? 'web.rootDisabled' : 'web.rootRefused'));
-      else say(status === 429 ? t('web.rootLocked') : detail);
+      const reasons = { disabled: 'web.keyDisabled', notRoot: 'web.keyNotRoot', expired: 'web.keyExpired' };
+      if (status === 403) say(t(reasons[detail] || 'web.keyRefused'));
+      else say(status === 429 ? t('web.keyLocked') : detail);
       form.token.select();
     }
     submit.disabled = false;
@@ -672,7 +719,7 @@ async function connect() {
   } catch (e) {
     failure = apiError(e).detail;
   }
-  // `#root` asks for the root token although a reverse proxy already signs this browser in.
+  // `#root` asks for root's key although a reverse proxy already signs this browser in.
   if (status && status.via === 'proxy' && location.hash === '#root') {
     history.replaceState(null, '', location.pathname + location.search);
     showAccount(null);
@@ -783,6 +830,7 @@ async function start() {
   t = await loadTranslator(navigator.language).catch(() => t);
   bindShell();
   await takeLaunchContext();
+  takeWakeRequest();
   await takeSignIn();
   // The host frames a page for a stored user and asks `connect` otherwise, as `#root` has it do.
   const status = await whoAmI().catch(() => null);

@@ -7,12 +7,17 @@
  *  2. configuration present -> `<served base>/ui/<page>.html`
  *  3. server unreachable    -> the unreachable panel (retry / open server /
  *                              change connection)
+ *  4. the application key the shell signs in with is dormant, or no longer
+ *     taken               -> a panel that sends the user to sign in on the
+ *                              web, or back to the connection page
  *
  * The served base comes from the background (`getUiBase`), which performs the
  * E2EE handshake trying the https session port first and the http API port
  * second. That keeps the Chrome self-signed certificate workflow: the "Open
  * server" button opens the https origin in a top-level tab so the certificate
  * can be accepted, after which https works for both the API and the iframe.
+ * With an application key the base is the https session port, and the
+ * background first asks the server for the key's standing.
  *
  * On the extension this module runs on its own (see the bottom); the mobile
  * and web shells import `initHost` and pass their shell name and hooks.
@@ -20,6 +25,7 @@
 
 import { createHost, callBackground } from '../lib/host-bridge.js';
 import { loadTranslator } from '../lib/i18n.js';
+import { apiError } from '../lib/api-error.js';
 
 /* global __SHELL_TARGET__, __UI_VERSION__ */
 
@@ -42,7 +48,27 @@ const STRINGS = {
   changeConnection: 'Change connection',
   mismatchTitle: 'Update required',
   mismatchBody: 'This app and the server web interface speak different bridge versions. Update the extension or app, or update the server, so both match.',
+  dormantTitle: 'Sign in on the web to continue',
+  dormantBody: 'Your application key is asleep: your administrator asks for a sign-in on the web now and then. Sign in there, and this app works again.',
+  signInWeb: 'Sign in on the web',
+  keyTitle: 'This key no longer signs you in',
+  keyUnknown: 'The key was revoked or never existed. Make a new one in your profile on the web.',
+  keyExpired: 'The key expired. Make a new one in your profile on the web.',
+  keyDisabled: 'Your administrator does not allow application keys for your account.',
+  keyClient: 'Your administrator does not allow this app to use application keys.',
 };
+// What the server answers for an application key that signs nobody in (`app.application_keys`).
+const KEY_REFUSALS = { dormant: 'dormant', unknown: 'keyUnknown', expired: 'keyExpired', disabled: 'keyDisabled', client: 'keyClient' };
+
+/**
+ * The code of a refused application key in a failed call, or null for any other failure.
+ *
+ * @param {Error|string} error
+ */
+function keyRefusal(error) {
+  const { status, detail } = apiError(error);
+  return status === 401 && KEY_REFUSALS[detail] ? detail : null;
+}
 
 /**
  * Translate the host panel strings in place using the bundled i18n subset.
@@ -112,7 +138,16 @@ export function initHost(overrides = {}) {
   const iframe = document.getElementById('app-frame');
   const panel = document.getElementById('host-panel');
   const shell = overrides.shell || SHELL;
-  const transport = overrides.transport || (shell === 'extension' ? extensionTransport : pageTransport);
+  const rawTransport = overrides.transport || (shell === 'extension' ? extensionTransport : pageTransport);
+  // A call the server refuses for the application key's sake takes the frame over: the page could only show an error.
+  const transport = async (message) => {
+    const reply = await rawTransport(message);
+    if (!overrides.connect && message.type === 'secureFetch' && reply && reply.success === false) {
+      const code = keyRefusal(reply.error);
+      if (code && lastConfig && lastConfig.applicationKeyHeld) showPanel(code === 'dormant' ? 'dormant' : 'key', code);
+    }
+    return reply;
+  };
 
   const launcher = overrides.launcher || 'popup';
   let page = document.body.dataset.page || params.get('page') || launcher;
@@ -195,6 +230,17 @@ export function initHost(overrides = {}) {
       if (detail) addText('p', detail, 'host-error');
       actions.appendChild(addButton(STRINGS.retry, 'primary', () => boot()));
       if (!overrides.connect) actions.appendChild(addButton(STRINGS.changeConnection, 'secondary', () => openPage('connect')));
+    } else if (kind === 'dormant') {
+      addText('h2', STRINGS.dormantTitle);
+      addText('p', STRINGS.dormantBody, 'host-muted');
+      actions.appendChild(addButton(STRINGS.signInWeb, 'primary', () => openServer('/?wake=1')));
+      actions.appendChild(addButton(STRINGS.retry, 'secondary', () => boot()));
+      actions.appendChild(addButton(STRINGS.changeConnection, 'secondary', () => openPage('connect')));
+    } else if (kind === 'key') {
+      addText('h2', STRINGS.keyTitle);
+      addText('p', STRINGS[KEY_REFUSALS[detail]] || STRINGS.keyUnknown, 'host-muted');
+      actions.appendChild(addButton(STRINGS.changeConnection, 'primary', () => openPage('connect')));
+      actions.appendChild(addButton(STRINGS.retry, 'secondary', () => boot()));
     }
     if (actions.childElementCount) box.appendChild(actions);
     panel.appendChild(box);
@@ -208,12 +254,12 @@ export function initHost(overrides = {}) {
     }
   }
 
-  async function openServer() {
+  async function openServer(path = '/ui/') {
     const config = lastConfig || (await bg('getPublicConfig').catch(() => null));
     if (!config || !config.serverIp) return;
     const url = config.sessionPort
-      ? `https://${config.serverIp}:${config.sessionPort}/ui/`
-      : `http://${config.serverIp}:${config.apiPort}/ui/`;
+      ? `https://${config.serverIp}:${config.sessionPort}${path}`
+      : `http://${config.serverIp}:${config.apiPort}${path}`;
     try {
       await bg('openExternal', { url });
     } catch (e) {
@@ -276,7 +322,9 @@ export function initHost(overrides = {}) {
     try {
       base = await bg('getUiBase');
     } catch (e) {
-      showPanel('unreachable', e && e.message ? e.message : String(e));
+      const code = keyRefusal(e);
+      if (code) showPanel(code === 'dormant' ? 'dormant' : 'key', code);
+      else showPanel('unreachable', e && e.message ? e.message : String(e));
       return;
     }
     loadServed(base, SERVED_PAGES.has(page) ? page : launcher);

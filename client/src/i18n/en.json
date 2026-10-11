@@ -86,7 +86,8 @@
       "cluster": "Cluster",
       "signIn": "Sign In",
       "audit": "Audit Log",
-      "branding": "Branding"
+      "branding": "Branding",
+      "keys": "Application Keys"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -151,7 +152,16 @@
       "keyGeneration": "Key Generation",
       "keyGenDescription": "If you don't have a key pair, you can generate one here. The private key will be filled in above. Provide the public key to your administrator.",
       "generateKeyButton": "Generate New Key Pair",
-      "publicKeyForAdminLabel": "Your Public Key (for admin)"
+      "publicKeyForAdminLabel": "Your Public Key (for admin)",
+      "keyTitle": "Connect with an application key",
+      "keyDescription": "In the web app, under Settings → Application Keys, make a key for this device and paste it here.",
+      "keyLabel": "Application key",
+      "keyPlaceholder": "ssk_…@sealskin.example.com:8443",
+      "keyConnectButton": "Connect",
+      "useKeyFileLink": "Use a key file instead",
+      "useKeyLink": "Use an application key",
+      "connectedWithKey": "Signed in with an application key.",
+      "connectedWithKeyFile": "Signed in with a key file."
     },
     "home": {
       "title": "Your Home Directories",
@@ -242,7 +252,37 @@
       "prootCatalogHelp": "Mounted read-only into every session; proot-apps installs from it instead of a registry. Left at None, the first of the user's groups to choose one decides.",
       "groupsHelp": "Hold Ctrl or Command to select several. Where groups disagree, the restricting value wins.",
       "providerGroups": "Groups the identity provider named at the last sign-in: {groups}",
-      "limitsHelp": "A limit of -1, or left blank, sets none."
+      "limitsHelp": "A limit of -1, or left blank, sets none.",
+      "applicationKeys": "Allow Application Keys (Browser Extension and Mobile App)",
+      "appKeyClients": "Apps that may use application keys",
+      "appKeyClientsHelp": "Each app names itself to the server; this is a convenience, not a lock.",
+      "appKeyDays": "Days an application key lives",
+      "appKeyDormantHours": "Hours after the last web sign-in at which application keys sleep",
+      "appKeyFollowSignIn": "Application Keys Sleep When the Web Sign-In Ends",
+      "keys": "Keys",
+      "keysTitle": "Application keys of {username}",
+      "noKeys": "No application keys.",
+      "revokeAll": "Revoke all",
+      "keyRevoked": "Key revoked.",
+      "keyRevokeFailed": "Could not revoke the key: {error}",
+      "keysLoadFailed": "Could not load the keys: {error}",
+      "keyState": {
+        "active": "Active",
+        "dormant": "Asleep",
+        "expired": "Expired"
+      },
+      "clients": {
+        "chrome": "Chrome extension",
+        "firefox": "Firefox add-on",
+        "android": "Android app",
+        "ios": "iOS app",
+        "other": "Other clients"
+      },
+      "keyLastUsed": "Last used",
+      "keyExpires": "Expires",
+      "keyNever": "Never",
+      "keyNeverUsed": "Never used",
+      "revokeAllConfirm": "Revoke every application key of '{username}'? Their extension and app sign-ins stop at once."
     },
     "groups": {
       "title": "Group Management",
@@ -260,7 +300,8 @@
       "on": "On",
       "off": "Off",
       "ssoGroups": "Identity provider groups whose members are in this group (comma-separated)",
-      "overrideHelp": "A group decides only what is set here; everything left unset or blank stays each member's own."
+      "overrideHelp": "A group decides only what is set here; everything left unset or blank stays each member's own.",
+      "chosen": "Only the apps checked below"
     },
     "installedApps": {
       "title": "Installed Applications",
@@ -1294,7 +1335,16 @@
       "catalogDeleteFailed": "Could not delete the catalog: {error}",
       "catalogUpdateStarted": "Updating catalog '{name}' on every node.",
       "catalogUpdateFailed": "Could not update the catalog: {error}",
-      "catalogsRefreshFailed": "Could not load the catalogs: {error}"
+      "catalogsRefreshFailed": "Could not load the catalogs: {error}",
+      "keyNoServer": "This key names no server. Make one in the web app, under Settings → Application Keys.",
+      "keyMissing": "Paste your application key.",
+      "keyRefused": {
+        "unknown": "The server knows no such key. Make one in your profile on the web app.",
+        "expired": "The key expired. Make a new one in your profile on the web app.",
+        "disabled": "Your administrator does not allow application keys for your account.",
+        "client": "Your administrator does not allow this app to use application keys.",
+        "dormant": "Your key is asleep. Sign in on the web app, then try again."
+      }
     },
     "placeholders": {
       "noAdmins": "No admins found.",
@@ -1319,11 +1369,12 @@
       "install": "Where the browser can install web apps, install {brand} from its menu to share links and files to it and to open files with it."
     },
     "via": {
-      "root": "Root token",
+      "root": "Root key",
       "oidc": "OpenID Connect",
       "saml": "SAML",
       "proxy": "Reverse proxy",
-      "key": "Key file"
+      "key": "Key file",
+      "app_key": "Application key"
     },
     "periods": {
       "day": "Day",
@@ -1413,7 +1464,8 @@
         "proxy_auth_logout_url": "Page of the proxy that signs its user out",
         "web_session_seconds": "Longest a root sign-in lasts unused (hours)",
         "files_sync": "Keep shared files in the object store",
-        "auto_sign_in": "Send a signed-out browser straight to"
+        "auto_sign_in": "Send a signed-out browser straight to",
+        "legacy_auth": "Accept key-file clients"
       },
       "usageTitle": "Usage",
       "usageHours": "Weighted hours",
@@ -1539,11 +1591,11 @@
       },
       "whoTitle": "Who Signs In",
       "whoHelp": "These hold for OpenID Connect, SAML, and the reverse proxy. To put the members of an identity provider group into a {brand} group, list it under \"Identity provider groups\" of that group in Groups.",
-      "rootTitle": "Root Token",
-      "rootHelp": "Always available. The token is in /config/root_token on the server until that file is deleted, and can be set with SEALSKIN_ROOT_TOKEN.",
+      "rootTitle": "Root Key",
+      "rootHelp": "Always available at /#root. The key is in /config/root_key on the server until that file is deleted, and can be set with SEALSKIN_ROOT_KEY.",
       "keyTitle": "Key Files",
-      "keyOn": "This node accepts the key-file clients: the browser extension and the mobile app. Set on each node with SEALSKIN_LEGACY_AUTH.",
-      "keyOff": "This node does not accept key-file clients. Set on each node with SEALSKIN_LEGACY_AUTH.",
+      "keyOn": "The nodes accept the key-file clients: the browser extension and the mobile app with a configuration file, and their encrypted API port. The dashboard makes key files for users and administrators. Switch them off once sign-ins come through an identity provider or a proxy and the apps use application keys: users made here then sign in through the provider alone, and administrators come from its group or a group's Administrator switch.",
+      "keyOff": "The nodes refuse the key-file clients. Users made in the dashboard sign in through the identity provider or the proxy; administrators come from its group or a group's Administrator switch, and root's key is the way in without one.",
       "resultIssuer": "Issuer:",
       "resultAuthorization": "Authorization endpoint:",
       "resultBackchannel": "Back-channel logout supported:",
@@ -1560,8 +1612,8 @@
       "autoNone": "This server's sign-in page",
       "autoOidc": "OpenID Connect",
       "autoSaml": "SAML",
-      "rootOff": "Switched off on this node with SEALSKIN_ROOT_SIGN_IN=false. To get back in with the token, restart the node with it on.",
-      "rootNoAdminGroup": "No identity provider group names administrators (see Who Signs In). With the root token off, nobody can administer this server."
+      "rootOff": "Switched off on this node with SEALSKIN_ROOT_SIGN_IN=false. To get back in with the key, restart the node with it on.",
+      "rootNoAdminGroup": "No identity provider group names administrators (see Who Signs In). With root's key off, nobody can administer this server."
     },
     "prootApps": {
       "title": "PRoot Apps Catalogs",
@@ -1609,7 +1661,6 @@
       "accent": "Accent color",
       "accentHelp": "The color of buttons, highlights, and the wordmark. Clear it for the default violet.",
       "accentDefault": "Default",
-      "storeLinks": "Show the extension and app store links on the sign-in page",
       "wallpaper": "Wallpaper",
       "wallpaperHelp": "A picture behind the home page, up to 8 MB. Users start from it and may still pick their own, unless it is forced.",
       "wallpaperForced": "Force this wallpaper on every user",
@@ -1635,12 +1686,44 @@
       "previewUser": "A user",
       "save": "Save branding",
       "reset": "Back to defaults",
-      "resetConfirm": "Remove the name, logo, colors, wallpaper, and links, back to the SealSkin defaults?",
+      "resetConfirm": "Remove the name, logo, colors, wallpaper, app links, and links, back to the SealSkin defaults?",
       "saved": "Branding saved. Reload the page to see the title and sidebar change.",
       "resetDone": "Branding reset to the defaults.",
       "saveFailed": "Could not save the branding: {error}",
       "pictureTooLarge": "The picture is too large, and could not be made smaller. Choose another.",
-      "notAPicture": "Choose a PNG, JPEG, or WebP picture."
+      "notAPicture": "Choose a PNG, JPEG, or WebP picture.",
+      "apps": "Companion apps",
+      "appsHelp": "Where users get the extension and the apps, linked from the sign-in page and beside the application keys in the profile. Point a link at your own build, or hide it.",
+      "appShow": "Shown",
+      "appUrl": "Address",
+      "appClient": "App"
+    },
+    "keys": {
+      "title": "Application Keys",
+      "intro": "Sign the browser extension and the mobile app in with a key made here, instead of a key file. Each device gets a key of its own; revoke one here and that device is signed out.",
+      "none": "No keys yet.",
+      "name": "Name",
+      "nameHelp": "What the key is for, as the device it goes on.",
+      "namePlaceholder": "e.g. Work laptop",
+      "made": "Made",
+      "lifetime": "Expires",
+      "days": "{count, plural, one {1 day} other {{count} days}}",
+      "create": "Make a key",
+      "revoke": "Revoke",
+      "revoked": "Key revoked.",
+      "shownOnce": "Copy this key now: it is shown this once. Paste it on the connection page of the extension or the app.",
+      "copied": "Key copied.",
+      "copyFailed": "The browser did not allow copying. Select the key and copy it.",
+      "notAllowed": "Your administrator does not allow application keys for your account.",
+      "clients": "Allowed apps: {clients}.",
+      "dormantHours": "Keys sleep {hours} hours after your last web sign-in; signing in here wakes them.",
+      "followSignIn": "Keys sleep when your web sign-in ends; signing in here wakes them.",
+      "maxDays": "A key lives at most {count, plural, one {1 day} other {{count} days}}.",
+      "get": "Get the apps",
+      "getHelp": "Install one of these, then enter the server's address and your key on its connection page.",
+      "loadFailed": "Could not load your keys: {error}",
+      "createFailed": "Could not make the key: {error}",
+      "tooLong": "That is longer than your administrator allows."
     }
   },
   "popup": {
@@ -1745,7 +1828,10 @@
     },
     "sidebar": {
       "sharedFiles": "{brand} Files",
-      "publicShares": "Public Shares"
+      "publicShares": "Public Shares",
+      "sharedHelp": "Your files on every node: every session has them at Desktop/files.",
+      "allNodes": "all nodes",
+      "homeHelp": "This home directory lives on node {node}; sessions that use it run there. Move it from the launcher to run elsewhere."
     },
     "shares": {
       "title": "Publicly Shared Files",
@@ -1846,7 +1932,15 @@
       "openServer": "Open server",
       "changeConnection": "Change connection",
       "mismatchTitle": "Update required",
-      "mismatchBody": "This app and the server web interface speak different bridge versions. Update the extension or app, or update the server, so both match."
+      "mismatchBody": "This app and the server web interface speak different bridge versions. Update the extension or app, or update the server, so both match.",
+      "dormantTitle": "Sign in on the web to continue",
+      "dormantBody": "Your application key is asleep: your administrator asks for a sign-in on the web now and then. Sign in there, and this app works again.",
+      "signInWeb": "Sign in on the web",
+      "keyTitle": "This key no longer signs you in",
+      "keyUnknown": "The key was revoked or never existed. Make a new one in your profile on the web.",
+      "keyExpired": "The key expired. Make a new one in your profile on the web.",
+      "keyDisabled": "Your administrator does not allow application keys for your account.",
+      "keyClient": "Your administrator does not allow this app to use application keys."
     }
   },
   "web": {
@@ -1856,11 +1950,6 @@
       "oidc": "Sign In with OpenID Connect",
       "saml": "Sign In with SAML"
     },
-    "rootToken": "Root token",
-    "rootTokenHelp": "The administrator's token, which the server keeps in its /config/root_token file.",
-    "rootSignIn": "Root Login",
-    "rootRefused": "That is not the server's root token.",
-    "rootLocked": "Too many tries. Wait a while, then try again.",
     "held": {
       "title": "Waiting for an administrator",
       "message": "You are signed in as {username}, but an administrator has to place you in a group before you can use {brand}. Check again once they have.",
@@ -1877,8 +1966,7 @@
       "noAccount": "No {brand} account has your name yet. Ask your administrator to create one.",
       "notConfigured": "This server offers no sign-in here. Ask your administrator.",
       "ended": "Your sign-in ended. Sign in again.",
-      "redirecting": "Taking you to sign in…",
-      "useRoot": "Use the root token instead"
+      "redirecting": "Taking you to sign in…"
     },
     "nav": {
       "home": "Home",
@@ -2014,6 +2102,27 @@
       "noHome": "The storage directory '{home}' this address names does not exist. Create it in {brand}, or open the address without it.",
       "openSealSkin": "Open {brand}"
     },
-    "rootDisabled": "The root token is switched off on this server."
+    "keyRefused": "That key signs nobody in.",
+    "keyNotRoot": "Only root signs in here with a key. Sign in through your identity provider.",
+    "keyExpired": "That key expired.",
+    "keyLocked": "Too many tries. Wait a while, then try again.",
+    "keyDisabled": "This server does not take root's application key at the web sign-in.",
+    "apps": {
+      "chrome": "Chrome extension",
+      "firefox": "Firefox add-on",
+      "android": "Android app",
+      "ios": "iOS app",
+      "other": "Other clients"
+    },
+    "rootKey": "Root key",
+    "rootKeyHelp": "The administrator's application key, which the server wrote to /config/root_key at its first start.",
+    "keys": {
+      "wakeTitle": "Your application key is active again",
+      "wakeBody": "You can go back to the app now, or carry on here.",
+      "wakeClose": "Close",
+      "wakeContinue": "Continue to {brand}",
+      "wakeFailed": "Could not wake your keys: {error}"
+    },
+    "rootSignIn": "Sign in as root"
   }
 }

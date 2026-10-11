@@ -42,7 +42,7 @@ terminates TLS, and not through one that asks for a sign-in of its own.
    `SEALSKIN_SESSION_DOMAIN` with session isolation, and take its published
    ports away.
 5. Open the web app, sign in with the
-   [root token](../signin.md#the-root-administrator), and look at
+   [root's application key](../signin.md#the-root-administrator), and look at
    **Settings → Sign In → Reaching This Server**. It shows the address the
    server believes it has, whether a session name answers this browser, the
    address the request came from and whether that is a trusted proxy, and
@@ -211,7 +211,7 @@ published port only on the host.
 | SealSkin learns the user from | The provider's signed answer | A header the proxy adds |
 | Key-file clients | Work | Are turned away by the proxy |
 | Public share links, room guests | Work | Need rules at the proxy |
-| Root token | Works | Works, once past the proxy's sign-in, at `/#root` |
+| Root's application key | Works | Works, once past the proxy's sign-in, at `/#root` |
 
 The first column is the one to prefer: every provider in this section
 speaks OpenID Connect, a user signed in there goes straight through, and

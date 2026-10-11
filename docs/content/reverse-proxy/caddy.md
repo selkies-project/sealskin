@@ -64,16 +64,26 @@ before the web app's `reverse_proxy`:
 
 ```caddyfile
 	handle @app {
-		forward_auth authelia:9091 {
-			uri /api/authz/forward-auth
-			copy_headers Remote-User Remote-Groups Remote-Email Remote-Name
+		# The companion apps, the sessions they open, and public share links: SealSkin signs these in itself.
+		@raw path_regexp ^/(companion/|public/|(ws/)?room/[0-9a-fA-F-]{36}|[0-9a-fA-F-]{36}/)
+		handle @raw {
+			reverse_proxy sealskin:8080
 		}
-		reverse_proxy sealskin:8080
+		handle {
+			forward_auth authelia:9091 {
+				uri /api/authz/forward-auth
+				copy_headers Remote-User Remote-Groups Remote-Email Remote-Name
+			}
+			reverse_proxy sealskin:8080
+		}
 	}
 ```
 
 Then set the sign-in headers on SealSkin as
-[A proxy that signs users in](sign-in.md) describes. `copy_headers` removes
+[A proxy that signs users in](sign-in.md) describes. The raw paths are the
+ones [that page lists](sign-in.md#the-companion-apps) for the browser
+extension and the mobile app; a web-only deployment leaves the `@raw`
+handle out. `copy_headers` removes
 what a visitor sent under those names before it copies the provider's
 answer. A site without `forward_auth` passes a visitor's own `Remote-User`
 through, which SealSkin detects and refuses.

@@ -85,7 +85,9 @@
       "admins": "Beheerders",
       "cluster": "Cluster",
       "signIn": "Aanmelding",
-      "audit": "Auditlog"
+      "audit": "Auditlog",
+      "branding": "Huisstijl",
+      "keys": "Toepassingssleutels"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -150,7 +152,16 @@
       "keyGeneration": "Sleutelgeneratie",
       "keyGenDescription": "Als u geen sleutelpaar heeft, kunt u er hier een genereren. De privésleutel wordt hierboven ingevuld. Geef de publieke sleutel aan uw beheerder.",
       "generateKeyButton": "Nieuw Sleutelpaar Genereren",
-      "publicKeyForAdminLabel": "Uw Publieke Sleutel (voor admin)"
+      "publicKeyForAdminLabel": "Uw Publieke Sleutel (voor admin)",
+      "keyTitle": "Verbinden met een toepassingssleutel",
+      "keyDescription": "Maak in de webapp, onder Instellingen → Toepassingssleutels, een sleutel voor dit apparaat en plak die hier.",
+      "keyLabel": "Toepassingssleutel",
+      "keyPlaceholder": "ssk_…@sealskin.example.com:8443",
+      "keyConnectButton": "Verbinden",
+      "useKeyFileLink": "Gebruik in plaats daarvan een sleutelbestand",
+      "useKeyLink": "Gebruik een toepassingssleutel",
+      "connectedWithKey": "Aangemeld met een toepassingssleutel.",
+      "connectedWithKeyFile": "Aangemeld met een sleutelbestand."
     },
     "home": {
       "title": "Uw Home Directories",
@@ -241,7 +252,37 @@
       "prootCatalogHelp": "Wordt alleen-lezen in elke sessie gemount; proot-apps installeert hieruit in plaats van uit een registry. Blijft dit op Geen, dan beslist de eerste groep van de gebruiker die er een kiest.",
       "groupsHelp": "Houd Ctrl of Command ingedrukt om er meerdere te selecteren. Waar groepen elkaar tegenspreken, wint de beperkende waarde.",
       "providerGroups": "Groepen die de identiteitsprovider bij de laatste aanmelding noemde: {groups}",
-      "limitsHelp": "Een limiet van -1, of een leeg veld, stelt geen limiet in."
+      "limitsHelp": "Een limiet van -1, of een leeg veld, stelt geen limiet in.",
+      "applicationKeys": "Toepassingssleutels Toestaan (Browserextensie en Mobiele App)",
+      "appKeyClients": "Apps die toepassingssleutels mogen gebruiken",
+      "appKeyClientsHelp": "Elke app noemt zichzelf bij de server; dit is een gemak, geen slot.",
+      "appKeyDays": "Dagen dat een toepassingssleutel geldig blijft",
+      "appKeyDormantHours": "Uren na de laatste webaanmelding waarna toepassingssleutels in slaap gaan",
+      "appKeyFollowSignIn": "Toepassingssleutels Gaan in Slaap Wanneer de Webaanmelding Eindigt",
+      "keys": "Sleutels",
+      "keysTitle": "Toepassingssleutels van {username}",
+      "noKeys": "Geen toepassingssleutels.",
+      "revokeAll": "Alles intrekken",
+      "keyRevoked": "Sleutel ingetrokken.",
+      "keyRevokeFailed": "Kon de sleutel niet intrekken: {error}",
+      "keysLoadFailed": "Kon de sleutels niet laden: {error}",
+      "keyState": {
+        "active": "Actief",
+        "dormant": "In slaap",
+        "expired": "Verlopen"
+      },
+      "clients": {
+        "chrome": "Chrome-extensie",
+        "firefox": "Firefox-add-on",
+        "android": "Android-app",
+        "ios": "iOS-app",
+        "other": "Overige clients"
+      },
+      "keyLastUsed": "Laatst gebruikt",
+      "keyExpires": "Verloopt",
+      "keyNever": "Nooit",
+      "keyNeverUsed": "Nooit gebruikt",
+      "revokeAllConfirm": "Alle toepassingssleutels van '{username}' intrekken? De aanmeldingen van hun extensie en app stoppen onmiddellijk."
     },
     "groups": {
       "title": "Groepsbeheer",
@@ -259,7 +300,8 @@
       "on": "Aan",
       "off": "Uit",
       "ssoGroups": "Groepen van de identiteitsprovider waarvan de leden in deze groep zitten (door komma's gescheiden)",
-      "overrideHelp": "Een groep bepaalt alleen wat hier is ingesteld; alles wat niet is ingesteld of leeg blijft, blijft de eigen instelling van elk lid."
+      "overrideHelp": "Een groep bepaalt alleen wat hier is ingesteld; alles wat niet is ingesteld of leeg blijft, blijft de eigen instelling van elk lid.",
+      "chosen": "Alleen de hieronder aangevinkte apps"
     },
     "installedApps": {
       "title": "Geïnstalleerde Applicaties",
@@ -1293,7 +1335,16 @@
       "catalogDeleteFailed": "Kon de catalogus niet verwijderen: {error}",
       "catalogUpdateStarted": "Catalogus '{name}' wordt op elke node geüpdatet.",
       "catalogUpdateFailed": "Kon de catalogus niet updaten: {error}",
-      "catalogsRefreshFailed": "Kon de catalogi niet laden: {error}"
+      "catalogsRefreshFailed": "Kon de catalogi niet laden: {error}",
+      "keyNoServer": "Deze sleutel noemt geen server. Maak er een in de webapp, onder Instellingen → Toepassingssleutels.",
+      "keyMissing": "Plak uw toepassingssleutel.",
+      "keyRefused": {
+        "unknown": "De server kent deze sleutel niet. Maak er een in uw profiel in de webapp.",
+        "expired": "De sleutel is verlopen. Maak een nieuwe in uw profiel in de webapp.",
+        "disabled": "Uw beheerder staat geen toepassingssleutels toe voor uw account.",
+        "client": "Uw beheerder staat deze app niet toe toepassingssleutels te gebruiken.",
+        "dormant": "Uw sleutel is in slaap. Meld u aan in de webapp en probeer het daarna opnieuw."
+      }
     },
     "placeholders": {
       "noAdmins": "Geen beheerders gevonden.",
@@ -1322,7 +1373,8 @@
       "oidc": "OpenID Connect",
       "saml": "SAML",
       "proxy": "Reverse proxy",
-      "key": "Sleutelbestand"
+      "key": "Sleutelbestand",
+      "app_key": "Toepassingssleutel"
     },
     "periods": {
       "day": "Dag",
@@ -1411,7 +1463,9 @@
         "proxy_auth_groups_header": "Header waarin een vertrouwde proxy de groepen van de gebruiker opsomt",
         "proxy_auth_logout_url": "Pagina van de proxy die de gebruiker afmeldt",
         "web_session_seconds": "Maximale duur van een ongebruikte root-aanmelding (uren)",
-        "files_sync": "Gedeelde bestanden in de objectopslag bewaren"
+        "files_sync": "Gedeelde bestanden in de objectopslag bewaren",
+        "auto_sign_in": "Een afgemelde browser direct doorsturen naar",
+        "legacy_auth": "Clients met een sleutelbestand accepteren"
       },
       "usageTitle": "Gebruik",
       "usageHours": "Gewogen uren",
@@ -1552,7 +1606,14 @@
       "resultEntity": "Entity-ID:",
       "resultSso": "Aanmeld-URL:",
       "resultSlo": "Single logout aangeboden:",
-      "resultCertificates": "Ondertekeningscertificaten:"
+      "resultCertificates": "Ondertekeningscertificaten:",
+      "landingTitle": "Startpunt",
+      "landingHelp": "Met een gekozen provider gaat een afgemelde browser daar direct naartoe in plaats van naar de aanmeldpagina van deze server. Voeg #root toe aan het adres van de webapp om de pagina toch te zien, zoals voor het root-token.",
+      "autoNone": "De aanmeldpagina van deze server",
+      "autoOidc": "OpenID Connect",
+      "autoSaml": "SAML",
+      "rootOff": "Op deze node uitgeschakeld met SEALSKIN_ROOT_SIGN_IN=false. Om weer met de sleutel binnen te komen, herstart u de node met die instelling aan.",
+      "rootNoAdminGroup": "Geen groep van de identiteitsprovider wijst beheerders aan (zie Wie zich aanmeldt). Met de sleutel van root uit kan niemand deze server beheren."
     },
     "prootApps": {
       "title": "PRoot Apps-catalogi",
@@ -1586,6 +1647,83 @@
       "updateTitle": "Haal de apps waarvan het pakket is gewijzigd nu opnieuw op, op elke node",
       "confirmDelete": "Catalogus '{name}' verwijderen? Elke node verwijdert zijn kopie en de gebruikers die eraan zijn toegewezen krijgen geen catalogus.",
       "deleteTitle": "Catalogus verwijderen"
+    },
+    "branding": {
+      "title": "Huisstijl",
+      "help": "Geef de webapp de naam, het logo, de kleuren, de achtergrond en de links van uw organisatie. De voorvertoning toont de startpagina zoals gebruikers die zien; er verandert niets totdat u opslaat.",
+      "identity": "Identiteit",
+      "name": "Productnaam",
+      "nameHelp": "Staat overal waar de interface SealSkin zou zeggen: de titel, de zijbalk, de geïnstalleerde webapp en de aanmeldpagina.",
+      "logo": "Logo",
+      "logoHelp": "Een vierkante PNG, JPEG of WebP van maximaal 1 MB. Het is het logo in de zijbalk, de favicon en het pictogram van de geïnstalleerde webapp.",
+      "logoLink": "Het logo linkt naar",
+      "logoLinkHelp": "Een adres dat het logo in een nieuw tabblad opent, zoals uw intranet. Laat het leeg voor geen link.",
+      "accent": "Accentkleur",
+      "accentHelp": "De kleur van knoppen, markeringen en het woordmerk. Wis deze voor het standaard violet.",
+      "accentDefault": "Standaard",
+      "wallpaper": "Achtergrond",
+      "wallpaperHelp": "Een afbeelding achter de startpagina, van maximaal 8 MB. Gebruikers beginnen ermee en mogen nog een eigen afbeelding kiezen, tenzij deze wordt afgedwongen.",
+      "wallpaperForced": "Deze achtergrond bij elke gebruiker afdwingen",
+      "wallpaperForcedHelp": "Gebruikers verliezen de knop Pagina aanpassen op de startpagina en zien allemaal deze achtergrond.",
+      "fit": "Positie",
+      "blur": "Vervaging",
+      "dim": "Dimmen",
+      "upload": "Uploaden",
+      "remove": "Verwijderen",
+      "links": "Links op de startpagina",
+      "linksHelp": "Tegels die de startpagina boven de applicaties toont, voor uw eigen sites en tools. Een link opent in een nieuw tabblad, of in een geïsoleerde sessie van een applicatie die de gebruiker kiest.",
+      "linkName": "Naam",
+      "linkUrl": "Adres",
+      "linkIcon": "Pictogram",
+      "linkIconHelp": "Een Font Awesome-klasse zoals fa-book of fab fa-github, of een https-adres van een afbeelding.",
+      "linkOpen": "Opent",
+      "openTab": "In een nieuw tabblad",
+      "openIsolated": "Geïsoleerd",
+      "addLink": "Een link toevoegen",
+      "noLinks": "Nog geen links.",
+      "preview": "Voorvertoning",
+      "previewHelp": "De startpagina zoals een gebruiker die ziet, met wat u hier heeft ingevoerd.",
+      "previewUser": "Een gebruiker",
+      "save": "Huisstijl opslaan",
+      "reset": "Terug naar de standaardwaarden",
+      "resetConfirm": "De naam, het logo, de kleuren, de achtergrond, de app-links en de links verwijderen, terug naar de standaardwaarden van SealSkin?",
+      "saved": "Huisstijl opgeslagen. Laad de pagina opnieuw om de titel en de zijbalk te zien veranderen.",
+      "resetDone": "Huisstijl teruggezet naar de standaardwaarden.",
+      "saveFailed": "Kon de huisstijl niet opslaan: {error}",
+      "pictureTooLarge": "De afbeelding is te groot en kon niet worden verkleind. Kies een andere.",
+      "notAPicture": "Kies een PNG-, JPEG- of WebP-afbeelding.",
+      "apps": "Begeleidende apps",
+      "appsHelp": "Waar gebruikers de extensie en de apps ophalen, gelinkt vanaf de aanmeldpagina en naast de toepassingssleutels in het profiel. Laat een link naar uw eigen build wijzen, of verberg hem.",
+      "appShow": "Getoond",
+      "appUrl": "Adres",
+      "appClient": "App"
+    },
+    "keys": {
+      "title": "Toepassingssleutels",
+      "intro": "Meld de browserextensie en de mobiele app aan met een sleutel die u hier maakt, in plaats van een sleutelbestand. Elk apparaat krijgt een eigen sleutel; trekt u er hier een in, dan is dat apparaat afgemeld.",
+      "none": "Nog geen sleutels.",
+      "name": "Naam",
+      "nameHelp": "Waar de sleutel voor is, zoals het apparaat waarop hij komt.",
+      "namePlaceholder": "bijv. Werklaptop",
+      "made": "Gemaakt",
+      "lifetime": "Verloopt",
+      "days": "{count, plural, one {1 dag} other {{count} dagen}}",
+      "create": "Een sleutel maken",
+      "revoke": "Intrekken",
+      "revoked": "Sleutel ingetrokken.",
+      "shownOnce": "Kopieer deze sleutel nu: hij wordt maar één keer getoond. Plak hem op de verbindingspagina van de extensie of de app.",
+      "copied": "Sleutel gekopieerd.",
+      "copyFailed": "De browser stond kopiëren niet toe. Selecteer de sleutel en kopieer deze.",
+      "notAllowed": "Uw beheerder staat geen toepassingssleutels toe voor uw account.",
+      "clients": "Toegestane apps: {clients}.",
+      "dormantHours": "Sleutels gaan {hours} uur na uw laatste webaanmelding in slaap; hier aanmelden maakt ze weer wakker.",
+      "followSignIn": "Sleutels gaan in slaap wanneer uw webaanmelding eindigt; hier aanmelden maakt ze weer wakker.",
+      "maxDays": "Een sleutel blijft hoogstens {count, plural, one {1 dag} other {{count} dagen}} geldig.",
+      "get": "De apps ophalen",
+      "getHelp": "Installeer een van deze en voer op de verbindingspagina het adres van de server en uw sleutel in.",
+      "loadFailed": "Kon uw sleutels niet laden: {error}",
+      "createFailed": "Kon de sleutel niet maken: {error}",
+      "tooLong": "Dat is langer dan uw beheerder toestaat."
     }
   },
   "popup": {
@@ -1624,7 +1762,8 @@
       "moveHomeTo": "Verplaatsen naar {node}",
       "moveHomeConfirm": "'{home}' verplaatsen naar {node}? Sessies die deze opslag gebruiken, moeten eerst worden gestopt.",
       "moveHomeTitle": "Opslag verplaatsen",
-      "allowance": "Tegoed: {used} van {hours} uur deze {period}"
+      "allowance": "Tegoed: {used} van {hours} uur deze {period}",
+      "newTab": "In een nieuw tabblad openen"
     },
     "sessionsView": {
       "noSessions": "Geen actieve sessies gevonden."
@@ -1689,7 +1828,10 @@
     },
     "sidebar": {
       "sharedFiles": "{brand}-bestanden",
-      "publicShares": "Openbare Delingen"
+      "publicShares": "Openbare Delingen",
+      "sharedHelp": "Uw bestanden op elke node: elke sessie heeft ze in Desktop/files.",
+      "allNodes": "alle nodes",
+      "homeHelp": "Deze home directory staat op node {node}; sessies die hem gebruiken, draaien daar. Verplaats hem vanuit de launcher om elders te draaien."
     },
     "shares": {
       "title": "Openbaar Gedeelde Bestanden",
@@ -1790,7 +1932,15 @@
       "openServer": "Server openen",
       "changeConnection": "Verbinding wijzigen",
       "mismatchTitle": "Update vereist",
-      "mismatchBody": "Deze app en de webinterface van de server gebruiken verschillende bridge-versies. Werk de extensie of app bij, of werk de server bij, zodat beide overeenkomen."
+      "mismatchBody": "Deze app en de webinterface van de server gebruiken verschillende bridge-versies. Werk de extensie of app bij, of werk de server bij, zodat beide overeenkomen.",
+      "dormantTitle": "Meld u aan op het web om verder te gaan",
+      "dormantBody": "Uw toepassingssleutel is in slaap: uw beheerder vraagt af en toe om een aanmelding op het web. Meld u daar aan, en deze app werkt weer.",
+      "signInWeb": "Aanmelden op het web",
+      "keyTitle": "Deze sleutel meldt u niet meer aan",
+      "keyUnknown": "De sleutel is ingetrokken of heeft nooit bestaan. Maak een nieuwe in uw profiel op het web.",
+      "keyExpired": "De sleutel is verlopen. Maak een nieuwe in uw profiel op het web.",
+      "keyDisabled": "Uw beheerder staat geen toepassingssleutels toe voor uw account.",
+      "keyClient": "Uw beheerder staat deze app niet toe toepassingssleutels te gebruiken."
     }
   },
   "web": {
@@ -1800,11 +1950,6 @@
       "oidc": "Aanmelden met OpenID Connect",
       "saml": "Aanmelden met SAML"
     },
-    "rootToken": "Root-token",
-    "rootTokenHelp": "Het token van de beheerder, dat de server in het bestand /config/root_token bewaart.",
-    "rootSignIn": "Aanmelden als root",
-    "rootRefused": "Dat is niet het root-token van de server.",
-    "rootLocked": "Te veel pogingen. Wacht even en probeer het dan opnieuw.",
     "held": {
       "title": "Wachten op een beheerder",
       "message": "U bent aangemeld als {username}, maar een beheerder moet u eerst in een groep plaatsen voordat u {brand} kunt gebruiken. Controleer het opnieuw zodra dat is gebeurd.",
@@ -1820,7 +1965,8 @@
       "otherIdentity": "Een ander account van de identiteitsprovider meldt zich al aan als deze {brand}-gebruiker. Vraag het uw beheerder.",
       "noAccount": "Er is nog geen {brand}-account met uw naam. Vraag uw beheerder om er een aan te maken.",
       "notConfigured": "Deze server biedt geen eenmalige aanmelding.",
-      "ended": "De identiteitsprovider heeft uw aanmelding beëindigd. Meld u opnieuw aan."
+      "ended": "De identiteitsprovider heeft uw aanmelding beëindigd. Meld u opnieuw aan.",
+      "redirecting": "U wordt naar de aanmelding gebracht…"
     },
     "nav": {
       "home": "Start",
@@ -1887,7 +2033,10 @@
       "openAppStores": "App Stores openen",
       "popupBlocked": "De browser heeft het tabblad van de sessie geblokkeerd. Sta pop-ups toe voor deze site en start daarna opnieuw.",
       "serverFileNeedsHome": "Een bestand dat op de server staat, kan niet in de Cleanroom-modus worden geopend. Kies een opslagmap.",
+      "copyLink": "Link kopiëren",
+      "copyLinkHelp": "Een link die deze applicatie met deze opties opent: zet hem in uw favorieten of installeer hem als app",
       "copyLinkManual": "De browser stond kopiëren niet toe. Selecteer de link hieronder en kopieer deze.",
+      "linkCopied": "Link gekopieerd.",
       "favorites": "Favorieten",
       "favoritesHint": "Sleep om te herschikken",
       "addFavorite": "Aan favorieten toevoegen",
@@ -1919,7 +2068,8 @@
       "fitFill": "Vullen",
       "fitFit": "Passend",
       "fitStretch": "Uitrekken",
-      "fitCenter": "Centreren"
+      "fitCenter": "Centreren",
+      "links": "Links"
     },
     "launch": {
       "title": "{app} starten",
@@ -1932,7 +2082,8 @@
         "image": "Applicatie-image downloaden",
         "starting": "Container aanmaken",
         "waiting": "Wachten tot de desktop reageert",
-        "ready": "Sessie openen"
+        "ready": "Sessie openen",
+        "client": "De webclient van de applicatie wordt voorbereid"
       },
       "uploading": "Bestand uploaden ({done} van {total})",
       "imageHint": "Bij de eerste start van een applicatie op een node wordt deze gedownload, wat minuten kan duren. Latere starts zijn snel.",
@@ -1941,6 +2092,37 @@
       "failed": "Het starten is mislukt",
       "unseen": "Het startverzoek heeft de server niet bereikt. Controleer het {brand}-tabblad waarmee het is gestart.",
       "closeTab": "De browser heeft dit tabblad opengehouden. Sluit het zelf."
-    }
+    },
+    "open": {
+      "title": "{app} wordt geopend",
+      "signingIn": "Controleren wie is aangemeld",
+      "looking": "Zoeken naar een actieve sessie",
+      "attaching": "De actieve sessie wordt geopend",
+      "notYours": "Deze applicatie is niet beschikbaar voor uw account, of bestaat niet.",
+      "noHome": "De opslagmap '{home}' die dit adres noemt, bestaat niet. Maak hem aan in {brand}, of open het adres zonder die map.",
+      "openSealSkin": "{brand} openen"
+    },
+    "keyRefused": "Die sleutel meldt niemand aan.",
+    "keyNotRoot": "Alleen root meldt zich hier met een sleutel aan. Meld u aan via uw identiteitsprovider.",
+    "keyExpired": "Die sleutel is verlopen.",
+    "keyLocked": "Te veel pogingen. Wacht even en probeer het dan opnieuw.",
+    "keyDisabled": "Deze server accepteert de toepassingssleutel van root niet bij de webaanmelding.",
+    "apps": {
+      "chrome": "Chrome-extensie",
+      "firefox": "Firefox-add-on",
+      "android": "Android-app",
+      "ios": "iOS-app",
+      "other": "Overige clients"
+    },
+    "rootKey": "Root-sleutel",
+    "rootKeyHelp": "De toepassingssleutel van de beheerder, die de server bij de eerste start naar /config/root_key heeft geschreven.",
+    "keys": {
+      "wakeTitle": "Uw toepassingssleutel is weer actief",
+      "wakeBody": "U kunt nu terug naar de app, of hier verdergaan.",
+      "wakeClose": "Sluiten",
+      "wakeContinue": "Doorgaan naar {brand}",
+      "wakeFailed": "Kon uw sleutels niet wakker maken: {error}"
+    },
+    "rootSignIn": "Aanmelden als root"
   }
 }

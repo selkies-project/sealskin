@@ -90,6 +90,9 @@ and at the top of `location /`:
 
 The two `proxy_set_header` lines are what keep a visitor's own headers out:
 nginx sends SealSkin oauth2-proxy's answer under those names, or nothing.
+Add the raw paths the browser extension and the mobile app need as the
+[SWAG page](swag.md#with-authelia-or-authentik-in-front) shows, a location
+before `location /` with no `auth_request`.
 
 ## SealSkin
 

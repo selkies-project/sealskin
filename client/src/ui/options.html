@@ -32,6 +32,10 @@
                     <i class="fas fa-thumbtack fa-fw"></i>
                     <span data-i18n="options.sidebar.pinned">Pinned Behavior</span>
                 </button>
+                <button class="nav-link" data-tabname="ApplicationKeys" id="keys-tab-button" style="display: none;">
+                    <i class="fas fa-key fa-fw"></i>
+                    <span data-i18n="options.sidebar.keys">Application Keys</span>
+                </button>
 
                 <div class="nav-separator" id="admin-nav-separator" style="display: none;"></div>
 
@@ -195,6 +199,44 @@
                     </div>
                     <div id="sessions-container">
                     </div>
+                </div>
+            </div>
+
+            <div id="ApplicationKeys" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 data-i18n="options.keys.title"><i class="fas fa-key"></i> Application Keys</h3>
+                    </div>
+                    <p class="description" data-i18n="options.keys.intro">Sign the browser extension and the mobile app in with a key made here, instead of a key file.</p>
+                    <p class="description" id="keys-not-allowed" hidden data-i18n="options.keys.notAllowed"></p>
+                    <div id="keys-allowed">
+                        <div class="table-container">
+                            <table id="keys-table">
+                                <thead><tr><th data-i18n="common.name">Name</th><th data-i18n="common.status">Status</th><th data-i18n="options.keys.made">Made</th><th data-i18n="options.keys.lifetime">Expires</th><th data-i18n="options.users.keyLastUsed">Last used</th><th class="actions-cell" data-i18n="common.actions">Actions</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <p class="description" id="keys-policy"></p>
+                        <form id="keys-form" class="keys-form" autocomplete="off">
+                            <div class="field-list">
+                                <div class="field">
+                                    <div class="field-text"><label for="keys-name" data-i18n="options.keys.name">Name</label><p class="description" data-i18n="options.keys.nameHelp"></p></div>
+                                    <div class="field-control"><input type="text" id="keys-name" maxlength="60" required data-i18n-placeholder="options.keys.namePlaceholder"></div>
+                                </div>
+                                <div class="field">
+                                    <div class="field-text"><label for="keys-days" data-i18n="options.keys.lifetime">Expires</label></div>
+                                    <div class="field-control"><select id="keys-days"></select></div>
+                                </div>
+                            </div>
+                            <div class="button-group"><button type="submit" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.keys.create">Make a key</span></button></div>
+                        </form>
+                        <div id="keys-reveal" class="keys-reveal" hidden></div>
+                    </div>
+                </div>
+                <div class="card" id="keys-apps-card" hidden>
+                    <div class="card-header"><h3 data-i18n="options.keys.get"><i class="fas fa-download"></i> Get the apps</h3></div>
+                    <p class="description" data-i18n="options.keys.getHelp">Install one of these, then enter the server's address and your key on its connection page.</p>
+                    <div id="keys-apps" class="keys-apps"></div>
                 </div>
             </div>
 
@@ -452,10 +494,21 @@
                                         <button type="button" class="secondary" id="brand-accent-clear"><i class="fas fa-undo"></i> <span data-i18n="options.branding.accentDefault">Default</span></button>
                                     </div>
                                 </div>
-                                <div class="field switch">
-                                    <div class="field-text"><label for="brand-store-links" data-i18n="options.branding.storeLinks">Show the extension and app store links on the sign-in page</label></div>
-                                    <div class="field-control"><input type="checkbox" id="brand-store-links"></div>
-                                </div>
+                            </div>
+
+                            <h5 class="field-group" data-i18n="options.branding.apps">Companion apps</h5>
+                            <p class="description" data-i18n="options.branding.appsHelp"></p>
+                            <div class="table-container">
+                                <table id="brand-apps-table">
+                                    <thead>
+                                        <tr>
+                                            <th data-i18n="options.branding.appClient">App</th>
+                                            <th data-i18n="options.branding.appUrl">Address</th>
+                                            <th class="actions-cell" data-i18n="options.branding.appShow">Shown</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
                             </div>
 
                             <h5 class="field-group" data-i18n="options.branding.wallpaper">Wallpaper</h5>
@@ -1073,6 +1126,22 @@
                 <button id="copyConfigBtn" class="secondary"><i class="fas fa-copy"></i> <span data-i18n="options.modals.copyButton">Copy Text</span></button>
                 <button id="downloadConfigBtn" class="primary"><i class="fas fa-download"></i> <span data-i18n="options.modals.downloadButton">Download File</span></button>
             </div>
+        </div>
+    </div>
+
+    <div id="user-keys-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="user-keys-title"></h3>
+                <span class="close-button" data-modal-id="user-keys-modal">&times;</span>
+            </div>
+            <div class="table-container">
+                <table id="user-keys-table">
+                    <thead><tr><th data-i18n="common.name">Name</th><th data-i18n="common.status">Status</th><th data-i18n="options.users.keyLastUsed">Last used</th><th data-i18n="options.users.keyExpires">Expires</th><th class="actions-cell" data-i18n="common.actions">Actions</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="button-group"><button type="button" id="user-keys-revoke-all" class="danger"><i class="fas fa-trash"></i> <span data-i18n="options.users.revokeAll">Revoke all</span></button></div>
         </div>
     </div>
 

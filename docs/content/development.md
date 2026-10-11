@@ -79,7 +79,7 @@ export SEALSKIN_APP_ICONS_PATH=~/sealskin-dev/storage/app_icons
 export SEALSKIN_CLUSTER_PATH=~/sealskin-dev/config/cluster
 export SEALSKIN_NODE_STATE_PATH=~/sealskin-dev/config/node
 export SEALSKIN_SSO_KEYS_PATH=~/sealskin-dev/config/sso_keys.yml
-export SEALSKIN_ROOT_TOKEN_PATH=~/sealskin-dev/config/root_token
+export SEALSKIN_ROOT_KEY_PATH=~/sealskin-dev/config/root_key
 export SEALSKIN_SHARED_FILES_PATH=~/sealskin-dev/storage/shared_store
 export HOST_URL=localhost
 python main.py          # or: python -m app

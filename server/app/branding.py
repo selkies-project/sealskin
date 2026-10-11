@@ -1,4 +1,4 @@
-"""The brand the web app wears: the name, logo, accent, wallpaper, and links an administrator gives it.
+"""The brand the web app wears: the name, logo, accent, wallpaper, app links, and links an administrator gives it.
 
 The brand is a shared object, `branding/branding.yml`, kept beside the
 pictures an administrator uploads, `branding/logo.<ext>` and
@@ -276,7 +276,7 @@ def client_brand() -> dict[str, Any]:
         "logoLink": branding.logo_link,
         "projectLink": branding.logo_link == PROJECT_URL,
         "accent": branding.accent.lower(),
-        "storeLinks": branding.store_links,
+        "apps": [{"client": app.client, "url": app.url} for app in branding.apps if app.enabled],
     }
 
 

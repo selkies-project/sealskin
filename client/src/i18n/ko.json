@@ -85,7 +85,9 @@
       "admins": "관리자",
       "cluster": "클러스터",
       "signIn": "로그인",
-      "audit": "감사 로그"
+      "audit": "감사 로그",
+      "branding": "브랜딩",
+      "keys": "애플리케이션 키"
     },
     "dashboard": {
       "title": "대시보드",
@@ -150,7 +152,16 @@
       "keyGeneration": "키 생성",
       "keyGenDescription": "키 쌍이 없는 경우 여기에서 생성할 수 있습니다. 개인 키는 위에 채워집니다. 관리자에게 공개 키를 제공하세요.",
       "generateKeyButton": "새 키 쌍 생성",
-      "publicKeyForAdminLabel": "공개 키 (관리자용)"
+      "publicKeyForAdminLabel": "공개 키 (관리자용)",
+      "keyTitle": "애플리케이션 키로 연결",
+      "keyDescription": "웹 앱의 설정 → 애플리케이션 키에서 이 기기용 키를 만들어 여기에 붙여넣으세요.",
+      "keyLabel": "애플리케이션 키",
+      "keyPlaceholder": "ssk_…@sealskin.example.com:8443",
+      "keyConnectButton": "연결",
+      "useKeyFileLink": "대신 키 파일 사용",
+      "useKeyLink": "애플리케이션 키 사용",
+      "connectedWithKey": "애플리케이션 키로 로그인되었습니다.",
+      "connectedWithKeyFile": "키 파일로 로그인되었습니다."
     },
     "home": {
       "title": "내 홈 디렉터리",
@@ -241,7 +252,37 @@
       "prootCatalogHelp": "모든 세션에 읽기 전용으로 마운트되며, proot-apps는 레지스트리 대신 여기에서 설치합니다. 없음으로 두면 사용자의 그룹 중 카탈로그를 먼저 선택한 그룹이 결정합니다.",
       "groupsHelp": "여러 개를 선택하려면 Ctrl 또는 Command 키를 누른 채 선택하세요. 그룹 간 설정이 다르면 더 제한적인 값이 적용됩니다.",
       "providerGroups": "마지막 로그인 시 ID 공급자가 알려준 그룹: {groups}",
-      "limitsHelp": "-1이거나 비워두면 제한이 없습니다."
+      "limitsHelp": "-1이거나 비워두면 제한이 없습니다.",
+      "applicationKeys": "애플리케이션 키 허용 (브라우저 확장 프로그램 및 모바일 앱)",
+      "appKeyClients": "애플리케이션 키를 사용할 수 있는 앱",
+      "appKeyClientsHelp": "각 앱은 서버에 스스로 이름을 알립니다. 이는 편의 기능이며 잠금 장치가 아닙니다.",
+      "appKeyDays": "애플리케이션 키의 유효 기간 (일)",
+      "appKeyDormantHours": "마지막 웹 로그인 후 애플리케이션 키가 휴면 상태가 되는 시간 (시간)",
+      "appKeyFollowSignIn": "웹 로그인이 끝나면 애플리케이션 키 휴면",
+      "keys": "키",
+      "keysTitle": "{username}의 애플리케이션 키",
+      "noKeys": "애플리케이션 키가 없습니다.",
+      "revokeAll": "모두 해지",
+      "keyRevoked": "키가 해지되었습니다.",
+      "keyRevokeFailed": "키를 해지할 수 없습니다: {error}",
+      "keysLoadFailed": "키를 불러올 수 없습니다: {error}",
+      "keyState": {
+        "active": "활성",
+        "dormant": "휴면",
+        "expired": "만료됨"
+      },
+      "clients": {
+        "chrome": "Chrome 확장 프로그램",
+        "firefox": "Firefox 부가 기능",
+        "android": "Android 앱",
+        "ios": "iOS 앱",
+        "other": "기타 클라이언트"
+      },
+      "keyLastUsed": "마지막 사용",
+      "keyExpires": "만료",
+      "keyNever": "없음",
+      "keyNeverUsed": "사용한 적 없음",
+      "revokeAllConfirm": "'{username}'의 모든 애플리케이션 키를 해지하시겠습니까? 해당 사용자의 확장 프로그램과 앱 로그인이 즉시 중단됩니다."
     },
     "groups": {
       "title": "그룹 관리",
@@ -259,7 +300,8 @@
       "on": "켜짐",
       "off": "꺼짐",
       "ssoGroups": "구성원을 이 그룹에 포함할 ID 공급자 그룹 (쉼표로 구분)",
-      "overrideHelp": "그룹은 여기에서 설정한 항목만 결정합니다. 설정하지 않았거나 비워둔 항목은 각 구성원 자신의 설정을 따릅니다."
+      "overrideHelp": "그룹은 여기에서 설정한 항목만 결정합니다. 설정하지 않았거나 비워둔 항목은 각 구성원 자신의 설정을 따릅니다.",
+      "chosen": "아래에서 선택한 앱만"
     },
     "installedApps": {
       "title": "설치된 애플리케이션",
@@ -1293,7 +1335,16 @@
       "catalogDeleteFailed": "카탈로그를 삭제할 수 없습니다: {error}",
       "catalogUpdateStarted": "모든 노드에서 카탈로그 '{name}'을(를) 업데이트하는 중입니다.",
       "catalogUpdateFailed": "카탈로그를 업데이트할 수 없습니다: {error}",
-      "catalogsRefreshFailed": "카탈로그를 불러올 수 없습니다: {error}"
+      "catalogsRefreshFailed": "카탈로그를 불러올 수 없습니다: {error}",
+      "keyNoServer": "이 키에는 서버가 지정되어 있지 않습니다. 웹 앱의 설정 → 애플리케이션 키에서 키를 만드세요.",
+      "keyMissing": "애플리케이션 키를 붙여넣으세요.",
+      "keyRefused": {
+        "unknown": "서버에 그런 키가 없습니다. 웹 앱의 프로필에서 키를 만드세요.",
+        "expired": "키가 만료되었습니다. 웹 앱의 프로필에서 새 키를 만드세요.",
+        "disabled": "관리자가 이 계정에 애플리케이션 키를 허용하지 않습니다.",
+        "client": "관리자가 이 앱에서 애플리케이션 키를 사용하는 것을 허용하지 않습니다.",
+        "dormant": "키가 휴면 상태입니다. 웹 앱에 로그인한 다음 다시 시도하세요."
+      }
     },
     "placeholders": {
       "noAdmins": "관리자를 찾을 수 없습니다.",
@@ -1322,7 +1373,8 @@
       "oidc": "OpenID Connect",
       "saml": "SAML",
       "proxy": "리버스 프록시",
-      "key": "키 파일"
+      "key": "키 파일",
+      "app_key": "애플리케이션 키"
     },
     "periods": {
       "day": "일",
@@ -1411,7 +1463,9 @@
         "proxy_auth_groups_header": "신뢰할 수 있는 프록시가 사용자의 그룹을 전달하는 헤더",
         "proxy_auth_logout_url": "사용자를 로그아웃시키는 프록시의 페이지",
         "web_session_seconds": "루트 로그인이 사용되지 않은 채 유지되는 최대 시간 (시간)",
-        "files_sync": "공유 파일을 오브젝트 스토리지에 보관"
+        "files_sync": "공유 파일을 오브젝트 스토리지에 보관",
+        "auto_sign_in": "로그아웃된 브라우저를 바로 보낼 곳",
+        "legacy_auth": "키 파일 클라이언트 허용"
       },
       "usageTitle": "사용량",
       "usageHours": "가중 시간",
@@ -1552,7 +1606,14 @@
       "resultEntity": "엔터티 ID:",
       "resultSso": "로그인 URL:",
       "resultSlo": "단일 로그아웃 제공:",
-      "resultCertificates": "서명 인증서:"
+      "resultCertificates": "서명 인증서:",
+      "landingTitle": "시작 화면",
+      "landingHelp": "공급자를 선택하면 로그아웃된 브라우저가 이 서버의 로그인 페이지 대신 해당 공급자로 바로 이동합니다. 루트 토큰을 사용할 때처럼 페이지를 보려면 웹 앱 주소에 #root를 추가하세요.",
+      "autoNone": "이 서버의 로그인 페이지",
+      "autoOidc": "OpenID Connect",
+      "autoSaml": "SAML",
+      "rootOff": "이 노드에서는 SEALSKIN_ROOT_SIGN_IN=false로 꺼져 있습니다. 키로 다시 로그인하려면 이 설정을 켠 상태로 노드를 다시 시작하세요.",
+      "rootNoAdminGroup": "관리자를 지정하는 ID 공급자 그룹이 없습니다 (로그인하는 사용자 참조). 루트 키가 꺼져 있으면 아무도 이 서버를 관리할 수 없습니다."
     },
     "prootApps": {
       "title": "PRoot Apps 카탈로그",
@@ -1586,6 +1647,83 @@
       "updateTitle": "패키지가 변경된 앱을 지금 모든 노드에서 다시 가져옵니다",
       "confirmDelete": "카탈로그 '{name}'을(를) 삭제할까요? 모든 노드가 복사본을 제거하고, 할당된 사용자는 카탈로그를 받지 못합니다.",
       "deleteTitle": "카탈로그 삭제"
+    },
+    "branding": {
+      "title": "브랜딩",
+      "help": "웹 앱에 조직의 이름, 로고, 색상, 배경 화면, 링크를 적용하세요. 미리 보기는 사용자에게 보이는 홈 페이지를 보여 주며, 저장하기 전까지는 아무것도 바뀌지 않습니다.",
+      "identity": "아이덴티티",
+      "name": "제품 이름",
+      "nameHelp": "인터페이스에서 SealSkin이라고 표시되는 모든 곳(제목, 사이드바, 설치된 웹 앱, 로그인 페이지)에 사용됩니다.",
+      "logo": "로고",
+      "logoHelp": "1 MB 이하의 정사각형 PNG, JPEG 또는 WebP 파일입니다. 사이드바 로고, 파비콘, 설치된 웹 앱의 아이콘으로 사용됩니다.",
+      "logoLink": "로고 링크 대상",
+      "logoLinkHelp": "로고를 클릭하면 새 탭에서 열리는 주소입니다 (예: 인트라넷). 링크를 두지 않으려면 비워 두세요.",
+      "accent": "강조 색상",
+      "accentHelp": "버튼, 강조 표시, 워드마크의 색상입니다. 기본 보라색을 사용하려면 비워 두세요.",
+      "accentDefault": "기본값",
+      "wallpaper": "배경 화면",
+      "wallpaperHelp": "홈 페이지 뒤에 표시되는 8 MB 이하의 사진입니다. 사용자는 이 사진으로 시작하되, 강제로 설정하지 않으면 직접 고를 수도 있습니다.",
+      "wallpaperForced": "모든 사용자에게 이 배경 화면 강제 적용",
+      "wallpaperForcedHelp": "사용자의 홈 페이지에서 페이지 꾸미기 버튼이 사라지고 모두 이 배경 화면을 보게 됩니다.",
+      "fit": "배치",
+      "blur": "흐림",
+      "dim": "어둡게",
+      "upload": "업로드",
+      "remove": "제거",
+      "links": "홈 페이지 링크",
+      "linksHelp": "홈 페이지에서 애플리케이션 위에 표시되는 타일로, 조직의 사이트와 도구를 연결합니다. 링크는 새 탭에서 열리거나, 사용자가 선택한 애플리케이션의 격리된 세션에서 열립니다.",
+      "linkName": "이름",
+      "linkUrl": "주소",
+      "linkIcon": "아이콘",
+      "linkIconHelp": "fa-book 또는 fab fa-github 같은 Font Awesome 클래스, 또는 그림의 https 주소입니다.",
+      "linkOpen": "열기 방식",
+      "openTab": "새 탭에서",
+      "openIsolated": "격리된 환경에서",
+      "addLink": "링크 추가",
+      "noLinks": "아직 링크가 없습니다.",
+      "preview": "미리 보기",
+      "previewHelp": "여기에 입력한 내용이 적용된, 사용자에게 보이는 홈 페이지입니다.",
+      "previewUser": "사용자",
+      "save": "브랜딩 저장",
+      "reset": "기본값으로 되돌리기",
+      "resetConfirm": "이름, 로고, 색상, 배경 화면, 앱 링크, 링크를 제거하고 SealSkin 기본값으로 되돌리시겠습니까?",
+      "saved": "브랜딩이 저장되었습니다. 제목과 사이드바의 변경 사항을 보려면 페이지를 새로 고치세요.",
+      "resetDone": "브랜딩이 기본값으로 초기화되었습니다.",
+      "saveFailed": "브랜딩을 저장할 수 없습니다: {error}",
+      "pictureTooLarge": "그림이 너무 크고 더 작게 만들 수 없습니다. 다른 그림을 선택하세요.",
+      "notAPicture": "PNG, JPEG 또는 WebP 그림을 선택하세요.",
+      "apps": "컴패니언 앱",
+      "appsHelp": "사용자가 확장 프로그램과 앱을 받는 곳으로, 로그인 페이지와 프로필의 애플리케이션 키 옆에 링크됩니다. 링크를 자체 빌드로 바꾸거나 숨길 수 있습니다.",
+      "appShow": "표시",
+      "appUrl": "주소",
+      "appClient": "앱"
+    },
+    "keys": {
+      "title": "애플리케이션 키",
+      "intro": "키 파일 대신 여기에서 만든 키로 브라우저 확장 프로그램과 모바일 앱에 로그인하세요. 기기마다 고유한 키를 받으며, 여기에서 키를 해지하면 해당 기기는 로그아웃됩니다.",
+      "none": "아직 키가 없습니다.",
+      "name": "이름",
+      "nameHelp": "키의 용도로, 키를 사용할 기기의 이름 등을 적습니다.",
+      "namePlaceholder": "예: 업무용 노트북",
+      "made": "생성일",
+      "lifetime": "만료",
+      "days": "{count, plural, one {1일} other {{count}일}}",
+      "create": "키 만들기",
+      "revoke": "해지",
+      "revoked": "키가 해지되었습니다.",
+      "shownOnce": "지금 이 키를 복사하세요. 이번 한 번만 표시됩니다. 확장 프로그램이나 앱의 연결 페이지에 붙여넣으세요.",
+      "copied": "키가 복사되었습니다.",
+      "copyFailed": "브라우저에서 복사를 허용하지 않았습니다. 키를 선택하여 복사하세요.",
+      "notAllowed": "관리자가 이 계정에 애플리케이션 키를 허용하지 않습니다.",
+      "clients": "허용된 앱: {clients}.",
+      "dormantHours": "마지막 웹 로그인 후 {hours}시간이 지나면 키가 휴면 상태가 되며, 여기에 로그인하면 다시 활성화됩니다.",
+      "followSignIn": "웹 로그인이 끝나면 키가 휴면 상태가 되며, 여기에 로그인하면 다시 활성화됩니다.",
+      "maxDays": "키의 유효 기간은 최대 {count, plural, one {1일} other {{count}일}}입니다.",
+      "get": "앱 받기",
+      "getHelp": "다음 중 하나를 설치한 다음, 연결 페이지에서 서버 주소와 키를 입력하세요.",
+      "loadFailed": "키를 불러올 수 없습니다: {error}",
+      "createFailed": "키를 만들 수 없습니다: {error}",
+      "tooLong": "관리자가 허용하는 기간보다 깁니다."
     }
   },
   "popup": {
@@ -1624,7 +1762,8 @@
       "moveHomeTo": "{node}(으)로 이동",
       "moveHomeConfirm": "'{home}'을(를) {node}(으)로 이동하시겠습니까? 이를 사용하는 세션은 먼저 중지해야 합니다.",
       "moveHomeTitle": "스토리지 이동",
-      "allowance": "할당량: {period}간 {hours}시간 중 {used}시간 사용"
+      "allowance": "할당량: {period}간 {hours}시간 중 {used}시간 사용",
+      "newTab": "새 탭에서 열기"
     },
     "sessionsView": {
       "noSessions": "활성 세션이 없습니다."
@@ -1689,7 +1828,10 @@
     },
     "sidebar": {
       "sharedFiles": "{brand} 파일",
-      "publicShares": "공개 공유"
+      "publicShares": "공개 공유",
+      "sharedHelp": "모든 노드에서 사용하는 내 파일입니다. 모든 세션의 Desktop/files에서 볼 수 있습니다.",
+      "allNodes": "모든 노드",
+      "homeHelp": "이 홈 디렉터리는 노드 {node}에 있으며, 이를 사용하는 세션은 그 노드에서 실행됩니다. 다른 곳에서 실행하려면 런처에서 이동하세요."
     },
     "shares": {
       "title": "공개적으로 공유된 파일",
@@ -1790,7 +1932,15 @@
       "openServer": "서버 열기",
       "changeConnection": "연결 변경",
       "mismatchTitle": "업데이트 필요",
-      "mismatchBody": "이 앱과 서버 웹 인터페이스의 브리지 버전이 서로 다릅니다. 둘이 일치하도록 확장 프로그램이나 앱, 또는 서버를 업데이트하세요."
+      "mismatchBody": "이 앱과 서버 웹 인터페이스의 브리지 버전이 서로 다릅니다. 둘이 일치하도록 확장 프로그램이나 앱, 또는 서버를 업데이트하세요.",
+      "dormantTitle": "계속하려면 웹에서 로그인하세요",
+      "dormantBody": "애플리케이션 키가 휴면 상태입니다. 관리자가 주기적으로 웹 로그인을 요구합니다. 웹에서 로그인하면 이 앱이 다시 작동합니다.",
+      "signInWeb": "웹에서 로그인",
+      "keyTitle": "이 키로는 더 이상 로그인할 수 없습니다",
+      "keyUnknown": "키가 해지되었거나 존재하지 않습니다. 웹의 프로필에서 새 키를 만드세요.",
+      "keyExpired": "키가 만료되었습니다. 웹의 프로필에서 새 키를 만드세요.",
+      "keyDisabled": "관리자가 이 계정에 애플리케이션 키를 허용하지 않습니다.",
+      "keyClient": "관리자가 이 앱에서 애플리케이션 키를 사용하는 것을 허용하지 않습니다."
     }
   },
   "web": {
@@ -1800,11 +1950,6 @@
       "oidc": "OpenID Connect로 로그인",
       "saml": "SAML로 로그인"
     },
-    "rootToken": "루트 토큰",
-    "rootTokenHelp": "관리자용 토큰으로, 서버의 /config/root_token 파일에 보관되어 있습니다.",
-    "rootSignIn": "루트로 로그인",
-    "rootRefused": "서버의 루트 토큰이 아닙니다.",
-    "rootLocked": "시도 횟수가 너무 많습니다. 잠시 기다린 후 다시 시도하세요.",
     "held": {
       "title": "관리자를 기다리는 중",
       "message": "{username}으로 로그인했지만 {brand}을 사용하려면 관리자가 그룹에 배정해야 합니다. 배정이 끝나면 다시 확인하세요.",
@@ -1820,7 +1965,8 @@
       "otherIdentity": "ID 공급자의 다른 계정이 이미 이 {brand} 사용자로 로그인하고 있습니다. 관리자에게 문의하세요.",
       "noAccount": "아직 귀하의 이름으로 된 {brand} 계정이 없습니다. 관리자에게 계정 생성을 요청하세요.",
       "notConfigured": "이 서버는 통합 인증을 제공하지 않습니다.",
-      "ended": "ID 공급자가 로그인을 종료했습니다. 다시 로그인하세요."
+      "ended": "ID 공급자가 로그인을 종료했습니다. 다시 로그인하세요.",
+      "redirecting": "로그인 페이지로 이동하는 중…"
     },
     "nav": {
       "home": "홈",
@@ -1887,7 +2033,10 @@
       "openAppStores": "앱 스토어 열기",
       "popupBlocked": "브라우저가 세션 탭을 차단했습니다. 이 사이트의 팝업을 허용한 다음 다시 시작하세요.",
       "serverFileNeedsHome": "서버에 보관된 파일은 클린룸 모드에서 열 수 없습니다. 스토리지 디렉터리를 선택하세요.",
+      "copyLink": "링크 복사",
+      "copyLinkHelp": "이 옵션으로 이 애플리케이션을 여는 링크입니다. 북마크하거나 앱으로 설치하세요",
       "copyLinkManual": "브라우저에서 복사를 허용하지 않았습니다. 아래 링크를 선택하여 복사하세요.",
+      "linkCopied": "링크가 복사되었습니다.",
       "favorites": "즐겨찾기",
       "favoritesHint": "끌어서 순서 변경",
       "addFavorite": "즐겨찾기에 추가",
@@ -1919,7 +2068,8 @@
       "fitFill": "채우기",
       "fitFit": "맞추기",
       "fitStretch": "늘이기",
-      "fitCenter": "가운데"
+      "fitCenter": "가운데",
+      "links": "링크"
     },
     "launch": {
       "title": "{app} 시작 중",
@@ -1932,7 +2082,8 @@
         "image": "애플리케이션 이미지 다운로드 중",
         "starting": "컨테이너 생성 중",
         "waiting": "데스크톱 응답 대기 중",
-        "ready": "세션 여는 중"
+        "ready": "세션 여는 중",
+        "client": "애플리케이션의 웹 클라이언트 준비 중"
       },
       "uploading": "파일 업로드 중 ({total}개 중 {done}개)",
       "imageHint": "노드에서 애플리케이션을 처음 시작할 때는 다운로드가 필요해 몇 분 정도 걸릴 수 있습니다. 이후에는 빠르게 시작됩니다.",
@@ -1941,6 +2092,37 @@
       "failed": "시작에 실패했습니다",
       "unseen": "시작 요청이 서버에 도달하지 않았습니다. 시작을 요청한 {brand} 탭을 확인하세요.",
       "closeTab": "브라우저가 이 탭을 열어 둔 상태입니다. 직접 닫아 주세요."
-    }
+    },
+    "open": {
+      "title": "{app} 여는 중",
+      "signingIn": "로그인 사용자 확인 중",
+      "looking": "실행 중인 세션 찾는 중",
+      "attaching": "실행 중인 세션 여는 중",
+      "notYours": "이 애플리케이션은 이 계정에서 사용할 수 없거나 존재하지 않습니다.",
+      "noHome": "이 주소가 가리키는 스토리지 디렉터리 '{home}'이(가) 없습니다. {brand}에서 만들거나, 디렉터리 없이 주소를 여세요.",
+      "openSealSkin": "{brand} 열기"
+    },
+    "keyRefused": "이 키로는 로그인할 수 없습니다.",
+    "keyNotRoot": "여기에서는 루트만 키로 로그인할 수 있습니다. ID 공급자를 통해 로그인하세요.",
+    "keyExpired": "이 키는 만료되었습니다.",
+    "keyLocked": "시도 횟수가 너무 많습니다. 잠시 후 다시 시도하세요.",
+    "keyDisabled": "이 서버는 웹 로그인에서 루트의 애플리케이션 키를 받지 않습니다.",
+    "apps": {
+      "chrome": "Chrome 확장 프로그램",
+      "firefox": "Firefox 부가 기능",
+      "android": "Android 앱",
+      "ios": "iOS 앱",
+      "other": "기타 클라이언트"
+    },
+    "rootKey": "루트 키",
+    "rootKeyHelp": "관리자의 애플리케이션 키로, 서버가 처음 시작할 때 /config/root_key에 기록한 것입니다.",
+    "keys": {
+      "wakeTitle": "애플리케이션 키가 다시 활성화되었습니다",
+      "wakeBody": "이제 앱으로 돌아가거나 여기에서 계속할 수 있습니다.",
+      "wakeClose": "닫기",
+      "wakeContinue": "{brand}(으)로 계속",
+      "wakeFailed": "키를 활성화할 수 없습니다: {error}"
+    },
+    "rootSignIn": "루트로 로그인"
   }
 }

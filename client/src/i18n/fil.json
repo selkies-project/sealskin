@@ -85,7 +85,9 @@
       "admins": "Mga Admin",
       "cluster": "Cluster",
       "signIn": "Sign In",
-      "audit": "Audit Log"
+      "audit": "Audit Log",
+      "branding": "Branding",
+      "keys": "Mga Application Key"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -150,7 +152,16 @@
       "keyGeneration": "Pagbuo ng Key",
       "keyGenDescription": "Kung wala kang key pair, maaari kang bumuo ng isa dito. Ang pribadong key ay pupunan sa itaas. Ibigay ang pampublikong key sa iyong administrator.",
       "generateKeyButton": "Bumuo ng Bagong Key Pair",
-      "publicKeyForAdminLabel": "Iyong Pampublikong Key (para sa admin)"
+      "publicKeyForAdminLabel": "Iyong Pampublikong Key (para sa admin)",
+      "keyTitle": "Kumonekta gamit ang application key",
+      "keyDescription": "Sa web app, sa ilalim ng Mga Setting → Mga Application Key, gumawa ng key para sa device na ito at i-paste ito dito.",
+      "keyLabel": "Application key",
+      "keyPlaceholder": "ssk_…@sealskin.example.com:8443",
+      "keyConnectButton": "Kumonekta",
+      "useKeyFileLink": "Gumamit ng key file sa halip",
+      "useKeyLink": "Gumamit ng application key",
+      "connectedWithKey": "Naka-sign in gamit ang application key.",
+      "connectedWithKeyFile": "Naka-sign in gamit ang key file."
     },
     "home": {
       "title": "Iyong mga Home Directory",
@@ -241,7 +252,37 @@
       "prootCatalogHelp": "Naka-mount nang read-only sa bawat session; mula rito nag-i-install ang proot-apps sa halip na mula sa registry. Kung iiwan sa Wala, ang unang grupo ng user na pumili ng isa ang magpapasya.",
       "groupsHelp": "Pindutin nang matagal ang Ctrl o Command upang pumili ng ilan. Kapag hindi nagkakasundo ang mga grupo, ang mas mahigpit na value ang mananaig.",
       "providerGroups": "Mga grupong binanggit ng identity provider sa huling sign-in: {groups}",
-      "limitsHelp": "Ang limitasyong -1, o iniwang blangko, ay nangangahulugang walang limitasyon."
+      "limitsHelp": "Ang limitasyong -1, o iniwang blangko, ay nangangahulugang walang limitasyon.",
+      "applicationKeys": "Pahintulutan ang mga Application Key (Browser Extension at Mobile App)",
+      "appKeyClients": "Mga app na maaaring gumamit ng application key",
+      "appKeyClientsHelp": "Ang bawat app ay nagpapakilala sa server; isa itong kaginhawaan, hindi isang lock.",
+      "appKeyDays": "Mga araw na tumatagal ang isang application key",
+      "appKeyDormantHours": "Mga oras pagkatapos ng huling web sign-in kung kailan natutulog ang mga application key",
+      "appKeyFollowSignIn": "Natutulog ang mga Application Key Kapag Natapos ang Web Sign-In",
+      "keys": "Mga Key",
+      "keysTitle": "Mga application key ni {username}",
+      "noKeys": "Walang application key.",
+      "revokeAll": "Bawiin lahat",
+      "keyRevoked": "Binawi ang key.",
+      "keyRevokeFailed": "Hindi mabawi ang key: {error}",
+      "keysLoadFailed": "Hindi ma-load ang mga key: {error}",
+      "keyState": {
+        "active": "Aktibo",
+        "dormant": "Natutulog",
+        "expired": "Nag-expire"
+      },
+      "clients": {
+        "chrome": "Chrome extension",
+        "firefox": "Firefox add-on",
+        "android": "Android app",
+        "ios": "iOS app",
+        "other": "Iba pang client"
+      },
+      "keyLastUsed": "Huling ginamit",
+      "keyExpires": "Mag-e-expire",
+      "keyNever": "Hindi kailanman",
+      "keyNeverUsed": "Hindi pa nagamit",
+      "revokeAllConfirm": "Bawiin ang lahat ng application key ni '{username}'? Agad na titigil ang kanilang mga sign-in sa extension at app."
     },
     "groups": {
       "title": "Pamamahala ng Grupo",
@@ -259,7 +300,8 @@
       "on": "Naka-on",
       "off": "Naka-off",
       "ssoGroups": "Mga grupo ng identity provider na ang mga miyembro ay kasama sa grupong ito (pinaghihiwalay ng kuwit)",
-      "overrideHelp": "Ang grupo ay nagpapasya lamang sa mga nakatakda rito; ang lahat ng hindi itinakda o iniwang blangko ay nananatiling sa bawat miyembro."
+      "overrideHelp": "Ang grupo ay nagpapasya lamang sa mga nakatakda rito; ang lahat ng hindi itinakda o iniwang blangko ay nananatiling sa bawat miyembro.",
+      "chosen": "Ang mga app lamang na may check sa ibaba"
     },
     "installedApps": {
       "title": "Mga Naka-install na Aplikasyon",
@@ -1293,7 +1335,16 @@
       "catalogDeleteFailed": "Hindi matanggal ang katalogo: {error}",
       "catalogUpdateStarted": "Ina-update ang katalogong '{name}' sa bawat node.",
       "catalogUpdateFailed": "Hindi ma-update ang katalogo: {error}",
-      "catalogsRefreshFailed": "Hindi ma-load ang mga katalogo: {error}"
+      "catalogsRefreshFailed": "Hindi ma-load ang mga katalogo: {error}",
+      "keyNoServer": "Walang server na pinangalanan ang key na ito. Gumawa ng isa sa web app, sa ilalim ng Mga Setting → Mga Application Key.",
+      "keyMissing": "I-paste ang iyong application key.",
+      "keyRefused": {
+        "unknown": "Hindi kilala ng server ang key na ito. Gumawa ng isa sa iyong profile sa web app.",
+        "expired": "Nag-expire na ang key. Gumawa ng bago sa iyong profile sa web app.",
+        "disabled": "Hindi pinapahintulutan ng iyong administrator ang mga application key para sa iyong account.",
+        "client": "Hindi pinapahintulutan ng iyong administrator na gumamit ng application key ang app na ito.",
+        "dormant": "Natutulog ang iyong key. Mag-sign in sa web app, pagkatapos subukang muli."
+      }
     },
     "placeholders": {
       "noAdmins": "Walang nahanap na admin.",
@@ -1322,7 +1373,8 @@
       "oidc": "OpenID Connect",
       "saml": "SAML",
       "proxy": "Reverse proxy",
-      "key": "Key file"
+      "key": "Key file",
+      "app_key": "Application key"
     },
     "periods": {
       "day": "Araw",
@@ -1411,7 +1463,9 @@
         "proxy_auth_groups_header": "Header kung saan inililista ng trusted na proxy ang mga grupo ng user",
         "proxy_auth_logout_url": "Pahina ng proxy na nagsa-sign out sa user nito",
         "web_session_seconds": "Pinakamatagal na itatagal ng root sign-in nang hindi ginagamit (oras)",
-        "files_sync": "Panatilihin ang mga ibinahaging file sa object store"
+        "files_sync": "Panatilihin ang mga ibinahaging file sa object store",
+        "auto_sign_in": "Dalhin nang direkta ang naka-sign out na browser sa",
+        "legacy_auth": "Tanggapin ang mga client na gumagamit ng key file"
       },
       "usageTitle": "Paggamit",
       "usageHours": "Weighted na oras",
@@ -1552,7 +1606,14 @@
       "resultEntity": "Entity ID:",
       "resultSso": "Sign-on URL:",
       "resultSlo": "Inaalok ang single logout:",
-      "resultCertificates": "Mga signing certificate:"
+      "resultCertificates": "Mga signing certificate:",
+      "landingTitle": "Landing",
+      "landingHelp": "Kapag may napiling provider, agad na pupunta roon ang naka-sign out na browser sa halip na sa sign-in page ng server na ito. Idagdag ang #root sa address ng web app para makita pa rin ang page, gaya ng para sa root token.",
+      "autoNone": "Sign-in page ng server na ito",
+      "autoOidc": "OpenID Connect",
+      "autoSaml": "SAML",
+      "rootOff": "Naka-off sa node na ito gamit ang SEALSKIN_ROOT_SIGN_IN=false. Para makapasok ulit gamit ang key, i-restart ang node nang naka-on ito.",
+      "rootNoAdminGroup": "Walang grupo ng identity provider na nagpapangalan ng mga administrator (tingnan ang Sino ang Nagsa-sign In). Kapag naka-off ang key ng root, walang makapamamahala sa server na ito."
     },
     "prootApps": {
       "title": "Mga Katalogo ng PRoot Apps",
@@ -1586,6 +1647,83 @@
       "updateTitle": "Kunin muli ngayon ang mga app, sa bawat node, kung saan nagbago ang package ng mga ito",
       "confirmDelete": "Tanggalin ang katalogong '{name}'? Tatanggalin ng bawat node ang kopya nito, at mawawalan ng katalogo ang mga user na nakatalaga rito.",
       "deleteTitle": "Tanggalin ang katalogo"
+    },
+    "branding": {
+      "title": "Branding",
+      "help": "Bigyan ang web app ng pangalan, logo, mga kulay, wallpaper, at mga link ng iyong organisasyon. Ipinapakita ng preview ang home page gaya ng makikita ng mga user; walang magbabago hanggang hindi mo ito nai-save.",
+      "identity": "Pagkakakilanlan",
+      "name": "Pangalan ng produkto",
+      "nameHelp": "Lumalabas saanman sasabihin ng interface ang SealSkin: ang title, ang sidebar, ang naka-install na web app, at ang sign-in page.",
+      "logo": "Logo",
+      "logoHelp": "Isang parisukat na PNG, JPEG, o WebP na hanggang 1 MB. Ito ang logo sa sidebar, ang favicon, at ang icon ng naka-install na web app.",
+      "logoLink": "Nagli-link ang logo sa",
+      "logoLinkHelp": "Isang address na binubuksan ng logo sa bagong tab, tulad ng iyong intranet. Iwanang blangko para walang link.",
+      "accent": "Accent na kulay",
+      "accentHelp": "Ang kulay ng mga button, highlight, at wordmark. Burahin ito para sa default na violet.",
+      "accentDefault": "Default",
+      "wallpaper": "Wallpaper",
+      "wallpaperHelp": "Isang larawan sa likod ng home page, hanggang 8 MB. Dito nagsisimula ang mga user at maaari pa rin silang pumili ng sarili nila, maliban kung sapilitan ito.",
+      "wallpaperForced": "Ipilit ang wallpaper na ito sa bawat user",
+      "wallpaperForcedHelp": "Mawawala sa mga user ang button na I-customize sa home page at lahat ay makakakita ng wallpaper na ito.",
+      "fit": "Posisyon",
+      "blur": "Blur",
+      "dim": "Padilimin",
+      "upload": "I-upload",
+      "remove": "Alisin",
+      "links": "Mga link sa home page",
+      "linksHelp": "Mga tile na ipinapakita ng home page sa itaas ng mga aplikasyon, para sa sarili mong mga site at tool. Bumubukas ang link sa bagong tab, o sa isang isolated na sesyon ng aplikasyong pipiliin ng user.",
+      "linkName": "Pangalan",
+      "linkUrl": "Address",
+      "linkIcon": "Icon",
+      "linkIconHelp": "Isang Font Awesome class tulad ng fa-book o fab fa-github, o isang https address ng larawan.",
+      "linkOpen": "Bumubukas",
+      "openTab": "Sa bagong tab",
+      "openIsolated": "Sa isolation",
+      "addLink": "Magdagdag ng link",
+      "noLinks": "Wala pang link.",
+      "preview": "Preview",
+      "previewHelp": "Ang home page gaya ng nakikita ng user, gamit ang inilagay mo dito.",
+      "previewUser": "Isang user",
+      "save": "I-save ang branding",
+      "reset": "Ibalik sa mga default",
+      "resetConfirm": "Alisin ang pangalan, logo, mga kulay, wallpaper, mga app link, at mga link, pabalik sa mga default ng SealSkin?",
+      "saved": "Na-save ang branding. I-reload ang page para makita ang pagbabago sa title at sidebar.",
+      "resetDone": "Naibalik sa mga default ang branding.",
+      "saveFailed": "Hindi ma-save ang branding: {error}",
+      "pictureTooLarge": "Masyadong malaki ang larawan, at hindi ito mapaliit. Pumili ng iba.",
+      "notAPicture": "Pumili ng larawang PNG, JPEG, o WebP.",
+      "apps": "Mga companion app",
+      "appsHelp": "Kung saan kinukuha ng mga user ang extension at ang mga app, naka-link mula sa sign-in page at sa tabi ng mga application key sa profile. Ituro ang link sa sarili mong build, o itago ito.",
+      "appShow": "Ipinapakita",
+      "appUrl": "Address",
+      "appClient": "App"
+    },
+    "keys": {
+      "title": "Mga Application Key",
+      "intro": "I-sign in ang browser extension at ang mobile app gamit ang key na ginawa dito, sa halip na key file. Bawat device ay may sariling key; bawiin ang isa dito at masa-sign out ang device na iyon.",
+      "none": "Wala pang key.",
+      "name": "Pangalan",
+      "nameHelp": "Para saan ang key, gaya ng device na paglalagyan nito.",
+      "namePlaceholder": "hal., Laptop sa trabaho",
+      "made": "Ginawa",
+      "lifetime": "Mag-e-expire",
+      "days": "{count, plural, one {1 araw} other {{count} araw}}",
+      "create": "Gumawa ng key",
+      "revoke": "Bawiin",
+      "revoked": "Binawi ang key.",
+      "shownOnce": "Kopyahin ang key na ito ngayon: minsan lamang itong ipapakita. I-paste ito sa connection page ng extension o ng app.",
+      "copied": "Nakopya ang key.",
+      "copyFailed": "Hindi pinayagan ng browser ang pagkopya. Piliin ang key at kopyahin ito.",
+      "notAllowed": "Hindi pinapahintulutan ng iyong administrator ang mga application key para sa iyong account.",
+      "clients": "Mga pinapahintulutang app: {clients}.",
+      "dormantHours": "Natutulog ang mga key {hours} oras pagkatapos ng iyong huling web sign-in; ginigising sila ng pag-sign in dito.",
+      "followSignIn": "Natutulog ang mga key kapag natapos ang iyong web sign-in; ginigising sila ng pag-sign in dito.",
+      "maxDays": "Tumatagal ang isang key nang hanggang {count, plural, one {1 araw} other {{count} araw}}.",
+      "get": "Kunin ang mga app",
+      "getHelp": "I-install ang isa sa mga ito, pagkatapos ilagay ang address ng server at ang iyong key sa connection page nito.",
+      "loadFailed": "Hindi ma-load ang iyong mga key: {error}",
+      "createFailed": "Hindi makagawa ng key: {error}",
+      "tooLong": "Mas mahaba iyan kaysa sa pinapahintulutan ng iyong administrator."
     }
   },
   "popup": {
@@ -1624,7 +1762,8 @@
       "moveHomeTo": "Ilipat sa {node}",
       "moveHomeConfirm": "Ilipat ang '{home}' sa {node}? Kailangan munang itigil ang mga sesyong gumagamit nito.",
       "moveHomeTitle": "Ilipat ang imbakan",
-      "allowance": "Allowance: {used} sa {hours} oras ngayong {period}"
+      "allowance": "Allowance: {used} sa {hours} oras ngayong {period}",
+      "newTab": "Buksan sa bagong tab"
     },
     "sessionsView": {
       "noSessions": "Walang nahanap na aktibong sesyon."
@@ -1689,7 +1828,10 @@
     },
     "sidebar": {
       "sharedFiles": "Mga File ng {brand}",
-      "publicShares": "Mga Pampublikong Pagbabahagi"
+      "publicShares": "Mga Pampublikong Pagbabahagi",
+      "sharedHelp": "Ang iyong mga file sa bawat node: nasa Desktop/files ang mga ito sa bawat sesyon.",
+      "allNodes": "lahat ng node",
+      "homeHelp": "Nasa node {node} ang home directory na ito; doon tumatakbo ang mga sesyong gumagamit nito. Ilipat ito mula sa launcher para patakbuhin sa ibang lugar."
     },
     "shares": {
       "title": "Mga File na Pampublikong Ibinahagi",
@@ -1790,7 +1932,15 @@
       "openServer": "Buksan ang server",
       "changeConnection": "Palitan ang koneksyon",
       "mismatchTitle": "Kailangan ng update",
-      "mismatchBody": "Magkaiba ang bersyon ng bridge ng app na ito at ng web interface ng server. I-update ang extension o app, o i-update ang server, upang magtugma ang dalawa."
+      "mismatchBody": "Magkaiba ang bersyon ng bridge ng app na ito at ng web interface ng server. I-update ang extension o app, o i-update ang server, upang magtugma ang dalawa.",
+      "dormantTitle": "Mag-sign in sa web para magpatuloy",
+      "dormantBody": "Natutulog ang iyong application key: hinihingi ng iyong administrator ang pag-sign in sa web paminsan-minsan. Mag-sign in doon, at gagana ulit ang app na ito.",
+      "signInWeb": "Mag-sign in sa web",
+      "keyTitle": "Hindi ka na naisa-sign in ng key na ito",
+      "keyUnknown": "Binawi ang key o hindi ito kailanman umiral. Gumawa ng bago sa iyong profile sa web.",
+      "keyExpired": "Nag-expire na ang key. Gumawa ng bago sa iyong profile sa web.",
+      "keyDisabled": "Hindi pinapahintulutan ng iyong administrator ang mga application key para sa iyong account.",
+      "keyClient": "Hindi pinapahintulutan ng iyong administrator na gumamit ng application key ang app na ito."
     }
   },
   "web": {
@@ -1800,11 +1950,6 @@
       "oidc": "Mag-sign In gamit ang OpenID Connect",
       "saml": "Mag-sign In gamit ang SAML"
     },
-    "rootToken": "Root token",
-    "rootTokenHelp": "Ang token ng administrator, na itinatago ng server sa file nitong /config/root_token.",
-    "rootSignIn": "Mag-sign In bilang Root",
-    "rootRefused": "Hindi iyan ang root token ng server.",
-    "rootLocked": "Masyadong maraming pagsubok. Maghintay sandali, pagkatapos ay subukan ulit.",
     "held": {
       "title": "Naghihintay ng administrator",
       "message": "Naka-sign in ka bilang {username}, pero kailangan ka munang ilagay ng administrator sa isang grupo bago mo magamit ang {brand}. Tingnan muli kapag nagawa na nila ito.",
@@ -1820,7 +1965,8 @@
       "otherIdentity": "May ibang account ng identity provider na nagsa-sign in na bilang user na ito ng {brand}. Magtanong sa iyong administrator.",
       "noAccount": "Wala pang {brand} account sa iyong pangalan. Hilingin sa iyong administrator na gumawa ng isa.",
       "notConfigured": "Walang single sign-on ang server na ito.",
-      "ended": "Tinapos ng identity provider ang iyong sign-in. Mag-sign in ulit."
+      "ended": "Tinapos ng identity provider ang iyong sign-in. Mag-sign in ulit.",
+      "redirecting": "Dinadala ka sa sign-in…"
     },
     "nav": {
       "home": "Home",
@@ -1887,7 +2033,10 @@
       "openAppStores": "Buksan ang mga Tindahan ng App",
       "popupBlocked": "Hinarang ng browser ang tab ng sesyon. Payagan ang mga pop-up para sa site na ito, pagkatapos ay ilunsad muli.",
       "serverFileNeedsHome": "Hindi mabubuksan sa Cleanroom mode ang file na nakatago sa server. Pumili ng directory ng imbakan.",
+      "copyLink": "Kopyahin ang link",
+      "copyLinkHelp": "Isang link na nagbubukas ng aplikasyong ito gamit ang mga opsyong ito: i-bookmark ito, o i-install bilang app",
       "copyLinkManual": "Hindi pinayagan ng browser ang pagkopya. Piliin ang link sa ibaba at kopyahin ito.",
+      "linkCopied": "Nakopya ang link.",
       "favorites": "Mga paborito",
       "favoritesHint": "I-drag para ayusin ang pagkakasunod",
       "addFavorite": "Idagdag sa mga paborito",
@@ -1919,7 +2068,8 @@
       "fitFill": "Punuin",
       "fitFit": "Ipasya",
       "fitStretch": "Ibanat",
-      "fitCenter": "Igitna"
+      "fitCenter": "Igitna",
+      "links": "Mga Link"
     },
     "launch": {
       "title": "Inilulunsad ang {app}",
@@ -1932,7 +2082,8 @@
         "image": "Dina-download ang imahe ng aplikasyon",
         "starting": "Ginagawa ang container",
         "waiting": "Hinihintay na tumugon ang desktop",
-        "ready": "Binubuksan ang sesyon"
+        "ready": "Binubuksan ang sesyon",
+        "client": "Inihahanda ang web client ng aplikasyon"
       },
       "uploading": "Ina-upload ang file ({done} sa {total})",
       "imageHint": "Ang unang paglunsad ng isang aplikasyon sa isang node ay nagda-download nito, na maaaring abutin ng ilang minuto. Mabilis na ang mga susunod na paglunsad.",
@@ -1941,6 +2092,37 @@
       "failed": "Nabigo ang paglunsad",
       "unseen": "Hindi pa nakararating sa server ang request sa paglunsad. Tingnan ang tab ng {brand} na nagsimula nito.",
       "closeTab": "Pinanatiling bukas ng browser ang tab na ito. Ikaw na ang magsara nito."
-    }
+    },
+    "open": {
+      "title": "Binubuksan ang {app}",
+      "signingIn": "Sinusuri kung sino ang naka-sign in",
+      "looking": "Hinahanap ang tumatakbong sesyon",
+      "attaching": "Binubuksan ang tumatakbong sesyon",
+      "notYours": "Hindi bukas sa iyong account ang aplikasyong ito, o hindi ito umiiral.",
+      "noHome": "Hindi umiiral ang direktoryo ng imbakan na '{home}' na pinangalanan ng address na ito. Gawin ito sa {brand}, o buksan ang address nang wala ito.",
+      "openSealSkin": "Buksan ang {brand}"
+    },
+    "keyRefused": "Walang naisa-sign in ang key na iyon.",
+    "keyNotRoot": "Tanging root lamang ang nagsa-sign in dito gamit ang key. Mag-sign in sa pamamagitan ng iyong identity provider.",
+    "keyExpired": "Nag-expire na ang key na iyon.",
+    "keyLocked": "Masyadong maraming pagsubok. Maghintay muna, pagkatapos subukang muli.",
+    "keyDisabled": "Hindi tinatanggap ng server na ito ang application key ng root sa web sign-in.",
+    "apps": {
+      "chrome": "Chrome extension",
+      "firefox": "Firefox add-on",
+      "android": "Android app",
+      "ios": "iOS app",
+      "other": "Iba pang client"
+    },
+    "rootKey": "Root key",
+    "rootKeyHelp": "Ang application key ng administrator, na isinulat ng server sa /config/root_key sa unang pagsimula nito.",
+    "keys": {
+      "wakeTitle": "Aktibo na ulit ang iyong application key",
+      "wakeBody": "Maaari ka nang bumalik sa app, o magpatuloy dito.",
+      "wakeClose": "Isara",
+      "wakeContinue": "Magpatuloy sa {brand}",
+      "wakeFailed": "Hindi magising ang iyong mga key: {error}"
+    },
+    "rootSignIn": "Mag-sign In bilang Root"
   }
 }

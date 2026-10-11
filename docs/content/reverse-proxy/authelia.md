@@ -80,16 +80,28 @@ session:
       authelia_url: https://auth.example.com
 ```
 
-To let public share links through without a sign-in:
+### The companion apps
+
+The browser extension and the mobile app reach the node on raw paths the
+sign-in must leave alone ([why](sign-in.md#the-companion-apps)): their own
+lane under `/companion/`, the sessions they open, and the public share
+links; leave this out for a web-only deployment. Where the proxy asks Authelia about every request, this is one rule:
 
 ```yaml
 access_control:
   default_policy: one_factor
   rules:
     - domain: sealskin.example.com
-      resources: ['^/public/']
+      resources:
+        - '^/companion/'
+        - '^/(ws/)?room/[0-9a-fA-F-]{36}([/?]|$)'
+        - '^/[0-9a-fA-F-]{36}/'
+        - '^/public/'
       policy: bypass
 ```
 
-A request that passes on a `bypass` rule reaches SealSkin with no
-`Remote-User`, whatever the visitor sent.
+Authelia matches `resources` against the path with its query string, which
+is why the room rule allows a `?` after the id. A request that passes on a
+`bypass` rule reaches SealSkin with no `Remote-User`, whatever the visitor
+sent; SealSkin authenticates it by the application key, the session's
+cookie, or the share's password.

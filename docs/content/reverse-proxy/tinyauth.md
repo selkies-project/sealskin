@@ -44,11 +44,15 @@ SEALSKIN_PROXY_AUTH_LOGOUT_URL=https://tinyauth.example.com/logout
 * **Nginx Proxy Manager** takes it in the web app host's Advanced tab, shown
   on [its page](nginx-proxy-manager.md#forward-auth).
 
+Either way, add the raw paths the browser extension and the mobile app need,
+as the [SWAG](swag.md#with-authelia-or-authentik-in-front) and
+[Nginx Proxy Manager](nginx-proxy-manager.md#forward-auth) pages show them.
+
 Tinyauth's own users have no groups, so `Remote-Groups` is empty for them
 and no group makes an administrator; groups come with its LDAP and OAuth
 users. To appoint administrators, open
-`https://sealskin.example.com/#root`, sign in with the
-[root token](../signin.md#the-root-administrator), and give the users the
+`https://sealskin.example.com/#root`, sign in with
+[root's key](../signin.md#the-root-administrator), and give the users the
 administrator switch, their own or a group's.
 
 ## OpenID Connect

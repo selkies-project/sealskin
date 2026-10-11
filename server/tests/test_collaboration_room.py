@@ -26,7 +26,7 @@ def http(tmp_path, monkeypatch):
     state.sessions.pop(SESSION_ID, None)
 
 
-def test_the_room_opens_selkies_with_the_token_in_the_fragment(http):
+def test_the_room_opens_selkies_with_the_token_in_the_query_and_the_fragment(http):
     state.sessions[SESSION_ID] = {
         "is_collaboration": True,
         "access_token": "access",
@@ -38,7 +38,16 @@ def test_the_room_opens_selkies_with_the_token_in_the_fragment(http):
     for token in ("controller", "viewer"):
         page = http.get(f"/room/{SESSION_ID}", params={"token": token})
         assert page.status_code == 200, token
-        assert f'data-src="/{SESSION_ID}/#token={token}"' in page.text, token
-        assert f"/{SESSION_ID}/?token=" not in page.text, token
+        assert f'data-src="/{SESSION_ID}/?token={token}#token={token}"' in page.text, token
+
         cookie = page.headers["set-cookie"]
         assert f"collab_token_{SESSION_ID}={token}" in cookie and f"Path=/{SESSION_ID}" in cookie, cookie
+
+
+def test_the_room_pages_assets_come_through_the_companion_lane():
+    """A guest with an invite link has no account at a proxy's provider: the assets take the lane a proxy passes raw."""
+    from app import collaboration
+
+    page = collaboration._absolutize_room_assets('<link href="room.css"><script src="room.js"></script><a href="/room/x">x</a><img src="../icons/i.png">')
+    assert 'href="/companion/ui/room/room.css"' in page and 'src="/companion/ui/room/room.js"' in page
+    assert 'src="/companion/ui/icons/i.png"' in page and 'href="/room/x"' in page

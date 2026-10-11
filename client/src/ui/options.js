@@ -16,7 +16,7 @@ import { reachableSessionOrigin } from '../lib/session-origin.js';
 import { confirmDialog } from '../lib/modal.js';
 import {
   announce, escapeHtml, formatBytes, formatDate, timeAgo, formatLogoSrc, hydrateLogos, showToast, tOr,
-  addMobileSafeArea, addMobileBackButton, downloadBlob, currentLocale,
+  addMobileSafeArea, addMobileBackButton, downloadBlob, currentLocale, apiUrl,
 } from '../lib/dom.js';
 
 let t;
@@ -1475,6 +1475,7 @@ const CLUSTER_SETTINGS = {
   web_session_seconds: 'hours',
   auto_sign_in: 'provider',
   files_sync: 'sync',
+  legacy_auth: 'bool',
 };
 // What the web app's Sign In section shows, card by card; the other shells keep one form in the Cluster section.
 const SIGNIN_CARDS = {
@@ -1482,6 +1483,7 @@ const SIGNIN_CARDS = {
   saml: ['saml_metadata_url', 'saml_username_attribute', 'saml_groups_attribute'],
   proxy: ['proxy_auth_user_header', 'proxy_auth_groups_header', 'proxy_auth_logout_url'],
   landing: ['auto_sign_in'],
+  key: ['legacy_auth'],
   who: ['sso_username_claim', 'sso_groups_claim', 'sso_admin_group', 'sso_max_age_seconds', 'web_session_seconds', 'sso_create_users', 'sso_hold_new_users', 'sso_force_login'],
 };
 // Issuer URL shapes of common OpenID Connect providers; a preset fills the hints and stores nothing.
@@ -1679,7 +1681,7 @@ function renderSignIn() {
         <div class="button-group"><button type="submit" class="primary"><i class="fas fa-save"></i> ${escapeHtml(t('common.save'))}</button></div>
     </form>`,
     signInCard('root', 'options.signin.rootTitle', rootOff ? 'off' : 'active', root, false),
-    signInCard('key', 'options.signin.keyTitle', enabled.key ? 'active' : 'off', sentence(enabled.key ? 'options.signin.keyOn' : 'options.signin.keyOff'), false),
+    signInCard('key', 'options.signin.keyTitle', enabled.key ? 'active' : 'off', sentence(enabled.key ? 'options.signin.keyOn' : 'options.signin.keyOff') + fields('key'), false),
   ].join('');
 
   typed.forEach((value, id) => {
@@ -1893,7 +1895,7 @@ function brandPicture(kind) {
   const pending = brandDraft.pictures[kind];
   if (pending === null) return '';
   if (pending) return pending;
-  return brandSaved[kind] ? brandSaved[kind].url : '';
+  return brandSaved[kind] ? apiUrl(brandSaved[kind].url) : '';
 }
 
 async function loadBranding() {
@@ -1905,10 +1907,10 @@ async function loadBranding() {
   }
   const record = { ...brandSaved };
   ['logo', 'wallpaper', 'is_default'].forEach((key) => delete record[key]);
-  brandDraft = { ...record, links: record.links.map((link) => ({ ...link })), pictures: {} };
+  brandDraft = { ...record, links: record.links.map((link) => ({ ...link })), apps: (record.apps || []).map((app) => ({ ...app })), pictures: {} };
   brandField('brand-name').value = record.name;
   brandField('brand-logo-link').value = record.logo_link;
-  brandField('brand-store-links').checked = record.store_links;
+  renderBrandApps();
   brandField('brand-wallpaper-fit').value = record.wallpaper_fit;
   brandField('brand-wallpaper-blur').value = record.wallpaper_blur;
   brandField('brand-wallpaper-dim').value = record.wallpaper_dim;
@@ -1926,6 +1928,17 @@ function showAccentControls() {
 }
 
 /** Draw the links table from the draft; what is typed goes back into the draft on input. */
+/** The companion apps' links: one row per app, with its address and whether it is shown. */
+function renderBrandApps() {
+  const tbody = document.querySelector('#brand-apps-table tbody');
+  tbody.innerHTML = brandDraft.apps.map((app, at) => `
+      <tr data-app="${at}">
+        <td><span class="brand-app-name">${escapeHtml(t(`options.users.clients.${app.client}`))}</span></td>
+        <td><input type="url" data-field="url" maxlength="2000" value="${escapeHtml(app.url)}" placeholder="https://"></td>
+        <td class="actions-cell"><input type="checkbox" data-field="enabled"${app.enabled ? ' checked' : ''} aria-label="${escapeHtml(t('options.branding.appShow'))}"></td>
+      </tr>`).join('');
+}
+
 function renderBrandLinks() {
   const tbody = document.querySelector('#brand-links-table tbody');
   if (!brandDraft.links.length) {
@@ -2087,7 +2100,6 @@ function bindBrandingEvents() {
   const take = () => {
     brandDraft.name = brandField('brand-name').value;
     brandDraft.logo_link = brandField('brand-logo-link').value.trim();
-    brandDraft.store_links = brandField('brand-store-links').checked;
     brandDraft.wallpaper_fit = brandField('brand-wallpaper-fit').value;
     brandDraft.wallpaper_blur = Number(brandField('brand-wallpaper-blur').value);
     brandDraft.wallpaper_dim = Number(brandField('brand-wallpaper-dim').value);
@@ -2095,6 +2107,11 @@ function bindBrandingEvents() {
     renderBrandingPreview();
   };
   form.addEventListener('input', (event) => {
+    if (event.target.closest('#brand-apps-table')) {
+      const app = brandDraft.apps[Number(event.target.closest('tr[data-app]').dataset.app)];
+      if (app && event.target.dataset.field === 'url') app.url = event.target.value.trim();
+      return;
+    }
     if (event.target.closest('#brand-links-table')) {
       const row = event.target.closest('tr[data-at]');
       const link = brandDraft.links[Number(row.dataset.at)];
@@ -2116,6 +2133,11 @@ function bindBrandingEvents() {
     take();
   });
   form.addEventListener('change', (event) => {
+    if (event.target.closest('#brand-apps-table')) {
+      const app = brandDraft.apps[Number(event.target.closest('tr[data-app]').dataset.app)];
+      if (app && event.target.dataset.field === 'enabled') app.enabled = event.target.checked;
+      return;
+    }
     if (event.target.closest('#brand-links-table select')) {
       const row = event.target.closest('tr[data-at]');
       brandDraft.links[Number(row.dataset.at)].open = event.target.value;
@@ -2373,6 +2395,7 @@ const tableRenderConfig = {
                         <div class="cell-wrapper">
                             ${waiting ? `<button class="primary" data-action="approve" data-username="${username}">${t('options.users.approve')}</button>` : ''}
                             <button class="secondary" data-username="${username}" ${homesDisabled ? `disabled title="${t('options.users.homesDisabledTooltip')}"` : ''}>${t('common.homes')}</button>
+                            <button class="secondary" data-action="keys" data-username="${username}">${t('options.users.keys')}</button>
                             <button class="warning" data-username="${username}">${t('common.edit')}</button>
                             <button class="danger" data-username="${username}">${t('common.delete')}</button>
                         </div>
@@ -2506,6 +2529,8 @@ const SETTING_SWITCHES = [
   ['edit_templates', 'options.users.allowEditTemplates', false],
   ['harden_container', 'options.users.hardenContainer', true],
   ['harden_openbox', 'options.users.hardenWm', true],
+  ['application_keys', 'options.users.applicationKeys', false],
+  ['application_key_follow_sign_in', 'options.users.appKeyFollowSignIn', true],
 ];
 // Each limit with its label and whether the server takes a whole number.
 const SETTING_LIMITS = [
@@ -2515,7 +2540,11 @@ const SETTING_LIMITS = [
   ['session_memory_mb', 'options.users.sessionMemory', true],
   ['session_hours', 'options.users.sessionHours', false],
   ['allowance_hours', 'options.users.allowanceHours', false],
+  ['application_key_days', 'options.users.appKeyDays', false],
+  ['application_key_dormant_hours', 'options.users.appKeyDormantHours', false],
 ];
+// The companion apps a key may be used from, as each names itself to the server.
+const APP_KEY_CLIENTS = ['chrome', 'firefox', 'android', 'ios', 'other'];
 const SETTING_LISTS = [
   ['pools', 'options.users.pools'],
   ['pools_denied', 'options.users.poolsDenied'],
@@ -2525,9 +2554,11 @@ const PERIODS = ['day', 'week', 'month'];
 // What the server gives a user whose record leaves a setting out.
 const USER_DEFAULTS = {
   active: true, admin: false, persistent_storage: true, public_sharing: false, gpu: true, gpu_share: true,
-  home_migration: false, edit_templates: false, harden_container: false, harden_openbox: false,
+  home_migration: true, edit_templates: false, harden_container: false, harden_openbox: false,
   session_limit: -1, storage_limit: -1, session_cpus: -1, session_memory_mb: -1, session_hours: -1,
   allowance_hours: -1, allowance_period: 'month', groups: [], pools: [], pools_denied: [], proot_catalog: null,
+  application_keys: true, application_key_clients: [...APP_KEY_CLIENTS], application_key_days: -1,
+  application_key_dormant_hours: -1, application_key_follow_sign_in: false,
 };
 // The new-user form starts without a GPU, as it always has.
 const NEW_USER_SETTINGS = { ...USER_DEFAULTS, gpu: false };
@@ -2571,6 +2602,12 @@ function buildSettingsForm(prefix, kind) {
                 <option value="false">${escapeHtml(t(restricting ? 'options.groups.off' : 'options.groups.deny'))}</option>
             </select>`)
     : row(name, label, `<input type="checkbox" id="${id(name)}"${NEW_USER_SETTINGS[name] ? ' checked' : ''}>`, { kind: 'switch' }))).join('');
+  // The apps that may use keys: a group leaves them alone until it names any.
+  const clientBoxes = APP_KEY_CLIENTS.map((client) => `<label class="client-box"><input type="checkbox" id="${id(`application_key_clients-${client}`)}" value="${client}"${isGroup ? ' disabled' : ' checked'}> ${escapeHtml(t(`options.users.clients.${client}`))}</label>`).join('');
+  const clients = row('application_key_clients', 'options.users.appKeyClients', `${isGroup ? `<select id="${id('application_key_clients')}" class="client-mode">
+                <option value="" selected>${notSet}</option>
+                <option value="set">${escapeHtml(t('options.groups.chosen'))}</option>
+            </select>` : ''}<div class="client-boxes">${clientBoxes}</div>`, { description: t('options.users.appKeyClientsHelp') });
   const groups = isGroup ? '' : `<div class="field-list single">${fieldHtml({
     id: id('groups'),
     label: t('common.groups'),
@@ -2585,9 +2622,18 @@ function buildSettingsForm(prefix, kind) {
     ${groups}
     <div class="field-list">${limits}${period}${lists}${catalog}</div>
     <h5 class="field-group">${escapeHtml(t(isGroup ? 'options.groups.permissionsTitle' : 'options.users.permissionsTitle'))}</h5>
-    <div class="field-list">${switches}</div>`;
+    <div class="field-list">${switches}</div>
+    <div class="field-list single">${clients}</div>`;
   markClampedDescriptions(host);
+  if (isGroup) {
+    const mode = field(prefix, 'application_key_clients');
+    mode.addEventListener('change', () => clientBoxesOf(prefix).forEach((box) => { box.disabled = !mode.value; }));
+  }
 }
+
+const clientBoxesOf = (prefix) => APP_KEY_CLIENTS.map((client) => field(prefix, `application_key_clients-${client}`));
+const readClients = (prefix) => clientBoxesOf(prefix).filter((box) => box.checked).map((box) => box.value);
+const fillClients = (prefix, chosen) => clientBoxesOf(prefix).forEach((box) => { box.checked = chosen.includes(box.value); });
 
 /** @returns {object} The user settings a form holds; a blank limit sets none. */
 function readUserSettings(prefix) {
@@ -2603,6 +2649,7 @@ function readUserSettings(prefix) {
   settings.pools = splitList(field(prefix, 'pools').value);
   settings.pools_denied = splitList(field(prefix, 'pools_denied').value);
   settings.proot_catalog = field(prefix, 'proot_catalog').value || null;
+  settings.application_key_clients = readClients(prefix);
   return settings;
 }
 
@@ -2611,6 +2658,7 @@ function fillUserSettings(prefix, stored) {
   SETTING_SWITCHES.forEach(([name]) => { field(prefix, name).checked = Boolean(settings[name]); });
   SETTING_LIMITS.forEach(([name]) => { field(prefix, name).value = settings[name]; });
   field(prefix, 'allowance_period').value = settings.allowance_period;
+  fillClients(prefix, settings.application_key_clients || []);
   const groups = groupsOf(settings);
   [...field(prefix, 'groups').options].forEach((option) => { option.selected = groups.includes(option.value); });
   field(prefix, 'pools').value = (settings.pools || []).join(', ');
@@ -2636,6 +2684,7 @@ function readGroupSettings(prefix) {
   settings.allowance_period = field(prefix, 'allowance_period').value || null;
   SETTING_LISTS.forEach(([name]) => { settings[name] = splitList(field(prefix, name).value); });
   settings.proot_catalog = field(prefix, 'proot_catalog').value || null;
+  settings.application_key_clients = field(prefix, 'application_key_clients').value ? readClients(prefix) : null;
   return settings;
 }
 
@@ -2645,6 +2694,10 @@ function fillGroupSettings(prefix, settings) {
   field(prefix, 'allowance_period').value = settings.allowance_period || '';
   SETTING_LISTS.forEach(([name]) => { field(prefix, name).value = (settings[name] || []).join(', '); });
   field(prefix, 'proot_catalog').value = settings.proot_catalog || '';
+  const named = Array.isArray(settings.application_key_clients);
+  field(prefix, 'application_key_clients').value = named ? 'set' : '';
+  clientBoxesOf(prefix).forEach((box) => { box.disabled = !named; });
+  fillClients(prefix, named ? settings.application_key_clients : APP_KEY_CLIENTS);
 }
 
 /**
@@ -2677,6 +2730,11 @@ function calculateEffectiveSettings(user) {
   });
   effective.pools = [...new Set([...members.flatMap((g) => g.pools || []), ...(base.pools || [])])].sort();
   effective.pools_denied = [...new Set([...members.flatMap((g) => g.pools_denied || []), ...(base.pools_denied || [])])].sort();
+  // The apps a key may come from: the user's own, narrowed by every group that names any.
+  effective.application_key_clients = members
+    .filter((g) => Array.isArray(g.application_key_clients))
+    .reduce((kept, g) => kept.filter((c) => g.application_key_clients.includes(c)), [...(base.application_key_clients || [])])
+    .sort();
   // A catalog is a choice: the user's own, else the first group's that makes one.
   effective.proot_catalog = base.proot_catalog || (members.find((g) => g.proot_catalog) || {}).proot_catalog || null;
   return effective;
@@ -2700,6 +2758,180 @@ function populateGroupDropdowns() {
     select.innerHTML = adminData.groups
       .map((group) => `<option value="${escapeHtml(group.name)}"${chosen.includes(group.name) ? ' selected' : ''}>${escapeHtml(group.name)}</option>`)
       .join('');
+  });
+}
+
+// --- THE USER'S OWN APPLICATION KEYS (the web app alone: a key cannot manage keys) ---
+
+/** The brand the page wears, from the meta the server put in its head (`app.branding`). */
+const pageBrand = (() => {
+  try {
+    return JSON.parse(document.querySelector('meta[name="sealskin-brand"]')?.content || '{}');
+  } catch (e) {
+    return {};
+  }
+})();
+const clientName = (name) => tOr(t, `options.users.clients.${name}`, name);
+
+/** Fill the Application Keys tab: the keys with their standing, the form within the policy, and the apps. */
+async function renderKeysTab() {
+  let listing;
+  try {
+    listing = await secureFetch('/api/keys', { method: 'GET' });
+  } catch (error) {
+    displayStatus(t('options.keys.loadFailed', { error: error.message }), true);
+    return;
+  }
+  const { keys, policy } = listing;
+  document.getElementById('keys-not-allowed').hidden = policy.allowed;
+  document.getElementById('keys-allowed').hidden = !policy.allowed;
+  const tbody = document.querySelector('#keys-table tbody');
+  tbody.innerHTML = keys.length ? keys.map((key) => `
+            <tr>
+                <td>${escapeHtml(key.name)}</td>
+                <td><span class="pill ${key.state === 'active' ? 'active' : 'off'}">${escapeHtml(t(`options.users.keyState.${key.state}`))}</span></td>
+                <td>${escapeHtml(formatDate(key.created))}</td>
+                <td>${key.expires ? escapeHtml(formatDate(key.expires)) : escapeHtml(t('options.users.keyNever'))}</td>
+                <td>${key.last_used ? `${escapeHtml(formatDate(key.last_used))}${key.client ? ` · ${escapeHtml(clientName(key.client))}` : ''}` : escapeHtml(t('options.users.keyNeverUsed'))}</td>
+                <td class="actions-cell"><button class="danger" data-keyid="${escapeHtml(key.id)}">${t('options.keys.revoke')}</button></td>
+            </tr>`).join('')
+    : `<tr class="empty-row"><td colspan="6" style="text-align:center; padding: 2rem;">${escapeHtml(t('options.keys.none'))}</td></tr>`;
+  // The lifetimes offered: the presets within the longest allowed, and that longest; never, where nothing caps it.
+  const presets = [1, 7, 30, 90, 365];
+  const max = policy.max_days;
+  const choices = max >= 0 ? [...presets.filter((d) => d < max), max] : presets;
+  const select = document.getElementById('keys-days');
+  select.innerHTML = (max >= 0 ? '' : `<option value="">${escapeHtml(t('options.users.keyNever'))}</option>`)
+    + choices.map((d) => `<option value="${d}"${max >= 0 && d === max ? ' selected' : ''}>${escapeHtml(t('options.keys.days', { count: d }))}</option>`).join('');
+  const notes = [];
+  const clients = (policy.clients || []).map(clientName);
+  if (clients.length && clients.length < APP_KEY_CLIENTS.length) notes.push(t('options.keys.clients', { clients: clients.join(', ') }));
+  if (max >= 0) notes.push(t('options.keys.maxDays', { count: max }));
+  if (policy.follow_sign_in) notes.push(t('options.keys.followSignIn'));
+  else if (policy.dormant_hours >= 0) notes.push(t('options.keys.dormantHours', { hours: policy.dormant_hours }));
+  const policyLine = document.getElementById('keys-policy');
+  policyLine.textContent = notes.join(' ');
+  policyLine.hidden = !notes.length;
+  const apps = Array.isArray(pageBrand.apps) ? pageBrand.apps : [];
+  document.getElementById('keys-apps-card').hidden = !apps.length;
+  document.getElementById('keys-apps').innerHTML = apps.map((app) => `<a class="button secondary" href="${escapeHtml(app.url)}" target="_blank" rel="noopener"><i class="fas fa-external-link-alt"></i> ${escapeHtml(clientName(app.client))}</a>`).join('');
+}
+
+function bindKeysEvents() {
+  document.querySelector('#keys-table tbody').addEventListener('click', async (e) => {
+    const button = e.target.closest('button[data-keyid]');
+    if (!button) return;
+    button.disabled = true;
+    try {
+      await secureFetch(`/api/keys/${button.dataset.keyid}`, { method: 'DELETE' });
+      displayStatus(t('options.keys.revoked'));
+      await renderKeysTab();
+    } catch (error) {
+      button.disabled = false;
+      displayStatus(t('options.users.keyRevokeFailed', { error: error.message }), true);
+    }
+  });
+  const form = document.getElementById('keys-form');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('keys-name').value.trim();
+    if (!name) return;
+    const daysValue = document.getElementById('keys-days').value;
+    const days = daysValue ? Number(daysValue) : null;
+    const button = form.querySelector('button[type="submit"]');
+    button.disabled = true;
+    const reveal = document.getElementById('keys-reveal');
+    try {
+      const made = await secureFetch('/api/keys', { method: 'POST', body: JSON.stringify({ name, days }) });
+      document.getElementById('keys-name').value = '';
+      await renderKeysTab();
+      reveal.innerHTML = `
+        <p class="description">${escapeHtml(t('options.keys.shownOnce'))}</p>
+        <div class="field-list single">
+          <div class="field"><div class="field-text"><label>${escapeHtml(t('options.keys.name'))}</label></div><div class="field-control">${escapeHtml(made.record.name)}</div></div>
+        </div>
+        <div class="keys-secret"><code>${escapeHtml(made.key)}</code><button type="button" class="secondary" title="${escapeHtml(t('common.copy'))}"><i class="fas fa-copy"></i></button></div>`;
+      reveal.hidden = false;
+      reveal.querySelector('button').addEventListener('click', () => navigator.clipboard.writeText(made.key)
+        .then(() => displayStatus(t('options.keys.copied')))
+        .catch(() => displayStatus(t('options.keys.copyFailed'), true)));
+      reveal.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    } catch (error) {
+      const detail = /- (\{.*\})$/.exec(error.message || '');
+      let reason = '';
+      try { reason = detail ? JSON.parse(detail[1]).detail : ''; } catch (e2) { /* not JSON */ }
+      displayStatus(reason === 'days' ? t('options.keys.tooLong') : t('options.keys.createFailed', { error: error.message }), true);
+    }
+    button.disabled = false;
+  });
+}
+
+// --- A USER'S APPLICATION KEYS, FOR AN ADMINISTRATOR ---
+
+const userKeysModal = document.getElementById('user-keys-modal');
+
+/** Fill the keys modal with a user's keys, each with a revoke. */
+async function renderUserKeys(username) {
+  const tbody = document.querySelector('#user-keys-table tbody');
+  document.getElementById('user-keys-title').textContent = t('options.users.keysTitle', { username });
+  userKeysModal.dataset.username = username;
+  let keys;
+  try {
+    keys = await secureFetch(`/api/admin/users/${encodeURIComponent(username)}/keys`, { method: 'GET' });
+  } catch (error) {
+    displayStatus(t('options.users.keysLoadFailed', { error: error.message }), true);
+    return;
+  }
+  document.getElementById('user-keys-revoke-all').disabled = !keys.length;
+  if (!keys.length) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="5" style="text-align:center; padding: 2rem;">${escapeHtml(t('options.users.noKeys'))}</td></tr>`;
+    return;
+  }
+  const client = (name) => tOr(t, `options.users.clients.${name}`, name);
+  tbody.innerHTML = keys.map((key) => `
+            <tr>
+                <td>${escapeHtml(key.name)}</td>
+                <td><span class="pill ${key.state === 'active' ? 'active' : 'off'}">${escapeHtml(t(`options.users.keyState.${key.state}`))}</span></td>
+                <td>${key.last_used ? `${escapeHtml(formatDate(key.last_used))}${key.client ? ` · ${escapeHtml(client(key.client))}` : ''}` : escapeHtml(t('options.users.keyNeverUsed'))}</td>
+                <td>${key.expires ? escapeHtml(formatDate(key.expires)) : escapeHtml(t('options.users.keyNever'))}</td>
+                <td class="actions-cell"><button class="danger" data-keyid="${escapeHtml(key.id)}">${t('web.keys.revoke')}</button></td>
+            </tr>`).join('');
+}
+
+async function openUserKeys(username) {
+  await renderUserKeys(username);
+  userKeysModal.style.display = 'block';
+}
+
+function bindUserKeysEvents() {
+  document.querySelector('#user-keys-table tbody').addEventListener('click', async (e) => {
+    const button = e.target.closest('button[data-keyid]');
+    if (!button) return;
+    const { username } = userKeysModal.dataset;
+    try {
+      await secureFetch(`/api/admin/users/${encodeURIComponent(username)}/keys/${button.dataset.keyid}`, { method: 'DELETE' });
+      displayStatus(t('options.users.keyRevoked'));
+      await renderUserKeys(username);
+    } catch (error) {
+      displayStatus(t('options.users.keyRevokeFailed', { error: error.message }), true);
+    }
+  });
+  document.getElementById('user-keys-revoke-all').addEventListener('click', async () => {
+    const { username } = userKeysModal.dataset;
+    const revoke = await confirmDialog(t, {
+      title: t('options.users.revokeAll'),
+      message: t('options.users.revokeAllConfirm', { username }),
+      confirm: t('options.users.revokeAll'),
+      danger: true,
+    });
+    if (!revoke) return;
+    try {
+      await secureFetch(`/api/admin/users/${encodeURIComponent(username)}/keys`, { method: 'DELETE' });
+      displayStatus(t('options.users.keyRevoked'));
+      await renderUserKeys(username);
+    } catch (error) {
+      displayStatus(t('options.users.keyRevokeFailed', { error: error.message }), true);
+    }
   });
 }
 
@@ -2756,10 +2988,23 @@ async function refreshAdminData() {
   }
 }
 
+/** Whether this node takes key-file clients; off, the dashboard offers nothing a key file would be for. */
+let keyFilesOn = true;
+
+/** Show or hide what only key files use: the Admins tab, the public key field and column. */
+function applyKeyFiles() {
+  const adminsLink = document.querySelector('.nav-link[data-tabname="Admins"]');
+  if (!keyFilesOn && adminsLink) adminsLink.style.display = 'none';
+  const keyGroup = document.getElementById('newUserKeyGroup');
+  if (!keyFilesOn || info.shell === 'web') keyGroup.style.display = 'none';
+  document.getElementById('users-table').classList.toggle('no-key-files', !keyFilesOn);
+}
+
 function setAdminNavVisibility(visible) {
   const display = visible ? 'flex' : 'none';
   adminNavLinks.forEach((link) => { link.style.display = display; });
   adminNavSeparator.style.display = visible ? 'block' : 'none';
+  applyKeyFiles();
   // The Sign In section is the web app's; the other shells keep those settings in the Cluster section.
   if (info.shell !== 'web') document.querySelector('.nav-link[data-tabname="SignIn"]').style.display = 'none';
   if (visible && info.platform === 'ios') {
@@ -2833,6 +3078,8 @@ async function loadDashboard() {
     }
 
     sessionsTabButton.style.display = 'flex';
+    keyFilesOn = statusData.key_files !== false;
+    applyKeyFiles();
 
     if (statusData.settings.gpu) {
       renderGpuInfo(statusData.gpus);
@@ -3490,6 +3737,8 @@ async function openTab(tabName) {
     await refreshCluster();
   } else if (tabName === 'Branding') {
     await loadBranding();
+  } else if (tabName === 'ApplicationKeys') {
+    await renderKeysTab();
   } else if (tabName === 'Audit') {
     await refreshAudit();
   }
@@ -3584,6 +3833,8 @@ function pickForSealSkin(app, hint) {
  */
 function applyWebLayout() {
   document.getElementById('web-card').style.display = '';
+  // Keys are made on the web alone: the extension and the app only hold one.
+  document.getElementById('keys-tab-button').style.display = '';
   // No connection to change and no key to give a user: the server signs both in.
   changeConnectionButton.style.display = 'none';
   document.getElementById('sign-out-button').style.display = '';
@@ -3750,7 +4001,9 @@ function bindEvents() {
     }
     const username = button.dataset.username;
     if (!username) return;
-    if (button.dataset.action === 'approve') {
+    if (button.dataset.action === 'keys') {
+      await openUserKeys(username);
+    } else if (button.dataset.action === 'approve') {
       try {
         await secureFetch(`/api/admin/users/${username}/approve`, { method: 'POST' });
         displayStatus(t('options.status.userApproved', { username }));
@@ -4235,6 +4488,8 @@ function bindEvents() {
   bindClusterEvents();
   bindSignInEvents();
   bindBrandingEvents();
+  bindUserKeysEvents();
+  bindKeysEvents();
   bindAuditEvents();
   bindWebLabEvents();
 }

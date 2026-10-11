@@ -36,7 +36,7 @@ Save as `/config/nginx/proxy-confs/sealskin.subdomain.conf`. The container
 is named `sealskin` and has a DNS name `sealskin.<your domain>`.
 
 ```nginx
-## Version 2026/10/06
+## Version 2026/10/11
 # make sure that your sealskin container is named sealskin
 # make sure that your dns has a cname set for sealskin, and a wildcard for the session names
 # sealskin opens every session of its web app on <session id>.<session domain>: the
@@ -59,12 +59,18 @@ server {
     # enable for Authentik (requires authentik-location.conf in the location block)
     #include /config/nginx/authentik-server.conf;
 
+    # enable for Tinyauth (requires tinyauth-location.conf in the location block)
+    #include /config/nginx/tinyauth-server.conf;
+
     location / {
         # enable for Authelia (requires authelia-server.conf in the server block)
         #include /config/nginx/authelia-location.conf;
 
         # enable for Authentik (requires authentik-server.conf in the server block)
         #include /config/nginx/authentik-location.conf;
+
+        # enable for Tinyauth (requires tinyauth-server.conf in the server block)
+        #include /config/nginx/tinyauth-location.conf;
 
         include /config/nginx/proxy.conf;
         include /config/nginx/resolver.conf;
@@ -133,6 +139,23 @@ through, which SealSkin detects and refuses.
 
 The second server block needs no include. To guard the session names too,
 add the same two lines there and set `SEALSKIN_SESSION_DOMAIN`.
+
+The browser extension and the mobile app reach the node on raw paths the
+sign-in must leave alone ([why](sign-in.md#the-companion-apps); leave this out for a web-only deployment): add these
+locations **before** `location /` in the first server block, with the same
+upstream lines and none of the provider's includes:
+
+```nginx
+    # The companion apps, the sessions they open, and public share links: SealSkin signs these in itself.
+    location ~ "^/(companion/|public/|(ws/)?room/[0-9a-fA-F-]{36}|[0-9a-fA-F-]{36}/)" {
+        include /config/nginx/proxy.conf;
+        include /config/nginx/resolver.conf;
+        set $upstream_app sealskin;
+        set $upstream_port 8443;
+        set $upstream_proto https;
+        proxy_pass $upstream_proto://$upstream_app:$upstream_port;
+    }
+```
 
 Authelia's and Authentik's own proxy configurations ship with SWAG as
 `authelia.subdomain.conf.sample` and `authentik.subdomain.conf.sample`.

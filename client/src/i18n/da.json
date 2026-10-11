@@ -85,7 +85,9 @@
       "admins": "Administratorer",
       "cluster": "Klynge",
       "signIn": "Login",
-      "audit": "Revisionslog"
+      "audit": "Revisionslog",
+      "branding": "Branding",
+      "keys": "Applikationsnøgler"
     },
     "dashboard": {
       "title": "Kontrolpanel",
@@ -150,7 +152,16 @@
       "keyGeneration": "Nøglegenerering",
       "keyGenDescription": "Hvis du ikke har et nøglepar, kan du generere et her. Den private nøgle vil blive udfyldt ovenfor. Giv den offentlige nøgle til din administrator.",
       "generateKeyButton": "Generer Nyt Nøglepar",
-      "publicKeyForAdminLabel": "Din Offentlige Nøgle (til admin)"
+      "publicKeyForAdminLabel": "Din Offentlige Nøgle (til admin)",
+      "keyTitle": "Forbind med en applikationsnøgle",
+      "keyDescription": "I webappen, under Indstillinger → Applikationsnøgler, opretter du en nøgle til denne enhed og indsætter den her.",
+      "keyLabel": "Applikationsnøgle",
+      "keyPlaceholder": "ssk_…@sealskin.example.com:8443",
+      "keyConnectButton": "Forbind",
+      "useKeyFileLink": "Brug en nøglefil i stedet",
+      "useKeyLink": "Brug en applikationsnøgle",
+      "connectedWithKey": "Logget ind med en applikationsnøgle.",
+      "connectedWithKeyFile": "Logget ind med en nøglefil."
     },
     "home": {
       "title": "Dine Hjemmemapper",
@@ -241,7 +252,37 @@
       "prootCatalogHelp": "Monteres skrivebeskyttet i hver session; proot-apps installerer fra det i stedet for et registry. Står det på Ingen, bestemmer den første af brugerens grupper, der vælger et.",
       "groupsHelp": "Hold Ctrl eller Kommando nede for at vælge flere. Hvor grupper er uenige, gælder den begrænsende værdi.",
       "providerGroups": "Grupper, som identitetsudbyderen angav ved seneste login: {groups}",
-      "limitsHelp": "En grænse på -1, eller et tomt felt, sætter ingen."
+      "limitsHelp": "En grænse på -1, eller et tomt felt, sætter ingen.",
+      "applicationKeys": "Tillad Applikationsnøgler (Browserudvidelse og Mobilapp)",
+      "appKeyClients": "Apps, der må bruge applikationsnøgler",
+      "appKeyClientsHelp": "Hver app præsenterer sig selv for serveren; dette er en bekvemmelighed, ikke en lås.",
+      "appKeyDays": "Dage en applikationsnøgle lever",
+      "appKeyDormantHours": "Timer efter seneste weblogin, hvor applikationsnøgler går i dvale",
+      "appKeyFollowSignIn": "Applikationsnøgler Går i Dvale, Når Webloginnet Slutter",
+      "keys": "Nøgler",
+      "keysTitle": "Applikationsnøgler for {username}",
+      "noKeys": "Ingen applikationsnøgler.",
+      "revokeAll": "Tilbagekald alle",
+      "keyRevoked": "Nøgle tilbagekaldt.",
+      "keyRevokeFailed": "Kunne ikke tilbagekalde nøglen: {error}",
+      "keysLoadFailed": "Kunne ikke indlæse nøglerne: {error}",
+      "keyState": {
+        "active": "Aktiv",
+        "dormant": "I dvale",
+        "expired": "Udløbet"
+      },
+      "clients": {
+        "chrome": "Chrome-udvidelse",
+        "firefox": "Firefox-tilføjelse",
+        "android": "Android-app",
+        "ios": "iOS-app",
+        "other": "Andre klienter"
+      },
+      "keyLastUsed": "Senest brugt",
+      "keyExpires": "Udløber",
+      "keyNever": "Aldrig",
+      "keyNeverUsed": "Aldrig brugt",
+      "revokeAllConfirm": "Tilbagekald alle applikationsnøgler for '{username}'? Deres udvidelses- og app-logins stopper straks."
     },
     "groups": {
       "title": "Gruppeadministration",
@@ -259,7 +300,8 @@
       "on": "Til",
       "off": "Fra",
       "ssoGroups": "Identitetsudbydergrupper, hvis medlemmer er i denne gruppe (kommasepareret)",
-      "overrideHelp": "En gruppe bestemmer kun det, der er angivet her; alt, der ikke er angivet eller står tomt, forbliver hvert medlems eget."
+      "overrideHelp": "En gruppe bestemmer kun det, der er angivet her; alt, der ikke er angivet eller står tomt, forbliver hvert medlems eget.",
+      "chosen": "Kun de apps, der er markeret nedenfor"
     },
     "installedApps": {
       "title": "Installerede Applikationer",
@@ -1293,7 +1335,16 @@
       "catalogDeleteFailed": "Kunne ikke slette kataloget: {error}",
       "catalogUpdateStarted": "Opdaterer kataloget '{name}' på hver node.",
       "catalogUpdateFailed": "Kunne ikke opdatere kataloget: {error}",
-      "catalogsRefreshFailed": "Kunne ikke indlæse katalogerne: {error}"
+      "catalogsRefreshFailed": "Kunne ikke indlæse katalogerne: {error}",
+      "keyNoServer": "Denne nøgle angiver ingen server. Opret en i webappen, under Indstillinger → Applikationsnøgler.",
+      "keyMissing": "Indsæt din applikationsnøgle.",
+      "keyRefused": {
+        "unknown": "Serveren kender ikke den nøgle. Opret en i din profil i webappen.",
+        "expired": "Nøglen er udløbet. Opret en ny i din profil i webappen.",
+        "disabled": "Din administrator tillader ikke applikationsnøgler for din konto.",
+        "client": "Din administrator tillader ikke, at denne app bruger applikationsnøgler.",
+        "dormant": "Din nøgle er i dvale. Log ind i webappen, og prøv igen."
+      }
     },
     "placeholders": {
       "noAdmins": "Ingen administratorer fundet.",
@@ -1322,7 +1373,8 @@
       "oidc": "OpenID Connect",
       "saml": "SAML",
       "proxy": "Reverse proxy",
-      "key": "Nøglefil"
+      "key": "Nøglefil",
+      "app_key": "Applikationsnøgle"
     },
     "periods": {
       "day": "Dag",
@@ -1411,7 +1463,9 @@
         "proxy_auth_groups_header": "Header, som en betroet proxy oplister brugerens grupper i",
         "proxy_auth_logout_url": "Proxyens side, der logger dens bruger ud",
         "web_session_seconds": "Længste tid et root-login varer ubrugt (timer)",
-        "files_sync": "Opbevar delte filer i objektlageret"
+        "files_sync": "Opbevar delte filer i objektlageret",
+        "auto_sign_in": "Send en ikke-indlogget browser direkte til",
+        "legacy_auth": "Accepter nøglefil-klienter"
       },
       "usageTitle": "Forbrug",
       "usageHours": "Vægtede timer",
@@ -1552,7 +1606,14 @@
       "resultEntity": "Entity-ID:",
       "resultSso": "Sign-on-URL:",
       "resultSlo": "Single logout tilbudt:",
-      "resultCertificates": "Signeringscertifikater:"
+      "resultCertificates": "Signeringscertifikater:",
+      "landingTitle": "Landing",
+      "landingHelp": "Med en valgt udbyder sendes en ikke-indlogget browser straks til den i stedet for denne servers loginside. Tilføj #root til webappens adresse for at se siden alligevel, som for root-tokenet.",
+      "autoNone": "Denne servers loginside",
+      "autoOidc": "OpenID Connect",
+      "autoSaml": "SAML",
+      "rootOff": "Slået fra på denne knude med SEALSKIN_ROOT_SIGN_IN=false. For at komme ind igen med nøglen skal knuden genstartes med den slået til.",
+      "rootNoAdminGroup": "Ingen identitetsudbydergruppe udpeger administratorer (se Hvem Logger Ind). Med roots nøgle slået fra kan ingen administrere denne server."
     },
     "prootApps": {
       "title": "PRoot Apps-kataloger",
@@ -1586,6 +1647,83 @@
       "updateTitle": "Hent apps igen nu, på hver node, hvor deres pakke er ændret",
       "confirmDelete": "Slet kataloget '{name}'? Hver node fjerner sin kopi, og brugere tildelt det får intet katalog.",
       "deleteTitle": "Slet katalog"
+    },
+    "branding": {
+      "title": "Branding",
+      "help": "Giv webappen din organisations navn, logo, farver, baggrund og links. Forhåndsvisningen viser hjemmesiden, som brugerne vil se den; intet ændres, før du gemmer.",
+      "identity": "Identitet",
+      "name": "Produktnavn",
+      "nameHelp": "Står overalt, hvor grænsefladen ellers ville sige SealSkin: titlen, sidepanelet, den installerede webapp og loginsiden.",
+      "logo": "Logo",
+      "logoHelp": "En kvadratisk PNG, JPEG eller WebP på op til 1 MB. Det er sidepanelets logo, faviconet og ikonet for den installerede webapp.",
+      "logoLink": "Logoet linker til",
+      "logoLinkHelp": "En adresse, logoet åbner i en ny fane, såsom jeres intranet. Lad feltet være tomt for intet link.",
+      "accent": "Accentfarve",
+      "accentHelp": "Farven på knapper, fremhævninger og ordmærket. Ryd den for standardens violet.",
+      "accentDefault": "Standard",
+      "wallpaper": "Baggrund",
+      "wallpaperHelp": "Et billede bag hjemmesiden på op til 8 MB. Brugerne starter med det og kan stadig vælge deres eget, medmindre det er gennemtvunget.",
+      "wallpaperForced": "Gennemtving denne baggrund for alle brugere",
+      "wallpaperForcedHelp": "Brugerne mister knappen Tilpas på hjemmesiden og ser alle denne baggrund.",
+      "fit": "Placering",
+      "blur": "Sløring",
+      "dim": "Dæmpning",
+      "upload": "Upload",
+      "remove": "Fjern",
+      "links": "Links på hjemmesiden",
+      "linksHelp": "Felter, hjemmesiden viser over applikationerne, til jeres egne websteder og værktøjer. Et link åbner i en ny fane eller i en isoleret session af en applikation, brugeren vælger.",
+      "linkName": "Navn",
+      "linkUrl": "Adresse",
+      "linkIcon": "Ikon",
+      "linkIconHelp": "En Font Awesome-klasse såsom fa-book eller fab fa-github, eller en https-adresse til et billede.",
+      "linkOpen": "Åbner",
+      "openTab": "I en ny fane",
+      "openIsolated": "I isolation",
+      "addLink": "Tilføj et link",
+      "noLinks": "Ingen links endnu.",
+      "preview": "Forhåndsvisning",
+      "previewHelp": "Hjemmesiden, som en bruger ser den, med det, du har indtastet her.",
+      "previewUser": "En bruger",
+      "save": "Gem branding",
+      "reset": "Tilbage til standard",
+      "resetConfirm": "Fjern navn, logo, farver, baggrund, app-links og links, tilbage til SealSkins standarder?",
+      "saved": "Branding gemt. Genindlæs siden for at se titlen og sidepanelet ændre sig.",
+      "resetDone": "Branding nulstillet til standarderne.",
+      "saveFailed": "Kunne ikke gemme brandingen: {error}",
+      "pictureTooLarge": "Billedet er for stort og kunne ikke gøres mindre. Vælg et andet.",
+      "notAPicture": "Vælg et PNG-, JPEG- eller WebP-billede.",
+      "apps": "Ledsagende apps",
+      "appsHelp": "Hvor brugerne henter udvidelsen og appsene, linket fra loginsiden og ved siden af applikationsnøglerne i profilen. Peg et link mod jeres egen build, eller skjul det.",
+      "appShow": "Vist",
+      "appUrl": "Adresse",
+      "appClient": "App"
+    },
+    "keys": {
+      "title": "Applikationsnøgler",
+      "intro": "Log browserudvidelsen og mobilappen ind med en nøgle oprettet her i stedet for en nøglefil. Hver enhed får sin egen nøgle; tilbagekald en her, og den enhed logges ud.",
+      "none": "Ingen nøgler endnu.",
+      "name": "Navn",
+      "nameHelp": "Hvad nøglen er til, f.eks. den enhed, den skal på.",
+      "namePlaceholder": "f.eks. Arbejdscomputer",
+      "made": "Oprettet",
+      "lifetime": "Udløber",
+      "days": "{count, plural, one {1 dag} other {{count} dage}}",
+      "create": "Opret en nøgle",
+      "revoke": "Tilbagekald",
+      "revoked": "Nøgle tilbagekaldt.",
+      "shownOnce": "Kopiér denne nøgle nu: den vises kun denne ene gang. Indsæt den på forbindelsessiden i udvidelsen eller appen.",
+      "copied": "Nøgle kopieret.",
+      "copyFailed": "Browseren tillod ikke kopiering. Markér nøglen, og kopiér den.",
+      "notAllowed": "Din administrator tillader ikke applikationsnøgler for din konto.",
+      "clients": "Tilladte apps: {clients}.",
+      "dormantHours": "Nøgler går i dvale {hours} timer efter dit seneste weblogin; at logge ind her vækker dem.",
+      "followSignIn": "Nøgler går i dvale, når dit weblogin slutter; at logge ind her vækker dem.",
+      "maxDays": "En nøgle lever højst {count, plural, one {1 dag} other {{count} dage}}.",
+      "get": "Hent appsene",
+      "getHelp": "Installer en af disse, og indtast derefter serverens adresse og din nøgle på dens forbindelsesside.",
+      "loadFailed": "Kunne ikke indlæse dine nøgler: {error}",
+      "createFailed": "Kunne ikke oprette nøglen: {error}",
+      "tooLong": "Det er længere, end din administrator tillader."
     }
   },
   "popup": {
@@ -1624,7 +1762,8 @@
       "moveHomeTo": "Flyt til {node}",
       "moveHomeConfirm": "Flyt '{home}' til {node}? Sessioner, der bruger den, skal stoppes først.",
       "moveHomeTitle": "Flyt lager",
-      "allowance": "Kvote: {used} af {hours} timer denne {period}"
+      "allowance": "Kvote: {used} af {hours} timer denne {period}",
+      "newTab": "Åbn i en ny fane"
     },
     "sessionsView": {
       "noSessions": "Ingen aktive sessioner fundet."
@@ -1689,7 +1828,10 @@
     },
     "sidebar": {
       "sharedFiles": "{brand}-filer",
-      "publicShares": "Offentlige Delinger"
+      "publicShares": "Offentlige Delinger",
+      "sharedHelp": "Dine filer på alle knuder: hver session har dem under Desktop/files.",
+      "allNodes": "alle knuder",
+      "homeHelp": "Denne hjemmemappe ligger på knuden {node}; sessioner, der bruger den, kører der. Flyt den fra starteren for at køre et andet sted."
     },
     "shares": {
       "title": "Offentligt Delte Filer",
@@ -1790,7 +1932,15 @@
       "openServer": "Åbn server",
       "changeConnection": "Skift forbindelse",
       "mismatchTitle": "Opdatering påkrævet",
-      "mismatchBody": "Denne app og serverens webgrænseflade bruger forskellige bridge-versioner. Opdater udvidelsen eller appen, eller opdater serveren, så de to matcher."
+      "mismatchBody": "Denne app og serverens webgrænseflade bruger forskellige bridge-versioner. Opdater udvidelsen eller appen, eller opdater serveren, så de to matcher.",
+      "dormantTitle": "Log ind på webben for at fortsætte",
+      "dormantBody": "Din applikationsnøgle er i dvale: din administrator kræver et login på webben nu og da. Log ind der, og denne app virker igen.",
+      "signInWeb": "Log ind på webben",
+      "keyTitle": "Denne nøgle logger dig ikke længere ind",
+      "keyUnknown": "Nøglen blev tilbagekaldt eller har aldrig eksisteret. Opret en ny i din profil på webben.",
+      "keyExpired": "Nøglen er udløbet. Opret en ny i din profil på webben.",
+      "keyDisabled": "Din administrator tillader ikke applikationsnøgler for din konto.",
+      "keyClient": "Din administrator tillader ikke, at denne app bruger applikationsnøgler."
     }
   },
   "web": {
@@ -1800,11 +1950,6 @@
       "oidc": "Log ind med OpenID Connect",
       "saml": "Log ind med SAML"
     },
-    "rootToken": "Root-token",
-    "rootTokenHelp": "Administratorens token, som serveren opbevarer i sin fil /config/root_token.",
-    "rootSignIn": "Log ind som Root",
-    "rootRefused": "Det er ikke serverens root-token.",
-    "rootLocked": "For mange forsøg. Vent et stykke tid, og prøv igen.",
     "held": {
       "title": "Venter på en administrator",
       "message": "Du er logget ind som {username}, men en administrator skal placere dig i en gruppe, før du kan bruge {brand}. Tjek igen, når det er sket.",
@@ -1820,7 +1965,8 @@
       "otherIdentity": "En anden konto hos identitetsudbyderen logger allerede ind som denne {brand}-bruger. Spørg din administrator.",
       "noAccount": "Der findes endnu ingen {brand}-konto med dit navn. Bed din administrator om at oprette en.",
       "notConfigured": "Denne server tilbyder ikke single sign-on.",
-      "ended": "Identitetsudbyderen afsluttede dit log ind. Log ind igen."
+      "ended": "Identitetsudbyderen afsluttede dit log ind. Log ind igen.",
+      "redirecting": "Sender dig videre til login…"
     },
     "nav": {
       "home": "Hjem",
@@ -1887,7 +2033,10 @@
       "openAppStores": "Åbn App Stores",
       "popupBlocked": "Browseren blokerede sessionens fane. Tillad pop op-vinduer for dette websted, og start igen.",
       "serverFileNeedsHome": "En fil, der ligger på serveren, kan ikke åbnes i Cleanroom-tilstand. Vælg en lagermappe.",
+      "copyLink": "Kopiér link",
+      "copyLinkHelp": "Et link, der åbner denne applikation med disse indstillinger: gem det som bogmærke, eller installer det som en app",
       "copyLinkManual": "Browseren tillod ikke kopiering. Markér linket nedenfor, og kopiér det.",
+      "linkCopied": "Link kopieret.",
       "favorites": "Favoritter",
       "favoritesHint": "Træk for at ændre rækkefølgen",
       "addFavorite": "Føj til favoritter",
@@ -1919,7 +2068,8 @@
       "fitFill": "Udfyld",
       "fitFit": "Tilpas",
       "fitStretch": "Stræk",
-      "fitCenter": "Centrer"
+      "fitCenter": "Centrer",
+      "links": "Links"
     },
     "launch": {
       "title": "Starter {app}",
@@ -1932,7 +2082,8 @@
         "image": "Downloader applikationens image",
         "starting": "Opretter containeren",
         "waiting": "Venter på, at skrivebordet svarer",
-        "ready": "Åbner sessionen"
+        "ready": "Åbner sessionen",
+        "client": "Forbereder applikationens webklient"
       },
       "uploading": "Uploader filen ({done} af {total})",
       "imageHint": "Første start af en applikation på en knude downloader den, hvilket kan tage minutter. Senere starter er hurtige.",
@@ -1941,6 +2092,37 @@
       "failed": "Starten mislykkedes",
       "unseen": "Startanmodningen har ikke nået serveren. Tjek den {brand}-fane, der startede den.",
       "closeTab": "Browseren holdt denne fane åben. Luk den selv."
-    }
+    },
+    "open": {
+      "title": "Åbner {app}",
+      "signingIn": "Kontrollerer, hvem der er logget ind",
+      "looking": "Leder efter en kørende session",
+      "attaching": "Åbner den kørende session",
+      "notYours": "Denne applikation er ikke åben for din konto, eller den findes ikke.",
+      "noHome": "Lagermappen '{home}', som denne adresse angiver, findes ikke. Opret den i {brand}, eller åbn adressen uden den.",
+      "openSealSkin": "Åbn {brand}"
+    },
+    "keyRefused": "Den nøgle logger ingen ind.",
+    "keyNotRoot": "Kun root logger ind her med en nøgle. Log ind via din identitetsudbyder.",
+    "keyExpired": "Den nøgle er udløbet.",
+    "keyLocked": "For mange forsøg. Vent lidt, og prøv igen.",
+    "keyDisabled": "Denne server tager ikke roots applikationsnøgle ved webloginnet.",
+    "apps": {
+      "chrome": "Chrome-udvidelse",
+      "firefox": "Firefox-tilføjelse",
+      "android": "Android-app",
+      "ios": "iOS-app",
+      "other": "Andre klienter"
+    },
+    "rootKey": "Root-nøgle",
+    "rootKeyHelp": "Administratorens applikationsnøgle, som serveren skrev til /config/root_key ved sin første start.",
+    "keys": {
+      "wakeTitle": "Din applikationsnøgle er aktiv igen",
+      "wakeBody": "Du kan gå tilbage til appen nu eller fortsætte her.",
+      "wakeClose": "Luk",
+      "wakeContinue": "Fortsæt til {brand}",
+      "wakeFailed": "Kunne ikke vække dine nøgler: {error}"
+    },
+    "rootSignIn": "Log ind som Root"
   }
 }

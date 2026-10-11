@@ -34,9 +34,8 @@ be written in the dashboard under **Sign In**; set the administrator group
 in the environment for the first start, since the dashboard opens to
 administrators.
 
-The `root` token still signs in, once the browser is past the proxy: open
-`https://sealskin.example.com/#root`, or choose **Root token** in the
-account menu. That is also how administrators are appointed where the
+Root's application key still signs in, once the browser is past the proxy:
+open `https://sealskin.example.com/#root`. That is also how administrators are appointed where the
 provider names no groups: as `root`, give a user the administrator switch.
 Signing out as `root` returns to the proxy's user.
 
@@ -116,6 +115,36 @@ there are session names too, and for those there is a choice:
   which a guarded name refuses, and takes the named domain as it is when
   none answers. Room guests then need an account at the provider.
 
+## The companion apps
+
+The browser extension and the mobile app sign in with an
+[application key](../signin.md#application-keys), with no browser session at
+the provider and no cookie of its, so a forward-auth that guards the whole
+site sends them to its sign-in page and they never reach SealSkin. For them
+the proxy has to pass three raw paths straight to the node, with no sign-in
+of its own:
+
+| Path | What it is | Who authenticates it |
+| --- | --- | --- |
+| `/companion/` | The apps' lane: the pages they frame and the API they call, the same as the web app's under one prefix. The web sign-in and the key-file handshake routes answer 404 there. | SealSkin, by the application key alone; a cookie or a proxy header counts for nothing there. |
+| `/<session id>/`, a UUID | The sessions the apps open in a browser tab or a Custom Tab, and the collaboration rooms (`/room/<id>`), whose guests arrive by invite link with no account at the provider. A room page loads its assets under `/companion/`. | The session's own cookie, set by the one-time token of its launch, or the room's token. |
+| `/public/` | Public share links, where users share files with people outside. | The share's password, where one was set. |
+
+All of this is optional. A deployment that wants the web app alone leaves
+the paths out: the apps are then refused at the proxy's sign-in page, and
+turning **Allow Application Keys** off for the users or groups, or for
+everyone, says so in the dashboard too. Where the paths are passed, nothing
+of the proxy's sign-in is lost: a request under `/companion/` with a made-up
+key is refused by SealSkin, a session answers nobody without the token it
+was launched with, and the check above still finds the sign-in headers
+guarded, since it sends none of these paths. Every proxy page shows
+the rule in its own syntax: [Authelia](authelia.md#the-companion-apps),
+[Authentik](authentik.md#forward-auth), [SWAG](swag.md#with-authelia-or-authentik-in-front),
+[Traefik](traefik.md#forward-auth), [Caddy](caddy.md),
+[Nginx Proxy Manager](nginx-proxy-manager.md#forward-auth), and
+[oauth2-proxy](oauth2-proxy.md#nginx). A proxy that only terminates TLS
+passes everything already.
+
 ## What to let through
 
 * **Public share links** are `/public/...` on the web app's name. Let that
@@ -123,8 +152,10 @@ there are session names too, and for those there is a choice:
   the provider pages show the rule. A request let through this way reaches
   SealSkin without the sign-in headers, which the proxies here remove from
   it.
-* **The key-file clients** cannot pass a proxy's sign-in. Use the web app, or
-  turn them off with `SEALSKIN_LEGACY_AUTH=false`.
+* **The companion apps** pass with an application key where the proxy
+  leaves their raw paths unguarded, as [above](#the-companion-apps). The
+  key-file clients cannot pass a proxy's sign-in: use application keys, or
+  turn the key files off with `SEALSKIN_LEGACY_AUTH=false`.
 
 ## Signing out
 

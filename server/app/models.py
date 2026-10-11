@@ -131,6 +131,15 @@ class SignInConfig(BaseModel):
 
 PROJECT_URL = "https://github.com/selkies-project/sealskin"
 WALLPAPER_FITS = ("cover", "contain", "stretch", "center")
+#: The companion apps as they name themselves to the server, and `other` for anything else.
+APP_KEY_CLIENTS = ("chrome", "firefox", "android", "ios", "other")
+#: Where each companion app is had, by default: the official stores.
+APP_STORE_URLS = {
+    "chrome": "https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk",
+    "firefox": "https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/",
+    "android": "https://play.google.com/store/apps/details?id=io.linuxserver.sealskin",
+    "ios": "https://apps.apple.com/us/app/sealskin/id6758210210",
+}
 
 
 class BrandLink(BaseModel):
@@ -158,6 +167,25 @@ class BrandLink(BaseModel):
         return value
 
 
+class BrandApp(BaseModel):
+    """Where one of the companion apps is had, as the sign-in page and the application keys section link to it.
+
+    Attributes:
+        client: `chrome`, `firefox`, `android`, or `ios`.
+        url: The address of the app, `http` or `https`; the official store by default.
+        enabled: Whether the link is shown at all.
+    """
+
+    client: str = Field(pattern=r"^(chrome|firefox|android|ios)$")
+    url: str = Field(default="", max_length=2000, pattern=r"^(https?://\S+)?$")
+    enabled: bool = True
+
+
+def default_brand_apps() -> list[BrandApp]:
+    """Return the links to the official stores, every app shown."""
+    return [BrandApp(client=client, url=url) for client, url in APP_STORE_URLS.items()]
+
+
 class Branding(BaseModel):
     """The brand the web app wears, as `branding/branding.yml` keeps it.
 
@@ -165,7 +193,7 @@ class Branding(BaseModel):
         name: The product name, which stands wherever the interface would say SealSkin.
         logo_link: Where the logo leads; empty for nowhere.
         accent: The accent color as `#rrggbb`, or empty for the default violet.
-        store_links: Show the extension and app store links on the sign-in page.
+        apps: Where the companion apps are had, one entry per client, shown on the sign-in page and with the application keys.
         wallpaper_fit: How the wallpaper sits on the home page.
         wallpaper_blur: Pixels of blur over the wallpaper.
         wallpaper_dim: Percent the wallpaper is darkened.
@@ -176,7 +204,7 @@ class Branding(BaseModel):
     name: str = Field(default="SealSkin", min_length=1, max_length=60)
     logo_link: str = Field(default=PROJECT_URL, max_length=2000)
     accent: str = Field(default="", pattern=r"^(#[0-9a-fA-F]{6})?$")
-    store_links: bool = True
+    apps: list[BrandApp] = Field(default_factory=default_brand_apps, max_length=4)
     wallpaper_fit: str = Field(default="cover", pattern=r"^(cover|contain|stretch|center)$")
     wallpaper_blur: int = Field(default=0, ge=0, le=24)
     wallpaper_dim: int = Field(default=30, ge=0, le=90)
@@ -196,6 +224,16 @@ class Branding(BaseModel):
         if value and not re.fullmatch(r"https?://\S+", value):
             raise ValueError("The logo's link is an http or https address, or empty.")
         return value
+
+    @field_validator("apps")
+    @classmethod
+    def _every_app_once(cls, value: list[BrandApp]) -> list[BrandApp]:
+        """Keep one entry per client, in the stores' order, the official address standing in for an empty one."""
+        given = {app.client: app for app in value}
+        return [
+            BrandApp(client=client, url=given[client].url or url, enabled=given[client].enabled) if client in given else BrandApp(client=client, url=url)
+            for client, url in APP_STORE_URLS.items()
+        ]
 
 
 class BrandImage(BaseModel):
@@ -227,10 +265,63 @@ class SignInRegistrationRequest(BaseModel):
     grant: str = Field(max_length=128)
 
 
-class RootSignInRequest(BaseModel):
-    """The root token."""
+class KeySignInRequest(BaseModel):
+    """An application key offered at the web app's sign-in page, which only root's open it."""
 
-    token: str = Field(max_length=512)
+    key: str = Field(max_length=512)
+
+
+class ApplicationKey(BaseModel):
+    """A key as its user and the dashboard see it; `state` is `active`, `dormant`, or `expired`."""
+
+    id: str
+    name: str
+    created: float
+    expires: float | None = None
+    last_used: float | None = None
+    client: str = ""
+    state: str = "active"
+
+
+class ApplicationKeyPolicy(BaseModel):
+    """What the settings let a user do with keys.
+
+    Attributes:
+        allowed: The user may make and use keys.
+        clients: The companion apps that may use them (see `APP_KEY_CLIENTS`).
+        max_days: The longest a key may live; negative for no limit.
+        dormant_hours: Hours after the last web sign-in at which keys sleep; negative for never.
+        follow_sign_in: Keys sleep as soon as the web sign-in has ended.
+        web_sign_in: When the user last signed in on the web (`at`) and until when (`until`).
+    """
+
+    allowed: bool = True
+    clients: list[str] = []
+    max_days: float = -1
+    dormant_hours: float = -1
+    follow_sign_in: bool = False
+    web_sign_in: dict[str, float] | None = None
+
+
+class ApplicationKeyList(BaseModel):
+    """A user's keys with the policy they are under."""
+
+    keys: list[ApplicationKey]
+    policy: ApplicationKeyPolicy
+
+
+class ApplicationKeyCreateRequest(BaseModel):
+    """A key to make: what to call it and, within the policy, how many days it lives (`None` for the longest allowed)."""
+
+    name: str = Field(min_length=1, max_length=60)
+    days: float | None = Field(default=None, gt=0, le=36500)
+
+
+class ApplicationKeyCreated(BaseModel):
+    """A made key: its text, shown this once, and its record."""
+
+    key: str
+    record: ApplicationKey
 
 
 class SignInRegistration(BaseModel):
@@ -471,6 +562,11 @@ class UserSettings(BaseModel):
         pools: Restricted pools open to the user.
         pools_denied: Pools closed to the user.
         proot_catalog: Id of the PRoot Apps catalog the user's sessions install from, or `None`.
+        application_keys: The user may make and use application keys for the companion apps.
+        application_key_clients: The companion apps that may use them (see `APP_KEY_CLIENTS`).
+        application_key_days: Longest a key lives, in days; negative for no expiry.
+        application_key_dormant_hours: Hours after the user's last web sign-in at which keys sleep; negative for never.
+        application_key_follow_sign_in: Keys sleep as soon as the user's web sign-in has ended.
         provider_groups: Groups the identity provider named at the last sign-in.
         approved: False for a user a sign-in created who waits for an administrator; the server keeps it.
     """
@@ -486,7 +582,7 @@ class UserSettings(BaseModel):
     edit_templates: bool = False
     gpu: bool = True
     gpu_share: bool = True
-    home_migration: bool = False
+    home_migration: bool = True
     storage_limit: int = -1
     session_limit: int = -1
     session_cpus: float = -1
@@ -497,6 +593,11 @@ class UserSettings(BaseModel):
     pools: list[str] = []
     pools_denied: list[str] = []
     proot_catalog: str | None = None
+    application_keys: bool = True
+    application_key_clients: list[str] = list(APP_KEY_CLIENTS)
+    application_key_days: float = -1
+    application_key_dormant_hours: float = -1
+    application_key_follow_sign_in: bool = False
     provider_groups: list[str] = []
     approved: bool = True
 
@@ -532,17 +633,29 @@ class GroupSettings(BaseModel):
     pools: list[str] = []
     pools_denied: list[str] = []
     proot_catalog: str | None = None
+    application_keys: bool | None = None
+    application_key_clients: list[str] | None = None
+    application_key_days: float | None = None
+    application_key_dormant_hours: float | None = None
+    application_key_follow_sign_in: bool | None = None
     sso_groups: list[str] = []
 
 
 class AdminStatusResponse(BaseModel):
-    """Status payload returned to every authenticated user; `held` marks one who waits for an administrator."""
+    """Status payload returned to every authenticated user; `held` marks one who waits for an administrator.
+
+    `via` is `key` for a key-file client, `app_key` for a companion app with an
+    application key, else how the web sign-in happened: `root`, `oidc`, `saml`,
+    or `proxy`.
+    """
 
     is_admin: bool
     held: bool = False
     username: str
     settings: UserSettings
     via: str = "key"
+    #: Whether this node takes key-file clients (`legacy_auth`), which decides what the dashboard offers.
+    key_files: bool = True
     sign_out_url: str = ""
     session_domain: str = ""
     session_isolation: bool = False

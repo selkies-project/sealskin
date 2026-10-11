@@ -54,8 +54,15 @@ other. Requests and answers are JSON as it is, protected by TLS, and only on
 a request that came through the node's own proxy: Caddy adds a secret to
 everything it passes on, which a request made to the API port directly cannot
 carry. The web app's requests authenticate by the cookie of a sign-in
-(`sso.py`), a proxy's by the header a trusted address sets, a node's by a
-signature of its server key. A cookie travels with any request the browser
+(`sso.py`), a companion app's by the application key it sends as a bearer
+with the name it gives itself (`application_keys.py`), a proxy's by the
+header a trusted address sets, a node's by a signature of its server key.
+A key is not ambient, so its requests skip the origin check that follows,
+and a key cannot manage keys. The apps use the same pages and API under
+`/companion/`, which Caddy strips and marks: there a key is the one
+credential taken and the sign-in and handshake routes answer 404, so a
+reverse proxy in front can pass the path unguarded.
+A cookie travels with any request the browser
 makes to the origin, so each of these routes also asks the browser's own
 account of where the request came from (`Sec-Fetch-Site`, else `Origin`) and
 refuses anything but the web app's pages; and the page of a web sign-in's
@@ -64,7 +71,9 @@ session is the server's own copy of the application's web client
 origin that holds the cookie. With `session_isolation` such a session is
 served only on an origin of its own as well.
 
-**The encrypted lane** is the key-file clients', described next. A request
+**The encrypted lane** is the key-file clients', described next. The
+browser extension and the mobile app take the plain lane instead when they
+hold an application key, and the encrypted lane with a key file. A request
 that names a crypto session takes it; a request to the API port always does.
 
 ## Encryption and authentication

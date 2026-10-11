@@ -130,9 +130,9 @@ On the first start with an empty `/config` the container:
    end-to-end encryption,
 3. finds no administrator and creates one named `admin`, writing its
    **private key** and connection details to `/config/admin.json`.
-4. writes the **root token** for the [web sign-in](signin.md) to
-   `/config/root_token`: paste it into the web app to sign in as `root`,
-   then delete the file.
+4. writes root's **application key** for the [web sign-in](signin.md) to
+   `/config/root_key`: paste it into the web app to sign in as `root`, then
+   delete the file.
 
 Copy `admin.json` somewhere safe and delete it from the server once you have
 imported it into a client. It is the only copy of that private key; the server
@@ -166,7 +166,17 @@ with a small host around them.
 
 Open the extension (toolbar icon or its options page), the app, or
 `https://<server>:8443/`. With no server configured you land on the
-**connection page**.
+**connection page**, which offers two ways in.
+
+**With an application key**, the companion of the web app. Sign in to the
+web app, open Settings, and under **Application Keys** make a key for this
+device; it is shown once, with the server's address after an `@`. Paste it
+on the connection page and click **Connect**: the app asks the server who
+the key is and opens the options page. The device has to trust the server's certificate.
+[Application keys](signin.md#application-keys) has the rules an
+administrator can set.
+
+**With a key file**, under **Use a key file instead**:
 
 1. Under **Quick Setup**, upload `admin.json` or paste its contents and click
    **Apply Configuration**. The manual form underneath takes the same values
@@ -178,9 +188,9 @@ Open the extension (toolbar icon or its options page), the app, or
    a token with your key, and calls the server; on success it saves the
    configuration and opens the dashboard.
 
-The web app takes no configuration file. It [signs in](signin.md) with the
-root token the first start wrote to `/config/root_token`, or through an
-identity provider once one is set up.
+The web app takes no configuration file. It [signs in](signin.md) with
+root's application key the first start wrote to `/config/root_key`, or
+through an identity provider once one is set up.
 
 ### Certificates
 

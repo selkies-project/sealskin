@@ -49,12 +49,12 @@ NetworkPolicy that lets only the server reach session pods where the network
 plugin enforces policies. Import `admin.json` into a client as described in
 [Getting Started](start.md#connect).
 
-For the web app, the server writes a root token at its first start instead;
-read it, sign in at `https://<host>/`, and delete it:
+For the web app, the server writes root's application key at its first
+start instead; read it, sign in at `https://<host>/`, and delete it:
 
 ```bash
-kubectl -n <namespace> exec deployment/sealskin -- cat /config/root_token
-kubectl -n <namespace> exec deployment/sealskin -- rm /config/root_token
+kubectl -n <namespace> exec deployment/sealskin -- cat /config/root_key
+kubectl -n <namespace> exec deployment/sealskin -- rm /config/root_key
 ```
 
 The web app needs a certificate browsers trust, and with session isolation
