@@ -18,6 +18,8 @@ export const hooks = {
 
 const sessionTabs = new Map();
 let reserved = null;
+/** Set in the tab's session storage while this tab shows a session in the web app's place (see `app.js`). */
+export const LEFT_FOR_SESSION = 'sealskin-left-for-session';
 
 /**
  * Take a blank tab while the click that launches a session still allows one,
@@ -95,6 +97,7 @@ function openTab(url) {
     tab = reserved && !reserved.closed ? reserved : null;
     reserved = null;
     if (!tab) {
+      try { sessionStorage.setItem(LEFT_FOR_SESSION, '1'); } catch (e) { /* no storage */ }
       location.assign(target.href);
       return;
     }

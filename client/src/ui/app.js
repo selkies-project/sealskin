@@ -37,7 +37,7 @@
  * handlers (`launchQueue`).
  */
 
-import { adoptLaunchTab, hooks, openLaunchTab, reserveTab } from './web-polyfill.js';
+import { LEFT_FOR_SESSION, adoptLaunchTab, hooks, openLaunchTab, reserveTab } from './web-polyfill.js';
 import '../shell/background.js';
 import { initHost, pageTransport } from '../shell/host.js';
 import { callBackground } from '../lib/host-bridge.js';
@@ -377,8 +377,21 @@ function bindShell() {
     const { page = 'home', ...params } = Object.fromEntries(new URLSearchParams(location.search));
     hostApi.openPage(page, params);
   });
-  // Back from a session, the page may come out of the back-forward cache with its rail folded away.
-  window.addEventListener('pageshow', (event) => { if (event.persisted) document.body.classList.remove('leaving'); });
+  // Back from a session shown in this tab, the page comes out of the back-forward cache as the shell left it,
+  // and its calls to the server stall; it is loaded afresh instead.
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted) return;
+    let left = false;
+    try {
+      left = sessionStorage.getItem(LEFT_FOR_SESSION) === '1';
+      sessionStorage.removeItem(LEFT_FOR_SESSION);
+    } catch (e) { /* no storage */ }
+    if (left) {
+      location.reload();
+      return;
+    }
+    document.body.classList.remove('leaving');
+  });
 }
 
 /** Ask the background for the session-origin suffix, which it probes for once. */
