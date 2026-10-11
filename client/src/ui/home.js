@@ -580,11 +580,6 @@ function showPlacement(app) {
   const hidden = isHidden(app);
   $('hide-btn').title = t(hidden ? 'web.home.showApp' : 'web.home.hideApp');
   $('hide-btn').querySelector('i').className = hidden ? 'fas fa-eye' : 'fas fa-eye-slash';
-  const order = $('favorite-order');
-  order.hidden = !favorite || layout.favorites.length < 2;
-  const at = layout.favorites.indexOf(app.id);
-  order.querySelector('[data-move="-1"]').disabled = at <= 0;
-  order.querySelector('[data-move="1"]').disabled = at >= layout.favorites.length - 1;
 }
 
 function openDrawer(app, anchor = null) {
@@ -681,21 +676,6 @@ async function toggleHidden() {
   closeDrawer();
   renderTypeChips();
   renderApps();
-  await saveLayout();
-}
-
-/** Move the panel's application among the favorites by `step` places. */
-async function moveFavorite(step) {
-  const app = drawerApp;
-  const at = layout.favorites.indexOf(app.id);
-  const to = at + step;
-  if (at < 0 || to < 0 || to >= layout.favorites.length) return;
-  const order = [...layout.favorites];
-  order.splice(at, 1);
-  order.splice(to, 0, app.id);
-  layout.favorites = order;
-  showPlacement(app);
-  renderFavorites();
   await saveLayout();
 }
 
@@ -1302,10 +1282,6 @@ function bindEvents() {
   $('drawer-backdrop').addEventListener('click', closeDrawer);
   $('favorite-btn').addEventListener('click', toggleFavorite);
   $('hide-btn').addEventListener('click', toggleHidden);
-  $('favorite-order').addEventListener('click', (event) => {
-    const button = event.target.closest('button[data-move]');
-    if (button) moveFavorite(Number(button.dataset.move));
-  });
   window.addEventListener('resize', () => { if (!drawer.hidden) placeDrawer(); });
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
