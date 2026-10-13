@@ -1,4 +1,4 @@
-"""The collaboration room page and the Selkies session its iframe opens."""
+"""The collaboration room page, the Selkies session its iframe opens, and the apps a controller swaps to."""
 
 import pytest
 from fastapi import FastAPI
@@ -51,3 +51,44 @@ def test_the_room_pages_assets_come_through_the_companion_lane():
     page = collaboration._absolutize_room_assets('<link href="room.css"><script src="room.js"></script><a href="/room/x">x</a><img src="../icons/i.png">')
     assert 'href="/companion/ui/room/room.css"' in page and 'src="/companion/ui/room/room.js"' in page
     assert 'src="/companion/ui/icons/i.png"' in page and 'href="/room/x"' in page
+
+
+def test_a_room_controller_swaps_only_to_apps_open_to_the_sessions_owner(http, monkeypatch):
+    from app.models import InstalledApp
+
+    started = []
+
+    async def ensure(session_id, app_id, timezone=None):
+        started.append(app_id)
+        return {"instance_id": "i", "ip": "127.0.0.1", "port": 1}
+
+    async def nothing(*_args, **_kwargs):
+        return None
+
+    monkeypatch.setattr(collaboration.launch, "ensure_container_for_session", ensure)
+    monkeypatch.setattr(collaboration.config_store, "save_sessions", nothing)
+    monkeypatch.setattr(collaboration, "broadcast_token_state", nothing)
+    for app_id, users in (("open", ["all"]), ("bobs", ["bob"])):
+        state.installed_apps[app_id] = InstalledApp.model_construct(
+            id=app_id, name=app_id, logo="", users=users, groups=[], provider_config=None
+        )
+    state.sessions[SESSION_ID] = {
+        "is_collaboration": True, "controller_token": "ctrl", "viewers": [], "username": "alice",
+        "provider_app_id": "other", "container_registry": {},
+    }
+    try:
+        with http.websocket_connect(f"/ws/room/{SESSION_ID}?token=ctrl") as ws:
+            ws.send_json({"action": "swap_app", "app_id": "bobs"})
+            ws.send_json({"action": "swap_app", "app_id": "open"})
+            refused = None
+            for _ in range(20):
+                message = ws.receive_json()
+                if message.get("type") == "error":
+                    refused = message
+                if message.get("type") == "app_swapped" and message.get("app_name") == "open":
+                    break
+        assert refused and "not open" in refused["message"]
+        assert started == ["open"]
+    finally:
+        for app_id in ("open", "bobs"):
+            state.installed_apps.pop(app_id, None)

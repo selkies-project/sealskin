@@ -504,6 +504,13 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
             "apps": sorted(user_apps, key=lambda x: x['name'])
         })
 
+    def owner_may_run(target_app_id: str) -> bool:
+        """Whether the session's owner may run the app, the rule `send_app_list` offers by:
+        the controller names an app id, which may be any installed app's."""
+        app = state.installed_apps.get(target_app_id)
+        owner = session_data.get("username", "")
+        return bool(app) and user_can_access(app.users, app.groups, owner, _owner_group(owner))
+
     async def handle_restart_app(target_app_id: str, timezone: str | None) -> None:
         """Restart one app's container inside the session."""
         try:
@@ -649,14 +656,22 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
 
                 elif action == "restart_app" and is_controller:
                     target_app_id = data.get("app_id")
-                    if target_app_id:
+                    if target_app_id and not owner_may_run(target_app_id):
+                        await websocket.send_json(
+                            {"type": "error", "message": "This application is not open to the session's owner."}
+                        )
+                    elif target_app_id:
                         asyncio.create_task(
                             handle_restart_app(target_app_id, data.get("timezone"))
                         )
 
                 elif action == "swap_app" and is_controller:
                     target_app_id = data.get("app_id")
-                    if target_app_id:
+                    if target_app_id and not owner_may_run(target_app_id):
+                        await websocket.send_json(
+                            {"type": "error", "message": "This application is not open to the session's owner."}
+                        )
+                    elif target_app_id:
                         asyncio.create_task(
                             handle_swap_app(target_app_id, data.get("timezone"))
                         )
