@@ -65,6 +65,13 @@ export function createHost(options) {
   const platform = detectPlatform(shell);
   let expectedOrigin = null;
   let helloSeen = false;
+  // The files the user handed the shell by address (a link, media, or a download it took);
+  // fetchBlob reads these alone with the shell's host permissions, never one a page names.
+  const handedFiles = new Set();
+  const onConnectPage = () => Boolean(options.isConnectPage && options.isConnectPage());
+  // The connect page's draft holds the private key, which a served page never sees.
+  const DRAFT_KEY = 'sealskinPendingConfig';
+  const namesDraft = (keys) => [].concat(keys || []).includes(DRAFT_KEY);
 
   const capabilities = {
     streamDownload: Boolean(options.streamDownload) || (shell === 'extension' && platform === 'chrome'),
@@ -115,10 +122,14 @@ export function createHost(options) {
         delete context.hasFile;
         if (file) context.file = file;
       }
+      if (context && context.action === 'file' && context.targetUrl) handedFiles.add(context.targetUrl);
       return context;
     },
 
     async setContext({ context, openPopup = true }) {
+      if (context && context.action === 'file' && context.targetUrl) {
+        throw new Error('A page hands over a file itself, not its address.');
+      }
       let toStore = context;
       if (context && context.file instanceof Blob) {
         await storePendingFile(context.file);
@@ -139,6 +150,7 @@ export function createHost(options) {
     async fetchBlob({ url }) {
       // Host pages carry the extension's host permissions, so cross-origin
       // fetches of link targets and media work here (not in the served page).
+      if (!handedFiles.has(url)) throw new Error('Only a file handed to the shell can be fetched.');
       const response = await fetch(url);
       if (!response.ok) throw new Error(`Failed to fetch file data: ${response.statusText}`);
       return response.blob();
@@ -198,15 +210,19 @@ export function createHost(options) {
       return {};
     },
 
-    storageGet({ keys }) {
-      return callBackground(transport, 'storageGet', { keys: keys === undefined ? null : keys });
+    async storageGet({ keys }) {
+      const items = await callBackground(transport, 'storageGet', { keys: keys === undefined ? null : keys });
+      if (items && !onConnectPage()) delete items[DRAFT_KEY];
+      return items;
     },
 
     storageSet({ items }) {
+      if (!onConnectPage() && namesDraft(Object.keys(items || {}))) throw new Error('Only the connect page keeps a draft.');
       return callBackground(transport, 'storageSet', { items });
     },
 
     storageRemove({ keys }) {
+      if (!onConnectPage() && namesDraft(keys)) throw new Error('Only the connect page keeps a draft.');
       return callBackground(transport, 'storageRemove', { keys });
     },
 
