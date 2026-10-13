@@ -64,6 +64,12 @@ async def get_app_icon(app_id: str, user: dict[str, Any] = Depends(verify_token)
     """Return a custom-uploaded app icon as base64 inside JSON."""
     if not re.fullmatch(r"[a-zA-Z0-9_-]+", app_id):
         raise HTTPException(status_code=400, detail="Invalid application ID.")
+    # Seen only by whom the app is listed for; 404 as for no icon, so it names no app.
+    app = state.installed_apps.get(app_id)
+    if not app or not (
+        user.get("is_admin") or user_can_access(app.users, app.groups, user["username"], user.get("groups") or [])
+    ):
+        raise HTTPException(status_code=404, detail="Icon not found.")
 
     icons_root = os.path.abspath(settings.app_icons_path)
     icon_path = os.path.abspath(os.path.join(icons_root, f"{app_id}.png"))
