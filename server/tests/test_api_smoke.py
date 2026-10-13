@@ -287,6 +287,12 @@ def test_template_editors_keep_docker_settings_to_administrators(role_clients):
     assert editor.call("POST", templates, {"name": "Hosted", "settings": same})[0] == 201
 
     assert editor.call("DELETE", f"{templates}/Hosted")[0] == 403
+    for twin in ("hosted", "HOSTED"):
+        assert editor.call("POST", templates, {"name": twin, "settings": {"TITLE": "Twin"}})[0] == 409
+        assert boss.call("POST", templates, {"name": twin, "settings": {}})[0] == 409
+        assert editor.call("DELETE", f"{templates}/{twin}")[0] == 404
+    listed = {t["name"]: t["settings"] for t in boss.call("GET", templates)[1]}
+    assert "hosted" not in listed and listed["Hosted"]["DOCKER_DEVICES"] == devices
     assert editor.call("DELETE", f"{templates}/Team")[0] == 204
     assert boss.call("DELETE", f"{templates}/Hosted")[0] == 204
     status, data = boss.call("POST", "/api/admin/status", {})

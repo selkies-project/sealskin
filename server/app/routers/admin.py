@@ -753,6 +753,10 @@ async def save_app_template(
         template.settings = {**template.settings, **kept}
     try:
         await config_store.save_app_template(template)
+    except FileExistsError as exc:
+        raise HTTPException(
+            status_code=409, detail=f"The template '{exc.args[0]}' is stored under that name; choose another."
+        ) from exc
     except OSError as exc:
         logger.error("Error saving app template: %s", exc)
         raise HTTPException(

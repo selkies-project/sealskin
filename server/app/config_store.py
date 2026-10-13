@@ -891,12 +891,23 @@ async def save_app_template(template: AppTemplate) -> None:
 
     Args:
         template: Template to save.
+
+    Raises:
+        FileExistsError: If another template's file is the one the name maps to
+            (names differing only in case or in spaces against underscores).
     """
     existing = state.template_files.get(template.name)
     if existing and existing.startswith(os.path.abspath(settings.app_templates_path)):
         path = existing
     else:
         path = os.path.join(settings.app_templates_path, template_filename(template.name))
+    holder = next(
+        (name for name, file in state.template_files.items()
+         if name != template.name and os.path.realpath(file) == os.path.realpath(path)),
+        None,
+    )
+    if holder is not None:
+        raise FileExistsError(holder)
     await persistence.write_yaml(path, template.model_dump())
     load_app_templates()
 
@@ -912,13 +923,10 @@ def delete_app_template(name: str) -> None:
         FileNotFoundError: If no template of that name exists.
     """
     known = state.template_files.get(name)
+    if known is None:
+        raise FileNotFoundError(name)
     try:
-        if known is None:
-            path = safe_join(settings.app_templates_path, template_filename(name))
-            if not os.path.exists(path):
-                raise FileNotFoundError(name)
-        else:
-            path = resolve_within(settings.app_templates_path, known)
+        path = resolve_within(settings.app_templates_path, known)
     except ValueError as exc:
         raise PermissionError(name) from exc
     if path == os.path.realpath(settings.app_templates_path):
