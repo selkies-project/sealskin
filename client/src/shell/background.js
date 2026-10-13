@@ -48,6 +48,51 @@ let session = {
   baseUrl: null
 };
 
+/**
+ * Servers (`<address>:<session port>`) that have answered over https. The
+ * plain http API port is a stage before a self-signed certificate is
+ * accepted; once https has worked, a failure there is a certificate to accept
+ * again (browsers forget the exception after a while) or something on the
+ * path blocking the port, so the served pages are not framed over http again
+ * until the user says so (`allowPlainHttp`, for the rest of the browser
+ * session). Kept apart from the configuration and out of the bridge's reach.
+ */
+const HTTPS_SEEN_KEY = 'sealskinHttpsSeen';
+const HTTP_ALLOWED_KEY = 'sealskinHttpAllowed';
+/** Prefix of the handshake failure the host answers with its held-https panel. */
+const HTTPS_HELD = 'https-held: ';
+// The session store outlives the service worker but not the browser; the mobile shell has none.
+const sessionStore = chrome.storage && chrome.storage.session;
+const httpAllowedInMemory = {};
+
+function serverOf(config) {
+  return config && config.serverIp && config.sessionPort ? `${config.serverIp}:${config.sessionPort}` : null;
+}
+
+async function httpsSeen(server) {
+  const { [HTTPS_SEEN_KEY]: seen } = await chrome.storage.local.get(HTTPS_SEEN_KEY);
+  return Boolean(seen && seen[server]);
+}
+
+async function markHttpsSeen(server) {
+  const { [HTTPS_SEEN_KEY]: seen } = await chrome.storage.local.get(HTTPS_SEEN_KEY);
+  if (seen && seen[server]) return;
+  await chrome.storage.local.set({ [HTTPS_SEEN_KEY]: { ...(seen || {}), [server]: true } });
+}
+
+async function plainHttpAllowed(server) {
+  if (!sessionStore) return Boolean(httpAllowedInMemory[server]);
+  const { [HTTP_ALLOWED_KEY]: allowed } = await sessionStore.get(HTTP_ALLOWED_KEY);
+  return Boolean(allowed && allowed[server]);
+}
+
+async function allowPlainHttpFor(server) {
+  httpAllowedInMemory[server] = true;
+  if (!sessionStore) return;
+  const { [HTTP_ALLOWED_KEY]: allowed } = await sessionStore.get(HTTP_ALLOWED_KEY);
+  await sessionStore.set({ [HTTP_ALLOWED_KEY]: { ...(allowed || {}), [server]: true } });
+}
+
 /** Storage keys the served pages may read and write through the bridge. */
 const STORAGE_ALLOWED_EXACT = new Set(['simple_launch_profile', 'home_layout', 'sealskinPendingConfig']);
 const STORAGE_ALLOWED_PREFIX = 'workflow_profile_';
@@ -103,7 +148,9 @@ async function decryptAesGcm(key, iv, ciphertext) {
 /**
  * Establish the E2EE session. Tries the https session port first and falls
  * back to the plain http API port (Chrome allows E2EE over http for servers
- * with a self-signed certificate that has not been accepted yet).
+ * with a self-signed certificate that has not been accepted yet), except for
+ * a server that has answered over https before (`HTTPS_SEEN_KEY`): its
+ * failure is reported with the HTTPS_HELD prefix instead.
  */
 async function performHandshake(config) {
   console.log('[SealSkin E2EE] Performing handshake...');
@@ -141,9 +188,11 @@ async function performHandshake(config) {
     return { key: aesKey, id: session_id, baseUrl };
   };
 
+  const server = serverOf(config);
+  const held = server !== null && await httpsSeen(server) && !(await plainHttpAllowed(server));
   const endpoints = [];
   if (sessionPort) endpoints.push(`https://${serverIp}:${sessionPort}`);
-  endpoints.push(`http://${serverIp}:${apiPort}`);
+  if (!held) endpoints.push(`http://${serverIp}:${apiPort}`);
 
   let lastError;
   const failures = [];
@@ -151,6 +200,7 @@ async function performHandshake(config) {
     try {
       session = await tryHandshake(url);
       console.log(`[SealSkin E2EE] Handshake successful using ${url}`);
+      if (server && url.startsWith('https://')) await markHttpsSeen(server);
       return;
     } catch (e) {
       console.warn(`[SealSkin E2EE] Handshake failed on ${url}:`, e);
@@ -158,7 +208,7 @@ async function performHandshake(config) {
       failures.push(describeNetworkError(url, e));
     }
   }
-  if (failures.length) throw new Error(failures.join(' '));
+  if (failures.length) throw new Error(`${held ? HTTPS_HELD : ''}${failures.join(' ')}`);
   throw lastError || new Error('Handshake failed on all attempted ports.');
 }
 
@@ -465,6 +515,14 @@ const handlers = {
     }
     const currentSession = await ensureSession();
     return currentSession.baseUrl;
+  },
+
+  // The user's word, from the host's held-https panel, for the rest of the browser session.
+  async allowPlainHttp() {
+    const server = serverOf(await getConfig());
+    if (server) await allowPlainHttpFor(server);
+    session = { key: null, id: null, baseUrl: null };
+    return {};
   },
 
   // The web app asks ahead of a launch, so the answer is known by the click.

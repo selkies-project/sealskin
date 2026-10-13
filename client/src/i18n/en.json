@@ -1940,7 +1940,12 @@
       "keyUnknown": "The key was revoked or never existed. Make a new one in your profile on the web.",
       "keyExpired": "The key expired. Make a new one in your profile on the web.",
       "keyDisabled": "Your administrator does not allow application keys for your account.",
-      "keyClient": "Your administrator does not allow this app to use application keys."
+      "keyClient": "Your administrator does not allow this app to use application keys.",
+      "heldTitle": "Secure connection failed",
+      "heldBody": "This server has answered over HTTPS before, so SealSkin does not fall back to plain HTTP on its own. Its certificate may need accepting again (browsers forget an accepted self-signed certificate after a while), or something on this network is blocking the secure port.",
+      "continuePlain": "Continue without TLS",
+      "plainNotice": "Loaded without TLS: what you send stays end-to-end encrypted, but on an untrusted network this page could be altered. Accept the server's certificate to secure it.",
+      "dismiss": "Dismiss"
     }
   },
   "web": {

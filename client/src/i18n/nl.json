@@ -1940,7 +1940,12 @@
       "keyUnknown": "De sleutel is ingetrokken of heeft nooit bestaan. Maak een nieuwe in uw profiel op het web.",
       "keyExpired": "De sleutel is verlopen. Maak een nieuwe in uw profiel op het web.",
       "keyDisabled": "Uw beheerder staat geen toepassingssleutels toe voor uw account.",
-      "keyClient": "Uw beheerder staat deze app niet toe toepassingssleutels te gebruiken."
+      "keyClient": "Uw beheerder staat deze app niet toe toepassingssleutels te gebruiken.",
+      "heldTitle": "Beveiligde verbinding mislukt",
+      "heldBody": "Deze server heeft eerder via HTTPS geantwoord, dus SealSkin valt niet uit zichzelf terug op gewone HTTP. Het certificaat moet misschien opnieuw worden geaccepteerd (browsers vergeten een geaccepteerd zelfondertekend certificaat na een tijd), of iets op dit netwerk blokkeert de beveiligde poort.",
+      "continuePlain": "Doorgaan zonder TLS",
+      "plainNotice": "Geladen zonder TLS: wat u verstuurt blijft end-to-end versleuteld, maar op een niet-vertrouwd netwerk kan deze pagina worden gewijzigd. Accepteer het certificaat van de server om haar te beveiligen.",
+      "dismiss": "Sluiten"
     }
   },
   "web": {

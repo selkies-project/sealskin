@@ -1940,7 +1940,12 @@
       "keyUnknown": "Binawi ang key o hindi ito kailanman umiral. Gumawa ng bago sa iyong profile sa web.",
       "keyExpired": "Nag-expire na ang key. Gumawa ng bago sa iyong profile sa web.",
       "keyDisabled": "Hindi pinapahintulutan ng iyong administrator ang mga application key para sa iyong account.",
-      "keyClient": "Hindi pinapahintulutan ng iyong administrator na gumamit ng application key ang app na ito."
+      "keyClient": "Hindi pinapahintulutan ng iyong administrator na gumamit ng application key ang app na ito.",
+      "heldTitle": "Nabigo ang secure na koneksyon",
+      "heldBody": "Sumagot na ang server na ito sa HTTPS dati, kaya hindi kusang bumabalik ang SealSkin sa plain HTTP. Maaaring kailangang tanggapin muli ang certificate nito (nakakalimutan ng mga browser ang tinanggap na self-signed certificate pagkalipas ng ilang panahon), o may humaharang sa secure na port sa network na ito.",
+      "continuePlain": "Magpatuloy nang walang TLS",
+      "plainNotice": "Na-load nang walang TLS: nananatiling end-to-end encrypted ang ipinapadala mo, pero sa network na hindi mapagkakatiwalaan ay maaaring mabago ang pahinang ito. Tanggapin ang certificate ng server para ma-secure ito.",
+      "dismiss": "Isara"
     }
   },
   "web": {

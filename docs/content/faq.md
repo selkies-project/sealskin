@@ -10,7 +10,11 @@ description: Certificates, Firefox and mobile requirements, the Docker socket, G
 
 With a self-signed certificate the browser refuses the served UI until you
 have accepted the certificate once. Click **Open server**, accept it in the
-tab that opens, then **Retry**. If the address or ports are wrong, **Change
+tab that opens, then **Retry**. Browsers forget an accepted self-signed
+certificate after a while; when that happens to a server the extension has
+reached over HTTPS, it shows **Secure connection failed** instead of quietly
+loading the interface over plain HTTP. Accept the certificate again, or
+choose **Continue without TLS**. If the address or ports are wrong, **Change
 connection** takes you back to the connection page. Check that the session
 port is reachable from where you are (`curl -k https://<server>:8443/`).
 </details>

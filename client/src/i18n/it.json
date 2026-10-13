@@ -1940,7 +1940,12 @@
       "keyUnknown": "La chiave è stata revocata o non è mai esistita. Creane una nuova nel tuo profilo sul web.",
       "keyExpired": "La chiave è scaduta. Creane una nuova nel tuo profilo sul web.",
       "keyDisabled": "Il tuo amministratore non consente le chiavi applicazione per il tuo account.",
-      "keyClient": "Il tuo amministratore non consente a questa app di usare le chiavi applicazione."
+      "keyClient": "Il tuo amministratore non consente a questa app di usare le chiavi applicazione.",
+      "heldTitle": "Connessione sicura non riuscita",
+      "heldBody": "Questo server ha già risposto tramite HTTPS, quindi SealSkin non ripiega da solo su HTTP in chiaro. Potrebbe essere necessario accettare di nuovo il suo certificato (i browser dimenticano dopo un po' un certificato autofirmato accettato), oppure qualcosa su questa rete sta bloccando la porta sicura.",
+      "continuePlain": "Continua senza TLS",
+      "plainNotice": "Caricata senza TLS: ciò che invii resta cifrato end-to-end, ma su una rete non attendibile questa pagina potrebbe essere alterata. Accetta il certificato del server per proteggerla.",
+      "dismiss": "Chiudi"
     }
   },
   "web": {

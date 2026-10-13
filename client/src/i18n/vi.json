@@ -1940,7 +1940,12 @@
       "keyUnknown": "Khóa đã bị thu hồi hoặc chưa từng tồn tại. Hãy tạo khóa mới trong hồ sơ của bạn trên web.",
       "keyExpired": "Khóa đã hết hạn. Hãy tạo khóa mới trong hồ sơ của bạn trên web.",
       "keyDisabled": "Quản trị viên không cho phép tài khoản của bạn dùng khóa ứng dụng.",
-      "keyClient": "Quản trị viên không cho phép ứng dụng này dùng khóa ứng dụng."
+      "keyClient": "Quản trị viên không cho phép ứng dụng này dùng khóa ứng dụng.",
+      "heldTitle": "Kết nối bảo mật thất bại",
+      "heldBody": "Máy chủ này đã từng phản hồi qua HTTPS, nên SealSkin không tự chuyển về HTTP thường. Có thể cần chấp nhận lại chứng chỉ của máy chủ (trình duyệt sẽ quên chứng chỉ tự ký đã chấp nhận sau một thời gian), hoặc có thứ gì đó trên mạng này đang chặn cổng bảo mật.",
+      "continuePlain": "Tiếp tục không dùng TLS",
+      "plainNotice": "Đã tải không dùng TLS: những gì bạn gửi vẫn được mã hóa đầu cuối, nhưng trên mạng không tin cậy, trang này có thể bị thay đổi. Hãy chấp nhận chứng chỉ của máy chủ để bảo vệ trang.",
+      "dismiss": "Bỏ qua"
     }
   },
   "web": {

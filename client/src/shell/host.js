@@ -17,7 +17,9 @@
  * server" button opens the https origin in a top-level tab so the certificate
  * can be accepted, after which https works for both the API and the iframe.
  * With an application key the base is the https session port, and the
- * background first asks the server for the key's standing.
+ * background first asks the server for the key's standing. A server that has
+ * answered over https before is not framed over http again without asking
+ * (the held panel), and a page framed over http has a notice above it.
  *
  * On the extension this module runs on its own (see the bottom); the mobile
  * and web shells import `initHost` and pass their shell name and hooks.
@@ -56,7 +58,14 @@ const STRINGS = {
   keyExpired: 'The key expired. Make a new one in your profile on the web.',
   keyDisabled: 'Your administrator does not allow application keys for your account.',
   keyClient: 'Your administrator does not allow this app to use application keys.',
+  heldTitle: 'Secure connection failed',
+  heldBody: 'This server has answered over HTTPS before, so SealSkin does not fall back to plain HTTP on its own. Its certificate may need accepting again (browsers forget an accepted self-signed certificate after a while), or something on this network is blocking the secure port.',
+  continuePlain: 'Continue without TLS',
+  plainNotice: 'Loaded without TLS: what you send stays end-to-end encrypted, but on an untrusted network this page could be altered. Accept the server\'s certificate to secure it.',
+  dismiss: 'Dismiss',
 };
+// The prefix background.js puts on a handshake failure where plain http waits for the user.
+const HTTPS_HELD = 'https-held: ';
 // What the server answers for an application key that signs nobody in (`app.application_keys`).
 const KEY_REFUSALS = { dormant: 'dormant', unknown: 'keyUnknown', expired: 'keyExpired', disabled: 'keyDisabled', client: 'keyClient' };
 
@@ -224,6 +233,16 @@ export function initHost(overrides = {}) {
         actions.appendChild(addButton(STRINGS.openServer, 'secondary', () => openServer()));
         actions.appendChild(addButton(STRINGS.changeConnection, 'secondary', () => openPage('connect')));
       }
+    } else if (kind === 'held') {
+      addText('h2', STRINGS.heldTitle);
+      addText('p', STRINGS.heldBody, 'host-muted');
+      if (detail) addText('p', detail, 'host-error');
+      actions.appendChild(addButton(STRINGS.openServer, 'primary', () => openServer()));
+      actions.appendChild(addButton(STRINGS.retry, 'secondary', () => boot()));
+      actions.appendChild(addButton(STRINGS.continuePlain, 'secondary', async () => {
+        await bg('allowPlainHttp').catch(() => {});
+        boot();
+      }));
     } else if (kind === 'mismatch') {
       addText('h2', STRINGS.mismatchTitle);
       addText('p', STRINGS.mismatchBody, 'host-muted');
@@ -244,6 +263,42 @@ export function initHost(overrides = {}) {
     }
     if (actions.childElementCount) box.appendChild(actions);
     panel.appendChild(box);
+  }
+
+  let notice = null;
+
+  /**
+   * The notice above a page the extension frames over plain http, which
+   * nothing authenticates, until the user dismisses it for that server.
+   */
+  function setPlainNotice(base) {
+    if (notice) { notice.remove(); notice = null; }
+    document.documentElement.classList.remove('host-noticed');
+    if (shell !== 'extension' || !base || !base.startsWith('http:')) return;
+    const dismissed = `sealskinPlainNoticeDismissed:${servedOrigin(base)}`;
+    try {
+      if (localStorage.getItem(dismissed)) return;
+    } catch (e) { /* no storage: shown */ }
+    notice = document.createElement('div');
+    notice.id = 'host-notice';
+    notice.setAttribute('role', 'status');
+    const text = document.createElement('span');
+    text.textContent = STRINGS.plainNotice;
+    const open = document.createElement('button');
+    open.textContent = STRINGS.openServer;
+    open.addEventListener('click', () => openServer());
+    const close = document.createElement('button');
+    close.textContent = '\u00d7';
+    close.className = 'host-notice-close';
+    close.setAttribute('aria-label', STRINGS.dismiss);
+    close.title = STRINGS.dismiss;
+    close.addEventListener('click', () => {
+      try { localStorage.setItem(dismissed, '1'); } catch (e) { /* shown again next time */ }
+      setPlainNotice(null);
+    });
+    notice.append(text, open, close);
+    iframe.before(notice);
+    document.documentElement.classList.add('host-noticed');
   }
 
   function servedOrigin(base) {
@@ -278,6 +333,7 @@ export function initHost(overrides = {}) {
       return;
     }
     framedConnect = true;
+    setPlainNotice(null);
     host.setExpectedOrigin(location.origin && location.origin !== 'null' ? location.origin : null);
     showPanel(null);
     iframe.src = 'connect.html';
@@ -288,6 +344,7 @@ export function initHost(overrides = {}) {
   function loadServed(base, target) {
     framedConnect = false;
     lastBase = base;
+    setPlainNotice(base);
     host.setExpectedOrigin(servedOrigin(base));
     showPanel('loading');
     iframe.hidden = false;
@@ -323,8 +380,10 @@ export function initHost(overrides = {}) {
       base = await bg('getUiBase');
     } catch (e) {
       const code = keyRefusal(e);
+      const message = e && e.message ? e.message : String(e);
       if (code) showPanel(code === 'dormant' ? 'dormant' : 'key', code);
-      else showPanel('unreachable', e && e.message ? e.message : String(e));
+      else if (message.startsWith(HTTPS_HELD)) showPanel('held', message.slice(HTTPS_HELD.length));
+      else showPanel('unreachable', message);
       return;
     }
     loadServed(base, SERVED_PAGES.has(page) ? page : launcher);

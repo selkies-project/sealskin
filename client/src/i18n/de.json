@@ -1940,7 +1940,12 @@
       "keyUnknown": "Der Schlüssel wurde widerrufen oder hat nie existiert. Erstellen Sie einen neuen in Ihrem Profil im Web.",
       "keyExpired": "Der Schlüssel ist abgelaufen. Erstellen Sie einen neuen in Ihrem Profil im Web.",
       "keyDisabled": "Ihr Administrator erlaubt für Ihr Konto keine Anwendungsschlüssel.",
-      "keyClient": "Ihr Administrator erlaubt dieser App nicht, Anwendungsschlüssel zu verwenden."
+      "keyClient": "Ihr Administrator erlaubt dieser App nicht, Anwendungsschlüssel zu verwenden.",
+      "heldTitle": "Sichere Verbindung fehlgeschlagen",
+      "heldBody": "Dieser Server hat bereits über HTTPS geantwortet, daher weicht SealSkin nicht von selbst auf einfaches HTTP aus. Sein Zertifikat muss eventuell erneut akzeptiert werden (Browser vergessen ein akzeptiertes selbstsigniertes Zertifikat nach einiger Zeit), oder etwas in diesem Netzwerk blockiert den sicheren Port.",
+      "continuePlain": "Ohne TLS fortfahren",
+      "plainNotice": "Ohne TLS geladen: Was Sie senden, bleibt Ende-zu-Ende-verschlüsselt, aber in einem nicht vertrauenswürdigen Netzwerk könnte diese Seite verändert werden. Akzeptieren Sie das Zertifikat des Servers, um sie abzusichern.",
+      "dismiss": "Schließen"
     }
   },
   "web": {

@@ -1940,7 +1940,12 @@
       "keyUnknown": "La clé a été révoquée ou n'a jamais existé. Créez-en une nouvelle dans votre profil sur le web.",
       "keyExpired": "La clé a expiré. Créez-en une nouvelle dans votre profil sur le web.",
       "keyDisabled": "Votre administrateur n'autorise pas les clés d'application pour votre compte.",
-      "keyClient": "Votre administrateur n'autorise pas cette application à utiliser des clés d'application."
+      "keyClient": "Votre administrateur n'autorise pas cette application à utiliser des clés d'application.",
+      "heldTitle": "La connexion sécurisée a échoué",
+      "heldBody": "Ce serveur a déjà répondu en HTTPS, donc SealSkin ne se rabat pas de lui-même sur HTTP en clair. Son certificat doit peut-être être accepté à nouveau (les navigateurs oublient un certificat auto-signé accepté au bout d'un certain temps), ou quelque chose sur ce réseau bloque le port sécurisé.",
+      "continuePlain": "Continuer sans TLS",
+      "plainNotice": "Chargée sans TLS : ce que vous envoyez reste chiffré de bout en bout, mais sur un réseau non fiable cette page pourrait être modifiée. Acceptez le certificat du serveur pour la sécuriser.",
+      "dismiss": "Ignorer"
     }
   },
   "web": {

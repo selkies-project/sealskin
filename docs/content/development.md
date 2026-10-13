@@ -209,8 +209,12 @@ workflows upload and what gets submitted to the stores.
 
 With a self-signed certificate on the server, the extension falls back to
 plain HTTP on the API port until you accept the certificate; the host's
-**Open server** button opens the right page for that. Firefox requires a
-trusted certificate for extension traffic.
+**Open server** button opens the right page for that, and a notice above a
+page framed over plain HTTP says so. Once a server has answered over HTTPS
+the extension no longer falls back on its own: a later failure (the browser
+forgot the accepted certificate, or something blocks the port) shows a panel
+that asks before it continues without TLS for the rest of the browser
+session. Firefox requires a trusted certificate for extension traffic.
 
 ## The mobile shells
 

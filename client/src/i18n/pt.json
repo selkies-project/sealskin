@@ -1940,7 +1940,12 @@
       "keyUnknown": "A chave foi revogada ou nunca existiu. Crie uma nova no seu perfil na web.",
       "keyExpired": "A chave expirou. Crie uma nova no seu perfil na web.",
       "keyDisabled": "Seu administrador não permite chaves de aplicação para a sua conta.",
-      "keyClient": "Seu administrador não permite que este aplicativo use chaves de aplicação."
+      "keyClient": "Seu administrador não permite que este aplicativo use chaves de aplicação.",
+      "heldTitle": "A conexão segura falhou",
+      "heldBody": "Este servidor já respondeu por HTTPS antes, então o SealSkin não volta sozinho para HTTP sem criptografia. Talvez seja preciso aceitar o certificado dele de novo (os navegadores esquecem um certificado autoassinado aceito depois de algum tempo), ou algo nesta rede está bloqueando a porta segura.",
+      "continuePlain": "Continuar sem TLS",
+      "plainNotice": "Carregada sem TLS: o que você envia continua criptografado de ponta a ponta, mas numa rede não confiável esta página pode ser alterada. Aceite o certificado do servidor para protegê-la.",
+      "dismiss": "Dispensar"
     }
   },
   "web": {

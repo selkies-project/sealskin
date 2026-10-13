@@ -43,7 +43,10 @@ Both ports carry the same API. Caddy forwards `/api/*` on the session port
 to the API server, so a client normally only needs `8443`; the API port is
 published separately for the Chrome self-signed-certificate fallback, where
 the extension talks plain HTTP to `8000` until the certificate has been
-accepted. Even over plain HTTP the API payloads are encrypted end to end.
+accepted. Even over plain HTTP the API payloads are encrypted end to end;
+the served pages themselves are not, so the extension shows a notice above a
+page framed over plain HTTP, and once a server has answered over HTTPS it
+does not fall back to `8000` without asking.
 
 ## Two lanes
 
@@ -195,7 +198,11 @@ The host page owns one iframe and cycles through three states:
 2. **Configured**: the host asks the background for the served UI base
    (`https://<server>:<session port>` first, then the `http://<server>:<api
    port>` fallback), points the iframe at `<base>/ui/<page>.html` and waits
-   for the page's `hello`.
+   for the page's `hello`. A page framed over plain HTTP has a notice above
+   it with **Open server**. For a server that has answered over HTTPS before,
+   the fallback waits for the user: a **Secure connection failed** panel
+   offers **Open server**, **Retry**, and **Continue without TLS** (for the
+   rest of the browser session).
 3. **No `hello` within eight seconds**, or the manifest fetch failed: the
    unreachable panel, with **Retry**, **Open server** (opens the web app at `<base>/` in
    a top-level tab so a self-signed certificate can be accepted), and

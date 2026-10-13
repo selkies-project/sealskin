@@ -1940,7 +1940,12 @@
       "keyUnknown": "Anahtar iptal edildi veya hiç var olmadı. Web'deki profilinizden yeni bir tane oluşturun.",
       "keyExpired": "Anahtarın süresi doldu. Web'deki profilinizden yeni bir tane oluşturun.",
       "keyDisabled": "Yöneticiniz hesabınız için uygulama anahtarlarına izin vermiyor.",
-      "keyClient": "Yöneticiniz bu uygulamanın uygulama anahtarı kullanmasına izin vermiyor."
+      "keyClient": "Yöneticiniz bu uygulamanın uygulama anahtarı kullanmasına izin vermiyor.",
+      "heldTitle": "Güvenli bağlantı başarısız oldu",
+      "heldBody": "Bu sunucu daha önce HTTPS üzerinden yanıt verdi, bu yüzden SealSkin kendiliğinden şifresiz HTTP'ye geri dönmez. Sertifikasının yeniden kabul edilmesi gerekebilir (tarayıcılar kabul edilmiş kendinden imzalı bir sertifikayı bir süre sonra unutur) ya da bu ağdaki bir şey güvenli bağlantı noktasını engelliyor.",
+      "continuePlain": "TLS olmadan devam et",
+      "plainNotice": "TLS olmadan yüklendi: gönderdikleriniz uçtan uca şifreli kalır, ancak güvenilmeyen bir ağda bu sayfa değiştirilebilir. Güvenceye almak için sunucunun sertifikasını kabul edin.",
+      "dismiss": "Kapat"
     }
   },
   "web": {

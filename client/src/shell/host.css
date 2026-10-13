@@ -41,6 +41,37 @@ body[data-page="popup"] { width: 450px; height: 580px; overflow: hidden; }
 }
 #app-frame[hidden] { display: none; }
 
+/* The page fills what the plain-http notice leaves (extension shell only). */
+html.host-noticed body { display: flex; flex-direction: column; }
+html.host-noticed #app-frame { flex: 1 1 auto; height: auto; min-height: 0; }
+
+#host-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  background-color: var(--bg-1);
+  border-bottom: 1px solid var(--border-strong);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+#host-notice span { flex: 1 1 auto; }
+#host-notice button {
+  flex: none;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background-color: var(--glass-strong);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+}
+#host-notice button:hover { background-color: var(--bg-3); border-color: var(--border-strong); }
+#host-notice button.host-notice-close { padding: 0.25rem 0.45rem; }
+
 #host-panel {
   position: fixed;
   inset: 0;

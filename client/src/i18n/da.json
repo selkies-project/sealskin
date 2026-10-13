@@ -1940,7 +1940,12 @@
       "keyUnknown": "Nøglen blev tilbagekaldt eller har aldrig eksisteret. Opret en ny i din profil på webben.",
       "keyExpired": "Nøglen er udløbet. Opret en ny i din profil på webben.",
       "keyDisabled": "Din administrator tillader ikke applikationsnøgler for din konto.",
-      "keyClient": "Din administrator tillader ikke, at denne app bruger applikationsnøgler."
+      "keyClient": "Din administrator tillader ikke, at denne app bruger applikationsnøgler.",
+      "heldTitle": "Sikker forbindelse mislykkedes",
+      "heldBody": "Denne server har svaret over HTTPS før, så SealSkin falder ikke selv tilbage til almindelig HTTP. Dens certifikat skal måske accepteres igen (browsere glemmer et accepteret selvsigneret certifikat efter et stykke tid), eller noget på dette netværk blokerer den sikre port.",
+      "continuePlain": "Fortsæt uden TLS",
+      "plainNotice": "Indlæst uden TLS: det, du sender, forbliver end-to-end-krypteret, men på et netværk, du ikke stoler på, kan denne side blive ændret. Accepter serverens certifikat for at sikre den.",
+      "dismiss": "Luk"
     }
   },
   "web": {
