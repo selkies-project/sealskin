@@ -47,6 +47,13 @@ router = APIRouter(
     route_class=EncryptedRoute,
 )
 
+#: The most one chunk may carry; the clients send 1-2 MiB.
+MAX_CHUNK_BYTES = 8 * 1024 * 1024
+#: Uploads a user may have open at once.
+MAX_OPEN_UPLOADS = 16
+#: How long an upload may sit unfinished before the next one a user starts clears it.
+UPLOAD_TTL_SECONDS = 24 * 3600
+
 _UPLOAD_ID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 _USERNAME_RE = re.compile(r"^[a-zA-Z0-9_-]+$")
 
@@ -134,16 +141,41 @@ async def reassemble_file(username: str, upload_id: str, total_chunks: int) -> s
         raise HTTPException(status_code=500, detail="Failed to reassemble file.") from exc
 
 
-@router.post("/initiate", response_model=UploadInitiateResponse)
+def _open_uploads(username: str) -> list[str]:
+    """The user's unfinished uploads, after clearing those idle past `UPLOAD_TTL_SECONDS`."""
+    root = user_upload_root(username)
+    if not os.path.isdir(root):
+        return []
+    kept = []
+    for name in os.listdir(root):
+        path = os.path.join(root, name)
+        if not os.path.isdir(path):
+            continue
+        if time.time() - os.path.getmtime(path) > UPLOAD_TTL_SECONDS:
+            shutil.rmtree(path, ignore_errors=True)
+        else:
+            kept.append(path)
+    return kept
+
+
+@router.post("/initiate", response_model=UploadInitiateResponse, dependencies=[Depends(routing.storage_room)])
 async def upload_initiate(
     decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body),
     user: dict[str, Any] = Depends(verify_token),
 ) -> dict[str, str]:
-    """Start a chunked upload and return its id."""
+    """Start a chunked upload and return its id: one that would not fit the user's
+    storage limit, or past `MAX_OPEN_UPLOADS` open, is refused."""
     try:
         req = UploadInitiateRequest(**decrypted_body)
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {exc}") from exc
+    limit = (user.get("effective_settings") or {}).get("storage_limit", -1)
+    if req.total_size < 0 or (
+        not user.get("is_admin") and limit is not None and limit >= 0 and req.total_size > limit * 1024**3
+    ):
+        raise HTTPException(status_code=413, detail="The file is larger than this account may store.")
+    if len(await asyncio.to_thread(_open_uploads, user["username"])) >= MAX_OPEN_UPLOADS:
+        raise HTTPException(status_code=429, detail="Too many uploads in progress; finish or wait for one.")
     upload_id = str(uuid.uuid4())
     directory = upload_path(user["username"], upload_id)
     os.makedirs(directory, exist_ok=True, mode=0o700)
@@ -167,13 +199,26 @@ async def upload_chunk(
     directory = upload_path(user["username"], req.upload_id)
     if not os.path.isdir(directory):
         raise HTTPException(status_code=404, detail="Upload session not found.")
+    if len(req.chunk_data_b64) > 4 * -(-MAX_CHUNK_BYTES // 3):
+        raise HTTPException(status_code=413, detail="Chunk too large.")
     try:
         data = base64.b64decode(req.chunk_data_b64)
     except (ValueError, TypeError, binascii.Error) as exc:
         raise HTTPException(status_code=400, detail=f"Invalid Base64 chunk data: {exc}") from exc
+    if len(data) > MAX_CHUNK_BYTES:
+        raise HTTPException(status_code=413, detail="Chunk too large.")
 
     def write() -> None:
-        with open(os.path.join(directory, f"chunk_{req.chunk_index}"), "wb") as handle:
+        # The chunks together may not pass the size the upload declared.
+        with open(os.path.join(directory, "metadata.json"), encoding="utf-8") as handle:
+            declared = json.load(handle).get("size", 0)
+        name = f"chunk_{req.chunk_index}"
+        held = sum(
+            entry.stat().st_size for entry in os.scandir(directory) if entry.name.startswith("chunk_") and entry.name != name
+        )
+        if held + len(data) > declared:
+            raise HTTPException(status_code=413, detail="The upload's chunks pass its declared size.")
+        with open(os.path.join(directory, name), "wb") as handle:
             handle.write(data)
 
     await asyncio.to_thread(write)
