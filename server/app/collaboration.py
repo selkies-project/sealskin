@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import hmac
 import json
 import logging
 import os
@@ -39,8 +40,34 @@ router = APIRouter()
 
 #: Live WebSocket connections keyed by session id.
 ROOM_CONNECTIONS: dict[str, dict[str, Any]] = {}
+#: Per room, the key a viewer's view of the other participants' tokens is drawn with.
+ROOM_ALIAS_KEYS: dict[str, bytes] = {}
 #: Control-plane URL that last accepted a token push, keyed by container IP.
 TOKEN_ENDPOINT_CACHE: dict[str, str] = {}
+
+
+def _alias(session_id: str, token: str) -> str:
+    """Another participant's token as a viewer is told it: stable for the room, so the
+    room page keys that participant's streams and slots by it, and no use for joining."""
+    key = ROOM_ALIAS_KEYS.setdefault(session_id, secrets.token_bytes(16))
+    return "p-" + hmac.new(key, token.encode(), "sha256").hexdigest()[:16]
+
+
+def _as_viewer_sees(session_id: str, payload: dict[str, Any], own: str) -> dict[str, Any]:
+    """`payload` as viewer `own` receives it: a room token, the controller's above all,
+    lets whoever holds it take that participant's part, so only `own` stays itself."""
+    def seen(token: Any) -> Any:
+        return token if not isinstance(token, str) or token == own else _alias(session_id, token)
+
+    if payload.get("type") == "state_update":
+        return {
+            **payload,
+            "viewers": [dict(u, token=seen(u.get("token"))) for u in payload.get("viewers", [])],
+            "designated_speaker": seen(payload.get("designated_speaker")),
+        }
+    if payload.get("type") == "resolution_update":
+        return {**payload, "token": seen(payload.get("token"))}
+    return payload
 
 
 _ROOM_ASSET_RE = re.compile(r'(?P<attr>\b(?:src|href))="(?P<url>[^"]+)"')
@@ -329,16 +356,16 @@ async def broadcast_to_room(session_id: str, payload: dict[str, Any]) -> None:
     if not connections:
         return
 
-    all_ws = []
+    sends = []
     if connections.get("controller"):
-        all_ws.append(connections["controller"]["websocket"])
+        sends.append((connections["controller"]["websocket"], payload))
 
-    for viewer_conn in connections.get("viewers", {}).values():
-        all_ws.append(viewer_conn["websocket"])
+    for viewer_token, viewer_conn in connections.get("viewers", {}).items():
+        sends.append((viewer_conn["websocket"], _as_viewer_sees(session_id, payload, viewer_token)))
 
     send_tasks = [
-        ws.send_json(payload)
-        for ws in all_ws
+        ws.send_json(message)
+        for ws, message in sends
         if ws.client_state == WebSocketState.CONNECTED
     ]
     results = await asyncio.gather(*send_tasks, return_exceptions=True)
@@ -780,6 +807,7 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
             and not ROOM_CONNECTIONS[session_id_str].get("viewers")
         ):
             ROOM_CONNECTIONS.pop(session_id_str, None)
+            ROOM_ALIAS_KEYS.pop(session_id_str, None)
             logger.info(
                 f"[{session_id_str}] Collab room is now empty and has been cleaned up."
             )
@@ -988,3 +1016,4 @@ async def notify_session_ended(session_id: str) -> None:
         logger.info(f"[{session_id}] Broadcasting session termination to room.")
         await broadcast_to_room(session_id, {"type": "session_ended"})
         ROOM_CONNECTIONS.pop(session_id, None)
+        ROOM_ALIAS_KEYS.pop(session_id, None)
