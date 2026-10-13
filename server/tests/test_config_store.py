@@ -198,3 +198,39 @@ def test_load_app_templates_migrates_legacy_keys(tmp_path):
         "SELKIES_ENABLE_CLIPBOARD": "false",
     }
     config_store.delete_app_template("Old")
+
+
+def test_store_app_ids_that_are_not_names_never_enter_the_catalog():
+    apps = config_store._extract_apps(
+        {"apps": [{"id": "../../keys/admin"}, {"id": "/etc/passwd"}, {"id": ".."}, {"id": 7}, {"id": "firefox"}]}
+    )
+    assert [a["id"] for a in apps] == ["firefox"]
+
+
+async def test_autostart_cache_never_leaves_its_directory(store_with_firefox, tmp_path, monkeypatch):
+    victim = tmp_path / "victim"
+    victim.write_text("kept")
+    escape = "../" * 8 + str(victim).lstrip("/")
+
+    class Store404:
+        """A store that has no script for the id, which empties the cache file."""
+
+        def __init__(self, **_):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_):
+            return False
+
+        async def get(self, url, **_):
+            return config_store.httpx.Response(404, request=config_store.httpx.Request("GET", url))
+
+    monkeypatch.setattr(config_store.httpx, "AsyncClient", Store404)
+    await config_store._fetch_and_cache_single_script("Test Store", "https://example.invalid", escape)
+    assert victim.read_text() == "kept"
+    record = InstalledAppRecord(id="app-3", source="Test Store", source_app_id=escape, app_template="Default")
+    assert config_store.autostart_cache_path(record) is None
+    record.source_app_id = "firefox"
+    assert config_store.autostart_cache_path(record).endswith("/Test Store/firefox")

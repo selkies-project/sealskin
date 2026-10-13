@@ -193,10 +193,21 @@ def _extract_apps(data: Any) -> list[dict[str, Any]]:
         ValueError: If the document is neither a list nor `{"apps": [...]}`.
     """
     if isinstance(data, dict) and "apps" in data:
-        return list(data["apps"] or [])
-    if isinstance(data, list):
-        return data
-    raise ValueError("App store YAML has an invalid format.")
+        apps = list(data["apps"] or [])
+    elif isinstance(data, list):
+        apps = data
+    else:
+        raise ValueError("App store YAML has an invalid format.")
+    # An app id names the app's autostart cache files: one that is not a plain name
+    # (a path, `..`) never enters the catalog.
+    kept = []
+    for app in apps:
+        app_id = app.get("id") if isinstance(app, dict) else None
+        if app_id is not None and not (isinstance(app_id, str) and is_safe_name(app_id)):
+            logger.warning("Skipping store app with unsafe id %r", app_id)
+            continue
+        kept.append(app)
+    return kept
 
 
 def _read_cached_script_b64(store_name: str, app_id: str, suffix: str = "") -> str | None:
@@ -382,16 +393,24 @@ def autostart_cache_path(app: InstalledApp | InstalledAppRecord, suffix: str = "
     store = get_store(app.source)
     if not store:
         return None
-    return os.path.join(settings.autostart_cache_path, store.name, f"{app.source_app_id}{suffix}")
+    try:
+        return safe_join(settings.autostart_cache_path, store.name, f"{app.source_app_id}{suffix}")
+    except ValueError:
+        logger.error("Refusing autostart cache path for unsafe name %r/%r", store.name, app.source_app_id)
+        return None
 
 
 async def _fetch_and_cache_single_script(
     store_name: str, base_url: str, app_id: str, suffix: str = ""
 ) -> None:
     """Fetch one autostart script into the cache using ETag conditional requests."""
-    cache_dir = os.path.join(settings.autostart_cache_path, store_name)
+    try:
+        cache_dir = safe_join(settings.autostart_cache_path, store_name)
+        cache_path = safe_join(cache_dir, f"{app_id}{suffix}")
+    except ValueError:
+        logger.error("Refusing autostart cache for unsafe name %r/%r", store_name, app_id)
+        return
     os.makedirs(cache_dir, exist_ok=True)
-    cache_path = os.path.join(cache_dir, f"{app_id}{suffix}")
     meta_path = cache_path + ".meta"
     headers: dict[str, str] = {}
     if os.path.exists(meta_path):
