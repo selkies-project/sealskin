@@ -243,11 +243,13 @@ def test_a_store_sets_only_the_docker_overrides_that_stay_in_the_container(store
         "volumes": ["/:/host"],
         "cap_add": ["SYS_ADMIN"],
         "pid_mode": "host",
-        "security_opt": ["seccomp=unconfined", "apparmor=unconfined"],
+        "security_opt": ["seccomp=unconfined", "apparmor=unconfined", "systempaths=unconfined"],
         "shm_size": "2g",
     }
     (app,) = config_store.process_store_content(yaml.safe_dump({"apps": [entry]}), "Test Store")
-    assert app["provider_config"]["docker_overrides"] == {"security_opt": ["seccomp=unconfined"], "shm_size": "2g"}
+    assert app["provider_config"]["docker_overrides"] == {
+        "security_opt": ["seccomp=unconfined", "apparmor=unconfined"], "shm_size": "2g"
+    }
     record = InstalledAppRecord(
         id="app-4", source="Test Store", source_app_id="firefox", app_template="Default", users=["all"],
         overrides={"provider_config": {"docker_overrides": {"privileged": True}}},

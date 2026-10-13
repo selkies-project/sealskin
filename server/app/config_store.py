@@ -217,8 +217,9 @@ def _extract_apps(data: Any) -> list[dict[str, Any]]:
 STORE_DOCKER_KEYS = frozenset(
     {"shm_size", "mem_limit", "cpu_shares", "nano_cpus", "ulimits", "tmpfs", "dns", "extra_hosts", "environment", "security_opt"}
 )
-#: The `security_opt` entries a store may ask for (the default store's own use).
-STORE_SECURITY_OPTS = frozenset({"seccomp=unconfined"})
+#: The `security_opt` entries a store may ask for: the container's own syscall and AppArmor
+#: confinement lifted for apps that sandbox themselves (the default store's Steam and ScummVM).
+STORE_SECURITY_OPTS = frozenset({"seccomp=unconfined", "apparmor=unconfined"})
 
 
 def store_docker_overrides(overrides: Any, app_id: Any) -> dict[str, Any]:
@@ -231,12 +232,11 @@ def store_docker_overrides(overrides: Any, app_id: Any) -> dict[str, Any]:
             value = [o for o in value or [] if o in STORE_SECURITY_OPTS] if isinstance(value, list) else []
         if key in STORE_DOCKER_KEYS and value:
             kept[key] = value
-    if kept != overrides:
-        logger.warning(
-            "Store app %r: ignoring docker_overrides only an admin may set: %s",
-            app_id,
-            {k: v for k, v in overrides.items() if kept.get(k) != v},
-        )
+    dropped = {k: v for k, v in overrides.items() if k not in kept}
+    if "security_opt" in kept and kept["security_opt"] != overrides["security_opt"]:
+        dropped["security_opt"] = [o for o in overrides["security_opt"] if o not in kept["security_opt"]]
+    if dropped:
+        logger.warning("Store app %r: ignoring docker_overrides only an admin may set: %s", app_id, dropped)
     return kept
 
 
