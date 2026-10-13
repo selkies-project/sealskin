@@ -3050,9 +3050,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const showOverlay = app.running && !app.active;
                 const overlay = showOverlay ? `<div class="running-overlay"><i class="fas fa-exchange-alt"></i></div>` : '';
 
-                const iconHtml = app.logo ? `<img src="${app.logo}" alt="${app.name}">` : `<div class="app-icon-fallback"><i class="fas fa-image"></i></div>`;
+                const iconHtml = app.logo ? `<img src="${escapeHTML(app.logo)}" alt="${escapeHTML(app.name)}">` : `<div class="app-icon-fallback"><i class="fas fa-image"></i></div>`;
 
-                card.innerHTML = `${overlay}${iconHtml}<span>${app.name}</span>`;
+                card.innerHTML = `${overlay}${iconHtml}<span>${escapeHTML(app.name)}</span>`;
                 if (!app.active) {
                     card.onclick = (e) => {
                         e.stopPropagation();
@@ -3072,24 +3072,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const stopBtn = app.active
                 ? `<button class="sm-btn-action sm-btn-stop" disabled title="${t('tooltips.cannotStopActive')}"><i class="fas fa-ban"></i></button>`
-                : `<button class="sm-btn-action sm-btn-stop" data-action="stop" data-id="${app.id}" title="${t('tooltips.stopApp')}"><i class="fas fa-stop"></i></button>`;
+                : `<button class="sm-btn-action sm-btn-stop" data-action="stop" data-id="${escapeHTML(app.id)}" title="${t('tooltips.stopApp')}"><i class="fas fa-stop"></i></button>`;
 
             const swapBtn = !app.active
-                ? `<button class="sm-btn-action sm-btn-swap" data-action="swap" data-id="${app.id}" title="${t('tooltips.swapApp')}"><i class="fas fa-exchange-alt"></i></button>`
+                ? `<button class="sm-btn-action sm-btn-swap" data-action="swap" data-id="${escapeHTML(app.id)}" title="${t('tooltips.swapApp')}"><i class="fas fa-exchange-alt"></i></button>`
                 : '';
 
             let actionButtons = '';
             if (pendingActions.has(`app_${app.id}`)) {
                 actionButtons = `<div class="spinner"></div>`;
             } else {
-                actionButtons = `${swapBtn} <button class="sm-btn-action sm-btn-restart" data-action="restart" data-id="${app.id}" title="${t('tooltips.restartApp')}"><i class="fas fa-redo"></i></button> ${stopBtn}`;
+                actionButtons = `${swapBtn} <button class="sm-btn-action sm-btn-restart" data-action="restart" data-id="${escapeHTML(app.id)}" title="${t('tooltips.restartApp')}"><i class="fas fa-redo"></i></button> ${stopBtn}`;
             }
 
-            const iconHtml = app.logo ? `<img src="${app.logo}">` : `<div class="app-icon-fallback"><i class="fas fa-image"></i></div>`;
+            const iconHtml = app.logo ? `<img src="${escapeHTML(app.logo)}">` : `<div class="app-icon-fallback"><i class="fas fa-image"></i></div>`;
             item.innerHTML = `
                 ${iconHtml}
                 <div class="sm-session-info">
-                    <div class="sm-session-name">${app.name}</div>
+                    <div class="sm-session-name">${escapeHTML(app.name)}</div>
                     <div class="sm-session-status">${app.active ? t('startMenu.activeVisible') : t('startMenu.runningBackground')}</div>
                 </div>
                 <div class="sm-session-actions">
