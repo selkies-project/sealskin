@@ -7,6 +7,7 @@ import base64
 import binascii
 import logging
 import os
+import shutil
 import uuid
 from collections import defaultdict
 from typing import Any
@@ -74,6 +75,7 @@ from ..security import (
 )
 from ..settings import settings
 from ..state import state
+from . import shares, uploads
 from .sessions import session_info
 
 logger = logging.getLogger(__name__)
@@ -900,6 +902,12 @@ async def delete_user(username: str) -> Response:
         await cluster.forget_user(username)
         await sso.end_sign_ins_of(username)
         await asyncio.to_thread(application_keys.revoke_all, username)
+        # What else the user had: running sessions, unfinished uploads, public shares.
+        for session_id, session in list(state.sessions.items()):
+            if session.get("username") == username:
+                await stop_session(session_id)
+        await asyncio.to_thread(shutil.rmtree, uploads.user_upload_root(username), True)
+        await shares.forget_owner(username)
         return Response(status_code=204)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

@@ -142,6 +142,17 @@ def _remove_share_file(share_id: str) -> None:
             logger.error("Error deleting share file for %s: %s", share_id, exc)
 
 
+async def forget_owner(username: str) -> None:
+    """Remove every share a deleted user made, the shared copies with them."""
+    owned = [sid for sid, meta in state.public_shares.items() if meta.owner_username == username]
+    for share_id in owned:
+        _remove_share_file(share_id)
+        state.public_shares.pop(share_id, None)
+        state.share_password_failures.pop(share_id, None)
+    if owned:
+        await config_store.save_public_shares()
+
+
 async def cleanup_expired_shares() -> None:
     """Remove expired shares and stale download tokens."""
     now = time.time()
