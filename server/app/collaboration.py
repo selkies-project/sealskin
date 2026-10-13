@@ -47,15 +47,21 @@ TOKEN_ENDPOINT_CACHE: dict[str, str] = {}
 
 
 def _alias(session_id: str, token: str) -> str:
-    """Another participant's token as a viewer is told it: stable for the room, so the
-    room page keys that participant's streams and slots by it, and no use for joining."""
+    """Another participant's token as a viewer is told it.
+
+    Stable for the room, so the room page keys that participant's streams and slots by it,
+    and no use for joining.
+    """
     key = ROOM_ALIAS_KEYS.setdefault(session_id, secrets.token_bytes(16))
     return "p-" + hmac.new(key, token.encode(), "sha256").hexdigest()[:16]
 
 
 def _as_viewer_sees(session_id: str, payload: dict[str, Any], own: str) -> dict[str, Any]:
-    """`payload` as viewer `own` receives it: a room token, the controller's above all,
-    lets whoever holds it take that participant's part, so only `own` stays itself."""
+    """`payload` as viewer `own` receives it.
+
+    A room token, the controller's above all, lets whoever holds it take that participant's
+    part, so only `own` stays itself.
+    """
     def seen(token: Any) -> Any:
         return token if not isinstance(token, str) or token == own else _alias(session_id, token)
 
@@ -505,8 +511,10 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
         })
 
     def owner_may_run(target_app_id: str) -> bool:
-        """Whether the session's owner may run the app, the rule `send_app_list` offers by:
-        the controller names an app id, which may be any installed app's."""
+        """Whether the session's owner may run the app, the rule `send_app_list` offers by.
+
+        The controller names an app id, which may be any installed app's.
+        """
         app = state.installed_apps.get(target_app_id)
         owner = session_data.get("username", "")
         return bool(app) and user_can_access(app.users, app.groups, owner, _owner_group(owner))

@@ -163,8 +163,10 @@ async def upload_initiate(
     decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body),
     user: dict[str, Any] = Depends(verify_token),
 ) -> dict[str, str]:
-    """Start a chunked upload and return its id: one that would not fit the user's
-    storage limit, or past `MAX_OPEN_UPLOADS` open, is refused."""
+    """Start a chunked upload and return its id.
+
+    One that would not fit the user's storage limit, or past `MAX_OPEN_UPLOADS` open, is refused.
+    """
     try:
         req = UploadInitiateRequest(**decrypted_body)
     except ValidationError as exc:
