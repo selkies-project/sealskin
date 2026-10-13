@@ -234,3 +234,22 @@ async def test_autostart_cache_never_leaves_its_directory(store_with_firefox, tm
     assert config_store.autostart_cache_path(record) is None
     record.source_app_id = "firefox"
     assert config_store.autostart_cache_path(record).endswith("/Test Store/firefox")
+
+
+def test_a_store_sets_only_the_docker_overrides_that_stay_in_the_container(store_with_firefox):
+    entry = copy.deepcopy(store_with_firefox)
+    entry["provider_config"]["docker_overrides"] = {
+        "privileged": True,
+        "volumes": ["/:/host"],
+        "cap_add": ["SYS_ADMIN"],
+        "pid_mode": "host",
+        "security_opt": ["seccomp=unconfined", "apparmor=unconfined"],
+        "shm_size": "2g",
+    }
+    (app,) = config_store.process_store_content(yaml.safe_dump({"apps": [entry]}), "Test Store")
+    assert app["provider_config"]["docker_overrides"] == {"security_opt": ["seccomp=unconfined"], "shm_size": "2g"}
+    record = InstalledAppRecord(
+        id="app-4", source="Test Store", source_app_id="firefox", app_template="Default", users=["all"],
+        overrides={"provider_config": {"docker_overrides": {"privileged": True}}},
+    )
+    assert config_store.resolve_app(record).provider_config.docker_overrides == {"privileged": True}

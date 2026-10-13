@@ -210,6 +210,36 @@ def _extract_apps(data: Any) -> list[dict[str, Any]]:
     return kept
 
 
+#: What a store's own `docker_overrides` may set: the container's resources and
+#: runtime, nothing that reaches past it to the host (privileges, capabilities,
+#: devices, bind mounts, the host's namespaces). An admin's overrides of an
+#: installed app may still set anything.
+STORE_DOCKER_KEYS = frozenset(
+    {"shm_size", "mem_limit", "cpu_shares", "nano_cpus", "ulimits", "tmpfs", "dns", "extra_hosts", "environment", "security_opt"}
+)
+#: The `security_opt` entries a store may ask for (the default store's own use).
+STORE_SECURITY_OPTS = frozenset({"seccomp=unconfined"})
+
+
+def store_docker_overrides(overrides: Any, app_id: Any) -> dict[str, Any]:
+    """The part of a store app's `docker_overrides` a store may set (`STORE_DOCKER_KEYS`)."""
+    if not isinstance(overrides, dict):
+        return {}
+    kept: dict[str, Any] = {}
+    for key, value in overrides.items():
+        if key == "security_opt":
+            value = [o for o in value or [] if o in STORE_SECURITY_OPTS] if isinstance(value, list) else []
+        if key in STORE_DOCKER_KEYS and value:
+            kept[key] = value
+    if kept != overrides:
+        logger.warning(
+            "Store app %r: ignoring docker_overrides only an admin may set: %s",
+            app_id,
+            {k: v for k, v in overrides.items() if kept.get(k) != v},
+        )
+    return kept
+
+
 def _read_cached_script_b64(store_name: str, app_id: str, suffix: str = "") -> str | None:
     """Return the cached autostart script of an app as base64, if present."""
     try:
@@ -250,6 +280,10 @@ def process_store_content(content: str, store_name: str) -> list[dict[str, Any]]
             continue
         app = copy.deepcopy(app)
         provider_config = app.setdefault("provider_config", {})
+        if provider_config.get("docker_overrides"):
+            provider_config["docker_overrides"] = store_docker_overrides(
+                provider_config["docker_overrides"], app.get("id")
+            )
         if provider_config.get("autostart") and app.get("id"):
             provider_config["custom_autostart_script_b64"] = _read_cached_script_b64(
                 store_name, app["id"]
