@@ -21,6 +21,7 @@ from .. import (
     application_keys,
     cluster,
     config_store,
+    filesync,
     logos,
     progress,
     prootapps,
@@ -913,6 +914,7 @@ async def delete_user(username: str) -> Response:
                 await stop_session(session_id)
         await asyncio.to_thread(shutil.rmtree, uploads.user_upload_root(username), True)
         await shares.forget_owner(username)
+        await asyncio.to_thread(filesync.forget, username)
         return Response(status_code=204)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

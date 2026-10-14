@@ -14,7 +14,9 @@ them through one `ObjectStore`, so the store is the authority and no node is:
 A write may be conditional on the object's entity tag (`if_match`) or on its
 absence (`if_absent`), which is all the locking the administrative writes
 need. Calls block: reads are served from the caches the callers keep, and
-writes are administrative and rare.
+writes are administrative and rare. A service that takes the conditions and
+ignores them would leave the nodes overwriting each other unseen, so `verify`
+proves them with one throwaway object before the node serves anything.
 
 A remote store is mirrored into the local files as it is read, and a node
 that cannot reach it serves that mirror until it can.
@@ -27,6 +29,7 @@ import hashlib
 import hmac
 import logging
 import os
+import secrets
 import tempfile
 import threading
 import time
@@ -58,6 +61,8 @@ MOUNTS: dict[str, str] = {
 
 #: Prefixes `changed` watches: everything shared but the users' files, which sync on their own.
 WATCHED = tuple(prefix for prefix in MOUNTS if prefix != "files/")
+#: Objects under the watched prefixes that come and go without meaning a record changed.
+UNWATCHED = ("cluster/leases/", "cluster/probe/")
 
 
 class Conflict(Exception):
@@ -66,6 +71,10 @@ class Conflict(Exception):
 
 class StoreUnavailable(Exception):
     """The store could not be reached."""
+
+
+class Unsafe(Exception):
+    """The store took a write its condition should have refused."""
 
 
 def key_for(path: str) -> str | None:
@@ -652,6 +661,7 @@ def changed() -> set[str]:
     listing: dict[str, str] = {}
     for prefix in WATCHED:
         listing.update(current.list(prefix))
+    listing = {key: tag for key, tag in listing.items() if not key.startswith(UNWATCHED)}
     if isinstance(current, MirroredStore) and not current.reachable:
         return set()
     first, _primed = not _primed, True
@@ -668,6 +678,44 @@ def changed() -> set[str]:
     _seen.clear()
     _seen.update(listing)
     return set() if first else differing | gone
+
+
+def verify() -> None:
+    """Prove that a remote store honors conditional writes, with one object written and removed.
+
+    A node's own files and the keeper's files honor them by construction;
+    an S3 service may accept `If-Match` and `If-None-Match` and overwrite
+    anyway, which this catches before the node writes a record.
+
+    Raises:
+        Unsafe: When a write the condition should have refused went through.
+        StoreUnavailable: When the store did not answer.
+    """
+    current = get_store()
+    remote = current.remote if isinstance(current, MirroredStore) else current
+    if not isinstance(remote, S3Store):
+        return
+    key = f"cluster/probe/{secrets.token_hex(6)}"
+    tag = remote.put(key, b"probe", if_absent=True)
+    try:
+        for condition, refused in (({"if_absent": True}, "If-None-Match"), ({"if_match": '"0"'}, "If-Match")):
+            try:
+                remote.put(key, b"overwritten", **condition)
+            except Conflict:
+                continue
+            raise Unsafe(
+                f"The object store took a write that {refused} should have refused, so two nodes could "
+                "overwrite each other's records unseen. Use a service that honors conditional writes."
+            )
+        try:
+            remote.put(key, b"probe", if_match=tag)
+        except Conflict as exc:
+            raise Unsafe("The object store refused a write with the right entity tag, so no record could ever be changed.") from exc
+    finally:
+        try:
+            remote.delete(key)
+        except (StoreUnavailable, OSError) as exc:
+            logger.warning("Could not remove the probe object '%s': %s", key, exc)
 
 
 def describe() -> dict[str, Any]:

@@ -9,11 +9,13 @@ changed is sent when it stops and every few minutes while it runs (`sync`).
 Files are written whole and moved into place, so a running session never
 sees a half-written one.
 
-Each file is the object `files/<user>/<path>`. A node remembers the entity
+Each file is the object `files/<user>/<path>`, encrypted under the user's
+key when the cluster has one (`filecrypt`). A node remembers the entity
 tag, size, and time of every file as of its last sync, which tells a file
 changed here from one changed elsewhere. The last writer wins; when both
 sides changed a file, this node's version is kept beside the store's under a
-`.conflict-<node>` name. Files larger than `MAX_BYTES` stay on their node.
+`.conflict-<node>` name. Files larger than `MAX_BYTES` stay on their node,
+and a file this node cannot decrypt is left as it is on both sides.
 """
 
 from __future__ import annotations
@@ -24,7 +26,7 @@ import os
 import threading
 from typing import Any
 
-from . import cluster, persistence, store
+from . import cluster, filecrypt, persistence, store
 from .settings import settings
 
 logger = logging.getLogger(__name__)
@@ -65,7 +67,7 @@ def _local_files(root: str) -> dict[str, tuple[int, int]]:
 def _write(target: str, data: bytes, tag: str) -> dict[str, Any]:
     """Write a file whole beside its place and move it there, and return its manifest entry."""
     os.makedirs(os.path.dirname(target), exist_ok=True)
-    partial = f"{target}.partial-{cluster.NODE_ID[:6]}"
+    partial = f"{target}.partial-{cluster.NODE_ID}"
     with open(partial, "wb") as handle:
         handle.write(data)
     os.replace(partial, target)
@@ -92,7 +94,12 @@ def _pull_file(username: str, root: str, name: str) -> bool:
         found = store.get(prefix + name)
         if found is None:
             return os.path.isfile(target)
-        manifest[name] = _write(target, found[0], found[1])
+        try:
+            content = filecrypt.unseal(username, found[0])
+        except filecrypt.Unreadable as exc:
+            logger.warning("Shared file '%s' of '%s' is not readable on this node: %s", name, username, exc)
+            return os.path.isfile(target)
+        manifest[name] = _write(target, content, found[1])
         os.makedirs(os.path.dirname(_manifest_path(username)), exist_ok=True, mode=0o700)
         persistence.write_yaml_sync(_manifest_path(username), manifest)
         return True
@@ -130,12 +137,17 @@ def _sync(username: str, root: str, send: bool) -> None:
             target = os.path.join(root, *name.split("/"))
             if not os.path.abspath(target).startswith(os.path.abspath(root) + os.sep):
                 continue
-            if changed_here(name):
-                os.replace(target, f"{target}.conflict-{cluster.NODE_ID[:6]}")
             found = store.get(prefix + name)
             if found is None:
                 continue
-            manifest[name] = _write(target, found[0], found[1])
+            try:
+                content = filecrypt.unseal(username, found[0])
+            except filecrypt.Unreadable as exc:
+                logger.warning("Shared file '%s' of '%s' is not readable on this node: %s", name, username, exc)
+                continue
+            if changed_here(name):
+                os.replace(target, f"{target}.conflict-{cluster.NODE_ID}")
+            manifest[name] = _write(target, content, found[1])
 
         for name in [n for n in manifest if n not in remote]:
             target = os.path.join(root, *name.split("/"))
@@ -154,7 +166,7 @@ def _sync(username: str, root: str, send: bool) -> None:
                     logger.warning("Shared file '%s' of '%s' is too large to sync; it stays on this node.", name, username)
                     continue
                 with open(os.path.join(root, *name.split("/")), "rb") as handle:
-                    tag = store.put(prefix + name, handle.read())
+                    tag = store.put(prefix + name, filecrypt.seal(username, handle.read()))
                 manifest[name] = {"etag": tag, "size": size, "mtime": mtime}
 
         os.makedirs(os.path.dirname(_manifest_path(username)), exist_ok=True, mode=0o700)
@@ -198,6 +210,18 @@ async def pull_file(username: str, root: str, name: str) -> bool:
     except Exception as exc:  # noqa: BLE001 - the launch goes on with what the node has
         logger.warning("Could not fetch the shared file '%s' of '%s': %s", name, username, exc)
         return os.path.isfile(os.path.join(root, *name.split("/")))
+
+
+def forget(username: str) -> None:
+    """Remove a deleted user's shared files from the store, and the key they were encrypted under."""
+    prefix = f"files/{username}/"
+    for key in store.list_keys(prefix):
+        store.delete(key)
+    filecrypt.forget(username)
+    try:
+        os.remove(_manifest_path(username))
+    except FileNotFoundError:
+        pass
 
 
 async def sync(username: str, root: str) -> None:

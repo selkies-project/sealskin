@@ -41,11 +41,12 @@ def test_paths_map_to_keys_and_back():
 
 
 class Bucket:
-    """A stand-in S3 service that honors the conditional headers."""
+    """A stand-in S3 service that honors the conditional headers, unless told to ignore them."""
 
-    def __init__(self):
+    def __init__(self, conditional=True):
         self.objects = {}
         self.requests = []
+        self.conditional = conditional
 
     def handle(self, request):
         self.requests.append(request)
@@ -61,9 +62,9 @@ class Bucket:
         current = self.objects.get(key)
         tag = f'"{len(current)}"' if current is not None else None
         if request.method == "PUT":
-            if request.headers.get("if-none-match") == "*" and current is not None:
+            if self.conditional and request.headers.get("if-none-match") == "*" and current is not None:
                 return httpx.Response(412)
-            if "if-match" in request.headers and request.headers["if-match"] != tag:
+            if self.conditional and "if-match" in request.headers and request.headers["if-match"] != tag:
                 return httpx.Response(412)
             self.objects[key] = request.content
             return httpx.Response(200, headers={"etag": f'"{len(request.content)}"'})
@@ -132,3 +133,23 @@ def test_changed_reports_what_another_node_wrote_and_not_this_one(bucket):
     store.get_store()._listed.clear()
     assert store.changed() == {"groups/theirs"}
     assert store.changed() == set()
+
+
+def test_a_remote_store_is_proven_to_honor_conditions_and_leaves_nothing_behind(bucket, monkeypatch):
+    store.verify()
+    assert not bucket.objects
+    assert store.changed() == set()
+    careless = Bucket(conditional=False)
+    remote = store.S3Store("https://s3.example", "bucket", "prod", "AKID", "secret", transport=httpx.MockTransport(careless.handle))
+    monkeypatch.setattr(store, "_store", store.MirroredStore(remote))
+    with pytest.raises(store.Unsafe):
+        store.verify()
+    assert not careless.objects
+
+
+def test_leases_and_probes_are_not_reported_as_changes(bucket):
+    assert store.changed() == set()
+    bucket.objects["prod/cluster/leases/launch/alice.yml"] = b"node: bravo\n"
+    bucket.objects["prod/cluster/pools/gpu.yml"] = b"cost: 2\n"
+    store.get_store()._listed.clear()
+    assert store.changed() == {"cluster/pools/gpu.yml"}

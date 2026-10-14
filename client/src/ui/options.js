@@ -1215,7 +1215,7 @@ function renderClusterNodes() {
   tbody.innerHTML = clusterData.nodes.map((node) => {
     const id = escapeHtml(node.id);
     let state = node.alive ? t('options.cluster.online') : t('options.cluster.offline');
-    if (!node.approved) state = t('options.cluster.waiting');
+    if (!node.approved) state = node.pending ? t('options.cluster.waiting') : t('options.cluster.suspended');
     const notes = [];
     if (!node.alive && node.last_seen) notes.push(t('options.cluster.lastSeen', { when: timeAgo(node.last_seen, t) }));
     if (node.alive && !node.store_reachable) notes.push(t('options.cluster.storeUnreachableNode'));

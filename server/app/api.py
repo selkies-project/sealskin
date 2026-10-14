@@ -24,6 +24,7 @@ from . import (
     cluster,
     collaboration,
     config_store,
+    filecrypt,
     filesync,
     persistence,
     prootapps,
@@ -137,6 +138,7 @@ async def _reload_proot_catalogs(_path: str) -> None:
 async def _reload_cluster(_path: str) -> None:
     """Watcher callback: reload the cluster's records after another node or an administrator changed them."""
     logger.info("Cluster records changed; reloading.")
+    filecrypt.reset()
     await asyncio.to_thread(cluster.apply_registry)
     await asyncio.to_thread(quota.load)
     await asyncio.to_thread(application_keys.load)
@@ -156,6 +158,7 @@ def _sync_records() -> None:
 
 def _catch_up() -> None:
     """Finish what a start without the store left undone, and read again everything it served from its copy."""
+    store.verify()
     _sync_records()
     user_manager.load_users_and_groups()
     config_store.load_app_stores()
@@ -270,6 +273,12 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     await asyncio.to_thread(cluster.join)
     if store.is_local():
         os.makedirs(settings.cluster_path, exist_ok=True, mode=0o700)
+    try:
+        await asyncio.to_thread(store.verify)
+    except store.StoreUnavailable as exc:
+        logger.error("%s Its conditional writes are checked when it answers.", exc)
+    if not store.is_local() and not settings.store_key:
+        logger.warning("SEALSKIN_STORE_KEY is not set: the users' shared files go to the store as they are.")
     logger.info("Node %s ('%s'), roles: %s. Shared records: %s.", cluster.NODE_ID, cluster.node_name(), ", ".join(sorted(cluster.roles())), store.describe()["kind"])
 
     _warn_if_cert_expiring()

@@ -374,6 +374,16 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "help": "Secret access key for an S3 store.",
     },
     {
+        "name": "store_key",
+        "type": "str",
+        "default": "",
+        "help": (
+            "Secret every node of a cluster holds, under which the users' shared files are encrypted on their "
+            "way to a remote store, each user under a key of their own. Any long random string, the same on "
+            "every node; empty sends the files as they are."
+        ),
+    },
+    {
         "name": "store_poll_seconds",
         "type": "int",
         "default": 15,
@@ -395,7 +405,11 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "name": "node_name",
         "type": "str",
         "default": "",
-        "help": "Name this node shows in the dashboard; empty takes the host name.",
+        "help": (
+            "Name of this node, which is its identity in the cluster: its records are kept under it, and a "
+            "node started again with an empty configuration directory but the same name and storage is the "
+            "same node. Empty takes the host name."
+        ),
     },
     {
         "name": "node_roles",

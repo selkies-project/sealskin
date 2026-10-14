@@ -26,10 +26,12 @@ Every node runs the same image. What a node does is its roles, set with
 The default is both. A node with only `runtime` needs no public name and no
 published session port: browsers never reach it, the frontends do.
 
-A node is its server key (`/config/ssl/server_key.pem`). Its id is a hash of
-the public key, and the other nodes know it by the record it publishes: that
-key, its roles, the address of its **peer listener**, and the certificate the
-listener serves.
+A node is its name, `SEALSKIN_NODE_NAME` or the host name, so give every
+node one of its own. The other nodes know it by the record it publishes under
+that name: its server key (`/config/ssl/server_key.pem`), its roles, the
+address of its **peer listener**, and the certificate the listener serves. A
+node started again with an empty configuration directory but the same name
+and storage publishes a new key and is the same node.
 
 ## What nodes need from the network
 
@@ -63,7 +65,7 @@ only.
 | Value | The objects are |
 | --- | --- |
 | `file` (default) | The files under `/config/.config/sealskin` the server has always kept, [editable by hand](configuration.md). |
-| `s3://<bucket>/<prefix>?endpoint=<url>&region=<region>` | In a bucket of any S3-compatible service, with `SEALSKIN_STORE_ACCESS_KEY` and `SEALSKIN_STORE_SECRET_KEY`. The service has to honor conditional writes (`If-Match`, `If-None-Match`). |
+| `s3://<bucket>/<prefix>?endpoint=<url>&region=<region>` | In a bucket of any S3-compatible service that honors conditional writes, with `SEALSKIN_STORE_ACCESS_KEY` and `SEALSKIN_STORE_SECRET_KEY`. The [object store page](object-store.md) is how to set one up and what the nodes do with it. |
 
 A node that joins with a join code keeps no store of its own: it reads and
 writes the files of the node it joined through, over the peer listener. That
@@ -78,6 +80,9 @@ order: each reads the bucket and finds its own sessions still running.
 
 Two administrators changing the same record on two nodes never overwrite each
 other unseen: the second write is refused, and the dashboard asks to reload.
+A launch of a user with a session limit or an allowance holds a lease in the
+store until the session is registered, so two frontends cannot admit one
+user past the limit between polls.
 
 ## Adding a node
 
@@ -108,20 +113,18 @@ be removed afterwards.
 
 ### With a bucket
 
-Start the node with the same `SEALSKIN_STORE_URL` and keys. It registers
-itself and waits: **Cluster** shows it as pending until an administrator
-approves it. The first node of an empty bucket approves itself.
-
-Whoever holds the bucket's keys can write any record, including approvals, so
-those keys are the cluster's administrator credential. Give them to nodes
-only.
+Start the node with the same `SEALSKIN_STORE_URL` and keys and a name of its
+own. It registers itself and is a member at once: whoever holds the bucket's
+keys can write any record, so the keys are the admission. Give them to nodes
+only. The [object store page](object-store.md) has the setup.
 
 ### Suspending and removing
 
 **Suspend** takes a node out of placement and out of the others' trust; its
 running sessions go on, unreachable through the frontends until it is
 approved again. **Remove** deletes its record. A removed node that is still
-running registers again, unapproved.
+running registers again: unapproved with a file store, a member again with a
+bucket, so suspend a node of a bucket to keep it out.
 
 ## Pools
 
@@ -193,7 +196,9 @@ the directory fetches that one file first. A node sends what changed when
 the session stops and every few minutes while it runs. The last
 writer of a file wins; when two nodes changed the same file, the losing
 version is kept beside it as `<name>.conflict-<node>`. Files over 512 MB stay
-on their node.
+on their node. With `SEALSKIN_STORE_KEY` set on every node, the files are
+[encrypted in the store](object-store.md#encrypting-the-users-files), each
+user under a key of their own.
 
 ## PRoot Apps catalogs
 
@@ -307,8 +312,10 @@ by its host name.
 
 ### The same with a bucket
 
-Create a bucket on any S3-compatible service and give both nodes
+Create a bucket on a service that honors conditional writes (the
+[object store page](object-store.md) lists some) and give both nodes
 `SEALSKIN_STORE_URL`, `SEALSKIN_STORE_ACCESS_KEY`, and
 `SEALSKIN_STORE_SECRET_KEY` instead of a join code. The second node shows
-under **Cluster** as pending; approve it there. Stop every node, start them
-in any order, and the cluster is as it was.
+under **Cluster** as soon as it starts, a member already. Stop every node,
+start them in any order, and the cluster is as it was; delete `bravo`'s
+`config` directory before starting it again, and it is still `bravo`.

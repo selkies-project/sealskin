@@ -41,3 +41,37 @@ async def test_sync_is_off_with_one_node_and_the_pull_looks_at_the_disk_alone(sh
     monkeypatch.setattr(settings, "files_sync", "auto")
     assert filesync.enabled() is False
     assert await filesync.pull_file("alice", shared, "report.pdf") is False
+
+
+@pytest.mark.asyncio
+async def test_files_are_encrypted_under_a_key_of_the_users_own_and_shredded_with_the_user(shared, monkeypatch, tmp_path):
+    from app import filecrypt, persistence
+
+    monkeypatch.setattr(settings, "store_key", "a-long-random-string-every-node-holds")
+    filecrypt.reset()
+    os.makedirs(shared, exist_ok=True)
+    with open(os.path.join(shared, "secret.txt"), "wb") as handle:
+        handle.write(b"the content")
+    await filesync.sync("alice", shared)
+    sealed = store.get("files/alice/secret.txt")[0]
+    assert sealed.startswith(filecrypt.MAGIC) and b"the content" not in sealed
+    wrapped = persistence.read_yaml(filecrypt._path("alice"))
+    assert wrapped["key_id"] == filecrypt.key_id() and filecrypt.user_key("alice") != filecrypt.user_key("bob")
+    # Another node (its own manifest) reads them, and a file written before the key was set as it is.
+    elsewhere = str(tmp_path / "other" / "_sealskin_shared_files")
+    os.remove(filesync._manifest_path("alice"))
+    await filesync.pull("alice", elsewhere)
+    assert open(os.path.join(elsewhere, "secret.txt"), "rb").read() == b"the content"
+    assert open(os.path.join(elsewhere, "report.pdf"), "rb").read() == b"report"
+    # Under another cluster key the file is left alone on both sides.
+    monkeypatch.setattr(settings, "store_key", "another-key")
+    filecrypt.reset()
+    third = str(tmp_path / "third" / "_sealskin_shared_files")
+    os.remove(filesync._manifest_path("alice"))
+    await filesync.pull("alice", third)
+    assert not os.path.exists(os.path.join(third, "secret.txt"))
+    assert open(os.path.join(third, "report.pdf"), "rb").read() == b"report"
+    monkeypatch.setattr(settings, "store_key", "a-long-random-string-every-node-holds")
+    filecrypt.reset()
+    filesync.forget("alice")
+    assert store.list_keys("files/alice/") == {} and persistence.read_yaml(filecrypt._path("alice")) is None

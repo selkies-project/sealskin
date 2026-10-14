@@ -151,6 +151,15 @@ def allowance(user: dict[str, Any]) -> dict[str, Any] | None:
     return {"hours": hours, "period": period, "used": round(used_hours(user["username"], period), 2)}
 
 
+def limited(user: dict[str, Any]) -> bool:
+    """Whether a user has a session limit or an allowance, so their launches have to be counted."""
+    if user.get("is_admin"):
+        return False
+    effective = user.get("effective_settings") or {}
+    limit = effective.get("session_limit", -1)
+    return (limit is not None and limit >= 0) or allowance(user) is not None
+
+
 async def check_launch(user: dict[str, Any]) -> None:
     """Refuse a launch that would take a user past the session limit or the allowance.
 

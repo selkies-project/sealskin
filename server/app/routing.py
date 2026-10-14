@@ -181,6 +181,8 @@ async def place_launch(
 
     The launch is followed for `progress` when the request names it, and
     however it ends, here, in the handler, or on another node, is recorded.
+    A user with limits holds their launch lease throughout, so two launches
+    of theirs, on any nodes, are checked one after the other.
 
     A forwarded launch asks the other node for any of its GPUs when the user
     picked one here, since devices are named per node. The request may name
@@ -191,9 +193,16 @@ async def place_launch(
     """
     followed = progress.begin(body.get("launch_id"), user["username"])
     try:
-        if not user.get("forwarded"):
+        if user.get("forwarded"):
+            yield
+        elif quota.limited(user):
+            # Held until the session is registered, so a second launch counts this one.
+            async with cluster.lease("launch", user["username"]):
+                await _place(request, body, user)
+                yield
+        else:
             await _place(request, body, user)
-        yield
+            yield
     except cluster.Forwarded as answer:
         try:
             result = json.loads(answer.response.body or b"{}")

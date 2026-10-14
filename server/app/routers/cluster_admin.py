@@ -108,6 +108,7 @@ def _node_view(node_id: str, record: dict[str, Any]) -> dict[str, Any]:
         "roles": status.get("roles") or record.get("roles") or [],
         "pool": record.get("pool") or cluster.DEFAULT_POOL,
         "approved": bool(record.get("approved")),
+        "pending": not record.get("approved") and not cluster.members_by_right(),
         "self": node_id == cluster.NODE_ID,
         "alive": cluster.is_alive(node_id),
         "error": peer.get("error") or "",
@@ -180,7 +181,7 @@ async def issue_join_code(body: dict[str, Any] = Depends(get_decrypted_request_b
         if current["kind"] == "s3":
             raise HTTPException(
                 status_code=400,
-                detail="With a bucket, a node joins by starting with the same SEALSKIN_STORE_URL; approve it here.",
+                detail="With a bucket, a node joins by starting with the same SEALSKIN_STORE_URL and keys; it is a member as soon as it does.",
             )
         raise HTTPException(status_code=400, detail="Issue join codes on the node that keeps the shared records.")
     return cluster.create_join_code(req.pool)
@@ -207,7 +208,7 @@ async def update_node(node_id: str, body: dict[str, Any] = Depends(get_decrypted
 
 @router.delete("/nodes/{node_id}", status_code=204)
 async def remove_node(node_id: str) -> Response:
-    """Remove a node's record; a node still running registers again, unapproved."""
+    """Remove a node's record; a node still running registers again, approved only with a bucket."""
     if node_id == cluster.NODE_ID:
         raise HTTPException(status_code=400, detail="Remove this node from another node.")
     if node_id not in cluster.NODES:

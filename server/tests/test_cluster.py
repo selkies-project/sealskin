@@ -77,10 +77,56 @@ def _status(node_id, sessions=(), gpus=(), **extra):
     }  # fmt: skip
 
 
-def test_the_first_node_of_a_store_approves_itself_and_knows_who_it_is(node):
-    assert cluster.NODE_ID and cluster.is_approved() and not cluster.is_clustered()
+def test_the_first_node_of_a_store_approves_itself_and_is_known_by_its_name(node):
+    assert cluster.NODE_ID == cluster.node_id_for(cluster.node_name()) and cluster.is_approved() and not cluster.is_clustered()
     record = persistence.read_yaml(cluster._node_path(cluster.NODE_ID))
     assert record["approved"] is True and record["pool"] == "default" and "BEGIN CERTIFICATE" in record["peer_cert"]
+    assert record["public_key"] == state.server_public_key_pem
+    assert cluster.node_id_for(" GPU Box #2 ") == "gpu-box-2" and cluster.node_id_for("***") == "node"
+
+
+def test_a_node_started_again_with_a_new_key_takes_its_record_over(node):
+    record = persistence.read_yaml(cluster._node_path(cluster.NODE_ID))
+    record["public_key"] = "-----BEGIN PUBLIC KEY-----\nold\n-----END PUBLIC KEY-----\n"
+    record["pool"] = "gpu"
+    persistence.write_yaml_sync(cluster._node_path(cluster.NODE_ID), record)
+    cluster.apply_registry()
+    taken = cluster.NODES[cluster.NODE_ID]
+    assert taken["public_key"] == state.server_public_key_pem and taken["pool"] == "gpu" and taken["approved"] is True
+
+
+def test_a_node_of_a_bucket_is_a_member_as_it_registers(node, monkeypatch):
+    monkeypatch.setattr(cluster, "members_by_right", lambda: True)
+    persistence.remove(cluster._node_path(cluster.NODE_ID))
+    cluster.NODES[cluster.NODE_ID]["approved"] = False
+    _other_node("bravo")
+    cluster.register_self()
+    cluster.load_registry()
+    assert cluster.is_approved()
+    signed_in = node.post("/api/auth/key", json={"key": "a-root-key-for-the-tests"}, headers=WEB)
+    cookie = {"Cookie": signed_in.headers["set-cookie"].split(";", 1)[0]}
+    shown = {n["id"]: n for n in node.get("/api/admin/cluster", headers={**WEB, **cookie}).json()["nodes"]}
+    assert shown[cluster.NODE_ID]["pending"] is False
+
+
+@pytest.mark.asyncio
+async def test_a_launch_lease_is_held_in_the_store_and_taken_over_when_it_expired(node):
+    _other_node("bravo")
+    key = cluster._lease_key("launch", "alice")
+    async with cluster.lease("launch", "alice"):
+        held = store.get(key)
+        assert held and f"node: {cluster.NODE_ID}".encode() in held[0]
+    assert store.get(key) is None
+    store.put(key, persistence.dump_yaml({"node": "bravo", "expires": time.time() + 60}).encode(), if_absent=True)
+    with pytest.raises(HTTPException) as refused:
+        async with cluster.lease("launch", "alice", wait=0.6):
+            pass
+    assert refused.value.status_code == 409
+    store.delete(key)
+    store.put(key, persistence.dump_yaml({"node": "bravo", "expires": time.time() - 1}).encode(), if_absent=True)
+    async with cluster.lease("launch", "alice", wait=0.6):
+        assert f"node: {cluster.NODE_ID}".encode() in store.get(key)[0]
+    assert store.get(key) is None
 
 
 def test_a_peer_request_is_taken_only_signed_by_an_approved_node_on_the_peer_listener(node):

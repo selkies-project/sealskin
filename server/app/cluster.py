@@ -5,11 +5,15 @@ Every node runs this same server. What a node does is its roles: a
 sessions. Nothing is a master; what the nodes share is the object store
 (`store`), and what each knows of the others it asks them.
 
-* **Identity.** A node is its server key: its id is a hash of the public key,
-  and its record, `cluster/nodes/<id>.yml`, publishes that key, the address of
-  its peer listener, and the certificate that listener serves. A node takes
-  part once its record is approved; the first node of an empty store approves
-  itself.
+* **Identity.** A node is its name (`node_name`, the host name by default):
+  its record, `cluster/nodes/<name>.yml`, publishes its current server key,
+  the address of its peer listener, and the certificate that listener serves.
+  A node started again with an empty configuration directory but the same
+  name and storage takes its record over with a new key and is the same node.
+  With a bucket, a node that can write it is a member as soon as it
+  registers, since the bucket's keys admit to everything anyway; a node of a
+  file store takes part once its record is approved, and the first node of an
+  empty store approves itself.
 * **Peer calls.** A node calls another on its peer listener over TLS pinned to
   the certificates of the approved records, and signs each request with its
   server key (`sign_request`, `verify_request`). A frontend may make a call
@@ -17,16 +21,20 @@ sessions. Nothing is a master; what the nodes share is the object store
   holds the session or home directory it is about (`forward`).
 * **Live state.** Sessions stay with the node that runs them. Every node asks
   every other for its sessions and load each `peer_poll_seconds` and keeps the
-  answers (`PEERS`), which placement, limits, and the dashboard read.
-* **Joining.** A node with a bucket registers itself and waits for an
-  administrator's approval. A node with a join code asks a node of the cluster
-  (`join`), proves the code without sending it, and from then on keeps the
-  shared records on the node that holds them (`store.PeerStore`).
+  answers (`PEERS`), which placement, limits, and the dashboard read. A count
+  taken from them is only as fresh as the last poll, so a launch of a user
+  with limits holds the user's launch lease (`lease`) from the check to the
+  session's registration, and two frontends cannot admit one user twice.
+* **Joining.** A node with a bucket registers itself and is in. A node with a
+  join code asks a node of the cluster (`join`), proves the code without
+  sending it, and from then on keeps the shared records on the node that
+  holds them (`store.PeerStore`).
 """
 
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import datetime
 import hashlib
 import hmac
@@ -34,13 +42,16 @@ import ipaddress
 import json
 import logging
 import os
+import re
 import secrets
 import ssl
 import time
+from collections.abc import AsyncIterator
 from typing import Any
 
 import httpx
 import jwt
+import yaml
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -62,6 +73,9 @@ JOIN_CODE_SECONDS = 3600
 #: Polls a node may miss before it counts as away.
 MISSED_POLLS = 3
 DEFAULT_POOL = "default"
+#: Seconds a lease outlives the node that took it and did not give it back.
+LEASE_SECONDS = 120
+_NODE_ID_CHARS = re.compile(r"[^a-z0-9_-]+")
 
 NODE_ID = ""
 #: Approved and pending node records keyed by node id.
@@ -81,6 +95,7 @@ _client: httpx.AsyncClient | None = None
 _sync_client: httpx.Client | None = None
 _trust_text = ""
 _seen_tokens: dict[str, float] = {}
+_lease_locks: dict[str, asyncio.Lock] = {}
 
 
 def _node_path(node_id: str) -> str:
@@ -106,6 +121,12 @@ def roles() -> set[str]:
 def node_name() -> str:
     """Return the name this node shows."""
     return settings.node_name or state.instance_name or os.uname()[1]
+
+
+def node_id_for(name: str) -> str:
+    """Return the id a node named `name` has: the name lowered, with anything but letters, digits, `_`, and `-` as `-`."""
+    cleaned = _NODE_ID_CHARS.sub("-", name.strip().lower()).strip("-")[:63]
+    return cleaned or "node"
 
 
 def peer_address() -> str:
@@ -177,12 +198,9 @@ def peer_certificate_paths() -> tuple[str, str, str]:
 
 
 def init() -> None:
-    """Derive this node's id, issue its peer certificate, and resume a cluster it joined."""
+    """Take this node's id from its name, issue its peer certificate, and resume a cluster it joined."""
     global NODE_ID
-    der = state.server_private_key.public_key().public_bytes(
-        serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo
-    )
-    NODE_ID = hashlib.sha256(der).hexdigest()[:16]
+    NODE_ID = node_id_for(settings.node_name or os.uname()[1])
     global _trust_text
     own = _ensure_peer_certificate()
     _cert, _key, trust_path = peer_certificate_paths()
@@ -217,11 +235,18 @@ def self_record() -> dict[str, Any]:
     }
 
 
+def members_by_right() -> bool:
+    """Whether a node that can write the store is a member by that alone, as with a bucket."""
+    return store.describe()["kind"] == "s3"
+
+
 def register_self() -> None:
     """Write this node's record, keeping what an administrator set on it.
 
-    The first node of a store approves itself; any other waits for approval
-    unless it joined with a code, which approved it already.
+    With a bucket the node is approved as it registers, and a suspension
+    stays until an administrator lifts it. With a file store the first node
+    approves itself and any other waits for approval, unless it joined with
+    a code, which approved it already.
     """
     path = _node_path(NODE_ID)
     for _attempt in range(3):
@@ -230,9 +255,14 @@ def register_self() -> None:
         record.update(self_record())
         if existing is None:
             others = [n for n in persistence.list_names(os.path.dirname(path)) if n != f"{NODE_ID}.yml"]
-            record["approved"] = not others
+            record["approved"] = members_by_right() or not others
             record["pool"] = settings.node_pool or DEFAULT_POOL
             record["joined_at"] = time.time()
+        elif existing.get("public_key") != record["public_key"]:
+            logger.warning(
+                "Taking over the record of node '%s' with a new key; a node still running under that name is replaced.",
+                NODE_ID,
+            )
         if record == existing:
             return
         try:
@@ -330,9 +360,12 @@ def load_registry() -> bool:
 
 
 def apply_registry() -> None:
-    """Read the cluster's records, put this node's own back if it is gone, and reload the proxy when the peer trust changed."""
+    """Read the cluster's records, put this node's own back if it is gone or another's, and reload the proxy when the peer trust changed."""
     changed = load_registry()
-    if NODE_ID not in NODES:
+    own = NODES.get(NODE_ID)
+    if own is not None and own.get("public_key") != state.server_public_key_pem:
+        logger.error("Another node registered under the name '%s'. Give every node its own SEALSKIN_NODE_NAME.", NODE_ID)
+    if own is None or own.get("public_key") != state.server_public_key_pem:
         register_self()
         changed = load_registry() or changed
     if changed and reload_proxy:
@@ -921,6 +954,79 @@ def choose_node(
     return min(candidates)[2]
 
 
+# --- Leases --------------------------------------------------------------------
+
+
+def _lease_key(kind: str, name: str) -> str:
+    """Return the object a lease is held in."""
+    return f"cluster/leases/{kind}/{name}.yml"
+
+
+def _take_lease(key: str) -> str:
+    """Write the lease `key` for this node and return its entity tag, taking over one that expired.
+
+    Raises:
+        store.Conflict: While another node holds it.
+    """
+    body = persistence.dump_yaml({"node": NODE_ID, "expires": time.time() + LEASE_SECONDS}).encode()
+    try:
+        return store.put(key, body, if_absent=True)
+    except store.Conflict:
+        found = store.get(key)
+        if found is None:
+            raise
+        try:
+            held = yaml.safe_load(found[0]) or {}
+        except yaml.YAMLError:
+            held = {}
+        if float(held.get("expires") or 0) > time.time():
+            raise
+        return store.put(key, body, if_match=found[1])
+
+
+@contextlib.asynccontextmanager
+async def lease(kind: str, name: str, wait: float = 15.0) -> AsyncIterator[None]:
+    """Hold the cluster-wide lease `kind`/`name` for the block.
+
+    On one node the lease is a lock in memory. In a cluster it is also an
+    object in the store, written only when absent, that the other nodes wait
+    on; one a node took and never gave back is taken over after
+    `LEASE_SECONDS`.
+
+    Args:
+        kind: What the lease is for, as `launch`.
+        name: Which one, as the user's name.
+        wait: Seconds to wait for the lease before giving up.
+
+    Raises:
+        HTTPException: 409 when the lease is held for longer than `wait`.
+    """
+    key = _lease_key(kind, name)
+    lock = _lease_locks.setdefault(key, asyncio.Lock())
+    async with lock:
+        if not is_clustered():
+            yield
+            return
+        deadline = time.monotonic() + wait
+        while True:
+            try:
+                tag = await asyncio.to_thread(_take_lease, key)
+                break
+            except store.Conflict as exc:
+                if time.monotonic() >= deadline:
+                    raise HTTPException(
+                        status_code=409, detail="Another of your launches is in progress on another node. Try again in a moment."
+                    ) from exc
+                await asyncio.sleep(0.5)
+        try:
+            yield
+        finally:
+            try:
+                await asyncio.to_thread(store.delete, key, tag)
+            except (store.Conflict, store.StoreUnavailable, OSError) as exc:
+                logger.warning("Could not give back the lease %s: %s", key, exc)
+
+
 # --- Joining -------------------------------------------------------------------
 
 
@@ -968,13 +1074,12 @@ def accept_join(code_id: str, record: dict[str, Any], proof: str) -> dict[str, A
     if not isinstance(entry, dict):
         raise refused
     key = bytes.fromhex(entry["key"])
-    der = serialization.load_pem_public_key(str(record.get("public_key", "")).encode()).public_bytes(
-        serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo
-    )
+    node_id = str(record.get("id") or "")
     if (
         entry.get("expires", 0) < time.time()
         or not hmac.compare_digest(proof, _proof(key, record))
-        or hashlib.sha256(der).hexdigest()[:16] != record.get("id")
+        or node_id_for(node_id) != node_id
+        or node_id == NODE_ID
     ):
         raise refused
     persistence.remove(path)
