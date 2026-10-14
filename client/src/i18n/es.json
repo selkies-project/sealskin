@@ -67,7 +67,8 @@
     "mb": "MB",
     "gb": "GB",
     "tb": "TB",
-    "pb": "PB"
+    "pb": "PB",
+    "vpn": "VPN"
   },
   "options": {
     "sidebar": {
@@ -87,7 +88,8 @@
       "signIn": "Inicio de Sesión",
       "audit": "Registro de Auditoría",
       "branding": "Marca",
-      "keys": "Claves de Aplicación"
+      "keys": "Claves de Aplicación",
+      "vpn": "Perfiles VPN"
     },
     "dashboard": {
       "title": "Panel de Control",
@@ -282,7 +284,8 @@
       "keyExpires": "Caduca",
       "keyNever": "Nunca",
       "keyNeverUsed": "Nunca usada",
-      "revokeAllConfirm": "¿Revocar todas las claves de aplicación de '{username}'? Sus sesiones en la extensión y la app se cerrarán de inmediato."
+      "revokeAllConfirm": "¿Revocar todas las claves de aplicación de '{username}'? Sus sesiones en la extensión y la app se cerrarán de inmediato.",
+      "allowVpn": "Permitir perfiles VPN"
     },
     "groups": {
       "title": "Gestión de Grupos",
@@ -1724,6 +1727,75 @@
       "loadFailed": "No se pudieron cargar sus claves: {error}",
       "createFailed": "No se pudo crear la clave: {error}",
       "tooLong": "Eso es más de lo que permite su administrador."
+    },
+    "vpn": {
+      "title": "Perfiles VPN",
+      "help": "Un perfil VPN es la configuración OpenVPN o WireGuard de un proveedor con sus servidores como lista de puntos de conexión. Lanzar una sesión con un perfil enruta todo su tráfico de Internet por ese proveedor: el nodo que ejecuta la sesión inicia un contenedor de puerta de enlace para el perfil y el punto de conexión, compartido por todas las sesiones de ese nodo que eligen el mismo punto de conexión. Cada nodo gasta una conexión del proveedor por punto de conexión en uso, y el límite de conexiones las acota en todo el despliegue.",
+      "import": "Importar",
+      "importTitle": "Importar un perfil",
+      "importHelp": "Un archivo .ovpn o .conf, un zip de ellos tal como lo entrega el proveedor, o la configuración pegada. Los archivos que comparten plantilla se convierten en un perfil con un punto de conexión por servidor; una plantilla propia se convierte en un perfil propio.",
+      "nameLabel": "Nombre del perfil",
+      "fileLabel": "Archivo de configuración o archivo comprimido",
+      "usernameLabel": "Usuario de OpenVPN",
+      "passwordLabel": "Contraseña de OpenVPN",
+      "credentialsHelp": "Las credenciales de servicio del proveedor, para una configuración que las pide.",
+      "usersLabel": "Usuarios",
+      "groupsLabel": "Grupos",
+      "importing": "Importando...",
+      "imported": "{count, plural, one {1 perfil importado} other {{count} perfiles importados}}.",
+      "importFailed": "No se pudo importar el perfil: {error}",
+      "kind": "Tipo",
+      "endpoints": "Puntos de conexión",
+      "published": "Publicados",
+      "tunnels": "Conexiones",
+      "noTunnels": "Ninguna activa",
+      "tunnel": "{label} en {node}: {sessions, plural, one {1 sesión} other {{sessions} sesiones}} ({state})",
+      "maxTunnels": "Límite de conexiones",
+      "maxTunnelsHelp": "Conexiones que todo el despliegue puede tener a la vez para este perfil; 0 para ningún límite.",
+      "noProfiles": "Aún no hay perfiles VPN.",
+      "editTitle": "Editar {name}",
+      "endpointsTitle": "Puntos de conexión",
+      "endpointsHelp": "Marque los puntos de conexión que los usuarios pueden elegir, en el orden en que se ofrecen; el primero es el predeterminado. Sin ninguno marcado, se usa el primero y los usuarios no eligen. Edite cualquier campo, quite un punto de conexión o añada uno a mano o desde otro archivo de configuración.",
+      "searchPlaceholder": "Buscar puntos de conexión...",
+      "publishedCount": "{count} de {total} publicados",
+      "allEndpoints": "Mostrando {count} de {total}",
+      "deleteTitle": "Eliminar perfil",
+      "confirmDelete": "¿Eliminar el perfil «{name}»? Las puertas de enlace en uso siguen hasta que terminen sus sesiones.",
+      "saved": "Perfil «{name}» guardado.",
+      "saveFailed": "No se pudo guardar el perfil: {error}",
+      "deleted": "Perfil «{name}» eliminado.",
+      "deleteFailed": "No se pudo eliminar el perfil: {error}",
+      "loadFailed": "No se pudieron cargar los perfiles VPN: {error}",
+      "credentialsKept": "Las credenciales están guardadas",
+      "credentialsMissing": "Faltan credenciales",
+      "kinds": {
+        "wireguard": "WireGuard",
+        "openvpn": "OpenVPN"
+      },
+      "kindLabel": "Tipo",
+      "sourceLabel": "Configuración",
+      "sourceFile": "Subir un archivo",
+      "sourceText": "Pegar la configuración",
+      "chooseFile": "Elegir archivo",
+      "noFile": "Ningún archivo elegido",
+      "everyone": "Todos",
+      "accessLabel": "Quién puede elegirlo",
+      "noConfig": "Elija primero un archivo o pegue una configuración.",
+      "pasteWireguard": "[Interface]\nPrivateKey = ...\nAddress = 10.0.0.2/32\nDNS = 10.0.0.1\n\n[Peer]\nPublicKey = ...\nEndpoint = vpn.example.com:51820\nAllowedIPs = 0.0.0.0/0",
+      "pasteOpenvpn": "client\ndev tun\nremote vpn.example.com 1194 udp\nauth-user-pass\n<ca>\n...\n</ca>",
+      "addEndpoint": "Añadir punto de conexión",
+      "addFromFile": "Añadir desde archivo",
+      "offer": "Ofrecer",
+      "label": "Etiqueta",
+      "host": "Host",
+      "port": "Puerto",
+      "proto": "Protocolo",
+      "publicKey": "Clave pública",
+      "presharedKey": "Clave precompartida",
+      "keyKept": "guardada",
+      "removeEndpoint": "Quitar punto de conexión",
+      "endpointIncomplete": "El punto de conexión «{label}» necesita host, puerto y, para WireGuard, la clave pública del servidor.",
+      "endpointsAdded": "{count, plural, one {1 punto de conexión añadido} other {{count} puntos de conexión añadidos}}."
     }
   },
   "popup": {
@@ -1763,7 +1835,9 @@
       "moveHomeConfirm": "¿Mover '{home}' a {node}? Antes hay que detener las sesiones que lo usan.",
       "moveHomeTitle": "Mover almacenamiento",
       "allowance": "Cuota: {used} de {hours} horas por {period}",
-      "newTab": "Abrir en una pestaña nueva"
+      "newTab": "Abrir en una pestaña nueva",
+      "noVpn": "Ninguna",
+      "vpnEndpoint": "Punto de conexión VPN"
     },
     "sessionsView": {
       "noSessions": "No se encontraron sesiones activas."
@@ -2074,7 +2148,9 @@
       "fitFit": "Ajustar",
       "fitStretch": "Estirar",
       "fitCenter": "Centrar",
-      "links": "Enlaces"
+      "links": "Enlaces",
+      "noVpn": "Ninguna",
+      "vpnEndpoint": "Punto de conexión VPN"
     },
     "launch": {
       "title": "Iniciando {app}",
@@ -2088,7 +2164,8 @@
         "starting": "Creando el contenedor",
         "waiting": "Esperando a que el escritorio responda",
         "ready": "Abriendo la sesión",
-        "client": "Preparando el cliente web de la aplicación"
+        "client": "Preparando el cliente web de la aplicación",
+        "vpn": "Iniciando la puerta de enlace VPN"
       },
       "uploading": "Subiendo el archivo ({done} de {total})",
       "imageHint": "El primer lanzamiento de una aplicación en un nodo la descarga, lo que puede tardar minutos. Los siguientes lanzamientos son rápidos.",

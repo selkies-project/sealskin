@@ -67,7 +67,8 @@
     "mb": "MB",
     "gb": "GB",
     "tb": "TB",
-    "pb": "PB"
+    "pb": "PB",
+    "vpn": "VPN"
   },
   "options": {
     "sidebar": {
@@ -87,7 +88,8 @@
       "signIn": "Đăng nhập",
       "audit": "Nhật ký kiểm toán",
       "branding": "Thương hiệu",
-      "keys": "Khóa ứng dụng"
+      "keys": "Khóa ứng dụng",
+      "vpn": "Hồ sơ VPN"
     },
     "dashboard": {
       "title": "Bảng điều khiển",
@@ -282,7 +284,8 @@
       "keyExpires": "Hết hạn",
       "keyNever": "Không bao giờ",
       "keyNeverUsed": "Chưa dùng",
-      "revokeAllConfirm": "Thu hồi mọi khóa ứng dụng của '{username}'? Các đăng nhập từ tiện ích mở rộng và ứng dụng của họ sẽ dừng ngay lập tức."
+      "revokeAllConfirm": "Thu hồi mọi khóa ứng dụng của '{username}'? Các đăng nhập từ tiện ích mở rộng và ứng dụng của họ sẽ dừng ngay lập tức.",
+      "allowVpn": "Cho phép hồ sơ VPN"
     },
     "groups": {
       "title": "Quản lý nhóm",
@@ -1724,6 +1727,75 @@
       "loadFailed": "Không thể tải các khóa của bạn: {error}",
       "createFailed": "Không thể tạo khóa: {error}",
       "tooLong": "Thời hạn này dài hơn mức quản trị viên cho phép."
+    },
+    "vpn": {
+      "title": "Hồ sơ VPN",
+      "help": "Hồ sơ VPN là cấu hình OpenVPN hoặc WireGuard của một nhà cung cấp với các máy chủ của họ dưới dạng danh sách điểm cuối. Khởi chạy phiên với một hồ sơ sẽ định tuyến toàn bộ lưu lượng internet của phiên qua nhà cung cấp đó: nút chạy phiên khởi động một container cổng cho hồ sơ và điểm cuối, và mọi phiên trên nút đó chọn cùng điểm cuối sẽ dùng chung. Mỗi nút tiêu tốn một kết nối của nhà cung cấp cho mỗi điểm cuối đang dùng, và giới hạn kết nối ràng buộc chúng trên toàn bộ hệ thống.",
+      "import": "Nhập",
+      "importTitle": "Nhập hồ sơ",
+      "importHelp": "Một tệp .ovpn hoặc .conf, tệp zip chứa chúng như nhà cung cấp phát hành, hoặc cấu hình được dán vào. Các tệp dùng chung một mẫu trở thành một hồ sơ với một điểm cuối cho mỗi máy chủ; mẫu riêng trở thành hồ sơ riêng.",
+      "nameLabel": "Tên hồ sơ",
+      "fileLabel": "Tệp cấu hình hoặc tệp nén",
+      "usernameLabel": "Tên người dùng OpenVPN",
+      "passwordLabel": "Mật khẩu OpenVPN",
+      "credentialsHelp": "Thông tin đăng nhập dịch vụ của nhà cung cấp, cho cấu hình yêu cầu chúng.",
+      "usersLabel": "Người dùng",
+      "groupsLabel": "Nhóm",
+      "importing": "Đang nhập...",
+      "imported": "Đã nhập {count, plural, other {{count} hồ sơ}}.",
+      "importFailed": "Không thể nhập hồ sơ: {error}",
+      "kind": "Loại",
+      "endpoints": "Điểm cuối",
+      "published": "Đã công bố",
+      "tunnels": "Kết nối",
+      "noTunnels": "Không có kết nối nào",
+      "tunnel": "{label} trên {node}: {sessions, plural, other {{sessions} phiên}} ({state})",
+      "maxTunnels": "Giới hạn kết nối",
+      "maxTunnelsHelp": "Số kết nối toàn bộ hệ thống được mở cùng lúc cho hồ sơ này; 0 là không giới hạn.",
+      "noProfiles": "Chưa có hồ sơ VPN nào.",
+      "editTitle": "Chỉnh sửa {name}",
+      "endpointsTitle": "Điểm cuối",
+      "endpointsHelp": "Đánh dấu các điểm cuối người dùng được chọn, theo thứ tự đưa ra; điểm đầu tiên là mặc định. Không đánh dấu gì thì dùng điểm đầu tiên và người dùng không có lựa chọn. Sửa bất kỳ trường nào, xóa một điểm cuối, hoặc thêm thủ công hay từ tệp cấu hình khác.",
+      "searchPlaceholder": "Tìm điểm cuối...",
+      "publishedCount": "Đã công bố {count} trong {total}",
+      "allEndpoints": "Hiển thị {count} trong {total}",
+      "deleteTitle": "Xóa hồ sơ",
+      "confirmDelete": "Xóa hồ sơ '{name}'? Các cổng đang dùng vẫn hoạt động đến khi phiên của chúng kết thúc.",
+      "saved": "Đã lưu hồ sơ '{name}'.",
+      "saveFailed": "Không thể lưu hồ sơ: {error}",
+      "deleted": "Đã xóa hồ sơ '{name}'.",
+      "deleteFailed": "Không thể xóa hồ sơ: {error}",
+      "loadFailed": "Không thể tải hồ sơ VPN: {error}",
+      "credentialsKept": "Thông tin đăng nhập đã được lưu",
+      "credentialsMissing": "Cần thông tin đăng nhập",
+      "kinds": {
+        "wireguard": "WireGuard",
+        "openvpn": "OpenVPN"
+      },
+      "kindLabel": "Loại",
+      "sourceLabel": "Cấu hình",
+      "sourceFile": "Tải lên tệp",
+      "sourceText": "Dán cấu hình",
+      "chooseFile": "Chọn tệp",
+      "noFile": "Chưa chọn tệp",
+      "everyone": "Mọi người",
+      "accessLabel": "Ai được chọn",
+      "noConfig": "Hãy chọn tệp hoặc dán cấu hình trước.",
+      "pasteWireguard": "[Interface]\nPrivateKey = ...\nAddress = 10.0.0.2/32\nDNS = 10.0.0.1\n\n[Peer]\nPublicKey = ...\nEndpoint = vpn.example.com:51820\nAllowedIPs = 0.0.0.0/0",
+      "pasteOpenvpn": "client\ndev tun\nremote vpn.example.com 1194 udp\nauth-user-pass\n<ca>\n...\n</ca>",
+      "addEndpoint": "Thêm điểm cuối",
+      "addFromFile": "Thêm từ tệp",
+      "offer": "Đưa ra",
+      "label": "Nhãn",
+      "host": "Máy chủ",
+      "port": "Cổng",
+      "proto": "Giao thức",
+      "publicKey": "Khóa công khai",
+      "presharedKey": "Khóa chia sẻ trước",
+      "keyKept": "đã lưu",
+      "removeEndpoint": "Xóa điểm cuối",
+      "endpointIncomplete": "Điểm cuối '{label}' cần máy chủ, cổng và với WireGuard là khóa công khai của máy chủ.",
+      "endpointsAdded": "Đã thêm {count, plural, other {{count} điểm cuối}}."
     }
   },
   "popup": {
@@ -1763,7 +1835,9 @@
       "moveHomeConfirm": "Di chuyển '{home}' đến {node}? Phải dừng các phiên đang dùng nó trước.",
       "moveHomeTitle": "Di chuyển lưu trữ",
       "allowance": "Hạn mức: {used} trên {hours} giờ trong {period} này",
-      "newTab": "Mở trong thẻ mới"
+      "newTab": "Mở trong thẻ mới",
+      "noVpn": "Không",
+      "vpnEndpoint": "Điểm cuối VPN"
     },
     "sessionsView": {
       "noSessions": "Không tìm thấy phiên hoạt động nào."
@@ -2074,7 +2148,9 @@
       "fitFit": "Vừa khít",
       "fitStretch": "Kéo giãn",
       "fitCenter": "Căn giữa",
-      "links": "Liên kết"
+      "links": "Liên kết",
+      "noVpn": "Không",
+      "vpnEndpoint": "Điểm cuối VPN"
     },
     "launch": {
       "title": "Đang khởi chạy {app}",
@@ -2088,7 +2164,8 @@
         "starting": "Đang tạo container",
         "waiting": "Đang chờ màn hình làm việc phản hồi",
         "ready": "Đang mở phiên",
-        "client": "Đang chuẩn bị máy khách web của ứng dụng"
+        "client": "Đang chuẩn bị máy khách web của ứng dụng",
+        "vpn": "Đang khởi động cổng VPN"
       },
       "uploading": "Đang tải lên tệp ({done} trên {total})",
       "imageHint": "Lần khởi chạy đầu tiên của một ứng dụng trên một nút sẽ tải ứng dụng về, có thể mất vài phút. Các lần khởi chạy sau sẽ nhanh.",

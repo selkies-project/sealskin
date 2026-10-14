@@ -29,6 +29,7 @@ from .. import (
     routing,
     sso,
     user_manager,
+    vpn,
     webclient,
 )
 from ..docker_utils import get_and_cache_image_metadata, get_system_stats, pull_and_cache_image
@@ -135,6 +136,7 @@ async def admin_status(user: dict[str, Any] = Depends(verify_token)) -> dict[str
     effective = user.get("effective_settings") or {}
     if effective.get("gpu", False):
         response["gpus"] = await _gpu_list()
+    response["vpns"] = vpn.choices_for(user)
     if effective.get("persistent_storage", False):
         response["storage_used"] = await asyncio.to_thread(quota.storage_used, user["username"])
     return response

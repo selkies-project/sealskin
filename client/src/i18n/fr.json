@@ -67,7 +67,8 @@
     "mb": "Mo",
     "gb": "Go",
     "tb": "To",
-    "pb": "Po"
+    "pb": "Po",
+    "vpn": "VPN"
   },
   "options": {
     "sidebar": {
@@ -87,7 +88,8 @@
       "signIn": "Connexion",
       "audit": "Journal d'Audit",
       "branding": "Image de marque",
-      "keys": "Clés d'application"
+      "keys": "Clés d'application",
+      "vpn": "Profils VPN"
     },
     "dashboard": {
       "title": "Tableau de Bord",
@@ -282,7 +284,8 @@
       "keyExpires": "Expire",
       "keyNever": "Jamais",
       "keyNeverUsed": "Jamais utilisée",
-      "revokeAllConfirm": "Révoquer toutes les clés d'application de '{username}' ? Ses connexions depuis l'extension et l'application cessent immédiatement."
+      "revokeAllConfirm": "Révoquer toutes les clés d'application de '{username}' ? Ses connexions depuis l'extension et l'application cessent immédiatement.",
+      "allowVpn": "Autoriser les profils VPN"
     },
     "groups": {
       "title": "Gestion des Groupes",
@@ -1724,6 +1727,75 @@
       "loadFailed": "Impossible de charger vos clés : {error}",
       "createFailed": "Impossible de créer la clé : {error}",
       "tooLong": "C'est plus long que ce que votre administrateur autorise."
+    },
+    "vpn": {
+      "title": "Profils VPN",
+      "help": "Un profil VPN est la configuration OpenVPN ou WireGuard d'un fournisseur, avec ses serveurs sous forme de liste de points de terminaison. Lancer une session avec un profil fait passer tout son trafic Internet par ce fournisseur : le nœud qui exécute la session démarre un conteneur passerelle pour le profil et le point de terminaison, partagé par toutes les sessions de ce nœud qui choisissent le même point de terminaison. Chaque nœud consomme une connexion du fournisseur par point de terminaison utilisé, et le plafond de connexions les borne sur l'ensemble du déploiement.",
+      "import": "Importer",
+      "importTitle": "Importer un profil",
+      "importHelp": "Un fichier .ovpn ou .conf, un zip de ces fichiers tel que le fournisseur le distribue, ou la configuration collée. Les fichiers qui partagent un modèle deviennent un profil avec un point de terminaison par serveur ; un modèle à part devient un profil à part.",
+      "nameLabel": "Nom du profil",
+      "fileLabel": "Fichier de configuration ou archive",
+      "usernameLabel": "Nom d'utilisateur OpenVPN",
+      "passwordLabel": "Mot de passe OpenVPN",
+      "credentialsHelp": "Les identifiants de service du fournisseur, pour une configuration qui les demande.",
+      "usersLabel": "Utilisateurs",
+      "groupsLabel": "Groupes",
+      "importing": "Importation...",
+      "imported": "{count, plural, one {1 profil importé} other {{count} profils importés}}.",
+      "importFailed": "Impossible d'importer le profil : {error}",
+      "kind": "Type",
+      "endpoints": "Points de terminaison",
+      "published": "Publiés",
+      "tunnels": "Connexions",
+      "noTunnels": "Aucune active",
+      "tunnel": "{label} sur {node} : {sessions, plural, one {1 session} other {{sessions} sessions}} ({state})",
+      "maxTunnels": "Plafond de connexions",
+      "maxTunnelsHelp": "Connexions que l'ensemble du déploiement peut avoir en même temps pour ce profil ; 0 pour aucun plafond.",
+      "noProfiles": "Aucun profil VPN pour l'instant.",
+      "editTitle": "Modifier {name}",
+      "endpointsTitle": "Points de terminaison",
+      "endpointsHelp": "Cochez les points de terminaison que les utilisateurs peuvent choisir, dans l'ordre où les proposer ; le premier est celui par défaut. Sans aucun coché, le premier est utilisé et les utilisateurs n'ont pas le choix. Modifiez un champ, retirez un point de terminaison, ou ajoutez-en un à la main ou depuis un autre fichier de configuration.",
+      "searchPlaceholder": "Rechercher des points de terminaison...",
+      "publishedCount": "{count} sur {total} publiés",
+      "allEndpoints": "{count} sur {total} affichés",
+      "deleteTitle": "Supprimer le profil",
+      "confirmDelete": "Supprimer le profil « {name} » ? Les passerelles en cours d'utilisation restent jusqu'à la fin de leurs sessions.",
+      "saved": "Profil « {name} » enregistré.",
+      "saveFailed": "Impossible d'enregistrer le profil : {error}",
+      "deleted": "Profil « {name} » supprimé.",
+      "deleteFailed": "Impossible de supprimer le profil : {error}",
+      "loadFailed": "Impossible de charger les profils VPN : {error}",
+      "credentialsKept": "Les identifiants sont conservés",
+      "credentialsMissing": "Identifiants requis",
+      "kinds": {
+        "wireguard": "WireGuard",
+        "openvpn": "OpenVPN"
+      },
+      "kindLabel": "Type",
+      "sourceLabel": "Configuration",
+      "sourceFile": "Envoyer un fichier",
+      "sourceText": "Coller la configuration",
+      "chooseFile": "Choisir un fichier",
+      "noFile": "Aucun fichier choisi",
+      "everyone": "Tout le monde",
+      "accessLabel": "Qui peut le choisir",
+      "noConfig": "Choisissez d'abord un fichier ou collez une configuration.",
+      "pasteWireguard": "[Interface]\nPrivateKey = ...\nAddress = 10.0.0.2/32\nDNS = 10.0.0.1\n\n[Peer]\nPublicKey = ...\nEndpoint = vpn.example.com:51820\nAllowedIPs = 0.0.0.0/0",
+      "pasteOpenvpn": "client\ndev tun\nremote vpn.example.com 1194 udp\nauth-user-pass\n<ca>\n...\n</ca>",
+      "addEndpoint": "Ajouter un point de terminaison",
+      "addFromFile": "Ajouter depuis un fichier",
+      "offer": "Proposer",
+      "label": "Libellé",
+      "host": "Hôte",
+      "port": "Port",
+      "proto": "Protocole",
+      "publicKey": "Clé publique",
+      "presharedKey": "Clé prépartagée",
+      "keyKept": "conservée",
+      "removeEndpoint": "Retirer le point de terminaison",
+      "endpointIncomplete": "Le point de terminaison « {label} » a besoin d'un hôte, d'un port et, pour WireGuard, de la clé publique du serveur.",
+      "endpointsAdded": "{count, plural, one {1 point de terminaison ajouté} other {{count} points de terminaison ajoutés}}."
     }
   },
   "popup": {
@@ -1763,7 +1835,9 @@
       "moveHomeConfirm": "Déplacer '{home}' vers {node} ? Les sessions qui l'utilisent doivent d'abord être arrêtées.",
       "moveHomeTitle": "Déplacer le stockage",
       "allowance": "Quota : {used} sur {hours} heures par {period}",
-      "newTab": "Ouvrir dans un nouvel onglet"
+      "newTab": "Ouvrir dans un nouvel onglet",
+      "noVpn": "Aucun",
+      "vpnEndpoint": "Point de terminaison VPN"
     },
     "sessionsView": {
       "noSessions": "Aucune session active trouvée."
@@ -2074,7 +2148,9 @@
       "fitFit": "Ajuster",
       "fitStretch": "Étirer",
       "fitCenter": "Centrer",
-      "links": "Liens"
+      "links": "Liens",
+      "noVpn": "Aucun",
+      "vpnEndpoint": "Point de terminaison VPN"
     },
     "launch": {
       "title": "Lancement de {app}",
@@ -2088,7 +2164,8 @@
         "starting": "Création du conteneur",
         "waiting": "En attente de la réponse du bureau",
         "ready": "Ouverture de la session",
-        "client": "Préparation du client web de l'application"
+        "client": "Préparation du client web de l'application",
+        "vpn": "Démarrage de la passerelle VPN"
       },
       "uploading": "Téléversement du fichier ({done} sur {total})",
       "imageHint": "Le premier lancement d'une application sur un nœud la télécharge, ce qui peut prendre plusieurs minutes. Les lancements suivants sont rapides.",

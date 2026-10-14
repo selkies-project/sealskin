@@ -471,6 +471,32 @@ async def test_deleting_a_user_forgets_its_homes_here_and_on_the_nodes_that_hold
     assert "alice" not in cluster.HOMES and not persistence.exists(f"{settings.cluster_path}/homes/alice.yml")
 
 
+def test_a_node_reports_which_sessions_leave_through_a_vpn(node):
+    state.sessions["s1"] = {"username": "alice", "provider_app_id": "a", "app_name": "A", "created_at": 1.0, "vpn": {"profile": "p1", "endpoint": "e1", "key": "k", "name": "Nord", "label": "x"}}
+    state.sessions["s2"] = {"username": "alice", "provider_app_id": "a", "app_name": "A", "created_at": 1.0}
+    reported = {s["session_id"]: s["vpn"] for s in cluster.local_status()["sessions"]}
+    # The other nodes count connections by profile and endpoint; the gateway's key and name stay home.
+    assert reported == {"s1": {"profile": "p1", "endpoint": "e1"}, "s2": None}
+
+
+def test_a_home_recorded_on_a_node_that_is_gone_is_this_nodes_again(node):
+    import os
+
+    user_manager.write_user_file("alice", "", user_manager.DEFAULT_USER_SETTINGS.copy())
+    user_manager.load_users_and_groups()
+    for home in ("work", "games", "old"):
+        os.makedirs(os.path.join(settings.storage_path, "alice", home))
+    other, _key = _other_node("bravo")
+    cluster.record_home("alice", "work", other)
+    cluster.record_home("alice", "games", cluster.NODE_ID)
+    cluster.record_home("alice", "old", "deadbeefdeadbeef")
+    cluster.adopt_local_homes()
+    # A living node's record stands; a vanished node's home, like an unrecorded one, is adopted.
+    assert cluster.node_of_home("alice", "work") == other
+    assert cluster.node_of_home("alice", "games") == cluster.NODE_ID
+    assert cluster.node_of_home("alice", "old") == cluster.NODE_ID
+
+
 def test_only_a_frontend_has_another_node_drop_a_users_storage(node):
     import os
 

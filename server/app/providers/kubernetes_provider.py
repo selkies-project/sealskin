@@ -31,6 +31,7 @@ import time
 from typing import Any
 
 import httpx
+import websockets
 from fastapi import HTTPException
 
 from .. import progress
@@ -137,6 +138,7 @@ class KubeClient:
         """Create a client for `base_url` scoped to `namespace`."""
         self.namespace = namespace
         self.token_path = token_path
+        self.verify = verify
         self.http = httpx.AsyncClient(base_url=base_url, verify=verify, timeout=30.0, transport=transport)
         self.mounts: list[tuple[str, dict[str, Any], str]] = []
         self.labels: dict[str, str] = {}
@@ -163,9 +165,8 @@ class KubeClient:
         """
         with open(self.token_path, encoding="utf-8") as handle:
             token = handle.read().strip()
-        response = await self.http.request(
-            method, path, headers={"Authorization": f"Bearer {token}"}, **kwargs
-        )
+        headers = {"Authorization": f"Bearer {token}", **(kwargs.pop("headers", None) or {})}
+        response = await self.http.request(method, path, headers=headers, **kwargs)
         if response.status_code >= 400:
             try:
                 message = response.json().get("message") or response.text
@@ -193,6 +194,51 @@ class KubeClient:
         """Return the URL path of a namespaced resource (collection when `name` is empty)."""
         base = f"/apis/{group}" if group else "/api/v1"
         return f"{base}/namespaces/{self.namespace}/{resource}{'/' + name if name else ''}"
+
+    async def exec(self, pod: str, container: str, command: list[str], timeout: float = 30.0) -> str:
+        """Run a command in a container and return its output, over the API's WebSocket exec channel.
+
+        Raises:
+            KubeError: When the command fails, with what it wrote to stderr.
+        """
+        from urllib.parse import urlencode
+
+        with open(self.token_path, encoding="utf-8") as handle:
+            token = handle.read().strip()
+        query = urlencode([("container", container), ("stdout", "true"), ("stderr", "true")] + [("command", part) for part in command])
+        base = str(self.http.base_url).rstrip("/")
+        url = base.replace("https://", "wss://", 1).replace("http://", "ws://", 1) + self.path("pods", pod) + "/exec?" + query
+        ssl_context = self.verify if isinstance(self.verify, ssl.SSLContext) and url.startswith("wss://") else None
+        out: list[bytes] = []
+        err: list[bytes] = []
+        status: dict[str, Any] = {}
+        try:
+            async with websockets.connect(
+                url,
+                additional_headers={"Authorization": f"Bearer {token}"},
+                subprotocols=["v4.channel.k8s.io"],
+                ssl=ssl_context,
+                open_timeout=timeout,
+                max_size=None,
+            ) as socket_:
+                async with asyncio.timeout(timeout):
+                    async for frame in socket_:
+                        if not isinstance(frame, bytes) or not frame:
+                            continue
+                        channel, data = frame[0], frame[1:]
+                        if channel == 1:
+                            out.append(data)
+                        elif channel == 2:
+                            err.append(data)
+                        elif channel == 3:
+                            import json
+
+                            status = json.loads(data or b"{}")
+        except (OSError, TimeoutError, websockets.exceptions.WebSocketException) as exc:
+            raise KubeError(500, f"exec in {pod}/{container} failed: {exc}") from exc
+        if status and status.get("status") != "Success":
+            raise KubeError(500, (b"".join(err).decode("utf-8", "replace").strip() or status.get("message") or "exec failed"))
+        return b"".join(out).decode("utf-8", "replace")
 
 
 _client: KubeClient | None = None
@@ -717,6 +763,7 @@ class KubernetesProvider(BaseProvider):
         volumes: dict[str, Any] | None,
         gpu_config: dict[str, Any] | None,
         template: dict[str, Any] | None = None,
+        vpn: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Build the session pod over the namespace's session template.
 
@@ -724,7 +771,10 @@ class KubernetesProvider(BaseProvider):
         pod; the PodTemplate's container named `app`, or its first, is the
         base of the session container. What NVIDIA sessions get by default,
         the `nvidia` RuntimeClass and every driver capability, yields to the
-        templates' own choice.
+        templates' own choice. With `vpn`, a native sidecar from the gateway
+        image joins the pod (see `app.vpn_kube`): it makes the hub the pod's
+        default route before the app starts, and the pod resolves names at
+        the hub.
 
         Raises:
             HTTPException: When a server path is not on a volume sessions can mount.
@@ -894,6 +944,24 @@ class KubernetesProvider(BaseProvider):
             spec["securityContext"] = pod_security
         spec["volumes"] = pod_volumes
         spec["containers"] = [_merge(app, container)] + others
+        if vpn:
+            spec["initContainers"] = list(base.pop("initContainers", None) or []) + [
+                {
+                    "name": "vpn",
+                    "image": settings.vpn_image,
+                    "args": ["spoke"],
+                    "restartPolicy": "Always",
+                    "env": [{"name": name, "value": str(value)} for name, value in vpn["spoke"].items()],
+                    "securityContext": {"capabilities": {"add": ["NET_ADMIN"]}},
+                    "startupProbe": {
+                        "exec": {"command": ["/usr/local/bin/sealskin-vpn", "health"]},
+                        "periodSeconds": 2,
+                        "failureThreshold": 60,
+                    },
+                }
+            ]
+            spec["dnsPolicy"] = "None"
+            spec["dnsConfig"] = {"nameservers": [vpn["spoke"]["HUB_ADDRESS"]]}
         metadata: dict[str, Any] = {
             "generateName": f"sealskin-{session_id[:8]}-",
             "labels": {
@@ -1004,6 +1072,7 @@ class KubernetesProvider(BaseProvider):
         is_collaboration: bool = False,
         master_token: str | None = None,
         initial_tokens: dict[str, Any] | None = None,
+        vpn: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Create the session pod and wait until its web endpoint answers.
 
@@ -1019,7 +1088,7 @@ class KubernetesProvider(BaseProvider):
                 if gpu_template is None:
                     raise HTTPException(status_code=400, detail=f"The GPU option '{gpu_config['device']}' is gone.")
                 template = _overlay(template, gpu_template)
-            manifest = self._pod_manifest(session_id, env_vars, volumes, gpu_config, template)
+            manifest = self._pod_manifest(session_id, env_vars, volumes, gpu_config, template, vpn)
             pod = await self._create(session_id, manifest)
         except KubeError as exc:
             logger.error("[%s] Kubernetes refused the session pod: %s", session_id, exc.message)

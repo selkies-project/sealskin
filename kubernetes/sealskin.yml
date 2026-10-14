@@ -37,6 +37,15 @@ rules:
 - apiGroups: ["apps"]
   resources: ["replicasets"]
   verbs: ["get"]
+# VPN hubs (https://docs.sealskin.app/vpn): a pod per profile and endpoint
+# behind a Service, its profile in a Secret, and the sessions' spokes added to
+# the running hub. Nothing else uses these; leave them out without VPN profiles.
+- apiGroups: [""]
+  resources: ["secrets", "services"]
+  verbs: ["get", "create", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["get", "create"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -110,6 +119,10 @@ spec:
           value: "1000"
         - name: TZ
           value: "Etc/UTC"
+        # The node's name, which is its identity in the cluster and its records; a pod's
+        # host name changes with every rollout, so the Deployment's name stands in.
+        - name: SEALSKIN_NODE_NAME
+          value: "sealskin"
         # The address clients use, written into the first admin.json; add the
         # port when it is not 8443, as behind an ingress (`sealskin.example.com:443`)
         - name: HOST_URL

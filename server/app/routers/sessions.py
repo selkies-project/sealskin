@@ -78,6 +78,7 @@ def session_info(session_id: str, data: dict[str, Any], for_owner: bool = True) 
         home=_home_of(data),
         gpu=bool(data.get("gpu_config")),
         gpu_device=str(data.get("selected_gpu") or ""),
+        vpn=str((data.get("vpn") or {}).get("name") or ""),
         language=str(data.get("language") or ""),
         wayland_mode=bool(data.get("wayland_mode", True)),
     )

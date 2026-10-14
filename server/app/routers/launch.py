@@ -79,6 +79,8 @@ async def launch_simple(
         wayland_mode=req.wayland_mode,
         timezone=req.timezone,
         auth_user=auth_user,
+        vpn_id=req.vpn,
+        vpn_endpoint=req.vpn_endpoint,
     )
 
 
@@ -104,6 +106,8 @@ async def launch_url(
         wayland_mode=req.wayland_mode,
         timezone=req.timezone,
         auth_user=auth_user,
+        vpn_id=req.vpn,
+        vpn_endpoint=req.vpn_endpoint,
     )
 
 
@@ -141,6 +145,8 @@ async def launch_file(
         wayland_mode=req.wayland_mode,
         timezone=req.timezone,
         auth_user=auth_user,
+        vpn_id=req.vpn,
+        vpn_endpoint=req.vpn_endpoint,
     )
 
 
@@ -190,4 +196,6 @@ async def launch_file_path(
         wayland_mode=req.wayland_mode,
         timezone=req.timezone,
         auth_user=auth_user,
+        vpn_id=req.vpn,
+        vpn_endpoint=req.vpn_endpoint,
     )

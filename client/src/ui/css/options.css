@@ -1744,6 +1744,45 @@ body:has(.popup-container)::before { display: none; }
 /* --------------------------------------------------------------------------
    PRoot Apps catalogs
    -------------------------------------------------------------------------- */
+.vpn-source-choice { display: flex; gap: 1.25rem; margin-bottom: 0.6rem; font-size: 0.9rem; }
+.vpn-source-choice label { display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer; }
+.vpn-file-pick { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.vpn-file-pick[hidden] { display: none; }
+.vpn-file-pick .description { margin: 0; }
+.vpn-access { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+.vpn-access label { display: block; margin-bottom: 0.3rem; font-size: 0.85rem; color: var(--text-secondary); }
+.vpn-access select { width: 100%; }
+.vpn-endpoints-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+.vpn-endpoints-bar .search-input { flex: 1; }
+.vpn-endpoints {
+  max-height: 22rem;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+.vpn-endpoints-bar button { white-space: nowrap; }
+.vpn-endpoint {
+  display: grid;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.85rem;
+}
+.vpn-endpoint.openvpn, .vpn-endpoints.openvpn .vpn-endpoint { grid-template-columns: 3.4rem minmax(6rem, 1.2fr) minmax(7rem, 1.6fr) 5.2rem 5.2rem auto; }
+.vpn-endpoint.wireguard, .vpn-endpoints.wireguard .vpn-endpoint { grid-template-columns: 3.4rem minmax(5rem, 1fr) minmax(6rem, 1.2fr) 5.2rem minmax(7rem, 1.6fr) minmax(6rem, 1.1fr) auto; }
+.vpn-endpoint.head { position: sticky; top: 0; z-index: 1; background: var(--bg-1); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.vpn-endpoint:last-child { border-bottom: none; }
+.vpn-endpoint input[type="text"], .vpn-endpoint input[type="number"], .vpn-endpoint input[type="password"], .vpn-endpoint select { width: 100%; min-width: 0; padding: 0.25rem 0.4rem; font-size: 0.85rem; }
+.vpn-endpoint input:user-invalid { border-color: var(--color-danger); }
+.vpn-endpoint .vpn-endpoint-pick { display: flex; align-items: center; gap: 0.25rem; }
+.vpn-endpoint .vpn-endpoint-order { color: var(--text-muted); font-size: 0.75rem; }
+.vpn-endpoint button.icon { padding: 0.2rem 0.45rem; }
 .proot-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));

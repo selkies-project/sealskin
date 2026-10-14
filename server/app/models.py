@@ -61,6 +61,9 @@ class LaunchRequestSimple(BaseModel):
     selected_gpu: str | None = None
     launch_in_room_mode: bool = False
     wayland_mode: bool = True
+    #: Id of the VPN profile the session's traffic leaves through, and of its endpoint (see `app.vpn`).
+    vpn: str | None = None
+    vpn_endpoint: str | None = None
 
 
 class LaunchRequestURL(BaseModel):
@@ -74,6 +77,9 @@ class LaunchRequestURL(BaseModel):
     selected_gpu: str | None = None
     launch_in_room_mode: bool = False
     wayland_mode: bool = True
+    #: Id of the VPN profile the session's traffic leaves through, and of its endpoint (see `app.vpn`).
+    vpn: str | None = None
+    vpn_endpoint: str | None = None
 
 
 class LaunchRequestFile(BaseModel):
@@ -90,6 +96,9 @@ class LaunchRequestFile(BaseModel):
     selected_gpu: str | None = None
     launch_in_room_mode: bool = False
     wayland_mode: bool = True
+    #: Id of the VPN profile the session's traffic leaves through, and of its endpoint (see `app.vpn`).
+    vpn: str | None = None
+    vpn_endpoint: str | None = None
 
 
 class LaunchResponse(BaseModel):
@@ -573,6 +582,7 @@ class UserSettings(BaseModel):
         pools: Restricted pools open to the user.
         pools_denied: Pools closed to the user.
         proot_catalog: Id of the PRoot Apps catalog the user's sessions install from, or `None`.
+        vpn: Sessions may leave through a VPN profile open to the user.
         application_keys: The user may make and use application keys for the companion apps.
         application_key_clients: The companion apps that may use them (see `APP_KEY_CLIENTS`).
         application_key_days: Longest a key lives, in days; negative for no expiry.
@@ -604,6 +614,7 @@ class UserSettings(BaseModel):
     pools: list[str] = []
     pools_denied: list[str] = []
     proot_catalog: str | None = None
+    vpn: bool = True
     application_keys: bool = True
     application_key_clients: list[str] = list(APP_KEY_CLIENTS)
     application_key_days: float = -1
@@ -644,6 +655,7 @@ class GroupSettings(BaseModel):
     pools: list[str] = []
     pools_denied: list[str] = []
     proot_catalog: str | None = None
+    vpn: bool | None = None
     application_keys: bool | None = None
     application_key_clients: list[str] | None = None
     application_key_days: float | None = None
@@ -677,10 +689,174 @@ class AdminStatusResponse(BaseModel):
     expires: float | None = None
     storage_used: int | None = None
     gpus: list[GPUInfo] = []
+    vpns: list[VpnChoice] = []
     cpu_model: str | None = None
     disk_total: int | None = None
     disk_used: int | None = None
     proxy_cert_expires_at: float | None = None
+
+
+class VpnEndpoint(BaseModel):
+    """One server of a VPN profile, as the profile's endpoint list keeps it.
+
+    Attributes:
+        id: Generated identifier.
+        label: What users see; the server's host name unless renamed.
+        host: Host name or address of the server.
+        port: Its port.
+        proto: `udp` or `tcp`; WireGuard is always `udp`.
+        public_key: The server's WireGuard public key; empty for OpenVPN.
+        allowed_ips: The WireGuard peer's allowed addresses.
+    """
+
+    id: str = Field(..., pattern=r"^[A-Za-z0-9_-]{1,64}$")
+    label: str = Field(..., min_length=1, max_length=120)
+    host: str = Field(..., min_length=1, max_length=253)
+    port: int = Field(..., ge=1, le=65535)
+    proto: str = Field(default="udp", pattern=r"^(udp|tcp)$")
+    public_key: str = ""
+    allowed_ips: str = "0.0.0.0/0"
+    #: Whether a WireGuard preshared key is held for the peer; the key itself stays on the server.
+    has_preshared_key: bool = False
+
+
+class VpnEndpointChoice(BaseModel):
+    """An endpoint as the launcher offers it."""
+
+    id: str
+    label: str
+
+
+class VpnChoice(BaseModel):
+    """A VPN profile as the launcher offers it to a user: its published endpoints, the first the default."""
+
+    id: str
+    name: str
+    kind: str
+    endpoints: list[VpnEndpointChoice] = []
+
+
+class VpnTunnel(BaseModel):
+    """A gateway up somewhere in the deployment: one connection to the provider.
+
+    Attributes:
+        endpoint: Id of the endpoint it is connected to.
+        label: The endpoint's label.
+        node: Name of the node running it.
+        sessions: Sessions on that node that leave through it.
+        state: The gateway container's state on this node, `healthy` while the tunnel carries
+            traffic; `running` for another node's, which reports its sessions and no more.
+    """
+
+    endpoint: str
+    label: str
+    node: str = ""
+    sessions: int = 0
+    state: str = ""
+
+
+class VpnEndpointEdit(BaseModel):
+    """An endpoint as the editor sends it back: an existing one by id, a new one without.
+
+    Attributes:
+        preshared_key: A new WireGuard preshared key; `None` keeps the one held, empty drops it.
+    """
+
+    id: str | None = Field(default=None, pattern=r"^[A-Za-z0-9_-]{1,64}$")
+    label: str = Field(default="", max_length=120)
+    host: str = Field(..., min_length=1, max_length=253)
+    port: int = Field(..., ge=1, le=65535)
+    proto: str = Field(default="udp", pattern=r"^(udp|tcp)$")
+    public_key: str = Field(default="", max_length=120)
+    preshared_key: str | None = Field(default=None, max_length=120)
+    allowed_ips: str = Field(default="0.0.0.0/0", max_length=512)
+
+
+class VpnEndpointsImport(BaseModel):
+    """Add the endpoints of an uploaded config file or archive to a profile."""
+
+    filename: str = Field(..., min_length=1, max_length=255)
+    upload_id: str
+    total_chunks: int = Field(..., ge=1)
+
+
+class VpnProfileView(BaseModel):
+    """A VPN profile as the dashboard shows it; the template and the credentials stay on the server.
+
+    Attributes:
+        id: Generated identifier.
+        name: Name shown to users.
+        kind: `wireguard` or `openvpn`.
+        endpoints: Every endpoint the import found.
+        published: Ids of the endpoints users may pick, in the order offered; empty publishes the first endpoint.
+        max_tunnels: Connections the deployment may have up for the profile at once; 0 for no limit.
+        users: Usernames the profile is open to (`all` for everyone).
+        groups: Groups the profile is open to (`all` for everyone).
+        has_credentials: Whether an OpenVPN username and password are kept.
+        needs_credentials: Whether the OpenVPN template asks for them.
+        tunnels: The gateways of the profile up across the deployment.
+        created: Unix time the profile was imported.
+    """
+
+    id: str
+    name: str
+    kind: str
+    endpoints: list[VpnEndpoint] = []
+    published: list[str] = []
+    max_tunnels: int = 0
+    users: list[str] = ["all"]
+    groups: list[str] = ["all"]
+    has_credentials: bool = False
+    needs_credentials: bool = False
+    tunnels: list[VpnTunnel] = []
+    created: float = 0
+
+
+class VpnImportRequest(BaseModel):
+    """Import VPN profiles from an uploaded config file or an archive of them.
+
+    Attributes:
+        name: Name of the profile; a bundle that holds several templates makes several profiles, named after it.
+        filename: Name of the uploaded file, which tells an archive from a single config.
+        upload_id: The chunked upload holding it.
+        total_chunks: Chunks of that upload.
+        kind: The type the administrator chose, which the config must be.
+        username: OpenVPN username, for a template that asks for one.
+        password: OpenVPN password.
+        users: Usernames the profiles are open to.
+        groups: Groups the profiles are open to.
+    """
+
+    name: str = Field(..., min_length=1, max_length=80)
+    filename: str = Field(..., min_length=1, max_length=255)
+    upload_id: str
+    total_chunks: int = Field(..., ge=1)
+    #: `wireguard` or `openvpn` when the administrator chose; a config of the other kind is refused.
+    kind: str | None = Field(default=None, pattern=r"^(wireguard|openvpn)$")
+    username: str = ""
+    password: str = ""
+    users: list[str] = ["all"]
+    groups: list[str] = ["all"]
+
+
+class VpnProfileUpdate(BaseModel):
+    """Change a VPN profile; a field left out keeps its value, and credentials given replace the kept ones.
+
+    Attributes:
+        labels: New labels keyed by endpoint id.
+        endpoints: The whole endpoint list as edited; one left out is removed, one without an
+            id is new.
+    """
+
+    name: str | None = Field(default=None, min_length=1, max_length=80)
+    published: list[str] | None = None
+    max_tunnels: int | None = Field(default=None, ge=0)
+    users: list[str] | None = None
+    groups: list[str] | None = None
+    labels: dict[str, str] | None = None
+    endpoints: list[VpnEndpointEdit] | None = None
+    username: str | None = None
+    password: str | None = None
 
 
 class ProotCatalogApp(BaseModel):
@@ -894,6 +1070,8 @@ class ActiveSessionInfo(BaseModel):
     home: str = ""
     gpu: bool = False
     gpu_device: str = ""
+    #: Name of the VPN profile the session leaves through, when it does.
+    vpn: str = ""
     language: str = ""
     wayland_mode: bool = True
 
@@ -1054,6 +1232,9 @@ class LaunchRequestFilePath(BaseModel):
     timezone: str | None = None
     selected_gpu: str | None = None
     wayland_mode: bool = True
+    #: Id of the VPN profile the session's traffic leaves through, and of its endpoint (see `app.vpn`).
+    vpn: str | None = None
+    vpn_endpoint: str | None = None
 
 
 class LaunchFromStorageRequest(BaseModel):

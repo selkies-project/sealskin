@@ -67,7 +67,8 @@
     "mb": "MB",
     "gb": "GB",
     "tb": "TB",
-    "pb": "PB"
+    "pb": "PB",
+    "vpn": "VPN"
   },
   "options": {
     "sidebar": {
@@ -87,7 +88,8 @@
       "signIn": "登录",
       "audit": "审计日志",
       "branding": "品牌定制",
-      "keys": "应用密钥"
+      "keys": "应用密钥",
+      "vpn": "VPN 配置"
     },
     "dashboard": {
       "title": "仪表盘",
@@ -282,7 +284,8 @@
       "keyExpires": "到期",
       "keyNever": "永不",
       "keyNeverUsed": "从未使用",
-      "revokeAllConfirm": "要撤销“{username}”的所有应用密钥吗？其扩展和应用的登录将立即失效。"
+      "revokeAllConfirm": "要撤销“{username}”的所有应用密钥吗？其扩展和应用的登录将立即失效。",
+      "allowVpn": "允许 VPN 配置"
     },
     "groups": {
       "title": "群组管理",
@@ -1724,6 +1727,75 @@
       "loadFailed": "无法加载您的密钥：{error}",
       "createFailed": "无法创建密钥：{error}",
       "tooLong": "超出了管理员允许的最长期限。"
+    },
+    "vpn": {
+      "title": "VPN 配置",
+      "help": "VPN 配置是服务商的 OpenVPN 或 WireGuard 配置，其服务器构成端点列表。使用配置启动会话后，会话的全部互联网流量都经由该服务商：运行会话的节点为该配置和端点启动一个网关容器，该节点上选择同一端点的所有会话共用它。每个节点为每个在用端点消耗服务商的一个连接，连接上限在整个部署范围内约束连接数。",
+      "import": "导入",
+      "importTitle": "导入配置",
+      "importHelp": "一个 .ovpn 或 .conf 文件、服务商分发的 zip 包，或粘贴的配置。共用同一模板的文件成为一个配置，每台服务器一个端点；模板不同的文件成为单独的配置。",
+      "nameLabel": "配置名称",
+      "fileLabel": "配置文件或压缩包",
+      "usernameLabel": "OpenVPN 用户名",
+      "passwordLabel": "OpenVPN 密码",
+      "credentialsHelp": "服务商的服务凭据，用于需要凭据的配置。",
+      "usersLabel": "用户",
+      "groupsLabel": "组",
+      "importing": "正在导入...",
+      "imported": "已导入 {count, plural, other {{count} 个配置}}。",
+      "importFailed": "无法导入配置：{error}",
+      "kind": "类型",
+      "endpoints": "端点",
+      "published": "已发布",
+      "tunnels": "连接",
+      "noTunnels": "无活动连接",
+      "tunnel": "{node} 上的 {label}：{sessions, plural, other {{sessions} 个会话}}（{state}）",
+      "maxTunnels": "连接上限",
+      "maxTunnelsHelp": "整个部署可为此配置同时保持的连接数；0 为不限。",
+      "noProfiles": "还没有 VPN 配置。",
+      "editTitle": "编辑 {name}",
+      "endpointsTitle": "端点",
+      "endpointsHelp": "勾选用户可选择的端点，按提供顺序排列；第一个为默认。不勾选则使用第一个端点，用户无需选择。可编辑任意字段、删除端点，或手动或从其他配置文件添加端点。",
+      "searchPlaceholder": "搜索端点...",
+      "publishedCount": "已发布 {count}/{total}",
+      "allEndpoints": "显示 {count}/{total}",
+      "deleteTitle": "删除配置",
+      "confirmDelete": "删除配置“{name}”？使用中的网关会保留到其会话结束。",
+      "saved": "已保存配置“{name}”。",
+      "saveFailed": "无法保存配置：{error}",
+      "deleted": "已删除配置“{name}”。",
+      "deleteFailed": "无法删除配置：{error}",
+      "loadFailed": "无法加载 VPN 配置：{error}",
+      "credentialsKept": "凭据已保存",
+      "credentialsMissing": "需要凭据",
+      "kinds": {
+        "wireguard": "WireGuard",
+        "openvpn": "OpenVPN"
+      },
+      "kindLabel": "类型",
+      "sourceLabel": "配置",
+      "sourceFile": "上传文件",
+      "sourceText": "粘贴配置",
+      "chooseFile": "选择文件",
+      "noFile": "未选择文件",
+      "everyone": "所有人",
+      "accessLabel": "谁可以选择",
+      "noConfig": "请先选择文件或粘贴配置。",
+      "pasteWireguard": "[Interface]\nPrivateKey = ...\nAddress = 10.0.0.2/32\nDNS = 10.0.0.1\n\n[Peer]\nPublicKey = ...\nEndpoint = vpn.example.com:51820\nAllowedIPs = 0.0.0.0/0",
+      "pasteOpenvpn": "client\ndev tun\nremote vpn.example.com 1194 udp\nauth-user-pass\n<ca>\n...\n</ca>",
+      "addEndpoint": "添加端点",
+      "addFromFile": "从文件添加",
+      "offer": "提供",
+      "label": "标签",
+      "host": "主机",
+      "port": "端口",
+      "proto": "协议",
+      "publicKey": "公钥",
+      "presharedKey": "预共享密钥",
+      "keyKept": "已保存",
+      "removeEndpoint": "删除端点",
+      "endpointIncomplete": "端点“{label}”需要主机、端口，WireGuard 还需要服务器公钥。",
+      "endpointsAdded": "已添加 {count, plural, other {{count} 个端点}}。"
     }
   },
   "popup": {
@@ -1763,7 +1835,9 @@
       "moveHomeConfirm": "要将“{home}”移动到 {node} 吗？必须先停止正在使用它的会话。",
       "moveHomeTitle": "移动存储",
       "allowance": "额度: 本{period}已用 {used} / {hours} 小时",
-      "newTab": "在新标签页中打开"
+      "newTab": "在新标签页中打开",
+      "noVpn": "无",
+      "vpnEndpoint": "VPN 端点"
     },
     "sessionsView": {
       "noSessions": "未找到活跃会话。"
@@ -2074,7 +2148,9 @@
       "fitFit": "适应",
       "fitStretch": "拉伸",
       "fitCenter": "居中",
-      "links": "链接"
+      "links": "链接",
+      "noVpn": "无",
+      "vpnEndpoint": "VPN 端点"
     },
     "launch": {
       "title": "正在启动 {app}",
@@ -2088,7 +2164,8 @@
         "starting": "正在创建容器",
         "waiting": "正在等待桌面响应",
         "ready": "正在打开会话",
-        "client": "正在准备应用程序的 Web 客户端"
+        "client": "正在准备应用程序的 Web 客户端",
+        "vpn": "正在启动 VPN 网关"
       },
       "uploading": "正在上传文件（{done} / {total}）",
       "imageHint": "应用程序在某个节点上首次启动时需要下载，可能要花几分钟。之后的启动会很快。",

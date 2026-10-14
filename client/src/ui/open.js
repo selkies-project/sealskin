@@ -166,6 +166,7 @@ async function launch(app, status, home) {
     if (!homes.includes(home)) throw new Error(t('web.open.noHome', { home }));
   }
   const gpu = params.get('gpu') || '';
+  const vpn = (status.vpns || []).find((item) => item.id === params.get('vpn')) || null;
   const language = params.get('lang') || '';
   const payload = {
     launch_id: id,
@@ -176,6 +177,8 @@ async function launch(app, status, home) {
     selected_gpu: (status.gpus || []).some((item) => item.device === gpu) ? gpu : null,
     launch_in_room_mode: flag(params.get('room')),
     wayland_mode: !['0', 'false'].includes(String(params.get('wayland') || '').toLowerCase()),
+    vpn: vpn ? vpn.id : null,
+    vpn_endpoint: vpn && vpn.endpoints.some((e) => e.id === params.get('vpn_endpoint')) ? params.get('vpn_endpoint') : null,
   };
   const [whereKind, whereName] = (params.get('where') || '').split(/:(.*)/);
   if ((whereKind === 'pool' || whereKind === 'node') && whereName) payload[whereKind] = whereName;

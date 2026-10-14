@@ -67,7 +67,8 @@
     "mb": "ميجابايت",
     "gb": "جيجابايت",
     "tb": "تيرابايت",
-    "pb": "بيتابايت"
+    "pb": "بيتابايت",
+    "vpn": "VPN"
   },
   "options": {
     "sidebar": {
@@ -87,7 +88,8 @@
       "signIn": "تسجيل الدخول",
       "audit": "سجل التدقيق",
       "branding": "الهوية البصرية",
-      "keys": "مفاتيح التطبيق"
+      "keys": "مفاتيح التطبيق",
+      "vpn": "ملفات VPN"
     },
     "dashboard": {
       "title": "لوحة التحكم",
@@ -282,7 +284,8 @@
       "keyExpires": "ينتهي",
       "keyNever": "أبدًا",
       "keyNeverUsed": "لم يُستخدم قط",
-      "revokeAllConfirm": "هل تريد إبطال كل مفاتيح التطبيق للمستخدم '{username}'؟ ستتوقف جلسات الدخول من الإضافة والتطبيق فورًا."
+      "revokeAllConfirm": "هل تريد إبطال كل مفاتيح التطبيق للمستخدم '{username}'؟ ستتوقف جلسات الدخول من الإضافة والتطبيق فورًا.",
+      "allowVpn": "السماح بملفات VPN"
     },
     "groups": {
       "title": "إدارة المجموعات",
@@ -1724,6 +1727,75 @@
       "loadFailed": "تعذر تحميل مفاتيحك: {error}",
       "createFailed": "تعذر إنشاء المفتاح: {error}",
       "tooLong": "هذه المدة أطول مما يسمح به المسؤول."
+    },
+    "vpn": {
+      "title": "ملفات VPN",
+      "help": "ملف VPN هو إعداد OpenVPN أو WireGuard لمزوّد ما مع خوادمه كقائمة نقاط نهاية. تشغيل جلسة بملف يمرّر كل حركة الإنترنت فيها عبر ذلك المزوّد: العقد الذي يشغّل الجلسة يبدأ حاوية بوابة للملف ونقطة النهاية، وتتشاركها كل جلسات ذلك العقد التي تختار نقطة النهاية نفسها. يستهلك كل عقد اتصالًا واحدًا من المزوّد لكل نقطة نهاية قيد الاستخدام، ويحدّ سقف الاتصالات منها عبر النشر كله.",
+      "import": "استيراد",
+      "importTitle": "استيراد ملف",
+      "importHelp": "ملف .ovpn أو .conf واحد، أو ملف zip يضمها كما يوزّعه المزوّد، أو الإعداد ملصوقًا. الملفات التي تتشارك قالبًا واحدًا تصبح ملفًا واحدًا بنقطة نهاية لكل خادم؛ والقالب المختلف يصبح ملفًا مستقلًا.",
+      "nameLabel": "اسم الملف",
+      "fileLabel": "ملف الإعداد أو الأرشيف",
+      "usernameLabel": "اسم مستخدم OpenVPN",
+      "passwordLabel": "كلمة مرور OpenVPN",
+      "credentialsHelp": "بيانات اعتماد الخدمة لدى المزوّد، لإعداد يطلبها.",
+      "usersLabel": "المستخدمون",
+      "groupsLabel": "المجموعات",
+      "importing": "جارٍ الاستيراد...",
+      "imported": "تم استيراد {count, plural, one {ملف واحد} other {{count} ملفات}}.",
+      "importFailed": "تعذّر استيراد الملف: {error}",
+      "kind": "النوع",
+      "endpoints": "نقاط النهاية",
+      "published": "منشورة",
+      "tunnels": "الاتصالات",
+      "noTunnels": "لا شيء نشط",
+      "tunnel": "{label} على {node}: {sessions, plural, one {جلسة واحدة} other {{sessions} جلسات}} ({state})",
+      "maxTunnels": "حد الاتصالات",
+      "maxTunnelsHelp": "عدد الاتصالات التي يمكن للنشر كله فتحها معًا لهذا الملف؛ 0 بلا حد.",
+      "noProfiles": "لا توجد ملفات VPN بعد.",
+      "editTitle": "تعديل {name}",
+      "endpointsTitle": "نقاط النهاية",
+      "endpointsHelp": "علّم نقاط النهاية التي يمكن للمستخدمين اختيارها بترتيب عرضها؛ الأولى هي الافتراضية. دون تعليم تُستخدم الأولى ولا خيار للمستخدمين. عدّل أي حقل، أو احذف نقطة نهاية، أو أضف واحدة يدويًا أو من ملف إعداد آخر.",
+      "searchPlaceholder": "البحث في نقاط النهاية...",
+      "publishedCount": "نُشر {count} من {total}",
+      "allEndpoints": "عرض {count} من {total}",
+      "deleteTitle": "حذف الملف",
+      "confirmDelete": "حذف الملف '{name}'؟ تبقى البوابات قيد الاستخدام حتى تنتهي جلساتها.",
+      "saved": "تم حفظ الملف '{name}'.",
+      "saveFailed": "تعذّر حفظ الملف: {error}",
+      "deleted": "تم حذف الملف '{name}'.",
+      "deleteFailed": "تعذّر حذف الملف: {error}",
+      "loadFailed": "تعذّر تحميل ملفات VPN: {error}",
+      "credentialsKept": "بيانات الاعتماد محفوظة",
+      "credentialsMissing": "تلزم بيانات اعتماد",
+      "kinds": {
+        "wireguard": "WireGuard",
+        "openvpn": "OpenVPN"
+      },
+      "addEndpoint": "إضافة نقطة نهاية",
+      "addFromFile": "إضافة من ملف",
+      "offer": "عرض",
+      "label": "التسمية",
+      "host": "المضيف",
+      "port": "المنفذ",
+      "proto": "البروتوكول",
+      "publicKey": "المفتاح العام",
+      "presharedKey": "المفتاح المشترك مسبقًا",
+      "keyKept": "محفوظ",
+      "removeEndpoint": "حذف نقطة النهاية",
+      "endpointIncomplete": "تحتاج نقطة النهاية '{label}' إلى مضيف ومنفذ، ولـ WireGuard المفتاح العام للخادم.",
+      "endpointsAdded": "تمت إضافة {count, plural, one {نقطة نهاية واحدة} other {{count} نقاط نهاية}}.",
+      "kindLabel": "النوع",
+      "sourceLabel": "الإعداد",
+      "sourceFile": "رفع ملف",
+      "sourceText": "لصق الإعداد",
+      "chooseFile": "اختيار ملف",
+      "noFile": "لم يُختر ملف",
+      "everyone": "الجميع",
+      "accessLabel": "من يحق له اختياره",
+      "noConfig": "اختر ملفًا أو الصق إعدادًا أولًا.",
+      "pasteWireguard": "[Interface]\nPrivateKey = ...\nAddress = 10.0.0.2/32\nDNS = 10.0.0.1\n\n[Peer]\nPublicKey = ...\nEndpoint = vpn.example.com:51820\nAllowedIPs = 0.0.0.0/0",
+      "pasteOpenvpn": "client\ndev tun\nremote vpn.example.com 1194 udp\nauth-user-pass\n<ca>\n...\n</ca>"
     }
   },
   "popup": {
@@ -1763,7 +1835,9 @@
       "moveHomeConfirm": "نقل '{home}' إلى {node}؟ يجب أولًا إيقاف الجلسات التي تستخدمه.",
       "moveHomeTitle": "نقل التخزين",
       "allowance": "الحصة: {used} من {hours} ساعة هذا ال{period}",
-      "newTab": "فتح في علامة تبويب جديدة"
+      "newTab": "فتح في علامة تبويب جديدة",
+      "noVpn": "بدون",
+      "vpnEndpoint": "نقطة نهاية VPN"
     },
     "sessionsView": {
       "noSessions": "لم يتم العثور على جلسات نشطة."
@@ -2074,7 +2148,9 @@
       "fitFit": "ملاءمة",
       "fitStretch": "تمديد",
       "fitCenter": "توسيط",
-      "links": "الروابط"
+      "links": "الروابط",
+      "noVpn": "بدون",
+      "vpnEndpoint": "نقطة نهاية VPN"
     },
     "launch": {
       "title": "جاري تشغيل {app}",
@@ -2088,7 +2164,8 @@
         "starting": "إنشاء الحاوية",
         "waiting": "بانتظار استجابة سطح المكتب",
         "ready": "فتح الجلسة",
-        "client": "جارٍ تجهيز عميل الويب للتطبيق"
+        "client": "جارٍ تجهيز عميل الويب للتطبيق",
+        "vpn": "جارٍ تشغيل بوابة VPN"
       },
       "uploading": "جاري رفع الملف ({done} من {total})",
       "imageHint": "أول تشغيل لتطبيق على عقدة يتطلب تنزيله، وقد يستغرق ذلك دقائق. عمليات التشغيل اللاحقة سريعة.",

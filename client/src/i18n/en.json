@@ -67,7 +67,8 @@
     "mb": "MB",
     "gb": "GB",
     "tb": "TB",
-    "pb": "PB"
+    "pb": "PB",
+    "vpn": "VPN"
   },
   "options": {
     "sidebar": {
@@ -87,7 +88,8 @@
       "signIn": "Sign In",
       "audit": "Audit Log",
       "branding": "Branding",
-      "keys": "Application Keys"
+      "keys": "Application Keys",
+      "vpn": "VPN Profiles"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -282,7 +284,8 @@
       "keyExpires": "Expires",
       "keyNever": "Never",
       "keyNeverUsed": "Never used",
-      "revokeAllConfirm": "Revoke every application key of '{username}'? Their extension and app sign-ins stop at once."
+      "revokeAllConfirm": "Revoke every application key of '{username}'? Their extension and app sign-ins stop at once.",
+      "allowVpn": "Allow VPN Profiles"
     },
     "groups": {
       "title": "Group Management",
@@ -1725,6 +1728,75 @@
       "loadFailed": "Could not load your keys: {error}",
       "createFailed": "Could not make the key: {error}",
       "tooLong": "That is longer than your administrator allows."
+    },
+    "vpn": {
+      "title": "VPN Profiles",
+      "help": "A VPN profile is a provider's OpenVPN or WireGuard configuration with its servers as a list of endpoints. Launching a session with a profile routes all of its internet traffic through that provider: the node running the session starts a gateway container for the profile and endpoint, and every session on that node that picks the same endpoint shares it. Each node spends one of the provider's connections per endpoint in use, and the connection cap bounds them across the whole deployment.",
+      "import": "Import",
+      "importTitle": "Import a profile",
+      "importHelp": "One .ovpn or .conf file, a zip of them as the provider hands it out, or the config pasted in. Files that share a template become one profile with an endpoint per server; a template of its own becomes a profile of its own.",
+      "nameLabel": "Profile name",
+      "fileLabel": "Config file or archive",
+      "usernameLabel": "OpenVPN username",
+      "passwordLabel": "OpenVPN password",
+      "credentialsHelp": "The provider's service credentials, for a config that asks for them.",
+      "usersLabel": "Users",
+      "groupsLabel": "Groups",
+      "importing": "Importing...",
+      "imported": "Imported {count, plural, one {1 profile} other {{count} profiles}}.",
+      "importFailed": "Could not import the profile: {error}",
+      "kind": "Kind",
+      "endpoints": "Endpoints",
+      "published": "Published",
+      "tunnels": "Connections",
+      "noTunnels": "None up",
+      "tunnel": "{label} on {node}: {sessions, plural, one {1 session} other {{sessions} sessions}} ({state})",
+      "maxTunnels": "Connection cap",
+      "maxTunnelsHelp": "Connections the whole deployment may have up for this profile at once; 0 for no cap.",
+      "noProfiles": "No VPN profiles yet.",
+      "editTitle": "Edit {name}",
+      "endpointsTitle": "Endpoints",
+      "endpointsHelp": "Tick the endpoints users may pick, in the order to offer them; the first is the default. With none ticked, the first endpoint is used and users get no choice. Edit any field, remove an endpoint, or add one by hand or from another config file.",
+      "searchPlaceholder": "Search endpoints...",
+      "publishedCount": "{count} of {total} published",
+      "allEndpoints": "Showing {count} of {total}",
+      "deleteTitle": "Delete profile",
+      "confirmDelete": "Delete the profile '{name}'? Gateways in use stay up until their sessions end.",
+      "saved": "Saved profile '{name}'.",
+      "saveFailed": "Could not save the profile: {error}",
+      "deleted": "Deleted profile '{name}'.",
+      "deleteFailed": "Could not delete the profile: {error}",
+      "loadFailed": "Could not load the VPN profiles: {error}",
+      "credentialsKept": "Credentials are kept",
+      "credentialsMissing": "Needs credentials",
+      "kinds": {
+        "wireguard": "WireGuard",
+        "openvpn": "OpenVPN"
+      },
+      "kindLabel": "Type",
+      "sourceLabel": "Config",
+      "sourceFile": "Upload a file",
+      "sourceText": "Paste the config",
+      "chooseFile": "Choose file",
+      "noFile": "No file chosen",
+      "everyone": "Everyone",
+      "accessLabel": "Who may pick it",
+      "noConfig": "Choose a file or paste a config first.",
+      "pasteWireguard": "[Interface]\nPrivateKey = ...\nAddress = 10.0.0.2/32\nDNS = 10.0.0.1\n\n[Peer]\nPublicKey = ...\nEndpoint = vpn.example.com:51820\nAllowedIPs = 0.0.0.0/0",
+      "pasteOpenvpn": "client\ndev tun\nremote vpn.example.com 1194 udp\nauth-user-pass\n<ca>\n...\n</ca>",
+      "addEndpoint": "Add endpoint",
+      "addFromFile": "Add from file",
+      "offer": "Offer",
+      "label": "Label",
+      "host": "Host",
+      "port": "Port",
+      "proto": "Protocol",
+      "publicKey": "Public key",
+      "presharedKey": "Preshared key",
+      "keyKept": "kept",
+      "removeEndpoint": "Remove endpoint",
+      "endpointIncomplete": "The endpoint '{label}' needs a host, a port, and for WireGuard the server's public key.",
+      "endpointsAdded": "Added {count, plural, one {1 endpoint} other {{count} endpoints}}."
     }
   },
   "popup": {
@@ -1764,7 +1836,9 @@
       "moveHomeConfirm": "Move '{home}' to {node}? Sessions using it must be stopped first.",
       "moveHomeTitle": "Move storage",
       "allowance": "Allowance: {used} of {hours} hours this {period}",
-      "newTab": "Open in a new tab"
+      "newTab": "Open in a new tab",
+      "noVpn": "None",
+      "vpnEndpoint": "VPN endpoint"
     },
     "sessionsView": {
       "noSessions": "No active sessions found."
@@ -2075,7 +2149,9 @@
       "fitFit": "Fit",
       "fitStretch": "Stretch",
       "fitCenter": "Center",
-      "links": "Links"
+      "links": "Links",
+      "noVpn": "None",
+      "vpnEndpoint": "VPN endpoint"
     },
     "launch": {
       "title": "Launching {app}",
@@ -2089,7 +2165,8 @@
         "starting": "Creating the container",
         "waiting": "Waiting for the desktop to respond",
         "ready": "Opening the session",
-        "client": "Preparing the application's web client"
+        "client": "Preparing the application's web client",
+        "vpn": "Bringing up the VPN gateway"
       },
       "uploading": "Uploading the file ({done} of {total})",
       "imageHint": "The first launch of an application on a node downloads it, which can take minutes. Later launches are fast.",

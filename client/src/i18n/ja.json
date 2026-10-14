@@ -67,7 +67,8 @@
     "mb": "MB",
     "gb": "GB",
     "tb": "TB",
-    "pb": "PB"
+    "pb": "PB",
+    "vpn": "VPN"
   },
   "options": {
     "sidebar": {
@@ -87,7 +88,8 @@
       "signIn": "サインイン",
       "audit": "監査ログ",
       "branding": "ブランディング",
-      "keys": "アプリケーションキー"
+      "keys": "アプリケーションキー",
+      "vpn": "VPN プロファイル"
     },
     "dashboard": {
       "title": "ダッシュボード",
@@ -282,7 +284,8 @@
       "keyExpires": "有効期限",
       "keyNever": "なし",
       "keyNeverUsed": "未使用",
-      "revokeAllConfirm": "'{username}' のすべてのアプリケーションキーを取り消しますか？拡張機能とアプリのサインインはすぐに無効になります。"
+      "revokeAllConfirm": "'{username}' のすべてのアプリケーションキーを取り消しますか？拡張機能とアプリのサインインはすぐに無効になります。",
+      "allowVpn": "VPN プロファイルを許可"
     },
     "groups": {
       "title": "グループ管理",
@@ -1724,6 +1727,75 @@
       "loadFailed": "キーを読み込めませんでした: {error}",
       "createFailed": "キーを作成できませんでした: {error}",
       "tooLong": "管理者が許可する期間を超えています。"
+    },
+    "vpn": {
+      "title": "VPN プロファイル",
+      "help": "VPN プロファイルは、プロバイダーの OpenVPN または WireGuard 設定と、そのサーバーのエンドポイント一覧です。プロファイルを指定してセッションを起動すると、そのインターネット通信はすべてそのプロバイダーを経由します。セッションを実行するノードがプロファイルとエンドポイントのためのゲートウェイコンテナを起動し、そのノードで同じエンドポイントを選んだすべてのセッションがそれを共有します。各ノードは使用中のエンドポイントごとにプロバイダーの接続を一つ消費し、接続上限が環境全体でそれを制限します。",
+      "import": "インポート",
+      "importTitle": "プロファイルをインポート",
+      "importHelp": ".ovpn または .conf ファイル一つ、プロバイダーが配布する zip、または貼り付けた設定です。同じテンプレートを共有するファイルはサーバーごとのエンドポイントを持つ一つのプロファイルになり、別のテンプレートは別のプロファイルになります。",
+      "nameLabel": "プロファイル名",
+      "fileLabel": "設定ファイルまたはアーカイブ",
+      "usernameLabel": "OpenVPN ユーザー名",
+      "passwordLabel": "OpenVPN パスワード",
+      "credentialsHelp": "認証情報を求める設定のための、プロバイダーのサービス認証情報です。",
+      "usersLabel": "ユーザー",
+      "groupsLabel": "グループ",
+      "importing": "インポート中...",
+      "imported": "{count, plural, other {{count} 件のプロファイル}}をインポートしました。",
+      "importFailed": "プロファイルをインポートできません: {error}",
+      "kind": "種類",
+      "endpoints": "エンドポイント",
+      "published": "公開済み",
+      "tunnels": "接続",
+      "noTunnels": "接続なし",
+      "tunnel": "{node} の {label}: {sessions, plural, other {{sessions} セッション}} ({state})",
+      "maxTunnels": "接続上限",
+      "maxTunnelsHelp": "このプロファイルで環境全体が同時に持てる接続数です。0 で無制限。",
+      "noProfiles": "VPN プロファイルはまだありません。",
+      "editTitle": "{name} を編集",
+      "endpointsTitle": "エンドポイント",
+      "endpointsHelp": "ユーザーが選べるエンドポイントを、提示する順にチェックします。最初のものが既定です。何もチェックしないと最初のエンドポイントが使われ、ユーザーは選べません。各項目の編集、エンドポイントの削除、手入力や別の設定ファイルからの追加ができます。",
+      "searchPlaceholder": "エンドポイントを検索...",
+      "publishedCount": "{total} 件中 {count} 件を公開",
+      "allEndpoints": "{total} 件中 {count} 件を表示",
+      "deleteTitle": "プロファイルを削除",
+      "confirmDelete": "プロファイル「{name}」を削除しますか? 使用中のゲートウェイはセッションが終わるまで残ります。",
+      "saved": "プロファイル「{name}」を保存しました。",
+      "saveFailed": "プロファイルを保存できません: {error}",
+      "deleted": "プロファイル「{name}」を削除しました。",
+      "deleteFailed": "プロファイルを削除できません: {error}",
+      "loadFailed": "VPN プロファイルを読み込めません: {error}",
+      "credentialsKept": "認証情報は保存済み",
+      "credentialsMissing": "認証情報が必要",
+      "kinds": {
+        "wireguard": "WireGuard",
+        "openvpn": "OpenVPN"
+      },
+      "kindLabel": "種類",
+      "sourceLabel": "設定",
+      "sourceFile": "ファイルをアップロード",
+      "sourceText": "設定を貼り付け",
+      "chooseFile": "ファイルを選択",
+      "noFile": "ファイルが選択されていません",
+      "everyone": "全員",
+      "accessLabel": "選べる人",
+      "noConfig": "先にファイルを選ぶか、設定を貼り付けてください。",
+      "pasteWireguard": "[Interface]\nPrivateKey = ...\nAddress = 10.0.0.2/32\nDNS = 10.0.0.1\n\n[Peer]\nPublicKey = ...\nEndpoint = vpn.example.com:51820\nAllowedIPs = 0.0.0.0/0",
+      "pasteOpenvpn": "client\ndev tun\nremote vpn.example.com 1194 udp\nauth-user-pass\n<ca>\n...\n</ca>",
+      "addEndpoint": "エンドポイントを追加",
+      "addFromFile": "ファイルから追加",
+      "offer": "提示",
+      "label": "ラベル",
+      "host": "ホスト",
+      "port": "ポート",
+      "proto": "プロトコル",
+      "publicKey": "公開鍵",
+      "presharedKey": "事前共有鍵",
+      "keyKept": "保存済み",
+      "removeEndpoint": "エンドポイントを削除",
+      "endpointIncomplete": "エンドポイント「{label}」にはホスト、ポート、WireGuard ではサーバーの公開鍵が必要です。",
+      "endpointsAdded": "{count, plural, other {{count} 件のエンドポイント}}を追加しました。"
     }
   },
   "popup": {
@@ -1763,7 +1835,9 @@
       "moveHomeConfirm": "'{home}' を {node} に移動しますか？使用中のセッションは先に停止する必要があります。",
       "moveHomeTitle": "ストレージを移動",
       "allowance": "利用枠: 今{period} {hours}時間中 {used}時間使用",
-      "newTab": "新しいタブで開く"
+      "newTab": "新しいタブで開く",
+      "noVpn": "なし",
+      "vpnEndpoint": "VPN エンドポイント"
     },
     "sessionsView": {
       "noSessions": "アクティブなセッションが見つかりません。"
@@ -2074,7 +2148,9 @@
       "fitFit": "画面に合わせる",
       "fitStretch": "引き伸ばす",
       "fitCenter": "中央",
-      "links": "リンク"
+      "links": "リンク",
+      "noVpn": "なし",
+      "vpnEndpoint": "VPN エンドポイント"
     },
     "launch": {
       "title": "{app} を起動中",
@@ -2088,7 +2164,8 @@
         "starting": "コンテナを作成中",
         "waiting": "デスクトップの応答を待機中",
         "ready": "セッションを開いています",
-        "client": "アプリケーションのウェブクライアントを準備中"
+        "client": "アプリケーションのウェブクライアントを準備中",
+        "vpn": "VPN ゲートウェイを起動しています"
       },
       "uploading": "ファイルをアップロード中（{done} / {total}）",
       "imageHint": "ノードでアプリケーションを初めて起動するときはダウンロードが行われるため、数分かかることがあります。2回目以降の起動は高速です。",

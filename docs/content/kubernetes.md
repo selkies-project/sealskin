@@ -33,7 +33,10 @@ administrator can install it on any cluster, managed or not.
 Download [`kubernetes/sealskin.yml`](https://github.com/selkies-project/sealskin/blob/main/kubernetes/sealskin.yml),
 set `HOST_URL` to the address clients will use and, to spread sessions over
 nodes, a `ReadWriteMany` access mode and class for `sealskin-storage`, then
-apply it to your namespace:
+apply it to your namespace. The manifest names the node `sealskin` through
+`SEALSKIN_NODE_NAME`, since a pod's host name changes with every rollout
+and the name is the node's identity in its records; change it when you run
+several servers against one store.
 
 ```bash
 kubectl apply -n <namespace> -f sealskin.yml
@@ -289,6 +292,18 @@ The server keeps the [catalogs](administration.md#proot-apps) under
 its catalog from there with a `subPath`, read-only, like its home directory.
 The packages are fetched for the architecture of the node the server pod runs
 on.
+
+## VPN profiles
+
+A session that picks a [VPN profile](vpn.md) gets a native sidecar that
+routes its pod through a hub pod the server runs per profile and endpoint,
+behind a ClusterIP Service, so sessions on any node share one connection to
+the provider. The Role grants the Secrets, Services, and `pods/exec` the
+hubs take, which nothing else uses, so a deployment without profiles can
+leave those rules out; the hub pod needs `NET_ADMIN`, `/dev/net/tun` from
+the node, and the IP forwarding a pod inherits from it, and the sidecar
+`NET_ADMIN` alone. [VPN profiles](vpn.md#on-kubernetes) has the details and
+the settings.
 
 ## Exposing the server
 

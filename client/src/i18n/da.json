@@ -67,7 +67,8 @@
     "mb": "MB",
     "gb": "GB",
     "tb": "TB",
-    "pb": "PB"
+    "pb": "PB",
+    "vpn": "VPN"
   },
   "options": {
     "sidebar": {
@@ -87,7 +88,8 @@
       "signIn": "Login",
       "audit": "Revisionslog",
       "branding": "Branding",
-      "keys": "Applikationsnøgler"
+      "keys": "Applikationsnøgler",
+      "vpn": "VPN-profiler"
     },
     "dashboard": {
       "title": "Kontrolpanel",
@@ -282,7 +284,8 @@
       "keyExpires": "Udløber",
       "keyNever": "Aldrig",
       "keyNeverUsed": "Aldrig brugt",
-      "revokeAllConfirm": "Tilbagekald alle applikationsnøgler for '{username}'? Deres udvidelses- og app-logins stopper straks."
+      "revokeAllConfirm": "Tilbagekald alle applikationsnøgler for '{username}'? Deres udvidelses- og app-logins stopper straks.",
+      "allowVpn": "Tillad VPN-profiler"
     },
     "groups": {
       "title": "Gruppeadministration",
@@ -1724,6 +1727,75 @@
       "loadFailed": "Kunne ikke indlæse dine nøgler: {error}",
       "createFailed": "Kunne ikke oprette nøglen: {error}",
       "tooLong": "Det er længere, end din administrator tillader."
+    },
+    "vpn": {
+      "title": "VPN-profiler",
+      "help": "En VPN-profil er en udbyders OpenVPN- eller WireGuard-konfiguration med dens servere som en liste af endepunkter. Starter man en session med en profil, går al dens internettrafik gennem den udbyder: noden, der kører sessionen, starter en gateway-container for profilen og endepunktet, som alle sessioner på den node med samme endepunkt deler. Hver node bruger én af udbyderens forbindelser pr. endepunkt i brug, og forbindelsesloftet begrænser dem på tværs af hele installationen.",
+      "import": "Importér",
+      "importTitle": "Importér en profil",
+      "importHelp": "Én .ovpn- eller .conf-fil, en zip af dem, som udbyderen udleverer den, eller den indsatte konfiguration. Filer med samme skabelon bliver én profil med et endepunkt pr. server; en egen skabelon bliver en egen profil.",
+      "nameLabel": "Profilnavn",
+      "fileLabel": "Konfigurationsfil eller arkiv",
+      "usernameLabel": "OpenVPN-brugernavn",
+      "passwordLabel": "OpenVPN-adgangskode",
+      "credentialsHelp": "Udbyderens tjenestelegitimation til en konfiguration, der beder om den.",
+      "usersLabel": "Brugere",
+      "groupsLabel": "Grupper",
+      "importing": "Importerer...",
+      "imported": "{count, plural, one {1 profil} other {{count} profiler}} importeret.",
+      "importFailed": "Profilen kunne ikke importeres: {error}",
+      "kind": "Type",
+      "endpoints": "Endepunkter",
+      "published": "Udgivet",
+      "tunnels": "Forbindelser",
+      "noTunnels": "Ingen aktive",
+      "tunnel": "{label} på {node}: {sessions, plural, one {1 session} other {{sessions} sessioner}} ({state})",
+      "maxTunnels": "Forbindelsesloft",
+      "maxTunnelsHelp": "Forbindelser hele installationen må have oppe ad gangen for denne profil; 0 for intet loft.",
+      "noProfiles": "Ingen VPN-profiler endnu.",
+      "editTitle": "Redigér {name}",
+      "endpointsTitle": "Endepunkter",
+      "endpointsHelp": "Markér de endepunkter, brugere må vælge, i den rækkefølge de tilbydes; det første er standarden. Uden markeringer bruges det første, og brugerne får intet valg. Redigér et felt, fjern et endepunkt, eller tilføj et i hånden eller fra en anden konfigurationsfil.",
+      "searchPlaceholder": "Søg endepunkter...",
+      "publishedCount": "{count} af {total} udgivet",
+      "allEndpoints": "Viser {count} af {total}",
+      "deleteTitle": "Slet profil",
+      "confirmDelete": "Slet profilen '{name}'? Gateways i brug bliver oppe, til deres sessioner slutter.",
+      "saved": "Profilen '{name}' er gemt.",
+      "saveFailed": "Profilen kunne ikke gemmes: {error}",
+      "deleted": "Profilen '{name}' er slettet.",
+      "deleteFailed": "Profilen kunne ikke slettes: {error}",
+      "loadFailed": "VPN-profilerne kunne ikke indlæses: {error}",
+      "credentialsKept": "Legitimation er gemt",
+      "credentialsMissing": "Mangler legitimation",
+      "kinds": {
+        "wireguard": "WireGuard",
+        "openvpn": "OpenVPN"
+      },
+      "kindLabel": "Type",
+      "sourceLabel": "Konfiguration",
+      "sourceFile": "Upload en fil",
+      "sourceText": "Indsæt konfigurationen",
+      "chooseFile": "Vælg fil",
+      "noFile": "Ingen fil valgt",
+      "everyone": "Alle",
+      "accessLabel": "Hvem må vælge den",
+      "noConfig": "Vælg først en fil, eller indsæt en konfiguration.",
+      "pasteWireguard": "[Interface]\nPrivateKey = ...\nAddress = 10.0.0.2/32\nDNS = 10.0.0.1\n\n[Peer]\nPublicKey = ...\nEndpoint = vpn.example.com:51820\nAllowedIPs = 0.0.0.0/0",
+      "pasteOpenvpn": "client\ndev tun\nremote vpn.example.com 1194 udp\nauth-user-pass\n<ca>\n...\n</ca>",
+      "addEndpoint": "Tilføj endepunkt",
+      "addFromFile": "Tilføj fra fil",
+      "offer": "Tilbyd",
+      "label": "Etiket",
+      "host": "Vært",
+      "port": "Port",
+      "proto": "Protokol",
+      "publicKey": "Offentlig nøgle",
+      "presharedKey": "Forhåndsdelt nøgle",
+      "keyKept": "gemt",
+      "removeEndpoint": "Fjern endepunkt",
+      "endpointIncomplete": "Endepunktet '{label}' kræver vært, port og for WireGuard serverens offentlige nøgle.",
+      "endpointsAdded": "{count, plural, one {1 endepunkt} other {{count} endepunkter}} tilføjet."
     }
   },
   "popup": {
@@ -1763,7 +1835,9 @@
       "moveHomeConfirm": "Flyt '{home}' til {node}? Sessioner, der bruger den, skal stoppes først.",
       "moveHomeTitle": "Flyt lager",
       "allowance": "Kvote: {used} af {hours} timer denne {period}",
-      "newTab": "Åbn i en ny fane"
+      "newTab": "Åbn i en ny fane",
+      "noVpn": "Ingen",
+      "vpnEndpoint": "VPN-endepunkt"
     },
     "sessionsView": {
       "noSessions": "Ingen aktive sessioner fundet."
@@ -2074,7 +2148,9 @@
       "fitFit": "Tilpas",
       "fitStretch": "Stræk",
       "fitCenter": "Centrer",
-      "links": "Links"
+      "links": "Links",
+      "noVpn": "Ingen",
+      "vpnEndpoint": "VPN-endepunkt"
     },
     "launch": {
       "title": "Starter {app}",
@@ -2088,7 +2164,8 @@
         "starting": "Opretter containeren",
         "waiting": "Venter på, at skrivebordet svarer",
         "ready": "Åbner sessionen",
-        "client": "Forbereder applikationens webklient"
+        "client": "Forbereder applikationens webklient",
+        "vpn": "VPN-gatewayen startes"
       },
       "uploading": "Uploader filen ({done} af {total})",
       "imageHint": "Første start af en applikation på en knude downloader den, hvilket kan tage minutter. Senere starter er hurtige.",

@@ -33,6 +33,7 @@ PATH_SETTINGS = [
     "app_store_cache_path",
     "proot_catalogs_path",
     "proot_apps_path",
+    "vpn_profiles_path",
     "keys_base_path",
     "groups_base_path",
     "storage_path",
@@ -64,6 +65,7 @@ def isolated_settings(tmp_path, monkeypatch):
         "app_store_cache_path": base / "app_stores_cache",
         "proot_catalogs_path": base / "proot_catalogs.yml",
         "proot_apps_path": tmp_path / "storage" / "proot_apps",
+        "vpn_profiles_path": base / "vpn_profiles.yml",
         "keys_base_path": base / "keys",
         "groups_base_path": base / "groups",
         "storage_path": tmp_path / "storage",
@@ -101,6 +103,8 @@ def isolated_settings(tmp_path, monkeypatch):
     state.app_templates.clear()
     state.template_files.clear()
     state.sessions.clear()
+    state.vpn_profiles.clear()
+    state.vpn_profiles.clear()
     state.available_gpus.clear()
     state.path_prefix_map.clear()
     yield
@@ -111,6 +115,7 @@ def isolated_settings(tmp_path, monkeypatch):
     state.app_templates.clear()
     state.template_files.clear()
     state.sessions.clear()
+    state.vpn_profiles.clear()
 
 
 STORE_APP = {

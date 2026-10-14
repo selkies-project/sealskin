@@ -93,6 +93,7 @@ let adminData = {
   prootCatalogs: [],
   proot_catalogs: [],
   proot_remote: 'linuxserver/proot-apps',
+  vpnProfiles: [],
 };
 const tableStates = {
   users: { currentPage: 1, searchTerm: '' },
@@ -101,6 +102,7 @@ const tableStates = {
   installedApps: { currentPage: 1, searchTerm: '' },
   availableApps: { currentPage: 1, searchTerm: '' },
   prootCatalogs: { currentPage: 1, searchTerm: '' },
+  vpnProfiles: { currentPage: 1, searchTerm: '' },
 };
 let labState = {
   isEditing: false,
@@ -121,6 +123,8 @@ let installedAppsPollingInterval = null;
 let prootPoll = null;
 // The catalog open in the editor: its apps, and the remote whose apps the grid shows.
 const prootEditor = { id: null, apps: [], remote: '', remoteApps: [], search: '', icons: {} };
+// The profile open in the VPN editor: its published endpoints in order, the labels as edited, and the search.
+const vpnEditor = { profile: null, published: [], endpoints: [], added: 0, search: '' };
 
 // --- TEMPLATE EDITOR ---
 
@@ -2436,6 +2440,32 @@ const tableRenderConfig = {
                 </tr>`;
     },
   },
+  vpnProfiles: {
+    tbody: document.querySelector('#vpnProfiles-table tbody'),
+    filter: (item, term) => item.name.toLowerCase().includes(term),
+    row: (item) => {
+      const id = escapeHtml(item.id);
+      const published = item.published.length ? ` <small>(${escapeHtml(t('options.vpn.publishedCount', { count: item.published.length, total: item.endpoints.length }))})</small>` : '';
+      const credentials = item.needs_credentials && !item.has_credentials
+        ? ` <small style="color: var(--color-danger);">${escapeHtml(t('options.vpn.credentialsMissing'))}</small>` : '';
+      const tunnels = item.tunnels.length
+        ? item.tunnels.map((tunnel) => escapeHtml(t('options.vpn.tunnel', { label: tunnel.label, node: tunnel.node, sessions: tunnel.sessions, state: tunnel.state }))).join('<br>')
+        : `<span class="description">${escapeHtml(t('options.vpn.noTunnels'))}</span>`;
+      return `
+                <tr>
+                    <td>${escapeHtml(item.name)}${credentials}</td>
+                    <td>${escapeHtml(t(`options.vpn.kinds.${item.kind}`))}</td>
+                    <td>${item.endpoints.length}${published}</td>
+                    <td>${tunnels}</td>
+                    <td class="actions-cell">
+                        <div class="cell-wrapper">
+                            <button class="warning" data-vpnid="${id}" data-action="edit">${t('common.edit')}</button>
+                            <button class="danger" data-vpnid="${id}" data-action="delete">${t('common.delete')}</button>
+                        </div>
+                    </td>
+                </tr>`;
+    },
+  },
   installedApps: {
     tbody: installedAppsTbody,
     filter: (item, term) => item.name.toLowerCase().includes(term) || item.provider_config.image.toLowerCase().includes(term),
@@ -2525,6 +2555,7 @@ const SETTING_SWITCHES = [
   ['public_sharing', 'options.users.allowPublicSharing', false],
   ['gpu', 'options.users.allowGpu', false],
   ['gpu_share', 'options.users.gpuShare', false],
+  ['vpn', 'options.users.allowVpn', false],
   ['home_migration', 'options.users.homeMigration', false],
   ['edit_templates', 'options.users.allowEditTemplates', false],
   ['harden_container', 'options.users.hardenContainer', true],
@@ -2553,7 +2584,7 @@ const SETTING_LISTS = [
 const PERIODS = ['day', 'week', 'month'];
 // What the server gives a user whose record leaves a setting out.
 const USER_DEFAULTS = {
-  active: true, admin: false, persistent_storage: true, public_sharing: false, gpu: true, gpu_share: true,
+  active: true, admin: false, persistent_storage: true, public_sharing: false, gpu: true, gpu_share: true, vpn: true,
   home_migration: true, edit_templates: false, harden_container: false, harden_openbox: false,
   session_limit: -1, storage_limit: -1, session_cpus: -1, session_memory_mb: -1, session_hours: -1,
   allowance_hours: -1, allowance_period: 'month', groups: [], pools: [], pools_denied: [], proot_catalog: null,
@@ -3510,6 +3541,319 @@ function toggleProotApp(remote, name) {
   }
 }
 
+// --- VPN PROFILES ---
+
+const VPN_CHUNK_BYTES = 2 * 1024 * 1024;
+
+/** Load the profiles with the gateways this node runs for each. */
+async function refreshVpnProfiles() {
+  try {
+    adminData.vpnProfiles = await secureFetch('/api/admin/vpn', { method: 'GET' });
+    renderTable('vpnProfiles');
+  } catch (error) {
+    displayStatus(t('options.vpn.loadFailed', { error: error.message }), true);
+  }
+}
+
+/** Fill a users or groups select: Everyone first, then every account or group, with `chosen` selected. */
+function fillAccessSelect(select, names, chosen) {
+  const picked = new Set(chosen);
+  select.innerHTML = `<option value="all">${escapeHtml(t('options.vpn.everyone'))}</option>`
+    + names.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('');
+  [...select.options].forEach((option) => { option.selected = picked.has(option.value); });
+}
+
+/** Everyone and specific names exclude each other: picking a name drops Everyone, picking Everyone drops the names. */
+function keepAccessExclusive(select) {
+  const settle = (justPicked) => {
+    const everyone = select.options[0];
+    const names = [...select.options].slice(1).filter((o) => o.selected);
+    if (everyone.selected && names.length) {
+      if (justPicked === everyone || (justPicked === null && select.dataset.wasEveryone !== '1')) {
+        names.forEach((o) => { o.selected = false; });
+      } else {
+        everyone.selected = false;
+      }
+    }
+    select.dataset.wasEveryone = everyone.selected ? '1' : '0';
+  };
+  select.addEventListener('mousedown', (e) => {
+    const option = e.target.closest('option');
+    if (!option || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    // Without a modifier a click toggles the one option, as a list of checkboxes would.
+    e.preventDefault();
+    option.selected = !option.selected;
+    settle(option.selected ? option : undefined);
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  // The keyboard path: whichever side was just added wins over the one that was there.
+  select.addEventListener('change', (e) => { if (e.isTrusted) settle(null); });
+}
+
+const readAccess = (select) => [...select.selectedOptions].map((o) => o.value);
+
+async function fillAccessSelects(usersSelect, groupsSelect, users, groups) {
+  if (!adminData.users.length && !adminData.groups.length) await refreshAdminData();
+  const userNames = [...adminData.admins.map((u) => u.username), ...adminData.users.map((u) => u.username)].filter((n, i, all) => all.indexOf(n) === i).sort();
+  fillAccessSelect(usersSelect, userNames, users);
+  fillAccessSelect(groupsSelect, adminData.groups.map((g) => g.name).sort(), groups);
+  usersSelect.dataset.wasEveryone = users.includes('all') ? '1' : '0';
+  groupsSelect.dataset.wasEveryone = groups.includes('all') ? '1' : '0';
+}
+
+/** Show what the chosen type and source need: credentials for OpenVPN, a file button or a text box. */
+function updateVpnImportForm() {
+  const kind = document.getElementById('vpn-import-kind').value;
+  document.querySelectorAll('#vpn-import-form .vpn-openvpn-only').forEach((row) => { row.hidden = kind !== 'openvpn'; });
+  const source = document.querySelector('input[name="vpn-source"]:checked').value;
+  document.getElementById('vpn-source-file').hidden = source !== 'file';
+  document.getElementById('vpn-source-text').hidden = source !== 'text';
+  document.getElementById('vpn-import-text').placeholder = t(kind === 'openvpn' ? 'options.vpn.pasteOpenvpn' : 'options.vpn.pasteWireguard');
+}
+
+async function openVpnImport() {
+  closeVpnEditor();
+  document.getElementById('vpn-import-form').reset();
+  document.getElementById('vpn-import-filename').textContent = t('options.vpn.noFile');
+  await fillAccessSelects(document.getElementById('vpn-import-users'), document.getElementById('vpn-import-groups'), ['all'], ['all']);
+  updateVpnImportForm();
+  document.getElementById('vpn-import').style.display = 'block';
+  document.getElementById('vpn-import').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeVpnImport() {
+  document.getElementById('vpn-import').style.display = 'none';
+}
+
+/** Send a file through the chunked upload and return what the import takes to find it. */
+async function uploadVpnFile(file) {
+  const { upload_id: uploadId } = await secureFetch('/api/upload/initiate', {
+    method: 'POST',
+    body: JSON.stringify({ filename: file.name, total_size: file.size }),
+  });
+  const total = Math.max(1, Math.ceil(file.size / VPN_CHUNK_BYTES));
+  for (let i = 0; i < total; i++) {
+    const chunk = file.slice(i * VPN_CHUNK_BYTES, Math.min((i + 1) * VPN_CHUNK_BYTES, file.size));
+    const chunkDataB64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1] || '');
+      reader.onerror = reject;
+      reader.readAsDataURL(chunk);
+    });
+    await secureFetch('/api/upload/chunk', {
+      method: 'POST',
+      body: JSON.stringify({ upload_id: uploadId, chunk_index: i, chunk_data_b64: chunkDataB64 }),
+    });
+  }
+  return { upload_id: uploadId, total_chunks: total };
+}
+
+/** The config to import: the chosen file, or the pasted text as a file of the chosen type. */
+function vpnImportSource() {
+  const kind = document.getElementById('vpn-import-kind').value;
+  if (document.querySelector('input[name="vpn-source"]:checked').value === 'file') {
+    return document.getElementById('vpn-import-file').files[0] || null;
+  }
+  const text = document.getElementById('vpn-import-text').value.trim();
+  if (!text) return null;
+  return new File([`${text}\n`], kind === 'openvpn' ? 'pasted.ovpn' : 'pasted.conf', { type: 'text/plain' });
+}
+
+async function importVpnProfile() {
+  const form = document.getElementById('vpn-import-form');
+  if (!form.reportValidity()) return;
+  const file = vpnImportSource();
+  if (!file) {
+    displayStatus(t('options.vpn.noConfig'), true);
+    return;
+  }
+  const button = document.getElementById('vpn-import-save-btn');
+  button.disabled = true;
+  const label = button.querySelector('span');
+  const idle = label.textContent;
+  label.textContent = t('options.vpn.importing');
+  try {
+    const upload = await uploadVpnFile(file);
+    const profiles = await secureFetch('/api/admin/vpn/import', {
+      method: 'POST',
+      body: JSON.stringify({
+        ...upload,
+        name: document.getElementById('vpn-import-name').value.trim(),
+        kind: document.getElementById('vpn-import-kind').value,
+        filename: file.name,
+        username: document.getElementById('vpn-import-username').value.trim(),
+        password: document.getElementById('vpn-import-password').value,
+        users: readAccess(document.getElementById('vpn-import-users')),
+        groups: readAccess(document.getElementById('vpn-import-groups')),
+      }),
+    });
+    displayStatus(t('options.vpn.imported', { count: profiles.length }));
+    closeVpnImport();
+    await refreshVpnProfiles();
+    if (profiles.length === 1) openVpnEditor(adminData.vpnProfiles.find((p) => p.id === profiles[0].id) || profiles[0]);
+  } catch (error) {
+    await writeFailed(error, t('options.vpn.importFailed', { error: error.message }), refreshVpnProfiles);
+  } finally {
+    button.disabled = false;
+    label.textContent = idle;
+  }
+}
+
+async function openVpnEditor(profile) {
+  closeVpnImport();
+  vpnEditor.profile = profile;
+  vpnEditor.published = [...profile.published];
+  vpnEditor.endpoints = profile.endpoints.map((e) => ({ ...e, preshared_key: null }));
+  vpnEditor.added = 0;
+  vpnEditor.search = '';
+  document.getElementById('vpn-editor-title').textContent = t('options.vpn.editTitle', { name: profile.name });
+  document.getElementById('vpn-name').value = profile.name;
+  document.getElementById('vpn-max-tunnels').value = profile.max_tunnels;
+  await fillAccessSelects(document.getElementById('vpn-users'), document.getElementById('vpn-groups'), profile.users, profile.groups);
+  document.getElementById('vpn-username').value = '';
+  document.getElementById('vpn-password').value = '';
+  document.getElementById('vpn-username').placeholder = profile.has_credentials ? t('options.vpn.credentialsKept') : '';
+  document.getElementById('vpn-credentials').style.display = profile.kind === 'openvpn' ? '' : 'none';
+  document.getElementById('vpn-credentials-password').style.display = profile.kind === 'openvpn' ? '' : 'none';
+  document.getElementById('vpn-endpoint-search').value = '';
+  renderVpnEndpoints();
+  document.getElementById('vpn-editor').style.display = 'block';
+  document.getElementById('vpn-editor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeVpnEditor() {
+  document.getElementById('vpn-editor').style.display = 'none';
+  vpnEditor.profile = null;
+  vpnEditor.endpoints = [];
+}
+
+/** List the endpoints that match the search as editable rows, the published ones with their place in the offer. */
+function renderVpnEndpoints(focusLast = false) {
+  const box = document.getElementById('vpn-endpoints');
+  const profile = vpnEditor.profile;
+  if (!profile) return;
+  const wireguard = profile.kind === 'wireguard';
+  box.className = `vpn-endpoints ${profile.kind}`;
+  const term = vpnEditor.search.toLowerCase();
+  const all = vpnEditor.endpoints;
+  const shown = all.map((endpoint, index) => ({ endpoint, index }))
+    .filter(({ endpoint }) => !term || endpoint.label.toLowerCase().includes(term) || endpoint.host.toLowerCase().includes(term))
+    .slice(0, 500);
+  document.getElementById('vpn-endpoints-summary').textContent = `${t('options.vpn.allEndpoints', { count: shown.length, total: all.length })} · ${t('options.vpn.publishedCount', { count: vpnEditor.published.length, total: all.length })}`;
+  const field = (index, name, value, extra = '') => `<input type="text" data-index="${index}" data-field="${name}" value="${escapeHtml(value)}" ${extra}>`;
+  const head = `
+      <div class="vpn-endpoint head">
+        <span>${escapeHtml(t('options.vpn.offer'))}</span><span>${escapeHtml(t('options.vpn.label'))}</span><span>${escapeHtml(t('options.vpn.host'))}</span><span>${escapeHtml(t('options.vpn.port'))}</span>
+        ${wireguard ? `<span>${escapeHtml(t('options.vpn.publicKey'))}</span><span>${escapeHtml(t('options.vpn.presharedKey'))}</span>` : `<span>${escapeHtml(t('options.vpn.proto'))}</span>`}<span></span>
+      </div>`;
+  box.innerHTML = head + shown.map(({ endpoint, index }) => {
+    const order = vpnEditor.published.indexOf(endpoint.id);
+    const psk = endpoint.preshared_key !== null ? endpoint.preshared_key : '';
+    const pskHint = endpoint.has_preshared_key && endpoint.preshared_key === null ? t('options.vpn.keyKept') : '';
+    return `
+      <div class="vpn-endpoint">
+        <label class="vpn-endpoint-pick"><input type="checkbox" data-endpoint="${escapeHtml(endpoint.id)}"${order >= 0 ? ' checked' : ''}>${order >= 0 ? `<span class="vpn-endpoint-order">#${order + 1}</span>` : ''}</label>
+        ${field(index, 'label', endpoint.label, 'maxlength="120"')}
+        ${field(index, 'host', endpoint.host, 'required maxlength="253"')}
+        <input type="number" data-index="${index}" data-field="port" value="${Number(endpoint.port) || ''}" min="1" max="65535" required>
+        ${wireguard
+    ? `${field(index, 'public_key', endpoint.public_key, 'required maxlength="120" spellcheck="false"')}<input type="password" data-index="${index}" data-field="preshared_key" value="${escapeHtml(psk)}" placeholder="${escapeHtml(pskHint)}" maxlength="120" autocomplete="new-password">`
+    : `<select data-index="${index}" data-field="proto"><option value="udp"${endpoint.proto === 'udp' ? ' selected' : ''}>UDP</option><option value="tcp"${endpoint.proto === 'tcp' ? ' selected' : ''}>TCP</option></select>`}
+        <button type="button" class="danger icon" data-remove="${index}" title="${escapeHtml(t('options.vpn.removeEndpoint'))}"><i class="fas fa-times"></i></button>
+      </div>`;
+  }).join('');
+  if (focusLast) {
+    const inputs = box.querySelectorAll('input[data-field="host"]');
+    if (inputs.length) inputs[inputs.length - 1].focus();
+  }
+}
+
+function addVpnEndpoint() {
+  const profile = vpnEditor.profile;
+  vpnEditor.added += 1;
+  vpnEditor.endpoints.push({
+    id: `new-${vpnEditor.added}`, label: '', host: '', port: profile.kind === 'wireguard' ? 51820 : 1194, proto: 'udp',
+    public_key: '', preshared_key: null, allowed_ips: '0.0.0.0/0', has_preshared_key: false,
+  });
+  vpnEditor.search = '';
+  document.getElementById('vpn-endpoint-search').value = '';
+  renderVpnEndpoints(true);
+}
+
+/** The endpoints as the server takes them back; `null` when a row is not valid, which it then shows. */
+function vpnEndpointsPayload() {
+  const box = document.getElementById('vpn-endpoints');
+  const bad = [...box.querySelectorAll('input')].find((input) => !input.checkValidity());
+  if (bad) {
+    bad.reportValidity();
+    return null;
+  }
+  const incomplete = vpnEditor.endpoints.find((e) => !e.host.trim() || !(Number(e.port) >= 1 && Number(e.port) <= 65535) || (vpnEditor.profile.kind === 'wireguard' && !e.public_key.trim()));
+  if (incomplete) {
+    displayStatus(t('options.vpn.endpointIncomplete', { label: incomplete.label || incomplete.host || '?' }), true);
+    return null;
+  }
+  return vpnEditor.endpoints.map((e) => ({
+    id: e.id, label: e.label.trim(), host: e.host.trim(), port: Number(e.port), proto: e.proto,
+    public_key: e.public_key.trim(), preshared_key: e.preshared_key, allowed_ips: e.allowed_ips || '0.0.0.0/0',
+  }));
+}
+
+/**
+ * Save the profile. With `stay`, the editor reopens on the saved profile instead of closing,
+ * for a step that needs the edits on the server first.
+ */
+async function saveVpnProfile(stay = false) {
+  const profile = vpnEditor.profile;
+  if (!profile) return null;
+  const form = document.getElementById('vpn-editor-form');
+  if (!form.reportValidity()) return null;
+  const endpoints = vpnEndpointsPayload();
+  if (!endpoints) return null;
+  const payload = {
+    name: document.getElementById('vpn-name').value.trim(),
+    max_tunnels: Number(document.getElementById('vpn-max-tunnels').value) || 0,
+    users: readAccess(document.getElementById('vpn-users')),
+    groups: readAccess(document.getElementById('vpn-groups')),
+    endpoints,
+    published: vpnEditor.published,
+  };
+  const username = document.getElementById('vpn-username').value.trim();
+  if (username) {
+    payload.username = username;
+    payload.password = document.getElementById('vpn-password').value;
+  }
+  try {
+    const saved = await secureFetch(`/api/admin/vpn/${profile.id}`, { method: 'PUT', body: JSON.stringify(payload) });
+    if (!stay) {
+      displayStatus(t('options.vpn.saved', { name: payload.name }));
+      closeVpnEditor();
+    }
+    await refreshVpnProfiles();
+    if (stay) await openVpnEditor(saved);
+    return saved;
+  } catch (error) {
+    await writeFailed(error, t('options.vpn.saveFailed', { error: error.message }), refreshVpnProfiles);
+    return null;
+  }
+}
+
+/** Add the endpoints of another config file: the edits so far are saved first, so none is lost. */
+async function addVpnEndpointsFromFile(file) {
+  const saved = await saveVpnProfile(true);
+  if (!saved) return;
+  try {
+    const upload = await uploadVpnFile(file);
+    const before = saved.endpoints.length;
+    const profile = await secureFetch(`/api/admin/vpn/${saved.id}/endpoints`, { method: 'POST', body: JSON.stringify({ ...upload, filename: file.name }) });
+    displayStatus(t('options.vpn.endpointsAdded', { count: profile.endpoints.length - before }));
+    await refreshVpnProfiles();
+    await openVpnEditor(profile);
+  } catch (error) {
+    await writeFailed(error, t('options.vpn.importFailed', { error: error.message }), refreshVpnProfiles);
+  }
+}
+
 async function saveProotCatalog() {
   const name = document.getElementById('proot-catalog-name').value.trim();
   if (!name) return document.getElementById('proot-catalog-name').reportValidity();
@@ -3725,6 +4069,8 @@ async function openTab(tabName) {
     if (adminData.appStores.length === 0) await refreshAppData();
   } else if (tabName === 'ProotApps') {
     await refreshProotCatalogs();
+  } else if (tabName === 'Vpn') {
+    await refreshVpnProfiles();
   } else if (tabName === 'PinnedBehavior') {
     await renderPinnedBehaviorTable();
   } else if (tabName === 'AppTemplates') {
@@ -4310,6 +4656,76 @@ function bindEvents() {
   document.getElementById('proot-selected').addEventListener('click', (e) => {
     const button = e.target.closest('button[data-name]');
     if (button) toggleProotApp(button.dataset.remote, button.dataset.name);
+  });
+  document.getElementById('vpn-import-btn').addEventListener('click', openVpnImport);
+  document.getElementById('vpn-import-cancel-btn').addEventListener('click', closeVpnImport);
+  document.getElementById('vpn-import-save-btn').addEventListener('click', importVpnProfile);
+  document.getElementById('vpn-import-form').addEventListener('submit', (e) => { e.preventDefault(); importVpnProfile(); });
+  document.getElementById('vpn-import-kind').addEventListener('change', updateVpnImportForm);
+  document.querySelectorAll('input[name="vpn-source"]').forEach((radio) => radio.addEventListener('change', updateVpnImportForm));
+  document.getElementById('vpn-import-choose').addEventListener('click', () => document.getElementById('vpn-import-file').click());
+  document.getElementById('vpn-import-file').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    document.getElementById('vpn-import-filename').textContent = file ? `${file.name} (${formatBytes(file.size, t)})` : t('options.vpn.noFile');
+  });
+  ['vpn-import-users', 'vpn-import-groups', 'vpn-users', 'vpn-groups'].forEach((id) => keepAccessExclusive(document.getElementById(id)));
+  document.getElementById('vpn-cancel-btn').addEventListener('click', closeVpnEditor);
+  document.getElementById('vpn-save-btn').addEventListener('click', () => saveVpnProfile());
+  document.getElementById('vpn-editor-form').addEventListener('submit', (e) => { e.preventDefault(); saveVpnProfile(); });
+  document.getElementById('vpn-endpoint-add').addEventListener('click', addVpnEndpoint);
+  document.getElementById('vpn-endpoint-add-file').addEventListener('click', () => document.getElementById('vpn-endpoint-file').click());
+  document.getElementById('vpn-endpoint-file').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (file) await addVpnEndpointsFromFile(file);
+  });
+  document.getElementById('vpn-endpoint-search').addEventListener('input', (e) => {
+    vpnEditor.search = e.target.value;
+    renderVpnEndpoints();
+  });
+  document.getElementById('vpn-endpoints').addEventListener('change', (e) => {
+    const box = e.target.closest('input[type="checkbox"][data-endpoint]');
+    if (box) {
+      vpnEditor.published = vpnEditor.published.filter((id) => id !== box.dataset.endpoint);
+      if (box.checked) vpnEditor.published.push(box.dataset.endpoint);
+      renderVpnEndpoints();
+    }
+  });
+  document.getElementById('vpn-endpoints').addEventListener('input', (e) => {
+    const field = e.target.closest('[data-index][data-field]');
+    if (field) vpnEditor.endpoints[Number(field.dataset.index)][field.dataset.field] = field.value;
+  });
+  document.getElementById('vpn-endpoints').addEventListener('click', (e) => {
+    const button = e.target.closest('button[data-remove]');
+    if (!button) return;
+    const [gone] = vpnEditor.endpoints.splice(Number(button.dataset.remove), 1);
+    vpnEditor.published = vpnEditor.published.filter((id) => id !== gone.id);
+    renderVpnEndpoints();
+  });
+  tableRenderConfig.vpnProfiles.tbody.addEventListener('click', async (e) => {
+    const button = e.target.closest('button[data-vpnid]');
+    if (!button) return;
+    const profile = adminData.vpnProfiles.find((p) => p.id === button.dataset.vpnid);
+    if (!profile) return;
+    if (button.dataset.action === 'edit') {
+      openVpnEditor(profile);
+    } else if (button.dataset.action === 'delete') {
+      const remove = await confirmDialog(t, {
+        title: t('options.vpn.deleteTitle'),
+        message: t('options.vpn.confirmDelete', { name: profile.name }),
+        confirm: t('common.delete'),
+        danger: true,
+      });
+      if (!remove) return;
+      try {
+        await secureFetch(`/api/admin/vpn/${profile.id}`, { method: 'DELETE' });
+        displayStatus(t('options.vpn.deleted', { name: profile.name }));
+        if (vpnEditor.profile && vpnEditor.profile.id === profile.id) closeVpnEditor();
+        await refreshVpnProfiles();
+      } catch (error) {
+        await writeFailed(error, t('options.vpn.deleteFailed', { error: error.message }), refreshVpnProfiles);
+      }
+    }
   });
   tableRenderConfig.prootCatalogs.tbody.addEventListener('click', async (e) => {
     const button = e.target.closest('button[data-catalogid]');

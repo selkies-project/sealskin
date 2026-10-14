@@ -37,6 +37,11 @@ paths refer to.
 | `SEALSKIN_PROOT_CATALOGS_PATH` | `str` | `/config/.config/sealskin/proot_catalogs.yml` | Path to the YAML file of the PRoot Apps catalogs, shared by the nodes of a cluster. |
 | `SEALSKIN_PROOT_APPS_PATH` | `str` | `/storage/sealskin_proot_apps` | Directory this node keeps the content of every PRoot Apps catalog in, one folder per catalog, mounted read-only into the sessions of the users assigned to it. |
 | `SEALSKIN_PROOT_APPS_REMOTE` | `str` | `linuxserver/proot-apps` | GitHub `owner/repo` of the PRoot Apps repository the catalog editor opens with; a fork lists its apps in `metadata/metadata.yml` and publishes them as tags of `ghcr.io/<owner>/<repo>`. |
+| `SEALSKIN_VPN_PROFILES_PATH` | `str` | `/config/.config/sealskin/vpn_profiles.yml` | Path to the YAML file of the VPN profiles, shared by the nodes of a cluster. |
+| `SEALSKIN_VPN_IMAGE` | `str` | `ghcr.io/selkies-project/sealskin-vpn:latest` | Image of the VPN gateway a node starts beside the sessions that chose a VPN profile, and of the helper that points a session's default route at it. |
+| `SEALSKIN_VPN_HUB_SUBNET` | `str` | `10.231.0.0/16` | On Kubernetes, the network a VPN hub and the sessions' spokes take their addresses from, the hub at `.1`; change it when it collides with a network the cluster reaches. |
+| `SEALSKIN_VPN_LOCAL_CIDRS` | `str` | `10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` | On Kubernetes, the networks a session pod and a VPN hub keep reaching directly beside the tunnel: the cluster's pod and Service ranges, and whatever else on the private ranges a session must reach without the VPN. Comma separated. |
+| `SEALSKIN_VPN_SUBNETS` | `str` | `10.230.0.0/16` | Address range the internal networks of the VPN gateways are carved from, one `/24` per gateway; change it when it collides with a network the host reaches. |
 | `SEALSKIN_AUTO_UPDATE_APPS` | `bool` | `true` | Enable automatic pulling of the latest app images in the background. |
 | `SEALSKIN_AUTO_UPDATE_INTERVAL_SECONDS` | `int` | `3600` | How often to check for app image updates (in seconds). |
 | `SEALSKIN_PUID` | `int` | `1000` | Default User ID to run containers as. |

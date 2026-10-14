@@ -410,7 +410,9 @@ const opensOnOwnOrigin = (sessionUrl) => SESSION_PATH.test(sessionUrl) || (WEB &
 
 // The web app keeps the session domain in memory: pages on its origin can rewrite its storage.
 let webSessionDomain = '';
-// Whether the server serves a web sign-in's sessions on origins of their own.
+// Whether the server serves a web sign-in's sessions on origins of their own (`session_isolation`).
+// A key-file or application-key client's session is served from the server's origin either way,
+// however the server is named, so the extension and the apps open their launches there.
 let webSessionIsolation = false;
 
 /** Keep the session domain the server's status names, which the probe tries first, and whether sessions have their own origins. */
@@ -500,7 +502,7 @@ const handlers = {
     if (url === '/api/admin/status') {
       await noteSessionDomain(data);
       // Probed while the user picks an application, the session origin is known by the launch.
-      if (!WEB || webSessionIsolation) getConfig().then(sessionOriginSuffix).catch(() => {});
+      if (WEB && webSessionIsolation) getConfig().then(sessionOriginSuffix).catch(() => {});
     }
     return data;
   },
@@ -609,7 +611,7 @@ const handlers = {
 
   async createTabAndTrack({ sessionId, session_url }) {
     const config = await getConfig();
-    const own = WEB ? webSessionIsolation && opensOnOwnOrigin(session_url) : opensOnOwnOrigin(session_url);
+    const own = WEB && webSessionIsolation && opensOnOwnOrigin(session_url);
     const suffix = own ? await sessionOriginSuffix(config) : null;
     // The server serves a web sign-in's session on its own origin alone.
     if (WEB && own && !suffix) throw new Error(NO_SESSION_ORIGIN);

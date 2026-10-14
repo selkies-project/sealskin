@@ -676,6 +676,7 @@ def local_status() -> dict[str, Any]:
             "gpu_exclusive": bool(data.get("gpu_exclusive")),
             "is_collaboration": bool(data.get("is_collaboration")),
             "lab": bool(data.get("lab")),
+            "vpn": {"profile": data["vpn"].get("profile"), "endpoint": data["vpn"].get("endpoint")} if data.get("vpn") else None,
         }
         for session_id, data in state.sessions.items()
     ]
@@ -860,7 +861,12 @@ async def forget_user(username: str) -> None:
 
 
 def adopt_local_homes() -> None:
-    """Record the home directories on this node that no record places yet."""
+    """Record the home directories on this node that no record places yet, or that a record places on a node that is gone.
+
+    A home here recorded on a node the registry no longer knows is this
+    node's again: the node was renamed, which changed its id, or its record
+    was removed while the storage stayed.
+    """
     if "runtime" not in roles() or not is_approved():
         return
     try:
@@ -871,8 +877,13 @@ def adopt_local_homes() -> None:
         if not user_manager.get_user(username):
             continue
         for home in user_manager.get_home_dirs(username):
-            if home.startswith("_") or node_of_home(username, home):
+            if home.startswith("_"):
                 continue
+            holder = node_of_home(username, home)
+            if holder and (holder == NODE_ID or holder in NODES):
+                continue
+            if holder:
+                logger.info("Taking over %s's home '%s', recorded on node %s, which is gone.", username, home, holder)
             record_home(username, home, NODE_ID)
 
 

@@ -33,6 +33,7 @@ from . import (
     sso,
     store,
     user_manager,
+    vpn,
     webclient,
 )
 from .docker_utils import get_and_cache_image_metadata, pull_and_cache_image, read_cpu_model
@@ -57,6 +58,7 @@ from .routers import (
 from .routers import application_keys as key_routes
 from .routers import branding as branding_routes
 from .routers import sso as sso_routes
+from .routers import vpn as vpn_routes
 from .security import init_server_keys, proxy_cert_not_after, prune_crypto_sessions
 from .settings import settings
 from .state import state
@@ -135,6 +137,12 @@ async def _reload_proot_catalogs(_path: str) -> None:
     prootapps.reconcile()
 
 
+async def _reload_vpn(_path: str) -> None:
+    """Watcher callback: reload the VPN profiles after another node or an administrator changed them."""
+    logger.info("VPN profiles changed; reloading.")
+    await asyncio.to_thread(vpn.load)
+
+
 async def _reload_cluster(_path: str) -> None:
     """Watcher callback: reload the cluster's records after another node or an administrator changed them."""
     logger.info("Cluster records changed; reloading.")
@@ -166,6 +174,7 @@ def _catch_up() -> None:
     config_store.load_app_templates()
     config_store.load_installed_apps()
     prootapps.load_catalogs()
+    vpn.load()
 
 
 async def background_peer_job() -> None:
@@ -223,6 +232,7 @@ def _watch_targets() -> dict[str, persistence.ReloadCallback]:
         settings.app_stores_path: _reload_app_stores,
         settings.app_templates_path: _reload_templates,
         settings.proot_catalogs_path: _reload_proot_catalogs,
+        settings.vpn_profiles_path: _reload_vpn,
         os.path.join(settings.keys_base_path, "users"): _reload_users,
         os.path.join(settings.keys_base_path, "admins"): _reload_users,
         settings.groups_base_path: _reload_users,
@@ -324,6 +334,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     config_store.load_installed_apps()
     prootapps.load_catalogs()
     prootapps.reconcile()
+    vpn.load()
 
     logger.info("Populating initial image metadata cache...")
     for image_name in {app.provider_config.image for app in state.installed_apps.values()}:
@@ -406,6 +417,7 @@ def create_app() -> FastAPI:
     app.include_router(branding_routes.router)
     app.include_router(branding_routes.user_router)
     app.include_router(branding_routes.admin_router)
+    app.include_router(vpn_routes.admin_router)
     app.include_router(peer.router)
     app.include_router(cluster_admin.router)
     app.include_router(cluster_admin.user_router)

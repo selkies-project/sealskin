@@ -67,7 +67,8 @@
     "mb": "MB",
     "gb": "GB",
     "tb": "TB",
-    "pb": "PB"
+    "pb": "PB",
+    "vpn": "VPN"
   },
   "options": {
     "sidebar": {
@@ -87,7 +88,8 @@
       "signIn": "Oturum Açma",
       "audit": "Denetim Günlüğü",
       "branding": "Markalama",
-      "keys": "Uygulama Anahtarları"
+      "keys": "Uygulama Anahtarları",
+      "vpn": "VPN Profilleri"
     },
     "dashboard": {
       "title": "Kontrol Paneli",
@@ -282,7 +284,8 @@
       "keyExpires": "Son geçerlilik",
       "keyNever": "Hiç",
       "keyNeverUsed": "Hiç kullanılmadı",
-      "revokeAllConfirm": "'{username}' kullanıcısının tüm uygulama anahtarları iptal edilsin mi? Uzantı ve uygulama girişleri hemen sona erer."
+      "revokeAllConfirm": "'{username}' kullanıcısının tüm uygulama anahtarları iptal edilsin mi? Uzantı ve uygulama girişleri hemen sona erer.",
+      "allowVpn": "VPN Profillerine İzin Ver"
     },
     "groups": {
       "title": "Grup Yönetimi",
@@ -1724,6 +1727,75 @@
       "loadFailed": "Anahtarlarınız yüklenemedi: {error}",
       "createFailed": "Anahtar oluşturulamadı: {error}",
       "tooLong": "Bu, yöneticinizin izin verdiğinden daha uzun."
+    },
+    "vpn": {
+      "title": "VPN Profilleri",
+      "help": "VPN profili, bir sağlayıcının OpenVPN veya WireGuard yapılandırması ve sunucularının uç nokta listesidir. Bir profille başlatılan oturumun tüm internet trafiği o sağlayıcı üzerinden geçer: oturumu çalıştıran düğüm, profil ve uç nokta için bir ağ geçidi konteyneri başlatır ve o düğümde aynı uç noktayı seçen her oturum bunu paylaşır. Her düğüm, kullanılan uç nokta başına sağlayıcının bir bağlantısını harcar; bağlantı sınırı ise bunları tüm kurulum genelinde sınırlar.",
+      "import": "İçe aktar",
+      "importTitle": "Profil içe aktar",
+      "importHelp": "Bir .ovpn veya .conf dosyası, sağlayıcının verdiği haliyle bunların zip'i ya da yapıştırılan yapılandırma. Aynı şablonu paylaşan dosyalar, sunucu başına bir uç noktası olan tek profil olur; kendi şablonu olan dosya ayrı bir profil olur.",
+      "nameLabel": "Profil adı",
+      "fileLabel": "Yapılandırma dosyası veya arşiv",
+      "usernameLabel": "OpenVPN kullanıcı adı",
+      "passwordLabel": "OpenVPN parolası",
+      "credentialsHelp": "Bunları isteyen bir yapılandırma için sağlayıcının hizmet kimlik bilgileri.",
+      "usersLabel": "Kullanıcılar",
+      "groupsLabel": "Gruplar",
+      "importing": "İçe aktarılıyor...",
+      "imported": "{count, plural, one {1 profil} other {{count} profil}} içe aktarıldı.",
+      "importFailed": "Profil içe aktarılamadı: {error}",
+      "kind": "Tür",
+      "endpoints": "Uç noktalar",
+      "published": "Yayımlanan",
+      "tunnels": "Bağlantılar",
+      "noTunnels": "Açık bağlantı yok",
+      "tunnel": "{node} üzerinde {label}: {sessions, plural, one {1 oturum} other {{sessions} oturum}} ({state})",
+      "maxTunnels": "Bağlantı sınırı",
+      "maxTunnelsHelp": "Bu profil için tüm kurulumun aynı anda açık tutabileceği bağlantı sayısı; sınır yoksa 0.",
+      "noProfiles": "Henüz VPN profili yok.",
+      "editTitle": "{name} düzenle",
+      "endpointsTitle": "Uç noktalar",
+      "endpointsHelp": "Kullanıcıların seçebileceği uç noktaları sunulacak sırayla işaretleyin; ilki varsayılandır. Hiçbiri işaretli değilse ilki kullanılır ve kullanıcılar seçim yapmaz. Herhangi bir alanı düzenleyin, bir uç noktayı kaldırın ya da elle veya başka bir yapılandırma dosyasından ekleyin.",
+      "searchPlaceholder": "Uç nokta ara...",
+      "publishedCount": "{total} uç noktanın {count} tanesi yayımlandı",
+      "allEndpoints": "{total} uç noktanın {count} tanesi gösteriliyor",
+      "deleteTitle": "Profili sil",
+      "confirmDelete": "'{name}' profili silinsin mi? Kullanımdaki ağ geçitleri oturumları bitene kadar açık kalır.",
+      "saved": "'{name}' profili kaydedildi.",
+      "saveFailed": "Profil kaydedilemedi: {error}",
+      "deleted": "'{name}' profili silindi.",
+      "deleteFailed": "Profil silinemedi: {error}",
+      "loadFailed": "VPN profilleri yüklenemedi: {error}",
+      "credentialsKept": "Kimlik bilgileri saklanıyor",
+      "credentialsMissing": "Kimlik bilgileri gerekli",
+      "kinds": {
+        "wireguard": "WireGuard",
+        "openvpn": "OpenVPN"
+      },
+      "kindLabel": "Tür",
+      "sourceLabel": "Yapılandırma",
+      "sourceFile": "Dosya yükle",
+      "sourceText": "Yapılandırmayı yapıştır",
+      "chooseFile": "Dosya seç",
+      "noFile": "Dosya seçilmedi",
+      "everyone": "Herkes",
+      "accessLabel": "Kimler seçebilir",
+      "noConfig": "Önce bir dosya seçin veya bir yapılandırma yapıştırın.",
+      "pasteWireguard": "[Interface]\nPrivateKey = ...\nAddress = 10.0.0.2/32\nDNS = 10.0.0.1\n\n[Peer]\nPublicKey = ...\nEndpoint = vpn.example.com:51820\nAllowedIPs = 0.0.0.0/0",
+      "pasteOpenvpn": "client\ndev tun\nremote vpn.example.com 1194 udp\nauth-user-pass\n<ca>\n...\n</ca>",
+      "addEndpoint": "Uç nokta ekle",
+      "addFromFile": "Dosyadan ekle",
+      "offer": "Sun",
+      "label": "Etiket",
+      "host": "Sunucu",
+      "port": "Port",
+      "proto": "Protokol",
+      "publicKey": "Genel anahtar",
+      "presharedKey": "Ön paylaşımlı anahtar",
+      "keyKept": "saklı",
+      "removeEndpoint": "Uç noktayı kaldır",
+      "endpointIncomplete": "'{label}' uç noktası için sunucu, port ve WireGuard'da sunucunun genel anahtarı gerekir.",
+      "endpointsAdded": "{count, plural, one {1 uç nokta} other {{count} uç nokta}} eklendi."
     }
   },
   "popup": {
@@ -1763,7 +1835,9 @@
       "moveHomeConfirm": "'{home}' dizini {node} düğümüne taşınsın mı? Onu kullanan oturumların önce durdurulması gerekir.",
       "moveHomeTitle": "Depolamayı taşı",
       "allowance": "Kota: bu {period} {used} / {hours} saat",
-      "newTab": "Yeni sekmede aç"
+      "newTab": "Yeni sekmede aç",
+      "noVpn": "Yok",
+      "vpnEndpoint": "VPN uç noktası"
     },
     "sessionsView": {
       "noSessions": "Aktif oturum bulunamadı."
@@ -2074,7 +2148,9 @@
       "fitFit": "Sığdır",
       "fitStretch": "Uzat",
       "fitCenter": "Ortala",
-      "links": "Bağlantılar"
+      "links": "Bağlantılar",
+      "noVpn": "Yok",
+      "vpnEndpoint": "VPN uç noktası"
     },
     "launch": {
       "title": "{app} başlatılıyor",
@@ -2088,7 +2164,8 @@
         "starting": "Konteyner oluşturuluyor",
         "waiting": "Masaüstünün yanıt vermesi bekleniyor",
         "ready": "Oturum açılıyor",
-        "client": "Uygulamanın web istemcisi hazırlanıyor"
+        "client": "Uygulamanın web istemcisi hazırlanıyor",
+        "vpn": "VPN ağ geçidi başlatılıyor"
       },
       "uploading": "Dosya yükleniyor ({done} / {total})",
       "imageHint": "Bir uygulamanın bir düğümdeki ilk başlatması onu indirir; bu dakikalar sürebilir. Sonraki başlatmalar hızlıdır.",

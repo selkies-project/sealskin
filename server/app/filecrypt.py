@@ -62,26 +62,31 @@ def _path(username: str) -> str:
     return os.path.join(settings.cluster_path, "file_keys", f"{username}.yml")
 
 
-def _wrap(key: bytes) -> dict[str, str | float]:
-    """Return the record that keeps `key` wrapped under the cluster key."""
+def wrap(data: bytes) -> dict[str, str | float]:
+    """Return the record that keeps `data` sealed under the cluster key, for a secret a shared record holds."""
     nonce = secrets.token_bytes(NONCE_BYTES)
-    sealed = AESGCM(_cluster_key()).encrypt(nonce, key, MAGIC)
+    sealed = AESGCM(_cluster_key()).encrypt(nonce, data, MAGIC)
     return {"key_id": key_id(), "wrapped": base64.b64encode(nonce + sealed).decode(), "created": time.time()}
 
 
-def _unwrap(record: dict) -> bytes:
-    """Return the key a record keeps.
+def unwrap(record: dict, what: str = "The user's file key") -> bytes:
+    """Return the bytes a record of `wrap` keeps.
+
+    Args:
+        record: The record.
+        what: What it keeps, for the error.
 
     Raises:
         Unreadable: When the record was wrapped under another cluster key, or is damaged.
     """
     if record.get("key_id") != key_id():
-        raise Unreadable("The user's file key was wrapped under another SEALSKIN_STORE_KEY.")
+        raise Unreadable(f"{what} was wrapped under another SEALSKIN_STORE_KEY.")
     try:
         raw = base64.b64decode(str(record.get("wrapped", "")))
         return AESGCM(_cluster_key()).decrypt(raw[:NONCE_BYTES], raw[NONCE_BYTES:], MAGIC)
     except (ValueError, InvalidTag) as exc:
-        raise Unreadable("The user's file key is damaged.") from exc
+        raise Unreadable(f"{what} is damaged.") from exc
+
 
 
 def user_key(username: str) -> bytes:
@@ -99,11 +104,11 @@ def user_key(username: str) -> bytes:
         for _attempt in range(3):
             record = persistence.read_yaml(path, None)
             if isinstance(record, dict) and record.get("wrapped"):
-                key = _unwrap(record)
+                key = unwrap(record)
                 break
             key = secrets.token_bytes(32)
             try:
-                persistence.write_yaml_sync(path, _wrap(key))
+                persistence.write_yaml_sync(path, wrap(key))
             except store.Conflict:
                 continue
             break

@@ -23,6 +23,10 @@ const appGridContainer = document.getElementById('app-grid-container');
 const appSearchInput = document.getElementById('app-search');
 const gpuFormGroup = document.getElementById('gpu-form-group');
 const gpuSelect = document.getElementById('gpuSelect');
+const vpnFormGroup = document.getElementById('vpn-form-group');
+const vpnSelect = document.getElementById('vpnSelect');
+const vpnEndpointFormGroup = document.getElementById('vpn-endpoint-form-group');
+const vpnEndpointSelect = document.getElementById('vpnEndpointSelect');
 const homeDirFormGroup = document.getElementById('homedir-form-group');
 const homeDirSelect = document.getElementById('homeDirectory');
 const languageSelect = document.getElementById('language');
@@ -63,6 +67,7 @@ let sealskinConfig = {};
 let userSettings = {};
 let availableApps = [];
 let availableGpus = [];
+let availableVpns = [];
 let homeDirs = [];
 // What the user may know of the cluster, or null on a server that is one node.
 let cluster = null;
@@ -441,6 +446,23 @@ function populateHomeDirDropdown() {
   homeDirSelect.value = bestHome((choice) => known(choice) && allowed(choice), current, lastProfile && lastProfile.homeDir);
 }
 
+/** Offer the VPN profiles open to the user, when there are any. */
+function populateVpnDropdown() {
+  vpnSelect.innerHTML = `<option value="">${escapeHtml(t('popup.launchView.noVpn'))}</option>`
+    + availableVpns.map((vpn) => `<option value="${escapeHtml(vpn.id)}">${escapeHtml(vpn.name)}</option>`).join('');
+  vpnFormGroup.classList.toggle('hidden', availableVpns.length === 0);
+  populateVpnEndpoints();
+}
+
+/** Offer the endpoints the chosen profile publishes; the field shows when there is a choice to make. */
+function populateVpnEndpoints(chosen = null) {
+  const vpn = availableVpns.find((v) => v.id === vpnSelect.value);
+  const endpoints = vpn ? vpn.endpoints : [];
+  vpnEndpointSelect.innerHTML = endpoints.map((e) => `<option value="${escapeHtml(e.id)}">${escapeHtml(e.label)}</option>`).join('');
+  if (chosen && endpoints.some((e) => e.id === chosen)) vpnEndpointSelect.value = chosen;
+  vpnEndpointFormGroup.classList.toggle('hidden', endpoints.length < 2);
+}
+
 /** Offer where the session starts: wherever the server picks, a pool, or one node. */
 function populateWhereDropdown() {
   const options = [`<option value="">${escapeHtml(t('popup.launchView.whereAuto'))}</option>`];
@@ -637,6 +659,8 @@ async function handleLaunch() {
   const selectedGpuValue = gpuFormGroup.classList.contains('hidden')
     ? null
     : (gpuSelect.value === 'none' ? null : gpuSelect.value);
+  const selectedVpn = vpnFormGroup.classList.contains('hidden') ? null : (vpnSelect.value || null);
+  const selectedVpnEndpoint = selectedVpn && !vpnEndpointFormGroup.classList.contains('hidden') ? (vpnEndpointSelect.value || null) : null;
 
   const collaborationMode = document.getElementById('collaborationMode').checked;
   const waylandMode = waylandModeCheckbox.checked;
@@ -648,6 +672,8 @@ async function handleLaunch() {
     homeDir: selectedHomeDirValue,
     language: languageSelect.value,
     gpu: selectedGpuValue,
+    vpn: selectedVpn,
+    vpnEndpoint: selectedVpnEndpoint,
     waylandMode,
     where: whereSelect.value,
   };
@@ -681,6 +707,8 @@ async function handleLaunch() {
       selected_gpu: selectedGpuValue,
       launch_in_room_mode: collaborationMode,
       wayland_mode: waylandMode,
+      vpn: selectedVpn,
+      vpn_endpoint: selectedVpnEndpoint,
     };
     // Left out, the server picks where the session starts.
     const [whereKind, whereName] = whereSelect.value.split(/:(.*)/);
@@ -875,6 +903,8 @@ async function init() {
 
     userSettings = statusData.settings;
     availableGpus = statusData.gpus || [];
+    availableVpns = statusData.vpns || [];
+    populateVpnDropdown();
     showAllowance(statusData.allowance);
     if (statusData.clustered) {
       const mine = await secureFetch('/api/cluster', { method: 'GET' }).catch(() => null);
@@ -908,6 +938,10 @@ async function init() {
         setTimeout(() => {
           if ([...gpuSelect.options].some((o) => o.value === savedProfile.gpu)) gpuSelect.value = savedProfile.gpu;
         }, 50);
+      }
+      if (savedProfile.vpn && [...vpnSelect.options].some((o) => o.value === savedProfile.vpn)) {
+        vpnSelect.value = savedProfile.vpn;
+        populateVpnEndpoints(savedProfile.vpnEndpoint);
       }
       if (savedProfile.waylandMode !== undefined) {
         waylandModeCheckbox.checked = savedProfile.waylandMode;
@@ -979,6 +1013,7 @@ whereSelect.addEventListener('change', () => {
   if (!homeDirFormGroup.classList.contains('hidden')) populateHomeDirDropdown();
   updateMoveHome();
 });
+vpnSelect.addEventListener('change', () => populateVpnEndpoints());
 
 sessionsListContainer.addEventListener('click', (e) => {
   const button = e.target.closest('button');

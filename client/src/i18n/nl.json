@@ -67,7 +67,8 @@
     "mb": "MB",
     "gb": "GB",
     "tb": "TB",
-    "pb": "PB"
+    "pb": "PB",
+    "vpn": "VPN"
   },
   "options": {
     "sidebar": {
@@ -87,7 +88,8 @@
       "signIn": "Aanmelding",
       "audit": "Auditlog",
       "branding": "Huisstijl",
-      "keys": "Toepassingssleutels"
+      "keys": "Toepassingssleutels",
+      "vpn": "VPN-profielen"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -282,7 +284,8 @@
       "keyExpires": "Verloopt",
       "keyNever": "Nooit",
       "keyNeverUsed": "Nooit gebruikt",
-      "revokeAllConfirm": "Alle toepassingssleutels van '{username}' intrekken? De aanmeldingen van hun extensie en app stoppen onmiddellijk."
+      "revokeAllConfirm": "Alle toepassingssleutels van '{username}' intrekken? De aanmeldingen van hun extensie en app stoppen onmiddellijk.",
+      "allowVpn": "VPN-profielen toestaan"
     },
     "groups": {
       "title": "Groepsbeheer",
@@ -1724,6 +1727,75 @@
       "loadFailed": "Kon uw sleutels niet laden: {error}",
       "createFailed": "Kon de sleutel niet maken: {error}",
       "tooLong": "Dat is langer dan uw beheerder toestaat."
+    },
+    "vpn": {
+      "title": "VPN-profielen",
+      "help": "Een VPN-profiel is de OpenVPN- of WireGuard-configuratie van een aanbieder met diens servers als lijst van eindpunten. Een sessie starten met een profiel stuurt al haar internetverkeer via die aanbieder: het knooppunt dat de sessie draait, start een gateway-container voor het profiel en het eindpunt, die alle sessies op dat knooppunt met hetzelfde eindpunt delen. Elk knooppunt verbruikt één verbinding van de aanbieder per gebruikt eindpunt, en de verbindingslimiet begrenst ze over de hele installatie.",
+      "import": "Importeren",
+      "importTitle": "Een profiel importeren",
+      "importHelp": "Eén .ovpn- of .conf-bestand, een zip ervan zoals de aanbieder die uitgeeft, of de geplakte configuratie. Bestanden met dezelfde sjabloon worden één profiel met een eindpunt per server; een eigen sjabloon wordt een eigen profiel.",
+      "nameLabel": "Profielnaam",
+      "fileLabel": "Configuratiebestand of archief",
+      "usernameLabel": "OpenVPN-gebruikersnaam",
+      "passwordLabel": "OpenVPN-wachtwoord",
+      "credentialsHelp": "De dienstgegevens van de aanbieder, voor een configuratie die erom vraagt.",
+      "usersLabel": "Gebruikers",
+      "groupsLabel": "Groepen",
+      "importing": "Importeren...",
+      "imported": "{count, plural, one {1 profiel} other {{count} profielen}} geïmporteerd.",
+      "importFailed": "Het profiel kon niet worden geïmporteerd: {error}",
+      "kind": "Soort",
+      "endpoints": "Eindpunten",
+      "published": "Gepubliceerd",
+      "tunnels": "Verbindingen",
+      "noTunnels": "Geen actief",
+      "tunnel": "{label} op {node}: {sessions, plural, one {1 sessie} other {{sessions} sessies}} ({state})",
+      "maxTunnels": "Verbindingslimiet",
+      "maxTunnelsHelp": "Verbindingen die de hele installatie tegelijk voor dit profiel mag hebben; 0 voor geen limiet.",
+      "noProfiles": "Nog geen VPN-profielen.",
+      "editTitle": "{name} bewerken",
+      "endpointsTitle": "Eindpunten",
+      "endpointsHelp": "Vink de eindpunten aan die gebruikers mogen kiezen, in de volgorde van aanbieden; het eerste is de standaard. Zonder vinkjes wordt het eerste gebruikt en hebben gebruikers geen keuze. Bewerk een veld, verwijder een eindpunt, of voeg er een toe met de hand of uit een ander configuratiebestand.",
+      "searchPlaceholder": "Eindpunten zoeken...",
+      "publishedCount": "{count} van {total} gepubliceerd",
+      "allEndpoints": "{count} van {total} getoond",
+      "deleteTitle": "Profiel verwijderen",
+      "confirmDelete": "Profiel '{name}' verwijderen? Gateways in gebruik blijven tot hun sessies eindigen.",
+      "saved": "Profiel '{name}' opgeslagen.",
+      "saveFailed": "Het profiel kon niet worden opgeslagen: {error}",
+      "deleted": "Profiel '{name}' verwijderd.",
+      "deleteFailed": "Het profiel kon niet worden verwijderd: {error}",
+      "loadFailed": "De VPN-profielen konden niet worden geladen: {error}",
+      "credentialsKept": "Gegevens zijn bewaard",
+      "credentialsMissing": "Gegevens ontbreken",
+      "kinds": {
+        "wireguard": "WireGuard",
+        "openvpn": "OpenVPN"
+      },
+      "kindLabel": "Soort",
+      "sourceLabel": "Configuratie",
+      "sourceFile": "Bestand uploaden",
+      "sourceText": "Configuratie plakken",
+      "chooseFile": "Bestand kiezen",
+      "noFile": "Geen bestand gekozen",
+      "everyone": "Iedereen",
+      "accessLabel": "Wie het mag kiezen",
+      "noConfig": "Kies eerst een bestand of plak een configuratie.",
+      "pasteWireguard": "[Interface]\nPrivateKey = ...\nAddress = 10.0.0.2/32\nDNS = 10.0.0.1\n\n[Peer]\nPublicKey = ...\nEndpoint = vpn.example.com:51820\nAllowedIPs = 0.0.0.0/0",
+      "pasteOpenvpn": "client\ndev tun\nremote vpn.example.com 1194 udp\nauth-user-pass\n<ca>\n...\n</ca>",
+      "addEndpoint": "Eindpunt toevoegen",
+      "addFromFile": "Toevoegen uit bestand",
+      "offer": "Aanbieden",
+      "label": "Label",
+      "host": "Host",
+      "port": "Poort",
+      "proto": "Protocol",
+      "publicKey": "Publieke sleutel",
+      "presharedKey": "Preshared key",
+      "keyKept": "bewaard",
+      "removeEndpoint": "Eindpunt verwijderen",
+      "endpointIncomplete": "Eindpunt '{label}' heeft een host, een poort en voor WireGuard de publieke sleutel van de server nodig.",
+      "endpointsAdded": "{count, plural, one {1 eindpunt} other {{count} eindpunten}} toegevoegd."
     }
   },
   "popup": {
@@ -1763,7 +1835,9 @@
       "moveHomeConfirm": "'{home}' verplaatsen naar {node}? Sessies die deze opslag gebruiken, moeten eerst worden gestopt.",
       "moveHomeTitle": "Opslag verplaatsen",
       "allowance": "Tegoed: {used} van {hours} uur deze {period}",
-      "newTab": "In een nieuw tabblad openen"
+      "newTab": "In een nieuw tabblad openen",
+      "noVpn": "Geen",
+      "vpnEndpoint": "VPN-eindpunt"
     },
     "sessionsView": {
       "noSessions": "Geen actieve sessies gevonden."
@@ -2074,7 +2148,9 @@
       "fitFit": "Passend",
       "fitStretch": "Uitrekken",
       "fitCenter": "Centreren",
-      "links": "Links"
+      "links": "Links",
+      "noVpn": "Geen",
+      "vpnEndpoint": "VPN-eindpunt"
     },
     "launch": {
       "title": "{app} starten",
@@ -2088,7 +2164,8 @@
         "starting": "Container aanmaken",
         "waiting": "Wachten tot de desktop reageert",
         "ready": "Sessie openen",
-        "client": "De webclient van de applicatie wordt voorbereid"
+        "client": "De webclient van de applicatie wordt voorbereid",
+        "vpn": "VPN-gateway wordt gestart"
       },
       "uploading": "Bestand uploaden ({done} van {total})",
       "imageHint": "Bij de eerste start van een applicatie op een node wordt deze gedownload, wat minuten kan duren. Latere starts zijn snel.",

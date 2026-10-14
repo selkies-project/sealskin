@@ -67,7 +67,8 @@
     "mb": "MB",
     "gb": "GB",
     "tb": "TB",
-    "pb": "PB"
+    "pb": "PB",
+    "vpn": "VPN"
   },
   "options": {
     "sidebar": {
@@ -87,7 +88,8 @@
       "signIn": "Sign In",
       "audit": "Audit Log",
       "branding": "Branding",
-      "keys": "Mga Application Key"
+      "keys": "Mga Application Key",
+      "vpn": "Mga VPN Profile"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -282,7 +284,8 @@
       "keyExpires": "Mag-e-expire",
       "keyNever": "Hindi kailanman",
       "keyNeverUsed": "Hindi pa nagamit",
-      "revokeAllConfirm": "Bawiin ang lahat ng application key ni '{username}'? Agad na titigil ang kanilang mga sign-in sa extension at app."
+      "revokeAllConfirm": "Bawiin ang lahat ng application key ni '{username}'? Agad na titigil ang kanilang mga sign-in sa extension at app.",
+      "allowVpn": "Payagan ang mga VPN Profile"
     },
     "groups": {
       "title": "Pamamahala ng Grupo",
@@ -1724,6 +1727,75 @@
       "loadFailed": "Hindi ma-load ang iyong mga key: {error}",
       "createFailed": "Hindi makagawa ng key: {error}",
       "tooLong": "Mas mahaba iyan kaysa sa pinapahintulutan ng iyong administrator."
+    },
+    "vpn": {
+      "title": "Mga VPN Profile",
+      "help": "Ang VPN profile ay ang OpenVPN o WireGuard config ng isang provider na may mga server nito bilang listahan ng mga endpoint. Ang pag-launch ng session na may profile ay nagpapadaan ng lahat ng internet traffic nito sa provider na iyon: ang node na nagpapatakbo ng session ay nagsisimula ng gateway container para sa profile at endpoint, at pinagsasaluhan ito ng bawat session sa node na iyon na pumili ng parehong endpoint. Bawat node ay gumagamit ng isang koneksyon ng provider bawat endpoint na ginagamit, at ang limitasyon ng koneksyon ang nagtatakda nito sa buong deployment.",
+      "import": "I-import",
+      "importTitle": "Mag-import ng profile",
+      "importHelp": "Isang .ovpn o .conf file, zip ng mga ito gaya ng ibinibigay ng provider, o ang config na naka-paste. Ang mga file na may iisang template ay nagiging isang profile na may isang endpoint bawat server; ang sariling template ay nagiging sariling profile.",
+      "nameLabel": "Pangalan ng profile",
+      "fileLabel": "Config file o archive",
+      "usernameLabel": "OpenVPN username",
+      "passwordLabel": "OpenVPN password",
+      "credentialsHelp": "Ang service credentials ng provider, para sa config na humihingi nito.",
+      "usersLabel": "Mga user",
+      "groupsLabel": "Mga grupo",
+      "importing": "Ini-import...",
+      "imported": "Na-import ang {count, plural, one {1 profile} other {{count} profile}}.",
+      "importFailed": "Hindi ma-import ang profile: {error}",
+      "kind": "Uri",
+      "endpoints": "Mga endpoint",
+      "published": "Nailathala",
+      "tunnels": "Mga koneksyon",
+      "noTunnels": "Walang aktibo",
+      "tunnel": "{label} sa {node}: {sessions, plural, one {1 session} other {{sessions} session}} ({state})",
+      "maxTunnels": "Limitasyon ng koneksyon",
+      "maxTunnelsHelp": "Bilang ng koneksyon na maaaring nakabukas nang sabay sa buong deployment para sa profile na ito; 0 para walang limitasyon.",
+      "noProfiles": "Wala pang VPN profile.",
+      "editTitle": "I-edit ang {name}",
+      "endpointsTitle": "Mga endpoint",
+      "endpointsHelp": "Lagyan ng tsek ang mga endpoint na maaaring piliin ng mga user, sa pagkakasunod ng pag-aalok; ang una ang default. Kung walang tsek, ang una ang gagamitin at walang pagpipilian ang mga user. I-edit ang anumang field, alisin ang endpoint, o magdagdag nang mano-mano o mula sa ibang config file.",
+      "searchPlaceholder": "Maghanap ng endpoint...",
+      "publishedCount": "{count} sa {total} ang nailathala",
+      "allEndpoints": "Ipinapakita ang {count} sa {total}",
+      "deleteTitle": "Burahin ang profile",
+      "confirmDelete": "Burahin ang profile na '{name}'? Mananatili ang mga gateway na ginagamit hanggang matapos ang kanilang mga session.",
+      "saved": "Na-save ang profile na '{name}'.",
+      "saveFailed": "Hindi ma-save ang profile: {error}",
+      "deleted": "Nabura ang profile na '{name}'.",
+      "deleteFailed": "Hindi mabura ang profile: {error}",
+      "loadFailed": "Hindi ma-load ang mga VPN profile: {error}",
+      "credentialsKept": "Nakatago ang credentials",
+      "credentialsMissing": "Kailangan ng credentials",
+      "kinds": {
+        "wireguard": "WireGuard",
+        "openvpn": "OpenVPN"
+      },
+      "kindLabel": "Uri",
+      "sourceLabel": "Config",
+      "sourceFile": "Mag-upload ng file",
+      "sourceText": "I-paste ang config",
+      "chooseFile": "Pumili ng file",
+      "noFile": "Walang napiling file",
+      "everyone": "Lahat",
+      "accessLabel": "Sino ang maaaring pumili",
+      "noConfig": "Pumili muna ng file o mag-paste ng config.",
+      "pasteWireguard": "[Interface]\nPrivateKey = ...\nAddress = 10.0.0.2/32\nDNS = 10.0.0.1\n\n[Peer]\nPublicKey = ...\nEndpoint = vpn.example.com:51820\nAllowedIPs = 0.0.0.0/0",
+      "pasteOpenvpn": "client\ndev tun\nremote vpn.example.com 1194 udp\nauth-user-pass\n<ca>\n...\n</ca>",
+      "addEndpoint": "Magdagdag ng endpoint",
+      "addFromFile": "Magdagdag mula sa file",
+      "offer": "Ialok",
+      "label": "Label",
+      "host": "Host",
+      "port": "Port",
+      "proto": "Protocol",
+      "publicKey": "Public key",
+      "presharedKey": "Preshared key",
+      "keyKept": "nakatago",
+      "removeEndpoint": "Alisin ang endpoint",
+      "endpointIncomplete": "Kailangan ng endpoint na '{label}' ng host, port, at para sa WireGuard ang public key ng server.",
+      "endpointsAdded": "Nadagdag ang {count, plural, one {1 endpoint} other {{count} endpoint}}."
     }
   },
   "popup": {
@@ -1763,7 +1835,9 @@
       "moveHomeConfirm": "Ilipat ang '{home}' sa {node}? Kailangan munang itigil ang mga sesyong gumagamit nito.",
       "moveHomeTitle": "Ilipat ang imbakan",
       "allowance": "Allowance: {used} sa {hours} oras ngayong {period}",
-      "newTab": "Buksan sa bagong tab"
+      "newTab": "Buksan sa bagong tab",
+      "noVpn": "Wala",
+      "vpnEndpoint": "VPN endpoint"
     },
     "sessionsView": {
       "noSessions": "Walang nahanap na aktibong sesyon."
@@ -2074,7 +2148,9 @@
       "fitFit": "Ipasya",
       "fitStretch": "Ibanat",
       "fitCenter": "Igitna",
-      "links": "Mga Link"
+      "links": "Mga Link",
+      "noVpn": "Wala",
+      "vpnEndpoint": "VPN endpoint"
     },
     "launch": {
       "title": "Inilulunsad ang {app}",
@@ -2088,7 +2164,8 @@
         "starting": "Ginagawa ang container",
         "waiting": "Hinihintay na tumugon ang desktop",
         "ready": "Binubuksan ang sesyon",
-        "client": "Inihahanda ang web client ng aplikasyon"
+        "client": "Inihahanda ang web client ng aplikasyon",
+        "vpn": "Sinisimulan ang VPN gateway"
       },
       "uploading": "Ina-upload ang file ({done} sa {total})",
       "imageHint": "Ang unang paglunsad ng isang aplikasyon sa isang node ay nagda-download nito, na maaaring abutin ng ilang minuto. Mabilis na ang mga susunod na paglunsad.",

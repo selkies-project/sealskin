@@ -59,6 +59,10 @@
                     <i class="fas fa-box-open fa-fw"></i>
                     <span data-i18n="options.sidebar.prootApps">PRoot Apps</span>
                 </button>
+                <button class="nav-link admin-nav-link" style="display:none;" data-tabname="Vpn">
+                    <i class="fas fa-shield-alt fa-fw"></i>
+                    <span data-i18n="options.sidebar.vpn">VPN Profiles</span>
+                </button>
                 <button class="nav-link admin-nav-link" style="display:none;" data-tabname="Users">
                     <i class="fas fa-users fa-fw"></i>
                     <span data-i18n="options.sidebar.users">Users</span>
@@ -820,6 +824,120 @@
                         </div>
                     </form>
                     <div id="proot-remote-grid" class="proot-grid"></div>
+                </div>
+            </div>
+
+            <div id="Vpn" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 data-i18n="options.vpn.title">VPN Profiles</h3>
+                        <div class="button-group">
+                            <button id="vpn-import-btn" class="primary"><i class="fas fa-file-import"></i> <span data-i18n="options.vpn.import">Import</span></button>
+                        </div>
+                    </div>
+                    <p class="description" data-i18n="options.vpn.help">A VPN profile is a provider's OpenVPN or WireGuard configuration with its servers as a list of endpoints. Launching a session with a profile routes all of its internet traffic through that provider: the node running the session starts a gateway container for the profile and endpoint, and every session on that node that picks the same endpoint shares it. Each node spends one of the provider's connections per endpoint in use, and the connection cap bounds them across the whole deployment.</p>
+                    <div class="table-container">
+                        <table id="vpnProfiles-table">
+                            <thead><tr><th data-i18n="common.name">Name</th><th data-i18n="options.vpn.kind">Kind</th><th data-i18n="options.vpn.endpoints">Endpoints</th><th data-i18n="options.vpn.tunnels">Connections</th><th class="actions-cell" data-i18n="common.actions">Actions</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-controls" id="vpnProfiles-pagination"></div>
+                </div>
+                <div class="card" id="vpn-import" style="display: none;">
+                    <div class="card-header">
+                        <h3 data-i18n="options.vpn.importTitle">Import a profile</h3>
+                        <div class="button-group">
+                            <button id="vpn-import-cancel-btn" class="secondary" data-i18n="common.cancel">Cancel</button>
+                            <button id="vpn-import-save-btn" class="primary"><i class="fas fa-file-import"></i> <span data-i18n="options.vpn.import">Import</span></button>
+                        </div>
+                    </div>
+                    <form id="vpn-import-form" class="field-list single">
+                        <div class="field">
+                            <div class="field-text"><label for="vpn-import-name" data-i18n="options.vpn.nameLabel">Profile name</label></div>
+                            <div class="field-control"><input type="text" id="vpn-import-name" required maxlength="80"></div>
+                        </div>
+                        <div class="field">
+                            <div class="field-text"><label for="vpn-import-kind" data-i18n="options.vpn.kindLabel">Type</label></div>
+                            <div class="field-control"><select id="vpn-import-kind"><option value="wireguard">WireGuard</option><option value="openvpn">OpenVPN</option></select></div>
+                        </div>
+                        <div class="field wide">
+                            <div class="field-text"><label data-i18n="options.vpn.sourceLabel">Config</label><p class="description" data-i18n="options.vpn.importHelp">One .ovpn or .conf file, a zip of them as the provider hands it out, or the config pasted in. Files that share a template become one profile with an endpoint per server; a template of its own becomes a profile of its own.</p></div>
+                            <div class="field-control">
+                                <div class="vpn-source-choice">
+                                    <label><input type="radio" name="vpn-source" value="file" checked> <span data-i18n="options.vpn.sourceFile">Upload a file</span></label>
+                                    <label><input type="radio" name="vpn-source" value="text"> <span data-i18n="options.vpn.sourceText">Paste the config</span></label>
+                                </div>
+                                <div id="vpn-source-file" class="vpn-file-pick">
+                                    <input type="file" id="vpn-import-file" accept=".ovpn,.conf,.zip" hidden>
+                                    <button type="button" id="vpn-import-choose" class="secondary"><i class="fas fa-upload"></i> <span data-i18n="options.vpn.chooseFile">Choose file</span></button>
+                                    <span id="vpn-import-filename" class="description" data-i18n="options.vpn.noFile">No file chosen</span>
+                                </div>
+                                <div id="vpn-source-text" hidden>
+                                    <textarea id="vpn-import-text" rows="12" spellcheck="false"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field vpn-openvpn-only">
+                            <div class="field-text"><label for="vpn-import-username" data-i18n="options.vpn.usernameLabel">OpenVPN username</label><p class="description" data-i18n="options.vpn.credentialsHelp">The provider's service credentials, for a config that asks for them.</p></div>
+                            <div class="field-control"><input type="text" id="vpn-import-username" autocomplete="off"></div>
+                        </div>
+                        <div class="field vpn-openvpn-only">
+                            <div class="field-text"><label for="vpn-import-password" data-i18n="options.vpn.passwordLabel">OpenVPN password</label></div>
+                            <div class="field-control"><input type="password" id="vpn-import-password" autocomplete="new-password"></div>
+                        </div>
+                        <div class="field wide">
+                            <div class="field-text"><label for="vpn-import-users" data-i18n="options.vpn.accessLabel">Who may pick it</label></div>
+                            <div class="field-control vpn-access">
+                                <div><label for="vpn-import-users" data-i18n="options.vpn.usersLabel">Users</label><select id="vpn-import-users" multiple size="6"></select></div>
+                                <div><label for="vpn-import-groups" data-i18n="options.vpn.groupsLabel">Groups</label><select id="vpn-import-groups" multiple size="6"></select></div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="card" id="vpn-editor" style="display: none;">
+                    <div class="card-header">
+                        <h3 id="vpn-editor-title"></h3>
+                        <div class="button-group">
+                            <button id="vpn-cancel-btn" class="secondary" data-i18n="common.cancel">Cancel</button>
+                            <button id="vpn-save-btn" class="primary"><i class="fas fa-save"></i> <span data-i18n="common.save">Save</span></button>
+                        </div>
+                    </div>
+                    <form id="vpn-editor-form" class="field-list single">
+                        <div class="field">
+                            <div class="field-text"><label for="vpn-name" data-i18n="options.vpn.nameLabel">Profile name</label></div>
+                            <div class="field-control"><input type="text" id="vpn-name" required maxlength="80"></div>
+                        </div>
+                        <div class="field">
+                            <div class="field-text"><label for="vpn-max-tunnels" data-i18n="options.vpn.maxTunnels">Connection cap</label><p class="description" data-i18n="options.vpn.maxTunnelsHelp">Connections the whole deployment may have up for this profile at once; 0 for no cap.</p></div>
+                            <div class="field-control"><input type="number" id="vpn-max-tunnels" min="0" step="1" value="0"></div>
+                        </div>
+                        <div class="field wide">
+                            <div class="field-text"><label for="vpn-users" data-i18n="options.vpn.accessLabel">Who may pick it</label></div>
+                            <div class="field-control vpn-access">
+                                <div><label for="vpn-users" data-i18n="options.vpn.usersLabel">Users</label><select id="vpn-users" multiple size="6"></select></div>
+                                <div><label for="vpn-groups" data-i18n="options.vpn.groupsLabel">Groups</label><select id="vpn-groups" multiple size="6"></select></div>
+                            </div>
+                        </div>
+                        <div class="field" id="vpn-credentials">
+                            <div class="field-text"><label for="vpn-username" data-i18n="options.vpn.usernameLabel">OpenVPN username</label><p class="description" data-i18n="options.vpn.credentialsHelp">The provider's service credentials, for a config that asks for them.</p></div>
+                            <div class="field-control"><input type="text" id="vpn-username" autocomplete="off"></div>
+                        </div>
+                        <div class="field" id="vpn-credentials-password">
+                            <div class="field-text"><label for="vpn-password" data-i18n="options.vpn.passwordLabel">OpenVPN password</label></div>
+                            <div class="field-control"><input type="password" id="vpn-password" autocomplete="new-password"></div>
+                        </div>
+                    </form>
+                    <h4 data-i18n="options.vpn.endpointsTitle">Endpoints</h4>
+                    <p class="description" data-i18n="options.vpn.endpointsHelp">Tick the endpoints users may pick, in the order to offer them; the first is the default. With none ticked, the first endpoint is used and users get no choice. Edit any field, remove an endpoint, or add one by hand or from another config file.</p>
+                    <div class="vpn-endpoints-bar">
+                        <input type="text" id="vpn-endpoint-search" class="search-input" data-i18n-placeholder="options.vpn.searchPlaceholder" placeholder="Search endpoints...">
+                        <span id="vpn-endpoints-summary" class="description"></span>
+                        <button type="button" id="vpn-endpoint-add" class="secondary"><i class="fas fa-plus"></i> <span data-i18n="options.vpn.addEndpoint">Add endpoint</span></button>
+                        <button type="button" id="vpn-endpoint-add-file" class="secondary"><i class="fas fa-file-import"></i> <span data-i18n="options.vpn.addFromFile">Add from file</span></button>
+                        <input type="file" id="vpn-endpoint-file" accept=".ovpn,.conf,.zip" hidden>
+                    </div>
+                    <div id="vpn-endpoints" class="vpn-endpoints"></div>
                 </div>
             </div>
 

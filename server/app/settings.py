@@ -138,6 +138,49 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         ),
     },
     {
+        "name": "vpn_profiles_path",
+        "type": "str",
+        "default": "/config/.config/sealskin/vpn_profiles.yml",
+        "help": "Path to the YAML file of the VPN profiles, shared by the nodes of a cluster.",
+    },
+    {
+        "name": "vpn_image",
+        "type": "str",
+        "default": "ghcr.io/selkies-project/sealskin-vpn:latest",
+        "help": (
+            "Image of the VPN gateway a node starts beside the sessions that chose a VPN profile, "
+            "and of the helper that points a session's default route at it."
+        ),
+    },
+    {
+        "name": "vpn_hub_subnet",
+        "type": "str",
+        "default": "10.231.0.0/16",
+        "help": (
+            "On Kubernetes, the network a VPN hub and the sessions' spokes take their addresses from, "
+            "the hub at `.1`; change it when it collides with a network the cluster reaches."
+        ),
+    },
+    {
+        "name": "vpn_local_cidrs",
+        "type": "str",
+        "default": "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
+        "help": (
+            "On Kubernetes, the networks a session pod and a VPN hub keep reaching directly beside the "
+            "tunnel: the cluster's pod and Service ranges, and whatever else on the private ranges a "
+            "session must reach without the VPN. Comma separated."
+        ),
+    },
+    {
+        "name": "vpn_subnets",
+        "type": "str",
+        "default": "10.230.0.0/16",
+        "help": (
+            "Address range the internal networks of the VPN gateways are carved from, one `/24` "
+            "per gateway; change it when it collides with a network the host reaches."
+        ),
+    },
+    {
         "name": "auto_update_apps",
         "type": "bool",
         "default": True,

@@ -33,6 +33,7 @@ from . import (
     prootapps,
     quota,
     user_manager,
+    vpn,
     webclient,
 )
 from .fsutil import safe_copytree, safe_join, sanitize_for_filename, unique_filename
@@ -85,6 +86,7 @@ class LaunchSpec:
         shared_files_path: Server-side path mounted at `Desktop/files`.
         launch_context: What the session was opened with (URL or file).
         collaboration: Extra provider kwargs for collaboration sessions.
+        vpn: The gateway the session leaves through (`vpn.acquire`), or `None`.
     """
 
     env: dict[str, str]
@@ -95,6 +97,7 @@ class LaunchSpec:
     shared_files_path: str | None
     launch_context: dict[str, Any] | None = None
     collaboration: dict[str, Any] = field(default_factory=dict)
+    vpn: dict[str, Any] | None = None
 
     def provider_kwargs(self, session_id: str) -> dict[str, Any]:
         """Return the keyword arguments for `provider.launch`."""
@@ -103,7 +106,8 @@ class LaunchSpec:
             "env_vars": self.env,
             "volumes": self.volumes,
             "gpu_config": self.gpu_config,
-            "network": state.discovered_network,
+            "network": (self.vpn or {}).get("network") or state.discovered_network,
+            "vpn": self.vpn,
         }
         kwargs.update(self.collaboration)
         return kwargs
@@ -712,6 +716,8 @@ async def launch_application(
     wayland_mode: bool = True,
     timezone: str | None = None,
     auth_user: dict[str, Any] | None = None,
+    vpn_id: str | None = None,
+    vpn_endpoint: str | None = None,
 ) -> dict[str, str]:
     """Start a new session for a user on this node.
 
@@ -736,6 +742,8 @@ async def launch_application(
             this node's copy of the application's web client (on an origin
             of its own with `session_isolation`), and the user's storage
             limit applies.
+        vpn_id: The VPN profile the session's traffic leaves through, or `None`.
+        vpn_endpoint: The profile's endpoint to use, or `None` for the first offered.
 
     Returns:
         `{"session_url": str, "session_id": str}`.
@@ -752,6 +760,7 @@ async def launch_application(
         if not user_can_access(app.users, app.groups, username, auth_user.get("groups") or []):
             raise HTTPException(status_code=403, detail="This application is not open to this account.")
 
+    vpn_choice = vpn.choose(vpn_id, vpn_endpoint, auth_user, effective_settings)
     native = bool(auth_user) and auth_user.get("via") != "key"
     session_id = str(uuid.uuid4())
     access_token = secrets.token_urlsafe(32)
@@ -806,6 +815,9 @@ async def launch_application(
     )
 
     quota.cap_resources(spec.app_config["provider_config"]["docker_overrides"], effective_settings)
+    if vpn_choice and spec.app_config["provider_config"]["docker_overrides"].get("network_mode"):
+        progress.finish(error="The application's template sets a network mode, which leaves no room for a VPN.")
+        raise HTTPException(status_code=400, detail="The application's template sets a network mode, which leaves no room for a VPN.")
 
     launch_context = spec.launch_context
     if file_bytes is not None and filename and shared_files_path:
@@ -820,7 +832,19 @@ async def launch_application(
             )
             launch_context = {"type": "file", "value": filename}
 
+    vpn_record: dict[str, Any] | None = None
     try:
+        if vpn_choice:
+            record, endpoint = vpn_choice
+            spec.vpn = await vpn.acquire(record, endpoint, session_id)
+            vpn_record = {
+                "profile": record["id"],
+                "endpoint": endpoint["id"],
+                "key": spec.vpn["key"],
+                "name": record["name"],
+                "label": endpoint["label"],
+                **{k: spec.vpn[k] for k in ("spoke_public_key", "spoke_address") if k in spec.vpn},
+            }
         provider = get_provider(spec.app_config)
         instance = await provider.launch(**spec.provider_kwargs(session_id))
         progress.step("client")
@@ -858,6 +882,7 @@ async def launch_application(
             "provider_groups": list((auth_user or {}).get("provider_groups") or []),
             "wayland_mode": wayland_mode,
             "timezone": timezone,
+            "vpn": vpn_record,
             "container_registry": {
                 application_id: {
                     "instance_id": instance["instance_id"],
@@ -887,7 +912,15 @@ async def launch_application(
             await asyncio.to_thread(cluster.record_home, username, os.path.basename(host_mount_path), cluster.NODE_ID)
 
         progress.finish({"session_url": session_url_for(session_id, access_token, controller_token), "session_id": session_id})
-        audit.record("launch", username, session=session_id, app=app.name, gpu=bool(gpu_config) or None, room=launch_in_room_mode or None)
+        audit.record(
+            "launch",
+            username,
+            session=session_id,
+            app=app.name,
+            gpu=bool(gpu_config) or None,
+            room=launch_in_room_mode or None,
+            vpn=vpn_record["name"] if vpn_record else None,
+        )
         logger.info(
             "[%s] Session ready for %s. Proxying to %s:%s",
             session_id,
@@ -903,6 +936,8 @@ async def launch_application(
         for path in (host_mount_path, shared_files_path):
             if path and path.startswith(ephemeral_base()):
                 shutil.rmtree(path, ignore_errors=True)
+        if spec.vpn:
+            await vpn.release(vpn_record or {"key": spec.vpn["key"]})
         logger.error(
             "[%s] Unhandled exception during launch for app '%s': %s",
             session_id,
@@ -1000,8 +1035,20 @@ async def ensure_container_for_session(
         proot_catalog_path=prootapps.mount_path_for(user_settings),
     )
 
+    if session.get("vpn"):
+        # Another application of the session leaves the way the session does.
+        record = state.vpn_profiles.get(session["vpn"].get("profile", ""))
+        endpoint = vpn.endpoint_of(record, session["vpn"].get("endpoint", "")) if record else None
+        if not record or not endpoint:
+            raise HTTPException(status_code=409, detail="The session's VPN profile is gone.")
+        spec.vpn = await vpn.acquire(record, endpoint, f"{session_id}:{target_app_id}")
     provider = get_provider(spec.app_config)
-    instance = await provider.launch(**spec.provider_kwargs(session_id))
+    try:
+        instance = await provider.launch(**spec.provider_kwargs(session_id))
+    except Exception:
+        if spec.vpn:
+            await vpn.release({**session["vpn"], **{k: spec.vpn[k] for k in ("spoke_public_key", "spoke_address") if k in spec.vpn}})
+        raise
     container_info = {
         "instance_id": instance["instance_id"],
         "ip": instance["ip"],
@@ -1009,6 +1056,8 @@ async def ensure_container_for_session(
         "app_id": target_app_id,
         "created_at": time.time(),
     }
+    if spec.vpn:
+        container_info["vpn"] = {**session["vpn"], **{k: spec.vpn[k] for k in ("spoke_public_key", "spoke_address") if k in spec.vpn}}
     registry[target_app_id] = container_info
     await config_store.save_sessions()
     return container_info
@@ -1025,6 +1074,8 @@ async def stop_container_in_session(session_id: str, target_app_id: str) -> None
     await get_provider().stop(container_info["instance_id"])
     del session["container_registry"][target_app_id]
     await config_store.save_sessions()
+    if container_info.get("vpn"):
+        await vpn.release(container_info["vpn"])
 
 
 async def stop_session(session_id: str) -> None:
@@ -1058,6 +1109,11 @@ async def stop_session(session_id: str) -> None:
             logger.error("[%s] Failed to stop container for app %s: %s", session_id, app_id, exc)
 
     await config_store.save_sessions()
+    for entry in registry.values():
+        if entry.get("vpn") and entry["vpn"].get("spoke_public_key") != (session.get("vpn") or {}).get("spoke_public_key"):
+            await vpn.release(entry["vpn"])
+    if session.get("vpn"):
+        await vpn.release(session["vpn"])
     shared = session.get("shared_files_path")
     if shared and not shared.startswith(ephemeral_base()) and session.get("username"):
         filesync.push_later(session["username"], shared)
@@ -1113,3 +1169,4 @@ async def reconcile_sessions() -> None:
         if instance_id not in referenced and created_at < cutoff:
             logger.info("Removing instance %s, which no session references.", instance_id)
             await provider.stop(instance_id)
+    await vpn.reconcile()

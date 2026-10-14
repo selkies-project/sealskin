@@ -171,11 +171,14 @@ class DockerProvider(BaseProvider):
         is_collaboration: bool = False,
         master_token: str | None = None,
         initial_tokens: dict[str, Any] | None = None,
+        vpn: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Run the application container and wait until it answers HTTP.
 
         See `BaseProvider.launch` for the arguments; volume keys are server
-        paths and are translated to host paths here.
+        paths and are translated to host paths here. With `vpn`, the
+        container resolves names at the gateway and, once started, has its
+        default route pointed at it by the helper (`_route_through`).
 
         Raises:
             HTTPException: On Docker errors or readiness timeout.
@@ -208,6 +211,8 @@ class DockerProvider(BaseProvider):
             translate_path_to_host(path): bind for path, bind in (volumes or {}).items()
         }
         run_kwargs["volumes"].update(bind_mounts)
+        if vpn:
+            run_kwargs["volumes"][vpn["resolv_conf"]] = {"bind": "/etc/resolv.conf", "mode": "ro"}
 
         if gpu_config:
             if gpu_config["type"] == "nvidia":
@@ -268,6 +273,14 @@ class DockerProvider(BaseProvider):
                 status_code=500, detail=f"Docker error: {exc.explanation}"
             ) from exc
 
+        if vpn:
+            try:
+                await self._route_through(session_id, container.id, vpn["gateway_ip"])
+            except Exception as exc:
+                await self.stop(container.id)
+                logger.error("[%s] Could not route the container through the VPN gateway: %s", session_id, exc)
+                raise HTTPException(status_code=500, detail="The session could not be routed through the VPN gateway.") from exc
+
         async def current_ip() -> str | None:
             await asyncio.to_thread(container.reload)
             return self._get_container_ip(container.attrs)
@@ -285,6 +298,26 @@ class DockerProvider(BaseProvider):
             await self.stop(container.id)
             raise
         return {"instance_id": container.id, "ip": ip_address, "port": config["port"]}
+
+    async def _route_through(self, session_id: str, container_id: str, gateway_ip: str) -> None:
+        """Point a container's default route at its VPN gateway.
+
+        The helper is the gateway image run in the container's network
+        namespace with `NET_ADMIN`, which the container itself never gets;
+        the route it sets outlives it.
+        """
+        from ..settings import settings
+
+        await asyncio.to_thread(
+            self.client.containers.run,
+            settings.vpn_image,
+            ["route", gateway_ip],
+            network_mode=f"container:{container_id}",
+            cap_add=["NET_ADMIN"],
+            remove=True,
+            labels={MANAGED_BY_LABEL: "sealskin-vpn-helper"},
+        )
+        logger.info("[%s] Routed the container through the VPN gateway at %s.", session_id, gateway_ip)
 
     async def stop(self, instance_id: str) -> None:
         """Stop (and remove) a container.

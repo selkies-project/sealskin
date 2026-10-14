@@ -251,6 +251,17 @@ README](https://github.com/linuxserver/proot-apps#for-administrators)
 describes for a local repository: `metadata/` for the installer and one
 `ghcr.io_<owner>_<repo>_<app>/` folder per package.
 
+## VPN Profiles
+
+A profile is a provider's WireGuard or OpenVPN configuration, imported from
+one config file or a zip of thousands, reduced to a template and a list of
+endpoints. A session that picks a profile leaves through a gateway container
+the node runs for that profile and endpoint, shared by every session that
+picked them, and the application image needs nothing for it. Import a
+profile, publish the endpoints users may pick, cap the connections it may
+spend, and say who may use it; [VPN profiles](vpn.md) describes the import,
+what the providers hand out, and how the routing works.
+
 ## App Templates
 
 A template is a named set of environment variables applied to every session

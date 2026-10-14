@@ -60,6 +60,7 @@ class RuntimeState:
         pull_status: Images currently being pulled keyed by image name.
         proot_catalogs: PRoot Apps catalogs keyed by id, as shared.
         proot_status: This node's sync state of each catalog keyed by id.
+        vpn_profiles: VPN profiles keyed by id, as shared (`app.vpn`).
         system_stats_cache: Cached CPU and disk statistics.
         cpu_model: CPU model string read from `/proc/cpuinfo`.
         path_prefix_map: Container mount path to host path mapping.
@@ -94,6 +95,7 @@ class RuntimeState:
     pull_status: dict[str, str] = field(default_factory=dict)
     proot_catalogs: dict[str, ProotCatalog] = field(default_factory=dict)
     proot_status: dict[str, dict[str, Any]] = field(default_factory=dict)
+    vpn_profiles: dict[str, dict[str, Any]] = field(default_factory=dict)
     system_stats_cache: dict[str, Any] = field(
         default_factory=lambda: {"data": None, "timestamp": 0.0}
     )

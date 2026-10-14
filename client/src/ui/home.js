@@ -84,6 +84,8 @@ const sessionsRow = $('sessions-row');
 const drawer = $('drawer');
 const homeDirSelect = $('homeDirectory');
 const gpuSelect = $('gpuSelect');
+const vpnSelect = $('vpnSelect');
+const vpnEndpointSelect = $('vpnEndpointSelect');
 const whereSelect = $('whereSelect');
 const languageSelect = $('language');
 
@@ -236,9 +238,12 @@ function optionsFor(app) {
   const saved = memory.apps[app.id] || {};
   const homes = app.is_meta_app ? [] : namedHomes();
   const homeDir = ['auto', 'cleanroom', ...homes].includes(saved.homeDir) ? saved.homeDir : 'auto';
+  const vpn = (status.vpns || []).find((v) => v.id === saved.vpn) || null;
   return {
     homeDir: hasStorage(app) ? homeDir : 'cleanroom',
     gpu: gpusFor(app).some((gpu) => gpu.device === saved.gpu) ? saved.gpu : null,
+    vpn: vpn ? vpn.id : null,
+    vpnEndpoint: vpn && vpn.endpoints.some((e) => e.id === saved.vpnEndpoint) ? saved.vpnEndpoint : null,
     where: whereChoices().includes(saved.where) ? saved.where : '',
     language: Object.values(supportedLangs).includes(saved.language) ? saved.language : defaultLanguage(),
     waylandMode: saved.waylandMode !== false,
@@ -262,6 +267,8 @@ function addressFor(app, options) {
   const query = new URLSearchParams();
   if (hasStorage(app) && options.homeDir && options.homeDir !== 'auto') query.set('home', options.homeDir);
   if (options.gpu) query.set('gpu', options.gpu);
+  if (options.vpn) query.set('vpn', options.vpn);
+  if (options.vpn && options.vpnEndpoint) query.set('vpn_endpoint', options.vpnEndpoint);
   if (options.room) query.set('room', '1');
   if (options.language && options.language !== defaultLanguage()) query.set('lang', options.language);
   if (!options.waylandMode) query.set('wayland', '0');
@@ -337,6 +344,7 @@ function sessionCard(s) {
   const badges = [];
   if (s.is_collaboration) badges.push(`<span class="badge"><i class="fas fa-users"></i>${escapeHtml(t('web.home.room'))}</span>`);
   if (s.gpu) badges.push(`<span class="badge"><i class="fas fa-microchip"></i>${escapeHtml(t('common.gpu'))}</span>`);
+  if (s.vpn) badges.push(`<span class="badge" title="${escapeHtml(s.vpn)}"><i class="fas fa-shield-alt"></i>${escapeHtml(s.vpn)}</span>`);
   if (s.home) badges.push(`<span class="badge" title="${escapeHtml(s.home)}"><i class="fas fa-hdd"></i>${escapeHtml(s.home)}</span>`);
   const meta = sessionMeta(s);
   const shot = shots.get(s.session_id);
@@ -611,6 +619,11 @@ function openDrawer(app, anchor = null) {
     ...gpus.map((gpu) => [gpu.device, `${gpu.device.split('/').pop()} (${gpu.driver})`]),
   ], options.gpu || '');
   $('gpu-form-group').hidden = gpus.length === 0;
+
+  const vpns = status.vpns || [];
+  fillSelect(vpnSelect, [['', t('web.home.noVpn')], ...vpns.map((vpn) => [vpn.id, vpn.name])], options.vpn || '');
+  $('vpn-form-group').hidden = vpns.length === 0;
+  fillVpnEndpoints(options.vpnEndpoint);
 
   languageSelect.value = options.language;
   $('collaborationMode').checked = options.room;
@@ -935,10 +948,21 @@ function bindCustomize() {
   $('customize-reset').addEventListener('click', () => setBackground({ ...DEFAULT_BACKGROUND }));
 }
 
+/** Offer the endpoints the chosen VPN publishes; the field shows when there is a choice to make. */
+function fillVpnEndpoints(chosen = null) {
+  const vpn = (status.vpns || []).find((v) => v.id === vpnSelect.value);
+  const endpoints = vpn ? vpn.endpoints : [];
+  const kept = chosen && endpoints.some((e) => e.id === chosen) ? chosen : (endpoints[0] ? endpoints[0].id : '');
+  fillSelect(vpnEndpointSelect, endpoints.map((e) => [e.id, e.label]), kept);
+  $('vpn-endpoint-form-group').hidden = endpoints.length < 2;
+}
+
 function drawerOptions() {
   return {
     homeDir: $('homedir-form-group').hidden ? 'cleanroom' : homeDirSelect.value,
     gpu: $('gpu-form-group').hidden ? null : gpuSelect.value || null,
+    vpn: $('vpn-form-group').hidden ? null : vpnSelect.value || null,
+    vpnEndpoint: $('vpn-form-group').hidden || !vpnSelect.value ? null : vpnEndpointSelect.value || null,
     where: whereSelect.value,
     language: languageSelect.value,
     waylandMode: $('waylandMode').checked,
@@ -1016,6 +1040,8 @@ async function launch(app, options) {
       selected_gpu: options.gpu,
       launch_in_room_mode: options.room,
       wayland_mode: options.waylandMode,
+      vpn: options.vpn,
+      vpn_endpoint: options.vpn ? options.vpnEndpoint : null,
     };
     // Left out, the server picks where the session starts.
     const [whereKind, whereName] = options.where.split(/:(.*)/);
@@ -1211,6 +1237,7 @@ function takeFile(file) {
 function bindEvents() {
   // Another destination changes which homes can start there; the chosen one is kept where it still can.
   whereSelect.addEventListener('change', () => { if (drawerApp) fillHomes(drawerApp, homeDirSelect.value); });
+  vpnSelect.addEventListener('change', () => fillVpnEndpoints());
   heroInput.addEventListener('input', () => {
     const typed = typedContext(false);
     if (typed || (context && context.typed)) setContext(typed);

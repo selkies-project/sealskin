@@ -79,6 +79,7 @@ class BaseProvider(ABC):
         is_collaboration: bool = False,
         master_token: str | None = None,
         initial_tokens: dict[str, Any] | None = None,
+        vpn: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Launch an instance of the application and wait until it answers.
 
@@ -91,6 +92,7 @@ class BaseProvider(ABC):
             is_collaboration: Whether this is a collaboration session.
             master_token: Master token of the downstream control plane.
             initial_tokens: Initial token set for the downstream control plane.
+            vpn: The gateway the instance leaves through, as `vpn.acquire` returns it, or `None`.
 
         Returns:
             `{"instance_id": str, "ip": str, "port": int}`.
