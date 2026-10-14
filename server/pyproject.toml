@@ -10,11 +10,11 @@ readme = "README.md"
 license = "MPL-2.0"
 requires-python = ">=3.11"
 dependencies = [
-    "fastapi==0.142.2",
+    "fastapi==0.143.0",
     "uvicorn[standard]==0.54.0",
     "uvloop==0.23.0",
     "PyJWT[crypto]==2.15.1",
-    "pydantic==2.13.5",
+    "pydantic==2.14.1",
     "cryptography==50.0.2",
     "httpx==0.28.1",
     "websockets==17.2",
