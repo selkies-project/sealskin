@@ -40,7 +40,7 @@ import httpx
 import yaml
 from pydantic import ValidationError
 
-from . import persistence
+from . import logos, persistence
 from .fsutil import safe_join, safe_rmtree
 from .models import ProotCatalog, ProotRemoteApp
 from .settings import settings
@@ -241,9 +241,9 @@ async def fetch_remote(remote: str, refresh: bool = False) -> list[dict[str, Any
 
 
 def remote_apps(remote: str, apps: list[dict[str, Any]]) -> list[ProotRemoteApp]:
-    """Return a remote's apps as API models, icons as URLs."""
+    """Return a remote's apps as API models, the icons served by this node."""
     return [
-        ProotRemoteApp(**dict(app, icon=icon_url(remote, app["icon"]) if app["icon"] else ""))
+        ProotRemoteApp(**dict(app, icon=logos.local(icon_url(remote, app["icon"])) if app["icon"] else ""))
         for app in apps
     ]
 

@@ -374,6 +374,7 @@ def create_app() -> FastAPI:
 
     app.include_router(handshake.router)
     app.include_router(applications.router)
+    app.include_router(applications.public_router)
     app.include_router(launch.router)
     app.include_router(launch.progress_router)
     app.include_router(admin.status_router)

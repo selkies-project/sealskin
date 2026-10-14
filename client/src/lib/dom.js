@@ -56,13 +56,6 @@ export function timeUntil(timestamp, t) {
   return rtf.format(Math.round(seconds / 3600), 'hour');
 }
 
-/**
- * Resolve an app logo reference to an `img` src. Secure icons are fetched
- * through the API and returned as data URLs.
- *
- * @param {string} logoData URL, `/api/app_icon/...` path, or empty.
- * @returns {Promise<string>}
- */
 /** The prefix this page is served under: `/companion` on the companion apps' lane, which the browser's own loads of the API need too. */
 export const PAGE_PREFIX = typeof location !== 'undefined' && location.pathname.startsWith('/companion/') ? '/companion' : '';
 
@@ -78,9 +71,18 @@ export const FALLBACK_LOGO = (() => {
   }
 })();
 
+/**
+ * Resolve an app logo reference to an `img` src. Every picture comes from the
+ * server: a store's or a remote's through `/api/logos/`, the brand's through
+ * `/api/branding/`, and an uploaded icon as JSON behind the sign-in, returned
+ * as a data URL. Anything else, a web address included, shows the fallback.
+ *
+ * @param {string} logoData Server path or empty.
+ * @returns {Promise<string>}
+ */
 export async function formatLogoSrc(logoData) {
   if (!logoData) return FALLBACK_LOGO;
-  if (logoData.startsWith('http') || logoData.startsWith('/api/branding/')) return apiUrl(logoData);
+  if (logoData.startsWith('/api/logos/') || logoData.startsWith('/api/branding/')) return apiUrl(logoData);
   if (logoData.startsWith('/api/app_icon/')) {
     try {
       const response = await secureFetch(logoData, { method: 'GET' });
@@ -94,11 +96,13 @@ export async function formatLogoSrc(logoData) {
   return FALLBACK_LOGO;
 }
 
-/** Swap every `img[data-logo-src]` under `scope` for its resolved logo. */
+/** Swap every `img[data-logo-src]` under `scope` for its resolved logo, the fallback standing in for one the server has not got. */
 export function hydrateLogos(scope) {
   scope.querySelectorAll('img[data-logo-src]').forEach(async (img) => {
     const src = await formatLogoSrc(img.dataset.logoSrc);
-    if (src) img.src = src;
+    if (!src) return;
+    if (src !== FALLBACK_LOGO) img.onerror = () => { img.onerror = null; img.src = FALLBACK_LOGO; };
+    img.src = src;
   });
 }
 

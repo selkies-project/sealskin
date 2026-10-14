@@ -87,12 +87,12 @@ export function createLaunchView(t, $) {
   }
 
   /**
-   * Show the application's logo: a store's by its address, an uploaded one through the API.
+   * Show the application's logo: a store's from the server's copy, an uploaded one through the API.
    *
    * @param {string} logo
    */
   async function showLogo(logo) {
-    if (/^https?:/.test(logo)) {
+    if (logo.startsWith('/api/logos/')) {
       $('app-logo').src = logo;
     } else if (logo.startsWith('/api/app_icon/')) {
       // An installed icon comes as JSON behind the sign-in.

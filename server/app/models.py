@@ -236,6 +236,16 @@ class Branding(BaseModel):
         ]
 
 
+class BrandLinkView(BrandLink):
+    """A home link as the pages read it.
+
+    Attributes:
+        image: Where the pages load an `https` icon from, on this server; empty for a Font Awesome icon.
+    """
+
+    image: str = ""
+
+
 class BrandImage(BaseModel):
     """An uploaded brand picture as the pages address it."""
 
@@ -248,6 +258,7 @@ class BrandImage(BaseModel):
 class BrandingView(Branding):
     """The brand with its pictures, as `GET /api/branding` returns it."""
 
+    links: list[BrandLinkView] = Field(default_factory=list, max_length=40)
     logo: BrandImage | None = None
     wallpaper: BrandImage | None = None
     is_default: bool = True

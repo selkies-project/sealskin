@@ -3475,7 +3475,7 @@ function renderProotRemoteGrid() {
     const title = app.disabled ? t('options.prootApps.disabledHint') : app.description;
     return `
       <div class="${classes.join(' ')}" style="--i: ${i}" data-name="${escapeHtml(app.name)}" title="${escapeHtml(title)}">
-        <img src="${escapeHtml(app.icon || 'icons/icon128.png')}" alt="">
+        <img src="${escapeHtml(app.icon ? apiUrl(app.icon) : 'icons/icon128.png')}" alt="">
         <span>${escapeHtml(app.full_name || app.name)}</span>
       </div>`;
   }).join('');

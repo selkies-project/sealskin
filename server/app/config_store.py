@@ -23,7 +23,7 @@ import httpx
 import yaml
 from pydantic import ValidationError
 
-from . import persistence
+from . import logos, persistence
 from .fsutil import resolve_within, safe_join
 from .models import (
     RECORD_FIELDS,
@@ -279,6 +279,8 @@ def process_store_content(content: str, store_name: str) -> list[dict[str, Any]]
         if not isinstance(app, dict):
             continue
         app = copy.deepcopy(app)
+        if isinstance(app.get("logo"), str):
+            app["logo"] = logos.local(app["logo"])
         provider_config = app.setdefault("provider_config", {})
         if provider_config.get("docker_overrides"):
             provider_config["docker_overrides"] = store_docker_overrides(
@@ -371,6 +373,7 @@ async def refresh_store_caches() -> None:
     ensure_config_dir()
     await asyncio.gather(*(_fetch_and_cache_app_store(store) for store in state.app_stores))
     load_store_entries()
+    await logos.prefetch()
     logger.info("App store cache refresh complete.")
 
 
@@ -567,6 +570,9 @@ def resolve_app(record: InstalledAppRecord) -> InstalledApp | None:
     merged = deep_merge(base, record.overrides)
     for key in RECORD_FIELDS:
         merged[key] = getattr(record, key)
+    # An override from before the server served the logos may still name a web address.
+    if isinstance(merged.get("logo"), str):
+        merged["logo"] = logos.local(merged["logo"])
     try:
         return InstalledApp(**merged)
     except ValidationError as exc:
@@ -591,6 +597,7 @@ def record_from_app(app: InstalledApp, existing: InstalledAppRecord | None = Non
         The record to persist.
     """
     full = app.model_dump()
+    full["logo"] = logos.local(full["logo"])
     record_fields = {key: full.pop(key) for key in RECORD_FIELDS}
     temp = InstalledAppRecord(**record_fields)
     base = _store_base(temp)
@@ -620,6 +627,8 @@ def apply_partial_update(record: InstalledAppRecord, patch: dict[str, Any]) -> I
             data[key] = value
         elif key == "overrides" and isinstance(value, dict):
             override_patch = deep_merge(override_patch, value)
+        elif key == "logo" and isinstance(value, str):
+            override_patch[key] = logos.local(value)
         else:
             override_patch[key] = value
     data["overrides"] = deep_merge(data.get("overrides", {}), override_patch)
@@ -635,6 +644,8 @@ def _migrate_legacy_record(raw: dict[str, Any]) -> InstalledAppRecord:
     record_fields = {key: raw.get(key) for key in RECORD_FIELDS if key in raw}
     temp = InstalledAppRecord(**record_fields)
     full = {key: value for key, value in raw.items() if key not in RECORD_FIELDS}
+    if isinstance(full.get("logo"), str):
+        full["logo"] = logos.local(full["logo"])
     base = _store_base(temp)
     if base is None and temp.is_meta_app and temp.base_app_id:
         # Legacy meta-apps stored the base app *name* in `source`; recover the store.

@@ -21,6 +21,7 @@ from .. import (
     application_keys,
     cluster,
     config_store,
+    logos,
     progress,
     prootapps,
     quota,
@@ -331,12 +332,12 @@ def _save_logo(app_id: str, logo: str | None) -> str | None:
 
     Args:
         app_id: App the icon belongs to.
-        logo: Base64 image data, an existing URL, or `None`.
+        logo: Base64 image data, an address the server already serves, a web address, or `None`.
 
     Returns:
         `/api/app_icon/<id>` when data was saved, otherwise `logo` unchanged.
     """
-    if not logo or logo.startswith("/api/app_icon/") or logo.startswith("http"):
+    if not logo or logo.startswith(("/api/app_icon/", logos.ROUTE, "http")):
         return logo
     try:
         icon_data = base64.b64decode(logo, validate=True)

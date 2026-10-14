@@ -105,6 +105,7 @@ proxy's: a key, or a key-file client, cannot manage keys.
 | --- | --- | --- |
 | `POST /api/applications` | encrypted, user | Applications the caller may launch, with their capabilities and extensions. |
 | `GET /api/app_icon/{app_id}` | encrypted, user | A custom (meta-app) icon as base64 JSON. |
+| `GET /api/logos/{name}` | none | A picture a store, a PRoot Apps remote, or a home link named, from this node's copy; the pages load every such picture here and never from its origin. `404` for a name the server never handed out. |
 | `POST /api/launch/simple` | encrypted, user | Launch with no context. Body: `application_id`, `home_name?`, `language?`, `timezone?`, `selected_gpu?`, `launch_in_room_mode?`, `wayland_mode?`. |
 | `POST /api/launch/url` | encrypted, user | As above plus `url`; the container receives `SEALSKIN_URL`. |
 | `POST /api/launch/file` | encrypted, user | As above plus `filename`, `upload_id`, `total_chunks`, `open_file_on_launch?`; the uploaded file is placed in `Desktop/files` and, if requested, `SEALSKIN_FILE` points at it. |

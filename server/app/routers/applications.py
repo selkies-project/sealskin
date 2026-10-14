@@ -1,4 +1,4 @@
-"""Application listing and icons for authenticated users."""
+"""Application listing and icons for authenticated users, and the pictures every page may load."""
 
 from __future__ import annotations
 
@@ -8,8 +8,9 @@ import os
 import re
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 
+from .. import logos
 from ..models import Application
 from ..security import EncryptedRoute, verify_token
 from ..settings import settings
@@ -17,6 +18,8 @@ from ..state import state
 
 logger = logging.getLogger(__name__)
 router = APIRouter(route_class=EncryptedRoute)
+#: The pictures of applications and links are public: a store or a remote published them, and an `img` tag carries no sign-in.
+public_router = APIRouter()
 
 
 def user_can_access(app_users: list[str], app_groups: list[str], username: str, groups: list[str] | str) -> bool:
@@ -83,3 +86,9 @@ async def get_app_icon(app_id: str, user: dict[str, Any] = Depends(verify_token)
     except OSError as exc:
         logger.error("Failed to read icon for app %s: %s", app_id, exc)
         raise HTTPException(status_code=500, detail="Error retrieving icon.") from exc
+
+
+@public_router.get("/api/logos/{name}", include_in_schema=False)
+async def get_logo(name: str, request: Request) -> Response:
+    """Serve a picture a store, a remote, or a home link named, from this node's copy."""
+    return await logos.serve(name, request)

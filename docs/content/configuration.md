@@ -33,7 +33,8 @@ watcher only fires for edits made by someone else.
   .config/sealskin/
     Caddyfile                      rendered from the template at every start
     app_stores.yml                 the catalogues to fetch
-    app_stores_cache/              cached copy of each catalogue
+    app_stores_cache/              cached copy of each catalogue, and under logos/ the
+                                   pictures it names, served to the pages by this node
     installed_apps.yml             installed applications (references + overrides)
     proot_catalogs.yml             PRoot Apps catalogs: the apps each one holds
     app_templates/*.yml            application templates
@@ -226,7 +227,7 @@ image and what it can do:
 apps:
   - id: firefox                       # unique within the store
     name: Firefox
-    logo: https://example.com/firefox.png
+    logo: https://example.com/firefox.png   # fetched by the server, which serves it to the pages
     url: https://github.com/linuxserver/docker-firefox
     provider: docker
     provider_config:

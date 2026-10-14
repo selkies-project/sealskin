@@ -43,7 +43,7 @@ import { secureFetch, getContextBlob, uploadInChunks, openPage } from '../lib/ap
 import { loadTranslator, applyTranslations } from '../lib/i18n.js';
 import { defaultLanguage as nearestLanguage, supportedLangs } from '../lib/languages.js';
 import { browserTimezone } from '../lib/timezone.js';
-import { announce, escapeHtml, formatLogoSrc, hydrateLogos, timeAgo, currentLocale, showToast } from '../lib/dom.js';
+import { announce, apiUrl, escapeHtml, formatLogoSrc, hydrateLogos, timeAgo, currentLocale, showToast } from '../lib/dom.js';
 import { noticeDialog } from '../lib/modal.js';
 import { createLaunchView } from '../lib/launch-view.js';
 import { autoHomeName, bestHome, homeAllowed, nodesFor } from '../lib/homes.js';
@@ -472,7 +472,7 @@ function renderApps() {
 function renderLinks() {
   const links = (brandInfo && brandInfo.links) || [];
   const icon = (link) => {
-    if (link.icon.startsWith('https://')) return `<img src="${escapeHtml(link.icon)}" alt="" draggable="false">`;
+    if (link.image) return `<img src="${escapeHtml(apiUrl(link.image))}" alt="" draggable="false">`;
     const classes = link.icon ? (link.icon.includes(' ') ? link.icon : `fas ${link.icon}`) : 'fas fa-link';
     return `<i class="${escapeHtml(classes)}"></i>`;
   };

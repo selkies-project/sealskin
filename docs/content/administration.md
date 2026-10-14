@@ -121,7 +121,8 @@ all.
 * **Home page links**: tiles the home page shows above the applications, for
   your own sites and tools, in the order given. Each has a name, an address,
   an icon (a [Font Awesome](https://fontawesome.com/search?ic=free-collection) class such as `fa-book` or `fab fa-github`, or an
-  `https` address of a picture), and opens either in a new tab or, marked
+  `https` address of a picture, which the server fetches and serves itself),
+  and opens either in a new tab or, marked
   **In isolation**, in a session of an application the user picks, as a
   pasted link does.
 

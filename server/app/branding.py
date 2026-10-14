@@ -33,8 +33,8 @@ from fastapi import HTTPException, Response
 from PIL import Image, UnidentifiedImageError
 from pydantic import ValidationError
 
-from . import persistence
-from .models import PROJECT_URL, BrandImage, Branding, BrandingView
+from . import logos, persistence
+from .models import PROJECT_URL, BrandImage, Branding, BrandingView, BrandLinkView
 from .settings import settings
 from .state import state
 
@@ -123,6 +123,9 @@ def load() -> None:
         except ValidationError as exc:
             logger.warning("Ignoring %s: %s", _yaml_path(), exc)
     state.branding = branding
+    for link in branding.links:
+        if link.icon.startswith("https://"):
+            logos.local(link.icon)
     try:
         _load_images()
     except Exception as exc:  # noqa: BLE001 - the store may be away; the pages keep the default pictures
@@ -207,8 +210,13 @@ def image_response(kind: str) -> Response:
 def view() -> BrandingView:
     """Return the brand with its pictures."""
     branding = state.branding
+    links = [
+        BrandLinkView(**link.model_dump(), image=logos.local(link.icon) if link.icon.startswith("https://") else "")
+        for link in branding.links
+    ]
     return BrandingView(
-        **branding.model_dump(),
+        **branding.model_dump(exclude={"links"}),
+        links=links,
         logo=image("logo"),
         wallpaper=image("wallpaper"),
         is_default=branding == Branding() and not _images,

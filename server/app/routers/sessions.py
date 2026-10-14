@@ -13,7 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import ValidationError
 
-from .. import cluster, config_store, routing, screenshots
+from .. import cluster, config_store, logos, routing, screenshots
 from ..fsutil import resolve_within, safe_join, unique_filename
 from ..launch import ephemeral_base, stop_session
 from ..models import ActiveSessionInfo, SendFileToSessionRequest
@@ -68,7 +68,7 @@ def session_info(session_id: str, data: dict[str, Any], for_owner: bool = True) 
         session_id=session_id,
         app_id=data["provider_app_id"],
         app_name=data["app_name"],
-        app_logo=data["app_logo"],
+        app_logo=logos.local(data["app_logo"]),
         created_at=data["created_at"],
         session_url=url,
         launch_context=data.get("launch_context"),
