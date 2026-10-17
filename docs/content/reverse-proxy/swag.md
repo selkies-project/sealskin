@@ -27,8 +27,10 @@ gets with DNS validation:
 ```
 
 With Duck DNS a wildcard certificate covers the subdomains only, so the web
-app lives on one too: `sealskin.you.duckdns.org`, with sessions on
-`<session id>.you.duckdns.org` and `SEALSKIN_SESSION_DOMAIN=you.duckdns.org`.
+app lives on one too: `sealskin.you.duckdns.org`. With
+[session isolation](index.md#session-isolation) the sessions open on
+`<session id>.you.duckdns.org` and `SEALSKIN_SESSION_DOMAIN=you.duckdns.org`;
+without it they open under the web app's own name.
 
 ## The proxy configuration
 
@@ -38,10 +40,11 @@ is named `sealskin` and has a DNS name `sealskin.<your domain>`.
 ```nginx
 ## Version 2026/10/11
 # make sure that your sealskin container is named sealskin
-# make sure that your dns has a cname set for sealskin, and a wildcard for the session names
-# sealskin opens every session of its web app on <session id>.<session domain>: the
-# certificate has to be a wildcard one, and the second server block below takes those names
-# set SEALSKIN_PUBLIC_URL, SEALSKIN_SESSION_DOMAIN and SEALSKIN_TRUSTED_PROXIES on sealskin
+# make sure that your dns has a cname set for sealskin
+# with session isolation on, sealskin opens every session on <session id>.<session domain>:
+# then the dns needs a wildcard too, the certificate has to be a wildcard one, and the
+# second server block below takes those names; harmless otherwise
+# set SEALSKIN_PUBLIC_URL and SEALSKIN_TRUSTED_PROXIES on sealskin, and SEALSKIN_SESSION_DOMAIN with session isolation
 
 server {
     listen 443 ssl;
@@ -84,7 +87,7 @@ server {
     }
 }
 
-# the sessions' own names: anything that starts with a session id
+# the sessions' own names with session isolation: anything that starts with a session id
 server {
     listen 443 ssl;
     listen [::]:443 ssl;

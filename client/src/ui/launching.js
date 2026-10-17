@@ -89,8 +89,8 @@ async function poll() {
       fail(t('web.signIn.ended'));
     } else if (response.status === 404) {
       if (view.stage() === null || view.stage() === 'requesting') view.show('requesting');
-      // Not final: a request held up on the way still shows up here.
-      if (Date.now() - lastSign > UNSEEN_MS) $('stage').textContent = t('web.launch.unseen');
+      // A request held up on the way still shows up here for a while; one the server never sees has been lost.
+      if (Date.now() - lastSign > UNSEEN_MS) fail(t('web.launch.unseen'));
     } else if (response.ok) {
       const progress = await response.json();
       lastSign = Date.now();

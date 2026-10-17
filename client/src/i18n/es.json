@@ -1391,6 +1391,7 @@
       "online": "En línea",
       "offline": "Fuera de línea",
       "waiting": "Pendiente de aprobación",
+      "suspended": "Suspendido",
       "lastSeen": "visto por última vez {when}",
       "storeUnreachableNode": "no puede acceder a los registros compartidos",
       "cpus": "{count} CPU",
@@ -1611,7 +1612,7 @@
       "resultSlo": "Cierre de sesión único ofrecido:",
       "resultCertificates": "Certificados de firma:",
       "landingTitle": "Página de llegada",
-      "landingHelp": "Con un proveedor elegido, un navegador sin sesión va directamente a él en lugar de a la página de inicio de sesión de este servidor. Añada #root a la dirección de la aplicación web para ver la página de todos modos, como para el token de root.",
+      "landingHelp": "Con un proveedor elegido, un navegador sin sesión va directamente a él en lugar de a la página de inicio de sesión de este servidor. Añada #root a la dirección de la aplicación web para ver la página de todos modos, como para el clave de root.",
       "autoNone": "La página de inicio de sesión de este servidor",
       "autoOidc": "OpenID Connect",
       "autoSaml": "SAML",
@@ -2045,6 +2046,7 @@
       "noAccount": "Todavía no hay una cuenta de {brand} con tu nombre. Pide a tu administrador que cree una.",
       "notConfigured": "Este servidor no ofrece inicio de sesión único.",
       "ended": "El proveedor de identidad terminó su sesión. Vuelva a iniciar sesión.",
+      "signedOut": "Ha cerrado la sesión.",
       "redirecting": "Llevándole a iniciar sesión…"
     },
     "nav": {

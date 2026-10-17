@@ -122,7 +122,8 @@ credentials the container was started with, which Caddy injects upstream,
 and, for a session whose web client the node exported, the directory of
 that client: Caddy then serves the client's files itself, answers the
 session's manifest and icon from the API, and sends the container only what
-is under `/<session id>/api/`, with a content security policy that lets
+is under `/<session id>/api/`, without the browser's cookies, which the
+container has no use for, and with a content security policy that lets
 nothing it answers run as a page. `/internal/*` is refused on the public
 listener. Other origins get CORS
 answers without `Access-Control-Allow-Credentials`, so no page elsewhere can
@@ -261,11 +262,11 @@ in the page, and frames the served pages. It talks only to the server that
 serves it, and only on the plain lane: its `secureFetch` is a same-origin
 `fetch` that carries the sign-in's cookie, with no handshake, key, or token.
 It draws the sign-in panel itself (the provider buttons `/api/auth/config`
-offers and the root token field), exchanges the grant a finished provider
+offers and the root key field), exchanges the grant a finished provider
 flow leaves in the URL fragment, and shows the panel again whenever a call
 answers 401. Where a reverse proxy signed the user in, there is no panel:
 the web app reloads when the proxy's sign-in runs out, so the proxy sends
-the browser to its own page, and `/#root` asks for the root token
+the browser to its own page, and `/#root` asks for the root key
 regardless.
 
 The host draws the frame around the pages: the rail of destinations and the
@@ -372,7 +373,7 @@ server/app/quota.py           session, storage, and time limits; usage records
 server/app/progress.py        the stage a launch is at, for the page that waits on it
 server/app/homes.py           moving a home directory between nodes
 server/app/filesync.py        the users' shared files kept in the store
-server/app/sso.py             web sign-ins: OpenID Connect, SAML, the root token
+server/app/sso.py             web sign-ins: OpenID Connect, SAML, the root key
 server/app/config_store.py    stores, installed records and resolution, templates, sessions, shares
 server/app/prootapps.py       PRoot Apps catalogs: the shared records and this node's copies of them
 server/app/security.py        handshake, EncryptedRoute, the lanes and who a request is, password hashing

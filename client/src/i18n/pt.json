@@ -1391,6 +1391,7 @@
       "online": "Online",
       "offline": "Offline",
       "waiting": "Aguardando aprovação",
+      "suspended": "Suspenso",
       "lastSeen": "visto pela última vez {when}",
       "storeUnreachableNode": "não consegue acessar os registros compartilhados",
       "cpus": "{count} CPUs",
@@ -1611,7 +1612,7 @@
       "resultSlo": "Logout único oferecido:",
       "resultCertificates": "Certificados de assinatura:",
       "landingTitle": "Entrada",
-      "landingHelp": "Com um provedor escolhido, um navegador sem login vai direto para ele, em vez da página de login deste servidor. Adicione #root ao endereço do aplicativo web para ver a página mesmo assim, como para o token root.",
+      "landingHelp": "Com um provedor escolhido, um navegador sem login vai direto para ele, em vez da página de login deste servidor. Adicione #root ao endereço do aplicativo web para ver a página mesmo assim, como para o chave do root.",
       "autoNone": "A página de login deste servidor",
       "autoOidc": "OpenID Connect",
       "autoSaml": "SAML",
@@ -2045,6 +2046,7 @@
       "noAccount": "Ainda não existe uma conta {brand} com o seu nome. Peça ao administrador para criar uma.",
       "notConfigured": "Este servidor não oferece login único.",
       "ended": "O provedor de identidade encerrou o seu login. Entre de novo.",
+      "signedOut": "Você saiu.",
       "redirecting": "Levando você ao login…"
     },
     "nav": {

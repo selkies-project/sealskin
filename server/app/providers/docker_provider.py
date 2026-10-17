@@ -142,8 +142,12 @@ class DockerProvider(BaseProvider):
         """
 
         def export() -> bytes:
+            # Labelled as an instance of this server, so a leaked one goes with the orphans at reconcile.
             container = self.client.containers.create(
-                image, entrypoint=["true"], network_disabled=True, labels={MANAGED_BY_LABEL: "sealskin-export"}
+                image,
+                entrypoint=["true"],
+                network_disabled=True,
+                labels={MANAGED_BY_LABEL: "sealskin", INSTANCE_LABEL: state.instance_name, "app.kubernetes.io/component": "web-export"},
             )
             try:
                 chunks, _stat = container.get_archive(path)

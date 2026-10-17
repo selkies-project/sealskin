@@ -128,7 +128,7 @@ spec:
         - name: HOST_URL
           value: "sealskin.example.com"
         # Behind an ingress or gateway (ingress.yml): how browsers reach the web
-        # app, the domain its sessions open under (<session id>.<domain>), the
+        # app, the domain sessions open under (<session id>.<domain>) with session isolation on, the
         # addresses the controller's requests come from, and the plain HTTP
         # port it is routed to, which answers those addresses alone
 #        - name: SEALSKIN_PUBLIC_URL

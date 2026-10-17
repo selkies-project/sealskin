@@ -1,6 +1,6 @@
 /**
  * Which client this code runs as: the name a shell gives the server in the
- * `X-SealSkin-Client` header and the pages in `hello`.
+ * `X-SealSkin-App` header and the pages in `hello`.
  */
 
 /**

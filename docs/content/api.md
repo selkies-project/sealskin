@@ -37,7 +37,7 @@ non-GET request to make a retry safe.
 private key whose claims include `sub` (the username) and `exp`, or, on the
 plain lane, `Authorization: Bearer ssk_<id>_<secret>`, an
 [application key](signin.md#application-keys) with the client's name in
-`X-SealSkin-Client` (`chrome`, `firefox`, `android`, `ios`, else `other`).
+`X-SealSkin-App` (`chrome`, `firefox`, `android`, `ios`, else `other`).
 A refused key answers `401` with the code in `detail`: `unknown`, `expired`,
 `disabled`, `client`, or `dormant`. The companion apps call every endpoint
 under `/companion/`, as `/companion/api/...`, where a key is the one
@@ -115,6 +115,13 @@ proxy's: a key, or a key-file client, cannot manage keys.
 A launch returns `{"session_url", "session_id"}`; `session_url` is relative
 to the session port and contains the one-time access token.
 
+| Method and path | Auth | Purpose |
+| --- | --- | --- |
+| `GET /app/{app_id}/?home=&gpu=&room=&lang=&wayland=&where=` | web | The pinned address of an application: attaches to the oldest running session of it with the same `home` and room-or-not, else launches with the start-only options; `/app/{app_id}` without the slash redirects here. |
+| `GET /app/{app_id}/manifest.json` | web | The web app manifest that installs the address as its own app, with the same query. |
+| `GET /app/{app_id}/icon.png` | none | The application's icon, which an installing browser asks for without the sign-in. |
+| `GET /{session_id}/manifest.json`, `icon.png`, `icon-512.png`, `favicon.ico` | session | A running session's own manifest and icons, built from its record. |
+
 ## Sessions
 
 | Method and path | Auth | Purpose |
@@ -185,6 +192,7 @@ All *encrypted, admin*.
 | `POST /api/admin/users` | Create a user (`username`, `public_key?`, `settings`); returns the generated private key when no key was supplied. |
 | `PUT /api/admin/users/{username}` | Replace a user's settings. |
 | `DELETE /api/admin/users/{username}` | Delete a user and their storage. |
+| `POST /api/admin/users/{username}/approve` | Let a held user in without placing them in a group. |
 | `GET`/`POST`/`DELETE /api/admin/users/{username}/homedirs[/{home}]` | A user's home directories. |
 | `GET`/`POST`/`DELETE /api/admin/admins/{username}/homedirs[/{home}]` | An administrator's home directories. |
 | `POST /api/admin/groups`, `PUT /api/admin/groups/{name}`, `DELETE /api/admin/groups/{name}` | Groups. |
@@ -205,6 +213,10 @@ All *encrypted, admin*.
 | `PUT /api/admin/branding` | Replace the brand's record (`name`, `logo_link`, `accent`, `apps` with a `client`, `url`, and `enabled` per companion app, the `wallpaper_*` fields, `links`); the pictures stay. |
 | `DELETE /api/admin/branding` | Back to the defaults: the record and the pictures are removed. |
 | `POST`/`DELETE /api/admin/branding/{logo\|wallpaper}` | Body `{data}`, a base64 PNG, JPEG, or WebP (1 MB for the logo, 8 MB for the wallpaper): keep or remove a picture. |
+| `GET /api/admin/proot/catalogs`, `POST /api/admin/proot/catalogs`, `PUT`/`DELETE /api/admin/proot/catalogs/{id}`, `POST /api/admin/proot/catalogs/{id}/update` | PRoot Apps catalogs: list them with the state of this node's copy, create, replace, delete, or fetch one again on every node. |
+| `GET /api/admin/proot/remote?repo=` | The apps a PRoot Apps remote (a GitHub `owner/repo`) publishes. |
+| `GET /api/admin/vpn`, `POST /api/admin/vpn/import` | VPN profiles with their gateways; make profiles of an uploaded WireGuard or OpenVPN file or archive (multipart `file`, `kind`, credentials). |
+| `PUT`/`DELETE /api/admin/vpn/{id}`, `POST /api/admin/vpn/{id}/endpoints` | Change a profile's name, published endpoints, cap, access, or credentials; delete it, its gateways staying up until their sessions end; add the endpoints of another file. |
 
 ## Branding
 

@@ -55,17 +55,48 @@ async def prune_dangling_images() -> None:
         logger.error("Failed to prune dangling images: %s", exc)
 
 
-async def inspect_self_container() -> None:
-    """Discover mount mappings, ports, and network of the server's own container.
-
-    Populates `state.path_prefix_map`, `state.discovered_api_port`,
-    `state.discovered_session_port`, `state.discovered_network`, and
-    `state.instance_name` (the container's name, else the host name).
+def _own_container(client: docker.DockerClient) -> Any | None:
+    """Return the server's own container, or `None` on a host or when Docker holds no container of this process.
 
     The server's own container is the one whose host name is this process's:
     the container Docker knows by that name or id, else the one named
     `sealskin` exactly. A container that merely carries the name is another
     server's, whose mounts and sessions are not this one's to use.
+    """
+    hostname = os.uname()[1]
+    for candidate in (hostname, "sealskin"):
+        try:
+            found = client.containers.get(candidate)
+        except NotFound:
+            continue
+        if found.attrs.get("Config", {}).get("Hostname") == hostname or found.id.startswith(hostname):
+            return found
+    return None
+
+
+def own_container_name() -> str:
+    """Return the name of the server's own container, or `""` on a host or when Docker does not answer.
+
+    A container's short id is its default host name and changes each time it
+    is recreated, while its name stays, so the cluster identity of a node in
+    Docker is taken from the name.
+    """
+    if not os.path.exists("/var/run/docker.sock"):
+        return ""
+    try:
+        container = _own_container(get_docker_client())
+    except Exception:  # noqa: BLE001 - the host name stands in when Docker cannot be asked
+        return ""
+    return container.name if container is not None else ""
+
+
+async def inspect_self_container() -> None:
+    """Discover mount mappings, ports, and network of the server's own container.
+
+    Populates `state.path_prefix_map`, `state.discovered_api_port`,
+    `state.discovered_session_port`, `state.discovered_network`, and
+    `state.instance_name` (the container's name, else the host name). The
+    container is the one `_own_container` finds.
     """
     state.discovered_api_port = settings.api_port
     state.discovered_session_port = settings.session_port
@@ -78,14 +109,7 @@ async def inspect_self_container() -> None:
     try:
         client = await asyncio.to_thread(get_docker_client)
         hostname = os.uname()[1]
-        for candidate in (hostname, "sealskin"):
-            try:
-                found = await asyncio.to_thread(client.containers.get, candidate)
-            except NotFound:
-                continue
-            if found.attrs.get("Config", {}).get("Hostname") == hostname or found.id.startswith(hostname):
-                container = found
-                break
+        container = await asyncio.to_thread(_own_container, client)
         if container is None:
             logger.warning(
                 "Could not find this server's own container by host name '%s' or the name 'sealskin'. "

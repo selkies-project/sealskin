@@ -1391,6 +1391,7 @@
       "online": "온라인",
       "offline": "오프라인",
       "waiting": "승인 대기 중",
+      "suspended": "일시 중지됨",
       "lastSeen": "마지막 확인: {when}",
       "storeUnreachableNode": "공유 레코드에 연결할 수 없음",
       "cpus": "CPU {count}개",
@@ -1611,7 +1612,7 @@
       "resultSlo": "단일 로그아웃 제공:",
       "resultCertificates": "서명 인증서:",
       "landingTitle": "시작 화면",
-      "landingHelp": "공급자를 선택하면 로그아웃된 브라우저가 이 서버의 로그인 페이지 대신 해당 공급자로 바로 이동합니다. 루트 토큰을 사용할 때처럼 페이지를 보려면 웹 앱 주소에 #root를 추가하세요.",
+      "landingHelp": "공급자를 선택하면 로그아웃된 브라우저가 이 서버의 로그인 페이지 대신 해당 공급자로 바로 이동합니다. 루트 키를 사용할 때처럼 페이지를 보려면 웹 앱 주소에 #root를 추가하세요.",
       "autoNone": "이 서버의 로그인 페이지",
       "autoOidc": "OpenID Connect",
       "autoSaml": "SAML",
@@ -2045,6 +2046,7 @@
       "noAccount": "아직 귀하의 이름으로 된 {brand} 계정이 없습니다. 관리자에게 계정 생성을 요청하세요.",
       "notConfigured": "이 서버는 통합 인증을 제공하지 않습니다.",
       "ended": "ID 공급자가 로그인을 종료했습니다. 다시 로그인하세요.",
+      "signedOut": "로그아웃했습니다.",
       "redirecting": "로그인 페이지로 이동하는 중…"
     },
     "nav": {

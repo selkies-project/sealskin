@@ -1391,6 +1391,7 @@
       "online": "在线",
       "offline": "离线",
       "waiting": "等待批准",
+      "suspended": "已暂停",
       "lastSeen": "最后在线: {when}",
       "storeUnreachableNode": "无法访问共享记录",
       "cpus": "{count} 个 CPU",
@@ -1611,7 +1612,7 @@
       "resultSlo": "提供单点注销:",
       "resultCertificates": "签名证书:",
       "landingTitle": "落地页",
-      "landingHelp": "选择了提供方后，未登录的浏览器会直接转到该提供方，而不是此服务器的登录页。在 Web 应用地址后加上 #root 仍可查看该页面，例如使用根令牌时。",
+      "landingHelp": "选择了提供方后，未登录的浏览器会直接转到该提供方，而不是此服务器的登录页。在 Web 应用地址后加上 #root 仍可查看该页面，例如使用根密钥时。",
       "autoNone": "此服务器的登录页",
       "autoOidc": "OpenID Connect",
       "autoSaml": "SAML",
@@ -2045,6 +2046,7 @@
       "noAccount": "尚无以您的名字命名的 {brand} 账户。请联系管理员创建。",
       "notConfigured": "此服务器不提供单点登录。",
       "ended": "身份提供方结束了您的登录。请重新登录。",
+      "signedOut": "您已退出登录。",
       "redirecting": "正在带您前往登录…"
     },
     "nav": {

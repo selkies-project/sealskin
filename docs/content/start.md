@@ -23,6 +23,10 @@ session.
   `8443`, which carries both the encrypted API and the streamed sessions.
   Port `8000` is a plain-HTTP fallback for the API that only the Chrome
   self-signed workflow needs.
+* A stable name for the server. It takes the name of its container, which
+  `container_name: sealskin` fixes; if you run it some other way, set
+  `hostname: sealskin` or `SEALSKIN_NODE_NAME` so the identity its records
+  are kept under does not change when the container is recreated.
 * Optionally, a GPU. NVIDIA needs the proprietary driver (580 or newer) with
   the `nvidia-container-toolkit` (v1.20.1 or higher) and `nvidia-drm.modeset=1`;
   Intel and AMD need nothing beyond `/dev/dri`. See [Administration](administration.md#gpus).
@@ -72,6 +76,7 @@ services:
   sealskin:
     image: lscr.io/linuxserver/sealskin:latest
     container_name: sealskin
+    hostname: sealskin   # or SEALSKIN_NODE_NAME, for anyone not keeping the container name
     environment:
       - PUID=1000
       - PGID=1000
@@ -92,7 +97,9 @@ A few things about this file are not negotiable:
 * **The container must be named `sealskin`.** The server inspects its own
   container to learn the host paths behind `/config` and `/storage`, the
   externally mapped ports, and the Docker network, and it finds itself by that
-  name (falling back to its hostname).
+  name (falling back to its hostname). The name is also the server's identity
+  among its records; `hostname: sealskin` or `SEALSKIN_NODE_NAME` pins it for
+  a container run under another name.
 * **The Docker socket is required.** Every session is a container the server
   starts through it, so the container's user must be allowed to use the
   socket. If launches fail with a permission error from Docker, make the

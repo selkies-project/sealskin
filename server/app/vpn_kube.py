@@ -16,9 +16,13 @@ provider's connection is spent once per endpoint in use.
 The hub's rendered files are a Secret the pod mounts: the profile's files,
 the hub's private key, and the spokes' peers, which the server also adds to
 the running hub through `pods/exec` so a session does not wait on the
-kubelet's Secret sync. A hub that restarts reads its peers from the file.
-Spoke addresses are taken from `vpn_hub_subnet`, the hub at `.1`, each
-session's from a hash of its id.
+kubelet's Secret sync. A hub that restarts reads its peers from the file,
+and a hub pod that failed or was evicted is created again over the same
+Secret and Service, so the spokes of its sessions reconnect with the keys
+they have. The hub's objects carry the server's instance in their names and
+labels, so two servers in one namespace keep hubs of their own. Spoke
+addresses are taken from `vpn_hub_subnet`, the hub at `.1`, each session's
+from a hash of its id.
 """
 
 from __future__ import annotations
@@ -28,6 +32,7 @@ import base64
 import hashlib
 import ipaddress
 import logging
+import re
 import time
 from typing import Any
 
@@ -47,6 +52,14 @@ HUB_PORT = 51820
 COMPONENT = "vpn-gateway"
 #: Seconds a hub pod gets to come up, with its image pull.
 READY_TIMEOUT = 300
+#: Seconds a deleted hub pod gets to go, before its name is used again.
+GONE_TIMEOUT = 60
+#: Letters of the instance name a hub's name carries; longer names are cut and hashed to fit a DNS label.
+INSTANCE_CHARS = 24
+
+
+class Foreign(Exception):
+    """An object under a hub's name that this server does not own."""
 
 
 def _kube() -> Any:
@@ -61,8 +74,19 @@ def _errors() -> tuple[type[Exception], ...]:
     return (KubeError, httpx.HTTPError)
 
 
+def _instance_tag() -> str:
+    """Return the server's instance name as part of a DNS label, shortened with a hash when it is long."""
+    name = state.instance_name or ""
+    tag = re.sub(r"[^a-z0-9-]+", "-", name.lower()).strip("-")
+    if len(tag) > INSTANCE_CHARS:
+        tag = f"{tag[: INSTANCE_CHARS - 7].rstrip('-')}-{hashlib.sha256(name.encode()).hexdigest()[:6]}"
+    return tag
+
+
 def _name(key: str) -> str:
-    return f"sealskin-vpn-{key}"
+    """Return the name of a hub's pod, Secret, and Service: the server's instance and the key."""
+    tag = _instance_tag()
+    return f"sealskin-vpn-{tag}-{key}" if tag else f"sealskin-vpn-{key}"
 
 
 def _labels(key: str, profile_id: str, endpoint_id: str) -> dict[str, str]:
@@ -79,10 +103,14 @@ def _labels(key: str, profile_id: str, endpoint_id: str) -> dict[str, str]:
     }
 
 
-def _selector() -> str:
+def _instance_label() -> str:
     from .providers.base_provider import INSTANCE_LABEL
 
-    return f"{vpn.MANAGED_LABEL}={vpn.MANAGED_VALUE},{INSTANCE_LABEL}={state.instance_name}"
+    return INSTANCE_LABEL
+
+
+def _selector() -> str:
+    return f"{vpn.MANAGED_LABEL}={vpn.MANAGED_VALUE},{_instance_label()}={state.instance_name}"
 
 
 def keypair() -> tuple[str, str]:
@@ -128,12 +156,24 @@ def _decode(data: dict[str, str], name: str) -> str:
     return base64.b64decode(data.get(name, "")).decode("utf-8")
 
 
-def hub_manifests(key: str, record: dict[str, Any], endpoint: dict[str, Any], files: dict[str, str]) -> tuple[dict, dict, dict]:
-    """Return the Secret, Pod, and Service of a hub."""
+def hub_manifests(
+    key: str, record: dict[str, Any], endpoint: dict[str, Any], files: dict[str, str], template: dict[str, Any] | None = None
+) -> tuple[dict, dict, dict]:
+    """Return the Secret, Pod, and Service of a hub.
+
+    Args:
+        key: The hub's key.
+        record: The profile.
+        endpoint: Its endpoint.
+        files: The rendered files the Secret carries.
+        template: The session PodTemplate's spec, whose pull secrets, tolerations, and node
+            selector the hub pod takes, as session and export pods do.
+    """
     api = _kube()
     name = _name(key)
     labels = _labels(key, record["id"], endpoint["id"])
     owner = [api.owner] if api.owner else []
+    placement = template or {}
     secret = {
         "apiVersion": "v1",
         "kind": "Secret",
@@ -149,7 +189,7 @@ def hub_manifests(key: str, record: dict[str, Any], endpoint: dict[str, Any], fi
             "automountServiceAccountToken": False,
             "enableServiceLinks": False,
             "terminationGracePeriodSeconds": 5,
-            "nodeSelector": {"kubernetes.io/os": "linux"},
+            "nodeSelector": placement.get("nodeSelector") or {"kubernetes.io/os": "linux"},
             "containers": [
                 {
                     "name": "gateway",
@@ -174,12 +214,15 @@ def hub_manifests(key: str, record: dict[str, Any], endpoint: dict[str, Any], fi
             ],
         },
     }
+    for field in ("imagePullSecrets", "tolerations"):
+        if placement.get(field):
+            pod["spec"][field] = placement[field]
     service = {
         "apiVersion": "v1",
         "kind": "Service",
         "metadata": {"name": name, "labels": labels, "ownerReferences": owner},
         "spec": {
-            "selector": {vpn.KEY_LABEL: key},
+            "selector": {vpn.KEY_LABEL: key, _instance_label(): state.instance_name},
             "ports": [{"name": "wireguard", "protocol": "UDP", "port": HUB_PORT, "targetPort": HUB_PORT}],
         },
     }
@@ -201,6 +244,21 @@ async def _get(resource: str, name: str) -> dict[str, Any] | None:
         raise
 
 
+async def _own(resource: str, key: str) -> dict[str, Any] | None:
+    """Return a hub's object by name, or `None` when there is none.
+
+    Raises:
+        Foreign: When what is under the name is not this server's hub, which is left alone.
+    """
+    found = await _get(resource, _name(key))
+    if found is None:
+        return None
+    labels = found["metadata"].get("labels") or {}
+    if labels.get(_instance_label()) != state.instance_name or labels.get(vpn.KEY_LABEL) != key:
+        raise Foreign(f"{resource}/{_name(key)} in the namespace is not this server's VPN hub.")
+    return found
+
+
 async def _delete(resource: str, name: str) -> None:
     api = _kube()
     try:
@@ -208,6 +266,26 @@ async def _delete(resource: str, name: str) -> None:
     except _errors()[0] as exc:
         if getattr(exc, "status", None) != 404:
             raise
+
+
+async def _remove_pod(key: str) -> None:
+    """Delete a hub's pod and wait until its name is free, keeping its Secret and Service."""
+    await _delete("pods", _name(key))
+    deadline = time.monotonic() + GONE_TIMEOUT
+    while time.monotonic() < deadline and await _get("pods", _name(key)) is not None:
+        await asyncio.sleep(1)
+
+
+async def _session_template() -> dict[str, Any]:
+    """Return the spec of the namespace's session PodTemplate, or `{}` without one."""
+    api = _kube()
+    try:
+        found = await api.request("GET", api.path("podtemplates", f"{state.instance_name}-session"))
+    except _errors()[0] as exc:
+        if getattr(exc, "status", None) in (403, 404):
+            return {}
+        raise
+    return ((found or {}).get("template") or {}).get("spec") or {}
 
 
 async def _wait_ready(key: str, record: dict[str, Any], endpoint: dict[str, Any]) -> dict[str, Any]:
@@ -236,48 +314,62 @@ async def _wait_ready(key: str, record: dict[str, Any], endpoint: dict[str, Any]
         pass
     reason = last or (pod.get("status") or {}).get("reason") or "the hub pod did not become ready"
     logger.error("VPN hub %s for '%s' (%s) did not come up: %s", name, record["name"], endpoint["label"], reason)
-    await teardown(key)
+    if vpn.in_use(key):
+        # Sessions keep their keys for the hub; the next launch or reconcile pass brings the pod back.
+        await _remove_pod(key)
+    else:
+        await teardown(key)
     raise HTTPException(status_code=502, detail=f"The VPN '{record['name']}' ({endpoint['label']}) did not connect: {reason}")
 
 
+def _ended(pod: dict[str, Any] | None) -> bool:
+    """Whether a hub pod is going or has ended, and is to be created again."""
+    return bool(pod) and bool(pod["metadata"].get("deletionTimestamp") or (pod.get("status") or {}).get("phase") in ("Failed", "Succeeded"))
+
+
 async def _ensure_hub(record: dict[str, Any], endpoint: dict[str, Any], key: str) -> tuple[dict[str, Any], str, str]:
-    """Return the hub's Secret, its Service address, and its public key, creating the hub when it is not there."""
+    """Return the hub's Secret, its Service address, and its public key, creating what is missing of the hub.
+
+    A pod that ended is created again over the Secret it had, so the spokes keep their keys.
+
+    Raises:
+        Foreign: When an object under the hub's name is another server's.
+    """
     api = _kube()
     name = _name(key)
-    secret = await _get("secrets", name)
-    pod = await _get("pods", name)
-    if pod and (pod["metadata"].get("deletionTimestamp") or (pod.get("status") or {}).get("phase") in ("Failed", "Succeeded")):
-        logger.info("The VPN hub %s is %s; starting it again.", name, (pod.get("status") or {}).get("phase") or "going")
-        await teardown(key)
-        secret = pod = None
-    if secret is None or pod is None:
-        if secret is None:
-            cap = int(record.get("max_tunnels") or 0)
-            if cap:
-                held = len(await tunnels(record["id"]))
-                if held >= cap:
-                    raise HTTPException(
-                        status_code=409,
-                        detail=f"'{record['name']}' already has {held} of its {cap} connections up across the deployment; pick an endpoint in use, or try later.",
-                    )
-            private, public = keypair()
-            files = vpn.render(record, endpoint, hub_address())
-            files["env"] += f"HUB_ADDRESS={hub_address()}/{hub_subnet().prefixlen}\nHUB_PORT={HUB_PORT}\nLOCAL_CIDRS={settings.vpn_local_cidrs}\n"
-            files["hub.key"] = private + "\n"
-            files["hub.pub"] = public + "\n"
-            files["peers"] = ""
-            secret_manifest, pod_manifest, service_manifest = hub_manifests(key, record, endpoint, files)
-            secret = await api.request("POST", api.path("secrets"), json=secret_manifest)
-        else:
-            _, pod_manifest, service_manifest = hub_manifests(key, record, endpoint, {})
+    secret = await _own("secrets", key)
+    pod = await _own("pods", key)
+    if _ended(pod):
+        logger.info("The VPN hub %s is %s; starting it again with its keys.", name, (pod.get("status") or {}).get("phase") or "going")
+        await _remove_pod(key)
+        pod = None
+    if secret is None:
+        cap = int(record.get("max_tunnels") or 0)
+        if cap:
+            held = len(await tunnels(record["id"]))
+            if held >= cap:
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"'{record['name']}' already has {held} of its {cap} connections up across the deployment; pick an endpoint in use, or try later.",
+                )
+        private, public = keypair()
+        files = vpn.render(record, endpoint, hub_address())
+        files["env"] += f"HUB_ADDRESS={hub_address()}/{hub_subnet().prefixlen}\nHUB_PORT={HUB_PORT}\nLOCAL_CIDRS={settings.vpn_local_cidrs}\n"
+        files["hub.key"] = private + "\n"
+        files["hub.pub"] = public + "\n"
+        files["peers"] = ""
+        secret_manifest, _, _ = hub_manifests(key, record, endpoint, files)
+        secret = await api.request("POST", api.path("secrets"), json=secret_manifest)
+    if pod is None:
         from . import progress
 
         progress.step("vpn", vpn=record["name"], endpoint=endpoint["label"])
-        if await _get("services", name) is None:
+        _, pod_manifest, service_manifest = hub_manifests(key, record, endpoint, {}, await _session_template())
+        if await _own("services", key) is None:
             await api.request("POST", api.path("services"), json=service_manifest)
         await api.request("POST", api.path("pods"), json=pod_manifest)
         logger.info("Started the VPN hub %s for '%s' (%s).", name, record["name"], endpoint["label"])
-    service = await _get("services", name)
+    service = await _own("services", key)
     if not service:
         raise HTTPException(status_code=500, detail="The VPN hub has no Service.")
     return secret, service["spec"]["clusterIP"], _decode(secret.get("data") or {}, "hub.pub").strip()
@@ -317,7 +409,8 @@ async def acquire(record: dict[str, Any], endpoint: dict[str, Any], who: str) ->
         `key`, `spoke_public_key`, `spoke_address`, and `spoke`, the environment of the sidecar.
 
     Raises:
-        HTTPException: 409 at the profile's cap, 502 when the hub does not come up.
+        HTTPException: 409 at the profile's cap or when another server's object holds the hub's
+            name, 502 when the hub does not come up.
     """
     key = vpn.key_for(record["id"], endpoint["id"])
     try:
@@ -331,6 +424,8 @@ async def acquire(record: dict[str, Any], endpoint: dict[str, Any], who: str) ->
         await _kube().exec(_name(key), "gateway", ["wg", "set", "hub0", "peer", public, "allowed-ips", f"{address}/32"])
     except vpn.Unusable as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Foreign as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     except _errors() as exc:
         raise HTTPException(status_code=500, detail=f"Kubernetes error at the VPN hub: {exc}") from exc
     return {
@@ -349,36 +444,54 @@ async def acquire(record: dict[str, Any], endpoint: dict[str, Any], who: str) ->
 
 
 async def release(info: dict[str, Any]) -> None:
-    """Take a session's spoke off its hub, and the hub down once no session of this node uses it."""
+    """Take a session's spoke off its hub, and the hub down once no session or launch of this node uses it."""
     key = info.get("key") or ""
     if not key:
         return
     public = info.get("spoke_public_key")
     if public:
         try:
-            secret = await _get("secrets", _name(key))
+            secret = await _own("secrets", key)
             if secret:
                 peers = _peers_of(secret)
                 peers.pop(public, None)
                 await _set_peers(key, secret, peers)
             await _kube().exec(_name(key), "gateway", ["wg", "set", "hub0", "peer", public, "remove"])
-        except _errors() as exc:
+        except (Foreign, *_errors()) as exc:
             logger.info("Could not take the spoke off the VPN hub %s: %s", _name(key), exc)
-    if not vpn.sessions_using(key):
+    if not vpn.in_use(key):
         await teardown(key)
 
 
 async def teardown(key: str) -> None:
-    """Delete a hub's pod, Service, and Secret; a part already gone is not an error."""
+    """Delete a hub's pod, Service, and Secret; a part already gone is not an error, another server's is left alone."""
     for resource in ("pods", "services", "secrets"):
         try:
-            await _delete(resource, _name(key))
+            if await _own(resource, key) is not None:
+                await _delete(resource, _name(key))
+        except Foreign as exc:
+            logger.warning("Not deleting %s", exc)
         except _errors() as exc:
             logger.error("Could not delete the VPN hub's %s %s: %s", resource, _name(key), exc)
 
 
+def _hubs_in_use() -> dict[str, tuple[str, str]]:
+    """Return the profile and endpoint of every hub a session of this node leaves through, by key."""
+    found: dict[str, tuple[str, str]] = {}
+    for session in state.sessions.values():
+        for info in [session.get("vpn"), *(e.get("vpn") for e in (session.get("container_registry") or {}).values())]:
+            if info and info.get("key") and info.get("profile") and info.get("endpoint"):
+                found[info["key"]] = (info["profile"], info["endpoint"])
+    return found
+
+
 async def reconcile() -> None:
-    """Take down the hubs no session of this node uses any more, once they have been there for a grace period."""
+    """Keep the hubs of this node in step with its sessions.
+
+    A hub no session or launch uses is taken down once it has been there for `vpn.ORPHAN_GRACE`;
+    one whose sessions still exist and whose pod failed or is gone gets its pod again, over the
+    Secret and Service it has, without waiting for it.
+    """
     api = _kube()
     try:
         pods = await api.request("GET", api.path("pods"), params={"labelSelector": _selector()})
@@ -388,11 +501,38 @@ async def reconcile() -> None:
     from .providers.base_provider import epoch
 
     cutoff = time.time() - vpn.ORPHAN_GRACE
+    used = _hubs_in_use()
+    seen: set[str] = set()
     for pod in pods.get("items", []):
         key = (pod["metadata"].get("labels") or {}).get(vpn.KEY_LABEL) or ""
-        if key and not vpn.sessions_using(key) and epoch(pod["metadata"]["creationTimestamp"]) < cutoff:
+        if not key:
+            continue
+        seen.add(key)
+        if not vpn.in_use(key) and epoch(pod["metadata"]["creationTimestamp"]) < cutoff:
             logger.info("Taking down the VPN hub %s, which no session uses.", pod["metadata"]["name"])
             await teardown(key)
+        elif key in used and _ended(pod):
+            await _restore(key, *used[key])
+    for key in used.keys() - seen:
+        await _restore(key, *used[key])
+
+
+async def _restore(key: str, profile_id: str, endpoint_id: str) -> None:
+    """Create the pod of a hub again for the sessions that leave through it, when its profile is still there."""
+    record = state.vpn_profiles.get(profile_id)
+    endpoint = vpn.endpoint_of(record, endpoint_id) if record else None
+    if not record or not endpoint:
+        logger.warning("The VPN hub %s has sessions but its profile is gone; leaving it.", _name(key))
+        return
+    async with vpn._lock(key):
+        try:
+            pod = await _own("pods", key)
+            if pod is not None and not _ended(pod):
+                return
+            logger.info("Starting the VPN hub %s again for the sessions that use it.", _name(key))
+            await _ensure_hub(record, endpoint, key)
+        except (Foreign, HTTPException, vpn.Unusable, *_errors()) as exc:
+            logger.error("Could not start the VPN hub %s again: %s", _name(key), getattr(exc, "detail", exc))
 
 
 async def tunnels(profile_id: str) -> list[VpnTunnel]:

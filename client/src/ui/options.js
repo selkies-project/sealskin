@@ -14,6 +14,7 @@ import { supportedLangs } from '../lib/languages.js';
 import { sendForgedSignIn } from '../lib/proxy-check.js';
 import { reachableSessionOrigin } from '../lib/session-origin.js';
 import { confirmDialog } from '../lib/modal.js';
+import { apiError } from '../lib/api-error.js';
 import {
   announce, escapeHtml, formatBytes, formatDate, timeAgo, formatLogoSrc, hydrateLogos, showToast, tOr,
   addMobileSafeArea, addMobileBackButton, downloadBlob, currentLocale, apiUrl,
@@ -24,6 +25,22 @@ let info;
 let config = {};
 
 const displayStatus = (message, isError = false) => showToast(message, isError);
+
+/**
+ * Run a form's submission with its button held down, so a second click sends nothing while the first is answered.
+ *
+ * @param {HTMLFormElement} form
+ * @param {function(): Promise<void>} work
+ */
+async function submitOnce(form, work) {
+  const button = form.querySelector('button[type="submit"]');
+  if (button) button.disabled = true;
+  try {
+    await work();
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
 
 const dashboardUsername = document.getElementById('dashboard-username');
 const dashboardRole = document.getElementById('dashboard-role');
@@ -2005,9 +2022,11 @@ function renderBrandingPreview() {
   brandField('mock-links-section').hidden = links.length === 0;
   brandField('mock-links').innerHTML = links.map((link) => {
     const icon = link.icon.trim();
-    const picture = icon.startsWith('https://')
-      ? `<img src="${escapeHtml(icon)}" alt="">`
-      : `<i class="${escapeHtml(icon ? (icon.includes(' ') ? icon : `fas ${icon}`) : 'fas fa-link')}"></i>`;
+    // A web address is shown through the server's copy, which exists once the link is saved; nothing loads from elsewhere.
+    const saved = icon.startsWith('https://') ? (brandSaved.links || []).find((known) => known.icon === icon && known.image) : null;
+    const picture = saved
+      ? `<img src="${escapeHtml(apiUrl(saved.image))}" alt="">`
+      : `<i class="${escapeHtml(icon && !icon.startsWith('https://') ? (icon.includes(' ') ? icon : `fas ${icon}`) : 'fas fa-link')}"></i>`;
     return mockTile(link.name, picture);
   }).join('');
 
@@ -2888,10 +2907,8 @@ function bindKeysEvents() {
         .catch(() => displayStatus(t('options.keys.copyFailed'), true)));
       reveal.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     } catch (error) {
-      const detail = /- (\{.*\})$/.exec(error.message || '');
-      let reason = '';
-      try { reason = detail ? JSON.parse(detail[1]).detail : ''; } catch (e2) { /* not JSON */ }
-      displayStatus(reason === 'days' ? t('options.keys.tooLong') : t('options.keys.createFailed', { error: error.message }), true);
+      // The web app's error is the bare `detail`; the other shells' carries the status and the body.
+      displayStatus(apiError(error).detail === 'days' ? t('options.keys.tooLong') : t('options.keys.createFailed', { error: error.message }), true);
     }
     button.disabled = false;
   });
@@ -4323,16 +4340,18 @@ function bindEvents() {
       settings: readUserSettings('newUser'),
     };
     if (!payload.username) return displayStatus(t('common.username') + ' is required.', true);
-    try {
-      displayStatus(t('options.status.creatingUser'));
-      const response = await secureFetch('/api/admin/users', { method: 'POST', body: JSON.stringify(payload) });
-      displayStatus(t('options.status.userCreated', { username: response.user.username }), false);
-      if (response.private_key) showUserConfigModal(response.user, response.private_key, true);
-      addUserForm.reset();
-      await refreshAdminData();
-    } catch (error) {
-      await writeFailed(error, t('options.status.userCreateFailed', { error: error.message }), refreshAdminData);
-    }
+    await submitOnce(addUserForm, async () => {
+      try {
+        displayStatus(t('options.status.creatingUser'));
+        const response = await secureFetch('/api/admin/users', { method: 'POST', body: JSON.stringify(payload) });
+        displayStatus(t('options.status.userCreated', { username: response.user.username }), false);
+        if (response.private_key) showUserConfigModal(response.user, response.private_key, true);
+        addUserForm.reset();
+        await refreshAdminData();
+      } catch (error) {
+        await writeFailed(error, t('options.status.userCreateFailed', { error: error.message }), refreshAdminData);
+      }
+    });
     return undefined;
   });
 
@@ -4397,20 +4416,22 @@ function bindEvents() {
   userEditForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const username = document.getElementById('editUsername').value;
-    try {
-      await secureFetch(`/api/admin/users/${username}`, {
-        method: 'PUT',
-        body: JSON.stringify({ settings: readUserSettings('editUser') }),
-      });
-      displayStatus(t('options.status.userUpdated', { username }));
-      userEditModal.style.display = 'none';
-      await refreshAdminData();
-    } catch (error) {
-      await writeFailed(error, t('options.status.userUpdateFailed', { error: error.message }), async () => {
+    await submitOnce(userEditForm, async () => {
+      try {
+        await secureFetch(`/api/admin/users/${username}`, {
+          method: 'PUT',
+          body: JSON.stringify({ settings: readUserSettings('editUser') }),
+        });
+        displayStatus(t('options.status.userUpdated', { username }));
         userEditModal.style.display = 'none';
         await refreshAdminData();
-      });
-    }
+      } catch (error) {
+        await writeFailed(error, t('options.status.userUpdateFailed', { error: error.message }), async () => {
+          userEditModal.style.display = 'none';
+          await refreshAdminData();
+        });
+      }
+    });
   });
 
   addGroupForm.addEventListener('submit', async (e) => {
@@ -4418,14 +4439,16 @@ function bindEvents() {
     const groupName = document.getElementById('newGroupName').value.trim();
     if (!groupName) return displayStatus(t('common.group') + ' name is required.', true);
     const payload = { name: groupName, settings: readGroupSettings('newGroup') };
-    try {
-      await secureFetch('/api/admin/groups', { method: 'POST', body: JSON.stringify(payload) });
-      displayStatus(t('options.status.groupCreated', { groupName }));
-      addGroupForm.reset();
-      await refreshAdminData();
-    } catch (error) {
-      await writeFailed(error, t('options.status.groupCreateFailed', { error: error.message }), refreshAdminData);
-    }
+    await submitOnce(addGroupForm, async () => {
+      try {
+        await secureFetch('/api/admin/groups', { method: 'POST', body: JSON.stringify(payload) });
+        displayStatus(t('options.status.groupCreated', { groupName }));
+        addGroupForm.reset();
+        await refreshAdminData();
+      } catch (error) {
+        await writeFailed(error, t('options.status.groupCreateFailed', { error: error.message }), refreshAdminData);
+      }
+    });
     return undefined;
   });
 
@@ -4483,14 +4506,16 @@ function bindEvents() {
     const homeNameInput = document.getElementById('newHomeDirName');
     const homeName = homeNameInput.value.trim();
     if (!homeName) return;
-    try {
-      await secureFetch('/api/homedirs', { method: 'POST', body: JSON.stringify({ home_name: homeName }) });
-      displayStatus(t('options.status.homedirCreated', { homeName }));
-      homeNameInput.value = '';
-      await refreshHomeDirs();
-    } catch (error) {
-      displayStatus(t('options.status.homedirCreateFailed', { error: error.message }), true);
-    }
+    await submitOnce(addHomeDirForm, async () => {
+      try {
+        await secureFetch('/api/homedirs', { method: 'POST', body: JSON.stringify({ home_name: homeName }) });
+        displayStatus(t('options.status.homedirCreated', { homeName }));
+        homeNameInput.value = '';
+        await refreshHomeDirs();
+      } catch (error) {
+        displayStatus(t('options.status.homedirCreateFailed', { error: error.message }), true);
+      }
+    });
   });
 
   homeDirsTbody.addEventListener('click', async (e) => {
@@ -4599,14 +4624,16 @@ function bindEvents() {
     const name = document.getElementById('new-app-store-name').value.trim();
     const url = document.getElementById('new-app-store-url').value.trim();
     if (!name || !url) return;
-    try {
-      await secureFetch('/api/admin/apps/stores', { method: 'POST', body: JSON.stringify({ name, url }) });
-      displayStatus(t('options.status.appStoreAdded', { name }));
-      addAppStoreForm.reset();
-      await refreshAppData();
-    } catch (error) {
-      displayStatus(t('options.status.appStoreAddFailed', { error: error.message }), true);
-    }
+    await submitOnce(addAppStoreForm, async () => {
+      try {
+        await secureFetch('/api/admin/apps/stores', { method: 'POST', body: JSON.stringify({ name, url }) });
+        displayStatus(t('options.status.appStoreAdded', { name }));
+        addAppStoreForm.reset();
+        await refreshAppData();
+      } catch (error) {
+        displayStatus(t('options.status.appStoreAddFailed', { error: error.message }), true);
+      }
+    });
   });
 
   addManualAppBtn.addEventListener('click', () => {

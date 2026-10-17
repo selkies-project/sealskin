@@ -23,7 +23,9 @@ administrator can install it on any cluster, managed or not.
   server's image and LinuxServer's application images do: the Pod Security
   `baseline` or `privileged` level, or, on OpenShift, the `anyuid` security
   context constraint for the service accounts the server and its sessions
-  run as.
+  run as. Sessions through a [VPN profile](vpn.md) need the `privileged`
+  level: the hub and the spoke add `NET_ADMIN`, and the hub mounts
+  `/dev/net/tun` from the node.
 * Optionally, GPUs through a device plugin or a Dynamic Resource Allocation
   driver: the NVIDIA GPU Operator, device plugin, or DRA driver over the
   NVIDIA Container Toolkit v1.20.1 or higher, or AMD's or Intel's.
@@ -161,7 +163,7 @@ run options; the Kubernetes backend maps each onto the session pod:
 | `cpu_shares` | `DOCKER_CPU_SHARES` | `requests.cpu` (1024 shares are one CPU) |
 | `devices`, `volumes` | `DOCKER_DEVICES`, `DOCKER_BIND_MOUNTS` | `hostPath` volumes on the node (see below for devices) |
 | `tmpfs` | `DOCKER_TMPFS` | memory volumes |
-| `network_mode`, `ipc_mode`, `pid_mode` of `host` | `DOCKER_NETWORK_MODE`, `DOCKER_IPC_MODE`, `DOCKER_PID_MODE` | `hostNetwork`, `hostIPC`, `hostPID` |
+| `network_mode`, `ipc_mode`, `pid_mode` of `host` | `DOCKER_NETWORK_MODE`, `DOCKER_IPC_MODE`, `DOCKER_PID_MODE` | `hostNetwork`, `hostIPC`, `hostPID` (on Docker, `network_mode` is ignored when the server itself runs in a container, since the session joins the server's network instead) |
 | `dns` | `DOCKER_DNS` | `dnsPolicy: None` with those nameservers |
 | `extra_hosts` | `DOCKER_EXTRA_HOSTS` | `hostAliases` |
 | `sysctls` | `DOCKER_SYSCTLS` | `securityContext.sysctls` |

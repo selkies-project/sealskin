@@ -26,12 +26,16 @@ Every node runs the same image. What a node does is its roles, set with
 The default is both. A node with only `runtime` needs no public name and no
 published session port: browsers never reach it, the frontends do.
 
-A node is its name, `SEALSKIN_NODE_NAME` or the host name, so give every
-node one of its own. The other nodes know it by the record it publishes under
-that name: its server key (`/config/ssl/server_key.pem`), its roles, the
-address of its **peer listener**, and the certificate the listener serves. A
-node started again with an empty configuration directory but the same name
-and storage publishes a new key and is the same node.
+A node is its name: `SEALSKIN_NODE_NAME`, else the name of its container in
+Docker, else the host name. Give every node one of its own. The other nodes
+know it by the record it publishes under that name: its server key
+(`/config/ssl/server_key.pem`), its roles, the address of its **peer
+listener**, and the certificate the listener serves. A node started again
+with an empty configuration directory but the same name and storage
+publishes a new key and is the same node. A node whose name changed, as the
+host name of a recreated container does when nothing pins it, takes over the
+records left under its earlier names when every one of them carries its own
+address or key, and says so in its log.
 
 ## What nodes need from the network
 
@@ -282,7 +286,8 @@ docker run -d --name bravo --hostname bravo --network sealskin-lab \
 
 `bravo` appears under **Cluster** within a few seconds, approved and
 answering. The container names matter: each server finds its own container
-by its host name.
+by its host name, and is named after it in the cluster when
+`SEALSKIN_NODE_NAME` is not set.
 
 ### Things to try
 

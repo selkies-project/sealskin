@@ -213,6 +213,7 @@ if [ "$KIND" = wireguard ]; then
   ip link set "$TUN" up
   ip route replace default dev "$TUN"
 else
+  # Script security 2 is for this up script alone; the profile's own script directives were dropped at import.
   cat > "$STATE/up.sh" <<'UP'
 #!/bin/sh
 # OpenVPN's up script: keep the DNS servers the server pushed for dnsmasq.

@@ -318,3 +318,188 @@ def test_a_launch_without_docker_offers_no_vpn(monkeypatch):
     monkeypatch.setattr(vpn, "_on_docker", lambda: False)
     vpn.import_profiles("Nord", "ovpn.zip", _nord_zip(("us1",)), username="u", password="p")
     assert vpn.choices_for(_user("bob")) == []
+
+
+def test_script_directives_of_an_openvpn_config_are_dropped(caplog):
+    text = "client\nremote a.b 1194\nup /tmp/x.sh\nplugin foo.so\nscript-security 2\nroute-up 'sh -c id'\ncipher AES-256-GCM\n<ca>\nx\n</ca>\n"
+    with caplog.at_level("WARNING", logger="app.vpn"):
+        (group,) = vpn.parse_bundle("hooks.ovpn", text.encode())
+    assert group.template == "client\ncipher AES-256-GCM\n<ca>\nx\n</ca>\n"
+    assert "dropped up, plugin, script-security, route-up" in caplog.text
+
+
+# --- Gateways against a fake Docker daemon ----------------------------------------
+
+
+class _Gateway:
+    """A gateway container as the daemon shows it; starting or restarting it makes it healthy."""
+
+    def __init__(self, daemon, name, status="running", health="healthy", created="2026-10-14T00:00:00Z"):
+        self.daemon, self.name, self.id, self.status = daemon, name, name, status
+        self.labels = {vpn.KEY_LABEL: name.removeprefix("sealskin-vpn-")}
+        self.attrs = {"State": {"Health": {"Status": health}}, "Created": created, "NetworkSettings": {"Networks": {name: {"IPAddress": "10.230.0.2"}}}}
+        self.actions = []
+
+    def reload(self):
+        pass
+
+    def start(self, action="start"):
+        self.actions.append(action)
+        self.status = "running"
+        self.attrs["State"]["Health"]["Status"] = "healthy"
+
+    def restart(self, timeout=None):
+        self.start("restart")
+
+    def remove(self, force=False):
+        self.actions.append("remove")
+        self.daemon.containers.pop(self.name, None)
+
+    def logs(self, tail=3):
+        return b""
+
+
+class _Net:
+    def __init__(self, daemon, name):
+        self.daemon, self.name, self.containers, self.attrs = daemon, name, [], {"IPAM": {"Config": [{"Subnet": "10.230.0.0/24"}]}}
+
+    def connect(self, container):
+        pass
+
+    def disconnect(self, container, force=False):
+        pass
+
+    def remove(self):
+        self.daemon.networks.pop(self.name, None)
+
+
+class _Daemon:
+    """What `vpn._acquire_sync` and `_teardown_sync` ask of a Docker client."""
+
+    def __init__(self):
+        from docker.errors import NotFound
+
+        self.containers = {}
+        self.networks = {"bridge": _Net(self, "bridge")}
+        self.not_found = NotFound
+        daemon = self
+
+        class Containers:
+            def get(self, name):
+                if name not in daemon.containers:
+                    raise daemon.not_found(name)
+                return daemon.containers[name]
+
+            def list(self, all=False, filters=None):
+                return [c for c in daemon.containers.values() if c.name.startswith("sealskin-vpn-")]
+
+            def create(self, image, name, **kwargs):
+                daemon.containers[name] = _Gateway(daemon, name, status="created", health=None)
+                daemon.containers[name].attrs["NetworkSettings"]["Networks"][name]["IPAddress"] = kwargs["networking_config"][name]
+                return daemon.containers[name]
+
+        class Networks:
+            def get(self, name):
+                if name not in daemon.networks:
+                    raise daemon.not_found(name)
+                return daemon.networks[name]
+
+            def list(self):
+                return list(daemon.networks.values())
+
+            def create(self, name, **kwargs):
+                daemon.networks[name] = _Net(daemon, name)
+                return daemon.networks[name]
+
+        class Images:
+            def get(self, image):
+                return object()
+
+        class Api:
+            def create_endpoint_config(self, ipv4_address):
+                return ipv4_address
+
+        self.containers_api, self.networks_api, self.images, self.api = Containers(), Networks(), Images(), Api()
+
+    @property
+    def client(self):
+        daemon = self
+
+        class Client:
+            containers = daemon.containers_api
+            networks = daemon.networks_api
+            images = daemon.images
+            api = daemon.api
+
+        return Client()
+
+
+@pytest.fixture
+def daemon(monkeypatch):
+    fake = _Daemon()
+    monkeypatch.setattr(vpn, "_client", lambda: fake.client)
+    monkeypatch.setattr(vpn, "_on_docker", lambda: True)
+    monkeypatch.setattr(vpn, "_on_kubernetes", lambda: False)
+    monkeypatch.setattr(vpn.time, "sleep", lambda _s: None)
+    vpn._in_flight.clear()
+    yield fake
+    vpn._in_flight.clear()
+
+
+def _gateway_of(daemon, status="running", health="healthy", created="2026-10-14T00:00:00Z"):
+    (record,) = vpn.import_profiles("Mullvad", "a.conf", (WG_INTERFACE + "[Peer]\nPublicKey = p1\nEndpoint = 1.1.1.1:51820\n").encode())
+    endpoint = record["endpoints"][0]
+    key = vpn.key_for(record["id"], endpoint["id"])
+    name = vpn._name(key)
+    daemon.containers[name] = _Gateway(daemon, name, status, health, created)
+    daemon.networks[name] = _Net(daemon, name)
+    return record, endpoint, key
+
+
+async def test_a_launch_in_progress_holds_the_gateway_against_a_release(daemon):
+    record, endpoint, key = _gateway_of(daemon)
+    name = vpn._name(key)
+    got = await vpn.acquire(record, endpoint, "launching")
+    assert got["key"] == key and vpn.in_flight(key) == 1 and vpn.in_use(key) == 1
+    # Another session of the endpoint ends while the launch has not registered its session yet.
+    await vpn.release({"key": key})
+    assert name in daemon.containers and name in daemon.networks
+    vpn.launched(key)
+    assert vpn.in_flight(key) == 0
+    await vpn.release({"key": key})
+    assert name not in daemon.containers and name not in daemon.networks
+
+
+async def test_reconcile_leaves_a_gateway_a_launch_holds(daemon):
+    record, endpoint, key = _gateway_of(daemon, created="2020-01-01T00:00:00Z")
+    name = vpn._name(key)
+    await vpn.acquire(record, endpoint, "launching")
+    await vpn.reconcile()
+    assert name in daemon.containers
+    vpn.launched(key)
+    await vpn.reconcile()
+    assert name not in daemon.containers
+
+
+async def test_a_gateway_with_sessions_is_brought_back_in_place(daemon):
+    record, endpoint, key = _gateway_of(daemon, status="exited", health="unhealthy")
+    name = vpn._name(key)
+    state.sessions["s"] = {"vpn": {"key": key}}
+    gateway = daemon.containers[name]
+    got = await vpn.acquire(record, endpoint, "another")
+    assert gateway.actions == ["start"] and daemon.containers[name] is gateway and name in daemon.networks
+    assert got["gateway_ip"] == "10.230.0.2" and got["network"] == name
+    vpn.launched(key)
+
+    gateway.status, gateway.attrs["State"]["Health"]["Status"], gateway.actions = "running", "unhealthy", []
+    await vpn.acquire(record, endpoint, "third")
+    assert gateway.actions == ["restart"] and daemon.containers[name] is gateway
+
+
+async def test_a_gateway_nobody_uses_is_rebuilt(daemon):
+    record, endpoint, key = _gateway_of(daemon, status="exited", health="unhealthy")
+    name = vpn._name(key)
+    old = daemon.containers[name]
+    got = await vpn.acquire(record, endpoint, "first")
+    assert old.actions == ["remove"] and daemon.containers[name] is not old
+    assert daemon.containers[name].actions == ["start"] and got["gateway_ip"] == "10.230.1.2"

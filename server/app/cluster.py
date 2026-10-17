@@ -5,18 +5,22 @@ Every node runs this same server. What a node does is its roles: a
 sessions. Nothing is a master; what the nodes share is the object store
 (`store`), and what each knows of the others it asks them.
 
-* **Identity.** A node is its name (`node_name`, the host name by default):
-  its record, `cluster/nodes/<name>.yml`, publishes its current server key,
-  the address of its peer listener, and the certificate that listener serves.
-  A node started again with an empty configuration directory but the same
-  name and storage takes its record over with a new key and is the same node.
-  With a bucket, a node that can write it is a member as soon as it
-  registers, since the bucket's keys admit to everything anyway; a node of a
-  file store takes part once its record is approved, and the first node of an
-  empty store approves itself.
+* **Identity.** A node is its name (`node_name`; by default its container's
+  name in Docker, else the host name): its record,
+  `cluster/nodes/<name>.yml`, publishes its current server key, the address
+  of its peer listener, and the certificate that listener serves. A node
+  started again with an empty configuration directory but the same name and
+  storage takes its record over with a new key and is the same node. With a
+  bucket, a node that can write it is a member as soon as it registers, since
+  the bucket's keys admit to everything anyway; a node of a file store takes
+  part once its record is approved, and the first node of an empty store
+  approves itself. A node of a file store that registers under a new name
+  while every other record carries its own address or key was renamed: it
+  takes those records' place (`register_self`).
 * **Peer calls.** A node calls another on its peer listener over TLS pinned to
   the certificates of the approved records, and signs each request with its
-  server key (`sign_request`, `verify_request`). A frontend may make a call
+  server key (`sign_request`, `verify_request`) over the path as it goes on
+  the wire, percent-encoded. A frontend may make a call
   act as a user (`act`), which is how a user's request reaches the node that
   holds the session or home directory it is about (`forward`).
 * **Live state.** Sessions stay with the node that runs them. Every node asks
@@ -58,8 +62,8 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509.oid import NameOID
 from fastapi import HTTPException, Request, Response
 
-from . import audit, persistence, store, user_manager
-from .settings import settings
+from . import audit, docker_utils, filecrypt, persistence, store, user_manager
+from .settings import SECRET_SETTINGS, settings
 from .state import state
 from .version import __version__
 
@@ -200,7 +204,7 @@ def peer_certificate_paths() -> tuple[str, str, str]:
 def init() -> None:
     """Take this node's id from its name, issue its peer certificate, and resume a cluster it joined."""
     global NODE_ID
-    NODE_ID = node_id_for(settings.node_name or os.uname()[1])
+    NODE_ID = node_id_for(settings.node_name or docker_utils.own_container_name() or os.uname()[1])
     global _trust_text
     own = _ensure_peer_certificate()
     _cert, _key, trust_path = peer_certificate_paths()
@@ -246,7 +250,10 @@ def register_self() -> None:
     With a bucket the node is approved as it registers, and a suspension
     stays until an administrator lifts it. With a file store the first node
     approves itself and any other waits for approval, unless it joined with
-    a code, which approved it already.
+    a code, which approved it already. A node of a file store whose name
+    changed, as a recreated container's host name does, finds the records of
+    its past names and takes their place: it keeps the pool, approval, and
+    joining time an administrator saw on the newest and removes them.
     """
     path = _node_path(NODE_ID)
     for _attempt in range(3):
@@ -255,9 +262,14 @@ def register_self() -> None:
         record.update(self_record())
         if existing is None:
             others = [n for n in persistence.list_names(os.path.dirname(path)) if n != f"{NODE_ID}.yml"]
-            record["approved"] = members_by_right() or not others
-            record["pool"] = settings.node_pool or DEFAULT_POOL
-            record["joined_at"] = time.time()
+            former = [] if members_by_right() else _former_records(record, others)
+            if former:
+                record.update({k: former[0].get(k) for k in ("approved", "pool", "joined_at") if k in former[0]})
+            record.setdefault("approved", members_by_right() or not others)
+            record.setdefault("pool", settings.node_pool or DEFAULT_POOL)
+            record.setdefault("joined_at", time.time())
+            for past in former:
+                persistence.remove(_node_path(past["id"]))
         elif existing.get("public_key") != record["public_key"]:
             logger.warning(
                 "Taking over the record of node '%s' with a new key; a node still running under that name is replaced.",
@@ -271,6 +283,31 @@ def register_self() -> None:
         except store.Conflict:
             continue
     logger.error("Could not write this node's record: another node keeps changing it.")
+
+
+def _former_records(own: dict[str, Any], names: list[str]) -> list[dict[str, Any]]:
+    """Return the records `names` hold when every one is this node's under an earlier name, newest first, else none.
+
+    A record is this node's when it carries the node's peer address or
+    server key; one of another node makes the whole set another's, since a
+    name this node held could as well be a node that is away.
+    """
+    found: list[dict[str, Any]] = []
+    directory = os.path.join(settings.cluster_path, "nodes")
+    for name in names:
+        past = persistence.read_yaml(os.path.join(directory, name), None)
+        if not isinstance(past, dict) or past.get("id") != name.removesuffix(".yml"):
+            return []
+        if past.get("address") != own["address"] and past.get("public_key") != own["public_key"]:
+            return []
+        found.append(past)
+    if found:
+        logger.info(
+            "Node %s was known as %s before; taking that record over. SEALSKIN_NODE_NAME pins the name.",
+            NODE_ID,
+            ", ".join(sorted(str(p.get("name") or p["id"]) for p in found)),
+        )
+    return sorted(found, key=lambda p: float(p.get("joined_at") or 0), reverse=True)
 
 
 def is_approved(node_id: str | None = None) -> bool:
@@ -348,7 +385,7 @@ def load_registry() -> bool:
         if node_id not in NODES:
             del PEERS[node_id]
     overrides = persistence.read_yaml(os.path.join(settings.cluster_path, "settings.yml"), {}) or {}
-    settings.apply_overrides(overrides if isinstance(overrides, dict) else {})
+    settings.apply_overrides(_unsealed_settings(overrides if isinstance(overrides, dict) else {}))
     own = self_record()["peer_cert"]
     certificates = [own] + [
         n["peer_cert"] for node_id, n in sorted(NODES.items()) if node_id != NODE_ID and n.get("approved") and n.get("peer_cert")
@@ -357,6 +394,26 @@ def load_registry() -> bool:
     if joined.get("store_node", {}).get("peer_cert"):
         certificates.append(joined["store_node"]["peer_cert"])
     return _write_trust("\n".join(dict.fromkeys(c.strip() for c in certificates)) + "\n")
+
+
+def seal_setting(value: str) -> dict[str, Any] | str:
+    """Return a secret setting as it is written to `cluster/settings.yml`: sealed under the cluster key when there is one."""
+    return filecrypt.wrap(value.encode("utf-8")) if filecrypt.enabled() else value
+
+
+def _unsealed_settings(written: dict[str, Any]) -> dict[str, Any]:
+    """Return the written settings with the secrets `seal_setting` sealed opened; one this node cannot open is left out."""
+    opened = dict(written)
+    for name in SECRET_SETTINGS:
+        value = opened.get(name)
+        if not isinstance(value, dict):
+            continue
+        try:
+            opened[name] = filecrypt.unwrap(value, f"The cluster setting '{name}'").decode("utf-8")
+        except filecrypt.Unreadable as exc:
+            logger.error("%s This node runs on its own value.", exc)
+            del opened[name]
+    return opened
 
 
 def apply_registry() -> None:
@@ -413,6 +470,19 @@ def _ssl_context() -> ssl.SSLContext:
     return context
 
 
+def wire_path(path: str) -> str:
+    """Return a path and query as the peer client sends them, percent-encoded, which is what a signature binds."""
+    return httpx.URL(f"https://{PEER_NAME}{path}").raw_path.decode("ascii")
+
+
+def raw_path(request: Request) -> str:
+    """Return the path and query of a request as they came in, before the server decoded them."""
+    raw = request.scope.get("raw_path")
+    path = raw.decode("ascii", "replace") if raw else wire_path(request.url.path)
+    query = request.scope.get("query_string") or b""
+    return path + ("?" + query.decode("ascii", "replace") if query else "")
+
+
 def sign_request(
     target: str, method: str, path: str, body: bytes | None, act: dict[str, Any] | None = None
 ) -> str:
@@ -421,7 +491,7 @@ def sign_request(
     Args:
         target: Id of the node called.
         method: HTTP method.
-        path: Path and query as sent.
+        path: Path and query, as sent or as the server decoded them.
         body: Request body, or `None` for a streamed one, which is not bound.
         act: The user the call acts as: `username`, `provider_groups`,
             `is_admin`, and `via`.
@@ -434,7 +504,7 @@ def sign_request(
         "exp": now + TOKEN_SECONDS,
         "jti": secrets.token_urlsafe(12),
         "m": method.upper(),
-        "p": path,
+        "p": wire_path(path),
         "b": hashlib.sha256(body).hexdigest() if body is not None else "-",
     }
     if act:
@@ -538,8 +608,7 @@ async def verify_request(request: Request, body: bytes | None = None, approved: 
         raise HTTPException(status_code=403, detail="This node is not an approved member of the cluster.")
     if body is None and unverified.get("b") != "-":
         body = await request.body()
-    path = request.url.path + (f"?{request.url.query}" if request.url.query else "")
-    return {"node": node, "claims": _verify(token, node["public_key"], request.method, path, body)}
+    return {"node": node, "claims": _verify(token, node["public_key"], request.method, raw_path(request), body)}
 
 
 def _address_of(node_id: str) -> str:
@@ -640,10 +709,9 @@ async def forward(request: Request, node_id: str, user: dict[str, Any], body: by
     """
     if body is None:
         body = await request.body()
-    path = request.url.path + (f"?{request.url.query}" if request.url.query else "")
     headers = {"content-type": request.headers.get("content-type")} if body else {}
     try:
-        answer = await call(node_id, request.method, path, content=body, act=acting(user), headers=headers, timeout=900)
+        answer = await call(node_id, request.method, raw_path(request), content=body, act=acting(user), headers=headers, timeout=900)
     except httpx.HTTPError as exc:
         name = NODES.get(node_id, {}).get("name", node_id)
         raise HTTPException(status_code=503, detail=f"Node '{name}' did not answer.") from exc

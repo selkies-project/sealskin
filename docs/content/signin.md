@@ -109,7 +109,7 @@ What the keys may do is set per user and group, under the same rules as the
 | Setting | Effect |
 | --- | --- |
 | **Allow Application Keys** | Off, the user can neither make nor use keys; the apps are refused with `disabled`. |
-| **Apps that may use application keys** | Which of the Chrome extension, the Firefox add-on, the Android app, the iOS app, and anything else may use the user's keys. Each app names itself in the `X-SealSkin-Client` header and nothing checks the name: this is a convenience, not a lock. A group that names any apps narrows the user's own list to those. |
+| **Apps that may use application keys** | Which of the Chrome extension, the Firefox add-on, the Android app, the iOS app, and anything else may use the user's keys. Each app names itself in the `X-SealSkin-App` header and nothing checks the name: this is a convenience, not a lock. A group that names any apps narrows the user's own list to those. |
 | **Days an application key lives** | The longest lifetime a user may choose when making a key; the default sets none, and a key then never expires. |
 | **Hours after the last web sign-in at which application keys sleep** | A dormancy rule: when the user's last web sign-in is older than this, their keys sleep until they sign in on the web again. |
 | **Application Keys Sleep When the Web Sign-In Ends** | The other dormancy rule: the keys work while the web sign-in the provider or the proxy granted lasts, by its own clock, and sleep as soon as it ends, as when the provider announces a logout. |
@@ -223,6 +223,13 @@ is the same for everyone who uses that provider, and a **Test** that asks the
 provider, or checks the proxy, with what was saved. The client secret is
 better left in the environment of the nodes that sign users in: what the
 dashboard writes goes to the shared store.
+
+A provider flow, and the sign-in it makes, live on the node that started
+them: with several frontends behind one name, the proxy has to keep a
+browser on one node (sticky sessions), or users signed in on one answer 401
+on the next. A provider's user named like an existing key-file user is that
+user, with that user's home directories; the provider's user named like an
+administrator or `root` is refused.
 
 ## Groups from the provider
 

@@ -1391,6 +1391,7 @@
       "online": "Trực tuyến",
       "offline": "Ngoại tuyến",
       "waiting": "Đang chờ phê duyệt",
+      "suspended": "Đã tạm ngưng",
       "lastSeen": "thấy lần cuối {when}",
       "storeUnreachableNode": "không truy cập được bản ghi dùng chung",
       "cpus": "{count} CPU",
@@ -1611,7 +1612,7 @@
       "resultSlo": "Có đăng xuất một lần:",
       "resultCertificates": "Chứng chỉ ký:",
       "landingTitle": "Trang đích",
-      "landingHelp": "Khi đã chọn nhà cung cấp, trình duyệt chưa đăng nhập sẽ được đưa ngay đến đó thay vì trang đăng nhập của máy chủ này. Thêm #root vào địa chỉ của ứng dụng web để vẫn xem được trang này, chẳng hạn để dùng token root.",
+      "landingHelp": "Khi đã chọn nhà cung cấp, trình duyệt chưa đăng nhập sẽ được đưa ngay đến đó thay vì trang đăng nhập của máy chủ này. Thêm #root vào địa chỉ của ứng dụng web để vẫn xem được trang này, chẳng hạn để dùng khóa root.",
       "autoNone": "Trang đăng nhập của máy chủ này",
       "autoOidc": "OpenID Connect",
       "autoSaml": "SAML",
@@ -2045,6 +2046,7 @@
       "noAccount": "Chưa có tài khoản {brand} nào mang tên bạn. Hãy yêu cầu quản trị viên tạo một tài khoản.",
       "notConfigured": "Máy chủ này không cung cấp đăng nhập một lần.",
       "ended": "Nhà cung cấp danh tính đã kết thúc lần đăng nhập của bạn. Hãy đăng nhập lại.",
+      "signedOut": "Bạn đã đăng xuất.",
       "redirecting": "Đang đưa bạn đến trang đăng nhập…"
     },
     "nav": {

@@ -268,3 +268,47 @@ def test_home_name_stays_in_the_callers_storage():
         with pytest.raises(HTTPException) as refused:
             resolve(name)
         assert refused.value.status_code == 404, name
+
+
+def test_template_editors_keep_docker_and_identity_settings_to_administrators():
+    from app.routers.admin import editor_settings
+
+    stored = {"TITLE": "Old", "DOCKER_DEVICES": "/dev/dri", "PUID": "1000"}
+    assert editor_settings(stored, {"TITLE": "New"}) == {"TITLE": "New", "DOCKER_DEVICES": "/dev/dri", "PUID": "1000"}
+    assert editor_settings(stored, {"PUID": 1000, "DOCKER_DEVICES": "/dev/dri"})["PUID"] == "1000"
+    for change in ({"PUID": "0"}, {"PGID": "0"}, {"CUSTOM_USER": "abc"}, {"PASSWORD": "x"}, {"SUBFOLDER": "/"}, {"SELKIES_MASTER_TOKEN": "t"}, {"SELKIES_ALLOWED_ORIGINS": "*"}):
+        with pytest.raises(HTTPException) as refused:
+            editor_settings(stored, change)
+        assert refused.value.status_code == 403 and "administrator" in refused.value.detail, change
+    with pytest.raises(HTTPException) as refused:
+        editor_settings(stored, {"DOCKER_PRIVILEGED": "true"})
+    assert refused.value.status_code == 403
+    assert set(launch.RESERVED_ENV) <= set(launch.session_base_env("s", "u", "p", "m"))
+
+
+class _Provider:
+    def __init__(self, app_config):
+        self.app_config = app_config
+
+    async def launch(self, **kwargs):
+        _Provider.launched = (self.app_config, kwargs)
+        return {"instance_id": "c2", "ip": "10.0.0.2", "port": 3000}
+
+
+async def test_a_room_swap_caps_resources_and_keeps_the_network_rule(monkeypatch):
+    from app import user_manager
+
+    state.installed_apps["app-2"] = make_app(id="app-2", name="Chromium", provider_config={**make_app().provider_config.model_dump(), "docker_overrides": {"nano_cpus": 4_000_000_000}})
+    state.sessions["s"] = {"username": "alice", "host_mount_path": launch.new_ephemeral_dir(), "container_registry": {}}
+    monkeypatch.setattr(user_manager, "get_effective_settings", lambda _username: {"session_cpus": 2, "session_memory_mb": 512})
+    monkeypatch.setattr(launch, "get_provider", _Provider)
+    info = await launch.ensure_container_for_session("s", "app-2")
+    assert info["instance_id"] == "c2"
+    overrides = _Provider.launched[0]["provider_config"]["docker_overrides"]
+    assert overrides["nano_cpus"] == 2_000_000_000 and overrides["mem_limit"] == 512 * 1024 * 1024
+
+    state.installed_apps["app-3"] = make_app(id="app-3", name="Host", provider_config={**make_app().provider_config.model_dump(), "docker_overrides": {"network_mode": "host"}})
+    state.sessions["s"]["vpn"] = {"key": "k", "profile": "p", "endpoint": "e"}
+    with pytest.raises(HTTPException) as refused:
+        await launch.ensure_container_for_session("s", "app-3")
+    assert refused.value.status_code == 400 and "network mode" in refused.value.detail

@@ -15,6 +15,10 @@ from fastapi.testclient import TestClient
 
 from app.settings import settings
 from app.state import state
+from tests.conftest import PROXY_SECRET
+
+#: What Caddy's forward_auth sub-request carries.
+INTERNAL = {"X-SealSkin-Secret": PROXY_SECRET}
 
 pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
 
@@ -112,7 +116,7 @@ def api_client(tmp_path, monkeypatch, store_with_firefox):
     from app import security
 
     security.init_server_keys()
-    with TestClient(api_module.api_app) as http:
+    with TestClient(api_module.api_app, client=("127.0.0.1", 50000)) as http:
         client = Client(http, server_pub, "tester", user_priv)
         client.handshake()
         yield client
@@ -196,7 +200,7 @@ def test_gpu_options_are_refreshed_when_offered(api_client, monkeypatch):
 def test_unauthenticated_and_bad_session_are_rejected(api_client):
     resp = api_client.http.post("/api/admin/status", headers={"X-Session-ID": "nope"})
     assert resp.status_code in (400, 401)
-    assert api_client.http.get("/internal/resolve_session/abc").status_code == 404
+    assert api_client.http.get("/internal/resolve_session/abc", headers=INTERNAL).status_code == 404
 
 
 def test_idempotency_key_replays_without_reexecuting(api_client, store_with_firefox):

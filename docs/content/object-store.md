@@ -45,12 +45,16 @@ Every object is under the prefix the URL names. With `s3://records/prod`:
 | `prod/files/<user>/` | The users' [shared files](cluster.md#shared-files), once the cluster has a second node. |
 
 The records hold no secret: public keys and hashes only, which is why the
-bucket's keys can be shared by every node. The users' shared files are the
-exception, since they are the users' own content, and the section on
-[encrypting them](#encrypting-the-users-files) is how to keep them from
-whoever holds the bucket's keys. Keep the bucket private, turn on
-server-side encryption, and give its keys to nodes only: whoever holds them
-can write any record.
+bucket's keys can be shared by every node. Two things in the bucket are
+secrets of their own: the users' shared files, which are their own content,
+and the credentials an administrator enters in the dashboard, the OIDC
+client secret in the sign-in settings and the credentials of the
+[VPN profiles](vpn.md). With `SEALSKIN_STORE_KEY` set they are sealed under
+the cluster key before they are written, as the section on
+[encrypting the files](#encrypting-the-users-files) describes; without it
+they are written as they are. Keep the bucket private, turn on server-side
+encryption, and give its keys to nodes only: whoever holds them can write
+any record.
 
 What stays on a node, under its `/config` and `/storage`:
 
@@ -155,13 +159,17 @@ its log.
 
 ## How the nodes use it
 
-**Identity.** A node is its name, `SEALSKIN_NODE_NAME` or its host name. Its
-record is `cluster/nodes/<name>.yml` and carries its current server key and
-peer certificate. A node started again with an empty configuration directory
+**Identity.** A node is its name: `SEALSKIN_NODE_NAME`, else the name of
+its container in Docker, else its host name. Its record is
+`cluster/nodes/<name>.yml` and carries its current server key and peer
+certificate. A node started again with an empty configuration directory
 publishes a new key under the same name and the others trust it at once, so
 give every node a name of its own and keep it with the node's storage. Two
 nodes under one name take the record from each other, which the log of each
-reports.
+reports. A node that comes up under a new name registers as a new node, and
+the record under the old name stays until an administrator removes it, so
+set `SEALSKIN_NODE_NAME` wherever the container's name or the host name can
+change.
 
 **Membership.** A node that can write the bucket is a member of the cluster
 as soon as it registers; there is no approval, since the bucket's keys admit

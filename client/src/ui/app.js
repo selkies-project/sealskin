@@ -321,8 +321,13 @@ async function signOut() {
   closeProfile();
   const leave = signOutUrl;
   await post('/api/auth/signout', {}).catch(() => {});
-  if (leave) location.assign(leave);
-  else hostApi.openPage('connect');
+  if (leave) {
+    location.assign(leave);
+    return;
+  }
+  // The panel is wanted after a sign-out, not the provider a signed-out browser is otherwise sent to.
+  notice = 'signedOut';
+  hostApi.openPage('connect');
 }
 
 function bindShell() {
@@ -510,9 +515,10 @@ async function renewProxySignIn() {
   return true;
 }
 
-/** The page transport; a call the server answers 401 means the sign-in ended. */
+/** The page transport; a call the server answers 401 means the sign-in ended, and a sign-out the frame sends ends on the panel. */
 async function transport(message) {
   const reply = await pageTransport(message);
+  if (message.type === 'secureFetch' && message.payload && message.payload.url === '/api/auth/signout') notice = 'signedOut';
   const failed = message.type === 'secureFetch' && reply && reply.success === false ? apiError(reply.error).status : null;
   if ((failed === 0 || failed === 401) && await renewProxySignIn()) return reply;
   if (failed === 401 && !notice) {
@@ -679,7 +685,7 @@ async function heldPanel(status) {
   const box = document.createElement('div');
   box.className = 'host-box';
   box.innerHTML = `
-    <img class="host-logo" src="icons/icon128.png" alt="SealSkin">
+    <img class="host-logo" src="${escapeHtml(brandLogo)}" alt="${escapeHtml(brandName)}">
     <h2></h2>
     <p class="host-muted" data-part="message"></p>
     <div class="host-actions">

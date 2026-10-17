@@ -1391,6 +1391,7 @@
       "online": "Çevrimiçi",
       "offline": "Çevrimdışı",
       "waiting": "Onay bekliyor",
+      "suspended": "Askıya alındı",
       "lastSeen": "son görülme: {when}",
       "storeUnreachableNode": "paylaşılan kayıtlara ulaşamıyor",
       "cpus": "{count} CPU",
@@ -1611,7 +1612,7 @@
       "resultSlo": "Tekli oturum kapatma sunuluyor:",
       "resultCertificates": "İmzalama sertifikaları:",
       "landingTitle": "Açılış",
-      "landingHelp": "Bir sağlayıcı seçildiğinde, oturumu kapalı bir tarayıcı bu sunucunun giriş sayfası yerine doğrudan sağlayıcıya gider. Sayfayı yine de görmek için, root belirtecinde olduğu gibi, web uygulamasının adresine #root ekleyin.",
+      "landingHelp": "Bir sağlayıcı seçildiğinde, oturumu kapalı bir tarayıcı bu sunucunun giriş sayfası yerine doğrudan sağlayıcıya gider. Sayfayı yine de görmek için, root anahtarında olduğu gibi, web uygulamasının adresine #root ekleyin.",
       "autoNone": "Bu sunucunun giriş sayfası",
       "autoOidc": "OpenID Connect",
       "autoSaml": "SAML",
@@ -2045,6 +2046,7 @@
       "noAccount": "Henüz adınızla bir {brand} hesabı yok. Yöneticinizden bir hesap oluşturmasını isteyin.",
       "notConfigured": "Bu sunucu çoklu oturum açma sunmuyor.",
       "ended": "Kimlik sağlayıcı oturumunuzu sonlandırdı. Yeniden oturum açın.",
+      "signedOut": "Oturumu kapattınız.",
       "redirecting": "Giriş sayfasına yönlendiriliyorsunuz…"
     },
     "nav": {

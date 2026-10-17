@@ -1612,7 +1612,7 @@
       "resultSlo": "Single logout offered:",
       "resultCertificates": "Signing certificates:",
       "landingTitle": "Landing",
-      "landingHelp": "With a provider chosen, a signed-out browser goes to it at once instead of this server's sign-in page. Add #root to the web app's address to see the page anyway, as for the root token.",
+      "landingHelp": "With a provider chosen, a signed-out browser goes to it at once instead of this server's sign-in page. Add #root to the web app's address to see the page anyway, as for the root key.",
       "autoNone": "This server's sign-in page",
       "autoOidc": "OpenID Connect",
       "autoSaml": "SAML",
@@ -2046,6 +2046,7 @@
       "noAccount": "No {brand} account has your name yet. Ask your administrator to create one.",
       "notConfigured": "This server offers no sign-in here. Ask your administrator.",
       "ended": "Your sign-in ended. Sign in again.",
+      "signedOut": "You signed out.",
       "redirecting": "Taking you to sign in…"
     },
     "nav": {

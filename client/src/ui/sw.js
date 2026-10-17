@@ -10,17 +10,20 @@
 import { storePendingFile, storeShared } from '../lib/context-store.js';
 
 async function receiveShare(request) {
-  const form = await request.formData();
-  const file = form.get('file');
-  const link = form.get('url') || (String(form.get('text') || '').match(/https?:\/\/\S+/) || [])[0];
-  if (file instanceof File && file.size) {
-    await storePendingFile(file);
-    await storeShared({ action: 'file', filename: file.name, hasFile: true });
-  } else if (link) {
-    await storeShared({ action: 'url', targetUrl: link });
-  } else if (form.get('text') || form.get('title')) {
-    await storeShared({ action: 'search', selectionText: String(form.get('text') || form.get('title')) });
-  }
+  // A share the worker cannot read still opens the app, with nothing attached, rather than a failed navigation.
+  try {
+    const form = await request.formData();
+    const file = form.get('file');
+    const link = form.get('url') || (String(form.get('text') || '').match(/https?:\/\/\S+/) || [])[0];
+    if (file instanceof File && file.size) {
+      await storePendingFile(file);
+      await storeShared({ action: 'file', filename: file.name, hasFile: true });
+    } else if (link) {
+      await storeShared({ action: 'url', targetUrl: link });
+    } else if (form.get('text') || form.get('title')) {
+      await storeShared({ action: 'search', selectionText: String(form.get('text') || form.get('title')) });
+    }
+  } catch (e) { /* malformed form: nothing to park */ }
   return Response.redirect('./?shared', 303);
 }
 

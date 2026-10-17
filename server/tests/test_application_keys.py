@@ -227,3 +227,35 @@ def test_an_administrators_keys_are_bound_by_the_rules_too(http, provider):
     assert status == 201 and made["record"]["expires"] - time.time() <= 86400
     answer = _as_app(http, made["key"], client="firefox")
     assert answer.status_code == 200 and answer.json()["is_admin"] is True and answer.json()["via"] == "app_key"
+
+
+def test_the_app_names_itself_apart_from_the_address_the_proxy_marks(http, provider):
+    alice = _alice(http, provider)
+    user_manager.write_group_file("users", {"application_key_clients": ["android"]})
+    status, made = alice.call("POST", "/api/keys", {"name": "Phone"})
+    assert status == 201
+    # Caddy writes the browser's address in `X-SealSkin-Client`; the app's own name rides `X-SealSkin-App`.
+    marked = {**APP, "Authorization": f"Bearer {made['key']}", "X-SealSkin-Client": "203.0.113.9", "X-SealSkin-App": "android"}
+    answer = http.post("/api/admin/status", json={}, headers=marked)
+    assert answer.status_code == 200, answer.text
+    assert application_keys.CLIENT_HEADER == "X-SealSkin-App"
+    assert application_keys._KEYS[made["record"]["id"]]["client"] == "android"
+    unnamed = http.post("/api/admin/status", json={}, headers={**APP, "Authorization": f"Bearer {made['key']}", "X-SealSkin-Client": "203.0.113.9"})
+    assert unnamed.status_code == 401 and unnamed.json()["detail"] == "client"
+
+
+def test_wrong_whole_bearers_lock_their_address_out_and_no_other(http, monkeypatch):
+    monkeypatch.setattr(settings, "root_key", "from-a-secret-manager")
+    application_keys.ensure_root_key()
+    guesser = {**APP, "X-SealSkin-Client": "203.0.113.5", application_keys.CLIENT_HEADER: "other"}
+    for _ in range(5):
+        refused = http.post("/api/admin/status", json={}, headers={**guesser, "Authorization": "Bearer not-it"})
+        assert refused.status_code == 401 and refused.json()["detail"] == "unknown"
+    locked = http.post("/api/admin/status", json={}, headers={**guesser, "Authorization": "Bearer from-a-secret-manager"})
+    assert locked.status_code == 429 and locked.json()["detail"] == "locked"
+    other = {**guesser, "X-SealSkin-Client": "203.0.113.6", "Authorization": "Bearer from-a-secret-manager"}
+    assert http.post("/api/admin/status", json={}, headers=other).json()["username"] == "root"
+    # An issued key is found by its unguessable id, so it is neither counted nor locked out.
+    root_key = open(settings.root_key_path, encoding="utf-8").read().strip()
+    assert http.post("/api/admin/status", json={}, headers={**guesser, "Authorization": f"Bearer {root_key}"}).status_code == 200
+    assert http.post("/api/admin/status", json={}, headers={**guesser, "Authorization": "Bearer ssk_nobody_nothing"}).json()["detail"] == "unknown"

@@ -599,3 +599,94 @@ def test_an_app_laboratory_session_is_one_per_admin_and_in_no_session_list(node)
     assert [s["session_id"][:8] for s in cluster.sessions_of("root")] == ["22222222"]
     again = node.post("/api/admin/launch/meta_customize", json={"application_id": "meta"}, headers=cookie)
     assert again.status_code == 409 and "Meta" in again.json()["detail"]
+
+
+def test_a_node_in_docker_is_named_after_its_container_unless_a_name_is_set(node, monkeypatch):
+    from app import docker_utils
+
+    # Without Docker, as on a host or in tests, the host name stands in.
+    assert docker_utils.own_container_name() == "" and cluster.NODE_ID == cluster.node_id_for(cluster.os.uname()[1])
+    monkeypatch.setattr(docker_utils, "own_container_name", lambda: "Sealskin Box")
+    cluster.init()
+    assert cluster.NODE_ID == "sealskin-box"
+    monkeypatch.setattr(settings, "node_name", "alpha")
+    cluster.init()
+    assert cluster.NODE_ID == "alpha"
+
+
+def test_a_recreated_container_takes_over_the_records_of_its_earlier_names_and_stays_alone(node, monkeypatch):
+    from app import filesync
+
+    own = cluster.self_record()
+    stale = {**own, "id": "0123456789ab", "name": "0123456789ab", "public_key": "-----BEGIN PUBLIC KEY-----\nold\n-----END PUBLIC KEY-----",
+             "approved": True, "pool": "gpu", "joined_at": time.time() - 86400}  # fmt: skip
+    persistence.write_yaml_sync(cluster._node_path("0123456789ab"), stale)
+    persistence.remove(cluster._node_path(cluster.NODE_ID))
+    monkeypatch.setattr(settings, "files_sync", "auto")
+    cluster.register_self()
+    cluster.load_registry()
+    assert set(cluster.NODES) == {cluster.NODE_ID}
+    taken = cluster.NODES[cluster.NODE_ID]
+    assert taken["approved"] is True and taken["pool"] == "gpu" and taken["joined_at"] == stale["joined_at"]
+    assert cluster.is_approved() and not cluster.is_clustered() and not filesync.enabled()
+    assert cluster.members() == [cluster.NODE_ID] and cluster.PEERS == {}
+    # A record of another node, under another address and key, makes the new name a new node that waits.
+    persistence.remove(cluster._node_path(cluster.NODE_ID))
+    other_id, _ = _other_node("bravo")
+    persistence.write_yaml_sync(cluster._node_path(other_id), cluster.NODES[other_id])
+    cluster.register_self()
+    cluster.load_registry()
+    assert cluster.is_approved() is False and len(cluster.NODES) == 2
+    # With a bucket, membership is the bucket's keys: no takeover and no approval.
+    monkeypatch.setattr(cluster, "members_by_right", lambda: True)
+    persistence.remove(cluster._node_path(cluster.NODE_ID))
+    persistence.write_yaml_sync(cluster._node_path("0123456789ab"), stale)
+    cluster.register_self()
+    cluster.load_registry()
+    assert cluster.is_approved() and "0123456789ab" in cluster.NODES
+
+
+def test_a_peer_signature_binds_the_path_as_it_goes_on_the_wire(node):
+    from urllib.parse import quote
+
+    node_id, key = _other_node("bravo", roles=("runtime",))
+    for raw_key in ("files/alice/My Doc.txt", "files/alice/Überblick.txt", "files/alice/a+b&c=d.txt"):
+        # As `store.PeerStore` sends it, through `cluster.call_sync`.
+        path = "/peer/store/" + quote(raw_key, safe="/-_.~")
+        token = _signed(key, node_id, "PUT", path, b"hello")
+        assert node.put(path, content=b"hello", headers={**PEER, "Authorization": token}).status_code == 200
+        assert store.get(raw_key)[0] == b"hello"
+        token = _signed(key, node_id, "GET", "/peer/store/files/alice/other.txt")
+        assert node.get(path, headers={**PEER, "Authorization": token}).status_code == 401
+    # A path given decoded is signed as the client will encode it.
+    token = _signed(key, node_id, "GET", "/peer/store/files/alice/My Doc.txt")
+    assert node.get("/peer/store/files/alice/My%20Doc.txt", headers={**PEER, "Authorization": token}).content == b"hello"
+    assert cluster.wire_path("/peer/status?q=a b") == "/peer/status?q=a%20b"
+
+
+def test_a_secret_cluster_setting_is_sealed_under_the_store_key(node, monkeypatch):
+    from app import filecrypt
+
+    path = cluster.os.path.join(settings.cluster_path, "settings.yml")
+    signed_in = node.post("/api/auth/key", json={"key": "a-root-key-for-the-tests"}, headers=WEB)
+    cookie = {**WEB, "Cookie": signed_in.headers["set-cookie"].split(";", 1)[0]}
+    monkeypatch.setattr(settings, "store_key", "a-long-random-string-every-node-holds")
+    written = node.put("/api/admin/cluster/settings", json={"oidc_client_secret": "hunter2", "oidc_client_id": "app"}, headers=cookie)
+    assert written.status_code == 200 and written.json()["written_settings"] == ["oidc_client_id", "oidc_client_secret"]
+    assert b"hunter2" not in persistence.read_bytes(path)
+    record = persistence.read_yaml(path)
+    assert record["oidc_client_secret"]["key_id"] == filecrypt.key_id() and record["oidc_client_id"] == "app"
+    cluster.load_registry()
+    assert settings.oidc_client_secret == "hunter2" and settings.oidc_client_id == "app"
+    # A value written before the key was set is read as it is; one sealed under another key is left to the node's own.
+    persistence.write_yaml_sync(path, {**record, "oidc_client_secret": "plain-old"})
+    cluster.load_registry()
+    assert settings.oidc_client_secret == "plain-old"
+    persistence.write_yaml_sync(path, record)
+    monkeypatch.setattr(settings, "store_key", "another-key")
+    cluster.load_registry()
+    assert settings.oidc_client_secret == ""
+    # Without a store key the secret is written as it is.
+    monkeypatch.setattr(settings, "store_key", "")
+    node.put("/api/admin/cluster/settings", json={"oidc_client_secret": "hunter3"}, headers=cookie)
+    assert persistence.read_yaml(path)["oidc_client_secret"] == "hunter3"

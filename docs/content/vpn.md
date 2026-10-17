@@ -36,9 +36,11 @@ session as it reaches any other.
 
 The gateway's firewall allows forwarding only from the sessions into the
 tunnel interface, and its own output only to the endpoint it was given. A
-tunnel that drops leaves the sessions with no path out rather than with the
-node's connection, and a gateway container that exits is started again by
-the node for the sessions still using it.
+VPN session on Docker reaches nothing but the gateway: not the host, not its
+LAN, not another container. A tunnel that drops leaves the sessions with no
+path out rather than with the node's connection, and a gateway container
+that exits or turns unhealthy is started again in place by the node for the
+sessions still using it, never rebuilt under them.
 
 One gateway per profile and endpoint on a node carries every session that
 picked them, so a provider's device limit is spent once per endpoint in use,
@@ -75,9 +77,15 @@ its node; a cluster that turns forwarding off in pods needs the
 `NET_ADMIN` and nothing else; the application container is unchanged. `SEALSKIN_VPN_HUB_SUBNET`
 gives the hubs and spokes their addresses, and `SEALSKIN_VPN_LOCAL_CIDRS`
 names the networks that stay direct beside the tunnel: the private ranges by
-default, which cover a cluster's pod and Service ranges. The hub pod is
-`sealskin-vpn-<key>`, and its log is where to look when a launch reports that
-the VPN did not connect.
+default, which cover a cluster's pod and Service ranges. Unlike a session on
+Docker, a VPN session on Kubernetes still reaches everything in those
+ranges, the cluster's LAN included; narrow the setting to the pod and
+Service ranges where that is not wanted. The hub pod is
+`sealskin-vpn-<instance>-<key>`, named after the server's `app.kubernetes.io/instance`
+so that two servers in one namespace keep hubs of their own, and its log is
+where to look when a launch reports that the VPN did not connect. A hub pod
+that fails or is evicted is created again over its Secret, with the keys it
+had, so the sessions' spokes reconnect to it.
 
 ## Importing a profile
 
@@ -93,7 +101,10 @@ become the endpoints, the certificates stay inline in the template, and a
 config that refers to separate `ca`, `cert`, `key`, or `tls-auth` files has
 them inlined from the same zip. A config with `auth-user-pass` asks for the
 provider's **service credentials**, which the import form takes; these are
-not the account's password at most providers. For WireGuard, the
+not the account's password at most providers. Script directives (`up`,
+`down`, `route-up`, `plugin`, `tls-verify`, and the like) are dropped with a
+line in the log, since the gateway runs as root and runs no program a config
+names. For WireGuard, the
 `[Interface]` section is the template and each `[Peer]` an endpoint, with its
 preshared key when it has one.
 
@@ -150,7 +161,7 @@ deployment with its node and the sessions on it.
 
 | Setting | Meaning |
 | --- | --- |
-| `SEALSKIN_VPN_IMAGE` | The gateway image, and the helper that sets a session's route. A node pulls it on first use. |
+| `SEALSKIN_VPN_IMAGE` | The gateway image, and the helper that sets a session's route. A node pulls it on first use; pin it to the server's version (`sealskin-vpn:<version>`) rather than `latest`, so that a pull on a new node brings the image the server was tested with. |
 | `SEALSKIN_VPN_SUBNETS` | The range the gateways' internal networks are carved from, one `/24` each (`10.230.0.0/16`). Change it when it collides with a network the host reaches. |
 | `SEALSKIN_VPN_HUB_SUBNET` | On Kubernetes, the network a hub and its spokes take their addresses from (`10.231.0.0/16`), the hub at `.1`. |
 | `SEALSKIN_VPN_LOCAL_CIDRS` | On Kubernetes, the networks a session pod and a hub keep reaching directly beside the tunnel: the private ranges by default. |

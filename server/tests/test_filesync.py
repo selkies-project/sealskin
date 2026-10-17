@@ -75,3 +75,26 @@ async def test_files_are_encrypted_under_a_key_of_the_users_own_and_shredded_wit
     filecrypt.reset()
     filesync.forget("alice")
     assert store.list_keys("files/alice/") == {} and persistence.read_yaml(filecrypt._path("alice")) is None
+
+
+@pytest.mark.asyncio
+async def test_a_pull_never_writes_through_a_link_a_session_left_in_the_directory(shared, tmp_path, caplog):
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    os.makedirs(shared)
+    os.symlink(str(outside), os.path.join(shared, "link"))
+    os.symlink(str(outside / "target.txt"), os.path.join(shared, "linked.txt"))
+    os.symlink(str(outside / "partial.txt"), os.path.join(shared, f"planted.txt.partial-{cluster.NODE_ID}"))
+    store.put("files/alice/link/planted.txt", b"owned")
+    store.put("files/alice/linked.txt", b"owned")
+    store.put("files/alice/planted.txt", b"fine")
+    await filesync.pull("alice", shared)
+    assert os.listdir(outside) == [] and os.path.islink(os.path.join(shared, "linked.txt"))
+    assert open(os.path.join(shared, "planted.txt"), "rb").read() == b"fine"
+    assert sum("were not placed" in r.message for r in caplog.records) == 1
+    assert await filesync.pull_file("alice", shared, "link/planted.txt") is False
+    assert await filesync.pull_file("alice", shared, "linked.txt") is False
+    assert os.listdir(outside) == []
+    # What the directory holds is still sent, links aside.
+    await filesync.sync("alice", shared)
+    assert "files/alice/planted.txt" in store.list_keys("files/alice/") and "files/alice/linked.txt" in store.list_keys("files/alice/")

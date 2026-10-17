@@ -8,9 +8,10 @@
 # SEALSKIN_TRUSTED_PROXIES, and SEALSKIN_HTTP_PORT=8080.
 # https://docs.sealskin.app/kubernetes#exposing-the-server describes the rest.
 #
-# The web app lives on one name and opens every session on a name of its own,
-# <session id>.<session domain>, so there are two hosts and the certificate in
-# the secret covers both: sealskin.example.com and *.example.com.
+# The web app and its sessions live on one name. With SEALSKIN_SESSION_ISOLATION
+# every session of a web sign-in opens on a name of its own, <session id>.<session
+# domain>, so the second host and the wildcard in the certificate are for that;
+# drop them otherwise.
 
 apiVersion: networking.k8s.io/v1
 kind: Ingress

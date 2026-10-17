@@ -78,6 +78,27 @@ MAX_FILES = 20000
 CONFIG_SUFFIXES = (".ovpn", ".conf")
 #: OpenVPN options the template does without: the server picks the endpoint, and Windows-only ones.
 _OVPN_DROPPED = ("remote", "proto", "port", "remote-random", "block-outside-dns", "windows-driver", "nobind")
+#: OpenVPN options that run a program or open a control channel in the gateway, which runs as root; dropped at import.
+_OVPN_SCRIPTS = (
+    "up",
+    "down",
+    "up-restart",
+    "down-pre",
+    "route-up",
+    "route-pre-down",
+    "ipchange",
+    "tls-verify",
+    "tls-export-cert",
+    "auth-user-pass-verify",
+    "client-connect",
+    "client-disconnect",
+    "learn-address",
+    "plugin",
+    "script-security",
+    "dns-updown",
+    "management",
+    "management-client",
+)
 #: OpenVPN options that name a file, and the inline block that carries it instead.
 _OVPN_FILES = {"ca": "ca", "cert": "cert", "key": "key", "tls-auth": "tls-auth", "tls-crypt": "tls-crypt", "tls-crypt-v2": "tls-crypt-v2", "crl-verify": "crl-verify"}
 _OVPN_BINARY = ("pkcs12",)
@@ -85,6 +106,8 @@ _OVPN_BINARY = ("pkcs12",)
 _WG_INTERFACE = ("PrivateKey", "Address", "DNS", "MTU")
 
 _locks: dict[str, asyncio.Lock] = {}
+#: Launches that acquired a gateway and have not registered their session yet, by key.
+_in_flight: dict[str, int] = {}
 
 
 class Unusable(Exception):
@@ -292,6 +315,7 @@ def _parse_openvpn(path: str, text: str, files: dict[str, bytes]) -> Parsed:
     default_proto: str | None = None
     needs_credentials = False
     inline: str | None = None
+    dropped: list[str] = []
     for raw in lines:
         line = raw.rstrip()
         if inline:
@@ -324,6 +348,9 @@ def _parse_openvpn(path: str, text: str, files: dict[str, bytes]) -> Parsed:
             continue
         if option in _OVPN_DROPPED:
             continue
+        if option in _OVPN_SCRIPTS:
+            dropped.append(option)
+            continue
         if option in _OVPN_BINARY:
             raise ValueError(f"'{path}' uses '{option}', which the gateway does not support; export a config with inline certificates.")
         if option == "auth-user-pass":
@@ -348,6 +375,8 @@ def _parse_openvpn(path: str, text: str, files: dict[str, bytes]) -> Parsed:
         kept.append(" ".join(parts))
     if inline:
         raise ValueError(f"'{path}' has an unterminated <{inline}> block.")
+    if dropped:
+        logger.warning("'%s': dropped %s, which the gateway does not run.", path, ", ".join(dict.fromkeys(dropped)))
     if not remotes:
         raise ValueError(f"'{path}' names no server (no 'remote' line).")
     endpoints = []
@@ -837,6 +866,27 @@ def sessions_using(key: str) -> int:
     return sum(1 for s in state.sessions.values() if (s.get("vpn") or {}).get("key") == key)
 
 
+def in_flight(key: str) -> int:
+    """Return how many launches of this node hold a gateway for a session not registered yet."""
+    return _in_flight.get(key, 0)
+
+
+def in_use(key: str) -> int:
+    """Return how many sessions and launches in progress of this node a gateway carries."""
+    return sessions_using(key) + in_flight(key)
+
+
+def launched(key: str | None) -> None:
+    """Let go of the hold `acquire` took for a launch: its session is registered, or it gave up."""
+    if not key:
+        return
+    left = _in_flight.get(key, 0) - 1
+    if left > 0:
+        _in_flight[key] = left
+    else:
+        _in_flight.pop(key, None)
+
+
 def _free_subnet(client: Any) -> ipaddress.IPv4Network:
     """Pick the first `/24` of `vpn_subnets` no Docker network of the host overlaps."""
     pool = ipaddress.ip_network(settings.vpn_subnets, strict=False)
@@ -946,6 +996,17 @@ def _acquire_sync(record: dict[str, Any], endpoint: dict[str, Any], key: str) ->
             if health == "starting":
                 _wait_healthy(existing, record, endpoint, key)
             return _info(key, network_name, _gateway_ip(existing, network_name))
+        if in_use(key):
+            # Sessions sit on its network; rebuilding it would cut them off, so it is brought back in place.
+            if existing.status == "running":
+                logger.info("The VPN gateway %s is %s; restarting it for the sessions on it.", network_name, health or "unhealthy")
+                existing.restart(timeout=5)
+            else:
+                logger.info("The VPN gateway %s is %s; starting it again for the sessions on it.", network_name, existing.status)
+                existing.start()
+            _wait_healthy(existing, record, endpoint, key)
+            existing.reload()
+            return _info(key, network_name, _gateway_ip(existing, network_name))
         logger.info("The VPN gateway %s is %s; starting it again.", network_name, existing.status)
         _teardown_sync(key)
 
@@ -1036,29 +1097,33 @@ async def acquire(record: dict[str, Any], endpoint: dict[str, Any], who: str) ->
     Returns:
         `key` and what the provider wires: on Docker `network`, `gateway_ip`, and `resolv_conf`,
         the host path of the file the session mounts as its `/etc/resolv.conf`; on Kubernetes the
-        spoke's keys and environment (see `vpn_kube.acquire`).
+        spoke's keys and environment (see `vpn_kube.acquire`). The gateway counts as in use until
+        the caller registers the session or calls `launched`.
 
     Raises:
         HTTPException: 409 at the profile's cap, 502 when the tunnel does not come up, 503 when the
             profile's secrets cannot be read.
     """
     key = key_for(record["id"], endpoint["id"])
-    if _on_kubernetes():
-        from . import vpn_kube
-
-        async with _lock(key):
-            return await vpn_kube.acquire(record, endpoint, who)
     async with _lock(key):
-        try:
-            return await asyncio.to_thread(_acquire_sync, record, endpoint, key)
-        except Unusable as exc:
-            raise HTTPException(status_code=503, detail=str(exc)) from exc
-        except RuntimeError as exc:
-            raise HTTPException(status_code=500, detail=str(exc)) from exc
+        if _on_kubernetes():
+            from . import vpn_kube
+
+            info = await vpn_kube.acquire(record, endpoint, who)
+        else:
+            try:
+                info = await asyncio.to_thread(_acquire_sync, record, endpoint, key)
+            except Unusable as exc:
+                raise HTTPException(status_code=503, detail=str(exc)) from exc
+            except RuntimeError as exc:
+                raise HTTPException(status_code=500, detail=str(exc)) from exc
+        # Held until the launch registers its session, so a release in between leaves the gateway up.
+        _in_flight[key] = _in_flight.get(key, 0) + 1
+        return info
 
 
 async def release(info: dict[str, Any] | None) -> None:
-    """Let go of what a session held: its spoke on Kubernetes, and the gateway once no session of this node uses it.
+    """Let go of what a session held: its spoke on Kubernetes, and the gateway once no session or launch of this node uses it.
 
     Args:
         info: The session's `vpn` record, with the gateway's `key`.
@@ -1073,7 +1138,7 @@ async def release(info: dict[str, Any] | None) -> None:
             await vpn_kube.release(info or {})
         return
     async with _lock(key):
-        if sessions_using(key):
+        if in_use(key):
             return
         try:
             await asyncio.to_thread(_teardown_sync, key)
@@ -1089,8 +1154,9 @@ def _running_gateways(client: Any) -> list[Any]:
 async def reconcile() -> None:
     """Keep the gateways of this node in step with its sessions.
 
-    A gateway no session references is stopped once it has been there for `ORPHAN_GRACE`; one that
-    exited while sessions still reference it is started again, with the files it was rendered from.
+    A gateway no session or launch references is stopped once it has been there for `ORPHAN_GRACE`;
+    one that exited while sessions still reference it is started again, with the files it was
+    rendered from.
     """
     if _on_kubernetes():
         from . import vpn_kube
@@ -1112,7 +1178,7 @@ async def reconcile() -> None:
         key = (container.labels or {}).get(KEY_LABEL) or ""
         if not key:
             continue
-        if not sessions_using(key):
+        if not in_use(key):
             if epoch(container.attrs["Created"]) < cutoff:
                 logger.info("Stopping the VPN gateway %s, which no session uses.", container.name)
                 await release({"key": key})

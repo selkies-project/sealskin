@@ -1391,6 +1391,7 @@
       "online": "Online",
       "offline": "Offline",
       "waiting": "Wartet auf Freigabe",
+      "suspended": "Ausgesetzt",
       "lastSeen": "zuletzt gesehen {when}",
       "storeUnreachableNode": "erreicht die gemeinsamen Datensätze nicht",
       "cpus": "{count} CPUs",
@@ -1611,7 +1612,7 @@
       "resultSlo": "Single Logout angeboten:",
       "resultCertificates": "Signaturzertifikate:",
       "landingTitle": "Startseite",
-      "landingHelp": "Ist ein Anbieter gewählt, geht ein abgemeldeter Browser sofort zu ihm statt zur Anmeldeseite dieses Servers. Hängen Sie #root an die Adresse der Web-App an, um die Seite trotzdem zu sehen, etwa für das Root-Token.",
+      "landingHelp": "Ist ein Anbieter gewählt, geht ein abgemeldeter Browser sofort zu ihm statt zur Anmeldeseite dieses Servers. Hängen Sie #root an die Adresse der Web-App an, um die Seite trotzdem zu sehen, etwa für den Root-Schlüssel.",
       "autoNone": "Die Anmeldeseite dieses Servers",
       "autoOidc": "OpenID Connect",
       "autoSaml": "SAML",
@@ -2045,6 +2046,7 @@
       "noAccount": "Es gibt noch kein {brand}-Konto mit Ihrem Namen. Bitten Sie Ihren Administrator, eines anzulegen.",
       "notConfigured": "Dieser Server bietet kein Single Sign-On an.",
       "ended": "Der Identitätsanbieter hat Ihre Anmeldung beendet. Melden Sie sich erneut an.",
+      "signedOut": "Sie haben sich abgemeldet.",
       "redirecting": "Sie werden zur Anmeldung weitergeleitet…"
     },
     "nav": {

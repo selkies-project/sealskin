@@ -1391,6 +1391,7 @@
       "online": "Online",
       "offline": "Offline",
       "waiting": "Naghihintay ng pag-apruba",
+      "suspended": "Nakasuspinde",
       "lastSeen": "huling nakita {when}",
       "storeUnreachableNode": "hindi maabot ang mga shared record",
       "cpus": "{count} CPU",
@@ -1611,7 +1612,7 @@
       "resultSlo": "Inaalok ang single logout:",
       "resultCertificates": "Mga signing certificate:",
       "landingTitle": "Landing",
-      "landingHelp": "Kapag may napiling provider, agad na pupunta roon ang naka-sign out na browser sa halip na sa sign-in page ng server na ito. Idagdag ang #root sa address ng web app para makita pa rin ang page, gaya ng para sa root token.",
+      "landingHelp": "Kapag may napiling provider, agad na pupunta roon ang naka-sign out na browser sa halip na sa sign-in page ng server na ito. Idagdag ang #root sa address ng web app para makita pa rin ang page, gaya ng para sa root key.",
       "autoNone": "Sign-in page ng server na ito",
       "autoOidc": "OpenID Connect",
       "autoSaml": "SAML",
@@ -2045,6 +2046,7 @@
       "noAccount": "Wala pang {brand} account sa iyong pangalan. Hilingin sa iyong administrator na gumawa ng isa.",
       "notConfigured": "Walang single sign-on ang server na ito.",
       "ended": "Tinapos ng identity provider ang iyong sign-in. Mag-sign in ulit.",
+      "signedOut": "Nag-sign out ka.",
       "redirecting": "Dinadala ka sa sign-in…"
     },
     "nav": {

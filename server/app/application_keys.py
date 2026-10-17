@@ -34,8 +34,9 @@ What an administrator sets, through the users' and groups' settings
 The `root` administrator, who has no identity provider, signs in to the web
 app with one of root's own keys (`web_sign_in`): the first start generates
 one and writes it to `root_key_path` for the administrator to copy and delete,
-or `SEALSKIN_ROOT_KEY` names it. Wrong keys at the web are counted per
-address, five a minute, which bounds guessing.
+or `SEALSKIN_ROOT_KEY` names it. Wrong keys at the web, and wrong bearers
+of any shape but `ssk_`, which could be a guess at the environment's key, are
+counted per address, five a minute, which bounds guessing.
 """
 
 from __future__ import annotations
@@ -54,8 +55,8 @@ from .settings import settings
 logger = logging.getLogger(__name__)
 
 PREFIX = "ssk_"
-#: The header a companion app names itself in, with a value of `APP_KEY_CLIENTS`.
-CLIENT_HEADER = "X-SealSkin-Client"
+#: The header a companion app names itself in, with a value of `APP_KEY_CLIENTS`; the proxy marks the address in `X-SealSkin-Client`.
+CLIENT_HEADER = "X-SealSkin-App"
 YAML_NAME = "application_keys.yml"
 ENV_KEY_ID = "env"
 ENV_KEY_NAME = "environment"
@@ -291,23 +292,25 @@ def _touch(key_id: str, client: str) -> None:
         logger.debug("Could not record the use of key %s: %s", key_id, exc)
 
 
-def authenticate(key: str, client: str) -> dict[str, Any]:
+def authenticate(key: str, client: str, address: str = "") -> dict[str, Any]:
     """Return the record of the key a companion app presents, or refuse it.
 
     Args:
         key: The bearer.
         client: What the app calls itself in `CLIENT_HEADER`; anything but a
             known name counts as `other`.
+        address: The client's address, which wrong whole keys are counted by.
 
-    A key of the `ssk_` shape is looked up by its id; any other text is
-    tried whole against root's keys, so the key `SEALSKIN_ROOT_KEY` names
-    signs the apps in too.
+    A key of the `ssk_` shape is looked up by its id, which is unguessable;
+    any other text is tried whole against root's keys, so the key
+    `SEALSKIN_ROOT_KEY` names signs the apps in too, and wrong ones are
+    counted per address as at the web sign-in.
 
     Raises:
-        KeyRefused: `unknown` for a key nobody holds, `expired`, `disabled`
-            where the user's settings deny keys, `client` for an app the
-            settings leave out, `dormant` while the user has to sign in on
-            the web first.
+        KeyRefused: `locked` after too many wrong whole keys from `address`,
+            `unknown` for a key nobody holds, `expired`, `disabled` where the
+            user's settings deny keys, `client` for an app the settings leave
+            out, `dormant` while the user has to sign in on the web first.
     """
     parsed = parse(key)
     if parsed:
@@ -316,10 +319,13 @@ def authenticate(key: str, client: str) -> dict[str, Any]:
         if not record or not secrets.compare_digest(_hash(secret), str(record.get("hash") or "")):
             raise KeyRefused("unknown", f"no key {key_id}")
     else:
-        # A key from the environment may have any shape: it is matched whole, among root's alone.
+        # A key from the environment may have any shape: it is matched whole, among root's alone, and so can be guessed at.
+        if locked_out(address):
+            raise KeyRefused("locked", "too many wrong keys; try again in a minute")
         whole = _hash(key.strip())
         key_id = next((k for k, v in _root_records().items() if secrets.compare_digest(whole, str(v.get("hash") or ""))), None)
         if key_id is None:
+            _count_failure(address)
             raise KeyRefused("unknown", "not an application key")
         record = _KEYS[key_id]
     now = time.time()

@@ -1,6 +1,6 @@
 {
   "name": "sealskin",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "SealSkin mobile shell (Capacitor). The web dir is copied from client/dist/mobile.",
   "main": "index.html",
   "scripts": {

@@ -299,7 +299,7 @@ const keyBase = (config) => `https://${config.serverIp}:${config.sessionPort || 
  * `http://` fallback of the key-file clients does not exist here.
  */
 async function keyFetch(url, options, config) {
-  const headers = { ...options.headers, Authorization: `Bearer ${config.applicationKey}`, 'X-SealSkin-Client': CLIENT };
+  const headers = { ...options.headers, Authorization: `Bearer ${config.applicationKey}`, 'X-SealSkin-App': CLIENT };
   // One key per logical request so a retried POST is executed once server-side.
   if ((options.method || 'GET').toUpperCase() !== 'GET') headers['X-Idempotency-Key'] = crypto.randomUUID();
   if (options.body) headers['Content-Type'] = 'application/json';

@@ -30,7 +30,7 @@ visit **[sealskin.app](https://sealskin.app)**.
 | **Firefox** | [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/) |
 | **iPhone and iPad** | [App Store](https://apps.apple.com/us/app/sealskin/id6758210210) |
 | **Android** | [Google Play](https://play.google.com/store/apps/details?id=io.linuxserver.sealskin) |
-| **Any browser**, nothing to install | the web app at `https://<server>:8443/ui/` |
+| **Any browser**, nothing to install | the web app at `https://<server>:8443/` |
 
 Every [release](https://github.com/selkies-project/sealskin/releases) also
 carries the extension zips, the APK, the IPA, and the server wheel.
@@ -48,11 +48,12 @@ mkdir sealskin && cd sealskin
 bash <(curl -sSL https://raw.githubusercontent.com/linuxserver/docker-sealskin/refs/heads/master/install.sh)
 ```
 
-Then import the generated `config/admin.json` into a client and launch your
-first application. The
+Then open `https://<server>:8443/` and sign in with the root key the server
+wrote to `config/root_key`, or import the generated `config/admin.json` into
+the extension or the app, and launch your first application. The
 [Getting Started](https://selkies-project.github.io/sealskin/start) guide
 covers the installer, the plain `docker compose` alternative, certificates,
-and the first login.
+and the first sign-in.
 
 On Kubernetes, one manifest installs the server in any namespace you
 administer, with no cluster-scoped objects, and every session runs as a pod
@@ -76,12 +77,15 @@ kubectl apply -n <namespace> -f sealskin.yml
   downloads, and password-protected public share links.
 * **Collaboration rooms.** Launch any app into a room with chat, voice and
   video, gamepad slots, and hand-over of mouse and keyboard control.
-* **End-to-end encrypted, passwordless.** Every API call is encrypted with a
-  per-session key negotiated against the server's RSA key; users authenticate
-  with a signed token from a private key that never leaves the client.
 * **Sign in with what you have.** The web app signs users in through OpenID
   Connect, SAML, or the reverse proxy in front of it, with groups that carry
-  permissions, session and storage limits, and time allowances.
+  permissions, session and storage limits, and time allowances. The extension
+  and the app sign in with an application key made on the web, or, on a single
+  server, with a key file and an end-to-end encrypted API that needs no
+  trusted certificate.
+* **VPN exits.** Administrators import WireGuard or OpenVPN profiles, and a
+  user picks one at launch: the session leaves through that tunnel and nothing
+  else, on Docker and on Kubernetes.
 * **One server or many.** Servers join into a cluster with shared users and
   applications and no master: pools of nodes, placement, GPU slots, and home
   directories that move between nodes.
@@ -120,6 +124,7 @@ client/              web UI source and build (dist/ui, dist/extension, dist/mobi
 browser_extension/   manifests, icons and packaging for the extension shell
 mobile/              Capacitor project for the iOS and Android shells
 kubernetes/          manifest for running the server in a Kubernetes namespace
+vpn/                 the VPN gateway image sessions leave through
 docs/                the documentation site
 release-notes/       one file per stable release
 ```

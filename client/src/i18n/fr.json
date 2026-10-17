@@ -1391,6 +1391,7 @@
       "online": "En ligne",
       "offline": "Hors ligne",
       "waiting": "En attente d'approbation",
+      "suspended": "Suspendu",
       "lastSeen": "vu pour la dernière fois {when}",
       "storeUnreachableNode": "ne peut pas joindre les données partagées",
       "cpus": "{count} CPU",
@@ -1611,7 +1612,7 @@
       "resultSlo": "Déconnexion unique proposée :",
       "resultCertificates": "Certificats de signature :",
       "landingTitle": "Page d'arrivée",
-      "landingHelp": "Avec un fournisseur choisi, un navigateur non connecté y est envoyé aussitôt au lieu de la page de connexion de ce serveur. Ajoutez #root à l'adresse de l'application web pour voir la page malgré tout, comme pour le jeton root.",
+      "landingHelp": "Avec un fournisseur choisi, un navigateur non connecté y est envoyé aussitôt au lieu de la page de connexion de ce serveur. Ajoutez #root à l'adresse de l'application web pour voir la page malgré tout, comme pour le clé root.",
       "autoNone": "La page de connexion de ce serveur",
       "autoOidc": "OpenID Connect",
       "autoSaml": "SAML",
@@ -2045,6 +2046,7 @@
       "noAccount": "Aucun compte {brand} ne porte encore votre nom. Demandez à votre administrateur d'en créer un.",
       "notConfigured": "Ce serveur ne propose pas d'authentification unique.",
       "ended": "Le fournisseur d'identité a mis fin à votre connexion. Reconnectez-vous.",
+      "signedOut": "Vous vous êtes déconnecté.",
       "redirecting": "Redirection vers la connexion…"
     },
     "nav": {

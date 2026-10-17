@@ -1,7 +1,9 @@
-"""Endpoints used only by Caddy's `forward_auth` on the loopback interface.
+"""Endpoints used only by Caddy's `forward_auth`.
 
 Caddy refuses `/internal/*` from clients; these handlers are reached only
-through the sub-request Caddy makes to `127.0.0.1`.
+through the sub-request Caddy makes to `127.0.0.1`, which carries the
+proxy's secret. The API port itself is bound on every interface, so
+`through_proxy` refuses whatever else reaches them.
 """
 
 from __future__ import annotations
@@ -13,7 +15,7 @@ import json
 import logging
 import os
 
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse
 
 from .. import cluster
@@ -23,7 +25,22 @@ from ..settings import settings
 from ..state import state
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/internal", include_in_schema=False)
+
+
+async def through_proxy(request: Request) -> None:
+    """Refuse a request that did not come through this node's Caddy, whose `forward_auth` sub-requests carry its secret.
+
+    The address is no guide: uvicorn takes the browser's from the
+    `X-Forwarded-For` the sub-request carries.
+
+    Raises:
+        HTTPException: 403 without the proxy's mark.
+    """
+    if not cluster.via_proxy(request):
+        raise HTTPException(status_code=403, detail="Forbidden.")
+
+
+router = APIRouter(prefix="/internal", include_in_schema=False, dependencies=[Depends(through_proxy)])
 
 STOPPED_PAGE = '<!doctype html><meta charset="utf-8"><title>SealSkin</title><p>{}</p><script>close()</script>'
 

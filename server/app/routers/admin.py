@@ -34,7 +34,7 @@ from .. import (
 )
 from ..docker_utils import get_and_cache_image_metadata, get_system_stats, pull_and_cache_image
 from ..fsutil import safe_join, safe_rmtree
-from ..launch import launch_application, stop_session
+from ..launch import RESERVED_ENV, launch_application, stop_session
 from ..models import (
     ActiveSessionInfo,
     AdminStatusResponse,
@@ -727,6 +727,32 @@ def _docker_settings(template_settings: dict[str, Any]) -> dict[str, str]:
     }
 
 
+def _identity_settings(template_settings: dict[str, Any]) -> dict[str, str]:
+    """A template's settings that name the session's identity (`RESERVED_ENV`), as text."""
+    return {key: str(value) for key, value in template_settings.items() if key in RESERVED_ENV}
+
+
+def editor_settings(stored: dict[str, Any], submitted: dict[str, Any]) -> dict[str, Any]:
+    """Return the settings a template editor who is not an administrator may save.
+
+    The stored template's `DOCKER_*` run options and identity variables stay as they
+    are: one left out keeps its value, and one added or changed is refused.
+
+    Raises:
+        HTTPException: 403 for a changed Docker or identity setting.
+    """
+    kept = _docker_settings(stored)
+    if any(kept.get(key) != value for key, value in _docker_settings(submitted).items()):
+        raise HTTPException(status_code=403, detail="Only an administrator can change a template's Docker settings.")
+    identity = _identity_settings(stored)
+    if any(identity.get(key) != value for key, value in _identity_settings(submitted).items()):
+        raise HTTPException(
+            status_code=403,
+            detail="Only an administrator can set a session's user, password, or Selkies tokens in a template.",
+        )
+    return {**submitted, **kept, **identity}
+
+
 @template_router.get("/apps/templates", response_model=list[AppTemplate])
 async def get_app_templates() -> list[dict[str, Any]]:
     """List app templates."""
@@ -741,7 +767,7 @@ async def save_app_template(
     """Create or replace a template.
 
     A template editor who is not an administrator keeps the template's `DOCKER_*`
-    settings as they are: one left out keeps its value, and one added or changed is refused.
+    settings and the session's identity variables as they are (`editor_settings`).
     """
     try:
         template = AppTemplate(**decrypted_body)
@@ -749,12 +775,7 @@ async def save_app_template(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     _require_safe_name(template.name, "template")
     if not user.get("is_admin"):
-        kept = _docker_settings(state.app_templates.get(template.name, {}).get("settings", {}))
-        if any(kept.get(key) != value for key, value in _docker_settings(template.settings).items()):
-            raise HTTPException(
-                status_code=403, detail="Only an administrator can change a template's Docker settings."
-            )
-        template.settings = {**template.settings, **kept}
+        template.settings = editor_settings(state.app_templates.get(template.name, {}).get("settings", {}), template.settings)
     try:
         await config_store.save_app_template(template)
     except FileExistsError as exc:

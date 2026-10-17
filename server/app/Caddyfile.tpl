@@ -126,13 +126,23 @@
                                         handle {
                                                 uri strip_prefix /{re.session_id.1}
                                                 root {http.request.header.X-Web-Root}
+                                                # Its cookie may be SameSite=None (`?embedded=true`), so only this origin and the
+                                                # shells, whose pages frame it, may frame the session.
                                                 @hashed path /assets/*
                                                 handle @hashed {
-                                                        header Cache-Control "public, max-age=31536000, immutable"
+                                                        header {
+                                                                Cache-Control "public, max-age=31536000, immutable"
+                                                                Content-Security-Policy "frame-ancestors 'self' chrome-extension: moz-extension: capacitor: https://localhost"
+                                                                defer
+                                                        }
                                                         file_server
                                                 }
                                                 handle {
-                                                        header Cache-Control "no-cache"
+                                                        header {
+                                                                Cache-Control "no-cache"
+                                                                Content-Security-Policy "frame-ancestors 'self' chrome-extension: moz-extension: capacitor: https://localhost"
+                                                                defer
+                                                        }
                                                         file_server
                                                 }
                                         }
@@ -151,6 +161,8 @@
         reverse_proxy {http.request.header.X-Upstream-Host} {
                 header_up Host {http.reverse_proxy.upstream.hostport}
                 header_up Authorization {http.request.header.X-Upstream-Auth}
+                # The container runs the user's code: of the cookies, only Selkies' own token cookie goes on.
+                header_up Cookie "^(?:(?:.*; *)?(selkies_token=[^;]*))?.*$" "$1"
 
                 header_up -X-Upstream-Host
                 header_up -X-Upstream-Auth
@@ -174,7 +186,7 @@
         header {
                 Access-Control-Allow-Origin "{header.Origin}"
                 Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-                Access-Control-Allow-Headers "Origin, Accept, Content-Type, X-Requested-With, X-Session-ID, X-Idempotency-Key, Authorization"
+                Access-Control-Allow-Headers "Origin, Accept, Content-Type, X-Requested-With, X-Session-ID, X-Idempotency-Key, Authorization, X-SealSkin-App"
                 defer
         }
 

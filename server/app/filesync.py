@@ -7,7 +7,8 @@ as the session comes up (`pull_later`), and a launch that opens one file of
 the directory fetches that file alone first (`pull_file`). What a session
 changed is sent when it stops and every few minutes while it runs (`sync`).
 Files are written whole and moved into place, so a running session never
-sees a half-written one.
+sees a half-written one, and never through a symbolic link: a user's link
+in the directory, which a session can make, is not followed (`_place`).
 
 Each file is the object `files/<user>/<path>`, encrypted under the user's
 key when the cluster has one (`filecrypt`). A node remembers the entity
@@ -64,11 +65,32 @@ def _local_files(root: str) -> dict[str, tuple[int, int]]:
     return found
 
 
+def _place(root: str, name: str) -> str | None:
+    """Return where the shared file `name` goes under `root`, or `None` when the path leaves the directory or crosses a link.
+
+    The directory is a session's to write, so a link in it may point
+    anywhere; a file is placed only where every directory on its way is a
+    real one under the root, and never over a link.
+    """
+    base = os.path.realpath(root)
+    target = os.path.normpath(os.path.join(base, *name.split("/")))
+    parent = os.path.dirname(target)
+    if not (parent == base or parent.startswith(base + os.sep)):
+        return None
+    if os.path.realpath(parent) != parent or os.path.islink(target):
+        return None
+    return target
+
+
 def _write(target: str, data: bytes, tag: str) -> dict[str, Any]:
     """Write a file whole beside its place and move it there, and return its manifest entry."""
     os.makedirs(os.path.dirname(target), exist_ok=True)
     partial = f"{target}.partial-{cluster.NODE_ID}"
-    with open(partial, "wb") as handle:
+    if os.path.islink(partial):
+        os.remove(partial)
+    # O_NOFOLLOW: a link made here since the check is refused, not written through.
+    fd = os.open(partial, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o644)
+    with os.fdopen(fd, "wb") as handle:
         handle.write(data)
     os.replace(partial, target)
     stat = os.stat(target)
@@ -78,8 +100,9 @@ def _write(target: str, data: bytes, tag: str) -> dict[str, Any]:
 def _pull_file(username: str, root: str, name: str) -> bool:
     """Fetch one of a user's shared files from the store unless this node's copy is current; return whether it is here."""
     prefix = f"files/{username}/"
-    target = os.path.join(root, *name.split("/"))
-    if not os.path.abspath(target).startswith(os.path.abspath(root) + os.sep):
+    target = _place(root, name)
+    if target is None:
+        logger.warning("Shared file '%s' of '%s' is not placed: its path leaves the directory or crosses a link.", name, username)
         return False
     lock = _locks.setdefault(username, threading.Lock())
     with lock:
@@ -120,6 +143,7 @@ def _sync(username: str, root: str, send: bool) -> None:
         remote = {key[len(prefix) :]: tag for key, tag in store.list_keys(prefix).items()}
         os.makedirs(root, exist_ok=True)
         local = _local_files(root)
+        refused: list[str] = []
 
         def changed_here(name: str) -> bool:
             known = manifest.get(name)
@@ -134,8 +158,9 @@ def _sync(username: str, root: str, send: bool) -> None:
                     store.delete(prefix + name)
                     manifest.pop(name, None)
                 continue
-            target = os.path.join(root, *name.split("/"))
-            if not os.path.abspath(target).startswith(os.path.abspath(root) + os.sep):
+            target = _place(root, name)
+            if target is None:
+                refused.append(name)
                 continue
             found = store.get(prefix + name)
             if found is None:
@@ -150,12 +175,19 @@ def _sync(username: str, root: str, send: bool) -> None:
             manifest[name] = _write(target, content, found[1])
 
         for name in [n for n in manifest if n not in remote]:
-            target = os.path.join(root, *name.split("/"))
-            if name in local and not changed_here(name):
+            target = _place(root, name)
+            if name in local and target and not changed_here(name):
                 os.remove(target)
                 manifest.pop(name)
             elif name not in local:
                 manifest.pop(name)
+        if refused:
+            logger.warning(
+                "%d shared file(s) of '%s' were not placed, their paths leave the directory or cross a link: %s",
+                len(refused),
+                username,
+                ", ".join(sorted(refused)[:5]),
+            )
 
         if send:
             for name, (size, mtime) in _local_files(root).items():

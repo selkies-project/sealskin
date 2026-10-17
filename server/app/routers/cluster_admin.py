@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from .. import audit, cluster, homes, persistence, proxy_auth, quota, routing, sso, store
 from ..security import EncryptedRoute, get_decrypted_request_body, verify_admin, verify_token
-from ..settings import CLUSTER_SETTINGS, settings
+from ..settings import CLUSTER_SETTINGS, SECRET_SETTINGS, settings
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,6 @@ router = APIRouter(
 user_router = APIRouter(prefix="/api/cluster", route_class=EncryptedRoute)
 
 _NAME = re.compile(r"[a-zA-Z0-9_-]+")
-SECRET_SETTINGS = ("oidc_client_secret",)
 
 
 class NodeUpdate(BaseModel):
@@ -249,6 +248,8 @@ async def write_settings(body: dict[str, Any] = Depends(get_decrypted_request_bo
             raise HTTPException(status_code=400, detail=f"'{name}' is not a cluster setting.")
         if value is None or value == "":
             current.pop(name, None)
+        elif name in SECRET_SETTINGS:
+            current[name] = cluster.seal_setting(str(value))
         else:
             current[name] = value
     _write(path, current)

@@ -451,7 +451,7 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "help": (
             "Name of this node, which is its identity in the cluster: its records are kept under it, and a "
             "node started again with an empty configuration directory but the same name and storage is the "
-            "same node. Empty takes the host name."
+            "same node. Empty takes the container's name in Docker, else the host name."
         ),
     },
     {
@@ -789,6 +789,10 @@ class AppSettings:
                 value = str(value)
             setattr(self, name, value)
 
+
+#: The cluster settings that are secrets: written sealed under `store_key` when there is one,
+#: and never shown back.
+SECRET_SETTINGS = ("oidc_client_secret",)
 
 #: Settings an administrator may also write for the whole cluster, in `cluster/settings.yml`
 #: of the shared store, where they take precedence over each node's environment.

@@ -480,7 +480,8 @@ async def _app_key_user(req: Request) -> dict[str, Any] | None:
 
     The key names the user; the app names itself in
     `application_keys.CLIENT_HEADER`. A refusal answers 401 with the code the
-    app reads: `unknown`, `expired`, `disabled`, `client`, or `dormant`.
+    app reads: `unknown`, `expired`, `disabled`, `client`, or `dormant`; 429
+    with `locked` while the address sent too many wrong keys.
     """
     header = req.headers.get("Authorization", "")
     if not header.startswith("Bearer "):
@@ -492,11 +493,12 @@ async def _app_key_user(req: Request) -> dict[str, Any] | None:
     if not is_plain(req):
         raise HTTPException(status_code=401, detail="Application keys are taken over HTTPS through the proxy alone.")
     client = req.headers.get(application_keys.CLIENT_HEADER, "")
+    address = cluster.client_address(req)
     try:
-        record = await asyncio.to_thread(application_keys.authenticate, key, client)
+        record = await asyncio.to_thread(application_keys.authenticate, key, client, address)
     except application_keys.KeyRefused as exc:
-        application_keys.refuse(key, client, cluster.client_address(req), exc.code)
-        raise HTTPException(status_code=401, detail=exc.code) from exc
+        application_keys.refuse(key, client, address, exc.code)
+        raise HTTPException(status_code=429 if exc.code == "locked" else 401, detail=exc.code) from exc
     username = str(record["user"])
     stored = (user_manager.get_user(username) or {}).get("settings") or {}
     provider_groups = stored.get("provider_groups") or ()

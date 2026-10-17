@@ -11,6 +11,10 @@ from fastapi.testclient import TestClient
 from app.routers import internal, sessions
 from app.settings import settings
 from app.state import state
+from tests.conftest import PROXY_SECRET
+
+#: What Caddy's forward_auth sub-request carries.
+INTERNAL = {"X-SealSkin-Secret": PROXY_SECRET}
 
 SID = "3487533d-0e2d-47e1-a1a9-9620aee90512"
 SHARED = "https://sealskin.example:8443"
@@ -25,7 +29,7 @@ def app_client():
     state.sessions.clear()
     state.sessions[SID] = {"access_token": "tok", "ip": "10.0.0.2", "port": 3000, "custom_user": "u", "password": "p"}
     yield lambda base: TestClient(
-        app, base_url=base, follow_redirects=False, cookies={f"{settings.session_cookie_name}_{SID}": "tok"}
+        app, base_url=base, follow_redirects=False, cookies={f"{settings.session_cookie_name}_{SID}": "tok"}, client=("127.0.0.1", 50000)
     )
     state.sessions.clear()
 
@@ -35,7 +39,7 @@ def exchange(client):
 
 
 def resolve(client):
-    return client.get(f"/internal/resolve_session/{SID}")
+    return client.get(f"/internal/resolve_session/{SID}", headers=INTERNAL)
 
 
 @pytest.mark.parametrize("first,other", [(OWN, SHARED), (SHARED, OWN)])
@@ -98,9 +102,9 @@ def test_a_stopped_session_page_closes_its_tab(app_client, tmp_path, monkeypatch
     monkeypatch.setattr(settings, "ui_path", str(tmp_path))
     state.sessions.clear()
     client = app_client(SHARED)
-    page = client.get(f"/internal/resolve_session/{SID}", headers={"Sec-Fetch-Dest": "document", "Accept-Language": "fr, de-DE;q=0.8"})
+    page = client.get(f"/internal/resolve_session/{SID}", headers={**INTERNAL, "Sec-Fetch-Dest": "document", "Accept-Language": "fr, de-DE;q=0.8"})
     assert page.status_code == 404
     assert "<script>close()</script>" in page.text and "Beendet &lt;b&gt;." in page.text
-    fallback = client.get(f"/internal/resolve_session/{SID}", headers={"Sec-Fetch-Dest": "document", "Accept-Language": "../../x"})
+    fallback = client.get(f"/internal/resolve_session/{SID}", headers={**INTERNAL, "Sec-Fetch-Dest": "document", "Accept-Language": "../../x"})
     assert "<p>Stopped.</p>" in fallback.text
-    assert client.get(f"/internal/resolve_session/{SID}").json() == {"detail": "Session not found."}
+    assert client.get(f"/internal/resolve_session/{SID}", headers=INTERNAL).json() == {"detail": "Session not found."}

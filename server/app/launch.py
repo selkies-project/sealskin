@@ -588,6 +588,10 @@ def resolve_timezone(*candidates: Any) -> str:
     return server_tz if is_valid_timezone(server_tz) else DEFAULT_TIMEZONE
 
 
+#: Session environment a template never overrides: who the container runs as, and how it is reached.
+RESERVED_ENV = ("SUBFOLDER", "PUID", "PGID", "CUSTOM_USER", "PASSWORD", "SELKIES_MASTER_TOKEN", "SELKIES_ALLOWED_ORIGINS")
+
+
 def session_base_env(
     session_id: str,
     custom_user: str,
@@ -833,10 +837,12 @@ async def launch_application(
             launch_context = {"type": "file", "value": filename}
 
     vpn_record: dict[str, Any] | None = None
+    holding: str | None = None
     try:
         if vpn_choice:
             record, endpoint = vpn_choice
             spec.vpn = await vpn.acquire(record, endpoint, session_id)
+            holding = spec.vpn["key"]
             vpn_record = {
                 "profile": record["id"],
                 "endpoint": endpoint["id"],
@@ -907,6 +913,9 @@ async def launch_application(
             )
         async with state.sessions_lock:
             state.sessions[session_id] = session
+        # The registered session holds the gateway from here on.
+        vpn.launched(holding)
+        holding = None
         await config_store.save_sessions()
         if persistent and not cluster.node_of_home(username, os.path.basename(host_mount_path)):
             await asyncio.to_thread(cluster.record_home, username, os.path.basename(host_mount_path), cluster.NODE_ID)
@@ -936,6 +945,8 @@ async def launch_application(
         for path in (host_mount_path, shared_files_path):
             if path and path.startswith(ephemeral_base()):
                 shutil.rmtree(path, ignore_errors=True)
+        vpn.launched(holding)
+        holding = None
         if spec.vpn:
             await vpn.release(vpn_record or {"key": spec.vpn["key"]})
         logger.error(
@@ -952,6 +963,8 @@ async def launch_application(
         raise HTTPException(
             status_code=500, detail="An internal error occurred during application launch."
         ) from exc
+    finally:
+        vpn.launched(holding)
 
 
 async def ensure_container_for_session(
@@ -971,7 +984,8 @@ async def ensure_container_for_session(
         The container registry entry for the app.
 
     Raises:
-        HTTPException: If the session or app is unknown.
+        HTTPException: If the session or app is unknown, or the app's template sets a network
+            mode in a session that leaves through a VPN.
     """
     session = state.sessions.get(session_id)
     if not session:
@@ -1035,6 +1049,11 @@ async def ensure_container_for_session(
         proot_catalog_path=prootapps.mount_path_for(user_settings),
     )
 
+    quota.cap_resources(spec.app_config["provider_config"]["docker_overrides"], user_settings)
+    if session.get("vpn") and spec.app_config["provider_config"]["docker_overrides"].get("network_mode"):
+        raise HTTPException(status_code=400, detail="The application's template sets a network mode, which leaves no room for a VPN.")
+
+    holding: str | None = None
     if session.get("vpn"):
         # Another application of the session leaves the way the session does.
         record = state.vpn_profiles.get(session["vpn"].get("profile", ""))
@@ -1042,13 +1061,18 @@ async def ensure_container_for_session(
         if not record or not endpoint:
             raise HTTPException(status_code=409, detail="The session's VPN profile is gone.")
         spec.vpn = await vpn.acquire(record, endpoint, f"{session_id}:{target_app_id}")
+        holding = spec.vpn["key"]
     provider = get_provider(spec.app_config)
     try:
         instance = await provider.launch(**spec.provider_kwargs(session_id))
     except Exception:
+        vpn.launched(holding)
+        holding = None
         if spec.vpn:
             await vpn.release({**session["vpn"], **{k: spec.vpn[k] for k in ("spoke_public_key", "spoke_address") if k in spec.vpn}})
         raise
+    finally:
+        vpn.launched(holding)
     container_info = {
         "instance_id": instance["instance_id"],
         "ip": instance["ip"],

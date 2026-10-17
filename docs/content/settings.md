@@ -83,7 +83,7 @@ paths refer to.
 | `SEALSKIN_STORE_POLL_SECONDS` | `int` | `15` | How often a node looks for objects another node changed in a remote store. |
 | `SEALSKIN_CLUSTER_PATH` | `str` | `/config/.config/sealskin/cluster` | Directory of the cluster's shared records (nodes, pools, sign-in settings, home locations). |
 | `SEALSKIN_NODE_STATE_PATH` | `str` | `/config/.config/sealskin/node` | Directory of this node's own state: web sign-ins, its join record, and usage not yet reported. |
-| `SEALSKIN_NODE_NAME` | `str` | _(empty)_ | Name of this node, which is its identity in the cluster: its records are kept under it, and a node started again with an empty configuration directory but the same name and storage is the same node. Empty takes the host name. |
+| `SEALSKIN_NODE_NAME` | `str` | _(empty)_ | Name of this node, which is its identity in the cluster: its records are kept under it, and a node started again with an empty configuration directory but the same name and storage is the same node. Empty takes the container's name in Docker, else the host name. |
 | `SEALSKIN_NODE_ROLES` | `str` | `frontend,runtime` | Comma-separated roles of this node: `frontend` signs users in and proxies their sessions, `runtime` runs sessions. |
 | `SEALSKIN_NODE_POOL` | `str` | `default` | Pool this node joins when it first registers; an administrator can move it later. |
 | `SEALSKIN_NODE_ADDRESS` | `str` | _(empty)_ | `host:port` other nodes reach this node's peer listener on; empty takes the host of `HOST_URL` and `peer_port`. |
