@@ -7,6 +7,8 @@ const en = {
         webcamLabel: 'Webcam',
     },
     alerts: {
+        errorTitle: 'Error',
+        dismiss: 'OK',
         webcodecsUnsupported: 'Your browser does not support WebCodecs, which is required for this feature.',
         mediaAccessError: 'Could not access your camera or microphone: {message}',
     },
@@ -87,6 +89,8 @@ const es = {
         webcamLabel: 'Cámara web',
     },
     alerts: {
+        errorTitle: 'Error',
+        dismiss: 'Aceptar',
         webcodecsUnsupported: 'Tu navegador no es compatible con WebCodecs, que es necesario para esta función.',
         mediaAccessError: 'No se pudo acceder a tu cámara o micrófono: {message}',
     },
@@ -167,6 +171,8 @@ const zh = {
         webcamLabel: '网络摄像头',
     },
     alerts: {
+        errorTitle: '错误',
+        dismiss: '确定',
         webcodecsUnsupported: '您的浏览器不支持 WebCodecs，此功能需要该技术。',
         mediaAccessError: '无法访问您的摄像头或麦克风：{message}',
     },
@@ -247,6 +253,8 @@ const hi = {
         webcamLabel: 'वेबकैम',
     },
     alerts: {
+        errorTitle: 'त्रुटि',
+        dismiss: 'ठीक है',
         webcodecsUnsupported: 'आपका ब्राउज़र WebCodecs का समर्थन नहीं करता है, जो इस सुविधा के लिए आवश्यक है।',
         mediaAccessError: 'आपके कैमरे या माइक्रोफ़ोन तक नहीं पहुँच सका: {message}',
     },
@@ -327,6 +335,8 @@ const pt = {
         webcamLabel: 'Webcam',
     },
     alerts: {
+        errorTitle: 'Erro',
+        dismiss: 'OK',
         webcodecsUnsupported: 'Seu navegador não suporta WebCodecs, que é necessário para este recurso.',
         mediaAccessError: 'Não foi possível acessar sua câmera ou microfone: {message}',
     },
@@ -407,6 +417,8 @@ const fr = {
         webcamLabel: 'Webcam',
     },
     alerts: {
+        errorTitle: 'Erreur',
+        dismiss: 'OK',
         webcodecsUnsupported: 'Votre navigateur ne prend pas en charge WebCodecs, ce qui est requis pour cette fonctionnalité.',
         mediaAccessError: 'Impossible d\'accéder à votre caméra ou à votre microphone : {message}',
     },
@@ -487,6 +499,8 @@ const ru = {
         webcamLabel: 'Веб-камера',
     },
     alerts: {
+        errorTitle: 'Ошибка',
+        dismiss: 'ОК',
         webcodecsUnsupported: 'Ваш браузер не поддерживает WebCodecs, который необходим для этой функции.',
         mediaAccessError: 'Не удалось получить доступ к вашей камере или микрофону: {message}',
     },
@@ -567,6 +581,8 @@ const de = {
         webcamLabel: 'Webcam',
     },
     alerts: {
+        errorTitle: 'Fehler',
+        dismiss: 'OK',
         webcodecsUnsupported: 'Ihr Browser unterstützt WebCodecs nicht, was für diese Funktion erforderlich ist.',
         mediaAccessError: 'Zugriff auf Ihre Kamera oder Ihr Mikrofon fehlgeschlagen: {message}',
     },
@@ -647,6 +663,8 @@ const tr = {
         webcamLabel: 'Web Kamerası',
     },
     alerts: {
+        errorTitle: 'Hata',
+        dismiss: 'Tamam',
         webcodecsUnsupported: 'Tarayıcınız bu özellik için gerekli olan WebCodecs\'i desteklemiyor.',
         mediaAccessError: 'Kameranıza veya mikrofonunuza erişilemedi: {message}',
     },
@@ -727,6 +745,8 @@ const it = {
         webcamLabel: 'Webcam',
     },
     alerts: {
+        errorTitle: 'Errore',
+        dismiss: 'OK',
         webcodecsUnsupported: 'Il tuo browser non supporta WebCodecs, necessario per questa funzionalità.',
         mediaAccessError: 'Impossibile accedere alla tua fotocamera o al tuo microfono: {message}',
     },
@@ -807,6 +827,8 @@ const nl = {
         webcamLabel: 'Webcam',
     },
     alerts: {
+        errorTitle: 'Fout',
+        dismiss: 'OK',
         webcodecsUnsupported: 'Uw browser ondersteunt geen WebCodecs, wat vereist is voor deze functie.',
         mediaAccessError: 'Kon geen toegang krijgen tot uw camera of microfoon: {message}',
     },
@@ -887,6 +909,8 @@ const ar = {
         webcamLabel: 'كاميرا الويب',
     },
     alerts: {
+        errorTitle: 'خطأ',
+        dismiss: 'موافق',
         webcodecsUnsupported: 'متصفحك لا يدعم WebCodecs، وهو مطلوب لهذه الميزة.',
         mediaAccessError: 'تعذر الوصول إلى الكاميرا أو الميكروفون: {message}',
     },
@@ -967,6 +991,8 @@ const ko = {
         webcamLabel: '웹캠',
     },
     alerts: {
+        errorTitle: '오류',
+        dismiss: '확인',
         webcodecsUnsupported: '브라우저가 이 기능에 필요한 WebCodecs를 지원하지 않습니다.',
         mediaAccessError: '카메라 또는 마이크에 액세스할 수 없습니다: {message}',
     },
@@ -1047,6 +1073,8 @@ const ja = {
         webcamLabel: 'ウェブカメラ',
     },
     alerts: {
+        errorTitle: 'エラー',
+        dismiss: 'OK',
         webcodecsUnsupported: 'お使いのブラウザは、この機能に必要なWebCodecsをサポートしていません。',
         mediaAccessError: 'カメラまたはマイクにアクセスできませんでした：{message}',
     },
@@ -1127,6 +1155,8 @@ const vi = {
         webcamLabel: 'Webcam',
     },
     alerts: {
+        errorTitle: 'Lỗi',
+        dismiss: 'OK',
         webcodecsUnsupported: 'Trình duyệt của bạn không hỗ trợ WebCodecs, yêu cầu cho tính năng này.',
         mediaAccessError: 'Không thể truy cập máy ảnh hoặc micrô của bạn: {message}',
     },
@@ -1207,6 +1237,8 @@ const th = {
         webcamLabel: 'เว็บแคม',
     },
     alerts: {
+        errorTitle: 'ข้อผิดพลาด',
+        dismiss: 'ตกลง',
         webcodecsUnsupported: 'เบราว์เซอร์ของคุณไม่รองรับ WebCodecs ซึ่งจำเป็นสำหรับฟีเจอร์นี้',
         mediaAccessError: 'ไม่สามารถเข้าถึงกล้องหรือไมโครโฟนของคุณได้: {message}',
     },
@@ -1287,6 +1319,8 @@ const fil = {
         webcamLabel: 'Webcam',
     },
     alerts: {
+        errorTitle: 'Error',
+        dismiss: 'OK',
         webcodecsUnsupported: 'Hindi sinusuportahan ng iyong browser ang WebCodecs, na kinakailangan para sa feature na ito.',
         mediaAccessError: 'Hindi ma-access ang iyong camera o mikropono: {message}',
     },
@@ -1367,6 +1401,8 @@ const da = {
         webcamLabel: 'Webcam',
     },
     alerts: {
+        errorTitle: 'Fejl',
+        dismiss: 'OK',
         webcodecsUnsupported: 'Din browser understøtter ikke WebCodecs, hvilket er påkrævet for denne funktion.',
         mediaAccessError: 'Kunne ikke få adgang til dit kamera eller din mikrofon: {message}',
     },

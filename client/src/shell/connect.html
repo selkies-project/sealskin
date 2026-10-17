@@ -15,12 +15,30 @@
 
         <div id="status" class="status" hidden></div>
 
+        <section class="card" id="key-config-view" hidden>
+            <div class="card-header">
+                <h3 data-i18n="options.config.keyTitle">Connect with an application key</h3>
+            </div>
+            <p data-i18n="options.config.keyDescription">In the web app, under Settings → Application Keys, make a key for this device and paste it here.</p>
+            <div class="form-group">
+                <label for="applicationKey" data-i18n="options.config.keyLabel">Application key</label>
+                <textarea id="applicationKey" rows="3" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-placeholder="options.config.keyPlaceholder" placeholder="ssk_…@sealskin.example.com:8443"></textarea>
+            </div>
+            <div class="button-group end">
+                <button id="connectKey" class="primary" data-i18n="options.config.keyConnectButton">Connect</button>
+            </div>
+            <div class="config-view-toggle">
+                <a href="#" id="show-keyfile-link" data-i18n="options.config.useKeyFileLink">Use a key file instead</a>
+            </div>
+        </section>
+
         <section class="card" id="connected-view" hidden>
             <div class="card-header">
                 <h3 data-i18n="options.dashboard.userStatus">User Status</h3>
             </div>
             <p><span data-i18n="options.dashboard.loggedInAs">Logged in as:</span> <strong id="connected-username"></strong></p>
             <p><span data-i18n="options.dashboard.server">Server:</span> <strong id="connected-server"></strong></p>
+            <p id="connected-how" class="muted"></p>
             <div class="button-group">
                 <button id="open-app" class="primary">Open SealSkin</button>
                 <button id="edit-connection" class="secondary">Edit connection</button>
@@ -51,6 +69,8 @@
             </div>
             <div class="config-view-toggle">
                 <a href="#" id="show-advanced-link" data-i18n="options.config.manualLink">Manual Configuration</a>
+                &middot;
+                <a href="#" id="show-key-link" data-i18n="options.config.useKeyLink">Use an application key</a>
             </div>
         </section>
 
@@ -102,6 +122,8 @@
             </div>
             <div class="config-view-toggle">
                 <a href="#" id="hide-advanced-link" data-i18n="options.config.automaticLink">Automatic Configuration</a>
+                &middot;
+                <a href="#" id="show-key-link-2" data-i18n="options.config.useKeyLink">Use an application key</a>
             </div>
         </section>
     </div>

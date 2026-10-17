@@ -6,12 +6,15 @@ import logging
 import os
 from typing import Any
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import ValidationError
 
+from .. import cluster, filesync, progress, routing
 from ..fsutil import safe_join
 from ..launch import launch_application
 from ..models import (
+    LaunchProgress,
     LaunchRequestFile,
     LaunchRequestFilePath,
     LaunchRequestSimple,
@@ -28,7 +31,30 @@ from ..settings import settings
 from .uploads import reassemble_file
 
 logger = logging.getLogger(__name__)
-router = APIRouter(route_class=EncryptedRoute)
+router = APIRouter(route_class=EncryptedRoute, dependencies=[Depends(routing.place_launch)])
+progress_router = APIRouter(route_class=EncryptedRoute)
+
+
+@progress_router.get("/api/launch/progress/{launch_id}", response_model=LaunchProgress, response_model_exclude_none=True)
+async def launch_progress(launch_id: str, user: dict[str, Any] = Depends(verify_token)) -> dict[str, Any]:
+    """Return where a launch the caller named with `launch_id` is, asking the node it was handed to."""
+    run = progress.get(launch_id, user["username"])
+    if not run:
+        raise HTTPException(status_code=404, detail="No such launch.")
+    answer = progress.view(run)
+    node_id = run.get("forwarded_to")
+    if node_id and run["stage"] == "forwarding":
+        try:
+            remote = await cluster.call(
+                node_id, "GET", f"/api/launch/progress/{launch_id}", act=cluster.acting(user), timeout=5
+            )
+            if remote.status_code == 200:
+                there = remote.json()
+                if there.get("stage") not in ("ready", "failed"):
+                    answer.update(stage=there["stage"], detail={**answer["detail"], **(there.get("detail") or {})})
+        except (httpx.HTTPError, ValueError):
+            pass
+    return answer
 
 
 @router.post("/api/launch/simple", response_model=LaunchResponse)
@@ -52,6 +78,9 @@ async def launch_simple(
         launch_in_room_mode=req.launch_in_room_mode,
         wayland_mode=req.wayland_mode,
         timezone=req.timezone,
+        auth_user=auth_user,
+        vpn_id=req.vpn,
+        vpn_endpoint=req.vpn_endpoint,
     )
 
 
@@ -76,6 +105,9 @@ async def launch_url(
         launch_in_room_mode=req.launch_in_room_mode,
         wayland_mode=req.wayland_mode,
         timezone=req.timezone,
+        auth_user=auth_user,
+        vpn_id=req.vpn,
+        vpn_endpoint=req.vpn_endpoint,
     )
 
 
@@ -112,6 +144,9 @@ async def launch_file(
         launch_in_room_mode=req.launch_in_room_mode,
         wayland_mode=req.wayland_mode,
         timezone=req.timezone,
+        auth_user=auth_user,
+        vpn_id=req.vpn,
+        vpn_endpoint=req.vpn_endpoint,
     )
 
 
@@ -138,6 +173,10 @@ async def launch_file_path(
         file_path = safe_join(shared_files_path, safe_filename)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail="Invalid file name.") from exc
+    # The one file the session opens is fetched before it starts; the rest of the directory follows behind.
+    if not os.path.exists(file_path):
+        progress.step("files")
+        await filesync.pull_file(username, shared_files_path, safe_filename)
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail=f"File '{safe_filename}' not found.")
 
@@ -156,4 +195,7 @@ async def launch_file_path(
         req.selected_gpu,
         wayland_mode=req.wayland_mode,
         timezone=req.timezone,
+        auth_user=auth_user,
+        vpn_id=req.vpn,
+        vpn_endpoint=req.vpn_endpoint,
     )

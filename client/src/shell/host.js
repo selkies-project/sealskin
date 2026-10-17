@@ -3,30 +3,38 @@
  *
  * Owns one iframe and decides what it shows:
  *
- *  1. no configuration      -> the bundled connect page
+ *  1. no configuration      -> the bundled connect page (the web app's sign-in panel)
  *  2. configuration present -> `<served base>/ui/<page>.html`
  *  3. server unreachable    -> the unreachable panel (retry / open server /
  *                              change connection)
+ *  4. the application key the shell signs in with is dormant, or no longer
+ *     taken               -> a panel that sends the user to sign in on the
+ *                              web, or back to the connection page
  *
  * The served base comes from the background (`getUiBase`), which performs the
  * E2EE handshake trying the https session port first and the http API port
  * second. That keeps the Chrome self-signed certificate workflow: the "Open
  * server" button opens the https origin in a top-level tab so the certificate
  * can be accepted, after which https works for both the API and the iframe.
+ * With an application key the base is the https session port, and the
+ * background first asks the server for the key's standing. A server that has
+ * answered over https before is not framed over http again without asking
+ * (the held panel), and a page framed over http has a notice above it.
  *
  * On the extension this module runs on its own (see the bottom); the mobile
- * shell imports `initHost` and passes its native hooks.
+ * and web shells import `initHost` and pass their shell name and hooks.
  */
 
 import { createHost, callBackground } from '../lib/host-bridge.js';
 import { loadTranslator } from '../lib/i18n.js';
+import { apiError } from '../lib/api-error.js';
 
 /* global __SHELL_TARGET__, __UI_VERSION__ */
 
 const SHELL = typeof __SHELL_TARGET__ !== 'undefined' ? __SHELL_TARGET__ : 'extension';
 const SHELL_VERSION = typeof __UI_VERSION__ !== 'undefined' ? __UI_VERSION__ : 'dev';
 const READY_TIMEOUT_MS = 8000;
-const SERVED_PAGES = new Set(['popup', 'options', 'files', 'upload']);
+const SERVED_PAGES = new Set(['popup', 'home', 'options', 'files', 'upload']);
 
 // English fallbacks; replaced by the shell i18n subset (`shell.host.*`) when it loads.
 const STRINGS = {
@@ -42,7 +50,34 @@ const STRINGS = {
   changeConnection: 'Change connection',
   mismatchTitle: 'Update required',
   mismatchBody: 'This app and the server web interface speak different bridge versions. Update the extension or app, or update the server, so both match.',
+  dormantTitle: 'Sign in on the web to continue',
+  dormantBody: 'Your application key is asleep: your administrator asks for a sign-in on the web now and then. Sign in there, and this app works again.',
+  signInWeb: 'Sign in on the web',
+  keyTitle: 'This key no longer signs you in',
+  keyUnknown: 'The key was revoked or never existed. Make a new one in your profile on the web.',
+  keyExpired: 'The key expired. Make a new one in your profile on the web.',
+  keyDisabled: 'Your administrator does not allow application keys for your account.',
+  keyClient: 'Your administrator does not allow this app to use application keys.',
+  heldTitle: 'Secure connection failed',
+  heldBody: 'This server has answered over HTTPS before, so SealSkin does not fall back to plain HTTP on its own. Its certificate may need accepting again (browsers forget an accepted self-signed certificate after a while), or something on this network is blocking the secure port.',
+  continuePlain: 'Continue without TLS',
+  plainNotice: 'Loaded without TLS: what you send stays end-to-end encrypted, but on an untrusted network this page could be altered. Accept the server\'s certificate to secure it.',
+  dismiss: 'Dismiss',
 };
+// The prefix background.js puts on a handshake failure where plain http waits for the user.
+const HTTPS_HELD = 'https-held: ';
+// What the server answers for an application key that signs nobody in (`app.application_keys`).
+const KEY_REFUSALS = { dormant: 'dormant', unknown: 'keyUnknown', expired: 'keyExpired', disabled: 'keyDisabled', client: 'keyClient' };
+
+/**
+ * The code of a refused application key in a failed call, or null for any other failure.
+ *
+ * @param {Error|string} error
+ */
+function keyRefusal(error) {
+  const { status, detail } = apiError(error);
+  return status === 401 && KEY_REFUSALS[detail] ? detail : null;
+}
 
 /**
  * Translate the host panel strings in place using the bundled i18n subset.
@@ -76,7 +111,12 @@ function extensionTransport(message) {
   });
 }
 
-function mobileTransport(message) {
+/**
+ * Relay to a background running in this window (mobile and web shells).
+ *
+ * @param {object} message
+ */
+export function pageTransport(message) {
   return new Promise((resolve, reject) => {
     if (typeof window.handleMessage !== 'function') {
       reject(new Error('Background is not loaded.'));
@@ -90,24 +130,43 @@ function mobileTransport(message) {
  * Start the host.
  *
  * @param {object} [overrides]
+ * @param {'extension'|'mobile'|'web'} [overrides.shell] defaults to the build target
  * @param {function} [overrides.transport]
  * @param {function} [overrides.saveBlob] mobile native file open
- * @param {function} [overrides.onPageChange] `(page) => void`, mobile back button bookkeeping
+ * @param {function} [overrides.reserveTab] web app tab reservation, see `bridge.reserveTab`
+ * @param {function} [overrides.streamDownload] web app streamed download, see `createHost`
+ * @param {function} [overrides.adoptLaunch] web app launch tab, see `createHost`
+ * @param {string} [overrides.launcher] page a shell shows as its launcher in place of `popup`
+ * @param {function} [overrides.connect] web app: shows its sign-in in the panel in place of the connect page
+ * @param {function} [overrides.onPageChange] `(page, params) => void`, mobile back button and web app address bookkeeping
+ * @param {function} [overrides.onLeave] `(leaving) => void`, web app: the framed page is growing a session over itself, see `createHost`
  * @returns {{openPage: function(string, object=): void, currentPage: function(): string, boot: function(): Promise<void>}}
  */
 export function initHost(overrides = {}) {
   const params = new URLSearchParams(location.search);
   const iframe = document.getElementById('app-frame');
   const panel = document.getElementById('host-panel');
-  const transport = overrides.transport || (SHELL === 'mobile' ? mobileTransport : extensionTransport);
+  const shell = overrides.shell || SHELL;
+  const rawTransport = overrides.transport || (shell === 'extension' ? extensionTransport : pageTransport);
+  // A call the server refuses for the application key's sake takes the frame over: the page could only show an error.
+  const transport = async (message) => {
+    const reply = await rawTransport(message);
+    if (!overrides.connect && message.type === 'secureFetch' && reply && reply.success === false) {
+      const code = keyRefusal(reply.error);
+      if (code && lastConfig && lastConfig.applicationKeyHeld) showPanel(code === 'dormant' ? 'dormant' : 'key', code);
+    }
+    return reply;
+  };
 
-  let page = document.body.dataset.page || params.get('page') || 'popup';
+  const launcher = overrides.launcher || 'popup';
+  let page = document.body.dataset.page || params.get('page') || launcher;
+  if (page === 'popup') page = launcher;
   // Extra query parameters (anything except page/tab) are forwarded to the served page.
   let pageParams = {};
   for (const [key, value] of params.entries()) {
     if (key !== 'page' && key !== 'tab') pageParams[key] = value;
   }
-  const isPopupWindow = SHELL === 'extension' && document.body.dataset.page === 'popup' && !params.has('tab');
+  const isPopupWindow = shell === 'extension' && document.body.dataset.page === 'popup' && !params.has('tab');
   let framedConnect = false;
   let readyTimer = null;
   let lastBase = null;
@@ -167,19 +226,79 @@ export function initHost(overrides = {}) {
         addText('code', `${lastConfig.serverIp}:${lastConfig.sessionPort || lastConfig.apiPort}`, 'host-server');
       }
       if (detail) addText('p', detail, 'host-error');
-      addText('p', STRINGS.selfSigned, 'host-muted host-small');
+      // The web app is on the server's own origin: nothing to open or to change.
+      if (!overrides.connect) addText('p', STRINGS.selfSigned, 'host-muted host-small');
       actions.appendChild(addButton(STRINGS.retry, 'primary', () => boot()));
-      actions.appendChild(addButton(STRINGS.openServer, 'secondary', () => openServer()));
-      actions.appendChild(addButton(STRINGS.changeConnection, 'secondary', () => openPage('connect')));
+      if (!overrides.connect) {
+        actions.appendChild(addButton(STRINGS.openServer, 'secondary', () => openServer()));
+        actions.appendChild(addButton(STRINGS.changeConnection, 'secondary', () => openPage('connect')));
+      }
+    } else if (kind === 'held') {
+      addText('h2', STRINGS.heldTitle);
+      addText('p', STRINGS.heldBody, 'host-muted');
+      if (detail) addText('p', detail, 'host-error');
+      actions.appendChild(addButton(STRINGS.openServer, 'primary', () => openServer()));
+      actions.appendChild(addButton(STRINGS.retry, 'secondary', () => boot()));
+      actions.appendChild(addButton(STRINGS.continuePlain, 'secondary', async () => {
+        await bg('allowPlainHttp').catch(() => {});
+        boot();
+      }));
     } else if (kind === 'mismatch') {
       addText('h2', STRINGS.mismatchTitle);
       addText('p', STRINGS.mismatchBody, 'host-muted');
       if (detail) addText('p', detail, 'host-error');
       actions.appendChild(addButton(STRINGS.retry, 'primary', () => boot()));
+      if (!overrides.connect) actions.appendChild(addButton(STRINGS.changeConnection, 'secondary', () => openPage('connect')));
+    } else if (kind === 'dormant') {
+      addText('h2', STRINGS.dormantTitle);
+      addText('p', STRINGS.dormantBody, 'host-muted');
+      actions.appendChild(addButton(STRINGS.signInWeb, 'primary', () => openServer('/?wake=1')));
+      actions.appendChild(addButton(STRINGS.retry, 'secondary', () => boot()));
       actions.appendChild(addButton(STRINGS.changeConnection, 'secondary', () => openPage('connect')));
+    } else if (kind === 'key') {
+      addText('h2', STRINGS.keyTitle);
+      addText('p', STRINGS[KEY_REFUSALS[detail]] || STRINGS.keyUnknown, 'host-muted');
+      actions.appendChild(addButton(STRINGS.changeConnection, 'primary', () => openPage('connect')));
+      actions.appendChild(addButton(STRINGS.retry, 'secondary', () => boot()));
     }
     if (actions.childElementCount) box.appendChild(actions);
     panel.appendChild(box);
+  }
+
+  let notice = null;
+
+  /**
+   * The notice above a page the extension frames over plain http, which
+   * nothing authenticates, until the user dismisses it for that server.
+   */
+  function setPlainNotice(base) {
+    if (notice) { notice.remove(); notice = null; }
+    document.documentElement.classList.remove('host-noticed');
+    if (shell !== 'extension' || !base || !base.startsWith('http:')) return;
+    const dismissed = `sealskinPlainNoticeDismissed:${servedOrigin(base)}`;
+    try {
+      if (localStorage.getItem(dismissed)) return;
+    } catch (e) { /* no storage: shown */ }
+    notice = document.createElement('div');
+    notice.id = 'host-notice';
+    notice.setAttribute('role', 'status');
+    const text = document.createElement('span');
+    text.textContent = STRINGS.plainNotice;
+    const open = document.createElement('button');
+    open.textContent = STRINGS.openServer;
+    open.addEventListener('click', () => openServer());
+    const close = document.createElement('button');
+    close.textContent = '\u00d7';
+    close.className = 'host-notice-close';
+    close.setAttribute('aria-label', STRINGS.dismiss);
+    close.title = STRINGS.dismiss;
+    close.addEventListener('click', () => {
+      try { localStorage.setItem(dismissed, '1'); } catch (e) { /* shown again next time */ }
+      setPlainNotice(null);
+    });
+    notice.append(text, open, close);
+    iframe.before(notice);
+    document.documentElement.classList.add('host-noticed');
   }
 
   function servedOrigin(base) {
@@ -190,12 +309,12 @@ export function initHost(overrides = {}) {
     }
   }
 
-  async function openServer() {
+  async function openServer(path = '/ui/') {
     const config = lastConfig || (await bg('getPublicConfig').catch(() => null));
     if (!config || !config.serverIp) return;
     const url = config.sessionPort
-      ? `https://${config.serverIp}:${config.sessionPort}/ui/`
-      : `http://${config.serverIp}:${config.apiPort}/ui/`;
+      ? `https://${config.serverIp}:${config.sessionPort}${path}`
+      : `http://${config.serverIp}:${config.apiPort}${path}`;
     try {
       await bg('openExternal', { url });
     } catch (e) {
@@ -204,7 +323,17 @@ export function initHost(overrides = {}) {
   }
 
   function loadConnect() {
+    if (overrides.connect) {
+      framedConnect = false;
+      showPanel('loading');
+      iframe.src = 'about:blank';
+      page = 'connect';
+      if (overrides.onPageChange) overrides.onPageChange(page);
+      overrides.connect();
+      return;
+    }
     framedConnect = true;
+    setPlainNotice(null);
     host.setExpectedOrigin(location.origin && location.origin !== 'null' ? location.origin : null);
     showPanel(null);
     iframe.src = 'connect.html';
@@ -215,6 +344,7 @@ export function initHost(overrides = {}) {
   function loadServed(base, target) {
     framedConnect = false;
     lastBase = base;
+    setPlainNotice(base);
     host.setExpectedOrigin(servedOrigin(base));
     showPanel('loading');
     iframe.hidden = false;
@@ -224,7 +354,7 @@ export function initHost(overrides = {}) {
       showPanel('unreachable', 'The web interface did not respond in time.');
     }, READY_TIMEOUT_MS);
     page = target;
-    if (overrides.onPageChange) overrides.onPageChange(page);
+    if (overrides.onPageChange) overrides.onPageChange(page, pageParams);
   }
 
   async function boot() {
@@ -249,10 +379,14 @@ export function initHost(overrides = {}) {
     try {
       base = await bg('getUiBase');
     } catch (e) {
-      showPanel('unreachable', e && e.message ? e.message : String(e));
+      const code = keyRefusal(e);
+      const message = e && e.message ? e.message : String(e);
+      if (code) showPanel(code === 'dormant' ? 'dormant' : 'key', code);
+      else if (message.startsWith(HTTPS_HELD)) showPanel('held', message.slice(HTTPS_HELD.length));
+      else showPanel('unreachable', message);
       return;
     }
-    loadServed(base, SERVED_PAGES.has(page) ? page : 'popup');
+    loadServed(base, SERVED_PAGES.has(page) ? page : launcher);
   }
 
   /**
@@ -262,7 +396,7 @@ export function initHost(overrides = {}) {
    */
   function openPage(target, extraParams) {
     const nextParams = extraParams && typeof extraParams === 'object' ? { ...extraParams } : {};
-    if (SHELL === 'extension' && isPopupWindow) {
+    if (isPopupWindow) {
       if (target === 'popup') {
         pageParams = nextParams;
         boot();
@@ -274,18 +408,24 @@ export function initHost(overrides = {}) {
       return;
     }
     pageParams = nextParams;
-    page = target === 'connect' || SERVED_PAGES.has(target) ? target : 'popup';
+    page = target === 'connect' || SERVED_PAGES.has(target) ? target : launcher;
+    if (page === 'popup') page = launcher;
     boot();
   }
 
   const host = createHost({
+    shell,
     iframe,
     transport,
     openPage,
     saveBlob: overrides.saveBlob,
+    reserveTab: overrides.reserveTab,
+    adoptLaunch: overrides.adoptLaunch,
+    streamDownload: overrides.streamDownload,
+    onLeave: overrides.onLeave,
     isConnectPage: () => framedConnect,
     close: () => {
-      if (SHELL === 'extension' && isPopupWindow) window.close();
+      if (isPopupWindow) window.close();
     },
     onReady: () => {
       showPanel(null);
@@ -296,7 +436,7 @@ export function initHost(overrides = {}) {
     },
   });
 
-  document.documentElement.classList.add(`shell-${SHELL}`);
+  document.documentElement.classList.add(`shell-${shell}`);
   localizeStrings().finally(() => boot());
 
   return {
@@ -307,6 +447,6 @@ export function initHost(overrides = {}) {
   };
 }
 
-if (SHELL !== 'mobile') {
+if (SHELL === 'extension') {
   initHost();
 }

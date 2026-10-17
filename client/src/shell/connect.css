@@ -227,3 +227,45 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* Dialogs (lib/modal.js), laid out as the served pages' modals are. */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  overflow: auto;
+  background-color: rgba(6, 9, 14, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.modal-content {
+  background: linear-gradient(var(--glass), transparent 30%), var(--bg-1);
+  margin: 6vh auto;
+  padding: 1.75rem;
+  border: 1px solid var(--border-strong);
+  width: 90%;
+  max-width: 700px;
+  border-radius: var(--radius-lg);
+  animation: riseIn var(--dur-slow) var(--ease-out);
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+}
+.modal-header h3 { margin: 0; font-size: 1.2rem; }
+.close-button {
+  color: var(--text-muted);
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1.75rem;
+  line-height: 1;
+  padding: 0 0.25rem;
+  transition: color var(--dur), transform var(--dur) var(--ease-spring);
+}
+.close-button:hover { color: var(--text-primary); transform: rotate(90deg); }
+.dialog-modal .button-group { justify-content: flex-end; }

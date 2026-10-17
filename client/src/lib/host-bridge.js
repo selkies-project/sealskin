@@ -16,6 +16,7 @@
  */
 
 import { storePendingFile, takePendingFile } from './context-store.js';
+import { detectPlatform } from './platform.js';
 
 export const BRIDGE_VERSION = 1;
 
@@ -23,26 +24,6 @@ export const BRIDGE_VERSION = 1;
 
 const SHELL = typeof __SHELL_TARGET__ !== 'undefined' ? __SHELL_TARGET__ : 'extension';
 const SHELL_VERSION = typeof __UI_VERSION__ !== 'undefined' ? __UI_VERSION__ : 'dev';
-
-/**
- * Detect the platform the host runs on.
- *
- * @returns {'chrome'|'firefox'|'android'|'ios'|'web'}
- */
-function detectPlatform() {
-  const cap = typeof window !== 'undefined' && window.Capacitor;
-  if (cap && typeof cap.getPlatform === 'function') {
-    const p = cap.getPlatform();
-    if (p === 'android' || p === 'ios') return p;
-  }
-  const ua = navigator.userAgent || '';
-  if (/Android/i.test(ua) && SHELL === 'mobile') return 'android';
-  if (/iPhone|iPad|iPod/i.test(ua) && SHELL === 'mobile') return 'ios';
-  if (typeof browser !== 'undefined' && /Firefox/.test(ua)) return 'firefox';
-  if (/Firefox/.test(ua)) return 'firefox';
-  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) return 'chrome';
-  return 'web';
-}
 
 /**
  * Call the background through the transport and unwrap its reply.
@@ -62,27 +43,41 @@ export async function callBackground(transport, type, payload = {}) {
  * Create the host bridge.
  *
  * @param {object} options
+ * @param {'extension'|'mobile'|'web'} [options.shell] defaults to the build target
  * @param {HTMLIFrameElement} options.iframe The single framed page.
  * @param {function} options.transport Sends a message to the background, resolves its reply.
  * @param {function} [options.onReady] Called with the page's hello payload the first time it arrives.
  * @param {function} [options.onHelloMismatch] Called when the page's bridge version differs.
  * @param {function} options.openPage `(page, params?) => void` implemented by the host page.
  * @param {function} [options.saveBlob] `(blob, filename) => Promise` for mobile native open.
+ * @param {function} [options.streamDownload] `(home, path, filename) => Promise`, the web app's streamed download.
+ * @param {function} [options.reserveTab] `(reserve, launch?) => void`, web app tab reservation; with
+ *   `launch` (`{id, app, logo, room}`) the tab shows the launching page, and a throw refuses the launch.
+ * @param {function} [options.adoptLaunch] `(launchId, sessionId) => boolean`, web app: the launch's tab is the session's.
+ * @param {function} [options.onLeave] `(leaving) => void`, web app: the framed page is growing a session over itself, or gave up.
  * @param {function} [options.close] Closes the popup (extension) or no-op.
  * @param {function} [options.isConnectPage] `() => boolean`, true while the bundled connect page is framed.
  * @returns {{setExpectedOrigin: function(string): void, destroy: function(): void}}
  */
 export function createHost(options) {
   const { iframe, transport } = options;
-  const platform = detectPlatform();
+  const shell = options.shell || SHELL;
+  const platform = detectPlatform(shell);
   let expectedOrigin = null;
   let helloSeen = false;
+  // The files the user handed the shell by address (a link, media, or a download it took);
+  // fetchBlob reads these alone with the shell's host permissions, never one a page names.
+  const handedFiles = new Set();
+  const onConnectPage = () => Boolean(options.isConnectPage && options.isConnectPage());
+  // The connect page's draft holds the private key, which a served page never sees.
+  const DRAFT_KEY = 'sealskinPendingConfig';
+  const namesDraft = (keys) => [].concat(keys || []).includes(DRAFT_KEY);
 
   const capabilities = {
-    streamDownload: SHELL === 'extension' && platform === 'chrome',
-    nativeFileOpen: SHELL === 'mobile',
-    contextMenus: SHELL === 'extension',
-    tabs: SHELL === 'extension',
+    streamDownload: Boolean(options.streamDownload) || (shell === 'extension' && platform === 'chrome'),
+    nativeFileOpen: shell === 'mobile',
+    contextMenus: shell === 'extension',
+    tabs: shell === 'extension',
   };
 
   const handlers = {
@@ -90,7 +85,7 @@ export function createHost(options) {
       const config = await callBackground(transport, 'getPublicConfig');
       const info = {
         bridge: BRIDGE_VERSION,
-        shell: SHELL,
+        shell,
         platform,
         shellVersion: SHELL_VERSION,
         locale: navigator.language || 'en-US',
@@ -115,6 +110,7 @@ export function createHost(options) {
       return info;
     },
 
+    // The web app's background answers this with a plain call under the sign-in cookie.
     secureFetch({ url, options: fetchOptions }) {
       return callBackground(transport, 'secureFetch', { url, options: fetchOptions || {} });
     },
@@ -126,10 +122,14 @@ export function createHost(options) {
         delete context.hasFile;
         if (file) context.file = file;
       }
+      if (context && context.action === 'file' && context.targetUrl) handedFiles.add(context.targetUrl);
       return context;
     },
 
     async setContext({ context, openPopup = true }) {
+      if (context && context.action === 'file' && context.targetUrl) {
+        throw new Error('A page hands over a file itself, not its address.');
+      }
       let toStore = context;
       if (context && context.file instanceof Blob) {
         await storePendingFile(context.file);
@@ -138,7 +138,7 @@ export function createHost(options) {
       }
       await callBackground(transport, 'setContext', { context: toStore });
       if (openPopup) {
-        if (SHELL === 'mobile') {
+        if (shell !== 'extension') {
           options.openPage('popup');
         } else {
           await callBackground(transport, 'openPopup');
@@ -150,12 +150,15 @@ export function createHost(options) {
     async fetchBlob({ url }) {
       // Host pages carry the extension's host permissions, so cross-origin
       // fetches of link targets and media work here (not in the served page).
+      if (!handedFiles.has(url)) throw new Error('Only a file handed to the shell can be fetched.');
       const response = await fetch(url);
       if (!response.ok) throw new Error(`Failed to fetch file data: ${response.statusText}`);
       return response.blob();
     },
 
-    openSession({ sessionId, sessionUrl }) {
+    openSession({ sessionId, sessionUrl, launchId }) {
+      // The web app's launching page takes its own tab to the session.
+      if (launchId && options.adoptLaunch && options.adoptLaunch(launchId, sessionId)) return {};
       return callBackground(transport, 'createTabAndTrack', { sessionId, session_url: sessionUrl });
     },
 
@@ -163,8 +166,18 @@ export function createHost(options) {
       return callBackground(transport, 'focusOrCreateTab', { session });
     },
 
+    async leaving({ leaving }) {
+      if (options.onLeave) options.onLeave(leaving !== false);
+      return {};
+    },
+
     closeSession({ sessionId }) {
       return callBackground(transport, 'closeSession', { sessionId });
+    },
+
+    async reserveTab({ reserve, launch }) {
+      if (options.reserveTab) await options.reserveTab(reserve !== false, launch);
+      return {};
     },
 
     async openPage({ page, params }) {
@@ -178,6 +191,10 @@ export function createHost(options) {
 
     async downloadFile({ home, path, filename }) {
       if (!capabilities.streamDownload) throw new Error('Streaming download is not available in this shell.');
+      if (options.streamDownload) {
+        await options.streamDownload(home, path, filename);
+        return {};
+      }
       const params = new URLSearchParams({ home, path, filename });
       const a = document.createElement('a');
       a.href = chrome.runtime.getURL(`/download-stream?${params.toString()}`);
@@ -193,15 +210,19 @@ export function createHost(options) {
       return {};
     },
 
-    storageGet({ keys }) {
-      return callBackground(transport, 'storageGet', { keys: keys === undefined ? null : keys });
+    async storageGet({ keys }) {
+      const items = await callBackground(transport, 'storageGet', { keys: keys === undefined ? null : keys });
+      if (items && !onConnectPage()) delete items[DRAFT_KEY];
+      return items;
     },
 
     storageSet({ items }) {
+      if (!onConnectPage() && namesDraft(Object.keys(items || {}))) throw new Error('Only the connect page keeps a draft.');
       return callBackground(transport, 'storageSet', { items });
     },
 
     storageRemove({ keys }) {
+      if (!onConnectPage() && namesDraft(keys)) throw new Error('Only the connect page keeps a draft.');
       return callBackground(transport, 'storageRemove', { keys });
     },
 

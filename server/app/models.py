@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import uuid
 from typing import Any
 
@@ -27,6 +28,27 @@ class Application(BaseModel):
     url_support: bool
     extensions: list[str]
     is_meta_app: bool = False
+    type: str = ""
+
+
+class LaunchProgress(BaseModel):
+    """Where a launch is (see `app.progress`).
+
+    Attributes:
+        stage: The stage the launch reached.
+        detail: What the stage is about: `node` or `image`.
+        elapsed: Seconds since the launch began.
+        session_url: Path the session opens at, once `stage` is `ready`.
+        session_id: Its id, once `stage` is `ready`.
+        error: Why it failed, once `stage` is `failed`.
+    """
+
+    stage: str
+    detail: dict[str, Any] = {}
+    elapsed: float = 0
+    session_url: str | None = None
+    session_id: str | None = None
+    error: str | None = None
 
 
 class LaunchRequestSimple(BaseModel):
@@ -39,6 +61,9 @@ class LaunchRequestSimple(BaseModel):
     selected_gpu: str | None = None
     launch_in_room_mode: bool = False
     wayland_mode: bool = True
+    #: Id of the VPN profile the session's traffic leaves through, and of its endpoint (see `app.vpn`).
+    vpn: str | None = None
+    vpn_endpoint: str | None = None
 
 
 class LaunchRequestURL(BaseModel):
@@ -52,6 +77,9 @@ class LaunchRequestURL(BaseModel):
     selected_gpu: str | None = None
     launch_in_room_mode: bool = False
     wayland_mode: bool = True
+    #: Id of the VPN profile the session's traffic leaves through, and of its endpoint (see `app.vpn`).
+    vpn: str | None = None
+    vpn_endpoint: str | None = None
 
 
 class LaunchRequestFile(BaseModel):
@@ -68,6 +96,9 @@ class LaunchRequestFile(BaseModel):
     selected_gpu: str | None = None
     launch_in_room_mode: bool = False
     wayland_mode: bool = True
+    #: Id of the VPN profile the session's traffic leaves through, and of its endpoint (see `app.vpn`).
+    vpn: str | None = None
+    vpn_endpoint: str | None = None
 
 
 class LaunchResponse(BaseModel):
@@ -94,6 +125,231 @@ class HandshakeExchangeResponse(BaseModel):
     """Identifier of the established E2EE session."""
 
     session_id: str
+
+
+class SignInConfig(BaseModel):
+    """The sign-ins the web app offers; `auto` names the provider a signed-out browser is sent to at once."""
+
+    oidc: bool
+    saml: bool
+    proxy: bool = False
+    root: bool = True
+    key: bool = True
+    auto: str = ""
+
+
+PROJECT_URL = "https://github.com/selkies-project/sealskin"
+WALLPAPER_FITS = ("cover", "contain", "stretch", "center")
+#: The companion apps as they name themselves to the server, and `other` for anything else.
+APP_KEY_CLIENTS = ("chrome", "firefox", "android", "ios", "other")
+#: Where each companion app is had, by default: the official stores.
+APP_STORE_URLS = {
+    "chrome": "https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk",
+    "firefox": "https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/",
+    "android": "https://play.google.com/store/apps/details?id=io.linuxserver.sealskin",
+    "ios": "https://apps.apple.com/us/app/sealskin/id6758210210",
+}
+
+
+class BrandLink(BaseModel):
+    """A link the home page shows beside the applications.
+
+    Attributes:
+        name: The tile's label.
+        url: Where it leads, `http` or `https`.
+        icon: Font Awesome classes such as `fa-book` or `fab fa-github`, an `https` image address, or empty for a link icon.
+        open: `tab` opens the address in a new tab, `isolated` in a session of an application the user picks.
+    """
+
+    name: str = Field(min_length=1, max_length=60)
+    url: str = Field(max_length=2000, pattern=r"^https?://\S+$")
+    icon: str = Field(default="", max_length=300)
+    open: str = Field(default="tab", pattern=r"^(tab|isolated)$")
+
+    @field_validator("icon")
+    @classmethod
+    def _icon_shape(cls, value: str) -> str:
+        """Keep an icon to Font Awesome classes or an `https` image."""
+        value = " ".join(value.split())
+        if value and not (re.fullmatch(r"(fa[sbrl]? )?fa-[a-z0-9-]+", value) or value.startswith("https://")):
+            raise ValueError("An icon is a Font Awesome class or an https address.")
+        return value
+
+
+class BrandApp(BaseModel):
+    """Where one of the companion apps is had, as the sign-in page and the application keys section link to it.
+
+    Attributes:
+        client: `chrome`, `firefox`, `android`, or `ios`.
+        url: The address of the app, `http` or `https`; the official store by default.
+        enabled: Whether the link is shown at all.
+    """
+
+    client: str = Field(pattern=r"^(chrome|firefox|android|ios)$")
+    url: str = Field(default="", max_length=2000, pattern=r"^(https?://\S+)?$")
+    enabled: bool = True
+
+
+def default_brand_apps() -> list[BrandApp]:
+    """Return the links to the official stores, every app shown."""
+    return [BrandApp(client=client, url=url) for client, url in APP_STORE_URLS.items()]
+
+
+class Branding(BaseModel):
+    """The brand the web app wears, as `branding/branding.yml` keeps it.
+
+    Attributes:
+        name: The product name, which stands wherever the interface would say SealSkin.
+        logo_link: Where the logo leads; empty for nowhere.
+        accent: The accent color as `#rrggbb`, or empty for the default violet.
+        apps: Where the companion apps are had, one entry per client, shown on the sign-in page and with the application keys.
+        wallpaper_fit: How the wallpaper sits on the home page.
+        wallpaper_blur: Pixels of blur over the wallpaper.
+        wallpaper_dim: Percent the wallpaper is darkened.
+        wallpaper_forced: Every user sees the wallpaper, and the page's own customization is withheld.
+        links: Links the home page shows beside the applications.
+    """
+
+    name: str = Field(default="SealSkin", min_length=1, max_length=60)
+    logo_link: str = Field(default=PROJECT_URL, max_length=2000)
+    accent: str = Field(default="", pattern=r"^(#[0-9a-fA-F]{6})?$")
+    apps: list[BrandApp] = Field(default_factory=default_brand_apps, max_length=4)
+    wallpaper_fit: str = Field(default="cover", pattern=r"^(cover|contain|stretch|center)$")
+    wallpaper_blur: int = Field(default=0, ge=0, le=24)
+    wallpaper_dim: int = Field(default=30, ge=0, le=90)
+    wallpaper_forced: bool = False
+    links: list[BrandLink] = Field(default_factory=list, max_length=40)
+
+    @field_validator("name", "logo_link")
+    @classmethod
+    def _stripped(cls, value: str) -> str:
+        """Trim the text fields."""
+        return value.strip()
+
+    @field_validator("logo_link")
+    @classmethod
+    def _link_shape(cls, value: str) -> str:
+        """Allow an `http` or `https` address, or none."""
+        if value and not re.fullmatch(r"https?://\S+", value):
+            raise ValueError("The logo's link is an http or https address, or empty.")
+        return value
+
+    @field_validator("apps")
+    @classmethod
+    def _every_app_once(cls, value: list[BrandApp]) -> list[BrandApp]:
+        """Keep one entry per client, in the stores' order, the official address standing in for an empty one."""
+        given = {app.client: app for app in value}
+        return [
+            BrandApp(client=client, url=given[client].url or url, enabled=given[client].enabled) if client in given else BrandApp(client=client, url=url)
+            for client, url in APP_STORE_URLS.items()
+        ]
+
+
+class BrandLinkView(BrandLink):
+    """A home link as the pages read it.
+
+    Attributes:
+        image: Where the pages load an `https` icon from, on this server; empty for a Font Awesome icon.
+    """
+
+    image: str = ""
+
+
+class BrandImage(BaseModel):
+    """An uploaded brand picture as the pages address it."""
+
+    url: str
+    width: int
+    height: int
+    type: str
+
+
+class BrandingView(Branding):
+    """The brand with its pictures, as `GET /api/branding` returns it."""
+
+    links: list[BrandLinkView] = Field(default_factory=list, max_length=40)
+    logo: BrandImage | None = None
+    wallpaper: BrandImage | None = None
+    is_default: bool = True
+
+
+class BrandImageUpload(BaseModel):
+    """A brand picture, base64 encoded, as the dashboard uploads it."""
+
+    data: str = Field(max_length=12_000_000)
+
+
+class SignInRegistrationRequest(BaseModel):
+    """The grant of a finished identity provider flow."""
+
+    grant: str = Field(max_length=128)
+
+
+class KeySignInRequest(BaseModel):
+    """An application key offered at the web app's sign-in page, which only root's open it."""
+
+    key: str = Field(max_length=512)
+
+
+class ApplicationKey(BaseModel):
+    """A key as its user and the dashboard see it; `state` is `active`, `dormant`, or `expired`."""
+
+    id: str
+    name: str
+    created: float
+    expires: float | None = None
+    last_used: float | None = None
+    client: str = ""
+    state: str = "active"
+
+
+class ApplicationKeyPolicy(BaseModel):
+    """What the settings let a user do with keys.
+
+    Attributes:
+        allowed: The user may make and use keys.
+        clients: The companion apps that may use them (see `APP_KEY_CLIENTS`).
+        max_days: The longest a key may live; negative for no limit.
+        dormant_hours: Hours after the last web sign-in at which keys sleep; negative for never.
+        follow_sign_in: Keys sleep as soon as the web sign-in has ended.
+        web_sign_in: When the user last signed in on the web (`at`) and until when (`until`).
+    """
+
+    allowed: bool = True
+    clients: list[str] = []
+    max_days: float = -1
+    dormant_hours: float = -1
+    follow_sign_in: bool = False
+    web_sign_in: dict[str, float] | None = None
+
+
+class ApplicationKeyList(BaseModel):
+    """A user's keys with the policy they are under."""
+
+    keys: list[ApplicationKey]
+    policy: ApplicationKeyPolicy
+
+
+class ApplicationKeyCreateRequest(BaseModel):
+    """A key to make: what to call it and, within the policy, how many days it lives (`None` for the longest allowed)."""
+
+    name: str = Field(min_length=1, max_length=60)
+    days: float | None = Field(default=None, gt=0, le=36500)
+
+
+class ApplicationKeyCreated(BaseModel):
+    """A made key: its text, shown this once, and its record."""
+
+    key: str
+    record: ApplicationKey
+
+
+class SignInRegistration(BaseModel):
+    """A started web sign-in."""
+
+    username: str
+    via: str
+    expires: float
 
 
 class EncryptedPayload(BaseModel):
@@ -256,11 +512,20 @@ class TemplateSchemaOption(BaseModel):
     label_key: str | None = None
 
 
+class TemplateSchemaSection(BaseModel):
+    """One card of the template editor, in the order the editor shows them."""
+
+    id: str
+    icon: str = ""
+
+
 class TemplateSchemaSetting(BaseModel):
     """Definition of one environment variable editable in templates."""
 
     name: str
     category: str
+    section: str = ""
+    group: str = ""
     type: str
     default: str = ""
     docker: bool = False
@@ -280,6 +545,7 @@ class TemplateSchemaSetting(BaseModel):
 class TemplateSchemaResponse(BaseModel):
     """Payload of `GET /api/ui/template_schema`."""
 
+    sections: list[TemplateSchemaSection] = []
     settings: list[TemplateSchemaSetting]
 
 
@@ -291,31 +557,392 @@ class UiManifest(BaseModel):
 
 
 class UserSettings(BaseModel):
-    """Per-user or per-group settings."""
+    """A user's own settings, and the form of the settings a request runs under.
+
+    Attributes:
+        active: The account may sign in.
+        group: The first of `groups`, as older clients read it.
+        groups: Groups the user is in.
+        admin: The user administers the server.
+        persistent_storage: The user has home directories.
+        public_sharing: The user may share files by public link.
+        harden_container: Sessions run with the container hardening.
+        harden_openbox: Sessions run with the desktop hardening.
+        edit_templates: The user may edit app templates.
+        gpu: Sessions may use a GPU.
+        gpu_share: Sessions may use a GPU other sessions use; off gives each a GPU of its own.
+        home_migration: The user may move their home directories between nodes.
+        storage_limit: Gigabytes of storage per node; negative for no limit.
+        session_limit: Sessions at once, on all nodes; negative for no limit.
+        session_cpus: CPUs per session; negative for no limit.
+        session_memory_mb: Megabytes of memory per session; negative for no limit.
+        session_hours: Hours a session may run; negative for no limit.
+        allowance_hours: Weighted session hours per `allowance_period`; negative for no limit.
+        allowance_period: `day`, `week`, or `month`.
+        pools: Restricted pools open to the user.
+        pools_denied: Pools closed to the user.
+        proot_catalog: Id of the PRoot Apps catalog the user's sessions install from, or `None`.
+        vpn: Sessions may leave through a VPN profile open to the user.
+        application_keys: The user may make and use application keys for the companion apps.
+        application_key_clients: The companion apps that may use them (see `APP_KEY_CLIENTS`).
+        application_key_days: Longest a key lives, in days; negative for no expiry.
+        application_key_dormant_hours: Hours after the user's last web sign-in at which keys sleep; negative for never.
+        application_key_follow_sign_in: Keys sleep as soon as the user's web sign-in has ended.
+        provider_groups: Groups the identity provider named at the last sign-in.
+        approved: False for a user a sign-in created who waits for an administrator; the server keeps it.
+    """
 
     active: bool = True
     group: str = "none"
+    groups: list[str] = []
+    admin: bool = False
     persistent_storage: bool = True
     public_sharing: bool = False
     harden_container: bool = False
     harden_openbox: bool = False
     edit_templates: bool = False
     gpu: bool = True
+    gpu_share: bool = True
+    home_migration: bool = True
     storage_limit: int = -1
     session_limit: int = -1
+    session_cpus: float = -1
+    session_memory_mb: int = -1
+    session_hours: float = -1
+    allowance_hours: float = -1
+    allowance_period: str = Field(default="month", pattern=r"^(day|week|month)$")
+    pools: list[str] = []
+    pools_denied: list[str] = []
+    proot_catalog: str | None = None
+    vpn: bool = True
+    application_keys: bool = True
+    application_key_clients: list[str] = list(APP_KEY_CLIENTS)
+    application_key_days: float = -1
+    application_key_dormant_hours: float = -1
+    application_key_follow_sign_in: bool = False
+    provider_groups: list[str] = []
+    approved: bool = True
+
+
+class GroupSettings(BaseModel):
+    """What a group sets for its members; a setting left out is not the group's to decide.
+
+    Where the groups of a user disagree, the restricting value of a switch
+    wins and the smallest limit does (see `user_manager.get_effective_settings`).
+
+    Attributes:
+        proot_catalog: Id of the PRoot Apps catalog the members' sessions install from.
+        sso_groups: Identity provider groups whose members are in this group.
+    """
+
+    active: bool | None = None
+    admin: bool | None = None
+    persistent_storage: bool | None = None
+    public_sharing: bool | None = None
+    harden_container: bool | None = None
+    harden_openbox: bool | None = None
+    edit_templates: bool | None = None
+    gpu: bool | None = None
+    gpu_share: bool | None = None
+    home_migration: bool | None = None
+    storage_limit: int | None = None
+    session_limit: int | None = None
+    session_cpus: float | None = None
+    session_memory_mb: int | None = None
+    session_hours: float | None = None
+    allowance_hours: float | None = None
+    allowance_period: str | None = Field(default=None, pattern=r"^(day|week|month)$")
+    pools: list[str] = []
+    pools_denied: list[str] = []
+    proot_catalog: str | None = None
+    vpn: bool | None = None
+    application_keys: bool | None = None
+    application_key_clients: list[str] | None = None
+    application_key_days: float | None = None
+    application_key_dormant_hours: float | None = None
+    application_key_follow_sign_in: bool | None = None
+    sso_groups: list[str] = []
 
 
 class AdminStatusResponse(BaseModel):
-    """Status payload returned to every authenticated user."""
+    """Status payload returned to every authenticated user; `held` marks one who waits for an administrator.
+
+    `via` is `key` for a key-file client, `app_key` for a companion app with an
+    application key, else how the web sign-in happened: `root`, `oidc`, `saml`,
+    or `proxy`.
+    """
 
     is_admin: bool
+    held: bool = False
     username: str
     settings: UserSettings
+    via: str = "key"
+    #: Whether this node takes key-file clients (`legacy_auth`), which decides what the dashboard offers.
+    key_files: bool = True
+    sign_out_url: str = ""
+    session_domain: str = ""
+    session_isolation: bool = False
+    clustered: bool = False
+    node_id: str = ""
+    allowance: dict[str, Any] | None = None
+    provider_groups: list[str] = []
+    expires: float | None = None
+    storage_used: int | None = None
     gpus: list[GPUInfo] = []
+    vpns: list[VpnChoice] = []
     cpu_model: str | None = None
     disk_total: int | None = None
     disk_used: int | None = None
     proxy_cert_expires_at: float | None = None
+
+
+class VpnEndpoint(BaseModel):
+    """One server of a VPN profile, as the profile's endpoint list keeps it.
+
+    Attributes:
+        id: Generated identifier.
+        label: What users see; the server's host name unless renamed.
+        host: Host name or address of the server.
+        port: Its port.
+        proto: `udp` or `tcp`; WireGuard is always `udp`.
+        public_key: The server's WireGuard public key; empty for OpenVPN.
+        allowed_ips: The WireGuard peer's allowed addresses.
+    """
+
+    id: str = Field(..., pattern=r"^[A-Za-z0-9_-]{1,64}$")
+    label: str = Field(..., min_length=1, max_length=120)
+    host: str = Field(..., min_length=1, max_length=253)
+    port: int = Field(..., ge=1, le=65535)
+    proto: str = Field(default="udp", pattern=r"^(udp|tcp)$")
+    public_key: str = ""
+    allowed_ips: str = "0.0.0.0/0"
+    #: Whether a WireGuard preshared key is held for the peer; the key itself stays on the server.
+    has_preshared_key: bool = False
+
+
+class VpnEndpointChoice(BaseModel):
+    """An endpoint as the launcher offers it."""
+
+    id: str
+    label: str
+
+
+class VpnChoice(BaseModel):
+    """A VPN profile as the launcher offers it to a user: its published endpoints, the first the default."""
+
+    id: str
+    name: str
+    kind: str
+    endpoints: list[VpnEndpointChoice] = []
+
+
+class VpnTunnel(BaseModel):
+    """A gateway up somewhere in the deployment: one connection to the provider.
+
+    Attributes:
+        endpoint: Id of the endpoint it is connected to.
+        label: The endpoint's label.
+        node: Name of the node running it.
+        sessions: Sessions on that node that leave through it.
+        state: The gateway container's state on this node, `healthy` while the tunnel carries
+            traffic; `running` for another node's, which reports its sessions and no more.
+    """
+
+    endpoint: str
+    label: str
+    node: str = ""
+    sessions: int = 0
+    state: str = ""
+
+
+class VpnEndpointEdit(BaseModel):
+    """An endpoint as the editor sends it back: an existing one by id, a new one without.
+
+    Attributes:
+        preshared_key: A new WireGuard preshared key; `None` keeps the one held, empty drops it.
+    """
+
+    id: str | None = Field(default=None, pattern=r"^[A-Za-z0-9_-]{1,64}$")
+    label: str = Field(default="", max_length=120)
+    host: str = Field(..., min_length=1, max_length=253)
+    port: int = Field(..., ge=1, le=65535)
+    proto: str = Field(default="udp", pattern=r"^(udp|tcp)$")
+    public_key: str = Field(default="", max_length=120)
+    preshared_key: str | None = Field(default=None, max_length=120)
+    allowed_ips: str = Field(default="0.0.0.0/0", max_length=512)
+
+
+class VpnEndpointsImport(BaseModel):
+    """Add the endpoints of an uploaded config file or archive to a profile."""
+
+    filename: str = Field(..., min_length=1, max_length=255)
+    upload_id: str
+    total_chunks: int = Field(..., ge=1)
+
+
+class VpnProfileView(BaseModel):
+    """A VPN profile as the dashboard shows it; the template and the credentials stay on the server.
+
+    Attributes:
+        id: Generated identifier.
+        name: Name shown to users.
+        kind: `wireguard` or `openvpn`.
+        endpoints: Every endpoint the import found.
+        published: Ids of the endpoints users may pick, in the order offered; empty publishes the first endpoint.
+        max_tunnels: Connections the deployment may have up for the profile at once; 0 for no limit.
+        users: Usernames the profile is open to (`all` for everyone).
+        groups: Groups the profile is open to (`all` for everyone).
+        has_credentials: Whether an OpenVPN username and password are kept.
+        needs_credentials: Whether the OpenVPN template asks for them.
+        tunnels: The gateways of the profile up across the deployment.
+        created: Unix time the profile was imported.
+    """
+
+    id: str
+    name: str
+    kind: str
+    endpoints: list[VpnEndpoint] = []
+    published: list[str] = []
+    max_tunnels: int = 0
+    users: list[str] = ["all"]
+    groups: list[str] = ["all"]
+    has_credentials: bool = False
+    needs_credentials: bool = False
+    tunnels: list[VpnTunnel] = []
+    created: float = 0
+
+
+class VpnImportRequest(BaseModel):
+    """Import VPN profiles from an uploaded config file or an archive of them.
+
+    Attributes:
+        name: Name of the profile; a bundle that holds several templates makes several profiles, named after it.
+        filename: Name of the uploaded file, which tells an archive from a single config.
+        upload_id: The chunked upload holding it.
+        total_chunks: Chunks of that upload.
+        kind: The type the administrator chose, which the config must be.
+        username: OpenVPN username, for a template that asks for one.
+        password: OpenVPN password.
+        users: Usernames the profiles are open to.
+        groups: Groups the profiles are open to.
+    """
+
+    name: str = Field(..., min_length=1, max_length=80)
+    filename: str = Field(..., min_length=1, max_length=255)
+    upload_id: str
+    total_chunks: int = Field(..., ge=1)
+    #: `wireguard` or `openvpn` when the administrator chose; a config of the other kind is refused.
+    kind: str | None = Field(default=None, pattern=r"^(wireguard|openvpn)$")
+    username: str = ""
+    password: str = ""
+    users: list[str] = ["all"]
+    groups: list[str] = ["all"]
+
+
+class VpnProfileUpdate(BaseModel):
+    """Change a VPN profile; a field left out keeps its value, and credentials given replace the kept ones.
+
+    Attributes:
+        labels: New labels keyed by endpoint id.
+        endpoints: The whole endpoint list as edited; one left out is removed, one without an
+            id is new.
+    """
+
+    name: str | None = Field(default=None, min_length=1, max_length=80)
+    published: list[str] | None = None
+    max_tunnels: int | None = Field(default=None, ge=0)
+    users: list[str] | None = None
+    groups: list[str] | None = None
+    labels: dict[str, str] | None = None
+    endpoints: list[VpnEndpointEdit] | None = None
+    username: str | None = None
+    password: str | None = None
+
+
+class ProotCatalogApp(BaseModel):
+    """One app of a PRoot Apps catalog: a package of a remote.
+
+    Attributes:
+        remote: GitHub `owner/repo` the app is published from.
+        name: The app's name there, which is its image tag.
+    """
+
+    remote: str = Field(..., pattern=r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+    name: str = Field(..., pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
+
+
+class ProotCatalog(BaseModel):
+    """A PRoot Apps catalog: the apps an administrator picked for a folder sessions install from.
+
+    Attributes:
+        id: Generated identifier; the folder of the catalog on every node.
+        name: Name shown in the dashboard and the user and group settings.
+        apps: The apps in the catalog.
+        auto_update: Fetch the apps again on the auto-update interval when their package changed.
+        revision: Bumped by every change and by an update asked for by hand; a node whose copy
+            is of an older revision syncs it.
+    """
+
+    id: str = Field(..., pattern=r"^[A-Za-z0-9_-]{1,64}$")
+    name: str = Field(..., min_length=1, max_length=80)
+    apps: list[ProotCatalogApp] = []
+    auto_update: bool = True
+    revision: int = 1
+
+
+class ProotCatalogName(BaseModel):
+    """What a user or group setting picks a catalog by."""
+
+    id: str
+    name: str
+
+
+class ProotCatalogStatus(ProotCatalog):
+    """A catalog with the state of this node's copy of it.
+
+    Attributes:
+        state: `pending` before the first sync, `syncing`, `ready`, or `error`.
+        message: What the last sync reported, or the error that ended it.
+        synced_revision: The revision this node's copy was made from.
+        synced_at: Unix time the last sync finished.
+        done: Apps handled so far by a running sync.
+        total: Apps a running sync handles.
+        current: The app a running sync is on.
+        size: Bytes the copy takes on this node.
+        present: Apps whose package is in the copy, keyed by image folder.
+    """
+
+    state: str = "pending"
+    message: str = ""
+    synced_revision: int = 0
+    synced_at: float | None = None
+    done: int = 0
+    total: int = 0
+    current: str = ""
+    size: int = 0
+    present: dict[str, dict[str, Any]] = {}
+
+
+class ProotRemoteApp(BaseModel):
+    """An app a PRoot Apps remote publishes, as its metadata lists it.
+
+    Attributes:
+        remote: The remote.
+        name: The app's name, its image tag.
+        full_name: Display name.
+        description: What the app is.
+        arch: Comma-separated platforms the package is built for.
+        icon: URL of the app's icon.
+        disabled: The remote marks the app as not offered.
+    """
+
+    remote: str
+    name: str
+    full_name: str = ""
+    description: str = ""
+    arch: str = ""
+    icon: str = ""
+    disabled: bool = False
 
 
 class User(BaseModel):
@@ -325,13 +952,17 @@ class User(BaseModel):
     public_key: str
     is_admin: bool
     settings: UserSettings | None = None
+    #: Waiting for an administrator (see `user_manager.held`); set in the dashboard's listing.
+    held: bool = False
+    #: Signs in as an administrator (see `user_manager.administers`); set in the dashboard's listing.
+    admin: bool = False
 
 
 class Group(BaseModel):
     """A group of users sharing settings."""
 
     name: str
-    settings: UserSettings
+    settings: GroupSettings
 
 
 class ManagementDataResponse(BaseModel):
@@ -344,6 +975,8 @@ class ManagementDataResponse(BaseModel):
     api_port: int
     session_port: int
     gpus: list[GPUInfo] = []
+    proot_catalogs: list[ProotCatalogName] = []
+    proot_remote: str = ""
 
 
 class CreateUserRequest(BaseModel):
@@ -371,13 +1004,13 @@ class CreateGroupRequest(BaseModel):
     """Create a group."""
 
     name: str = Field(..., pattern=r"^[a-zA-Z0-9_-]+$")
-    settings: UserSettings
+    settings: GroupSettings
 
 
 class UpdateGroupRequest(BaseModel):
     """Replace a group's settings."""
 
-    settings: UserSettings
+    settings: GroupSettings
 
 
 class CreateMetaAppRequest(BaseModel):
@@ -432,6 +1065,15 @@ class ActiveSessionInfo(BaseModel):
     session_url: str
     launch_context: dict[str, Any] | None = None
     is_collaboration: bool = False
+    own_origin: bool = False
+    node: str = ""
+    home: str = ""
+    gpu: bool = False
+    gpu_device: str = ""
+    #: Name of the VPN profile the session leaves through, when it does.
+    vpn: str = ""
+    language: str = ""
+    wayland_mode: bool = True
 
 
 class SendFileToSessionRequest(BaseModel):
@@ -590,6 +1232,9 @@ class LaunchRequestFilePath(BaseModel):
     timezone: str | None = None
     selected_gpu: str | None = None
     wayland_mode: bool = True
+    #: Id of the VPN profile the session's traffic leaves through, and of its endpoint (see `app.vpn`).
+    vpn: str | None = None
+    vpn_endpoint: str | None = None
 
 
 class LaunchFromStorageRequest(BaseModel):

@@ -21,7 +21,7 @@ export function arrayBufferToBase64(buffer) {
   return btoa(binary);
 }
 
-function arrayBufferToPem(buffer, type) {
+export function arrayBufferToPem(buffer, type) {
   const b64 = arrayBufferToBase64(buffer);
   const lines = b64.match(/.{1,64}/g).join('\n');
   return `-----BEGIN ${type} KEY-----\n${lines}\n-----END ${type} KEY-----\n`;
@@ -62,6 +62,13 @@ function arrayBufferToBase64Url(buffer) {
 
 const keyCache = new Map();
 
+/**
+ * Sign a five-minute API token for `username`.
+ *
+ * @param {string} privateKeyPem PKCS#8 PEM.
+ * @param {string} username
+ * @returns {Promise<string>} The RS256 JWT.
+ */
 export async function generateJwtNative(privateKeyPem, username) {
   if (!privateKeyPem || !username) {
     throw new Error("Private key and username are required to generate a token.");
@@ -89,7 +96,7 @@ export async function generateJwtNative(privateKeyPem, username) {
 
   const header = {
     alg: 'RS256',
-    typ: 'JWT'
+    typ: 'JWT',
   };
   const now = Math.floor(Date.now() / 1000);
   const payload = {

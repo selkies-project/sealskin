@@ -19,6 +19,6 @@ def setup_logging() -> None:
         force=True,
     )
     if log_level != "DEBUG":
-        for lib in ["uvicorn", "websockets", "docker", "watchfiles"]:
+        for lib in ["uvicorn", "websockets", "docker", "watchfiles", "httpx", "httpcore"]:
             logging.getLogger(lib).setLevel(logging.WARNING)
     logging.info("Logging configured with level: %s", log_level)

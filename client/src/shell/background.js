@@ -2,13 +2,16 @@
  * SealSkin shell background script.
  *
  * Runs as the extension's background (MV3 service worker on Chrome, background
- * page on Firefox) and, on mobile, inside the app's outer window on top of the
- * polyfill in `mobile/polyfill.js`. It owns everything privileged:
+ * page on Firefox) and, in the mobile app and the web app, inside the host
+ * window on top of the polyfill in `polyfill.js`. It owns everything privileged:
  *
  *  - the E2EE handshake and encrypted fetch (`secureFetchInBackground`)
  *  - JWT signing with the stored private key
+ *  - with an application key, in their place, plain HTTPS calls to the
+ *    session port carrying the key as a bearer and this client's name (`keyFetch`)
+ *  - in the web app, plain same-origin calls under the sign-in cookie
  *  - context menus, "send next download" interception, badge
- *  - the session-to-tab map and tab focus/close
+ *  - the session-to-tab map and tab focus/close, and the origin a session opens on
  *  - the pending launch context handed to the popup
  *  - the Chrome streaming-download fetch handler
  *
@@ -18,12 +21,21 @@
  */
 
 import { pemToArrayBuffer, arrayBufferToBase64, generateJwtNative } from '../lib/crypto-utils.js';
+import { probeSessionOrigin } from '../lib/session-origin.js';
+import { detectPlatform } from '../lib/platform.js';
 // Context menu titles per language. The build generates this module from
 // `background.contextMenu` of src/i18n/*.json (see build.mjs); it is bundled
 // because the menus are registered before any page could fetch a language file.
 import { contextMenuTitles } from 'sealskin-i18n/context-menu';
 
 /* global __SHELL_TARGET__ */
+
+// The web app signs in with a cookie and calls the plain API of its own origin.
+const WEB = typeof __SHELL_TARGET__ !== 'undefined' && __SHELL_TARGET__ === 'ui';
+// What this shell calls itself to the server when it signs in with an application key.
+const CLIENT = detectPlatform(typeof __SHELL_TARGET__ !== 'undefined' ? __SHELL_TARGET__ : 'extension');
+// Thrown where the web app cannot reach a session's own origin; the pages translate it.
+const NO_SESSION_ORIGIN = 'noSessionOrigin';
 
 const isServiceWorker = typeof ServiceWorkerGlobalScope !== 'undefined' && self instanceof ServiceWorkerGlobalScope;
 
@@ -36,8 +48,53 @@ let session = {
   baseUrl: null
 };
 
+/**
+ * Servers (`<address>:<session port>`) that have answered over https. The
+ * plain http API port is a stage before a self-signed certificate is
+ * accepted; once https has worked, a failure there is a certificate to accept
+ * again (browsers forget the exception after a while) or something on the
+ * path blocking the port, so the served pages are not framed over http again
+ * until the user says so (`allowPlainHttp`, for the rest of the browser
+ * session). Kept apart from the configuration and out of the bridge's reach.
+ */
+const HTTPS_SEEN_KEY = 'sealskinHttpsSeen';
+const HTTP_ALLOWED_KEY = 'sealskinHttpAllowed';
+/** Prefix of the handshake failure the host answers with its held-https panel. */
+const HTTPS_HELD = 'https-held: ';
+// The session store outlives the service worker but not the browser; the mobile shell has none.
+const sessionStore = chrome.storage && chrome.storage.session;
+const httpAllowedInMemory = {};
+
+function serverOf(config) {
+  return config && config.serverIp && config.sessionPort ? `${config.serverIp}:${config.sessionPort}` : null;
+}
+
+async function httpsSeen(server) {
+  const { [HTTPS_SEEN_KEY]: seen } = await chrome.storage.local.get(HTTPS_SEEN_KEY);
+  return Boolean(seen && seen[server]);
+}
+
+async function markHttpsSeen(server) {
+  const { [HTTPS_SEEN_KEY]: seen } = await chrome.storage.local.get(HTTPS_SEEN_KEY);
+  if (seen && seen[server]) return;
+  await chrome.storage.local.set({ [HTTPS_SEEN_KEY]: { ...(seen || {}), [server]: true } });
+}
+
+async function plainHttpAllowed(server) {
+  if (!sessionStore) return Boolean(httpAllowedInMemory[server]);
+  const { [HTTP_ALLOWED_KEY]: allowed } = await sessionStore.get(HTTP_ALLOWED_KEY);
+  return Boolean(allowed && allowed[server]);
+}
+
+async function allowPlainHttpFor(server) {
+  httpAllowedInMemory[server] = true;
+  if (!sessionStore) return;
+  const { [HTTP_ALLOWED_KEY]: allowed } = await sessionStore.get(HTTP_ALLOWED_KEY);
+  await sessionStore.set({ [HTTP_ALLOWED_KEY]: { ...(allowed || {}), [server]: true } });
+}
+
 /** Storage keys the served pages may read and write through the bridge. */
-const STORAGE_ALLOWED_EXACT = new Set(['simple_launch_profile', 'sealskinPendingConfig']);
+const STORAGE_ALLOWED_EXACT = new Set(['simple_launch_profile', 'home_layout', 'sealskinPendingConfig']);
 const STORAGE_ALLOWED_PREFIX = 'workflow_profile_';
 
 function isAllowedStorageKey(key) {
@@ -91,7 +148,9 @@ async function decryptAesGcm(key, iv, ciphertext) {
 /**
  * Establish the E2EE session. Tries the https session port first and falls
  * back to the plain http API port (Chrome allows E2EE over http for servers
- * with a self-signed certificate that has not been accepted yet).
+ * with a self-signed certificate that has not been accepted yet), except for
+ * a server that has answered over https before (`HTTPS_SEEN_KEY`): its
+ * failure is reported with the HTTPS_HELD prefix instead.
  */
 async function performHandshake(config) {
   console.log('[SealSkin E2EE] Performing handshake...');
@@ -129,9 +188,11 @@ async function performHandshake(config) {
     return { key: aesKey, id: session_id, baseUrl };
   };
 
+  const server = serverOf(config);
+  const held = server !== null && await httpsSeen(server) && !(await plainHttpAllowed(server));
   const endpoints = [];
   if (sessionPort) endpoints.push(`https://${serverIp}:${sessionPort}`);
-  endpoints.push(`http://${serverIp}:${apiPort}`);
+  if (!held) endpoints.push(`http://${serverIp}:${apiPort}`);
 
   let lastError;
   const failures = [];
@@ -139,6 +200,7 @@ async function performHandshake(config) {
     try {
       session = await tryHandshake(url);
       console.log(`[SealSkin E2EE] Handshake successful using ${url}`);
+      if (server && url.startsWith('https://')) await markHttpsSeen(server);
       return;
     } catch (e) {
       console.warn(`[SealSkin E2EE] Handshake failed on ${url}:`, e);
@@ -146,7 +208,7 @@ async function performHandshake(config) {
       failures.push(describeNetworkError(url, e));
     }
   }
-  if (failures.length) throw new Error(failures.join(' '));
+  if (failures.length) throw new Error(`${held ? HTTPS_HELD : ''}${failures.join(' ')}`);
   throw lastError || new Error('Handshake failed on all attempted ports.');
 }
 
@@ -200,7 +262,66 @@ function describeNetworkError(baseUrl, error) {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/**
+ * The web app's API call: JSON as it is, on this origin, under the sign-in
+ * cookie. No `X-Session-ID` goes with it, which is how the server tells it
+ * from an encrypted call.
+ */
+async function plainFetch(url, options = {}) {
+  const headers = { ...options.headers };
+  // One key per logical request so a retried POST is executed once server-side.
+  if ((options.method || 'GET').toUpperCase() !== 'GET') headers['X-Idempotency-Key'] = crypto.randomUUID();
+  if (options.body) headers['Content-Type'] = 'application/json';
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const response = await fetch(url, { ...options, headers, credentials: 'same-origin' });
+      const text = response.status === 204 ? '' : await response.text();
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status} - ${text}`);
+      return text ? JSON.parse(text) : null;
+    } catch (error) {
+      if (!isNetworkError(error)) throw error;
+      if (attempt >= NETWORK_RETRY_DELAYS_MS.length) throw new Error(describeNetworkError(location.origin, error));
+      await sleep(NETWORK_RETRY_DELAYS_MS[attempt]);
+    }
+  }
+}
+
+/**
+ * The address a configuration with an application key reaches the server at: HTTPS on the session
+ * port, under `/companion/`, the lane a reverse proxy that signs users in lets through for the apps.
+ */
+const keyBase = (config) => `https://${config.serverIp}:${config.sessionPort || config.apiPort || '443'}/companion`;
+
+/**
+ * The companion apps' API call with an application key: JSON as it is over
+ * HTTPS to the session port, the key as a bearer, this client's name beside
+ * it. No handshake and no envelope; TLS alone protects it, so the plain
+ * `http://` fallback of the key-file clients does not exist here.
+ */
+async function keyFetch(url, options, config) {
+  const headers = { ...options.headers, Authorization: `Bearer ${config.applicationKey}`, 'X-SealSkin-App': CLIENT };
+  // One key per logical request so a retried POST is executed once server-side.
+  if ((options.method || 'GET').toUpperCase() !== 'GET') headers['X-Idempotency-Key'] = crypto.randomUUID();
+  if (options.body) headers['Content-Type'] = 'application/json';
+  const base = keyBase(config);
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const response = await fetch(`${base}${url}`, { ...options, headers, credentials: 'omit' });
+      const text = response.status === 204 ? '' : await response.text();
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status} - ${text}`);
+      return text ? JSON.parse(text) : null;
+    } catch (error) {
+      if (!isNetworkError(error)) throw error;
+      if (attempt >= NETWORK_RETRY_DELAYS_MS.length) throw new Error(describeNetworkError(base, error));
+      await sleep(NETWORK_RETRY_DELAYS_MS[attempt]);
+    }
+  }
+}
+
 async function secureFetchInBackground(url, options = {}) {
+  if (WEB) return plainFetch(url, options);
+  const keyConfig = await getConfig();
+  if (keyConfig && keyConfig.applicationKey) return keyFetch(url, options, keyConfig);
   // One key per logical request so a retried POST is executed once server-side.
   const idempotencyKey = (options.method || 'GET').toUpperCase() === 'GET' ? null : crypto.randomUUID();
   let sessionRetried = false;
@@ -282,6 +403,66 @@ function getSessionUrlBase(config) {
   return `https://${config.serverIp}:${config.sessionPort}`;
 }
 
+const SESSION_PATH = /^\/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\//i;
+const ROOM_PATH = /^\/room\/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}(?:[/?]|$)/i;
+// A web sign-in's collaboration room is served on its session's own origin too.
+const opensOnOwnOrigin = (sessionUrl) => SESSION_PATH.test(sessionUrl) || (WEB && ROOM_PATH.test(sessionUrl));
+
+// The web app keeps the session domain in memory: pages on its origin can rewrite its storage.
+let webSessionDomain = '';
+// Whether the server serves a web sign-in's sessions on origins of their own (`session_isolation`).
+// A key-file or application-key client's session is served from the server's origin either way,
+// however the server is named, so the extension and the apps open their launches there.
+let webSessionIsolation = false;
+
+/** Keep the session domain the server's status names, which the probe tries first, and whether sessions have their own origins. */
+async function noteSessionDomain(status) {
+  if (!status || typeof status.session_domain !== 'string') return;
+  if (WEB) {
+    webSessionDomain = status.session_domain;
+    webSessionIsolation = Boolean(status.session_isolation);
+    return;
+  }
+  const { sealskinSessionDomain } = await chrome.storage.local.get('sealskinSessionDomain');
+  if (sealskinSessionDomain !== status.session_domain) await chrome.storage.local.set({ sealskinSessionDomain: status.session_domain });
+}
+
+async function sessionDomain() {
+  if (WEB) return webSessionDomain;
+  const { sealskinSessionDomain } = await chrome.storage.local.get('sealskinSessionDomain');
+  return sealskinSessionDomain || '';
+}
+const sessionOriginProbes = new Map();
+
+/**
+ * The name under which this browser reaches a session's own origin,
+ * `<session id>.<suffix>` (see `probeSessionOrigin`), probed once per server
+ * and session domain; a probe that found none runs again at the next ask. A
+ * session opened on its own origin shares no storage, cookies, or service
+ * workers with the web app or other sessions, and one opened on the shared
+ * origin is served as it always was; the web app opens a session on its own
+ * origin or not at all.
+ *
+ * @param {object} config
+ * @returns {Promise<string|null>} The suffix, or null for the shared origin.
+ */
+async function sessionOriginSuffix(config) {
+  const { serverIp: host, sessionPort: port } = config || {};
+  if (!host || !port) return null;
+  const key = `${host}:${port}|${await sessionDomain()}`;
+  if (!sessionOriginProbes.has(key)) {
+    const probe = probeSessionOrigin(host, port, key.split('|')[1]);
+    sessionOriginProbes.set(key, probe);
+    probe.then((suffix) => { if (!suffix) sessionOriginProbes.delete(key); });
+  }
+  return sessionOriginProbes.get(key);
+}
+
+function sessionHref(config, sessionId, sessionUrl, suffix) {
+  if (!suffix) return `${getSessionUrlBase(config)}${sessionUrl}`;
+  return `https://${sessionId}.${suffix}:${config.sessionPort}${sessionUrl}`;
+}
+
 // --- Pending launch context ---------------------------------------------------
 
 /** True when the context can round-trip through chrome.storage (no File). */
@@ -317,19 +498,46 @@ async function takePendingContext() {
 
 const handlers = {
   async secureFetch({ url, options }) {
-    return secureFetchInBackground(url, options);
+    const data = await secureFetchInBackground(url, options);
+    if (url === '/api/admin/status') {
+      await noteSessionDomain(data);
+      // Probed while the user picks an application, the session origin is known by the launch.
+      if (WEB && webSessionIsolation) getConfig().then(sessionOriginSuffix).catch(() => {});
+    }
+    return data;
   },
 
   async getUiBase() {
+    if (WEB) return location.origin;
+    const config = await getConfig();
+    if (config && config.applicationKey) {
+      // The key is tried first, so the host learns of a dormant or revoked key before any page does.
+      await keyFetch('/api/admin/status', { method: 'POST', body: '{}' }, config);
+      return keyBase(config);
+    }
     const currentSession = await ensureSession();
     return currentSession.baseUrl;
+  },
+
+  // The user's word, from the host's held-https panel, for the rest of the browser session.
+  async allowPlainHttp() {
+    const server = serverOf(await getConfig());
+    if (server) await allowPlainHttpFor(server);
+    session = { key: null, id: null, baseUrl: null };
+    return {};
+  },
+
+  // The web app asks ahead of a launch, so the answer is known by the click.
+  async sessionOrigin() {
+    return sessionOriginSuffix(await getConfig());
   },
 
   async getPublicConfig() {
     const config = await getConfig();
     if (!config) return null;
-    const { clientPrivateKey, ...publicConfig } = config;
-    return publicConfig;
+    const { clientPrivateKey, applicationKey, ...publicConfig } = config;
+    // The host learns that a key is held, never the key.
+    return { ...publicConfig, applicationKeyHeld: Boolean(applicationKey) };
   },
 
   async getFullConfig() {
@@ -403,8 +611,11 @@ const handlers = {
 
   async createTabAndTrack({ sessionId, session_url }) {
     const config = await getConfig();
-    const fullUrl = `${getSessionUrlBase(config)}${session_url}`;
-    const newTab = await chrome.tabs.create({ url: fullUrl });
+    const own = WEB && webSessionIsolation && opensOnOwnOrigin(session_url);
+    const suffix = own ? await sessionOriginSuffix(config) : null;
+    // The server serves a web sign-in's session on its own origin alone.
+    if (WEB && own && !suffix) throw new Error(NO_SESSION_ORIGIN);
+    const newTab = await chrome.tabs.create({ url: sessionHref(config, sessionId, session_url, suffix) });
     const map = await getSessionTabMap();
     if (newTab && newTab.id) {
       map[sessionId] = newTab.id;
@@ -432,8 +643,11 @@ const handlers = {
     }
 
     const config = await getConfig();
-    const fullUrl = `${getSessionUrlBase(config)}${sess.session_url}`;
-    const newTab = await chrome.tabs.create({ url: fullUrl });
+    const own = WEB ? webSessionIsolation && opensOnOwnOrigin(sess.session_url) : sess.own_origin;
+    const probed = own ? await sessionOriginSuffix(config) : null;
+    if (WEB && own && !probed) throw new Error(NO_SESSION_ORIGIN);
+    const suffix = own ? probed || config.serverIp : null;
+    const newTab = await chrome.tabs.create({ url: sessionHref(config, sess.session_id, sess.session_url, suffix) });
     if (newTab && newTab.id) {
       map[sess.session_id] = newTab.id;
       await saveSessionTabMap(map);

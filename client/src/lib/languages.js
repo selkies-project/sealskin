@@ -262,3 +262,24 @@ export const supportedLangs = {
   "zh_TW.UTF-8": "zh_TW.UTF-8",
   "zu_ZA.UTF-8": "zu_ZA.UTF-8"
 };
+
+/**
+ * The session locale nearest a browser locale, as the launcher has always picked it.
+ *
+ * @param {string} locale e.g. 'pt-BR', 'en_US'.
+ * @returns {string} A value of `supportedLangs`.
+ */
+export function defaultLanguage(locale) {
+  const [lang = 'en', region = ''] = String(locale || 'en').replace('_', '-').split('-');
+  const langCode = lang.toLowerCase();
+  const regionCode = region.toUpperCase();
+  const values = Object.values(supportedLangs);
+  const exact = `${langCode}_${regionCode}.UTF-8`;
+  if (values.includes(exact)) return exact;
+  const primary = {
+    es: 'ES', fr: 'FR', pt: 'BR', de: 'DE', it: 'IT', ru: 'RU', ja: 'JP', ko: 'KR', th: 'TH',
+    zh: regionCode === 'TW' || regionCode === 'HK' ? regionCode : 'CN',
+  }[langCode];
+  if (primary && values.includes(`${langCode}_${primary}.UTF-8`)) return `${langCode}_${primary}.UTF-8`;
+  return values.find((value) => value.startsWith(`${langCode}_`)) || 'en_US.UTF-8';
+}

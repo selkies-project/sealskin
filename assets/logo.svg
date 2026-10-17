@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="SealSkin">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a2130"/>
+      <stop offset="1" stop-color="#0d1117"/>
+    </linearGradient>
+    <linearGradient id="selkies-gradient" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0.4293" stop-color="#D5499A"/>
+      <stop offset="0.6263" stop-color="#C34AA2"/>
+      <stop offset="0.9945" stop-color="#7967C5"/>
+    </linearGradient>
+    <linearGradient id="shield-gradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#D5499A"/>
+      <stop offset="0.35" stop-color="#C34AA2"/>
+      <stop offset="1" stop-color="#7967C5"/>
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="104" fill="url(#tile)"/>
+  <rect x="16" y="16" width="480" height="240" rx="104" fill="#fff" opacity="0.04"/>
+  <rect x="24" y="24" width="464" height="464" rx="96" fill="none" stroke="#7967C5" stroke-opacity="0.35" stroke-width="2"/>
+  <!-- the mark at four fifths, centered on the tile -->
+  <g transform="translate(51.2,51.2) scale(0.8)">
+    <path d="M 256,36 L 446,92 V 252 C 446,352 364,432 256,478 C 148,432 66,352 66,252 V 92 Z" fill="none" stroke="url(#shield-gradient)" stroke-width="28" stroke-linejoin="round"/>
+  <g transform="translate(103.3,89.0) scale(0.6637)">
+    <g transform="translate(0,460) scale(0.1,-0.1)">
+    <path fill="url(#selkies-gradient)" fill-rule="evenodd" d="M3570 4078 l-65 -19 -125 -36 -125 -35 -95 -28 -95 -28 -95 -26 -95 -27 -45 -12 -45 -12 -355 -707 -354 -708 -79 0 -79 0 5 13 6 12 34 80 35 80 46 105 46 105 0 2 0 3 -13 0 -12 0 -285 -141 -285 -142 -350 -172 -350 -173 -355 -176 -354 -176 -10 -10 -10 -10 1834 0 1834 0 179 178 179 178 -16 90 -16 89 -46 280 -45 279 -5 7 -4 7 -93 53 -92 52 -40 22 -41 22 -22 14 -22 14 0 7 0 8 340 0 340 0 19 38 19 37 96 160 96 159 0 29 0 29 -29 29 -29 29 -234 1 -233 0 -82 102 -83 102 -22 29 -23 28 -23 27 -22 26 -53 67 -52 67 -20 0 -20 -1 -65 -20z m59 -387 l83 -66 15 -11 14 -12 -58 -54 -58 -55 -42 -37 -42 -38 -128 58 -128 57 -8 7 -8 7 73 63 73 64 10 10 10 11 43 38 43 38 12 -7 12 -7 84 -66z M54 1558 l6 -33 14 -105 15 -105 16 -120 17 -120 1 -1 2 -1 135 -93 135 -94 65 -46 65 -47 83 -57 83 -58 4 4 4 4 -14 59 -14 60 -27 120 -26 120 -19 85 -19 85 -5 23 -5 22 1075 0 1075 0 0 13 -1 12 -77 150 -77 150 -1258 3 -1258 2 5 -32z M2940 1584 l0 -6 122 -243 122 -243 -59 -68 -60 -68 -25 -26 -25 -27 -35 -39 -35 -39 -62 -71 -63 -72 0 -6 0 -6 199 0 199 0 183 136 184 137 124 91 123 91 30 25 30 26 -68 92 -69 92 -85 115 -85 115 -322 0 -323 0 0 -6z"/>
+  </g>
+  </g>
+  </g>
+</svg>

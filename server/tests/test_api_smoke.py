@@ -14,6 +14,11 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from fastapi.testclient import TestClient
 
 from app.settings import settings
+from app.state import state
+from tests.conftest import PROXY_SECRET
+
+#: What Caddy's forward_auth sub-request carries.
+INTERNAL = {"X-SealSkin-Secret": PROXY_SECRET}
 
 pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
 
@@ -111,7 +116,7 @@ def api_client(tmp_path, monkeypatch, store_with_firefox):
     from app import security
 
     security.init_server_keys()
-    with TestClient(api_module.api_app) as http:
+    with TestClient(api_module.api_app, client=("127.0.0.1", 50000)) as http:
         client = Client(http, server_pub, "tester", user_priv)
         client.handshake()
         yield client
@@ -128,6 +133,7 @@ def test_template_schema_is_public(api_client):
 def test_status_install_patch_flow(api_client, store_with_firefox):
     status, data = api_client.call("POST", "/api/admin/status", {})
     assert status == 200 and data["is_admin"] is True and data["username"] == "tester"
+    assert data["expires"] is None and data["provider_groups"] == [] and data["storage_used"] == 0
 
     status, available = api_client.call(
         "GET", "/api/admin/apps/available?url=https://example.invalid/apps.yml&store_name=Test%20Store"
@@ -180,10 +186,21 @@ def test_status_install_patch_flow(api_client, store_with_firefox):
     assert status == 204
 
 
+def test_gpu_options_are_refreshed_when_offered(api_client, monkeypatch):
+    from app.providers.docker_provider import DockerProvider
+
+    async def refresh(self):
+        state.available_gpus[:] = [{"device": "gpu-l40s", "driver": "nvidia", "type": "nvidia"}]
+
+    monkeypatch.setattr(DockerProvider, "refresh_gpus", refresh)
+    status, data = api_client.call("POST", "/api/admin/data", {})
+    assert status == 200 and [gpu["device"] for gpu in data["gpus"]] == ["gpu-l40s"]
+
+
 def test_unauthenticated_and_bad_session_are_rejected(api_client):
     resp = api_client.http.post("/api/admin/status", headers={"X-Session-ID": "nope"})
     assert resp.status_code in (400, 401)
-    assert api_client.http.get("/internal/resolve_session/abc").status_code == 404
+    assert api_client.http.get("/internal/resolve_session/abc", headers=INTERNAL).status_code == 404
 
 
 def test_idempotency_key_replays_without_reexecuting(api_client, store_with_firefox):
@@ -274,6 +291,12 @@ def test_template_editors_keep_docker_settings_to_administrators(role_clients):
     assert editor.call("POST", templates, {"name": "Hosted", "settings": same})[0] == 201
 
     assert editor.call("DELETE", f"{templates}/Hosted")[0] == 403
+    for twin in ("hosted", "HOSTED"):
+        assert editor.call("POST", templates, {"name": twin, "settings": {"TITLE": "Twin"}})[0] == 409
+        assert boss.call("POST", templates, {"name": twin, "settings": {}})[0] == 409
+        assert editor.call("DELETE", f"{templates}/{twin}")[0] == 404
+    listed = {t["name"]: t["settings"] for t in boss.call("GET", templates)[1]}
+    assert "hosted" not in listed and listed["Hosted"]["DOCKER_DEVICES"] == devices
     assert editor.call("DELETE", f"{templates}/Team")[0] == 204
     assert boss.call("DELETE", f"{templates}/Hosted")[0] == 204
     status, data = boss.call("POST", "/api/admin/status", {})
