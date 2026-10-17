@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/selkies-project/sealskin/main/mobile/assets/logo.png" alt="SealSkin" width="160">
+  <img src="https://raw.githubusercontent.com/selkies-project/sealskin/main/assets/logo.svg" alt="SealSkin" width="160" height="160">
 </p>
 
 <h1 align="center">SealSkin</h1>
@@ -119,6 +119,7 @@ the site is rebuilt on every push to `main`.
 
 ```
 VERSION              the one version number for server, UI, extension and app
+assets/              the logo tile the README shows
 server/              Python API server, Caddy template, tests, wheel
 client/              web UI source and build (dist/ui, dist/extension, dist/mobile)
 browser_extension/   manifests, icons and packaging for the extension shell
