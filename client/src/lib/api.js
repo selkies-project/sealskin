@@ -1,24 +1,36 @@
 /**
  * API helpers for the served pages.
  *
- * Every call goes through the shell bridge: the host signs the JWT where the
- * API needs it and handles the E2EE session. Pages never see the private key.
+ * Every call goes through the shell bridge: the extension and the mobile app
+ * sign the JWT and handle the E2EE session, and the web app calls the server
+ * under its sign-in cookie. Pages never see a key.
  */
 
 import { bridge, request } from './bridge.js';
+import { apiError } from './api-error.js';
 
 /**
- * Encrypted API call.
+ * API call through the shell.
  *
  * Mirrors the historical page-side wrapper: an empty reply to a DELETE or POST
  * resolves to `{}` so callers can destructure without null checks.
  *
  * @param {string} url Path beginning with `/api/`.
  * @param {object} [options] fetch-like options: method, headers, body (string).
- * @returns {Promise<any>} Decrypted JSON body.
+ * @param {object} [opts] Bridge request options, such as `timeout`.
+ * @returns {Promise<any>} JSON body.
+ * @throws {Error} With the HTTP status as `status` and, in the web app, the server's `detail` as its message.
  */
-export async function secureFetch(url, options = {}) {
-  const data = await bridge.secureFetch(url, options);
+export async function secureFetch(url, options = {}, opts = {}) {
+  let data;
+  try {
+    data = await bridge.secureFetch(url, options, opts);
+  } catch (error) {
+    const { status, detail } = apiError(error);
+    if (!status) throw error;
+    // The web app shows the server's sentence; the other shells keep the message they always showed.
+    throw Object.assign(bridge.info && bridge.info.shell === 'web' ? new Error(detail) : error, { status });
+  }
   if (data === null && (options.method === 'DELETE' || options.method === 'POST')) {
     return {};
   }

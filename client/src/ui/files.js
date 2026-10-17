@@ -7,6 +7,7 @@
 import { bridge } from '../lib/bridge.js';
 import { secureFetch } from '../lib/api.js';
 import { loadTranslator, applyTranslations } from '../lib/i18n.js';
+import { confirmDialog } from '../lib/modal.js';
 import {
   announce, escapeHtml, formatBytes, timeUntil, formatDate, showToast, downloadBlob,
   addMobileSafeArea, addMobileBackButton,
@@ -32,6 +33,8 @@ const state = {
   isLoading: false,
   currentView: 'files',
   uploadQueue: new Map(),
+  /** The `/api/cluster` answer in a cluster: which node holds each home. */
+  cluster: null,
 };
 
 // --- DOM ELEMENTS ---
@@ -58,8 +61,6 @@ const paginationControls = document.getElementById('pagination-controls');
 const fileManagerFooter = document.getElementById('file-manager-footer');
 const newFolderModal = document.getElementById('new-folder-modal');
 const newFolderForm = document.getElementById('new-folder-form');
-const confirmDeleteModal = document.getElementById('confirm-delete-modal');
-const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
 const fileContentArea = document.querySelector('.file-content-area');
 const shareFileModal = document.getElementById('share-file-modal');
 const shareFileInfo = document.getElementById('share-file-info');
@@ -130,16 +131,28 @@ async function fetchPublicShares() {
 
 // --- RENDER FUNCTIONS ---
 
+/** The name of the node that holds a home directory, or '' outside a cluster or for a home with no record. */
+function holderName(dir) {
+  const { cluster } = state;
+  const id = cluster && cluster.homes[dir];
+  if (!id) return '';
+  const node = cluster.nodes.find((n) => n.id === id);
+  return node ? node.name || node.id : id;
+}
+
 function renderSidebar() {
   homeDirNav.innerHTML = '';
 
   const normalHomeDirs = state.homeDirs.filter((d) => d !== SPECIAL_HOME).sort();
+  const clustered = Boolean(state.cluster);
 
   const specialBtn = document.createElement('button');
   specialBtn.className = `nav-link special-homedir ${state.currentView === 'files' && state.currentHome === SPECIAL_HOME ? 'active' : ''}`;
   specialBtn.dataset.homedir = SPECIAL_HOME;
   specialBtn.dataset.view = 'files';
-  specialBtn.innerHTML = `<i class="fas fa-star fa-fw"></i> <span>${t('files.sidebar.sharedFiles')}</span>`;
+  // In a cluster each directory is tagged with where it lives; the tag's tooltip says what that means.
+  const chip = (label, help) => `<span class="node-chip" title="${escapeHtml(help)}">${escapeHtml(label)}</span>`;
+  specialBtn.innerHTML = `<i class="fas fa-star fa-fw"></i> <span>${t('files.sidebar.sharedFiles')}</span>${clustered ? chip(t('files.sidebar.allNodes'), t('files.sidebar.sharedHelp')) : ''}`;
   homeDirNav.appendChild(specialBtn);
 
   normalHomeDirs.forEach((dir) => {
@@ -147,7 +160,8 @@ function renderSidebar() {
     button.className = `nav-link ${state.currentView === 'files' && state.currentHome === dir ? 'active' : ''}`;
     button.dataset.homedir = dir;
     button.dataset.view = 'files';
-    button.innerHTML = `<i class="fas fa-hdd fa-fw"></i> <span>${escapeHtml(dir)}</span>`;
+    const node = holderName(dir);
+    button.innerHTML = `<i class="fas fa-hdd fa-fw"></i> <span>${escapeHtml(dir)}</span>${node ? chip(node, t('files.sidebar.homeHelp', { node })) : ''}`;
     homeDirNav.appendChild(button);
   });
 
@@ -404,13 +418,16 @@ async function downloadFile(home, path) {
   const caps = info.capabilities || {};
 
   if (caps.streamDownload) {
-    // Chrome extension: the service worker streams the chunks straight into a download.
+    // The Chrome extension and the web app: a service worker streams the chunks straight into a download.
     try {
       await bridge.downloadFile(home, path, filename);
+      return;
     } catch (error) {
-      displayStatus(t('files.status.downloadFailed', { error: error.message }), true);
+      if (error.message !== 'no-stream-worker') {
+        displayStatus(t('files.status.downloadFailed', { error: error.message }), true);
+        return;
+      }
     }
-    return;
   }
 
   displayStatus(t('files.status.downloading', { filename }) || `Downloading ${filename}...`);
@@ -429,8 +446,6 @@ async function downloadFile(home, path) {
 }
 
 async function handleDeleteSelected() {
-  confirmDeleteModal.style.display = 'none';
-
   let pathsToDelete = Array.from(state.selectedItems);
   if (state.currentHome !== SPECIAL_HOME) {
     const protectedPaths = ['/Desktop', '/Desktop/files'];
@@ -657,8 +672,8 @@ async function init() {
   info = await announce();
   t = await loadTranslator(info.locale);
 
+  if (info.shell === 'mobile') addMobileSafeArea();
   if (info.shell === 'mobile') {
-    addMobileSafeArea();
     const header = document.querySelector('.sidebar-header');
     if (header) addMobileBackButton(header, () => window.history.back());
   }
@@ -689,6 +704,14 @@ async function init() {
       const separator = navContainer.previousElementSibling;
       if (separator && separator.classList.contains('nav-separator')) separator.style.display = 'none';
     }
+  }
+
+  // Where each home lives, in a cluster: the sidebar tags say so.
+  try {
+    const mine = await secureFetch('/api/cluster', { method: 'GET' });
+    state.cluster = mine && mine.clustered ? mine : null;
+  } catch (error) {
+    state.cluster = null;
   }
 
   const homeDirs = await fetchHomeDirs();
@@ -814,16 +837,17 @@ async function init() {
     newFolderForm.reset();
   });
 
-  deleteSelectedBtn.addEventListener('click', () => {
-    document.getElementById('confirm-delete-message').textContent = t('files.modals.confirmDelete.message', { count: state.selectedItems.size });
-    confirmDeleteModal.style.display = 'block';
+  const confirmDelete = (count) => confirmDialog(t, {
+    title: t('files.modals.confirmDelete.title'),
+    message: t('files.modals.confirmDelete.message', { count }),
+    confirm: t('common.delete'),
+    danger: true,
   });
-  confirmDeleteBtn.addEventListener('click', handleDeleteSelected);
-
-  deleteSelectedSharesBtn.addEventListener('click', () => {
-    if (confirm(t('files.modals.confirmDelete.message', { count: state.selectedShares.size }))) {
-      handleDeleteSelectedShares();
-    }
+  deleteSelectedBtn.addEventListener('click', async () => {
+    if (await confirmDelete(state.selectedItems.size)) handleDeleteSelected();
+  });
+  deleteSelectedSharesBtn.addEventListener('click', async () => {
+    if (await confirmDelete(state.selectedShares.size)) handleDeleteSelectedShares();
   });
 
   uploadFileBtn.addEventListener('click', () => fileUploadInput.click());

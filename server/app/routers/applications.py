@@ -1,4 +1,4 @@
-"""Application listing and icons for authenticated users."""
+"""Application listing and icons for authenticated users, and the pictures every page may load."""
 
 from __future__ import annotations
 
@@ -8,8 +8,9 @@ import os
 import re
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 
+from .. import logos
 from ..models import Application
 from ..security import EncryptedRoute, verify_token
 from ..settings import settings
@@ -17,30 +18,31 @@ from ..state import state
 
 logger = logging.getLogger(__name__)
 router = APIRouter(route_class=EncryptedRoute)
+#: The pictures of applications and links are public: a store or a remote published them, and an `img` tag carries no sign-in.
+public_router = APIRouter()
 
 
-def user_can_access(app_users: list[str], app_groups: list[str], username: str, group: str) -> bool:
+def user_can_access(app_users: list[str], app_groups: list[str], username: str, groups: list[str] | str) -> bool:
     """Tell whether a user may see an application.
 
     Args:
         app_users: Usernames allowed by the app (`"all"` allows everyone).
         app_groups: Groups allowed by the app (`"all"` allows everyone).
         username: The user.
-        group: The user's effective group.
+        groups: The groups the user is in, or a single group name.
 
     Returns:
-        `True` when access is allowed.
+        `True` when the user, or one of their groups, is allowed.
     """
-    return (
-        "all" in app_users or username in app_users or "all" in app_groups or group in app_groups
-    )
+    held = {groups} if isinstance(groups, str) else set(groups)
+    return "all" in app_users or username in app_users or "all" in app_groups or bool(held & set(app_groups))
 
 
 @router.post("/api/applications", response_model=list[Application])
 async def get_applications(user: dict[str, Any] = Depends(verify_token)) -> list[Application]:
     """List the applications the calling user may launch."""
     username = user["username"]
-    user_group = user.get("group", "none")
+    user_groups = user.get("groups") or []
     apps = [
         Application(
             id=app.id,
@@ -52,9 +54,10 @@ async def get_applications(user: dict[str, Any] = Depends(verify_token)) -> list
             dri3_support=app.provider_config.dri3_support,
             url_support=app.provider_config.url_support,
             extensions=app.provider_config.extensions,
+            type=app.provider_config.type or "",
         )
         for app in state.installed_apps.values()
-        if user_can_access(app.users, app.groups, username, user_group)
+        if user_can_access(app.users, app.groups, username, user_groups)
     ]
     return sorted(apps, key=lambda a: a.name.lower())
 
@@ -62,8 +65,14 @@ async def get_applications(user: dict[str, Any] = Depends(verify_token)) -> list
 @router.get("/api/app_icon/{app_id}")
 async def get_app_icon(app_id: str, user: dict[str, Any] = Depends(verify_token)) -> dict[str, str]:
     """Return a custom-uploaded app icon as base64 inside JSON."""
-    if not re.match(r"^[a-zA-Z0-9_-]+$", app_id):
+    if not re.fullmatch(r"[a-zA-Z0-9_-]+", app_id):
         raise HTTPException(status_code=400, detail="Invalid application ID.")
+    # Seen only by whom the app is listed for; 404 as for no icon, so it names no app.
+    app = state.installed_apps.get(app_id)
+    if not app or not (
+        user.get("is_admin") or user_can_access(app.users, app.groups, user["username"], user.get("groups") or [])
+    ):
+        raise HTTPException(status_code=404, detail="Icon not found.")
 
     icons_root = os.path.abspath(settings.app_icons_path)
     icon_path = os.path.abspath(os.path.join(icons_root, f"{app_id}.png"))
@@ -77,3 +86,9 @@ async def get_app_icon(app_id: str, user: dict[str, Any] = Depends(verify_token)
     except OSError as exc:
         logger.error("Failed to read icon for app %s: %s", app_id, exc)
         raise HTTPException(status_code=500, detail="Error retrieving icon.") from exc
+
+
+@public_router.get("/api/logos/{name}", include_in_schema=False)
+async def get_logo(name: str, request: Request) -> Response:
+    """Serve a picture a store, a remote, or a home link named, from this node's copy."""
+    return await logos.serve(name, request)

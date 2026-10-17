@@ -12,6 +12,10 @@ from app.routers import internal, sessions, shares
 from app.security import hash_share_password
 from app.settings import settings
 from app.state import state
+from tests.conftest import PROXY_SECRET
+
+#: What Caddy's forward_auth sub-request carries.
+INTERNAL = {"X-SealSkin-Secret": PROXY_SECRET}
 
 pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
 
@@ -24,7 +28,7 @@ def http():
     app.include_router(shares.public_router)
     app.include_router(internal.router)
     app.include_router(sessions.proxy_router)
-    yield TestClient(app, raise_server_exceptions=False)
+    yield TestClient(app, raise_server_exceptions=False, client=("127.0.0.1", 50000))
     state.public_shares.clear()
     state.download_tokens.clear()
     state.share_password_failures.clear()
@@ -78,8 +82,8 @@ def test_forward_auth_accepts_each_token_and_nothing_else(http):
     }
     url = f"/internal/resolve_session/{SESSION_ID}"
     for query in ({"access_token": "access"}, {"token": "controller"}, {"token": "viewer"}):
-        assert http.get(url, params=query).status_code == 200, query
+        assert http.get(url, params=query, headers=INTERNAL).status_code == 200, query
     for query in ({}, {"access_token": "wrong"}, {"token": "wrong"}, {"access_token": "é"}, {"token": "é"}):
-        assert http.get(url, params=query).status_code == 403, query
+        assert http.get(url, params=query, headers=INTERNAL).status_code == 403, query
     for token in ("wrong", "é"):
         assert http.get(f"/{SESSION_ID}/", params={"access_token": token}).status_code == 403, token

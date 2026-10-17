@@ -2,9 +2,9 @@
 
 `build_launch_spec` assembles everything a provider needs to start an
 application container (environment, volumes, GPU, autostart script, Docker
-overrides). It is used by the launch routes for new sessions and by the
-collaboration module when a room swaps to another application, so the two
-paths can no longer drift apart.
+run options, which the Kubernetes backend maps onto the pod). It is used by
+the launch routes for new sessions and by the collaboration module when a room
+swaps to another application, so the two paths can no longer drift apart.
 """
 
 from __future__ import annotations
@@ -24,17 +24,29 @@ from typing import Any
 import docker
 from fastapi import HTTPException
 
-from . import config_store, user_manager
-from .docker_utils import translate_path_to_host
+from . import (
+    audit,
+    cluster,
+    config_store,
+    filesync,
+    progress,
+    prootapps,
+    quota,
+    user_manager,
+    vpn,
+    webclient,
+)
 from .fsutil import safe_copytree, safe_join, sanitize_for_filename, unique_filename
 from .models import InstalledApp
-from .providers.docker_provider import DockerProvider
+from .providers import get_provider
 from .settings import settings
 from .state import state
 
 logger = logging.getLogger(__name__)
 
 DOCKER_LIST_KEYS = ("devices", "volumes")
+#: Ephemeral directories being deleted, referenced until their task ends.
+_removals: set[asyncio.Task] = set()
 
 # User-level hardening switches (see `UserSettings`) and the base image preset
 # each one forces on. Applied after the template and the per-app environment so
@@ -67,13 +79,14 @@ class LaunchSpec:
 
     Attributes:
         env: Container environment.
-        volumes: Docker volume mapping (host path -> bind spec).
+        volumes: Server paths to mount, each to `{"bind", "mode"}`.
         gpu_config: Selected GPU, or `None`.
         app_config: Resolved app dictionary with merged `docker_overrides`.
         host_mount_path: Server-side path mounted as the session home.
         shared_files_path: Server-side path mounted at `Desktop/files`.
         launch_context: What the session was opened with (URL or file).
         collaboration: Extra provider kwargs for collaboration sessions.
+        vpn: The gateway the session leaves through (`vpn.acquire`), or `None`.
     """
 
     env: dict[str, str]
@@ -84,6 +97,7 @@ class LaunchSpec:
     shared_files_path: str | None
     launch_context: dict[str, Any] | None = None
     collaboration: dict[str, Any] = field(default_factory=dict)
+    vpn: dict[str, Any] | None = None
 
     def provider_kwargs(self, session_id: str) -> dict[str, Any]:
         """Return the keyword arguments for `provider.launch`."""
@@ -92,7 +106,8 @@ class LaunchSpec:
             "env_vars": self.env,
             "volumes": self.volumes,
             "gpu_config": self.gpu_config,
-            "network": state.discovered_network,
+            "network": (self.vpn or {}).get("network") or state.discovered_network,
+            "vpn": self.vpn,
         }
         kwargs.update(self.collaboration)
         return kwargs
@@ -241,17 +256,54 @@ def validate_gpu(
         effective_settings: The user's effective settings.
         app: Application being launched.
 
+    `auto` takes the GPU of this node the app supports with the fewest
+    sessions on it, as a launch another node forwarded asks. A user without
+    `gpu_share` gets a GPU no session uses and keeps it alone; any other
+    user gets one no session holds alone. `node_gpu_slots` caps the GPU
+    sessions of the node.
+
     Returns:
         The GPU descriptor from `state.available_gpus`, or `None`.
 
     Raises:
-        HTTPException: 400 when the GPU is unavailable or unsupported.
+        HTTPException: 400 when the GPU is unavailable or unsupported, 503
+            when every GPU the session could use is taken.
     """
     if not selected_gpu or not effective_settings.get("gpu", False):
         return None
+    using: dict[str, int] = {}
+    alone: set[str] = set()
+    for data in state.sessions.values():
+        device = (data.get("gpu_config") or {}).get("device")
+        if device:
+            using[device] = using.get(device, 0) + 1
+            if data.get("gpu_exclusive"):
+                alone.add(device)
+    if settings.node_gpu_slots and sum(using.values()) >= settings.node_gpu_slots:
+        raise HTTPException(status_code=503, detail="Every GPU slot of this node is taken.")
+    exclusive = not effective_settings.get("gpu_share", True)
+
+    def free(gpu: dict[str, Any]) -> bool:
+        return gpu["device"] not in alone and not (exclusive and using.get(gpu["device"]))
+
+    if selected_gpu == "auto":
+        supported = [
+            g
+            for g in state.available_gpus
+            if (g["type"] == "nvidia" and app.provider_config.nvidia_support)
+            or (g["type"] == "dri3" and app.provider_config.dri3_support)
+        ]
+        if not supported:
+            return None
+        candidates = sorted((g for g in supported if free(g)), key=lambda g: using.get(g["device"], 0))
+        if not candidates:
+            raise HTTPException(status_code=503, detail="Every GPU of this node is taken.")
+        return candidates[0]
     gpu_info = next((g for g in state.available_gpus if g["device"] == selected_gpu), None)
     if not gpu_info:
         raise HTTPException(status_code=400, detail=f"Selected GPU '{selected_gpu}' is not available.")
+    if not free(gpu_info):
+        raise HTTPException(status_code=503, detail="That GPU is taken; pick another or try later.")
     if gpu_info["type"] == "nvidia" and not app.provider_config.nvidia_support:
         raise HTTPException(status_code=400, detail=f"App '{app.name}' does not support Nvidia GPUs.")
     if gpu_info["type"] == "dri3" and not app.provider_config.dri3_support:
@@ -336,6 +388,37 @@ def write_autostart(app: InstalledApp, host_mount_path: str, wayland_mode: bool,
         logger.error("[%s] Failed to write autostart script: %s", session_id, exc)
 
 
+def held_slots(value: Any) -> list[int]:
+    """The gamepad slots a participant's `slot` holds: none, one, or a list.
+
+    Args:
+        value: The participant record's `slot` (`controller_slot` for the
+            controller).
+
+    Returns:
+        The slot numbers, empty for none.
+    """
+    items = value if isinstance(value, list) else [value]
+    return [s for s in items if isinstance(s, int) and not isinstance(s, bool)]
+
+
+def slot_value(slots: list[int]) -> int | list[int] | None:
+    """`slots` as a participant record and the token table keep them.
+
+    `None` for none, the number for one, and the list for several, which
+    Selkies gives one each to the participant's local controllers, in order.
+
+    Args:
+        slots: Slot numbers, as `held_slots` gives them.
+
+    Returns:
+        The value to store.
+    """
+    if not slots:
+        return None
+    return slots[0] if len(slots) == 1 else list(slots)
+
+
 def collaboration_initial_tokens(session: dict[str, Any]) -> dict[str, Any]:
     """Build the token table pushed to a collaboration container.
 
@@ -351,14 +434,14 @@ def collaboration_initial_tokens(session: dict[str, Any]) -> dict[str, Any]:
     tokens: dict[str, Any] = {
         controller_token: {
             "role": "controller",
-            "slot": session.get("controller_slot"),
+            "slot": slot_value(held_slots(session.get("controller_slot"))),
             "mk_control": (mk_owner == controller_token) if mk_owner else True,
         }
     }
     for viewer in session.get("viewers", []):
         tokens[viewer["token"]] = {
             "role": "viewer",
-            "slot": viewer.get("slot"),
+            "slot": slot_value(held_slots(viewer.get("slot"))),
             "mk_control": viewer["token"] == mk_owner,
         }
     return tokens
@@ -377,6 +460,7 @@ def build_launch_spec(
     shared_files_path: str | None,
     collaboration: dict[str, Any] | None = None,
     forced_env: dict[str, str] | None = None,
+    proot_catalog_path: str | None = None,
 ) -> LaunchSpec:
     """Assemble the environment, volumes, and Docker options for a launch.
 
@@ -393,6 +477,8 @@ def build_launch_spec(
         collaboration: Extra provider kwargs for collaboration sessions.
         forced_env: Variables applied last, after the template and the app's
             own overrides; the user-level hardening from `hardening_env`.
+        proot_catalog_path: This node's folder of the user's PRoot Apps catalog,
+            mounted read-only at `prootapps.MOUNT_PATH`, or `None`.
 
     Returns:
         A `LaunchSpec`.
@@ -416,6 +502,13 @@ def build_launch_spec(
             app.name,
         )
 
+    app_config = app.model_dump()
+    provider_config = app_config.setdefault("provider_config", {})
+    provider_config["docker_overrides"] = merge_docker_overrides(
+        provider_config.get("docker_overrides"), extract_docker_overrides(template_settings)
+    )
+    env.update({k: str(v) for k, v in provider_config["docker_overrides"].pop("environment", {}).items()})
+
     launch_context: dict[str, Any] | None = None
     if extra_env:
         env.update(extra_env)
@@ -428,24 +521,21 @@ def build_launch_spec(
     if forced_env:
         env.update(forced_env)
 
-    if gpu_config and (gpu_config["type"] == "dri3" or (gpu_config["type"] == "nvidia" and wayland_mode)):
+    # A Kubernetes GPU is a resource the device plugin mounts wherever it likes.
+    if (
+        gpu_config
+        and gpu_config["device"].startswith("/dev/")
+        and (gpu_config["type"] == "dri3" or wayland_mode)
+    ):
         env["DRI_NODE"] = gpu_config["device"]
         env["DRINODE"] = gpu_config["device"]
-
-    app_config = app.model_dump()
-    template_overrides = extract_docker_overrides(template_settings)
-    if template_overrides:
-        provider_config = app_config.setdefault("provider_config", {})
-        provider_config["docker_overrides"] = merge_docker_overrides(
-            provider_config.get("docker_overrides"), template_overrides
-        )
 
     if host_mount_path:
         write_autostart(app, host_mount_path, wayland_mode, session_id)
 
     volumes: dict[str, dict[str, str]] = {}
     if host_mount_path:
-        volumes[translate_path_to_host(host_mount_path)] = {
+        volumes[host_mount_path] = {
             "bind": settings.container_config_path,
             "mode": "rw",
         }
@@ -453,10 +543,14 @@ def build_launch_spec(
         os.makedirs(shared_files_path, exist_ok=True, mode=0o755)
         if host_mount_path:
             os.makedirs(os.path.join(host_mount_path, "Desktop", "files"), exist_ok=True, mode=0o755)
-        volumes[translate_path_to_host(shared_files_path)] = {
+        volumes[shared_files_path] = {
             "bind": os.path.join(settings.container_config_path, "Desktop", "files"),
             "mode": "rw",
         }
+    if proot_catalog_path:
+        # proot-apps installs from the folder PA_REPO_FOLDER names and reaches no registry.
+        volumes[proot_catalog_path] = {"bind": prootapps.MOUNT_PATH, "mode": "ro"}
+        env["PA_REPO_FOLDER"] = prootapps.MOUNT_PATH
 
     return LaunchSpec(
         env=env,
@@ -476,7 +570,7 @@ DEFAULT_TIMEZONE = "Etc/UTC"
 
 def is_valid_timezone(name: Any) -> bool:
     """Whether `name` looks like an IANA zone name (`Europe/Berlin`, `UTC`)."""
-    return isinstance(name, str) and 0 < len(name) <= 64 and bool(_TZ_NAME_RE.match(name))
+    return isinstance(name, str) and 0 < len(name) <= 64 and bool(_TZ_NAME_RE.fullmatch(name))
 
 
 def resolve_timezone(*candidates: Any) -> str:
@@ -492,6 +586,10 @@ def resolve_timezone(*candidates: Any) -> str:
             return candidate
     server_tz = os.environ.get("TZ")
     return server_tz if is_valid_timezone(server_tz) else DEFAULT_TIMEZONE
+
+
+#: Session environment a template never overrides: who the container runs as, and how it is reached.
+RESERVED_ENV = ("SUBFOLDER", "PUID", "PGID", "CUSTOM_USER", "PASSWORD", "SELKIES_MASTER_TOKEN", "SELKIES_ALLOWED_ORIGINS")
 
 
 def session_base_env(
@@ -599,6 +697,13 @@ async def _resolve_storage(
     return new_ephemeral_dir(), new_ephemeral_dir("_shared")
 
 
+def session_url_for(session_id: str, access_token: str, controller_token: str | None = None) -> str:
+    """Return the path a new session opens at: its room when it has a controller token, else itself."""
+    if controller_token:
+        return f"/room/{session_id}?access_token={access_token}&token={controller_token}"
+    return f"/{session_id}/?access_token={access_token}"
+
+
 async def launch_application(
     application_id: str,
     username: str,
@@ -614,8 +719,11 @@ async def launch_application(
     launch_in_room_mode: bool = False,
     wayland_mode: bool = True,
     timezone: str | None = None,
+    auth_user: dict[str, Any] | None = None,
+    vpn_id: str | None = None,
+    vpn_endpoint: str | None = None,
 ) -> dict[str, str]:
-    """Start a new session for a user.
+    """Start a new session for a user on this node.
 
     Args:
         application_id: Installed app id.
@@ -633,6 +741,13 @@ async def launch_application(
         wayland_mode: Use the Wayland compositor.
         timezone: The browser's IANA zone; the container's `TZ` (see
             `resolve_timezone`).
+        auth_user: The record of the user launching, when a user is: the app
+            must be open to them, a session of a web sign-in is served by
+            this node's copy of the application's web client (on an origin
+            of its own with `session_isolation`), and the user's storage
+            limit applies.
+        vpn_id: The VPN profile the session's traffic leaves through, or `None`.
+        vpn_endpoint: The profile's endpoint to use, or `None` for the first offered.
 
     Returns:
         `{"session_url": str, "session_id": str}`.
@@ -643,7 +758,14 @@ async def launch_application(
     app = state.installed_apps.get(application_id)
     if not app:
         raise HTTPException(status_code=404, detail=f"Application with ID '{application_id}' not found.")
+    if auth_user and not auth_user.get("is_admin"):
+        from .routers.applications import user_can_access
 
+        if not user_can_access(app.users, app.groups, username, auth_user.get("groups") or []):
+            raise HTTPException(status_code=403, detail="This application is not open to this account.")
+
+    vpn_choice = vpn.choose(vpn_id, vpn_endpoint, auth_user, effective_settings)
+    native = bool(auth_user) and auth_user.get("via") != "key"
     session_id = str(uuid.uuid4())
     access_token = secrets.token_urlsafe(32)
     master_token = controller_token = viewer_token = None
@@ -655,10 +777,23 @@ async def launch_application(
     password = str(uuid.uuid4())
     timezone = resolve_timezone(timezone)
 
-    host_mount_path, shared_files_path = await _resolve_storage(
-        app, session_id, username, effective_settings, home_name, forced_rw_mount
-    )
+    progress.step("storage")
+    try:
+        host_mount_path, shared_files_path = await _resolve_storage(
+            app, session_id, username, effective_settings, home_name, forced_rw_mount
+        )
+    except HTTPException as exc:
+        progress.finish(error=str(exc.detail))
+        raise
+    if selected_gpu:
+        await get_provider().refresh_gpus()
     gpu_config = validate_gpu(selected_gpu, effective_settings, app)
+    persistent = bool(host_mount_path) and not host_mount_path.startswith(ephemeral_base()) and not forced_rw_mount
+    if persistent and auth_user:
+        await quota.check_storage(auth_user)
+    # The session starts over the node's copy; the store's newer files arrive under it as it comes up.
+    if persistent and shared_files_path and filesync.enabled():
+        filesync.pull_later(username, shared_files_path)
 
     collaboration: dict[str, Any] = {}
     if launch_in_room_mode:
@@ -680,7 +815,13 @@ async def launch_application(
         shared_files_path=shared_files_path,
         collaboration=collaboration,
         forced_env=hardening_env(effective_settings),
+        proot_catalog_path=prootapps.mount_path_for(effective_settings),
     )
+
+    quota.cap_resources(spec.app_config["provider_config"]["docker_overrides"], effective_settings)
+    if vpn_choice and spec.app_config["provider_config"]["docker_overrides"].get("network_mode"):
+        progress.finish(error="The application's template sets a network mode, which leaves no room for a VPN.")
+        raise HTTPException(status_code=400, detail="The application's template sets a network mode, which leaves no room for a VPN.")
 
     launch_context = spec.launch_context
     if file_bytes is not None and filename and shared_files_path:
@@ -695,9 +836,31 @@ async def launch_application(
             )
             launch_context = {"type": "file", "value": filename}
 
+    vpn_record: dict[str, Any] | None = None
+    holding: str | None = None
     try:
-        provider = DockerProvider(spec.app_config)
+        if vpn_choice:
+            record, endpoint = vpn_choice
+            spec.vpn = await vpn.acquire(record, endpoint, session_id)
+            holding = spec.vpn["key"]
+            vpn_record = {
+                "profile": record["id"],
+                "endpoint": endpoint["id"],
+                "key": spec.vpn["key"],
+                "name": record["name"],
+                "label": endpoint["label"],
+                **{k: spec.vpn[k] for k in ("spoke_public_key", "spoke_address") if k in spec.vpn},
+            }
+        provider = get_provider(spec.app_config)
         instance = await provider.launch(**spec.provider_kwargs(session_id))
+        progress.step("client")
+        try:
+            web_root = await webclient.root_for_session(
+                app.provider_config.image, spec.env, required=native and not settings.session_isolation
+            )
+        except HTTPException:
+            await provider.stop(instance["instance_id"])
+            raise
         now = time.time()
         session: dict[str, Any] = {
             "instance_id": instance["instance_id"],
@@ -715,8 +878,17 @@ async def launch_application(
             "custom_user": custom_user,
             "password": password,
             "gpu_config": gpu_config,
+            "gpu_exclusive": bool(gpu_config) and not effective_settings.get("gpu_share", True),
+            "native": native,
+            "lab": bool(forced_rw_mount) and native,
+            "web_root": web_root,
+            "home_name": home_name or "",
+            "language": language or "",
+            "selected_gpu": selected_gpu or "",
+            "provider_groups": list((auth_user or {}).get("provider_groups") or []),
             "wayland_mode": wayland_mode,
             "timezone": timezone,
+            "vpn": vpn_record,
             "container_registry": {
                 application_id: {
                     "instance_id": instance["instance_id"],
@@ -727,6 +899,8 @@ async def launch_application(
                 }
             },
         }
+        if native and settings.session_isolation:
+            session["own_origin"] = True
         if launch_in_room_mode:
             session.update(
                 {
@@ -739,8 +913,23 @@ async def launch_application(
             )
         async with state.sessions_lock:
             state.sessions[session_id] = session
+        # The registered session holds the gateway from here on.
+        vpn.launched(holding)
+        holding = None
         await config_store.save_sessions()
+        if persistent and not cluster.node_of_home(username, os.path.basename(host_mount_path)):
+            await asyncio.to_thread(cluster.record_home, username, os.path.basename(host_mount_path), cluster.NODE_ID)
 
+        progress.finish({"session_url": session_url_for(session_id, access_token, controller_token), "session_id": session_id})
+        audit.record(
+            "launch",
+            username,
+            session=session_id,
+            app=app.name,
+            gpu=bool(gpu_config) or None,
+            room=launch_in_room_mode or None,
+            vpn=vpn_record["name"] if vpn_record else None,
+        )
         logger.info(
             "[%s] Session ready for %s. Proxying to %s:%s",
             session_id,
@@ -748,15 +937,18 @@ async def launch_application(
             instance["ip"],
             instance["port"],
         )
-        if launch_in_room_mode:
-            session_url = f"/room/{session_id}?access_token={access_token}&token={controller_token}"
-        else:
-            session_url = f"/{session_id}/?access_token={access_token}"
-        return {"session_url": session_url, "session_id": session_id}
+        return {
+            "session_url": session_url_for(session_id, access_token, controller_token if launch_in_room_mode else None),
+            "session_id": session_id,
+        }
     except Exception as exc:
         for path in (host_mount_path, shared_files_path):
             if path and path.startswith(ephemeral_base()):
                 shutil.rmtree(path, ignore_errors=True)
+        vpn.launched(holding)
+        holding = None
+        if spec.vpn:
+            await vpn.release(vpn_record or {"key": spec.vpn["key"]})
         logger.error(
             "[%s] Unhandled exception during launch for app '%s': %s",
             session_id,
@@ -765,10 +957,14 @@ async def launch_application(
             exc_info=True,
         )
         if isinstance(exc, HTTPException):
+            progress.finish(error=str(exc.detail))
             raise
+        progress.finish(error="An internal error occurred during application launch.")
         raise HTTPException(
             status_code=500, detail="An internal error occurred during application launch."
         ) from exc
+    finally:
+        vpn.launched(holding)
 
 
 async def ensure_container_for_session(
@@ -788,7 +984,8 @@ async def ensure_container_for_session(
         The container registry entry for the app.
 
     Raises:
-        HTTPException: If the session or app is unknown.
+        HTTPException: If the session or app is unknown, or the app's template sets a network
+            mode in a session that leaves through a VPN.
     """
     session = state.sessions.get(session_id)
     if not session:
@@ -829,6 +1026,7 @@ async def ensure_container_for_session(
             "master_token": session.get("master_token"),
             "initial_tokens": collaboration_initial_tokens(session),
         }
+    user_settings = user_manager.get_effective_settings(session["username"]) if session.get("username") else None
 
     spec = build_launch_spec(
         app,
@@ -847,13 +1045,34 @@ async def ensure_container_for_session(
         host_mount_path=new_home,
         shared_files_path=shared_files_path,
         collaboration=collaboration,
-        forced_env=hardening_env(
-            user_manager.get_effective_settings(session["username"]) if session.get("username") else None
-        ),
+        forced_env=hardening_env(user_settings),
+        proot_catalog_path=prootapps.mount_path_for(user_settings),
     )
 
-    provider = DockerProvider(spec.app_config)
-    instance = await provider.launch(**spec.provider_kwargs(session_id))
+    quota.cap_resources(spec.app_config["provider_config"]["docker_overrides"], user_settings)
+    if session.get("vpn") and spec.app_config["provider_config"]["docker_overrides"].get("network_mode"):
+        raise HTTPException(status_code=400, detail="The application's template sets a network mode, which leaves no room for a VPN.")
+
+    holding: str | None = None
+    if session.get("vpn"):
+        # Another application of the session leaves the way the session does.
+        record = state.vpn_profiles.get(session["vpn"].get("profile", ""))
+        endpoint = vpn.endpoint_of(record, session["vpn"].get("endpoint", "")) if record else None
+        if not record or not endpoint:
+            raise HTTPException(status_code=409, detail="The session's VPN profile is gone.")
+        spec.vpn = await vpn.acquire(record, endpoint, f"{session_id}:{target_app_id}")
+        holding = spec.vpn["key"]
+    provider = get_provider(spec.app_config)
+    try:
+        instance = await provider.launch(**spec.provider_kwargs(session_id))
+    except Exception:
+        vpn.launched(holding)
+        holding = None
+        if spec.vpn:
+            await vpn.release({**session["vpn"], **{k: spec.vpn[k] for k in ("spoke_public_key", "spoke_address") if k in spec.vpn}})
+        raise
+    finally:
+        vpn.launched(holding)
     container_info = {
         "instance_id": instance["instance_id"],
         "ip": instance["ip"],
@@ -861,6 +1080,8 @@ async def ensure_container_for_session(
         "app_id": target_app_id,
         "created_at": time.time(),
     }
+    if spec.vpn:
+        container_info["vpn"] = {**session["vpn"], **{k: spec.vpn[k] for k in ("spoke_public_key", "spoke_address") if k in spec.vpn}}
     registry[target_app_id] = container_info
     await config_store.save_sessions()
     return container_info
@@ -874,11 +1095,11 @@ async def stop_container_in_session(session_id: str, target_app_id: str) -> None
     container_info = session["container_registry"].get(target_app_id)
     if not container_info:
         return
-    app = state.installed_apps.get(target_app_id)
-    if app:
-        await DockerProvider(app.model_dump()).stop(container_info["instance_id"])
+    await get_provider().stop(container_info["instance_id"])
     del session["container_registry"][target_app_id]
     await config_store.save_sessions()
+    if container_info.get("vpn"):
+        await vpn.release(container_info["vpn"])
 
 
 async def stop_session(session_id: str) -> None:
@@ -901,21 +1122,75 @@ async def stop_session(session_id: str) -> None:
         logger.warning("Attempted to stop session %s, but it was not found in the database.", session_id)
         return
 
+    audit.record("stop", session.get("username") or "", session=session_id, app=session.get("app_name"))
     registry = session.get("container_registry") or {}
     if not registry and "provider_app_id" in session:
         registry = {session["provider_app_id"]: {"instance_id": session["instance_id"]}}
     for app_id, container_info in registry.items():
-        app = state.installed_apps.get(app_id)
-        if not app:
-            continue
         try:
-            await DockerProvider(app.model_dump()).stop(container_info["instance_id"])
+            await get_provider().stop(container_info["instance_id"])
         except Exception as exc:  # noqa: BLE001
             logger.error("[%s] Failed to stop container for app %s: %s", session_id, app_id, exc)
 
     await config_store.save_sessions()
+    for entry in registry.values():
+        if entry.get("vpn") and entry["vpn"].get("spoke_public_key") != (session.get("vpn") or {}).get("spoke_public_key"):
+            await vpn.release(entry["vpn"])
+    if session.get("vpn"):
+        await vpn.release(session["vpn"])
+    shared = session.get("shared_files_path")
+    if shared and not shared.startswith(ephemeral_base()) and session.get("username"):
+        filesync.push_later(session["username"], shared)
     for key in ("host_mount_path", "shared_files_path"):
         path = session.get(key)
-        if path and path.startswith(ephemeral_base()) and os.path.exists(path):
-            await asyncio.to_thread(shutil.rmtree, path, ignore_errors=True)
+        if path and path.startswith(ephemeral_base()):
+            # Deleting a cleanroom home on network storage takes long; nobody waits for it.
+            task = asyncio.create_task(asyncio.to_thread(shutil.rmtree, path, ignore_errors=True))
+            _removals.add(task)
+            task.add_done_callback(_removals.discard)
     logger.info("[%s] Session stopped and cleaned up successfully.", session_id)
+
+
+async def reconcile_sessions() -> None:
+    """Stop sessions whose instance ended and remove instances no session references.
+
+    An instance of another app in a room is dropped from the session when it
+    ends. A backend that cannot be asked skips the pass, so an outage never
+    reads as ended sessions; unreferenced instances are left alone for the
+    provider's `orphan_grace`, while a launch may still own them.
+    """
+    provider = get_provider()
+    referenced: set[str] = set()
+    changed = False
+    quota.tick()
+    for session_id, reason in quota.overdue():
+        logger.info("[%s] Ending the session: %s.", session_id, reason)
+        await stop_session(session_id)
+    try:
+        owned = await provider.managed_instances()
+        for session_id, data in list(state.sessions.items()):
+            registry = data.get("container_registry") or {}
+            referenced.update(entry["instance_id"] for entry in registry.values())
+            referenced.add(data.get("instance_id", ""))
+            if not data.get("instance_id") or not await provider.is_running(data["instance_id"]):
+                logger.info("[%s] Session instance ended; stopping the session.", session_id)
+                await stop_session(session_id)
+                continue
+            for app_id, entry in list(registry.items()):
+                if entry["instance_id"] != data["instance_id"] and not await provider.is_running(
+                    entry["instance_id"]
+                ):
+                    logger.info("[%s] Instance of app %s ended.", session_id, app_id)
+                    del registry[app_id]
+                    changed = True
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Could not reconcile sessions with the backend: %s", exc)
+        return
+    if changed:
+        await config_store.save_sessions()
+    cutoff = time.time() - provider.orphan_grace
+    for instance_id, created_at in owned.items():
+        if instance_id not in referenced and created_at < cutoff:
+            logger.info("Removing instance %s, which no session references.", instance_id)
+            await provider.stop(instance_id)
+    await vpn.reconcile()

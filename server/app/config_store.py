@@ -23,7 +23,7 @@ import httpx
 import yaml
 from pydantic import ValidationError
 
-from . import persistence
+from . import logos, persistence
 from .fsutil import resolve_within, safe_join
 from .models import (
     RECORD_FIELDS,
@@ -52,7 +52,7 @@ def is_safe_name(name: str) -> bool:
         `True` when the name only contains letters, digits, spaces, `_`,
         `.`, and `-` and does not reduce to `.` or `..`.
     """
-    return bool(name) and bool(SAFE_NAME_RE.match(name)) and name.strip(". ") != ""
+    return bool(name) and bool(SAFE_NAME_RE.fullmatch(name)) and name.strip(". ") != ""
 
 
 def deep_merge(base: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any]:
@@ -193,10 +193,51 @@ def _extract_apps(data: Any) -> list[dict[str, Any]]:
         ValueError: If the document is neither a list nor `{"apps": [...]}`.
     """
     if isinstance(data, dict) and "apps" in data:
-        return list(data["apps"] or [])
-    if isinstance(data, list):
-        return data
-    raise ValueError("App store YAML has an invalid format.")
+        apps = list(data["apps"] or [])
+    elif isinstance(data, list):
+        apps = data
+    else:
+        raise ValueError("App store YAML has an invalid format.")
+    # An app id names the app's autostart cache files: one that is not a plain name
+    # (a path, `..`) never enters the catalog.
+    kept = []
+    for app in apps:
+        app_id = app.get("id") if isinstance(app, dict) else None
+        if app_id is not None and not (isinstance(app_id, str) and is_safe_name(app_id)):
+            logger.warning("Skipping store app with unsafe id %r", app_id)
+            continue
+        kept.append(app)
+    return kept
+
+
+#: What a store's own `docker_overrides` may set: the container's resources and
+#: runtime, nothing that reaches past it to the host (privileges, capabilities,
+#: devices, bind mounts, the host's namespaces). An admin's overrides of an
+#: installed app may still set anything.
+STORE_DOCKER_KEYS = frozenset(
+    {"shm_size", "mem_limit", "cpu_shares", "nano_cpus", "ulimits", "tmpfs", "dns", "extra_hosts", "environment", "security_opt"}
+)
+#: The `security_opt` entries a store may ask for: the container's own syscall and AppArmor
+#: confinement lifted for apps that sandbox themselves (the default store's Steam and ScummVM).
+STORE_SECURITY_OPTS = frozenset({"seccomp=unconfined", "apparmor=unconfined"})
+
+
+def store_docker_overrides(overrides: Any, app_id: Any) -> dict[str, Any]:
+    """The part of a store app's `docker_overrides` a store may set (`STORE_DOCKER_KEYS`)."""
+    if not isinstance(overrides, dict):
+        return {}
+    kept: dict[str, Any] = {}
+    for key, value in overrides.items():
+        if key == "security_opt":
+            value = [o for o in value or [] if o in STORE_SECURITY_OPTS] if isinstance(value, list) else []
+        if key in STORE_DOCKER_KEYS and value:
+            kept[key] = value
+    dropped = {k: v for k, v in overrides.items() if k not in kept}
+    if "security_opt" in kept and kept["security_opt"] != overrides["security_opt"]:
+        dropped["security_opt"] = [o for o in overrides["security_opt"] if o not in kept["security_opt"]]
+    if dropped:
+        logger.warning("Store app %r: ignoring docker_overrides only an admin may set: %s", app_id, dropped)
+    return kept
 
 
 def _read_cached_script_b64(store_name: str, app_id: str, suffix: str = "") -> str | None:
@@ -238,7 +279,13 @@ def process_store_content(content: str, store_name: str) -> list[dict[str, Any]]
         if not isinstance(app, dict):
             continue
         app = copy.deepcopy(app)
+        if isinstance(app.get("logo"), str):
+            app["logo"] = logos.local(app["logo"])
         provider_config = app.setdefault("provider_config", {})
+        if provider_config.get("docker_overrides"):
+            provider_config["docker_overrides"] = store_docker_overrides(
+                provider_config["docker_overrides"], app.get("id")
+            )
         if provider_config.get("autostart") and app.get("id"):
             provider_config["custom_autostart_script_b64"] = _read_cached_script_b64(
                 store_name, app["id"]
@@ -326,6 +373,7 @@ async def refresh_store_caches() -> None:
     ensure_config_dir()
     await asyncio.gather(*(_fetch_and_cache_app_store(store) for store in state.app_stores))
     load_store_entries()
+    await logos.prefetch()
     logger.info("App store cache refresh complete.")
 
 
@@ -382,16 +430,24 @@ def autostart_cache_path(app: InstalledApp | InstalledAppRecord, suffix: str = "
     store = get_store(app.source)
     if not store:
         return None
-    return os.path.join(settings.autostart_cache_path, store.name, f"{app.source_app_id}{suffix}")
+    try:
+        return safe_join(settings.autostart_cache_path, store.name, f"{app.source_app_id}{suffix}")
+    except ValueError:
+        logger.error("Refusing autostart cache path for unsafe name %r/%r", store.name, app.source_app_id)
+        return None
 
 
 async def _fetch_and_cache_single_script(
     store_name: str, base_url: str, app_id: str, suffix: str = ""
 ) -> None:
     """Fetch one autostart script into the cache using ETag conditional requests."""
-    cache_dir = os.path.join(settings.autostart_cache_path, store_name)
+    try:
+        cache_dir = safe_join(settings.autostart_cache_path, store_name)
+        cache_path = safe_join(cache_dir, f"{app_id}{suffix}")
+    except ValueError:
+        logger.error("Refusing autostart cache for unsafe name %r/%r", store_name, app_id)
+        return
     os.makedirs(cache_dir, exist_ok=True)
-    cache_path = os.path.join(cache_dir, f"{app_id}{suffix}")
     meta_path = cache_path + ".meta"
     headers: dict[str, str] = {}
     if os.path.exists(meta_path):
@@ -514,6 +570,9 @@ def resolve_app(record: InstalledAppRecord) -> InstalledApp | None:
     merged = deep_merge(base, record.overrides)
     for key in RECORD_FIELDS:
         merged[key] = getattr(record, key)
+    # An override from before the server served the logos may still name a web address.
+    if isinstance(merged.get("logo"), str):
+        merged["logo"] = logos.local(merged["logo"])
     try:
         return InstalledApp(**merged)
     except ValidationError as exc:
@@ -538,6 +597,7 @@ def record_from_app(app: InstalledApp, existing: InstalledAppRecord | None = Non
         The record to persist.
     """
     full = app.model_dump()
+    full["logo"] = logos.local(full["logo"])
     record_fields = {key: full.pop(key) for key in RECORD_FIELDS}
     temp = InstalledAppRecord(**record_fields)
     base = _store_base(temp)
@@ -567,6 +627,8 @@ def apply_partial_update(record: InstalledAppRecord, patch: dict[str, Any]) -> I
             data[key] = value
         elif key == "overrides" and isinstance(value, dict):
             override_patch = deep_merge(override_patch, value)
+        elif key == "logo" and isinstance(value, str):
+            override_patch[key] = logos.local(value)
         else:
             override_patch[key] = value
     data["overrides"] = deep_merge(data.get("overrides", {}), override_patch)
@@ -582,6 +644,8 @@ def _migrate_legacy_record(raw: dict[str, Any]) -> InstalledAppRecord:
     record_fields = {key: raw.get(key) for key in RECORD_FIELDS if key in raw}
     temp = InstalledAppRecord(**record_fields)
     full = {key: value for key, value in raw.items() if key not in RECORD_FIELDS}
+    if isinstance(full.get("logo"), str):
+        full["logo"] = logos.local(full["logo"])
     base = _store_base(temp)
     if base is None and temp.is_meta_app and temp.base_app_id:
         # Legacy meta-apps stored the base app *name* in `source`; recover the store.
@@ -782,9 +846,7 @@ def migrate_legacy_template_settings(template_settings: dict[str, Any]) -> dict[
 
 def _load_templates_from(directory: str, source: str) -> None:
     """Load every YAML template in `directory` into state."""
-    if not os.path.isdir(directory):
-        return
-    for filename in sorted(os.listdir(directory)):
+    for filename in persistence.list_names(directory):
         if not filename.endswith((".yml", ".yaml")):
             continue
         path = os.path.join(directory, filename)
@@ -840,12 +902,23 @@ async def save_app_template(template: AppTemplate) -> None:
 
     Args:
         template: Template to save.
+
+    Raises:
+        FileExistsError: If another template's file is the one the name maps to
+            (names differing only in case or in spaces against underscores).
     """
     existing = state.template_files.get(template.name)
     if existing and existing.startswith(os.path.abspath(settings.app_templates_path)):
         path = existing
     else:
         path = os.path.join(settings.app_templates_path, template_filename(template.name))
+    holder = next(
+        (name for name, file in state.template_files.items()
+         if name != template.name and os.path.realpath(file) == os.path.realpath(path)),
+        None,
+    )
+    if holder is not None:
+        raise FileExistsError(holder)
     await persistence.write_yaml(path, template.model_dump())
     load_app_templates()
 
@@ -861,13 +934,10 @@ def delete_app_template(name: str) -> None:
         FileNotFoundError: If no template of that name exists.
     """
     known = state.template_files.get(name)
+    if known is None:
+        raise FileNotFoundError(name)
     try:
-        if known is None:
-            path = safe_join(settings.app_templates_path, template_filename(name))
-            if not os.path.exists(path):
-                raise FileNotFoundError(name)
-        else:
-            path = resolve_within(settings.app_templates_path, known)
+        path = resolve_within(settings.app_templates_path, known)
     except ValueError as exc:
         raise PermissionError(name) from exc
     if path == os.path.realpath(settings.app_templates_path):

@@ -13,7 +13,8 @@ SealSkin runs desktop applications in isolated containers on a server you
 control and streams them to any browser or phone. A browser extension turns
 every link, file, download, and text selection into something you open
 remotely instead of locally, so nothing from the web ever runs on the device
-in front of you. It is built on [Selkies](https://github.com/selkies-project/selkies)
+in front of you; with nothing installed, the server's own web app does the
+same from any browser. It is built on [Selkies](https://github.com/selkies-project/selkies)
 and the [LinuxServer.io](https://www.linuxserver.io) application images.
 
 **[Read the documentation](https://selkies-project.github.io/sealskin/)** or
@@ -29,6 +30,7 @@ visit **[sealskin.app](https://sealskin.app)**.
 | **Firefox** | [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/) |
 | **iPhone and iPad** | [App Store](https://apps.apple.com/us/app/sealskin/id6758210210) |
 | **Android** | [Google Play](https://play.google.com/store/apps/details?id=io.linuxserver.sealskin) |
+| **Any browser**, nothing to install | the web app at `https://<server>:8443/` |
 
 Every [release](https://github.com/selkies-project/sealskin/releases) also
 carries the extension zips, the APK, the IPA, and the server wheel.
@@ -46,11 +48,22 @@ mkdir sealskin && cd sealskin
 bash <(curl -sSL https://raw.githubusercontent.com/linuxserver/docker-sealskin/refs/heads/master/install.sh)
 ```
 
-Then import the generated `config/admin.json` into a client and launch your
-first application. The
+Then open `https://<server>:8443/` and sign in with the root key the server
+wrote to `config/root_key`, or import the generated `config/admin.json` into
+the extension or the app, and launch your first application. The
 [Getting Started](https://selkies-project.github.io/sealskin/start) guide
 covers the installer, the plain `docker compose` alternative, certificates,
-and the first login.
+and the first sign-in.
+
+On Kubernetes, one manifest installs the server in any namespace you
+administer, with no cluster-scoped objects, and every session runs as a pod
+beside it ([Kubernetes](https://selkies-project.github.io/sealskin/kubernetes)):
+
+```bash
+curl -LO https://raw.githubusercontent.com/selkies-project/sealskin/main/kubernetes/sealskin.yml
+# set HOST_URL, and a ReadWriteMany class for the storage to use more than one node
+kubectl apply -n <namespace> -f sealskin.yml
+```
 
 ## What it does
 
@@ -64,18 +77,31 @@ and the first login.
   downloads, and password-protected public share links.
 * **Collaboration rooms.** Launch any app into a room with chat, voice and
   video, gamepad slots, and hand-over of mouse and keyboard control.
-* **End-to-end encrypted, passwordless.** Every API call is encrypted with a
-  per-session key negotiated against the server's RSA key; users authenticate
-  with a signed token from a private key that never leaves the client.
+* **Sign in with what you have.** The web app signs users in through OpenID
+  Connect, SAML, or the reverse proxy in front of it, with groups that carry
+  permissions, session and storage limits, and time allowances. The extension
+  and the app sign in with an application key made on the web, or, on a single
+  server, with a key file and an end-to-end encrypted API that needs no
+  trusted certificate.
+* **VPN exits.** Administrators import WireGuard or OpenVPN profiles, and a
+  user picks one at launch: the session leaves through that tunnel and nothing
+  else, on Docker and on Kubernetes.
+* **One server or many.** Servers join into a cluster with shared users and
+  applications and no master: pools of nodes, placement, GPU slots, and home
+  directories that move between nodes.
 * **One UI, served by the server.** The extension and the app are thin
-  shells; the launcher, dashboard, and admin panels ship with the server
-  image, so UI updates never wait for a store review.
+  shells, and any browser can use the same pages as a web app; the launcher,
+  dashboard, and admin panels ship with the server image, so UI updates never
+  wait for a store review.
 
 ## Documentation
 
 | | |
 | --- | --- |
 | [Getting Started](https://selkies-project.github.io/sealskin/start) | Install the server, connect a client, launch an application. |
+| [Signing in](https://selkies-project.github.io/sealskin/signin) | The web sign-in, identity providers, groups and limits, reverse proxies. |
+| [Clusters](https://selkies-project.github.io/sealskin/cluster) | Several servers as one: nodes, the shared store, pools, and a lab to try it. |
+| [Kubernetes](https://selkies-project.github.io/sealskin/kubernetes) | Run the server in any namespace, with sessions as pods beside it. |
 | [Usage](https://selkies-project.github.io/sealskin/usage) | The launcher, context menus, sessions, storage, files, and rooms. |
 | [Administration](https://selkies-project.github.io/sealskin/administration) | Users, groups, app stores, templates, the App Laboratory, GPUs. |
 | [Configuration](https://selkies-project.github.io/sealskin/configuration) | What lives in `/config` and `/storage`, keys, hand-editing the YAML. |
@@ -97,6 +123,8 @@ server/              Python API server, Caddy template, tests, wheel
 client/              web UI source and build (dist/ui, dist/extension, dist/mobile)
 browser_extension/   manifests, icons and packaging for the extension shell
 mobile/              Capacitor project for the iOS and Android shells
+kubernetes/          manifest for running the server in a Kubernetes namespace
+vpn/                 the VPN gateway image sessions leave through
 docs/                the documentation site
 release-notes/       one file per stable release
 ```

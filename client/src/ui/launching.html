@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" style="background-color: #0d1117; color-scheme: dark;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#0d1117">
+    <title>SealSkin</title>
+    <!-- Inline, so the tab is dark before the stylesheet arrives. -->
+    <style>html, body { margin: 0; background-color: #0d1117; color: #eaf0f8; color-scheme: dark; }</style>
+    <link rel="icon" href="icons/icon128.png">
+    <link rel="stylesheet" href="css/launching.css">
+</head>
+<body>
+    <main class="launching">
+        <div class="launch-head">
+            <img id="app-logo" src="icons/icon128.png" alt="">
+            <div>
+                <h1 id="app-name"></h1>
+                <p id="node" class="muted" hidden></p>
+            </div>
+        </div>
+        <div class="launch-now">
+            <div id="spinner" class="spinner"></div>
+            <div>
+                <p id="stage"></p>
+                <p id="hint" class="muted" hidden></p>
+            </div>
+            <span id="elapsed" class="muted"></span>
+        </div>
+        <p id="error" class="error" hidden></p>
+        <ol id="steps"></ol>
+        <div class="launch-actions">
+            <button type="button" id="close" hidden></button>
+            <p id="close-hint" class="muted" hidden></p>
+        </div>
+    </main>
+    <script type="module" src="launching.js"></script>
+</body>
+</html>

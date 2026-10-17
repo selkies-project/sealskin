@@ -15,7 +15,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import ValidationError
 
-from .. import user_manager
+from .. import routing, user_manager
 from ..fsutil import safe_join, safe_rmtree, unique_filename
 from ..models import (
     CreateFolderRequest,
@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/api/files",
-    dependencies=[Depends(verify_persistent_storage_enabled)],
+    dependencies=[Depends(verify_persistent_storage_enabled), Depends(routing.home_node)],
     route_class=EncryptedRoute,
 )
 
@@ -67,7 +67,7 @@ def get_validated_path(
         HTTPException: 400 for bad names, 403 for traversal or denied access,
             404 when missing.
     """
-    if not re.match(r"^[a-zA-Z0-9_-]+$", home_dir):
+    if not re.fullmatch(r"[a-zA-Z0-9_-]+", home_dir):
         raise HTTPException(status_code=400, detail="Invalid home directory name.")
     if home_dir not in user_manager.get_home_dirs(username):
         raise HTTPException(status_code=403, detail=f"Access to home directory '{home_dir}' denied.")

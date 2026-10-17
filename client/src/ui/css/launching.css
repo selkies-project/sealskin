@@ -1,0 +1,33 @@
+/* Web app launching page: what a launch is waiting on, in the tab the session will take. */
+@import "../../shell/host.css";
+
+body { display: grid; place-items: center; min-height: 100dvh; padding: 1.5rem; box-sizing: border-box; background: radial-gradient(600px 360px at 50% -10%, rgba(139, 124, 246, 0.16), transparent 65%), var(--bg-0); }
+.launching { width: min(520px, 100%); display: flex; flex-direction: column; gap: 1.25rem; animation: host-rise 420ms var(--ease-out); }
+.launching p { margin: 0; line-height: 1.5; }
+.muted { color: var(--text-muted); font-size: 0.85rem; }
+[hidden] { display: none !important; }
+
+.launch-head { display: flex; align-items: center; gap: 1rem; }
+.launch-head img { width: 64px; height: 64px; object-fit: contain; }
+.launch-head h1 { margin: 0; font-size: 1.4rem; letter-spacing: -0.01em; }
+
+.launch-now { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.15rem; border: 1px solid var(--border-color); border-radius: 12px; background-color: var(--bg-1); }
+.launch-now > div:nth-child(2) { flex: 1; min-width: 0; }
+#stage { font-size: 1.02rem; font-weight: 600; }
+#elapsed { font-variant-numeric: tabular-nums; }
+.spinner { width: 28px; height: 28px; flex-shrink: 0; border: 3px solid var(--border-color); border-top-color: var(--accent-primary); border-radius: 50%; animation: host-spin 0.8s linear infinite; }
+
+.error { padding: 1rem 1.15rem; border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 12px; background-color: rgba(239, 68, 68, 0.14); color: var(--color-danger-text); font-weight: 600; word-break: break-word; }
+
+#steps { list-style: none; margin: 0; padding: 0 0 0 0.6rem; display: flex; flex-direction: column; gap: 0.55rem; }
+#steps li { display: flex; align-items: baseline; gap: 0.7rem; font-size: 0.9rem; color: var(--text-muted); }
+#steps li::before { content: ""; width: 0.55rem; height: 0.3rem; flex-shrink: 0; border-left: 2px solid #6ee7b7; border-bottom: 2px solid #6ee7b7; transform: rotate(-45deg) translateY(-0.2rem); }
+#steps li.current { color: var(--text-primary); }
+#steps li.current::before { width: 0.5rem; height: 0.5rem; border: none; border-radius: 50%; background-color: var(--accent-primary); transform: none; }
+#steps li span:last-child { margin-left: auto; font-variant-numeric: tabular-nums; font-size: 0.8rem; }
+
+.launch-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+#close { border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.6rem 1.1rem; background-color: var(--glass-strong); color: var(--text-primary); font: 600 0.9rem var(--font-family); cursor: pointer; }
+#close:hover { background-color: var(--bg-3); border-color: var(--border-strong); }
+
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2s; } }

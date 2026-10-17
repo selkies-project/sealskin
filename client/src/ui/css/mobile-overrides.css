@@ -266,3 +266,29 @@ html.shell-mobile #file-list-table, html.shell-mobile #shares-list-table {
     min-width: 800px;
 }
 
+
+/* The settings page on a phone: landscape keeps the sidebar and the content side by side and scrolls sideways
+   between them, portrait stacks them; either way the content pane scrolls inside itself. */
+html.shell-mobile .options-container {
+    width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+}
+html.shell-mobile .options-container .sidebar {
+    flex: 0 0 auto;
+}
+html.shell-mobile .options-container .main-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100vw;
+    min-width: 100vw;
+    padding: 1rem !important;
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch;
+}
+html.shell-mobile .options-container .card,
+html.shell-mobile .modal-content {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+}

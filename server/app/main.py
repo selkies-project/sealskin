@@ -6,21 +6,78 @@ import asyncio
 import logging
 import os
 import platform
+import secrets
 import shutil
 import signal
 import subprocess
 from typing import Any
+from urllib.parse import urlsplit
 
 import uvicorn
 import uvloop
 
+from . import cluster
 from .logging_config import setup_logging
+from .security import init_server_keys
 from .settings import settings
+from .state import state
 
 setup_logging()
 
 logger = logging.getLogger(__name__)
 caddy_process: subprocess.Popen | None = None
+
+
+#: The plain HTTP listener of `http_port`, for a reverse proxy that terminates TLS. It answers
+#: the trusted proxies alone, and of their requests those the browser sent over TLS: one sent in
+#: the clear goes to the public URL, and one the proxy says nothing about is refused. Traefik
+#: names a WebSocket's scheme `wss`.
+HTTP_SITE = """http://:{port} {{
+        @stranger not remote_ip {networks}
+        handle @stranger {{
+                respond "This port serves the reverse proxies in SEALSKIN_TRUSTED_PROXIES alone, and {{remote_host}} is not one." 403
+        }}
+        @clear {{
+                header X-Forwarded-Proto http
+                header X-Forwarded-Proto ws
+        }}
+        handle @clear {{
+                redir {public}{{uri}} 308
+        }}
+        @secure {{
+                header X-Forwarded-Proto https
+                header X-Forwarded-Proto wss
+        }}
+        handle @secure {{
+                import entrance
+        }}
+        handle {{
+                respond "The reverse proxy must send X-Forwarded-Proto: https with what it received over HTTPS." 403
+        }}
+}}
+"""
+
+
+def http_listener() -> bool:
+    """Whether the plain HTTP listener is opened: `http_port` is set and a proxy is trusted to use it."""
+    if not settings.http_port:
+        return False
+    if not any(n.strip() for n in settings.trusted_proxies.split(",")):
+        logger.error("SEALSKIN_HTTP_PORT is set but SEALSKIN_TRUSTED_PROXIES names no reverse proxy: the HTTP listener stays closed.")
+        return False
+    return True
+
+
+def advertises_own_port() -> bool:
+    """Whether browsers reach the session port under its own number, with no reverse proxy before it.
+
+    Caddy offers HTTP/3 in an `Alt-Svc` header that names the port it listens
+    on. Behind a reverse proxy or a remapped port that is another service's
+    port, or nobody's, so HTTP/3 is left off there.
+    """
+    if any(n.strip() for n in settings.trusted_proxies.split(",")):
+        return False
+    return (urlsplit(cluster.public_url()).port or 443) == settings.session_port
 
 
 def run_caddy() -> None:
@@ -45,16 +102,39 @@ def run_caddy() -> None:
         logger.info("Generating Caddyfile from template: %s", template_path)
         with open(template_path, encoding="utf-8") as handle:
             config_content = handle.read()
+        init_server_keys()
+        cluster.init()
+        cluster.reload_proxy = reload_caddy
+        peer_cert, peer_key, peer_trust = cluster.peer_certificate_paths()
+        state.proxy_secret = state.proxy_secret or secrets.token_urlsafe(32)
+        networks = " ".join(n.strip() for n in settings.trusted_proxies.split(",") if n.strip())
+        options = []
+        if networks:
+            # Strict: the address is the last one a trusted proxy did not add, never one the visitor wrote.
+            options += [f"trusted_proxies static {networks}", "trusted_proxies_strict"]
+        if not advertises_own_port():
+            options.append("protocols h1 h2")
+        trusted = "        servers {\n" + "".join(f"                {line}\n" for line in options) + "        }" if options else ""
+        http_site = HTTP_SITE.format(port=settings.http_port, networks=networks, public=cluster.public_url()) if http_listener() else ""
         for placeholder, value in (
             ("{{API_PORT}}", str(settings.api_port)),
             ("{{SESSION_PORT}}", str(settings.session_port)),
+            ("{{PEER_PORT}}", str(settings.peer_port)),
             ("{{PROXY_CERT_PATH}}", settings.proxy_cert_path),
             ("{{PROXY_KEY_PATH}}", settings.proxy_key_path),
+            ("{{PEER_CERT_PATH}}", peer_cert),
+            ("{{PEER_KEY_PATH}}", peer_key),
+            ("{{PEER_TRUST_PATH}}", peer_trust),
+            ("{{PROXY_SECRET}}", state.proxy_secret),
+            ("{{TRUSTED_PROXIES}}", trusted),
+            ("{{HTTP_SITE}}", http_site),
         ):
             config_content = config_content.replace(placeholder, value)
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        with open(output_path, "w", encoding="utf-8") as handle:
+        fd = os.open(output_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
             handle.write(config_content)
+        os.chmod(output_path, 0o600)
         logger.info("Caddyfile written to %s", output_path)
     except OSError as exc:
         logger.error("Failed to generate Caddyfile: %s", exc)
@@ -69,6 +149,22 @@ def run_caddy() -> None:
     except OSError as exc:
         logger.error("Failed to start Caddy: %s", exc)
         caddy_process = None
+
+
+def reload_caddy() -> None:
+    """Have the running Caddy read its configuration again, as when the peer trust bundle changed."""
+    if not caddy_process or caddy_process.poll() is not None:
+        return
+    try:
+        subprocess.run(
+            ["caddy", "reload", "--force", "--config", settings.caddyfile_path, "--adapter", "caddyfile"],
+            check=True,
+            capture_output=True,
+            timeout=30,
+        )
+        logger.info("Caddy reloaded its configuration.")
+    except (OSError, subprocess.SubprocessError) as exc:
+        logger.error("Could not reload Caddy: %s", exc)
 
 
 def stop_caddy(signum: int | None = None, frame: Any = None) -> None:

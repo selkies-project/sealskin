@@ -11,7 +11,7 @@ description: Versioning, release notes, the GitHub workflows, what each release 
 | **Pre-release** (`prerelease.yml`) | every push to `main` | Builds everything, including the mobile apps, and publishes a GitHub pre-release named after the short commit SHA with all the artifacts attached. Nothing is uploaded to a store. |
 | **Release** (`release.yml`) | every pushed tag | Refuses to run unless the tag matches `VERSION` and `release-notes/<VERSION>.md` exists; then builds everything, uploads the mobile apps to TestFlight and the Google Play internal track, and publishes a stable GitHub release with the notes as its body. |
 | **Mobile** (`mobile.yml`) | called by the two above, or by hand from the Actions tab | Builds the signed IPA, APK, and AAB. Uploads to the stores only when the `upload` input is set, which the Release workflow does and a manual run can. |
-| **Docs** (`docs.yml`) | every push to `main` and every pull request touching `docs/` or the server | Builds this site, checks every link and anchor, verifies the Settings Reference is current, and (on `main`) deploys it to GitHub Pages. |
+| **Docs** (`docs.yml`) | every push to `main` and every pull request | Builds this site, checks every link and anchor, verifies the Settings Reference is current, and (on `main`) deploys it to GitHub Pages. |
 
 ## Cutting a release
 

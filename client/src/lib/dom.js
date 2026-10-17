@@ -5,15 +5,7 @@
 import { bridge } from './bridge.js';
 import { secureFetch } from './api.js';
 
-/** Escape a value for insertion into HTML text or attribute context. */
-export function escapeHtml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
+export { escapeHtml, formatBytes, formatDate } from './format.js';
 
 /** Locale reported by the shell, falling back to the browser's. */
 export function currentLocale() {
@@ -30,22 +22,6 @@ export function currentLocale() {
 export function tOr(t, key, fallback) {
   const value = t(key);
   return value === key ? fallback : value;
-}
-
-/**
- * Human readable size.
- *
- * @param {number} bytes
- * @param {function} t Translator (uses common.bytes .. common.pb).
- * @param {number} [decimals]
- */
-export function formatBytes(bytes, t, decimals = 2) {
-  if (!bytes || bytes === 0) return `0 ${t('common.bytes')}`;
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = [t('common.bytes'), t('common.kb'), t('common.mb'), t('common.gb'), t('common.tb'), t('common.pb')];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
 /**
@@ -80,21 +56,33 @@ export function timeUntil(timestamp, t) {
   return rtf.format(Math.round(seconds / 3600), 'hour');
 }
 
-/** Absolute date and time for a unix-seconds timestamp. */
-export function formatDate(timestamp) {
-  return new Date(timestamp * 1000).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
-}
+/** The prefix this page is served under: `/companion` on the companion apps' lane, which the browser's own loads of the API need too. */
+export const PAGE_PREFIX = typeof location !== 'undefined' && location.pathname.startsWith('/companion/') ? '/companion' : '';
+
+/** An absolute API address as this page reaches it, under the lane's prefix where there is one. */
+export const apiUrl = (path) => (PAGE_PREFIX && typeof path === 'string' && path.startsWith('/api/') ? PAGE_PREFIX + path : path);
+
+/** The picture standing for an application without one: the brand's logo where one was uploaded, else SealSkin's. */
+export const FALLBACK_LOGO = (() => {
+  try {
+    return apiUrl(JSON.parse(document.querySelector('meta[name="sealskin-brand"]')?.content || '{}').logo || 'icons/icon128.png');
+  } catch (e) {
+    return 'icons/icon128.png';
+  }
+})();
 
 /**
- * Resolve an app logo reference to an `img` src. Secure icons are fetched
- * through the API and returned as data URLs.
+ * Resolve an app logo reference to an `img` src. Every picture comes from the
+ * server: a store's or a remote's through `/api/logos/`, the brand's through
+ * `/api/branding/`, and an uploaded icon as JSON behind the sign-in, returned
+ * as a data URL. Anything else, a web address included, shows the fallback.
  *
- * @param {string} logoData URL, `/api/app_icon/...` path, or empty.
+ * @param {string} logoData Server path or empty.
  * @returns {Promise<string>}
  */
 export async function formatLogoSrc(logoData) {
-  if (!logoData) return 'icons/icon128.png';
-  if (logoData.startsWith('http')) return logoData;
+  if (!logoData) return FALLBACK_LOGO;
+  if (logoData.startsWith('/api/logos/') || logoData.startsWith('/api/branding/')) return apiUrl(logoData);
   if (logoData.startsWith('/api/app_icon/')) {
     try {
       const response = await secureFetch(logoData, { method: 'GET' });
@@ -105,14 +93,16 @@ export async function formatLogoSrc(logoData) {
       console.error(`Failed to fetch secure icon for ${logoData}:`, error);
     }
   }
-  return 'icons/icon128.png';
+  return FALLBACK_LOGO;
 }
 
-/** Swap every `img[data-logo-src]` under `scope` for its resolved logo. */
+/** Swap every `img[data-logo-src]` under `scope` for its resolved logo, the fallback standing in for one the server has not got. */
 export function hydrateLogos(scope) {
   scope.querySelectorAll('img[data-logo-src]').forEach(async (img) => {
     const src = await formatLogoSrc(img.dataset.logoSrc);
-    if (src) img.src = src;
+    if (!src) return;
+    if (src !== FALLBACK_LOGO) img.onerror = () => { img.onerror = null; img.src = FALLBACK_LOGO; };
+    img.src = src;
   });
 }
 

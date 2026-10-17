@@ -79,6 +79,41 @@ def test_build_launch_spec_env_volumes_and_overrides(tmp_path):
     assert kwargs["env_vars"] is spec.env and "is_collaboration" not in kwargs
 
 
+def test_docker_env_joins_the_session_environment(tmp_path):
+    state.app_templates["Default"] = {
+        "name": "Default",
+        "settings": {"DOCKER_ENV": "EXTRA=1,APP_ENV=template", "DOCKER_BIND_MOUNTS": "/srv:/srv:ro"},
+    }
+    spec = launch.build_launch_spec(
+        make_app(),
+        "sess",
+        base_env=launch.session_base_env("sess", "u", "p", None),
+        extra_env=None,
+        language=None,
+        wayland_mode=False,
+        gpu_config={"type": "nvidia", "device": "nvidia.com/gpu", "resource": "nvidia.com/gpu"},
+        host_mount_path=str(tmp_path),
+        shared_files_path=None,
+    )
+    assert spec.env["EXTRA"] == "1" and spec.env["SUBFOLDER"] == "/sess/" and spec.env["PASSWORD"] == "p"
+    assert spec.env["APP_ENV"] == "1"
+    assert "DRI_NODE" not in spec.env
+    overrides = spec.app_config["provider_config"]["docker_overrides"]
+    assert "environment" not in overrides and overrides["volumes"] == ["/srv:/srv:ro"]
+    assert set(spec.volumes) == {str(tmp_path)}
+
+
+def test_docker_bind_mounts_keep_session_volumes():
+    from app.providers.docker_provider import _bind_volumes
+
+    assert _bind_volumes(["/srv:/srv:ro", "/data:/mnt", "bad"]) == {
+        "/srv": {"bind": "/srv", "mode": "ro"},
+        "/data": {"bind": "/mnt", "mode": "rw"},
+    }
+    assert _bind_volumes({"/a": {"bind": "/b", "mode": "rw"}}) == {"/a": {"bind": "/b", "mode": "rw"}}
+    assert _bind_volumes(None) == {}
+
+
 def test_extract_docker_overrides_parsing():
     result = launch.extract_docker_overrides(
         {
@@ -119,6 +154,21 @@ def test_collaboration_initial_tokens():
     )
     assert tokens["c"] == {"role": "controller", "slot": 1, "mk_control": False}
     assert tokens["v1"]["mk_control"] is True and tokens["v2"]["mk_control"] is False
+
+
+def test_collaboration_initial_tokens_slot_lists():
+    """A participant holding several slots hands Selkies the list, and one
+    holding one the number it always did."""
+    tokens = launch.collaboration_initial_tokens(
+        {
+            "controller_token": "c",
+            "controller_slot": [1],
+            "viewers": [{"token": "v1", "slot": [3, 4]}, {"token": "v2", "slot": []}],
+        }
+    )
+    assert tokens["c"]["slot"] == 1
+    assert tokens["v1"]["slot"] == [3, 4]
+    assert tokens["v2"]["slot"] is None
 
 
 def test_resolve_timezone_prefers_valid_client_zone(monkeypatch):
@@ -218,3 +268,47 @@ def test_home_name_stays_in_the_callers_storage():
         with pytest.raises(HTTPException) as refused:
             resolve(name)
         assert refused.value.status_code == 404, name
+
+
+def test_template_editors_keep_docker_and_identity_settings_to_administrators():
+    from app.routers.admin import editor_settings
+
+    stored = {"TITLE": "Old", "DOCKER_DEVICES": "/dev/dri", "PUID": "1000"}
+    assert editor_settings(stored, {"TITLE": "New"}) == {"TITLE": "New", "DOCKER_DEVICES": "/dev/dri", "PUID": "1000"}
+    assert editor_settings(stored, {"PUID": 1000, "DOCKER_DEVICES": "/dev/dri"})["PUID"] == "1000"
+    for change in ({"PUID": "0"}, {"PGID": "0"}, {"CUSTOM_USER": "abc"}, {"PASSWORD": "x"}, {"SUBFOLDER": "/"}, {"SELKIES_MASTER_TOKEN": "t"}, {"SELKIES_ALLOWED_ORIGINS": "*"}):
+        with pytest.raises(HTTPException) as refused:
+            editor_settings(stored, change)
+        assert refused.value.status_code == 403 and "administrator" in refused.value.detail, change
+    with pytest.raises(HTTPException) as refused:
+        editor_settings(stored, {"DOCKER_PRIVILEGED": "true"})
+    assert refused.value.status_code == 403
+    assert set(launch.RESERVED_ENV) <= set(launch.session_base_env("s", "u", "p", "m"))
+
+
+class _Provider:
+    def __init__(self, app_config):
+        self.app_config = app_config
+
+    async def launch(self, **kwargs):
+        _Provider.launched = (self.app_config, kwargs)
+        return {"instance_id": "c2", "ip": "10.0.0.2", "port": 3000}
+
+
+async def test_a_room_swap_caps_resources_and_keeps_the_network_rule(monkeypatch):
+    from app import user_manager
+
+    state.installed_apps["app-2"] = make_app(id="app-2", name="Chromium", provider_config={**make_app().provider_config.model_dump(), "docker_overrides": {"nano_cpus": 4_000_000_000}})
+    state.sessions["s"] = {"username": "alice", "host_mount_path": launch.new_ephemeral_dir(), "container_registry": {}}
+    monkeypatch.setattr(user_manager, "get_effective_settings", lambda _username: {"session_cpus": 2, "session_memory_mb": 512})
+    monkeypatch.setattr(launch, "get_provider", _Provider)
+    info = await launch.ensure_container_for_session("s", "app-2")
+    assert info["instance_id"] == "c2"
+    overrides = _Provider.launched[0]["provider_config"]["docker_overrides"]
+    assert overrides["nano_cpus"] == 2_000_000_000 and overrides["mem_limit"] == 512 * 1024 * 1024
+
+    state.installed_apps["app-3"] = make_app(id="app-3", name="Host", provider_config={**make_app().provider_config.model_dump(), "docker_overrides": {"network_mode": "host"}})
+    state.sessions["s"]["vpn"] = {"key": "k", "profile": "p", "endpoint": "e"}
+    with pytest.raises(HTTPException) as refused:
+        await launch.ensure_container_for_session("s", "app-3")
+    assert refused.value.status_code == 400 and "network mode" in refused.value.detail
