@@ -36,7 +36,7 @@ from . import (
     vpn,
     webclient,
 )
-from .fsutil import safe_copytree, safe_join, sanitize_for_filename, unique_filename
+from .fsutil import create_exclusive, open_within, safe_copytree, safe_join, sanitize_for_filename
 from .models import InstalledApp
 from .providers import get_provider
 from .settings import settings
@@ -834,11 +834,16 @@ async def launch_application(
 
     launch_context = spec.launch_context
     if file_bytes is not None and filename and shared_files_path:
-        actual_filename = unique_filename(shared_files_path, filename)
-        file_location = os.path.join(shared_files_path, actual_filename)
-        with open(file_location, "wb") as handle:
-            handle.write(file_bytes)
-        os.chmod(file_location, 0o644)
+        # The user's sessions write this folder: the file is created in it by name, past
+        # whatever symlink holds a name already, never by opening a path that could lead out.
+        dir_fd = open_within(shared_files_path, shared_files_path, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            out_fd, actual_filename = create_exclusive(dir_fd, os.path.basename(filename))
+            with os.fdopen(out_fd, "wb") as handle:
+                handle.write(file_bytes)
+                os.fchmod(handle.fileno(), 0o644)
+        finally:
+            os.close(dir_fd)
         if open_file_on_launch:
             spec.env["SEALSKIN_FILE"] = os.path.join(
                 settings.container_config_path, "Desktop", "files", actual_filename

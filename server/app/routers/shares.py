@@ -8,6 +8,7 @@ import logging
 import os
 import secrets
 import shutil
+import stat
 import time
 import uuid
 from collections import deque
@@ -18,7 +19,7 @@ from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from pydantic import ValidationError
 
 from .. import config_store
-from ..fsutil import safe_join
+from ..fsutil import open_within, safe_join
 from ..models import PublicShareInfo, PublicShareMetadata, ShareFileRequest
 from ..security import (
     EncryptedRoute,
@@ -29,7 +30,7 @@ from ..security import (
 )
 from ..settings import settings
 from ..state import state
-from .files import get_validated_path
+from .files import get_validated_path, home_base
 
 logger = logging.getLogger(__name__)
 
@@ -75,10 +76,25 @@ async def create_public_share(
         raise HTTPException(status_code=400, detail="Path does not point to a file.")
 
     share_id = str(uuid.uuid4())
+    base = home_base(username, req.home_dir)
+
+    def publish() -> os.stat_result:
+        # Copied from the object opened and checked inside the home, never from the path again:
+        # the user's session container can swap a symlink in for it after it was resolved.
+        with os.fdopen(open_within(base, str(source)), "rb") as src:
+            info = os.fstat(src.fileno())
+            if not stat.S_ISREG(info.st_mode):
+                raise IsADirectoryError(str(source))
+            with open(os.path.join(settings.public_storage_path, share_id), "xb") as dst:
+                shutil.copyfileobj(src, dst, 1 << 20)
+        return info
+
     try:
         os.makedirs(settings.public_storage_path, exist_ok=True, mode=0o700)
-        await asyncio.to_thread(shutil.copy, source, os.path.join(settings.public_storage_path, share_id))
-        stat_info = source.stat()
+        try:
+            stat_info = await asyncio.to_thread(publish)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail="Path does not point to a file.") from exc
         expiry = None
         if req.expiry_hours is not None and req.expiry_hours > 0:
             expiry = time.time() + req.expiry_hours * 3600
@@ -93,6 +109,8 @@ async def create_public_share(
         state.public_shares[share_id] = metadata
         await config_store.save_public_shares()
         return _share_info(share_id, metadata)
+    except HTTPException:
+        raise
     except Exception as exc:  # noqa: BLE001
         logger.error("Failed to create share for user '%s': %s", username, exc)
         raise HTTPException(status_code=500, detail="Failed to create share.") from exc

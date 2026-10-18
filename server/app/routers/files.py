@@ -8,7 +8,7 @@ import logging
 import os
 import pathlib
 import re
-import shutil
+import stat
 import uuid
 from typing import Any
 
@@ -16,7 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import ValidationError
 
 from .. import routing, user_manager
-from ..fsutil import safe_join, safe_rmtree, unique_filename
+from ..fsutil import open_parent_within, open_within, place_file, safe_join, safe_rmtree
 from ..models import (
     CreateFolderRequest,
     DeleteItemsRequest,
@@ -49,6 +49,31 @@ router = APIRouter(
 CHUNK_SIZE = 2 * 1024 * 1024
 
 
+def home_base(username: str, home_dir: str) -> str:
+    """Return the resolved root of a user's home directory.
+
+    Every path the file manager acts on must lie inside it, and is checked
+    again against the object it opened (`fsutil.open_within`): the user's
+    session container writes the tree, and can swap a symlink in after a path
+    was resolved.
+
+    Raises:
+        HTTPException: 400 for a bad name, 403 for a home not the user's, 404
+            when missing.
+    """
+    if not re.fullmatch(r"[a-zA-Z0-9_-]+", home_dir):
+        raise HTTPException(status_code=400, detail="Invalid home directory name.")
+    if home_dir not in user_manager.get_home_dirs(username):
+        raise HTTPException(status_code=403, detail=f"Access to home directory '{home_dir}' denied.")
+    try:
+        base_dir = safe_join(settings.storage_path, username, home_dir)
+    except ValueError as exc:
+        raise HTTPException(status_code=403, detail=f"Access to home directory '{home_dir}' denied.") from exc
+    if not os.path.isdir(base_dir):
+        raise HTTPException(status_code=404, detail="Home directory not found.")
+    return base_dir
+
+
 def get_validated_path(
     username: str, home_dir: str, sub_path: str, check_existence: bool = True
 ) -> pathlib.Path:
@@ -67,17 +92,7 @@ def get_validated_path(
         HTTPException: 400 for bad names, 403 for traversal or denied access,
             404 when missing.
     """
-    if not re.fullmatch(r"[a-zA-Z0-9_-]+", home_dir):
-        raise HTTPException(status_code=400, detail="Invalid home directory name.")
-    if home_dir not in user_manager.get_home_dirs(username):
-        raise HTTPException(status_code=403, detail=f"Access to home directory '{home_dir}' denied.")
-
-    try:
-        base_dir = safe_join(settings.storage_path, username, home_dir)
-    except ValueError as exc:
-        raise HTTPException(status_code=403, detail=f"Access to home directory '{home_dir}' denied.") from exc
-    if not os.path.isdir(base_dir):
-        raise HTTPException(status_code=404, detail="Home directory not found.")
+    base_dir = home_base(username, home_dir)
 
     normalized = os.path.normpath(sub_path).lstrip("/")
     if ".." in normalized.split(os.path.sep):
@@ -97,12 +112,25 @@ async def _perform_deletion(task_id: str, username: str, home_dir: str, paths: l
     task["status"] = "processing"
     deleted = 0
     try:
+        base = home_base(username, home_dir)
         for path in paths:
             validated = get_validated_path(username, home_dir, path)
-            if validated.is_dir():
-                await asyncio.to_thread(safe_rmtree, str(validated))
-            elif validated.is_file():
-                await asyncio.to_thread(os.remove, validated)
+
+            def remove(target: str = str(validated)) -> None:
+                try:
+                    parent_fd, name = open_parent_within(base, target)
+                except ValueError as exc:
+                    raise HTTPException(status_code=403, detail="Path is outside the home directory.") from exc
+                try:
+                    mode = os.stat(name, dir_fd=parent_fd, follow_symlinks=False).st_mode
+                    if stat.S_ISDIR(mode):
+                        safe_rmtree(name, dir_fd=parent_fd)
+                    else:
+                        os.unlink(name, dir_fd=parent_fd)
+                finally:
+                    os.close(parent_fd)
+
+            await asyncio.to_thread(remove)
             deleted += 1
         task.update({"status": "completed", "message": f"Successfully deleted {deleted} items."})
     except HTTPException as exc:
@@ -123,14 +151,19 @@ async def download_file_chunk(
     validated = get_validated_path(user["username"], home_dir, path)
     if not validated.is_file():
         raise HTTPException(status_code=404, detail="File not found or is a directory.")
+    base = home_base(user["username"], home_dir)
 
     def read_chunk() -> bytes:
-        with open(validated, "rb") as handle:
+        with os.fdopen(open_within(base, str(validated)), "rb") as handle:
+            if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
+                raise IsADirectoryError(str(validated))
             handle.seek(chunk_index * CHUNK_SIZE)
             return handle.read(CHUNK_SIZE)
 
     try:
         data = await asyncio.to_thread(read_chunk)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail="File not found or is a directory.") from exc
     except OSError as exc:
         logger.error("Error reading chunk for file %s: %s", path, exc)
         raise HTTPException(status_code=500, detail="Error reading file chunk.") from exc
@@ -159,9 +192,17 @@ async def create_folder(
     if new_folder == parent or new_folder.exists():
         raise HTTPException(status_code=409, detail=f"Folder '{req.folder_name}' already exists.")
     try:
-        new_folder.mkdir()
+        parent_fd = open_within(home_base(user["username"], home_dir), str(parent), os.O_RDONLY | os.O_DIRECTORY)
+    except (ValueError, OSError) as exc:
+        raise HTTPException(status_code=403, detail="Path is outside the home directory.") from exc
+    try:
+        os.mkdir(req.folder_name, dir_fd=parent_fd)
+    except FileExistsError as exc:
+        raise HTTPException(status_code=409, detail=f"Folder '{req.folder_name}' already exists.") from exc
     except OSError as exc:
         raise HTTPException(status_code=500, detail=f"Could not create folder: {exc}") from exc
+    finally:
+        os.close(parent_fd)
     return {"message": f"Folder '{req.folder_name}' created successfully."}
 
 
@@ -205,30 +246,40 @@ async def list_files(
     validated = get_validated_path(user["username"], home_dir, path)
     if not validated.is_dir():
         raise HTTPException(status_code=400, detail="Path is not a valid directory.")
-    home_root = pathlib.Path(os.path.realpath(pathlib.Path(settings.storage_path) / user["username"] / home_dir))
+    base = home_base(user["username"], home_dir)
+    relative_dir = os.path.relpath(validated, base)
+    prefix = "" if relative_dir == "." else "/" + relative_dir.replace("\\", "/")
 
     def scan() -> tuple[int, list[dict[str, Any]]]:
         try:
-            entries = sorted(validated.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower()))
+            dir_fd = open_within(base, str(validated), os.O_RDONLY | os.O_DIRECTORY)
+        except ValueError as exc:
+            raise HTTPException(status_code=403, detail="Path is outside the home directory.") from exc
         except OSError as exc:
             raise HTTPException(status_code=500, detail=f"Error reading directory: {exc}") from exc
-        start = (page - 1) * per_page
-        items = []
-        for entry in entries[start : start + per_page]:
-            try:
-                stat = entry.stat()
-            except OSError:
-                continue
-            relative = entry.relative_to(home_root)
-            items.append(
-                {
-                    "name": entry.name,
-                    "path": "/" if str(relative) == "." else f"/{relative}".replace("\\", "/"),
-                    "is_dir": entry.is_dir(),
-                    "size": stat.st_size,
-                    "mtime": stat.st_mtime,
-                }
-            )
+        try:
+            with os.scandir(dir_fd) as listing:
+                entries = sorted(listing, key=lambda e: (not e.is_dir(), e.name.lower()))
+            start = (page - 1) * per_page
+            items = []
+            for entry in entries[start : start + per_page]:
+                try:
+                    info = entry.stat()
+                except OSError:
+                    continue
+                items.append(
+                    {
+                        "name": entry.name,
+                        "path": f"{prefix}/{entry.name}",
+                        "is_dir": entry.is_dir(),
+                        "size": info.st_size,
+                        "mtime": info.st_mtime,
+                    }
+                )
+        except OSError as exc:
+            raise HTTPException(status_code=500, detail=f"Error reading directory: {exc}") from exc
+        finally:
+            os.close(dir_fd)
         return len(entries), items
 
     total, items = await asyncio.to_thread(scan)
@@ -250,17 +301,23 @@ async def finalize_upload_to_dir(
     if not dest_dir.is_dir():
         raise HTTPException(status_code=400, detail="Destination path is not a valid directory.")
 
+    base = home_base(user["username"], home_dir)
     reassembled_path = await reassemble_file(user["username"], req.upload_id, req.total_chunks)
     safe_filename = os.path.basename(req.filename)
-    actual_filename = await asyncio.to_thread(unique_filename, str(dest_dir), safe_filename)
-    try:
-        final_location = pathlib.Path(safe_join(str(dest_dir), actual_filename))
-    except ValueError as exc:
+    if safe_filename in ("", ".", ".."):
         os.remove(reassembled_path)
-        raise HTTPException(status_code=400, detail="Invalid file name.") from exc
+        raise HTTPException(status_code=400, detail="Invalid file name.")
+
+    def place() -> str:
+        # The directory is opened and checked after the reassembly the client paced.
+        return place_file(reassembled_path, base, str(dest_dir), safe_filename)
+
     try:
-        await asyncio.to_thread(shutil.move, reassembled_path, str(final_location))
-        await asyncio.to_thread(os.chmod, str(final_location), 0o644)
+        actual_filename = await asyncio.to_thread(place)
+    except ValueError as exc:
+        if os.path.exists(reassembled_path):
+            os.remove(reassembled_path)
+        raise HTTPException(status_code=403, detail="Destination is outside the home directory.") from exc
     except Exception as exc:  # noqa: BLE001
         if os.path.exists(reassembled_path):
             os.remove(reassembled_path)

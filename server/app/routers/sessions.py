@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
-import shutil
 import uuid
 from typing import Any
 
@@ -14,7 +13,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import ValidationError
 
 from .. import cluster, config_store, logos, routing, screenshots
-from ..fsutil import resolve_within, safe_join, unique_filename
+from ..fsutil import place_file, resolve_within, safe_join
 from ..launch import ephemeral_base, stop_session
 from ..models import ActiveSessionInfo, SendFileToSessionRequest
 from ..security import (
@@ -157,15 +156,11 @@ async def send_file_to_session(
         raise HTTPException(status_code=400, detail="Session storage path is invalid.") from exc
     os.makedirs(dest_dir, exist_ok=True, mode=0o755)
 
-    actual_filename = await asyncio.to_thread(unique_filename, dest_dir, safe_filename)
-    try:
-        file_location = safe_join(dest_dir, actual_filename)
-    except ValueError as exc:
+    if safe_filename in ("", ".", ".."):
         os.remove(reassembled_path)
-        raise HTTPException(status_code=400, detail="Invalid file name.") from exc
+        raise HTTPException(status_code=400, detail="Invalid file name.")
     try:
-        await asyncio.to_thread(shutil.move, reassembled_path, file_location)
-        await asyncio.to_thread(os.chmod, file_location, 0o644)
+        actual_filename = await asyncio.to_thread(place_file, reassembled_path, dest_dir, dest_dir, safe_filename)
     except Exception as exc:  # noqa: BLE001
         if os.path.exists(reassembled_path):
             os.remove(reassembled_path)
