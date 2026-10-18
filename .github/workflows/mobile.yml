@@ -349,7 +349,7 @@ jobs:
 
           # altool looks for the key at ~/private_keys/AuthKey_<KEY_ID>.p8
           mkdir -p ~/private_keys
-          echo "$APPSTORE_PRIVATE_KEY" | base64 --decode > ~/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8
+          echo "$APPSTORE_PRIVATE_KEY" | base64 --decode > ~/private_keys/"AuthKey_${APPSTORE_KEY_ID}.p8"
 
           xcrun altool --upload-app -f dist/sealskin-v*.ipa -t ios \
             --apiKey "$APPSTORE_KEY_ID" --apiIssuer "$APPSTORE_ISSUER_ID"

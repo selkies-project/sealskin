@@ -91,7 +91,7 @@ jobs:
           pip install build
           python -m build --wheel server/
           VERSION=$(cat VERSION)
-          mv server/dist/sealskin_server-${VERSION}-py3-none-any.whl "sealskin_server-${VERSION}-py3-none-any.whl"
+          mv "server/dist/sealskin_server-${VERSION}-py3-none-any.whl" "sealskin_server-${VERSION}-py3-none-any.whl"
 
       - name: Build browser extensions
         working-directory: browser_extension
