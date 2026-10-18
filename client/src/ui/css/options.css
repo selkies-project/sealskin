@@ -338,7 +338,7 @@ html.shell-web .sidebar-header { display: none; }
    -------------------------------------------------------------------------- */
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
   gap: 1.5rem 2rem;
 }
 
@@ -1086,7 +1086,7 @@ span.close-button:hover { transform: rotate(90deg); }
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.preview-browser-content { display: flex; flex-grow: 1; min-height: 0; }
+.preview-browser-content { display: flex; flex-grow: 1; min-height: 0; overflow-x: auto; }
 .preview-sidebar {
   width: 280px;
   flex-shrink: 0;
@@ -1164,7 +1164,7 @@ span.close-button:hover { transform: rotate(90deg); }
 }
 .field-group[hidden] { display: none; }
 /* The fields of a form are rows of one list, which flows into two columns on a wide window; `single` keeps one column. */
-.field-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); column-gap: 2.5rem; align-items: start; }
+.field-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(430px, 100%), 1fr)); column-gap: 2.5rem; align-items: start; container-type: inline-size; }
 .field {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 200px;
@@ -1228,6 +1228,13 @@ span.close-button:hover { transform: rotate(90deg); }
 .field-control { display: flex; justify-content: flex-end; align-items: center; min-width: 0; }
 .field-control input[type="text"], .field-control input[type="number"], .field-control input[type="url"], .field-control select { width: 100%; padding: 0.45rem 0.65rem; font-size: 0.9rem; }
 .field-control input[type="checkbox"] { margin: 0; flex-shrink: 0; }
+/* A list too narrow for a label beside a 200px control puts the control under the text, full width; a switch keeps its box beside the label. */
+@container (max-width: 459px) {
+  .field, .field-list.single .field { grid-template-columns: 1fr; gap: 0.4rem; }
+  .field.switch, .field-list.single .field.switch { grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; }
+  .field-control { justify-content: flex-start; }
+  .field-list.single .field .field-control > input:not([type="checkbox"]), .field-list.single .field .field-control > select { max-width: none; }
+}
 /* A value that differs from the default shows as such, so a template reads at a glance. */
 .field.changed .field-text label::before { content: ''; display: inline-block; width: 6px; height: 6px; margin: 0 0.45rem 2px 0; border-radius: 50%; background-color: var(--accent-primary); }
 /* The preview heads the appearance card, above the rows whose toggles it follows. */
@@ -1325,7 +1332,7 @@ body.upload-page {
 /* --------------------------------------------------------------------------
    Popup (launcher)
    -------------------------------------------------------------------------- */
-html,
+html:has(.popup-container),
 body:has(.popup-container) {
   height: 580px;
   width: 450px;
@@ -1716,8 +1723,9 @@ body:has(.popup-container)::before { display: none; }
   .nav-link i { display: none; }
   .sidebar-footer { display: none; }
   .main-content { padding: 1rem; }
+  .card { padding: 1.15rem; }
   .lab-container { flex-direction: column; height: auto; }
-  .lab-sidebar { width: 100%; max-width: none; height: auto; max-height: 400px; }
+  .lab-sidebar { width: 100%; max-width: none; min-width: 0; height: auto; max-height: 400px; }
   .form-grid { grid-template-columns: 1fr; }
   th, td { padding: 0.5rem; font-size: 0.85rem; }
   .actions-cell button { padding: 0.3rem 0.5rem; }
@@ -1825,7 +1833,7 @@ body:has(.popup-container)::before { display: none; }
 
 /* --- Branding: the form beside a mock of the home page, painted as the brand is edited. --- */
 .branding-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; align-items: start; }
-@media (max-width: 1200px) { .branding-layout { grid-template-columns: 1fr; } }
+@media (max-width: 1200px) { .branding-layout { grid-template-columns: minmax(0, 1fr); } }
 .branding-form .field-group:first-child { margin-top: 0; }
 .branding-preview { position: sticky; top: 1rem; }
 .brand-picture { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
