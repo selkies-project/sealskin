@@ -180,7 +180,9 @@ An app store is a YAML catalogue at a URL. The default store is
 which covers the LinuxServer.io desktop images. **Add New App Store** takes a
 name and a URL; the server fetches and caches the file and refreshes it on
 the auto-update interval or on demand with **Refresh**. The format is
-described in [Configuration](configuration.md#app-store-catalogues).
+described in [Configuration](configuration.md#app-store-catalogues), and a
+host that asks for a sign-in is served by the node's
+[netrc file](registries.md#hosts).
 
 **Available Apps** shows the selected store. Installing opens the app's
 settings:
@@ -209,7 +211,8 @@ the newest image and refreshes the app's cached autostart script. On
 Kubernetes, where nodes pull images themselves, **Pull** pins the registry's
 current digest for new sessions instead (see [Kubernetes](kubernetes.md#images)). **Edit**
 reopens the install dialog. Deleting an app does not stop its running
-sessions.
+sessions. A private registry, and a mirror every image is pulled through,
+are set up on the node ([Registries and proxies](registries.md)).
 
 With `SEALSKIN_AUTO_UPDATE_APPS` enabled (the default) a background job pulls
 every auto-updating app's image once an hour, refreshes the store caches, and
@@ -234,11 +237,13 @@ their sessions reach no registry: PRoot Apps finds the catalog through
 
 **New Catalog** opens the editor. Give the catalog a name, then pick its apps
 from the grid, which lists what the **remote** publishes. A remote is the
-GitHub `owner/repo` of a proot-apps repository; the editor opens on
-`SEALSKIN_PROOT_APPS_REMOTE` (linuxserver/proot-apps) and takes any fork
-built the same way, whose apps are then installed by their full image name
-(`ghcr.io/<owner>/<repo>:<app>`), since the short names belong to the default
-remote. A catalog can mix apps from several remotes. Include `gui` to give
+GitHub `owner/repo` of a proot-apps repository, or the base URL of one
+served elsewhere and the registry of its images, one space apart
+([Registries and proxies](registries.md#proot-apps-remotes)); the editor
+opens on `SEALSKIN_PROOT_APPS_REMOTE` (linuxserver/proot-apps) and takes any
+repository built the same way, whose apps are then installed by their full
+image name (`ghcr.io/<owner>/<repo>:<app>`), since the short names belong to
+the default remote. A catalog can mix apps from several remotes. Include `gui` to give
 the users the graphical installer, which the remote lists as disabled: it is
 installed like any app (`proot-apps install gui`) and shows the catalog,
 nothing more.
@@ -258,7 +263,7 @@ the image ships it, fetching from the registry. The catalogs live under
 catalog, in the layout the [proot-apps
 README](https://github.com/linuxserver/proot-apps#for-administrators)
 describes for a local repository: `metadata/` for the installer and one
-`ghcr.io_<owner>_<repo>_<app>/` folder per package.
+folder per package, named after its image (`ghcr.io_<owner>_<repo>_<app>/`).
 
 ## VPN Profiles
 

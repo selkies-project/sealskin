@@ -225,7 +225,6 @@
       "publicKeyPlaceholder": "Dán khóa công khai của người dùng vào đây, hoặc để trống để tạo một khóa mới.",
       "settingsTitle": "Cài đặt người dùng",
       "sessionLimitLabel": "Giới hạn phiên",
-      "sessionLimitTitle": "Số phiên hoạt động mà người dùng có thể có. -1 cho không giới hạn.",
       "permissionsTitle": "Quyền & Tăng cường bảo mật",
       "activeAccount": "Tài khoản hoạt động",
       "allowStorage": "Cho phép lưu trữ lâu dài",
@@ -318,11 +317,9 @@
     "installedApps": {
       "title": "Ứng dụng đã cài đặt",
       "searchPlaceholder": "Tìm kiếm ứng dụng đã cài đặt...",
-      "noAppsFound": "Không tìm thấy ứng dụng đã cài đặt nào.",
       "pulling": "Đang kéo image mới...",
       "notLocal": "Không tìm thấy image cục bộ",
       "isLaboratory": "Đây là ứng dụng Phòng thí nghiệm, được dựng từ một image cơ sở với các cài đặt tùy chỉnh.",
-      "laboratory": "Phòng thí nghiệm",
       "confirmDelete": "Bạn có chắc chắn muốn xóa ứng dụng đã cài đặt '{appName}' không?",
       "deleteTitle": "Xóa ứng dụng đã cài"
     },
@@ -1154,20 +1151,14 @@
     },
     "appLaboratory": {
       "title": "Phòng thí nghiệm ứng dụng",
-      "description": "Tạo và thử nghiệm các cấu hình ứng dụng tùy chỉnh bằng cách xếp lớp các thay đổi lên trên một ứng dụng cơ sở.",
       "selectApp": "Chọn ứng dụng",
       "createNew": "Tạo ứng dụng mới",
       "baseApp": "Ứng dụng cơ sở",
       "baseAppDescription": "Ứng dụng đã cài đặt mà ứng dụng tùy chỉnh mới của bạn sẽ dựa trên.",
       "selectBase": "Chọn một ứng dụng cơ sở",
-      "customizationTitle": "Tùy chỉnh",
       "appName": "Tên ứng dụng",
       "appIcon": "Biểu tượng ứng dụng",
       "uploadIcon": "Tải lên biểu tượng",
-      "autostartScriptLabel": "Tập lệnh Tự khởi động Tùy chỉnh",
-      "permissionsTitle": "Quyền",
-      "usersLabel": "Người dùng được phép",
-      "groupsLabel": "Nhóm được phép",
       "launchButton": "Lưu & Khởi chạy Phiên tùy chỉnh",
       "closeButton": "Đóng Phiên & Hoàn tất",
       "savingAndLaunching": "Đang lưu & Khởi chạy...",
@@ -1189,7 +1180,6 @@
       "closeTitle": "Đóng phiên tùy chỉnh",
       "unsavedTitle": "Thay đổi chưa được lưu",
       "unsavedClose": "Không thể lưu các thay đổi. Vẫn đóng phiên?",
-      "templateSaved": "Đã đóng phiên. Mẫu đã được lưu.",
       "busy": "Một phiên tùy chỉnh cho '{name}' đang mở. Hãy đóng nó ở trên trước khi thay đổi meta-app hoặc bắt đầu phiên khác.",
       "describeTitle": "1. Mô tả",
       "customizeTitle": "2. Tùy chỉnh",
@@ -1258,7 +1248,6 @@
     },
     "status": {
       "loggingIn": "Đang đăng nhập...",
-      "configSaved": "Đã lưu cấu hình thành công!",
       "configApplied": "Đã áp dụng cấu hình! Vui lòng Đăng nhập & Kiểm tra.",
       "configApplyFailed": "Không thể áp dụng cấu hình: {error}",
       "fileReadError": "Lỗi khi đọc tệp.",
@@ -1287,7 +1276,6 @@
       "userUpdateFailed": "Lỗi khi cập nhật người dùng: {error}",
       "userApproved": "Đã phê duyệt người dùng '{username}'.",
       "userApproveFailed": "Lỗi khi phê duyệt người dùng: {error}",
-      "creatingGroup": "Đang tạo nhóm...",
       "groupCreated": "Đã tạo nhóm '{groupName}'.",
       "groupCreateFailed": "Lỗi khi tạo nhóm: {error}",
       "groupDeleted": "Đã xóa nhóm '{groupName}' thành công.",
@@ -1355,7 +1343,8 @@
         "expired": "Khóa đã hết hạn. Hãy tạo khóa mới trong hồ sơ của bạn trên ứng dụng web.",
         "disabled": "Quản trị viên không cho phép tài khoản của bạn dùng khóa ứng dụng.",
         "client": "Quản trị viên không cho phép ứng dụng này dùng khóa ứng dụng.",
-        "dormant": "Khóa của bạn đang ngủ. Hãy đăng nhập trên ứng dụng web, rồi thử lại."
+        "dormant": "Khóa của bạn đang ngủ. Hãy đăng nhập trên ứng dụng web, rồi thử lại.",
+        "locked": "Quá nhiều khóa sai. Hãy đợi một phút, rồi thử lại."
       },
       "scanFailed": "Không đọc được mã: {error}",
       "scanNotKey": "Mã QR đó không phải là khóa ứng dụng SealSkin."
@@ -1369,7 +1358,8 @@
       "noPinned": "Không tìm thấy hành vi đã ghim nào.",
       "errorLoading": "Lỗi khi tải thư mục.",
       "noInstalledApps": "Chưa có ứng dụng nào được cài đặt.",
-      "noProotCatalogs": "Chưa có danh mục nào."
+      "noProotCatalogs": "Chưa có danh mục nào.",
+      "noVpnProfiles": "Chưa có hồ sơ VPN nào."
     },
     "web": {
       "title": "{brand} trong trình duyệt này",
@@ -1645,7 +1635,7 @@
       "noneSelected": "Chưa chọn ứng dụng nào. Thêm \"gui\" để cung cấp trình cài đặt đồ họa cho người dùng.",
       "remoteTitle": "Ứng dụng có sẵn",
       "searchPlaceholder": "Tìm ứng dụng...",
-      "remoteLabel": "Remote (GitHub owner/repo của một kho proot-apps)",
+      "remoteLabel": "Remote: một owner/repo trên GitHub, hoặc URL gốc của một kho proot-apps và registry của các image của nó, cách nhau một dấu cách",
       "load": "Tải",
       "refreshRemote": "Kéo lại danh sách",
       "noApps": "Không tìm thấy ứng dụng nào.",
@@ -1748,7 +1738,6 @@
       "importTitle": "Nhập hồ sơ",
       "importHelp": "Một tệp .ovpn hoặc .conf, tệp zip chứa chúng như nhà cung cấp phát hành, hoặc cấu hình được dán vào. Các tệp dùng chung một mẫu trở thành một hồ sơ với một điểm cuối cho mỗi máy chủ; mẫu riêng trở thành hồ sơ riêng.",
       "nameLabel": "Tên hồ sơ",
-      "fileLabel": "Tệp cấu hình hoặc tệp nén",
       "usernameLabel": "Tên người dùng OpenVPN",
       "passwordLabel": "Mật khẩu OpenVPN",
       "credentialsHelp": "Thông tin đăng nhập dịch vụ của nhà cung cấp, cho cấu hình yêu cầu chúng.",
@@ -1759,13 +1748,11 @@
       "importFailed": "Không thể nhập hồ sơ: {error}",
       "kind": "Loại",
       "endpoints": "Điểm cuối",
-      "published": "Đã công bố",
       "tunnels": "Kết nối",
       "noTunnels": "Không có kết nối nào",
       "tunnel": "{label} trên {node}: {sessions, plural, other {{sessions} phiên}} ({state})",
       "maxTunnels": "Giới hạn kết nối",
       "maxTunnelsHelp": "Số kết nối toàn bộ hệ thống được mở cùng lúc cho hồ sơ này; 0 là không giới hạn.",
-      "noProfiles": "Chưa có hồ sơ VPN nào.",
       "editTitle": "Chỉnh sửa {name}",
       "endpointsTitle": "Điểm cuối",
       "endpointsHelp": "Đánh dấu các điểm cuối người dùng được chọn, theo thứ tự đưa ra; điểm đầu tiên là mặc định. Không đánh dấu gì thì dùng điểm đầu tiên và người dùng không có lựa chọn. Sửa bất kỳ trường nào, xóa một điểm cuối, hoặc thêm thủ công hay từ tệp cấu hình khác.",
@@ -1823,9 +1810,6 @@
     "launchView": {
       "searchPlaceholder": "Tìm kiếm ứng dụng...",
       "uploadingFile": "Đang tải lên tệp...",
-      "gpuLabel": "GPU",
-      "storageLabel": "Lưu trữ",
-      "languageLabel": "Ngôn ngữ",
       "cleanroom": "Phòng sạch (Tạm thời)",
       "noGpu": "Không có",
       "saveOptions": "Lưu các tùy chọn khởi chạy này",
@@ -1856,7 +1840,6 @@
       "noSessions": "Không tìm thấy phiên hoạt động nào."
     },
     "uploadStorageView": {
-      "selectHome": "Chọn thư mục chính",
       "description": "Thao tác này sẽ tải tệp <strong>{filename}</strong> trực tiếp lên bộ nhớ Tệp của bạn để sử dụng trong tương lai.",
       "descriptionFallback": "Thao tác này sẽ tải tệp <strong>{filename}</strong> trực tiếp lên bộ nhớ Tệp của bạn để sử dụng trong tương lai.",
       "uploadButton": "Tải lên tệp",
@@ -1878,7 +1861,6 @@
       "errorClosingSession": "Lỗi khi đóng phiên: {message}",
       "preparingSession": "Đang chuẩn bị phiên cách ly...",
       "fetchingData": "Đang lấy dữ liệu tệp...",
-      "fetchDataFailed": "Không thể lấy dữ liệu tệp: {statusText}",
       "unknownAction": "Hành động khởi chạy không xác định.",
       "noAppSelected": "Vui lòng chọn một ứng dụng.",
       "noAppsAvailable": "Không có ứng dụng nào có sẵn cho tài khoản của bạn.",
@@ -1981,8 +1963,6 @@
       "shareCreated": "Chia sẻ đã được tạo thành công! Liên kết đã được sao chép vào clipboard của bạn.",
       "shareCreateFailed": "Không thể tạo chia sẻ: {error}",
       "sharesLoadFailed": "Không thể tải các tệp đã chia sẻ: {error}",
-      "shareDeleteFailed": "Không thể xóa chia sẻ: {error}",
-      "shareDeleted": "Đã xóa chia sẻ thành công.",
       "urlCopied": "Đã sao chép URL công khai vào clipboard.",
       "downloading": "Đang tải xuống {filename}...",
       "downloadSuccess": "Tải xuống hoàn tất",
@@ -2211,7 +2191,6 @@
       "other": "Máy khách khác"
     },
     "rootKey": "Khóa root",
-    "rootKeyHelp": "Khóa ứng dụng của quản trị viên, được máy chủ ghi vào /config/root_key khi khởi động lần đầu.",
     "keys": {
       "wakeTitle": "Khóa ứng dụng của bạn đã hoạt động lại",
       "wakeBody": "Bạn có thể quay lại ứng dụng ngay, hoặc tiếp tục ở đây.",

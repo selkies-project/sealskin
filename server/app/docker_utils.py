@@ -14,8 +14,9 @@ import time
 from typing import Any
 
 import docker
-from docker.errors import DockerException, NotFound
+from docker.errors import DockerException, ImageNotFound, NotFound
 
+from . import progress
 from .settings import settings
 from .state import state
 
@@ -43,6 +44,23 @@ def get_docker_client() -> docker.DockerClient:
             raise RuntimeError("Failed to connect to Docker daemon.") from exc
         _CLIENT = client
     return _CLIENT
+
+
+def local_image(client: docker.DockerClient, image: str) -> str:
+    """Return the reference this node runs an image by, pulling it through its mirror when it is not here.
+
+    Raises:
+        APIError: If the pull fails.
+    """
+    from . import registries
+
+    reference = registries.mirror(image)
+    try:
+        client.images.get(reference)
+    except ImageNotFound:
+        progress.step("image", image=reference)
+        client.images.pull(reference, auth_config=registries.docker_auth(reference))
+    return reference
 
 
 async def prune_dangling_images() -> None:

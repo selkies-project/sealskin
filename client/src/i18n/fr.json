@@ -225,7 +225,6 @@
       "publicKeyPlaceholder": "Collez la clé publique de l'utilisateur ici, ou laissez vide pour en générer une.",
       "settingsTitle": "Paramètres de l'Utilisateur",
       "sessionLimitLabel": "Limite de sessions",
-      "sessionLimitTitle": "Nombre de sessions actives qu'un utilisateur peut avoir. -1 pour illimité.",
       "permissionsTitle": "Permissions & Renforcement",
       "activeAccount": "Compte Actif",
       "allowStorage": "Autoriser le Stockage Persistant",
@@ -318,11 +317,9 @@
     "installedApps": {
       "title": "Applications Installées",
       "searchPlaceholder": "Rechercher des applications installées...",
-      "noAppsFound": "Aucune application installée trouvée.",
       "pulling": "Téléchargement de la nouvelle image...",
       "notLocal": "Image non trouvée localement",
       "isLaboratory": "Ceci est une application de Laboratoire, construite à partir d'une image de base avec des paramètres personnalisés.",
-      "laboratory": "Laboratoire",
       "confirmDelete": "Êtes-vous sûr de vouloir supprimer l'application installée '{appName}' ?",
       "deleteTitle": "Supprimer l'application installée"
     },
@@ -1154,20 +1151,14 @@
     },
     "appLaboratory": {
       "title": "Laboratoire d'applications",
-      "description": "Créez et testez des configurations d'applications personnalisées en superposant des modifications sur une application de base.",
       "selectApp": "Sélectionner une application",
       "createNew": "Créer une nouvelle application",
       "baseApp": "Application de base",
       "baseAppDescription": "L'application installée sur laquelle votre nouvelle application personnalisée sera basée.",
       "selectBase": "Sélectionner une application de base",
-      "customizationTitle": "Personnalisation",
       "appName": "Nom de l'application",
       "appIcon": "Icône de l'application",
       "uploadIcon": "Téléverser une icône",
-      "autostartScriptLabel": "Script de Démarrage Automatique Personnalisé",
-      "permissionsTitle": "Permissions",
-      "usersLabel": "Utilisateurs Autorisés",
-      "groupsLabel": "Groupes Autorisés",
       "launchButton": "Enregistrer et Lancer la Session de Personnalisation",
       "closeButton": "Fermer la Session et Finaliser",
       "savingAndLaunching": "Enregistrement et Lancement...",
@@ -1189,7 +1180,6 @@
       "closeTitle": "Fermer la session de personnalisation",
       "unsavedTitle": "Modifications non enregistrées",
       "unsavedClose": "Les modifications n'ont pas pu être enregistrées. Fermer la session quand même ?",
-      "templateSaved": "Session fermée. Le modèle est enregistré.",
       "busy": "Une session de personnalisation pour '{name}' est ouverte. Fermez-la ci-dessus avant de modifier une méta-application ou d'en démarrer une autre.",
       "describeTitle": "1. Décrire",
       "customizeTitle": "2. Personnaliser",
@@ -1258,7 +1248,6 @@
     },
     "status": {
       "loggingIn": "Connexion en cours...",
-      "configSaved": "Configuration enregistrée avec succès !",
       "configApplied": "Configuration appliquée ! Veuillez vous connecter et tester.",
       "configApplyFailed": "Échec de l'application de la configuration : {error}",
       "fileReadError": "Erreur de lecture du fichier.",
@@ -1287,7 +1276,6 @@
       "userUpdateFailed": "Erreur lors de la mise à jour de l'utilisateur : {error}",
       "userApproved": "Utilisateur '{username}' approuvé.",
       "userApproveFailed": "Erreur lors de l'approbation de l'utilisateur : {error}",
-      "creatingGroup": "Création du groupe...",
       "groupCreated": "Groupe '{groupName}' créé.",
       "groupCreateFailed": "Erreur lors de la création du groupe : {error}",
       "groupDeleted": "Groupe '{groupName}' supprimé avec succès.",
@@ -1355,7 +1343,8 @@
         "expired": "La clé a expiré. Créez-en une nouvelle dans votre profil sur l'application web.",
         "disabled": "Votre administrateur n'autorise pas les clés d'application pour votre compte.",
         "client": "Votre administrateur n'autorise pas cette application à utiliser des clés d'application.",
-        "dormant": "Votre clé est endormie. Connectez-vous sur l'application web, puis réessayez."
+        "dormant": "Votre clé est endormie. Connectez-vous sur l'application web, puis réessayez.",
+        "locked": "Trop de clés incorrectes. Patientez une minute, puis réessayez."
       },
       "scanFailed": "Impossible de lire le code : {error}",
       "scanNotKey": "Ce code QR n'est pas une clé d'application SealSkin."
@@ -1369,7 +1358,8 @@
       "noPinned": "Aucun comportement épinglé trouvé.",
       "errorLoading": "Erreur lors du chargement des dossiers.",
       "noInstalledApps": "Aucune application n'a encore été installée.",
-      "noProotCatalogs": "Aucun catalogue pour l'instant."
+      "noProotCatalogs": "Aucun catalogue pour l'instant.",
+      "noVpnProfiles": "Aucun profil VPN pour l'instant."
     },
     "web": {
       "title": "{brand} dans ce Navigateur",
@@ -1645,7 +1635,7 @@
       "noneSelected": "Aucune application sélectionnée pour l'instant. Incluez \"gui\" pour donner l'installateur graphique aux utilisateurs.",
       "remoteTitle": "Applications disponibles",
       "searchPlaceholder": "Rechercher des applications...",
-      "remoteLabel": "Dépôt distant (GitHub owner/repo d'un dépôt proot-apps)",
+      "remoteLabel": "Dépôt distant : un owner/repo GitHub, ou l'URL de base d'un dépôt proot-apps et le registre de ses images, séparés par une espace",
       "load": "Charger",
       "refreshRemote": "Récupérer à nouveau la liste",
       "noApps": "Aucune application trouvée.",
@@ -1748,7 +1738,6 @@
       "importTitle": "Importer un profil",
       "importHelp": "Un fichier .ovpn ou .conf, un zip de ces fichiers tel que le fournisseur le distribue, ou la configuration collée. Les fichiers qui partagent un modèle deviennent un profil avec un point de terminaison par serveur ; un modèle à part devient un profil à part.",
       "nameLabel": "Nom du profil",
-      "fileLabel": "Fichier de configuration ou archive",
       "usernameLabel": "Nom d'utilisateur OpenVPN",
       "passwordLabel": "Mot de passe OpenVPN",
       "credentialsHelp": "Les identifiants de service du fournisseur, pour une configuration qui les demande.",
@@ -1759,13 +1748,11 @@
       "importFailed": "Impossible d'importer le profil : {error}",
       "kind": "Type",
       "endpoints": "Points de terminaison",
-      "published": "Publiés",
       "tunnels": "Connexions",
       "noTunnels": "Aucune active",
       "tunnel": "{label} sur {node} : {sessions, plural, one {1 session} other {{sessions} sessions}} ({state})",
       "maxTunnels": "Plafond de connexions",
       "maxTunnelsHelp": "Connexions que l'ensemble du déploiement peut avoir en même temps pour ce profil ; 0 pour aucun plafond.",
-      "noProfiles": "Aucun profil VPN pour l'instant.",
       "editTitle": "Modifier {name}",
       "endpointsTitle": "Points de terminaison",
       "endpointsHelp": "Cochez les points de terminaison que les utilisateurs peuvent choisir, dans l'ordre où les proposer ; le premier est celui par défaut. Sans aucun coché, le premier est utilisé et les utilisateurs n'ont pas le choix. Modifiez un champ, retirez un point de terminaison, ou ajoutez-en un à la main ou depuis un autre fichier de configuration.",
@@ -1823,9 +1810,6 @@
     "launchView": {
       "searchPlaceholder": "Rechercher des applications...",
       "uploadingFile": "Téléversement du fichier...",
-      "gpuLabel": "GPU",
-      "storageLabel": "Stockage",
-      "languageLabel": "Langue",
       "cleanroom": "Salle Blanche (Éphémère)",
       "noGpu": "Aucun",
       "saveOptions": "Enregistrer ces options de lancement",
@@ -1856,7 +1840,6 @@
       "noSessions": "Aucune session active trouvée."
     },
     "uploadStorageView": {
-      "selectHome": "Sélectionner un Dossier Personnel",
       "description": "Ceci téléversera le fichier <strong>{filename}</strong> directement dans votre espace de stockage Fichiers pour une utilisation future.",
       "descriptionFallback": "Ceci téléversera le fichier <strong>{filename}</strong> directement dans votre espace de stockage Fichiers pour une utilisation future.",
       "uploadButton": "Téléverser le Fichier",
@@ -1878,7 +1861,6 @@
       "errorClosingSession": "Erreur lors de la fermeture de la session : {message}",
       "preparingSession": "Préparation de la session isolée...",
       "fetchingData": "Récupération des données du fichier...",
-      "fetchDataFailed": "Échec de la récupération des données du fichier : {statusText}",
       "unknownAction": "Action de lancement inconnue.",
       "noAppSelected": "Veuillez sélectionner une application.",
       "noAppsAvailable": "Aucune application n'est disponible pour votre compte.",
@@ -1981,8 +1963,6 @@
       "shareCreated": "Partage créé avec succès ! Le lien a été copié dans votre presse-papiers.",
       "shareCreateFailed": "Échec de la création du partage : {error}",
       "sharesLoadFailed": "Échec du chargement des fichiers partagés : {error}",
-      "shareDeleteFailed": "Échec de la suppression du partage : {error}",
-      "shareDeleted": "Partage supprimé avec succès.",
       "urlCopied": "URL publique copiée dans le presse-papiers.",
       "downloading": "Téléchargement de {filename}...",
       "downloadSuccess": "Téléchargement terminé",
@@ -2211,7 +2191,6 @@
       "other": "Autres clients"
     },
     "rootKey": "Clé root",
-    "rootKeyHelp": "La clé d'application de l'administrateur, que le serveur a écrite dans /config/root_key à son premier démarrage.",
     "keys": {
       "wakeTitle": "Votre clé d'application est de nouveau active",
       "wakeBody": "Vous pouvez revenir à l'application maintenant, ou continuer ici.",

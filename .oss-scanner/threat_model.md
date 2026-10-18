@@ -24,8 +24,10 @@
   (`launch.py`, `providers/`), the file manager, uploads, and public shares, the object store a cluster shares
   (`store.py`, S3 or a file emulation, with users' files under `filesync.py`/`filecrypt.py`), the peer routes
   (`routers/peer.py`, `cluster.py`), VPN profiles an administrator uploads (`vpn.py`, `vpn_kube.py`,
-  `vpn/entrypoint.sh`), the web client exported from an image (`webclient.py`), and Caddy's `forward_auth` to the
-  loopback-only `/internal/resolve_session`.
+  `vpn/entrypoint.sh`), the web client exported from an image (`webclient.py`), the credential files a node
+  reads and the pull secrets it reads on Kubernetes (`registries.py`: a Docker `config.json` and a netrc under
+  `/config`, sent to the registries and hosts they name and nowhere else, never to the store or a client), and
+  Caddy's `forward_auth` to the loopback-only `/internal/resolve_session`.
 
 ## Components that matter most / least
 - Most: anything that lets a lower principal reach a higher one: an anonymous client reaching the API, a session
@@ -49,7 +51,8 @@
   from a user, a template editor, a store's YAML, or a VPN profile to that authority; a stranger acting as a node.
 - High: one user reaching another's files, sessions, store objects or keys; a session container, a session page,
   or an iframe page reaching the web sign-in, the control plane or the user's private key; authentication bypass
-  of a collaboration role; a secret of the store readable by a node that should not hold it.
+  of a collaboration role; a secret of the store readable by a node that should not hold it; a node's registry
+  or host credential reaching a client, the store, another node, or a host the file does not name.
 - Medium: denial of service by an authenticated user; cross-origin reads of non-secret data; secrets in logs.
 - Low: hardening without a demonstrated crossing.
 

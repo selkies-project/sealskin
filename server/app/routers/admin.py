@@ -249,8 +249,12 @@ def _catalog_from(body: dict[str, Any], catalog_id: str, revision: int) -> Proot
     seen: set[tuple[str, str]] = set()
     apps = []
     for app in catalog.apps:
-        if (app.remote.lower(), app.name) not in seen:
-            seen.add((app.remote.lower(), app.name))
+        try:
+            key = (prootapps.remote_key(app.remote), app.name)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        if key not in seen:
+            seen.add(key)
             apps.append(app)
     catalog.apps = apps
     for other in state.proot_catalogs.values():
@@ -267,7 +271,7 @@ async def list_proot_catalogs() -> list[ProotCatalogStatus]:
 
 @router.get("/proot/remote", response_model=list[ProotRemoteApp])
 async def list_proot_remote(remote: str, refresh: bool = False) -> list[ProotRemoteApp]:
-    """Return the apps a PRoot Apps remote (a GitHub `owner/repo`) publishes."""
+    """Return the apps a PRoot Apps remote publishes (see `prootapps.Remote`)."""
     try:
         apps = await prootapps.fetch_remote(remote, refresh)
     except ValueError as exc:

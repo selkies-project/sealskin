@@ -9,6 +9,7 @@
     "object-store",
     "vpn",
     "kubernetes",
+    "registries",
     "usage",
     "administration",
     "configuration",

@@ -225,7 +225,6 @@
       "publicKeyPlaceholder": "Indsæt brugerens offentlige nøgle her, eller lad feltet være tomt for at generere en.",
       "settingsTitle": "Brugerindstillinger",
       "sessionLimitLabel": "Sessionsgrænse",
-      "sessionLimitTitle": "Antal aktive sessioner en bruger kan have. -1 for ubegrænset.",
       "permissionsTitle": "Tilladelser & Hærdning",
       "activeAccount": "Aktiv Konto",
       "allowStorage": "Tillad Vedvarende Lager",
@@ -318,11 +317,9 @@
     "installedApps": {
       "title": "Installerede Applikationer",
       "searchPlaceholder": "Søg efter installerede apps...",
-      "noAppsFound": "Ingen installerede apps fundet.",
       "pulling": "Henter nyt image...",
       "notLocal": "Image ikke fundet lokalt",
       "isLaboratory": "Dette er en laboratorie-app, bygget fra et basis-image med tilpassede indstillinger.",
-      "laboratory": "Laboratorium",
       "confirmDelete": "Er du sikker på, at du vil slette den installerede app '{appName}'?",
       "deleteTitle": "Slet installeret app"
     },
@@ -1154,20 +1151,14 @@
     },
     "appLaboratory": {
       "title": "App-laboratorium",
-      "description": "Opret og test brugerdefinerede applikationskonfigurationer ved at lægge ændringer oven på en basis-app.",
       "selectApp": "Vælg App",
       "createNew": "Opret Ny App",
       "baseApp": "Basisapplikation",
       "baseAppDescription": "Den installerede applikation, som din nye brugerdefinerede app vil være baseret på.",
       "selectBase": "Vælg en Basis-app",
-      "customizationTitle": "Tilpasning",
       "appName": "App-navn",
       "appIcon": "App-ikon",
       "uploadIcon": "Upload Ikon",
-      "autostartScriptLabel": "Brugerdefineret Autostart Script",
-      "permissionsTitle": "Tilladelser",
-      "usersLabel": "Tilladte Brugere",
-      "groupsLabel": "Tilladte Grupper",
       "launchButton": "Gem & Start Tilpasningssession",
       "closeButton": "Luk Session & Afslut",
       "savingAndLaunching": "Gemmer & Starter...",
@@ -1189,7 +1180,6 @@
       "closeTitle": "Luk tilpasningssession",
       "unsavedTitle": "Ændringer ikke gemt",
       "unsavedClose": "Ændringerne kunne ikke gemmes. Luk sessionen alligevel?",
-      "templateSaved": "Session lukket. Skabelonen er gemt.",
       "busy": "En tilpasningssession for '{name}' er åben. Luk den ovenfor, før du ændrer en meta-app eller starter en ny.",
       "describeTitle": "1. Beskriv",
       "customizeTitle": "2. Tilpas",
@@ -1258,7 +1248,6 @@
     },
     "status": {
       "loggingIn": "Logger ind...",
-      "configSaved": "Konfiguration gemt med succes!",
       "configApplied": "Konfiguration anvendt! Log venligst ind & test.",
       "configApplyFailed": "Kunne ikke anvende konfiguration: {error}",
       "fileReadError": "Fejl ved læsning af fil.",
@@ -1287,7 +1276,6 @@
       "userUpdateFailed": "Fejl ved opdatering af bruger: {error}",
       "userApproved": "Brugeren '{username}' er godkendt.",
       "userApproveFailed": "Fejl ved godkendelse af brugeren: {error}",
-      "creatingGroup": "Opretter gruppe...",
       "groupCreated": "Gruppe '{groupName}' oprettet.",
       "groupCreateFailed": "Fejl ved oprettelse af gruppe: {error}",
       "groupDeleted": "Gruppe '{groupName}' slettet med succes.",
@@ -1355,7 +1343,8 @@
         "expired": "Nøglen er udløbet. Opret en ny i din profil i webappen.",
         "disabled": "Din administrator tillader ikke applikationsnøgler for din konto.",
         "client": "Din administrator tillader ikke, at denne app bruger applikationsnøgler.",
-        "dormant": "Din nøgle er i dvale. Log ind i webappen, og prøv igen."
+        "dormant": "Din nøgle er i dvale. Log ind i webappen, og prøv igen.",
+        "locked": "For mange forkerte nøgler. Vent et minut, og prøv igen."
       },
       "scanFailed": "Koden kunne ikke læses: {error}",
       "scanNotKey": "Denne QR-kode er ikke en SealSkin-applikationsnøgle."
@@ -1369,7 +1358,8 @@
       "noPinned": "Ingen fastgjorte adfærd fundet.",
       "errorLoading": "Fejl ved indlæsning af mapper.",
       "noInstalledApps": "Ingen applikationer er installeret endnu.",
-      "noProotCatalogs": "Ingen kataloger endnu."
+      "noProotCatalogs": "Ingen kataloger endnu.",
+      "noVpnProfiles": "Ingen VPN-profiler endnu."
     },
     "web": {
       "title": "{brand} i denne browser",
@@ -1645,7 +1635,7 @@
       "noneSelected": "Ingen apps valgt endnu. Medtag \"gui\" for at give brugerne det grafiske installationsprogram.",
       "remoteTitle": "Tilgængelige apps",
       "searchPlaceholder": "Søg i apps...",
-      "remoteLabel": "Remote (GitHub owner/repo for et proot-apps-repository)",
+      "remoteLabel": "Remote: et GitHub owner/repo, eller basis-URL'en for et proot-apps-repository og registret for dets images, adskilt af et mellemrum",
       "load": "Indlæs",
       "refreshRemote": "Hent listen igen",
       "noApps": "Ingen apps fundet.",
@@ -1748,7 +1738,6 @@
       "importTitle": "Importér en profil",
       "importHelp": "Én .ovpn- eller .conf-fil, en zip af dem, som udbyderen udleverer den, eller den indsatte konfiguration. Filer med samme skabelon bliver én profil med et endepunkt pr. server; en egen skabelon bliver en egen profil.",
       "nameLabel": "Profilnavn",
-      "fileLabel": "Konfigurationsfil eller arkiv",
       "usernameLabel": "OpenVPN-brugernavn",
       "passwordLabel": "OpenVPN-adgangskode",
       "credentialsHelp": "Udbyderens tjenestelegitimation til en konfiguration, der beder om den.",
@@ -1759,13 +1748,11 @@
       "importFailed": "Profilen kunne ikke importeres: {error}",
       "kind": "Type",
       "endpoints": "Endepunkter",
-      "published": "Udgivet",
       "tunnels": "Forbindelser",
       "noTunnels": "Ingen aktive",
       "tunnel": "{label} på {node}: {sessions, plural, one {1 session} other {{sessions} sessioner}} ({state})",
       "maxTunnels": "Forbindelsesloft",
       "maxTunnelsHelp": "Forbindelser hele installationen må have oppe ad gangen for denne profil; 0 for intet loft.",
-      "noProfiles": "Ingen VPN-profiler endnu.",
       "editTitle": "Redigér {name}",
       "endpointsTitle": "Endepunkter",
       "endpointsHelp": "Markér de endepunkter, brugere må vælge, i den rækkefølge de tilbydes; det første er standarden. Uden markeringer bruges det første, og brugerne får intet valg. Redigér et felt, fjern et endepunkt, eller tilføj et i hånden eller fra en anden konfigurationsfil.",
@@ -1823,9 +1810,6 @@
     "launchView": {
       "searchPlaceholder": "Søg efter applikationer...",
       "uploadingFile": "Uploader fil...",
-      "gpuLabel": "GPU",
-      "storageLabel": "Lager",
-      "languageLabel": "Sprog",
       "cleanroom": "Cleanroom (Midlertidig)",
       "noGpu": "Ingen",
       "saveOptions": "Gem disse startindstillinger",
@@ -1856,7 +1840,6 @@
       "noSessions": "Ingen aktive sessioner fundet."
     },
     "uploadStorageView": {
-      "selectHome": "Vælg Hjemmemappe",
       "description": "Dette vil uploade filen <strong>{filename}</strong> direkte til dit Fillager til fremtidig brug.",
       "descriptionFallback": "Dette vil uploade filen <strong>{filename}</strong> direkte til dit Fillager til fremtidig brug.",
       "uploadButton": "Upload Fil",
@@ -1878,7 +1861,6 @@
       "errorClosingSession": "Fejl ved lukning af session: {message}",
       "preparingSession": "Forbereder isoleret session...",
       "fetchingData": "Henter fildata...",
-      "fetchDataFailed": "Kunne ikke hente fildata: {statusText}",
       "unknownAction": "Ukendt starthandling.",
       "noAppSelected": "Vælg venligst en applikation.",
       "noAppsAvailable": "Ingen applikationer er tilgængelige for din konto.",
@@ -1981,8 +1963,6 @@
       "shareCreated": "Deling oprettet med succes! Linket er blevet kopieret til din udklipsholder.",
       "shareCreateFailed": "Kunne ikke oprette deling: {error}",
       "sharesLoadFailed": "Kunne ikke indlæse delte filer: {error}",
-      "shareDeleteFailed": "Kunne ikke slette deling: {error}",
-      "shareDeleted": "Deling slettet med succes.",
       "urlCopied": "Offentlig URL kopieret til udklipsholder.",
       "downloading": "Downloader {filename}...",
       "downloadSuccess": "Download fuldført",
@@ -2211,7 +2191,6 @@
       "other": "Andre klienter"
     },
     "rootKey": "Root-nøgle",
-    "rootKeyHelp": "Administratorens applikationsnøgle, som serveren skrev til /config/root_key ved sin første start.",
     "keys": {
       "wakeTitle": "Din applikationsnøgle er aktiv igen",
       "wakeBody": "Du kan gå tilbage til appen nu eller fortsætte her.",

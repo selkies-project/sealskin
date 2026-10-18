@@ -27,6 +27,8 @@ watcher only fires for edits made by someone else.
 ```
 /config
   admin.json                       first-run key file of `admin`, delete after import
+  .docker/config.json              this node's registry credentials (registries.md)
+  .netrc                           this node's credentials for app store and catalog hosts
   ssl/
     server_key.pem                 RSA key anchoring the end-to-end encryption
     proxy_cert.pem, proxy_key.pem  TLS certificate and key Caddy serves
@@ -216,7 +218,8 @@ user an administrator, as membership in a group that sets it does.
 The first start seeds it with the default store from
 `SEALSKIN_APP_RESOURCE_PATH`. Each store's YAML is downloaded into
 `app_stores_cache/` and refreshed by the auto-update job, or from the App
-Store panel.
+Store panel. A store on a host that asks for a sign-in is fetched with the
+node's [netrc file](registries.md#hosts).
 
 ### App store catalogues
 
@@ -253,9 +256,11 @@ session's home directory at launch so the application starts by itself.
 ## PRoot Apps catalogs
 
 `proot_catalogs.yml` is the list of [catalogs](administration.md#proot-apps),
-shared by the nodes of a cluster. Each names its apps by remote (the GitHub
-`owner/repo` of a proot-apps repository) and name, which is the app's image
-tag under `ghcr.io/<owner>/<repo>`:
+shared by the nodes of a cluster. Each names its apps by remote and name,
+which is the app's image tag. A remote is the GitHub `owner/repo` of a
+proot-apps repository, whose apps are tags of `ghcr.io/<owner>/<repo>`, or
+the base URL its `metadata/` is served under and the registry of its images,
+one space apart ([Registries and proxies](registries.md#proot-apps-remotes)):
 
 ```yaml
 - id: 7c1e2b9a-...                  # generated; the catalog's folder on every node
@@ -269,14 +274,18 @@ tag under `ghcr.io/<owner>/<repo>`:
       name: gui
     - remote: myorg/proot-apps
       name: internal-tool
+    - remote: https://git.example/raw/it/proot-apps/main registry.example/it/proot-apps
+      name: ledger
 ```
 
 A node's copy lives under `sealskin_proot_apps/<id>/`: `metadata/metadata.yml`
 and `metadata/img/` for the graphical installer, and for each app a folder
-`ghcr.io_<owner>_<repo>_<name>/` holding `app.tar.gz`, the image's layer, and
-`SHALAYER`, its digest, exactly as `proot-apps localrepo get` would write
-them. Packages are fetched from the registry anonymously, for the node's own
-architecture, and only when their digest changed. Users and groups name a
+named after its image reference with `/` and `:` as `_`
+(`ghcr.io_<owner>_<repo>_<name>/`) holding `app.tar.gz`, the image's layer,
+and `SHALAYER`, its digest, exactly as `proot-apps localrepo get` would write
+them. Packages are fetched from the registry, through its mirror and with
+the node's credential for it, for the node's own architecture, and only when
+their digest changed. Users and groups name a
 catalog in `proot_catalog` by its `id`.
 
 ## Installed applications

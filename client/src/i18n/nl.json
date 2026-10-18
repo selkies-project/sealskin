@@ -225,7 +225,6 @@
       "publicKeyPlaceholder": "Plak hier de publieke sleutel van de gebruiker, of laat leeg om er een te genereren.",
       "settingsTitle": "Gebruikersinstellingen",
       "sessionLimitLabel": "Sessielimiet",
-      "sessionLimitTitle": "Aantal actieve sessies dat een gebruiker kan hebben. -1 voor onbeperkt.",
       "permissionsTitle": "Permissies & Beveiliging",
       "activeAccount": "Actief Account",
       "allowStorage": "Persistente Opslag Toestaan",
@@ -318,11 +317,9 @@
     "installedApps": {
       "title": "Geïnstalleerde Applicaties",
       "searchPlaceholder": "Zoek geïnstalleerde apps...",
-      "noAppsFound": "Geen geïnstalleerde apps gevonden.",
       "pulling": "Nieuwe image wordt gedownload...",
       "notLocal": "Image niet lokaal gevonden",
       "isLaboratory": "Dit is een Laboratorium-app, gebouwd op basis van een basisimage met aangepaste instellingen.",
-      "laboratory": "Laboratorium",
       "confirmDelete": "Weet u zeker dat u de geïnstalleerde app '{appName}' wilt verwijderen?",
       "deleteTitle": "Geïnstalleerde app verwijderen"
     },
@@ -1154,20 +1151,14 @@
     },
     "appLaboratory": {
       "title": "App Laboratorium",
-      "description": "Creëer en test aangepaste applicatieconfiguraties door wijzigingen bovenop een basis-app te leggen.",
       "selectApp": "Selecteer App",
       "createNew": "Nieuwe App Maken",
       "baseApp": "Basis Applicatie",
       "baseAppDescription": "De geïnstalleerde applicatie waarop uw nieuwe aangepaste app gebaseerd zal zijn.",
       "selectBase": "Selecteer een Basis App",
-      "customizationTitle": "Aanpassing",
       "appName": "App Naam",
       "appIcon": "App Icoon",
       "uploadIcon": "Icoon Uploaden",
-      "autostartScriptLabel": "Aangepast Autostart Script",
-      "permissionsTitle": "Permissies",
-      "usersLabel": "Toegestane Gebruikers",
-      "groupsLabel": "Toegestane Groepen",
       "launchButton": "Opslaan & Aanpassingssessie Starten",
       "closeButton": "Sessie Sluiten & Afronden",
       "savingAndLaunching": "Opslaan & Starten...",
@@ -1189,7 +1180,6 @@
       "closeTitle": "Aanpassingssessie sluiten",
       "unsavedTitle": "Wijzigingen niet opgeslagen",
       "unsavedClose": "De wijzigingen konden niet worden opgeslagen. Sessie toch sluiten?",
-      "templateSaved": "Sessie gesloten. Het sjabloon is opgeslagen.",
       "busy": "Er is een aanpassingssessie voor '{name}' geopend. Sluit die hierboven voordat u een meta-app wijzigt of een andere sessie start.",
       "describeTitle": "1. Beschrijven",
       "customizeTitle": "2. Aanpassen",
@@ -1258,7 +1248,6 @@
     },
     "status": {
       "loggingIn": "Inloggen...",
-      "configSaved": "Configuratie succesvol opgeslagen!",
       "configApplied": "Configuratie toegepast! Gelieve In te loggen & te Testen.",
       "configApplyFailed": "Kon configuratie niet toepassen: {error}",
       "fileReadError": "Fout bij het lezen van het bestand.",
@@ -1287,7 +1276,6 @@
       "userUpdateFailed": "Fout bij bijwerken gebruiker: {error}",
       "userApproved": "Gebruiker '{username}' goedgekeurd.",
       "userApproveFailed": "Fout bij het goedkeuren van de gebruiker: {error}",
-      "creatingGroup": "Groep aanmaken...",
       "groupCreated": "Groep '{groupName}' aangemaakt.",
       "groupCreateFailed": "Fout bij aanmaken groep: {error}",
       "groupDeleted": "Groep '{groupName}' succesvol verwijderd.",
@@ -1355,7 +1343,8 @@
         "expired": "De sleutel is verlopen. Maak een nieuwe in uw profiel in de webapp.",
         "disabled": "Uw beheerder staat geen toepassingssleutels toe voor uw account.",
         "client": "Uw beheerder staat deze app niet toe toepassingssleutels te gebruiken.",
-        "dormant": "Uw sleutel is in slaap. Meld u aan in de webapp en probeer het daarna opnieuw."
+        "dormant": "Uw sleutel is in slaap. Meld u aan in de webapp en probeer het daarna opnieuw.",
+        "locked": "Te veel verkeerde sleutels. Wacht een minuut en probeer het daarna opnieuw."
       },
       "scanFailed": "De code kon niet worden gelezen: {error}",
       "scanNotKey": "Die QR-code is geen SealSkin-toepassingssleutel."
@@ -1369,7 +1358,8 @@
       "noPinned": "Geen vastgezet gedrag gevonden.",
       "errorLoading": "Fout bij het laden van de mappen.",
       "noInstalledApps": "Er zijn nog geen applicaties geïnstalleerd.",
-      "noProotCatalogs": "Nog geen catalogi."
+      "noProotCatalogs": "Nog geen catalogi.",
+      "noVpnProfiles": "Nog geen VPN-profielen."
     },
     "web": {
       "title": "{brand} in Deze Browser",
@@ -1645,7 +1635,7 @@
       "noneSelected": "Nog geen apps geselecteerd. Neem \"gui\" op om gebruikers het grafische installatieprogramma te geven.",
       "remoteTitle": "Beschikbare apps",
       "searchPlaceholder": "Apps zoeken...",
-      "remoteLabel": "Remote (GitHub owner/repo van een proot-apps-repository)",
+      "remoteLabel": "Remote: een GitHub owner/repo, of de basis-URL van een proot-apps-repository en de registry van zijn images, gescheiden door een spatie",
       "load": "Laden",
       "refreshRemote": "Lijst opnieuw ophalen",
       "noApps": "Geen apps gevonden.",
@@ -1748,7 +1738,6 @@
       "importTitle": "Een profiel importeren",
       "importHelp": "Eén .ovpn- of .conf-bestand, een zip ervan zoals de aanbieder die uitgeeft, of de geplakte configuratie. Bestanden met dezelfde sjabloon worden één profiel met een eindpunt per server; een eigen sjabloon wordt een eigen profiel.",
       "nameLabel": "Profielnaam",
-      "fileLabel": "Configuratiebestand of archief",
       "usernameLabel": "OpenVPN-gebruikersnaam",
       "passwordLabel": "OpenVPN-wachtwoord",
       "credentialsHelp": "De dienstgegevens van de aanbieder, voor een configuratie die erom vraagt.",
@@ -1759,13 +1748,11 @@
       "importFailed": "Het profiel kon niet worden geïmporteerd: {error}",
       "kind": "Soort",
       "endpoints": "Eindpunten",
-      "published": "Gepubliceerd",
       "tunnels": "Verbindingen",
       "noTunnels": "Geen actief",
       "tunnel": "{label} op {node}: {sessions, plural, one {1 sessie} other {{sessions} sessies}} ({state})",
       "maxTunnels": "Verbindingslimiet",
       "maxTunnelsHelp": "Verbindingen die de hele installatie tegelijk voor dit profiel mag hebben; 0 voor geen limiet.",
-      "noProfiles": "Nog geen VPN-profielen.",
       "editTitle": "{name} bewerken",
       "endpointsTitle": "Eindpunten",
       "endpointsHelp": "Vink de eindpunten aan die gebruikers mogen kiezen, in de volgorde van aanbieden; het eerste is de standaard. Zonder vinkjes wordt het eerste gebruikt en hebben gebruikers geen keuze. Bewerk een veld, verwijder een eindpunt, of voeg er een toe met de hand of uit een ander configuratiebestand.",
@@ -1823,9 +1810,6 @@
     "launchView": {
       "searchPlaceholder": "Zoek applicaties...",
       "uploadingFile": "Bestand uploaden...",
-      "gpuLabel": "GPU",
-      "storageLabel": "Opslag",
-      "languageLabel": "Taal",
       "cleanroom": "Cleanroom (Tijdelijk)",
       "noGpu": "Geen",
       "saveOptions": "Deze startopties opslaan",
@@ -1856,7 +1840,6 @@
       "noSessions": "Geen actieve sessies gevonden."
     },
     "uploadStorageView": {
-      "selectHome": "Selecteer Home Directory",
       "description": "Hiermee wordt het bestand <strong>{filename}</strong> voor toekomstig gebruik rechtstreeks naar uw Bestanden-opslag geüpload.",
       "descriptionFallback": "Hiermee wordt het bestand <strong>{filename}</strong> voor toekomstig gebruik rechtstreeks naar uw Bestanden-opslag geüpload.",
       "uploadButton": "Bestand Uploaden",
@@ -1878,7 +1861,6 @@
       "errorClosingSession": "Fout bij sluiten sessie: {message}",
       "preparingSession": "Geïsoleerde sessie voorbereiden...",
       "fetchingData": "Bestandsgegevens ophalen...",
-      "fetchDataFailed": "Kon bestandsgegevens niet ophalen: {statusText}",
       "unknownAction": "Onbekende startactie.",
       "noAppSelected": "Selecteer een applicatie.",
       "noAppsAvailable": "Er zijn geen applicaties beschikbaar voor uw account.",
@@ -1981,8 +1963,6 @@
       "shareCreated": "Deellink succesvol aangemaakt! De link is naar je klembord gekopieerd.",
       "shareCreateFailed": "Aanmaken van deellink mislukt: {error}",
       "sharesLoadFailed": "Laden van gedeelde bestanden mislukt: {error}",
-      "shareDeleteFailed": "Verwijderen van deellink mislukt: {error}",
-      "shareDeleted": "Deellink succesvol verwijderd.",
       "urlCopied": "Openbare URL naar klembord gekopieerd.",
       "downloading": "{filename} wordt gedownload...",
       "downloadSuccess": "Download voltooid",
@@ -2211,7 +2191,6 @@
       "other": "Overige clients"
     },
     "rootKey": "Root-sleutel",
-    "rootKeyHelp": "De toepassingssleutel van de beheerder, die de server bij de eerste start naar /config/root_key heeft geschreven.",
     "keys": {
       "wakeTitle": "Uw toepassingssleutel is weer actief",
       "wakeBody": "U kunt nu terug naar de app, of hier verdergaan.",

@@ -225,7 +225,6 @@
       "publicKeyPlaceholder": "ここにユーザーの公開鍵を貼り付けるか、空欄にして生成します。",
       "settingsTitle": "ユーザー設定",
       "sessionLimitLabel": "セッション制限",
-      "sessionLimitTitle": "ユーザーが持つことができるアクティブなセッションの数。-1で無制限。",
       "permissionsTitle": "権限と強化",
       "activeAccount": "アクティブなアカウント",
       "allowStorage": "永続ストレージを許可",
@@ -318,11 +317,9 @@
     "installedApps": {
       "title": "インストール済みアプリケーション",
       "searchPlaceholder": "インストール済みアプリを検索...",
-      "noAppsFound": "インストール済みのアプリが見つかりません。",
       "pulling": "新しいイメージをプルしています...",
       "notLocal": "イメージがローカルに見つかりません",
       "isLaboratory": "これは、基本イメージにカスタム設定を加えて構築されたラボアプリです。",
-      "laboratory": "ラボ",
       "confirmDelete": "インストール済みのアプリ '{appName}' を本当に削除しますか？",
       "deleteTitle": "インストール済みアプリを削除"
     },
@@ -1154,20 +1151,14 @@
     },
     "appLaboratory": {
       "title": "アプリラボ",
-      "description": "基本アプリの上に変更を重ねて、カスタムアプリケーション設定を作成およびテストします。",
       "selectApp": "アプリを選択",
       "createNew": "新しいアプリを作成",
       "baseApp": "基本アプリケーション",
       "baseAppDescription": "新しいカスタムアプリの基になるインストール済みアプリケーション。",
       "selectBase": "基本アプリを選択",
-      "customizationTitle": "カスタマイズ",
       "appName": "アプリ名",
       "appIcon": "アプリアイコン",
       "uploadIcon": "アイコンをアップロード",
-      "autostartScriptLabel": "カスタム自動起動スクリプト",
-      "permissionsTitle": "権限",
-      "usersLabel": "許可されたユーザー",
-      "groupsLabel": "許可されたグループ",
       "launchButton": "保存してカスタマイズセッションを開始",
       "closeButton": "セッションを閉じて確定",
       "savingAndLaunching": "保存して起動中...",
@@ -1189,7 +1180,6 @@
       "closeTitle": "カスタマイズセッションを閉じる",
       "unsavedTitle": "変更が保存されていません",
       "unsavedClose": "変更を保存できませんでした。それでもセッションを閉じますか？",
-      "templateSaved": "セッションを閉じました。テンプレートが保存されました。",
       "busy": "'{name}' のカスタマイズセッションが開いています。メタアプリを変更したり別のセッションを開始したりする前に、上で閉じてください。",
       "describeTitle": "1. 説明",
       "customizeTitle": "2. カスタマイズ",
@@ -1258,7 +1248,6 @@
     },
     "status": {
       "loggingIn": "ログイン中...",
-      "configSaved": "設定が正常に保存されました！",
       "configApplied": "設定が適用されました！ログインしてテストしてください。",
       "configApplyFailed": "設定の適用に失敗しました: {error}",
       "fileReadError": "ファイルの読み取り中にエラーが発生しました。",
@@ -1287,7 +1276,6 @@
       "userUpdateFailed": "ユーザーの更新中にエラーが発生しました: {error}",
       "userApproved": "ユーザー '{username}' を承認しました。",
       "userApproveFailed": "ユーザーの承認に失敗しました: {error}",
-      "creatingGroup": "グループを作成中...",
       "groupCreated": "グループ '{groupName}' が作成されました。",
       "groupCreateFailed": "グループの作成中にエラーが発生しました: {error}",
       "groupDeleted": "グループ '{groupName}' が正常に削除されました。",
@@ -1355,7 +1343,8 @@
         "expired": "キーの有効期限が切れました。ウェブアプリのプロフィールで新しいキーを作成してください。",
         "disabled": "管理者はあなたのアカウントでのアプリケーションキーの使用を許可していません。",
         "client": "管理者はこのアプリでのアプリケーションキーの使用を許可していません。",
-        "dormant": "キーは休止中です。ウェブアプリでサインインしてから、もう一度お試しください。"
+        "dormant": "キーは休止中です。ウェブアプリでサインインしてから、もう一度お試しください。",
+        "locked": "誤ったキーの入力が多すぎます。1分待ってから、もう一度お試しください。"
       },
       "scanFailed": "コードを読み取れませんでした: {error}",
       "scanNotKey": "このQRコードはSealSkinのアプリケーションキーではありません。"
@@ -1369,7 +1358,8 @@
       "noPinned": "ピン留めされた動作が見つかりません。",
       "errorLoading": "ディレクトリの読み込み中にエラーが発生しました。",
       "noInstalledApps": "まだアプリケーションがインストールされていません。",
-      "noProotCatalogs": "カタログはまだありません。"
+      "noProotCatalogs": "カタログはまだありません。",
+      "noVpnProfiles": "VPN プロファイルはまだありません。"
     },
     "web": {
       "title": "このブラウザーでの{brand}",
@@ -1645,7 +1635,7 @@
       "noneSelected": "まだアプリが選択されていません。ユーザーにグラフィカルインストーラーを提供するには \"gui\" を含めてください。",
       "remoteTitle": "利用可能なアプリ",
       "searchPlaceholder": "アプリを検索...",
-      "remoteLabel": "リモート（proot-apps リポジトリの GitHub owner/repo）",
+      "remoteLabel": "リモート：GitHub の owner/repo、または proot-apps リポジトリのベース URL とそのイメージのレジストリをスペース 1 つで区切ったもの",
       "load": "読み込む",
       "refreshRemote": "リストを再取得",
       "noApps": "アプリが見つかりません。",
@@ -1748,7 +1738,6 @@
       "importTitle": "プロファイルをインポート",
       "importHelp": ".ovpn または .conf ファイル一つ、プロバイダーが配布する zip、または貼り付けた設定です。同じテンプレートを共有するファイルはサーバーごとのエンドポイントを持つ一つのプロファイルになり、別のテンプレートは別のプロファイルになります。",
       "nameLabel": "プロファイル名",
-      "fileLabel": "設定ファイルまたはアーカイブ",
       "usernameLabel": "OpenVPN ユーザー名",
       "passwordLabel": "OpenVPN パスワード",
       "credentialsHelp": "認証情報を求める設定のための、プロバイダーのサービス認証情報です。",
@@ -1759,13 +1748,11 @@
       "importFailed": "プロファイルをインポートできません: {error}",
       "kind": "種類",
       "endpoints": "エンドポイント",
-      "published": "公開済み",
       "tunnels": "接続",
       "noTunnels": "接続なし",
       "tunnel": "{node} の {label}: {sessions, plural, other {{sessions} セッション}} ({state})",
       "maxTunnels": "接続上限",
       "maxTunnelsHelp": "このプロファイルで環境全体が同時に持てる接続数です。0 で無制限。",
-      "noProfiles": "VPN プロファイルはまだありません。",
       "editTitle": "{name} を編集",
       "endpointsTitle": "エンドポイント",
       "endpointsHelp": "ユーザーが選べるエンドポイントを、提示する順にチェックします。最初のものが既定です。何もチェックしないと最初のエンドポイントが使われ、ユーザーは選べません。各項目の編集、エンドポイントの削除、手入力や別の設定ファイルからの追加ができます。",
@@ -1823,9 +1810,6 @@
     "launchView": {
       "searchPlaceholder": "アプリケーションを検索...",
       "uploadingFile": "ファイルをアップロード中...",
-      "gpuLabel": "GPU",
-      "storageLabel": "ストレージ",
-      "languageLabel": "言語",
       "cleanroom": "クリーンルーム（一時的）",
       "noGpu": "なし",
       "saveOptions": "これらの起動オプションを保存",
@@ -1856,7 +1840,6 @@
       "noSessions": "アクティブなセッションが見つかりません。"
     },
     "uploadStorageView": {
-      "selectHome": "ホームディレクトリを選択",
       "description": "これにより、ファイル <strong>{filename}</strong> がファイルストレージに直接アップロードされ、後で使用できるようになります。",
       "descriptionFallback": "これにより、ファイル <strong>{filename}</strong> がファイルストレージに直接アップロードされ、後で使用できるようになります。",
       "uploadButton": "ファイルをアップロード",
@@ -1878,7 +1861,6 @@
       "errorClosingSession": "セッションの終了中にエラーが発生しました: {message}",
       "preparingSession": "隔離セッションを準備中...",
       "fetchingData": "ファイルデータを取得中...",
-      "fetchDataFailed": "ファイルデータの取得に失敗しました: {statusText}",
       "unknownAction": "不明な起動アクションです。",
       "noAppSelected": "アプリケーションを選択してください。",
       "noAppsAvailable": "あなたのアカウントで利用可能なアプリケーションはありません。",
@@ -1981,8 +1963,6 @@
       "shareCreated": "共有が正常に作成されました！リンクがクリップボードにコピーされました。",
       "shareCreateFailed": "共有の作成に失敗しました: {error}",
       "sharesLoadFailed": "共有ファイルの読み込みに失敗しました: {error}",
-      "shareDeleteFailed": "共有の削除に失敗しました: {error}",
-      "shareDeleted": "共有が正常に削除されました。",
       "urlCopied": "公開URLがクリップボードにコピーされました。",
       "downloading": "{filename} をダウンロード中...",
       "downloadSuccess": "ダウンロード完了",
@@ -2211,7 +2191,6 @@
       "other": "その他のクライアント"
     },
     "rootKey": "ルートキー",
-    "rootKeyHelp": "管理者のアプリケーションキーです。サーバーが初回起動時に /config/root_key に書き出したものです。",
     "keys": {
       "wakeTitle": "アプリケーションキーが再び有効になりました",
       "wakeBody": "アプリに戻るか、ここで続けることができます。",

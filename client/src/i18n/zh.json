@@ -225,7 +225,6 @@
       "publicKeyPlaceholder": "在此处粘贴用户的公钥，或留空以生成一个。",
       "settingsTitle": "用户设置",
       "sessionLimitLabel": "会话限制",
-      "sessionLimitTitle": "用户可以拥有的活跃会话数。-1表示无限制。",
       "permissionsTitle": "权限与安全加固",
       "activeAccount": "启用账户",
       "allowStorage": "允许持久性存储",
@@ -318,11 +317,9 @@
     "installedApps": {
       "title": "已安装应用",
       "searchPlaceholder": "搜索已安装的应用...",
-      "noAppsFound": "未找到已安装的应用。",
       "pulling": "正在拉取新镜像...",
       "notLocal": "本地未找到镜像",
       "isLaboratory": "这是一个实验室应用，基于基础镜像并使用自定义设置构建。",
-      "laboratory": "实验室",
       "confirmDelete": "您确定要删除已安装的应用“{appName}”吗？",
       "deleteTitle": "删除已安装的应用"
     },
@@ -1154,20 +1151,14 @@
     },
     "appLaboratory": {
       "title": "应用实验室",
-      "description": "在基础应用之上叠加更改，创建和测试自定义应用程序配置。",
       "selectApp": "选择应用",
       "createNew": "创建新应用",
       "baseApp": "基础应用",
       "baseAppDescription": "您的新自定义应用将基于此已安装的应用程序。",
       "selectBase": "选择一个基础应用",
-      "customizationTitle": "自定义",
       "appName": "应用名称",
       "appIcon": "应用图标",
       "uploadIcon": "上传图标",
-      "autostartScriptLabel": "自定义自动启动脚本",
-      "permissionsTitle": "权限",
-      "usersLabel": "允许的用户",
-      "groupsLabel": "允许的群组",
       "launchButton": "保存并启动自定义会话",
       "closeButton": "关闭会话并最终确定",
       "savingAndLaunching": "正在保存并启动...",
@@ -1189,7 +1180,6 @@
       "closeTitle": "关闭自定义会话",
       "unsavedTitle": "更改未保存",
       "unsavedClose": "无法保存更改。仍要关闭会话吗？",
-      "templateSaved": "会话已关闭。模板已保存。",
       "busy": "“{name}”的自定义会话正处于打开状态。请先在上方将其关闭，再更改元应用或启动其他会话。",
       "describeTitle": "1. 描述",
       "customizeTitle": "2. 自定义",
@@ -1258,7 +1248,6 @@
     },
     "status": {
       "loggingIn": "登录中...",
-      "configSaved": "配置保存成功！",
       "configApplied": "配置已应用！请登录并测试。",
       "configApplyFailed": "应用配置失败: {error}",
       "fileReadError": "读取文件时出错。",
@@ -1287,7 +1276,6 @@
       "userUpdateFailed": "更新用户时出错: {error}",
       "userApproved": "用户 '{username}' 已批准。",
       "userApproveFailed": "批准用户时出错：{error}",
-      "creatingGroup": "正在创建群组...",
       "groupCreated": "群组“{groupName}”已创建。",
       "groupCreateFailed": "创建群组时出错: {error}",
       "groupDeleted": "群组“{groupName}”已成功删除。",
@@ -1355,7 +1343,8 @@
         "expired": "密钥已过期。请在 Web 应用的个人资料中创建一个新密钥。",
         "disabled": "您的管理员不允许您的账户使用应用密钥。",
         "client": "您的管理员不允许此应用使用应用密钥。",
-        "dormant": "您的密钥处于休眠状态。请先在 Web 应用上登录，然后重试。"
+        "dormant": "您的密钥处于休眠状态。请先在 Web 应用上登录，然后重试。",
+        "locked": "错误的密钥尝试次数过多。请等待一分钟，然后重试。"
       },
       "scanFailed": "无法读取该码：{error}",
       "scanNotKey": "该二维码不是 SealSkin 应用密钥。"
@@ -1369,7 +1358,8 @@
       "noPinned": "未找到固定行为。",
       "errorLoading": "加载目录时出错。",
       "noInstalledApps": "尚未安装任何应用程序。",
-      "noProotCatalogs": "尚无目录。"
+      "noProotCatalogs": "尚无目录。",
+      "noVpnProfiles": "还没有 VPN 配置。"
     },
     "web": {
       "title": "在此浏览器中使用 {brand}",
@@ -1645,7 +1635,7 @@
       "noneSelected": "尚未选择应用。加入 \"gui\" 可为用户提供图形安装器。",
       "remoteTitle": "可用应用",
       "searchPlaceholder": "搜索应用...",
-      "remoteLabel": "远程源（proot-apps 仓库的 GitHub owner/repo）",
+      "remoteLabel": "远程源：GitHub 的 owner/repo，或 proot-apps 仓库的基础 URL 与其镜像的注册表，以一个空格分隔",
       "load": "加载",
       "refreshRemote": "重新拉取列表",
       "noApps": "未找到应用。",
@@ -1748,7 +1738,6 @@
       "importTitle": "导入配置",
       "importHelp": "一个 .ovpn 或 .conf 文件、服务商分发的 zip 包，或粘贴的配置。共用同一模板的文件成为一个配置，每台服务器一个端点；模板不同的文件成为单独的配置。",
       "nameLabel": "配置名称",
-      "fileLabel": "配置文件或压缩包",
       "usernameLabel": "OpenVPN 用户名",
       "passwordLabel": "OpenVPN 密码",
       "credentialsHelp": "服务商的服务凭据，用于需要凭据的配置。",
@@ -1759,13 +1748,11 @@
       "importFailed": "无法导入配置：{error}",
       "kind": "类型",
       "endpoints": "端点",
-      "published": "已发布",
       "tunnels": "连接",
       "noTunnels": "无活动连接",
       "tunnel": "{node} 上的 {label}：{sessions, plural, other {{sessions} 个会话}}（{state}）",
       "maxTunnels": "连接上限",
       "maxTunnelsHelp": "整个部署可为此配置同时保持的连接数；0 为不限。",
-      "noProfiles": "还没有 VPN 配置。",
       "editTitle": "编辑 {name}",
       "endpointsTitle": "端点",
       "endpointsHelp": "勾选用户可选择的端点，按提供顺序排列；第一个为默认。不勾选则使用第一个端点，用户无需选择。可编辑任意字段、删除端点，或手动或从其他配置文件添加端点。",
@@ -1823,9 +1810,6 @@
     "launchView": {
       "searchPlaceholder": "搜索应用程序...",
       "uploadingFile": "正在上传文件...",
-      "gpuLabel": "GPU",
-      "storageLabel": "存储",
-      "languageLabel": "语言",
       "cleanroom": "无尘室 (临时)",
       "noGpu": "无",
       "saveOptions": "保存这些启动选项",
@@ -1856,7 +1840,6 @@
       "noSessions": "未找到活跃会话。"
     },
     "uploadStorageView": {
-      "selectHome": "选择主目录",
       "description": "这将上传文件 <strong>{filename}</strong> 直接到您的“文件”存储中，以备将来使用。",
       "descriptionFallback": "这将上传文件 <strong>{filename}</strong> 直接到您的“文件”存储中，以备将来使用。",
       "uploadButton": "上传文件",
@@ -1878,7 +1861,6 @@
       "errorClosingSession": "关闭会话时出错: {message}",
       "preparingSession": "准备隔离会话中...",
       "fetchingData": "正在获取文件数据...",
-      "fetchDataFailed": "获取文件数据失败: {statusText}",
       "unknownAction": "未知的启动操作。",
       "noAppSelected": "请选择一个应用程序。",
       "noAppsAvailable": "您的账户没有可用的应用程序。",
@@ -1981,8 +1963,6 @@
       "shareCreated": "分享链接创建成功！链接已复制到剪贴板。",
       "shareCreateFailed": "创建分享失败: {error}",
       "sharesLoadFailed": "加载分享文件失败: {error}",
-      "shareDeleteFailed": "删除分享失败: {error}",
-      "shareDeleted": "分享已成功删除。",
       "urlCopied": "公开URL已复制到剪贴板。",
       "downloading": "正在下载 {filename}...",
       "downloadSuccess": "下载完成",
@@ -2211,7 +2191,6 @@
       "other": "其他客户端"
     },
     "rootKey": "根密钥",
-    "rootKeyHelp": "管理员的应用密钥，由服务器在首次启动时写入 /config/root_key。",
     "keys": {
       "wakeTitle": "您的应用密钥已重新激活",
       "wakeBody": "您现在可以返回应用，也可以继续留在这里。",

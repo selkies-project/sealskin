@@ -39,7 +39,9 @@ rules:
   verbs: ["get"]
 # VPN hubs (https://docs.sealskin.app/vpn): a pod per profile and endpoint
 # behind a Service, its profile in a Secret, and the sessions' spokes added to
-# the running hub. Nothing else uses these; leave them out without VPN profiles.
+# the running hub. "get" on secrets also reads the session template's pull
+# secrets (https://docs.sealskin.app/registries); leave the rest out without
+# VPN profiles.
 - apiGroups: [""]
   resources: ["secrets", "services"]
   verbs: ["get", "create", "patch", "delete"]

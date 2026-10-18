@@ -43,6 +43,8 @@ address or key, and says so in its log.
   (`8444`), at the address the node advertises in `SEALSKIN_NODE_ADDRESS`
   (`host:port`; by default the host of `HOST_URL`).
 * Browsers reach the frontends' session port only.
+* Behind an egress proxy, `NO_PROXY` names the other nodes
+  ([Registries and proxies](registries.md#proxies-and-private-certificate-authorities)).
 
 **Cluster** in the dashboard shows each node as answering or not, with the
 reason the last attempt failed. "Signed for another node" means the address a

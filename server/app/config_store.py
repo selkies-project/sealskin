@@ -23,7 +23,7 @@ import httpx
 import yaml
 from pydantic import ValidationError
 
-from . import logos, persistence
+from . import logos, persistence, registries
 from .fsutil import resolve_within, safe_join
 from .models import (
     RECORD_FIELDS,
@@ -342,7 +342,7 @@ async def _fetch_and_cache_app_store(store: AppStore) -> None:
             pass
 
     try:
-        async with httpx.AsyncClient(follow_redirects=True) as client:
+        async with httpx.AsyncClient(follow_redirects=True, auth=registries.netrc_auth()) as client:
             response = await client.get(store.url, timeout=15, headers=headers)
         if response.status_code == 304:
             logger.debug("App store '%s' is up to date.", store.name)
@@ -400,7 +400,7 @@ async def fetch_store_apps(store: AppStore, refresh: bool) -> list[dict[str, Any
         except Exception as exc:  # noqa: BLE001
             logger.warning("Cache read failed for %s: %s", store_name, exc)
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(auth=registries.netrc_auth()) as client:
         response = await client.get(store.url, follow_redirects=True, timeout=15)
         response.raise_for_status()
     ensure_config_dir()
@@ -461,7 +461,7 @@ async def _fetch_and_cache_single_script(
 
     autostart_url = f"{base_url}/autostart/{app_id}{suffix}"
     try:
-        async with httpx.AsyncClient(follow_redirects=True) as client:
+        async with httpx.AsyncClient(follow_redirects=True, auth=registries.netrc_auth()) as client:
             response = await client.get(autostart_url, timeout=10, headers=headers)
         if response.status_code == 304:
             logger.debug("Autostart script for '%s%s' in '%s' is up to date.", app_id, suffix, store_name)

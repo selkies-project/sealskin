@@ -225,7 +225,6 @@
       "publicKeyPlaceholder": "Paste user's public key here, or leave blank to generate one.",
       "settingsTitle": "User Settings",
       "sessionLimitLabel": "Sessions limit",
-      "sessionLimitTitle": "Number of active sessions a user can have. -1 for unlimited.",
       "permissionsTitle": "Permissions & Hardening",
       "activeAccount": "Active Account",
       "allowStorage": "Allow Persistent Storage",
@@ -318,11 +317,9 @@
     "installedApps": {
       "title": "Installed Applications",
       "searchPlaceholder": "Search installed apps...",
-      "noAppsFound": "No installed apps found.",
       "pulling": "Pulling new image...",
       "notLocal": "Image not found locally",
       "isLaboratory": "This is a Laboratory app, built from a base image with custom settings.",
-      "laboratory": "Laboratory",
       "confirmDelete": "Are you sure you want to delete the installed app '{appName}'?",
       "deleteTitle": "Delete installed app"
     },
@@ -1154,20 +1151,14 @@
     },
     "appLaboratory": {
       "title": "App Laboratory",
-      "description": "Create and test custom application configurations by layering changes on top of a base app.",
       "selectApp": "Select App",
       "createNew": "Create New App",
       "baseApp": "Base Application",
       "baseAppDescription": "The installed application that your new custom app will be based on.",
       "selectBase": "Select a Base App",
-      "customizationTitle": "Customization",
       "appName": "App Name",
       "appIcon": "App Icon",
       "uploadIcon": "Upload Icon",
-      "autostartScriptLabel": "Custom Autostart Script",
-      "permissionsTitle": "Permissions",
-      "usersLabel": "Allowed Users",
-      "groupsLabel": "Allowed Groups",
       "launchButton": "Save & Launch Customization Session",
       "closeButton": "Close Session & Finalize",
       "savingAndLaunching": "Saving & Launching...",
@@ -1189,7 +1180,6 @@
       "closeTitle": "Close customization session",
       "unsavedTitle": "Changes not saved",
       "unsavedClose": "The changes could not be saved. Close the session anyway?",
-      "templateSaved": "Session closed. The template is saved.",
       "busy": "A customization session for '{name}' is open. Close it above before changing a meta-app or starting another.",
       "describeTitle": "1. Describe",
       "customizeTitle": "2. Customize",
@@ -1258,7 +1248,6 @@
     },
     "status": {
       "loggingIn": "Logging in...",
-      "configSaved": "Configuration saved successfully!",
       "configApplied": "Configuration applied! Please Login & Test.",
       "configApplyFailed": "Failed to apply configuration: {error}",
       "fileReadError": "Error reading file.",
@@ -1287,7 +1276,6 @@
       "userUpdateFailed": "Error updating user: {error}",
       "userApproved": "User '{username}' approved.",
       "userApproveFailed": "Error approving user: {error}",
-      "creatingGroup": "Creating group...",
       "groupCreated": "Group '{groupName}' created.",
       "groupCreateFailed": "Error creating group: {error}",
       "groupDeleted": "Group '{groupName}' deleted successfully.",
@@ -1355,7 +1343,8 @@
         "expired": "The key expired. Make a new one in your profile on the web app.",
         "disabled": "Your administrator does not allow application keys for your account.",
         "client": "Your administrator does not allow this app to use application keys.",
-        "dormant": "Your key is asleep. Sign in on the web app, then try again."
+        "dormant": "Your key is asleep. Sign in on the web app, then try again.",
+        "locked": "Too many wrong keys. Wait a minute, then try again."
       },
       "scanFailed": "Could not read the code: {error}",
       "scanNotKey": "That QR code is not a SealSkin application key."
@@ -1369,7 +1358,8 @@
       "noPinned": "No pinned behaviors found.",
       "errorLoading": "Error loading directories.",
       "noInstalledApps": "No applications have been installed yet.",
-      "noProotCatalogs": "No catalogs yet."
+      "noProotCatalogs": "No catalogs yet.",
+      "noVpnProfiles": "No VPN profiles yet."
     },
     "web": {
       "title": "{brand} in This Browser",
@@ -1645,7 +1635,7 @@
       "noneSelected": "No apps selected yet. Include \"gui\" to give users the graphical installer.",
       "remoteTitle": "Available apps",
       "searchPlaceholder": "Search apps...",
-      "remoteLabel": "Remote (GitHub owner/repo of a proot-apps repository)",
+      "remoteLabel": "Remote: a GitHub owner/repo, or the base URL of a proot-apps repository and the registry of its images, one space apart",
       "load": "Load",
       "refreshRemote": "Fetch the list again",
       "noApps": "No apps found.",
@@ -1748,7 +1738,6 @@
       "importTitle": "Import a profile",
       "importHelp": "One .ovpn or .conf file, a zip of them as the provider hands it out, or the config pasted in. Files that share a template become one profile with an endpoint per server; a template of its own becomes a profile of its own.",
       "nameLabel": "Profile name",
-      "fileLabel": "Config file or archive",
       "usernameLabel": "OpenVPN username",
       "passwordLabel": "OpenVPN password",
       "credentialsHelp": "The provider's service credentials, for a config that asks for them.",
@@ -1759,13 +1748,11 @@
       "importFailed": "Could not import the profile: {error}",
       "kind": "Kind",
       "endpoints": "Endpoints",
-      "published": "Published",
       "tunnels": "Connections",
       "noTunnels": "None up",
       "tunnel": "{label} on {node}: {sessions, plural, one {1 session} other {{sessions} sessions}} ({state})",
       "maxTunnels": "Connection cap",
       "maxTunnelsHelp": "Connections the whole deployment may have up for this profile at once; 0 for no cap.",
-      "noProfiles": "No VPN profiles yet.",
       "editTitle": "Edit {name}",
       "endpointsTitle": "Endpoints",
       "endpointsHelp": "Tick the endpoints users may pick, in the order to offer them; the first is the default. With none ticked, the first endpoint is used and users get no choice. Edit any field, remove an endpoint, or add one by hand or from another config file.",
@@ -1823,9 +1810,6 @@
     "launchView": {
       "searchPlaceholder": "Search applications...",
       "uploadingFile": "Uploading file...",
-      "gpuLabel": "GPU",
-      "storageLabel": "Storage",
-      "languageLabel": "Language",
       "cleanroom": "Cleanroom (Ephemeral)",
       "noGpu": "None",
       "saveOptions": "Save these launch options",
@@ -1856,7 +1840,6 @@
       "noSessions": "No active sessions found."
     },
     "uploadStorageView": {
-      "selectHome": "Select Home Directory",
       "description": "This will upload the file <strong>{filename}</strong> directly to your Files storage for future use.",
       "descriptionFallback": "This will upload the file <strong>{filename}</strong> directly to your Files storage for future use.",
       "uploadButton": "Upload File",
@@ -1878,7 +1861,6 @@
       "errorClosingSession": "Error closing session: {message}",
       "preparingSession": "Preparing isolated session...",
       "fetchingData": "Fetching file data...",
-      "fetchDataFailed": "Failed to fetch file data: {statusText}",
       "unknownAction": "Unknown launch action.",
       "noAppSelected": "Please select an application.",
       "noAppsAvailable": "No applications are available for your account.",
@@ -1981,8 +1963,6 @@
       "shareCreated": "Share created successfully! The link has been copied to your clipboard.",
       "shareCreateFailed": "Failed to create share: {error}",
       "sharesLoadFailed": "Failed to load shared files: {error}",
-      "shareDeleteFailed": "Failed to delete share: {error}",
-      "shareDeleted": "Share successfully deleted.",
       "urlCopied": "Public URL copied to clipboard.",
       "downloading": "Downloading {filename}...",
       "downloadSuccess": "Download complete",
@@ -2211,7 +2191,6 @@
       "other": "Other clients"
     },
     "rootKey": "Root key",
-    "rootKeyHelp": "The administrator's application key, which the server wrote to /config/root_key at its first start.",
     "keys": {
       "wakeTitle": "Your application key is active again",
       "wakeBody": "You can go back to the app now, or carry on here.",

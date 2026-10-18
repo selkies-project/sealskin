@@ -36,7 +36,7 @@ paths refer to.
 | `SEALSKIN_APP_STORE_CACHE_PATH` | `str` | `/config/.config/sealskin/app_stores_cache` | Path to cache app store YAML files. |
 | `SEALSKIN_PROOT_CATALOGS_PATH` | `str` | `/config/.config/sealskin/proot_catalogs.yml` | Path to the YAML file of the PRoot Apps catalogs, shared by the nodes of a cluster. |
 | `SEALSKIN_PROOT_APPS_PATH` | `str` | `/storage/sealskin_proot_apps` | Directory this node keeps the content of every PRoot Apps catalog in, one folder per catalog, mounted read-only into the sessions of the users assigned to it. |
-| `SEALSKIN_PROOT_APPS_REMOTE` | `str` | `linuxserver/proot-apps` | GitHub `owner/repo` of the PRoot Apps repository the catalog editor opens with; a fork lists its apps in `metadata/metadata.yml` and publishes them as tags of `ghcr.io/<owner>/<repo>`. |
+| `SEALSKIN_PROOT_APPS_REMOTE` | `str` | `linuxserver/proot-apps` | The PRoot Apps remote the catalog editor opens with: the GitHub `owner/repo` of a proot-apps repository, whose apps are tags of `ghcr.io/<owner>/<repo>`, or the base URL under which `metadata/metadata.yml` is served and the registry its apps are tags of, separated by a space (`https://git.example/raw/it/proot-apps/main registry.example/it/proot-apps`). |
 | `SEALSKIN_VPN_PROFILES_PATH` | `str` | `/config/.config/sealskin/vpn_profiles.yml` | Path to the YAML file of the VPN profiles, shared by the nodes of a cluster. |
 | `SEALSKIN_VPN_IMAGE` | `str` | `ghcr.io/selkies-project/sealskin-vpn:latest` | Image of the VPN gateway a node starts beside the sessions that chose a VPN profile, and of the helper that points a session's default route at it. |
 | `SEALSKIN_VPN_HUB_SUBNET` | `str` | `10.231.0.0/16` | On Kubernetes, the network a VPN hub and the sessions' spokes take their addresses from, the hub at `.1`; change it when it collides with a network the cluster reaches. |
@@ -44,6 +44,9 @@ paths refer to.
 | `SEALSKIN_VPN_SUBNETS` | `str` | `10.230.0.0/16` | Address range the internal networks of the VPN gateways are carved from, one `/24` per gateway; change it when it collides with a network the host reaches. |
 | `SEALSKIN_AUTO_UPDATE_APPS` | `bool` | `true` | Enable automatic pulling of the latest app images in the background. |
 | `SEALSKIN_AUTO_UPDATE_INTERVAL_SECONDS` | `int` | `3600` | How often to check for app image updates (in seconds). |
+| `SEALSKIN_IMAGE_MIRRORS` | `str` | _(empty)_ | Mirror per upstream registry every image is pulled through, as `upstream=mirror` pairs separated by commas: `lscr.io=registry.example/lscr,docker.io=registry.example/hub` pulls `lscr.io/linuxserver/firefox` as `registry.example/lscr/linuxserver/firefox`. Records keep the upstream name. |
+| `SEALSKIN_REGISTRY_AUTH_PATH` | `str` | `/config/.docker/config.json` | Docker `config.json` whose `auths` sign this node in to registries: for session and gateway images, digest checks, and the packages of PRoot Apps catalogs. Read at every use; credential helpers are not run. On Kubernetes the session template's pull secrets add to it. |
+| `SEALSKIN_NETRC_PATH` | `str` | `/config/.netrc` | netrc file whose machines sign this node in to the hosts of app stores, autostart scripts, logos, and the metadata and icons of PRoot Apps catalogs, with basic authentication. Read at every use. |
 | `SEALSKIN_PUID` | `int` | `1000` | Default User ID to run containers as. |
 | `SEALSKIN_PGID` | `int` | `1000` | Default Group ID to run containers as. |
 | `SEALSKIN_KEYS_BASE_PATH` | `str` | `/config/.config/sealskin/keys` | Base directory for admin and user public keys. |

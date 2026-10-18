@@ -2,6 +2,7 @@
 
 import os
 
+import httpx
 import yaml
 
 from app import launch, prootapps, user_manager
@@ -15,8 +16,48 @@ def test_names_follow_proot_apps():
     assert prootapps.remote_image("MyOrg/proot-apps", "gimp") == "ghcr.io/myorg/proot-apps:gimp"
     assert prootapps.install_name("linuxserver/proot-apps", "firefox") == "firefox"
     assert prootapps.install_name("myorg/proot-apps", "gimp") == "ghcr.io/myorg/proot-apps:gimp"
-    assert prootapps.icon_file("myorg/proot-apps", "gimp.svg") == "myorg_proot-apps_gimp.svg"
+    assert prootapps.icon_file("myorg/proot-apps", "gimp.svg") == "ghcr.io_myorg_proot-apps_gimp.svg"
+    assert prootapps.icon_url("MyOrg/proot-apps", "gimp.svg") == "https://raw.githubusercontent.com/myorg/proot-apps/master/metadata/img/gimp.svg"
     assert prootapps.is_remote("linuxserver/proot-apps") and not prootapps.is_remote("not a remote")
+
+
+def test_a_remote_may_be_a_url_and_a_registry():
+    remote = "  https://git.example/raw/IT/proot-apps/Main/   Registry.example:5000/it/proot-apps "
+    parsed = prootapps.Remote.parse(remote)
+    assert parsed.key == "https://git.example/raw/IT/proot-apps/Main registry.example:5000/it/proot-apps"
+    assert parsed.metadata_url == "https://git.example/raw/IT/proot-apps/Main/metadata/metadata.yml"
+    assert prootapps.icon_url(remote, "gimp.svg") == "https://git.example/raw/IT/proot-apps/Main/metadata/img/gimp.svg"
+    assert prootapps.remote_image(remote, "gimp") == "registry.example:5000/it/proot-apps:gimp"
+    assert prootapps.install_name(remote, "gimp") == "registry.example:5000/it/proot-apps:gimp"
+    assert prootapps.icon_file(remote, "gimp.svg") == "registry.example_5000_it_proot-apps_gimp.svg"
+    assert prootapps.image_folder(prootapps.remote_image(remote, "gimp")) == "registry.example_5000_it_proot-apps_gimp"
+    assert not prootapps.is_remote("https://git.example/raw/it/proot-apps/main")
+    assert not prootapps.is_remote("https://git.example/raw/it/proot-apps/main not a registry")
+    assert not prootapps.is_remote("ftp://git.example/x registry.example/it/proot-apps")
+
+
+def test_the_registry_client_signs_in_as_the_challenge_asks(monkeypatch):
+    calls = []
+
+    def handler(request):
+        calls.append((request.url.host, request.url.path, request.headers.get("Authorization")))
+        if request.url.host == "bearer.example":
+            if request.url.path == "/token":
+                return httpx.Response(200, json={"token": "tok"})
+            if request.headers.get("Authorization") != "Bearer tok":
+                return httpx.Response(401, headers={"WWW-Authenticate": 'Bearer realm="https://bearer.example/token",service="r",scope="repository:x/y:pull"'})
+        if request.url.host == "basic.example" and request.headers.get("Authorization") != "Basic dTpw":
+            return httpx.Response(401, headers={"WWW-Authenticate": 'Basic realm="Registry"'})
+        return httpx.Response(200, json={"layers": [{"digest": "sha256:" + "c" * 64}]})
+
+    auths = {"bearer.example": ("u", "p"), "basic.example": ("u", "p")}
+    with httpx.Client(transport=httpx.MockTransport(handler)) as client:
+        assert prootapps._Registry(client, "bearer.example/x/y:app", auths).layer_digest("amd64") == "sha256:" + "c" * 64
+        assert prootapps._Registry(client, "basic.example/x/y:app", auths).layer_digest("amd64") == "sha256:" + "c" * 64
+        assert prootapps._Registry(client, "bearer.example/x/y:app", {}).layer_digest("amd64") == "sha256:" + "c" * 64
+    assert ("bearer.example", "/token", "Basic dTpw") in calls
+    assert ("basic.example", "/v2/x/y/manifests/app", "Basic dTpw") in calls
+    assert ("bearer.example", "/token", None) in calls
 
 
 class FakeRegistry:
@@ -24,7 +65,7 @@ class FakeRegistry:
 
     digests = {"firefox": "sha256:" + "a" * 64, "gimp": "sha256:" + "b" * 64}
 
-    def __init__(self, _client, image):
+    def __init__(self, _client, image, _auths=None):
         self.tag = image.rsplit(":", 1)[1]
 
     def layer_digest(self, _arch):

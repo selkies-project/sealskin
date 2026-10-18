@@ -143,6 +143,10 @@ class BaseProvider(ABC):
     async def prune_images(self) -> None:
         """Remove images no session can use any more."""
 
+    async def registry_credentials(self) -> dict[str, tuple[str, str]]:
+        """Return the username and password per registry host the backend holds beside the node's file."""
+        return {}
+
     @abstractmethod
     async def export_web_client(self, image: str, path: str) -> bytes:
         """Return `path` of the image as a tar stream, gzipped or not, from a throwaway instance of it.

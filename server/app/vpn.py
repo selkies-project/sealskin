@@ -978,10 +978,10 @@ def _teardown_sync(key: str) -> None:
 def _acquire_sync(record: dict[str, Any], endpoint: dict[str, Any], key: str) -> dict[str, Any]:
     """Start the gateway of a profile and an endpoint, or return the running one, and wait for its tunnel."""
     import docker.types
-    from docker.errors import ImageNotFound, NotFound
+    from docker.errors import NotFound
 
     from . import progress
-    from .docker_utils import translate_path_to_host
+    from .docker_utils import local_image, translate_path_to_host
 
     client = _client()
     network_name = _name(key)
@@ -1018,11 +1018,7 @@ def _acquire_sync(record: dict[str, Any], endpoint: dict[str, Any], key: str) ->
                 status_code=409,
                 detail=f"'{record['name']}' already has {held} of its {cap} connections up across the deployment; pick an endpoint in use, or try later.",
             )
-    try:
-        client.images.get(settings.vpn_image)
-    except ImageNotFound:
-        progress.step("image", image=settings.vpn_image)
-        client.images.pull(settings.vpn_image)
+    image = local_image(client, settings.vpn_image)
     progress.step("vpn", vpn=record["name"], endpoint=endpoint["label"])
 
     subnet = _free_subnet(client)
@@ -1039,7 +1035,7 @@ def _acquire_sync(record: dict[str, Any], endpoint: dict[str, Any], key: str) ->
     )
     try:
         container = client.containers.create(
-            settings.vpn_image,
+            image,
             name=network_name,
             labels=labels,
             cap_add=["NET_ADMIN"],

@@ -1,16 +1,21 @@
 """PRoot Apps catalogs: folders of application packages that sessions install from.
 
 A catalog is a shared record of `proot_catalogs.yml` naming the apps an
-administrator picked from one or more remotes. A remote is a GitHub
-`owner/repo` fork of linuxserver/proot-apps: its `metadata/metadata.yml`
+administrator picked from one or more remotes. A remote (`Remote`) is a
+repository built like linuxserver/proot-apps: its `metadata/metadata.yml`
 lists the apps and each app is a one-layer image tagged with its name under
-`ghcr.io/<owner>/<repo>`. Every node keeps its own copy of a catalog's
-content under `proot_apps_path/<id>`, in the layout `proot-apps` reads
-through `PA_REPO_FOLDER`:
+one registry prefix. A GitHub `owner/repo` names one served from
+raw.githubusercontent.com with images on `ghcr.io/<owner>/<repo>`; any other
+is named by the base URL `metadata/` is served under and the registry prefix,
+one space apart. The node's credentials (`registries`) and mirrors serve
+both fetches. Every node keeps its own copy of a catalog's content under
+`proot_apps_path/<id>`, in the layout `proot-apps` reads through
+`PA_REPO_FOLDER`:
 
     metadata/metadata.yml          the apps, for the graphical installer
     metadata/img/<icon>            their icons
-    ghcr.io_<owner>_<repo>_<app>/  app.tar.gz, the image's layer, and SHALAYER, its digest
+    <registry>_<app>/              app.tar.gz, the image's layer, and SHALAYER, its digest;
+                                   the image reference with `/` and `:` as `_`
 
 A session of a user whose effective settings name a catalog mounts that
 folder read-only at `MOUNT_PATH` with `PA_REPO_FOLDER` pointing at it, so
@@ -34,13 +39,14 @@ import re
 import shutil
 import threading
 import time
+from dataclasses import dataclass
 from typing import Any
 
 import httpx
 import yaml
 from pydantic import ValidationError
 
-from . import logos, persistence
+from . import logos, persistence, registries
 from .fsutil import safe_join, safe_rmtree
 from .models import ProotCatalog, ProotRemoteApp
 from .settings import settings
@@ -62,7 +68,10 @@ MANIFEST_TYPES = (
 #: Seconds a remote's metadata is served from memory before it is fetched again.
 REMOTE_CACHE_SECONDS = 900
 
-_REMOTE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+_SHORTHAND = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+_URL_FORM = re.compile(r"^(https?://\S+) (\S+)$")
+_REGISTRY = re.compile(r"^[a-z0-9.-]+(:\d+)?(/[a-z0-9._-]+)+$")
+_ICON = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 _remote_cache: dict[str, tuple[float, list[dict[str, Any]]]] = {}
 _locks: dict[str, asyncio.Lock] = {}
 _tasks: dict[str, asyncio.Task] = {}
@@ -79,14 +88,84 @@ def node_arch() -> str:
     return {"x86_64": "amd64", "AMD64": "amd64", "aarch64": "arm64", "arm64": "arm64"}.get(machine, machine)
 
 
+@dataclass(frozen=True)
+class Remote:
+    """A PRoot Apps remote: where its metadata is served and the registry its apps are tags of.
+
+    Attributes:
+        key: The remote as records and listings name it: `owner/repo` in lower case, or the
+            base URL and the registry one space apart.
+        metadata: URL of the `metadata/` directory, holding `metadata.yml` and `img/`.
+        registry: Image prefix the apps are tags of, `ghcr.io/owner/repo`.
+    """
+
+    key: str
+    metadata: str
+    registry: str
+
+    @classmethod
+    def parse(cls, remote: str) -> Remote:
+        """Read a remote from a GitHub `owner/repo`, or a base URL and a registry separated by a space.
+
+        Raises:
+            ValueError: For anything else.
+        """
+        text = " ".join((remote or "").split())
+        if _SHORTHAND.match(text):
+            key = text.lower()
+            return cls(key, f"https://raw.githubusercontent.com/{key}/master/metadata", f"ghcr.io/{key}")
+        match = _URL_FORM.match(text)
+        if match and _REGISTRY.match(match[2].lower()):
+            base, registry = match[1].rstrip("/"), match[2].lower()
+            return cls(f"{base} {registry}", f"{base}/metadata", registry)
+        raise ValueError(
+            "A remote is a GitHub owner/repo, or the base URL of a proot-apps repository and the "
+            "registry of its images, separated by a space."
+        )
+
+    @property
+    def metadata_url(self) -> str:
+        """Return the URL of the metadata file."""
+        return f"{self.metadata}/metadata.yml"
+
+    def icon_url(self, icon: str) -> str:
+        """Return the URL of an icon the metadata names."""
+        return f"{self.metadata}/img/{icon}"
+
+    def image(self, name: str) -> str:
+        """Return the image reference of an app."""
+        return f"{self.registry}:{name}"
+
+    @property
+    def default(self) -> bool:
+        """Whether short names belong to this remote: it is `proot_apps_remote`."""
+        try:
+            return self.key == remote_key(settings.proot_apps_remote)
+        except ValueError:
+            return False
+
+
+def remote_key(remote: str) -> str:
+    """Return the key a remote is listed under.
+
+    Raises:
+        ValueError: When `remote` is not one.
+    """
+    return Remote.parse(remote).key
+
+
 def is_remote(remote: str) -> bool:
-    """Tell whether `remote` is a GitHub `owner/repo`."""
-    return bool(_REMOTE.match(remote or ""))
+    """Tell whether `Remote.parse` reads `remote`."""
+    try:
+        Remote.parse(remote)
+    except ValueError:
+        return False
+    return True
 
 
 def remote_image(remote: str, name: str) -> str:
     """Return the image reference of an app of a remote."""
-    return f"ghcr.io/{remote.lower()}:{name}"
+    return Remote.parse(remote).image(name)
 
 
 def image_folder(image: str) -> str:
@@ -96,24 +175,19 @@ def image_folder(image: str) -> str:
 
 def install_name(remote: str, name: str) -> str:
     """Return what a user types to install an app: the short name from the default remote, else the image."""
-    return name if remote.lower() == settings.proot_apps_remote.lower() else remote_image(remote, name)
-
-
-def metadata_url(remote: str) -> str:
-    """Return the URL of a remote's metadata file."""
-    return f"https://raw.githubusercontent.com/{remote}/master/metadata/metadata.yml"
+    parsed = Remote.parse(remote)
+    return name if parsed.default else parsed.image(name)
 
 
 def icon_url(remote: str, icon: str) -> str:
     """Return the URL of an icon the remote's metadata names."""
-    return f"https://raw.githubusercontent.com/{remote}/master/metadata/img/{icon}"
+    return Remote.parse(remote).icon_url(icon)
 
 
 def icon_file(remote: str, icon: str) -> str:
     """Return the file name an icon is kept under in a catalog, distinct per remote."""
-    if remote.lower() == settings.proot_apps_remote.lower():
-        return icon
-    return f"{remote.lower().replace('/', '_')}_{icon}"
+    parsed = Remote.parse(remote)
+    return icon if parsed.default else f"{image_folder(parsed.registry)}_{icon}"
 
 
 def catalog_dir(catalog_id: str) -> str:
@@ -206,6 +280,8 @@ def _parse_metadata(raw: bytes, remote: str) -> list[dict[str, Any]]:
         if not isinstance(entry, dict) or not entry.get("name"):
             continue
         icon = str(entry.get("icon") or "")
+        if not _ICON.match(icon):
+            icon = ""
         apps.append(
             {
                 "remote": remote,
@@ -224,19 +300,18 @@ async def fetch_remote(remote: str, refresh: bool = False) -> list[dict[str, Any
     """Return the apps a remote publishes, from memory unless stale or `refresh`.
 
     Raises:
-        ValueError: For a remote that is not `owner/repo` or whose metadata is not a list of apps.
+        ValueError: For a remote `Remote.parse` does not read or whose metadata is not a list of apps.
         httpx.HTTPError: When the metadata cannot be fetched.
     """
-    if not is_remote(remote):
-        raise ValueError("A remote is a GitHub owner/repo.")
-    cached = _remote_cache.get(remote.lower())
+    parsed = Remote.parse(remote)
+    cached = _remote_cache.get(parsed.key)
     if cached and not refresh and time.time() - cached[0] < REMOTE_CACHE_SECONDS:
         return cached[1]
-    async with httpx.AsyncClient(timeout=20.0, follow_redirects=True) as client:
-        response = await client.get(metadata_url(remote))
+    async with httpx.AsyncClient(timeout=20.0, follow_redirects=True, auth=registries.netrc_auth()) as client:
+        response = await client.get(parsed.metadata_url)
         response.raise_for_status()
-    apps = _parse_metadata(response.content, remote)
-    _remote_cache[remote.lower()] = (time.time(), apps)
+    apps = _parse_metadata(response.content, parsed.key)
+    _remote_cache[parsed.key] = (time.time(), apps)
     return apps
 
 
@@ -251,42 +326,35 @@ def remote_apps(remote: str, apps: list[dict[str, Any]]) -> list[ProotRemoteApp]
 # --- The registry --------------------------------------------------------------
 
 
-def _split_reference(image: str) -> tuple[str, str, str]:
-    """Split an image reference into registry host, repository, and tag."""
-    first, _, rest = image.partition("/")
-    if rest and ("." in first or ":" in first or first == "localhost"):
-        registry, repository = first, rest
-    else:
-        registry, repository = "registry-1.docker.io", image
-        if "/" not in repository:
-            repository = f"library/{repository}"
-    repository, _, tag = repository.rpartition(":") if ":" in repository.rsplit("/", 1)[-1] else (repository, "", "")
-    return registry, repository, tag or "latest"
-
-
 class _Registry:
-    """Anonymous pull access to one repository of a distribution registry."""
+    """Pull access to one repository of a distribution registry, with the node's credential for it."""
 
-    def __init__(self, client: httpx.Client, image: str) -> None:
+    def __init__(self, client: httpx.Client, image: str, auths: dict[str, tuple[str, str]] | None = None) -> None:
         self.client = client
-        self.registry, self.repository, self.tag = _split_reference(image)
+        self.registry, self.repository, self.tag = registries.split_reference(image)
+        self.credential = registries.credential(self.registry, auths or {})
         self.headers: dict[str, str] = {"Accept": ", ".join(MANIFEST_TYPES)}
 
     def _url(self, kind: str, reference: str) -> str:
         return f"https://{self.registry}/v2/{self.repository}/{kind}/{reference}"
 
     def _authorize(self, response: httpx.Response) -> bool:
-        """Get the anonymous token a 401 asks for; `False` when the registry offers none."""
-        challenge = dict(re.findall(r'(\w+)="([^"]*)"', response.headers.get("WWW-Authenticate", "")))
-        if "realm" not in challenge:
-            return False
-        token = self.client.get(
-            challenge["realm"], params={k: v for k, v in challenge.items() if k in ("service", "scope")}
-        )
-        token.raise_for_status()
-        body = token.json()
-        self.headers["Authorization"] = f"Bearer {body.get('token') or body.get('access_token')}"
-        return True
+        """Answer a 401 with the token its challenge asks for, or basic authentication; `False` when neither serves."""
+        scheme, params = registries.challenge(response)
+        if scheme == "bearer" and "realm" in params:
+            token = self.client.get(
+                params["realm"],
+                params={k: v for k, v in params.items() if k in ("service", "scope")},
+                auth=self.credential,
+            )
+            token.raise_for_status()
+            body = token.json()
+            self.headers["Authorization"] = f"Bearer {body.get('token') or body.get('access_token')}"
+            return True
+        if scheme == "basic" and self.credential:
+            self.headers["Authorization"] = registries.basic(self.credential)
+            return True
+        return False
 
     def manifest(self, reference: str) -> dict[str, Any]:
         """Return a manifest or index by tag or digest."""
@@ -395,10 +463,16 @@ def _folder_size(folder: str) -> int:
     return total
 
 
-def _sync_blocking(catalog: ProotCatalog, listings: dict[str, list[dict[str, Any]]], status: dict[str, Any]) -> None:
+def _sync_blocking(
+    catalog: ProotCatalog,
+    listings: dict[str, list[dict[str, Any]]],
+    status: dict[str, Any],
+    auths: dict[str, tuple[str, str]] | None = None,
+) -> None:
     """Bring this node's copy of a catalog to what the record names; runs in a thread.
 
-    `status` is the live status dict and is updated as the sync goes.
+    `status` is the live status dict and is updated as the sync goes; `auths`
+    are the registry credentials the packages are fetched with.
     """
     arch = node_arch()
     folder = catalog_dir(catalog.id)
@@ -406,7 +480,7 @@ def _sync_blocking(catalog: ProotCatalog, listings: dict[str, list[dict[str, Any
     wanted: list[dict[str, Any]] = []
     missing: list[str] = []
     for app in catalog.apps:
-        listed = next((a for a in listings.get(app.remote.lower(), []) if a["name"] == app.name), None)
+        listed = next((a for a in listings.get(remote_key(app.remote), []) if a["name"] == app.name), None)
         if listed is None:
             missing.append(install_name(app.remote, app.name))
             listed = {
@@ -422,7 +496,9 @@ def _sync_blocking(catalog: ProotCatalog, listings: dict[str, list[dict[str, Any
     present: dict[str, dict[str, Any]] = {}
     failures: list[str] = []
     status.update(total=len(wanted), done=0, current="")
-    with httpx.Client(timeout=httpx.Timeout(30.0, read=300.0), follow_redirects=True) as client:
+    with httpx.Client(
+        timeout=httpx.Timeout(30.0, read=300.0), follow_redirects=True, auth=registries.netrc_auth()
+    ) as client:
         _write_metadata(folder, wanted, client, status)
         for app in wanted:
             image = remote_image(app["remote"], app["name"])
@@ -436,7 +512,7 @@ def _sync_blocking(catalog: ProotCatalog, listings: dict[str, list[dict[str, Any
                 status["done"] += 1
                 continue
             try:
-                registry = _Registry(client, image)
+                registry = _Registry(client, registries.mirror(image), auths)
                 digest = registry.layer_digest(arch)
                 sha_file = os.path.join(app_dir, "SHALAYER")
                 package = os.path.join(app_dir, "app.tar.gz")
@@ -502,14 +578,20 @@ async def _sync_once(catalog: ProotCatalog) -> None:
     status = status_of(catalog.id)
     status.update(state="syncing", message="", done=0, total=len(catalog.apps), current="")
     listings: dict[str, list[dict[str, Any]]] = {}
-    for remote in sorted({app.remote.lower() for app in catalog.apps}):
+    try:
+        remotes = sorted({remote_key(app.remote) for app in catalog.apps})
+    except ValueError as exc:
+        status.update(state="error", message=str(exc), current="")
+        return
+    for remote in remotes:
         try:
             listings[remote] = await fetch_remote(remote)
         except (httpx.HTTPError, ValueError) as exc:
             status["message"] = f"Metadata of {remote} not fetched: {exc}"
             logger.warning("Could not fetch the PRoot Apps metadata of %s: %s", remote, exc)
+    auths = await registries.registry_auths()
     try:
-        await asyncio.to_thread(_sync_blocking, catalog, listings, status)
+        await asyncio.to_thread(_sync_blocking, catalog, listings, status, auths)
         status["synced_revision"] = catalog.revision
     except Exception as exc:  # noqa: BLE001 - the status carries the error
         status.update(state="error", message=str(exc), current="")

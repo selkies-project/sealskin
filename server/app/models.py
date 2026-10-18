@@ -867,11 +867,12 @@ class ProotCatalogApp(BaseModel):
     """One app of a PRoot Apps catalog: a package of a remote.
 
     Attributes:
-        remote: GitHub `owner/repo` the app is published from.
+        remote: The remote the app is published from, as `prootapps.Remote` reads it: a GitHub
+            `owner/repo`, or a metadata base URL and a registry separated by a space.
         name: The app's name there, which is its image tag.
     """
 
-    remote: str = Field(..., pattern=r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+    remote: str = Field(..., max_length=512, pattern=r"^([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+|https?://\S+\s+\S+)$")
     name: str = Field(..., pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
 
 

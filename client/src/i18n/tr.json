@@ -225,7 +225,6 @@
       "publicKeyPlaceholder": "Kullanıcının açık anahtarını buraya yapıştırın veya bir tane oluşturmak için boş bırakın.",
       "settingsTitle": "Kullanıcı Ayarları",
       "sessionLimitLabel": "Oturum limiti",
-      "sessionLimitTitle": "Bir kullanıcının sahip olabileceği aktif oturum sayısı. Sınırsız için -1.",
       "permissionsTitle": "İzinler ve Güvenlik",
       "activeAccount": "Aktif Hesap",
       "allowStorage": "Kalıcı Depolamaya İzin Ver",
@@ -318,11 +317,9 @@
     "installedApps": {
       "title": "Yüklü Uygulamalar",
       "searchPlaceholder": "Yüklü uygulamaları ara...",
-      "noAppsFound": "Yüklü uygulama bulunamadı.",
       "pulling": "Yeni imaj çekiliyor...",
       "notLocal": "İmaj yerel olarak bulunamadı",
       "isLaboratory": "Bu, özel ayarlarla bir temel imajdan oluşturulmuş bir Laboratuvar uygulamasıdır.",
-      "laboratory": "Laboratuvar",
       "confirmDelete": "'{appName}' yüklü uygulamasını silmek istediğinizden emin misiniz?",
       "deleteTitle": "Yüklü uygulamayı sil"
     },
@@ -1154,20 +1151,14 @@
     },
     "appLaboratory": {
       "title": "Uygulama Laboratuvarı",
-      "description": "Temel bir uygulamanın üzerine değişiklikler katmanlayarak özel uygulama yapılandırmaları oluşturun ve test edin.",
       "selectApp": "Uygulama Seç",
       "createNew": "Yeni Uygulama Oluştur",
       "baseApp": "Temel Uygulama",
       "baseAppDescription": "Yeni özel uygulamanızın temel alacağı yüklü uygulama.",
       "selectBase": "Bir Temel Uygulama Seçin",
-      "customizationTitle": "Özelleştirme",
       "appName": "Uygulama Adı",
       "appIcon": "Uygulama Simgesi",
       "uploadIcon": "Simge Yükle",
-      "autostartScriptLabel": "Özel Otomatik Başlatma Betiği",
-      "permissionsTitle": "İzinler",
-      "usersLabel": "İzin Verilen Kullanıcılar",
-      "groupsLabel": "İzin Verilen Gruplar",
       "launchButton": "Kaydet ve Özelleştirme Oturumunu Başlat",
       "closeButton": "Oturumu Kapat ve Sonlandır",
       "savingAndLaunching": "Kaydediliyor ve Başlatılıyor...",
@@ -1189,7 +1180,6 @@
       "closeTitle": "Özelleştirme oturumunu kapat",
       "unsavedTitle": "Değişiklikler kaydedilmedi",
       "unsavedClose": "Değişiklikler kaydedilemedi. Oturum yine de kapatılsın mı?",
-      "templateSaved": "Oturum kapatıldı. Şablon kaydedildi.",
       "busy": "'{name}' için bir özelleştirme oturumu açık. Bir meta uygulamayı değiştirmeden veya yenisini başlatmadan önce yukarıdan kapatın.",
       "describeTitle": "1. Tanımla",
       "customizeTitle": "2. Özelleştir",
@@ -1258,7 +1248,6 @@
     },
     "status": {
       "loggingIn": "Giriş yapılıyor...",
-      "configSaved": "Yapılandırma başarıyla kaydedildi!",
       "configApplied": "Yapılandırma uygulandı! Lütfen Giriş Yapıp Test Edin.",
       "configApplyFailed": "Yapılandırma uygulanamadı: {error}",
       "fileReadError": "Dosya okunurken hata oluştu.",
@@ -1287,7 +1276,6 @@
       "userUpdateFailed": "Kullanıcı güncellenirken hata: {error}",
       "userApproved": "'{username}' kullanıcısı onaylandı.",
       "userApproveFailed": "Kullanıcı onaylanırken hata oluştu: {error}",
-      "creatingGroup": "Grup oluşturuluyor...",
       "groupCreated": "Grup '{groupName}' oluşturuldu.",
       "groupCreateFailed": "Grup oluşturulurken hata: {error}",
       "groupDeleted": "Grup '{groupName}' başarıyla silindi.",
@@ -1355,7 +1343,8 @@
         "expired": "Anahtarın süresi doldu. Web uygulamasındaki profilinizden yeni bir tane oluşturun.",
         "disabled": "Yöneticiniz hesabınız için uygulama anahtarlarına izin vermiyor.",
         "client": "Yöneticiniz bu uygulamanın uygulama anahtarı kullanmasına izin vermiyor.",
-        "dormant": "Anahtarınız uykuda. Web uygulamasında giriş yapıp yeniden deneyin."
+        "dormant": "Anahtarınız uykuda. Web uygulamasında giriş yapıp yeniden deneyin.",
+        "locked": "Çok fazla yanlış anahtar. Bir dakika bekleyip yeniden deneyin."
       },
       "scanFailed": "Kod okunamadı: {error}",
       "scanNotKey": "Bu QR kodu bir SealSkin uygulama anahtarı değil."
@@ -1369,7 +1358,8 @@
       "noPinned": "Sabitlenmiş davranış bulunamadı.",
       "errorLoading": "Dizinler yüklenirken hata oluştu.",
       "noInstalledApps": "Henüz hiçbir uygulama yüklenmedi.",
-      "noProotCatalogs": "Henüz katalog yok."
+      "noProotCatalogs": "Henüz katalog yok.",
+      "noVpnProfiles": "Henüz VPN profili yok."
     },
     "web": {
       "title": "Bu Tarayıcıda {brand}",
@@ -1645,7 +1635,7 @@
       "noneSelected": "Henüz uygulama seçilmedi. Kullanıcılara grafik yükleyiciyi vermek için \"gui\" ekleyin.",
       "remoteTitle": "Kullanılabilir uygulamalar",
       "searchPlaceholder": "Uygulama ara...",
-      "remoteLabel": "Uzak kaynak (bir proot-apps deposunun GitHub owner/repo adı)",
+      "remoteLabel": "Uzak kaynak: bir GitHub owner/repo adı veya bir proot-apps deposunun temel URL'si ile imajlarının kayıt defteri, bir boşlukla ayrılmış",
       "load": "Yükle",
       "refreshRemote": "Listeyi yeniden çek",
       "noApps": "Uygulama bulunamadı.",
@@ -1748,7 +1738,6 @@
       "importTitle": "Profil içe aktar",
       "importHelp": "Bir .ovpn veya .conf dosyası, sağlayıcının verdiği haliyle bunların zip'i ya da yapıştırılan yapılandırma. Aynı şablonu paylaşan dosyalar, sunucu başına bir uç noktası olan tek profil olur; kendi şablonu olan dosya ayrı bir profil olur.",
       "nameLabel": "Profil adı",
-      "fileLabel": "Yapılandırma dosyası veya arşiv",
       "usernameLabel": "OpenVPN kullanıcı adı",
       "passwordLabel": "OpenVPN parolası",
       "credentialsHelp": "Bunları isteyen bir yapılandırma için sağlayıcının hizmet kimlik bilgileri.",
@@ -1759,13 +1748,11 @@
       "importFailed": "Profil içe aktarılamadı: {error}",
       "kind": "Tür",
       "endpoints": "Uç noktalar",
-      "published": "Yayımlanan",
       "tunnels": "Bağlantılar",
       "noTunnels": "Açık bağlantı yok",
       "tunnel": "{node} üzerinde {label}: {sessions, plural, one {1 oturum} other {{sessions} oturum}} ({state})",
       "maxTunnels": "Bağlantı sınırı",
       "maxTunnelsHelp": "Bu profil için tüm kurulumun aynı anda açık tutabileceği bağlantı sayısı; sınır yoksa 0.",
-      "noProfiles": "Henüz VPN profili yok.",
       "editTitle": "{name} düzenle",
       "endpointsTitle": "Uç noktalar",
       "endpointsHelp": "Kullanıcıların seçebileceği uç noktaları sunulacak sırayla işaretleyin; ilki varsayılandır. Hiçbiri işaretli değilse ilki kullanılır ve kullanıcılar seçim yapmaz. Herhangi bir alanı düzenleyin, bir uç noktayı kaldırın ya da elle veya başka bir yapılandırma dosyasından ekleyin.",
@@ -1823,9 +1810,6 @@
     "launchView": {
       "searchPlaceholder": "Uygulamaları ara...",
       "uploadingFile": "Dosya yükleniyor...",
-      "gpuLabel": "GPU",
-      "storageLabel": "Depolama",
-      "languageLabel": "Dil",
       "cleanroom": "Temiz Oda (Geçici)",
       "noGpu": "Yok",
       "saveOptions": "Bu başlatma seçeneklerini kaydet",
@@ -1856,7 +1840,6 @@
       "noSessions": "Aktif oturum bulunamadı."
     },
     "uploadStorageView": {
-      "selectHome": "Ana Dizin Seç",
       "description": "Bu, <strong>{filename}</strong> dosyasını ileride kullanmak üzere doğrudan Dosyalar depolama alanınıza yükleyecektir.",
       "descriptionFallback": "Bu, <strong>{filename}</strong> dosyasını ileride kullanmak üzere doğrudan Dosyalar depolama alanınıza yükleyecektir.",
       "uploadButton": "Dosya Yükle",
@@ -1878,7 +1861,6 @@
       "errorClosingSession": "Oturum kapatılırken hata: {message}",
       "preparingSession": "İzole oturum hazırlanıyor...",
       "fetchingData": "Dosya verileri alınıyor...",
-      "fetchDataFailed": "Dosya verileri alınamadı: {statusText}",
       "unknownAction": "Bilinmeyen başlatma eylemi.",
       "noAppSelected": "Lütfen bir uygulama seçin.",
       "noAppsAvailable": "Hesabınız için uygun uygulama yok.",
@@ -1981,8 +1963,6 @@
       "shareCreated": "Paylaşım başarıyla oluşturuldu! Bağlantı panonuza kopyalandı.",
       "shareCreateFailed": "Paylaşım oluşturulamadı: {error}",
       "sharesLoadFailed": "Paylaşılan dosyalar yüklenemedi: {error}",
-      "shareDeleteFailed": "Paylaşım silinemedi: {error}",
-      "shareDeleted": "Paylaşım başarıyla silindi.",
       "urlCopied": "Genel URL panoya kopyalandı.",
       "downloading": "{filename} indiriliyor...",
       "downloadSuccess": "İndirme tamamlandı",
@@ -2211,7 +2191,6 @@
       "other": "Diğer istemciler"
     },
     "rootKey": "Root anahtarı",
-    "rootKeyHelp": "Sunucunun ilk başlatılışında /config/root_key dosyasına yazdığı yönetici uygulama anahtarı.",
     "keys": {
       "wakeTitle": "Uygulama anahtarınız yeniden etkin",
       "wakeBody": "Artık uygulamaya dönebilir veya buradan devam edebilirsiniz.",

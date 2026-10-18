@@ -225,7 +225,6 @@
       "publicKeyPlaceholder": "Öffentlichen Schlüssel des Benutzers hier einfügen oder leer lassen, um einen zu generieren.",
       "settingsTitle": "Benutzereinstellungen",
       "sessionLimitLabel": "Sitzungslimit",
-      "sessionLimitTitle": "Anzahl der aktiven Sitzungen, die ein Benutzer haben kann. -1 für unbegrenzt.",
       "permissionsTitle": "Berechtigungen & Härtung",
       "activeAccount": "Aktives Konto",
       "allowStorage": "Persistenten Speicher erlauben",
@@ -318,11 +317,9 @@
     "installedApps": {
       "title": "Installierte Anwendungen",
       "searchPlaceholder": "Installierte Apps suchen...",
-      "noAppsFound": "Keine installierten Apps gefunden.",
       "pulling": "Neues Image wird heruntergeladen...",
       "notLocal": "Image lokal nicht gefunden",
       "isLaboratory": "Dies ist eine Labor-App, erstellt aus einem Basis-Image mit eigenen Einstellungen.",
-      "laboratory": "Labor",
       "confirmDelete": "Sind Sie sicher, dass Sie die installierte App '{appName}' löschen möchten?",
       "deleteTitle": "Installierte App löschen"
     },
@@ -1154,20 +1151,14 @@
     },
     "appLaboratory": {
       "title": "App-Labor",
-      "description": "Erstellen und testen Sie benutzerdefinierte Anwendungskonfigurationen, indem Sie Änderungen auf eine Basis-App aufschichten.",
       "selectApp": "App auswählen",
       "createNew": "Neue App erstellen",
       "baseApp": "Basisanwendung",
       "baseAppDescription": "Die installierte Anwendung, auf der Ihre neue benutzerdefinierte App basieren wird.",
       "selectBase": "Basis-App auswählen",
-      "customizationTitle": "Anpassung",
       "appName": "App-Name",
       "appIcon": "App-Symbol",
       "uploadIcon": "Symbol hochladen",
-      "autostartScriptLabel": "Benutzerdefiniertes Autostart-Skript",
-      "permissionsTitle": "Berechtigungen",
-      "usersLabel": "Erlaubte Benutzer",
-      "groupsLabel": "Erlaubte Gruppen",
       "launchButton": "Speichern & Anpassungssitzung starten",
       "closeButton": "Sitzung schließen & abschließen",
       "savingAndLaunching": "Speichern & Starten...",
@@ -1189,7 +1180,6 @@
       "closeTitle": "Anpassungssitzung schließen",
       "unsavedTitle": "Änderungen nicht gespeichert",
       "unsavedClose": "Die Änderungen konnten nicht gespeichert werden. Sitzung trotzdem schließen?",
-      "templateSaved": "Sitzung geschlossen. Die Vorlage ist gespeichert.",
       "busy": "Eine Anpassungssitzung für '{name}' ist geöffnet. Schließen Sie sie oben, bevor Sie eine Meta-App ändern oder eine weitere starten.",
       "describeTitle": "1. Beschreiben",
       "customizeTitle": "2. Anpassen",
@@ -1258,7 +1248,6 @@
     },
     "status": {
       "loggingIn": "Anmeldung läuft...",
-      "configSaved": "Konfiguration erfolgreich gespeichert!",
       "configApplied": "Konfiguration angewendet! Bitte Anmelden & Testen.",
       "configApplyFailed": "Anwenden der Konfiguration fehlgeschlagen: {error}",
       "fileReadError": "Fehler beim Lesen der Datei.",
@@ -1287,7 +1276,6 @@
       "userUpdateFailed": "Fehler beim Aktualisieren des Benutzers: {error}",
       "userApproved": "Benutzer '{username}' freigegeben.",
       "userApproveFailed": "Fehler beim Freigeben des Benutzers: {error}",
-      "creatingGroup": "Gruppe wird erstellt...",
       "groupCreated": "Gruppe '{groupName}' erstellt.",
       "groupCreateFailed": "Fehler beim Erstellen der Gruppe: {error}",
       "groupDeleted": "Gruppe '{groupName}' erfolgreich gelöscht.",
@@ -1355,7 +1343,8 @@
         "expired": "Der Schlüssel ist abgelaufen. Erstellen Sie einen neuen in Ihrem Profil in der Web-App.",
         "disabled": "Ihr Administrator erlaubt für Ihr Konto keine Anwendungsschlüssel.",
         "client": "Ihr Administrator erlaubt dieser App nicht, Anwendungsschlüssel zu verwenden.",
-        "dormant": "Ihr Schlüssel ruht. Melden Sie sich in der Web-App an und versuchen Sie es dann erneut."
+        "dormant": "Ihr Schlüssel ruht. Melden Sie sich in der Web-App an und versuchen Sie es dann erneut.",
+        "locked": "Zu viele falsche Schlüssel. Warten Sie eine Minute und versuchen Sie es dann erneut."
       },
       "scanFailed": "Der Code konnte nicht gelesen werden: {error}",
       "scanNotKey": "Dieser QR-Code ist kein SealSkin-Anwendungsschlüssel."
@@ -1369,7 +1358,8 @@
       "noPinned": "Keine gepinnten Verhalten gefunden.",
       "errorLoading": "Fehler beim Laden der Verzeichnisse.",
       "noInstalledApps": "Es wurden noch keine Anwendungen installiert.",
-      "noProotCatalogs": "Noch keine Kataloge."
+      "noProotCatalogs": "Noch keine Kataloge.",
+      "noVpnProfiles": "Noch keine VPN-Profile."
     },
     "web": {
       "title": "{brand} in diesem Browser",
@@ -1645,7 +1635,7 @@
       "noneSelected": "Noch keine Apps ausgewählt. Nehmen Sie \"gui\" auf, um Benutzern das grafische Installationsprogramm zu geben.",
       "remoteTitle": "Verfügbare Apps",
       "searchPlaceholder": "Apps durchsuchen...",
-      "remoteLabel": "Remote (GitHub owner/repo eines proot-apps-Repositorys)",
+      "remoteLabel": "Remote: ein GitHub owner/repo, oder die Basis-URL eines proot-apps-Repositorys und die Registry seiner Images, durch ein Leerzeichen getrennt",
       "load": "Laden",
       "refreshRemote": "Liste erneut holen",
       "noApps": "Keine Apps gefunden.",
@@ -1748,7 +1738,6 @@
       "importTitle": "Profil importieren",
       "importHelp": "Eine .ovpn- oder .conf-Datei, ein Zip davon, wie der Anbieter es ausgibt, oder die eingefügte Konfiguration. Dateien mit derselben Vorlage werden ein Profil mit einem Endpunkt je Server; eine eigene Vorlage wird ein eigenes Profil.",
       "nameLabel": "Profilname",
-      "fileLabel": "Konfigurationsdatei oder Archiv",
       "usernameLabel": "OpenVPN-Benutzername",
       "passwordLabel": "OpenVPN-Passwort",
       "credentialsHelp": "Die Dienstzugangsdaten des Anbieters für eine Konfiguration, die sie verlangt.",
@@ -1759,13 +1748,11 @@
       "importFailed": "Das Profil konnte nicht importiert werden: {error}",
       "kind": "Art",
       "endpoints": "Endpunkte",
-      "published": "Veröffentlicht",
       "tunnels": "Verbindungen",
       "noTunnels": "Keine aktiv",
       "tunnel": "{label} auf {node}: {sessions, plural, one {1 Sitzung} other {{sessions} Sitzungen}} ({state})",
       "maxTunnels": "Verbindungslimit",
       "maxTunnelsHelp": "Verbindungen, die die gesamte Installation für dieses Profil gleichzeitig haben darf; 0 für kein Limit.",
-      "noProfiles": "Noch keine VPN-Profile.",
       "editTitle": "{name} bearbeiten",
       "endpointsTitle": "Endpunkte",
       "endpointsHelp": "Markieren Sie die Endpunkte, die Benutzer wählen dürfen, in der Reihenfolge des Angebots; der erste ist die Vorgabe. Ohne Markierung wird der erste Endpunkt genutzt und Benutzer haben keine Wahl. Jedes Feld lässt sich bearbeiten, ein Endpunkt entfernen oder von Hand bzw. aus einer weiteren Konfigurationsdatei hinzufügen.",
@@ -1823,9 +1810,6 @@
     "launchView": {
       "searchPlaceholder": "Anwendungen suchen...",
       "uploadingFile": "Datei wird hochgeladen...",
-      "gpuLabel": "GPU",
-      "storageLabel": "Speicher",
-      "languageLabel": "Sprache",
       "cleanroom": "Cleanroom (Temporär)",
       "noGpu": "Keine",
       "saveOptions": "Diese Startoptionen speichern",
@@ -1856,7 +1840,6 @@
       "noSessions": "Keine aktiven Sitzungen gefunden."
     },
     "uploadStorageView": {
-      "selectHome": "Home-Verzeichnis auswählen",
       "description": "Dies lädt die Datei <strong>{filename}</strong> zur zukünftigen Verwendung direkt in Ihren Dateispeicher hoch.",
       "descriptionFallback": "Dies lädt die Datei <strong>{filename}</strong> zur zukünftigen Verwendung direkt in Ihren Dateispeicher hoch.",
       "uploadButton": "Datei hochladen",
@@ -1878,7 +1861,6 @@
       "errorClosingSession": "Fehler beim Schließen der Sitzung: {message}",
       "preparingSession": "Isolierte Sitzung wird vorbereitet...",
       "fetchingData": "Dateidaten werden abgerufen...",
-      "fetchDataFailed": "Abrufen der Dateidaten fehlgeschlagen: {statusText}",
       "unknownAction": "Unbekannte Startaktion.",
       "noAppSelected": "Bitte wählen Sie eine Anwendung aus.",
       "noAppsAvailable": "Für Ihr Konto sind keine Anwendungen verfügbar.",
@@ -1981,8 +1963,6 @@
       "shareCreated": "Freigabe erfolgreich erstellt! Der Link wurde in Ihre Zwischenablage kopiert.",
       "shareCreateFailed": "Fehler beim Erstellen der Freigabe: {error}",
       "sharesLoadFailed": "Fehler beim Laden der freigegebenen Dateien: {error}",
-      "shareDeleteFailed": "Fehler beim Löschen der Freigabe: {error}",
-      "shareDeleted": "Freigabe erfolgreich gelöscht.",
       "urlCopied": "Öffentliche URL in die Zwischenablage kopiert.",
       "downloading": "{filename} wird heruntergeladen...",
       "downloadSuccess": "Download abgeschlossen",
@@ -2211,7 +2191,6 @@
       "other": "Andere Clients"
     },
     "rootKey": "Root-Schlüssel",
-    "rootKeyHelp": "Der Anwendungsschlüssel des Administrators, den der Server beim ersten Start nach /config/root_key geschrieben hat.",
     "keys": {
       "wakeTitle": "Ihr Anwendungsschlüssel ist wieder aktiv",
       "wakeBody": "Sie können jetzt zur App zurückkehren oder hier weitermachen.",

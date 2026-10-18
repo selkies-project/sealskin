@@ -10,7 +10,7 @@ from docker.errors import APIError, DockerException, ImageNotFound, NotFound
 from docker.types import DeviceRequest
 from fastapi import HTTPException
 
-from .. import progress
+from .. import progress, registries
 from ..docker_utils import (
     get_docker_client,
     inspect_self_container,
@@ -73,7 +73,7 @@ class DockerProvider(BaseProvider):
             `{"id", "short_id", "digests"}` or `None` when not present.
         """
         try:
-            image = await asyncio.to_thread(self.client.images.get, image_name)
+            image = await asyncio.to_thread(self.client.images.get, registries.mirror(image_name))
             return {
                 "id": image.id,
                 "short_id": image.short_id.split(":")[-1],
@@ -94,9 +94,10 @@ class DockerProvider(BaseProvider):
         Returns:
             The registry digest, or `None` if it could not be determined.
         """
+        reference = registries.mirror(image_name)
         try:
             distribution_info = await asyncio.to_thread(
-                self.client.api.inspect_distribution, image_name
+                self.client.api.inspect_distribution, reference, auth_config=registries.docker_auth(reference)
             )
             return distribution_info["Descriptor"]["digest"]
         except APIError as exc:
@@ -110,7 +111,7 @@ class DockerProvider(BaseProvider):
             return None
 
     async def pull_image(self, image_name: str) -> Any:
-        """Pull an image from its registry.
+        """Pull an image from its registry, or its mirror, with the node's credential for it.
 
         Args:
             image_name: Image reference.
@@ -121,10 +122,13 @@ class DockerProvider(BaseProvider):
         Raises:
             APIError: If the pull fails.
         """
+        reference = registries.mirror(image_name)
         try:
-            logger.info("Pulling latest image for '%s'...", image_name)
-            image = await asyncio.to_thread(self.client.images.pull, image_name)
-            logger.info("Successfully pulled '%s'.", image_name)
+            logger.info("Pulling latest image for '%s'...", reference)
+            image = await asyncio.to_thread(
+                self.client.images.pull, reference, auth_config=registries.docker_auth(reference)
+            )
+            logger.info("Successfully pulled '%s'.", reference)
             return image
         except APIError as exc:
             logger.error("Failed to pull image '%s': %s", image_name, exc)
@@ -144,7 +148,7 @@ class DockerProvider(BaseProvider):
         def export() -> bytes:
             # Labelled as an instance of this server, so a leaked one goes with the orphans at reconcile.
             container = self.client.containers.create(
-                image,
+                registries.mirror(image),
                 entrypoint=["true"],
                 network_disabled=True,
                 labels={MANAGED_BY_LABEL: "sealskin", INSTANCE_LABEL: state.instance_name, "app.kubernetes.io/component": "web-export"},
@@ -188,7 +192,7 @@ class DockerProvider(BaseProvider):
             HTTPException: On Docker errors or readiness timeout.
         """
         config = self.app_config["provider_config"]
-        image = config["image"]
+        image = registries.mirror(config["image"])
 
         try:
             await asyncio.to_thread(self.client.images.get, image)
@@ -314,7 +318,7 @@ class DockerProvider(BaseProvider):
 
         await asyncio.to_thread(
             self.client.containers.run,
-            settings.vpn_image,
+            registries.mirror(settings.vpn_image),
             ["route", gateway_ip],
             network_mode=f"container:{container_id}",
             cap_add=["NET_ADMIN"],

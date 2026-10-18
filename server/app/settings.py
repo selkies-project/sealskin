@@ -132,9 +132,10 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "type": "str",
         "default": "linuxserver/proot-apps",
         "help": (
-            "GitHub `owner/repo` of the PRoot Apps repository the catalog editor opens with; a "
-            "fork lists its apps in `metadata/metadata.yml` and publishes them as tags of "
-            "`ghcr.io/<owner>/<repo>`."
+            "The PRoot Apps remote the catalog editor opens with: the GitHub `owner/repo` of a "
+            "proot-apps repository, whose apps are tags of `ghcr.io/<owner>/<repo>`, or the base URL "
+            "under which `metadata/metadata.yml` is served and the registry its apps are tags of, "
+            "separated by a space (`https://git.example/raw/it/proot-apps/main registry.example/it/proot-apps`)."
         ),
     },
     {
@@ -191,6 +192,37 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "type": "int",
         "default": 3600,
         "help": "How often to check for app image updates (in seconds).",
+    },
+    {
+        "name": "image_mirrors",
+        "type": "str",
+        "default": "",
+        "help": (
+            "Mirror per upstream registry every image is pulled through, as "
+            "`upstream=mirror` pairs separated by commas: `lscr.io=registry.example/lscr,"
+            "docker.io=registry.example/hub` pulls `lscr.io/linuxserver/firefox` as "
+            "`registry.example/lscr/linuxserver/firefox`. Records keep the upstream name."
+        ),
+    },
+    {
+        "name": "registry_auth_path",
+        "type": "str",
+        "default": "/config/.docker/config.json",
+        "help": (
+            "Docker `config.json` whose `auths` sign this node in to registries: for session and "
+            "gateway images, digest checks, and the packages of PRoot Apps catalogs. Read at every "
+            "use; credential helpers are not run. On Kubernetes the session template's pull secrets add to it."
+        ),
+    },
+    {
+        "name": "netrc_path",
+        "type": "str",
+        "default": "/config/.netrc",
+        "help": (
+            "netrc file whose machines sign this node in to the hosts of app stores, autostart "
+            "scripts, logos, and the metadata and icons of PRoot Apps catalogs, with basic "
+            "authentication. Read at every use."
+        ),
     },
     {
         "name": "puid",

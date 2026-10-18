@@ -285,8 +285,13 @@ session runs exactly that image; each node pulls it the first time it runs
 it and reuses it after. With auto-update on, the digests are re-pinned every update interval. An
 image that was never pinned since the server started runs by its tag under
 the cluster's pull policy, which for `:latest` is to pull on every start.
-Registries are asked anonymously, so a private image is not pinned and always
-runs by its tag, pulled with the namespace's image pull secrets.
+The registry is asked with the pull secrets the [session
+template](#the-session-template) names, which the server reads through its
+Role, and with the node's own credential file
+([Registries and proxies](registries.md#credentials)); a private image
+covered by neither is not pinned and runs by its tag. Images are pulled
+through the mirrors `SEALSKIN_IMAGE_MIRRORS` names, by the kubelet and the
+server alike.
 
 ## PRoot Apps catalogs
 

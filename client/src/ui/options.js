@@ -3505,7 +3505,9 @@ async function refreshProotCatalogs() {
   }
 }
 
-const prootKey = (remote, name) => `${remote.toLowerCase()}:${name}`;
+/** The key a remote is listed under: owner/repo in lower case, a URL form as typed. */
+const prootRemoteKey = (remote) => (remote.includes('://') ? remote.trim().replace(/\s+/g, ' ') : remote.toLowerCase());
+const prootKey = (remote, name) => `${prootRemoteKey(remote)}:${name}`;
 const prootSelected = (remote, name) => prootEditor.apps.some((a) => prootKey(a.remote, a.name) === prootKey(remote, name));
 
 /** Open the editor on a catalog, or empty for a new one. */
@@ -3579,7 +3581,7 @@ function renderProotSelected() {
   }
   box.innerHTML = prootEditor.apps.map((app) => {
     const icon = prootEditor.icons[prootKey(app.remote, app.name)];
-    const other = app.remote.toLowerCase() !== adminData.proot_remote.toLowerCase()
+    const other = prootRemoteKey(app.remote) !== prootRemoteKey(adminData.proot_remote)
       ? ` <small>${escapeHtml(t('options.prootApps.fromRemote', { remote: app.remote }))}</small>` : '';
     return `<span class="chip">${icon ? `<img src="${escapeHtml(icon)}" alt="">` : ''}${escapeHtml(app.name)}${other}<button type="button" data-remote="${escapeHtml(app.remote)}" data-name="${escapeHtml(app.name)}" title="${t('common.delete')}">&times;</button></span>`;
   }).join('');
@@ -3594,7 +3596,7 @@ function toggleProotApp(remote, name) {
   }
   renderProotSelected();
   // Flip the one card rather than rebuild the grid, which would animate every card again.
-  if (remote.toLowerCase() === prootEditor.remote.toLowerCase()) {
+  if (prootRemoteKey(remote) === prootRemoteKey(prootEditor.remote)) {
     const card = [...document.querySelectorAll('#proot-remote-grid .app-card-popup[data-name]')].find((c) => c.dataset.name === name);
     if (card) card.classList.toggle('selected', selected);
   }

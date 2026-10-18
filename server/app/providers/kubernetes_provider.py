@@ -20,6 +20,7 @@ import asyncio
 import base64
 import binascii
 import hashlib
+import json
 import logging
 import os
 import posixpath
@@ -34,7 +35,7 @@ import httpx
 import websockets
 from fastapi import HTTPException
 
-from .. import progress
+from .. import progress, registries
 from ..docker_utils import scan_render_nodes
 from ..settings import settings
 from ..state import state
@@ -102,6 +103,9 @@ MANIFEST_TYPES = (
     "application/vnd.oci.image.manifest.v1+json",
     "application/vnd.docker.distribution.manifest.v2+json",
 )
+#: Seconds the session template's pull secrets are kept before they are read again.
+PULL_SECRET_SECONDS = 60
+_pull_secrets: tuple[float, dict[str, tuple[str, str]]] = (0.0, {})
 _DOCKER_SIZE_RE = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*([bkmgt]?)b?\s*$", re.IGNORECASE)
 
 
@@ -352,65 +356,64 @@ def _quota_applies(quota: dict[str, Any], spec: dict[str, Any]) -> bool:
     return True
 
 
-def _repository(image: str) -> str:
-    """Return an image reference without its tag or digest."""
-    name = image.partition("@")[0]
-    return name.rsplit(":", 1)[0] if ":" in name.rsplit("/", 1)[-1] else name
-
-
 def _session_image(image: str) -> str:
-    """Return the reference sessions run: the pinned digest once there is one."""
+    """Return the reference sessions run: the mirror's, at the pinned digest once there is one."""
+    reference = registries.mirror(image)
     digest = state.image_metadata.get(image, {}).get("pinned")
-    return f"{_repository(image)}@{digest}" if digest and "@" not in image else image
+    return f"{registries.repository_of(reference)}@{digest}" if digest and "@" not in reference else reference
 
 
-def _split_reference(image: str) -> tuple[str, str, str]:
-    """Split an image reference into registry host, repository, and tag or digest."""
-    name, _, digest = image.partition("@")
-    first, _, rest = name.partition("/")
-    if rest and ("." in first or ":" in first or first == "localhost"):
-        registry, repository = first, rest
-    else:
-        registry, repository = "registry-1.docker.io", name
-        if "/" not in repository:
-            repository = f"library/{repository}"
-    if registry == "docker.io":
-        registry = "registry-1.docker.io"
-    if digest:
-        return registry, _repository(repository), digest
-    if ":" in repository.rsplit("/", 1)[-1]:
-        repository, _, tag = repository.rpartition(":")
-        return registry, repository, tag
-    return registry, repository, "latest"
+def _secret_auths(secret: dict[str, Any], name: str) -> dict[str, tuple[str, str]]:
+    """Return the credentials a pull secret holds, in either of the two forms Kubernetes takes."""
+    data = secret.get("data") or {}
+    try:
+        if ".dockerconfigjson" in data:
+            document = json.loads(base64.b64decode(data[".dockerconfigjson"]))
+        elif ".dockercfg" in data:
+            document = {"auths": json.loads(base64.b64decode(data[".dockercfg"]))}
+        else:
+            logger.warning("Pull secret '%s' holds no Docker configuration.", name)
+            return {}
+    except (ValueError, binascii.Error) as exc:
+        logger.warning("Pull secret '%s' is not readable: %s", name, exc)
+        return {}
+    return registries.parse_docker_config(document, f"pull secret '{name}'")
 
 
-async def registry_digest(image: str) -> str | None:
-    """Ask the image's registry for the digest its reference points to now.
+async def registry_digest(image: str, auths: dict[str, tuple[str, str]] | None = None) -> str | None:
+    """Ask the image's registry, or its mirror, for the digest its reference points to now.
 
-    Anonymous bearer tokens cover public images on Docker Hub, GHCR, Quay, and
-    other distribution registries; a private image yields `None`.
+    The node's credential for the registry signs in through the bearer token
+    the registry's challenge asks for, or as basic authentication; without
+    one, anonymous tokens cover public images. A refusal yields `None`.
     """
-    registry, repository, reference = _split_reference(image)
-    if reference.startswith("sha256:"):
-        return reference
-    url = f"https://{registry}/v2/{repository}/manifests/{reference}"
+    reference = registries.mirror(image)
+    registry, repository, tag = registries.split_reference(reference)
+    if tag.startswith("sha256:"):
+        return tag
+    if auths is None:
+        auths = await registries.registry_auths()
+    found = registries.credential(registry, auths)
+    url = f"https://{registry}/v2/{repository}/manifests/{tag}"
     headers = {"Accept": ", ".join(MANIFEST_TYPES)}
     try:
         async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
             response = await client.head(url, headers=headers)
             if response.status_code == 401:
-                challenge = dict(
-                    re.findall(r'(\w+)="([^"]*)"', response.headers.get("WWW-Authenticate", ""))
-                )
-                if "realm" not in challenge:
+                scheme, params = registries.challenge(response)
+                if scheme == "bearer" and "realm" in params:
+                    token_response = await client.get(
+                        params["realm"],
+                        params={k: v for k, v in params.items() if k in ("service", "scope")},
+                        auth=found,
+                    )
+                    token_response.raise_for_status()
+                    body = token_response.json()
+                    headers["Authorization"] = f"Bearer {body.get('token') or body.get('access_token')}"
+                elif scheme == "basic" and found:
+                    headers["Authorization"] = registries.basic(found)
+                else:
                     return None
-                token_response = await client.get(
-                    challenge["realm"],
-                    params={k: v for k, v in challenge.items() if k in ("service", "scope")},
-                )
-                token_response.raise_for_status()
-                body = token_response.json()
-                headers["Authorization"] = f"Bearer {body.get('token') or body.get('access_token')}"
                 response = await client.head(url, headers=headers)
             if response.status_code != 200:
                 logger.warning("Registry answered %s for image '%s'.", response.status_code, image)
@@ -661,7 +664,8 @@ class KubernetesProvider(BaseProvider):
         digest = state.image_metadata.get(image_name, {}).get("pinned")
         if not digest:
             return None
-        return {"id": digest, "short_id": digest.split(":")[-1][:12], "digests": [f"{_repository(image_name)}@{digest}"]}
+        repository = registries.repository_of(registries.mirror(image_name))
+        return {"id": digest, "short_id": digest.split(":")[-1][:12], "digests": [f"{repository}@{digest}"]}
 
     async def get_remote_image_digest(self, image_name: str) -> str | None:
         """Return the digest the image's registry serves now."""
@@ -682,6 +686,27 @@ class KubernetesProvider(BaseProvider):
 
     async def prune_images(self) -> None:
         """Leave unused images to the kubelet's image garbage collection."""
+
+    async def registry_credentials(self) -> dict[str, tuple[str, str]]:
+        """Return the credentials of the pull secrets the session template names, read again each minute."""
+        global _pull_secrets
+        if time.monotonic() - _pull_secrets[0] < PULL_SECRET_SECONDS:
+            return _pull_secrets[1]
+        api = kube()
+        auths: dict[str, tuple[str, str]] = {}
+        template = (await self._pod_template() or {}).get("spec") or {}
+        for entry in template.get("imagePullSecrets") or []:
+            name = (entry or {}).get("name")
+            if not name:
+                continue
+            try:
+                secret = await api.request("GET", api.path("secrets", name))
+            except KubeError as exc:
+                logger.warning("Pull secret '%s' of the session template not read: %s", name, exc.message)
+                continue
+            auths.update(_secret_auths(secret, name))
+        _pull_secrets = (time.monotonic(), auths)
+        return auths
 
     async def export_web_client(self, image: str, path: str) -> bytes:
         """Run `tar` in a pod of the image and read what it wrote from the pod's log (see `BaseProvider`).
@@ -948,7 +973,7 @@ class KubernetesProvider(BaseProvider):
             spec["initContainers"] = list(base.pop("initContainers", None) or []) + [
                 {
                     "name": "vpn",
-                    "image": settings.vpn_image,
+                    "image": registries.mirror(settings.vpn_image),
                     "args": ["spoke"],
                     "restartPolicy": "Always",
                     "env": [{"name": name, "value": str(value)} for name, value in vpn["spoke"].items()],

@@ -816,9 +816,9 @@
                         <input type="text" id="proot-remote-search" class="search-input" data-i18n-placeholder="options.prootApps.searchPlaceholder" placeholder="Search apps...">
                     </div>
                     <form id="proot-remote-form" class="form-group">
-                        <label for="proot-remote" data-i18n="options.prootApps.remoteLabel">Remote (GitHub owner/repo of a proot-apps repository)</label>
+                        <label for="proot-remote" data-i18n="options.prootApps.remoteLabel">Remote: a GitHub owner/repo, or the base URL of a proot-apps repository and the registry of its images, one space apart</label>
                         <div style="display: flex; gap: 0.5rem;">
-                            <input type="text" id="proot-remote" pattern="^[A-Za-z0-9_.\-]+/[A-Za-z0-9_.\-]+$" required style="flex: 1;">
+                            <input type="text" id="proot-remote" pattern="^\s*([A-Za-z0-9_.\-]+/[A-Za-z0-9_.\-]+|https?://\S+\s+\S+)\s*$" required style="flex: 1;">
                             <button type="submit" class="secondary"><i class="fas fa-cloud-download-alt"></i> <span data-i18n="options.prootApps.load">Load</span></button>
                             <button type="button" id="proot-remote-refresh" class="secondary" data-i18n-title="options.prootApps.refreshRemote" title="Fetch the list again"><i class="fas fa-sync-alt"></i></button>
                         </div>

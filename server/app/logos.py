@@ -24,6 +24,7 @@ import re
 import httpx
 from fastapi import Request, Response
 
+from . import registries
 from .fsutil import safe_join
 from .settings import settings
 
@@ -130,7 +131,9 @@ async def fetch(name: str) -> tuple[bytes, str] | None:
             with open(found[0], "rb") as handle:
                 return handle.read(), found[1]
         try:
-            async with httpx.AsyncClient(timeout=TIMEOUT, follow_redirects=True, transport=_transport) as client:
+            async with httpx.AsyncClient(
+                timeout=TIMEOUT, follow_redirects=True, transport=_transport, auth=registries.netrc_auth()
+            ) as client:
                 picture = await _download(client, address)
         except httpx.HTTPError as exc:
             logger.warning("Logo %s not fetched: %s", address, exc)

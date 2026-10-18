@@ -225,7 +225,6 @@
       "publicKeyPlaceholder": "사용자의 공개 키를 여기에 붙여넣거나, 비워두면 새로 생성됩니다.",
       "settingsTitle": "사용자 설정",
       "sessionLimitLabel": "세션 제한",
-      "sessionLimitTitle": "사용자가 가질 수 있는 활성 세션의 수. -1은 무제한입니다.",
       "permissionsTitle": "권한 및 보안 강화",
       "activeAccount": "활성 계정",
       "allowStorage": "영구 스토리지 허용",
@@ -318,11 +317,9 @@
     "installedApps": {
       "title": "설치된 애플리케이션",
       "searchPlaceholder": "설치된 앱 검색...",
-      "noAppsFound": "설치된 앱이 없습니다.",
       "pulling": "새 이미지 가져오는 중...",
       "notLocal": "로컬에서 이미지를 찾을 수 없음",
       "isLaboratory": "이것은 기본 이미지에 사용자 정의 설정을 더해 빌드된 실험실 앱입니다.",
-      "laboratory": "실험실",
       "confirmDelete": "설치된 앱 '{appName}'을(를) 삭제하시겠습니까?",
       "deleteTitle": "설치된 앱 삭제"
     },
@@ -1154,20 +1151,14 @@
     },
     "appLaboratory": {
       "title": "앱 실험실",
-      "description": "기본 앱 위에 변경 사항을 레이어링하여 사용자 지정 애플리케이션 구성을 만들고 테스트합니다.",
       "selectApp": "앱 선택",
       "createNew": "새 앱 만들기",
       "baseApp": "기본 애플리케이션",
       "baseAppDescription": "새로운 사용자 지정 앱의 기반이 될 설치된 애플리케이션입니다.",
       "selectBase": "기본 앱 선택",
-      "customizationTitle": "사용자 지정",
       "appName": "앱 이름",
       "appIcon": "앱 아이콘",
       "uploadIcon": "아이콘 업로드",
-      "autostartScriptLabel": "사용자 지정 자동 시작 스크립트",
-      "permissionsTitle": "권한",
-      "usersLabel": "허용된 사용자",
-      "groupsLabel": "허용된 그룹",
       "launchButton": "저장 및 사용자 지정 세션 시작",
       "closeButton": "세션 닫기 및 최종 확정",
       "savingAndLaunching": "저장 및 시작 중...",
@@ -1189,7 +1180,6 @@
       "closeTitle": "사용자 지정 세션 닫기",
       "unsavedTitle": "변경 사항이 저장되지 않음",
       "unsavedClose": "변경 사항을 저장할 수 없습니다. 그래도 세션을 닫으시겠습니까?",
-      "templateSaved": "세션이 닫혔습니다. 템플릿이 저장되었습니다.",
       "busy": "'{name}'의 사용자 지정 세션이 열려 있습니다. 메타 앱을 변경하거나 다른 세션을 시작하려면 먼저 위에서 닫으세요.",
       "describeTitle": "1. 설명",
       "customizeTitle": "2. 사용자 지정",
@@ -1258,7 +1248,6 @@
     },
     "status": {
       "loggingIn": "로그인 중...",
-      "configSaved": "구성이 성공적으로 저장되었습니다!",
       "configApplied": "구성이 적용되었습니다! 로그인하여 테스트하세요.",
       "configApplyFailed": "구성 적용 실패: {error}",
       "fileReadError": "파일 읽기 오류.",
@@ -1287,7 +1276,6 @@
       "userUpdateFailed": "사용자 업데이트 오류: {error}",
       "userApproved": "사용자 '{username}'이(가) 승인되었습니다.",
       "userApproveFailed": "사용자 승인 오류: {error}",
-      "creatingGroup": "그룹 생성 중...",
       "groupCreated": "그룹 '{groupName}'이(가) 생성되었습니다.",
       "groupCreateFailed": "그룹 생성 오류: {error}",
       "groupDeleted": "그룹 '{groupName}'이(가) 성공적으로 삭제되었습니다.",
@@ -1355,7 +1343,8 @@
         "expired": "키가 만료되었습니다. 웹 앱의 프로필에서 새 키를 만드세요.",
         "disabled": "관리자가 이 계정에 애플리케이션 키를 허용하지 않습니다.",
         "client": "관리자가 이 앱에서 애플리케이션 키를 사용하는 것을 허용하지 않습니다.",
-        "dormant": "키가 휴면 상태입니다. 웹 앱에 로그인한 다음 다시 시도하세요."
+        "dormant": "키가 휴면 상태입니다. 웹 앱에 로그인한 다음 다시 시도하세요.",
+        "locked": "잘못된 키 입력이 너무 많습니다. 1분 기다린 다음 다시 시도하세요."
       },
       "scanFailed": "코드를 읽을 수 없습니다: {error}",
       "scanNotKey": "이 QR 코드는 SealSkin 애플리케이션 키가 아닙니다."
@@ -1369,7 +1358,8 @@
       "noPinned": "고정된 동작을 찾을 수 없습니다.",
       "errorLoading": "디렉터리 로딩 중 오류 발생.",
       "noInstalledApps": "아직 설치된 애플리케이션이 없습니다.",
-      "noProotCatalogs": "아직 카탈로그가 없습니다."
+      "noProotCatalogs": "아직 카탈로그가 없습니다.",
+      "noVpnProfiles": "아직 VPN 프로필이 없습니다."
     },
     "web": {
       "title": "이 브라우저의 {brand}",
@@ -1645,7 +1635,7 @@
       "noneSelected": "아직 선택한 앱이 없습니다. 사용자에게 그래픽 설치 프로그램을 제공하려면 \"gui\"를 포함하세요.",
       "remoteTitle": "사용 가능한 앱",
       "searchPlaceholder": "앱 검색...",
-      "remoteLabel": "리모트 (proot-apps 저장소의 GitHub owner/repo)",
+      "remoteLabel": "리모트: GitHub owner/repo, 또는 proot-apps 저장소의 기본 URL과 그 이미지의 레지스트리를 공백 하나로 구분한 것",
       "load": "불러오기",
       "refreshRemote": "목록 다시 가져오기",
       "noApps": "앱을 찾을 수 없습니다.",
@@ -1748,7 +1738,6 @@
       "importTitle": "프로필 가져오기",
       "importHelp": ".ovpn 또는 .conf 파일 하나, 공급자가 배포하는 zip, 또는 붙여넣은 설정입니다. 같은 템플릿을 공유하는 파일은 서버마다 엔드포인트가 있는 하나의 프로필이 되고, 다른 템플릿은 별도의 프로필이 됩니다.",
       "nameLabel": "프로필 이름",
-      "fileLabel": "설정 파일 또는 압축 파일",
       "usernameLabel": "OpenVPN 사용자 이름",
       "passwordLabel": "OpenVPN 비밀번호",
       "credentialsHelp": "자격 증명을 요구하는 설정을 위한 공급자의 서비스 자격 증명입니다.",
@@ -1759,13 +1748,11 @@
       "importFailed": "프로필을 가져올 수 없습니다: {error}",
       "kind": "종류",
       "endpoints": "엔드포인트",
-      "published": "게시됨",
       "tunnels": "연결",
       "noTunnels": "열린 연결 없음",
       "tunnel": "{node}의 {label}: {sessions, plural, other {세션 {sessions}개}} ({state})",
       "maxTunnels": "연결 상한",
       "maxTunnelsHelp": "이 프로필에 대해 전체 배포가 동시에 열 수 있는 연결 수입니다. 0은 제한 없음.",
-      "noProfiles": "아직 VPN 프로필이 없습니다.",
       "editTitle": "{name} 편집",
       "endpointsTitle": "엔드포인트",
       "endpointsHelp": "사용자가 선택할 수 있는 엔드포인트를 제공할 순서대로 체크하세요. 첫 번째가 기본값입니다. 아무것도 체크하지 않으면 첫 번째가 사용되고 사용자는 선택할 수 없습니다. 어떤 필드든 편집하고, 엔드포인트를 제거하거나, 직접 또는 다른 설정 파일에서 추가할 수 있습니다.",
@@ -1823,9 +1810,6 @@
     "launchView": {
       "searchPlaceholder": "애플리케이션 검색...",
       "uploadingFile": "파일 업로드 중...",
-      "gpuLabel": "GPU",
-      "storageLabel": "스토리지",
-      "languageLabel": "언어",
       "cleanroom": "클린룸 (임시)",
       "noGpu": "없음",
       "saveOptions": "이 시작 옵션 저장",
@@ -1856,7 +1840,6 @@
       "noSessions": "활성 세션이 없습니다."
     },
     "uploadStorageView": {
-      "selectHome": "홈 디렉터리 선택",
       "description": "이 작업은 파일 <strong>{filename}</strong>을(를) 나중에 사용할 수 있도록 파일 저장소에 직접 업로드합니다.",
       "descriptionFallback": "이 작업은 파일 <strong>{filename}</strong>을(를) 나중에 사용할 수 있도록 파일 저장소에 직접 업로드합니다.",
       "uploadButton": "파일 업로드",
@@ -1878,7 +1861,6 @@
       "errorClosingSession": "세션 닫기 오류: {message}",
       "preparingSession": "격리된 세션 준비 중...",
       "fetchingData": "파일 데이터 가져오는 중...",
-      "fetchDataFailed": "파일 데이터 가져오기 실패: {statusText}",
       "unknownAction": "알 수 없는 시작 작업입니다.",
       "noAppSelected": "애플리케이션을 선택하세요.",
       "noAppsAvailable": "계정에서 사용할 수 있는 애플리케이션이 없습니다.",
@@ -1981,8 +1963,6 @@
       "shareCreated": "공유가 성공적으로 생성되었습니다! 링크가 클립보드에 복사되었습니다.",
       "shareCreateFailed": "공유 생성 실패: {error}",
       "sharesLoadFailed": "공유된 파일을 불러오지 못했습니다: {error}",
-      "shareDeleteFailed": "공유 삭제 실패: {error}",
-      "shareDeleted": "공유가 성공적으로 삭제되었습니다.",
       "urlCopied": "공개 URL이 클립보드에 복사되었습니다.",
       "downloading": "{filename} 다운로드 중...",
       "downloadSuccess": "다운로드 완료",
@@ -2211,7 +2191,6 @@
       "other": "기타 클라이언트"
     },
     "rootKey": "루트 키",
-    "rootKeyHelp": "관리자의 애플리케이션 키로, 서버가 처음 시작할 때 /config/root_key에 기록한 것입니다.",
     "keys": {
       "wakeTitle": "애플리케이션 키가 다시 활성화되었습니다",
       "wakeBody": "이제 앱으로 돌아가거나 여기에서 계속할 수 있습니다.",

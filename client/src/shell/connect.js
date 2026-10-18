@@ -208,7 +208,8 @@ async function handleKeyLogin() {
     return true;
   } catch (error) {
     const { status, detail } = apiError(error);
-    const reason = status === 401 && /^[a-z]+$/.test(detail) ? t(`options.status.keyRefused.${detail}`) : null;
+    // A refused key is a 401 with its code; a locked-out address is a 429 with `locked`.
+    const reason = (status === 401 || status === 429) && /^[a-z]+$/.test(detail) ? t(`options.status.keyRefused.${detail}`) : null;
     const known = reason && reason !== `options.status.keyRefused.${detail}`;
     displayStatus(known ? reason : t('options.status.loginFailed', { error: error.message }), true);
     return false;

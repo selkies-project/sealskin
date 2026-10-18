@@ -225,7 +225,6 @@
       "publicKeyPlaceholder": "I-paste ang pampublikong key ng user dito, o iwanang blangko upang bumuo ng isa.",
       "settingsTitle": "Mga Setting ng User",
       "sessionLimitLabel": "Limitasyon ng Sesyon",
-      "sessionLimitTitle": "Bilang ng aktibong sesyon na maaaring magkaroon ang isang user. -1 para sa walang limitasyon.",
       "permissionsTitle": "Mga Pahintulot at Pagpapatibay",
       "activeAccount": "Aktibong Account",
       "allowStorage": "Pahintulutan ang Persistenteng Imbakan",
@@ -318,11 +317,9 @@
     "installedApps": {
       "title": "Mga Naka-install na Aplikasyon",
       "searchPlaceholder": "Maghanap ng mga naka-install na app...",
-      "noAppsFound": "Walang nahanap na naka-install na app.",
       "pulling": "Hinihila ang bagong imahe...",
       "notLocal": "Hindi nahanap ang imahe nang lokal",
       "isLaboratory": "Ito ay isang app ng Laboratoryo, na binuo mula sa isang base na imahe na may mga pasadyang setting.",
-      "laboratory": "Laboratoryo",
       "confirmDelete": "Sigurado ka bang gusto mong burahin ang naka-install na app na '{appName}'?",
       "deleteTitle": "Burahin ang naka-install na app"
     },
@@ -1154,20 +1151,14 @@
     },
     "appLaboratory": {
       "title": "Laboratoryo ng App",
-      "description": "Lumikha at subukan ang mga pasadyang configuration ng application sa pamamagitan ng pagpapatong ng mga pagbabago sa ibabaw ng isang base app.",
       "selectApp": "Pumili ng App",
       "createNew": "Gumawa ng Bagong App",
       "baseApp": "Base na Aplikasyon",
       "baseAppDescription": "Ang naka-install na aplikasyon kung saan ibabatay ang iyong bagong pasadyang app.",
       "selectBase": "Pumili ng Base App",
-      "customizationTitle": "Pagpapasadya",
       "appName": "Pangalan ng App",
       "appIcon": "Icon ng App",
       "uploadIcon": "Mag-upload ng Icon",
-      "autostartScriptLabel": "Pasadyang Autostart Script",
-      "permissionsTitle": "Mga Pahintulot",
-      "usersLabel": "Mga Pinapayagang User",
-      "groupsLabel": "Mga Pinapayagang Grupo",
       "launchButton": "I-save at Ilunsad ang Sesyon ng Pagpapasadya",
       "closeButton": "Isara ang Sesyon at I-finalize",
       "savingAndLaunching": "Nagse-save at Naglulunsad...",
@@ -1189,7 +1180,6 @@
       "closeTitle": "Isara ang session ng pag-customize",
       "unsavedTitle": "Hindi na-save ang mga pagbabago",
       "unsavedClose": "Hindi ma-save ang mga pagbabago. Isara pa rin ang session?",
-      "templateSaved": "Naisara ang sesyon. Na-save ang template.",
       "busy": "May bukas na sesyon ng pagpapasadya para sa '{name}'. Isara ito sa itaas bago baguhin ang isang meta-app o magsimula ng iba.",
       "describeTitle": "1. Ilarawan",
       "customizeTitle": "2. I-customize",
@@ -1258,7 +1248,6 @@
     },
     "status": {
       "loggingIn": "Nagla-log in...",
-      "configSaved": "Matagumpay na na-save ang konfigurasyon!",
       "configApplied": "Nailapat ang konfigurasyon! Mangyaring Mag-login at Subukan.",
       "configApplyFailed": "Nabigong ilapat ang konfigurasyon: {error}",
       "fileReadError": "Error sa pagbasa ng file.",
@@ -1287,7 +1276,6 @@
       "userUpdateFailed": "Error sa pag-update ng user: {error}",
       "userApproved": "Naaprubahan ang user na '{username}'.",
       "userApproveFailed": "Error sa pag-apruba ng user: {error}",
-      "creatingGroup": "Gumagawa ng grupo...",
       "groupCreated": "Nilikha ang grupong '{groupName}'.",
       "groupCreateFailed": "Error sa paggawa ng grupo: {error}",
       "groupDeleted": "Matagumpay na nabura ang grupong '{groupName}'.",
@@ -1355,7 +1343,8 @@
         "expired": "Nag-expire na ang key. Gumawa ng bago sa iyong profile sa web app.",
         "disabled": "Hindi pinapahintulutan ng iyong administrator ang mga application key para sa iyong account.",
         "client": "Hindi pinapahintulutan ng iyong administrator na gumamit ng application key ang app na ito.",
-        "dormant": "Natutulog ang iyong key. Mag-sign in sa web app, pagkatapos subukang muli."
+        "dormant": "Natutulog ang iyong key. Mag-sign in sa web app, pagkatapos subukang muli.",
+        "locked": "Masyadong maraming maling key. Maghintay ng isang minuto, pagkatapos subukang muli."
       },
       "scanFailed": "Hindi mabasa ang code: {error}",
       "scanNotKey": "Ang QR code na iyon ay hindi isang SealSkin application key."
@@ -1369,7 +1358,8 @@
       "noPinned": "Walang nahanap na naka-pin na gawi.",
       "errorLoading": "Error sa pag-load ng mga directory.",
       "noInstalledApps": "Wala pang naka-install na mga application.",
-      "noProotCatalogs": "Wala pang katalogo."
+      "noProotCatalogs": "Wala pang katalogo.",
+      "noVpnProfiles": "Wala pang VPN profile."
     },
     "web": {
       "title": "{brand} sa Browser na Ito",
@@ -1645,7 +1635,7 @@
       "noneSelected": "Wala pang napipiling app. Isama ang \"gui\" para mabigyan ang mga user ng graphical installer.",
       "remoteTitle": "Mga available na app",
       "searchPlaceholder": "Maghanap ng mga app...",
-      "remoteLabel": "Remote (GitHub owner/repo ng isang proot-apps repository)",
+      "remoteLabel": "Remote: isang GitHub owner/repo, o ang base URL ng isang proot-apps repository at ang registry ng mga image nito, hiwalay ng isang espasyo",
       "load": "I-load",
       "refreshRemote": "Kunin muli ang listahan",
       "noApps": "Walang nahanap na app.",
@@ -1748,7 +1738,6 @@
       "importTitle": "Mag-import ng profile",
       "importHelp": "Isang .ovpn o .conf file, zip ng mga ito gaya ng ibinibigay ng provider, o ang config na naka-paste. Ang mga file na may iisang template ay nagiging isang profile na may isang endpoint bawat server; ang sariling template ay nagiging sariling profile.",
       "nameLabel": "Pangalan ng profile",
-      "fileLabel": "Config file o archive",
       "usernameLabel": "OpenVPN username",
       "passwordLabel": "OpenVPN password",
       "credentialsHelp": "Ang service credentials ng provider, para sa config na humihingi nito.",
@@ -1759,13 +1748,11 @@
       "importFailed": "Hindi ma-import ang profile: {error}",
       "kind": "Uri",
       "endpoints": "Mga endpoint",
-      "published": "Nailathala",
       "tunnels": "Mga koneksyon",
       "noTunnels": "Walang aktibo",
       "tunnel": "{label} sa {node}: {sessions, plural, one {1 session} other {{sessions} session}} ({state})",
       "maxTunnels": "Limitasyon ng koneksyon",
       "maxTunnelsHelp": "Bilang ng koneksyon na maaaring nakabukas nang sabay sa buong deployment para sa profile na ito; 0 para walang limitasyon.",
-      "noProfiles": "Wala pang VPN profile.",
       "editTitle": "I-edit ang {name}",
       "endpointsTitle": "Mga endpoint",
       "endpointsHelp": "Lagyan ng tsek ang mga endpoint na maaaring piliin ng mga user, sa pagkakasunod ng pag-aalok; ang una ang default. Kung walang tsek, ang una ang gagamitin at walang pagpipilian ang mga user. I-edit ang anumang field, alisin ang endpoint, o magdagdag nang mano-mano o mula sa ibang config file.",
@@ -1823,9 +1810,6 @@
     "launchView": {
       "searchPlaceholder": "Maghanap ng mga aplikasyon...",
       "uploadingFile": "Nag-a-upload ng file...",
-      "gpuLabel": "GPU",
-      "storageLabel": "Imbakan",
-      "languageLabel": "Wika",
       "cleanroom": "Cleanroom (Ephemeral)",
       "noGpu": "Wala",
       "saveOptions": "I-save ang mga opsyon sa paglunsad na ito",
@@ -1856,7 +1840,6 @@
       "noSessions": "Walang nahanap na aktibong sesyon."
     },
     "uploadStorageView": {
-      "selectHome": "Pumili ng Home Directory",
       "description": "Ia-upload nito ang file na <strong>{filename}</strong> direkta sa iyong imbakan ng mga File para sa paggamit sa hinaharap.",
       "descriptionFallback": "Ia-upload nito ang file na <strong>{filename}</strong> direkta sa iyong imbakan ng mga File para sa paggamit sa hinaharap.",
       "uploadButton": "I-upload ang File",
@@ -1878,7 +1861,6 @@
       "errorClosingSession": "Error sa pagsasara ng sesyon: {message}",
       "preparingSession": "Inihahanda ang isolated na sesyon...",
       "fetchingData": "Kinukuha ang data ng file...",
-      "fetchDataFailed": "Nabigong kunin ang data ng file: {statusText}",
       "unknownAction": "Hindi kilalang aksyon sa paglunsad.",
       "noAppSelected": "Mangyaring pumili ng isang aplikasyon.",
       "noAppsAvailable": "Walang magagamit na aplikasyon para sa iyong account.",
@@ -1981,8 +1963,6 @@
       "shareCreated": "Matagumpay na nagawa ang pagbabahagi! Ang link ay nakopya sa iyong clipboard.",
       "shareCreateFailed": "Nabigong gumawa ng pagbabahagi: {error}",
       "sharesLoadFailed": "Nabigong i-load ang mga ibinahaging file: {error}",
-      "shareDeleteFailed": "Nabigong burahin ang pagbabahagi: {error}",
-      "shareDeleted": "Matagumpay na nabura ang pagbabahagi.",
       "urlCopied": "Nakopya ang pampublikong URL sa clipboard.",
       "downloading": "Dina-download ang {filename}...",
       "downloadSuccess": "Tapos na ang pag-download",
@@ -2211,7 +2191,6 @@
       "other": "Iba pang client"
     },
     "rootKey": "Root key",
-    "rootKeyHelp": "Ang application key ng administrator, na isinulat ng server sa /config/root_key sa unang pagsimula nito.",
     "keys": {
       "wakeTitle": "Aktibo na ulit ang iyong application key",
       "wakeBody": "Maaari ka nang bumalik sa app, o magpatuloy dito.",

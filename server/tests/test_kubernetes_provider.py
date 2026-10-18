@@ -7,6 +7,7 @@ import httpx
 import pytest
 from fastapi import HTTPException
 
+from app import registries
 from app.providers import kubernetes_provider as kp
 from app.settings import settings
 from app.state import state
@@ -57,6 +58,7 @@ class FakeApi:
         self.pod_status = {"phase": "Running", "podIP": "fd00::5"}
         self.pod_templates = {}
         self.pod_templates_failure = None
+        self.secrets = {}
         self.events = []
         self.log = ""
 
@@ -78,6 +80,11 @@ class FakeApi:
             if self.device_classes is None:
                 return httpx.Response(404, json={"message": "the server could not find the requested resource"})
             return httpx.Response(200, json={"items": self.device_classes})
+        if "/secrets/" in path and request.method == "GET":
+            name = path.rsplit("/", 1)[1]
+            if name not in self.secrets:
+                return httpx.Response(404, json={"message": f'secrets "{name}" not found'})
+            return httpx.Response(200, json=self.secrets[name])
         if "/podtemplates/" in path:
             name = path.rsplit("/", 1)[1]
             if name not in self.pod_templates:
@@ -601,7 +608,37 @@ async def test_pinned_digest_becomes_the_session_image(api):
     ],
 )
 def test_split_reference(image, expected):
-    assert kp._split_reference(image) == expected
+    assert registries.split_reference(image) == expected
+
+
+async def test_the_session_templates_pull_secrets_serve_the_registry(api, tmp_path, monkeypatch):
+    await kp.KubernetesProvider().inspect_self()
+    monkeypatch.setattr("app.providers.get_provider", lambda *_args, **_kwargs: kp.KubernetesProvider())
+    monkeypatch.setattr(kp, "_pull_secrets", (0.0, {}))
+    api.pod_templates["sealskin-session"] = {
+        "template": {"spec": {"imagePullSecrets": [{"name": "regcred"}, {"name": "gone"}], "containers": [{"name": "app", "image": "x"}]}}
+    }
+    document = {"auths": {"registry.example": {"auth": base64.b64encode(b"u:p").decode()}}}
+    api.secrets["regcred"] = {
+        "type": "kubernetes.io/dockerconfigjson",
+        "data": {".dockerconfigjson": base64.b64encode(json.dumps(document).encode()).decode()},
+    }
+    assert await kp.KubernetesProvider().registry_credentials() == {"registry.example": ("u", "p")}
+    monkeypatch.setattr(settings, "registry_auth_path", str(tmp_path / "config.json"))
+    (tmp_path / "config.json").write_text(json.dumps({"auths": {"registry.example": {"username": "file", "password": "wins"}}}))
+    assert await registries.registry_auths() == {"registry.example": ("file", "wins")}
+
+
+async def test_a_mirror_names_the_image_a_session_runs(api, monkeypatch):
+    await kp.KubernetesProvider().inspect_self()
+    monkeypatch.setattr(settings, "image_mirrors", "lscr.io=registry.example/lscr")
+    image = "lscr.io/linuxserver/firefox:latest"
+    template = {"spec": {"containers": [{"name": "app", "image": "x"}]}}
+    pod = _provider()._pod_manifest("s" * 36, {}, {}, None, template)
+    assert pod["spec"]["containers"][0]["image"] == "registry.example/lscr/linuxserver/firefox:latest"
+    state.image_metadata[image] = {"pinned": "sha256:" + "a" * 64}
+    pod = _provider()._pod_manifest("s" * 36, {}, {}, None, template)
+    assert pod["spec"]["containers"][0]["image"] == "registry.example/lscr/linuxserver/firefox@sha256:" + "a" * 64
 
 
 def test_docker_quantity():

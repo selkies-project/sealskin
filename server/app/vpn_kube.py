@@ -41,7 +41,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import x25519
 from fastapi import HTTPException
 
-from . import vpn
+from . import registries, vpn
 from .models import VpnTunnel
 from .settings import settings
 from .state import state
@@ -193,7 +193,7 @@ def hub_manifests(
             "containers": [
                 {
                     "name": "gateway",
-                    "image": settings.vpn_image,
+                    "image": registries.mirror(settings.vpn_image),
                     "args": ["hub"],
                     "securityContext": {"capabilities": {"add": ["NET_ADMIN"]}},
                     "readinessProbe": {
