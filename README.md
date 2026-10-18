@@ -13,7 +13,7 @@ SealSkin runs desktop applications in isolated containers on a server you
 control and streams them to any browser or phone. A browser extension turns
 every link, file, download, and text selection into something you open
 remotely instead of locally, so nothing from the web ever runs on the device
-in front of you; with nothing installed, the server's own web app does the
+in front of you. With nothing installed, the server's own web app does the
 same from any browser. It is built on [Selkies](https://github.com/selkies-project/selkies)
 and the [LinuxServer.io](https://www.linuxserver.io) application images.
 
@@ -55,6 +55,16 @@ the extension or the app, and launch your first application. The
 covers the installer, the plain `docker compose` alternative, certificates,
 and the first sign-in.
 
+On the web, the root key is the only sign-in the server handles itself.
+Everyone else is authenticated externally, by an identity provider (OpenID
+Connect or SAML) or a reverse proxy that signs users in, whose groups make
+administrators and carry limits. Plan on one of those before inviting a
+second person. [Signing in](https://selkies-project.github.io/sealskin/signin)
+and [Behind a reverse proxy](https://selkies-project.github.io/sealskin/reverse-proxy)
+show how, with tested configurations for Authelia, Authentik, Keycloak,
+Pocket ID, Tinyauth, oauth2-proxy, SWAG, Traefik, Nginx Proxy Manager, and
+Caddy.
+
 On Kubernetes, one manifest installs the server in any namespace you
 administer, with no cluster-scoped objects, and every session runs as a pod
 beside it ([Kubernetes](https://selkies-project.github.io/sealskin/kubernetes)):
@@ -68,8 +78,8 @@ kubectl apply -n <namespace> -f sealskin.yml
 ## What it does
 
 * **Isolation.** Links, files, downloads, and searches open in a fresh
-  container on the server. Cleanroom sessions leave nothing behind;
-  persistent home directories keep what you choose.
+  container on the server. Cleanroom sessions leave nothing behind,
+  and persistent home directories keep what you choose.
 * **Any application.** Browsers, office suites, IDEs, media editors,
   emulators, and 3D tools from the app stores, or any Selkies-compatible image
   you add, with NVIDIA and DRI3 GPU acceleration.
@@ -90,7 +100,7 @@ kubectl apply -n <namespace> -f sealskin.yml
   applications and no master: pools of nodes, placement, GPU slots, and home
   directories that move between nodes.
 * **One UI, served by the server.** The extension and the app are thin
-  shells, and any browser can use the same pages as a web app; the launcher,
+  shells, and any browser can use the same pages as a web app. The launcher,
   dashboard, and admin panels ship with the server image, so UI updates never
   wait for a store review.
 
@@ -100,6 +110,8 @@ kubectl apply -n <namespace> -f sealskin.yml
 | --- | --- |
 | [Getting Started](https://selkies-project.github.io/sealskin/start) | Install the server, connect a client, launch an application. |
 | [Signing in](https://selkies-project.github.io/sealskin/signin) | The web sign-in, identity providers, groups and limits, reverse proxies. |
+| [Behind a reverse proxy](https://selkies-project.github.io/sealskin/reverse-proxy) | What a proxy in front needs, with guides for SWAG, Traefik, Nginx Proxy Manager, and Caddy. |
+| [External authentication](https://selkies-project.github.io/sealskin/reverse-proxy/sign-in) | Forward-auth and identity providers: Authelia, Authentik, Keycloak, Pocket ID, Tinyauth, oauth2-proxy. |
 | [Clusters](https://selkies-project.github.io/sealskin/cluster) | Several servers as one: nodes, the shared store, pools, and a lab to try it. |
 | [Kubernetes](https://selkies-project.github.io/sealskin/kubernetes) | Run the server in any namespace, with sessions as pods beside it. |
 | [Usage](https://selkies-project.github.io/sealskin/usage) | The launcher, context menus, sessions, storage, files, and rooms. |
@@ -112,7 +124,7 @@ kubectl apply -n <namespace> -f sealskin.yml
 | [Releasing](https://selkies-project.github.io/sealskin/releasing) | Versioning, release notes, and the workflows. |
 | [Troubleshooting](https://selkies-project.github.io/sealskin/faq) | Certificates, Firefox, mobile, GPUs, and Docker. |
 
-The pages live in [`docs/content`](docs/content) and can be edited on GitHub;
+The pages live in [`docs/content`](docs/content) and can be edited on GitHub, and
 the site is rebuilt on every push to `main`.
 
 ## Repository

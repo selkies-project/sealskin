@@ -781,7 +781,7 @@ function applyMobileLayout() {
     header.style.alignItems = 'center';
     header.innerHTML = `
         <div style="display: flex; align-items: center;">
-            <img src="icons/icon128.png" alt="SealSkin" style="height: 32px; margin-right: 10px;">
+            <img src="icons/icon128.png" alt="SealSkin" style="margin-right: 10px;">
             <h1>SealSkin</h1>
         </div>
         <div class="mobile-header-actions" style="display: flex; align-items: center;">
