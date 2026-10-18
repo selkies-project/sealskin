@@ -60,8 +60,9 @@ it, or set `HOST_URL` and delete the `keys/admins/admin` file and
 <summary>I lost admin.json.</summary>
 
 The server only keeps the public key. Remove `/config/.config/sealskin/keys/admins/admin`
-and restart: a new `admin` key pair and `admin.json` are created. Any other
-administrator can also create a new admin account from the dashboard.
+and restart: a new key pair and `admin.json` for `admin` are created, and
+the account keeps its desktops and its root key. Any other administrator can
+also create a new administrator from the dashboard.
 </details>
 
 <details>

@@ -28,7 +28,7 @@ the provider named, and when it ends. `security.verify_token` asks
   provider's subject there (`user_manager.ensure_user`), and another subject
   is refused as that user later. A key-file administrator's name is refused,
   since administrators come from `sso_admin_group` alone.
-* The `root` administrator signs in with one of root's application keys
+* The built-in administrator `admin` signs in with one of their application keys
   (`app.application_keys.web_sign_in`), which starts a sign-in here like a
   provider's; it ends after `web_session_seconds` unused. A user a reverse
   proxy names has no sign-in here: the proxy's header is read on each request

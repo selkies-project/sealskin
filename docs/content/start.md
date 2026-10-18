@@ -135,11 +135,16 @@ On the first start with an empty `/config` the container:
    `ssl/proxy_key.pem`) unless you supplied one,
 2. generates the server's RSA key (`ssl/server_key.pem`) that anchors the
    end-to-end encryption,
-3. finds no administrator and creates one named `admin`, writing its
-   **private key** and connection details to `/config/admin.json`.
-4. writes root's **application key** for the [web sign-in](signin.md) to
-   `/config/root_key`: paste it into the web app to sign in as `root`, then
-   delete the file.
+3. finds no administrator and writes the **key file** of the built-in
+   administrator `admin`, its private key and connection details, to
+   `/config/admin.json`, for the browser extension and the mobile app.
+4. writes the **root key**, an application key of the same `admin`, for the
+   [web sign-in](signin.md) to `/config/root_key`: paste it into the web
+   app to sign in as `admin`, then delete the file.
+
+Both files open the one account: a desktop launched from the web app is in
+the extension, and a key made under **Application Keys** in the web app
+signs the companion apps in without the key file.
 
 Copy `admin.json` somewhere safe and delete it from the server once you have
 imported it into a client. It is the only copy of that private key; the server
@@ -196,7 +201,7 @@ administrator can set.
    configuration and opens the dashboard.
 
 The web app takes no configuration file. It [signs in](signin.md) with
-root's application key the first start wrote to `/config/root_key`, or
+the root key the first start wrote to `/config/root_key`, or
 through an identity provider once one is set up.
 
 ### Certificates

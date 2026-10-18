@@ -2207,6 +2207,6 @@
       "wakeContinue": "Magpatuloy sa {brand}",
       "wakeFailed": "Hindi magising ang iyong mga key: {error}"
     },
-    "rootSignIn": "Mag-sign In bilang Root"
+    "rootSignIn": "Mag-sign in gamit ang root key"
   }
 }

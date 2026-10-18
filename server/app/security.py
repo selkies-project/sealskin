@@ -517,7 +517,7 @@ async def _app_key_user(req: Request) -> dict[str, Any] | None:
         username,
         "app_key",
         provider_groups,
-        username == user_manager.ROOT or user_manager.in_admin_group(provider_groups),
+        username == user_manager.ADMIN or user_manager.in_admin_group(provider_groups),
         key_id=record["id"],
     )
 

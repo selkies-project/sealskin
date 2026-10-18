@@ -91,9 +91,10 @@ command with the built UI, the Caddyfile template, and all dependencies
 inside the package, so only the environment above and the key files are
 needed.
 
-The first start creates the `admin` account and writes `admin.json` into
-`~/sealskin-dev/config`, three levels above the keys directory, and the root
-token for the [web sign-in](signin.md) beside it. Build the
+The first start writes the key file of the built-in administrator `admin`,
+`admin.json`, into `~/sealskin-dev/config`, three levels above the keys
+directory, and the root key for the [web sign-in](signin.md) as the same
+account beside it. Build the
 client first (below) or the server has no UI to serve; `SEALSKIN_UI_PATH`
 overrides where it looks. The [Settings Reference](settings.md) lists every
 variable.

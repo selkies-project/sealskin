@@ -1,9 +1,11 @@
-"""Application keys: made on the web, used by the companion apps, bound by the settings, and root's way in."""
+"""Application keys: made on the web, used by the companion apps, bound by the settings, and the built-in administrator's way in."""
 
 # ruff: noqa: F811 - the `provider` fixture is imported from the sign-in tests and taken by name
 
+import json
 import time
 
+import jwt
 import pytest
 from fastapi.testclient import TestClient
 
@@ -55,13 +57,49 @@ def _as_app(http, key, client="chrome", method="POST", url="/api/admin/status", 
     return http.request(method, url, json=body if body is not None else {}, headers=headers)
 
 
+def test_the_first_start_gives_the_one_administrator_a_key_file_and_the_root_key(tmp_path, monkeypatch, store_with_firefox):
+    # Mirror the shipped layout, where the key file lands three levels above the keys directory, in `/config`.
+    monkeypatch.setattr(settings, "keys_base_path", str(tmp_path / "config" / ".config" / "sealskin" / "keys"))
+    _key, server_priv, _server_pub = _pem_pair()
+    key_path = tmp_path / "server_key.pem"
+    key_path.write_text(server_priv)
+    monkeypatch.setattr(settings, "server_private_key_path", str(key_path))
+    monkeypatch.setattr(settings, "auto_update_apps", False)
+    monkeypatch.setattr(settings, "watch_config_files", False)
+    monkeypatch.setattr(settings, "ui_path", str(tmp_path / "no-ui"))
+    import app.api as api_module
+
+    security.init_server_keys()
+    application_keys._FAILURES.clear()
+    with TestClient(api_module.api_app) as http:
+        key_file = json.loads((tmp_path / "config" / "admin.json").read_text())
+        assert key_file["username"] == user_manager.ADMIN == "admin"
+        assert user_manager.get_user("admin")["is_admin"] is True and user_manager.get_user("admin")["public_key"]
+        # The key file's token, as the extension signs it, over the proxy and so with no session named.
+        now = int(time.time())
+        token = jwt.encode({"iat": now, "exp": now + 300, "sub": "admin"}, key_file["private_key"], algorithm="RS256")
+        by_file = http.post("/api/admin/status", json={}, headers={**WEB, "Authorization": f"Bearer {token}"})
+        assert by_file.status_code == 200 and by_file.json()["username"] == "admin" and by_file.json()["is_admin"] is True
+        # The root key, on the web and as a bearer in the apps, is the same account's.
+        root_key = open(settings.root_key_path, encoding="utf-8").read().strip()
+        signed_in = http.post("/api/auth/key", json={"key": root_key}, headers=WEB)
+        assert signed_in.status_code == 200 and signed_in.json()["username"] == "admin"
+        assert _as_app(http, root_key).json()["username"] == "admin"
+        assert [k["name"] for k in application_keys.list_for("admin")] == ["first start"]
+        # The one account stays: neither a provider nor the dashboard may take or drop the name.
+        with pytest.raises(ValueError):
+            user_manager.ensure_user("admin", "oidc", "oidc https://idp sub-9")
+        with pytest.raises(ValueError):
+            user_manager.delete_admin("admin")
+
+
 def test_the_first_start_writes_root_a_key_the_web_takes_and_the_store_keeps_hashed(http):
     key = open(settings.root_key_path, encoding="utf-8").read().strip()
     assert key.startswith("ssk_") and application_keys.parse(key)
     assert key.split("_")[2] not in persistence.read_bytes(application_keys._path()).decode()
     assert http.post("/api/auth/key", json={"key": key}).status_code == 403
     signed_in = http.post("/api/auth/key", json={"key": key}, headers=WEB)
-    assert signed_in.status_code == 200 and signed_in.json()["username"] == "root" and signed_in.json()["via"] == "root"
+    assert signed_in.status_code == 200 and signed_in.json()["username"] == "admin" and signed_in.json()["via"] == "root"
     cookie = {"Cookie": f"{sso.SESSION_COOKIE}={signed_in.headers['set-cookie'].split('=', 1)[1].split(';')[0]}"}
     status = http.post("/api/admin/status", json={}, headers={**WEB, **cookie})
     assert status.status_code == 200 and status.json()["is_admin"] is True
@@ -77,16 +115,16 @@ def test_wrong_keys_are_counted_per_address_and_the_environment_key_is_matched_w
     assert locked.status_code == 429 and locked.json()["detail"] == "locked"
     monkeypatch.setattr(settings, "root_key", "from-a-secret-manager")
     application_keys.ensure_root_key()
-    assert [k["name"] for k in application_keys.list_for("root")] == ["environment", "first start"]
+    assert [k["name"] for k in application_keys.list_for("admin")] == ["environment", "first start"]
     assert http.post("/api/auth/key", json={"key": "from-a-secret-manager"}, headers=WEB).status_code == 200
     # The environment's key signs the apps in too, on the companion lane as anywhere.
     lane = {**APP, "X-SealSkin-Lane": "companion", "Authorization": "Bearer from-a-secret-manager", application_keys.CLIENT_HEADER: "other"}
-    assert http.post("/api/admin/status", json={}, headers=lane).json()["username"] == "root"
-    assert _as_app(http, "from-a-secret-manager").json()["username"] == "root"
+    assert http.post("/api/admin/status", json={}, headers=lane).json()["username"] == "admin"
+    assert _as_app(http, "from-a-secret-manager").json()["username"] == "admin"
     assert _as_app(http, "nobody-s-key").json()["detail"] == "unknown"
     monkeypatch.setattr(settings, "root_key", "")
     application_keys.ensure_root_key()
-    assert [k["name"] for k in application_keys.list_for("root")] == ["first start"]
+    assert [k["name"] for k in application_keys.list_for("admin")] == ["first start"]
 
 
 def test_a_user_makes_a_key_on_the_web_and_the_app_signs_in_with_it(http, provider):
@@ -254,7 +292,7 @@ def test_wrong_whole_bearers_lock_their_address_out_and_no_other(http, monkeypat
     locked = http.post("/api/admin/status", json={}, headers={**guesser, "Authorization": "Bearer from-a-secret-manager"})
     assert locked.status_code == 429 and locked.json()["detail"] == "locked"
     other = {**guesser, "X-SealSkin-Client": "203.0.113.6", "Authorization": "Bearer from-a-secret-manager"}
-    assert http.post("/api/admin/status", json={}, headers=other).json()["username"] == "root"
+    assert http.post("/api/admin/status", json={}, headers=other).json()["username"] == "admin"
     # An issued key is found by its unguessable id, so it is neither counted nor locked out.
     root_key = open(settings.root_key_path, encoding="utf-8").read().strip()
     assert http.post("/api/admin/status", json={}, headers={**guesser, "Authorization": f"Bearer {root_key}"}).status_code == 200

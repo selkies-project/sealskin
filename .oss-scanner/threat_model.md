@@ -8,7 +8,7 @@
   mobile shell).
 - Principals, weakest first: an anonymous internet client (the web app's pages, the sign-in flows, public shares,
   the key-file handshake, the template schema and version); a user signed in on the web (a cookie naming a
-  record, from root's key, OpenID Connect, SAML, or a trusted reverse proxy's header); a companion app holding
+  record, from the root key, OpenID Connect, SAML, or a trusted reverse proxy's header); a companion app holding
   an application key (a bearer over `/companion/`); a key-file client (an RS256 JWT the client signs, under
   `SEALSKIN_LEGACY_AUTH`); a template editor (may edit templates but not their `DOCKER_*` settings nor the
   session's identity variables); session collaborators (controller, viewer and read-only invite tokens); an
@@ -53,8 +53,8 @@
 
 ## Anything to leave alone
 - An admin controls the host's Docker, or the namespace on Kubernetes, by design.
-- The bootstrap key file in `/config/admin.json` and the root key in `/config/root_key` are documented and meant
-  to be copied and removed by the operator.
+- The bootstrap key file in `/config/admin.json` and the root key in `/config/root_key`, both credentials of the
+  built-in administrator `admin`, are documented and meant to be copied and removed by the operator.
 - A node with the bucket's credentials is a member of the cluster by design ("the bucket keys are the master
   key"); a file-store cluster approves nodes by hand.
 - Reports should name the file and line, give a reproducer (a pytest test against the TestClient is ideal), and

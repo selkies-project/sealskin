@@ -11,8 +11,9 @@ are two views of the same data, and hand edits are picked up live.
 There are two roles. **Administrators** can do everything, have no per-user
 settings (they always get the defaults, with storage and GPU enabled) and
 cannot be limited. **Users** launch and manage their own sessions and files
-within the permissions set for them. The root account `admin` cannot be
-deleted.
+within the permissions set for them. The built-in administrator `admin`,
+who signs in with the root key on the web and with the first start's key
+file in the apps, cannot be deleted.
 
 ## Dashboard
 

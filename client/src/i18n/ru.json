@@ -2207,6 +2207,6 @@
       "wakeContinue": "Перейти в {brand}",
       "wakeFailed": "Не удалось пробудить ваши ключи: {error}"
     },
-    "rootSignIn": "Войти как root"
+    "rootSignIn": "Войти с root-ключом"
   }
 }

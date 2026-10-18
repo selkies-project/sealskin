@@ -268,7 +268,7 @@ def test_root_signs_in_with_the_key_and_the_plain_lane_needs_the_proxy_and_the_a
     assert signed_in.headers["set-cookie"].startswith(f"{sso.SESSION_COOKIE}=")
     cookie = {"Cookie": signed_in.headers["set-cookie"].split(";", 1)[0]}
     status = node.post("/api/admin/status", json={}, headers={**WEB, **cookie})
-    assert status.status_code == 200 and status.json()["username"] == "root" and status.json()["is_admin"] is True
+    assert status.status_code == 200 and status.json()["username"] == "admin" and status.json()["is_admin"] is True
     assert status.json()["via"] == "root"
     assert node.post("/api/admin/status", json={}, headers=cookie).status_code in (400, 401)
     sibling = {**WEB, **cookie, "Sec-Fetch-Site": "same-site"}
@@ -566,7 +566,7 @@ def test_the_audit_log_is_searched_and_paged_newest_first(node):
 
     for n in range(7):
         audit.record("launch", "alice" if n % 2 else "bob", session=f"s{n}", app="Firefox")
-    audit.record("admin", "root", method="PUT", path="/api/admin/groups/staff")
+    audit.record("admin", "admin", method="PUT", path="/api/admin/groups/staff")
     signed_in = node.post("/api/auth/key", json={"key": "a-root-key-for-the-tests"}, headers=WEB)
     cookie = {**WEB, "Cookie": signed_in.headers["set-cookie"].split(";", 1)[0]}
     page = node.get("/api/admin/cluster/audit?limit=3", headers=cookie).json()
@@ -585,7 +585,7 @@ def test_an_app_laboratory_session_is_one_per_admin_and_in_no_session_list(node)
     cookie = {**WEB, "Cookie": signed_in.headers["set-cookie"].split(";", 1)[0]}
     assert node.get("/api/admin/lab", headers=cookie).json() == {"session": None}
     state.sessions["11111111-1111-4111-8111-111111111111"] = {
-        "username": "root", "lab": True, "provider_app_id": "meta", "app_name": "Meta", "app_logo": "",
+        "username": "admin", "lab": True, "provider_app_id": "meta", "app_name": "Meta", "app_logo": "",
         "created_at": time.time(), "access_token": "t", "instance_id": "",
     }  # fmt: skip
     state.sessions["22222222-2222-4222-8222-222222222222"] = dict(
@@ -596,7 +596,7 @@ def test_an_app_laboratory_session_is_one_per_admin_and_in_no_session_list(node)
     assert [s["app_name"] for s in node.get("/api/sessions", headers=cookie).json()] == ["Plain"]
     listed = node.get("/api/admin/sessions", headers=cookie).json()
     assert [s["app_name"] for u in listed for s in u["sessions"]] == ["Plain"]
-    assert [s["session_id"][:8] for s in cluster.sessions_of("root")] == ["22222222"]
+    assert [s["session_id"][:8] for s in cluster.sessions_of("admin")] == ["22222222"]
     again = node.post("/api/admin/launch/meta_customize", json={"application_id": "meta"}, headers=cookie)
     assert again.status_code == 409 and "Meta" in again.json()["detail"]
 

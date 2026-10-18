@@ -1,4 +1,4 @@
-"""Application keys: what the companion apps sign in with, and the root administrator's way into the web app.
+"""Application keys: what the companion apps sign in with, and the built-in administrator's way into the web app.
 
 A key is a secret a signed-in web user makes for the browser extension or the
 mobile app, `ssk_<id>_<secret>@<host>:<port>`, the server's address after
@@ -31,10 +31,11 @@ What an administrator sets, through the users' and groups' settings
   app sends its user to the web app, whose sign-in wakes the keys
   (`user_manager.note_web_sign_in`).
 
-The `root` administrator, who has no identity provider, signs in to the web
-app with one of root's own keys (`web_sign_in`): the first start generates
-one and writes it to `root_key_path` for the administrator to copy and delete,
-or `SEALSKIN_ROOT_KEY` names it. Wrong keys at the web, and wrong bearers
+The built-in administrator `admin` (`user_manager.ADMIN`), who has no
+identity provider, signs in to the web app with one of their own keys, the
+root key (`web_sign_in`): the first start generates one and writes it to
+`root_key_path` for the administrator to copy and delete, or
+`SEALSKIN_ROOT_KEY` names it. Wrong keys at the web, and wrong bearers
 of any shape but `ssk_`, which could be a guess at the environment's key, are
 counted per address, five a minute, which bounds guessing.
 """
@@ -257,7 +258,7 @@ def revoke_all(username: str) -> int:
 
 def _dormant(username: str, now: float) -> bool:
     """Whether a user's keys sleep under the dormancy rules, given the user's last web sign-in."""
-    if username == user_manager.ROOT:
+    if username == user_manager.ADMIN:
         return False
     effective = user_manager.get_effective_settings(username)
     follow = bool(effective.get("application_key_follow_sign_in"))
@@ -302,7 +303,7 @@ def authenticate(key: str, client: str, address: str = "") -> dict[str, Any]:
         address: The client's address, which wrong whole keys are counted by.
 
     A key of the `ssk_` shape is looked up by its id, which is unguessable;
-    any other text is tried whole against root's keys, so the key
+    any other text is tried whole against the administrator's keys, so the key
     `SEALSKIN_ROOT_KEY` names signs the apps in too, and wrong ones are
     counted per address as at the web sign-in.
 
@@ -319,7 +320,7 @@ def authenticate(key: str, client: str, address: str = "") -> dict[str, Any]:
         if not record or not secrets.compare_digest(_hash(secret), str(record.get("hash") or "")):
             raise KeyRefused("unknown", f"no key {key_id}")
     else:
-        # A key from the environment may have any shape: it is matched whole, among root's alone, and so can be guessed at.
+        # A key from the environment may have any shape: it is matched whole, among the administrator's alone, and so can be guessed at.
         if locked_out(address):
             raise KeyRefused("locked", "too many wrong keys; try again in a minute")
         whole = _hash(key.strip())
@@ -350,12 +351,12 @@ def refuse(key: str, client: str, address: str, code: str) -> None:
     audit.record("sign_in_refused", via="app_key", key=parsed[0] if parsed else "", client=client, address=address, reason=code)
 
 
-# --- The root administrator's key ---------------------------------------------
+# --- The built-in administrator's key ---------------------------------------------
 
 
 def _root_records() -> dict[str, dict[str, Any]]:
-    """Return root's keys by id."""
-    return {k: v for k, v in _KEYS.items() if v.get("user") == user_manager.ROOT}
+    """Return the built-in administrator's keys by id."""
+    return {k: v for k, v in _KEYS.items() if v.get("user") == user_manager.ADMIN}
 
 
 def ensure_root_key() -> None:
@@ -363,7 +364,7 @@ def ensure_root_key() -> None:
 
     `SEALSKIN_ROOT_KEY` names one, kept under `ENV_KEY_ID` and replaced
     there when it changes, or dropped when the setting goes; with none set and
-    no key of root's in the store, one is generated and written to
+    no key of the administrator's in the store, one is generated and written to
     `root_key_path` for the administrator to copy and delete.
     """
     load()
@@ -378,10 +379,10 @@ def ensure_root_key() -> None:
             return
 
         def set_env() -> None:
-            for key_id in [k for k, v in _KEYS.items() if v.get("user") == user_manager.ROOT and v.get("name") == ENV_KEY_NAME]:
+            for key_id in [k for k, v in _KEYS.items() if v.get("user") == user_manager.ADMIN and v.get("name") == ENV_KEY_NAME]:
                 del _KEYS[key_id]
             _KEYS[env_id] = {
-                "user": user_manager.ROOT,
+                "user": user_manager.ADMIN,
                 "name": ENV_KEY_NAME,
                 "hash": env_hash,
                 "created": time.time(),
@@ -409,7 +410,7 @@ def ensure_root_key() -> None:
         def add() -> None:
             if not _root_records():
                 _KEYS[key_id] = {
-                    "user": user_manager.ROOT,
+                    "user": user_manager.ADMIN,
                     "name": "first start",
                     "hash": _hash(secret),
                     "created": time.time(),
@@ -429,7 +430,8 @@ def ensure_root_key() -> None:
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
             handle.write(f"{PREFIX}{key_id}_{secret}\n")
         logger.warning(
-            "Generated the root application key; sign in to the web app as 'root' with the content of %s, then delete that file.",
+            "Generated the root key; sign in to the web app as '%s' with the content of %s, then delete that file.",
+            user_manager.ADMIN,
             settings.root_key_path,
         )
     except OSError as exc:
@@ -462,8 +464,9 @@ def web_sign_in(key: str, address: str = "") -> dict[str, Any]:
 
     Raises:
         KeyRefused: `locked` after too many wrong keys from `address`,
-            `refused` for a key of nobody's, `notRoot` for another user's
-            key, which signs the companion apps in alone, `expired`.
+            `refused` for a key of nobody's, `notRoot` for a key of anyone
+            but the built-in administrator, which signs the companion apps in
+            alone, `expired`.
     """
     key = key.strip()
     if locked_out(address):
@@ -474,23 +477,23 @@ def web_sign_in(key: str, address: str = "") -> dict[str, Any]:
     if parsed and parsed[0] in _KEYS and secrets.compare_digest(_hash(parsed[1]), str(_KEYS[parsed[0]].get("hash") or "")):
         record = dict(_KEYS[parsed[0]], id=parsed[0])
     else:
-        # A key from the environment may have any shape: it is matched whole, among root's alone.
+        # A key from the environment may have any shape: it is matched whole, among the administrator's alone.
         whole = _hash(key)
         for key_id, candidate in _root_records().items():
             if secrets.compare_digest(whole, str(candidate.get("hash") or "")):
                 record = dict(candidate, id=key_id)
     if not record:
         _count_failure(address)
-        audit.record("sign_in_refused", user_manager.ROOT, via="root", address=address)
+        audit.record("sign_in_refused", user_manager.ADMIN, via="root", address=address)
         raise KeyRefused("refused", "the key is nobody's")
-    if record.get("user") != user_manager.ROOT:
-        raise KeyRefused("notRoot", "only root's keys sign in to the web app")
+    if record.get("user") != user_manager.ADMIN:
+        raise KeyRefused("notRoot", "only the built-in administrator's keys sign in to the web app")
     now = time.time()
     if record.get("expires") and float(record["expires"]) <= now:
         raise KeyRefused("expired", f"key {record['id']} expired")
     _touch(record["id"], "web")
     return {
-        "username": user_manager.ROOT,
+        "username": user_manager.ADMIN,
         "admin": True,
         "groups": [],
         "subject": "root",

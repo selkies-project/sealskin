@@ -104,10 +104,10 @@ paths refer to.
 | `SEALSKIN_PROXY_AUTH_UNCHECKED` | `bool` | `false` | Believe the proxy's sign-in header although this node cannot check, by reaching its own `public_url` or a trusted proxy's address, that the proxy removes the header a visitor sends. Leave it off wherever the check can run. |
 | `SEALSKIN_PROXY_AUTH_LOGOUT_URL` | `str` | _(empty)_ | URL the web app opens to sign out a user a proxy signed in, as the proxy's or its identity provider's logout page; empty leaves signing out to the proxy. |
 | `SEALSKIN_HTTP_PORT` | `int` | `0` | Port of a plain HTTP listener for a reverse proxy that terminates TLS, serving what the session port does; 0 opens none. It answers the addresses in `trusted_proxies` alone, and only requests they say arrived over HTTPS. |
-| `SEALSKIN_ROOT_KEY` | `str` | _(empty)_ | Application key the `root` administrator signs in to the web app with, kept as root's key named `environment`; empty generates one at first start and writes it to `root_key_path`. |
+| `SEALSKIN_ROOT_KEY` | `str` | _(empty)_ | Application key the built-in administrator `admin` signs in to the web app with, kept as their key named `environment`; empty generates one at first start and writes it to `root_key_path`. |
 | `SEALSKIN_ROOT_KEY_PATH` | `str` | `/config/root_key` | File the generated root application key is written to, for the administrator to copy and delete. |
-| `SEALSKIN_WEB_SESSION_SECONDS` | `int` | `43200` | Longest a web sign-in with root's application key, or a reverse proxy's sign-in, lasts unused. |
-| `SEALSKIN_ROOT_SIGN_IN` | `bool` | `true` | Accept root's application key on this node's web sign-in. Turn it off once administrators sign in through an identity provider; a node restarted with it on takes the key again. |
+| `SEALSKIN_WEB_SESSION_SECONDS` | `int` | `43200` | Longest a web sign-in with the root key, or a reverse proxy's sign-in, lasts unused. |
+| `SEALSKIN_ROOT_SIGN_IN` | `bool` | `true` | Accept the root key, the built-in administrator's, on this node's web sign-in. Turn it off once administrators sign in through an identity provider; a node restarted with it on takes the key again. |
 | `SEALSKIN_AUTO_SIGN_IN` | `str` | _(empty)_ | Identity provider, `oidc` or `saml`, the web app sends a signed-out browser to at once instead of showing its sign-in page; `#root` on the web app's address shows the page anyway. |
 | `SEALSKIN_SSO_FORCE_LOGIN` | `bool` | `false` | Make the identity provider ask for credentials at every sign-in instead of reusing its session. |
 | `SEALSKIN_SSO_CREATE_USERS` | `bool` | `true` | Create a user at the first sign-in an identity provider or a proxy vouches for. |

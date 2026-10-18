@@ -2207,6 +2207,6 @@
       "wakeContinue": "Doorgaan naar {brand}",
       "wakeFailed": "Kon uw sleutels niet wakker maken: {error}"
     },
-    "rootSignIn": "Aanmelden als root"
+    "rootSignIn": "Aanmelden met de rootsleutel"
   }
 }

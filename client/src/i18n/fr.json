@@ -2207,6 +2207,6 @@
       "wakeContinue": "Continuer vers {brand}",
       "wakeFailed": "Impossible de réveiller vos clés : {error}"
     },
-    "rootSignIn": "Se Connecter en tant que Root"
+    "rootSignIn": "Se connecter avec la clé root"
   }
 }

@@ -75,10 +75,10 @@ validation, `500` for provider errors.
 
 | Method and path | Purpose |
 | --- | --- |
-| `GET /api/auth/config` | Which sign-ins the server offers: `oidc`, `saml`, `proxy`, `root` (root's application key), `key` (key files); `auto` names the provider a signed-out browser is sent to at once, or is empty. |
+| `GET /api/auth/config` | Which sign-ins the server offers: `oidc`, `saml`, `proxy`, `root` (the root key), `key` (key files); `auto` names the provider a signed-out browser is sent to at once, or is empty. |
 | `GET /api/auth/oidc/login`, `GET /api/auth/saml/login` | Start a provider flow; it ends at `/#sso=<grant>` or `/#sso-error=<code>`. |
 | `POST /api/auth/register` | Body `{grant}`: start the sign-in and set its cookie. |
-| `POST /api/auth/key` | Body `{key}`: sign `root` in with one of root's application keys; `403 disabled` where the node has `SEALSKIN_ROOT_SIGN_IN=false`, `403 notRoot` for another user's key, `403 refused`, `429 locked` after five wrong keys from one address within a minute. |
+| `POST /api/auth/key` | Body `{key}`: sign the built-in administrator `admin` in with one of their application keys, the root key; `403 disabled` where the node has `SEALSKIN_ROOT_SIGN_IN=false`, `403 notRoot` for another user's key, `403 refused`, `429 locked` after five wrong keys from one address within a minute. |
 | `POST /api/auth/signout` | End the sign-in the caller's cookie names and clear the cookie. |
 | `GET /api/auth/proxy` | What the request's [sign-in headers](reverse-proxy/sign-in.md) held when it arrived and whether a trusted proxy passed it on: the path the server asks through its own public address to check the proxy. It signs nobody in. |
 | `GET /api/auth/saml/metadata` | The service provider metadata to register with a SAML provider. |

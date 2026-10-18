@@ -3,7 +3,7 @@
 `router` is public: it starts and finishes the provider flows, serves this
 server's SAML metadata, takes the provider's logout notices, answers the
 check of a reverse proxy that signs users in (`app.proxy_auth`), and turns the
-grant of a finished flow, or root's application key, into a sign-in the
+grant of a finished flow, or the root key, into a sign-in the
 browser keeps in a cookie. A finished flow sends the browser to the web app with the
 grant, or the code of what went wrong, in the URL fragment, which reaches
 neither a server nor a Referer. Signing out is here too, outside the
@@ -191,7 +191,7 @@ async def register(req: SignInRegistrationRequest, request: Request, response: R
 
 @router.post("/api/auth/key", response_model=SignInRegistration)
 async def key_sign_in(req: KeySignInRequest, request: Request, response: Response) -> dict[str, Any]:
-    """Sign the root administrator in with one of root's application keys; refused where `root_sign_in` is off.
+    """Sign the built-in administrator in with one of their application keys, the root key; refused where `root_sign_in` is off.
 
     Another user's key answers `403 notRoot`: it signs the companion apps in,
     the web is for the identity provider.

@@ -188,7 +188,7 @@ and dashboard in an ordinary tab. It has no configuration file and keeps no
 key. [Sign in](signin.md) with what the administrator set up: **Sign In with
 OpenID Connect** or **Sign In with SAML** takes you to your organization's
 identity provider and back, a reverse proxy that signs you in opens the app
-signed in, and the administrator of the server uses the root key at `/#root`. The
+signed in, and the built-in administrator `admin` uses the root key at `/#root`. The
 dashboard shows who you are signed in as and has **Sign out**; a logout at
 the identity provider ends the sign-in as well.
 

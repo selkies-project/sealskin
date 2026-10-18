@@ -631,7 +631,7 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "type": "str",
         "default": "",
         "help": (
-            "Application key the `root` administrator signs in to the web app with, kept as root's key "
+            "Application key the built-in administrator `admin` signs in to the web app with, kept as their key "
             "named `environment`; empty generates one at first start and writes it to `root_key_path`."
         ),
     },
@@ -645,14 +645,14 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "name": "web_session_seconds",
         "type": "int",
         "default": 43200,
-        "help": "Longest a web sign-in with root's application key, or a reverse proxy's sign-in, lasts unused.",
+        "help": "Longest a web sign-in with the root key, or a reverse proxy's sign-in, lasts unused.",
     },
     {
         "name": "root_sign_in",
         "type": "bool",
         "default": True,
         "help": (
-            "Accept root's application key on this node's web sign-in. Turn it off once administrators sign in "
+            "Accept the root key, the built-in administrator's, on this node's web sign-in. Turn it off once administrators sign in "
             "through an identity provider; a node restarted with it on takes the key again."
         ),
     },

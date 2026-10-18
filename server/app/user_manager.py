@@ -12,7 +12,9 @@ administrator (`approve`), or named in a group by the provider.
 
 All three are objects of the shared store (`store.MOUNTS`), read into memory
 after every change here and whenever the store reports one made elsewhere or
-by hand. The `root` administrator has no file.
+by hand. The built-in administrator `admin` needs none: the root key signs
+them in on the web and in the companion apps, and the key file the first
+start writes is the same account's for the key-file clients.
 """
 
 from __future__ import annotations
@@ -41,8 +43,8 @@ logger = logging.getLogger(__name__)
 USER_DATA: dict[str, dict[str, Any]] = {}
 GROUP_DATA: dict[str, dict[str, Any]] = {}
 
-#: Name of the administrator that signs in with the root token and has no file.
-ROOT = "root"
+#: Name of the built-in administrator, who signs in with the root key and, while key files are taken, with the first start's key file.
+ADMIN = "admin"
 
 #: Keys of a user record the server writes and an administrator's edit keeps.
 RECORD_KEYS = ("auth", "provider_groups", "approved", "web_sign_in")
@@ -259,21 +261,22 @@ def write_user_file(username: str, pub_key_pem: str, settings_dict: dict[str, An
 
 
 def _generate_default_admin() -> None:
-    """Create the default key-file `admin` account when no administrator exists.
+    """Write the built-in administrator's key file when no administrator has one.
 
     The generated private key is written to `admin.json` three levels above
     the keys directory (`/config/admin.json` by default) for the operator to
-    import into a client and then delete. A node that takes no key-file
-    clients creates none; its first administrator is `root`.
+    import into a client and then delete; it signs in as `ADMIN`, the account
+    the root key opens on the web. A node that takes no key-file clients
+    writes none, and `ADMIN` signs in with the root key alone.
     """
     admin_dir = os.path.join(settings.keys_base_path, "admins")
     if not settings.legacy_auth or persistence.list_names(admin_dir):
         return
 
-    logger.warning("No admin users found. Creating a default 'admin' user.")
+    logger.warning("No administrator has a key file. Writing one for '%s'.", ADMIN)
     private_pem, public_pem = _generate_key_pair(4096)
     try:
-        persistence.write_bytes(os.path.join(admin_dir, "admin"), public_pem.encode("utf-8"))
+        persistence.write_bytes(os.path.join(admin_dir, ADMIN), public_pem.encode("utf-8"))
     except store.Conflict:
         return
 
@@ -283,7 +286,7 @@ def _generate_default_admin() -> None:
         "server_endpoint": address,
         "api_port": port or EXTERNAL_API_PORT,
         "session_port": port or EXTERNAL_SESSION_PORT,
-        "username": "admin",
+        "username": ADMIN,
         "private_key": private_pem,
         "server_public_key": SERVER_PUBLIC_KEY_PEM or "",
     }
@@ -318,7 +321,7 @@ def load_users_and_groups() -> None:
             logger.error("Failed to load admin '%s': %s", username, exc)
 
     for username in persistence.list_names(user_dir):
-        if username in users or username == ROOT:
+        if username in users or username == ADMIN:
             continue
         settings_dict, pub_key = parse_key_file(os.path.join(user_dir, username))
         if settings_dict is not None and pub_key is not None:
@@ -348,9 +351,14 @@ def load_users_and_groups() -> None:
 
 
 def get_user(username: str) -> dict[str, Any] | None:
-    """Return a user record by name; `root` has one without a file."""
-    if username == ROOT:
-        return {"public_key": "", "is_admin": True, "username": ROOT}
+    """Return a user record by name.
+
+    `ADMIN` has one with or without a file: the public key of the key file the
+    first start wrote, where it exists, so the key file and the root key open
+    the same account.
+    """
+    if username == ADMIN:
+        return {"public_key": (USER_DATA.get(ADMIN) or {}).get("public_key", ""), "is_admin": True, "username": ADMIN}
     return USER_DATA.get(username)
 
 
@@ -508,8 +516,8 @@ def ensure_user(username: str, via: str, subject: str = "", provider_groups: Any
             administrator's, or a user bound to another subject.
     """
     validate_name(username)
-    if username == ROOT:
-        raise ValueError("The root administrator signs in with the root token alone.")
+    if username == ADMIN:
+        raise ValueError("The built-in administrator signs in with the root key or its key file alone.")
     user = USER_DATA.get(username)
     if user and user.get("is_admin"):
         raise ValueError(f"'{username}' is a key-file administrator.")
@@ -584,11 +592,11 @@ def note_web_sign_in(username: str, until: float, renew: bool = False) -> None:
     web writes the record about once per sign-in lifetime, not per request.
 
     Args:
-        username: The user; `root` and key-file administrators have no record and are skipped.
+        username: The user; `admin` and key-file administrators have no record and are skipped.
         until: When the sign-in ends by the server's clock.
         renew: Whether this is a sign-in happening now.
     """
-    if username == ROOT or username not in USER_DATA:
+    if username == ADMIN or username not in USER_DATA:
         return
     now = time.time()
     stamp = web_sign_in_of(username)
@@ -640,7 +648,7 @@ def create_admin(username: str, public_key: str | None) -> tuple[dict[str, Any],
         ValueError: For invalid or duplicate names.
     """
     validate_name(username)
-    if username in USER_DATA or username == ROOT:
+    if username in USER_DATA or username == ADMIN:
         raise ValueError(f"User or admin '{username}' already exists.")
     private_pem: str | None = None
     if public_key:
@@ -666,10 +674,10 @@ def delete_admin(username: str) -> None:
     """Delete an administrator and their storage.
 
     Raises:
-        ValueError: For the root admin or unknown admins.
+        ValueError: For the built-in administrator or unknown admins.
     """
-    if username == "admin":
-        raise ValueError("The root 'admin' account cannot be deleted.")
+    if username == ADMIN:
+        raise ValueError(f"The built-in administrator '{ADMIN}' cannot be deleted.")
     user = get_user(username)
     if not user or not user.get("is_admin"):
         raise ValueError(f"Admin '{username}' not found.")
@@ -697,7 +705,7 @@ def create_user(
         ValueError: For invalid or duplicate names.
     """
     validate_name(username)
-    if username in USER_DATA or username == ROOT:
+    if username in USER_DATA or username == ADMIN:
         raise ValueError(f"User '{username}' already exists.")
     private_pem: str | None = None
     if public_key is not None:

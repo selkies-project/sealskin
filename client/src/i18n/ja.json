@@ -2207,6 +2207,6 @@
       "wakeContinue": "{brand} に進む",
       "wakeFailed": "キーを再び有効にできませんでした: {error}"
     },
-    "rootSignIn": "ルートとしてサインイン"
+    "rootSignIn": "ルートキーでサインイン"
   }
 }

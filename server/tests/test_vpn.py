@@ -212,7 +212,7 @@ def test_choose_resolves_a_launch_to_a_profile_and_an_endpoint():
     with pytest.raises(HTTPException) as refused:
         vpn.choose(record["id"], None, _user("bob", vpn_allowed=False), {"vpn": False})
     assert refused.value.status_code == 403
-    assert vpn.choose(record["id"], None, _user("root", admin=True), _user("root")["effective_settings"])[1]["id"] == ids[1]
+    assert vpn.choose(record["id"], None, _user("admin", admin=True), _user("admin")["effective_settings"])[1]["id"] == ids[1]
 
 
 def test_update_changes_what_was_given_and_refuses_unknown_endpoints():

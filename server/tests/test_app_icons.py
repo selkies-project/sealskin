@@ -25,7 +25,7 @@ def alices_app():
 async def test_an_icon_is_served_to_whom_its_app_is_listed_for(alices_app):
     shown = await applications.get_app_icon("alices", user={"username": "alice", "groups": []})
     assert shown["icon_data_b64"]
-    assert await applications.get_app_icon("alices", user={"username": "root", "groups": [], "is_admin": True})
+    assert await applications.get_app_icon("alices", user={"username": "admin", "groups": [], "is_admin": True})
     for app_id in ("alices", "no-such-app"):
         with pytest.raises(HTTPException) as refused:
             await applications.get_app_icon(app_id, user={"username": "bob", "groups": []})

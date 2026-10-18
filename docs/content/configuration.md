@@ -26,7 +26,7 @@ watcher only fires for edits made by someone else.
 
 ```
 /config
-  admin.json                       first-run admin credentials, delete after import
+  admin.json                       first-run key file of `admin`, delete after import
   ssl/
     server_key.pem                 RSA key anchoring the end-to-end encryption
     proxy_cert.pem, proxy_key.pem  TLS certificate and key Caddy serves
@@ -47,7 +47,7 @@ watcher only fires for edits made by someone else.
     branding/wallpaper.<ext>
     cluster/nodes/<id>.yml         one record per node: key, address, roles, pool, approval
     cluster/pools/<name>.yml       pools of nodes
-    cluster/application_keys.yml   the application keys, hashed, root's among them
+    cluster/application_keys.yml   the application keys, hashed, the root key among them
     cluster/settings.yml           sign-in settings written for the whole cluster
     cluster/homes/<user>.yml       which node holds each home directory
     cluster/usage/<day>/<id>.yml   session time each node ran, per user
@@ -57,7 +57,7 @@ watcher only fires for edits made by someone else.
     sso_keys.yml                   this node's web sign-ins
     sessions.yml                   live sessions, rewritten by the server
     public_shares.yml              public share metadata
-  root_key                         root's first-run application key, delete after signing in
+  root_key                         first-run root key of `admin`, delete after signing in
 
 /storage
   <username>/<home>/               home directories, mounted at /config in sessions
@@ -100,8 +100,8 @@ openssl rsa -in config/ssl/server_key.pem -pubout    # the public key clients ne
 ```
 
 To provide your own administrator, place a public key PEM at
-`keys/admins/<name>` before the first start; the server then skips creating
-the default `admin` account and `admin.json`.
+`keys/admins/<name>` before the first start; the server then writes no
+`admin.json`, and `admin` signs in with the root key alone.
 
 ### Session origins
 

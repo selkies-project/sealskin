@@ -51,7 +51,7 @@ def test_a_sign_in_creates_binds_and_refuses_another_subject(users, monkeypatch)
     with pytest.raises(ValueError):
         user_manager.ensure_user("dave", "oidc", "oidc https://idp sub-2", [])
     with pytest.raises(ValueError):
-        user_manager.ensure_user("root", "proxy")
+        user_manager.ensure_user("admin", "proxy")
     monkeypatch.setattr(user_manager.settings, "sso_create_users", False)
     with pytest.raises(ValueError):
         user_manager.ensure_user("erin", "proxy")
@@ -104,7 +104,7 @@ def test_a_user_the_provider_puts_in_a_group_or_an_administrator_made_is_never_h
     assert listed["gina"] == (False, False) and listed["greg"] == (False, True)
     user_manager.create_user("hank", None, dict(user_manager.DEFAULT_USER_SETTINGS))
     assert user_manager.held("hank") is False
-    assert user_manager.held("root") is False
+    assert user_manager.held("admin") is False
 
 
 def test_a_sign_in_for_an_unknown_user_while_sign_ins_create_none_names_the_missing_account(users, monkeypatch):

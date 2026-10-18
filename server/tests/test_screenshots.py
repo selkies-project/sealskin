@@ -82,7 +82,7 @@ def test_only_the_owner_is_shown_a_sessions_thumbnail(node, monkeypatch):  # noq
     _container(monkeypatch, lambda _r: httpx.Response(200, content=_png(800, 600), headers={"content-type": "image/png"}))
     signed_in = node.post("/api/auth/key", json={"key": "a-root-key-for-the-tests"}, headers=WEB)
     cookie = {**WEB, "Cookie": signed_in.headers["set-cookie"].split(";", 1)[0]}
-    state.sessions[SESSION] = {"username": "root", "ip": "10.0.0.5", "port": 3000, "custom_user": "u", "password": "p"}
+    state.sessions[SESSION] = {"username": "admin", "ip": "10.0.0.5", "port": 3000, "custom_user": "u", "password": "p"}
     other = SESSION.replace("1111", "9999")
     state.sessions[other] = {"username": "alice", "ip": "10.0.0.6", "port": 3000}
     answer = node.get(f"/api/sessions/{SESSION}/screenshot", headers=cookie)

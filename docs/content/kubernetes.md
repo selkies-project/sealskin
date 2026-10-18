@@ -54,8 +54,9 @@ NetworkPolicy that lets only the server reach session pods where the network
 plugin enforces policies. Import `admin.json` into a client as described in
 [Getting Started](start.md#connect).
 
-For the web app, the server writes root's application key at its first
-start instead; read it, sign in at `https://<host>/`, and delete it:
+For the web app, the server writes the root key, the same administrator's
+application key, at its first start; read it, sign in at `https://<host>/`,
+and delete it:
 
 ```bash
 kubectl -n <namespace> exec deployment/sealskin -- cat /config/root_key

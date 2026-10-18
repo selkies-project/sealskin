@@ -2207,6 +2207,6 @@
       "wakeContinue": "{brand} ile devam et",
       "wakeFailed": "Anahtarlarınız uyandırılamadı: {error}"
     },
-    "rootSignIn": "Root Olarak Oturum Aç"
+    "rootSignIn": "Root anahtarıyla oturum aç"
   }
 }

@@ -2207,6 +2207,6 @@
       "wakeContinue": "ไปต่อที่ {brand}",
       "wakeFailed": "ไม่สามารถปลุกคีย์ของคุณได้: {error}"
     },
-    "rootSignIn": "ลงชื่อเข้าใช้เป็น root"
+    "rootSignIn": "ลงชื่อเข้าใช้ด้วยคีย์ root"
   }
 }

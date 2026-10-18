@@ -2207,6 +2207,6 @@
       "wakeContinue": "المتابعة إلى {brand}",
       "wakeFailed": "تعذر إيقاظ مفاتيحك: {error}"
     },
-    "rootSignIn": "تسجيل الدخول كجذر"
+    "rootSignIn": "تسجيل الدخول بمفتاح الجذر"
   }
 }

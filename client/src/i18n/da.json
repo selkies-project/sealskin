@@ -2207,6 +2207,6 @@
       "wakeContinue": "Fortsæt til {brand}",
       "wakeFailed": "Kunne ikke vække dine nøgler: {error}"
     },
-    "rootSignIn": "Log ind som Root"
+    "rootSignIn": "Log ind med rootnøglen"
   }
 }

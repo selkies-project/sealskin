@@ -2207,6 +2207,6 @@
       "wakeContinue": "{brand}(으)로 계속",
       "wakeFailed": "키를 활성화할 수 없습니다: {error}"
     },
-    "rootSignIn": "루트로 로그인"
+    "rootSignIn": "루트 키로 로그인"
   }
 }

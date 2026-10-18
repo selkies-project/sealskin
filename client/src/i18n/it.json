@@ -2207,6 +2207,6 @@
       "wakeContinue": "Continua su {brand}",
       "wakeFailed": "Impossibile risvegliare le tue chiavi: {error}"
     },
-    "rootSignIn": "Accedi come Root"
+    "rootSignIn": "Accedi con la chiave root"
   }
 }

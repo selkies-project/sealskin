@@ -2207,6 +2207,6 @@
       "wakeContinue": "Tiếp tục đến {brand}",
       "wakeFailed": "Không thể đánh thức các khóa của bạn: {error}"
     },
-    "rootSignIn": "Đăng nhập với quyền root"
+    "rootSignIn": "Đăng nhập bằng khóa root"
   }
 }

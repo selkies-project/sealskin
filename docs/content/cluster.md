@@ -226,7 +226,7 @@ overrun by about that much.
 
 Every node keeps a log of what was done on it, one JSON line per event, in
 `/config/.config/sealskin/node/audit/<day>.log`: sign-ins and refused root
-tokens, launches and stops, nodes that joined, and every administrative
+keys, launches and stops, nodes that joined, and every administrative
 change with the administrator who made it. **Audit Log** in the
 dashboard reads the logs of all answering nodes together, newest first, with
 a search, a day or a range, and an export as CSV or JSON; the
@@ -269,8 +269,8 @@ certificate the [installer](start.md#with-the-installer-recommended) makes;
 on a machine with no public name, `mkcert localhost` after `mkcert -install`
 gives one for `localhost`. (Session isolation would also take wildcard DNS
 and a certificate covering the name's subdomains: `mkcert "*.localhost"
-localhost`.) Open `https://<your name>:8443/`, sign in with root's
-application key, install an application under **App Stores**, and launch it.
+localhost`.) Open `https://<your name>:8443/`, sign in with the root
+key, install an application under **App Stores**, and launch it.
 
 Then, in the dashboard, **Cluster → Add a node** gives a join code; start
 the second node with it:

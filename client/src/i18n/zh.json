@@ -2207,6 +2207,6 @@
       "wakeContinue": "继续前往 {brand}",
       "wakeFailed": "无法唤醒您的密钥：{error}"
     },
-    "rootSignIn": "以根身份登录"
+    "rootSignIn": "使用根密钥登录"
   }
 }

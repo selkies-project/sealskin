@@ -2207,6 +2207,6 @@
       "wakeContinue": "Continue to {brand}",
       "wakeFailed": "Could not wake your keys: {error}"
     },
-    "rootSignIn": "Sign in as root"
+    "rootSignIn": "Sign in with the root key"
   }
 }

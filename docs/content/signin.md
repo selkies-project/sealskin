@@ -1,6 +1,6 @@
 ---
 title: Signing in
-description: The web sign-in (root's application key, OpenID Connect, SAML, or a reverse proxy), the application keys of the companion apps, the key-file clients, groups and limits, and running behind a proxy.
+description: The web sign-in (the root key, OpenID Connect, SAML, or a reverse proxy), the application keys of the companion apps, the key-file clients, groups and limits, and running behind a proxy.
 ---
 
 SealSkin takes three kinds of client.
@@ -18,8 +18,8 @@ The key-file clients work as they always have and are described in
 encrypted API and the generated `admin.json`; the companion apps then connect
 with [application keys](#application-keys), a user made in the dashboard is
 sign-in-only, and administrators come from the provider's group or a group's
-Administrator switch, with root's key as the way in without one. Setting up
-a server is therefore: sign in with root's key, configure the provider under
+Administrator switch, with the root key as the way in without one. Setting up
+a server is therefore: sign in with the root key, configure the provider under
 Sign In, sign in through it as an administrator, then switch key files off
 there. The rest of this page is the web sign-in and the keys.
 
@@ -49,30 +49,36 @@ under another one than the web app. It is the setting for a server running
 images it does not vouch for. A collaboration room of a web sign-in opens on
 its session's origin too.
 
-## The root administrator
+## The built-in administrator
 
-The first start of a server writes root's application key to
-`/config/root_key`. Open the web app and paste it into the **Root key**
-field: you are signed in as `root`, an administrator with no file and no
-settings. Then delete the file; the server keeps only a hash of the key, with
-every other application key in `cluster/application_keys.yml`. Root has no
-identity provider, so root's keys are the one kind the web sign-in takes;
-any other user's key answers that it signs the companion apps in alone.
+The first start of a server writes the **root key**, an application key of
+the built-in administrator `admin`, to `/config/root_key`. Open the web app
+and paste it into the **Root key** field: you are signed in as `admin`, an
+administrator with no settings. Then delete the file; the server keeps only a
+hash of the key, with every other application key in
+`cluster/application_keys.yml`. The key file the same first start writes to
+`/config/admin.json` is the same account's for the key-file clients, so the
+desktops, files, and keys of `admin` are one set whichever way in you take.
+`admin` has no identity provider, so their keys are the one kind the web
+sign-in takes; any other user's key answers that it signs the companion apps
+in alone.
 
-`root` is for setting the server up and for when the identity provider is
-away: once a provider is configured, the sign-in page offers the providers
-alone, and the key field is reached by adding `#root` to the web app's
-address, `https://<server>/#root`. Set `SEALSKIN_ROOT_KEY` to choose the key yourself, as from a secret
-manager; it is kept as root's key named `environment`, replaced there when
-the value changes and dropped when the variable goes. Five wrong keys from
-one address within a minute close the form to that address until the oldest
-ages out. A root sign-in ends after `SEALSKIN_WEB_SESSION_SECONDS` unused.
-Signed in, root can make further keys under **Application Keys** in Settings
-like any user, and those sign in both the web app and the companion apps.
+The root key is for setting the server up, for a server with one
+administrator and no provider, and for when the identity provider is away:
+once a provider is configured, the sign-in page offers the providers alone,
+and the key field is reached by adding `#root` to the web app's address,
+`https://<server>/#root`. Set `SEALSKIN_ROOT_KEY` to choose the key yourself,
+as from a secret manager; it is kept as the key of `admin` named
+`environment`, replaced there when the value changes and dropped when the
+variable goes. Five wrong keys from one address within a minute close the
+form to that address until the oldest ages out. A sign-in with the root key
+ends after `SEALSKIN_WEB_SESSION_SECONDS` unused. Signed in, `admin` can make
+further keys under **Application Keys** in Settings like any user, and those
+sign in both the web app and the companion apps.
 
 Once your administrators sign in through a provider (`SEALSKIN_SSO_ADMIN_GROUP`
 or a group with the **Administrator** switch), `SEALSKIN_ROOT_SIGN_IN=false`
-switches root's key off on a node's web sign-in: its sign-in page no longer
+switches the root key off on a node's web sign-in: its sign-in page no longer
 offers it and the server refuses it. Hiding the field is not what protects
 the key, the hash and the lockout are; the switch is for a deployment that
 wants no password-like sign-in at all. It is set per node, so if the provider
@@ -120,8 +126,8 @@ sign-in that still holds, counts as the user's sign-in now, which wakes the
 keys, and the web app says so over its home page with a way back to the app.
 Both rules read the user's web sign-ins as the server records them on the
 user: the time of the sign-in and until when it lasts, which an OpenID
-Connect refresh moves on. Root's keys never sleep, since root's sign-in is a
-key.
+Connect refresh moves on. The keys of `admin` never sleep, since their web
+sign-in is a key.
 
 ## Landing on the provider
 
@@ -135,7 +141,7 @@ again, so a broken provider never bounces the browser back and forth.
 
 To reach the server's own sign-in page anyway, with the root key field, add
 `#root` to the web app's address: `https://<server>/#root`. The same fragment
-asks for root's key where a reverse proxy already signs the browser in.
+asks for the root key where a reverse proxy already signs the browser in.
 
 ## OpenID Connect
 
@@ -208,7 +214,7 @@ claim users cannot set for themselves at the provider.
   account, and another account naming the same user is refused from then on.
 * Members of `SEALSKIN_SSO_ADMIN_GROUP` sign in as administrators, and the
   Users table marks them **Administrator**. The names of key-file
-  administrators and `root` are refused.
+  administrators and `admin` are refused.
 * The groups the provider names (`SEALSKIN_SSO_GROUPS_CLAIM`, or the proxy's
   groups header) put the user in the SealSkin groups of the same names, and in
   every group that lists one of them under **Identity provider groups**. They
@@ -229,7 +235,7 @@ them: with several frontends behind one name, the proxy has to keep a
 browser on one node (sticky sessions), or users signed in on one answer 401
 on the next. A provider's user named like an existing key-file user is that
 user, with that user's home directories; the provider's user named like an
-administrator or `root` is refused.
+administrator or `admin` is refused.
 
 ## Groups from the provider
 

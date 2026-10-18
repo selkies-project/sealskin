@@ -290,7 +290,7 @@ class SignInRegistrationRequest(BaseModel):
 
 
 class KeySignInRequest(BaseModel):
-    """An application key offered at the web app's sign-in page, which only root's open it."""
+    """An application key offered at the web app's sign-in page, which only the built-in administrator's open."""
 
     key: str = Field(max_length=512)
 

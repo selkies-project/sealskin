@@ -2207,6 +2207,6 @@
       "wakeContinue": "Continuar a {brand}",
       "wakeFailed": "No se pudieron despertar sus claves: {error}"
     },
-    "rootSignIn": "Iniciar Sesión como Root"
+    "rootSignIn": "Iniciar sesión con la clave root"
   }
 }
