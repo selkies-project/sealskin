@@ -5,8 +5,10 @@ name: Mobile
 # only when `upload` is set: by hand from the Actions tab, or by the Release
 # workflow when a stable release is cut. The Pre-release workflow calls this
 # with `upload: false` so builds land in the pre-release but never in a store.
-# The signing material is in the release environment, which only main and
-# tags reach, so a run by hand on another branch stops at the signing jobs.
+# The signing material is in the release environment, which admits main and
+# every tag; every job here waits on the version job, which lets main and a tag
+# on main through, as the Release workflow holds its own tags, so a run by hand
+# on another branch, or on a tag of a commit not on main, signs nothing.
 # A caller passes `secrets: inherit`, without which a called workflow's jobs
 # see none of their environment's secrets.
 
@@ -41,6 +43,21 @@ jobs:
       version: ${{ steps.numbers.outputs.version }}
       build: ${{ steps.numbers.outputs.build }}
     steps:
+      - name: Check the ref is main or a tag on it
+        if: github.ref != 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          case "${GITHUB_REF}" in
+            refs/tags/*) ;;
+            *) echo "::error::${GITHUB_REF} is neither main nor a tag; the signing material is main's and its tags'"; exit 1 ;;
+          esac
+          status="$(gh api "repos/${GITHUB_REPOSITORY}/compare/main...${GITHUB_SHA}" --jq .status)"
+          case "${status}" in
+            identical|behind) ;;
+            *) echo "::error::${GITHUB_REF_NAME} points at a commit that is not on main (${status:-unknown})"; exit 1 ;;
+          esac
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
