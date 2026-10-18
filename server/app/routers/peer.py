@@ -15,6 +15,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel
 
 from .. import cluster, homes, store, user_manager
+from ..fsutil import safe_join
 from .uploads import upload_path
 
 logger = logging.getLogger(__name__)
@@ -147,7 +148,7 @@ async def take_upload_chunk(
         raise HTTPException(status_code=400, detail="Not a file of an upload.")
     directory = upload_path(username, upload_id)
     os.makedirs(directory, exist_ok=True, mode=0o700)
-    with open(os.path.join(directory, name), "wb") as handle:
+    with open(safe_join(directory, name), "wb") as handle:
         handle.write(await request.body())
     return Response(status_code=204)
 

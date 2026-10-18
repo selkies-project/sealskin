@@ -92,7 +92,7 @@ let isolated = false;
 /** The status of whoever is signed in, as the profile shows it. */
 let lastStatus = null;
 const NEXT_KEY = 'sealskin-next';
-const NEXT_ADDRESS = /^\/app\/[A-Za-z0-9_-]+\/(\?[^#\s]*)?$/;
+const NEXT_ADDRESS = /^\/app\/([A-Za-z0-9_-]+)\/(\?[^#\s]*)?$/;
 const WAKE_KEY = 'sealskin-wake';
 // The web sign-ins, whose user may manage application keys; a key-file or key sign-in may not.
 const WEB_SIGN_INS = new Set(['root', 'oidc', 'saml', 'proxy']);
@@ -176,7 +176,9 @@ function leaveForNext() {
   const next = nextAddress();
   if (!next) return false;
   try { sessionStorage.removeItem(NEXT_KEY); } catch (e) { /* no storage */ }
-  location.replace(next);
+  // Rebuilt on this origin from the parts the pattern took, never the address as given.
+  const [, app, query] = NEXT_ADDRESS.exec(next);
+  location.replace('/app/' + app + '/' + (query || ''));
   return true;
 }
 

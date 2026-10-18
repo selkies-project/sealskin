@@ -24,6 +24,7 @@ import re
 import httpx
 from fastapi import Request, Response
 
+from .fsutil import safe_join
 from .settings import settings
 
 logger = logging.getLogger(__name__)
@@ -88,7 +89,7 @@ def _dir() -> str:
 def _find(name: str) -> tuple[str, str] | None:
     """Return the file and media type of a cached picture, or `None` where there is none."""
     for ext, media in _MEDIA_TYPES.items():
-        path = os.path.join(_dir(), f"{name}.{ext}")
+        path = safe_join(_dir(), f"{name}.{ext}")
         if os.path.exists(path):
             return path, media
     return None
@@ -137,7 +138,7 @@ async def fetch(name: str) -> tuple[bytes, str] | None:
         if not picture:
             return None
         data, media = picture
-        path = os.path.join(_dir(), f"{name}.{TYPES[media]}")
+        path = safe_join(_dir(), f"{name}.{TYPES[media]}")
         try:
             os.makedirs(_dir(), exist_ok=True)
             with open(path + ".part", "wb") as handle:

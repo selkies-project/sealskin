@@ -8,7 +8,9 @@ import os
 import re
 from typing import Any
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from lxml import etree
 from pydantic import BaseModel, Field, ValidationError
 
 from .. import audit, cluster, homes, persistence, proxy_auth, quota, routing, sso, store
@@ -200,7 +202,7 @@ async def update_node(node_id: str, body: dict[str, Any] = Depends(get_decrypted
         updated["approved"] = req.approved
     if req.pool:
         updated["pool"] = req.pool
-    _write(os.path.join(settings.cluster_path, "nodes", f"{node_id}.yml"), updated)
+    _write(cluster.node_file(node_id), updated)
     await _changed()
     return _node_view(node_id, cluster.NODES[node_id])
 
@@ -212,7 +214,7 @@ async def remove_node(node_id: str) -> Response:
         raise HTTPException(status_code=400, detail="Remove this node from another node.")
     if node_id not in cluster.NODES:
         raise HTTPException(status_code=404, detail="No such node.")
-    persistence.remove(os.path.join(settings.cluster_path, "nodes", f"{node_id}.yml"))
+    persistence.remove(cluster.node_file(node_id))
     await _changed()
     return Response(status_code=204)
 
@@ -223,7 +225,7 @@ async def write_pool(name: str, body: dict[str, Any] = Depends(get_decrypted_req
     if not _NAME.fullmatch(name):
         raise HTTPException(status_code=400, detail="Invalid pool name.")
     req = _parse(PoolRecord, body)
-    _write(os.path.join(settings.cluster_path, "pools", f"{name}.yml"), req.model_dump(exclude_none=True))
+    _write(cluster.pool_file(name), req.model_dump(exclude_none=True))
     await _changed()
     return cluster.pool_record(name)
 
@@ -231,9 +233,11 @@ async def write_pool(name: str, body: dict[str, Any] = Depends(get_decrypted_req
 @router.delete("/pools/{name}", status_code=204)
 async def delete_pool(name: str) -> Response:
     """Delete a pool no node is in."""
+    if not _NAME.fullmatch(name):
+        raise HTTPException(status_code=400, detail="Invalid pool name.")
     if any(cluster.pool_of(node_id) == name for node_id in cluster.NODES):
         raise HTTPException(status_code=409, detail="Move the pool's nodes to another pool first.")
-    persistence.remove(os.path.join(settings.cluster_path, "pools", f"{name}.yml"))
+    persistence.remove(cluster.pool_file(name))
     await _changed()
     return Response(status_code=204)
 
@@ -348,8 +352,29 @@ async def test_sign_in(request: Request, body: dict[str, Any] = Depends(get_decr
             found = await proxy_auth.check(fresh=True, cookies=request.headers.get("cookie", ""))
             return found | {"ok": found["state"] == "guarded", "error": found["detail"]}
     except Exception as exc:  # noqa: BLE001 - whatever went wrong is the answer
-        return {"ok": False, "error": str(exc) or type(exc).__name__}
+        logger.warning("Sign-in test (%s) failed: %s", kind, exc)
+        return {"ok": False, "error": _test_failure(exc)}
     raise HTTPException(status_code=400, detail="The kind is oidc, saml, or proxy.")
+
+
+def _test_failure(exc: Exception) -> str:
+    """Say why a sign-in test failed in the server's own words, by what failed; the exception goes to the log."""
+    cause = exc.__cause__ or exc
+    if isinstance(cause, httpx.TimeoutException):
+        return "The provider did not answer in time."
+    if isinstance(cause, httpx.ConnectError):
+        return "The provider could not be reached."
+    if isinstance(cause, httpx.HTTPStatusError):
+        return "The provider answered with an error status."
+    if isinstance(cause, httpx.HTTPError):
+        return "The request to the provider failed."
+    if isinstance(cause, etree.XMLSyntaxError):
+        return "The provider's metadata is not well-formed XML."
+    if isinstance(cause, ValueError):
+        return "The provider's answer could not be read."
+    if isinstance(exc, sso.SignInError) and exc.code == "notConfigured":
+        return "The sign-in is not configured."
+    return "The provider's configuration is not usable; the server's log says why."
 
 
 @router.get("/users/{username}/homes")

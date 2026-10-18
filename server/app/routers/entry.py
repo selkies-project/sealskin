@@ -110,9 +110,9 @@ def _open_to(app: InstalledApp, user: dict[str, Any]) -> InstalledApp:
 @router.get("/app/{app_id}")
 async def app_address_slash(app_id: str, request: Request) -> RedirectResponse:
     """Send an address written without its trailing slash to the one with it, options kept."""
-    _app(app_id)
-    query = f"?{request.url.query}" if request.url.query else ""
-    return RedirectResponse(f"/app/{app_id}/{query}", status_code=308)
+    app = _app(app_id)
+    query = "?" + request.url.query if request.url.query else ""
+    return RedirectResponse("/app/" + app.id + "/" + query, status_code=308)
 
 
 @router.get("/app/{app_id}/", response_class=HTMLResponse)

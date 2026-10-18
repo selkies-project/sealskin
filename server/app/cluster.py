@@ -63,6 +63,7 @@ from cryptography.x509.oid import NameOID
 from fastapi import HTTPException, Request, Response
 
 from . import audit, docker_utils, filecrypt, persistence, store, user_manager
+from .fsutil import safe_join
 from .settings import SECRET_SETTINGS, settings
 from .state import state
 from .version import __version__
@@ -102,14 +103,19 @@ _seen_tokens: dict[str, float] = {}
 _lease_locks: dict[str, asyncio.Lock] = {}
 
 
-def _node_path(node_id: str) -> str:
-    """Return the path of a node record."""
-    return os.path.join(settings.cluster_path, "nodes", f"{node_id}.yml")
+def node_file(node_id: str) -> str:
+    """Return the path of a node record, inside the cluster's records."""
+    return safe_join(settings.cluster_path, "nodes", f"{node_id}.yml")
 
 
-def _pool_path(name: str) -> str:
-    """Return the path of a pool record."""
-    return os.path.join(settings.cluster_path, "pools", f"{name}.yml")
+def pool_file(name: str) -> str:
+    """Return the path of a pool record, inside the cluster's records."""
+    return safe_join(settings.cluster_path, "pools", f"{name}.yml")
+
+
+def join_file(code_id: str) -> str:
+    """Return the path of a join code's record, inside the cluster's records."""
+    return safe_join(settings.cluster_path, "join", f"{code_id}.yml")
 
 
 def _state_file(name: str) -> str:
@@ -255,7 +261,7 @@ def register_self() -> None:
     its past names and takes their place: it keeps the pool, approval, and
     joining time an administrator saw on the newest and removes them.
     """
-    path = _node_path(NODE_ID)
+    path = node_file(NODE_ID)
     for _attempt in range(3):
         existing = persistence.read_yaml(path, None)
         record = dict(existing or {})
@@ -269,7 +275,7 @@ def register_self() -> None:
             record.setdefault("pool", settings.node_pool or DEFAULT_POOL)
             record.setdefault("joined_at", time.time())
             for past in former:
-                persistence.remove(_node_path(past["id"]))
+                persistence.remove(node_file(past["id"]))
         elif existing.get("public_key") != record["public_key"]:
             logger.warning(
                 "Taking over the record of node '%s' with a new key; a node still running under that name is replaced.",
@@ -885,9 +891,14 @@ def node_of_home(username: str, home_name: str) -> str | None:
     return HOMES.get(username, {}).get(home_name)
 
 
+def homes_file(username: str) -> str:
+    """Return the file recording where a user's home directories are, inside the cluster's records."""
+    return safe_join(settings.cluster_path, "homes", f"{username}.yml")
+
+
 def record_home(username: str, home_name: str, node_id: str | None) -> None:
     """Record where a home directory is, or forget it with `node_id` `None`."""
-    path = os.path.join(settings.cluster_path, "homes", f"{username}.yml")
+    path = homes_file(username)
     for _attempt in range(3):
         current = persistence.read_yaml(path, {}) or {}
         updated = {k: v for k, v in current.items() if k != home_name}
@@ -922,7 +933,7 @@ async def forget_user(username: str) -> None:
         except httpx.HTTPError as exc:
             logger.warning("Node '%s' did not answer to delete the storage of '%s': %s", name, username, exc)
     try:
-        persistence.remove(os.path.join(settings.cluster_path, "homes", f"{username}.yml"))
+        persistence.remove(homes_file(username))
     except (OSError, store.StoreUnavailable) as exc:
         logger.warning("Could not remove the home directory records of '%s': %s", username, exc)
     HOMES.pop(username, None)
@@ -1128,7 +1139,7 @@ def create_join_code(pool: str = DEFAULT_POOL) -> dict[str, Any]:
     code_id, secret = secrets.token_hex(6), secrets.token_urlsafe(24)
     expires = time.time() + JOIN_CODE_SECONDS
     persistence.write_yaml_sync(
-        os.path.join(settings.cluster_path, "join", f"{code_id}.yml"),
+        join_file(code_id),
         {"key": _join_key(secret).hex(), "expires": expires, "pool": pool or DEFAULT_POOL},
     )
     return {"code": f"{code_id}.{secret}", "expires": expires, "join_url": peer_address()}
@@ -1148,7 +1159,7 @@ def accept_join(code_id: str, record: dict[str, Any], proof: str) -> dict[str, A
     refused = HTTPException(status_code=403, detail="The join code is not valid.")
     if not code_id.isalnum():
         raise refused
-    path = os.path.join(settings.cluster_path, "join", f"{code_id}.yml")
+    path = join_file(code_id)
     entry = persistence.read_yaml(path, None)
     if not isinstance(entry, dict):
         raise refused
@@ -1164,7 +1175,7 @@ def accept_join(code_id: str, record: dict[str, Any], proof: str) -> dict[str, A
     persistence.remove(path)
     kept = {k: record.get(k) for k in self_record()}
     kept.update(approved=True, pool=entry.get("pool") or DEFAULT_POOL, joined_at=time.time())
-    persistence.write_yaml_sync(_node_path(kept["id"]), kept)
+    persistence.write_yaml_sync(node_file(kept["id"]), kept)
     logger.info("Node '%s' (%s) joined with a join code.", kept.get("name"), kept["id"])
     audit.record("node_joined", node=kept["id"], name=kept.get("name"), pool=kept["pool"])
     joined = persistence.read_yaml(_state_file("join.yml"), {}) or {}

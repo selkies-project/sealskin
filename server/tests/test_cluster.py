@@ -79,17 +79,17 @@ def _status(node_id, sessions=(), gpus=(), **extra):
 
 def test_the_first_node_of_a_store_approves_itself_and_is_known_by_its_name(node):
     assert cluster.NODE_ID == cluster.node_id_for(cluster.node_name()) and cluster.is_approved() and not cluster.is_clustered()
-    record = persistence.read_yaml(cluster._node_path(cluster.NODE_ID))
+    record = persistence.read_yaml(cluster.node_file(cluster.NODE_ID))
     assert record["approved"] is True and record["pool"] == "default" and "BEGIN CERTIFICATE" in record["peer_cert"]
     assert record["public_key"] == state.server_public_key_pem
     assert cluster.node_id_for(" GPU Box #2 ") == "gpu-box-2" and cluster.node_id_for("***") == "node"
 
 
 def test_a_node_started_again_with_a_new_key_takes_its_record_over(node):
-    record = persistence.read_yaml(cluster._node_path(cluster.NODE_ID))
+    record = persistence.read_yaml(cluster.node_file(cluster.NODE_ID))
     record["public_key"] = "-----BEGIN PUBLIC KEY-----\nold\n-----END PUBLIC KEY-----\n"
     record["pool"] = "gpu"
-    persistence.write_yaml_sync(cluster._node_path(cluster.NODE_ID), record)
+    persistence.write_yaml_sync(cluster.node_file(cluster.NODE_ID), record)
     cluster.apply_registry()
     taken = cluster.NODES[cluster.NODE_ID]
     assert taken["public_key"] == state.server_public_key_pem and taken["pool"] == "gpu" and taken["approved"] is True
@@ -97,7 +97,7 @@ def test_a_node_started_again_with_a_new_key_takes_its_record_over(node):
 
 def test_a_node_of_a_bucket_is_a_member_as_it_registers(node, monkeypatch):
     monkeypatch.setattr(cluster, "members_by_right", lambda: True)
-    persistence.remove(cluster._node_path(cluster.NODE_ID))
+    persistence.remove(cluster.node_file(cluster.NODE_ID))
     cluster.NODES[cluster.NODE_ID]["approved"] = False
     _other_node("bravo")
     cluster.register_self()
@@ -620,8 +620,8 @@ def test_a_recreated_container_takes_over_the_records_of_its_earlier_names_and_s
     own = cluster.self_record()
     stale = {**own, "id": "0123456789ab", "name": "0123456789ab", "public_key": "-----BEGIN PUBLIC KEY-----\nold\n-----END PUBLIC KEY-----",
              "approved": True, "pool": "gpu", "joined_at": time.time() - 86400}  # fmt: skip
-    persistence.write_yaml_sync(cluster._node_path("0123456789ab"), stale)
-    persistence.remove(cluster._node_path(cluster.NODE_ID))
+    persistence.write_yaml_sync(cluster.node_file("0123456789ab"), stale)
+    persistence.remove(cluster.node_file(cluster.NODE_ID))
     monkeypatch.setattr(settings, "files_sync", "auto")
     cluster.register_self()
     cluster.load_registry()
@@ -631,16 +631,16 @@ def test_a_recreated_container_takes_over_the_records_of_its_earlier_names_and_s
     assert cluster.is_approved() and not cluster.is_clustered() and not filesync.enabled()
     assert cluster.members() == [cluster.NODE_ID] and cluster.PEERS == {}
     # A record of another node, under another address and key, makes the new name a new node that waits.
-    persistence.remove(cluster._node_path(cluster.NODE_ID))
+    persistence.remove(cluster.node_file(cluster.NODE_ID))
     other_id, _ = _other_node("bravo")
-    persistence.write_yaml_sync(cluster._node_path(other_id), cluster.NODES[other_id])
+    persistence.write_yaml_sync(cluster.node_file(other_id), cluster.NODES[other_id])
     cluster.register_self()
     cluster.load_registry()
     assert cluster.is_approved() is False and len(cluster.NODES) == 2
     # With a bucket, membership is the bucket's keys: no takeover and no approval.
     monkeypatch.setattr(cluster, "members_by_right", lambda: True)
-    persistence.remove(cluster._node_path(cluster.NODE_ID))
-    persistence.write_yaml_sync(cluster._node_path("0123456789ab"), stale)
+    persistence.remove(cluster.node_file(cluster.NODE_ID))
+    persistence.write_yaml_sync(cluster.node_file("0123456789ab"), stale)
     cluster.register_self()
     cluster.load_registry()
     assert cluster.is_approved() and "0123456789ab" in cluster.NODES

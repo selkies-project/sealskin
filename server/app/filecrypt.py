@@ -19,7 +19,6 @@ from __future__ import annotations
 import base64
 import hashlib
 import logging
-import os
 import secrets
 import threading
 import time
@@ -28,6 +27,7 @@ from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 from . import persistence, store
+from .fsutil import safe_join
 from .settings import settings
 
 logger = logging.getLogger(__name__)
@@ -59,7 +59,7 @@ def key_id() -> str:
 
 def _path(username: str) -> str:
     """Return where a user's wrapped key is kept."""
-    return os.path.join(settings.cluster_path, "file_keys", f"{username}.yml")
+    return safe_join(settings.cluster_path, "file_keys", f"{username}.yml")
 
 
 def wrap(data: bytes) -> dict[str, str | float]:

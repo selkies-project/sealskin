@@ -131,7 +131,7 @@ async def receive(username: str, home_name: str, chunks: AsyncIterator[bytes]) -
     path = home_path(username, home_name)
     if os.path.exists(path):
         raise HTTPException(status_code=409, detail="This node already has a home directory of that name.")
-    staging = os.path.join(os.path.dirname(path), f".incoming-{home_name}")
+    staging = safe_join(settings.storage_path, username, f".incoming-{home_name}")
     shutil.rmtree(staging, ignore_errors=True)
     os.makedirs(staging, mode=0o700)
     process = await asyncio.create_subprocess_exec(
@@ -143,7 +143,7 @@ async def receive(username: str, home_name: str, chunks: AsyncIterator[bytes]) -
             await process.stdin.drain()
         process.stdin.close()
         problem = (await process.stderr.read()).decode(errors="replace")
-        unpacked = os.path.join(staging, home_name)
+        unpacked = safe_join(staging, home_name)
         if await process.wait() != 0 or not os.path.isdir(unpacked):
             raise HTTPException(status_code=500, detail=f"The archive did not unpack: {problem[-300:]}")
         os.replace(unpacked, path)

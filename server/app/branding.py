@@ -155,7 +155,7 @@ def save_image(kind: str, encoded: str) -> None:
     Raises:
         HTTPException: 400 for an unknown kind, bad encoding, a file that is not a picture, or one too large.
     """
-    if kind not in IMAGE_LIMITS:
+    if kind not in ("logo", "wallpaper"):
         raise HTTPException(status_code=400, detail="The picture is a logo or a wallpaper.")
     try:
         data = base64.b64decode(encoded.split(",", 1)[-1], validate=True)
@@ -174,7 +174,7 @@ def save_image(kind: str, encoded: str) -> None:
 
 def remove_image(kind: str, reload: bool = True) -> None:
     """Delete the brand's logo or wallpaper, whatever its format."""
-    if kind not in IMAGE_LIMITS:
+    if kind not in ("logo", "wallpaper"):
         raise HTTPException(status_code=400, detail="The picture is a logo or a wallpaper.")
     for ext, _ in FORMATS.values():
         persistence.remove(os.path.join(_dir(), f"{kind}.{ext}"))
