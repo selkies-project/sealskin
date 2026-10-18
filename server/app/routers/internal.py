@@ -113,8 +113,10 @@ async def resolve_session(session_id: str, request: Request) -> Response:
     """Authorise a proxied request and tell Caddy where to send it.
 
     Returns:
-        An empty 200 response with `X-Upstream-Host` and `X-Upstream-Auth`,
-        and `X-Web-Root` where this node serves the session's web client
+        An empty 200 response with `X-Upstream-Host` and `X-Upstream-Auth`
+        (the session's login for its owner and a room's controller, its
+        view-only login for a room's viewer), and `X-Web-Root` where this
+        node serves the session's web client
         itself (see `webclient`); or with `X-Upstream-Peer` for a session
         another node runs, which authorises the request itself; for a page
         load of a session that is not running, `stopped_page`.
@@ -152,7 +154,12 @@ async def resolve_session(session_id: str, request: Request) -> Response:
     web_root = session.get("web_root")
     if web_root and os.path.isfile(os.path.join(web_root, "index.html")):
         headers["X-Web-Root"] = web_root
-    if "custom_user" in session and "password" in session:
-        auth_b64 = base64.b64encode(f"{session['custom_user']}:{session['password']}".encode()).decode()
+    # The hop reaches the container as the login its caller may hold: the session's own for
+    # its owner and a room's controller, the view-only one Selkies caps at the viewer role for
+    # a room's viewer. A session launched without one gives a viewer none, and its Selkies
+    # token is what holds it then.
+    login = session.get("password") if (is_standard_auth or is_collab_controller) else session.get("viewonly_password")
+    if "custom_user" in session and login:
+        auth_b64 = base64.b64encode(f"{session['custom_user']}:{login}".encode()).decode()
         headers["X-Upstream-Auth"] = f"Basic {auth_b64}"
     return Response(status_code=200, headers=headers)
