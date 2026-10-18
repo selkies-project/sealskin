@@ -61,11 +61,12 @@ principals from an anonymous client up to an admin, its entry points, what matte
 exercise it, and how severity is rated; `Dockerfile` builds the server and the client and runs the
 server's tests offline the way CI does. The threat model is the rule the code is held to, not a
 description of it: where the code lets a principal reach what the model keeps from it, the code is
-the defect even when `docs/` and a test agree with it, and the fix corrects all three. Only a
-maintainer changes the rule itself. Keep the model current in the commit that moves it: a new
-route, socket, proxy hop, or stored secret joins its entry points, a new role or credential its
-principals, and a change to what a role may reach its rules. Carry a change to what the build or
-the tests need into `Dockerfile`.
+the defect even when `docs/` and a test agree with it, and the fix corrects all three. Anyone, an
+agent included, may change the rule to harden it (a principal reaching less, a boundary it did not
+state yet); loosening it is a maintainer's call. Keep the model current in the commit that moves
+it: a new route, socket, proxy hop, or stored secret joins its entry points, a new role or
+credential its principals, and a change to what a role may reach its rules. Carry a change to what
+the build or the tests need into `Dockerfile`.
 
 ## Landing a change
 
