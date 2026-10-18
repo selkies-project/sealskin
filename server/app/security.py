@@ -107,6 +107,11 @@ def unwrap_session_key(encrypted_session_key_b64: str) -> bytes:
     )
 
 
+#: The most E2EE sessions held at once. The handshake answers anyone, so past this the
+#: sessions used least recently are dropped; their clients hand-shake again.
+MAX_CRYPTO_SESSIONS = 4096
+
+
 def register_crypto_session(aes_key: bytes) -> str:
     """Store a negotiated AES key and return its session id.
 
@@ -117,6 +122,12 @@ def register_crypto_session(aes_key: bytes) -> str:
         A new random session id.
     """
     prune_crypto_sessions()
+    excess = len(state.crypto_sessions) - MAX_CRYPTO_SESSIONS + 1
+    if excess > 0:
+        idle = sorted(state.crypto_sessions.items(), key=lambda item: item[1].last_used)
+        for sid, _ in idle[:excess]:
+            state.crypto_sessions.pop(sid, None)
+        logger.warning("Dropped %d E2EE session(s) used least recently: %d held.", excess, MAX_CRYPTO_SESSIONS)
     session_id = secrets.token_hex(16)
     state.crypto_sessions[session_id] = CryptoSession(key=aes_key)
     return session_id

@@ -116,9 +116,13 @@ class HandshakeInitiateResponse(BaseModel):
 
 
 class HandshakeExchangeRequest(BaseModel):
-    """Second E2EE handshake step: the client's wrapped AES key."""
+    """Second E2EE handshake step: the client's wrapped AES key.
 
-    encrypted_session_key: str
+    RSA-OAEP of a 32-byte key is one modulus long, 684 Base64 characters for a
+    4096-bit key, so 1024 bounds every key the server may hold.
+    """
+
+    encrypted_session_key: str = Field(max_length=1024)
 
 
 class HandshakeExchangeResponse(BaseModel):

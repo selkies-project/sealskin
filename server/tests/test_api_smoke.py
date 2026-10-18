@@ -301,3 +301,25 @@ def test_template_editors_keep_docker_settings_to_administrators(role_clients):
     assert boss.call("DELETE", f"{templates}/Hosted")[0] == 204
     status, data = boss.call("POST", "/api/admin/status", {})
     assert status == 200 and data["settings"]["edit_templates"] is False
+
+
+def test_handshake_bodies_are_bounded(api_client):
+    """The exchange answers anyone, so it reads no more than a wrapped key's worth."""
+    resp = api_client.http.post("/api/handshake/exchange", json={"encrypted_session_key": "A" * 20000})
+    assert resp.status_code == 413
+    resp = api_client.http.post("/api/handshake/exchange", json={"encrypted_session_key": "A" * 2000})
+    assert resp.status_code == 422
+    resp = api_client.http.post("/api/handshake/exchange", content=b"{" * 100)
+    assert resp.status_code == 422
+
+
+def test_crypto_sessions_are_capped(monkeypatch):
+    """Past the cap, the sessions used least recently make room for a new one."""
+    from app import security
+
+    monkeypatch.setattr(security, "MAX_CRYPTO_SESSIONS", 8)
+    state.crypto_sessions.clear()
+    ids = [security.register_crypto_session(os.urandom(32)) for _ in range(20)]
+    assert len(state.crypto_sessions) == 8
+    assert set(state.crypto_sessions) == set(ids[-8:])
+    state.crypto_sessions.clear()
