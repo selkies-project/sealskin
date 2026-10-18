@@ -539,7 +539,7 @@ def _key_user(req: Request) -> dict[str, Any]:
     if not user or not user.get("public_key"):
         raise HTTPException(status_code=401, detail="Invalid token.")
     try:
-        jwt.decode(
+        claims = jwt.decode(
             token,
             user["public_key"],
             algorithms=[ALGORITHM],
@@ -548,6 +548,15 @@ def _key_user(req: Request) -> dict[str, Any]:
         )
     except jwt.PyJWTError as exc:
         raise HTTPException(status_code=401, detail="Invalid token signature or claims.") from exc
+    # The token rides outside the E2EE envelope, in cleartext on the API port, so it names the crypto
+    # session it was signed for: one seen on the wire buys nothing with a session of another's making.
+    # Over this node's proxy, so over TLS, a token from a client that names none is still taken.
+    sid = claims.get("sid")
+    if sid is None:
+        if not cluster.via_proxy(req):
+            raise HTTPException(status_code=401, detail="Token names no session.")
+    elif not secrets.compare_digest(str(sid), req.headers.get("X-Session-ID", "")):
+        raise HTTPException(status_code=401, detail="Token names another session.")
     return _signed_in(username, "key")
 
 

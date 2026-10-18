@@ -334,15 +334,15 @@ async function secureFetchInBackground(url, options = {}) {
         throw new Error('Extension is not configured.');
       }
 
+      const currentSession = await ensureSession();
       if (url.startsWith('/api/') && !url.startsWith('/api/handshake')) {
-        const jwt = await generateJwtNative(sealskinConfig.clientPrivateKey, sealskinConfig.username);
+        const jwt = await generateJwtNative(sealskinConfig.clientPrivateKey, sealskinConfig.username, currentSession.id);
         options.headers = {
           ...options.headers,
           'Authorization': `Bearer ${jwt}`
         };
       }
 
-      const currentSession = await ensureSession();
       baseUrlForError = currentSession.baseUrl;
       const fullUrl = `${currentSession.baseUrl}${url}`;
       const headers = { ...options.headers, 'X-Session-ID': currentSession.id };

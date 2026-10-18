@@ -107,9 +107,14 @@ running waits for it.
 private key and sends as `Authorization: Bearer`. The `sub` claim names the
 user, `exp` is required, and one minute of clock skew is tolerated. The
 server verifies the signature against the public key stored for that user
-and refuses inactive accounts. There are no passwords and no server-side
-user sessions to steal; the private key never leaves the client, and on the
-extension it never leaves the background script.
+and refuses inactive accounts. The token travels outside the encrypted
+envelope, in cleartext on the plain HTTP API port, so its `sid` claim names
+the crypto session it was signed for, and the server takes it only with that
+`X-Session-ID`: a token read off the wire is no use with a session its reader
+made. A token naming no session is taken only over the node's own TLS proxy.
+There are no passwords and no server-side user sessions to steal; the private
+key never leaves the client, and on the extension it never leaves the
+background script.
 
 **Sessions.** A launch returns a URL with a one-time `access_token`. Opening
 `https://<server>:8443/<session id>/?access_token=...` hits the API server,

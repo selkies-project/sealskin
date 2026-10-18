@@ -34,7 +34,9 @@ non-GET request to make a retry safe.
 
 **Authentication.** Endpoints marked *user* or *admin* require
 `Authorization: Bearer <jwt>`, an `RS256` token signed with the user's
-private key whose claims include `sub` (the username) and `exp`, or, on the
+private key whose claims include `sub` (the username), `exp`, and `sid`, the
+`X-Session-ID` it is sent with (a token without `sid` is refused on the API
+port itself and taken only through the node's TLS proxy), or, on the
 plain lane, `Authorization: Bearer ssk_<id>_<secret>`, an
 [application key](signin.md#application-keys) with the client's name in
 `X-SealSkin-App` (`chrome`, `firefox`, `android`, `ios`, else `other`).

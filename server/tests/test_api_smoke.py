@@ -22,6 +22,9 @@ INTERNAL = {"X-SealSkin-Secret": PROXY_SECRET}
 
 pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
 
+#: The token names the calling client's own crypto session.
+OWN = object()
+
 
 def _pem_pair():
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
@@ -65,11 +68,13 @@ class Client:
         assert resp.status_code == 200, resp.text
         self.session_id = resp.json()["session_id"]
 
-    def call(self, method, url, body=None, extra_headers=None):
+    def call(self, method, url, body=None, extra_headers=None, sid=OWN):
+        """An encrypted request whose token names `sid`: this client's session by default, none for None."""
         now = int(time.time())
-        token = jwt.encode(
-            {"iat": now, "exp": now + 300, "sub": self.username}, self.user_priv, algorithm="RS256"
-        )
+        claims = {"iat": now, "exp": now + 300, "sub": self.username}
+        if sid is not None:
+            claims["sid"] = self.session_id if sid is OWN else sid
+        token = jwt.encode(claims, self.user_priv, algorithm="RS256")
         headers = {"X-Session-ID": self.session_id, "Authorization": f"Bearer {token}"}
         headers.update(extra_headers or {})
         content = None
@@ -128,6 +133,23 @@ def test_template_schema_is_public(api_client):
     names = [s["name"] for s in resp.json()["settings"]]
     assert "SELKIES_ENCODER" in names and "DOCKER_PRIVILEGED" in names
     assert api_client.http.get("/api/ui/version").json()["bridge"] == 1
+
+
+def test_a_key_token_is_taken_only_with_the_session_it_names(api_client):
+    """A key-file token travels outside the E2EE envelope, in cleartext on the API port after a
+    plain-HTTP fallback, so one seen on the wire must buy nothing with a crypto session of another's
+    making: it names the session it was signed for. A token naming none is taken only over this
+    node's proxy, so over TLS, where an older client's still works."""
+    assert api_client.call("POST", "/api/admin/status", {})[0] == 200
+    victim = api_client.session_id
+    api_client.handshake()
+    assert api_client.session_id != victim
+    status, body = api_client.call("POST", "/api/admin/status", {}, sid=victim)
+    assert status == 401 and body["detail"] == "Token names another session."
+    status, body = api_client.call("POST", "/api/admin/status", {}, sid=None)
+    assert status == 401 and body["detail"] == "Token names no session."
+    assert api_client.call("POST", "/api/admin/status", {}, sid=None, extra_headers=INTERNAL)[0] == 200
+    assert api_client.call("POST", "/api/admin/status", {})[0] == 200
 
 
 def test_status_install_patch_flow(api_client, store_with_firefox):

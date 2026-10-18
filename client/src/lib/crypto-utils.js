@@ -63,13 +63,14 @@ function arrayBufferToBase64Url(buffer) {
 const keyCache = new Map();
 
 /**
- * Sign a five-minute API token for `username`.
+ * Sign a five-minute API token for `username`, bound to the crypto session it travels with.
  *
  * @param {string} privateKeyPem PKCS#8 PEM.
  * @param {string} username
+ * @param {string} sessionId The `X-Session-ID` the token is sent with; the server takes it with no other.
  * @returns {Promise<string>} The RS256 JWT.
  */
-export async function generateJwtNative(privateKeyPem, username) {
+export async function generateJwtNative(privateKeyPem, username, sessionId) {
   if (!privateKeyPem || !username) {
     throw new Error("Private key and username are required to generate a token.");
   }
@@ -103,6 +104,7 @@ export async function generateJwtNative(privateKeyPem, username) {
     iat: now,
     exp: now + (5 * 60),
     sub: username,
+    sid: sessionId,
   };
 
   const encodedHeader = base64UrlEncode(JSON.stringify(header));
