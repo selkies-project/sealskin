@@ -1015,7 +1015,7 @@ async function launchLab() {
     await request('reserveTab', { reserve: true, launch: { id, app: name, logo: (labApp && labApp.logo) || '', room: false } });
   } catch (error) {
     const reason = { noSessionOrigin: t('popup.status.noSessionOrigin'), popupBlocked: t('web.home.popupBlocked') }[error.message] || error.message;
-    displayStatus(escapeHtml(reason), true);
+    displayStatus(reason, true);
     return;
   }
   // The launching page asks for news when it loads, which may be after a failure.
@@ -1048,7 +1048,7 @@ async function launchLab() {
   } catch (error) {
     tell({ error: error.message });
     setTimeout(() => channel.close(), 120000);
-    displayStatus(t('options.status.launchFailed', { error: escapeHtml(error.message) }), true);
+    displayStatus(t('options.status.launchFailed', { error: error.message }), true);
   }
   labLaunching = false;
   wlab('spinner').style.display = 'none';
@@ -1102,7 +1102,7 @@ async function closeLab() {
   }
   const saved = t('options.appLaboratory.closingSaved', { files: kept.files || 0, size: formatBytes(kept.bytes || 0, t) });
   showLabClosing(saved);
-  displayStatus(escapeHtml(saved));
+  displayStatus(saved);
   await refreshLab();
   await refreshAppData();
   showLabClosing('');
@@ -1147,9 +1147,9 @@ function bindWebLabEvents() {
   wlab('update-btn').addEventListener('click', async () => {
     try {
       const saved = await saveLabApp();
-      displayStatus(t('options.status.appSaved', { name: escapeHtml(saved.name), action: t('options.status.appSaveActions.updated') }));
+      displayStatus(t('options.status.appSaved', { name: saved.name, action: t('options.status.appSaveActions.updated') }));
     } catch (error) {
-      displayStatus(t('options.status.appSaveFailed', { error: escapeHtml(error.message) }), true);
+      displayStatus(t('options.status.appSaveFailed', { error: error.message }), true);
     }
   });
   wlab('launch-btn').addEventListener('click', launchLab);
@@ -1157,7 +1157,7 @@ function bindWebLabEvents() {
     try {
       await bridge.focusSession(labSession);
     } catch (error) {
-      displayStatus(escapeHtml(error.message === 'noSessionOrigin' ? t('popup.status.noSessionOrigin') : error.message), true);
+      displayStatus(error.message === 'noSessionOrigin' ? t('popup.status.noSessionOrigin') : error.message, true);
     }
   });
   wlab('close-btn').addEventListener('click', async () => {
@@ -2335,7 +2335,7 @@ async function exportAudit(format, button) {
     else downloadBlob(blob, filename);
     displayStatus(t('options.audit.exported', { count: all.length }));
   } catch (error) {
-    displayStatus(escapeHtml(error.message), true);
+    displayStatus(error.message, true);
   }
   button.disabled = false;
 }

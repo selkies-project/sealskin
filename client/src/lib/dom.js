@@ -109,7 +109,7 @@ export function hydrateLogos(scope) {
 /**
  * Show a transient toast in the corner of the page.
  *
- * @param {string} message HTML-safe message (already translated).
+ * @param {string} message Message (already translated), shown as text.
  * @param {boolean} [isError]
  * @param {number} [durationMs]
  */
@@ -117,7 +117,9 @@ export function showToast(message, isError = false, durationMs) {
   document.querySelectorAll('.status-toast').forEach((el) => el.remove());
   const toast = document.createElement('div');
   toast.className = `status-toast ${isError ? 'error' : 'success'}`;
-  toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i> ${message}`;
+  const icon = document.createElement('i');
+  icon.className = `fas ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'}`;
+  toast.append(icon, ` ${message}`);
   document.body.appendChild(toast);
   setTimeout(() => toast.classList.add('visible'), 10);
   setTimeout(() => {

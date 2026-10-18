@@ -120,7 +120,7 @@ const WINDOW_MS = 260;
 // Launches in flight, by launch id.
 const flights = new Map();
 
-const notify = (message, isError = false) => showToast(escapeHtml(message), isError);
+const notify = (message, isError = false) => showToast(message, isError);
 // What the shell answers when it cannot open a tab for a session, in the user's words.
 const shellError = (error) => ({
   noSessionOrigin: t('popup.status.noSessionOrigin'),
