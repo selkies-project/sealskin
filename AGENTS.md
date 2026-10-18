@@ -54,6 +54,19 @@ a shell is tried in the extension or app it ships in, not only in the build; a c
 is tried against a running Selkies container, which the development page shows how to start.
 Validate in a sandbox, never in a session someone is using.
 
+## Threat model and scanner
+
+`.oss-scanner/` serves Anthropic's OSS Scanner. `threat_model.md` states what SealSkin does, its
+principals from an anonymous client up to an admin, its entry points, what matters most, how to
+exercise it, and how severity is rated; `Dockerfile` builds the server and the client and runs the
+server's tests offline the way CI does. The threat model is the rule the code is held to, not a
+description of it: where the code lets a principal reach what the model keeps from it, the code is
+the defect even when `docs/` and a test agree with it, and the fix corrects all three. Only a
+maintainer changes the rule itself. Keep the model current in the commit that moves it: a new
+route, socket, proxy hop, or stored secret joins its entry points, a new role or credential its
+principals, and a change to what a role may reach its rules. Carry a change to what the build or
+the tests need into `Dockerfile`.
+
 ## Landing a change
 
 One commit per concern under a one-line `type: Sentence` subject, the contributor's own identity
