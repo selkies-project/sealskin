@@ -68,6 +68,15 @@ it: a new route, socket, proxy hop, or stored secret joins its entry points, a n
 credential its principals, and a change to what a role may reach its rules. Carry a change to what
 the build or the tests need into `Dockerfile`.
 
+CodeQL's code scanning alerts are at least stylistic recommendations: each is fixed in the code
+and closed by the next scan, never dismissed or closed by hand, a case that is so by design
+included. Code that is safe through a check CodeQL cannot follow (a validator in another function,
+a lookup in a table the code fills itself) is rewritten so the check sits where the query
+recognizes it (its `*Customizations.qll` in github/codeql lists the forms: for a Python path,
+`os.path.realpath` and then `startswith` on that result; for a value from a fixed set, `==` or
+`in` against literals; for a redirect, a constant prefix the value follows), so the scan keeps
+watching that path.
+
 ## Landing a change
 
 One commit per concern under a one-line `type: Sentence` subject, the contributor's own identity
