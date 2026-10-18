@@ -163,7 +163,9 @@
       "useKeyFileLink": "Brug en nøglefil i stedet",
       "useKeyLink": "Brug en applikationsnøgle",
       "connectedWithKey": "Logget ind med en applikationsnøgle.",
-      "connectedWithKeyFile": "Logget ind med en nøglefil."
+      "connectedWithKeyFile": "Logget ind med en nøglefil.",
+      "keyScanButton": "Scan QR-kode",
+      "keyScanInstructions": "Ret kameraet mod nøglens QR-kode i webappen."
     },
     "home": {
       "title": "Dine Hjemmemapper",
@@ -1347,7 +1349,9 @@
         "disabled": "Din administrator tillader ikke applikationsnøgler for din konto.",
         "client": "Din administrator tillader ikke, at denne app bruger applikationsnøgler.",
         "dormant": "Din nøgle er i dvale. Log ind i webappen, og prøv igen."
-      }
+      },
+      "scanFailed": "Koden kunne ikke læses: {error}",
+      "scanNotKey": "Denne QR-kode er ikke en SealSkin-applikationsnøgle."
     },
     "placeholders": {
       "noAdmins": "Ingen administratorer fundet.",
@@ -1715,7 +1719,7 @@
       "create": "Opret en nøgle",
       "revoke": "Tilbagekald",
       "revoked": "Nøgle tilbagekaldt.",
-      "shownOnce": "Kopiér denne nøgle nu: den vises kun denne ene gang. Indsæt den på forbindelsessiden i udvidelsen eller appen.",
+      "shownOnce": "Kopiér nøglen nu: den vises kun denne ene gang. Indsæt den på forbindelsessiden i udvidelsen eller appen, eller scan koden med appen.",
       "copied": "Nøgle kopieret.",
       "copyFailed": "Browseren tillod ikke kopiering. Markér nøglen, og kopiér den.",
       "notAllowed": "Din administrator tillader ikke applikationsnøgler for din konto.",
@@ -1727,7 +1731,8 @@
       "getHelp": "Installer en af disse, og indtast derefter serverens adresse og din nøgle på dens forbindelsesside.",
       "loadFailed": "Kunne ikke indlæse dine nøgler: {error}",
       "createFailed": "Kunne ikke oprette nøglen: {error}",
-      "tooLong": "Det er længere, end din administrator tillader."
+      "tooLong": "Det er længere, end din administrator tillader.",
+      "scan": "Scan med mobilappen i stedet for at skrive nøglen."
     },
     "vpn": {
       "title": "VPN-profiler",

@@ -12,6 +12,7 @@ import { App } from '@capacitor/app';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import write_blob from 'capacitor-blob-writer';
 import { FileOpener } from '@capawesome-team/capacitor-file-opener';
+import { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint, CapacitorBarcodeScannerCameraDirection } from '@capacitor/barcode-scanner';
 
 // Import order is the load order: polyfill first, then the background
 // (E2EE, JWT, pending context) which runs in this window, then the host.
@@ -49,8 +50,30 @@ async function saveBlob(blob, filename) {
   await FileOpener.openFile({ path: uriResult.uri });
 }
 
+/**
+ * Read a QR code with the camera, in the plugin's own full-screen scanner.
+ *
+ * @param {string} instructions Line shown over the camera.
+ * @returns {Promise<string>} The code's text; empty when the user closed the scanner.
+ */
+async function scanCode(instructions) {
+  try {
+    const result = await CapacitorBarcodeScanner.scanBarcode({
+      hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
+      scanInstructions: instructions,
+      cameraDirection: CapacitorBarcodeScannerCameraDirection.BACK,
+    });
+    return (result && result.ScanResult) || '';
+  } catch (e) {
+    // Closing the scanner is not an error worth a message.
+    if (/cancel/i.test(e && e.message ? e.message : String(e))) return '';
+    throw e;
+  }
+}
+
 hostApi = initHost({
   saveBlob,
+  scanCode,
 });
 
 App.addListener('backButton', () => {

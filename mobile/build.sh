@@ -25,6 +25,12 @@ mkdir -p www && [ -f www/index.html ] || echo "<html></html>" > www/index.html
 npm run build
 npx cap sync android
 
+# The barcode scanner wants the camera and Android 8 (SDK 26); the generated project declares neither.
+MANIFEST=android/app/src/main/AndroidManifest.xml
+grep -q 'android.permission.CAMERA' "$MANIFEST" \
+    || sed -i 's|    <uses-permission android:name="android.permission.INTERNET" />|&\n    <uses-permission android:name="android.permission.CAMERA" />|' "$MANIFEST"
+sed -i 's/minSdkVersion = 2[0-5]$/minSdkVersion = 26/' android/variables.gradle
+
 # Stamp the app version into the generated gradle project.
 sed -i "s/versionCode [0-9]*/versionCode ${VERSION_CODE}/; s/versionName \"[^\"]*\"/versionName \"${VERSION}\"/" android/app/build.gradle
 

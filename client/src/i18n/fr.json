@@ -163,7 +163,9 @@
       "useKeyFileLink": "Utiliser plutôt un fichier de clé",
       "useKeyLink": "Utiliser une clé d'application",
       "connectedWithKey": "Connecté avec une clé d'application.",
-      "connectedWithKeyFile": "Connecté avec un fichier de clé."
+      "connectedWithKeyFile": "Connecté avec un fichier de clé.",
+      "keyScanButton": "Scanner le code QR",
+      "keyScanInstructions": "Pointez la caméra vers le code QR de la clé dans l'application web."
     },
     "home": {
       "title": "Vos Dossiers Personnels",
@@ -1347,7 +1349,9 @@
         "disabled": "Votre administrateur n'autorise pas les clés d'application pour votre compte.",
         "client": "Votre administrateur n'autorise pas cette application à utiliser des clés d'application.",
         "dormant": "Votre clé est endormie. Connectez-vous sur l'application web, puis réessayez."
-      }
+      },
+      "scanFailed": "Impossible de lire le code : {error}",
+      "scanNotKey": "Ce code QR n'est pas une clé d'application SealSkin."
     },
     "placeholders": {
       "noAdmins": "Aucun admin trouvé.",
@@ -1715,7 +1719,7 @@
       "create": "Créer une clé",
       "revoke": "Révoquer",
       "revoked": "Clé révoquée.",
-      "shownOnce": "Copiez cette clé maintenant : elle n'est affichée qu'une seule fois. Collez-la sur la page de connexion de l'extension ou de l'application.",
+      "shownOnce": "Copiez cette clé maintenant : elle n'est affichée que cette fois. Collez-la sur la page de connexion de l'extension ou de l'application, ou scannez le code avec l'application.",
       "copied": "Clé copiée.",
       "copyFailed": "Le navigateur n'a pas autorisé la copie. Sélectionnez la clé et copiez-la.",
       "notAllowed": "Votre administrateur n'autorise pas les clés d'application pour votre compte.",
@@ -1727,7 +1731,8 @@
       "getHelp": "Installez l'une d'elles, puis saisissez l'adresse du serveur et votre clé sur sa page de connexion.",
       "loadFailed": "Impossible de charger vos clés : {error}",
       "createFailed": "Impossible de créer la clé : {error}",
-      "tooLong": "C'est plus long que ce que votre administrateur autorise."
+      "tooLong": "C'est plus long que ce que votre administrateur autorise.",
+      "scan": "Scannez avec l'application mobile au lieu de saisir la clé."
     },
     "vpn": {
       "title": "Profils VPN",

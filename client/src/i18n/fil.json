@@ -163,7 +163,9 @@
       "useKeyFileLink": "Gumamit ng key file sa halip",
       "useKeyLink": "Gumamit ng application key",
       "connectedWithKey": "Naka-sign in gamit ang application key.",
-      "connectedWithKeyFile": "Naka-sign in gamit ang key file."
+      "connectedWithKeyFile": "Naka-sign in gamit ang key file.",
+      "keyScanButton": "I-scan ang QR code",
+      "keyScanInstructions": "Itutok ang camera sa QR code ng key sa web app."
     },
     "home": {
       "title": "Iyong mga Home Directory",
@@ -1347,7 +1349,9 @@
         "disabled": "Hindi pinapahintulutan ng iyong administrator ang mga application key para sa iyong account.",
         "client": "Hindi pinapahintulutan ng iyong administrator na gumamit ng application key ang app na ito.",
         "dormant": "Natutulog ang iyong key. Mag-sign in sa web app, pagkatapos subukang muli."
-      }
+      },
+      "scanFailed": "Hindi mabasa ang code: {error}",
+      "scanNotKey": "Ang QR code na iyon ay hindi isang SealSkin application key."
     },
     "placeholders": {
       "noAdmins": "Walang nahanap na admin.",
@@ -1715,7 +1719,7 @@
       "create": "Gumawa ng key",
       "revoke": "Bawiin",
       "revoked": "Binawi ang key.",
-      "shownOnce": "Kopyahin ang key na ito ngayon: minsan lamang itong ipapakita. I-paste ito sa connection page ng extension o ng app.",
+      "shownOnce": "Kopyahin ang key na ito ngayon: ipinapakita lang ito nang isang beses. I-paste ito sa connection page ng extension o ng app, o i-scan ang code gamit ang app.",
       "copied": "Nakopya ang key.",
       "copyFailed": "Hindi pinayagan ng browser ang pagkopya. Piliin ang key at kopyahin ito.",
       "notAllowed": "Hindi pinapahintulutan ng iyong administrator ang mga application key para sa iyong account.",
@@ -1727,7 +1731,8 @@
       "getHelp": "I-install ang isa sa mga ito, pagkatapos ilagay ang address ng server at ang iyong key sa connection page nito.",
       "loadFailed": "Hindi ma-load ang iyong mga key: {error}",
       "createFailed": "Hindi makagawa ng key: {error}",
-      "tooLong": "Mas mahaba iyan kaysa sa pinapahintulutan ng iyong administrator."
+      "tooLong": "Mas mahaba iyan kaysa sa pinapahintulutan ng iyong administrator.",
+      "scan": "I-scan gamit ang mobile app sa halip na i-type ang key."
     },
     "vpn": {
       "title": "Mga VPN Profile",

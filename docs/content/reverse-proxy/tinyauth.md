@@ -52,7 +52,7 @@ Tinyauth's own users have no groups, so `Remote-Groups` is empty for them
 and no group makes an administrator; groups come with its LDAP and OAuth
 users. To appoint administrators, open
 `https://sealskin.example.com/#root`, sign in with
-[root's key](../signin.md#the-root-administrator), and give the users the
+[root's key](../signin.md#the-built-in-administrator), and give the users the
 administrator switch, their own or a group's.
 
 ## OpenID Connect

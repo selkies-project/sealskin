@@ -163,7 +163,9 @@
       "useKeyFileLink": "Usar un archivo de clave en su lugar",
       "useKeyLink": "Usar una clave de aplicación",
       "connectedWithKey": "Sesión iniciada con una clave de aplicación.",
-      "connectedWithKeyFile": "Sesión iniciada con un archivo de clave."
+      "connectedWithKeyFile": "Sesión iniciada con un archivo de clave.",
+      "keyScanButton": "Escanear código QR",
+      "keyScanInstructions": "Apunte la cámara al código QR de la clave en la aplicación web."
     },
     "home": {
       "title": "Sus Directorios Personales",
@@ -1347,7 +1349,9 @@
         "disabled": "Su administrador no permite claves de aplicación para su cuenta.",
         "client": "Su administrador no permite que esta app use claves de aplicación.",
         "dormant": "Su clave está dormida. Inicie sesión en la aplicación web y vuelva a intentarlo."
-      }
+      },
+      "scanFailed": "No se pudo leer el código: {error}",
+      "scanNotKey": "Ese código QR no es una clave de aplicación de SealSkin."
     },
     "placeholders": {
       "noAdmins": "No se encontraron administradores.",
@@ -1715,7 +1719,7 @@
       "create": "Crear una clave",
       "revoke": "Revocar",
       "revoked": "Clave revocada.",
-      "shownOnce": "Copie esta clave ahora: se muestra solo esta vez. Péguela en la página de conexión de la extensión o de la app.",
+      "shownOnce": "Copie esta clave ahora: se muestra solo esta vez. Péguela en la página de conexión de la extensión o de la aplicación, o escanee el código con la aplicación.",
       "copied": "Clave copiada.",
       "copyFailed": "El navegador no permitió copiar. Seleccione la clave y cópiela.",
       "notAllowed": "Su administrador no permite claves de aplicación para su cuenta.",
@@ -1727,7 +1731,8 @@
       "getHelp": "Instale una de estas y luego introduzca la dirección del servidor y su clave en su página de conexión.",
       "loadFailed": "No se pudieron cargar sus claves: {error}",
       "createFailed": "No se pudo crear la clave: {error}",
-      "tooLong": "Eso es más de lo que permite su administrador."
+      "tooLong": "Eso es más de lo que permite su administrador.",
+      "scan": "Escanee con la aplicación móvil en lugar de escribir la clave."
     },
     "vpn": {
       "title": "Perfiles VPN",

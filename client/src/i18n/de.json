@@ -163,7 +163,9 @@
       "useKeyFileLink": "Stattdessen eine Schlüsseldatei verwenden",
       "useKeyLink": "Einen Anwendungsschlüssel verwenden",
       "connectedWithKey": "Mit einem Anwendungsschlüssel angemeldet.",
-      "connectedWithKeyFile": "Mit einer Schlüsseldatei angemeldet."
+      "connectedWithKeyFile": "Mit einer Schlüsseldatei angemeldet.",
+      "keyScanButton": "QR-Code scannen",
+      "keyScanInstructions": "Richten Sie die Kamera auf den QR-Code des Schlüssels in der Web-App."
     },
     "home": {
       "title": "Ihre Home-Verzeichnisse",
@@ -1347,7 +1349,9 @@
         "disabled": "Ihr Administrator erlaubt für Ihr Konto keine Anwendungsschlüssel.",
         "client": "Ihr Administrator erlaubt dieser App nicht, Anwendungsschlüssel zu verwenden.",
         "dormant": "Ihr Schlüssel ruht. Melden Sie sich in der Web-App an und versuchen Sie es dann erneut."
-      }
+      },
+      "scanFailed": "Der Code konnte nicht gelesen werden: {error}",
+      "scanNotKey": "Dieser QR-Code ist kein SealSkin-Anwendungsschlüssel."
     },
     "placeholders": {
       "noAdmins": "Keine Admins gefunden.",
@@ -1715,7 +1719,7 @@
       "create": "Schlüssel erstellen",
       "revoke": "Widerrufen",
       "revoked": "Schlüssel widerrufen.",
-      "shownOnce": "Kopieren Sie diesen Schlüssel jetzt: Er wird nur dieses eine Mal angezeigt. Fügen Sie ihn auf der Verbindungsseite der Erweiterung oder der App ein.",
+      "shownOnce": "Kopieren Sie diesen Schlüssel jetzt: Er wird nur dieses eine Mal angezeigt. Fügen Sie ihn auf der Verbindungsseite der Erweiterung oder der App ein, oder scannen Sie den Code mit der App.",
       "copied": "Schlüssel kopiert.",
       "copyFailed": "Der Browser hat das Kopieren nicht erlaubt. Markieren Sie den Schlüssel und kopieren Sie ihn.",
       "notAllowed": "Ihr Administrator erlaubt für Ihr Konto keine Anwendungsschlüssel.",
@@ -1727,7 +1731,8 @@
       "getHelp": "Installieren Sie eine davon und geben Sie dann auf ihrer Verbindungsseite die Adresse des Servers und Ihren Schlüssel ein.",
       "loadFailed": "Ihre Schlüssel konnten nicht geladen werden: {error}",
       "createFailed": "Der Schlüssel konnte nicht erstellt werden: {error}",
-      "tooLong": "Das ist länger, als Ihr Administrator erlaubt."
+      "tooLong": "Das ist länger, als Ihr Administrator erlaubt.",
+      "scan": "Mit der Mobil-App scannen, statt den Schlüssel einzutippen."
     },
     "vpn": {
       "title": "VPN-Profile",

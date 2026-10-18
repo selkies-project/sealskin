@@ -163,7 +163,9 @@
       "useKeyFileLink": "Usar um arquivo de chave",
       "useKeyLink": "Usar uma chave de aplicação",
       "connectedWithKey": "Logado com uma chave de aplicação.",
-      "connectedWithKeyFile": "Logado com um arquivo de chave."
+      "connectedWithKeyFile": "Logado com um arquivo de chave.",
+      "keyScanButton": "Escanear código QR",
+      "keyScanInstructions": "Aponte a câmera para o código QR da chave no aplicativo web."
     },
     "home": {
       "title": "Seus Diretórios Home",
@@ -1347,7 +1349,9 @@
         "disabled": "Seu administrador não permite chaves de aplicação para a sua conta.",
         "client": "Seu administrador não permite que este aplicativo use chaves de aplicação.",
         "dormant": "Sua chave está adormecida. Faça login no aplicativo web e tente de novo."
-      }
+      },
+      "scanFailed": "Não foi possível ler o código: {error}",
+      "scanNotKey": "Esse código QR não é uma chave de aplicação do SealSkin."
     },
     "placeholders": {
       "noAdmins": "Nenhum admin encontrado.",
@@ -1715,7 +1719,7 @@
       "create": "Criar uma chave",
       "revoke": "Revogar",
       "revoked": "Chave revogada.",
-      "shownOnce": "Copie esta chave agora: ela é mostrada só desta vez. Cole-a na página de conexão da extensão ou do aplicativo.",
+      "shownOnce": "Copie esta chave agora: ela é mostrada apenas esta vez. Cole-a na página de conexão da extensão ou do aplicativo, ou escaneie o código com o aplicativo.",
       "copied": "Chave copiada.",
       "copyFailed": "O navegador não permitiu copiar. Selecione a chave e copie-a.",
       "notAllowed": "Seu administrador não permite chaves de aplicação para a sua conta.",
@@ -1727,7 +1731,8 @@
       "getHelp": "Instale um destes e, na página de conexão dele, informe o endereço do servidor e a sua chave.",
       "loadFailed": "Não foi possível carregar suas chaves: {error}",
       "createFailed": "Não foi possível criar a chave: {error}",
-      "tooLong": "Isso é mais do que o seu administrador permite."
+      "tooLong": "Isso é mais do que o seu administrador permite.",
+      "scan": "Escaneie com o aplicativo móvel em vez de digitar a chave."
     },
     "vpn": {
       "title": "Perfis VPN",

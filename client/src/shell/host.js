@@ -133,6 +133,7 @@ export function pageTransport(message) {
  * @param {'extension'|'mobile'|'web'} [overrides.shell] defaults to the build target
  * @param {function} [overrides.transport]
  * @param {function} [overrides.saveBlob] mobile native file open
+ * @param {function} [overrides.scanCode] mobile camera QR code reader, see `bridge.scanCode`
  * @param {function} [overrides.reserveTab] web app tab reservation, see `bridge.reserveTab`
  * @param {function} [overrides.streamDownload] web app streamed download, see `createHost`
  * @param {function} [overrides.adoptLaunch] web app launch tab, see `createHost`
@@ -419,6 +420,7 @@ export function initHost(overrides = {}) {
     transport,
     openPage,
     saveBlob: overrides.saveBlob,
+    scanCode: overrides.scanCode,
     reserveTab: overrides.reserveTab,
     adoptLaunch: overrides.adoptLaunch,
     streamDownload: overrides.streamDownload,

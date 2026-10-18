@@ -1904,6 +1904,9 @@ body:has(.popup-container)::before { display: none; }
 .keys-secret { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem; }
 .keys-secret code { flex: 1; min-width: 0; padding: 0.6rem 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background-color: var(--bg-0); font-size: 0.85rem; overflow-wrap: anywhere; user-select: all; }
 .keys-secret button { flex: none; }
+.keys-qr { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; margin-top: 1rem; }
+.keys-qr svg { width: 11rem; height: 11rem; border-radius: var(--radius-sm); }
+.keys-qr .description { margin: 0; text-align: center; }
 .keys-apps { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .keys-apps .button { text-decoration: none; }
 

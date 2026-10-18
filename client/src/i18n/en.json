@@ -163,7 +163,9 @@
       "useKeyFileLink": "Use a key file instead",
       "useKeyLink": "Use an application key",
       "connectedWithKey": "Signed in with an application key.",
-      "connectedWithKeyFile": "Signed in with a key file."
+      "connectedWithKeyFile": "Signed in with a key file.",
+      "keyScanButton": "Scan QR code",
+      "keyScanInstructions": "Point the camera at the QR code of the key in the web app."
     },
     "home": {
       "title": "Your Home Directories",
@@ -1347,7 +1349,9 @@
         "disabled": "Your administrator does not allow application keys for your account.",
         "client": "Your administrator does not allow this app to use application keys.",
         "dormant": "Your key is asleep. Sign in on the web app, then try again."
-      }
+      },
+      "scanFailed": "Could not read the code: {error}",
+      "scanNotKey": "That QR code is not a SealSkin application key."
     },
     "placeholders": {
       "noAdmins": "No admins found.",
@@ -1715,7 +1719,7 @@
       "create": "Make a key",
       "revoke": "Revoke",
       "revoked": "Key revoked.",
-      "shownOnce": "Copy this key now: it is shown this once. Paste it on the connection page of the extension or the app.",
+      "shownOnce": "Copy this key now: it is shown this once. Paste it on the connection page of the extension or the app, or scan the code with the app.",
       "copied": "Key copied.",
       "copyFailed": "The browser did not allow copying. Select the key and copy it.",
       "notAllowed": "Your administrator does not allow application keys for your account.",
@@ -1727,7 +1731,8 @@
       "getHelp": "Install one of these, then enter the server's address and your key on its connection page.",
       "loadFailed": "Could not load your keys: {error}",
       "createFailed": "Could not make the key: {error}",
-      "tooLong": "That is longer than your administrator allows."
+      "tooLong": "That is longer than your administrator allows.",
+      "scan": "Scan with the mobile app instead of typing the key."
     },
     "vpn": {
       "title": "VPN Profiles",

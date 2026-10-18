@@ -50,6 +50,7 @@ export async function callBackground(transport, type, payload = {}) {
  * @param {function} [options.onHelloMismatch] Called when the page's bridge version differs.
  * @param {function} options.openPage `(page, params?) => void` implemented by the host page.
  * @param {function} [options.saveBlob] `(blob, filename) => Promise` for mobile native open.
+ * @param {function} [options.scanCode] `(instructions) => Promise<string>`, mobile: reads a QR code with the camera, empty when closed.
  * @param {function} [options.streamDownload] `(home, path, filename) => Promise`, the web app's streamed download.
  * @param {function} [options.reserveTab] `(reserve, launch?) => void`, web app tab reservation; with
  *   `launch` (`{id, app, logo, room}`) the tab shows the launching page, and a throw refuses the launch.
@@ -76,6 +77,7 @@ export function createHost(options) {
   const capabilities = {
     streamDownload: Boolean(options.streamDownload) || (shell === 'extension' && platform === 'chrome'),
     nativeFileOpen: shell === 'mobile',
+    scanCode: Boolean(options.scanCode),
     contextMenus: shell === 'extension',
     tabs: shell === 'extension',
   };
@@ -208,6 +210,13 @@ export function createHost(options) {
       if (!options.saveBlob) throw new Error('Native file open is not available in this shell.');
       await options.saveBlob(blob, filename);
       return {};
+    },
+
+    // Connect page only: the camera reads the application key the web app shows.
+    async scanCode({ instructions }) {
+      if (!options.scanCode) throw new Error('Scanning is not available in this shell.');
+      if (!onConnectPage()) throw new Error('scanCode is only accepted from the connect page.');
+      return { text: await options.scanCode(typeof instructions === 'string' ? instructions : '') };
     },
 
     async storageGet({ keys }) {

@@ -163,7 +163,9 @@
       "useKeyFileLink": "改用密钥文件",
       "useKeyLink": "使用应用密钥",
       "connectedWithKey": "已使用应用密钥登录。",
-      "connectedWithKeyFile": "已使用密钥文件登录。"
+      "connectedWithKeyFile": "已使用密钥文件登录。",
+      "keyScanButton": "扫描二维码",
+      "keyScanInstructions": "将摄像头对准网页应用中显示的密钥二维码。"
     },
     "home": {
       "title": "您的主目录",
@@ -1347,7 +1349,9 @@
         "disabled": "您的管理员不允许您的账户使用应用密钥。",
         "client": "您的管理员不允许此应用使用应用密钥。",
         "dormant": "您的密钥处于休眠状态。请先在 Web 应用上登录，然后重试。"
-      }
+      },
+      "scanFailed": "无法读取该码：{error}",
+      "scanNotKey": "该二维码不是 SealSkin 应用密钥。"
     },
     "placeholders": {
       "noAdmins": "未找到管理员。",
@@ -1715,7 +1719,7 @@
       "create": "创建密钥",
       "revoke": "撤销",
       "revoked": "密钥已撤销。",
-      "shownOnce": "请立即复制此密钥：它只显示这一次。将其粘贴到扩展或应用的连接页面。",
+      "shownOnce": "请立即复制此密钥：它只显示这一次。将其粘贴到扩展或应用的连接页面，或用应用扫描此二维码。",
       "copied": "密钥已复制。",
       "copyFailed": "浏览器不允许复制。请选中密钥后手动复制。",
       "notAllowed": "您的管理员不允许您的账户使用应用密钥。",
@@ -1727,7 +1731,8 @@
       "getHelp": "安装其中一个，然后在其连接页面输入服务器地址和您的密钥。",
       "loadFailed": "无法加载您的密钥：{error}",
       "createFailed": "无法创建密钥：{error}",
-      "tooLong": "超出了管理员允许的最长期限。"
+      "tooLong": "超出了管理员允许的最长期限。",
+      "scan": "用手机应用扫描，无需输入密钥。"
     },
     "vpn": {
       "title": "VPN 配置",

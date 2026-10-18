@@ -3,7 +3,8 @@
  *
  * The only page that must work with no server. Its first card takes an
  * application key the user made in the web app, which names the server after
- * an `@`; the others take a key file, or its values one by one. Either way it tests the
+ * an `@`, pasted or, on a phone, read from the QR code the web app shows beside
+ * it; the others take a key file, or its values one by one. Either way it tests the
  * connection through the background and stores the configuration. It is
  * framed by the shell host and talks to it with the same bridge as the served
  * pages, plus the connect-only requests `getConnectConfig`, `saveConfig`, and
@@ -32,6 +33,7 @@ const keyConfigView = $('key-config-view');
 const simpleConfigView = $('simple-config-view');
 const advancedConfigView = $('advanced-config-view');
 const applicationKeyInput = $('applicationKey');
+const scanKeyButton = $('scanKey');
 const statusDiv = $('status');
 const configFileUpload = $('configFileUpload');
 const configTextArea = $('configTextArea');
@@ -213,6 +215,26 @@ async function handleKeyLogin() {
   }
 }
 
+/** Read an application key from the QR code the web app shows and sign in with it. */
+async function handleScan() {
+  scanKeyButton.disabled = true;
+  try {
+    const text = await bridge.scanCode(t('options.config.keyScanInstructions'));
+    if (!text) return;
+    const { key, address } = splitKey(text);
+    if (!key || !parseAddress(address)) {
+      displayStatus(t('options.status.scanNotKey'), true);
+      return;
+    }
+    applicationKeyInput.value = text.trim();
+    await handleKeyLogin();
+  } catch (error) {
+    displayStatus(t('options.status.scanFailed', { error: error.message }), true);
+  } finally {
+    scanKeyButton.disabled = false;
+  }
+}
+
 /**
  * Save the form as the active configuration and test it against the server.
  *
@@ -320,6 +342,8 @@ async function init() {
   $('open-app').addEventListener('click', () => bridge.openPage('options'));
   $('edit-connection').addEventListener('click', () => showView(usesKey(currentConfig) ? 'key' : 'advanced'));
   $('connectKey').addEventListener('click', handleKeyLogin);
+  scanKeyButton.hidden = !(info.capabilities && info.capabilities.scanCode);
+  scanKeyButton.addEventListener('click', handleScan);
   applicationKeyInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();

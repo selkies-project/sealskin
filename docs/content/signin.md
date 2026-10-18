@@ -91,9 +91,10 @@ names administrators.
 The browser extension and the mobile app are companions of the web app: a
 user signs in on the web, opens Settings, and under **Application Keys**
 makes a key for each device, named after it, which the server shows once:
-`ssk_<id>_<secret>@<host>:<port>`, the server's address after the `@`. The
-app's connection page takes that key and is signed in as the user, with everything the web app allows them, on every node
-of a cluster. The tab lists each key with when it was made, when it expires,
+`ssk_<id>_<secret>@<host>:<port>`, the server's address after the `@`, as
+text and as a QR code. The app's connection page takes that key, pasted or,
+on a phone, scanned, and is signed in as the user, with everything the web
+app allows them, on every node of a cluster. The tab lists each key with when it was made, when it expires,
 and when and from which app it was last used, and revokes it; the
 Users table of the dashboard shows an administrator every user's keys with
 the same. Deleting a user deletes the keys. The server keeps only a hash of

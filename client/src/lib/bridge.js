@@ -292,6 +292,15 @@ export const bridge = {
   saveBlob(blob, filename) {
     return request('saveBlob', { blob, filename }, { timeout: 0 });
   },
+  /**
+   * Open the device's camera on a QR code and read it (mobile, `capabilities.scanCode`).
+   *
+   * @param {string} [instructions] Line the scanner shows over the camera.
+   * @returns {Promise<string>} The code's text, or an empty string when the user closed the scanner.
+   */
+  scanCode(instructions = '') {
+    return request('scanCode', { instructions }, { timeout: 0 }).then((data) => (data && data.text) || '');
+  },
 
   storageGet(keys) {
     return request('storageGet', { keys });

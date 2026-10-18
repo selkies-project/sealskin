@@ -242,6 +242,7 @@ never crosses the bridge: signing and encryption stay in the background.
 | `openExternal` | `{url}` | | New tab or Custom Tab. |
 | `downloadFile` | `{home, path, filename}` | | Chrome only (`capabilities.streamDownload`): the service worker streams the file. |
 | `saveBlob` | `{blob, filename}` | | Mobile only (`capabilities.nativeFileOpen`). |
+| `scanCode` | `{instructions}` | `{text}` | Mobile only (`capabilities.scanCode`), and only from the connection page: the camera reads a QR code. |
 | `storageGet` / `storageSet` / `storageRemove` | keys | | Limited to the launch profiles and the pending connection config. |
 | `updateConfig` | `{searchEngineUrl?, userSettings?}` | | Only these fields; keys and the server address belong to the connection page. |
 | `close` | | | Closes the popup; a no-op on mobile. |
@@ -256,8 +257,8 @@ The Capacitor app's `index.html` is the host. It installs a small `chrome.*`
 polyfill (`chrome.storage.local` over `localStorage`, `chrome.tabs.create`
 over the Browser plugin, `chrome.action.openPopup` setting the iframe) and
 runs the same background script as the extension in the outer window.
-Native file opening and the back button stay outside the iframe. The WebView
-requires a trusted certificate.
+Native file opening, the QR code scanner, and the back button stay outside
+the iframe. The WebView requires a trusted certificate.
 
 ### Web app
 

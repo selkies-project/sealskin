@@ -163,7 +163,9 @@
       "useKeyFileLink": "Usa invece un file di chiave",
       "useKeyLink": "Usa una chiave applicazione",
       "connectedWithKey": "Accesso effettuato con una chiave applicazione.",
-      "connectedWithKeyFile": "Accesso effettuato con un file di chiave."
+      "connectedWithKeyFile": "Accesso effettuato con un file di chiave.",
+      "keyScanButton": "Scansiona codice QR",
+      "keyScanInstructions": "Punta la fotocamera sul codice QR della chiave nell'app web."
     },
     "home": {
       "title": "Le Tue Cartelle Home",
@@ -1347,7 +1349,9 @@
         "disabled": "Il tuo amministratore non consente le chiavi applicazione per il tuo account.",
         "client": "Il tuo amministratore non consente a questa app di usare le chiavi applicazione.",
         "dormant": "La tua chiave è addormentata. Accedi all'app web, poi riprova."
-      }
+      },
+      "scanFailed": "Impossibile leggere il codice: {error}",
+      "scanNotKey": "Questo codice QR non è una chiave applicazione SealSkin."
     },
     "placeholders": {
       "noAdmins": "Nessun amministratore trovato.",
@@ -1715,7 +1719,7 @@
       "create": "Crea una chiave",
       "revoke": "Revoca",
       "revoked": "Chiave revocata.",
-      "shownOnce": "Copia subito questa chiave: viene mostrata solo questa volta. Incollala nella pagina di connessione dell'estensione o dell'app.",
+      "shownOnce": "Copia questa chiave adesso: viene mostrata solo questa volta. Incollala nella pagina di connessione dell'estensione o dell'app, oppure scansiona il codice con l'app.",
       "copied": "Chiave copiata.",
       "copyFailed": "Il browser non ha consentito la copia. Seleziona la chiave e copiala.",
       "notAllowed": "Il tuo amministratore non consente le chiavi applicazione per il tuo account.",
@@ -1727,7 +1731,8 @@
       "getHelp": "Installane una, poi inserisci l'indirizzo del server e la tua chiave nella sua pagina di connessione.",
       "loadFailed": "Impossibile caricare le tue chiavi: {error}",
       "createFailed": "Impossibile creare la chiave: {error}",
-      "tooLong": "È più lunga di quanto il tuo amministratore consenta."
+      "tooLong": "È più lunga di quanto il tuo amministratore consenta.",
+      "scan": "Scansiona con l'app mobile invece di digitare la chiave."
     },
     "vpn": {
       "title": "Profili VPN",

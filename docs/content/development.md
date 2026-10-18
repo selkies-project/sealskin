@@ -232,7 +232,10 @@ which also produces a signed APK and AAB when the keystore variables are set
 `versionCode` is derived from `VERSION` locally and overridden by a build
 number in CI. Native plugins: Browser (sessions in a Custom Tab or Safari
 view), App (back button), Filesystem, blob writer, and file opener
-(downloads). The WebView needs a trusted certificate.
+(downloads), and the barcode scanner (the application key's QR code on the
+connection page), which needs the camera: `NSCameraUsageDescription` is in
+`Info.plist`, and `build.sh` adds the permission to the generated Android
+manifest. The WebView needs a trusted certificate.
 
 ## Versioning
 

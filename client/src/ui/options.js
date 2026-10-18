@@ -15,6 +15,7 @@ import { sendForgedSignIn } from '../lib/proxy-check.js';
 import { reachableSessionOrigin } from '../lib/session-origin.js';
 import { confirmDialog } from '../lib/modal.js';
 import { apiError } from '../lib/api-error.js';
+import { qrSvg } from '../lib/qr.js';
 import {
   announce, escapeHtml, formatBytes, formatDate, timeAgo, formatLogoSrc, hydrateLogos, showToast, tOr,
   addMobileSafeArea, addMobileBackButton, downloadBlob, currentLocale, apiUrl,
@@ -2900,9 +2901,10 @@ function bindKeysEvents() {
         <div class="field-list single">
           <div class="field"><div class="field-text"><label>${escapeHtml(t('options.keys.name'))}</label></div><div class="field-control">${escapeHtml(made.record.name)}</div></div>
         </div>
-        <div class="keys-secret"><code>${escapeHtml(made.key)}</code><button type="button" class="secondary" title="${escapeHtml(t('common.copy'))}"><i class="fas fa-copy"></i></button></div>`;
+        <div class="keys-secret"><code>${escapeHtml(made.key)}</code><button type="button" class="secondary" title="${escapeHtml(t('common.copy'))}"><i class="fas fa-copy"></i></button></div>
+        <div class="keys-qr">${qrSvg(made.key, { label: t('options.keys.scan') })}<p class="description">${escapeHtml(t('options.keys.scan'))}</p></div>`;
       reveal.hidden = false;
-      reveal.querySelector('button').addEventListener('click', () => navigator.clipboard.writeText(made.key)
+      reveal.querySelector('.keys-secret button').addEventListener('click', () => navigator.clipboard.writeText(made.key)
         .then(() => displayStatus(t('options.keys.copied')))
         .catch(() => displayStatus(t('options.keys.copyFailed'), true)));
       reveal.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
