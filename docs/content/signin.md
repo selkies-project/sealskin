@@ -254,19 +254,34 @@ granted here as well as there.
 
 A user the sign-in creates who lands in no group is **held**: signed in, but
 told to wait for an administrator and refused everything else. The dashboard
-marks such users **Awaiting a group** in the Users table, and either placing
-them in a group or pressing **Approve** lets them in, as does the provider
-naming a group of theirs, or `SEALSKIN_SSO_ADMIN_GROUP`, from then on. Nothing is held while
-`SEALSKIN_SSO_HOLD_NEW_USERS=false`, which gives a new user the default
-settings at once. Where the provider sends no groups and every account should
+marks such users **Awaiting a group** in the Users table, and **Approve**
+opens the groups to place them in, with the groups the provider named shown
+beside, as does the provider naming a group of theirs, or
+`SEALSKIN_SSO_ADMIN_GROUP`, from then on. Approved with no group chosen, the
+user is in `default` (see [The default group](#the-default-group)). With
+`SEALSKIN_SSO_HOLD_NEW_USERS=false` a new user is put in `default` at once;
+users held before stay held until approved, so turning the setting off lets
+nobody in by itself. Where the provider sends no groups and every account should
 be looked at first, `SEALSKIN_SSO_CREATE_USERS=false` refuses unknown names
 instead, and the administrator creates each user in the dashboard, with no
 key, before their first sign-in binds the account.
 
+## The default group
+
+A user in no other group is in `default`, a group with no file: it is the
+user's own settings, which are the server's defaults where the user's record
+sets nothing (GPU, VPN, persistent storage, and application keys allowed; no
+limits), and it is listed in the Groups table so that what such a user gets is
+in plain view. It cannot be edited or deleted; to change what a user in it
+gets, place them in a group or edit the user. Applications, VPN profiles, and
+pools may name `default` beside the other groups to reach exactly the users in
+no group, where `all` reaches everyone. No group file may be named `default`,
+`all`, or `none`.
+
 ## Groups, switches, and limits
 
-A user's own settings apply while the user is in no group. A user in groups
-gets each setting from the groups that set it:
+A user's own settings apply while the user is in no group (`default`). A user
+in groups gets each setting from the groups that set it:
 
 * A **switch** (active, persistent storage, public sharing, GPU, GPU sharing,
   template editing, moving home directories, administrator, and the two

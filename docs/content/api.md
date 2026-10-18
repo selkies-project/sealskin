@@ -194,10 +194,10 @@ All *encrypted, admin*.
 | `POST /api/admin/users` | Create a user (`username`, `public_key?`, `settings`); returns the generated private key when no key was supplied. |
 | `PUT /api/admin/users/{username}` | Replace a user's settings. |
 | `DELETE /api/admin/users/{username}` | Delete a user and their storage. |
-| `POST /api/admin/users/{username}/approve` | Let a held user in without placing them in a group. |
+| `POST /api/admin/users/{username}/approve` | Let a held user in, placed in the `groups` the body names; none leaves them in `default`. |
 | `GET`/`POST`/`DELETE /api/admin/users/{username}/homedirs[/{home}]` | A user's home directories. |
 | `GET`/`POST`/`DELETE /api/admin/admins/{username}/homedirs[/{home}]` | An administrator's home directories. |
-| `POST /api/admin/groups`, `PUT /api/admin/groups/{name}`, `DELETE /api/admin/groups/{name}` | Groups. |
+| `POST /api/admin/groups`, `PUT /api/admin/groups/{name}`, `DELETE /api/admin/groups/{name}` | Groups. `default`, the built-in group of users in no other, is listed with the rest but takes none of these (`409`), nor does the name `all` or `none`. |
 | `GET`/`POST /api/admin/apps/stores`, `DELETE /api/admin/apps/stores/{name}` | App stores. |
 | `GET /api/admin/apps/available?url=&store_name=&refresh=` | A store's catalogue, cached unless `refresh`. |
 | `GET /api/admin/apps/installed` | Installed apps with image status. |

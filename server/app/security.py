@@ -416,7 +416,7 @@ def _signed_in(username: str, via: str, provider_groups: Any = (), admin: bool =
         is_admin=is_admin,
         held=held,
         effective_settings=effective,
-        group=effective.get("group", "none"),
+        group=effective.get("group", user_manager.DEFAULT_GROUP),
         groups=effective.get("groups") or [],
         provider_groups=sorted(provider_groups or []),
         via=via,

@@ -17,6 +17,7 @@
     "remove": "Kaldır",
     "move": "Taşı",
     "edit": "Düzenle",
+    "view": "Görüntüle",
     "save": "Kaydet",
     "none": "yok",
     "error": "Hata",
@@ -240,6 +241,9 @@
       "signInOnly": "Yalnızca çoklu oturum açma",
       "awaitingGroup": "Grup bekleniyor",
       "approve": "Onayla",
+      "approveTitle": "{username} onayla",
+      "approveGroups": "Kullanıcının yerleştirileceği gruplar",
+      "approveHelp": "Grup seçilmezse kullanıcı default grubuna girer: kendi ayarları ve herkese ya da default grubuna açık her uygulama, VPN profili ve havuz.",
       "admin": "Yönetici",
       "gpuShare": "GPU'yu Diğer Oturumlarla Paylaşmaya İzin Ver",
       "homeMigration": "Ana Dizinleri Düğümler Arasında Taşımaya İzin Ver",
@@ -306,7 +310,10 @@
       "off": "Kapalı",
       "ssoGroups": "Üyeleri bu gruba dahil olan kimlik sağlayıcı grupları (virgülle ayrılmış)",
       "overrideHelp": "Bir grup yalnızca burada ayarlananları belirler; ayarlanmayan veya boş bırakılan her şey üyenin kendi değerinde kalır.",
-      "chosen": "Yalnızca aşağıda işaretli uygulamalar"
+      "chosen": "Yalnızca aşağıda işaretli uygulamalar",
+      "builtin": "Yerleşik",
+      "defaultTitle": "Varsayılan grup",
+      "defaultHelp": "Başka grubu olmayan bir kullanıcının ayarları; hiçbir dosya tutmaz. Böyle bir kullanıcının aldıklarını değiştirmek için onu bir gruba yerleştirin ya da kendi ayarlarını düzenleyin."
     },
     "installedApps": {
       "title": "Yüklü Uygulamalar",

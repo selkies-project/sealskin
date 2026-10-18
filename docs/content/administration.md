@@ -44,7 +44,7 @@ Each user carries these settings, editable later:
 | Setting | Effect |
 | --- | --- |
 | **Active Account** | An inactive user is refused. |
-| **Groups** | The groups the user is in, beside those the identity provider puts them in, which the form lists. |
+| **Groups** | The groups the user is in, beside those the identity provider puts them in, which the form lists. In none, the user is in `default` (see [Groups](#groups)). |
 | **Administrator** | The user administers the server. |
 | **Allow Persistent Storage** | Without it every session is a cleanroom, the file manager is unavailable, and files cannot be sent to sessions. |
 | **Allow Public File Sharing** | Enables share links from the file manager. Requires persistent storage. |
@@ -78,9 +78,17 @@ edit dialog shows the result as **Effective Settings**. The **PRoot Apps
 catalog** is a choice rather than a limit: a member's own choice wins, then
 the first of their groups that makes one. **Identity provider
 groups** names the provider's groups whose members are in this group without
-being listed. Groups are also a permission target for applications and
-pools. Deleting a group leaves its members with what their other groups and
-their own settings give.
+being listed. Groups are also a permission target for applications, VPN
+profiles, and pools. Deleting a group leaves its members with what their other
+groups and their own settings give.
+
+The table opens with `default`, marked **Built in**: the group of every user in
+no other group, with no file behind it. **View** shows its settings, which are
+the server's defaults; they cannot be changed here, and no group may take the
+name. To change what a user in `default` gets, place them in a group or edit
+the user. Naming `default` in the users and groups of an application, a VPN
+profile, or a pool opens it to exactly those users, where `all` opens it to
+everyone.
 
 ## Cluster
 

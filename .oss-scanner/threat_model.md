@@ -8,7 +8,9 @@
   mobile shell).
 - Principals, weakest first: an anonymous internet client (the web app's pages, the sign-in flows, public shares,
   the key-file handshake, the template schema and version); a user signed in on the web (a cookie naming a
-  record, from the root key, OpenID Connect, SAML, or a trusted reverse proxy's header); a companion app holding
+  record, from the root key, OpenID Connect, SAML, or a trusted reverse proxy's header, who reaches the
+  applications, VPN profiles, and pools whose lists name `all`, one of their groups, or `default` for a user in
+  no group, and nothing but the status route while held for an administrator); a companion app holding
   an application key (a bearer over `/companion/`); a key-file client (an RS256 JWT the client signs, under
   `SEALSKIN_LEGACY_AUTH`); a template editor (may edit templates but not their `DOCKER_*` settings nor the
   session's identity variables); session collaborators (controller, viewer and read-only invite tokens); an

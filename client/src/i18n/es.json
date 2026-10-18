@@ -17,6 +17,7 @@
     "remove": "Quitar",
     "move": "Mover",
     "edit": "Editar",
+    "view": "Ver",
     "save": "Guardar",
     "none": "ninguno",
     "error": "Error",
@@ -240,6 +241,9 @@
       "signInOnly": "Solo inicio de sesión único",
       "awaitingGroup": "Esperando un grupo",
       "approve": "Aprobar",
+      "approveTitle": "Aprobar a {username}",
+      "approveGroups": "Grupos en los que colocar al usuario",
+      "approveHelp": "Sin ningún grupo elegido, el usuario queda en default: su propia configuración y toda aplicación, perfil VPN y pool abiertos a todos o a default.",
       "admin": "Administrador",
       "gpuShare": "Permitir Compartir una GPU con Otras Sesiones",
       "homeMigration": "Permitir Mover Directorios Personales entre Nodos",
@@ -306,7 +310,10 @@
       "off": "Desactivado",
       "ssoGroups": "Grupos del proveedor de identidad cuyos miembros pertenecen a este grupo (separados por comas)",
       "overrideHelp": "Un grupo decide solo lo que se define aquí; todo lo que quede sin definir o en blanco sigue siendo propio de cada miembro.",
-      "chosen": "Solo las apps marcadas a continuación"
+      "chosen": "Solo las apps marcadas a continuación",
+      "builtin": "Integrado",
+      "defaultTitle": "El grupo predeterminado",
+      "defaultHelp": "La configuración de un usuario sin otro grupo; ningún archivo la guarda. Para cambiar lo que recibe ese usuario, colóquelo en un grupo o edite su propia configuración."
     },
     "installedApps": {
       "title": "Aplicaciones Instaladas",

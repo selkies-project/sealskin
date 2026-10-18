@@ -565,7 +565,7 @@ class UserSettings(BaseModel):
 
     Attributes:
         active: The account may sign in.
-        group: The first of `groups`, as older clients read it.
+        group: The first of `groups`, as older clients read it; `default` for a user in none.
         groups: Groups the user is in.
         admin: The user administers the server.
         persistent_storage: The user has home directories.
@@ -597,7 +597,7 @@ class UserSettings(BaseModel):
     """
 
     active: bool = True
-    group: str = "none"
+    group: str = "default"
     groups: list[str] = []
     admin: bool = False
     persistent_storage: bool = True
@@ -963,10 +963,16 @@ class User(BaseModel):
 
 
 class Group(BaseModel):
-    """A group of users sharing settings."""
+    """A group of users sharing settings.
+
+    Attributes:
+        builtin: The group has no file and cannot be changed: `default`, the
+            settings of a user in no other group.
+    """
 
     name: str
     settings: GroupSettings
+    builtin: bool = False
 
 
 class ManagementDataResponse(BaseModel):
@@ -1015,6 +1021,12 @@ class UpdateGroupRequest(BaseModel):
     """Replace a group's settings."""
 
     settings: GroupSettings
+
+
+class ApproveUserRequest(BaseModel):
+    """Let a held user in, placed in `groups`; none leaves the user in `default`."""
+
+    groups: list[str] = []
 
 
 class CreateMetaAppRequest(BaseModel):

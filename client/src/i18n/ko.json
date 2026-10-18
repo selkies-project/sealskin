@@ -17,6 +17,7 @@
     "remove": "제거",
     "move": "이동",
     "edit": "편집",
+    "view": "보기",
     "save": "저장",
     "none": "없음",
     "error": "오류",
@@ -240,6 +241,9 @@
       "signInOnly": "통합 인증만 사용",
       "awaitingGroup": "그룹 대기 중",
       "approve": "승인",
+      "approveTitle": "{username} 승인",
+      "approveGroups": "사용자를 넣을 그룹",
+      "approveHelp": "그룹을 선택하지 않으면 사용자는 default에 들어갑니다. 본인 설정 그대로, 모두 또는 default에 열린 모든 애플리케이션, VPN 프로필, 풀을 쓸 수 있습니다.",
       "admin": "관리자",
       "gpuShare": "다른 세션과 GPU 공유 허용",
       "homeMigration": "노드 간 홈 디렉터리 이동 허용",
@@ -306,7 +310,10 @@
       "off": "꺼짐",
       "ssoGroups": "구성원을 이 그룹에 포함할 ID 공급자 그룹 (쉼표로 구분)",
       "overrideHelp": "그룹은 여기에서 설정한 항목만 결정합니다. 설정하지 않았거나 비워둔 항목은 각 구성원 자신의 설정을 따릅니다.",
-      "chosen": "아래에서 선택한 앱만"
+      "chosen": "아래에서 선택한 앱만",
+      "builtin": "기본 제공",
+      "defaultTitle": "기본 그룹",
+      "defaultHelp": "다른 그룹에 속하지 않은 사용자의 설정이며 파일은 없습니다. 그런 사용자가 받는 것을 바꾸려면 그룹에 넣거나 사용자 본인의 설정을 편집하세요."
     },
     "installedApps": {
       "title": "설치된 애플리케이션",

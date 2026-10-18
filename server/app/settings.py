@@ -683,7 +683,8 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "default": True,
         "help": (
             "Hold a user a sign-in creates, who may do nothing here, until an administrator places them in "
-            "a group or approves them; a user the provider puts in a group is never held."
+            "a group or approves them; a user the provider puts in a group is never held. Off, new users "
+            "are let in at once; those already held stay held until approved."
         ),
     },
     {

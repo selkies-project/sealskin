@@ -17,6 +17,7 @@
     "remove": "移除",
     "move": "移动",
     "edit": "编辑",
+    "view": "查看",
     "save": "保存",
     "none": "无",
     "error": "错误",
@@ -240,6 +241,9 @@
       "signInOnly": "仅单点登录",
       "awaitingGroup": "等待分组",
       "approve": "批准",
+      "approveTitle": "批准 {username}",
+      "approveGroups": "将用户放入的组",
+      "approveHelp": "不选择任何组时，用户进入 default：使用自己的设置，并可使用所有对全体或对 default 开放的应用、VPN 配置和资源池。",
       "admin": "管理员",
       "gpuShare": "允许与其他会话共享 GPU",
       "homeMigration": "允许在节点之间移动主目录",
@@ -306,7 +310,10 @@
       "off": "关",
       "ssoGroups": "其成员归入此群组的身份提供方群组（逗号分隔）",
       "overrideHelp": "群组只决定此处已设置的项；未设置或留空的项仍沿用各成员自己的设置。",
-      "chosen": "仅限下方勾选的应用"
+      "chosen": "仅限下方勾选的应用",
+      "builtin": "内置",
+      "defaultTitle": "默认组",
+      "defaultHelp": "不属于其他任何组的用户的设置，没有文件保存。要改变这类用户获得的内容，请将其放入某个组，或编辑该用户自己的设置。"
     },
     "installedApps": {
       "title": "已安装应用",

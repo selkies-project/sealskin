@@ -17,6 +17,7 @@
     "remove": "Verwijderen",
     "move": "Verplaatsen",
     "edit": "Bewerken",
+    "view": "Bekijken",
     "save": "Opslaan",
     "none": "geen",
     "error": "Fout",
@@ -240,6 +241,9 @@
       "signInOnly": "Alleen eenmalige aanmelding",
       "awaitingGroup": "Wacht op een groep",
       "approve": "Goedkeuren",
+      "approveTitle": "{username} goedkeuren",
+      "approveGroups": "Groepen waarin de gebruiker komt",
+      "approveHelp": "Zonder gekozen groep komt de gebruiker in default: de eigen instellingen en elke applicatie, elk VPN-profiel en elke pool die open is voor iedereen of voor default.",
       "admin": "Beheerder",
       "gpuShare": "Delen van een GPU met andere sessies toestaan",
       "homeMigration": "Verplaatsen van home directories tussen nodes toestaan",
@@ -306,7 +310,10 @@
       "off": "Uit",
       "ssoGroups": "Groepen van de identiteitsprovider waarvan de leden in deze groep zitten (door komma's gescheiden)",
       "overrideHelp": "Een groep bepaalt alleen wat hier is ingesteld; alles wat niet is ingesteld of leeg blijft, blijft de eigen instelling van elk lid.",
-      "chosen": "Alleen de hieronder aangevinkte apps"
+      "chosen": "Alleen de hieronder aangevinkte apps",
+      "builtin": "Ingebouwd",
+      "defaultTitle": "De standaardgroep",
+      "defaultHelp": "De instellingen van een gebruiker zonder andere groep; geen bestand bevat ze. Plaats de gebruiker in een groep of bewerk de eigen instellingen om te veranderen wat zo'n gebruiker krijgt."
     },
     "installedApps": {
       "title": "Geïnstalleerde Applicaties",

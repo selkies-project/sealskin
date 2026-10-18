@@ -17,6 +17,7 @@
     "remove": "Fjern",
     "move": "Flyt",
     "edit": "Rediger",
+    "view": "Vis",
     "save": "Gem",
     "none": "ingen",
     "error": "Fejl",
@@ -240,6 +241,9 @@
       "signInOnly": "Kun single sign-on",
       "awaitingGroup": "Afventer en gruppe",
       "approve": "Godkend",
+      "approveTitle": "Godkend {username}",
+      "approveGroups": "Grupper brugeren placeres i",
+      "approveHelp": "Uden en valgt gruppe placeres brugeren i default: egne indstillinger og alle programmer, VPN-profiler og puljer, der er åbne for alle eller for default.",
       "admin": "Administrator",
       "gpuShare": "Tillad Deling af en GPU med Andre Sessioner",
       "homeMigration": "Tillad Flytning af Hjemmemapper Mellem Knuder",
@@ -306,7 +310,10 @@
       "off": "Fra",
       "ssoGroups": "Identitetsudbydergrupper, hvis medlemmer er i denne gruppe (kommasepareret)",
       "overrideHelp": "En gruppe bestemmer kun det, der er angivet her; alt, der ikke er angivet eller står tomt, forbliver hvert medlems eget.",
-      "chosen": "Kun de apps, der er markeret nedenfor"
+      "chosen": "Kun de apps, der er markeret nedenfor",
+      "builtin": "Indbygget",
+      "defaultTitle": "Standardgruppen",
+      "defaultHelp": "Indstillingerne for en bruger uden anden gruppe; ingen fil rummer dem. Placer brugeren i en gruppe, eller rediger brugerens egne indstillinger, for at ændre hvad brugeren får."
     },
     "installedApps": {
       "title": "Installerede Applikationer",

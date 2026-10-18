@@ -6,7 +6,10 @@
   an identity provider (see `sso.py`).
 * `groups/<name>`: YAML settings its members get (see `get_effective_settings`).
 
-A user a sign-in created while `sso_hold_new_users` was on carries
+A user in no group is judged by `DEFAULT_GROUP`, which has no file: the
+settings are the user's own, `DEFAULT_USER_SETTINGS` where the record sets
+nothing, and the access lists of applications, VPN profiles, and pools may
+name it. A user a sign-in created while `sso_hold_new_users` was on carries
 `approved: false` and is held (`held`) until placed in a group, approved by an
 administrator (`approve`), or named in a group by the provider.
 
@@ -35,7 +38,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 
 from . import audit, persistence, store
 from .fsutil import safe_join
-from .models import APP_KEY_CLIENTS
+from .models import APP_KEY_CLIENTS, GroupSettings
 from .settings import settings
 
 logger = logging.getLogger(__name__)
@@ -48,6 +51,10 @@ ADMIN = "admin"
 
 #: Keys of a user record the server writes and an administrator's edit keeps.
 RECORD_KEYS = ("auth", "provider_groups", "approved", "web_sign_in")
+#: Name of the group a user in no other group is judged by; it has no file and the default settings.
+DEFAULT_GROUP = "default"
+#: Names no group file may take: the default group's, the `all` of every access list, and `none`, the older spelling of no group.
+RESERVED_GROUP_NAMES = (DEFAULT_GROUP, "all", "none")
 
 
 class NoAccount(ValueError):
@@ -55,7 +62,7 @@ class NoAccount(ValueError):
 
 DEFAULT_USER_SETTINGS: dict[str, Any] = {
     "active": True,
-    "group": "none",
+    "group": DEFAULT_GROUP,
     "groups": [],
     "admin": False,
     "persistent_storage": True,
@@ -201,9 +208,9 @@ def _generate_key_pair(key_size: int = 2048) -> tuple[str, str]:
 
 def _groups_of(settings_dict: dict[str, Any]) -> list[str]:
     """Return the groups a settings block names, the single `group` of older files included."""
-    names = [str(g) for g in settings_dict.get("groups") or [] if g]
+    names = [str(g) for g in settings_dict.get("groups") or [] if g and str(g) not in RESERVED_GROUP_NAMES]
     single = settings_dict.get("group")
-    if single and single != "none" and single not in names:
+    if single and single not in RESERVED_GROUP_NAMES and single not in names:
         names.insert(0, str(single))
     return names
 
@@ -230,7 +237,7 @@ def parse_key_file(path: str) -> tuple[dict[str, Any] | None, str | None]:
         if user_settings:
             final_settings.update(user_settings)
         final_settings["groups"] = _groups_of(final_settings)
-        final_settings["group"] = final_settings["groups"][0] if final_settings["groups"] else "none"
+        final_settings["group"] = final_settings["groups"][0] if final_settings["groups"] else DEFAULT_GROUP
         return final_settings, pub_key_pem
     except Exception as exc:  # noqa: BLE001
         logger.error("Failed to parse user file %s: %s", path, exc)
@@ -248,7 +255,7 @@ def write_user_file(username: str, pub_key_pem: str, settings_dict: dict[str, An
     file_path = safe_join(settings.keys_base_path, "users", username)
     stored = dict(settings_dict)
     stored["groups"] = _groups_of(stored)
-    stored["group"] = stored["groups"][0] if stored["groups"] else "none"
+    stored["group"] = stored["groups"][0] if stored["groups"] else DEFAULT_GROUP
     settings_yaml = yaml.safe_dump(stored, default_flow_style=False, sort_keys=False)
     content = (
         "--- Settings ---\n"
@@ -417,14 +424,16 @@ def administers(username: str) -> bool:
 def held(username: str, provider_groups: Any = None) -> bool:
     """Return whether a user waits for an administrator: created held, in no group, not approved.
 
-    A user the provider names in `sso_admin_group` is in a group for this purpose.
+    The record alone decides: `sso_hold_new_users` says whether a sign-in
+    creates users held, and turning it off holds no one who already is. A user
+    the provider names in `sso_admin_group` is in a group for this purpose.
 
     Args:
         username: The user.
         provider_groups: See `groups_of`.
     """
     user = USER_DATA.get(username)
-    if not user or user.get("is_admin") or not settings.sso_hold_new_users:
+    if not user or user.get("is_admin"):
         return False
     stored = user.get("settings") or {}
     if stored.get("approved") is not False or stored.get("admin"):
@@ -438,7 +447,8 @@ def held(username: str, provider_groups: Any = None) -> bool:
 def get_effective_settings(username: str, provider_groups: Any = None) -> dict[str, Any]:
     """Return the settings a user's sessions and requests run under.
 
-    A user in no group has the settings of the user file. In groups, each
+    A user in no group has the settings of the user file, and `groups` names
+    `DEFAULT_GROUP` alone, which the access lists may name. In groups, each
     setting is taken from the groups that set it: a switch takes its
     restricting value when any group gives it that (see `SWITCHES`), a limit
     the smallest any group sets, the pools are those any group allows less
@@ -461,7 +471,7 @@ def get_effective_settings(username: str, provider_groups: Any = None) -> dict[s
     members = [GROUP_DATA[name]["settings"] for name in names]
     # A catalog is a choice, not a limit: the user's own, else the first group's that makes one.
     catalog = base.get("proot_catalog") or next((g["proot_catalog"] for g in members if g.get("proot_catalog")), None)
-    effective = dict(base, groups=names, group=names[0] if names else "none", proot_catalog=catalog)
+    effective = dict(base, groups=names or [DEFAULT_GROUP], group=names[0] if names else DEFAULT_GROUP, proot_catalog=catalog)
     for key, restricting in SWITCHES.items():
         chosen = [bool(g[key]) for g in members if g.get(key) is not None]
         if chosen:
@@ -545,17 +555,28 @@ def ensure_user(username: str, via: str, subject: str = "", provider_groups: Any
     return USER_DATA[username]
 
 
-def approve(username: str) -> dict[str, Any]:
-    """Let a held user in without a group.
+def approve(username: str, groups: Any = ()) -> dict[str, Any]:
+    """Let a held user in, placed in `groups` beside those the record names.
+
+    Placed in none, the user runs under `DEFAULT_GROUP`, their own settings.
+
+    Args:
+        username: The user.
+        groups: Names of existing groups.
 
     Raises:
-        ValueError: For an unknown user.
+        ValueError: For an unknown user or group.
     """
     user = USER_DATA.get(username)
     if not user:
         raise ValueError(f"User '{username}' not found.")
+    unknown = [str(g) for g in groups if str(g) not in GROUP_DATA]
+    if unknown:
+        raise ValueError(f"No group named {', '.join(repr(g) for g in unknown)}.")
     current = dict(user.get("settings") or {})
-    if current.get("approved") is not True:
+    named = _groups_of(current)
+    current["groups"] = named + [str(g) for g in groups if str(g) not in named]
+    if current.get("approved") is not True or current["groups"] != named:
         current["approved"] = True
         write_user_file(username, user["public_key"], current)
         load_users_and_groups()
@@ -623,9 +644,15 @@ def get_all_admins() -> list[dict[str, Any]]:
     return [u for u in USER_DATA.values() if u["is_admin"]]
 
 
+def default_group() -> dict[str, Any]:
+    """Return `DEFAULT_GROUP` as the dashboard lists it: the default settings, marked `builtin`."""
+    fields = {k: v for k, v in DEFAULT_USER_SETTINGS.items() if k in GroupSettings.model_fields}
+    return {"name": DEFAULT_GROUP, "settings": dict(fields, sso_groups=[]), "builtin": True}
+
+
 def get_all_groups() -> list[dict[str, Any]]:
-    """Return every group."""
-    return list(GROUP_DATA.values())
+    """Return every group, `default_group` first."""
+    return [default_group(), *GROUP_DATA.values()]
 
 
 def validate_name(username: str) -> None:
@@ -757,7 +784,12 @@ def write_group_file(group_name: str, settings_dict: dict[str, Any]) -> None:
     Args:
         group_name: Group name (validated by the API model).
         settings_dict: Settings applied to members.
+
+    Raises:
+        ValueError: For a name in `RESERVED_GROUP_NAMES`.
     """
+    if group_name in RESERVED_GROUP_NAMES:
+        raise ValueError(f"'{group_name}' is not a group a file can hold.")
     file_path = safe_join(settings.groups_base_path, group_name)
     persistence.write_yaml_sync(file_path, {k: v for k, v in settings_dict.items() if v is not None})
     logger.info("Wrote group file for '%s'.", group_name)
@@ -768,8 +800,10 @@ def delete_group(group_name: str) -> None:
     """Delete a group.
 
     Raises:
-        ValueError: For unknown groups.
+        ValueError: For an unknown group or `DEFAULT_GROUP`.
     """
+    if group_name == DEFAULT_GROUP:
+        raise ValueError(f"'{DEFAULT_GROUP}' is built in.")
     if group_name not in GROUP_DATA:
         raise ValueError(f"Group '{group_name}' not found.")
     persistence.remove(safe_join(settings.groups_base_path, group_name))

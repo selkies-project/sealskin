@@ -3,6 +3,7 @@
 import pytest
 
 from app import user_manager
+from app.routers.applications import user_can_access
 
 
 @pytest.fixture
@@ -16,11 +17,31 @@ def users():
     user_manager.load_users_and_groups()
 
 
-def test_a_user_in_no_group_keeps_their_own_settings(users):
+def test_a_user_in_no_group_keeps_their_own_settings_and_is_judged_by_the_default_group(users):
     user_manager.write_user_file("carol", "", dict(user_manager.DEFAULT_USER_SETTINGS, session_limit=3, gpu=False))
     user_manager.load_users_and_groups()
     effective = user_manager.get_effective_settings("carol")
-    assert (effective["session_limit"], effective["gpu"], effective["groups"]) == (3, False, [])
+    assert (effective["session_limit"], effective["gpu"], effective["groups"], effective["group"]) == (3, False, ["default"], "default")
+    assert user_manager.groups_of("carol") == []
+    # An access list may name the default group; the group of an older record's `none` is no group.
+    assert user_can_access(["nobody"], ["default"], "carol", effective["groups"]) is True
+    assert user_can_access(["nobody"], ["default"], "bob", user_manager.get_effective_settings("bob")["groups"]) is False
+    user_manager.write_user_file("carol", "", dict(user_manager.DEFAULT_USER_SETTINGS, group="none", groups=["none", "default"]))
+    user_manager.load_users_and_groups()
+    assert user_manager.get_user("carol")["settings"]["groups"] == [] and user_manager.get_user("carol")["settings"]["group"] == "default"
+
+
+def test_the_default_group_is_listed_first_and_no_file_may_take_a_reserved_name(users):
+    listed = user_manager.get_all_groups()
+    assert listed[0]["name"] == "default" and listed[0]["builtin"] is True
+    assert listed[0]["settings"]["gpu"] is True and listed[0]["settings"]["session_limit"] == -1 and "group" not in listed[0]["settings"]
+    assert {g["name"] for g in listed[1:]} == set(user_manager.GROUP_DATA)
+    for name in ("default", "all", "none"):
+        with pytest.raises(ValueError):
+            user_manager.write_group_file(name, {"gpu": False})
+    with pytest.raises(ValueError):
+        user_manager.delete_group("default")
+    assert "default" not in user_manager.GROUP_DATA
 
 
 def test_one_group_decides_what_it_sets_and_leaves_the_rest_to_the_user(users):
@@ -85,10 +106,29 @@ def test_a_user_a_sign_in_creates_in_no_group_is_held_until_grouped_or_approved(
     user_manager.approve("erin")
     assert user_manager.held("erin") is False
     assert user_manager.get_user("erin")["settings"]["approved"] is True
+    assert user_manager.get_effective_settings("erin")["groups"] == ["default"]
+    # Off, the setting stops holding new users and releases nobody already held.
+    user_manager.ensure_user("ed", "proxy")
+    assert user_manager.held("ed") is True
     monkeypatch.setattr(user_manager.settings, "sso_hold_new_users", False)
     user_manager.ensure_user("frank", "proxy")
     assert "approved" not in user_manager.get_user("frank")["settings"]
     assert user_manager.held("frank") is False
+    assert user_manager.held("ed") is True
+
+
+def test_approving_places_the_user_in_the_groups_named_beside_those_the_record_has(users):
+    user_manager.ensure_user("erin", "oidc", "oidc https://idp sub-9", ["nobody"])
+    user_manager.update_user_settings("erin", dict(user_manager.DEFAULT_USER_SETTINGS, groups=["power"]))
+    with pytest.raises(ValueError):
+        user_manager.approve("erin", ["power", "nobody"])
+    assert user_manager.get_user("erin")["settings"]["approved"] is False
+    user_manager.approve("erin", ["staff", "power"])
+    stored = user_manager.get_user("erin")["settings"]
+    assert stored["approved"] is True and stored["groups"] == ["power", "staff"]
+    assert user_manager.held("erin") is False and user_manager.get_effective_settings("erin")["session_limit"] == 2
+    with pytest.raises(ValueError):
+        user_manager.approve("nobody")
 
 
 def test_a_user_the_provider_puts_in_a_group_or_an_administrator_made_is_never_held(users, monkeypatch):

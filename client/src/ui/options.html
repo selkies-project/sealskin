@@ -1209,12 +1209,37 @@
         </div>
     </div>
 
+    <div id="user-approve-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="user-approve-title"></h3>
+                <span class="close-button" data-modal-id="user-approve-modal">&times;</span>
+            </div>
+            <form id="user-approve-form">
+                <input type="hidden" id="approveUsername">
+                <div class="field-list single">
+                    <div class="field">
+                        <div class="field-text">
+                            <label for="approve-groups" data-i18n="options.users.approveGroups">Groups to place the user in</label>
+                            <p class="description" data-i18n="options.users.groupsHelp">Hold Ctrl or Command to select several. Where groups disagree, the restricting value wins.</p>
+                        </div>
+                        <div class="field-control"><select id="approve-groups" multiple size="4"></select></div>
+                    </div>
+                </div>
+                <p class="description" id="approve-provider-groups" style="display: none;"></p>
+                <p class="description" data-i18n="options.users.approveHelp">With no group chosen, the user is placed in default: their own settings, and every application, VPN profile, and pool open to all or to default.</p>
+                <div class="button-group"><button type="submit" class="primary" data-i18n="options.users.approve">Approve</button></div>
+            </form>
+        </div>
+    </div>
+
     <div id="group-edit-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="group-edit-title">Edit Group</h3>
                 <span class="close-button" data-modal-id="group-edit-modal">&times;</span>
             </div>
+            <p class="description" id="group-edit-note" style="display: none;"></p>
             <form id="group-edit-form">
                 <input type="hidden" id="editGroupName">
                 <div id="editGroupSettings"></div>

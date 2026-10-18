@@ -38,6 +38,7 @@ from ..launch import RESERVED_ENV, launch_application, stop_session
 from ..models import (
     ActiveSessionInfo,
     AdminStatusResponse,
+    ApproveUserRequest,
     AppStore,
     AppTemplate,
     AvailableApp,
@@ -915,12 +916,15 @@ async def update_user(
 
 
 @router.post("/users/{username}/approve", response_model=User)
-async def approve_user(username: str) -> dict[str, Any]:
-    """Let a held user in without placing them in a group."""
+async def approve_user(username: str, decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body)) -> dict[str, Any]:
+    """Let a held user in, placed in the groups the body names; none leaves them in `default`."""
     try:
-        return user_manager.approve(username)
+        req = ApproveUserRequest(**decrypted_body)
+        return user_manager.approve(username, req.groups)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValidationError as exc:
+        raise HTTPException(status_code=422, detail=f"Invalid request body: {exc}") from exc
 
 
 @router.delete("/users/{username}", status_code=204)
@@ -1047,7 +1051,10 @@ async def create_group(decrypted_body: dict[str, Any] = Depends(get_decrypted_re
         raise HTTPException(status_code=422, detail=f"Invalid request body: {exc}") from exc
     if req.name in user_manager.GROUP_DATA:
         raise HTTPException(status_code=409, detail=f"Group '{req.name}' already exists.")
-    user_manager.write_group_file(req.name, req.settings.model_dump())
+    try:
+        user_manager.write_group_file(req.name, req.settings.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     return user_manager.GROUP_DATA.get(req.name)
 
 
@@ -1055,11 +1062,13 @@ async def create_group(decrypted_body: dict[str, Any] = Depends(get_decrypted_re
 async def update_group(
     group_name: str, decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body)
 ) -> dict[str, Any]:
-    """Replace a group's settings."""
+    """Replace a group's settings; `default` has none to replace."""
     try:
         req = UpdateGroupRequest(**decrypted_body)
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=f"Invalid request body: {exc}") from exc
+    if group_name == user_manager.DEFAULT_GROUP:
+        raise HTTPException(status_code=409, detail=f"'{group_name}' is built in.")
     if group_name not in user_manager.GROUP_DATA:
         raise HTTPException(status_code=404, detail=f"Group '{group_name}' not found.")
     user_manager.write_group_file(group_name, req.settings.model_dump())
@@ -1068,7 +1077,9 @@ async def update_group(
 
 @router.delete("/groups/{group_name}", status_code=204)
 async def delete_group(group_name: str) -> Response:
-    """Delete a group."""
+    """Delete a group; `default` cannot be."""
+    if group_name == user_manager.DEFAULT_GROUP:
+        raise HTTPException(status_code=409, detail=f"'{group_name}' is built in.")
     try:
         user_manager.delete_group(group_name)
         return Response(status_code=204)

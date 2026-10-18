@@ -17,6 +17,7 @@
     "remove": "Alisin",
     "move": "Ilipat",
     "edit": "I-edit",
+    "view": "Tingnan",
     "save": "I-save",
     "none": "wala",
     "error": "Error",
@@ -240,6 +241,9 @@
       "signInOnly": "Single sign-on lamang",
       "awaitingGroup": "Naghihintay ng grupo",
       "approve": "Aprubahan",
+      "approveTitle": "Aprubahan si {username}",
+      "approveGroups": "Mga grupong ilalagay sa user",
+      "approveHelp": "Kung walang piniling grupo, mapupunta ang user sa default: ang sarili niyang mga setting, at bawat application, VPN profile, at pool na bukas sa lahat o sa default.",
       "admin": "Administrator",
       "gpuShare": "Pahintulutan ang Pagbabahagi ng GPU sa Ibang mga Sesyon",
       "homeMigration": "Pahintulutan ang Paglilipat ng mga Home Directory sa Pagitan ng mga Node",
@@ -306,7 +310,10 @@
       "off": "Naka-off",
       "ssoGroups": "Mga grupo ng identity provider na ang mga miyembro ay kasama sa grupong ito (pinaghihiwalay ng kuwit)",
       "overrideHelp": "Ang grupo ay nagpapasya lamang sa mga nakatakda rito; ang lahat ng hindi itinakda o iniwang blangko ay nananatiling sa bawat miyembro.",
-      "chosen": "Ang mga app lamang na may check sa ibaba"
+      "chosen": "Ang mga app lamang na may check sa ibaba",
+      "builtin": "Built in",
+      "defaultTitle": "Ang default na grupo",
+      "defaultHelp": "Ang mga setting ng user na wala sa ibang grupo; walang file na naghahawak nito. Para baguhin ang nakukuha ng gayong user, ilagay siya sa isang grupo o i-edit ang sarili niyang mga setting."
     },
     "installedApps": {
       "title": "Mga Naka-install na Aplikasyon",

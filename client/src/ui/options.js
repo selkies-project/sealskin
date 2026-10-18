@@ -68,6 +68,8 @@ const refreshSessionsBtn = document.getElementById('refresh-sessions-btn');
 const userEditModal = document.getElementById('user-edit-modal');
 const userEditForm = document.getElementById('user-edit-form');
 const groupEditModal = document.getElementById('group-edit-modal');
+const userApproveModal = document.getElementById('user-approve-modal');
+const userApproveForm = document.getElementById('user-approve-form');
 const groupEditForm = document.getElementById('group-edit-form');
 const userConfigModal = document.getElementById('user-config-modal');
 const generatedConfigText = document.getElementById('generatedConfigText');
@@ -2408,7 +2410,7 @@ const tableRenderConfig = {
       return `
                 <tr>
                     <td>${username}</td>
-                    <td>${escapeHtml(groupsOf(item.settings).join(', ')) || t('common.none')}${marks}</td>
+                    <td>${escapeHtml(groupsOf(item.settings).join(', ')) || (waiting ? t('common.none') : DEFAULT_GROUP)}${marks}</td>
                     <td class="pubkey-cell" title="${pubkey}">
                         <div class="cell-wrapper">
                             <span class="key-text">${item.public_key ? shortKey(item.public_key) : t('options.users.signInOnly')}</span>
@@ -2432,10 +2434,10 @@ const tableRenderConfig = {
     filter: (item, term) => item.name.toLowerCase().includes(term),
     row: (item) => `
                 <tr>
-                    <td>${escapeHtml(item.name)}</td>
+                    <td>${escapeHtml(item.name)}${item.builtin ? ` <span class="pill active">${escapeHtml(t('options.groups.builtin'))}</span>` : ''}</td>
                     <td class="actions-cell">
-                        <button class="warning" data-groupname="${escapeHtml(item.name)}">${t('common.edit')}</button>
-                        <button class="danger" data-groupname="${escapeHtml(item.name)}">${t('common.delete')}</button>
+                        ${item.builtin ? `<button class="secondary" data-groupname="${escapeHtml(item.name)}">${t('common.view')}</button>` : `<button class="warning" data-groupname="${escapeHtml(item.name)}">${t('common.edit')}</button>
+                        <button class="danger" data-groupname="${escapeHtml(item.name)}">${t('common.delete')}</button>`}
                     </td>
                 </tr>`,
   },
@@ -2613,14 +2615,19 @@ const USER_DEFAULTS = {
 };
 // The new-user form starts without a GPU, as it always has.
 const NEW_USER_SETTINGS = { ...USER_DEFAULTS, gpu: false };
+// The group a user in no other group is judged by: the server lists it with the default settings and no file.
+const DEFAULT_GROUP = 'default';
+// Names no group file holds: the default group's, the `all` of access lists, and the older spelling of no group.
+const RESERVED_GROUPS = new Set([DEFAULT_GROUP, 'all', 'none']);
 
 const splitList = (value) => value.split(',').map((s) => s.trim()).filter(Boolean);
 const field = (prefix, name) => document.getElementById(`${prefix}-${name}`);
 
 /** The groups a user's settings name; records written before `groups` name one in `group`. */
 function groupsOf(settings) {
-  if (settings.groups && settings.groups.length) return settings.groups;
-  return settings.group && settings.group !== 'none' ? [settings.group] : [];
+  const named = (settings.groups || []).filter((name) => !RESERVED_GROUPS.has(name));
+  if (named.length) return named;
+  return settings.group && !RESERVED_GROUPS.has(settings.group) ? [settings.group] : [];
 }
 
 /**
@@ -2696,7 +2703,7 @@ function readUserSettings(prefix) {
   });
   settings.allowance_period = field(prefix, 'allowance_period').value;
   settings.groups = [...field(prefix, 'groups').selectedOptions].map((option) => option.value);
-  settings.group = settings.groups[0] || 'none';
+  settings.group = settings.groups[0] || DEFAULT_GROUP;
   settings.pools = splitList(field(prefix, 'pools').value);
   settings.pools_denied = splitList(field(prefix, 'pools_denied').value);
   settings.proot_catalog = field(prefix, 'proot_catalog').value || null;
@@ -2759,14 +2766,14 @@ function fillGroupSettings(prefix, settings) {
 function calculateEffectiveSettings(user) {
   if (!user || !user.settings) return {};
   const base = { ...USER_DEFAULTS, ...user.settings };
-  const known = new Map(adminData.groups.map((group) => [group.name, group.settings || {}]));
+  const known = new Map(adminData.groups.filter((group) => !group.builtin).map((group) => [group.name, group.settings || {}]));
   const brought = new Set(base.provider_groups || []);
   const names = groupsOf(base).filter((name) => known.has(name));
   known.forEach((settings, name) => {
     if (!names.includes(name) && (brought.has(name) || (settings.sso_groups || []).some((g) => brought.has(g)))) names.push(name);
   });
   const members = names.map((name) => known.get(name));
-  const effective = { ...base, groups: names, group: names[0] || 'none' };
+  const effective = { ...base, groups: names.length ? names : [DEFAULT_GROUP], group: names[0] || DEFAULT_GROUP };
   SETTING_SWITCHES.forEach(([key, , restricting]) => {
     const chosen = members.filter((g) => typeof g[key] === 'boolean').map((g) => g[key]);
     if (chosen.length) effective[key] = chosen.includes(restricting) ? restricting : !restricting;
@@ -2804,12 +2811,45 @@ function populateCatalogDropdowns() {
 }
 
 function populateGroupDropdowns() {
-  document.querySelectorAll('#newUser-groups, #editUser-groups').forEach((select) => {
+  document.querySelectorAll('#newUser-groups, #editUser-groups, #approve-groups').forEach((select) => {
     const chosen = [...select.selectedOptions].map((option) => option.value);
     select.innerHTML = adminData.groups
+      .filter((group) => !group.builtin)
       .map((group) => `<option value="${escapeHtml(group.name)}"${chosen.includes(group.name) ? ' selected' : ''}>${escapeHtml(group.name)}</option>`)
       .join('');
   });
+}
+
+/** Open a group's settings: a form for one with a file, a read-only view with the note for the built-in group. */
+function openGroupEditor(group) {
+  const builtin = Boolean(group.builtin);
+  document.getElementById('group-edit-title').textContent = builtin
+    ? t('options.groups.defaultTitle')
+    : t('options.modals.editGroupTitle', { groupName: group.name });
+  document.getElementById('editGroupName').value = group.name;
+  // Filling decides which client boxes are live, so the form is unlocked before it and locked whole after.
+  groupEditForm.querySelectorAll('input, select').forEach((control) => { control.disabled = false; });
+  fillGroupSettings('editGroup', group.settings || {});
+  if (builtin) groupEditForm.querySelectorAll('input, select').forEach((control) => { control.disabled = true; });
+  const note = document.getElementById('group-edit-note');
+  note.textContent = builtin ? t('options.groups.defaultHelp') : '';
+  note.style.display = builtin ? 'block' : 'none';
+  groupEditForm.querySelector('button[type="submit"]').style.display = builtin ? 'none' : '';
+  groupEditModal.style.display = 'block';
+  markClampedDescriptions(groupEditModal);
+}
+
+/** Open the approval of a held user: the groups to place them in, with those the provider named as a hint. */
+function openApproval(user) {
+  const { username } = user;
+  document.getElementById('user-approve-title').textContent = t('options.users.approveTitle', { username });
+  document.getElementById('approveUsername').value = username;
+  [...document.getElementById('approve-groups').options].forEach((option) => { option.selected = false; });
+  const provided = document.getElementById('approve-provider-groups');
+  const named = (user.settings && user.settings.provider_groups) || [];
+  provided.textContent = t('options.users.providerGroups', { groups: named.join(', ') });
+  provided.style.display = named.length ? 'block' : 'none';
+  userApproveModal.style.display = 'block';
 }
 
 // --- THE USER'S OWN APPLICATION KEYS (the web app alone: a key cannot manage keys) ---
@@ -2944,7 +2984,7 @@ async function renderUserKeys(username) {
                 <td><span class="pill ${key.state === 'active' ? 'active' : 'off'}">${escapeHtml(t(`options.users.keyState.${key.state}`))}</span></td>
                 <td>${key.last_used ? `${escapeHtml(formatDate(key.last_used))}${key.client ? ` · ${escapeHtml(client(key.client))}` : ''}` : escapeHtml(t('options.users.keyNeverUsed'))}</td>
                 <td>${key.expires ? escapeHtml(formatDate(key.expires)) : escapeHtml(t('options.users.keyNever'))}</td>
-                <td class="actions-cell"><button class="danger" data-keyid="${escapeHtml(key.id)}">${t('web.keys.revoke')}</button></td>
+                <td class="actions-cell"><button class="danger" data-keyid="${escapeHtml(key.id)}">${t('options.keys.revoke')}</button></td>
             </tr>`).join('');
 }
 
@@ -4371,13 +4411,8 @@ function bindEvents() {
     if (button.dataset.action === 'keys') {
       await openUserKeys(username);
     } else if (button.dataset.action === 'approve') {
-      try {
-        await secureFetch(`/api/admin/users/${username}/approve`, { method: 'POST' });
-        displayStatus(t('options.status.userApproved', { username }));
-        await refreshAdminData();
-      } catch (error) {
-        await writeFailed(error, t('options.status.userApproveFailed', { error: error.message }), refreshAdminData);
-      }
+      const user = adminData.users.find((u) => u.username === username);
+      if (user) openApproval(user);
     } else if (button.classList.contains('danger')) {
       const remove = await confirmDialog(t, {
         title: t('options.users.deleteTitle'),
@@ -4413,6 +4448,25 @@ function bindEvents() {
       await refreshAdminUserHomeDirs(username, false);
       userHomeDirModal.style.display = 'block';
     }
+  });
+
+  userApproveForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('approveUsername').value;
+    const groups = [...document.getElementById('approve-groups').selectedOptions].map((option) => option.value);
+    await submitOnce(userApproveForm, async () => {
+      try {
+        await secureFetch(`/api/admin/users/${username}/approve`, { method: 'POST', body: JSON.stringify({ groups }) });
+        displayStatus(t('options.status.userApproved', { username }));
+        userApproveModal.style.display = 'none';
+        await refreshAdminData();
+      } catch (error) {
+        await writeFailed(error, t('options.status.userApproveFailed', { error: error.message }), async () => {
+          userApproveModal.style.display = 'none';
+          await refreshAdminData();
+        });
+      }
+    });
   });
 
   userEditForm.addEventListener('submit', async (e) => {
@@ -4475,14 +4529,9 @@ function bindEvents() {
           await writeFailed(error, t('options.status.groupDeleteFailed', { error: error.message }), refreshAdminData);
         }
       }
-    } else if (button.classList.contains('warning')) {
+    } else {
       const group = adminData.groups.find((g) => g.name === groupName);
-      if (!group) return;
-      document.getElementById('group-edit-title').textContent = t('options.modals.editGroupTitle', { groupName });
-      document.getElementById('editGroupName').value = groupName;
-      fillGroupSettings('editGroup', group.settings || {});
-      groupEditModal.style.display = 'block';
-      markClampedDescriptions(groupEditModal);
+      if (group) openGroupEditor(group);
     }
   });
 

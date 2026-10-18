@@ -17,6 +17,7 @@
     "remove": "Retirer",
     "move": "Déplacer",
     "edit": "Modifier",
+    "view": "Voir",
     "save": "Enregistrer",
     "none": "aucun",
     "error": "Erreur",
@@ -240,6 +241,9 @@
       "signInOnly": "Authentification unique seulement",
       "awaitingGroup": "En attente d'un groupe",
       "approve": "Approuver",
+      "approveTitle": "Approuver {username}",
+      "approveGroups": "Groupes où placer l'utilisateur",
+      "approveHelp": "Sans groupe choisi, l'utilisateur est placé dans default : ses propres réglages, et toute application, tout profil VPN et tout pool ouverts à tous ou à default.",
       "admin": "Administrateur",
       "gpuShare": "Autoriser le Partage d'un GPU avec d'Autres Sessions",
       "homeMigration": "Autoriser le Déplacement des Dossiers Personnels entre Nœuds",
@@ -306,7 +310,10 @@
       "off": "Désactivé",
       "ssoGroups": "Groupes du fournisseur d'identité dont les membres font partie de ce groupe (séparés par des virgules)",
       "overrideHelp": "Un groupe ne décide que de ce qui est défini ici ; tout ce qui reste non défini ou vide reste propre à chaque membre.",
-      "chosen": "Seulement les applications cochées ci-dessous"
+      "chosen": "Seulement les applications cochées ci-dessous",
+      "builtin": "Intégré",
+      "defaultTitle": "Le groupe par défaut",
+      "defaultHelp": "Les réglages d'un utilisateur sans autre groupe ; aucun fichier ne les contient. Pour changer ce qu'un tel utilisateur obtient, placez-le dans un groupe ou modifiez ses propres réglages."
     },
     "installedApps": {
       "title": "Applications Installées",

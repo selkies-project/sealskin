@@ -17,6 +17,7 @@
     "remove": "Gỡ",
     "move": "Di chuyển",
     "edit": "Chỉnh sửa",
+    "view": "Xem",
     "save": "Lưu",
     "none": "không có",
     "error": "Lỗi",
@@ -240,6 +241,9 @@
       "signInOnly": "Chỉ đăng nhập một lần",
       "awaitingGroup": "Đang chờ nhóm",
       "approve": "Phê duyệt",
+      "approveTitle": "Phê duyệt {username}",
+      "approveGroups": "Các nhóm để xếp người dùng vào",
+      "approveHelp": "Không chọn nhóm nào thì người dùng được xếp vào default: cài đặt riêng của họ, và mọi ứng dụng, hồ sơ VPN và pool mở cho tất cả hoặc cho default.",
       "admin": "Quản trị viên",
       "gpuShare": "Cho phép dùng chung GPU với các phiên khác",
       "homeMigration": "Cho phép di chuyển thư mục chính giữa các nút",
@@ -306,7 +310,10 @@
       "off": "Tắt",
       "ssoGroups": "Các nhóm của nhà cung cấp danh tính có thành viên thuộc nhóm này (phân tách bằng dấu phẩy)",
       "overrideHelp": "Nhóm chỉ quyết định những gì được đặt ở đây; mọi thứ chưa đặt hoặc để trống vẫn theo thiết lập riêng của từng thành viên.",
-      "chosen": "Chỉ các ứng dụng được đánh dấu bên dưới"
+      "chosen": "Chỉ các ứng dụng được đánh dấu bên dưới",
+      "builtin": "Có sẵn",
+      "defaultTitle": "Nhóm mặc định",
+      "defaultHelp": "Cài đặt của người dùng không thuộc nhóm nào khác; không tệp nào lưu chúng. Để thay đổi những gì người dùng như vậy nhận được, hãy xếp họ vào một nhóm hoặc chỉnh sửa cài đặt riêng của họ."
     },
     "installedApps": {
       "title": "Ứng dụng đã cài đặt",
