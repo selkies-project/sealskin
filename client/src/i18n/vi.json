@@ -408,6 +408,10 @@
           "label": "Hiển thị các nút cốt lõi",
           "description": "Hiển thị các nút thành phần cốt lõi (hiển thị, âm thanh, v.v.)."
         },
+        "SELKIES_UI_SHOW_CONNECTION_INDICATOR": {
+          "label": "Hiện chỉ báo kết nối",
+          "description": "Hiện một dấu trên luồng khi máy chủ thấy kết nối của máy khách kém, có hoặc không có thanh bên."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
           "label": "Hiển thị cài đặt video",
           "description": "Hiển thị phần cài đặt video trong thanh bên."
@@ -552,6 +556,10 @@
           "label": "Bật in",
           "description": "Chuyển các tài liệu được in vào hàng đợi Selkies của phiên cho trình duyệt dưới dạng PDF. Khi tắt sẽ từ chối chúng và ẩn phần máy in; «Tăng cường bảo mật máy tính để bàn» sẽ tắt mục này trừ khi được đặt ở đây."
         },
+        "SELKIES_PRINT_SPOOL_PATH": {
+          "label": "Thư mục hàng đợi in",
+          "description": "Thư mục mà hàng đợi in của phiên ghi các lệnh in hoàn tất dưới dạng PDF, được tạo khi khởi động nếu chưa có. Để trống dùng selkies/print trong thư mục trạng thái của người dùng phiên."
+        },
         "SELKIES_ENABLE_SHARING": {
           "label": "Bật tất cả chia sẻ",
           "description": "Công tắc chính cho tất cả các tính năng chia sẻ."
@@ -687,6 +695,10 @@
           "label": "Kênh âm thanh",
           "description": "Số kênh âm thanh; 2 là âm thanh nổi."
         },
+        "SELKIES_AUDIO_DEVICE_NAME": {
+          "label": "Thiết bị thu âm thanh",
+          "description": "Nguồn PulseAudio mà âm thanh của phiên được thu từ đó. Ảnh tạo sink output, có monitor là output.monitor."
+        },
         "SELKIES_AUDIO_REDUNDANCY": {
           "label": "Dự phòng âm thanh (Opus RED)",
           "description": "Gửi kèm các khung âm thanh trước đó làm dự phòng để giảm gián đoạn khi mất gói tin."
@@ -708,11 +720,13 @@
           "description": "ví dụ: '8-240' cho một phạm vi, '60' cho giá trị ban đầu cố định, '60,8-240' cho cả hai; '60-60' sẽ khóa giá trị."
         },
         "SELKIES_RATE_CONTROL_MODE": {
-          "label": "Chế độ kiểm soát tốc độ bit",
-          "description": "Điều khiển tốc độ mặc định của các bộ mã hóa video: chất lượng cố định (CRF) hoặc tốc độ bit cố định (CBR).",
+          "label": "Chế độ điều khiển tốc độ bit",
+          "description": "Điều khiển tốc độ bit mà bộ mã hóa video khởi đầu và các chế độ máy khách có thể chuyển sang: chất lượng cố định (CRF) hoặc tốc độ bit cố định (CBR). Một chế độ duy nhất sẽ khóa lựa chọn.",
           "options": {
-            "crf": "Chất lượng không đổi (CRF)",
-            "cbr": "Bitrate không đổi (CBR)"
+            "crfCbr": "CRF mặc định, có thể chọn CBR",
+            "cbrCrf": "CBR mặc định, có thể chọn CRF",
+            "crf": "Chỉ CRF",
+            "cbr": "Chỉ CBR"
           }
         },
         "SELKIES_ENABLE_RATE_CONTROL": {
@@ -746,6 +760,10 @@
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "Màu đầy đủ video (4:4:4)",
           "description": "Mã hóa với chroma 4:4:4 khi codec và bộ mã hóa hỗ trợ (H.264 và H.265 trên NVENC, VA-API, x264 và x265; VP9 trên VA-API và libvpx). Máy khách không có cấu hình 4:4:4 sẽ phát 4:2:0 với cùng codec trừ khi mục này bị khóa; khi đó nó chuyển sang bộ mã hóa kế tiếp mà nó giải mã được."
+        },
+        "SELKIES_VIDEO_10BIT": {
+          "label": "Video 10 bit",
+          "description": "Mã hóa 10 bit mỗi mẫu khi codec và bộ mã hóa hỗ trợ (H.264 trên x264; H.265, VP9 và AV1 trên VA-API và các bộ mã hóa phần mềm; H.265 và AV1 trên NVENC). Tốn CPU trên bộ mã hóa phần mềm và chỉ thấy rõ khi dùng cùng màu đầy đủ 4:4:4."
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "Chế độ truyền phát video (Turbo)",
@@ -793,6 +811,10 @@
             "auto": "Tự động"
           }
         },
+        "SELKIES_WEBCAM_DEVICE": {
+          "label": "Thiết bị kernel của webcam",
+          "description": "Đồng thời phản chiếu webcam vào một thiết bị v4l2loopback mà ứng dụng tìm thấy không cần lớp chèn. auto dùng thiết bị đầu tiên tìm được, đường dẫn như /dev/video10 dùng thiết bị đó, false không bao giờ dùng."
+        },
         "HARDEN_DESKTOP": {
           "label": "Tăng cường bảo mật Desktop (Cài đặt sẵn)",
           "description": "Bật DISABLE_OPEN_TOOLS, DISABLE_SUDO và DISABLE_TERMINALS, và trừ khi được đặt rõ, cũng tắt truyền tệp, websocket lệnh, in ấn cùng các phần tệp và ứng dụng trong thanh bên. Bắt buộc với người dùng có «Tăng cường bảo mật bộ chứa»."
@@ -816,6 +838,10 @@
         "DISABLE_CLOSE_BUTTON": {
           "label": "Vô hiệu hóa nút đóng cửa sổ",
           "description": "Xóa nút đóng khỏi thanh tiêu đề cửa sổ."
+        },
+        "DISABLE_WINDOW_BUTTONS": {
+          "label": "Vô hiệu hóa nút cửa sổ",
+          "description": "Gỡ các nút thu nhỏ, phóng to và đóng khỏi thanh tiêu đề cửa sổ."
         },
         "DISABLE_MOUSE_BUTTONS": {
           "label": "Vô hiệu hóa nhấp chuột phải/giữa",
@@ -852,6 +878,10 @@
         "DRI_NODE": {
           "label": "Nút kết xuất để mã hóa",
           "description": "Nút kết xuất DRI mà bộ mã hóa video dùng (VA-API hoặc NVENC), ví dụ /dev/dri/renderD128. Để trống sẽ theo lựa chọn GPU tự động."
+        },
+        "SELKIES_GPU_ID": {
+          "label": "ID GPU bộ mã hóa",
+          "description": "Chỉ số GPU mà bộ mã hóa video phần cứng dùng, chọn /dev/dri/renderD(128 + n). Để trống mã hóa trên GPU đầu tiên hoặc GPU được chọn tự động, -1 tắt mã hóa phần cứng. Bị bỏ qua khi đã đặt nút kết xuất mã hóa."
         },
         "DRINODE": {
           "label": "Nút kết xuất",

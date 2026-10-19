@@ -408,6 +408,10 @@
           "label": "Kern-Schaltflächen anzeigen",
           "description": "Die Schaltflächen der Kernkomponenten (Anzeige, Audio usw.) anzeigen."
         },
+        "SELKIES_UI_SHOW_CONNECTION_INDICATOR": {
+          "label": "Verbindungsanzeige anzeigen",
+          "description": "Zeigt eine Markierung über dem Stream, solange der Server die Verbindung des Clients als schlecht einstuft, mit oder ohne Seitenleiste."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
           "label": "Videoeinstellungen anzeigen",
           "description": "Den Abschnitt Videoeinstellungen in der Seitenleiste anzeigen."
@@ -552,6 +556,10 @@
           "label": "Drucken aktivieren",
           "description": "Übergibt Dokumente, die an die Selkies-Warteschlange der Sitzung gedruckt werden, als PDF an den Browser. Aus lehnt sie ab und blendet den Druckerbereich aus; „Desktop härten“ schaltet es aus, sofern hier nichts gesetzt ist."
         },
+        "SELKIES_PRINT_SPOOL_PATH": {
+          "label": "Druck-Spool-Verzeichnis",
+          "description": "Verzeichnis, in das die Druckwarteschlange der Sitzung fertige Aufträge als PDFs schreibt, beim Start angelegt, falls es fehlt. Leer verwendet selkies/print im Zustandsverzeichnis des Sitzungsbenutzers."
+        },
         "SELKIES_ENABLE_SHARING": {
           "label": "Alle Freigaben aktivieren",
           "description": "Hauptschalter für alle Freigabefunktionen."
@@ -687,6 +695,10 @@
           "label": "Audiokanäle",
           "description": "Anzahl der Audiokanäle; 2 ist Stereo."
         },
+        "SELKIES_AUDIO_DEVICE_NAME": {
+          "label": "Audio-Aufnahmegerät",
+          "description": "PulseAudio-Quelle, von der das Audio der Sitzung aufgenommen wird. Das Image erstellt die Senke output, deren Monitor output.monitor ist."
+        },
         "SELKIES_AUDIO_REDUNDANCY": {
           "label": "Audio-Redundanz (Opus RED)",
           "description": "Vorherige Audio-Frames als Redundanz mitsenden, um Aussetzer bei Paketverlust zu verringern."
@@ -709,10 +721,12 @@
         },
         "SELKIES_RATE_CONTROL_MODE": {
           "label": "Ratensteuerungsmodus",
-          "description": "Standard-Ratensteuerung der Video-Encoder: konstante Qualität (CRF) oder konstante Bitrate (CBR).",
+          "description": "Ratensteuerung, mit der die Video-Encoder starten, und die Modi, zu denen ein Client wechseln darf: konstante Qualität (CRF) oder konstante Bitrate (CBR). Ein einzelner Modus sperrt die Auswahl.",
           "options": {
-            "crf": "Konstante Qualität (CRF)",
-            "cbr": "Konstante Bitrate (CBR)"
+            "crfCbr": "CRF Standard, CBR wählbar",
+            "cbrCrf": "CBR Standard, CRF wählbar",
+            "crf": "Nur CRF",
+            "cbr": "Nur CBR"
           }
         },
         "SELKIES_ENABLE_RATE_CONTROL": {
@@ -746,6 +760,10 @@
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "Video-Vollfarbe (4:4:4)",
           "description": "Kodiert mit 4:4:4-Chroma, wo Codec und Encoder es tragen (H.264 und H.265 auf NVENC, VA-API, x264 und x265; VP9 auf VA-API und libvpx). Ein Client ohne 4:4:4-Profil streamt 4:2:0 im selben Codec, sofern dies nicht festgelegt ist; dann wechselt er zum nächsten Encoder, den er dekodiert."
+        },
+        "SELKIES_VIDEO_10BIT": {
+          "label": "Video 10 Bit",
+          "description": "Kodiert 10 Bit pro Abtastwert, wo Codec und Encoder es unterstützen (H.264 auf x264; H.265, VP9 und AV1 auf VA-API und den Software-Encodern; H.265 und AV1 auf NVENC). Kostet CPU bei Software-Encodern und zeigt sich nur zusammen mit 4:4:4-Vollfarbe."
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "Video-Streaming (Turbo) Modus",
@@ -793,6 +811,10 @@
             "auto": "Auto"
           }
         },
+        "SELKIES_WEBCAM_DEVICE": {
+          "label": "Webcam-Kernelgerät",
+          "description": "Spiegelt die Webcam zusätzlich in ein v4l2loopback-Gerät, das Anwendungen ohne den Interposer finden. auto nimmt das erste gefundene, ein Pfad wie /dev/video10 dieses Gerät, false keines."
+        },
         "HARDEN_DESKTOP": {
           "label": "Desktop härten (Voreinstellung)",
           "description": "Aktiviert DISABLE_OPEN_TOOLS, DISABLE_SUDO und DISABLE_TERMINALS und deaktiviert, sofern nicht ausdrücklich gesetzt, auch Dateiübertragungen, den Befehls-Websocket, das Drucken sowie die Bereiche Dateien und Apps der Seitenleiste. Für Benutzer mit „Container härten“ erzwungen."
@@ -816,6 +838,10 @@
         "DISABLE_CLOSE_BUTTON": {
           "label": "Fenster-Schließen-Button deaktivieren",
           "description": "Entfernt den Schließen-Button aus den Fenstertitelleisten."
+        },
+        "DISABLE_WINDOW_BUTTONS": {
+          "label": "Fensterschaltflächen deaktivieren",
+          "description": "Entfernt die Schaltflächen Minimieren, Maximieren und Schließen aus den Fenstertitelleisten."
         },
         "DISABLE_MOUSE_BUTTONS": {
           "label": "Rechts-/Mittelklick deaktivieren",
@@ -852,6 +878,10 @@
         "DRI_NODE": {
           "label": "Render-Knoten für die Kodierung",
           "description": "DRI-Render-Knoten, den der Video-Encoder nutzt (VA-API oder NVENC), etwa /dev/dri/renderD128. Leer folgt der automatischen GPU-Auswahl."
+        },
+        "SELKIES_GPU_ID": {
+          "label": "Encoder-GPU-ID",
+          "description": "Index der GPU für die Hardware-Video-Encoder, wählt /dev/dri/renderD(128 + n). Leer kodiert auf der ersten oder der automatisch gewählten GPU, -1 deaktiviert die Hardware-Kodierung. Wird ignoriert, wenn Encode-Render-Node gesetzt ist."
         },
         "DRINODE": {
           "label": "Render-Knoten",

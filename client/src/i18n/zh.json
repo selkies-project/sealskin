@@ -408,6 +408,10 @@
           "label": "显示核心按钮",
           "description": "显示核心组件按钮（显示、音频等）。"
         },
+        "SELKIES_UI_SHOW_CONNECTION_INDICATOR": {
+          "label": "显示连接指示器",
+          "description": "当服务器判定客户端连接较差时，在流画面上显示标记，无论是否显示侧边栏。"
+        },
         "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
           "label": "显示视频设置",
           "description": "在侧边栏中显示视频设置部分。"
@@ -552,6 +556,10 @@
           "label": "启用打印",
           "description": "将打印到会话 Selkies 队列的文档以 PDF 形式交给浏览器。关闭后会拒绝这些文档并隐藏打印机部分；除非在此设置，否则“加固桌面”会将其关闭。"
         },
+        "SELKIES_PRINT_SPOOL_PATH": {
+          "label": "打印队列目录",
+          "description": "会话打印队列将完成的任务以 PDF 写入的目录，不存在时在启动时创建。留空使用会话用户状态目录下的 selkies/print。"
+        },
         "SELKIES_ENABLE_SHARING": {
           "label": "启用所有共享",
           "description": "所有共享功能的主开关。"
@@ -687,6 +695,10 @@
           "label": "音频声道",
           "description": "音频声道数；2 为立体声。"
         },
+        "SELKIES_AUDIO_DEVICE_NAME": {
+          "label": "音频采集设备",
+          "description": "采集会话音频的 PulseAudio 源。镜像会创建 output 接收器，其监视器为 output.monitor。"
+        },
         "SELKIES_AUDIO_REDUNDANCY": {
           "label": "音频冗余 (Opus RED)",
           "description": "将先前的音频帧作为冗余数据一并传送，以减少丢包时的断音。"
@@ -709,10 +721,12 @@
         },
         "SELKIES_RATE_CONTROL_MODE": {
           "label": "码率控制模式",
-          "description": "视频编码器的默认码率控制：恒定质量（CRF）或恒定码率（CBR）。",
+          "description": "视频编码器启动时的码率控制以及客户端可切换的模式：恒定质量 (CRF) 或恒定码率 (CBR)。单一模式会锁定选择。",
           "options": {
-            "crf": "恒定质量 (CRF)",
-            "cbr": "恒定比特率 (CBR)"
+            "crfCbr": "默认 CRF，可选 CBR",
+            "cbrCrf": "默认 CBR，可选 CRF",
+            "crf": "仅 CRF",
+            "cbr": "仅 CBR"
           }
         },
         "SELKIES_ENABLE_RATE_CONTROL": {
@@ -746,6 +760,10 @@
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "视频全彩 (4:4:4)",
           "description": "在编解码器和编码器支持时以 4:4:4 色度编码（NVENC、VA-API、x264 和 x265 上的 H.264 与 H.265；VA-API 和 libvpx 上的 VP9）。没有 4:4:4 配置的客户端在未锁定时以同一编解码器接收 4:2:0；锁定时则切换到其可解码的下一个编码器。"
+        },
+        "SELKIES_VIDEO_10BIT": {
+          "label": "10 位视频",
+          "description": "在编解码器和编码器支持时以每样本 10 位编码（x264 上的 H.264；VA-API 和软件编码器上的 H.265、VP9 和 AV1；NVENC 上的 H.265 和 AV1）。在软件编码器上消耗 CPU，且只有与 4:4:4 全彩一起使用时才有可见效果。"
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "视频流媒体（Turbo）模式",
@@ -793,6 +811,10 @@
             "auto": "自动"
           }
         },
+        "SELKIES_WEBCAM_DEVICE": {
+          "label": "摄像头内核设备",
+          "description": "同时将摄像头镜像到应用程序无需拦截层即可找到的 v4l2loopback 设备。auto 使用找到的第一个设备，/dev/video10 之类的路径使用该设备，false 则从不使用。"
+        },
         "HARDEN_DESKTOP": {
           "label": "桌面加固（预设）",
           "description": "启用 DISABLE_OPEN_TOOLS、DISABLE_SUDO 和 DISABLE_TERMINALS，并在未显式设置时同时禁用文件传输、命令 websocket、打印以及侧边栏的文件和应用部分。对启用“加固容器”的用户强制生效。"
@@ -816,6 +838,10 @@
         "DISABLE_CLOSE_BUTTON": {
           "label": "禁用窗口关闭按钮",
           "description": "从窗口标题栏中移除关闭按钮。"
+        },
+        "DISABLE_WINDOW_BUTTONS": {
+          "label": "禁用窗口按钮",
+          "description": "从窗口标题栏移除最小化、最大化和关闭按钮。"
         },
         "DISABLE_MOUSE_BUTTONS": {
           "label": "禁用右键/中键单击",
@@ -852,6 +878,10 @@
         "DRI_NODE": {
           "label": "编码渲染节点",
           "description": "视频编码器（VA-API 或 NVENC）使用的 DRI 渲染节点，例如 /dev/dri/renderD128。留空则遵循自动 GPU 选择。"
+        },
+        "SELKIES_GPU_ID": {
+          "label": "编码器 GPU ID",
+          "description": "硬件视频编码器使用的 GPU 索引，选择 /dev/dri/renderD(128 + n)。留空在第一个或自动选择的 GPU 上编码，-1 禁用硬件编码。设置了编码渲染节点时忽略。"
         },
         "DRINODE": {
           "label": "渲染节点",

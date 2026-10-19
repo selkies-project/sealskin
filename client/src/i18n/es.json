@@ -408,6 +408,10 @@
           "label": "Mostrar Botones Principales",
           "description": "Mostrar los botones de componentes principales (pantalla, audio, etc.)."
         },
+        "SELKIES_UI_SHOW_CONNECTION_INDICATOR": {
+          "label": "Mostrar indicador de conexión",
+          "description": "Muestra una marca sobre la transmisión mientras el servidor considera deficiente la conexión del cliente, con o sin la barra lateral."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
           "label": "Mostrar Ajustes de Video",
           "description": "Mostrar la sección de ajustes de video en la barra lateral."
@@ -552,6 +556,10 @@
           "label": "Habilitar impresión",
           "description": "Entrega al navegador, como PDF, los documentos impresos en la cola Selkies de la sesión. Desactivado, los rechaza y oculta la sección de impresora; «Endurecer escritorio» lo desactiva salvo que se fije aquí."
         },
+        "SELKIES_PRINT_SPOOL_PATH": {
+          "label": "Directorio de cola de impresión",
+          "description": "Directorio donde la cola de impresión de la sesión escribe los trabajos terminados como PDF, creado al inicio si falta. Vacío usa selkies/print en el directorio de estado del usuario de la sesión."
+        },
         "SELKIES_ENABLE_SHARING": {
           "label": "Habilitar Todo para Compartir",
           "description": "Interruptor maestro para todas las funciones de compartir."
@@ -687,6 +695,10 @@
           "label": "Canales de Audio",
           "description": "Número de canales de audio; 2 es estéreo."
         },
+        "SELKIES_AUDIO_DEVICE_NAME": {
+          "label": "Dispositivo de captura de audio",
+          "description": "Fuente PulseAudio desde la que se captura el audio de la sesión. La imagen crea el sumidero output, cuyo monitor es output.monitor."
+        },
         "SELKIES_AUDIO_REDUNDANCY": {
           "label": "Redundancia de Audio (Opus RED)",
           "description": "Incluir fotogramas de audio anteriores como redundancia para reducir los cortes ante la pérdida de paquetes."
@@ -708,11 +720,13 @@
           "description": "ej., '8-240' para un rango, '60' para un valor inicial fijo, '60,8-240' para ambos; '60-60' lo bloquea."
         },
         "SELKIES_RATE_CONTROL_MODE": {
-          "label": "Modo de Control de Tasa",
-          "description": "Control de tasa predeterminado de los codificadores de vídeo: calidad constante (CRF) o tasa de bits constante (CBR).",
+          "label": "Modo de control de tasa",
+          "description": "Control de tasa con el que arrancan los codificadores de vídeo y modos a los que un cliente puede cambiar: calidad constante (CRF) o tasa de bits constante (CBR). Un solo modo bloquea la elección.",
           "options": {
-            "crf": "Calidad constante (CRF)",
-            "cbr": "Tasa de bits constante (CBR)"
+            "crfCbr": "CRF predeterminado, CBR seleccionable",
+            "cbrCrf": "CBR predeterminado, CRF seleccionable",
+            "crf": "Solo CRF",
+            "cbr": "Solo CBR"
           }
         },
         "SELKIES_ENABLE_RATE_CONTROL": {
@@ -746,6 +760,10 @@
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "Color Completo de Video (4:4:4)",
           "description": "Codifica con croma 4:4:4 donde el códec y el codificador lo admiten (H.264 y H.265 en NVENC, VA-API, x264 y x265; VP9 en VA-API y libvpx). Un cliente sin perfil 4:4:4 transmite 4:2:0 con el mismo códec salvo que esto esté bloqueado; entonces pasa al siguiente codificador que decodifica."
+        },
+        "SELKIES_VIDEO_10BIT": {
+          "label": "Vídeo de 10 bits",
+          "description": "Codifica 10 bits por muestra donde el códec y el codificador lo admiten (H.264 en x264; H.265, VP9 y AV1 en VA-API y los codificadores por software; H.265 y AV1 en NVENC). Consume CPU en los codificadores por software y solo se aprecia junto con el color completo 4:4:4."
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "Modo Streaming de Video (Turbo)",
@@ -793,6 +811,10 @@
             "auto": "Auto"
           }
         },
+        "SELKIES_WEBCAM_DEVICE": {
+          "label": "Dispositivo de kernel de la cámara web",
+          "description": "Refleja además la cámara web en un dispositivo v4l2loopback que las aplicaciones encuentran sin el interpositor. auto usa el primero encontrado, una ruta como /dev/video10 usa ese dispositivo y false nunca lo hace."
+        },
         "HARDEN_DESKTOP": {
           "label": "Fortalecer Escritorio (Preajuste)",
           "description": "Activa DISABLE_OPEN_TOOLS, DISABLE_SUDO y DISABLE_TERMINALS y, salvo que se fijen explícitamente, también desactiva las transferencias de archivos, el websocket de comandos, la impresión y las secciones de archivos y aplicaciones de la barra lateral. Forzado para usuarios con «Endurecer contenedor»."
@@ -816,6 +838,10 @@
         "DISABLE_CLOSE_BUTTON": {
           "label": "Deshabilitar Botón de Cierre de Ventana",
           "description": "Elimina el botón de cierre de las barras de título de las ventanas."
+        },
+        "DISABLE_WINDOW_BUTTONS": {
+          "label": "Deshabilitar botones de ventana",
+          "description": "Elimina los botones de minimizar, maximizar y cerrar de las barras de título de las ventanas."
         },
         "DISABLE_MOUSE_BUTTONS": {
           "label": "Deshabilitar Clic Derecho/Medio",
@@ -852,6 +878,10 @@
         "DRI_NODE": {
           "label": "Nodo de renderizado para codificar",
           "description": "Nodo de renderizado DRI que usa el codificador de vídeo (VA-API o NVENC), como /dev/dri/renderD128. Vacío sigue la selección automática de GPU."
+        },
+        "SELKIES_GPU_ID": {
+          "label": "ID de GPU del codificador",
+          "description": "Índice de la GPU que usan los codificadores de vídeo por hardware, seleccionando /dev/dri/renderD(128 + n). Vacío codifica en la primera GPU o en la seleccionada automáticamente, -1 desactiva la codificación por hardware. Se ignora cuando el nodo de renderizado de codificación está definido."
         },
         "DRINODE": {
           "label": "Nodo de renderizado",

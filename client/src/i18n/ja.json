@@ -408,6 +408,10 @@
           "label": "コアボタンを表示",
           "description": "コアコンポーネントのボタン（ディスプレイ、オーディオなど）を表示します。"
         },
+        "SELKIES_UI_SHOW_CONNECTION_INDICATOR": {
+          "label": "接続インジケーターを表示",
+          "description": "サーバーがクライアントの接続を不良と判断している間、サイドバーの有無にかかわらずストリーム上にマークを表示します。"
+        },
         "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
           "label": "ビデオ設定を表示",
           "description": "サイドバーにビデオ設定セクションを表示します。"
@@ -552,6 +556,10 @@
           "label": "印刷を有効化",
           "description": "セッションの Selkies キューに印刷された文書を PDF としてブラウザーへ渡します。オフでは拒否し、プリンター欄を隠します。「デスクトップを強化」はここで設定しない限りこれをオフにします。"
         },
+        "SELKIES_PRINT_SPOOL_PATH": {
+          "label": "印刷スプールディレクトリ",
+          "description": "セッションの印刷キューが完了したジョブを PDF として書き出すディレクトリで、存在しなければ起動時に作成されます。空はセッションユーザーの状態ディレクトリ下の selkies/print を使います。"
+        },
         "SELKIES_ENABLE_SHARING": {
           "label": "すべての共有を有効化",
           "description": "すべての共有機能のマスター切り替え。"
@@ -687,6 +695,10 @@
           "label": "オーディオチャンネル",
           "description": "オーディオチャンネル数。2はステレオです。"
         },
+        "SELKIES_AUDIO_DEVICE_NAME": {
+          "label": "音声キャプチャデバイス",
+          "description": "セッションの音声をキャプチャする PulseAudio ソース。イメージは output シンクを作成し、そのモニターが output.monitor です。"
+        },
         "SELKIES_AUDIO_REDUNDANCY": {
           "label": "オーディオ冗長化（Opus RED）",
           "description": "以前のオーディオフレームを冗長データとして送信し、パケットロス時の音切れを軽減します。"
@@ -709,10 +721,12 @@
         },
         "SELKIES_RATE_CONTROL_MODE": {
           "label": "レート制御モード",
-          "description": "ビデオエンコーダーのデフォルトのレート制御：固定品質（CRF）または固定ビットレート（CBR）。",
+          "description": "ビデオエンコーダーの開始時のレート制御と、クライアントが切り替えられるモード: 固定品質 (CRF) または固定ビットレート (CBR)。単一のモードは選択を固定します。",
           "options": {
-            "crf": "固定品質（CRF）",
-            "cbr": "固定ビットレート（CBR）"
+            "crfCbr": "CRF 既定、CBR 選択可",
+            "cbrCrf": "CBR 既定、CRF 選択可",
+            "crf": "CRF のみ",
+            "cbr": "CBR のみ"
           }
         },
         "SELKIES_ENABLE_RATE_CONTROL": {
@@ -746,6 +760,10 @@
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "ビデオフルカラー（4:4:4）",
           "description": "コーデックとエンコーダーが対応する場合に 4:4:4 クロマでエンコードします（NVENC、VA-API、x264、x265 の H.264 と H.265、VA-API と libvpx の VP9）。4:4:4 プロファイルのないクライアントは、これが固定されていない限り同じコーデックで 4:2:0 を受信し、固定されている場合はデコードできる次のエンコーダーへ移ります。"
+        },
+        "SELKIES_VIDEO_10BIT": {
+          "label": "10 ビットビデオ",
+          "description": "コーデックとエンコーダーが対応する場合にサンプルあたり 10 ビットでエンコードします (x264 の H.264、VA-API とソフトウェアエンコーダーの H.265・VP9・AV1、NVENC の H.265・AV1)。ソフトウェアエンコーダーでは CPU を消費し、4:4:4 フルカラーと併用したときだけ効果が見えます。"
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "ビデオストリーミング（ターボ）モード",
@@ -793,6 +811,10 @@
             "auto": "自動"
           }
         },
+        "SELKIES_WEBCAM_DEVICE": {
+          "label": "ウェブカメラのカーネルデバイス",
+          "description": "ウェブカメラをインターポーザーなしでアプリケーションが見つけられる v4l2loopback デバイスにもミラーします。auto は最初に見つかったもの、/dev/video10 のようなパスはそのデバイスを使い、false は使いません。"
+        },
         "HARDEN_DESKTOP": {
           "label": "デスクトップを強化（プリセット）",
           "description": "DISABLE_OPEN_TOOLS、DISABLE_SUDO、DISABLE_TERMINALS を有効にし、明示的に設定しない限りファイル転送、コマンド WebSocket、印刷、サイドバーのファイルとアプリの欄も無効にします。「コンテナを強化」のユーザーには強制されます。"
@@ -816,6 +838,10 @@
         "DISABLE_CLOSE_BUTTON": {
           "label": "ウィンドウ閉じるボタンを無効化",
           "description": "ウィンドウのタイトルバーから閉じるボタンを削除します。"
+        },
+        "DISABLE_WINDOW_BUTTONS": {
+          "label": "ウィンドウボタンを無効化",
+          "description": "ウィンドウのタイトルバーから最小化、最大化、閉じるボタンを取り除きます。"
         },
         "DISABLE_MOUSE_BUTTONS": {
           "label": "右/中クリックを無効化",
@@ -852,6 +878,10 @@
         "DRI_NODE": {
           "label": "エンコード用レンダーノード",
           "description": "ビデオエンコーダー（VA-API または NVENC）が使う DRI レンダーノード。例：/dev/dri/renderD128。空欄なら GPU の自動選択に従います。"
+        },
+        "SELKIES_GPU_ID": {
+          "label": "エンコーダー GPU ID",
+          "description": "ハードウェアビデオエンコーダーが使う GPU のインデックスで、/dev/dri/renderD(128 + n) を選びます。空は最初または自動選択された GPU でエンコードし、-1 はハードウェアエンコードを無効にします。エンコードレンダーノードが設定されている場合は無視されます。"
         },
         "DRINODE": {
           "label": "レンダーノード",

@@ -408,6 +408,10 @@
           "label": "Afficher les Boutons Principaux",
           "description": "Afficher les boutons des composants principaux (affichage, audio, etc.)."
         },
+        "SELKIES_UI_SHOW_CONNECTION_INDICATOR": {
+          "label": "Afficher l'indicateur de connexion",
+          "description": "Affiche un repère sur le flux tant que le serveur juge la connexion du client médiocre, avec ou sans la barre latérale."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
           "label": "Afficher les Paramètres Vidéo",
           "description": "Afficher la section des paramètres vidéo dans la barre latérale."
@@ -552,6 +556,10 @@
           "label": "Activer l'impression",
           "description": "Remet au navigateur, en PDF, les documents imprimés vers la file Selkies de la session. Désactivé, les refuse et masque la section imprimante ; « Durcir le bureau » le désactive sauf réglage ici."
         },
+        "SELKIES_PRINT_SPOOL_PATH": {
+          "label": "Répertoire de spool d'impression",
+          "description": "Répertoire où la file d'impression de la session écrit les travaux terminés en PDF, créé au démarrage s'il manque. Vide utilise selkies/print dans le répertoire d'état de l'utilisateur de la session."
+        },
         "SELKIES_ENABLE_SHARING": {
           "label": "Activer Tout le Partage",
           "description": "Interrupteur principal pour toutes les fonctionnalités de partage."
@@ -687,6 +695,10 @@
           "label": "Canaux Audio",
           "description": "Nombre de canaux audio ; 2 correspond à la stéréo."
         },
+        "SELKIES_AUDIO_DEVICE_NAME": {
+          "label": "Périphérique de capture audio",
+          "description": "Source PulseAudio depuis laquelle l'audio de la session est capturé. L'image crée le puits output, dont le moniteur est output.monitor."
+        },
         "SELKIES_AUDIO_REDUNDANCY": {
           "label": "Redondance Audio (Opus RED)",
           "description": "Transporter les trames audio précédentes en redondance pour réduire les coupures en cas de perte de paquets."
@@ -708,11 +720,13 @@
           "description": "ex., '8-240' pour une plage, '60' pour une valeur initiale fixe, '60,8-240' pour les deux ; '60-60' la verrouille."
         },
         "SELKIES_RATE_CONTROL_MODE": {
-          "label": "Mode de Contrôle du Débit",
-          "description": "Contrôle de débit par défaut des encodeurs vidéo : qualité constante (CRF) ou débit constant (CBR).",
+          "label": "Mode de contrôle du débit",
+          "description": "Contrôle du débit avec lequel les encodeurs vidéo démarrent et modes vers lesquels un client peut basculer : qualité constante (CRF) ou débit constant (CBR). Un seul mode verrouille le choix.",
           "options": {
-            "crf": "Qualité constante (CRF)",
-            "cbr": "Débit constant (CBR)"
+            "crfCbr": "CRF par défaut, CBR sélectionnable",
+            "cbrCrf": "CBR par défaut, CRF sélectionnable",
+            "crf": "CRF uniquement",
+            "cbr": "CBR uniquement"
           }
         },
         "SELKIES_ENABLE_RATE_CONTROL": {
@@ -746,6 +760,10 @@
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "Couleur Complète Vidéo (4:4:4)",
           "description": "Encode en chroma 4:4:4 là où le codec et l'encodeur le portent (H.264 et H.265 sur NVENC, VA-API, x264 et x265 ; VP9 sur VA-API et libvpx). Un client sans profil 4:4:4 diffuse en 4:2:0 avec le même codec, sauf si ceci est verrouillé ; il passe alors à l'encodeur suivant qu'il décode."
+        },
+        "SELKIES_VIDEO_10BIT": {
+          "label": "Vidéo 10 bits",
+          "description": "Encode 10 bits par échantillon là où le codec et l'encodeur le permettent (H.264 sur x264 ; H.265, VP9 et AV1 sur VA-API et les encodeurs logiciels ; H.265 et AV1 sur NVENC). Coûte du CPU sur les encodeurs logiciels et n'est visible qu'avec la couleur complète 4:4:4."
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "Mode Streaming Vidéo (Turbo)",
@@ -793,6 +811,10 @@
             "auto": "Auto"
           }
         },
+        "SELKIES_WEBCAM_DEVICE": {
+          "label": "Périphérique noyau de la webcam",
+          "description": "Reflète aussi la webcam dans un périphérique v4l2loopback que les applications trouvent sans l'interposeur. auto utilise le premier trouvé, un chemin tel que /dev/video10 utilise ce périphérique, false n'en utilise aucun."
+        },
         "HARDEN_DESKTOP": {
           "label": "Renforcer le Bureau (Préréglage)",
           "description": "Active DISABLE_OPEN_TOOLS, DISABLE_SUDO et DISABLE_TERMINALS et, sauf réglage explicite, désactive aussi les transferts de fichiers, le websocket de commandes, l'impression et les sections fichiers et applications de la barre latérale. Forcé pour les utilisateurs avec « Durcir le conteneur »."
@@ -816,6 +838,10 @@
         "DISABLE_CLOSE_BUTTON": {
           "label": "Désactiver le Bouton de Fermeture de Fenêtre",
           "description": "Supprime le bouton de fermeture des barres de titre des fenêtres."
+        },
+        "DISABLE_WINDOW_BUTTONS": {
+          "label": "Désactiver les boutons de fenêtre",
+          "description": "Retire les boutons réduire, agrandir et fermer des barres de titre des fenêtres."
         },
         "DISABLE_MOUSE_BUTTONS": {
           "label": "Désactiver Clic Droit/Milieu",
@@ -852,6 +878,10 @@
         "DRI_NODE": {
           "label": "Nœud de rendu pour l'encodage",
           "description": "Nœud de rendu DRI utilisé par l'encodeur vidéo (VA-API ou NVENC), par exemple /dev/dri/renderD128. Vide suit la sélection automatique du GPU."
+        },
+        "SELKIES_GPU_ID": {
+          "label": "ID du GPU d'encodage",
+          "description": "Index du GPU utilisé par les encodeurs vidéo matériels, sélectionnant /dev/dri/renderD(128 + n). Vide encode sur le premier GPU ou celui choisi automatiquement, -1 désactive l'encodage matériel. Ignoré quand le nœud de rendu d'encodage est défini."
         },
         "DRINODE": {
           "label": "Nœud de rendu",

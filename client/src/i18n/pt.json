@@ -408,6 +408,10 @@
           "label": "Exibir Botões Principais",
           "description": "Exibir os botões dos componentes principais (tela, áudio, etc)."
         },
+        "SELKIES_UI_SHOW_CONNECTION_INDICATOR": {
+          "label": "Mostrar indicador de conexão",
+          "description": "Mostra uma marca sobre a transmissão enquanto o servidor considera a conexão do cliente ruim, com ou sem a barra lateral."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
           "label": "Exibir Configurações de Vídeo",
           "description": "Exibir a seção de configurações de vídeo na barra lateral."
@@ -552,6 +556,10 @@
           "label": "Habilitar impressão",
           "description": "Entrega ao navegador, como PDF, os documentos impressos na fila Selkies da sessão. Desligado, recusa-os e oculta a seção de impressora; «Reforçar área de trabalho» o desliga salvo se definido aqui."
         },
+        "SELKIES_PRINT_SPOOL_PATH": {
+          "label": "Diretório de spool de impressão",
+          "description": "Diretório onde a fila de impressão da sessão grava os trabalhos concluídos como PDFs, criado na inicialização se não existir. Vazio usa selkies/print no diretório de estado do usuário da sessão."
+        },
         "SELKIES_ENABLE_SHARING": {
           "label": "Habilitar Todo o Compartilhamento",
           "description": "Interruptor mestre para todos os recursos de compartilhamento."
@@ -687,6 +695,10 @@
           "label": "Canais de Áudio",
           "description": "Número de canais de áudio; 2 é estéreo."
         },
+        "SELKIES_AUDIO_DEVICE_NAME": {
+          "label": "Dispositivo de captura de áudio",
+          "description": "Fonte PulseAudio da qual o áudio da sessão é capturado. A imagem cria o sink output, cujo monitor é output.monitor."
+        },
         "SELKIES_AUDIO_REDUNDANCY": {
           "label": "Redundância de Áudio (Opus RED)",
           "description": "Transportar quadros de áudio anteriores como redundância para reduzir falhas sob perda de pacotes."
@@ -708,11 +720,13 @@
           "description": "ex., '8-240' para um intervalo, '60' para um valor inicial fixo, '60,8-240' para ambos; '60-60' bloqueia o valor."
         },
         "SELKIES_RATE_CONTROL_MODE": {
-          "label": "Modo de Controle de Taxa",
-          "description": "Controle de taxa padrão dos codificadores de vídeo: qualidade constante (CRF) ou taxa de bits constante (CBR).",
+          "label": "Modo de controle de taxa",
+          "description": "Controle de taxa com que os codificadores de vídeo iniciam e modos para os quais um cliente pode alternar: qualidade constante (CRF) ou taxa de bits constante (CBR). Um único modo bloqueia a escolha.",
           "options": {
-            "crf": "Qualidade constante (CRF)",
-            "cbr": "Taxa de bits constante (CBR)"
+            "crfCbr": "CRF padrão, CBR selecionável",
+            "cbrCrf": "CBR padrão, CRF selecionável",
+            "crf": "Somente CRF",
+            "cbr": "Somente CBR"
           }
         },
         "SELKIES_ENABLE_RATE_CONTROL": {
@@ -746,6 +760,10 @@
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "Cor Completa de Vídeo (4:4:4)",
           "description": "Codifica com croma 4:4:4 onde o codec e o codificador suportam (H.264 e H.265 em NVENC, VA-API, x264 e x265; VP9 em VA-API e libvpx). Um cliente sem perfil 4:4:4 transmite 4:2:0 no mesmo codec, a menos que isto esteja travado; então passa ao próximo codificador que decodifica."
+        },
+        "SELKIES_VIDEO_10BIT": {
+          "label": "Vídeo de 10 bits",
+          "description": "Codifica 10 bits por amostra onde o codec e o codificador suportam (H.264 no x264; H.265, VP9 e AV1 no VA-API e nos codificadores por software; H.265 e AV1 no NVENC). Consome CPU nos codificadores por software e só aparece junto com a cor completa 4:4:4."
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "Modo de Streaming de Vídeo (Turbo)",
@@ -793,6 +811,10 @@
             "auto": "Auto"
           }
         },
+        "SELKIES_WEBCAM_DEVICE": {
+          "label": "Dispositivo de kernel da webcam",
+          "description": "Também espelha a webcam em um dispositivo v4l2loopback que os aplicativos encontram sem o interpositor. auto usa o primeiro encontrado, um caminho como /dev/video10 usa esse dispositivo e false nunca usa."
+        },
         "HARDEN_DESKTOP": {
           "label": "Reforçar Desktop (Predefinição)",
           "description": "Ativa DISABLE_OPEN_TOOLS, DISABLE_SUDO e DISABLE_TERMINALS e, salvo se definidos explicitamente, também desativa transferências de arquivos, o websocket de comandos, a impressão e as seções de arquivos e aplicativos da barra lateral. Forçado para usuários com «Reforçar contêiner»."
@@ -816,6 +838,10 @@
         "DISABLE_CLOSE_BUTTON": {
           "label": "Desabilitar Botão de Fechar Janela",
           "description": "Remove o botão de fechar das barras de título das janelas."
+        },
+        "DISABLE_WINDOW_BUTTONS": {
+          "label": "Desabilitar botões da janela",
+          "description": "Remove os botões de minimizar, maximizar e fechar das barras de título das janelas."
         },
         "DISABLE_MOUSE_BUTTONS": {
           "label": "Desabilitar Clique Direito/Meio",
@@ -852,6 +878,10 @@
         "DRI_NODE": {
           "label": "Nó de renderização para codificação",
           "description": "Nó de renderização DRI usado pelo codificador de vídeo (VA-API ou NVENC), como /dev/dri/renderD128. Vazio segue a seleção automática de GPU."
+        },
+        "SELKIES_GPU_ID": {
+          "label": "ID da GPU do codificador",
+          "description": "Índice da GPU usada pelos codificadores de vídeo por hardware, selecionando /dev/dri/renderD(128 + n). Vazio codifica na primeira GPU ou na selecionada automaticamente, -1 desativa a codificação por hardware. Ignorado quando o nó de renderização de codificação está definido."
         },
         "DRINODE": {
           "label": "Nó de renderização",

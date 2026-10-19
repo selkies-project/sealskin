@@ -408,6 +408,10 @@
           "label": "Çekirdek Düğmeleri Göster",
           "description": "Çekirdek bileşen düğmelerini (ekran, ses vb.) göster."
         },
+        "SELKIES_UI_SHOW_CONNECTION_INDICATOR": {
+          "label": "Bağlantı Göstergesini Göster",
+          "description": "Sunucu istemcinin bağlantısını zayıf bulduğu sürece akışın üzerinde bir işaret gösterir, kenar çubuğu olsun ya da olmasın."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
           "label": "Video Ayarlarını Göster",
           "description": "Kenar çubuğunda video ayarları bölümünü göster."
@@ -552,6 +556,10 @@
           "label": "Yazdırmayı Etkinleştir",
           "description": "Oturumun Selkies kuyruğuna yazdırılan belgeleri PDF olarak tarayıcıya verir. Kapalıyken reddeder ve yazıcı bölümünü gizler; burada ayarlanmadıkça „Masaüstünü Sıkılaştır“ kapatır."
         },
+        "SELKIES_PRINT_SPOOL_PATH": {
+          "label": "Yazdırma Kuyruğu Dizini",
+          "description": "Oturumun yazdırma kuyruğunun tamamlanan işleri PDF olarak yazdığı dizin, yoksa başlangıçta oluşturulur. Boş, oturum kullanıcısının durum dizini altında selkies/print kullanır."
+        },
         "SELKIES_ENABLE_SHARING": {
           "label": "Tüm Paylaşımı Etkinleştir",
           "description": "Tüm paylaşım özellikleri için ana anahtar."
@@ -687,6 +695,10 @@
           "label": "Ses Kanalları",
           "description": "Ses kanalı sayısı; 2 stereodur."
         },
+        "SELKIES_AUDIO_DEVICE_NAME": {
+          "label": "Ses Yakalama Aygıtı",
+          "description": "Oturumun sesinin yakalandığı PulseAudio kaynağı. İmaj, monitörü output.monitor olan output alıcısını oluşturur."
+        },
         "SELKIES_AUDIO_REDUNDANCY": {
           "label": "Ses Yedekliliği (Opus RED)",
           "description": "Paket kaybında kesintileri azaltmak için önceki ses çerçevelerini yedek olarak taşı."
@@ -708,11 +720,13 @@
           "description": "örn. bir aralık için '8-240', sabit bir başlangıç değeri için '60', her ikisi için '60,8-240'; '60-60' kilitler."
         },
         "SELKIES_RATE_CONTROL_MODE": {
-          "label": "Hız Kontrol Modu",
-          "description": "Video kodlayıcıların varsayılan hız denetimi: sabit kalite (CRF) veya sabit bit hızı (CBR).",
+          "label": "Hız Denetimi Modu",
+          "description": "Video kodlayıcıların başladığı hız denetimi ve bir istemcinin geçebileceği modlar: sabit kalite (CRF) veya sabit bit hızı (CBR). Tek bir mod seçimi kilitler.",
           "options": {
-            "crf": "Sabit kalite (CRF)",
-            "cbr": "Sabit bit hızı (CBR)"
+            "crfCbr": "CRF varsayılan, CBR seçilebilir",
+            "cbrCrf": "CBR varsayılan, CRF seçilebilir",
+            "crf": "Yalnızca CRF",
+            "cbr": "Yalnızca CBR"
           }
         },
         "SELKIES_ENABLE_RATE_CONTROL": {
@@ -746,6 +760,10 @@
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "Video Tam Renk (4:4:4)",
           "description": "Kodek ve kodlayıcının desteklediği yerde 4:4:4 renk örneklemesiyle kodlar (NVENC, VA-API, x264 ve x265'te H.264 ve H.265; VA-API ve libvpx'te VP9). 4:4:4 profili olmayan istemci, bu kilitlenmemişse aynı kodekle 4:2:0 alır; kilitliyse çözebildiği sonraki kodlayıcıya geçer."
+        },
+        "SELKIES_VIDEO_10BIT": {
+          "label": "10 Bit Video",
+          "description": "Codec ve kodlayıcının desteklediği yerlerde örnek başına 10 bit kodlar (x264'te H.264; VA-API ve yazılım kodlayıcılarında H.265, VP9 ve AV1; NVENC'te H.265 ve AV1). Yazılım kodlayıcılarda CPU tüketir ve yalnızca 4:4:4 tam renkle birlikte fark edilir."
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "Video Akış (Turbo) Modu",
@@ -793,6 +811,10 @@
             "auto": "Otomatik"
           }
         },
+        "SELKIES_WEBCAM_DEVICE": {
+          "label": "Web Kamerası Çekirdek Aygıtı",
+          "description": "Web kamerasını ayrıca uygulamaların araya giren katman olmadan bulduğu bir v4l2loopback aygıtına yansıtır. auto bulunan ilkini, /dev/video10 gibi bir yol o aygıtı kullanır, false hiç kullanmaz."
+        },
         "HARDEN_DESKTOP": {
           "label": "Masaüstünü Güçlendir (Ön Ayar)",
           "description": "DISABLE_OPEN_TOOLS, DISABLE_SUDO ve DISABLE_TERMINALS'ı etkinleştirir; açıkça ayarlanmadıkça dosya aktarımlarını, komut websocket'ini, yazdırmayı ve kenar çubuğundaki dosyalar ile uygulamalar bölümlerini de devre dışı bırakır. „Konteyneri Sıkılaştır“ olan kullanıcılar için zorunludur."
@@ -816,6 +838,10 @@
         "DISABLE_CLOSE_BUTTON": {
           "label": "Pencere Kapatma Düğmesini Devre Dışı Bırak",
           "description": "Pencere başlık çubuklarından kapatma düğmesini kaldırır."
+        },
+        "DISABLE_WINDOW_BUTTONS": {
+          "label": "Pencere Düğmelerini Devre Dışı Bırak",
+          "description": "Pencere başlık çubuklarından küçült, büyüt ve kapat düğmelerini kaldırır."
         },
         "DISABLE_MOUSE_BUTTONS": {
           "label": "Sağ/Orta Tıklamayı Devre Dışı Bırak",
@@ -852,6 +878,10 @@
         "DRI_NODE": {
           "label": "Kodlama İçin Render Düğümü",
           "description": "Video kodlayıcının kullandığı DRI render düğümü (VA-API veya NVENC), örneğin /dev/dri/renderD128. Boş bırakılırsa Otomatik GPU Seçimi'ni izler."
+        },
+        "SELKIES_GPU_ID": {
+          "label": "Kodlayıcı GPU Kimliği",
+          "description": "Donanım video kodlayıcılarının kullandığı GPU'nun dizini, /dev/dri/renderD(128 + n) seçer. Boş, ilk veya otomatik seçilen GPU'da kodlar, -1 donanım kodlamayı kapatır. Kodlama işleme düğümü ayarlıysa yoksayılır."
         },
         "DRINODE": {
           "label": "Render Düğümü",

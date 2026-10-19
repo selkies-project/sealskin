@@ -408,6 +408,10 @@
           "label": "Kernknoppen Tonen",
           "description": "Toon de knoppen voor kerncomponenten (display, audio, etc)."
         },
+        "SELKIES_UI_SHOW_CONNECTION_INDICATOR": {
+          "label": "Verbindingsindicator tonen",
+          "description": "Toont een markering over de stream zolang de server de verbinding van de client slecht vindt, met of zonder de zijbalk."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
           "label": "Video-instellingen Tonen",
           "description": "Toon de sectie video-instellingen in de zijbalk."
@@ -552,6 +556,10 @@
           "label": "Afdrukken inschakelen",
           "description": "Geeft documenten die naar de Selkies-wachtrij van de sessie zijn afgedrukt als PDF aan de browser. Uit weigert ze en verbergt de printersectie; „Bureaublad verharden” zet het uit tenzij hier ingesteld."
         },
+        "SELKIES_PRINT_SPOOL_PATH": {
+          "label": "Afdrukspoolmap",
+          "description": "Map waarin de afdrukwachtrij van de sessie voltooide taken als PDF wegschrijft, bij het starten aangemaakt als die ontbreekt. Leeg gebruikt selkies/print in de statusmap van de sessiegebruiker."
+        },
         "SELKIES_ENABLE_SHARING": {
           "label": "Alle Deling Inschakelen",
           "description": "Hoofdschakelaar voor alle deelfuncties."
@@ -687,6 +695,10 @@
           "label": "Audiokanalen",
           "description": "Aantal audiokanalen; 2 is stereo."
         },
+        "SELKIES_AUDIO_DEVICE_NAME": {
+          "label": "Audio-opnameapparaat",
+          "description": "PulseAudio-bron waarvan het geluid van de sessie wordt opgenomen. De image maakt de sink output aan, waarvan de monitor output.monitor is."
+        },
         "SELKIES_AUDIO_REDUNDANCY": {
           "label": "Audioredundantie (Opus RED)",
           "description": "Stuur eerdere audioframes mee als redundantie om onderbrekingen bij pakketverlies te verminderen."
@@ -708,11 +720,13 @@
           "description": "bijv., '8-240' voor een bereik, '60' voor een vaste beginwaarde, '60,8-240' voor beide; '60-60' vergrendelt het."
         },
         "SELKIES_RATE_CONTROL_MODE": {
-          "label": "Rate Control Modus",
-          "description": "Standaard bitratebeheer van de videocoders: constante kwaliteit (CRF) of constante bitrate (CBR).",
+          "label": "Bitratebesturingsmodus",
+          "description": "Bitratebesturing waarmee de video-encoders starten en de modi waarnaar een client mag wisselen: constante kwaliteit (CRF) of constante bitrate (CBR). Eén modus vergrendelt de keuze.",
           "options": {
-            "crf": "Constante kwaliteit (CRF)",
-            "cbr": "Constante bitrate (CBR)"
+            "crfCbr": "CRF standaard, CBR selecteerbaar",
+            "cbrCrf": "CBR standaard, CRF selecteerbaar",
+            "crf": "Alleen CRF",
+            "cbr": "Alleen CBR"
           }
         },
         "SELKIES_ENABLE_RATE_CONTROL": {
@@ -746,6 +760,10 @@
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "Video Volledige Kleur (4:4:4)",
           "description": "Codeert met 4:4:4-chroma waar codec en encoder het dragen (H.264 en H.265 op NVENC, VA-API, x264 en x265; VP9 op VA-API en libvpx). Een client zonder 4:4:4-profiel streamt 4:2:0 met dezelfde codec tenzij dit is vergrendeld; dan stapt hij over naar de volgende encoder die hij decodeert."
+        },
+        "SELKIES_VIDEO_10BIT": {
+          "label": "Video 10-bit",
+          "description": "Codeert 10 bits per sample waar codec en encoder dit dragen (H.264 op x264; H.265, VP9 en AV1 op VA-API en de software-encoders; H.265 en AV1 op NVENC). Kost CPU op software-encoders en is alleen zichtbaar samen met 4:4:4 volledige kleur."
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "Video Streaming (Turbo) Modus",
@@ -793,6 +811,10 @@
             "auto": "Auto"
           }
         },
+        "SELKIES_WEBCAM_DEVICE": {
+          "label": "Webcam-kernelapparaat",
+          "description": "Spiegelt de webcam ook naar een v4l2loopback-apparaat dat toepassingen zonder de interposer vinden. auto gebruikt het eerste gevonden apparaat, een pad zoals /dev/video10 dat apparaat, false nooit."
+        },
         "HARDEN_DESKTOP": {
           "label": "Desktop Beveiligen (Preset)",
           "description": "Schakelt DISABLE_OPEN_TOOLS, DISABLE_SUDO en DISABLE_TERMINALS in en schakelt, tenzij expliciet ingesteld, ook bestandsoverdrachten, de opdrachten-websocket, afdrukken en de secties bestanden en apps in de zijbalk uit. Geforceerd voor gebruikers met „Container verharden”."
@@ -816,6 +838,10 @@
         "DISABLE_CLOSE_BUTTON": {
           "label": "Venster Sluitknop Uitschakelen",
           "description": "Verwijdert de sluitknop uit de titelbalken van vensters."
+        },
+        "DISABLE_WINDOW_BUTTONS": {
+          "label": "Vensterknoppen uitschakelen",
+          "description": "Verwijdert de knoppen minimaliseren, maximaliseren en sluiten uit de titelbalken van vensters."
         },
         "DISABLE_MOUSE_BUTTONS": {
           "label": "Rechter-/Middenklik Uitschakelen",
@@ -852,6 +878,10 @@
         "DRI_NODE": {
           "label": "Rendernode voor codering",
           "description": "DRI-rendernode die de videocoder gebruikt (VA-API of NVENC), zoals /dev/dri/renderD128. Leeg volgt de automatische GPU-selectie."
+        },
+        "SELKIES_GPU_ID": {
+          "label": "Encoder-GPU-ID",
+          "description": "Index van de GPU die de hardware-video-encoders gebruiken, selecteert /dev/dri/renderD(128 + n). Leeg codeert op de eerste of automatisch gekozen GPU, -1 schakelt hardwarecodering uit. Genegeerd wanneer de encode-rendernode is ingesteld."
         },
         "DRINODE": {
           "label": "Rendernode",

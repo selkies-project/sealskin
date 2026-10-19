@@ -408,6 +408,10 @@
           "label": "Vis Kerneknapper",
           "description": "Vis knapperne for kernekomponenter (skærm, lyd, osv.)."
         },
+        "SELKIES_UI_SHOW_CONNECTION_INDICATOR": {
+          "label": "Vis forbindelsesindikator",
+          "description": "Viser et mærke over streamen, så længe serveren vurderer klientens forbindelse som dårlig, med eller uden sidepanelet."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
           "label": "Vis Videoindstillinger",
           "description": "Vis sektionen for videoindstillinger i sidepanelet."
@@ -552,6 +556,10 @@
           "label": "Aktivér udskrivning",
           "description": "Giver dokumenter udskrevet til sessionens Selkies-kø til browseren som PDF. Fra afviser dem og skjuler printerafsnittet; „Hærd skrivebord“ slår det fra, medmindre det sættes her."
         },
+        "SELKIES_PRINT_SPOOL_PATH": {
+          "label": "Udskriftsspoolmappe",
+          "description": "Mappe, hvor sessionens udskriftskø skriver færdige job som PDF, oprettet ved start, hvis den mangler. Tom bruger selkies/print under sessionsbrugerens tilstandsmappe."
+        },
         "SELKIES_ENABLE_SHARING": {
           "label": "Aktiver al Deling",
           "description": "Hovedafbryder for alle delingsfunktioner."
@@ -687,6 +695,10 @@
           "label": "Lydkanaler",
           "description": "Antal lydkanaler; 2 er stereo."
         },
+        "SELKIES_AUDIO_DEVICE_NAME": {
+          "label": "Lydoptagelsesenhed",
+          "description": "PulseAudio-kilde, som sessionens lyd optages fra. Imaget opretter sinken output, hvis monitor er output.monitor."
+        },
         "SELKIES_AUDIO_REDUNDANCY": {
           "label": "Lydredundans (Opus RED)",
           "description": "Medsend tidligere lydframes som redundans for at reducere udfald ved pakketab."
@@ -708,11 +720,13 @@
           "description": "f.eks., '8-240' for et område, '60' for en fast startværdi, '60,8-240' for begge; '60-60' låser den."
         },
         "SELKIES_RATE_CONTROL_MODE": {
-          "label": "Ratestyringstilstand",
-          "description": "Standard ratestyring for videokoderne: konstant kvalitet (CRF) eller konstant bitrate (CBR).",
+          "label": "Bitratestyringstilstand",
+          "description": "Bitratestyring, som videoenkoderne starter med, og de tilstande en klient må skifte til: konstant kvalitet (CRF) eller konstant bitrate (CBR). En enkelt tilstand låser valget.",
           "options": {
-            "crf": "Konstant kvalitet (CRF)",
-            "cbr": "Konstant bitrate (CBR)"
+            "crfCbr": "CRF standard, CBR kan vælges",
+            "cbrCrf": "CBR standard, CRF kan vælges",
+            "crf": "Kun CRF",
+            "cbr": "Kun CBR"
           }
         },
         "SELKIES_ENABLE_RATE_CONTROL": {
@@ -746,6 +760,10 @@
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "Video Fuld Farve (4:4:4)",
           "description": "Koder med 4:4:4-chroma, hvor codec og koder understøtter det (H.264 og H.265 på NVENC, VA-API, x264 og x265; VP9 på VA-API og libvpx). En klient uden 4:4:4-profil streamer 4:2:0 med samme codec, medmindre dette er låst; så går den videre til den næste koder, den dekoder."
+        },
+        "SELKIES_VIDEO_10BIT": {
+          "label": "Video 10-bit",
+          "description": "Koder 10 bit pr. sample, hvor codec og enkoder understøtter det (H.264 på x264; H.265, VP9 og AV1 på VA-API og softwareenkoderne; H.265 og AV1 på NVENC). Koster CPU på softwareenkodere og ses kun sammen med 4:4:4 fuld farve."
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "Video Streaming (Turbo) Tilstand",
@@ -793,6 +811,10 @@
             "auto": "Auto"
           }
         },
+        "SELKIES_WEBCAM_DEVICE": {
+          "label": "Webcam-kerneenhed",
+          "description": "Spejler også webcammet til en v4l2loopback-enhed, som programmer finder uden interposeren. auto bruger den første fundne, en sti som /dev/video10 bruger den enhed, og false gør det aldrig."
+        },
         "HARDEN_DESKTOP": {
           "label": "Hærd Desktop (Forudindstilling)",
           "description": "Aktiverer DISABLE_OPEN_TOOLS, DISABLE_SUDO og DISABLE_TERMINALS og deaktiverer, medmindre det er sat udtrykkeligt, også filoverførsler, kommando-websocketen, udskrivning samt sidepanelets fil- og app-afsnit. Gennemtvinges for brugere med „Hærd container“."
@@ -816,6 +838,10 @@
         "DISABLE_CLOSE_BUTTON": {
           "label": "Deaktiver vindues luk-knap",
           "description": "Fjerner luk-knappen fra vinduestitelbjælker."
+        },
+        "DISABLE_WINDOW_BUTTONS": {
+          "label": "Deaktiver vinduesknapper",
+          "description": "Fjerner knapperne minimer, maksimer og luk fra vinduernes titellinjer."
         },
         "DISABLE_MOUSE_BUTTONS": {
           "label": "Deaktiver Højre-/Midterklik",
@@ -852,6 +878,10 @@
         "DRI_NODE": {
           "label": "Renderknude til kodning",
           "description": "DRI-renderknude, som videokoderen bruger (VA-API eller NVENC), fx /dev/dri/renderD128. Tom følger automatisk GPU-valg."
+        },
+        "SELKIES_GPU_ID": {
+          "label": "Enkoder-GPU-id",
+          "description": "Indeks for den GPU, hardwarevideoenkoderne bruger, vælger /dev/dri/renderD(128 + n). Tom koder på den første eller den automatisk valgte GPU, -1 slår hardwarekodning fra. Ignoreres, når encode-rendernoden er sat."
         },
         "DRINODE": {
           "label": "Renderknude",

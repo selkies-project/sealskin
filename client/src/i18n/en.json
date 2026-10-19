@@ -408,6 +408,10 @@
           "label": "Show Core Buttons",
           "description": "Show the core components buttons (display, audio, etc)."
         },
+        "SELKIES_UI_SHOW_CONNECTION_INDICATOR": {
+          "label": "Show Connection Indicator",
+          "description": "Show a mark over the stream while the server finds the client's connection poor, with or without the sidebar."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
           "label": "Show Video Settings",
           "description": "Show the video settings section in the sidebar."
@@ -552,6 +556,10 @@
           "label": "Enable Printing",
           "description": "Hand documents printed to the session's Selkies queue to the browser as PDFs. Off refuses them and hides the printer section; Harden Desktop turns it off unless set here."
         },
+        "SELKIES_PRINT_SPOOL_PATH": {
+          "label": "Print Spool Directory",
+          "description": "Directory the session's print queue writes finished jobs into as PDFs, created at startup when missing. Empty uses selkies/print under the session user's state directory."
+        },
         "SELKIES_ENABLE_SHARING": {
           "label": "Enable All Sharing",
           "description": "Master toggle for all sharing features."
@@ -687,6 +695,10 @@
           "label": "Audio Channels",
           "description": "Number of audio channels; 2 is stereo."
         },
+        "SELKIES_AUDIO_DEVICE_NAME": {
+          "label": "Audio Capture Device",
+          "description": "PulseAudio source the session's audio is captured from. The image creates the output sink, whose monitor is output.monitor."
+        },
         "SELKIES_AUDIO_REDUNDANCY": {
           "label": "Audio Redundancy (Opus RED)",
           "description": "Carry prior audio frames as redundancy to cut dropouts under packet loss."
@@ -709,10 +721,12 @@
         },
         "SELKIES_RATE_CONTROL_MODE": {
           "label": "Rate Control Mode",
-          "description": "Default rate control for the video encoders: constant quality (CRF) or constant bitrate (CBR).",
+          "description": "Rate control the video encoders start with and the modes a client may switch to: constant quality (CRF) or constant bitrate (CBR). A single mode locks the choice.",
           "options": {
-            "crf": "Constant quality (CRF)",
-            "cbr": "Constant bitrate (CBR)"
+            "crfCbr": "CRF default, CBR selectable",
+            "cbrCrf": "CBR default, CRF selectable",
+            "crf": "CRF only",
+            "cbr": "CBR only"
           }
         },
         "SELKIES_ENABLE_RATE_CONTROL": {
@@ -746,6 +760,10 @@
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "Video Full Color (4:4:4)",
           "description": "Encode with 4:4:4 chroma where the codec and encoder carry it (H.264 and H.265 on NVENC, VA-API, x264, and x265; VP9 on VA-API and libvpx). A client without the 4:4:4 profile streams 4:2:0 on the same codec unless this is locked on, when it steps to the next encoder it decodes."
+        },
+        "SELKIES_VIDEO_10BIT": {
+          "label": "Video 10-Bit",
+          "description": "Encode 10 bits per sample where the codec and encoder carry it (H.264 on x264; H.265, VP9, and AV1 on VA-API and the software encoders; H.265 and AV1 on NVENC). Costs CPU on software encoders and only shows together with 4:4:4 full color."
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "Video Streaming (Turbo) Mode",
@@ -793,6 +811,10 @@
             "auto": "Auto"
           }
         },
+        "SELKIES_WEBCAM_DEVICE": {
+          "label": "Webcam Kernel Device",
+          "description": "Also mirror the webcam into a v4l2loopback device that applications find without the interposer. auto uses the first one found, a path such as /dev/video10 uses that device, and false never does."
+        },
         "HARDEN_DESKTOP": {
           "label": "Harden Desktop (Preset)",
           "description": "Enables DISABLE_OPEN_TOOLS, DISABLE_SUDO, and DISABLE_TERMINALS, and unless set explicitly also disables file transfers, the command websocket, printing, and the files and apps sidebar sections. Forced on for users with Harden Container."
@@ -816,6 +838,10 @@
         "DISABLE_CLOSE_BUTTON": {
           "label": "Disable Window Close Button",
           "description": "Removes the close button from window title bars."
+        },
+        "DISABLE_WINDOW_BUTTONS": {
+          "label": "Disable Window Buttons",
+          "description": "Removes the minimize, maximize, and close buttons from window title bars."
         },
         "DISABLE_MOUSE_BUTTONS": {
           "label": "Disable Right/Middle Click",
@@ -852,6 +878,10 @@
         "DRI_NODE": {
           "label": "Encode Render Node",
           "description": "DRI render node the video encoder uses (VA-API or NVENC), such as /dev/dri/renderD128. Empty follows Automatic GPU Selection."
+        },
+        "SELKIES_GPU_ID": {
+          "label": "Encoder GPU ID",
+          "description": "Index of the GPU the hardware video encoders use, selecting /dev/dri/renderD(128 + n). Empty encodes on the first or the automatically selected GPU, -1 disables hardware encoding. Ignored when Encode Render Node is set."
         },
         "DRINODE": {
           "label": "Render Node",

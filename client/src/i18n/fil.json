@@ -408,6 +408,10 @@
           "label": "Ipakita ang mga Pangunahing Pindutan",
           "description": "Ipakita ang mga pindutan ng pangunahing bahagi (display, audio, atbp)."
         },
+        "SELKIES_UI_SHOW_CONNECTION_INDICATOR": {
+          "label": "Ipakita ang Indicator ng Koneksyon",
+          "description": "Nagpapakita ng marka sa ibabaw ng stream habang itinuturing ng server na mahina ang koneksyon ng kliyente, may sidebar o wala."
+        },
         "SELKIES_UI_SIDEBAR_SHOW_VIDEO_SETTINGS": {
           "label": "Ipakita ang Mga Setting ng Video",
           "description": "Ipakita ang seksyon ng mga setting ng video sa sidebar."
@@ -552,6 +556,10 @@
           "label": "Paganahin ang Pag-print",
           "description": "Ibinibigay sa browser bilang PDF ang mga dokumentong na-print sa Selkies queue ng session. Kung naka-off, tinatanggihan ang mga ito at itinatago ang seksyon ng printer; ino-off ito ng «Patigasin ang Desktop» maliban kung itinakda dito."
         },
+        "SELKIES_PRINT_SPOOL_PATH": {
+          "label": "Directory ng Print Spool",
+          "description": "Directory kung saan isinusulat ng print queue ng session ang mga natapos na trabaho bilang PDF, ginagawa sa pagsisimula kung wala. Kung blangko, ginagamit ang selkies/print sa ilalim ng state directory ng user ng session."
+        },
         "SELKIES_ENABLE_SHARING": {
           "label": "Paganahin ang Lahat ng Pagbabahagi",
           "description": "Pangunahing toggle para sa lahat ng mga tampok ng pagbabahagi."
@@ -687,6 +695,10 @@
           "label": "Mga Channel ng Audio",
           "description": "Bilang ng mga audio channel; ang 2 ay stereo."
         },
+        "SELKIES_AUDIO_DEVICE_NAME": {
+          "label": "Device ng Pagkuha ng Audio",
+          "description": "PulseAudio source kung saan kinukuha ang audio ng session. Gumagawa ang image ng output sink, na ang monitor ay output.monitor."
+        },
         "SELKIES_AUDIO_REDUNDANCY": {
           "label": "Audio Redundancy (Opus RED)",
           "description": "Isama ang mga naunang audio frame bilang redundancy upang mabawasan ang mga dropout kapag may packet loss."
@@ -708,11 +720,13 @@
           "description": "hal., '8-240' para sa isang saklaw, '60' para sa nakapirming paunang halaga, '60,8-240' para sa pareho; ang '60-60' ay nagla-lock nito."
         },
         "SELKIES_RATE_CONTROL_MODE": {
-          "label": "Mode ng Rate Control",
-          "description": "Default na rate control ng mga video encoder: constant quality (CRF) o constant bitrate (CBR).",
+          "label": "Mode ng Kontrol ng Rate",
+          "description": "Kontrol ng rate na sinisimulan ng mga video encoder at ang mga mode na maaaring lipatan ng kliyente: constant quality (CRF) o constant bitrate (CBR). Isang mode lang ang nagla-lock ng pagpili.",
           "options": {
-            "crf": "Constant quality (CRF)",
-            "cbr": "Constant bitrate (CBR)"
+            "crfCbr": "CRF default, mapipili ang CBR",
+            "cbrCrf": "CBR default, mapipili ang CRF",
+            "crf": "CRF lamang",
+            "cbr": "CBR lamang"
           }
         },
         "SELKIES_ENABLE_RATE_CONTROL": {
@@ -746,6 +760,10 @@
         "SELKIES_VIDEO_FULLCOLOR": {
           "label": "Buong Kulay ng Video (4:4:4)",
           "description": "Nag-e-encode gamit ang 4:4:4 chroma kung saan sinusuportahan ito ng codec at encoder (H.264 at H.265 sa NVENC, VA-API, x264 at x265; VP9 sa VA-API at libvpx). Ang client na walang 4:4:4 profile ay nag-i-stream ng 4:2:0 sa parehong codec maliban kung naka-lock ito; kung gayon, lilipat ito sa susunod na encoder na nade-decode nito."
+        },
+        "SELKIES_VIDEO_10BIT": {
+          "label": "10-Bit na Video",
+          "description": "Nag-e-encode ng 10 bit kada sample kung saan sinusuportahan ito ng codec at encoder (H.264 sa x264; H.265, VP9, at AV1 sa VA-API at mga software encoder; H.265 at AV1 sa NVENC). Kumukonsumo ng CPU sa mga software encoder at nakikita lang kasama ng 4:4:4 full color."
         },
         "SELKIES_VIDEO_STREAMING_MODE": {
           "label": "Video Streaming (Turbo) Mode",
@@ -793,6 +811,10 @@
             "auto": "Auto"
           }
         },
+        "SELKIES_WEBCAM_DEVICE": {
+          "label": "Kernel Device ng Webcam",
+          "description": "Ini-mirror din ang webcam sa isang v4l2loopback device na nahahanap ng mga application nang walang interposer. Ginagamit ng auto ang unang nahanap, ng path tulad ng /dev/video10 ang device na iyon, at ng false ay wala."
+        },
         "HARDEN_DESKTOP": {
           "label": "Patibayin ang Desktop (Preset)",
           "description": "Pinagagana ang DISABLE_OPEN_TOOLS, DISABLE_SUDO at DISABLE_TERMINALS at, maliban kung tahasang itinakda, hindi rin pinagagana ang mga paglilipat ng file, ang command websocket, ang pag-print, at ang mga seksyon ng files at apps sa sidebar. Sapilitan para sa mga user na may «Patigasin ang Container»."
@@ -816,6 +838,10 @@
         "DISABLE_CLOSE_BUTTON": {
           "label": "Huwag Paganahin ang Pindutan ng Pagsara ng Window",
           "description": "Inaalis ang pindutan ng pagsara mula sa mga title bar ng window."
+        },
+        "DISABLE_WINDOW_BUTTONS": {
+          "label": "I-disable ang mga Button ng Window",
+          "description": "Inaalis ang mga button na minimize, maximize, at close sa mga title bar ng window."
         },
         "DISABLE_MOUSE_BUTTONS": {
           "label": "Huwag Paganahin ang Right/Middle Click",
@@ -852,6 +878,10 @@
         "DRI_NODE": {
           "label": "Render Node para sa Pag-encode",
           "description": "DRI render node na ginagamit ng video encoder (VA-API o NVENC), tulad ng /dev/dri/renderD128. Kung blangko, sinusunod ang Awtomatikong Pagpili ng GPU."
+        },
+        "SELKIES_GPU_ID": {
+          "label": "GPU ID ng Encoder",
+          "description": "Index ng GPU na ginagamit ng mga hardware video encoder, pumipili ng /dev/dri/renderD(128 + n). Kung blangko, nag-e-encode sa una o sa awtomatikong napiling GPU, -1 ay nagdi-disable ng hardware encoding. Hindi pinapansin kung nakatakda ang Encode Render Node."
         },
         "DRINODE": {
           "label": "Render Node",

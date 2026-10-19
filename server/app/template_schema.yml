@@ -109,6 +109,12 @@ settings:
     type: boolean
     default: "true"
     docker: false
+  - name: SELKIES_UI_SHOW_CONNECTION_INDICATOR
+    category: ui
+    section: appearance
+    type: boolean
+    default: "true"
+    docker: false
   - name: SELKIES_UI_SIDEBAR_SHOW_SOFT_BUTTONS
     category: ui
     section: appearance
@@ -455,6 +461,12 @@ settings:
     type: text
     default: "2"
     docker: false
+  - name: SELKIES_AUDIO_DEVICE_NAME
+    category: app
+    section: audio
+    type: text
+    default: "output.monitor"
+    docker: false
   - name: SELKIES_AUDIO_REDUNDANCY
     category: app
     section: audio
@@ -539,6 +551,12 @@ settings:
         label: "YUYV"
       - value: "MJPEG"
         label: "MJPEG"
+  - name: SELKIES_WEBCAM_DEVICE
+    category: app
+    section: webcam
+    type: text
+    default: "auto"
+    docker: false
   - name: NO_WEBCAM
     category: general
     section: webcam
@@ -570,9 +588,13 @@ settings:
     category: app
     section: performance
     type: select
-    default: "crf"
+    default: "crf,cbr"
     docker: false
     options:
+      - value: "crf,cbr"
+        label_key: crfCbr
+      - value: "cbr,crf"
+        label_key: cbrCrf
       - value: "crf"
         label_key: crf
       - value: "cbr"
@@ -620,6 +642,12 @@ settings:
     default: "1-100"
     docker: false
   - name: SELKIES_VIDEO_FULLCOLOR
+    category: app
+    section: performance
+    type: boolean
+    default: "false"
+    docker: false
+  - name: SELKIES_VIDEO_10BIT
     category: app
     section: performance
     type: boolean
@@ -703,6 +731,12 @@ settings:
     type: text
     default: ""
     docker: false
+  - name: SELKIES_GPU_ID
+    category: general
+    section: gpu
+    type: text
+    default: ""
+    docker: false
   - name: DRINODE
     category: general
     section: gpu
@@ -774,6 +808,12 @@ settings:
     section: clipboard
     type: boolean
     default: "true"
+    docker: false
+  - name: SELKIES_PRINT_SPOOL_PATH
+    category: app
+    section: clipboard
+    type: text
+    default: ""
     docker: false
   - name: SELKIES_COMMAND_ENABLED
     category: app
@@ -854,6 +894,12 @@ settings:
     default: "false"
     docker: false
   - name: DISABLE_CLOSE_BUTTON
+    category: hardening
+    section: hardening
+    type: boolean
+    default: "false"
+    docker: false
+  - name: DISABLE_WINDOW_BUTTONS
     category: hardening
     section: hardening
     type: boolean
