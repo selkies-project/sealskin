@@ -243,10 +243,8 @@ served elsewhere and the registry of its images, one space apart
 opens on `SEALSKIN_PROOT_APPS_REMOTE` (linuxserver/proot-apps) and takes any
 repository built the same way, whose apps are then installed by their full
 image name (`ghcr.io/<owner>/<repo>:<app>`), since the short names belong to
-the default remote. A catalog can mix apps from several remotes. Include `gui` to give
-the users the graphical installer, which the remote lists as disabled: it is
-installed like any app (`proot-apps install gui`) and shows the catalog,
-nothing more.
+the default remote. A catalog can mix apps from several remotes. Apps the
+remote marks `disabled` are not listed.
 
 The table shows the state of this node's copy of each catalog. Every node
 with sessions fetches the apps itself, for its own architecture, as soon as

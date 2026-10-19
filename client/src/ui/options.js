@@ -3555,7 +3555,7 @@ async function loadProotRemote(remote, refresh) {
 function renderProotRemoteGrid() {
   const grid = document.getElementById('proot-remote-grid');
   const term = prootEditor.search.toLowerCase();
-  const apps = prootEditor.remoteApps.filter((app) => !term || app.name.toLowerCase().includes(term) || app.full_name.toLowerCase().includes(term));
+  const apps = prootEditor.remoteApps.filter((app) => !app.disabled && (!term || app.name.toLowerCase().includes(term) || app.full_name.toLowerCase().includes(term)));
   if (!apps.length) {
     grid.innerHTML = `<p style="text-align: center; color: var(--text-muted); grid-column: 1 / -1;">${t('options.prootApps.noApps')}</p>`;
     return;
@@ -3563,10 +3563,8 @@ function renderProotRemoteGrid() {
   grid.innerHTML = apps.map((app, i) => {
     const classes = ['app-card-popup'];
     if (prootSelected(prootEditor.remote, app.name)) classes.push('selected');
-    if (app.disabled) classes.push('disabled');
-    const title = app.disabled ? t('options.prootApps.disabledHint') : app.description;
     return `
-      <div class="${classes.join(' ')}" style="--i: ${i}" data-name="${escapeHtml(app.name)}" title="${escapeHtml(title)}">
+      <div class="${classes.join(' ')}" style="--i: ${i}" data-name="${escapeHtml(app.name)}" title="${escapeHtml(app.description)}">
         <img src="${escapeHtml(app.icon ? apiUrl(app.icon) : 'icons/icon128.png')}" alt="">
         <span>${escapeHtml(app.full_name || app.name)}</span>
       </div>`;
