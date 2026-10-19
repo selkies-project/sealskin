@@ -269,13 +269,12 @@ html.shell-mobile #file-list-table, html.shell-mobile #shares-list-table {
 }
 
 
-/* The settings page on a phone: landscape keeps the sidebar and the content side by side and scrolls sideways
-   between them, portrait stacks them; either way the content pane scrolls inside itself. */
+/* The settings page in the mobile shell: the content pane scrolls inside itself, and a phone in landscape,
+   too short to stack the sidebar over the content, keeps them side by side at full width each and scrolls
+   sideways between them. A tablet keeps the desktop layout, so the pane never outgrows the viewport there. */
 html.shell-mobile .options-container {
     width: 100% !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden !important;
 }
 html.shell-mobile .options-container .sidebar {
     flex: 0 0 auto;
@@ -283,11 +282,19 @@ html.shell-mobile .options-container .sidebar {
 html.shell-mobile .options-container .main-content {
     flex: 1 1 auto;
     min-height: 0;
-    width: 100vw;
-    min-width: 100vw;
+    min-width: 0;
     padding: 1rem !important;
     overflow: auto !important;
     -webkit-overflow-scrolling: touch;
+}
+@media (orientation: landscape) and (max-height: 500px) {
+    html.shell-mobile .options-container {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    html.shell-mobile .options-container .main-content {
+        min-width: 100%;
+    }
 }
 html.shell-mobile .options-container .card,
 html.shell-mobile .modal-content {
