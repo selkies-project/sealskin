@@ -363,8 +363,13 @@ def _session_image(image: str) -> str:
     return f"{registries.repository_of(reference)}@{digest}" if digest and "@" not in reference else reference
 
 
-def _secret_auths(secret: dict[str, Any], name: str) -> dict[str, tuple[str, str]]:
-    """Return the credentials a pull secret holds, in either of the two forms Kubernetes takes."""
+def _secret_auths(secret: dict[str, Any], label: str) -> dict[str, tuple[str, str]]:
+    """Return the credentials a pull secret holds, in either of the two forms Kubernetes takes.
+
+    `label` names the secret in the log by where the template lists it, and a
+    secret that cannot be read is logged by the kind of failure alone: neither
+    its name nor a message raised over its content reaches the log.
+    """
     data = secret.get("data") or {}
     try:
         if ".dockerconfigjson" in data:
@@ -372,12 +377,12 @@ def _secret_auths(secret: dict[str, Any], name: str) -> dict[str, tuple[str, str
         elif ".dockercfg" in data:
             document = {"auths": json.loads(base64.b64decode(data[".dockercfg"]))}
         else:
-            logger.warning("Pull secret '%s' holds no Docker configuration.", name)
+            logger.warning("%s holds no Docker configuration.", label)
             return {}
     except (ValueError, binascii.Error) as exc:
-        logger.warning("Pull secret '%s' is not readable: %s", name, exc)
+        logger.warning("%s is not readable (%s).", label, type(exc).__name__)
         return {}
-    return registries.parse_docker_config(document, f"pull secret '{name}'")
+    return registries.parse_docker_config(document, label)
 
 
 async def registry_digest(image: str, auths: dict[str, tuple[str, str]] | None = None) -> str | None:
@@ -695,16 +700,17 @@ class KubernetesProvider(BaseProvider):
         api = kube()
         auths: dict[str, tuple[str, str]] = {}
         template = (await self._pod_template() or {}).get("spec") or {}
-        for entry in template.get("imagePullSecrets") or []:
+        for index, entry in enumerate(template.get("imagePullSecrets") or [], 1):
             name = (entry or {}).get("name")
             if not name:
                 continue
+            label = f"Pull secret {index} of the session template"
             try:
                 secret = await api.request("GET", api.path("secrets", name))
             except KubeError as exc:
-                logger.warning("Pull secret '%s' of the session template not read: %s", name, exc.message)
+                logger.warning("%s not read: HTTP %s.", label, exc.status)
                 continue
-            auths.update(_secret_auths(secret, name))
+            auths.update(_secret_auths(secret, label))
         _pull_secrets = (time.monotonic(), auths)
         return auths
 
