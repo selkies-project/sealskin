@@ -289,6 +289,7 @@ def _parse_metadata(raw: bytes, remote: str) -> list[dict[str, Any]]:
                 "full_name": str(entry.get("full_name") or entry["name"]).strip(),
                 "description": str(entry.get("description") or "").strip(),
                 "arch": str(entry.get("arch") or ""),
+                "category": str(entry.get("category") or "").strip(),
                 "icon": icon,
                 "disabled": bool(entry.get("disabled")),
             }
@@ -432,6 +433,8 @@ def _write_metadata(folder: str, apps: list[dict[str, Any]], client: httpx.Clien
             "arch": app["arch"],
             "description": app["description"],
         }
+        if app.get("category"):
+            entry["category"] = app["category"]
         if app["icon"]:
             icon = icon_file(app["remote"], app["icon"])
             entry["icon"] = icon
@@ -489,6 +492,7 @@ def _sync_blocking(
                 "full_name": app.name,
                 "description": "",
                 "arch": "",
+                "category": "",
                 "icon": "",
                 "disabled": False,
             }

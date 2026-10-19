@@ -77,6 +77,28 @@ class FakeRegistry:
         return 3
 
 
+def test_the_category_a_remote_lists_reaches_the_catalog_metadata():
+    raw = b"""include:
+  - name: gimp
+    full_name: GIMP
+    arch: linux/amd64
+    category: Creative
+    description: paint
+  - name: vim
+    full_name: Vim
+    arch: linux/amd64
+    description: edit
+"""
+    apps = prootapps._parse_metadata(raw, "linuxserver/proot-apps")
+    assert [a["category"] for a in apps] == ["Creative", ""]
+    folder = prootapps.catalog_dir("cat-categories")
+    prootapps._write_metadata(folder, apps, None, {})
+    with open(os.path.join(folder, "metadata", "metadata.yml")) as handle:
+        include = yaml.safe_load(handle)["include"]
+    assert include[0]["category"] == "Creative"
+    assert "category" not in include[1]
+
+
 def test_a_sync_writes_the_folder_proot_apps_reads(monkeypatch):
     monkeypatch.setattr(prootapps, "_Registry", FakeRegistry)
     monkeypatch.setattr(prootapps, "node_arch", lambda: "amd64")
