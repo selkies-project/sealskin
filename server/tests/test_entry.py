@@ -4,6 +4,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from app import logos
 from app.models import InstalledApp
 from app.routers import entry
 from app.settings import settings
@@ -78,6 +79,10 @@ def test_the_manifest_keeps_the_options_in_the_address():
 
 def test_the_icon_is_the_store_logo_or_the_uploaded_one(http, tmp_path):
     assert http.get(f"/app/{APP_ID}/icon.png").headers["location"] == "https://example.invalid/firefox.png"
+    local = logos.local("https://example.invalid/firefox.png")
+    state.installed_apps[APP_ID] = make_app(logo=local)
+    assert local.startswith("/api/logos/")
+    assert http.get(f"/app/{APP_ID}/icon.png").headers["location"] == local
     state.installed_apps[APP_ID] = make_app(logo=f"/api/app_icon/{APP_ID}")
     icons = tmp_path / "storage" / "icons"
     icons.mkdir(parents=True, exist_ok=True)

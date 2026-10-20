@@ -21,7 +21,7 @@ from urllib.parse import urlencode
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
 
-from .. import branding
+from .. import branding, logos
 from ..models import InstalledApp
 from ..security import verify_token
 from ..settings import settings
@@ -78,7 +78,8 @@ def manifest_for(app: InstalledApp, options: dict[str, str], icon: str) -> dict[
 def icon_response(app: InstalledApp) -> Response:
     """Answer with an application's icon: its uploaded one, a redirect to the one its store names, or the brand's logo."""
     logo = app.logo or ""
-    if logo.startswith(("http://", "https://")):
+    # A store's logo is handed out as this node's copy of it (see `logos.local`).
+    if logo.startswith(("http://", "https://", logos.ROUTE)):
         return RedirectResponse(logo, status_code=302)
     if logo.startswith("/api/app_icon/") and APP_ID.fullmatch(app.id):
         path = os.path.abspath(os.path.join(settings.app_icons_path, f"{app.id}.png"))
