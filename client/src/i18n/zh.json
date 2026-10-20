@@ -715,6 +715,10 @@
           "label": "强制CPU编码",
           "description": "强制为pixelflux使用基于CPU的编码。"
         },
+        "SELKIES_CPU_ENCODE_THREADING": {
+          "label": "多线程CPU编码",
+          "description": "将软件编码器编码的每一帧分散到多个线程。在将大量会话挤在核心上的主机上关闭此项，使每个会话的编码只占一个线程；一帧的编码时间会相应变长。硬件编码器不受影响。"
+        },
         "SELKIES_FRAMERATE": {
           "label": "帧率（范围或固定值）",
           "description": "例如，'8-240' 表示范围，'60' 表示固定初始值，'60,8-240' 表示两者兼有；'60-60' 则锁定该值。"

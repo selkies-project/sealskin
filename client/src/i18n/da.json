@@ -715,6 +715,10 @@
           "label": "Tving CPU Encoding",
           "description": "Tving CPU-baseret encoding for pixelflux."
         },
+        "SELKIES_CPU_ENCODE_THREADING": {
+          "label": "Multitrådet CPU Encoding",
+          "description": "Fordel hvert billede, som en software-encoder koder, over flere tråde. Slå det fra på værter, der pakker mange sessioner på deres kerner, så hver session koder på én tråd; et billede tager så længere tid at kode. Hardware-encodere påvirkes ikke."
+        },
         "SELKIES_FRAMERATE": {
           "label": "Billedfrekvens (Område eller Fast)",
           "description": "f.eks., '8-240' for et område, '60' for en fast startværdi, '60,8-240' for begge; '60-60' låser den."

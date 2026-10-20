@@ -715,6 +715,10 @@
           "label": "Pilitin ang CPU Encoding",
           "description": "Pilitin ang encoding na nakabase sa CPU para sa pixelflux."
         },
+        "SELKIES_CPU_ENCODE_THREADING": {
+          "label": "Multithreaded na CPU Encoding",
+          "description": "Ipamahagi sa ilang thread ang bawat frame na ini-encode ng software encoder. Patayin sa mga host na nagsisiksik ng maraming session sa kanilang mga core, para manatili sa isang thread ang encoding ng bawat session; mas matagal naman ang pag-encode ng isang frame. Hindi apektado ang mga hardware encoder."
+        },
         "SELKIES_FRAMERATE": {
           "label": "Framerate (Saklaw o Nakapirmi)",
           "description": "hal., '8-240' para sa isang saklaw, '60' para sa nakapirming paunang halaga, '60,8-240' para sa pareho; ang '60-60' ay nagla-lock nito."

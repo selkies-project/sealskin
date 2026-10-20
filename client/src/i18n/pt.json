@@ -715,6 +715,10 @@
           "label": "Forçar Codificação por CPU",
           "description": "Forçar codificação baseada em CPU para o pixelflux."
         },
+        "SELKIES_CPU_ENCODE_THREADING": {
+          "label": "Codificação por CPU Multithread",
+          "description": "Distribuir cada quadro que um codificador por software codifica por várias threads. Desative em hosts que concentram muitas sessões nos seus núcleos, para que cada sessão codifique numa única thread; um quadro demora então mais a codificar. Os codificadores por hardware não são afetados."
+        },
         "SELKIES_FRAMERATE": {
           "label": "Taxa de Quadros (Intervalo ou Fixo)",
           "description": "ex., '8-240' para um intervalo, '60' para um valor inicial fixo, '60,8-240' para ambos; '60-60' bloqueia o valor."

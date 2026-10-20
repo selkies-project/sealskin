@@ -715,6 +715,10 @@
           "label": "CPU-codering Forceren",
           "description": "Forceer CPU-gebaseerde codering voor pixelflux."
         },
+        "SELKIES_CPU_ENCODE_THREADING": {
+          "label": "Multithreaded CPU-codering",
+          "description": "Elk frame dat een software-encoder codeert over meerdere threads verdelen. Zet dit uit op hosts die veel sessies op hun cores samenpakken, zodat elke sessie op één thread codeert; een frame duurt dan langer. Hardware-encoders worden niet beïnvloed."
+        },
         "SELKIES_FRAMERATE": {
           "label": "Framerate (Bereik of Vast)",
           "description": "bijv., '8-240' voor een bereik, '60' voor een vaste beginwaarde, '60,8-240' voor beide; '60-60' vergrendelt het."

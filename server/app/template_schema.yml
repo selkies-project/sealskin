@@ -659,6 +659,12 @@ settings:
     type: boolean
     default: "false"
     docker: false
+  - name: SELKIES_CPU_ENCODE_THREADING
+    category: app
+    section: performance
+    type: boolean
+    default: "true"
+    docker: false
   - name: SELKIES_USE_PAINT_OVER_QUALITY
     category: app
     section: performance

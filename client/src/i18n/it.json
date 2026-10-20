@@ -715,6 +715,10 @@
           "label": "Forza Codifica CPU",
           "description": "Forza la codifica basata su CPU per pixelflux."
         },
+        "SELKIES_CPU_ENCODE_THREADING": {
+          "label": "Codifica CPU Multithread",
+          "description": "Distribuisce ogni fotogramma codificato da un codificatore software su più thread. Disattivarlo sugli host che concentrano molte sessioni sui loro core, così ogni sessione codifica su un solo thread; un fotogramma richiede allora più tempo. I codificatori hardware non sono interessati."
+        },
         "SELKIES_FRAMERATE": {
           "label": "Framerate (Intervallo o Fisso)",
           "description": "es. '8-240' per un intervallo, '60' per un valore iniziale fisso, '60,8-240' per entrambi; '60-60' lo blocca."

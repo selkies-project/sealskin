@@ -715,6 +715,10 @@
           "label": "Buộc mã hóa bằng CPU",
           "description": "Buộc mã hóa dựa trên CPU cho pixelflux."
         },
+        "SELKIES_CPU_ENCODE_THREADING": {
+          "label": "Mã hóa CPU đa luồng",
+          "description": "Phân bổ mỗi khung hình mà bộ mã hóa phần mềm mã hóa lên nhiều luồng. Tắt trên các máy chủ dồn nhiều phiên lên các lõi, để mỗi phiên chỉ mã hóa trên một luồng; khi đó một khung hình mất nhiều thời gian hơn để mã hóa. Bộ mã hóa phần cứng không bị ảnh hưởng."
+        },
         "SELKIES_FRAMERATE": {
           "label": "Tốc độ khung hình (Phạm vi hoặc Cố định)",
           "description": "ví dụ: '8-240' cho một phạm vi, '60' cho giá trị ban đầu cố định, '60,8-240' cho cả hai; '60-60' sẽ khóa giá trị."

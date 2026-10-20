@@ -715,6 +715,10 @@
           "label": "CPU Kodlamasını Zorla",
           "description": "Pixelflux için CPU tabanlı kodlamayı zorla."
         },
+        "SELKIES_CPU_ENCODE_THREADING": {
+          "label": "Çok İş Parçacıklı CPU Kodlaması",
+          "description": "Bir yazılım kodlayıcının kodladığı her kareyi birden fazla iş parçacığına dağıtır. Çekirdeklerine çok sayıda oturum sığdıran sunucularda kapatın; böylece her oturum tek iş parçacığında kodlar ve bir karenin kodlanması daha uzun sürer. Donanım kodlayıcılar etkilenmez."
+        },
         "SELKIES_FRAMERATE": {
           "label": "Kare Hızı (Aralık veya Sabit)",
           "description": "örn. bir aralık için '8-240', sabit bir başlangıç değeri için '60', her ikisi için '60,8-240'; '60-60' kilitler."

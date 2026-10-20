@@ -715,6 +715,10 @@
           "label": "Force CPU Encoding",
           "description": "Force CPU-based encoding for pixelflux."
         },
+        "SELKIES_CPU_ENCODE_THREADING": {
+          "label": "Multithreaded CPU Encoding",
+          "description": "Spread each frame a software encoder codes across threads. Turn it off on hosts that pack many sessions onto their cores, so each session's encode keeps to one thread; a frame then takes longer to code. Hardware encoders are unaffected."
+        },
         "SELKIES_FRAMERATE": {
           "label": "Framerate (Range or Fixed)",
           "description": "e.g. '8-240' for a range, '60' for a fixed initial value, '60,8-240' for both; '60-60' locks it."

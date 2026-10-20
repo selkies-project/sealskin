@@ -715,6 +715,10 @@
           "label": "CPU-Codierung erzwingen",
           "description": "CPU-basierte Codierung für Pixelflux erzwingen."
         },
+        "SELKIES_CPU_ENCODE_THREADING": {
+          "label": "Multithreading bei CPU-Codierung",
+          "description": "Jedes Bild, das ein Software-Encoder codiert, auf mehrere Threads verteilen. Auf Hosts, die viele Sitzungen auf ihre Kerne packen, ausschalten, damit jede Sitzung mit einem Thread codiert; ein Bild braucht dann länger. Hardware-Encoder sind nicht betroffen."
+        },
         "SELKIES_FRAMERATE": {
           "label": "Framerate (Bereich oder fest)",
           "description": "z.B. '8-240' für einen Bereich, '60' für einen festen Anfangswert, '60,8-240' für beides; '60-60' legt sie fest."

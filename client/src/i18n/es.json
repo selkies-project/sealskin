@@ -715,6 +715,10 @@
           "label": "Forzar Codificación por CPU",
           "description": "Forzar la codificación basada en CPU para pixelflux."
         },
+        "SELKIES_CPU_ENCODE_THREADING": {
+          "label": "Codificación por CPU Multihilo",
+          "description": "Repartir cada fotograma que codifica un codificador por software entre varios hilos. Desactívelo en hosts que concentran muchas sesiones en sus núcleos, para que cada sesión codifique en un solo hilo; un fotograma tarda entonces más en codificarse. Los codificadores por hardware no se ven afectados."
+        },
         "SELKIES_FRAMERATE": {
           "label": "Tasa de Fotogramas (Rango o Fijo)",
           "description": "ej., '8-240' para un rango, '60' para un valor inicial fijo, '60,8-240' para ambos; '60-60' lo bloquea."

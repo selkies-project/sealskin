@@ -715,6 +715,10 @@
           "label": "Forcer l'Encodage CPU",
           "description": "Forcer l'encodage basé sur le CPU pour pixelflux."
         },
+        "SELKIES_CPU_ENCODE_THREADING": {
+          "label": "Encodage CPU Multithread",
+          "description": "Répartir chaque image codée par un encodeur logiciel sur plusieurs threads. À désactiver sur les hôtes qui entassent de nombreuses sessions sur leurs cœurs, afin que chaque session encode sur un seul thread ; une image met alors plus de temps à être codée. Les encodeurs matériels ne sont pas concernés."
+        },
         "SELKIES_FRAMERATE": {
           "label": "Fréquence d'Images (Plage ou Fixe)",
           "description": "ex., '8-240' pour une plage, '60' pour une valeur initiale fixe, '60,8-240' pour les deux ; '60-60' la verrouille."
