@@ -96,7 +96,7 @@ def test_the_first_start_gives_the_one_administrator_a_key_file_and_the_root_key
 def test_the_first_start_writes_root_a_key_the_web_takes_and_the_store_keeps_hashed(http):
     key = open(settings.root_key_path, encoding="utf-8").read().strip()
     assert key.startswith("ssk_") and application_keys.parse(key)
-    assert key.split("_")[2] not in persistence.read_bytes(application_keys._path()).decode()
+    assert application_keys.parse(key)[1] not in persistence.read_bytes(application_keys._path()).decode()
     assert http.post("/api/auth/key", json={"key": key}).status_code == 403
     signed_in = http.post("/api/auth/key", json={"key": key}, headers=WEB)
     assert signed_in.status_code == 200 and signed_in.json()["username"] == "admin" and signed_in.json()["via"] == "root"
