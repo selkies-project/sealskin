@@ -7,7 +7,7 @@ description: Self-hosted browser isolation and remote application streaming. Ope
 
 <h1 align="center">SealSkin</h1>
 
-<p align="center">Part of <a href="https://www.linuxserver.io"><img src="https://raw.githubusercontent.com/selkies-project/sealskin/main/assets/linuxserver.svg" alt="LinuxServer.io" title="LinuxServer.io" width="200" align="middle"></a></p>
+<p align="center">Part of <a href="https://www.linuxserver.io"><img src="https://raw.githubusercontent.com/selkies-project/sealskin/main/assets/linuxserver.svg" alt="LinuxServer.io" title="LinuxServer.io" width="182" align="middle"></a></p>
 
 [![CI](https://github.com/selkies-project/sealskin/actions/workflows/ci.yml/badge.svg)](https://github.com/selkies-project/sealskin/actions/workflows/ci.yml) [![Pre-release](https://github.com/selkies-project/sealskin/actions/workflows/prerelease.yml/badge.svg)](https://github.com/selkies-project/sealskin/actions/workflows/prerelease.yml) [![Docs](https://github.com/selkies-project/sealskin/actions/workflows/docs.yml/badge.svg)](https://github.com/selkies-project/sealskin/actions/workflows/docs.yml) [![Release](https://img.shields.io/github/v/release/selkies-project/sealskin?label=release)](https://github.com/selkies-project/sealskin/releases/latest) [![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0) [![Discord](https://img.shields.io/discord/354974912613449730?logo=discord&label=Discord)](https://discord.com/invite/linuxserver) [![Ask DeepWiki](https://img.shields.io/badge/Ask-DeepWiki-blue)](https://deepwiki.com/selkies-project/sealskin)
 
