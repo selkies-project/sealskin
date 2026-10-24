@@ -23,24 +23,25 @@ description: Versioning, release notes, the GitHub workflows, what each release 
    user-visible.
 4. Merge to `main` and let CI and the pre-release run. The pre-release is the
    release candidate: its extension zips, APK, and IPA are what you test.
-5. Open the [Release](https://github.com/selkies-project/sealskin/actions/workflows/release.yml)
-   workflow, click **Run workflow** with **Use workflow from** on `main`, and
-   enter the version as the tag. The run tags the commit it started from.
-   Pushing the tag instead (`git tag 0.4.0 && git push origin 0.4.0`) runs
-   the same workflow.
+5. Cut the release as described below, with the version as the tag (`0.4.0`).
 
 The Release workflow checks the tag against `VERSION` and the notes file
 first, so a mismatch fails before anything is tagged, built, or uploaded.
 
-The run's `latest` input decides the "Latest" badge, which is also the
-release LinuxServer.io's image builds, since that image takes
-`releases/latest`. `auto`, the default, gives it to the new release; `never`
-holds it back for a fix to an older series, which then reaches no image.
+Releases are cut by running the
+[Release](https://github.com/selkies-project/sealskin/actions/workflows/release.yml)
+workflow from the Actions tab, **Run workflow** with **Use workflow from** on
+`main` and the tag, or by pushing the tag. A run releases the commit it
+started from: a new tag is created on it once the checks pass, and a tag that
+already exists has to be on it, so an earlier commit's tag is released by a
+run started from that tag. The `latest` input decides the "Latest" badge:
+`auto` gives it to a release and not to a pre-release, `never` holds it back
+for a fix to an older series, and `always` gives it to a pre-release as well.
 
-The mobile apps are built from the commit the run started from, so a run
-that releases a tag which already exists is started from that tag in **Use
-workflow from**. The stores refuse a build number they already have, so a
-release the stores already received fails at the upload.
+The "Latest" badge is also the release LinuxServer.io's image builds, since
+that image takes `releases/latest`, so a fix to an older series released with
+`never` reaches no image. The stores refuse a build number they already have,
+so a release the stores already received fails at the upload.
 
 ### What a release carries
 

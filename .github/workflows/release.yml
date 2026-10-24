@@ -1,33 +1,37 @@
 name: Release
 
-# A tag push releases that tag. A manual run releases the tag it names,
-# tagging the commit it started from when the tag is new, and decides the
-# "Latest" badge, which LinuxServer.io's image follows: held off a fix to an
-# older series. The tag is VERSION exactly, which the browser extension
-# manifests carry, so it is always a release; the per-commit pre-releases are
-# the release candidates.
+# A release is cut by running this workflow from the Actions tab with the tag,
+# or by pushing the tag. A run releases the commit it started from: a manual
+# run creates a new tag on it, cut from main, once the checks pass, and a tag
+# that already exists has to be on it, so an earlier commit's tag is released
+# by a run started from that tag. The latest input decides the "Latest" badge:
+# auto gives it to a release and not to a pre-release, never holds it back for
+# a fix to an older series, and always gives it to a pre-release too, which is
+# then released as a release since GitHub gives the badge to no pre-release.
 #
-# The mobile apps build from the run's own commit, so a manual run that
-# releases a tag which already exists is started from that tag.
+# The tag is VERSION exactly, which the browser extension manifests carry,
+# so it is a release's three numbers; the per-commit pre-releases are the
+# release candidates. The release's Latest badge is also the release
+# LinuxServer.io's image builds.
 
 on:
   push:
     tags:
-      - '*'
+      - '[0-9]+.[0-9]+.[0-9]+*'
   workflow_dispatch:
     inputs:
       tag:
-        description: Release tag, VERSION exactly (e.g. 0.4.0), tagging this run's commit when it is new
+        description: Release tag, created on this run's commit when it is new (e.g. 0.5.0)
         type: string
         required: true
       latest:
-        description: Designate this release as the latest, the one LinuxServer.io's image builds; never holds a fix to an older series back
+        description: Designate this release as the latest; auto does so for a release and not for a pre-release
         type: choice
         options: [auto, always, never]
         default: auto
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   # The tag this run releases: the pushed one, or the one a manual run names
@@ -35,64 +39,74 @@ env:
 
 jobs:
   check:
-    name: Check release notes
+    name: Check the tag
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
-      version: ${{ steps.notes.outputs.version }}
-      path: ${{ steps.notes.outputs.path }}
+      notes: ${{ steps.notes.outputs.path }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Check the tag is a version
+        # VERSION, which the browser extension manifests carry: three numbers
+        run: |
+          echo "${RELEASE_TAG}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$' \
+            || { echo "::error::${RELEASE_TAG} is not a version (0.5.0)"; exit 1; }
 
-      - name: Locate release notes
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check VERSION matches the tag
+        run: |
+          version="$(tr -d '[:space:]' < VERSION)"
+          [ "${version}" = "${RELEASE_TAG}" ] \
+            || { echo "::error::VERSION is ${version}, the tag is ${RELEASE_TAG}"; exit 1; }
+
+      - name: Resolve the release notes
         id: notes
         run: |
-          VERSION="${RELEASE_TAG}"
-          FILE_VERSION="$(cat VERSION)"
-          if [ "$VERSION" != "$FILE_VERSION" ]; then
-            echo "::error::Tag ${RELEASE_TAG} does not match VERSION file (${FILE_VERSION}); a release tag carries the version alone, with no leading v"
-            exit 1
-          fi
-          NOTES="release-notes/${VERSION}.md"
-          if [ ! -f "$NOTES" ]; then
-            echo "::error::No release notes found at ${NOTES}; refusing to cut a stable release for tag ${RELEASE_TAG}"
-            exit 1
-          fi
-          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "path=${NOTES}" >> "$GITHUB_OUTPUT"
-
-      - name: Tag the commit this run started from
-        # Checked above, so a refused run leaves no tag behind; an existing tag
-        # is released only from a run on its own commit, which the apps build
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" > /dev/null 2>&1; then
-            status="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${GITHUB_SHA}...${RELEASE_TAG}" --jq .status)"
-            [ "${status}" = identical ] || { echo "::error::${RELEASE_TAG} tags another commit than this run's; start the run from the tag (Use workflow from)"; exit 1; }
-            echo "${RELEASE_TAG} is already tagged"
-          else
-            [ "${GITHUB_REF}" = refs/heads/main ] || { echo "::error::a new tag is cut from main; this run started from ${GITHUB_REF_NAME}"; exit 1; }
-            gh api --method POST "repos/${GITHUB_REPOSITORY}/git/refs" \
-              -f ref="refs/tags/${RELEASE_TAG}" -f sha="${GITHUB_SHA}"
-            echo "${RELEASE_TAG} now tags ${GITHUB_SHA}"
-          fi
+          # A pre-release carries the notes of the release it leads to unless it
+          # was given its own
+          path="release-notes/${RELEASE_TAG}.md"
+          [ -s "${path}" ] || path="release-notes/${RELEASE_TAG%%-*}.md"
+          [ -s "${path}" ] || { echo "::error::no release notes for ${RELEASE_TAG}"; exit 1; }
+          echo "path=${path}" >> "$GITHUB_OUTPUT"
 
       - name: Check the tag is on main
-        # A release is cut from main and its tags alone: a tag on any other
-        # commit is refused before anything is built or created under it
+        # A release is cut from main and its tags alone: a commit that is not on
+        # main is refused before anything is tagged, built, or released
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           status="$(gh api "repos/${GITHUB_REPOSITORY}/compare/main...${GITHUB_SHA}" --jq .status)"
           case "${status}" in
             identical|behind) ;;
-            *) echo "::error::${RELEASE_TAG} points at a commit that is not on main (${status:-unknown})"; exit 1 ;;
+            *) echo "::error::${RELEASE_TAG} is on a commit that is not on main (${status:-unknown})"; exit 1 ;;
           esac
 
-  # A stable release is the one automatic path to the stores: the mobile
-  # workflow builds both apps and pushes them to TestFlight and the Google
-  # Play internal track.
+      - name: Tag the commit this run started from
+        # The checks above have passed, so a refused run leaves no tag behind. A
+        # new tag is cut from main; one that already exists, a pushed one
+        # included, has to be on this run's commit, which is what is built
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" > /dev/null 2>&1; then
+            status="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${GITHUB_SHA}...${RELEASE_TAG}" --jq .status)"
+            [ "${status}" = identical ] \
+              || { echo "::error::${RELEASE_TAG} tags another commit than this run's; start the run from the tag (Use workflow from)"; exit 1; }
+            echo "${RELEASE_TAG} tags ${GITHUB_SHA}"
+          else
+            [ "${GITHUB_REF}" = refs/heads/main ] \
+              || { echo "::error::a new tag is cut from main; this run started from ${GITHUB_REF_NAME}"; exit 1; }
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/git/refs" \
+              -f ref="refs/tags/${RELEASE_TAG}" -f sha="${GITHUB_SHA}" > /dev/null
+            echo "${RELEASE_TAG} now tags ${GITHUB_SHA}"
+          fi
+
+  # A release is the one automatic path to the stores: the mobile workflow
+  # builds both apps from this run's commit and pushes them to TestFlight and
+  # the Google Play internal track.
   mobile:
     name: Mobile apps
     needs: check
@@ -105,8 +119,12 @@ jobs:
     name: Release
     needs: [check, mobile]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -147,16 +165,36 @@ jobs:
           merge-multiple: true
           path: mobile-dist
 
-      - name: Create release
+      - name: Classify the tag
+        id: kind
+        env:
+          LATEST: ${{ inputs.latest }}
+        run: |
+          # A release takes the "Latest" badge and a pre-release does not,
+          # unless a manual run says otherwise; GitHub gives the badge to no
+          # pre-release, so one designated takes it marked as a release.
+          is_prerelease() { echo "$1" | grep -q -- '-'; }
+          case "${LATEST:-auto}" in
+            always) latest=true ;;
+            never) latest=false ;;
+            *) if is_prerelease "${RELEASE_TAG}"; then latest=false; else latest=true; fi ;;
+          esac
+          prerelease=false
+          if [ "${latest}" = false ] && is_prerelease "${RELEASE_TAG}"; then prerelease=true; fi
+          {
+            echo "prerelease=${prerelease}"
+            echo "make_latest=${latest}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create the release
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
         with:
           tag_name: ${{ env.RELEASE_TAG }}
           name: ${{ env.RELEASE_TAG }}
-          body_path: ${{ needs.check.outputs.path }}
-          prerelease: false
-          # Every tag here is a release, which takes the badge unless a manual
-          # run holds it back
-          make_latest: ${{ inputs.latest != 'never' }}
+          target_commitish: ${{ github.sha }}
+          body_path: ${{ needs.check.outputs.notes }}
+          prerelease: ${{ steps.kind.outputs.prerelease == 'true' }}
+          make_latest: ${{ steps.kind.outputs.make_latest }}
           files: |
             sealskin-ui-v*.tar.gz
             browser_extension/sealskin-chrome-v*.zip

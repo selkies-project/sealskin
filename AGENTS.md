@@ -44,7 +44,8 @@ Everything is written in American English. The prose under `docs/content` follow
 - `VERSION` is read by the client build, the packaging scripts, `server/app/version.py`, and the
   wheel build; a release tag is that version exactly, with no leading `v`, on a commit of `main`,
   with `release-notes/<version>.md` present, or the release workflow refuses it. A release is cut
-  by running that workflow from the Actions tab, which tags the commit, or by pushing the tag.
+  by running that workflow from the Actions tab, which tags the commit it started from, or by
+  pushing the tag; a tag that already exists has to be on the run's commit.
 
 ## Testing
 
