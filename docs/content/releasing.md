@@ -9,7 +9,7 @@ description: Versioning, release notes, the GitHub workflows, what each release 
 | --- | --- | --- |
 | **CI** (`ci.yml`) | every push to `main` and every pull request | Lints (`ruff`) and tests (`pytest`) the server, builds the client and checks that every manifest carries the version from `VERSION`, builds and validates the wheel. |
 | **Pre-release** (`prerelease.yml`) | every push to `main` | Builds everything, including the mobile apps, and publishes a GitHub pre-release named after the short commit SHA with all the artifacts attached. Nothing is uploaded to a store. |
-| **Release** (`release.yml`) | every pushed tag | Refuses to run unless the tag matches `VERSION` and `release-notes/<VERSION>.md` exists; then builds everything, uploads the mobile apps to TestFlight and the Google Play internal track, and publishes a stable GitHub release with the notes as its body. |
+| **Release** (`release.yml`) | by hand from the Actions tab, or every pushed tag | Refuses to run unless the tag matches `VERSION` and `release-notes/<VERSION>.md` exists; then builds everything, uploads the mobile apps to TestFlight and the Google Play internal track, and publishes a stable GitHub release with the notes as its body. |
 | **Mobile** (`mobile.yml`) | called by the two above, or by hand from the Actions tab | Builds the signed IPA, APK, and AAB. Uploads to the stores only when the `upload` input is set, which the Release workflow does and a manual run can. |
 | **Docs** (`docs.yml`) | every push to `main` and every pull request | Builds this site, checks every link and anchor, verifies the Settings Reference is current, and (on `main`) deploys it to GitHub Pages. |
 
@@ -23,15 +23,24 @@ description: Versioning, release notes, the GitHub workflows, what each release 
    user-visible.
 4. Merge to `main` and let CI and the pre-release run. The pre-release is the
    release candidate: its extension zips, APK, and IPA are what you test.
-5. Tag the commit with the version and push the tag:
-
-   ```bash
-   git tag 0.4.0
-   git push origin 0.4.0
-   ```
+5. Open the [Release](https://github.com/selkies-project/sealskin/actions/workflows/release.yml)
+   workflow, click **Run workflow** with **Use workflow from** on `main`, and
+   enter the version as the tag. The run tags the commit it started from.
+   Pushing the tag instead (`git tag 0.4.0 && git push origin 0.4.0`) runs
+   the same workflow.
 
 The Release workflow checks the tag against `VERSION` and the notes file
-first, so a mismatch fails before anything is built or uploaded.
+first, so a mismatch fails before anything is tagged, built, or uploaded.
+
+The run's `latest` input decides the "Latest" badge, which is also the
+release LinuxServer.io's image builds, since that image takes
+`releases/latest`. `auto`, the default, gives it to the new release; `never`
+holds it back for a fix to an older series, which then reaches no image.
+
+The mobile apps are built from the commit the run started from, so a run
+that releases a tag which already exists is started from that tag in **Use
+workflow from**. The stores refuse a build number they already have, so a
+release the stores already received fails at the upload.
 
 ### What a release carries
 
