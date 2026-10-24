@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/selkies-project/sealskin/main/assets/logo.svg" alt="SealSkin" width="160" height="160">
+  <img src="https://raw.githubusercontent.com/selkies-project/sealskin/main/assets/logo.svg" alt="SealSkin" width="160">
 </p>
 
 <h1 align="center">SealSkin</h1>
 
-<p align="center">Part of <a href="https://www.linuxserver.io"><img src="https://raw.githubusercontent.com/selkies-project/sealskin/main/assets/linuxserver.svg" alt="LinuxServer.io" title="LinuxServer.io" width="32" height="32" align="middle"></a></p>
+<p align="center">Part of <a href="https://www.linuxserver.io"><img src="https://raw.githubusercontent.com/selkies-project/sealskin/main/assets/linuxserver.svg" alt="LinuxServer.io" title="LinuxServer.io" width="200" align="middle"></a></p>
 
 <p align="center"><strong>Your browser is your new computer.</strong><br>
 Self-hosted browser isolation and remote application streaming.</p>
