@@ -1180,6 +1180,10 @@
         "DOCKER_GROUP_ADD": {
           "label": "Gruppe hinzufügen",
           "description": "Liste zusätzlicher Gruppennamen und/oder IDs (kommagetrennt)."
+        },
+        "KUBERNETES_POD_TEMPLATE": {
+          "label": "Kubernetes-Pod-Vorlage",
+          "description": "Unter Kubernetes der Name einer PodTemplate im Namespace, die für die Apps dieser Vorlage über die Sitzungsvorlage gelegt wird: Labels, Annotationen, Node-Selektoren, Tolerations, Ressourcen. Unter Docker ohne Wirkung."
         }
       }
     },

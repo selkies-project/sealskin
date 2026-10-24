@@ -1180,6 +1180,10 @@
         "DOCKER_GROUP_ADD": {
           "label": "Ajout de Groupe",
           "description": "Liste de noms et/ou d'ID de groupes supplémentaires (séparés par des virgules)."
+        },
+        "KUBERNETES_POD_TEMPLATE": {
+          "label": "Modèle de pod Kubernetes",
+          "description": "Sous Kubernetes, le nom d'un PodTemplate de l'espace de noms appliqué par-dessus le modèle de session pour les applications de ce modèle : labels, annotations, sélecteurs de nœuds, tolérances, ressources. Ignoré sous Docker."
         }
       }
     },

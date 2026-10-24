@@ -12,15 +12,17 @@
 # Fields:
 #   name      Environment variable name passed to the session container.
 #   category  What the server gates by: ui, app, hardening, general, webrtc,
-#             docker (the Docker overrides only an administrator may edit).
+#             docker (the Docker and Kubernetes run options only an
+#             administrator may edit).
 #   section   The editor's card, one of `sections` below, whose label is the
 #             translation options.appTemplates.sections.<section>.
 #   group     For the webrtc section alone, the heading inside its block, with
 #             the label at options.appTemplates.groups.<group>.
 #   type      text | boolean | select.
 #   default   Default value shown in the editor (always a string).
-#   docker    true when the variable is translated into a Docker run option
-#             instead of being passed to the container environment.
+#   docker    true when the variable becomes a Docker run option or names the
+#             session's PodTemplate instead of being passed to the container
+#             environment.
 #   options   For select types: list of {value, label_key} or {value, label}.
 #             label_key resolves to the translation key
 #             options.appTemplates.settings.<NAME>.options.<label_key>.
@@ -1393,6 +1395,12 @@ settings:
     default: ""
     docker: true
   - name: DOCKER_GROUP_ADD
+    category: docker
+    section: container
+    type: text
+    default: ""
+    docker: true
+  - name: KUBERNETES_POD_TEMPLATE
     category: docker
     section: container
     type: text

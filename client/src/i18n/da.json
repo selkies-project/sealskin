@@ -1180,6 +1180,10 @@
         "DOCKER_GROUP_ADD": {
           "label": "Tilføj Gruppe",
           "description": "Liste over yderligere gruppenavne og/eller ID'er (kommasepareret)."
+        },
+        "KUBERNETES_POD_TEMPLATE": {
+          "label": "Kubernetes-podskabelon",
+          "description": "På Kubernetes navnet på en PodTemplate i navnerummet, der lægges over sessionsskabelonen for denne skabelons apps: labels, annotationer, nodeselektorer, tolerations, ressourcer. Ignoreres på Docker."
         }
       }
     },

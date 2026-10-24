@@ -1180,6 +1180,10 @@
         "DOCKER_GROUP_ADD": {
           "label": "เพิ่มกลุ่ม",
           "description": "รายการชื่อกลุ่มและ/หรือ ID เพิ่มเติม (คั่นด้วยจุลภาค)"
+        },
+        "KUBERNETES_POD_TEMPLATE": {
+          "label": "เทมเพลตพ็อดของ Kubernetes",
+          "description": "บน Kubernetes ชื่อของ PodTemplate ในเนมสเปซที่ซ้อนทับเทมเพลตเซสชันสำหรับแอปของเทมเพลตนี้: ป้ายกำกับ คำอธิบายประกอบ ตัวเลือกโหนด tolerations และทรัพยากร ไม่มีผลบน Docker"
         }
       }
     },

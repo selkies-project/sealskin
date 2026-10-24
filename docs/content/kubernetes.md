@@ -148,6 +148,53 @@ LimitRange or admission policy sets, which can be too little for a desktop.
 The template is read at every launch, so `kubectl edit podtemplate
 sealskin-session` applies to the next session.
 
+## Pod templates per application
+
+The session template applies to every application. What differs between
+them, such as the labels and annotations an admission controller or policy
+keys on, node selectors and tolerations, or resources, goes into a PodTemplate
+of its own, named by the **Kubernetes Pod Template** setting
+(`KUBERNETES_POD_TEMPLATE`) in the Container card of the
+[app template](administration.md#app-templates) those applications use:
+
+```yaml
+apiVersion: v1
+kind: PodTemplate
+metadata:
+  name: cad-workstation
+template:
+  metadata:
+    labels:
+      example.com/profile: cad
+    annotations:
+      example.com/policy: workstation
+  spec:
+    nodeSelector:
+      workload-type: cad
+    tolerations:
+    - key: workload-type
+      operator: Equal
+      value: cad
+      effect: NoSchedule
+    containers:
+    - name: app
+      image: sealskin-session   # the API requires one; the application's image replaces it
+      resources:
+        limits:
+          memory: 16Gi
+```
+
+A session pod is built from the session template, then the application's
+template, then the template of the [GPU option](#gpu-options-you-define) the
+user picked, each laid over the last as SealSkin lays its own fields, which
+come last: a GPU choice wins over the application's defaults, and SealSkin's
+labels, volumes, and the session container's image, ports, and environment
+win over all three. The template is read at every launch, and a launch whose
+template the namespace lacks fails with that reason. Only an administrator
+sets it, as with the `DOCKER_*` settings; the Docker backend ignores it, and
+the pods that export a web client and the VPN gateways start from the session
+template alone.
+
 ## Run options on a pod
 
 An app's `docker_overrides` and a template's `DOCKER_*` settings are Docker

@@ -1180,6 +1180,10 @@
         "DOCKER_GROUP_ADD": {
           "label": "Group Add",
           "description": "List of additional group names and/or IDs (comma separated)."
+        },
+        "KUBERNETES_POD_TEMPLATE": {
+          "label": "Kubernetes Pod Template",
+          "description": "On Kubernetes, the name of a PodTemplate in the namespace laid over the session template for this template's apps: labels, annotations, node selectors, tolerations, resources. Ignored on Docker."
         }
       }
     },

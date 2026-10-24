@@ -34,7 +34,14 @@ from .. import (
 )
 from ..docker_utils import get_and_cache_image_metadata, get_system_stats, pull_and_cache_image
 from ..fsutil import safe_join, safe_rmtree
-from ..launch import RESERVED_ENV, launch_application, stop_session
+from ..launch import (
+    POD_TEMPLATE_SETTING,
+    RESERVED_ENV,
+    RUN_OPTION_PREFIXES,
+    launch_application,
+    stop_session,
+    valid_pod_template_name,
+)
 from ..models import (
     ActiveSessionInfo,
     AdminStatusResponse,
@@ -91,7 +98,7 @@ router = APIRouter(
     route_class=EncryptedRoute,
 )
 # Templates are open to users granted `edit_templates` as well, short of the settings that
-# carry authority over the Docker host (`_docker_settings`).
+# carry authority over the Docker host or the namespace (`_run_option_settings`).
 template_router = APIRouter(
     prefix="/api/admin",
     dependencies=[Depends(verify_template_editor), Depends(routing.announce_changes)],
@@ -718,17 +725,18 @@ async def launch_meta_for_customization(
 # --- Templates -------------------------------------------------------------
 
 
-def _docker_settings(template_settings: dict[str, Any]) -> dict[str, str]:
-    """A template's `DOCKER_*` settings, as text.
+def _run_option_settings(template_settings: dict[str, Any]) -> dict[str, str]:
+    """A template's `DOCKER_*` and `KUBERNETES_*` settings, as text.
 
     They become container run options (privileged mode, devices, namespaces, binds)
-    and so carry authority over the Docker host. Text, since a hand-edited template
-    may hold them as YAML booleans or numbers.
+    or the pod template a session starts from, and so carry authority over the
+    Docker host or the namespace. Text, since a hand-edited template may hold them
+    as YAML booleans or numbers.
     """
     return {
         key: ("true" if value is True else "false" if value is False else str(value))
         for key, value in template_settings.items()
-        if key.startswith("DOCKER_")
+        if key.startswith(RUN_OPTION_PREFIXES)
     }
 
 
@@ -740,15 +748,18 @@ def _identity_settings(template_settings: dict[str, Any]) -> dict[str, str]:
 def editor_settings(stored: dict[str, Any], submitted: dict[str, Any]) -> dict[str, Any]:
     """Return the settings a template editor who is not an administrator may save.
 
-    The stored template's `DOCKER_*` run options and identity variables stay as they
-    are: one left out keeps its value, and one added or changed is refused.
+    The stored template's `DOCKER_*` and `KUBERNETES_*` run options and identity
+    variables stay as they are: one left out keeps its value, and one added or
+    changed is refused.
 
     Raises:
-        HTTPException: 403 for a changed Docker or identity setting.
+        HTTPException: 403 for a changed run option or identity setting.
     """
-    kept = _docker_settings(stored)
-    if any(kept.get(key) != value for key, value in _docker_settings(submitted).items()):
-        raise HTTPException(status_code=403, detail="Only an administrator can change a template's Docker settings.")
+    kept = _run_option_settings(stored)
+    if any(kept.get(key) != value for key, value in _run_option_settings(submitted).items()):
+        raise HTTPException(
+            status_code=403, detail="Only an administrator can change a template's Docker or Kubernetes settings."
+        )
     identity = _identity_settings(stored)
     if any(identity.get(key) != value for key, value in _identity_settings(submitted).items()):
         raise HTTPException(
@@ -772,13 +783,20 @@ async def save_app_template(
     """Create or replace a template.
 
     A template editor who is not an administrator keeps the template's `DOCKER_*`
-    settings and the session's identity variables as they are (`editor_settings`).
+    and `KUBERNETES_*` settings and the session's identity variables as they are
+    (`editor_settings`). A PodTemplate the template names must be a valid name.
     """
     try:
         template = AppTemplate(**decrypted_body)
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     _require_safe_name(template.name, "template")
+    pod_template = str(template.settings.get(POD_TEMPLATE_SETTING) or "").strip()
+    if pod_template and not valid_pod_template_name(pod_template):
+        raise HTTPException(
+            status_code=422,
+            detail=f"'{pod_template}' is not a PodTemplate name: lowercase letters, digits, '-' and '.'.",
+        )
     if not user.get("is_admin"):
         template.settings = editor_settings(state.app_templates.get(template.name, {}).get("settings", {}), template.settings)
     try:
@@ -799,13 +817,13 @@ async def save_app_template(
 async def delete_app_template(
     template_name: str, user: dict[str, Any] = Depends(verify_template_editor)
 ) -> Response:
-    """Delete a user template; one with `DOCKER_*` settings only as an administrator."""
+    """Delete a user template; one with `DOCKER_*` or `KUBERNETES_*` settings only as an administrator."""
     _require_safe_name(template_name, "template")
-    if not user.get("is_admin") and _docker_settings(
+    if not user.get("is_admin") and _run_option_settings(
         state.app_templates.get(template_name, {}).get("settings", {})
     ):
         raise HTTPException(
-            status_code=403, detail="Only an administrator can delete a template with Docker settings."
+            status_code=403, detail="Only an administrator can delete a template with Docker or Kubernetes settings."
         )
     try:
         config_store.delete_app_template(template_name)

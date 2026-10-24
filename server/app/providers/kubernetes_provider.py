@@ -8,7 +8,8 @@ volume that backs it, with a `subPath`; a volume only one node can mount (a
 `ReadWriteOnce` claim, a `hostPath`) pins sessions to the server's node.
 A session pod starts from the PodTemplate `<owner>-session` when the namespace
 has one, which is where node placement, runtime classes, and default resources
-belong. Session pods are labelled with the server's owner (its Deployment or
+belong; an application's template may name another PodTemplate, laid over it for
+that application's sessions. Session pods are labelled with the server's owner (its Deployment or
 StatefulSet) and owned by it, so uninstalling removes them too. Images are
 pulled by the kubelet, so `pull_image` pins the registry's current digest and
 sessions run that exact image.
@@ -1107,6 +1108,9 @@ class KubernetesProvider(BaseProvider):
     ) -> dict[str, Any]:
         """Create the session pod and wait until its web endpoint answers.
 
+        The pod is built over the session template, the PodTemplate the app's
+        template names, and the GPU option's PodTemplate, laid over one another in
+        that order, so the GPU a user picked wins over the application's defaults.
         See `BaseProvider.launch` for the arguments; `network` has no meaning here.
 
         Raises:
@@ -1114,6 +1118,16 @@ class KubernetesProvider(BaseProvider):
         """
         try:
             template = await self._pod_template() or {}
+            app_template = self.app_config["provider_config"].get("pod_template") or ""
+            if app_template:
+                if len(app_template) > 253 or not re.fullmatch(r"[a-z0-9]([-a-z0-9.]*[a-z0-9])?", app_template):
+                    raise HTTPException(status_code=400, detail=f"'{app_template}' is not a PodTemplate name.")
+                found = await self._pod_template(app_template)
+                if found is None:
+                    raise HTTPException(
+                        status_code=400, detail=f"The application's PodTemplate '{app_template}' is not in the namespace."
+                    )
+                template = _overlay(template, found)
             if gpu_config and "template" in gpu_config:
                 gpu_template = await self._pod_template(gpu_config["template"])
                 if gpu_template is None:

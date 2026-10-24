@@ -12,8 +12,8 @@
   applications, VPN profiles, and pools whose lists name `all`, one of their groups, or `default` for a user in
   no group, and nothing but the status route while held for an administrator); a companion app holding
   an application key (a bearer over `/companion/`); a key-file client (an RS256 JWT the client signs, under
-  `SEALSKIN_LEGACY_AUTH`); a template editor (may edit templates but not their `DOCKER_*` settings nor the
-  session's identity variables); session collaborators (controller, viewer and read-only invite tokens); an
+  `SEALSKIN_LEGACY_AUTH`); a template editor (may edit templates but not their `DOCKER_*` and `KUBERNETES_*` settings nor
+  the session's identity variables); session collaborators (controller, viewer and read-only invite tokens); an
   admin; another node of the cluster (a signed peer request, acting for a user it signed in); the session
   container workload; a VPN gateway; the page inside the shell's iframe (no key material, a postMessage bridge
   only).

@@ -1180,6 +1180,10 @@
         "DOCKER_GROUP_ADD": {
           "label": "Groep Toevoegen",
           "description": "Lijst met extra groepsnamen en/of ID's (komma-gescheiden)."
+        },
+        "KUBERNETES_POD_TEMPLATE": {
+          "label": "Kubernetes-podsjabloon",
+          "description": "Op Kubernetes de naam van een PodTemplate in de namespace die voor de apps van dit sjabloon over het sessiesjabloon wordt gelegd: labels, annotaties, nodeselectors, tolerations, resources. Genegeerd op Docker."
         }
       }
     },

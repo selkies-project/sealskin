@@ -1180,6 +1180,10 @@
         "DOCKER_GROUP_ADD": {
           "label": "添加组",
           "description": "附加组名称和/或 ID 的列表（逗号分隔）。"
+        },
+        "KUBERNETES_POD_TEMPLATE": {
+          "label": "Kubernetes Pod 模板",
+          "description": "在 Kubernetes 上，命名空间中一个 PodTemplate 的名称，会叠加在此模板应用的会话模板之上：标签、注解、节点选择器、容忍度、资源。在 Docker 上忽略。"
         }
       }
     },

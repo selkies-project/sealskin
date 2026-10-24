@@ -51,7 +51,7 @@ Each user carries these settings, editable later:
 | **Allow GPU Access** | Whether the launcher offers GPUs to this user. |
 | **Share GPUs** | Off gives each of the user's GPU sessions a GPU no other session is on. |
 | **Move Home Directories** | The user may move their own home directories between the nodes of a [cluster](cluster.md), from the launcher. On by default: a user who has home directories can take them where they launch. |
-| **Allow Editing App Templates** | Opens the [App Templates](#app-templates) editor to a user who is not an administrator. They create, change, and delete templates, except for the `DOCKER_*` settings, which grant authority over the Docker host: those keep the values an administrator gave them, and only an administrator deletes a template that carries any. |
+| **Allow Editing App Templates** | Opens the [App Templates](#app-templates) editor to a user who is not an administrator. They create, change, and delete templates, except for the `DOCKER_*` and `KUBERNETES_*` settings, which grant authority over the Docker host or the namespace: those keep the values an administrator gave them, and only an administrator deletes a template that carries any. |
 | **Harden Container**, **Harden Window Manager** | Force the base image presets `HARDEN_DESKTOP` and `HARDEN_OPENBOX` on every session the user starts, including apps a collaboration room swaps to. They are applied after the [app template](#app-templates) and the app's own environment overrides, so neither can switch them back off. Leave them off to let the template decide. |
 | **Limits** | Sessions at once, storage, CPUs and memory per session, session length, and a time allowance per day, week, or month; see [the limits](signin.md#groups-switches-and-limits). Blank or negative is no limit. |
 | **Application keys** | Whether the user may sign the extension and the mobile app in with [application keys](signin.md#application-keys), which apps may use them, how long a key lives, and the dormancy rules that send the user back to the web to sign in. These bind administrators too. |
@@ -315,8 +315,9 @@ leaves just the values a template sets. The cards:
 * **Container**: `DOCKER_*` settings that become container run options rather
   than environment variables: privileged mode, capabilities, devices, extra
   bind mounts, memory and CPU limits, network, IPC and PID modes, DNS,
-  sysctls, ulimits, tmpfs, and extra groups. Only an administrator edits
-  these.
+  sysctls, ulimits, tmpfs, and extra groups; and on Kubernetes
+  `KUBERNETES_POD_TEMPLATE`, a [PodTemplate](kubernetes.md#pod-templates-per-application)
+  laid over the session pod. Only an administrator edits these.
 
 The list of variables comes from `template_schema.yml` on the server, so a
 new image option is a server change and never needs a client update. The

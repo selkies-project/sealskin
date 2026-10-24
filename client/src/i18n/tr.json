@@ -1180,6 +1180,10 @@
         "DOCKER_GROUP_ADD": {
           "label": "Grup Ekle",
           "description": "Ek grup adları ve/veya kimlikleri listesi (virgülle ayrılmış)."
+        },
+        "KUBERNETES_POD_TEMPLATE": {
+          "label": "Kubernetes Pod Şablonu",
+          "description": "Kubernetes'te, bu şablonun uygulamaları için oturum şablonunun üzerine uygulanan, ad alanındaki bir PodTemplate'in adı: etiketler, açıklamalar, düğüm seçiciler, toleranslar, kaynaklar. Docker'da yok sayılır."
         }
       }
     },

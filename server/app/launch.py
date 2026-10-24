@@ -57,6 +57,11 @@ HARDENING_ENV = {
 }
 
 
+def valid_pod_template_name(name: str) -> bool:
+    """Tell whether `name` can name a PodTemplate: a DNS subdomain (RFC 1123)."""
+    return len(name) <= 253 and re.fullmatch(r"[a-z0-9]([-a-z0-9.]*[a-z0-9])?", name) is not None
+
+
 def hardening_env(effective_settings: dict[str, Any] | None) -> dict[str, str]:
     """Return the environment forced by a user's hardening switches.
 
@@ -71,6 +76,11 @@ def hardening_env(effective_settings: dict[str, Any] | None) -> dict[str, str]:
         return {}
     return {var: "true" for key, var in HARDENING_ENV.items() if effective_settings.get(key)}
 DOCKER_DICT_KEYS = ("environment",)
+#: Template settings that configure the session's container or pod rather than its
+#: environment; only an administrator may set them.
+RUN_OPTION_PREFIXES = ("DOCKER_", "KUBERNETES_")
+#: Template setting naming a PodTemplate laid over the session template on Kubernetes.
+POD_TEMPLATE_SETTING = "KUBERNETES_POD_TEMPLATE"
 
 
 @dataclass
@@ -493,7 +503,7 @@ def build_launch_spec(
     template_settings: dict[str, Any] = {}
     if template and template.get("settings"):
         template_settings = config_store.migrate_legacy_template_settings(template["settings"])
-        env.update({k: str(v) for k, v in template_settings.items() if not k.startswith("DOCKER_")})
+        env.update({k: str(v) for k, v in template_settings.items() if not k.startswith(RUN_OPTION_PREFIXES)})
     elif not template:
         logger.warning(
             "[%s] Template '%s' not found for app '%s'. Using container defaults.",
@@ -508,6 +518,9 @@ def build_launch_spec(
         provider_config.get("docker_overrides"), extract_docker_overrides(template_settings)
     )
     env.update({k: str(v) for k, v in provider_config["docker_overrides"].pop("environment", {}).items()})
+    pod_template = str(template_settings.get(POD_TEMPLATE_SETTING) or "").strip()
+    if pod_template:
+        provider_config["pod_template"] = pod_template
 
     launch_context: dict[str, Any] | None = None
     if extra_env:

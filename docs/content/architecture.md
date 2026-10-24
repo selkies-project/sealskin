@@ -157,7 +157,8 @@ guessing and the scrypt work it costs the server.
    `LC_ALL`), the template's variables, the request's `SEALSKIN_URL` or
    `SEALSKIN_FILE`, the app's environment overrides, the GPU device, the
    volumes, and Docker run options merged from the store entry and the
-   template's `DOCKER_*` settings. If the app has an autostart script, it is
+   template's `DOCKER_*` settings, with the PodTemplate its
+   `KUBERNETES_POD_TEMPLATE` names on Kubernetes. If the app has an autostart script, it is
    written into the home directory as the `openbox` or `labwc` autostart.
 4. The provider starts the instance: the Docker provider pulls the image if
    needed and runs the container (removed on exit) on the server's network;

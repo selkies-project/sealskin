@@ -692,6 +692,74 @@ async def test_session_pods_start_from_the_namespace_pod_template(api, monkeypat
     assert pod["metadata"]["labels"]["team"] == "a" and pod["metadata"]["annotations"] == {"note": "x"}
 
 
+async def test_an_app_template_lays_its_pod_template_between_the_session_and_gpu_templates(api, monkeypatch):
+    await kp.KubernetesProvider().inspect_self()
+    api.pod_templates["sealskin-session"] = {
+        "template": {
+            "metadata": {"labels": {"team": "a"}},
+            "spec": {
+                "nodeSelector": {"pool": "desktops"},
+                "tolerations": [{"key": "desktops", "operator": "Exists"}],
+                "containers": [{"name": "app", "image": "x", "resources": {"requests": {"cpu": "1"}}}],
+            },
+        }
+    }
+    api.pod_templates["cad-workstation"] = {
+        "template": {
+            "metadata": {
+                "labels": {"example.com/profile": "cad", "app.kubernetes.io/component": "other", kp.MANAGED_BY_LABEL: "x"},
+                "annotations": {"example.com/policy": "workstation"},
+            },
+            "spec": {
+                "nodeSelector": {"workload-type": "cad", "amd.com/gpu.product-name": "any"},
+                "tolerations": [{"key": "workload-type", "operator": "Equal", "value": "cad", "effect": "NoSchedule"}],
+                "automountServiceAccountToken": True,
+                "restartPolicy": "Always",
+                "containers": [{"name": "app", "image": "placeholder", "resources": {"limits": {"memory": "16Gi"}}}],
+            },
+        }
+    }
+    api.pod_templates["radeon"] = {
+        "metadata": {"labels": {"sealskin.app/gpu": "amdgpu"}},
+        "template": {
+            "spec": {
+                "nodeSelector": {"amd.com/gpu.product-name": "AMD_Radeon_PRO_W7900"},
+                "containers": [{"name": "app", "image": "x", "resources": {"limits": {"amd.com/gpu": "1"}}}],
+            }
+        },
+    }
+    await kp.KubernetesProvider().detect_gpus()
+    monkeypatch.setattr(kp.KubernetesProvider, "_wait_until_ready", _ready)
+    provider = _provider()
+    provider.app_config["provider_config"]["pod_template"] = "cad-workstation"
+    await provider.launch("s" * 36, {}, {}, state.available_gpus[0])
+    pod = api.posted[0]
+    spec, labels = pod["spec"], pod["metadata"]["labels"]
+    assert labels["team"] == "a" and labels["example.com/profile"] == "cad"
+    assert labels["app.kubernetes.io/component"] == "session" and labels[kp.MANAGED_BY_LABEL] == "sealskin"
+    assert pod["metadata"]["annotations"] == {"example.com/policy": "workstation"}
+    assert spec["nodeSelector"] == {
+        "pool": "desktops",
+        "workload-type": "cad",
+        "amd.com/gpu.product-name": "AMD_Radeon_PRO_W7900",
+        "kubernetes.io/os": "linux",
+    }
+    assert [t["key"] for t in spec["tolerations"]] == ["desktops", "workload-type"]
+    assert spec["automountServiceAccountToken"] is False and spec["restartPolicy"] == "Never"
+    app = spec["containers"][0]
+    assert app["image"] == "lscr.io/linuxserver/firefox:latest"
+    assert app["resources"] == {"requests": {"cpu": "1"}, "limits": {"memory": "16Gi", "amd.com/gpu": "1"}}
+
+    provider.app_config["provider_config"]["pod_template"] = "gone"
+    with pytest.raises(HTTPException) as missing:
+        await provider.launch("t" * 36, {}, {}, None)
+    assert missing.value.status_code == 400 and "'gone'" in missing.value.detail
+    provider.app_config["provider_config"]["pod_template"] = "../secrets/server"
+    with pytest.raises(HTTPException) as malformed:
+        await provider.launch("u" * 36, {}, {}, None)
+    assert malformed.value.status_code == 400 and len(api.posted) == 1
+
+
 async def test_pending_timeout_reports_the_last_warning(api, monkeypatch):
     await kp.KubernetesProvider().inspect_self()
     api.pod_status = {"phase": "Pending", "containerStatuses": [{"state": {"waiting": {"reason": "ContainerCreating"}}}]}

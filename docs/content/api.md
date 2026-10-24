@@ -209,7 +209,7 @@ All *encrypted, admin*.
 | `POST /api/admin/apps/installed/{app_id}/pull_latest` | Pull the newest image. |
 | `POST /api/admin/apps/meta` | Create a meta-app (`name`, `base_app_id`, `logo`, autostart scripts, `users`, `groups`). |
 | `POST /api/admin/launch/meta_customize` | Launch a meta-app with its template mounted read-write; `409` while the caller has one open. |
-| `GET`/`POST /api/admin/apps/templates`, `DELETE /api/admin/apps/templates/{name}` | Templates; also open to a user allowed to edit app templates, short of their `DOCKER_*` settings. |
+| `GET`/`POST /api/admin/apps/templates`, `DELETE /api/admin/apps/templates/{name}` | Templates; also open to a user allowed to edit app templates, short of their `DOCKER_*` and `KUBERNETES_*` settings. |
 | `GET /api/admin/sessions` | Every session grouped by user. |
 | `DELETE /api/admin/sessions/{session_id}` | Stop any session. |
 | `PUT /api/admin/branding` | Replace the brand's record (`name`, `logo_link`, `accent`, `apps` with a `client`, `url`, and `enabled` per companion app, the `wallpaper_*` fields, `links`); the pictures stay. |

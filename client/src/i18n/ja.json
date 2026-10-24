@@ -1180,6 +1180,10 @@
         "DOCKER_GROUP_ADD": {
           "label": "グループ追加",
           "description": "追加のグループ名および/またはIDのリスト（カンマ区切り）。"
+        },
+        "KUBERNETES_POD_TEMPLATE": {
+          "label": "Kubernetes Pod テンプレート",
+          "description": "Kubernetes では、このテンプレートのアプリのセッションテンプレートに重ねる、名前空間内の PodTemplate の名前（ラベル、アノテーション、ノードセレクター、トレレーション、リソース）。Docker では無視されます。"
         }
       }
     },

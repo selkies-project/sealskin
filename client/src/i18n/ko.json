@@ -1180,6 +1180,10 @@
         "DOCKER_GROUP_ADD": {
           "label": "그룹 추가",
           "description": "추가 그룹 이름 및/또는 ID 목록 (쉼표로 구분)."
+        },
+        "KUBERNETES_POD_TEMPLATE": {
+          "label": "Kubernetes 파드 템플릿",
+          "description": "Kubernetes에서 이 템플릿의 앱에 대해 세션 템플릿 위에 덧씌우는 네임스페이스의 PodTemplate 이름입니다: 레이블, 어노테이션, 노드 셀렉터, 톨러레이션, 리소스. Docker에서는 무시됩니다."
         }
       }
     },

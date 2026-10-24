@@ -79,6 +79,27 @@ def test_build_launch_spec_env_volumes_and_overrides(tmp_path):
     assert kwargs["env_vars"] is spec.env and "is_collaboration" not in kwargs
 
 
+def test_a_template_names_the_session_pod_template_outside_the_environment(tmp_path):
+    for value, expected in ((" cad-workstation ", "cad-workstation"), ("", None)):
+        state.app_templates["Default"] = {"name": "Default", "settings": {"TITLE": "Hi", "KUBERNETES_POD_TEMPLATE": value}}
+        spec = launch.build_launch_spec(
+            make_app(),
+            "sess",
+            base_env=launch.session_base_env("sess", "u", "p", None),
+            extra_env=None,
+            language=None,
+            wayland_mode=False,
+            gpu_config=None,
+            host_mount_path=str(tmp_path),
+            shared_files_path=None,
+        )
+        assert spec.env["TITLE"] == "Hi" and "KUBERNETES_POD_TEMPLATE" not in spec.env
+        assert spec.app_config["provider_config"].get("pod_template") == expected
+    assert launch.valid_pod_template_name("cad-workstation") and launch.valid_pod_template_name("a.b-1")
+    for name in ("../secrets/x", "Cad", "-cad", "cad-", "a" * 254, "cad/x", "cad?x"):
+        assert not launch.valid_pod_template_name(name), name
+
+
 def test_docker_env_joins_the_session_environment(tmp_path):
     state.app_templates["Default"] = {
         "name": "Default",
@@ -283,6 +304,12 @@ def test_template_editors_keep_docker_and_identity_settings_to_administrators():
     with pytest.raises(HTTPException) as refused:
         editor_settings(stored, {"DOCKER_PRIVILEGED": "true"})
     assert refused.value.status_code == 403
+    placed = {"TITLE": "Old", "KUBERNETES_POD_TEMPLATE": "cad"}
+    assert editor_settings(placed, {"TITLE": "New"}) == {"TITLE": "New", "KUBERNETES_POD_TEMPLATE": "cad"}
+    for change in ({"KUBERNETES_POD_TEMPLATE": "privileged"}, {"KUBERNETES_ANYTHING": "x"}):
+        with pytest.raises(HTTPException) as refused:
+            editor_settings(placed, change)
+        assert refused.value.status_code == 403, change
     assert set(launch.RESERVED_ENV) <= set(launch.session_base_env("s", "u", "p", "m"))
 
 

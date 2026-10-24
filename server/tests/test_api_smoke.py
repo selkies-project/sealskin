@@ -302,6 +302,12 @@ def test_template_editors_keep_docker_settings_to_administrators(role_clients):
 
     assert editor.call("POST", templates, {"name": "Team", "settings": {"TITLE": "Team"}})[0] == 201
     assert editor.call("POST", templates, {"name": "Team", "settings": {"DOCKER_PRIVILEGED": "true"}})[0] == 403
+    assert editor.call("POST", templates, {"name": "Team", "settings": {"KUBERNETES_POD_TEMPLATE": "cad"}})[0] == 403
+    placed = {"KUBERNETES_POD_TEMPLATE": "../secrets/sealskin"}
+    assert boss.call("POST", templates, {"name": "Placed", "settings": placed})[0] == 422
+    assert boss.call("POST", templates, {"name": "Placed", "settings": {"KUBERNETES_POD_TEMPLATE": "cad"}})[0] == 201
+    assert editor.call("DELETE", f"{templates}/Placed")[0] == 403
+    assert boss.call("DELETE", f"{templates}/Placed")[0] == 204
 
     devices = "/dev/dri/renderD128"
     assert boss.call("POST", templates, {"name": "Hosted", "settings": {"DOCKER_DEVICES": devices}})[0] == 201

@@ -1180,6 +1180,10 @@
         "DOCKER_GROUP_ADD": {
           "label": "Magdagdag ng Grupo",
           "description": "Listahan ng karagdagang mga pangalan at/o ID ng grupo (pinaghihiwalay ng kuwit)."
+        },
+        "KUBERNETES_POD_TEMPLATE": {
+          "label": "Kubernetes Pod Template",
+          "description": "Sa Kubernetes, ang pangalan ng isang PodTemplate sa namespace na ipinapatong sa session template para sa mga app ng template na ito: labels, annotations, node selectors, tolerations, resources. Hindi pinapansin sa Docker."
         }
       }
     },

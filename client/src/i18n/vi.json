@@ -1180,6 +1180,10 @@
         "DOCKER_GROUP_ADD": {
           "label": "Thêm nhóm",
           "description": "Danh sách tên nhóm và/hoặc ID bổ sung (phân tách bằng dấu phẩy)."
+        },
+        "KUBERNETES_POD_TEMPLATE": {
+          "label": "Mẫu pod Kubernetes",
+          "description": "Trên Kubernetes, tên của một PodTemplate trong namespace được áp lên mẫu phiên cho các ứng dụng của mẫu này: nhãn, chú thích, bộ chọn nút, tolerations, tài nguyên. Bị bỏ qua trên Docker."
         }
       }
     },
