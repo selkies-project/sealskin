@@ -602,10 +602,7 @@ def resolve_timezone(*candidates: Any) -> str:
 
 
 #: Session environment a template never overrides: who the container runs as, and how it is reached.
-RESERVED_ENV = (
-    "SUBFOLDER", "PUID", "PGID", "CUSTOM_USER", "PASSWORD", "VIEWONLY_PASSWORD", "SELKIES_MASTER_TOKEN",
-    "SELKIES_ALLOWED_ORIGINS",
-)
+RESERVED_ENV = ("SUBFOLDER", "PUID", "PGID", "CUSTOM_USER", "PASSWORD", "SELKIES_MASTER_TOKEN", "SELKIES_ALLOWED_ORIGINS")
 
 
 def session_base_env(
@@ -614,7 +611,6 @@ def session_base_env(
     password: str,
     master_token: str | None,
     timezone: str | None = None,
-    viewonly_password: str | None = None,
 ) -> dict[str, str]:
     """Return the session-level environment shared by every container of a session.
 
@@ -624,9 +620,6 @@ def session_base_env(
         password: Basic-auth password for the container.
         master_token: Collaboration master token, or `None` outside a room.
         timezone: IANA zone for `TZ`; resolved via `resolve_timezone`.
-        viewonly_password: The second Basic-auth password, which Selkies caps at the
-            viewer role: what a room's viewer reaches the container with
-            (`routers.internal.resolve_session`). None leaves the split off.
     """
     env = {
         "SUBFOLDER": f"/{session_id}/",
@@ -634,7 +627,6 @@ def session_base_env(
         "PGID": str(settings.pgid),
         "CUSTOM_USER": custom_user,
         "PASSWORD": password,
-        "VIEWONLY_PASSWORD": viewonly_password or "",
         "TZ": resolve_timezone(timezone),
         "SELKIES_ALLOWED_ORIGINS": "*",
     }
@@ -796,7 +788,6 @@ async def launch_application(
         viewer_token = secrets.token_urlsafe(16)
     custom_user = str(uuid.uuid4())
     password = str(uuid.uuid4())
-    viewonly_password = str(uuid.uuid4())
     timezone = resolve_timezone(timezone)
 
     progress.step("storage")
@@ -828,7 +819,7 @@ async def launch_application(
     spec = build_launch_spec(
         app,
         session_id,
-        base_env=session_base_env(session_id, custom_user, password, master_token, timezone, viewonly_password),
+        base_env=session_base_env(session_id, custom_user, password, master_token, timezone),
         extra_env=env_vars,
         language=language,
         wayland_mode=wayland_mode,
@@ -904,7 +895,6 @@ async def launch_application(
             "launch_context": launch_context,
             "custom_user": custom_user,
             "password": password,
-            "viewonly_password": viewonly_password,
             "gpu_config": gpu_config,
             "gpu_exclusive": bool(gpu_config) and not effective_settings.get("gpu_share", True),
             "native": native,
@@ -1065,7 +1055,6 @@ async def ensure_container_for_session(
             session.get("password", "abc"),
             session.get("master_token") if session.get("is_collaboration") else None,
             resolve_timezone(timezone, session.get("timezone")),
-            session.get("viewonly_password"),
         ),
         extra_env=None,
         language=None,
