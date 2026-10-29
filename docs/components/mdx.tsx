@@ -1,5 +1,5 @@
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import * as PythonComponents from 'fumadocs-python/components';
+import * as Python from 'fumadocs-python/components';
 import type { MDXComponents } from 'mdx/types';
 import type { ImgHTMLAttributes } from 'react';
 
@@ -13,6 +13,10 @@ function Image(props: ImgHTMLAttributes<HTMLImageElement>) {
   // eslint-disable-next-line @next/next/no-img-element
   return <img loading="lazy" decoding="async" {...props} />;
 }
+
+// createPythonComponents makes the components for a custom highlighter; it is
+// not a component itself.
+const { createPythonComponents: _, ...PythonComponents } = Python;
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
