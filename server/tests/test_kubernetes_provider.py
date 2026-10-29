@@ -2,6 +2,7 @@
 
 import base64
 import json
+import math
 
 import httpx
 import pytest
@@ -614,7 +615,7 @@ def test_split_reference(image, expected):
 async def test_the_session_templates_pull_secrets_serve_the_registry(api, tmp_path, monkeypatch):
     await kp.KubernetesProvider().inspect_self()
     monkeypatch.setattr("app.providers.get_provider", lambda *_args, **_kwargs: kp.KubernetesProvider())
-    monkeypatch.setattr(kp, "_pull_secrets", (0.0, {}))
+    monkeypatch.setattr(kp, "_pull_secrets", (-math.inf, {}))
     api.pod_templates["sealskin-session"] = {
         "template": {"spec": {"imagePullSecrets": [{"name": "regcred"}, {"name": "gone"}], "containers": [{"name": "app", "image": "x"}]}}
     }

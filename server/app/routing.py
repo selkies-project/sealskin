@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import os
 import shutil
 import time
@@ -115,7 +116,7 @@ async def home_node(request: Request, user: dict[str, Any] = Depends(verify_toke
     owner = _home_owner(request, user)
     if name == SHARED_FILES and not user.get("forwarded") and filesync.enabled():
         path = os.path.join(settings.storage_path, owner, SHARED_FILES)
-        if time.monotonic() - _shared_synced.get(owner, 0.0) > SHARED_SYNC_SECONDS:
+        if time.monotonic() - _shared_synced.get(owner, -math.inf) > SHARED_SYNC_SECONDS:
             _shared_synced[owner] = time.monotonic()
             await filesync.sync(owner, path)
         yield

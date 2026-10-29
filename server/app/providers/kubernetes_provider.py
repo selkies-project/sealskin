@@ -23,6 +23,7 @@ import binascii
 import hashlib
 import json
 import logging
+import math
 import os
 import posixpath
 import re
@@ -106,7 +107,7 @@ MANIFEST_TYPES = (
 )
 #: Seconds the session template's pull secrets are kept before they are read again.
 PULL_SECRET_SECONDS = 60
-_pull_secrets: tuple[float, dict[str, tuple[str, str]]] = (0.0, {})
+_pull_secrets: tuple[float, dict[str, tuple[str, str]]] = (-math.inf, {})
 _DOCKER_SIZE_RE = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*([bkmgt]?)b?\s*$", re.IGNORECASE)
 
 
