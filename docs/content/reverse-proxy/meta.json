@@ -11,6 +11,7 @@
     "authentik",
     "keycloak",
     "pocket-id",
+    "dex",
     "tinyauth",
     "oauth2-proxy",
     "troubleshooting"

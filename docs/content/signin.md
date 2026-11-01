@@ -205,6 +205,15 @@ the SAML attributes on their own.
 It has to be a valid SealSkin user name (letters, digits, `_`, `-`); choose a
 claim users cannot set for themselves at the provider.
 
+Who may sign in at all is the provider's rule, not SealSkin's: an access
+policy at Authelia or Authentik, the organizations in Dex's connector, the
+users assigned to the application at Okta or Entra. SealSkin sees only the
+accounts the provider signs in, and the settings below say what becomes of
+them; nothing in the dashboard shows the provider's rule, so keep it where
+the provider is configured. Where the provider admits everyone with an
+account there, `SEALSKIN_SSO_CREATE_USERS=false` or the hold below is what
+keeps strangers out.
+
 * A name with no user gets one, with the default settings, unless
   `SEALSKIN_SSO_CREATE_USERS=false`, which refuses the sign-in and tells the
   user to ask for an account. A user created this way is held until an

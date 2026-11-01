@@ -21,6 +21,7 @@ each page:
 | [Authentik](authentik.md) | OpenID Connect, SAML, and the proxy provider. |
 | [Keycloak](keycloak.md) | OpenID Connect and SAML clients, and the mappers for groups. |
 | [Pocket ID](pocket-id.md) | OpenID Connect client. |
+| [Dex](dex.md) | OpenID Connect from GitHub or another upstream, under the web app's own name. |
 | [Tinyauth](tinyauth.md) | Forward-auth, and its OpenID Connect provider. |
 | [oauth2-proxy](oauth2-proxy.md) | Forward-auth in front of any OpenID Connect provider. |
 | [Troubleshooting](troubleshooting.md) | What each failure looks like and what causes it. |
