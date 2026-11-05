@@ -21,7 +21,7 @@
     "fumadocs-mdx": "15.4.10",
     "fumadocs-python": "^1.0.5",
     "fumadocs-ui": "npm:@fumadocs/base-ui@16.17.9",
-    "lucide-react": "^1.59.0",
+    "lucide-react": "^1.66.0",
     "next": "16.4.3",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
@@ -33,10 +33,10 @@
     "@tailwindcss/postcss": "^4.3.3",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.14",
-    "@types/node": "^26.6.5",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
-    "postcss": "^8.5.31",
+    "postcss": "^8.5.32",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2"
   }
