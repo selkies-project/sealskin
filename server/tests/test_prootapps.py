@@ -190,3 +190,14 @@ def test_a_session_mounts_its_catalog_read_only(tmp_path):
     )
     assert spec.volumes[path] == {"bind": prootapps.MOUNT_PATH, "mode": "ro"}
     assert spec.env["PA_REPO_FOLDER"] == prootapps.MOUNT_PATH
+    assert spec.env["PA_DEFAULT_REPO"] == "ghcr.io/linuxserver/proot-apps"
+
+
+def test_a_custom_default_remote_keeps_short_names(monkeypatch):
+    monkeypatch.setattr(settings, "proot_apps_remote", "http://10.0.0.5:8889 harbor1.test/sealskin/proot-apps")
+    remote = "http://10.0.0.5:8889 harbor1.test/sealskin/proot-apps"
+    assert prootapps.default_repo() == "harbor1.test/sealskin/proot-apps"
+    assert prootapps.install_name(remote, "kind") == "kind"
+    assert prootapps.install_name("linuxserver/proot-apps", "firefox") == "ghcr.io/linuxserver/proot-apps:firefox"
+    monkeypatch.setattr(settings, "proot_apps_remote", "not a remote")
+    assert prootapps.default_repo() is None

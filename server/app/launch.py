@@ -564,6 +564,10 @@ def build_launch_spec(
         # proot-apps installs from the folder PA_REPO_FOLDER names and reaches no registry.
         volumes[proot_catalog_path] = {"bind": prootapps.MOUNT_PATH, "mode": "ro"}
         env["PA_REPO_FOLDER"] = prootapps.MOUNT_PATH
+        # proot-apps expands a short name to an image of its built-in remote unless told the catalog's.
+        repo = prootapps.default_repo()
+        if repo:
+            env["PA_DEFAULT_REPO"] = repo
 
     return LaunchSpec(
         env=env,

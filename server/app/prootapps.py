@@ -20,7 +20,10 @@ both fetches. Every node keeps its own copy of a catalog's content under
 A session of a user whose effective settings name a catalog mounts that
 folder read-only at `MOUNT_PATH` with `PA_REPO_FOLDER` pointing at it, so
 `proot-apps install`, `update`, and the installer take everything from the
-folder and reach no registry. The content follows the record: a node syncs a
+folder and reach no registry. The catalog names the apps of the default
+remote, `proot_apps_remote`, by their short names and every other app by its
+image, and the session's `PA_DEFAULT_REPO` (`default_repo`) is the registry
+those short names are tags of. The content follows the record: a node syncs a
 catalog whenever the record's `revision` is newer than its copy, and the
 auto-update job syncs every catalog that asks for it; a sync fetches only the
 apps whose layer digest changed, and removes the folders of apps no longer
@@ -138,7 +141,7 @@ class Remote:
 
     @property
     def default(self) -> bool:
-        """Whether short names belong to this remote: it is `proot_apps_remote`."""
+        """Whether short names belong to this remote: it is `proot_apps_remote`, whose registry `default_repo` names."""
         try:
             return self.key == remote_key(settings.proot_apps_remote)
         except ValueError:
@@ -152,6 +155,14 @@ def remote_key(remote: str) -> str:
         ValueError: When `remote` is not one.
     """
     return Remote.parse(remote).key
+
+
+def default_repo() -> str | None:
+    """Return the registry the short names of a session's catalog are tags of, or `None` when the setting is not a remote."""
+    try:
+        return Remote.parse(settings.proot_apps_remote).registry
+    except ValueError:
+        return None
 
 
 def is_remote(remote: str) -> bool:

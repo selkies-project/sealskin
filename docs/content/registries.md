@@ -129,21 +129,25 @@ https://git.example/raw/it/proot-apps/main registry.example/it/proot-apps
 The base URL is anything that serves `metadata/metadata.yml` and
 `metadata/img/<icon>` beneath it: a raw file endpoint of GitHub Enterprise or
 GitLab, a web server, a bucket. The registry is any distribution registry;
-the node's credential for it and its mirror apply. Inside a session the apps
-of such a remote are installed by their full image name
-(`registry.example/it/proot-apps:<app>`), as the apps of any remote but the
-default one are.
+the node's credential for it and its mirror apply. Set as
+`SEALSKIN_PROOT_APPS_REMOTE`, its apps keep their short names in sessions on a
+catalog, which get its registry as `PA_DEFAULT_REPO`; added to a catalog
+beside another default, they are installed by their full image name
+(`registry.example/it/proot-apps:<app>`). A desktop entry the app was built
+with still names `ghcr.io/<owner>/<repo>:<app>`; PRoot Apps falls back to the
+same app of `PA_DEFAULT_REPO` when that image is not installed.
 
 ## Without internet access
 
 A deployment that reaches no public host runs with the pieces above:
 
 1. Mirror the images into the internal registry and name the mirror in
-   `SEALSKIN_IMAGE_MIRRORS`, or install each app by its internal image name.
+   `SEALSKIN_IMAGE_MIRRORS`.
 2. Serve the store's `apps.yml` and the `autostart/` scripts from an internal
    host and add that store; put its logos on a host the nodes reach, or
    leave them, since a logo that cannot be fetched is shown as the default.
 3. Serve a proot-apps repository's `metadata/` from an internal host and
-   push its images to the internal registry; name both in the remote.
+   push its images to the internal registry; name both in the remote, and
+   make it `SEALSKIN_PROOT_APPS_REMOTE` so its apps keep their short names.
 4. Give each node the two credential files, and set the proxy variables
    where an egress proxy is the way out.

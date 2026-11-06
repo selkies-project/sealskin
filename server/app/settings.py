@@ -135,7 +135,9 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
             "The PRoot Apps remote the catalog editor opens with: the GitHub `owner/repo` of a "
             "proot-apps repository, whose apps are tags of `ghcr.io/<owner>/<repo>`, or the base URL "
             "under which `metadata/metadata.yml` is served and the registry its apps are tags of, "
-            "separated by a space (`https://git.example/raw/it/proot-apps/main registry.example/it/proot-apps`)."
+            "separated by a space (`https://git.example/raw/it/proot-apps/main registry.example/it/proot-apps`). "
+            "Catalogs name its apps by their short names, which sessions on a catalog resolve "
+            "through `PA_DEFAULT_REPO`; the apps of any other remote are named by their image."
         ),
     },
     {

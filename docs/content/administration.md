@@ -241,9 +241,14 @@ GitHub `owner/repo` of a proot-apps repository, or the base URL of one
 served elsewhere and the registry of its images, one space apart
 ([Registries and proxies](registries.md#proot-apps-remotes)); the editor
 opens on `SEALSKIN_PROOT_APPS_REMOTE` (linuxserver/proot-apps) and takes any
-repository built the same way, whose apps are then installed by their full
-image name (`ghcr.io/<owner>/<repo>:<app>`), since the short names belong to
-the default remote. A catalog can mix apps from several remotes. Apps the
+repository built the same way. The apps of `SEALSKIN_PROOT_APPS_REMOTE` keep
+their short names: a session on a catalog gets `PA_DEFAULT_REPO`, the
+registry of that remote, which tells PRoot Apps what `install <app>` means.
+Apps of any other remote are installed by their full image name
+(`registry.example/it/proot-apps:<app>`). A catalog can mix apps from several
+remotes. A PRoot Apps older than `PA_DEFAULT_REPO` takes short names for apps
+of linuxserver/proot-apps whatever the setting says, so with such a desktop
+image only that remote may be the setting. Apps the
 remote marks `disabled` are not listed.
 
 The table shows the state of this node's copy of each catalog. Every node
