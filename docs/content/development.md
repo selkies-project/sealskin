@@ -249,6 +249,14 @@ files as `mobile-resolutions-<commit>`. Select **refresh_dependencies** when
 intentionally regenerating those files through the supported Capacitor and npm
 commands; review and commit the results before running the normal validation.
 
+The workflow also runs Capacitor 8.6.0's own HTTP-interceptor navigation
+regression fixtures from the pinned upstream commit. Android runs the
+instrumented `HttpInterceptorNavigationTest` in a dedicated software-rendered
+emulator with its guest network interface disabled. iOS runs
+`HttpInterceptorNavigationTests` through the official `Capacitor` scheme in a
+simulator. Their navigation inputs are in memory and load no session data or
+remote payload.
+
 ## Versioning
 
 `VERSION` at the repository root is read by the client build (stamped into
