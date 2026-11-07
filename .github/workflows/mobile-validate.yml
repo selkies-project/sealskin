@@ -81,7 +81,7 @@ jobs:
 
       - name: Install upstream test prerequisites
         working-directory: capacitor-8.6.0
-        run: npm ci --ignore-scripts --no-audit --no-fund
+        run: npm install --ignore-scripts --no-audit --no-fund
 
       - name: Run navigation tests in an isolated emulator
         uses: reactivecircus/android-emulator-runner@b530d96654c385303d652368551fb075bc2f0b6b # v2.35.0
@@ -218,7 +218,4 @@ jobs:
             -scheme Capacitor \
             -destination 'platform=iOS Simulator,name=iPhone 17' \
             -derivedDataPath "$RUNNER_TEMP/CapacitorDerivedData" \
-            -only-testing:CapacitorTests/HttpInterceptorNavigationTests \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            | xcbeautify --renderer github-actions
+            -only-testing:CapacitorTests/HttpInterceptorNavigationTests
