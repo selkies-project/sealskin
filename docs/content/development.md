@@ -14,7 +14,7 @@ mobile/              Capacitor project for the iOS and Android shells
 kubernetes/          the manifest that installs the server in a namespace
 docs/                this site (Fumadocs) with the pages under docs/content
 release-notes/       one Markdown file per stable release
-.github/workflows/   CI, Pre-release, Release, Mobile and Docs
+.github/workflows/   CI, Pre-release, Release, Mobile, Mobile Unsigned Validation and Docs
 ```
 
 The server is a FastAPI application; the client is plain JavaScript bundled
@@ -238,6 +238,15 @@ view), App (back button), Filesystem, blob writer, and file opener
 connection page), which needs the camera: `NSCameraUsageDescription` is in
 `Info.plist`, and `build.sh` adds the permission to the generated Android
 manifest. The WebView needs a trusted certificate.
+
+To validate a branch or commit without release credentials, run **Mobile
+Unsigned Validation** from the Actions tab and enter its ref. The workflow
+performs clean npm installs, the strict mobile client build, an Android debug
+build without release signing material, and an iOS simulator Debug build with
+code signing disabled. It uploads only the three dependency resolution text
+files as `mobile-resolutions-<commit>`. Select **refresh_dependencies** when
+intentionally regenerating those files through the supported Capacitor and npm
+commands; review and commit the results before running the normal validation.
 
 ## Versioning
 
