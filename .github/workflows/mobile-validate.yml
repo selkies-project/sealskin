@@ -63,6 +63,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      - name: Enable KVM for the emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ionic-team/capacitor
@@ -97,7 +103,8 @@ jobs:
           disk-size: 4096M
           emulator-boot-timeout: 600
           disable-animations: true
-          emulator-options: -no-snapshot -no-window -noaudio -no-boot-anim -gpu swiftshader_indirect -qemu -nic none
+          disable-linux-hw-accel: false
+          emulator-options: -no-metrics -no-snapshot -no-window -noaudio -no-boot-anim -gpu swiftshader_indirect -qemu -nic none
           script: cd "$GITHUB_WORKSPACE/capacitor-8.6.0/android" && ./gradlew --no-daemon -b capacitor/build.gradle connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.getcapacitor.android.HttpInterceptorNavigationTest
 
   ios:
@@ -188,8 +195,10 @@ jobs:
 
   upstream-ios-navigation:
     name: Upstream iOS interceptor tests
-    runs-on: macos-26
+    runs-on: macos-15
     timeout-minutes: 20
+    env:
+      XCODE: /Applications/Xcode_26.0.app
     defaults:
       run:
         shell: bash
@@ -206,6 +215,11 @@ jobs:
           sudo xcode-select -s "$XCODE"
           xcodebuild -version
 
+      - name: Prepare the upstream iOS simulator platform
+        run: |
+          xcrun simctl list > /dev/null
+          xcodebuild -downloadPlatform iOS
+
       - name: Inspect the official test scheme
         working-directory: capacitor-8.6.0/ios/Capacitor
         run: xcodebuild -list -workspace Capacitor.xcworkspace
@@ -216,6 +230,6 @@ jobs:
           xcodebuild clean test \
             -workspace Capacitor.xcworkspace \
             -scheme Capacitor \
-            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.0.1' \
             -derivedDataPath "$RUNNER_TEMP/CapacitorDerivedData" \
             -only-testing:CapacitorTests/HttpInterceptorNavigationTests
