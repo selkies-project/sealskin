@@ -14,7 +14,7 @@ mobile/              Capacitor project for the iOS and Android shells
 kubernetes/          the manifest that installs the server in a namespace
 docs/                this site (Fumadocs) with the pages under docs/content
 release-notes/       one Markdown file per stable release
-.github/workflows/   CI, Pre-release, Release, Mobile and Docs
+.github/workflows/   CI, Pre-release, Release, Mobile, Mobile Unsigned Validation and Docs
 ```
 
 The server is a FastAPI application; the client is plain JavaScript bundled
@@ -238,6 +238,24 @@ view), App (back button), Filesystem, blob writer, and file opener
 connection page), which needs the camera: `NSCameraUsageDescription` is in
 `Info.plist`, and `build.sh` adds the permission to the generated Android
 manifest. The WebView needs a trusted certificate.
+
+Pull requests run **Mobile Unsigned Validation** against the exact head
+commit. To validate another branch or commit without release credentials, run
+it from the Actions tab and enter its ref. The workflow performs clean npm
+installs, the strict mobile client build, an Android debug
+build without release signing material, and an iOS simulator Debug build with
+code signing disabled. It uploads only the three dependency resolution text
+files as `mobile-resolutions-<commit>`. Select **refresh_dependencies** when
+intentionally regenerating those files through the supported Capacitor and npm
+commands; review and commit the results before running the normal validation.
+
+The workflow also runs Capacitor 8.6.0's own HTTP-interceptor navigation
+regression fixtures from the pinned upstream commit. Android runs the
+instrumented `HttpInterceptorNavigationTest` in a dedicated software-rendered
+emulator with its guest network interface disabled. iOS runs
+`HttpInterceptorNavigationTests` through the official `Capacitor` scheme in a
+simulator. Their navigation inputs are in memory and load no session data or
+remote payload.
 
 ## Versioning
 
