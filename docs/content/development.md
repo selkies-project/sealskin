@@ -239,9 +239,10 @@ connection page), which needs the camera: `NSCameraUsageDescription` is in
 `Info.plist`, and `build.sh` adds the permission to the generated Android
 manifest. The WebView needs a trusted certificate.
 
-To validate a branch or commit without release credentials, run **Mobile
-Unsigned Validation** from the Actions tab and enter its ref. The workflow
-performs clean npm installs, the strict mobile client build, an Android debug
+Pull requests run **Mobile Unsigned Validation** against the exact head
+commit. To validate another branch or commit without release credentials, run
+it from the Actions tab and enter its ref. The workflow performs clean npm
+installs, the strict mobile client build, an Android debug
 build without release signing material, and an iOS simulator Debug build with
 code signing disabled. It uploads only the three dependency resolution text
 files as `mobile-resolutions-<commit>`. Select **refresh_dependencies** when
