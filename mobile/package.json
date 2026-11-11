@@ -17,7 +17,7 @@
     "@capacitor/filesystem": "^8.1.5",
     "@capacitor/ios": "^8.6.0",
     "@capawesome-team/capacitor-file-opener": "^8.1.1",
-    "capacitor-blob-writer": "^1.1.21"
+    "capacitor-blob-writer": "^1.1.22"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.6.0",
