@@ -1,8 +1,8 @@
-fastapi==0.162.0
+fastapi==0.162.2
 uvicorn[standard]==0.54.0
 uvloop==0.23.0
 PyJWT[crypto]==2.15.1
-pydantic==2.14.2
+pydantic==2.14.3
 cryptography==50.0.2
 httpx==0.28.1
 websockets==17.4
