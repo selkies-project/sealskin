@@ -135,6 +135,30 @@ def test_docker_bind_mounts_keep_session_volumes():
     assert _bind_volumes(None) == {}
 
 
+async def test_docker_session_containers_are_named_after_the_session(monkeypatch):
+    """The container carries the `sealskin-` prefix and the session's first eight characters."""
+    from types import SimpleNamespace
+
+    from app.providers import docker_provider
+
+    runs = []
+
+    def run(**kwargs):
+        runs.append(kwargs)
+        return SimpleNamespace(id="c1", short_id="c1", attrs={}, reload=lambda: None)
+
+    client = SimpleNamespace(images=SimpleNamespace(get=lambda _image: None), containers=SimpleNamespace(run=run))
+    monkeypatch.setattr(docker_provider, "get_docker_client", lambda: client)
+
+    async def ready(self, *_args, **_kwargs):
+        return "10.0.0.2"
+
+    monkeypatch.setattr(docker_provider.DockerProvider, "_wait_until_ready", ready)
+    provider = docker_provider.DockerProvider({"provider_config": {"image": "img:latest", "port": 3000}})
+    await provider.launch("0123abcd-4567-89ef-0123-456789abcdef", {})
+    assert runs[0]["name"] == "sealskin-0123abcd"
+
+
 def test_extract_docker_overrides_parsing():
     result = launch.extract_docker_overrides(
         {

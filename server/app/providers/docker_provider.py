@@ -184,7 +184,9 @@ class DockerProvider(BaseProvider):
         """Run the application container and wait until it answers HTTP.
 
         See `BaseProvider.launch` for the arguments; volume keys are server
-        paths and are translated to host paths here. With `vpn`, the
+        paths and are translated to host paths here. The container is named
+        `sealskin-<session>` after the first eight characters of the session
+        id, as a Kubernetes session pod is. With `vpn`, the
         container resolves names at the gateway and, once started, has its
         default route pointed at it by the helper (`_route_through`).
 
@@ -205,6 +207,7 @@ class DockerProvider(BaseProvider):
         bind_mounts = _bind_volumes(overrides.pop("volumes", None))
         run_kwargs: dict[str, Any] = {
             "image": image,
+            "name": f"sealskin-{session_id[:8]}",
             "detach": True,
             "shm_size": "1g",
             "environment": env_vars,
