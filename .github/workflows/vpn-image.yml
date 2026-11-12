@@ -53,5 +53,7 @@ jobs:
           tags: |
             ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}
             ${{ steps.meta.outputs.image }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # Alpine and a few packages build whole in seconds, so every build
+          # takes the packages and base image upstream serves instead of a
+          # cached layer of an earlier build's
+          no-cache: true
