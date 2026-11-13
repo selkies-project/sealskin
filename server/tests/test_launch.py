@@ -2,6 +2,7 @@
 
 import asyncio
 import os
+import re
 
 import pytest
 from fastapi import HTTPException
@@ -136,7 +137,8 @@ def test_docker_bind_mounts_keep_session_volumes():
 
 
 async def test_docker_session_containers_are_named_after_the_session(monkeypatch):
-    """The container carries the `sealskin-` prefix and the session's first eight characters."""
+    """The container carries the `sealskin-` prefix and the session's first eight characters, and a
+    session's second application gets a name of its own."""
     from types import SimpleNamespace
 
     from app.providers import docker_provider
@@ -155,8 +157,11 @@ async def test_docker_session_containers_are_named_after_the_session(monkeypatch
 
     monkeypatch.setattr(docker_provider.DockerProvider, "_wait_until_ready", ready)
     provider = docker_provider.DockerProvider({"provider_config": {"image": "img:latest", "port": 3000}})
-    await provider.launch("0123abcd-4567-89ef-0123-456789abcdef", {})
-    assert runs[0]["name"] == "sealskin-0123abcd"
+    for _ in range(2):
+        await provider.launch("0123abcd-4567-89ef-0123-456789abcdef", {})
+    names = [run["name"] for run in runs]
+    assert all(re.fullmatch(r"sealskin-0123abcd-[0-9a-f]{6}", name) for name in names), names
+    assert names[0] != names[1]
 
 
 def test_extract_docker_overrides_parsing():
