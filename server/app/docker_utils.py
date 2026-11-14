@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import re
 import shutil
 import time
 from typing import Any
@@ -73,6 +74,28 @@ async def prune_dangling_images() -> None:
         logger.error("Failed to prune dangling images: %s", exc)
 
 
+class NameTaken(RuntimeError):
+    """Docker runs another container under the name this server would go by."""
+
+
+def _own_id() -> str:
+    """Return the id of the container this process runs in, as its mounts show it, or `""` on a host."""
+    try:
+        with open("/proc/self/mountinfo", encoding="utf-8") as handle:
+            found = re.search(r"/containers/([0-9a-f]{64})/", handle.read())
+    except OSError:
+        return ""
+    return found.group(1) if found else ""
+
+
+def _taken(container: Any) -> NameTaken:
+    return NameTaken(
+        f"Docker runs another container, '{container.name}', under this server's name. A server's name is its "
+        "identity: its sessions, its records, and its place in a cluster go by it. Stop that container, or give "
+        "this server a name of its own (its container's name and host name, or SEALSKIN_NODE_NAME)."
+    )
+
+
 def _own_container(client: docker.DockerClient) -> Any | None:
     """Return the server's own container, or `None` on a host or when Docker holds no container of this process.
 
@@ -80,15 +103,30 @@ def _own_container(client: docker.DockerClient) -> Any | None:
     the container Docker knows by that name or id, else the one named
     `sealskin` exactly. A container that merely carries the name is another
     server's, whose mounts and sessions are not this one's to use.
+
+    Raises:
+        NameTaken: When the container found by this process's host name is not the one the process runs in, or
+            a running container is named as `node_name` names this server: two servers would then go by one name.
     """
     hostname = os.uname()[1]
+    own = _own_id()
     for candidate in (hostname, "sealskin"):
         try:
             found = client.containers.get(candidate)
         except NotFound:
             continue
         if found.attrs.get("Config", {}).get("Hostname") == hostname or found.id.startswith(hostname):
+            running = getattr(found, "status", "running") == "running"
+            if (own and found.id != own) or (not own and not os.path.exists("/.dockerenv") and running):
+                raise _taken(found)
             return found
+    if settings.node_name:
+        try:
+            named = client.containers.get(settings.node_name)
+        except NotFound:
+            return None
+        if getattr(named, "status", "") == "running" and named.id != own:
+            raise _taken(named)
     return None
 
 
@@ -103,7 +141,7 @@ def own_container_name() -> str:
         return ""
     try:
         container = _own_container(get_docker_client())
-    except Exception:  # noqa: BLE001 - the host name stands in when Docker cannot be asked
+    except Exception:  # noqa: BLE001 - the host name stands in when Docker cannot be asked; a taken name stops the start in `inspect_self_container`
         return ""
     return container.name if container is not None else ""
 
@@ -115,6 +153,9 @@ async def inspect_self_container() -> None:
     `state.discovered_session_port`, `state.discovered_network`, and
     `state.instance_name` (the container's name, else the host name). The
     container is the one `_own_container` finds.
+
+    Raises:
+        NameTaken: When another container runs under this server's name, which stops the server from starting.
     """
     state.discovered_api_port = settings.api_port
     state.discovered_session_port = settings.session_port
@@ -148,6 +189,9 @@ async def inspect_self_container() -> None:
             logger.info("Detected container mount prefixes: %s", state.path_prefix_map)
         else:
             logger.warning("Could not find any usable mount points on the current container.")
+    except NameTaken as exc:
+        logger.critical("%s", exc)
+        raise
     except (DockerException, RuntimeError) as exc:
         logger.warning("Could not inspect self in Docker. Path mapping disabled. Error: %s", exc)
         return
