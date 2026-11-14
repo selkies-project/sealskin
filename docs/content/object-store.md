@@ -36,6 +36,7 @@ Every object is under the prefix the URL names. With `s3://records/prod`:
 | `prod/installed_apps.yml`, `prod/app_stores.yml`, `prod/app_templates/` | Installed applications, the stores they came from, and templates. |
 | `prod/proot_catalogs.yml` | [PRoot Apps catalogs](administration.md#proot-apps). |
 | `prod/branding/` | [Branding](administration.md#branding). |
+| `prod/dashboards/` | [Dashboards](dashboards.md) and the widget library. |
 | `prod/cluster/nodes/<name>.yml`, `prod/cluster/pools/` | The nodes and the pools. |
 | `prod/cluster/homes/<user>.yml` | Which node holds each home directory. |
 | `prod/cluster/usage/<day>/<node>.yml` | Session time per user, one object per node and day. |

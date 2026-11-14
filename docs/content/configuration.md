@@ -49,6 +49,9 @@ watcher only fires for edits made by someone else.
     branding/wallpaper.<ext>
     branding/logo.<id>.<ext>       the pictures of a brand for certain host names or groups
     branding/wallpaper.<id>.<ext>
+    dashboards/boards.yml          the dashboards an administrator lays out
+    dashboards/widgets.yml         the widget library they draw on
+    dashboards/icons/<hash>.png    the icons an administrator uploaded for tiles
     cluster/nodes/<id>.yml         one record per node: key, address, roles, pool, approval
     cluster/pools/<name>.yml       pools of nodes
     cluster/application_keys.yml   the application keys, hashed, the root key among them

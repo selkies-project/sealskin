@@ -16,7 +16,7 @@
                 <i class="fas fa-search"></i>
                 <input type="text" id="hero-input" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-placeholder="web.home.searchPlaceholder" placeholder="Search applications, or paste a link to open it in isolation">
                 <button type="button" id="upload-button" class="secondary"><i class="fas fa-upload"></i> <span data-i18n="web.home.upload">Upload a file</span></button>
-                <button type="button" id="customize-button" class="secondary icon-only" data-i18n-title="web.home.customize" title="Customize"><i class="fas fa-paint-brush"></i></button>
+                <button type="button" id="edit-button" class="secondary icon-only" hidden data-i18n-title="web.home.customize" title="Customize the page"><i class="fas fa-pen"></i></button>
                 <input type="file" id="file-input" hidden>
             </div>
             <div class="hero-chips" id="status-chips"></div>
@@ -29,37 +29,66 @@
         </div>
 
         <section id="sessions-section" hidden>
-            <h2 data-i18n="web.home.running">Running sessions</h2>
+            <div class="section-head">
+                <h2 data-i18n="web.home.running">Running sessions</h2>
+            </div>
             <div id="sessions-row" class="session-row"></div>
         </section>
 
-        <section id="links-section" hidden>
-            <div class="section-head">
-                <h2 data-i18n="web.home.links">Links</h2>
-            </div>
-            <div id="links-grid" class="app-tiles"></div>
-        </section>
+        <nav id="board-tabs" class="board-tabs" hidden></nav>
 
-        <section id="favorites-section" hidden>
-            <div class="section-head">
-                <h2 data-i18n="web.home.favorites">Favorites</h2>
-                <span class="home-hint" data-i18n="web.home.favoritesHint">Drag to reorder</span>
+        <div id="edit-bar" class="edit-bar" hidden>
+            <div class="edit-main">
+                <span class="edit-title"><i class="fas fa-pen"></i> <span id="edit-title"></span></span>
+                <button type="button" id="edit-add-tile" class="secondary"><i class="fas fa-plus"></i> <span data-i18n="web.board.addTile">Add a tile</span></button>
+                <button type="button" id="customize-button" class="secondary"><i class="fas fa-paint-brush"></i> <span data-i18n="web.board.appearance">Appearance</span></button>
+                <div class="menu-wrap">
+                    <button type="button" id="edit-more" class="secondary"><i class="fas fa-ellipsis-h"></i> <span data-i18n="web.board.more">More</span></button>
+                    <div id="edit-menu" class="menu" hidden>
+                        <button type="button" data-act="tidy"><i class="fas fa-compress-alt"></i> <span data-i18n="web.board.tidy">Close the empty rows</span></button>
+                        <button type="button" data-act="import-bookmarks"><i class="fas fa-bookmark"></i> <span data-i18n="web.board.importBookmarks">Import browser bookmarks</span></button>
+                        <button type="button" data-act="export-page"><i class="fas fa-file-export"></i> <span data-i18n="web.board.exportPage">Export this page</span></button>
+                        <button type="button" data-act="import-page"><i class="fas fa-file-import"></i> <span data-i18n="web.board.importPage">Import a page</span></button>
+                        <button type="button" data-act="show-apps"><i class="fas fa-th"></i> <span data-i18n="web.board.showApps">Add the applications</span></button>
+                        <button type="button" data-act="rename-page"><i class="fas fa-pen"></i> <span data-i18n="web.board.renamePage">Rename this page</span></button>
+                        <button type="button" data-act="delete-page"><i class="fas fa-trash"></i> <span data-i18n="web.board.deletePage">Delete this page</span></button>
+                        <button type="button" data-act="reset-page"><i class="fas fa-undo"></i> <span data-i18n="web.board.resetPage">Reset this page</span></button>
+                        <button type="button" data-act="reset-all"><i class="fas fa-trash-restore"></i> <span data-i18n="web.board.resetAll">Reset everything to default</span></button>
+                    </div>
+                </div>
+                <span class="spacer"></span>
+                <button type="button" id="edit-done" class="primary"><i class="fas fa-check"></i> <span data-i18n="web.board.done">Done</span></button>
             </div>
-            <div id="favorites-grid" class="app-tiles"></div>
-        </section>
+            <p id="edit-narrow" class="home-hint" hidden data-i18n="web.board.narrow">Tiles are arranged on a wider window; here they show in reading order.</p>
+            <div id="admin-bar" class="edit-admin" hidden>
+                <span class="seg" id="admin-scope">
+                    <button type="button" data-scope="mine"><span data-i18n="web.board.scopeMine">My page</span></button>
+                    <button type="button" data-scope="shared"><span data-i18n="web.board.scopeShared">Shared dashboard</span></button>
+                </span>
+                <span id="admin-note" class="home-hint"></span>
+                <span class="spacer"></span>
+                <button type="button" id="admin-settings" class="secondary"><i class="fas fa-sliders-h"></i> <span data-i18n="web.board.dashboardSettings">Dashboard settings</span></button>
+                <button type="button" id="admin-widgets" class="secondary"><i class="fas fa-puzzle-piece"></i> <span data-i18n="web.board.widgetLibrary">Widget library</span></button>
+                <button type="button" id="admin-manage" class="secondary"><i class="fas fa-th-large"></i> <span data-i18n="web.board.allDashboards">All dashboards</span></button>
+                <button type="button" id="admin-save" class="primary"><i class="fas fa-cloud-upload-alt"></i> <span data-i18n="web.board.saveShared">Save for everyone</span></button>
+            </div>
+        </div>
 
-        <section id="apps-section">
-            <div class="section-head">
-                <h2 data-i18n="web.home.applications">Applications</h2>
-                <div id="type-chips" class="chip-row"></div>
-            </div>
-            <div id="app-grid" class="app-tiles"></div>
-            <div id="apps-empty" class="home-empty" hidden>
-                <i class="fas fa-box-open"></i>
-                <p id="apps-empty-text"></p>
-                <button type="button" id="apps-empty-admin" class="primary" hidden data-i18n="web.home.openAppStores">Open the App Stores</button>
-            </div>
-        </section>
+        <div id="board">
+            <section id="apps-section">
+                <div class="section-head">
+                    <h2 data-i18n="web.home.applications">Applications</h2>
+                    <span class="section-tools"></span>
+                    <div id="type-chips" class="chip-row"></div>
+                </div>
+                <div id="app-grid" class="app-tiles"></div>
+                <div id="apps-empty" class="home-empty" hidden>
+                    <i class="fas fa-box-open"></i>
+                    <p id="apps-empty-text"></p>
+                    <button type="button" id="apps-empty-admin" class="primary" hidden data-i18n="web.home.openAppStores">Open the App Stores</button>
+                </div>
+            </section>
+        </div>
     </div>
 
     <div id="drawer-backdrop" hidden></div>
@@ -116,7 +145,7 @@
     <aside id="customize" class="drawer customize" hidden aria-modal="true" role="dialog">
         <header class="drawer-head">
             <i class="fas fa-paint-brush drawer-icon"></i>
-            <div><h3 data-i18n="web.home.customize">Customize</h3></div>
+            <div><h3 data-i18n="web.board.appearance">Appearance</h3></div>
             <button type="button" id="customize-close" class="secondary icon-only" data-i18n-title="common.close" title="Close"><i class="fas fa-times"></i></button>
         </header>
         <div class="drawer-body">
@@ -171,6 +200,37 @@
                 <label for="bg-dim"><span data-i18n="web.home.dim">Dim</span> <output id="bg-dim-value"></output></label>
                 <input type="range" id="bg-dim" min="0" max="90" step="5">
             </div>
+            <h4 class="drawer-part" data-i18n="web.board.tiles">Tiles</h4>
+            <p id="look-note" class="field-hint"></p>
+            <div class="form-group">
+                <label data-i18n="web.board.lookStyle">Cards</label>
+                <div id="look-style" class="seg">
+                    <button type="button" data-value="solid" data-i18n="web.board.lookSolid">Solid</button>
+                    <button type="button" data-value="glass" data-i18n="web.board.lookGlass">Glass</button>
+                    <button type="button" data-value="flat" data-i18n="web.board.lookFlat">None</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label data-i18n="web.board.lookDensity">Rows</label>
+                <div id="look-density" class="seg">
+                    <button type="button" data-value="compact" data-i18n="web.board.lookCompact">Compact</button>
+                    <button type="button" data-value="normal" data-i18n="web.board.lookNormal">Normal</button>
+                    <button type="button" data-value="roomy" data-i18n="web.board.lookRoomy">Roomy</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label data-i18n="web.board.lookWidth">Page width</label>
+                <div id="look-width" class="seg">
+                    <button type="button" data-value="normal" data-i18n="web.board.lookCentered">Centered</button>
+                    <button type="button" data-value="wide" data-i18n="web.board.lookWide">Whole window</button>
+                </div>
+            </div>
+            <div class="form-group"><label><input type="checkbox" id="look-labels"> <span data-i18n="web.board.lookLabels">Show names on application and link tiles</span></label></div>
+            <div class="form-group" id="look-accent-group">
+                <label for="look-accent" data-i18n="web.board.lookAccent">Accent color</label>
+                <input type="color" id="look-accent" value="#8b7cf6">
+            </div>
+            <button type="button" id="look-reset" class="secondary small"><i class="fas fa-undo"></i> <span data-i18n="web.board.lookReset">Use the dashboard's look</span></button>
         </div>
         <footer class="drawer-foot">
             <button type="button" id="customize-reset" class="secondary"><i class="fas fa-undo"></i> <span data-i18n="web.home.reset">Reset</span></button>

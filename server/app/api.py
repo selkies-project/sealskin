@@ -24,6 +24,7 @@ from . import (
     cluster,
     collaboration,
     config_store,
+    dashboards,
     filecrypt,
     filesync,
     persistence,
@@ -57,6 +58,7 @@ from .routers import (
 )
 from .routers import application_keys as key_routes
 from .routers import branding as branding_routes
+from .routers import dashboards as dashboard_routes
 from .routers import sso as sso_routes
 from .routers import vpn as vpn_routes
 from .security import init_server_keys, proxy_cert_not_after, prune_crypto_sessions
@@ -225,6 +227,12 @@ async def _reload_branding(_path: str) -> None:
     await asyncio.to_thread(branding.load)
 
 
+async def _reload_dashboards(_path: str) -> None:
+    """Watcher callback: take up the dashboards and the widget library after an edit."""
+    logger.info("The dashboards changed; reloading.")
+    await asyncio.to_thread(dashboards.load)
+
+
 def _watch_targets() -> dict[str, persistence.ReloadCallback]:
     """Return the configuration paths to watch and their reload callbacks."""
     return {
@@ -238,6 +246,7 @@ def _watch_targets() -> dict[str, persistence.ReloadCallback]:
         settings.groups_base_path: _reload_users,
         settings.cluster_path: _reload_cluster,
         settings.branding_path: _reload_branding,
+        settings.dashboards_path: _reload_dashboards,
     }
 
 
@@ -306,6 +315,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     user_manager.load_users_and_groups()
     sso.load()
     branding.load()
+    dashboards.load()
     try:
         application_keys.load()
     except store.StoreUnavailable:
@@ -417,6 +427,9 @@ def create_app() -> FastAPI:
     app.include_router(branding_routes.router)
     app.include_router(branding_routes.user_router)
     app.include_router(branding_routes.admin_router)
+    app.include_router(dashboard_routes.router)
+    app.include_router(dashboard_routes.user_router)
+    app.include_router(dashboard_routes.admin_router)
     app.include_router(vpn_routes.admin_router)
     app.include_router(peer.router)
     app.include_router(cluster_admin.router)

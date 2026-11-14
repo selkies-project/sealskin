@@ -5,11 +5,14 @@
  * opens an application (a sheet on a narrow window), and the play button in
  * its corner launches at once with the options last used.
  *
- * The page is the user's own: applications starred as favorites come first,
- * in the order they drag them into (or move them from the panel), hidden
- * ones leave the grid until shown again, and the background is theirs to
- * pick, a gradient, a color, or a picture of their own, blurred and dimmed
- * to taste; a picture is kept as data, never fetched from an address.
+ * Between the search box and the page's end sits the dashboard
+ * (`board.js`): a grid of tiles an administrator laid out and the user
+ * rearranges, among them the running sessions and the catalog of
+ * applications. The page is the user's own besides: an application starred
+ * as a favorite becomes a tile of the dashboard, hidden
+ * ones leave the catalog until shown again, and the background is theirs
+ * to pick, a gradient, a color, or a picture of their own, blurred and
+ * dimmed to taste; a picture is kept as data, never fetched from an address.
  * That layout is kept in the browser under `home_layout`, beside the launch
  * options under `simple_launch_profile`.
  *
@@ -24,9 +27,9 @@
  * folds its rail away (`bridge.leaving`), and the tab then goes to the
  * session.
  *
- * The brand (`/api/branding`) puts links of the administrator's on the page
- * as tiles of their own, and may give it a wallpaper: the look users start
- * from, or, forced, the look they all have, the customize button withheld.
+ * The brand (`/api/branding`) may give the page a wallpaper: the look users
+ * start from, or, forced, the look they all have, the background's button
+ * withheld.
  *
  * A launch shows its progress on the tile and as a card in the sessions
  * row with the launching page's checklist of stages (`launch-view.js`), and the
@@ -43,10 +46,13 @@ import { secureFetch, getContextBlob, uploadInChunks, openPage } from '../lib/ap
 import { loadTranslator, applyTranslations } from '../lib/i18n.js';
 import { defaultLanguage as nearestLanguage, supportedLangs } from '../lib/languages.js';
 import { browserTimezone } from '../lib/timezone.js';
-import { announce, apiUrl, escapeHtml, formatLogoSrc, hydrateLogos, timeAgo, currentLocale, showToast } from '../lib/dom.js';
+import { announce, escapeHtml, formatLogoSrc, hydrateLogos, timeAgo, currentLocale, showToast } from '../lib/dom.js';
 import { noticeDialog } from '../lib/modal.js';
 import { createLaunchView } from '../lib/launch-view.js';
 import { autoHomeName, bestHome, homeAllowed, nodesFor } from '../lib/homes.js';
+import { readLayout } from '../lib/board-model.js';
+import { createBoard } from './board.js';
+import { attachAdmin } from './board-admin.js';
 
 const RECENT_MAX = 8;
 const SESSIONS_REFRESH_MS = 10000;
@@ -63,8 +69,6 @@ const CHANNEL_LINGER_MS = 120000;
 const DEFAULT_SEARCH_ENGINE = 'https://google.com/search?q=';
 const LOOKS_LIKE_URL = /^(https?:\/\/\S+|[a-z0-9-]+(\.[a-z0-9-]+)+(:\d+)?(\/\S*)?)$/i;
 const LAYOUT_KEY = 'home_layout';
-// A picked-up tile is a drag once the pointer has moved this far.
-const DRAG_THRESHOLD = 6;
 // An uploaded background is scaled to fit this and kept under the size, as browser storage is small.
 const BG_MAX_EDGE = 1920;
 const BG_MAX_BYTES = 1200000;
@@ -107,8 +111,10 @@ let cluster = null;
 let context = null;
 // `{apps: {<id>: options}, recent: [<id>]}`, kept in the shell under `simple_launch_profile`.
 let memory = { apps: {}, recent: [] };
-// `{favorites: [<id>], hidden: [<id>], background}`, kept in the shell under `home_layout`.
-let layout = { favorites: [], hidden: [], background: { ...DEFAULT_BACKGROUND } };
+// `{hidden: [<id>], background, look, active, boards, own}` (see `board-model.js`), kept in the shell under `home_layout`.
+let layout = { hidden: [], background: { ...DEFAULT_BACKGROUND }, look: {}, active: '', boards: {}, own: [] };
+// The dashboard between the search box and the page's end.
+let board = null;
 let activeType = 'all';
 /** The brand as the server keeps it, with the wallpaper and the links it puts on the page. */
 let brandInfo = null;
@@ -194,6 +200,7 @@ function paintShot(id) {
   if (!tile || !shot) return;
   tile.querySelector('.preview').src = shot.image;
   tile.classList.add('has-shot');
+  if (board) board.live();
 }
 
 function saveMemory() {
@@ -204,9 +211,8 @@ function saveLayout() {
   return bridge.storageSet({ [LAYOUT_KEY]: layout }).catch((e) => console.warn('Could not save the layout:', e));
 }
 
-const isFavorite = (app) => layout.favorites.includes(app.id);
+const isFavorite = (app) => board.isFavorite(app);
 const isHidden = (app) => layout.hidden.includes(app.id);
-const favoriteApps = () => layout.favorites.map((id) => apps.find((app) => app.id === id)).filter(Boolean);
 
 // --- Launch options -----------------------------------------------------------
 
@@ -401,6 +407,7 @@ function renderSessions() {
   });
   kept.forEach((tile) => tile.remove());
   $('sessions-section').hidden = cards.length === 0;
+  if (board) board.live();
 }
 
 /** The applications the search, the chips, and what is being opened leave, recent ones first. */
@@ -453,20 +460,15 @@ function tileHtml(app, flight) {
         </div>`;
 }
 
-function renderFavorites() {
-  const list = favoriteApps();
-  const busy = busyFlights();
-  $('favorites-grid').innerHTML = list.map((app) => tileHtml(app, busy.get(app.id))).join('');
-  hydrateLogos($('favorites-grid'));
-  $('favorites-section').hidden = list.length === 0;
-}
-
 function renderApps() {
   const list = visibleApps();
   const busy = busyFlights();
   appGrid.innerHTML = list.map((app) => tileHtml(app, busy.get(app.id))).join('');
   hydrateLogos(appGrid);
-  renderFavorites();
+  board.syncApps();
+  // A dashboard without the catalog shows it while something is searched for or being opened.
+  const searching = Boolean(heroInput.value.trim() || context);
+  $('apps-section').hidden = $('apps-section').dataset.transient === 'true' && !searching;
   const empty = list.length === 0;
   $('apps-empty').hidden = !empty;
   if (empty) {
@@ -474,22 +476,6 @@ function renderApps() {
     $('apps-empty-text').textContent = t(none ? (status.is_admin ? 'web.home.noAppsAdmin' : 'web.home.noApps') : 'web.home.noMatch');
     $('apps-empty-admin').hidden = !(none && status.is_admin);
   }
-}
-
-/** The administrator's links as tiles: a new tab, or the address opened in a session of an application the user picks. */
-function renderLinks() {
-  const links = (brandInfo && brandInfo.links) || [];
-  const icon = (link) => {
-    if (link.image) return `<img src="${escapeHtml(apiUrl(link.image))}" alt="" draggable="false">`;
-    const classes = link.icon ? (link.icon.includes(' ') ? link.icon : `fas ${link.icon}`) : 'fas fa-link';
-    return `<i class="${escapeHtml(classes)}"></i>`;
-  };
-  $('links-grid').innerHTML = links.map((link) => (link.open === 'isolated'
-    ? `<button type="button" class="app-tile link-tile" data-link="${escapeHtml(link.url)}" title="${escapeHtml(link.url)}">
-            ${icon(link)}<span class="name">${escapeHtml(link.name)}</span><i class="fas fa-shield-alt where"></i></button>`
-    : `<a class="app-tile link-tile" href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(link.url)}">
-            ${icon(link)}<span class="name">${escapeHtml(link.name)}</span><i class="fas fa-external-link-alt where"></i></a>`)).join('');
-  $('links-section').hidden = links.length === 0;
 }
 
 function renderSkeleton() {
@@ -582,6 +568,8 @@ function foldedTransform() {
 /** Show the launch panel's favorite and hidden state for its application. */
 function showPlacement(app) {
   const favorite = isFavorite(app);
+  // A locked dashboard takes no favorites.
+  $('favorite-btn').hidden = !board.canCustomize();
   $('favorite-btn').title = t(favorite ? 'web.home.removeFavorite' : 'web.home.addFavorite');
   $('favorite-btn').classList.toggle('active', favorite);
   $('favorite-btn').querySelector('i').className = favorite ? 'fas fa-star' : 'far fa-star';
@@ -673,13 +661,11 @@ function closeDrawer() {
   });
 }
 
-/** Star or unstar the panel's application; a new favorite goes last. */
+/** Star or unstar the panel's application; a new favorite takes the first free place of the dashboard. */
 async function toggleFavorite() {
   const app = drawerApp;
-  layout.favorites = isFavorite(app) ? layout.favorites.filter((id) => id !== app.id) : [...layout.favorites, app.id];
+  await board.toggleFavorite(app);
   showPlacement(app);
-  renderApps();
-  await saveLayout();
 }
 
 /** Hide the panel's application from the grid, or show it again. */
@@ -690,89 +676,6 @@ async function toggleHidden() {
   renderTypeChips();
   renderApps();
   await saveLayout();
-}
-
-// --- Favorites: drag to reorder --------------------------------------------------
-
-/**
- * Pick a favorite's tile up with a mouse or pen and drop it among the
- * others: a copy follows the pointer, the tile itself takes its new place
- * as the pointer crosses the others, which slide aside, and the order is
- * kept on the drop. Touch scrolls the page instead; the panel's arrows
- * reorder there.
- */
-function bindFavoriteDrag() {
-  const grid = $('favorites-grid');
-  let drag = null;
-
-  const slide = (tiles, before) => {
-    tiles.forEach((tile) => {
-      const was = before.get(tile);
-      const now = tile.getBoundingClientRect();
-      const dx = was.left - now.left;
-      const dy = was.top - now.top;
-      if (dx || dy) tile.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], { duration: 200, easing: ZOOM_EASING });
-    });
-  };
-
-  grid.addEventListener('pointerdown', (event) => {
-    const tile = event.target.closest('.app-tile');
-    if (!tile || event.button !== 0 || event.pointerType === 'touch' || event.target.closest('.quick')) return;
-    // A selection left on the page would be what the browser drags instead of the tile.
-    const selection = window.getSelection();
-    if (selection && !selection.isCollapsed) selection.removeAllRanges();
-    drag = { tile, x: event.clientX, y: event.clientY, ghost: null, id: event.pointerId };
-  });
-  grid.addEventListener('dragstart', (event) => event.preventDefault());
-
-  grid.addEventListener('pointermove', (event) => {
-    if (!drag || event.pointerId !== drag.id) return;
-    if (!drag.ghost) {
-      if (Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < DRAG_THRESHOLD) return;
-      const rect = drag.tile.getBoundingClientRect();
-      drag.ghost = drag.tile.cloneNode(true);
-      drag.ghost.className = 'app-tile drag-ghost';
-      drag.ghost.style.cssText = `left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px;`;
-      drag.offset = { x: event.clientX - rect.left, y: event.clientY - rect.top };
-      document.body.append(drag.ghost);
-      drag.tile.classList.add('drag-source');
-      grid.classList.add('reordering');
-      grid.setPointerCapture(event.pointerId);
-    }
-    drag.ghost.style.left = `${event.clientX - drag.offset.x}px`;
-    drag.ghost.style.top = `${event.clientY - drag.offset.y}px`;
-    const over = document.elementsFromPoint(event.clientX, event.clientY).find((el) => el.classList && el.classList.contains('app-tile') && el !== drag.ghost && el !== drag.tile && grid.contains(el));
-    if (!over) return;
-    const rect = over.getBoundingClientRect();
-    const after = event.clientX > rect.left + rect.width / 2;
-    const target = after ? over.nextElementSibling : over;
-    if (target === drag.tile || (after && over.nextElementSibling === drag.tile)) return;
-    const others = [...grid.children].filter((el) => el !== drag.tile);
-    const before = new Map(others.map((el) => [el, el.getBoundingClientRect()]));
-    grid.insertBefore(drag.tile, target);
-    slide(others, before);
-  });
-
-  const drop = async (event) => {
-    if (!drag || event.pointerId !== drag.id) return;
-    const { tile, ghost } = drag;
-    drag = null;
-    if (!ghost) return;
-    grid.classList.remove('reordering');
-    const rect = tile.getBoundingClientRect();
-    await ghost.animate(
-      [{ left: ghost.style.left, top: ghost.style.top }, { left: `${rect.left}px`, top: `${rect.top}px` }],
-      { duration: 160, easing: ZOOM_EASING, fill: 'forwards' },
-    ).finished.catch(() => {});
-    ghost.remove();
-    tile.classList.remove('drag-source');
-    layout.favorites = [...grid.children].map((el) => el.dataset.app);
-    await saveLayout();
-  };
-  grid.addEventListener('pointerup', drop);
-  grid.addEventListener('pointercancel', drop);
-  // A click that ended a drag is not a launch.
-  grid.addEventListener('click', (event) => { if (event.target.closest('.drag-source')) event.stopImmediatePropagation(); }, true);
 }
 
 // --- Background --------------------------------------------------------------
@@ -1227,6 +1130,48 @@ function typedContext(asSearch) {
   return null;
 }
 
+/**
+ * Open an address in a session, whose browser is inside the server's
+ * network: of the application named, or the only one that opens addresses;
+ * of one the user then picks otherwise. A session of that application the
+ * user already has running, leaving the same way, is handed the address,
+ * which it opens beside what it has open, and is brought forward; where it
+ * takes none, as after its application was closed, a new session starts
+ * with the options last used.
+ *
+ * @param {string} url
+ * @param {string} [appId]
+ * @param {{vpn?: string, vpnEndpoint?: string}} [network] The VPN profile the session leaves through.
+ */
+async function openIsolated(url, appId = '', network = {}) {
+  heroInput.value = '';
+  const browsers = apps.filter((candidate) => candidate.url_support);
+  const app = browsers.find((candidate) => candidate.id === appId) || (browsers.length === 1 ? browsers[0] : null);
+  const profile = network.vpn ? (status.vpns || []).find((vpn) => vpn.id === network.vpn) : null;
+  // A link that names a way out the user has not got is not opened another way.
+  if (network.vpn && !profile) {
+    notify(t('web.board.noNetworkAccess'), true);
+    return;
+  }
+  if (!app) {
+    setContext({ action: 'url', targetUrl: url });
+    $('apps-section').scrollIntoView({ block: 'nearest' });
+    return;
+  }
+  // A room is shared with others, so it is not handed addresses unasked.
+  const running = sessions.find((s) => s.app_id === app.id && !s.is_collaboration && !stopping.has(s.session_id) && (s.vpn || '') === (profile ? profile.name : ''));
+  if (running) {
+    try {
+      await secureFetch(`/api/sessions/${running.session_id}/open_url`, { method: 'POST', body: JSON.stringify({ url }) });
+      openSession(running, sessionsRow.querySelector(`[data-session-id="${CSS.escape(running.session_id)}"]`));
+      return;
+    } catch (error) { /* nothing in it took the address: a session of its own, then */ }
+  }
+  context = { action: 'url', targetUrl: url };
+  const options = optionsFor(app);
+  launch(app, profile ? { ...options, vpn: profile.id, vpnEndpoint: network.vpnEndpoint || (profile.endpoints[0] ? profile.endpoints[0].id : null) } : options);
+}
+
 function takeFile(file) {
   if (!file) return;
   heroInput.value = '';
@@ -1250,14 +1195,6 @@ function bindEvents() {
     if (!context && list.length === 0) setContext(typedContext(true));
     else if (list.length === 1) openDrawer(list[0]);
   });
-  // A link marked for isolation is opened the way a pasted address is: in an application the user picks.
-  $('links-grid').addEventListener('click', (event) => {
-    const tile = event.target.closest('button[data-link]');
-    if (!tile) return;
-    heroInput.value = '';
-    setContext({ action: 'url', targetUrl: tile.dataset.link });
-    $('apps-section').scrollIntoView({ block: 'nearest' });
-  });
   $('context-clear').addEventListener('click', () => {
     if (context && context.typed) heroInput.value = '';
     setContext(null);
@@ -1276,7 +1213,7 @@ function bindEvents() {
     return tile && !tile.classList.contains('busy') ? apps.find((app) => app.id === tile.dataset.app) : null;
   };
   // A tile opens its launch window; the play button in its corner launches at once. Enter opens, Shift+Enter launches.
-  for (const grid of [appGrid, $('favorites-grid')]) {
+  for (const grid of [$('board')]) {
     grid.addEventListener('click', (event) => {
       const app = tileApp(event);
       if (!app) return;
@@ -1292,7 +1229,6 @@ function bindEvents() {
       else openDrawer(app, event.target.closest('.app-tile'));
     });
   }
-  bindFavoriteDrag();
   bindCustomize();
 
   sessionsRow.addEventListener('click', (event) => {
@@ -1315,6 +1251,8 @@ function bindEvents() {
       if (!drawer.hidden) closeDrawer();
       if (!$('customize').hidden) closeCustomize();
     }
+    // In edit mode the keys are the forms'.
+    if (board.isEditing()) return;
     // Slash reaches the search box from anywhere on the page.
     if (event.key === '/' && !event.target.closest('input, select, textarea') && drawer.hidden) {
       event.preventDefault();
@@ -1371,6 +1309,7 @@ function bindEvents() {
   // Landing on the page again, by any road, is when the desktops must be current.
   const landed = () => {
     lastActive = Date.now();
+    board.refresh();
     refreshSessions().then(() => refreshShots({ fresh: true }));
   };
   // Back from a session, the page may come out of the back-forward cache as it was left: grown over, and stale.
@@ -1404,14 +1343,42 @@ async function init() {
     .map(([name, value]) => `<option value="${escapeHtml(value)}">${escapeHtml(name)}</option>`)
     .join('');
   renderSkeleton();
+  board = createBoard({
+    t,
+    locale: currentLocale(),
+    info,
+    apps: () => apps,
+    layout: () => layout,
+    saveLayout,
+    tileHtml,
+    busyFlights,
+    openIsolated,
+    notify,
+    fetch: secureFetch,
+    looking,
+    isAdmin: () => Boolean(status.is_admin),
+    sessionOf: (appId) => sessions.find((s) => s.app_id === appId && !stopping.has(s.session_id)),
+    shotOf: (sessionId) => (shots.get(sessionId) || {}).image || '',
+    openSession: (session, element) => openSession(session, element),
+    vpns: () => status.vpns || [],
+    resetLayout: async () => {
+      layout = readLayout({}).layout;
+      layout.background = normalizeBackground();
+      applyBackground();
+      renderTypeChips();
+      await saveLayout();
+    },
+    changed: () => { if (apps.length || status.settings) renderApps(); },
+  });
   bindEvents();
 
   try {
-    const [pending, stored, , brandData] = await Promise.all([
+    const [pending, stored, , brandData, dashboard] = await Promise.all([
       bridge.getContext(),
       bridge.storageGet(['simple_launch_profile', LAYOUT_KEY]),
       loadAll(),
       secureFetch('/api/branding', { method: 'GET' }).catch(() => null),
+      secureFetch('/api/dashboard', { method: 'GET' }).catch(() => null),
     ]);
     brandInfo = brandData;
     // The page's own gradients start from the brand's accent; a forced wallpaper takes the customize button away.
@@ -1419,13 +1386,13 @@ async function init() {
     $('customize-button').hidden = Boolean(brandInfo && brandInfo.wallpaper && brandInfo.wallpaper_forced);
     const saved = stored.simple_launch_profile || {};
     memory = { apps: saved.apps || {}, recent: saved.recent || [] };
-    const kept = stored[LAYOUT_KEY] || {};
-    layout = {
-      favorites: (kept.favorites || []).filter((id) => apps.some((app) => app.id === id)),
-      hidden: (kept.hidden || []).filter((id) => apps.some((app) => app.id === id)),
-      background: normalizeBackground(kept.background),
-    };
+    const kept = readLayout(stored[LAYOUT_KEY] || {});
+    layout = kept.layout;
+    layout.hidden = layout.hidden.filter((id) => apps.some((app) => app.id === id));
+    layout.background = normalizeBackground(layout.background);
     applyBackground();
+    board.load(dashboard, kept.favorites);
+    if (status.is_admin) attachAdmin(board.core);
     if (pending && pending.action === 'search') {
       const engine = info.config.searchEngineUrl || DEFAULT_SEARCH_ENGINE;
       context = { action: 'url', targetUrl: `${engine}${encodeURIComponent(pending.selectionText)}` };
@@ -1439,10 +1406,10 @@ async function init() {
   }
   renderStatusChips();
   renderSessions();
-  renderLinks();
   renderTypeChips();
   renderContext();
   renderApps();
+  board.render();
   refreshShots({ fresh: true });
   heroInput.focus();
 }

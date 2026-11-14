@@ -272,6 +272,56 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         ),
     },
     {
+        "name": "dashboards_path",
+        "type": "str",
+        "default": "/config/.config/sealskin/dashboards",
+        "help": (
+            "Directory of the dashboards an administrator lays out (`boards.yml`) and the widget "
+            "library they draw on (`widgets.yml`). Shared by every node of a cluster."
+        ),
+    },
+    {
+        "name": "widget_secrets_path",
+        "type": "str",
+        "default": "/config/.config/sealskin/widget_secrets",
+        "help": (
+            "Directory of the credentials dashboard widgets use, one file per secret: a widget that "
+            "says `{{secret.NAME}}` is given the content of the file `NAME`, or of the environment "
+            "variable `SEALSKIN_WIDGET_SECRET_NAME`. Each node keeps its own; the shared store holds none."
+        ),
+    },
+    {
+        "name": "dashboard_link_schemes",
+        "type": "str",
+        "default": "mailto,tel,ssh,sftp,rdp,vnc",
+        "help": (
+            "Comma-separated URL schemes a dashboard link may have besides `http` and `https`, each "
+            "handed to the application the user's device opens it with. `javascript`, `data`, `file`, "
+            "and the other schemes a browser runs inside the page are refused whatever is listed."
+        ),
+    },
+    {
+        "name": "weather_url",
+        "type": "str",
+        "default": "https://api.open-meteo.com/v1/forecast",
+        "help": "Forecast endpoint of the Open-Meteo API the weather widget reads, for a deployment that hosts its own.",
+    },
+    {
+        "name": "stocks_url",
+        "type": "str",
+        "default": "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}",
+        "help": (
+            "Chart endpoint the stocks widget reads, `{symbol}` standing for the ticker; it answers in the shape "
+            "of Yahoo Finance's chart API."
+        ),
+    },
+    {
+        "name": "geocoding_url",
+        "type": "str",
+        "default": "https://geocoding-api.open-meteo.com/v1/search",
+        "help": "Search endpoint of the Open-Meteo geocoding API the weather widget's form looks places up with.",
+    },
+    {
         "name": "home_templates_path",
         "type": "str",
         "default": "/storage/sealskin_home_templates",

@@ -53,6 +53,7 @@ Each user carries these settings, editable later:
 | **Move Home Directories** | The user may move their own home directories between the nodes of a [cluster](cluster.md), from the launcher. On by default: a user who has home directories can take them where they launch. |
 | **Allow Editing App Templates** | Opens the [App Templates](#app-templates) editor to a user who is not an administrator. They create, change, and delete templates, except for the `DOCKER_*` and `KUBERNETES_*` settings, which grant authority over the Docker host or the namespace: those keep the values an administrator gave them, and only an administrator deletes a template that carries any. |
 | **Harden Container**, **Harden Window Manager** | Force the base image presets `HARDEN_DESKTOP` and `HARDEN_OPENBOX` on every session the user starts, including apps a collaboration room swaps to. They are applied after the [app template](#app-templates) and the app's own environment overrides, so neither can switch them back off. Leave them off to let the template decide. |
+| **Allow Customizing the Home Page**, **Allow Own Links**, **Allow Own Feeds and Calendars** | What the user may do with their [dashboard](dashboards.md): rearrange it and add to it at all, add links of their own, and add feeds and calendars by address, which the server fetches from the public internet. All on by default. |
 | **Limits** | Sessions at once, storage, CPUs and memory per session, session length, and a time allowance per day, week, or month; see [the limits](signin.md#groups-switches-and-limits). Blank or negative is no limit. |
 | **Application keys** | Whether the user may sign the extension and the mobile app in with [application keys](signin.md#application-keys), which apps may use them, how long a key lives, and the dormancy rules that send the user back to the web to sign in. These bind administrators too. |
 | **Pools** | Restricted [pools](cluster.md#pools) open to the user, and pools closed to them. |
@@ -126,7 +127,7 @@ all.
   scaled down in the browser before it is uploaded), with the same position,
   blur, and dim controls users have. Users start from it and may still pick
   their own background, unless **Force this wallpaper on every user** is on,
-  which also takes the Customize button off the home page.
+  which also takes the Appearance button out of the home page's edit mode.
 * **Home page links**: tiles the home page shows above the applications, for
   your own sites and tools, in the order given. Each has a name, an address,
   an icon (a [Font Awesome](https://fontawesome.com/search?ic=free-collection) class such as `fa-book` or `fab fa-github`, or an

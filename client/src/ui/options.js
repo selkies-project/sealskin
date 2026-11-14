@@ -2638,6 +2638,9 @@ const SETTING_SWITCHES = [
   ['harden_openbox', 'options.users.hardenWm', true],
   ['application_keys', 'options.users.applicationKeys', false],
   ['application_key_follow_sign_in', 'options.users.appKeyFollowSignIn', true],
+  ['dashboard_customize', 'options.users.dashboardCustomize', false],
+  ['dashboard_links', 'options.users.dashboardLinks', false],
+  ['dashboard_feeds', 'options.users.dashboardFeeds', false],
 ];
 // Each limit with its label and whether the server takes a whole number.
 const SETTING_LIMITS = [
@@ -2666,6 +2669,7 @@ const USER_DEFAULTS = {
   allowance_hours: -1, allowance_period: 'month', groups: [], pools: [], pools_denied: [], proot_catalog: null,
   application_keys: true, application_key_clients: [...APP_KEY_CLIENTS], application_key_days: -1,
   application_key_dormant_hours: -1, application_key_follow_sign_in: false,
+  dashboard_customize: true, dashboard_links: true, dashboard_feeds: true,
 };
 // The new-user form starts without a GPU, as it always has.
 const NEW_USER_SETTINGS = { ...USER_DEFAULTS, gpu: false };

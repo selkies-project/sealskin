@@ -666,6 +666,9 @@ class UserSettings(BaseModel):
         application_key_days: Longest a key lives, in days; negative for no expiry.
         application_key_dormant_hours: Hours after the user's last web sign-in at which keys sleep; negative for never.
         application_key_follow_sign_in: Keys sleep as soon as the user's web sign-in has ended.
+        dashboard_customize: The user may rearrange their home page and add to it.
+        dashboard_links: The user may put links of their own on it.
+        dashboard_feeds: The user may put feeds and calendars of their own on it, which the server fetches.
         provider_groups: Groups the identity provider named at the last sign-in.
         approved: False for a user a sign-in created who waits for an administrator; the server keeps it.
     """
@@ -698,6 +701,9 @@ class UserSettings(BaseModel):
     application_key_days: float = -1
     application_key_dormant_hours: float = -1
     application_key_follow_sign_in: bool = False
+    dashboard_customize: bool = True
+    dashboard_links: bool = True
+    dashboard_feeds: bool = True
     provider_groups: list[str] = []
     approved: bool = True
 
@@ -739,6 +745,9 @@ class GroupSettings(BaseModel):
     application_key_days: float | None = None
     application_key_dormant_hours: float | None = None
     application_key_follow_sign_in: bool | None = None
+    dashboard_customize: bool | None = None
+    dashboard_links: bool | None = None
+    dashboard_feeds: bool | None = None
     sso_groups: list[str] = []
 
 

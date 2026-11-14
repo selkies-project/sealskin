@@ -222,6 +222,22 @@ All *encrypted, admin*.
 | `GET /api/admin/vpn`, `POST /api/admin/vpn/import` | VPN profiles with their gateways; make profiles of an uploaded WireGuard or OpenVPN file or archive (multipart `file`, `kind`, credentials). |
 | `PUT`/`DELETE /api/admin/vpn/{id}`, `POST /api/admin/vpn/{id}/endpoints` | Change a profile's name, published endpoints, cap, access, or credentials; delete it, its gateways staying up until their sessions end; add the endpoints of another file. |
 
+## Dashboards
+
+| Method and path | Auth | Purpose |
+| --- | --- | --- |
+| `GET /api/dashboard` | encrypted, user | The caller's dashboards (`boards`, each with its `look` and its `tiles` at `x`, `y`, `w`, `h` on a grid of `columns`, `{username}` filled in), the library widgets they may place (`id`, `name`, `type`, `w`, `h`), `policy` (`customize`, `links`, `feeds`, `schemes`), and `user_types`. |
+| `POST /api/dashboard/data` | encrypted, user | Body `{items, fresh}`, each item `{key, widget}` for a library widget, `{key, type, config}` for one of the user's own, or `{key, link, board}` for whether a dashboard's link answers the server: `results` by key, each `{ok, data, at}` or `{ok: false, error}`. |
+| `POST /api/dashboard/places` | encrypted, user | Body `{name}`: the places a weather widget's form offers. |
+| `POST /api/dashboard/icons` | encrypted, user | Body `{names}`, icon pack names such as `di-plex`: `images`, where the page loads each from on this server. |
+| `POST /api/dashboard/site-icon` | encrypted, user | Body `{url}`: the site's own icon as a PNG `data` URL. A user's site is read only on the public internet. |
+| `GET /api/dashboard/icons/{hash}` | none | An icon an administrator uploaded, cached for a year. |
+| `POST /api/admin/dashboards/icons` | encrypted, admin | Body `{data}`, a base64 picture up to 1 MB: kept as a PNG, answered as the `icon` a tile names it by and its `image` address. |
+| `GET /api/admin/dashboards` | encrypted, admin | The dashboards and the library as kept, with the names of the node's secrets, the link schemes, the widget types, and the groups. |
+| `PUT /api/admin/dashboards/boards`, `PUT /api/admin/dashboards/widgets` | encrypted, admin | Replace every dashboard (`{boards}`) or the whole library (`{widgets}`). |
+| `POST /api/admin/dashboards/widgets/test` | encrypted, admin | Body `{type, config}`: read a widget without saving it. |
+| `POST /api/admin/dashboards/widgets/homepage` | encrypted, admin | Body `{text}`, a Homepage `customapi` definition as YAML: the `api` widget's `config` and `refresh`. |
+
 ## Branding
 
 | Method and path | Auth | Purpose |
