@@ -43,10 +43,10 @@ def test_only_the_app_page_is_isolated(http):
     assert page.headers["Cross-Origin-Opener-Policy"] == "same-origin-allow-popups"
     assert page.headers["Content-Security-Policy"].startswith("frame-ancestors 'none'; script-src 'self'")
     assert page.headers["Cache-Control"] == "no-cache"
-    # Served pages stay frameable by the extension and the mobile app.
+    # Served pages stay frameable by the extension and the mobile app, and run their own scripts alone.
     framed = http.get("/ui/popup.html")
     assert "Cross-Origin-Opener-Policy" not in framed.headers
-    assert "Content-Security-Policy" not in framed.headers
+    assert framed.headers["Content-Security-Policy"] == "script-src 'self'; object-src 'none'; base-uri 'self'"
     # The pick bookmarklet's receive page keeps the opener that hands it the
     # file, so it carries the script CSP but not the opener policy.
     receive = http.get("/ui/receive.html")
@@ -54,6 +54,21 @@ def test_only_the_app_page_is_isolated(http):
     assert receive.headers["Content-Security-Policy"].startswith("frame-ancestors 'none'; script-src 'self'")
     assert http.get("/ui/sw.js").headers["Cache-Control"] == "no-cache"
     assert "immutable" in http.get("/ui/app.ABC123.js").headers["Cache-Control"]
+
+
+def test_every_page_runs_its_own_scripts_alone_and_a_widget_frame_is_sandboxed(tmp_path, monkeypatch):
+    (tmp_path / "room").mkdir()
+    for name in ("home.html", "widget-frame.html", "options.html", "room/room.html"):
+        (tmp_path / name).write_text("<!DOCTYPE html><html><head><title>SealSkin</title></head><body></body></html>")
+    monkeypatch.setattr(settings, "ui_path", str(tmp_path))
+    app = FastAPI()
+    ui.mount_ui(app)
+    http = TestClient(app)
+    assert http.get("/ui/home.html").headers["content-security-policy"] == "script-src 'self'; object-src 'none'; base-uri 'self'"
+    frame = http.get("/ui/widget-frame.html").headers["content-security-policy"]
+    assert frame.startswith("sandbox allow-scripts ") and "allow-same-origin" not in frame and "allow-top-navigation" not in frame
+    assert http.get("/ui/options.html").headers["content-security-policy"] == "script-src 'self'; object-src 'none'; base-uri 'self'"
+    assert http.get("/ui/room/room.html").headers["content-security-policy"].startswith("script-src 'self' blob:; worker-src 'self' blob:")
 
 
 def test_manifest_opens_what_installed_apps_open(http, store_with_firefox):

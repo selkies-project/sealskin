@@ -40,6 +40,16 @@ BRIDGE_VERSION = 1
 NO_CACHE_SUFFIXES = (".html", ".json", "/sw.js")
 #: The web app runs only its own scripts, is never framed, and sets its own `<base>` alone.
 WEB_APP_CSP = "frame-ancestors 'none'; script-src 'self'; object-src 'none'; base-uri 'self'"
+#: The pages the web app and the shells frame run only their own scripts too.
+PAGE_CSP = "script-src 'self'; object-src 'none'; base-uri 'self'"
+#: The room's page builds its workers and audio worklets from its own text, which the browser sees as `blob:` scripts.
+ROOM_CSP = "script-src 'self' blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'"
+#: The page a dashboard's frame widget is written into: an origin of its own with no way to the page around it,
+#: free to run the administrator's script and load from anywhere.
+WIDGET_FRAME_CSP = (
+    "sandbox allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox; "
+    "default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; base-uri 'none'"
+)
 _ASSET_RE = re.compile(r'(?P<attr>\b(?:src|href))="(?P<url>[^"]+)"')
 
 
@@ -81,7 +91,9 @@ class UiStaticFiles(StaticFiles):
     read and served wearing the brand (`branding.brand_page`). The web app's
     page holds the unlocked private key, so it runs only its own scripts, is
     never framed, and gives a page that opens it, such as a session's, no
-    handle on it.
+    handle on it. Every other page runs only its own scripts as well, the
+    room's with the workers it builds, and the page of a frame widget is
+    sandboxed into an origin of its own.
     """
 
     def file_response(self, full_path: Any, stat_result: os.stat_result, scope: Any, status_code: int = 200) -> Response:
@@ -98,6 +110,12 @@ class UiStaticFiles(StaticFiles):
         name = os.path.basename(str(full_path))
         if name in ("index.html", "receive.html", "launching.html"):
             response.headers["Content-Security-Policy"] = WEB_APP_CSP
+        elif name == "widget-frame.html":
+            response.headers["Content-Security-Policy"] = WIDGET_FRAME_CSP
+        elif name == "room.html":
+            response.headers["Content-Security-Policy"] = ROOM_CSP
+        elif name.endswith(".html"):
+            response.headers["Content-Security-Policy"] = PAGE_CSP
         # Only the app page severs its opener; receive.html keeps the one the
         # pick bookmarklet opened it with, to take the fetched file from it.
         if name == "index.html":
