@@ -26,8 +26,10 @@
   (`routers/peer.py`, `cluster.py`), VPN profiles an administrator uploads (`vpn.py`, `vpn_kube.py`,
   `vpn/entrypoint.sh`), the web client exported from an image (`webclient.py`), the credential files a node
   reads and the pull secrets it reads on Kubernetes (`registries.py`: a Docker `config.json` and a netrc under
-  `/config`, sent to the registries and hosts they name and nowhere else, never to the store or a client), and
-  Caddy's `forward_auth` to the loopback-only `/internal/resolve_session`.
+  `/config`, sent to the registries and hosts they name and nowhere else, never to the store or a client),
+  Caddy's `forward_auth` to the loopback-only `/internal/resolve_session`, and the address a user hands one of
+  their own running sessions (`POST /api/sessions/<id>/open_url`: a web address by pattern, passed to a fixed
+  script inside the session's container as an argument, run as the session's own user).
 
 ## Components that matter most / least
 - Most: anything that lets a lower principal reach a higher one: an anonymous client reaching the API, a session

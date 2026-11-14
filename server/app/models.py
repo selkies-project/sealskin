@@ -1098,6 +1098,12 @@ class ActiveSessionInfo(BaseModel):
     wayland_mode: bool = True
 
 
+class OpenUrlRequest(BaseModel):
+    """An address for a running session to open, held to what a launch takes (see `LaunchRequestURL`)."""
+
+    url: str = Field(max_length=8192, pattern=r"^(?:(?:https?|ftp)://|magnet:\?)[^\s\x00-\x1f\x7f]+$")
+
+
 class SendFileToSessionRequest(BaseModel):
     """Deliver an uploaded file into a running session."""
 

@@ -131,6 +131,7 @@ to the session port and contains the one-time access token.
 | `GET /api/sessions` | encrypted, user | The caller's sessions, newest first. |
 | `DELETE /api/sessions/{session_id}` | encrypted, user | Stop one of the caller's sessions. |
 | `GET /api/sessions/{session_id}/screenshot` | encrypted, user | A thumbnail of the session's desktop, `{"image", "width", "height", "taken_at"}`, with `image` a JPEG data URI, a recent capture unless `?fresh=1` asks for a new one; 404 while the container has none to give. |
+| `POST /api/sessions/{session_id}/open_url` | encrypted, user | Body `{url}`, a web address: the session's application opens it beside what it has open. `409` where the application takes no addresses or none is running in the session. |
 | `POST /api/sessions/{session_id}/send_file` | encrypted, user | Move a finished upload (`filename`, `upload_id`, `total_chunks`) into the session's files directory. |
 | `GET /{session_id}/` | access token | Exchange `?access_token=` for the session cookie and redirect. Add `&embedded=true` for a `SameSite=None` cookie. |
 | `GET /room/{session_id}` | access or collaboration token | The collaboration room page. |

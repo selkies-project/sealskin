@@ -40,6 +40,40 @@ def epoch(timestamp: str) -> float:
     ).timestamp()
 
 
+#: Run by `bash -c` inside a session with the address as its first argument: hands the address to the application
+#: the session shows. The application was started by the desktop's autostart script (`write_autostart`), which
+#: passes `SEALSKIN_URL` on; run again in that script's own environment, as its own user, the application's
+#: command reaches the instance already running, which opens the address beside what it has open. Exits 3 where
+#: no autostart script is running, as after the application was closed, and 5 where the user cannot be taken on.
+OPEN_URL_SCRIPT = r"""url=$1
+for desktop in labwc openbox; do
+  from=$(pgrep -o -f "/\.config/$desktop/autostart\$") && break
+  from=
+done
+[ -n "$from" ] || exit 3
+owner=$(stat -c %u "/proc/$from")
+group=$(stat -c %g "/proc/$from")
+if [ "$(id -u)" != "$owner" ]; then
+  if command -v setpriv >/dev/null; then
+    exec setpriv --reuid "$owner" --regid "$group" --init-groups bash -c "$BASH_EXECUTION_STRING" "$0" "$url"
+  elif command -v s6-applyuidgid >/dev/null; then
+    exec s6-applyuidgid -u "$owner" -g "$group" bash -c "$BASH_EXECUTION_STRING" "$0" "$url"
+  fi
+  exit 5
+fi
+script=$(tr '\0' '\n' < "/proc/$from/cmdline" | tail -n 1)
+while IFS= read -r -d '' pair; do export "$pair" 2>/dev/null; done < "/proc/$from/environ"
+unset SEALSKIN_FILE
+export SEALSKIN_URL="$url"
+setsid bash "$script" >/dev/null 2>&1 &
+"""
+
+
+def open_url_command(url: str) -> list[str]:
+    """Return the command that hands a running session an address; the address is an argument, never script text."""
+    return ["bash", "-c", OPEN_URL_SCRIPT, "sealskin-open", url]
+
+
 def instance_labels(session_id: str) -> dict[str, str]:
     """Labels that mark an instance as this server's, for `managed_instances`."""
     return {
@@ -142,6 +176,14 @@ class BaseProvider(ABC):
     @abstractmethod
     async def prune_images(self) -> None:
         """Remove images no session can use any more."""
+
+    async def open_url(self, instance_id: str, url: str) -> bool:
+        """Hand a running instance an address to open in the application it shows (see `OPEN_URL_SCRIPT`).
+
+        Returns:
+            Whether the application took it; `False` where the backend cannot, or nothing in the instance could.
+        """
+        return False
 
     async def registry_credentials(self) -> dict[str, tuple[str, str]]:
         """Return the username and password per registry host the backend holds beside the node's file."""
