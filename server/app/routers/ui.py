@@ -22,7 +22,7 @@ from fastapi import APIRouter, FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from starlette.staticfiles import StaticFiles
 
-from .. import branding
+from .. import branding, sso, user_manager
 from ..models import (
     TemplateSchemaResponse,
     TemplateSchemaSection,
@@ -69,15 +69,35 @@ def absolutize(html: str, base: str) -> str:
     return _ASSET_RE.sub(rewrite, html)
 
 
-def built_page(name: str, base: str = "/ui/") -> str:
-    """Return a page of the built UI wearing the brand, with its assets pointed at `base`.
+async def brand_of(request: Request) -> str:
+    """Return the id of the brand a page request wears (see `branding.choose`).
+
+    The host name is the one the browser asked for, and the groups are those
+    of the web sign-in its cookie names, when there is one; the pages a
+    companion app frames carry no sign-in, and wear the brand of their host
+    name.
+    """
+    groups: Any = ()
+    token = request.cookies.get(sso.SESSION_COOKIE)
+    if token and any(item.groups for item in state.branding.variants):
+        try:
+            signed_in = await sso.current(sso.session_id(token))
+            if signed_in:
+                groups = user_manager.get_effective_settings(signed_in["username"], signed_in.get("groups") or ()).get("groups") or ()
+        except Exception:  # noqa: BLE001 - a sign-in that cannot be read leaves the host name to pick the brand
+            groups = ()
+    return branding.choose(request.headers.get("host", ""), groups)
+
+
+def built_page(name: str, base: str = "/ui/", brand: str = "") -> str:
+    """Return a page of the built UI wearing a brand, with its assets pointed at `base`.
 
     Raises:
         HTTPException: 404 when the UI is not built.
     """
     try:
         with open(os.path.join(settings.ui_path, name), encoding="utf-8") as handle:
-            return branding.brand_page(absolutize(handle.read(), base))
+            return branding.brand_page(absolutize(handle.read(), base), brand)
     except OSError as exc:
         raise HTTPException(status_code=404, detail="The web UI is not built.") from exc
 
@@ -96,11 +116,16 @@ class UiStaticFiles(StaticFiles):
     sandboxed into an origin of its own.
     """
 
+    async def get_response(self, path: str, scope: Any) -> Response:
+        """Note the brand the request wears before the file is answered with."""
+        scope["sealskin.brand"] = await brand_of(Request(scope))
+        return await super().get_response(path, scope)
+
     def file_response(self, full_path: Any, stat_result: os.stat_result, scope: Any, status_code: int = 200) -> Response:
         """Add `Cache-Control`, the brand, and the web app's isolation to the response Starlette builds."""
         if str(full_path).endswith(".html"):
             with open(full_path, encoding="utf-8") as handle:
-                response: Response = HTMLResponse(branding.brand_page(handle.read()), status_code=status_code)
+                response: Response = HTMLResponse(branding.brand_page(handle.read(), scope.get("sealskin.brand", "")), status_code=status_code)
         else:
             response = super().file_response(full_path, stat_result, scope, status_code)
         if str(full_path).endswith(NO_CACHE_SUFFIXES):
@@ -173,7 +198,7 @@ async def get_template_schema() -> dict[str, Any]:
 
 
 @router.get("/ui/manifest.webmanifest", include_in_schema=False)
-async def web_app_manifest() -> JSONResponse:
+async def web_app_manifest(request: Request) -> JSONResponse:
     """Describe the web app for installing it, sharing to it, and opening files and links with it.
 
     The file handlers offer the extensions installed applications open, each
@@ -186,7 +211,8 @@ async def web_app_manifest() -> JSONResponse:
         mime = mimetypes.guess_type(f"file.{extension}")[0]
         if mime:
             accept.setdefault(mime, []).append(f".{extension}")
-    logo = branding.image("logo")
+    brand = await brand_of(request)
+    logo = branding.image("logo", brand)
     icons = (
         [{"src": logo.url, "sizes": f"{logo.width}x{logo.height}", "type": logo.type}]
         if logo
@@ -196,7 +222,7 @@ async def web_app_manifest() -> JSONResponse:
         ]
     )
     manifest: dict[str, Any] = {
-        "name": state.branding.name,
+        "name": branding.view(brand).name,
         "start_url": "/",
         "scope": "/",
         "display": "standalone",
@@ -226,8 +252,9 @@ async def opensearch_description(request: Request) -> Response:
     """
     public = settings.public_url.rstrip("/")
     app = f"{public}/" if public else str(request.base_url)
-    name = state.branding.name
-    logo = branding.image("logo")
+    brand = await brand_of(request)
+    name = branding.view(brand).name
+    logo = branding.image("logo", brand)
     picture = (
         f'<Image width="{logo.width}" height="{logo.height}" type="{logo.type}">{escape(app.rstrip("/") + logo.url)}</Image>'
         if logo
@@ -253,10 +280,10 @@ async def get_ui_version() -> dict[str, Any]:
 
 
 @router.get("/", response_class=HTMLResponse, include_in_schema=False)
-async def web_app() -> HTMLResponse:
+async def web_app(request: Request) -> HTMLResponse:
     """Serve the web app's page, with the isolation its built copy under `/ui/` carries."""
     return HTMLResponse(
-        built_page("index.html"),
+        built_page("index.html", brand=await brand_of(request)),
         headers={
             "Cache-Control": "no-cache",
             "Content-Security-Policy": WEB_APP_CSP,

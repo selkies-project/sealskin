@@ -204,6 +204,53 @@ def default_brand_apps() -> list[BrandApp]:
     return [BrandApp(client=client, url=url) for client, url in APP_STORE_URLS.items()]
 
 
+class BrandVariant(BaseModel):
+    """A brand of its own for some of a deployment: the users who arrive at certain host names, or are in certain groups.
+
+    Attributes:
+        id: Its name in the record and in its pictures' file names.
+        label: What the administrator calls it.
+        hosts: Host names the web app is reached at under this brand, without a port; `*.example.org` takes every name under one.
+        groups: Groups whose signed-in members see this brand at any host name.
+        name: The product name.
+        logo_link: Where the logo leads; empty for nowhere.
+        accent: The accent color as `#rrggbb`, or empty for the default violet.
+        wallpaper_fit: How the wallpaper sits on the home page.
+        wallpaper_blur: Pixels of blur over the wallpaper.
+        wallpaper_dim: Percent the wallpaper is darkened.
+        wallpaper_forced: Every user sees the wallpaper, and the page's own choice of background is withheld.
+        links: Links the built-in home page shows beside the applications.
+    """
+
+    id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,32}$")
+    label: str = Field(min_length=1, max_length=60)
+    hosts: list[str] = Field(default_factory=list, max_length=20)
+    groups: list[str] = Field(default_factory=list, max_length=50)
+    name: str = Field(default="SealSkin", min_length=1, max_length=60)
+    logo_link: str = Field(default="", max_length=2000, pattern=r"^(https?://\S+)?$")
+    accent: str = Field(default="", pattern=r"^(#[0-9a-fA-F]{6})?$")
+    wallpaper_fit: str = Field(default="cover", pattern=r"^(cover|contain|stretch|center)$")
+    wallpaper_blur: int = Field(default=0, ge=0, le=24)
+    wallpaper_dim: int = Field(default=30, ge=0, le=90)
+    wallpaper_forced: bool = False
+    links: list[BrandLink] = Field(default_factory=list, max_length=40)
+
+    @field_validator("hosts")
+    @classmethod
+    def _host_names(cls, value: list[str]) -> list[str]:
+        """Keep host names lower case, without a port, each a name or `*.` and a name."""
+        hosts = list(dict.fromkeys(host.strip().lower() for host in value if host.strip()))
+        if not all(re.fullmatch(r"(\*\.)?[a-z0-9]([a-z0-9.-]{0,251}[a-z0-9])?", host) for host in hosts):
+            raise ValueError("A host name is written as portal.example.org or *.example.org, without a port.")
+        return hosts
+
+    @field_validator("groups")
+    @classmethod
+    def _group_names(cls, value: list[str]) -> list[str]:
+        """Trim the group names and leave out the empty."""
+        return list(dict.fromkeys(group.strip() for group in value if group.strip()))
+
+
 class Branding(BaseModel):
     """The brand the web app wears, as `branding/branding.yml` keeps it.
 
@@ -217,6 +264,7 @@ class Branding(BaseModel):
         wallpaper_dim: Percent the wallpaper is darkened.
         wallpaper_forced: Every user sees the wallpaper, and the page's own customization is withheld.
         links: Links the home page shows beside the applications.
+        variants: Brands of their own for certain host names or groups; the first that matches a request is worn, this one otherwise.
     """
 
     name: str = Field(default="SealSkin", min_length=1, max_length=60)
@@ -228,6 +276,15 @@ class Branding(BaseModel):
     wallpaper_dim: int = Field(default=30, ge=0, le=90)
     wallpaper_forced: bool = False
     links: list[BrandLink] = Field(default_factory=list, max_length=40)
+    variants: list[BrandVariant] = Field(default_factory=list, max_length=20)
+
+    @field_validator("variants")
+    @classmethod
+    def _every_variant_once(cls, value: list[BrandVariant]) -> list[BrandVariant]:
+        """Refuse two variants of one id."""
+        if len({variant.id for variant in value}) != len(value):
+            raise ValueError("Every brand has its own id.")
+        return value
 
     @field_validator("name", "logo_link")
     @classmethod
@@ -274,7 +331,19 @@ class BrandImage(BaseModel):
 
 
 class BrandingView(Branding):
-    """The brand with its pictures, as `GET /api/branding` returns it."""
+    """A brand with its pictures, as `GET /api/branding` returns the one a request wears.
+
+    Attributes:
+        id: The variant's id; empty for the brand every request wears that no variant matches.
+        label: The variant's label.
+        hosts: The host names the variant is for.
+        groups: The groups the variant is for.
+    """
+
+    id: str = ""
+    label: str = ""
+    hosts: list[str] = []
+    groups: list[str] = []
 
     links: list[BrandLinkView] = Field(default_factory=list, max_length=40)
     logo: BrandImage | None = None

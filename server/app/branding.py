@@ -9,6 +9,14 @@ for whatever is missing or invalid. A picture's address carries the hash of
 its bytes, so a browser caches it for a year and still sees a new upload at
 once.
 
+A deployment may keep brands of its own for some of its users, the record's
+`variants`: each names the host names it is worn at, the groups whose
+signed-in members see it, or both, and has pictures of its own beside the
+others, `logo.<id>.<ext>` and `wallpaper.<id>.<ext>`, the brand's own
+standing in where a variant has none. `choose` picks the brand of a
+request, the first variant in the record's order that matches, and every
+function below takes the id it returns, empty for the brand itself.
+
 Every page the server serves carries the brand in its head (`brand_page`):
 the title, the favicon, an `application-name` meta the translator fills
 `{brand}` with, a `sealskin-brand` meta holding the rest as JSON, and a style
@@ -27,6 +35,7 @@ import json
 import logging
 import os
 import re
+from collections.abc import Iterable
 from typing import Any
 
 from fastapi import HTTPException, Response
@@ -34,7 +43,7 @@ from PIL import Image, UnidentifiedImageError
 from pydantic import ValidationError
 
 from . import logos, persistence
-from .models import PROJECT_URL, BrandImage, Branding, BrandingView, BrandLinkView
+from .models import PROJECT_URL, BrandImage, Branding, BrandingView, BrandLinkView, BrandVariant
 from .settings import settings
 from .state import state
 
@@ -55,7 +64,9 @@ _ICON_LINK = re.compile(r'<link rel="icon" href="[^"]*">')
 _BRAND_TEXT = re.compile(r"(<(?:span|h1)\b[^>]*>)SealSkin(</)")
 _DEFAULT_ICON = re.compile(r'(src=")(?:/ui/)?icons/icon128\.png(")')
 
-#: The uploaded pictures by kind: bytes, media type, hash, and size.
+_VARIANT_ID = re.compile(r"[A-Za-z0-9_-]{1,32}")
+
+#: The uploaded pictures by kind, and by `<kind>.<variant id>` for a variant's own: bytes, media type, hash, and size.
 _images: dict[str, dict[str, Any]] = {}
 
 
@@ -89,7 +100,8 @@ def _load_images() -> None:
     extensions = {ext for ext, _ in FORMATS.values()}
     for name in persistence.list_names(_dir()):
         stem, _, extension = name.rpartition(".")
-        if stem not in IMAGE_LIMITS or extension not in extensions or stem in _images:
+        kind, _, variant = stem.partition(".")
+        if kind not in IMAGE_LIMITS or extension not in extensions or stem in _images or (variant and not _VARIANT_ID.fullmatch(variant)):
             continue
         data = persistence.read_bytes(os.path.join(_dir(), name))
         if not data:
@@ -97,7 +109,7 @@ def _load_images() -> None:
         try:
             _, media_type, width, height = _inspect(data)
         except ValueError:
-            logger.warning("The brand's %s at %s is not a picture; ignoring it.", stem, name)
+            logger.warning("The brand's %s at %s is not a picture; ignoring it.", kind, name)
             continue
         _images[stem] = {
             "data": data,
@@ -107,6 +119,40 @@ def _load_images() -> None:
             "width": width,
             "height": height,
         }
+
+
+def variant(brand: str) -> BrandVariant | None:
+    """Return the variant of an id, or `None` for the brand itself or an id no variant has."""
+    return next((item for item in state.branding.variants if item.id == brand), None) if brand else None
+
+
+def choose(host: str = "", groups: Iterable[str] = ()) -> str:
+    """Return the id of the brand a request wears: the first variant its host name or one of its groups matches.
+
+    Args:
+        host: The `Host` the request named, with or without a port.
+        groups: The groups of the signed-in user, when there is one.
+
+    Returns:
+        A variant's id, or `""` for the brand itself.
+    """
+    name = host.strip().lower().rsplit("@", 1)[-1]
+    name = name[1 : name.index("]")] if name.startswith("[") and "]" in name else name.split(":", 1)[0]
+    held = set(groups)
+    for item in state.branding.variants:
+        if any(name == wanted or (wanted.startswith("*.") and name.endswith(wanted[1:])) for wanted in item.hosts):
+            return item.id
+        if held & set(item.groups):
+            return item.id
+    return ""
+
+
+def _record(brand: str) -> Branding:
+    """Return the fields a brand is worn with: a variant's own, with the companion apps of the brand itself."""
+    item = variant(brand)
+    if item is None:
+        return state.branding
+    return Branding(**item.model_dump(exclude={"id", "label", "hosts", "groups"}), apps=state.branding.apps)
 
 
 def load() -> None:
@@ -123,7 +169,7 @@ def load() -> None:
         except ValidationError as exc:
             logger.warning("Ignoring %s: %s", _yaml_path(), exc)
     state.branding = branding
-    for link in branding.links:
+    for link in [*branding.links, *(link for item in branding.variants for link in item.links)]:
         if link.icon.startswith("https://"):
             logos.local(link.icon)
     try:
@@ -133,9 +179,10 @@ def load() -> None:
 
 
 def save(branding: Branding) -> None:
-    """Write the brand's record and take it up."""
+    """Write the brand's record and take it up, letting go of the pictures of variants it no longer has."""
     persistence.write_yaml_sync(_yaml_path(), branding.model_dump())
     load()
+    _prune_images()
 
 
 def reset() -> None:
@@ -145,18 +192,27 @@ def reset() -> None:
     load()
 
 
-def save_image(kind: str, encoded: str) -> None:
-    """Keep an uploaded picture as the brand's logo or wallpaper.
+def _own(brand: str) -> str:
+    """Return a variant's id as given, or raise 404 for an id no variant has."""
+    if brand and variant(brand) is None:
+        raise HTTPException(status_code=404, detail="No such brand.")
+    return brand
+
+
+def save_image(kind: str, encoded: str, brand: str = "") -> None:
+    """Keep an uploaded picture as a brand's logo or wallpaper.
 
     Args:
         kind: `logo` or `wallpaper`.
         encoded: The picture, base64 encoded.
+        brand: The variant it is for; empty for the brand itself.
 
     Raises:
-        HTTPException: 400 for an unknown kind, bad encoding, a file that is not a picture, or one too large.
+        HTTPException: 400 for an unknown kind, bad encoding, a file that is not a picture, or one too large; 404 for an unknown variant.
     """
     if kind not in ("logo", "wallpaper"):
         raise HTTPException(status_code=400, detail="The picture is a logo or a wallpaper.")
+    _own(brand)
     try:
         data = base64.b64decode(encoded.split(",", 1)[-1], validate=True)
     except (ValueError, binascii.Error) as exc:
@@ -167,60 +223,79 @@ def save_image(kind: str, encoded: str) -> None:
         extension, _, _, _ = _inspect(data)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    remove_image(kind, reload=False)
-    persistence.write_bytes(os.path.join(_dir(), f"{kind}.{extension}"), data)
+    remove_image(kind, brand, reload=False)
+    persistence.write_bytes(os.path.join(_dir(), f"{kind}{'.' + brand if brand else ''}.{extension}"), data)
     load()
 
 
-def remove_image(kind: str, reload: bool = True) -> None:
-    """Delete the brand's logo or wallpaper, whatever its format."""
+def remove_image(kind: str, brand: str = "", reload: bool = True) -> None:
+    """Delete a brand's logo or wallpaper, whatever its format."""
     if kind not in ("logo", "wallpaper"):
         raise HTTPException(status_code=400, detail="The picture is a logo or a wallpaper.")
+    stem = f"{kind}.{brand}" if brand and _VARIANT_ID.fullmatch(brand) else kind
     for ext, _ in FORMATS.values():
-        persistence.remove(os.path.join(_dir(), f"{kind}.{ext}"))
+        persistence.remove(os.path.join(_dir(), f"{stem}.{ext}"))
     if reload:
         load()
 
 
-def image(kind: str) -> BrandImage | None:
-    """Describe an uploaded picture for the pages, or return `None` where there is none."""
-    found = _images.get(kind)
+def _prune_images() -> None:
+    """Delete the pictures of variants the record no longer has."""
+    known = {item.id for item in state.branding.variants}
+    for stem, found in list(_images.items()):
+        _, _, owner = stem.partition(".")
+        if owner and owner not in known:
+            persistence.remove(os.path.join(_dir(), found["name"]))
+            _images.pop(stem, None)
+
+
+def image(kind: str, brand: str = "") -> BrandImage | None:
+    """Describe a brand's picture for the pages: a variant's own, else the brand's; `None` where there is neither."""
+    own = _images.get(f"{kind}.{brand}") if brand else None
+    found = own or _images.get(kind)
     if not found:
         return None
     return BrandImage(
-        url=f"/api/branding/{kind}?v={found['version']}",
+        url=f"/api/branding/{kind}?v={found['version']}" + (f"&b={brand}" if own else ""),
         width=found["width"],
         height=found["height"],
         type=found["type"],
     )
 
 
-def image_response(kind: str) -> Response:
-    """Answer with an uploaded picture, cached for a year under its versioned address.
+def image_response(kind: str, brand: str = "") -> Response:
+    """Answer with a brand's picture, cached for a year under its versioned address.
 
     Raises:
         HTTPException: 404 where no such picture was uploaded.
     """
-    found = _images.get(kind)
+    found = (_images.get(f"{kind}.{brand}") if brand and _VARIANT_ID.fullmatch(brand) else None) or _images.get(kind)
     if not found:
         raise HTTPException(status_code=404, detail="No such picture.")
     return Response(found["data"], media_type=found["type"], headers={"Cache-Control": "public, max-age=31536000, immutable"})
 
 
-def view() -> BrandingView:
-    """Return the brand with its pictures."""
-    branding = state.branding
+def view(brand: str = "") -> BrandingView:
+    """Return a brand with its pictures."""
+    record = _record(brand)
+    item = variant(brand)
     links = [
         BrandLinkView(**link.model_dump(), image=logos.local(link.icon) if link.icon.startswith("https://") else "")
-        for link in branding.links
+        for link in record.links
     ]
     return BrandingView(
-        **branding.model_dump(exclude={"links"}),
+        **record.model_dump(exclude={"links", "variants"}),
         links=links,
-        logo=image("logo"),
-        wallpaper=image("wallpaper"),
-        is_default=branding == Branding() and not _images,
+        logo=image("logo", brand),
+        wallpaper=image("wallpaper", brand),
+        is_default=state.branding == Branding() and not _images,
+        **(item.model_dump(include={"id", "label", "hosts", "groups"}) if item else {}),
     )
+
+
+def views() -> list[BrandingView]:
+    """Return the brand itself and then every variant, each with its pictures, for the administrator's form."""
+    return [view(), *(view(item.id) for item in state.branding.variants)]
 
 
 def _rgb(color: str) -> tuple[int, int, int]:
@@ -274,10 +349,10 @@ def accent_css(accent: str) -> str:
     return ":root{" + ";".join(f"{name}:{value}" for name, value in pairs) + "}"
 
 
-def client_brand() -> dict[str, Any]:
+def client_brand(brand: str = "") -> dict[str, Any]:
     """Return what every page reads from its `sealskin-brand` meta."""
-    branding = state.branding
-    logo = image("logo")
+    branding = _record(brand)
+    logo = image("logo", brand)
     return {
         "name": branding.name,
         "logo": logo.url if logo else "",
@@ -288,19 +363,19 @@ def client_brand() -> dict[str, Any]:
     }
 
 
-def brand_page(page: str) -> str:
-    """Return a served page wearing the brand.
+def brand_page(page: str, brand: str = "") -> str:
+    """Return a served page wearing a brand.
 
     The title and the wordmarks say the name, the favicon and the default
     pictures become the logo where one was uploaded, and the head gains the
     metas and the accent style described in the module docstring.
     """
-    branding = state.branding
-    brand = client_brand()
+    branding = _record(brand)
+    shown = client_brand(brand)
     name = branding.name
     head = [
         f'<meta name="application-name" content="{html.escape(name, quote=True)}">',
-        f"<meta name=\"sealskin-brand\" content='{html.escape(json.dumps(brand, separators=(',', ':')), quote=True)}'>",
+        f"<meta name=\"sealskin-brand\" content='{html.escape(json.dumps(shown, separators=(',', ':')), quote=True)}'>",
     ]
     if branding.accent:
         head.append(f"<style>{accent_css(branding.accent)}</style>")
@@ -308,9 +383,10 @@ def brand_page(page: str) -> str:
         page = _TITLE.sub(lambda m: f"<title>{html.escape(m.group(1).replace('SealSkin', name))}</title>", page, count=1)
         page = _BRAND_TEXT.sub(lambda m: f"{m.group(1)}{html.escape(name)}{m.group(2)}", page)
         page = page.replace('alt="SealSkin"', f'alt="{html.escape(name, quote=True)}"')
-    if brand["logo"]:
-        page = _ICON_LINK.sub(f'<link rel="icon" href="{brand["logo"]}">', page, count=1)
-        page = _DEFAULT_ICON.sub(lambda m: f"{m.group(1)}{brand['logo']}{m.group(2)}", page)
+    if shown["logo"]:
+        logo = html.escape(shown["logo"], quote=True)
+        page = _ICON_LINK.sub(lambda m: f'<link rel="icon" href="{logo}">', page, count=1)
+        page = _DEFAULT_ICON.sub(lambda m: f"{m.group(1)}{logo}{m.group(2)}", page)
     marker = "</head>"
     if marker in page:
         return page.replace(marker, "".join(head) + marker, 1)

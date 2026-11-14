@@ -1922,26 +1922,60 @@ function brandPicture(kind) {
   return brandSaved[kind] ? apiUrl(brandSaved[kind].url) : '';
 }
 
+/** Every brand as saved, the brand itself first and then its variants, each with the draft being edited. */
+let brandAll = [];
+let brandAt = 0;
+
+/** A draft of a brand from its saved view: the record's fields, and no pictures pending. */
+function brandDraftOf(saved) {
+  const record = { ...saved };
+  ['logo', 'wallpaper', 'is_default', 'variants'].forEach((key) => delete record[key]);
+  return { ...record, hosts: [...(record.hosts || [])], groups: [...(record.groups || [])], links: record.links.map((link) => ({ ...link })), apps: (record.apps || []).map((app) => ({ ...app })), pictures: {} };
+}
+
+/** Show one of the brands in the form: the brand itself, or a variant for certain host names or groups. */
+function showBrand(at) {
+  brandAt = Math.min(Math.max(0, at), brandAll.length - 1);
+  ({ saved: brandSaved, draft: brandDraft } = brandAll[brandAt]);
+  const variant = brandAt > 0;
+  brandField('brand-which').innerHTML = brandAll.map((brand, index) => `<option value="${index}"${index === brandAt ? ' selected' : ''}>${escapeHtml(index ? (brand.draft.label || brand.draft.name) : t('options.branding.everyone'))}</option>`).join('');
+  document.querySelectorAll('.brand-variant-only').forEach((field) => { field.hidden = !variant; });
+  brandField('brand-remove').hidden = !variant;
+  // The companion apps' links are the deployment's, whichever brand a page wears.
+  brandField('brand-apps-block').hidden = variant;
+  brandField('brand-label').value = brandDraft.label || '';
+  brandField('brand-hosts').value = (brandDraft.hosts || []).join(', ');
+  brandField('brand-groups').value = (brandDraft.groups || []).join(', ');
+  brandField('brand-name').value = brandDraft.name;
+  brandField('brand-logo-link').value = brandDraft.logo_link;
+  renderBrandApps();
+  brandField('brand-wallpaper-fit').value = brandDraft.wallpaper_fit;
+  brandField('brand-wallpaper-blur').value = brandDraft.wallpaper_blur;
+  brandField('brand-wallpaper-dim').value = brandDraft.wallpaper_dim;
+  brandField('brand-wallpaper-forced').checked = brandDraft.wallpaper_forced;
+  showAccentControls();
+  renderBrandLinks();
+  renderBrandingPreview();
+}
+
 async function loadBranding() {
+  let saved;
   try {
-    brandSaved = await secureFetch('/api/branding', { method: 'GET' });
+    saved = await secureFetch('/api/admin/branding', { method: 'GET' });
   } catch (error) {
     displayStatus(t('options.branding.saveFailed', { error: error.message }), true);
     return;
   }
-  const record = { ...brandSaved };
-  ['logo', 'wallpaper', 'is_default'].forEach((key) => delete record[key]);
-  brandDraft = { ...record, links: record.links.map((link) => ({ ...link })), apps: (record.apps || []).map((app) => ({ ...app })), pictures: {} };
-  brandField('brand-name').value = record.name;
-  brandField('brand-logo-link').value = record.logo_link;
-  renderBrandApps();
-  brandField('brand-wallpaper-fit').value = record.wallpaper_fit;
-  brandField('brand-wallpaper-blur').value = record.wallpaper_blur;
-  brandField('brand-wallpaper-dim').value = record.wallpaper_dim;
-  brandField('brand-wallpaper-forced').checked = record.wallpaper_forced;
-  showAccentControls();
-  renderBrandLinks();
-  renderBrandingPreview();
+  brandAll = saved.map((brand) => ({ saved: brand, draft: brandDraftOf(brand) }));
+  showBrand(brandAt);
+}
+
+/** Start a brand for certain host names or groups from the brand itself, whose pictures stand in until it has its own. */
+function addBrand() {
+  const { saved, draft } = brandAll[0];
+  const id = `b${Array.from(crypto.getRandomValues(new Uint8Array(6)), (byte) => byte.toString(36)).join('').slice(0, 10)}`;
+  brandAll.push({ saved: { ...saved }, draft: { ...brandDraftOf({ ...saved, ...draft, links: draft.links }), id, label: t('options.branding.newBrand'), hosts: [], groups: [], pictures: {} } });
+  showBrand(brandAll.length - 1);
 }
 
 function showAccentControls() {
@@ -2083,13 +2117,22 @@ async function saveBranding() {
   const button = brandField('branding-save-btn');
   button.disabled = true;
   try {
-    const { pictures, ...record } = brandDraft;
-    record.name = record.name.trim() || 'SealSkin';
-    record.links = record.links.filter((link) => link.name.trim() && link.url.trim()).map((link) => ({ ...link, name: link.name.trim(), url: link.url.trim(), icon: link.icon.trim() }));
+    // The record is the brand itself with its variants; each brand's pictures go up after it, under the brand's id.
+    const clean = ({ pictures, ...record }) => ({
+      ...record,
+      name: record.name.trim() || 'SealSkin',
+      links: record.links.filter((link) => link.name.trim() && link.url.trim()).map((link) => ({ ...link, name: link.name.trim(), url: link.url.trim(), icon: link.icon.trim() })),
+    });
+    const [own, ...variants] = brandAll.map((brand) => clean(brand.draft));
+    ['id', 'label', 'hosts', 'groups'].forEach((key) => delete own[key]);
+    const record = { ...own, variants: variants.map(({ apps, ...variant }) => ({ ...variant, label: (variant.label || '').trim() || variant.name })) };
     await secureFetch('/api/admin/branding', { method: 'PUT', body: JSON.stringify(record) });
-    for (const kind of Object.keys(BRAND_LIMITS)) {
-      if (pictures[kind] === null) await secureFetch(`/api/admin/branding/${kind}`, { method: 'DELETE' });
-      else if (pictures[kind]) await secureFetch(`/api/admin/branding/${kind}`, { method: 'POST', body: JSON.stringify({ data: pictures[kind].split(',')[1] }) });
+    for (const [index, { draft }] of brandAll.entries()) {
+      const which = index ? `?brand=${encodeURIComponent(draft.id)}` : '';
+      for (const kind of Object.keys(BRAND_LIMITS)) {
+        if (draft.pictures[kind] === null) await secureFetch(`/api/admin/branding/${kind}${which}`, { method: 'DELETE' });
+        else if (draft.pictures[kind]) await secureFetch(`/api/admin/branding/${kind}${which}`, { method: 'POST', body: JSON.stringify({ data: draft.pictures[kind].split(',')[1] }) });
+      }
     }
     displayStatus(t('options.branding.saved'));
     await loadBranding();
@@ -2110,6 +2153,7 @@ async function resetBranding() {
   try {
     await secureFetch('/api/admin/branding', { method: 'DELETE' });
     displayStatus(t('options.branding.resetDone'));
+    brandAt = 0;
     await loadBranding();
   } catch (error) {
     displayStatus(t('options.branding.saveFailed', { error: error.message }), true);
@@ -2121,10 +2165,20 @@ function bindBrandingEvents() {
   form.addEventListener('submit', (event) => event.preventDefault());
   brandField('branding-save-btn').addEventListener('click', saveBranding);
   brandField('branding-reset-btn').addEventListener('click', resetBranding);
+  brandField('brand-which').addEventListener('change', (event) => showBrand(Number(event.target.value)));
+  brandField('brand-add').addEventListener('click', addBrand);
+  brandField('brand-remove').addEventListener('click', () => {
+    if (brandAt > 0) brandAll.splice(brandAt, 1);
+    showBrand(brandAt - 1);
+  });
 
   // Every field repaints the mock as it changes.
   const take = () => {
     brandDraft.name = brandField('brand-name').value;
+    if (brandAt > 0) {
+      const names = (id) => brandField(id).value.split(',').map((name) => name.trim()).filter(Boolean);
+      Object.assign(brandDraft, { label: brandField('brand-label').value, hosts: names('brand-hosts'), groups: names('brand-groups') });
+    }
     brandDraft.logo_link = brandField('brand-logo-link').value.trim();
     brandDraft.wallpaper_fit = brandField('brand-wallpaper-fit').value;
     brandDraft.wallpaper_blur = Number(brandField('brand-wallpaper-blur').value);
@@ -2170,7 +2224,7 @@ function bindBrandingEvents() {
       renderBrandingPreview();
       return;
     }
-    if (event.target.type === 'file') return;
+    if (event.target.type === 'file' || event.target.id === 'brand-which') return;
     take();
   });
   brandField('brand-accent-clear').addEventListener('click', () => {

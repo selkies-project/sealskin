@@ -113,3 +113,36 @@ def test_links_and_the_logo_link_are_checked():
         Branding(links=[{"name": "Wiki", "url": "https://wiki", "icon": "<img>"}])
     brand = Branding(links=[{"name": "Wiki", "url": "https://wiki", "icon": "fa-book", "open": "isolated"}])
     assert brand.links[0].open == "isolated"
+
+
+def test_a_variant_is_worn_at_its_host_names_and_by_its_groups_with_its_own_pictures(http):
+    from app.models import BrandVariant
+
+    branding.save(Branding(name="Acme", accent="#336699", variants=[
+        BrandVariant(id="render", label="Render farm", hosts=["Render.Example.org", "*.farm.example.org"], name="Render Farm", accent="#aa3300", wallpaper_forced=True),
+        BrandVariant(id="ops", label="Operations", groups=["ops"], name="Ops Portal"),
+    ]))
+    branding.save_image("logo", picture())
+    branding.save_image("logo", picture(40, 40), "render")
+    branding.save_image("wallpaper", picture(300, 200, "JPEG"), "ops")
+    assert [branding.choose(host) for host in ("render.example.org:8443", "a.farm.example.org", "farm.example.org", "portal.example.org", "[::1]:8443", "")] == ["render", "render", "", "", "", ""]
+    assert branding.choose("portal.example.org", ["staff", "ops"]) == "ops" and branding.choose("render.example.org", ["ops"]) == "render"
+    # The pages wear the brand of the host name they were asked at.
+    plain, farm = http.get("/", headers={"host": "portal.example.org"}).text, http.get("/ui/home.html", headers={"host": "render.example.org"}).text
+    assert "<title>Acme</title>" in plain and "--accent-primary:#336699" in plain and "&b=" not in plain
+    assert "<title>Render Farm</title>" in farm and "--accent-primary:#aa3300" in farm and "&amp;b=render" in farm
+    assert http.get("/ui/manifest.webmanifest", headers={"host": "render.example.org"}).json()["name"] == "Render Farm"
+    # A variant's own picture is served under its id; where it has none, the brand's stands in.
+    render, ops = branding.view("render"), branding.view("ops")
+    assert render.logo.width == 40 and render.wallpaper is None and render.id == "render" and render.hosts == ["render.example.org", "*.farm.example.org"]
+    assert ops.logo.url == branding.view().logo.url and ops.wallpaper.url.endswith("&b=ops") and branding.view().wallpaper is None
+    assert http.get(render.logo.url).content != http.get(ops.logo.url).content and http.get("/api/branding/logo?b=../../x").status_code == 200
+    assert [item.name for item in branding.views()] == ["Acme", "Render Farm", "Ops Portal"]
+    # Taking a variant out of the record takes its pictures with it.
+    branding.save(Branding(name="Acme", variants=[BrandVariant(id="ops", label="Operations", groups=["ops"])]))
+    assert branding.choose("render.example.org") == "" and "logo.render" not in branding._images and "wallpaper.ops" in branding._images
+    for bad in ({"hosts": ["https://x"]}, {"hosts": ["x:8443"]}, {"id": "a.b"}):
+        with pytest.raises(ValueError):
+            BrandVariant(**{"id": "v", "label": "V", **bad})
+    with pytest.raises(ValueError):
+        Branding(variants=[BrandVariant(id="v", label="A"), BrandVariant(id="v", label="B")])

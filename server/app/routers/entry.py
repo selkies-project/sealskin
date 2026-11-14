@@ -27,7 +27,7 @@ from ..security import verify_token
 from ..settings import settings
 from ..state import state
 from .applications import user_can_access
-from .ui import WEB_APP_CSP, built_page
+from .ui import WEB_APP_CSP, brand_of, built_page
 
 logger = logging.getLogger(__name__)
 router = APIRouter(include_in_schema=False)
@@ -117,11 +117,11 @@ async def app_address_slash(app_id: str, request: Request) -> RedirectResponse:
 
 
 @router.get("/app/{app_id}/", response_class=HTMLResponse)
-async def app_address(app_id: str) -> HTMLResponse:
+async def app_address(app_id: str, request: Request) -> HTMLResponse:
     """Serve the page that opens the application; it tells the visitor itself when the application is not theirs."""
     _app(app_id)
     return HTMLResponse(
-        built_page("open.html"),
+        built_page("open.html", brand=await brand_of(request)),
         headers={"Cache-Control": "no-cache", "Content-Security-Policy": WEB_APP_CSP},
     )
 

@@ -1739,7 +1739,19 @@
       "appsHelp": "Where users get the extension and the apps, linked from the sign-in page and beside the application keys in the profile. Point a link at your own build, or hide it.",
       "appShow": "Shown",
       "appUrl": "Address",
-      "appClient": "App"
+      "appClient": "App",
+      "which": "Brand",
+      "whichHelp": "The brand everyone sees, or one of its own for the users who arrive at certain host names or are in certain groups. The first that matches is worn.",
+      "everyone": "Everyone else (the default)",
+      "addBrand": "Add a brand for certain host names or groups",
+      "removeBrand": "Remove this brand",
+      "newBrand": "New brand",
+      "label": "Label",
+      "labelHelp": "What this brand is called in this list.",
+      "hosts": "Host names",
+      "hostsHelp": "The addresses the web app is reached at under this brand, comma separated, without a port. *.example.org takes every name under one. The sign-in page wears it too.",
+      "groups": "Groups",
+      "groupsHelp": "Groups whose members see this brand once signed in on the web, at any host name. Comma separated."
     },
     "keys": {
       "title": "Application Keys",

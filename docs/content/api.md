@@ -213,9 +213,10 @@ All *encrypted, admin*.
 | `GET`/`POST /api/admin/apps/templates`, `DELETE /api/admin/apps/templates/{name}` | Templates; also open to a user allowed to edit app templates, short of their `DOCKER_*` and `KUBERNETES_*` settings. |
 | `GET /api/admin/sessions` | Every session grouped by user. |
 | `DELETE /api/admin/sessions/{session_id}` | Stop any session. |
-| `PUT /api/admin/branding` | Replace the brand's record (`name`, `logo_link`, `accent`, `apps` with a `client`, `url`, and `enabled` per companion app, the `wallpaper_*` fields, `links`); the pictures stay. |
+| `GET /api/admin/branding` | Every brand with its pictures: the brand itself, then its variants. |
+| `PUT /api/admin/branding` | Replace the brand's record, its `variants` included (each an `id`, `label`, `hosts`, `groups`, and the brand's own fields) (`name`, `logo_link`, `accent`, `apps` with a `client`, `url`, and `enabled` per companion app, the `wallpaper_*` fields, `links`); the pictures stay. |
 | `DELETE /api/admin/branding` | Back to the defaults: the record and the pictures are removed. |
-| `POST`/`DELETE /api/admin/branding/{logo\|wallpaper}` | Body `{data}`, a base64 PNG, JPEG, or WebP (1 MB for the logo, 8 MB for the wallpaper): keep or remove a picture. |
+| `POST`/`DELETE /api/admin/branding/{logo\|wallpaper}` | With `?brand=<id>` for a variant's own picture. Body `{data}`, a base64 PNG, JPEG, or WebP (1 MB for the logo, 8 MB for the wallpaper): keep or remove a picture. |
 | `GET /api/admin/proot/catalogs`, `POST /api/admin/proot/catalogs`, `PUT`/`DELETE /api/admin/proot/catalogs/{id}`, `POST /api/admin/proot/catalogs/{id}/update` | PRoot Apps catalogs: list them with the state of this node's copy, create, replace, delete, or fetch one again on every node. |
 | `GET /api/admin/proot/remote?repo=` | The apps a PRoot Apps remote (a GitHub `owner/repo`) publishes. |
 | `GET /api/admin/vpn`, `POST /api/admin/vpn/import` | VPN profiles with their gateways; make profiles of an uploaded WireGuard or OpenVPN file or archive (multipart `file`, `kind`, credentials). |
@@ -225,8 +226,8 @@ All *encrypted, admin*.
 
 | Method and path | Auth | Purpose |
 | --- | --- | --- |
-| `GET /api/branding` | encrypted, user | The brand with its pictures, as the home page reads it: the record, `logo` and `wallpaper` (`url`, `width`, `height`, `type`, or `null`), and `is_default`. |
-| `GET /api/branding/logo`, `GET /api/branding/wallpaper` | none | The uploaded pictures, addressed with `?v=<hash>` and cached for a year; `404` where none was uploaded. |
+| `GET /api/branding` | encrypted, user | The brand the request wears, with its pictures, as the home page reads it (the variant its host name or the caller's groups pick, else the brand itself): the record, `logo` and `wallpaper` (`url`, `width`, `height`, `type`, or `null`), and `is_default`. |
+| `GET /api/branding/logo`, `GET /api/branding/wallpaper` | none | The uploaded pictures, addressed with `?v=<hash>` (and `&b=<id>` for a variant's own) and cached for a year; `404` where none was uploaded. |
 
 Every page the server serves carries the brand in its head: an
 `application-name` meta, a `sealskin-brand` meta holding the name, logo

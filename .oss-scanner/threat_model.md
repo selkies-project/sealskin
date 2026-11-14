@@ -27,9 +27,12 @@
   `vpn/entrypoint.sh`), the web client exported from an image (`webclient.py`), the credential files a node
   reads and the pull secrets it reads on Kubernetes (`registries.py`: a Docker `config.json` and a netrc under
   `/config`, sent to the registries and hosts they name and nowhere else, never to the store or a client),
-  Caddy's `forward_auth` to the loopback-only `/internal/resolve_session`, and the address a user hands one of
+  Caddy's `forward_auth` to the loopback-only `/internal/resolve_session`, the address a user hands one of
   their own running sessions (`POST /api/sessions/<id>/open_url`: a web address by pattern, passed to a fixed
-  script inside the session's container as an argument, run as the session's own user).
+  script inside the session's container as an argument, run as the session's own user), and the brand a page request
+  wears (`routers/ui.py`: picked by the `Host` the browser named and, for a web sign-in, the groups of the user
+  its cookie names; a brand's name and pictures are public, so the choice gives a stranger nothing but which
+  brand a host name wears).
 
 ## Components that matter most / least
 - Most: anything that lets a lower principal reach a higher one: an anonymous client reaching the API, a session

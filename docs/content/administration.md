@@ -133,7 +133,24 @@ all.
   `https` address of a picture, which the server fetches and serves itself),
   and opens either in a new tab or, marked
   **In isolation**, in a session of an application the user picks, as a
-  pasted link does.
+  pasted link does. They show on the built-in home page; a
+  [dashboard](dashboards.md) carries links of its own.
+
+### A brand per host name or group
+
+**Brand** at the top of the form chooses which brand the fields below are:
+the one everyone sees, or one of its own for some users, added with the
+plus button. Such a brand has a label, the **host names** the web app is
+reached at under it (`portal.example.org`, or `*.example.org` for every name
+under one), the **groups** whose members see it once signed in on the web,
+or both, and its own name, logo, accent color, wallpaper, and home page
+links. The first brand in the list that matches a request is worn. The
+sign-in page, the installed web app, and the search engine entry wear the
+brand of the host name, since nobody is signed in there; a group's brand
+shows after the sign-in. Until a brand has a logo or a wallpaper of its
+own, the default's stands in. The companion apps' links are the same under
+every brand, and the pages the extension and the mobile app frame wear the
+brand of their host name.
 
 The brand is kept in `branding/` beside the other shared records, as
 `branding.yml` with the logo and wallpaper files next to it, so every node of

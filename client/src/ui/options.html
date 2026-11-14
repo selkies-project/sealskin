@@ -471,6 +471,27 @@
                     <p class="description" data-i18n="options.branding.help">Give the web app your organization's name, logo, colors, wallpaper, and links.</p>
                     <div class="branding-layout">
                         <form id="branding-form" class="branding-form" autocomplete="off">
+                            <h5 class="field-group" data-i18n="options.branding.which">Brand</h5>
+                            <div class="field-list single">
+                                <div class="field">
+                                    <div class="field-text"><label for="brand-which" data-i18n="options.branding.which">Brand</label><p class="description" data-i18n="options.branding.whichHelp"></p></div>
+                                    <div class="field-control" style="display: flex; gap: 0.5rem;"><select id="brand-which" style="flex: 1; min-width: 0;"></select>
+                                        <button type="button" id="brand-add" class="secondary" data-i18n-title="options.branding.addBrand" title="Add a brand"><i class="fas fa-plus"></i></button>
+                                        <button type="button" id="brand-remove" class="secondary" data-i18n-title="options.branding.removeBrand" title="Remove this brand"><i class="fas fa-trash"></i></button></div>
+                                </div>
+                                <div class="field brand-variant-only">
+                                    <div class="field-text"><label for="brand-label" data-i18n="options.branding.label">Label</label><p class="description" data-i18n="options.branding.labelHelp"></p></div>
+                                    <div class="field-control"><input type="text" id="brand-label" maxlength="60"></div>
+                                </div>
+                                <div class="field brand-variant-only">
+                                    <div class="field-text"><label for="brand-hosts" data-i18n="options.branding.hosts">Host names</label><p class="description" data-i18n="options.branding.hostsHelp"></p></div>
+                                    <div class="field-control"><input type="text" id="brand-hosts" placeholder="portal.example.org, *.example.net"></div>
+                                </div>
+                                <div class="field brand-variant-only">
+                                    <div class="field-text"><label for="brand-groups" data-i18n="options.branding.groups">Groups</label><p class="description" data-i18n="options.branding.groupsHelp"></p></div>
+                                    <div class="field-control"><input type="text" id="brand-groups"></div>
+                                </div>
+                            </div>
                             <h5 class="field-group" data-i18n="options.branding.identity">Identity</h5>
                             <div class="field-list single">
                                 <div class="field">
@@ -500,6 +521,7 @@
                                 </div>
                             </div>
 
+                            <div id="brand-apps-block">
                             <h5 class="field-group" data-i18n="options.branding.apps">Companion apps</h5>
                             <p class="description" data-i18n="options.branding.appsHelp"></p>
                             <div class="table-container">
@@ -513,6 +535,7 @@
                                     </thead>
                                     <tbody></tbody>
                                 </table>
+                            </div>
                             </div>
 
                             <h5 class="field-group" data-i18n="options.branding.wallpaper">Wallpaper</h5>
