@@ -6,9 +6,10 @@ import re
 
 import pytest
 from fastapi import HTTPException
+from pydantic import ValidationError
 
 from app import launch
-from app.models import InstalledApp
+from app.models import InstalledApp, LaunchRequestURL
 from app.settings import settings
 from app.state import state
 
@@ -41,6 +42,17 @@ def make_app(**overrides):
     }
     data.update(overrides)
     return InstalledApp(**data)
+
+
+@pytest.mark.parametrize("url", ["--renderer-cmd-prefix=/bin/sh", "javascript:alert(1)", "file:///etc/passwd", "https://a b", "", "https://ok.example/\n--flag"])
+def test_a_launch_takes_a_web_address_alone(url):
+    with pytest.raises(ValidationError):
+        LaunchRequestURL(url=url, application_id="firefox")
+
+
+def test_a_launch_takes_web_ftp_and_magnet_addresses():
+    for url in ("https://example.org/a?b=c#d", "http://10.0.0.1:8080/", "ftp://example.org/file", "magnet:?xt=urn:btih:abc"):
+        assert LaunchRequestURL(url=url, application_id="firefox").url == url
 
 
 def test_build_launch_spec_env_volumes_and_overrides(tmp_path):

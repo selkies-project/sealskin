@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import base64
 import binascii
+import io
 import logging
 import os
 import shutil
@@ -15,6 +16,7 @@ from typing import Any
 import httpx
 import yaml
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from PIL import Image, UnidentifiedImageError
 from pydantic import ValidationError
 
 from .. import (
@@ -342,8 +344,13 @@ async def delete_proot_catalog(catalog_id: str) -> Response:
 # --- Installed apps --------------------------------------------------------
 
 
+#: The picture formats an application's icon is taken in, by Pillow's name, and the pixels of its longer edge once kept.
+ICON_FORMATS = ("PNG", "JPEG", "WEBP", "GIF", "ICO", "BMP")
+ICON_EDGE = 512
+
+
 def _save_logo(app_id: str, logo: str | None) -> str | None:
-    """Persist a base64 logo as a PNG icon and return the icon URL.
+    """Persist a base64 picture as an app's icon, a PNG at most `ICON_EDGE` pixels wide, and return the icon URL.
 
     Args:
         app_id: App the icon belongs to.
@@ -351,6 +358,9 @@ def _save_logo(app_id: str, logo: str | None) -> str | None:
 
     Returns:
         `/api/app_icon/<id>` when data was saved, otherwise `logo` unchanged.
+
+    Raises:
+        HTTPException: 400 for data that is not a picture of `ICON_FORMATS`, or an id no file can be named by.
     """
     if not logo or logo.startswith(("/api/app_icon/", logos.ROUTE, "http")):
         return logo
@@ -358,6 +368,18 @@ def _save_logo(app_id: str, logo: str | None) -> str | None:
         icon_data = base64.b64decode(logo, validate=True)
     except (ValueError, TypeError, binascii.Error):
         return logo
+    # Whatever picture was uploaded is kept as a PNG, which is what the file's name and the routes that serve it say.
+    try:
+        with Image.open(io.BytesIO(icon_data)) as picture:
+            if picture.format not in ICON_FORMATS or max(picture.size) > 4096:
+                raise ValueError(picture.format)
+            picture = picture.convert("RGBA")
+            picture.thumbnail((ICON_EDGE, ICON_EDGE))
+            encoded = io.BytesIO()
+            picture.save(encoded, format="PNG")
+            icon_data = encoded.getvalue()
+    except (UnidentifiedImageError, OSError, SyntaxError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail="The icon is not a PNG, JPEG, WebP, GIF, or ICO picture.") from exc
     os.makedirs(settings.app_icons_path, exist_ok=True, mode=0o700)
     try:
         icon_path = safe_join(settings.app_icons_path, f"{app_id}.png")

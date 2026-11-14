@@ -67,9 +67,14 @@ class LaunchRequestSimple(BaseModel):
 
 
 class LaunchRequestURL(BaseModel):
-    """Launch an application and open a URL in it."""
+    """Launch an application and open a URL in it.
 
-    url: str
+    The address is `http`, `https`, or `ftp`, or a `magnet` link, without
+    spaces: it reaches the application's command line, so nothing shaped
+    like an option is taken.
+    """
+
+    url: str = Field(max_length=8192, pattern=r"^(?:(?:https?|ftp)://|magnet:\?)[^\s\x00-\x1f\x7f]+$")
     application_id: str
     home_name: str | None = None
     language: str | None = None

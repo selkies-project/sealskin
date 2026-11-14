@@ -828,7 +828,9 @@ async function streamDownload(home, path, filename) {
 async function takeLaunchContext() {
   const params = new URLSearchParams(location.search);
   let context = null;
-  if (params.has('url')) context = { action: 'url', targetUrl: params.get('url').replace(/^web\+sealskin:/i, '') };
+  // The protocol handler and a search engine entry hand over web addresses alone.
+  const target = params.has('url') ? params.get('url').replace(/^web\+sealskin:/i, '').trim() : '';
+  if (/^https?:\/\/\S+$/i.test(target)) context = { action: 'url', targetUrl: target };
   else if (params.has('q')) context = { action: 'search', selectionText: params.get('q') };
   else if (params.has('shared')) context = await takeShared();
   if (context) await pageTransport({ type: 'setContext', payload: { context } });
