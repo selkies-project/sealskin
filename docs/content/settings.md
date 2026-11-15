@@ -54,6 +54,12 @@ paths refer to.
 | `SEALSKIN_STORAGE_PATH` | `str` | `/storage` | Base directory for user home directories. |
 | `SEALSKIN_APP_ICONS_PATH` | `str` | `/storage/sealskin_app_icons` | Directory for storing custom-uploaded application icons. |
 | `SEALSKIN_BRANDING_PATH` | `str` | `/config/.config/sealskin/branding` | Directory of the brand the web app wears: `branding.yml` and the logo and wallpaper an administrator uploads. Shared by every node of a cluster. |
+| `SEALSKIN_DASHBOARDS_PATH` | `str` | `/config/.config/sealskin/dashboards` | Directory of the dashboards an administrator lays out (`boards.yml`) and the widget library they draw on (`widgets.yml`). Shared by every node of a cluster. |
+| `SEALSKIN_WIDGET_SECRETS_PATH` | `str` | `/config/.config/sealskin/widget_secrets` | Directory of the credentials dashboard widgets use, one file per secret: a widget that says `{{secret.NAME}}` is given the content of the file `NAME`, or of the environment variable `SEALSKIN_WIDGET_SECRET_NAME`. Each node keeps its own; the shared store holds none. |
+| `SEALSKIN_DASHBOARD_LINK_SCHEMES` | `str` | `mailto,tel,ssh,sftp,rdp,vnc` | Comma-separated URL schemes a dashboard link may have besides `http` and `https`, each handed to the application the user's device opens it with. `javascript`, `data`, `file`, and the other schemes a browser runs inside the page are refused whatever is listed. |
+| `SEALSKIN_WEATHER_URL` | `str` | `https://api.open-meteo.com/v1/forecast` | Forecast endpoint of the Open-Meteo API the weather widget reads, for a deployment that hosts its own. |
+| `SEALSKIN_STOCKS_URL` | `str` | `https://query1.finance.yahoo.com/v8/finance/chart/{symbol}` | Chart endpoint the stocks widget reads, `{symbol}` standing for the ticker; it answers in the shape of Yahoo Finance's chart API. |
+| `SEALSKIN_GEOCODING_URL` | `str` | `https://geocoding-api.open-meteo.com/v1/search` | Search endpoint of the Open-Meteo geocoding API the weather widget's form looks places up with. |
 | `SEALSKIN_HOME_TEMPLATES_PATH` | `str` | `/storage/sealskin_home_templates` | Base directory for meta-app home directory templates. |
 | `SEALSKIN_CONTAINER_CONFIG_PATH` | `str` | `/config` | Mount point for home directories inside the container. |
 | `SEALSKIN_SERVER_PRIVATE_KEY_PATH` | `str` | `/config/ssl/server_key.pem` | Path to the server private key PEM file. |

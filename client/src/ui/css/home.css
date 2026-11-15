@@ -171,7 +171,7 @@ body.zooming .home-wrap { opacity: 0.35; transition: opacity var(--dur-slow) var
 /* A link the administrator put on the page: a tile that leads out, or opens the address in a session. */
 .link-tile { color: inherit; text-decoration: none; font: inherit; }
 .link-tile:hover, .link-tile:focus-visible { color: inherit; text-decoration: none; }
-.link-tile i { display: grid; place-items: center; width: 64px; height: 64px; font-size: 2rem; color: var(--accent-text); }
+.link-tile > .glyph, .app-tile.missing > .glyph { display: grid; place-items: center; width: 64px; height: 64px; font-size: 2rem; color: var(--accent-text); }
 .link-tile .where { position: absolute; top: 0.55rem; right: 0.6rem; font-size: 0.7rem; color: var(--text-muted); }
 .app-tile .name { font-size: 0.88rem; font-weight: 500; line-height: 1.3; max-width: 100%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .app-tile .stage { font-size: 0.72rem; color: var(--accent-text); min-height: 1em; }
@@ -192,14 +192,6 @@ body.zooming .home-wrap { opacity: 0.35; transition: opacity var(--dur-slow) var
 @media (hover: none) { .app-tile .quick { opacity: 1; } }
 .app-tile.busy .quick { display: none; }
 .app-tile.favorite::before { content: "\f005"; position: absolute; top: 0.55rem; left: 0.6rem; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 0.7rem; color: var(--color-warning-text); opacity: 0.85; }
-
-/* Favorites being reordered: the picked tile fades where it was, and a copy of it rides the pointer. */
-#favorites-grid .app-tile { touch-action: pan-y; user-select: none; -webkit-user-select: none; }
-#favorites-grid.reordering .app-tile { cursor: grabbing; transition: none; }
-#favorites-grid.reordering .app-tile .quick { opacity: 0; }
-.app-tile.drag-source { opacity: 0.3; transform: none !important; box-shadow: none !important; }
-.app-tile.drag-ghost { position: fixed; z-index: 60; margin: 0; pointer-events: none; transform: scale(1.04); box-shadow: var(--shadow-lg); border-color: var(--accent-border); background-color: var(--bg-2); }
-.app-tile.drag-ghost .quick { display: none; }
 
 .app-tile.skeleton { cursor: default; pointer-events: none; }
 .skeleton .bone { border-radius: var(--radius-sm); background: linear-gradient(90deg, var(--bg-2) 25%, var(--bg-3) 50%, var(--bg-2) 75%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
@@ -292,4 +284,288 @@ body.zooming .home-wrap { opacity: 0.35; transition: opacity var(--dur-slow) var
   .session-actions button { padding: 0.4rem 0.6rem; }
   .shot .logo { width: 44px; height: 44px; }
   .drawer, #drawer { top: auto; right: 0; bottom: 0; left: 0; width: 100%; max-height: 88dvh; border: none; border-top: 1px solid var(--border-strong); border-radius: var(--radius-lg) var(--radius-lg) 0 0; animation: sheetIn var(--dur) var(--ease-out); }
+}
+
+/* The dashboard: tabs to switch between dashboards, then one grid twelve cells wide, drawn in stretches between the sessions and the catalog; every tile sits at its own cell. */
+#board { --cell: 104px; --gap: 0.75rem; display: flex; flex-direction: column; gap: 1.5rem; }
+body.page-wide .home-wrap { max-width: none; }
+.board-tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: -0.75rem; }
+.home .board-tab { display: inline-flex; align-items: center; gap: 0.5rem; margin: 0; padding: 0.45rem 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-pill); background-color: var(--glass); color: var(--text-secondary); font: inherit; font-size: 0.88rem; font-weight: 500; cursor: pointer; transform: none; }
+.home .board-tab:hover { color: var(--text-primary); border-color: var(--border-strong); }
+.home .board-tab.active { background-color: var(--accent-soft); border-color: var(--accent-border); color: var(--accent-text-strong); }
+.home .board-tab.add { border-style: dashed; }
+.board-tab .lock { font-size: 0.65rem; opacity: 0.6; }
+.section-head h2 { flex: 0 1 auto; }
+.section-tools { display: inline-flex; gap: 0.25rem; }
+.tile-grid { display: grid; grid-template-columns: repeat(var(--columns, 12), minmax(0, 1fr)); grid-template-rows: repeat(var(--rows, 1), var(--cell)); grid-auto-rows: var(--cell); gap: var(--gap); }
+.tile-grid > .tile { box-sizing: border-box; min-width: 0; min-height: 0; overflow: hidden; margin: 0; font: inherit; }
+/* One cell holds a picture and a name; the name gives way before the picture does. */
+.tile-grid > .app-tile { justify-content: center; gap: 0.45rem; padding: 0.6rem 0.4rem; }
+.tile-grid > .app-tile > img, .tile-grid > .app-tile > .glyph { width: 44px; height: 44px; flex-shrink: 0; object-fit: contain; }
+.tile-grid > .app-tile > i.glyph { display: grid; place-items: center; font-size: 1.6rem; color: var(--accent-text); }
+.tile-grid > .app-tile > .name { font-size: 0.76rem; line-height: 1.2; -webkit-line-clamp: 2; }
+.tile-grid > .app-tile .quick { right: 0.3rem; bottom: 0.3rem; width: 26px; height: 26px; font-size: 0.62rem; }
+.tile-grid > .app-tile.favorite::before, .tile-grid > .link-tile .where { top: 0.4rem; font-size: 0.6rem; }
+.tile-grid > .link-tile .where { right: 0.45rem; }
+img.glyph.invert { filter: invert(1); }
+/* Whether a link's address answers the server: gray until known. */
+.reach { position: absolute; left: 0.45rem; top: 0.45rem; width: 0.5rem; height: 0.5rem; border-radius: 50%; background-color: var(--text-muted); opacity: 0.5; }
+.reach.up { background-color: var(--color-success); box-shadow: 0 0 0 3px var(--color-success-soft); opacity: 1; }
+.reach.down { background-color: var(--color-danger); box-shadow: 0 0 0 3px var(--color-danger-soft); opacity: 1; }
+.inside-hint { margin: -0.5rem 0 1rem; padding: 0.5rem 0.7rem; border-left: 3px solid var(--accent-primary); border-radius: var(--radius-sm); background-color: var(--accent-soft); color: var(--text-secondary); }
+.admin-rows label.row-name { cursor: pointer; }
+.icon-preview .glyph { width: 32px; height: 32px; display: grid; place-items: center; font-size: 1.3rem; color: var(--accent-text); object-fit: contain; }
+/* Wider than a cell and one row high, a tile reads left to right: the picture, then the name and a line about it. */
+.tile-grid > .app-tile.wide { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto; align-content: center; justify-content: start; column-gap: 0.8rem; row-gap: 0.1rem; padding: 0.6rem 1rem; text-align: left; }
+.tile-grid > .app-tile.wide > img, .tile-grid > .app-tile.wide > .glyph { grid-row: 1 / span 2; align-self: center; }
+.tile-grid > .app-tile.wide > .name { align-self: end; font-size: 0.92rem; font-weight: 600; -webkit-line-clamp: 1; }
+.tile-grid > .app-tile.wide > .detail, .tile-grid > .app-tile.wide > .stage { grid-column: 2; align-self: start; }
+.tile-grid > .app-tile.wide > .name:nth-last-child(-n + 2), .tile-grid > .app-tile.wide > .stage:empty { align-self: center; }
+/* Two rows and more: the picture grows with the tile. */
+.tile-grid > .app-tile.tall > img, .tile-grid > .app-tile.tall > .glyph { width: min(96px, 55%); height: auto; aspect-ratio: 1; }
+.tile-grid > .app-tile.tall > i.glyph { font-size: 2.6rem; }
+.tile-grid > .app-tile.tall > .name { font-size: 0.95rem; font-weight: 600; }
+.app-tile .detail { max-width: 100%; font-size: 0.74rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-tile:not(.wide):not(.tall) .detail { display: none; }
+.link-tile .where.count { display: grid; place-items: center; width: auto; min-width: 1.15rem; height: 1.15rem; padding: 0 0.25rem; border-radius: var(--radius-pill); background-color: var(--accent-soft); color: var(--accent-text-strong); font-size: 0.62rem; font-weight: 700; }
+.app-tile.missing { opacity: 0.5; border-style: dashed; cursor: default; }
+/* A heading sits at the foot of its cells, a line running on from it, over the tiles below; its text comes in three sizes. */
+.tile-grid > .heading-tile { display: flex; align-items: flex-end; gap: 0.75rem; padding: 0 0.1rem 0.3rem; color: var(--text-primary); position: relative; }
+.heading-tile > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.2; }
+.heading-tile.scale-s { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+.heading-tile.scale-m { font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; }
+.heading-tile.scale-l { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
+.heading-tile::after { content: ""; flex: 1; min-width: 1rem; height: 1px; margin-bottom: 0.45em; background-color: var(--border-color); }
+.grid-empty { margin: 0; padding: 1.25rem; border: 1px dashed var(--border-color); border-radius: var(--radius); color: var(--text-muted); font-size: 0.85rem; text-align: center; list-style: none; }
+/* An application with a session of the user's running carries a mark; two rows high and more, its tile shows the desktop, which a click opens. */
+.tile-grid > .app-tile.running::after { content: ""; position: absolute; left: 0.45rem; bottom: 0.45rem; width: 0.5rem; height: 0.5rem; border-radius: 50%; background-color: var(--color-success); box-shadow: 0 0 0 3px var(--color-success-soft); }
+.tile-grid > .app-tile.live { justify-content: flex-end; padding: 0; }
+.tile-grid > .app-tile.live > .live-shot { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; object-fit: cover; }
+.tile-grid > .app-tile.live > img:not(.live-shot) { position: absolute; left: 0.5rem; top: 0.5rem; width: 26px; height: 26px; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6)); z-index: 1; }
+.tile-grid > .app-tile.live > .name { position: relative; z-index: 1; width: 100%; box-sizing: border-box; padding: 1.2rem 0.6rem 0.45rem 1.4rem; background: linear-gradient(transparent, rgba(5, 8, 13, 0.85)); text-align: left; }
+.tile-grid > .app-tile.live::after { z-index: 2; bottom: 0.6rem; left: 0.55rem; }
+.tile-grid > .app-tile.live .quick, .tile-grid > .app-tile.live .stage { z-index: 2; }
+.tile.off-schedule { opacity: 0.45; outline: 1px dashed var(--color-warning) !important; }
+/* A kiosk dashboard is the whole page: the search box and its buttons go, an administrator keeping the pencil. */
+body.kiosk .hero-search > :not(#edit-button), body.kiosk .hero-chips, body.kiosk #context-bar { display: none !important; }
+body.kiosk .hero-search { flex: 0 0 auto; margin-left: auto; padding: 0; border: none; background: none; box-shadow: none; backdrop-filter: none; }
+body.kiosk .hero:not(:has(#edit-button:not([hidden]))) { display: none !important; }
+.window input[type="datetime-local"] { width: 100%; box-sizing: border-box; color-scheme: dark; }
+
+/* The look a user or a dashboard picks: glass cards over the background, or no cards at all; names hidden. */
+body.tiles-glass .tile-grid > .app-tile, body.tiles-glass .widget-tile, body.tiles-glass .session-tile, body.tiles-glass #app-grid .app-tile { background-color: color-mix(in srgb, var(--bg-1) 55%, transparent); backdrop-filter: blur(14px) saturate(1.2); -webkit-backdrop-filter: blur(14px) saturate(1.2); border-color: rgba(255, 255, 255, 0.1); }
+body.tiles-flat .tile-grid > .app-tile, body.tiles-flat #app-grid .app-tile { background-color: transparent; border-color: transparent; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+body.tiles-flat .tile-grid > .app-tile:hover, body.tiles-flat #app-grid .app-tile:hover { background-color: var(--glass-strong); }
+body.tiles-flat .widget-tile { background-color: color-mix(in srgb, var(--bg-1) 40%, transparent); border-color: transparent; }
+body.labels-off .tile-grid > .app-tile:not(.wide) > .name { display: none; }
+body.labels-off .tile-grid > .app-tile:not(.wide) > img, body.labels-off .tile-grid > .app-tile:not(.wide) > .glyph { width: 56px; height: 56px; }
+.drawer-part { margin: 1.25rem 0 0.25rem; padding-top: 1rem; border-top: 1px solid var(--border-color); font-size: 0.95rem; }
+#customize #look-accent { width: 100%; height: 2.4rem; padding: 0.2rem; }
+#customize button.small { margin: 0.25rem 0 0; padding: 0.45rem 0.8rem; font-size: 0.82rem; }
+
+/* Widgets: a titled card whose body is drawn from what the server read. */
+.widget-tile { position: relative; display: flex; flex-direction: column; background-color: var(--bg-1); border: 1px solid var(--border-color); border-radius: var(--radius); text-align: left; }
+body.has-picture .widget-tile { background-color: color-mix(in srgb, var(--bg-1) 82%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.widget-tile { container: tile / size; }
+.widget-body { container: body / size; }
+/* A widget one cell wide gives its room to what it shows: the title keeps its icon alone. */
+@container tile (max-width: 150px) { .widget-tile > header { padding: 0.4rem 0.55rem 0.1rem; } .widget-tile > header span { display: none; } .widget-body { padding: 0.1rem 0.5rem 0.45rem; } }
+@container tile (max-height: 100px) { .widget-tile > header { padding-top: 0.4rem; padding-bottom: 0.1rem; } .widget-body { padding-bottom: 0.4rem; } }
+.widget-tile > header { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0.85rem 0.35rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); flex-shrink: 0; }
+.widget-tile > header span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.widget-tile > header i { color: var(--accent-text); }
+.widget-body { flex: 1; min-height: 0; overflow: auto; padding: 0.15rem 0.85rem 0.75rem; font-size: 0.88rem; }
+.widget-body a { color: var(--text-primary); text-decoration: none; }
+.widget-body a:hover { color: var(--accent-text-strong); text-decoration: underline; }
+.widget-body small { display: block; color: var(--text-muted); font-size: 0.74rem; }
+.w-empty, .w-error { margin: 0; color: var(--text-muted); font-size: 0.82rem; }
+.w-error { color: var(--color-warning-text); }
+.w-list, .w-rows, .w-weather .days { list-style: none; margin: 0; padding: 0; }
+.w-list li { padding: 0.4rem 0; border-top: 1px solid var(--border-color); line-height: 1.35; }
+.w-list li:first-child, .w-rows li:first-child { border-top: none; }
+.w-list li > a, .w-list li > span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.w-events li { display: grid; grid-template-columns: 5.2rem 1fr; gap: 0.75rem; }
+.w-events .when b { display: block; font-size: 0.78rem; font-weight: 600; color: var(--accent-text); }
+.w-rows li { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; padding: 0.35rem 0; border-top: 1px solid var(--border-color); }
+.w-rows li > :first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.w-rows b { flex-shrink: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.w-sites .dot { display: inline-block; width: 0.55rem; height: 0.55rem; margin-right: 0.5rem; border-radius: 50%; background-color: var(--color-danger); box-shadow: 0 0 0 3px var(--color-danger-soft); }
+.w-sites .dot.up { background-color: var(--color-success); box-shadow: 0 0 0 3px var(--color-success-soft); }
+.w-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr)); gap: 0.5rem; height: 100%; align-content: center; }
+.w-stats > div { padding: 0.55rem 0.4rem; border-radius: var(--radius-sm); background-color: var(--glass-strong); text-align: center; min-width: 0; }
+.w-stats strong { display: block; font-size: 1.15rem; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The clock's time fills what room the tile has; the date and the label show where there is room for them. */
+.w-clock { height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 0.1rem; overflow: hidden; }
+.w-clock strong { font-size: clamp(0.85rem, min(21cqw, 46cqh), 3.2rem); font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.05; white-space: nowrap; }
+.w-clock span { color: var(--text-secondary); font-size: clamp(0.7rem, 6cqw, 1rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.w-clock small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@container body (max-height: 78px) { .w-clock span { display: none; } }
+@container body (max-height: 52px) { .w-clock small { display: none; } }
+@container body (max-width: 110px) { .w-clock { align-items: center; text-align: center; } .w-clock span { display: none; } .w-clock small { max-width: 100%; font-size: 0.66rem; } }
+/* Stocks share the tile's height between them. A row with room to spare puts its line under the symbol and the price, as high as the row allows; one cell wide, it stacks the symbol over the price. */
+.w-stocks { display: grid; grid-auto-rows: minmax(2.6rem, 1fr); min-height: 100%; }
+.w-stocks li { container: quote / size; display: block; padding: 0; min-height: 0; }
+.w-stocks .q { box-sizing: border-box; height: 100%; display: flex; align-items: center; gap: 0.75rem; padding: 0.3rem 0; }
+.w-stocks .sym { flex: 1 1 auto; min-width: 3.2rem; overflow: hidden; }
+.w-stocks .sym b, .w-stocks .val b { display: block; font-weight: 600; white-space: nowrap; }
+.w-stocks .sym small, .w-stocks .val small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.w-stocks .val { flex: 0 0 auto; text-align: right; font-variant-numeric: tabular-nums; }
+.w-stocks small.up { color: var(--color-success-text); }
+.w-stocks small.down { color: var(--color-danger-text); }
+.spark { flex: 0 1 5.5rem; min-width: 2rem; height: 1.8rem; overflow: visible; }
+.spark polyline { fill: none; stroke-width: 1.6; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.spark polygon { stroke: none; opacity: 0.12; }
+.spark.up polyline { stroke: var(--color-success); }
+.spark.up polygon { fill: var(--color-success); }
+.spark.down polyline { stroke: var(--color-danger); }
+.spark.down polygon { fill: var(--color-danger); }
+@container quote (max-width: 190px) { .spark, .w-stocks .sym small { display: none; } }
+@container quote (min-height: 84px) {
+  .w-stocks .q { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto minmax(0, 1fr); align-items: start; gap: 0.3rem 0.75rem; padding: 0.5rem 0; }
+  .w-stocks .spark { display: block; grid-column: 1 / -1; grid-row: 2; width: 100%; height: 100%; min-height: 1.5rem; }
+  .w-stocks .sym small { display: block; }
+}
+@container quote (min-height: 150px) { .w-stocks .sym b { font-size: 1.15rem; } .w-stocks .val b { font-size: 1.5rem; letter-spacing: -0.02em; } .w-stocks .val small { font-size: 0.85rem; } }
+@container quote (max-width: 110px) {
+  .w-stocks .q { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.1rem; text-align: center; }
+  .w-stocks .sym { flex: none; min-width: 0; }
+  .w-stocks .sym small { display: none; }
+  .w-stocks .val { text-align: center; font-size: 0.8rem; }
+  .w-stocks .spark { flex: 1 1 auto; width: 100%; min-height: 0; }
+}
+@container quote (max-width: 110px) and (max-height: 83px) { .w-stocks .spark { display: none; } }
+/* Weather shows what its tile has room for: the temperature alone in a cell, the conditions beside it when wide, the coming hours under it when higher, and the coming days under those when higher still. */
+.w-weather { height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 0.6rem; overflow: hidden; }
+.w-weather .now { display: flex; align-items: center; gap: 0.7rem; min-width: 0; flex: 0 0 auto; }
+.w-weather .now > i { font-size: clamp(1.2rem, min(22cqh, 26cqw), 2.2rem); color: var(--accent-text); }
+.w-weather .now strong { font-size: clamp(1.05rem, min(22cqh, 24cqw), 2.2rem); font-weight: 700; letter-spacing: -0.02em; white-space: nowrap; }
+.w-weather .facts { min-width: 0; flex: 1; }
+.w-weather .facts span, .w-weather .facts small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.w-weather .facts b { margin-left: 0.4rem; font-weight: 500; color: var(--text-secondary); }
+.w-weather .sun { display: none; }
+.w-weather ul { list-style: none; margin: 0; padding: 0; }
+.w-weather .hours { display: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 0.35rem; flex: 0 0 auto; }
+.w-weather .hours li { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; padding: 0.4rem 0.1rem; border-radius: var(--radius-sm); background-color: var(--glass-strong); font-size: 0.74rem; min-width: 0; }
+.w-weather .hours li > span { color: var(--text-muted); white-space: nowrap; }
+.w-weather .hours b { font-weight: 600; font-size: 0.85rem; }
+.w-weather .hours i, .w-weather .days i { color: var(--text-secondary); }
+.w-weather .rain { display: inline-flex; align-items: center; gap: 0.2rem; min-height: 1em; color: #7dd3fc; font-size: 0.66rem; }
+.w-weather .rain i { color: inherit; font-size: 0.55rem; }
+.w-weather .hours li:nth-child(n + 5) { display: none; }
+.w-weather .days { display: none; flex: 1 1 0; min-height: 0; flex-direction: column; justify-content: space-around; overflow: hidden; }
+.w-weather .days li { display: grid; grid-template-columns: 2.6rem 1.4rem 2.8rem 2.2rem minmax(1.5rem, 1fr) 2.2rem; align-items: center; gap: 0.4rem; padding: 0.2rem 0; border-top: 1px solid var(--border-color); font-size: 0.82rem; }
+.w-weather .days .low { color: var(--text-muted); text-align: right; }
+.w-weather .days .high { font-weight: 600; }
+.w-weather .range { position: relative; height: 4px; border-radius: 2px; background-color: var(--glass-strong); }
+.w-weather .range > span { position: absolute; top: 0; bottom: 0; border-radius: 2px; background: linear-gradient(90deg, #7dd3fc, var(--color-warning)); }
+@container body (min-height: 140px) { .w-weather { justify-content: flex-start; } .w-weather .hours { display: grid; } }
+@container body (min-height: 260px) { .w-weather .days { display: flex; } .w-weather .days li:nth-child(n + 4) { display: none; } }
+@container body (min-height: 330px) { .w-weather .days li:nth-child(n + 4) { display: grid; } }
+@container body (min-width: 300px) { .w-weather .hours li:nth-child(-n + 6) { display: flex; } .w-weather .sun { display: block; } }
+@container body (min-width: 420px) { .w-weather .hours li:nth-child(-n + 9) { display: flex; } }
+@container body (min-width: 560px) { .w-weather .hours li:nth-child(-n + 12) { display: flex; } }
+@container body (min-width: 760px) { .w-weather .hours li:nth-child(-n + 18) { display: flex; } }
+@container body (max-width: 200px) { .w-weather .facts small, .w-weather .facts b { display: none; } .w-weather .hours li:nth-child(n + 4) { display: none; } .w-weather .days li { grid-template-columns: 2.4rem 1.2rem 1fr 2rem; } .w-weather .days .rain, .w-weather .days .range { display: none; } }
+@container body (max-width: 110px) { .w-weather { align-items: center; } .w-weather .now { flex-direction: column; gap: 0.15rem; } .w-weather .facts, .w-weather .hours { display: none; } }
+@container body (max-width: 110px) and (max-height: 70px) { .w-weather .now > i { display: none; } }
+.w-text { white-space: pre-line; line-height: 1.5; padding: 0.6rem 0.75rem; border-radius: var(--radius-sm); border-left: 3px solid var(--border-strong); background-color: var(--glass); }
+.w-text a { text-decoration: underline; }
+.w-text.tone-info { border-color: var(--accent-primary); background-color: var(--accent-soft); }
+.w-text.tone-success { border-color: var(--color-success); background-color: var(--color-success-soft); }
+.w-text.tone-warning { border-color: var(--color-warning); background-color: var(--color-warning-soft); }
+.w-text.tone-danger { border-color: var(--color-danger); background-color: var(--color-danger-soft); }
+.home .w-notes { width: 100%; height: 100%; margin: 0; padding: 0; border: none; background: none; box-shadow: none; resize: none; color: var(--text-primary); font: inherit; line-height: 1.5; }
+.home .w-notes:focus { background: none; box-shadow: none; outline: none; }
+.widget-tile.type-frame .widget-body, .widget-tile.type-embed .widget-body { padding: 0; overflow: hidden; }
+.w-frame { display: block; width: 100%; height: 100%; border: none; background: transparent; color-scheme: dark; }
+
+/* Edit mode: the bar of tools, and on every tile and section the handles that change it. */
+.edit-bar { position: sticky; top: 0.5rem; z-index: 15; display: flex; flex-direction: column; gap: 0.6rem; padding: 0.7rem 0.9rem; border: 1px solid var(--accent-border); border-radius: var(--radius); background-color: color-mix(in srgb, var(--bg-1) 92%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: var(--shadow-md); }
+.edit-main, .edit-admin { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.edit-admin { padding-top: 0.6rem; border-top: 1px solid var(--border-color); }
+.edit-title { display: inline-flex; align-items: center; gap: 0.5rem; margin-right: 0.5rem; font-weight: 600; }
+.edit-title i { color: var(--accent-text); }
+.edit-bar .spacer { flex: 1; }
+.edit-bar button { margin: 0; padding: 0.45rem 0.85rem; font-size: 0.85rem; }
+.edit-bar .seg { padding: 0.15rem; }
+.edit-bar .seg button { margin: 0; padding: 0.35rem 0.8rem; border: none; border-radius: 6px; background: none; color: var(--text-secondary); transform: none; }
+.edit-bar .seg button.active { background-color: var(--glass-strong); color: var(--text-primary); box-shadow: var(--shadow-sm); }
+.menu-wrap { position: relative; }
+.menu { position: absolute; top: calc(100% + 0.4rem); left: 0; z-index: 16; display: flex; flex-direction: column; min-width: 15rem; padding: 0.35rem; border: 1px solid var(--border-strong); border-radius: var(--radius); background-color: var(--bg-2); box-shadow: var(--shadow-lg); }
+.home .menu button { display: flex; align-items: center; gap: 0.7rem; width: 100%; margin: 0; padding: 0.55rem 0.7rem; border: none; border-radius: var(--radius-sm); background: none; color: var(--text-primary); font-size: 0.88rem; font-weight: 500; text-align: left; transform: none; box-shadow: none; }
+.home .menu button:hover { background-color: var(--glass-strong); }
+.home .menu button i { width: 1rem; color: var(--text-muted); text-align: center; }
+#edit-button.active { background-color: var(--accent-soft); border-color: var(--accent-border); color: var(--accent-text-strong); }
+.home .tool { width: 1.75rem; height: 1.75rem; margin: 0; padding: 0; display: inline-grid; place-items: center; border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--bg-2); color: var(--text-secondary); font-size: 0.72rem; cursor: pointer; transform: none; box-shadow: none; }
+.home .tool:hover:not(:disabled) { color: var(--text-primary); border-color: var(--accent-border); background-color: var(--bg-3); }
+.home .tool:disabled { opacity: 0.35; cursor: default; }
+/* In edit mode the grid shows its cells, and a mark shows where a dragged tile will land. */
+body.board-editing .tile-grid { border-radius: var(--radius); background-image: radial-gradient(circle, var(--border-strong) 1px, transparent 1.5px); background-size: calc((100% + var(--gap)) / var(--columns, 12)) calc(var(--cell) + var(--gap)); background-position: calc(var(--gap) / -2) calc(var(--gap) / -2); }
+body.board-editing .tile-grid > .tile { outline: 1px dashed var(--border-strong); outline-offset: 1px; }
+body.board-placing .tile-grid > .tile { cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+body.board-editing .tile-grid > .tile:hover { transform: none; }
+body.board-editing .tile .quick, body.board-editing .tile .where { display: none; }
+body.board-editing .widget-body { pointer-events: none; }
+body.board-editing .type-notes .widget-body { pointer-events: auto; }
+.tile-tools { position: absolute; top: 0.25rem; right: 0.25rem; z-index: 2; display: flex; gap: 0.2rem; opacity: 0; transition: opacity var(--dur-fast); }
+.tile:hover > .tile-tools, .tile:focus-within > .tile-tools { opacity: 1; }
+@media (hover: none) { .tile-tools { opacity: 1; } }
+.tile-tools .tool { width: 1.5rem; height: 1.5rem; font-size: 0.62rem; }
+.tile-resize { position: absolute; right: 0; bottom: 0; z-index: 2; width: 1.3rem; height: 1.3rem; display: grid; place-items: center; border-radius: var(--radius-sm) 0 var(--radius) 0; background-color: var(--accent-soft); color: var(--accent-text-strong); font-size: 0.55rem; cursor: nwse-resize; touch-action: none; }
+.heading-tile .tile-tools { top: auto; bottom: 0.3rem; }
+.tile.resizing { outline: 2px solid var(--accent-primary) !important; z-index: 3; }
+.tile.drag-source, #board > section.drag-source { opacity: 0.3; }
+.drag-ghost { position: fixed; z-index: 60; margin: 0; pointer-events: none; box-shadow: var(--shadow-lg); border-color: var(--accent-border); }
+.drag-ghost .quick, .drag-ghost .tile-tools, .drag-ghost .tile-resize { display: none; }
+.band-ghost { display: flex; align-items: center; padding: 0 1rem; border: 1px solid var(--accent-border); border-radius: var(--radius); background-color: var(--bg-2); font-weight: 600; }
+.drop-mark { border: 2px dashed var(--accent-primary); border-radius: var(--radius); background-color: var(--accent-soft); pointer-events: none; }
+.home .band-grip { cursor: grab; touch-action: none; }
+body.board-dragging { cursor: grabbing; }
+body.board-dragging .tile-grid > .tile { transition: none; }
+#edit-narrow { margin: 0; }
+.icon-row { display: flex; align-items: center; gap: 0.5rem; }
+.icon-row input[type="text"] { flex: 1; min-width: 0; margin: 0; }
+.icon-row button { flex: 0 0 auto; margin: 0; padding: 0.55rem 0.7rem; }
+.icon-preview { flex: 0 0 auto; width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background-color: var(--bg-0); }
+
+/* The dashboard's windows: a tile's form, a dashboard's settings, the widget library. */
+#board-window-backdrop { position: fixed; inset: 0; z-index: 40; background-color: rgba(5, 8, 13, 0.6); backdrop-filter: blur(2px); animation: fadeIn var(--dur) var(--ease-out); }
+.drawer.window { z-index: 41; top: 50%; left: 50%; right: auto; bottom: auto; width: min(480px, calc(100vw - 24px)); max-height: calc(100vh - 24px); transform: translate(-50%, -50%); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); animation: fadeIn var(--dur) var(--ease-out); }
+.drawer.window.wide { width: min(720px, calc(100vw - 24px)); }
+.window .drawer-icon { width: 40px; height: 40px; display: grid; place-items: center; font-size: 1.15rem; color: var(--accent-text); }
+.window .drawer-body { display: block; }
+.window textarea { width: 100%; box-sizing: border-box; resize: vertical; font: inherit; }
+.window textarea.code { font-family: var(--font-mono); font-size: 0.8rem; white-space: pre; }
+.window .seg.kinds button { flex: 1; margin: 0; padding: 0.45rem 0.4rem; border: none; border-radius: 6px; background: none; color: var(--text-secondary); font: inherit; font-size: 0.82rem; font-weight: 500; cursor: pointer; transform: none; box-shadow: none; }
+.window .seg.kinds button.active { background-color: var(--glass-strong); color: var(--text-primary); box-shadow: var(--shadow-sm); }
+.field-hint { display: block; margin: 0.35rem 0 0; color: var(--text-muted); font-size: 0.76rem; line-height: 1.4; }
+.form-error { margin: 0.5rem 0 0; padding: 0.6rem 0.8rem; border-radius: var(--radius-sm); background-color: var(--color-danger-soft); color: var(--color-danger-text); font-size: 0.85rem; }
+.inline-row { display: flex; gap: 0.6rem; align-items: flex-start; }
+.inline-row > * { flex: 1; min-width: 0; }
+.inline-row > button { flex: 0 0 auto; margin: 0; }
+.window input.narrow { max-width: 7rem; }
+.size-row { align-items: center; max-width: 12rem; }
+.size-row > span { flex: 0 0 auto; color: var(--text-muted); }
+.window button.small { margin: 0 0 0.9rem; padding: 0.4rem 0.75rem; font-size: 0.8rem; }
+.window details { margin-bottom: 1rem; }
+.window summary { cursor: pointer; color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 0.6rem; }
+.map-row { display: grid; grid-template-columns: 1.3fr 1fr 9.5rem 4.5rem auto; gap: 0.4rem; margin-bottom: 0.4rem; align-items: center; }
+.map-row input, .map-row select { margin: 0; min-width: 0; }
+.admin-rows { list-style: none; margin: 0 0 1rem; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.admin-rows li:not(.grid-empty) { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background-color: var(--glass); }
+.admin-rows li > i { width: 1.2rem; color: var(--accent-text); text-align: center; }
+.admin-rows .row-name { flex: 1; min-width: 0; }
+.admin-rows .row-name small { display: block; color: var(--text-muted); font-size: 0.76rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.widget-preview { margin-top: 0.75rem; height: 220px; }
+
+@media (max-width: 700px) {
+  #board { --gap: 0.55rem; }
+  .tile-grid > .app-tile.wide { padding: 0.5rem 0.75rem; }
+  .edit-bar { top: 0.25rem; }
+  .edit-bar button span { display: none; }
+  .edit-title span, .edit-bar .seg button span, .menu button span, #edit-done span, #admin-save span { display: inline !important; }
+  .drawer.window, .drawer.window.wide { top: auto; left: 0; right: 0; bottom: 0; width: 100%; max-height: 92dvh; transform: none; border: none; border-top: 1px solid var(--border-strong); border-radius: var(--radius-lg) var(--radius-lg) 0 0; animation: sheetIn var(--dur) var(--ease-out); }
+  .map-row { grid-template-columns: 1fr 1fr auto; }
+  .map-row select, .map-row .narrow { grid-row: 2; }
+  .inline-row { flex-wrap: wrap; }
 }

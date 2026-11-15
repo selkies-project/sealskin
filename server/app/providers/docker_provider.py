@@ -20,7 +20,14 @@ from ..docker_utils import (
     translate_path_to_host,
 )
 from ..state import state
-from .base_provider import INSTANCE_LABEL, MANAGED_BY_LABEL, BaseProvider, epoch, instance_labels
+from .base_provider import (
+    INSTANCE_LABEL,
+    MANAGED_BY_LABEL,
+    BaseProvider,
+    epoch,
+    instance_labels,
+    open_url_command,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -372,6 +379,16 @@ class DockerProvider(BaseProvider):
             filters={"label": [f"{MANAGED_BY_LABEL}=sealskin", f"{INSTANCE_LABEL}={state.instance_name}"]},
         )
         return {container.id: epoch(container.attrs["Created"]) for container in containers}
+
+    async def open_url(self, instance_id: str, url: str) -> bool:
+        """Run `OPEN_URL_SCRIPT` in a session's container."""
+        try:
+            container = await asyncio.to_thread(self.client.containers.get, instance_id)
+            code, _ = await asyncio.to_thread(container.exec_run, open_url_command(url))
+        except (NotFound, APIError) as exc:
+            logger.warning("Could not hand %s an address: %s", instance_id[:12], exc)
+            return False
+        return code == 0
 
     @staticmethod
     def _get_container_ip(container_attrs: dict[str, Any]) -> str | None:

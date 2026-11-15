@@ -48,6 +48,7 @@ from .base_provider import (
     epoch,
     host_port,
     instance_labels,
+    open_url_command,
 )
 
 logger = logging.getLogger(__name__)
@@ -693,6 +694,15 @@ class KubernetesProvider(BaseProvider):
 
     async def prune_images(self) -> None:
         """Leave unused images to the kubelet's image garbage collection."""
+
+    async def open_url(self, instance_id: str, url: str) -> bool:
+        """Run `OPEN_URL_SCRIPT` in a session pod's application container."""
+        try:
+            await kube().exec(instance_id, "app", open_url_command(url))
+        except Exception as exc:  # noqa: BLE001 - a script that found nothing to hand the address to ends in an error too
+            logger.info("Pod %s took no address: %s", instance_id, exc)
+            return False
+        return True
 
     async def registry_credentials(self) -> dict[str, tuple[str, str]]:
         """Return the credentials of the pull secrets the session template names, read again each minute."""

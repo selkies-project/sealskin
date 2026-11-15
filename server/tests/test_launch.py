@@ -6,9 +6,10 @@ import re
 
 import pytest
 from fastapi import HTTPException
+from pydantic import ValidationError
 
 from app import launch
-from app.models import InstalledApp
+from app.models import InstalledApp, LaunchRequestURL
 from app.settings import settings
 from app.state import state
 
@@ -41,6 +42,17 @@ def make_app(**overrides):
     }
     data.update(overrides)
     return InstalledApp(**data)
+
+
+@pytest.mark.parametrize("url", ["--renderer-cmd-prefix=/bin/sh", "javascript:alert(1)", "file:///etc/passwd", "https://a b", "", "https://ok.example/\n--flag"])
+def test_a_launch_takes_a_web_address_alone(url):
+    with pytest.raises(ValidationError):
+        LaunchRequestURL(url=url, application_id="firefox")
+
+
+def test_a_launch_takes_web_ftp_and_magnet_addresses():
+    for url in ("https://example.org/a?b=c#d", "http://10.0.0.1:8080/", "ftp://example.org/file", "magnet:?xt=urn:btih:abc"):
+        assert LaunchRequestURL(url=url, application_id="firefox").url == url
 
 
 def test_build_launch_spec_env_volumes_and_overrides(tmp_path):
@@ -368,3 +380,44 @@ async def test_a_room_swap_caps_resources_and_keeps_the_network_rule(monkeypatch
     with pytest.raises(HTTPException) as refused:
         await launch.ensure_container_for_session("s", "app-3")
     assert refused.value.status_code == 400 and "network mode" in refused.value.detail
+
+
+async def test_a_running_session_takes_an_address_only_from_its_owner_and_only_a_web_one(monkeypatch, store_with_firefox):
+    import pytest
+    from fastapi import HTTPException
+
+    from app import config_store
+    from app.models import InstalledAppRecord
+    from app.providers.base_provider import open_url_command
+    from app.routers import sessions as routes
+
+    config_store.set_record(InstalledAppRecord(id="ff", source="Test Store", source_app_id="firefox"))
+    state.sessions["s1"] = {"username": "alice", "provider_app_id": "ff", "instance_id": "c1", "app_name": "Firefox"}
+    state.sessions["s2"] = {"username": "alice", "provider_app_id": "gone", "instance_id": "c2"}
+    handed = []
+
+    class Fake:
+        async def open_url(self, instance_id, url):
+            handed.append((instance_id, url))
+            return "refused" not in url
+
+    monkeypatch.setattr(routes, "get_provider", lambda: Fake())
+    alice, bob = {"username": "alice"}, {"username": "bob"}
+    assert await routes.open_url_in_session("s1", {"url": "http://wiki.lan/a?b=c"}, alice) == {"status": "opened"}
+    assert handed == [("c1", "http://wiki.lan/a?b=c")] and state.sessions["s1"]["launch_context"] == {"type": "url", "value": "http://wiki.lan/a?b=c"}
+    for session, body, user, code in (
+        ("s1", {"url": "http://wiki.lan/"}, bob, 404),
+        ("nope", {"url": "http://wiki.lan/"}, alice, 404),
+        ("s1", {"url": "--remote-debugging-port=9222"}, alice, 422),
+        ("s1", {"url": "javascript:alert(1)"}, alice, 422),
+        ("s1", {"url": "http://a b"}, alice, 422),
+        ("s2", {"url": "http://wiki.lan/"}, alice, 409),
+        ("s1", {"url": "http://refused.lan/"}, alice, 409),
+    ):
+        with pytest.raises(HTTPException) as refused:
+            await routes.open_url_in_session(session, body, user)
+        assert refused.value.status_code == code
+    assert len(handed) == 2
+    # The address travels as an argument of its own, never inside the script's text.
+    command = open_url_command('http://x/";touch /tmp/p;"')
+    assert command[:2] == ["bash", "-c"] and command[-1] == 'http://x/";touch /tmp/p;"' and "touch" not in command[2]

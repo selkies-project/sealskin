@@ -131,6 +131,7 @@ to the session port and contains the one-time access token.
 | `GET /api/sessions` | encrypted, user | The caller's sessions, newest first. |
 | `DELETE /api/sessions/{session_id}` | encrypted, user | Stop one of the caller's sessions. |
 | `GET /api/sessions/{session_id}/screenshot` | encrypted, user | A thumbnail of the session's desktop, `{"image", "width", "height", "taken_at"}`, with `image` a JPEG data URI, a recent capture unless `?fresh=1` asks for a new one; 404 while the container has none to give. |
+| `POST /api/sessions/{session_id}/open_url` | encrypted, user | Body `{url}`, a web address: the session's application opens it beside what it has open. `409` where the application takes no addresses or none is running in the session. |
 | `POST /api/sessions/{session_id}/send_file` | encrypted, user | Move a finished upload (`filename`, `upload_id`, `total_chunks`) into the session's files directory. |
 | `GET /{session_id}/` | access token | Exchange `?access_token=` for the session cookie and redirect. Add `&embedded=true` for a `SameSite=None` cookie. |
 | `GET /room/{session_id}` | access or collaboration token | The collaboration room page. |
@@ -212,20 +213,37 @@ All *encrypted, admin*.
 | `GET`/`POST /api/admin/apps/templates`, `DELETE /api/admin/apps/templates/{name}` | Templates; also open to a user allowed to edit app templates, short of their `DOCKER_*` and `KUBERNETES_*` settings. |
 | `GET /api/admin/sessions` | Every session grouped by user. |
 | `DELETE /api/admin/sessions/{session_id}` | Stop any session. |
-| `PUT /api/admin/branding` | Replace the brand's record (`name`, `logo_link`, `accent`, `apps` with a `client`, `url`, and `enabled` per companion app, the `wallpaper_*` fields, `links`); the pictures stay. |
+| `GET /api/admin/branding` | Every brand with its pictures: the brand itself, then its variants. |
+| `PUT /api/admin/branding` | Replace the brand's record, its `variants` included (each an `id`, `label`, `hosts`, `groups`, and the brand's own fields) (`name`, `logo_link`, `accent`, `apps` with a `client`, `url`, and `enabled` per companion app, the `wallpaper_*` fields, `links`); the pictures stay. |
 | `DELETE /api/admin/branding` | Back to the defaults: the record and the pictures are removed. |
-| `POST`/`DELETE /api/admin/branding/{logo\|wallpaper}` | Body `{data}`, a base64 PNG, JPEG, or WebP (1 MB for the logo, 8 MB for the wallpaper): keep or remove a picture. |
+| `POST`/`DELETE /api/admin/branding/{logo\|wallpaper}` | With `?brand=<id>` for a variant's own picture. Body `{data}`, a base64 PNG, JPEG, or WebP (1 MB for the logo, 8 MB for the wallpaper): keep or remove a picture. |
 | `GET /api/admin/proot/catalogs`, `POST /api/admin/proot/catalogs`, `PUT`/`DELETE /api/admin/proot/catalogs/{id}`, `POST /api/admin/proot/catalogs/{id}/update` | PRoot Apps catalogs: list them with the state of this node's copy, create, replace, delete, or fetch one again on every node. |
 | `GET /api/admin/proot/remote?repo=` | The apps a PRoot Apps remote (a GitHub `owner/repo`) publishes. |
 | `GET /api/admin/vpn`, `POST /api/admin/vpn/import` | VPN profiles with their gateways; make profiles of an uploaded WireGuard or OpenVPN file or archive (multipart `file`, `kind`, credentials). |
 | `PUT`/`DELETE /api/admin/vpn/{id}`, `POST /api/admin/vpn/{id}/endpoints` | Change a profile's name, published endpoints, cap, access, or credentials; delete it, its gateways staying up until their sessions end; add the endpoints of another file. |
 
+## Dashboards
+
+| Method and path | Auth | Purpose |
+| --- | --- | --- |
+| `GET /api/dashboard` | encrypted, user | The caller's dashboards (`boards`, each with its `look` and its `tiles` at `x`, `y`, `w`, `h` on a grid of `columns`, `{username}` filled in), the library widgets they may place (`id`, `name`, `type`, `w`, `h`), `policy` (`customize`, `links`, `feeds`, `schemes`), and `user_types`. |
+| `POST /api/dashboard/data` | encrypted, user | Body `{items, fresh}`, each item `{key, widget}` for a library widget, `{key, type, config}` for one of the user's own, or `{key, link, board}` for whether a dashboard's link answers the server: `results` by key, each `{ok, data, at}` or `{ok: false, error}`. |
+| `POST /api/dashboard/places` | encrypted, user | Body `{name}`: the places a weather widget's form offers. |
+| `POST /api/dashboard/icons` | encrypted, user | Body `{names}`, icon pack names such as `di-plex`: `images`, where the page loads each from on this server. |
+| `POST /api/dashboard/site-icon` | encrypted, user | Body `{url}`: the site's own icon as a PNG `data` URL. A user's site is read only on the public internet. |
+| `GET /api/dashboard/icons/{hash}` | none | An icon an administrator uploaded, cached for a year. |
+| `POST /api/admin/dashboards/icons` | encrypted, admin | Body `{data}`, a base64 picture up to 1 MB: kept as a PNG, answered as the `icon` a tile names it by and its `image` address. |
+| `GET /api/admin/dashboards` | encrypted, admin | The dashboards and the library as kept, with the names of the node's secrets, the link schemes, the widget types, and the groups. |
+| `PUT /api/admin/dashboards/boards`, `PUT /api/admin/dashboards/widgets` | encrypted, admin | Replace every dashboard (`{boards}`) or the whole library (`{widgets}`). |
+| `POST /api/admin/dashboards/widgets/test` | encrypted, admin | Body `{type, config}`: read a widget without saving it. |
+| `POST /api/admin/dashboards/widgets/homepage` | encrypted, admin | Body `{text}`, a Homepage `customapi` definition as YAML: the `api` widget's `config` and `refresh`. |
+
 ## Branding
 
 | Method and path | Auth | Purpose |
 | --- | --- | --- |
-| `GET /api/branding` | encrypted, user | The brand with its pictures, as the home page reads it: the record, `logo` and `wallpaper` (`url`, `width`, `height`, `type`, or `null`), and `is_default`. |
-| `GET /api/branding/logo`, `GET /api/branding/wallpaper` | none | The uploaded pictures, addressed with `?v=<hash>` and cached for a year; `404` where none was uploaded. |
+| `GET /api/branding` | encrypted, user | The brand the request wears, with its pictures, as the home page reads it (the variant its host name or the caller's groups pick, else the brand itself): the record, `logo` and `wallpaper` (`url`, `width`, `height`, `type`, or `null`), and `is_default`. |
+| `GET /api/branding/logo`, `GET /api/branding/wallpaper` | none | The uploaded pictures, addressed with `?v=<hash>` (and `&b=<id>` for a variant's own) and cached for a year; `404` where none was uploaded. |
 
 Every page the server serves carries the brand in its head: an
 `application-name` meta, a `sealskin-brand` meta holding the name, logo

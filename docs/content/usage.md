@@ -208,12 +208,12 @@ tile; the options are remembered per application, and the play button in the
 tile's corner launches with them straight away. Drop a file anywhere on the
 page to open it in an application that takes it.
 
-The page is yours to arrange. From the options panel an application can be
-starred as a favorite or hidden from the page. Favorites sit in a row of
-their own above the applications, in the order you drag them into (or move
-them from the panel), and hidden applications wait under the **Hidden** chip
-until shown again. The brush beside the search box sets the page's
-background: a color, from the presets or your own, painted solid or as
+The page is yours to arrange; see [Dashboards](dashboards.md). From the
+options panel an application can be starred as a favorite or hidden from the
+page. A favorite becomes a tile of the dashboard, and hidden applications
+wait under the **Hidden** chip until shown again. The pencil beside the
+search box opens edit mode, where **Appearance** sets the look of the tiles
+and the page's background: a color, from the presets or your own, painted solid or as
 one of several gradients, or a picture of your own, filled, fitted,
 stretched, or centered, with blur and dim to taste. The sidebar folds away from the chevron at its foot and
 comes back from the tab left at the window's edge. All of this is kept in

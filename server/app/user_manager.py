@@ -89,6 +89,9 @@ DEFAULT_USER_SETTINGS: dict[str, Any] = {
     "application_key_days": -1,
     "application_key_dormant_hours": -1,
     "application_key_follow_sign_in": False,
+    "dashboard_customize": True,
+    "dashboard_links": True,
+    "dashboard_feeds": True,
 }
 
 #: Switches and the value of each that restricts: where groups disagree, that value wins.
@@ -106,6 +109,9 @@ SWITCHES: dict[str, bool] = {
     "harden_openbox": True,
     "application_keys": False,
     "application_key_follow_sign_in": True,
+    "dashboard_customize": False,
+    "dashboard_links": False,
+    "dashboard_feeds": False,
 }
 
 #: Limits, where a negative value sets none and the smallest set by any group wins.

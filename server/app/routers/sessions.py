@@ -12,10 +12,11 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import ValidationError
 
-from .. import cluster, config_store, logos, routing, screenshots
+from .. import audit, cluster, config_store, logos, routing, screenshots
 from ..fsutil import place_file, resolve_within, safe_join
 from ..launch import ephemeral_base, stop_session
-from ..models import ActiveSessionInfo, SendFileToSessionRequest
+from ..models import ActiveSessionInfo, OpenUrlRequest, SendFileToSessionRequest
+from ..providers import get_provider
 from ..security import (
     OWN_ORIGIN_NEEDED,
     WEB_CLIENT_NEEDED,
@@ -117,6 +118,34 @@ async def session_screenshot(
     if not data or data.get("username") != user["username"]:
         raise HTTPException(status_code=404, detail="Session not found or permission denied.")
     return await screenshots.thumbnail(session_id, data, fresh=fresh)
+
+
+@router.post("/{session_id}/open_url", dependencies=[Depends(routing.session_node)])
+async def open_url_in_session(
+    session_id: str,
+    decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body),
+    user: dict[str, Any] = Depends(verify_token),
+) -> dict[str, str]:
+    """Hand one of the caller's running sessions an address, which its application opens beside what it has open.
+
+    Answers 409 where the session's application takes no addresses or none is running in it to take one, so the
+    caller can launch a session for the address instead.
+    """
+    try:
+        req = OpenUrlRequest(**decrypted_body)
+    except ValidationError as exc:
+        raise HTTPException(status_code=422, detail="The address is not one a session opens.") from exc
+    data = state.sessions.get(session_id)
+    if not data or data.get("username") != user["username"]:
+        raise HTTPException(status_code=404, detail="Session not found or permission denied.")
+    app = state.installed_apps.get(data.get("provider_app_id") or "")
+    if not app or not app.provider_config.url_support or not data.get("instance_id"):
+        raise HTTPException(status_code=409, detail="The session's application opens no addresses.")
+    if not await get_provider().open_url(data["instance_id"], req.url):
+        raise HTTPException(status_code=409, detail="Nothing in the session took the address.")
+    data["launch_context"] = {"type": "url", "value": req.url}
+    audit.record("open_url", user["username"], session=session_id, app=data.get("app_name"))
+    return {"status": "opened"}
 
 
 @router.post("/{session_id}/send_file", dependencies=[Depends(routing.session_node)])
