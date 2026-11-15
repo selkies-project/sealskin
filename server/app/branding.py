@@ -192,11 +192,24 @@ def reset() -> None:
     load()
 
 
-def _own(brand: str) -> str:
-    """Return a variant's id as given, or raise 404 for an id no variant has."""
-    if brand and variant(brand) is None:
+def _stem(kind: str, brand: str = "") -> str:
+    """Return the file stem of a brand's picture, built from the literal kind and the record's own variant id.
+
+    Raises:
+        HTTPException: 400 for an unknown kind; 404 for an id no variant has.
+    """
+    if kind == "logo":
+        stem = "logo"
+    elif kind == "wallpaper":
+        stem = "wallpaper"
+    else:
+        raise HTTPException(status_code=400, detail="The picture is a logo or a wallpaper.")
+    if not brand:
+        return stem
+    item = variant(brand)
+    if item is None:
         raise HTTPException(status_code=404, detail="No such brand.")
-    return brand
+    return f"{stem}.{item.id}"
 
 
 def save_image(kind: str, encoded: str, brand: str = "") -> None:
@@ -210,9 +223,7 @@ def save_image(kind: str, encoded: str, brand: str = "") -> None:
     Raises:
         HTTPException: 400 for an unknown kind, bad encoding, a file that is not a picture, or one too large; 404 for an unknown variant.
     """
-    if kind not in ("logo", "wallpaper"):
-        raise HTTPException(status_code=400, detail="The picture is a logo or a wallpaper.")
-    _own(brand)
+    stem = _stem(kind, brand)
     try:
         data = base64.b64decode(encoded.split(",", 1)[-1], validate=True)
     except (ValueError, binascii.Error) as exc:
@@ -223,20 +234,25 @@ def save_image(kind: str, encoded: str, brand: str = "") -> None:
         extension, _, _, _ = _inspect(data)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    remove_image(kind, brand, reload=False)
-    persistence.write_bytes(os.path.join(_dir(), f"{kind}{'.' + brand if brand else ''}.{extension}"), data)
+    _remove_stem(stem)
+    persistence.write_bytes(os.path.join(_dir(), f"{stem}.{extension}"), data)
     load()
 
 
-def remove_image(kind: str, brand: str = "", reload: bool = True) -> None:
-    """Delete a brand's logo or wallpaper, whatever its format."""
-    if kind not in ("logo", "wallpaper"):
-        raise HTTPException(status_code=400, detail="The picture is a logo or a wallpaper.")
-    stem = f"{kind}.{brand}" if brand and _VARIANT_ID.fullmatch(brand) else kind
+def _remove_stem(stem: str) -> None:
+    """Delete a picture of a stem `_stem` returned, whatever its format."""
     for ext, _ in FORMATS.values():
         persistence.remove(os.path.join(_dir(), f"{stem}.{ext}"))
-    if reload:
-        load()
+
+
+def remove_image(kind: str, brand: str = "") -> None:
+    """Delete a brand's logo or wallpaper, whatever its format.
+
+    Raises:
+        HTTPException: 400 for an unknown kind; 404 for an unknown variant.
+    """
+    _remove_stem(_stem(kind, brand))
+    load()
 
 
 def _prune_images() -> None:
