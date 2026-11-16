@@ -173,6 +173,8 @@
 
                 # A session's service worker stays under its own path, off the web app at /ui/.
                 header_down -Service-Worker-Allowed
+                # Nor does it set a cookie here: on the shared origin that could be the web sign-in's own.
+                header_down -Set-Cookie
                 stream_close_delay 24h
         }
 }
