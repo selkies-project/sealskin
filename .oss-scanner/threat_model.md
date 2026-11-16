@@ -55,6 +55,14 @@
   checked for an administrator's link that asks for it and told to the users its dashboard names alone, never
   for a user's own link), and the widget secrets a node reads from `widget_secrets_path` and
   `SEALSKIN_WIDGET_SECRET_*` (filled in on the server, never sent to a client or written to the store).
+- Rules the entry points are held to: a user's name is never one of the server's own directories under
+  `storage_path` (`sealskin_*` is refused, whoever names the user); whatever the server writes into a home
+  directory or a user's shared files goes through a descriptor checked inside it, since a session leaves links
+  there; a store's YAML sets no variable of the session's identity nor one the image's init or loader runs
+  (`config_store.STORE_ENV_DENIED`); an OpenVPN profile's options are read by the names OpenVPN gives them
+  (quotes and leading dashes removed, `setenv opt` unwrapped) before the ones that run a program are dropped;
+  a room message carries a participant's alias, never their token; a proxy's mark counts only on a request
+  that came through this node's proxy; the server publishes no OpenAPI description.
 
 ## Components that matter most / least
 - Most: anything that lets a lower principal reach a higher one: an anonymous client reaching the API, a session
