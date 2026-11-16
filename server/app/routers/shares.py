@@ -223,7 +223,17 @@ def _file_response(share_id: str, metadata: PublicShareMetadata) -> FileResponse
         raise HTTPException(status_code=404, detail="Shared file not found on disk.") from exc
     if not os.path.exists(path):
         raise HTTPException(status_code=404, detail="Shared file not found on disk.")
-    return FileResponse(path=path, filename=metadata.original_filename, media_type="application/octet-stream")
+    return FileResponse(
+        path=path,
+        filename=metadata.original_filename,
+        media_type="application/octet-stream",
+        # A user's file, on the web app's origin: a download and nothing a browser would run or show.
+        headers={
+            "X-Content-Type-Options": "nosniff",
+            "Content-Security-Policy": "sandbox; default-src 'none'",
+            "Cache-Control": "no-store",
+        },
+    )
 
 
 @public_router.get("/public/download/{token}")

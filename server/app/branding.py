@@ -288,7 +288,7 @@ def image_response(kind: str, brand: str = "") -> Response:
     found = (_images.get(f"{kind}.{brand}") if brand and _VARIANT_ID.fullmatch(brand) else None) or _images.get(kind)
     if not found:
         raise HTTPException(status_code=404, detail="No such picture.")
-    return Response(found["data"], media_type=found["type"], headers={"Cache-Control": "public, max-age=31536000, immutable"})
+    return Response(found["data"], media_type=found["type"], headers={"Cache-Control": "public, max-age=31536000, immutable", "X-Content-Type-Options": "nosniff"})
 
 
 def view(brand: str = "") -> BrandingView:
