@@ -2210,6 +2210,8 @@
       "uploadingFile": "Загрузка файла...",
       "cleanroom": "Изолированная среда (Временная)",
       "noGpu": "Нет",
+      "anyGpu": "Любой GPU {kind}",
+      "gpuOnNode": "{gpu} на {node}",
       "saveOptions": "Сохранить эти параметры запуска",
       "saveOptionsForUrl": "Сохранить параметры для всех URL",
       "saveOptionsForFile": "Сохранить параметры для файлов .{extension}",

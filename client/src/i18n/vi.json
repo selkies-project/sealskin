@@ -2210,6 +2210,8 @@
       "uploadingFile": "Đang tải lên tệp...",
       "cleanroom": "Phòng sạch (Tạm thời)",
       "noGpu": "Không có",
+      "anyGpu": "GPU {kind} bất kỳ",
+      "gpuOnNode": "{gpu} trên {node}",
       "saveOptions": "Lưu các tùy chọn khởi chạy này",
       "saveOptionsForUrl": "Lưu tùy chọn cho tất cả các URL",
       "saveOptionsForFile": "Lưu tùy chọn cho các tệp .{extension}",

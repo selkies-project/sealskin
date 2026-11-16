@@ -2210,6 +2210,8 @@
       "uploadingFile": "Enviando arquivo...",
       "cleanroom": "Sala Limpa (Efêmero)",
       "noGpu": "Nenhum",
+      "anyGpu": "Qualquer GPU {kind}",
+      "gpuOnNode": "{gpu} em {node}",
       "saveOptions": "Salvar estas opções de inicialização",
       "saveOptionsForUrl": "Salvar opções para todas as URLs",
       "saveOptionsForFile": "Salvar opções para arquivos .{extension}",

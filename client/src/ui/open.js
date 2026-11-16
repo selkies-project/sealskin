@@ -8,7 +8,7 @@
  *
  * The options are the launcher's, as the dashboard's copy-link control
  * writes them: `home` (`auto`, `cleanroom`, or a storage directory), `gpu`
- * (a device), `room` (`1`), `lang` (a locale), `wayland` (`0` for X11), and
+ * (a device; in a cluster also `auto:<kind>` or `<device>@<node id>`), `room` (`1`), `lang` (a locale), `wayland` (`0` for X11), and
  * `where` (`pool:<name>` or `node:<id>`). Storage and room decide which
  * session is the one; the rest only say how to start a new one. A launch
  * this page started is remembered in the tab's session storage, so a
@@ -26,6 +26,7 @@ import { loadTranslator } from '../lib/i18n.js';
 import { createLaunchView } from '../lib/launch-view.js';
 import { defaultLanguage, supportedLangs } from '../lib/languages.js';
 import { browserTimezone } from '../lib/timezone.js';
+import { gpuRequest } from '../lib/gpus.js';
 
 const POLL_MS = 600;
 const POLL_SLOW_MS = 1500;
@@ -174,7 +175,6 @@ async function launch(app, status, home) {
     home_name: app.is_meta_app ? null : home,
     language: Object.values(supportedLangs).includes(language) ? language : defaultLanguage(navigator.language),
     timezone: browserTimezone(),
-    selected_gpu: (status.gpus || []).some((item) => item.device === gpu) ? gpu : null,
     launch_in_room_mode: flag(params.get('room')),
     wayland_mode: !['0', 'false'].includes(String(params.get('wayland') || '').toLowerCase()),
     vpn: vpn ? vpn.id : null,
@@ -182,6 +182,9 @@ async function launch(app, status, home) {
   };
   const [whereKind, whereName] = (params.get('where') || '').split(/:(.*)/);
   if ((whereKind === 'pool' || whereKind === 'node') && whereName) payload[whereKind] = whereName;
+  // In a cluster the node that holds the GPU checks it; on one node it is one of this node's.
+  const known = status.clustered ? /^auto(:|$)|@/.test(gpu) : (status.gpus || []).some((item) => item.device === gpu);
+  Object.assign(payload, gpuRequest(known ? gpu : null));
 
   remember(key, id);
   view.show('requesting');

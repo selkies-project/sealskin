@@ -2210,6 +2210,8 @@
       "uploadingFile": "正在上传文件...",
       "cleanroom": "无尘室 (临时)",
       "noGpu": "无",
+      "anyGpu": "任意 {kind} GPU",
+      "gpuOnNode": "{node} 上的 {gpu}",
       "saveOptions": "保存这些启动选项",
       "saveOptionsForUrl": "为所有URL保存选项",
       "saveOptionsForFile": "为.{extension}文件保存选项",

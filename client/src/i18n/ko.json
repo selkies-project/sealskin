@@ -2210,6 +2210,8 @@
       "uploadingFile": "파일 업로드 중...",
       "cleanroom": "클린룸 (임시)",
       "noGpu": "없음",
+      "anyGpu": "아무 {kind} GPU",
+      "gpuOnNode": "{node}의 {gpu}",
       "saveOptions": "이 시작 옵션 저장",
       "saveOptionsForUrl": "모든 URL에 대해 옵션 저장",
       "saveOptionsForFile": ".{extension} 파일에 대해 옵션 저장",

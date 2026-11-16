@@ -2210,6 +2210,8 @@
       "uploadingFile": "กำลังอัปโหลดไฟล์...",
       "cleanroom": "ห้องปลอดเชื้อ (ชั่วคราว)",
       "noGpu": "ไม่มี",
+      "anyGpu": "GPU {kind} ใดก็ได้",
+      "gpuOnNode": "{gpu} บน {node}",
       "saveOptions": "บันทึกตัวเลือกการเปิดเหล่านี้",
       "saveOptionsForUrl": "บันทึกตัวเลือกสำหรับ URL ทั้งหมด",
       "saveOptionsForFile": "บันทึกตัวเลือกสำหรับไฟล์ .{extension}",

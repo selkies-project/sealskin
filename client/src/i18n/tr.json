@@ -2210,6 +2210,8 @@
       "uploadingFile": "Dosya yükleniyor...",
       "cleanroom": "Temiz Oda (Geçici)",
       "noGpu": "Yok",
+      "anyGpu": "Herhangi bir {kind} GPU",
+      "gpuOnNode": "{node} üzerinde {gpu}",
       "saveOptions": "Bu başlatma seçeneklerini kaydet",
       "saveOptionsForUrl": "Tüm URL'ler için seçenekleri kaydet",
       "saveOptionsForFile": ".{extension} dosyaları için seçenekleri kaydet",

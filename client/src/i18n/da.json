@@ -2210,6 +2210,8 @@
       "uploadingFile": "Uploader fil...",
       "cleanroom": "Cleanroom (Midlertidig)",
       "noGpu": "Ingen",
+      "anyGpu": "Vilkårlig {kind}-GPU",
+      "gpuOnNode": "{gpu} på {node}",
       "saveOptions": "Gem disse startindstillinger",
       "saveOptionsForUrl": "Gem indstillinger for alle URL'er",
       "saveOptionsForFile": "Gem indstillinger for .{extension} filer",

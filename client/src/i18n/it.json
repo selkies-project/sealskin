@@ -2210,6 +2210,8 @@
       "uploadingFile": "Caricamento file...",
       "cleanroom": "Cleanroom (Effimero)",
       "noGpu": "Nessuna",
+      "anyGpu": "Qualsiasi GPU {kind}",
+      "gpuOnNode": "{gpu} su {node}",
       "saveOptions": "Salva queste opzioni di avvio",
       "saveOptionsForUrl": "Salva opzioni per tutti gli URL",
       "saveOptionsForFile": "Salva opzioni per file .{extension}",

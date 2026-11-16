@@ -185,6 +185,11 @@ another's. What it controls is who gets one:
   supports, and a launch forwarded to another node gets a GPU there of the
   kind it asked for.
 
+Each node tells the others the kind of each of its GPUs, so the launcher
+lists the GPUs of every answering node open to the user: **Any NVIDIA GPU**
+or **Any DRI3 GPU** starts the session on whichever node has a free GPU of
+that kind, and a GPU named with its node starts it on that node.
+
 ## Home directories
 
 A home directory lives on one node. The cluster records which

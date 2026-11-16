@@ -11,6 +11,7 @@ import { browserTimezone } from '../lib/timezone.js';
 import { announce, escapeHtml, formatLogoSrc, hydrateLogos, timeAgo, currentLocale } from '../lib/dom.js';
 import { confirmDialog } from '../lib/modal.js';
 import { autoHomeName, bestHome, homeAllowed, nodesFor } from '../lib/homes.js';
+import { gpuChoices, gpuRequest } from '../lib/gpus.js';
 
 let t;
 let info;
@@ -333,27 +334,7 @@ function updateDynamicForms() {
   const selectedApp = availableApps.find((app) => app.id === selectedAppId);
   if (!selectedApp) return;
 
-  const userHasGpu = userSettings.gpu;
-  const appHasGpu = selectedApp.nvidia_support || selectedApp.dri3_support;
-  if (userHasGpu && appHasGpu && availableGpus.length > 0) {
-    const currentGpuVal = gpuSelect.value;
-    gpuSelect.innerHTML = `<option value="none">${t('popup.launchView.noGpu')}</option>`;
-    availableGpus.forEach((gpu) => {
-      const isNvidia = gpu.driver === 'nvidia';
-      if ((isNvidia && selectedApp.nvidia_support) || (!isNvidia && selectedApp.dri3_support)) {
-        const option = document.createElement('option');
-        option.value = gpu.device;
-        option.textContent = `${gpu.device.split('/').pop()} (${gpu.driver})`;
-        gpuSelect.appendChild(option);
-      }
-    });
-    if ([...gpuSelect.options].some((o) => o.value === currentGpuVal)) {
-      gpuSelect.value = currentGpuVal;
-    }
-    gpuFormGroup.classList.remove('hidden');
-  } else {
-    gpuFormGroup.classList.add('hidden');
-  }
+  populateGpuDropdown(selectedApp);
 
   const userHasStorage = userSettings.persistent_storage;
   const appHasStorage = selectedApp.home_directories;
@@ -444,6 +425,16 @@ function populateHomeDirDropdown() {
       .join('');
   const known = (choice) => [...homeDirSelect.options].some((o) => o.value === choice);
   homeDirSelect.value = bestHome((choice) => known(choice) && allowed(choice), current, lastProfile && lastProfile.homeDir);
+}
+
+/** Offer the GPUs a launch of `app` can use where the Where field sends it, keeping the chosen one where it still can. */
+function populateGpuDropdown(app) {
+  const choices = userSettings.gpu ? gpuChoices(t, app, availableGpus, cluster, nodesFor(cluster, whereSelect.value)) : [];
+  const current = gpuSelect.value;
+  gpuSelect.innerHTML = `<option value="none">${escapeHtml(t('popup.launchView.noGpu'))}</option>`
+    + choices.map(([value, label]) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`).join('');
+  if (choices.some(([value]) => value === current)) gpuSelect.value = current;
+  gpuFormGroup.classList.toggle('hidden', choices.length === 0);
 }
 
 /** Offer the VPN profiles open to the user, when there are any. */
@@ -704,7 +695,6 @@ async function handleLaunch() {
       home_name: finalHomeName,
       language: languageSelect.value,
       timezone: browserTimezone(),
-      selected_gpu: selectedGpuValue,
       launch_in_room_mode: collaborationMode,
       wayland_mode: waylandMode,
       vpn: selectedVpn,
@@ -713,6 +703,8 @@ async function handleLaunch() {
     // Left out, the server picks where the session starts.
     const [whereKind, whereName] = whereSelect.value.split(/:(.*)/);
     if (whereKind) payload[whereKind] = whereName;
+    // A GPU of a cluster node names that node too.
+    Object.assign(payload, gpuRequest(selectedGpuValue));
 
     if (isSimpleLaunch || !sealskinContext.action) {
       setStatus(t('popup.status.preparingSession'));
@@ -934,6 +926,8 @@ async function init() {
       if ([...languageSelect.options].some((o) => o.value === savedProfile.language)) languageSelect.value = savedProfile.language;
       if (savedProfile.where && [...whereSelect.options].some((o) => o.value === savedProfile.where && !o.disabled)) whereSelect.value = savedProfile.where;
       updateMoveHome();
+      const savedApp = availableApps.find((app) => app.id === selectedAppId);
+      if (savedApp) populateGpuDropdown(savedApp);
       if (savedProfile.gpu) {
         setTimeout(() => {
           if ([...gpuSelect.options].some((o) => o.value === savedProfile.gpu)) gpuSelect.value = savedProfile.gpu;
@@ -1012,6 +1006,8 @@ moveHomeSelect.addEventListener('change', handleMoveHome);
 whereSelect.addEventListener('change', () => {
   if (!homeDirFormGroup.classList.contains('hidden')) populateHomeDirDropdown();
   updateMoveHome();
+  const app = availableApps.find((a) => a.id === selectedAppId);
+  if (app) populateGpuDropdown(app);
 });
 vpnSelect.addEventListener('change', () => populateVpnEndpoints());
 

@@ -2210,6 +2210,8 @@
       "uploadingFile": "Téléversement du fichier...",
       "cleanroom": "Salle Blanche (Éphémère)",
       "noGpu": "Aucun",
+      "anyGpu": "N'importe quel GPU {kind}",
+      "gpuOnNode": "{gpu} sur {node}",
       "saveOptions": "Enregistrer ces options de lancement",
       "saveOptionsForUrl": "Enregistrer les options pour toutes les URL",
       "saveOptionsForFile": "Enregistrer les options pour les fichiers .{extension}",
