@@ -297,6 +297,78 @@ profile, publish the endpoints users may pick, cap the connections it may
 spend, and say who may use it; [VPN profiles](vpn.md) describes the import,
 what the providers hand out, and how the routing works.
 
+## Browser Policies
+
+A browser policy is a named set of the settings Chromium and Firefox take from
+an administrator: a home page, managed bookmarks, allowed and blocked sites,
+forced extensions, trusted certificates, and every other policy the two
+engines read. It is optional, like an application template: an application
+names at most one, picked in its install dialog; a meta-app or a baked application
+starts with the policy of the application it was made from. Every session of
+the application starts with the policy in force, in a single-browser image and
+in a full desktop alike.
+
+The editor has a tab per engine, and a policy may fill in either or both.
+Each tab lists the **Common** settings first and whatever else the policy
+sets under them; the search and the group filter reach every policy the
+engine reads on Linux. Ticking a policy puts
+it in and shows a control for its value. A deprecated policy is listed only
+while the policy sets it, or with **Show deprecated** ticked. On the Chromium tab **Users may
+change this** applies a setting as a default instead of enforcing it. **JSON**
+shows a tab as the file a browser reads and takes a pasted policy file, so an
+existing `policies.json` or Chromium policy file is carried over whole. A
+policy the catalog does not know, as one only Edge or Brave reads, is kept as
+the JSON it was given. `CloudManagementEnrollmentToken` is refused: the shared
+record holds no credential.
+
+The names, descriptions, and value shapes come from the engines' own policy
+definitions, read at a pinned revision by
+`server/scripts/ingest_browser_policies.py` into the two catalogs under
+`server/app/browser_policy_catalog/`; running the script again refreshes them.
+The titles and descriptions are shown in the language of the web UI where the
+engine publishes a translation (Chromium in 13 of the UI's languages, Firefox
+in all of them, each with gaps) and in English otherwise. The translations
+are not in the repository: `ingest_browser_policies.py --translations`
+fetches them at the same pinned revisions when the server is packaged.
+
+At launch the node writes the policy as files under
+`SEALSKIN_BROWSER_POLICY_FILES_PATH` (`/storage/sealskin_browser_policies`),
+one folder per policy, and mounts each read-only where a browser reads it. A
+change applies to the sessions started after it; a running session keeps the
+policy it started with. An application whose policy is missing on the node
+does not launch.
+
+| Browser | Read at |
+| --- | --- |
+| Chromium, ungoogled-chromium, Helium | `/etc/chromium/policies/managed/sealskin.json` |
+| Google Chrome | `/etc/opt/chrome/policies/managed/sealskin.json` |
+| Brave | `/etc/brave/policies/managed/sealskin.json` |
+| Microsoft Edge | `/etc/opt/edge/policies/managed/sealskin.json` |
+| Opera | `/etc/opt/opera/policies/managed/sealskin.json` |
+| Vivaldi | `/etc/vivaldi/policies/managed/sealskin.json` |
+| Firefox | `/etc/firefox/policies/policies.json`, `/etc/firefox-esr/policies/policies.json` |
+| LibreWolf | `/etc/librewolf/policies/policies.json`, `/usr/share/librewolf/distribution/policies.json` |
+| Zen | `/etc/zen/policies/policies.json`, `/opt/zen/distribution/policies.json` |
+| Mullvad Browser | `/app/Browser/distribution/policies.json` |
+
+The Chromium paths are the ones each browser's binary names in the
+linuxserver images, and defaults go to `recommended/` beside `managed/`. A
+Chromium-family browser reads every file of its directory, so `sealskin.json`
+adds to what an image ships. A Firefox-family browser reads one file, the
+system one where it exists and the one of its install otherwise, so the
+policy stands in place of an image's own `policies.json`: LibreWolf's and
+Mullvad Browser's shipped defaults do not apply under a policy with a Firefox
+part. A part left empty mounts nothing. Forks are best effort: a fork reads
+the file, and may not honor every policy its engine defines.
+
+The files are owned by root and mounted read-only, so the session's user
+cannot change them. A user who is root in the container can still move a
+policy directory aside or add a file to it, so a policy holds only where
+sessions run without root: turn on desktop hardening in the user's or group's
+settings, which takes `sudo` and the terminals away. A policy is configuration of the browsers an image holds, not
+containment: a user who runs a browser of their own that reads another path
+is not held by it.
+
 ## App Templates
 
 A template is a named set of environment variables applied to every session

@@ -348,6 +348,13 @@ its catalog from there with a `subPath`, read-only, like its home directory.
 The packages are fetched for the architecture of the node the server pod runs
 on.
 
+## Browser policies
+
+The server writes the files of a [browser policy](administration.md#browser-policies)
+under `/storage/sealskin_browser_policies`, on the storage claim, and a session
+pod mounts each file from there with a `subPath`, read-only, at the paths the
+browsers read.
+
 ## VPN profiles
 
 A session that picks a [VPN profile](vpn.md) gets a native sidecar that

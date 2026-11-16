@@ -35,6 +35,7 @@ Every object is under the prefix the URL names. With `s3://records/prod`:
 | `prod/groups/<name>` | Groups. |
 | `prod/installed_apps.yml`, `prod/app_stores.yml`, `prod/app_templates/` | Installed applications, the stores they came from, and templates. |
 | `prod/proot_catalogs.yml` | [PRoot Apps catalogs](administration.md#proot-apps). |
+| `prod/browser_policies.yml` | [Browser policies](administration.md#browser-policies). Every node writes the policy files of its own sessions from it. |
 | `prod/bakery/recipes.yml`, `prod/bakery/files/<sha256>` | The [Bakery](administration.md#bakery)'s recipes and the files they copy into images, up to 64 MiB each and not encrypted. Every node builds its own images from them. |
 | `prod/branding/` | [Branding](administration.md#branding). |
 | `prod/dashboards/` | [Dashboards](dashboards.md) and the widget library. |
