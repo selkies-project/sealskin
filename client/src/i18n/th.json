@@ -1296,7 +1296,11 @@
       "dockerDescription": "การตั้งค่าเหล่านี้จะแทนที่การกำหนดค่าคอนเทนเนอร์เริ่มต้น โปรดใช้ด้วยความระมัดระวังและเฉพาะในกรณีที่คุณรู้ว่ากำลังทำอะไรอยู่",
       "browserPolicyLabel": "นโยบายเบราว์เซอร์",
       "browserPolicyDescription": "เริ่มทุกเซสชันของแอปพลิเคชันนี้โดยมีนโยบายเบราว์เซอร์บังคับใช้",
-      "browserPolicyNone": "ไม่มี"
+      "browserPolicyNone": "ไม่มี",
+      "iconLabel": "ไอคอน",
+      "iconDescription": "รูปภาพ PNG, JPEG, WebP, GIF, BMP หรือ ICO ขนาดไม่เกิน 4 MB จัดเก็บเป็น PNG ขนาดไม่เกิน 512 พิกเซล",
+      "iconReset": "รีเซ็ต",
+      "iconRefused": "ไอคอนต้องเป็นรูปภาพ PNG, JPEG, WebP, GIF, BMP หรือ ICO ขนาดไม่เกิน 4 MB"
     },
     "status": {
       "loggingIn": "กำลังเข้าสู่ระบบ...",

@@ -1115,7 +1115,7 @@
                             <label class="bk-field"><span data-i18n="options.bakery.baseApp">Build on</span><select id="bk-base-app"></select></label>
                             <label class="bk-field"><span><span data-i18n="options.bakery.name">Name</span> <em class="bk-required">*</em></span><input type="text" id="bk-name" maxlength="80" required></label>
                             <div class="bk-field" id="bk-icon-field"><span data-i18n="options.bakery.icon">Icon</span>
-                                <div class="bk-icon"><img id="bk-icon-preview" src="icons/icon128.png" alt=""><label class="button secondary"><i class="fas fa-upload"></i> <span data-i18n="options.appLaboratory.uploadIcon">Upload</span><input type="file" id="bk-icon-upload" accept="image/png,image/jpeg,image/webp,image/gif,image/x-icon" hidden></label></div>
+                                <div class="bk-icon"><img id="bk-icon-preview" src="icons/icon128.png" alt=""><label class="button secondary"><i class="fas fa-upload"></i> <span data-i18n="options.appLaboratory.uploadIcon">Upload</span><input type="file" id="bk-icon-upload" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp,image/x-icon" hidden></label></div>
                             </div>
                             <label class="bk-field"><span data-i18n="options.bakery.family">Distribution</span><select id="bk-family"></select></label>
                             <div class="bk-field bk-grow"><span data-i18n="options.bakery.builtOn">Built on</span><code id="bk-base" class="bk-base"></code></div>
@@ -1205,7 +1205,7 @@
                                 <div style="display: flex; align-items: center; gap: 1rem;">
                                     <img id="lab-icon-preview" src="icons/icon128.png" alt="Icon Preview" class="lab-icon-preview">
                                     <label for="lab-icon-upload" class="button secondary"><i class="fas fa-upload"></i> <span data-i18n="options.appLaboratory.uploadIcon">Upload</span></label>
-                                    <input type="file" id="lab-icon-upload" accept="image/png,image/jpeg,image/webp,image/gif,image/x-icon" style="display: none;">
+                                    <input type="file" id="lab-icon-upload" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp,image/x-icon" style="display: none;">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -1296,7 +1296,7 @@
                         </div>
                         <div class="field icon">
                             <div class="field-text"><label data-i18n="options.appLaboratory.appIcon">App Icon (PNG, 192x192 recommended)</label></div>
-                            <div class="field-control"><img id="wlab-icon-preview" src="icons/icon128.png" alt="Icon Preview" class="lab-icon-preview"><label for="wlab-icon-upload" class="button secondary"><i class="fas fa-upload"></i> <span data-i18n="options.appLaboratory.uploadIcon">Upload</span></label><input type="file" id="wlab-icon-upload" accept="image/png,image/jpeg,image/webp,image/gif,image/x-icon" style="display: none;"></div>
+                            <div class="field-control"><img id="wlab-icon-preview" src="icons/icon128.png" alt="Icon Preview" class="lab-icon-preview"><label for="wlab-icon-upload" class="button secondary"><i class="fas fa-upload"></i> <span data-i18n="options.appLaboratory.uploadIcon">Upload</span></label><input type="file" id="wlab-icon-upload" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp,image/x-icon" style="display: none;"></div>
                         </div>
                         <div class="field">
                             <div class="field-text"><label for="wlab-app-users" data-i18n="options.modals.allowedUsersLabel">Allowed Users</label></div>
@@ -1527,6 +1527,10 @@
                     <div class="field">
                             <div class="field-text"><label for="install-app-image" data-i18n="options.modals.imageLabel">Container Image</label></div>
                             <div class="field-control"><input type="text" id="install-app-image" required></div>
+                        </div>
+                    <div class="field icon">
+                            <div class="field-text"><label for="install-icon-upload" data-i18n="options.modals.iconLabel">Icon</label><p class="description" data-i18n="options.modals.iconDescription">A PNG, JPEG, WebP, GIF, BMP, or ICO picture up to 4 MB, kept as a PNG of at most 512 pixels.</p></div>
+                            <div class="field-control"><img id="install-icon-preview" src="icons/icon128.png" alt="" class="lab-icon-preview"><label for="install-icon-upload" class="button secondary"><i class="fas fa-upload"></i> <span data-i18n="options.appLaboratory.uploadIcon">Upload Icon</span></label><input type="file" id="install-icon-upload" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp,image/x-icon" hidden><button type="button" id="install-icon-reset" class="secondary" hidden><i class="fas fa-undo"></i> <span data-i18n="options.modals.iconReset">Reset</span></button></div>
                         </div>
                 </div>
                 <h5 class="field-group" data-i18n="options.modals.permissions">Permissions</h5>

@@ -207,6 +207,9 @@ settings:
 
 * **Custom Name** and **Container Image**: override what the store says. An
   image you change here is kept even when the store entry is updated.
+* **Icon**: the store's, or a PNG, JPEG, WebP, GIF, BMP, or ICO picture of up
+  to 4 MB you upload, kept as a PNG of at most 512 pixels. **Reset** goes back
+  to the store's icon, or to none for a manual app.
 * **Allowed Users** and **Allowed Groups**: comma-separated names, or `all`.
   An app is visible to a user when they are listed, their group is listed, or
   either list says `all`.
@@ -217,7 +220,8 @@ settings:
   is applied to every launch.
 * **Environment variables**: extra `NAME=value` pairs passed to the container.
 
-**Add Manual App** installs an image that is in no store. It must be built on
+**Add Manual App** installs an image that is in no store, with the same
+settings and an icon you upload. It must be built on
 a Selkies-compatible base (the LinuxServer.io `baseimage-selkies`), listen on
 the port you enter, and honour the same environment variables.
 
@@ -228,8 +232,8 @@ Every installed application with its source, image, and image status.
 the newest image and refreshes the app's cached autostart script. On
 Kubernetes, where nodes pull images themselves, **Pull** pins the registry's
 current digest for new sessions instead (see [Kubernetes](kubernetes.md#images)). **Edit**
-reopens the install dialog. Deleting an app does not stop its running
-sessions. A private registry, and a mirror every image is pulled through,
+reopens the install dialog. Deleting an app removes its uploaded icon and does
+not stop its running sessions. A private registry, and a mirror every image is pulled through,
 are set up on the node ([Registries and proxies](registries.md)).
 
 With `SEALSKIN_AUTO_UPDATE_APPS` enabled (the default) a background job pulls
@@ -560,8 +564,8 @@ images are each node's own, tagged `sealskin.local/bake/<application
 id>:<key>`. In a cluster every node builds a recipe when it sees the record,
 or at the first launch there when it has not pulled the application's image
 yet, and the list shows the state of the image on each node under this
-node's. A baked application's icon, like any uploaded icon, stays on the
-node it was uploaded to. A build is given no registry credential: it starts from the
+node's. A baked application's icon, like any uploaded icon, is shared by the
+nodes. A build is given no registry credential: it starts from the
 image the node already pulled. The Bakery needs the Docker provider; on
 Kubernetes the tab says so and recipes cannot be saved.
 

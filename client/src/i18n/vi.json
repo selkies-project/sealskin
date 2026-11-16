@@ -1296,7 +1296,11 @@
       "dockerDescription": "Các cài đặt này ghi đè cấu hình container mặc định. Sử dụng thận trọng và chỉ khi bạn biết mình đang làm gì.",
       "browserPolicyLabel": "Chính sách trình duyệt",
       "browserPolicyDescription": "Khởi động mọi phiên của ứng dụng này với một chính sách trình duyệt có hiệu lực.",
-      "browserPolicyNone": "Không có"
+      "browserPolicyNone": "Không có",
+      "iconLabel": "Biểu tượng",
+      "iconDescription": "Ảnh PNG, JPEG, WebP, GIF, BMP hoặc ICO tối đa 4 MB, được lưu dưới dạng PNG tối đa 512 pixel.",
+      "iconReset": "Đặt lại",
+      "iconRefused": "Biểu tượng là ảnh PNG, JPEG, WebP, GIF, BMP hoặc ICO tối đa 4 MB."
     },
     "status": {
       "loggingIn": "Đang đăng nhập...",

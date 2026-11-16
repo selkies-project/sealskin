@@ -1296,7 +1296,11 @@
       "dockerDescription": "이 설정은 기본 컨테이너 구성을 재정의합니다. 주의해서 사용하고 수행 중인 작업을 알고 있는 경우에만 사용하십시오.",
       "browserPolicyLabel": "브라우저 정책",
       "browserPolicyDescription": "이 애플리케이션의 모든 세션을 브라우저 정책이 적용된 상태로 시작합니다.",
-      "browserPolicyNone": "없음"
+      "browserPolicyNone": "없음",
+      "iconLabel": "아이콘",
+      "iconDescription": "최대 4MB의 PNG, JPEG, WebP, GIF, BMP 또는 ICO 이미지로, 최대 512픽셀의 PNG로 저장됩니다.",
+      "iconReset": "재설정",
+      "iconRefused": "아이콘은 최대 4MB의 PNG, JPEG, WebP, GIF, BMP 또는 ICO 이미지입니다."
     },
     "status": {
       "loggingIn": "로그인 중...",

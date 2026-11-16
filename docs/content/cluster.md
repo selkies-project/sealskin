@@ -247,8 +247,7 @@ a search, a day or a range, and an export as CSV or JSON; the
   file. The browser extension and the mobile app reach every node with an
   [application key](signin.md#application-keys) instead.
 * Public share links for files on a node other than the one the link names.
-* Application icons and meta-app home templates, which stay on the node they
-  were uploaded to.
+* Meta-app home templates, which stay on the node they were made on.
 * Moving a running session between nodes. Stop it, move the home directory,
   start it again.
 

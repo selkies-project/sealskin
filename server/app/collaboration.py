@@ -28,7 +28,7 @@ from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
-from . import config_store, launch
+from . import app_icons, config_store, launch
 from .providers.base_provider import host_port
 from .routers.applications import user_can_access
 from .security import OWN_ORIGIN_NEEDED, canonical_uuid, on_session_origin, relative, token_matches
@@ -490,13 +490,9 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
         for app in state.installed_apps.values():
             if user_can_access(app.users, app.groups, owner, owner_group):
                     logo_src = app.logo
-                    if logo_src and logo_src.startswith("/api/app_icon/"):
+                    if logo_src and logo_src.startswith(app_icons.ROUTE):
                         try:
-                            icon_path = os.path.join(settings.app_icons_path, f"{app.id}.png")
-                            if os.path.exists(icon_path):
-                                with open(icon_path, "rb") as f:
-                                    b64_data = base64.b64encode(f.read()).decode('utf-8')
-                                    logo_src = f"data:image/png;base64,{b64_data}"
+                            logo_src = await asyncio.to_thread(app_icons.data_url, app.id) or logo_src
                         except Exception as e:
                             logger.warning(f"Failed to load icon for app {app.id}: {e}")
 

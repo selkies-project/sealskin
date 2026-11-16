@@ -1296,7 +1296,11 @@
       "dockerDescription": "Deze instellingen overschrijven de standaard containerconfiguratie. Gebruik met voorzichtigheid en alleen als u weet wat u doet.",
       "browserPolicyLabel": "Browserbeleid",
       "browserPolicyDescription": "Start elke sessie van deze applicatie met een browserbeleid van kracht.",
-      "browserPolicyNone": "Geen"
+      "browserPolicyNone": "Geen",
+      "iconLabel": "Pictogram",
+      "iconDescription": "Een PNG-, JPEG-, WebP-, GIF-, BMP- of ICO-afbeelding tot 4 MB, bewaard als PNG van maximaal 512 pixels.",
+      "iconReset": "Herstellen",
+      "iconRefused": "Een pictogram is een PNG-, JPEG-, WebP-, GIF-, BMP- of ICO-afbeelding tot 4 MB."
     },
     "status": {
       "loggingIn": "Inloggen...",

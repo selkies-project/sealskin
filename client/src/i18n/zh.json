@@ -1296,7 +1296,11 @@
       "dockerDescription": "这些设置覆盖默认的容器配置。请谨慎使用，除非您知道自己在做什么。",
       "browserPolicyLabel": "浏览器策略",
       "browserPolicyDescription": "此应用程序的每个会话启动时都应用一项浏览器策略。",
-      "browserPolicyNone": "无"
+      "browserPolicyNone": "无",
+      "iconLabel": "图标",
+      "iconDescription": "不超过 4 MB 的 PNG、JPEG、WebP、GIF、BMP 或 ICO 图片，保存为最大 512 像素的 PNG。",
+      "iconReset": "重置",
+      "iconRefused": "图标须为不超过 4 MB 的 PNG、JPEG、WebP、GIF、BMP 或 ICO 图片。"
     },
     "status": {
       "loggingIn": "登录中...",

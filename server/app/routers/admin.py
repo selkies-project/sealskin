@@ -3,9 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import base64
-import binascii
-import io
 import logging
 import os
 import shutil
@@ -16,16 +13,15 @@ from typing import Any
 import httpx
 import yaml
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from PIL import Image, UnidentifiedImageError
 from pydantic import ValidationError
 
 from .. import (
+    app_icons,
     application_keys,
     bakery,
     cluster,
     config_store,
     filesync,
-    logos,
     progress,
     prootapps,
     quota,
@@ -36,7 +32,7 @@ from .. import (
     webclient,
 )
 from ..docker_utils import get_and_cache_image_metadata, get_system_stats, pull_and_cache_image
-from ..fsutil import safe_join, safe_rmtree
+from ..fsutil import safe_rmtree
 from ..launch import (
     POD_TEMPLATE_SETTING,
     RESERVED_ENV,
@@ -350,51 +346,16 @@ async def delete_proot_catalog(catalog_id: str) -> Response:
 # --- Installed apps --------------------------------------------------------
 
 
-#: The picture formats an application's icon is taken in, by Pillow's name, and the pixels of its longer edge once kept.
-ICON_FORMATS = ("PNG", "JPEG", "WEBP", "GIF", "ICO", "BMP")
-ICON_EDGE = 512
-
-
 def _save_logo(app_id: str, logo: str | None) -> str | None:
-    """Persist a base64 picture as an app's icon, a PNG at most `ICON_EDGE` pixels wide, and return the icon URL.
-
-    Args:
-        app_id: App the icon belongs to.
-        logo: Base64 image data, an address the server already serves, a web address, or `None`.
-
-    Returns:
-        `/api/app_icon/<id>` when data was saved, otherwise `logo` unchanged.
+    """Keep the icon a logo carries for an application, and return the logo that names it (`app_icons.save`).
 
     Raises:
-        HTTPException: 400 for data that is not a picture of `ICON_FORMATS`, or an id no file can be named by.
+        HTTPException: 400 for picture data that is not a picture an icon is made from.
     """
-    if not logo or logo.startswith(("/api/app_icon/", logos.ROUTE, "http")):
-        return logo
     try:
-        icon_data = base64.b64decode(logo, validate=True)
-    except (ValueError, TypeError, binascii.Error):
-        return logo
-    # Whatever picture was uploaded is kept as a PNG, which is what the file's name and the routes that serve it say.
-    try:
-        with Image.open(io.BytesIO(icon_data)) as picture:
-            if picture.format not in ICON_FORMATS or max(picture.size) > 4096:
-                raise ValueError(picture.format)
-            picture = picture.convert("RGBA")
-            picture.thumbnail((ICON_EDGE, ICON_EDGE))
-            encoded = io.BytesIO()
-            picture.save(encoded, format="PNG")
-            icon_data = encoded.getvalue()
-    except (UnidentifiedImageError, OSError, SyntaxError, ValueError) as exc:
-        raise HTTPException(status_code=400, detail="The icon is not a PNG, JPEG, WebP, GIF, or ICO picture.") from exc
-    os.makedirs(settings.app_icons_path, exist_ok=True, mode=0o700)
-    try:
-        icon_path = safe_join(settings.app_icons_path, f"{app_id}.png")
+        return app_icons.save(app_id, logo)
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail="Invalid application id.") from exc
-    with open(icon_path, "wb") as handle:
-        handle.write(icon_data)
-    logger.info("Saved custom icon for app %s", app_id)
-    return f"/api/app_icon/{app_id}"
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 def _normalise_scripts(provider_config: dict[str, Any]) -> None:
@@ -447,7 +408,7 @@ async def install_app(decrypted_body: dict[str, Any] = Depends(get_decrypted_req
     if app.id in state.installed_records:
         raise HTTPException(status_code=409, detail="App with this ID already exists.")
     app.browser_policy = _known_browser_policy(app.browser_policy)
-    app.logo = _save_logo(app.id, app.logo) or app.logo
+    app.logo = _save_logo(app.id, app.logo) or ""
     record = config_store.record_from_app(app)
     resolved = config_store.set_record(record)
     await config_store.save_installed_apps()
@@ -472,7 +433,7 @@ async def update_installed_app(
         raise HTTPException(status_code=400, detail="App ID in path does not match body.")
 
     app_update.browser_policy = _known_browser_policy(app_update.browser_policy)
-    app_update.logo = _save_logo(app_id, app_update.logo) or app_update.logo
+    app_update.logo = _save_logo(app_id, app_update.logo) or ""
     provider_config = app_update.provider_config
     if provider_config.custom_autostart_script_b64 == "":
         provider_config.custom_autostart_script_b64 = None
@@ -486,6 +447,7 @@ async def update_installed_app(
     await config_store.save_installed_apps()
     if not resolved:
         raise HTTPException(status_code=422, detail="Application could not be resolved against its store.")
+    app_icons.forget(app_id, resolved.logo)
     if old_image != resolved.provider_config.image:
         asyncio.create_task(pull_and_cache_image(resolved.provider_config.image))
     return resolved
@@ -522,6 +484,7 @@ async def patch_installed_app(
     await config_store.save_installed_apps()
     if not resolved:
         raise HTTPException(status_code=422, detail="Application could not be resolved against its store.")
+    app_icons.forget(app_id, resolved.logo)
     if old_image != resolved.provider_config.image:
         asyncio.create_task(pull_and_cache_image(resolved.provider_config.image))
     return resolved
@@ -529,7 +492,7 @@ async def patch_installed_app(
 
 @router.delete("/apps/installed/{app_id}", status_code=204)
 async def delete_installed_app(app_id: str) -> Response:
-    """Uninstall an app with its Bakery recipe (and purge a meta-app's icon and home template).
+    """Uninstall an app with its uploaded icon and Bakery recipe (and purge a meta-app's home template).
 
     Raises:
         HTTPException: 409 while a baked application, or a meta-app of a baked one, is built on it.
@@ -542,10 +505,6 @@ async def delete_installed_app(app_id: str) -> Response:
         raise HTTPException(status_code=409, detail=f"{', '.join(held_by)} are built on this application. Delete them first.")
 
     if record.is_meta_app:
-        try:
-            icon_path = safe_join(settings.app_icons_path, f"{app_id}.png")
-        except ValueError as exc:
-            raise HTTPException(status_code=400, detail="Invalid application id.") from exc
         template_dir = None
         if record.home_template_name:
             # Resolved and held under the templates' folder here, beside the removal it guards.
@@ -553,12 +512,6 @@ async def delete_installed_app(app_id: str) -> Response:
             template_dir = os.path.realpath(os.path.join(templates_root, record.home_template_name))
             if not template_dir.startswith(templates_root + os.sep):
                 raise HTTPException(status_code=400, detail="Invalid home template.")
-        if os.path.exists(icon_path):
-            try:
-                os.remove(icon_path)
-                logger.info("Deleted custom icon for meta-app %s", app_id)
-            except OSError as exc:
-                logger.error("Failed to delete icon for meta-app %s: %s", app_id, exc)
         if template_dir and os.path.isdir(template_dir):
             try:
                 safe_rmtree(template_dir)
@@ -569,6 +522,7 @@ async def delete_installed_app(app_id: str) -> Response:
     config_store.remove_record(app_id)
     await config_store.save_installed_apps()
     await bakery.forget(app_id)
+    app_icons.forget(app_id)
     return Response(status_code=204)
 
 
@@ -642,7 +596,7 @@ async def create_meta_app(decrypted_body: dict[str, Any] = Depends(get_decrypted
         template_dir = os.path.join(settings.home_templates_path, home_template_name)
         os.makedirs(os.path.join(template_dir, "Desktop", "files"), exist_ok=True, mode=0o755)
         os.chmod(template_dir, 0o700)
-        logo_url = _save_logo(new_app_id, req.logo) if req.logo else base_app.logo
+        logo_url = _save_logo(new_app_id, req.logo or base_app.logo) or ""
 
         overrides = config_store.deep_merge(
             base_record.overrides,

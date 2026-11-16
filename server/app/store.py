@@ -59,6 +59,7 @@ MOUNTS: dict[str, str] = {
     "groups/": "groups_base_path",
     "branding/": "branding_path",
     "dashboards/": "dashboards_path",
+    "app_icons/": "app_icons_path",
     "cluster/": "cluster_path",
     "files/": "shared_files_path",
 }

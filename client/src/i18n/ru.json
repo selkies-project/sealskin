@@ -1296,7 +1296,11 @@
       "dockerDescription": "Эти настройки переопределяют конфигурацию контейнера по умолчанию. Используйте с осторожностью и только если понимаете, что делаете.",
       "browserPolicyLabel": "Политика браузера",
       "browserPolicyDescription": "Запускать каждую сессию этого приложения с действующей политикой браузера.",
-      "browserPolicyNone": "Нет"
+      "browserPolicyNone": "Нет",
+      "iconLabel": "Значок",
+      "iconDescription": "Изображение PNG, JPEG, WebP, GIF, BMP или ICO размером до 4 МБ, сохраняется как PNG не более 512 пикселей.",
+      "iconReset": "Сбросить",
+      "iconRefused": "Значок — это изображение PNG, JPEG, WebP, GIF, BMP или ICO размером до 4 МБ."
     },
     "status": {
       "loggingIn": "Вход в систему...",

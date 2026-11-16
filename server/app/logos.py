@@ -10,19 +10,23 @@ or the first time a client asks for it, and kept under
 `app_store_cache_path/logos`, each node its own copy. A picture is served
 with caching headers and a content security policy that keeps a script in an
 SVG from running on the web app's origin, since a store, not an
-administrator, chose it.
+administrator, chose it. `to_png` turns a picture an administrator uploads
+into the PNG kept for it.
 """
 
 from __future__ import annotations
 
 import asyncio
 import hashlib
+import io
 import logging
 import os
 import re
+import warnings
 
 import httpx
 from fastapi import Request, Response
+from PIL import Image, UnidentifiedImageError
 
 from . import registries
 from .fsutil import safe_join
@@ -45,6 +49,10 @@ TYPES = {
     "image/x-icon": "ico",
     "image/vnd.microsoft.icon": "ico",
 }
+#: The formats an uploaded picture is taken in, by Pillow's name.
+UPLOAD_FORMATS = ("PNG", "JPEG", "WEBP", "GIF", "ICO", "BMP")
+#: Pixels of an uploaded picture's longer edge at most.
+UPLOAD_EDGE = 4096
 #: Seconds a browser keeps a picture before asking again, which an `ETag` answers cheaply.
 MAX_AGE = 86400
 #: Pictures fetched at once by `prefetch`.
@@ -57,6 +65,9 @@ _HEADERS = {
 }
 _NAME = re.compile(r"^[0-9a-f]{32}$")
 _MEDIA_TYPES = {ext: media for media, ext in TYPES.items()}
+
+# Pixels a picture may decode to, for every picture this process opens: Pillow warns past it and refuses past twice it.
+Image.MAX_IMAGE_PIXELS = UPLOAD_EDGE * UPLOAD_EDGE
 
 #: The address behind every name handed out since the server started.
 _known: dict[str, str] = {}
@@ -81,6 +92,27 @@ def local(address: str) -> str:
     name = name_of(address)
     _known[name] = address
     return ROUTE + name
+
+
+def to_png(data: bytes, edge: int) -> bytes:
+    """Return an uploaded picture as a PNG whose longer edge is at most `edge` pixels.
+
+    Raises:
+        ValueError: For anything but a picture of `UPLOAD_FORMATS` at most `UPLOAD_EDGE` pixels wide.
+    """
+    try:
+        # An ICO states its size apart from the picture it wraps, so the decoder's own count is held to as well.
+        with warnings.catch_warnings(), Image.open(io.BytesIO(data), formats=UPLOAD_FORMATS) as picture:
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
+            if picture.format not in UPLOAD_FORMATS or max(picture.size) > UPLOAD_EDGE:
+                raise ValueError("An icon is a PNG, JPEG, WebP, GIF, BMP, or ICO picture, at most 4096 pixels wide.")
+            picture = picture.convert("RGBA")
+            picture.thumbnail((edge, edge))
+            out = io.BytesIO()
+            picture.save(out, format="PNG")
+            return out.getvalue()
+    except (UnidentifiedImageError, OSError, SyntaxError, Image.DecompressionBombError, Image.DecompressionBombWarning) as exc:
+        raise ValueError("An icon is a PNG, JPEG, WebP, GIF, BMP, or ICO picture.") from exc
 
 
 def _dir() -> str:

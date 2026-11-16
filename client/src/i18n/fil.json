@@ -1296,7 +1296,11 @@
       "dockerDescription": "Ang mga setting na ito ay nag-o-override sa default na configuration ng container. Gamitin nang may pag-iingat at kung alam mo lang ang iyong ginagawa.",
       "browserPolicyLabel": "Patakaran ng Browser",
       "browserPolicyDescription": "Simulan ang bawat sesyon ng aplikasyong ito nang may umiiral na patakaran ng browser.",
-      "browserPolicyNone": "Wala"
+      "browserPolicyNone": "Wala",
+      "iconLabel": "Icon",
+      "iconDescription": "Isang PNG, JPEG, WebP, GIF, BMP, o ICO na larawan na hanggang 4 MB, iniimbak bilang PNG na hindi hihigit sa 512 pixel.",
+      "iconReset": "I-reset",
+      "iconRefused": "Ang icon ay isang PNG, JPEG, WebP, GIF, BMP, o ICO na larawan na hanggang 4 MB."
     },
     "status": {
       "loggingIn": "Nagla-log in...",

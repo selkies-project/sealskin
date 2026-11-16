@@ -2,18 +2,17 @@
 
 from __future__ import annotations
 
+import asyncio
 import base64
 import logging
-import os
 import re
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 
-from .. import logos
+from .. import app_icons, logos
 from ..models import Application
 from ..security import EncryptedRoute, verify_token
-from ..settings import settings
 from ..state import state
 
 logger = logging.getLogger(__name__)
@@ -64,7 +63,7 @@ async def get_applications(user: dict[str, Any] = Depends(verify_token)) -> list
 
 @router.get("/api/app_icon/{app_id}")
 async def get_app_icon(app_id: str, user: dict[str, Any] = Depends(verify_token)) -> dict[str, str]:
-    """Return a custom-uploaded app icon as base64 inside JSON."""
+    """Return an application's uploaded icon as base64 inside JSON."""
     if not re.fullmatch(r"[a-zA-Z0-9_-]+", app_id):
         raise HTTPException(status_code=400, detail="Invalid application ID.")
     # Seen only by whom the app is listed for; 404 as for no icon, so it names no app.
@@ -74,18 +73,10 @@ async def get_app_icon(app_id: str, user: dict[str, Any] = Depends(verify_token)
     ):
         raise HTTPException(status_code=404, detail="Icon not found.")
 
-    icons_root = os.path.abspath(settings.app_icons_path)
-    icon_path = os.path.abspath(os.path.join(icons_root, f"{app_id}.png"))
-    if not icon_path.startswith(icons_root + os.sep):
-        raise HTTPException(status_code=403, detail="Access denied.")
-    if not os.path.exists(icon_path):
+    picture = await asyncio.to_thread(app_icons.read, app_id)
+    if not picture:
         raise HTTPException(status_code=404, detail="Icon not found.")
-    try:
-        with open(icon_path, "rb") as handle:
-            return {"icon_data_b64": base64.b64encode(handle.read()).decode("utf-8")}
-    except OSError as exc:
-        logger.error("Failed to read icon for app %s: %s", app_id, exc)
-        raise HTTPException(status_code=500, detail="Error retrieving icon.") from exc
+    return {"icon_data_b64": base64.b64encode(picture).decode("utf-8")}
 
 
 @public_router.get("/api/logos/{name}", include_in_schema=False)

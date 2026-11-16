@@ -21,7 +21,7 @@ from urllib.parse import urlencode
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
 
-from .. import branding, logos
+from .. import app_icons, branding, logos
 from ..models import InstalledApp
 from ..security import verify_token
 from ..settings import settings
@@ -81,10 +81,9 @@ def icon_response(app: InstalledApp) -> Response:
     # A store's logo is handed out as this node's copy of it (see `logos.local`).
     if logo.startswith(("http://", "https://", logos.ROUTE)):
         return RedirectResponse(logo, status_code=302)
-    if logo.startswith("/api/app_icon/") and APP_ID.fullmatch(app.id):
-        path = os.path.abspath(os.path.join(settings.app_icons_path, f"{app.id}.png"))
-        if path.startswith(os.path.abspath(settings.app_icons_path) + os.sep) and os.path.isfile(path):
-            return FileResponse(path, media_type="image/png", headers={"Cache-Control": "public, max-age=86400"})
+    picture = app_icons.read(app.id) if logo.startswith(app_icons.ROUTE) else None
+    if picture:
+        return Response(picture, media_type="image/png", headers={"Cache-Control": "public, max-age=86400"})
     if branding.image("logo"):
         return branding.image_response("logo")
     fallback = os.path.join(settings.ui_path, "icons", "icon128.png")

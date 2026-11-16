@@ -1296,7 +1296,11 @@
       "dockerDescription": "Estas configuraciones anulan la configuración predeterminada del contenedor. Úselas con precaución y solo si sabe lo que está haciendo.",
       "browserPolicyLabel": "Política de navegador",
       "browserPolicyDescription": "Iniciar cada sesión de esta aplicación con una política de navegador en vigor.",
-      "browserPolicyNone": "Ninguna"
+      "browserPolicyNone": "Ninguna",
+      "iconLabel": "Icono",
+      "iconDescription": "Una imagen PNG, JPEG, WebP, GIF, BMP o ICO de hasta 4 MB, guardada como PNG de 512 píxeles como máximo.",
+      "iconReset": "Restablecer",
+      "iconRefused": "Un icono es una imagen PNG, JPEG, WebP, GIF, BMP o ICO de hasta 4 MB."
     },
     "status": {
       "loggingIn": "Iniciando sesión...",

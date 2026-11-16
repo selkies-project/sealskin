@@ -678,17 +678,13 @@ function initializeAppLaboratoryTab() {
   usersInput.addEventListener('input', setLabDirty);
   groupsInput.addEventListener('input', setLabDirty);
 
-  iconUploadInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file && file.type === 'image/png') {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        labState.base64Icon = event.target.result;
-        iconPreview.src = labState.base64Icon;
-        setLabDirty();
-      };
-      reader.readAsDataURL(file);
-    }
+  iconUploadInput.addEventListener('change', async (e) => {
+    const picked = await readIconFile(e.target.files[0]);
+    e.target.value = '';
+    if (!picked) return;
+    labState.base64Icon = picked;
+    iconPreview.src = picked;
+    setLabDirty();
   });
 
   async function handleLabUpdate() {
@@ -1142,15 +1138,12 @@ function bindWebLabEvents() {
     wlab('icon-preview').src = labIcon || 'icons/icon128.png';
     renderLabGpus();
   });
-  wlab('icon-upload').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file || file.type !== 'image/png') return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      labIcon = reader.result;
-      wlab('icon-preview').src = labIcon;
-    };
-    reader.readAsDataURL(file);
+  wlab('icon-upload').addEventListener('change', async (e) => {
+    const picked = await readIconFile(e.target.files[0]);
+    e.target.value = '';
+    if (!picked) return;
+    labIcon = picked;
+    wlab('icon-preview').src = picked;
   });
   wlab('update-btn').addEventListener('click', async () => {
     try {
@@ -4049,6 +4042,38 @@ async function saveProotCatalog() {
   return undefined;
 }
 
+// An uploaded icon is kept by the server as `/api/app_icon/<id>`; `data:` is one picked and not saved yet.
+const ICON_MAX_BYTES = 4_000_000;
+const isCustomIcon = (logo) => logo.startsWith('data:') || logo.startsWith('/api/app_icon/');
+
+/** Read a picture picked as an application's icon into a `data:` URL; `null`, with the reason shown, for one that is not taken. */
+function readIconFile(file) {
+  return new Promise((resolve) => {
+    if (!file) {
+      resolve(null);
+    } else if (!file.type.startsWith('image/') || file.size > ICON_MAX_BYTES) {
+      displayStatus(t('options.modals.iconRefused'), true);
+      resolve(null);
+    } else {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(file);
+    }
+  });
+}
+
+// The logo the install dialog saves, and the store's, which an empty one shows.
+const installIcon = { value: '', store: '' };
+
+async function showInstallIcon(value) {
+  installIcon.value = value;
+  document.getElementById('install-icon-reset').hidden = !isCustomIcon(value);
+  const shown = value || installIcon.store;
+  const src = shown.startsWith('data:') ? shown : await formatLogoSrc(shown);
+  if (installIcon.value === value) document.getElementById('install-icon-preview').src = src;
+}
+
 function showInstallModal(appData, existingInstall = null, isManual = false) {
   const isEditing = !!existingInstall;
   document.getElementById('manual-install-note').style.display = isManual ? 'block' : 'none';
@@ -4062,6 +4087,9 @@ function showInstallModal(appData, existingInstall = null, isManual = false) {
     : (isManual ? 'manual' : appStoreSelect.options[appStoreSelect.selectedIndex].text);
   document.getElementById('install-app-name').value = isEditing ? existingInstall.name : appData.name;
   document.getElementById('install-app-image').value = isEditing ? existingInstall.provider_config.image : appData.provider_config.image;
+  const storeApp = isEditing ? adminData.availableApps.find((a) => a.id === existingInstall.source_app_id) : appData;
+  installIcon.store = (storeApp && storeApp.logo) || '';
+  showInstallIcon(isEditing ? existingInstall.logo || '' : installIcon.store);
 
   document.getElementById('install-gpu-support').checked = isEditing
     ? (existingInstall.provider_config.nvidia_support || existingInstall.provider_config.dri3_support)
@@ -4834,6 +4862,13 @@ function bindEvents() {
     }, null, true);
   });
 
+  document.getElementById('install-icon-upload').addEventListener('change', async (e) => {
+    const picked = await readIconFile(e.target.files[0]);
+    e.target.value = '';
+    if (picked) showInstallIcon(picked);
+  });
+  document.getElementById('install-icon-reset').addEventListener('click', () => showInstallIcon(''));
+
   availableAppsContainer.addEventListener('click', (e) => {
     const card = e.target.closest('.app-card[data-appid]');
     if (!card) return;
@@ -4990,7 +5025,7 @@ function bindEvents() {
       auto_update: document.getElementById('install-auto-update').checked,
       app_template: document.getElementById('install-app-template').value,
       browser_policy: document.getElementById('install-browser-policy').value || null,
-      logo: sourceApp?.logo || '',
+      logo: installIcon.value,
       url: sourceApp?.url || '',
       provider: sourceApp?.provider || 'docker',
       provider_config: {

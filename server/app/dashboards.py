@@ -51,18 +51,15 @@ from __future__ import annotations
 import base64
 import binascii
 import hashlib
-import io
 import logging
 import os
 import re
-import warnings
 from typing import Any
 from urllib.parse import quote, urljoin
 
 from fastapi import Response
 from lxml import etree
 from lxml import html as lxml_html
-from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
 from . import logos, netguard, persistence, widgets
@@ -111,9 +108,6 @@ ICON_ROUTE = "/api/dashboard/icons/"
 #: Bytes an uploaded icon may be at most, and the pixels of its longer edge once kept.
 ICON_BYTES = 1_000_000
 ICON_EDGE = 192
-ICON_FORMATS = ("PNG", "JPEG", "WEBP", "GIF", "ICO", "BMP")
-#: Pixels a picture may decode to, for every picture this process opens: Pillow warns past it and refuses past twice it.
-Image.MAX_IMAGE_PIXELS = 4096 * 4096
 COLUMNS = 12
 MAX_ROWS = 8
 MAX_TILES = 300
@@ -434,23 +428,6 @@ def load() -> None:
         logger.warning("Could not read the dashboards' icons: %s", exc)
 
 
-def _png(data: bytes) -> bytes:
-    """Return a picture as a PNG no larger than `ICON_EDGE`, or raise `ValueError` for anything but a picture."""
-    try:
-        # An ICO states its size apart from the picture it wraps, so the decoder's own count is held to as well.
-        with warnings.catch_warnings(), Image.open(io.BytesIO(data), formats=ICON_FORMATS) as picture:
-            warnings.simplefilter("error", Image.DecompressionBombWarning)
-            if picture.format not in ICON_FORMATS or max(picture.size) > 4096:
-                raise ValueError("An icon is a PNG, JPEG, WebP, GIF, or ICO picture, at most 4096 pixels wide.")
-            picture = picture.convert("RGBA")
-            picture.thumbnail((ICON_EDGE, ICON_EDGE))
-            out = io.BytesIO()
-            picture.save(out, format="PNG")
-            return out.getvalue()
-    except (UnidentifiedImageError, OSError, SyntaxError, Image.DecompressionBombError, Image.DecompressionBombWarning) as exc:
-        raise ValueError("An icon is a PNG, JPEG, WebP, GIF, or ICO picture.") from exc
-
-
 def save_icon(encoded: str) -> str:
     """Keep an uploaded picture as an icon, and return the `icon:<hash>` a tile names it by.
 
@@ -463,7 +440,7 @@ def save_icon(encoded: str) -> str:
         raise ValueError("The icon is not base64 encoded.") from exc
     if not data or len(data) > ICON_BYTES:
         raise ValueError("An icon is at most 1 MB.")
-    picture = _png(data)
+    picture = logos.to_png(data, ICON_EDGE)
     name = hashlib.sha256(picture).hexdigest()[:16]
     if name not in _icons:
         persistence.write_bytes(os.path.join(_dir(), ICONS_DIR, f"{name}.png"), picture)
@@ -509,7 +486,7 @@ async def site_icon(url: str, public_only: bool) -> str:
         try:
             fetched = await netguard.fetch(candidate, public_only=public_only, max_bytes=ICON_BYTES, timeout=8.0)
             if fetched.status < 400:
-                return "data:image/png;base64," + base64.b64encode(_png(fetched.content)).decode()
+                return "data:image/png;base64," + base64.b64encode(logos.to_png(fetched.content, ICON_EDGE)).decode()
         except (netguard.Refused, ValueError):
             continue
     raise ValueError("The site has no icon this server can read.")

@@ -1296,7 +1296,11 @@
       "dockerDescription": "ये सेटिंग्स डिफ़ॉल्ट कंटेनर कॉन्फ़िगरेशन को ओवरराइड करती हैं। सावधानी से उपयोग करें और केवल तभी जब आप जानते हों कि आप क्या कर रहे हैं।",
       "browserPolicyLabel": "ब्राउज़र नीति",
       "browserPolicyDescription": "इस एप्लिकेशन का हर सत्र एक लागू ब्राउज़र नीति के साथ शुरू करें।",
-      "browserPolicyNone": "कोई नहीं"
+      "browserPolicyNone": "कोई नहीं",
+      "iconLabel": "आइकन",
+      "iconDescription": "4 MB तक की PNG, JPEG, WebP, GIF, BMP या ICO छवि, जिसे अधिकतम 512 पिक्सेल की PNG के रूप में रखा जाता है।",
+      "iconReset": "रीसेट करें",
+      "iconRefused": "आइकन 4 MB तक की PNG, JPEG, WebP, GIF, BMP या ICO छवि होती है।"
     },
     "status": {
       "loggingIn": "लॉग इन हो रहा है...",

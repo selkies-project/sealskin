@@ -1296,7 +1296,11 @@
       "dockerDescription": "Ces paramètres remplacent la configuration par défaut du conteneur. À utiliser avec prudence et seulement si vous savez ce que vous faites.",
       "browserPolicyLabel": "Stratégie de navigateur",
       "browserPolicyDescription": "Démarrer chaque session de cette application avec une stratégie de navigateur en vigueur.",
-      "browserPolicyNone": "Aucune"
+      "browserPolicyNone": "Aucune",
+      "iconLabel": "Icône",
+      "iconDescription": "Une image PNG, JPEG, WebP, GIF, BMP ou ICO de 4 Mo au plus, conservée en PNG de 512 pixels au plus.",
+      "iconReset": "Réinitialiser",
+      "iconRefused": "Une icône est une image PNG, JPEG, WebP, GIF, BMP ou ICO de 4 Mo au plus."
     },
     "status": {
       "loggingIn": "Connexion en cours...",

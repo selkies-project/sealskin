@@ -1296,7 +1296,11 @@
       "dockerDescription": "Queste impostazioni sovrascrivono la configurazione predefinita del container. Usa con cautela e solo se sai cosa stai facendo.",
       "browserPolicyLabel": "Criterio del browser",
       "browserPolicyDescription": "Avvia ogni sessione di questa applicazione con un criterio del browser in vigore.",
-      "browserPolicyNone": "Nessuno"
+      "browserPolicyNone": "Nessuno",
+      "iconLabel": "Icona",
+      "iconDescription": "Un'immagine PNG, JPEG, WebP, GIF, BMP o ICO fino a 4 MB, salvata come PNG di al massimo 512 pixel.",
+      "iconReset": "Ripristina",
+      "iconRefused": "Un'icona è un'immagine PNG, JPEG, WebP, GIF, BMP o ICO fino a 4 MB."
     },
     "status": {
       "loggingIn": "Accesso in corso...",

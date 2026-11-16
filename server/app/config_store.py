@@ -615,7 +615,7 @@ def record_from_app(app: InstalledApp, existing: InstalledAppRecord | None = Non
     """Convert a full installed app into a reference-plus-overrides record.
 
     Args:
-        app: Complete app as received from the admin UI.
+        app: Complete app as received from the admin UI; an empty `logo` is the store entry's.
         existing: Current record of the same app, whose overrides are replaced.
 
     Returns:
@@ -627,6 +627,9 @@ def record_from_app(app: InstalledApp, existing: InstalledAppRecord | None = Non
     temp = InstalledAppRecord(**record_fields)
     base = _store_base(temp)
     overrides = diff_overrides(full, base) if base else full
+    # An empty logo shows the store's.
+    if base and overrides.get("logo") == "":
+        del overrides["logo"]
     return InstalledAppRecord(**record_fields, overrides=overrides)
 
 

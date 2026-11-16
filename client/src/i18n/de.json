@@ -1296,7 +1296,11 @@
       "dockerDescription": "Diese Einstellungen überschreiben die Standard-Containerkonfiguration. Verwenden Sie sie mit Vorsicht und nur, wenn Sie wissen, was Sie tun.",
       "browserPolicyLabel": "Browserrichtlinie",
       "browserPolicyDescription": "Jede Sitzung dieser Anwendung mit einer geltenden Browserrichtlinie starten.",
-      "browserPolicyNone": "Keine"
+      "browserPolicyNone": "Keine",
+      "iconLabel": "Symbol",
+      "iconDescription": "Ein PNG-, JPEG-, WebP-, GIF-, BMP- oder ICO-Bild bis 4 MB, gespeichert als PNG mit höchstens 512 Pixeln.",
+      "iconReset": "Zurücksetzen",
+      "iconRefused": "Ein Symbol ist ein PNG-, JPEG-, WebP-, GIF-, BMP- oder ICO-Bild bis 4 MB."
     },
     "status": {
       "loggingIn": "Anmeldung läuft...",

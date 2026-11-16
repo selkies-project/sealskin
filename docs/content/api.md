@@ -105,7 +105,7 @@ proxy's: a key, or a key-file client, cannot manage keys.
 | Method and path | Auth | Purpose |
 | --- | --- | --- |
 | `POST /api/applications` | encrypted, user | Applications the caller may launch, with their capabilities and extensions. |
-| `GET /api/app_icon/{app_id}` | encrypted, user | A custom (meta-app) icon as base64 JSON. |
+| `GET /api/app_icon/{app_id}` | encrypted, user | An application's uploaded icon as base64 JSON, to anyone the application is listed for. |
 | `GET /api/logos/{name}` | none | A picture a store, a PRoot Apps remote, or a home link named, from this node's copy; the pages load every such picture here and never from its origin. `404` for a name the server never handed out. |
 | `POST /api/launch/simple` | encrypted, user | Launch with no context. Body: `application_id`, `home_name?`, `language?`, `timezone?`, `selected_gpu?`, `launch_in_room_mode?`, `wayland_mode?`. |
 | `POST /api/launch/url` | encrypted, user | As above plus `url`; the container receives `SEALSKIN_URL`. |
@@ -201,10 +201,10 @@ All *encrypted, admin*.
 | `GET`/`POST /api/admin/apps/stores`, `DELETE /api/admin/apps/stores/{name}` | App stores. |
 | `GET /api/admin/apps/available?url=&store_name=&refresh=` | A store's catalogue, cached unless `refresh`. |
 | `GET /api/admin/apps/installed` | Installed apps with image status. |
-| `POST /api/admin/apps/installed` | Install from a store entry. |
-| `PUT /api/admin/apps/installed/{app_id}` | Replace with a full definition. |
+| `POST /api/admin/apps/installed` | Install from a store entry, or a manual one. A `logo` of base64 picture data, bare or as a `data` URL, is kept as the application's icon, `/api/app_icon/<id>`. |
+| `PUT /api/admin/apps/installed/{app_id}` | Replace with a full definition; `logo` as on install, an empty one showing the store's. |
 | `PATCH /api/admin/apps/installed/{app_id}` | Partial update: record fields (`users`, `groups`, `app_template`, `auto_update`) apply directly, anything else becomes an override. |
-| `DELETE /api/admin/apps/installed/{app_id}` | Uninstall (purges a meta-app's icon and template, and a baked application's recipe); `409` while a baked application, or a meta-app of a baked one, is built on it. |
+| `DELETE /api/admin/apps/installed/{app_id}` | Uninstall (purges the uploaded icon, a meta-app's template, and a baked application's recipe); `409` while a baked application, or a meta-app of a baked one, is built on it. |
 | `POST /api/admin/apps/installed/{app_id}/check_update` | Compare the local image digest with the registry. |
 | `POST /api/admin/apps/installed/{app_id}/pull_latest` | Pull the newest image. |
 | `POST /api/admin/apps/meta` | Create a meta-app (`name`, `base_app_id`, `logo`, autostart scripts, `users`, `groups`) of an installed application or a baked one. |

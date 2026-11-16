@@ -1296,7 +1296,11 @@
       "dockerDescription": "Bu ayarlar varsayılan konteyner yapılandırmasını geçersiz kılar. Dikkatli kullanın ve yalnızca ne yaptığınızı biliyorsanız kullanın.",
       "browserPolicyLabel": "Tarayıcı Politikası",
       "browserPolicyDescription": "Bu uygulamanın her oturumunu yürürlükte olan bir tarayıcı politikasıyla başlatır.",
-      "browserPolicyNone": "Yok"
+      "browserPolicyNone": "Yok",
+      "iconLabel": "Simge",
+      "iconDescription": "En fazla 4 MB boyutunda PNG, JPEG, WebP, GIF, BMP veya ICO resmi; en fazla 512 piksellik PNG olarak saklanır.",
+      "iconReset": "Sıfırla",
+      "iconRefused": "Simge, en fazla 4 MB boyutunda PNG, JPEG, WebP, GIF, BMP veya ICO resmidir."
     },
     "status": {
       "loggingIn": "Giriş yapılıyor...",

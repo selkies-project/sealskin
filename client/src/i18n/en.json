@@ -1296,7 +1296,11 @@
       "dockerDescription": "These settings override the default container configuration. Use with caution and only if you know what you are doing.",
       "browserPolicyLabel": "Browser Policy",
       "browserPolicyDescription": "Start every session of this application with a browser policy in force.",
-      "browserPolicyNone": "None"
+      "browserPolicyNone": "None",
+      "iconLabel": "Icon",
+      "iconDescription": "A PNG, JPEG, WebP, GIF, BMP, or ICO picture up to 4 MB, kept as a PNG of at most 512 pixels.",
+      "iconReset": "Reset",
+      "iconRefused": "An icon is a PNG, JPEG, WebP, GIF, BMP, or ICO picture up to 4 MB."
     },
     "status": {
       "loggingIn": "Logging in...",

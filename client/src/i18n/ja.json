@@ -1296,7 +1296,11 @@
       "dockerDescription": "これらの設定は、デフォルトのコンテナ構成を上書きします。注意して使用し、何をしているか理解している場合にのみ使用してください。",
       "browserPolicyLabel": "ブラウザポリシー",
       "browserPolicyDescription": "このアプリケーションのすべてのセッションを、ブラウザポリシーを適用した状態で開始します。",
-      "browserPolicyNone": "なし"
+      "browserPolicyNone": "なし",
+      "iconLabel": "アイコン",
+      "iconDescription": "4 MB までの PNG、JPEG、WebP、GIF、BMP、ICO 画像。最大 512 ピクセルの PNG として保存されます。",
+      "iconReset": "リセット",
+      "iconRefused": "アイコンは 4 MB までの PNG、JPEG、WebP、GIF、BMP、ICO 画像です。"
     },
     "status": {
       "loggingIn": "ログイン中...",

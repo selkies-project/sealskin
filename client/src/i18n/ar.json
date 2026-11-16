@@ -1296,7 +1296,11 @@
       "dockerDescription": "تتجاوز هذه الإعدادات التكوين الافتراضي للحاوية. استخدمها بحذر وفقط إذا كنت تعرف ما تفعله.",
       "browserPolicyLabel": "سياسة المتصفح",
       "browserPolicyDescription": "بدء كل جلسة لهذا التطبيق مع سياسة متصفح سارية.",
-      "browserPolicyNone": "لا شيء"
+      "browserPolicyNone": "لا شيء",
+      "iconLabel": "الأيقونة",
+      "iconDescription": "صورة PNG أو JPEG أو WebP أو GIF أو BMP أو ICO حتى 4 ميغابايت، تُحفظ بصيغة PNG بحد أقصى 512 بكسل.",
+      "iconReset": "إعادة تعيين",
+      "iconRefused": "الأيقونة صورة PNG أو JPEG أو WebP أو GIF أو BMP أو ICO حتى 4 ميغابايت."
     },
     "status": {
       "loggingIn": "جاري تسجيل الدخول...",

@@ -76,7 +76,7 @@ watcher only fires for edits made by someone else.
   sealskin_uploads/<username>/     chunked uploads in progress
   sealskin_public/                 files behind public share links
   sealskin_home_templates/         meta-app home templates
-  sealskin_app_icons/              icons uploaded for meta-apps
+  sealskin_app_icons/<id>.png      the icons uploaded for applications, shared by the nodes
   sealskin_proot_apps/<id>/        this node's copy of each PRoot Apps catalog, mounted
                                    read-only at /mnt/proot-apps in the sessions assigned to it
   sealskin_browser_policies/<id>/  the policy files of each browser policy, mounted read-only

@@ -1296,7 +1296,11 @@
       "dockerDescription": "Disse indstillinger tilsidesætter standard containerkonfigurationen. Brug med forsigtighed og kun hvis du ved, hvad du gør.",
       "browserPolicyLabel": "Browserpolitik",
       "browserPolicyDescription": "Start hver session af denne applikation med en gældende browserpolitik.",
-      "browserPolicyNone": "Ingen"
+      "browserPolicyNone": "Ingen",
+      "iconLabel": "Ikon",
+      "iconDescription": "Et PNG-, JPEG-, WebP-, GIF-, BMP- eller ICO-billede på op til 4 MB, gemt som PNG på højst 512 pixels.",
+      "iconReset": "Nulstil",
+      "iconRefused": "Et ikon er et PNG-, JPEG-, WebP-, GIF-, BMP- eller ICO-billede på op til 4 MB."
     },
     "status": {
       "loggingIn": "Logger ind...",
