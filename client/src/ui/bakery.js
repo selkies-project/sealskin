@@ -249,6 +249,8 @@ function renderBar() {
 async function loadBase() {
   const target = targetApp();
   base = null;
+  offers = null;
+  renderMenus();
   renderBar();
   if (!target) return;
   try {
@@ -433,7 +435,8 @@ function renderSteps() {
 }
 
 function renderMenus() {
-  const hidden = (offers && offers.hidden) || [];
+  // Until the image is read, the steps of one distribution alone stay out of the menu.
+  const hidden = offers ? offers.hidden : ['ppa'];
   const menu = GROUPS.map((group) => `<h5 class="bk-group">${escapeHtml(tk(`groups.${group}`))}</h5>${KINDS.filter((item) => item.group === group && !hidden.includes(item.kind)).map(({ kind, icon }) => `
     <button type="button" class="bk-kind" data-kind="${kind}">
       <i class="fas ${icon} fa-fw"></i><strong>${escapeHtml(tk(`kinds.${kind}.title`))}</strong><span>${escapeHtml(tk(`kinds.${kind}.short`))}</span>
