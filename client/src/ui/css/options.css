@@ -2056,3 +2056,51 @@ body:has(.popup-container)::before { display: none; }
 .tree-kind.lab { color: var(--color-warning-text); border-color: rgba(245, 158, 11, 0.35); background-color: var(--color-warning-soft); }
 tr.tree-child td { background-color: rgba(255, 255, 255, 0.015); }
 tr.tree-open:not(.tree-child) td { border-bottom-color: transparent; }
+
+/* Browser policies */
+.bp-muted, .bp-empty { color: var(--text-muted); }
+.bp-empty { text-align: center; padding: 1.5rem; }
+.bp-name { max-width: 420px; }
+.bp-checks { display: flex; flex-wrap: wrap; gap: 0.45rem 1.25rem; }
+.bp-checks small { color: var(--text-muted); }
+.bp-engines { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--border-color); border-radius: var(--radius-sm); overflow: hidden; }
+#BrowserPolicies .bp-engines button { margin: 0; padding: 0.7rem 1.1rem; justify-content: center; text-align: center; border: none; border-radius: 0; background: none; color: var(--text-muted); font-weight: 600; cursor: pointer; }
+#BrowserPolicies .bp-engines button:hover:not(.active) { color: var(--text-primary); }
+#BrowserPolicies .bp-engines button.active, #BrowserPolicies .bp-engines button.active:hover { background: var(--accent-primary); color: #fff; }
+.bp-tab-count:not(:empty) { margin-left: 0.35rem; padding: 0.05rem 0.45rem; border-radius: var(--radius-pill); background: rgba(255, 255, 255, 0.16); font-size: 0.72rem; }
+.bp-paths { margin: 0.9rem 0 0; font-size: 0.8rem; color: var(--text-secondary); }
+.bp-paths summary { cursor: pointer; color: var(--text-muted); }
+.bp-paths ul { margin: 0.4rem 0 0; padding-left: 1.2rem; }
+.bp-paths code, .bp-row-title code, .bp-field-name code { font-family: var(--font-mono); font-size: 0.76rem; color: var(--text-muted); }
+.bp-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 0.9rem; margin: 1rem 0 0.4rem; }
+.bp-toolbar input[type="search"] { flex: 1; min-width: 220px; margin: 0; }
+.bp-toolbar select { width: auto; max-width: 260px; margin: 0; }
+#BrowserPolicies .bp-toolbar button { margin: 0; }
+#BrowserPolicies .bp-toolbar button.active { background: var(--accent-soft); border-color: var(--accent-border); color: var(--accent-text-strong); }
+.bp-toolbar.bp-json-on > :not(#bp-json) { visibility: hidden; }
+.bp-upstream { margin: 0 0 0.6rem; font-size: 0.75rem; }
+.bp-section { margin: 1.3rem 0 0.4rem; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+.bp-row { border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.6rem 0.8rem; margin-bottom: 0.45rem; background-color: var(--glass); }
+.bp-row.set { border-color: var(--accent-border); background-color: var(--accent-soft); }
+.bp-row-head { display: flex; align-items: flex-start; gap: 0.7rem; }
+.bp-set { padding-top: 0.15rem; cursor: pointer; }
+.bp-row-text { flex: 1; min-width: 0; }
+.bp-row-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.6rem; font-size: 0.875rem; color: var(--text-primary); }
+.bp-row-title .pill { font-size: 0.68rem; padding: 0.02rem 0.5rem; }
+.bp-desc { margin: 0.25rem 0 0; font-size: 0.78rem; line-height: 1.45; color: var(--text-secondary); white-space: pre-line; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; cursor: pointer; }
+.bp-desc.open { display: block; }
+.bp-row-body { margin: 0.6rem 0 0.1rem 1.9rem; }
+.bp-row-body input[type="text"], .bp-row-body input[type="number"], .bp-row-body select, .bp-row-body textarea { margin: 0; max-width: 640px; }
+.bp-row-body textarea, .bp-json-view textarea { font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.5; tab-size: 2; }
+#BrowserPolicies textarea.invalid { border-color: var(--color-danger-text); }
+.bp-extras { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1.2rem; margin-top: 0.55rem; }
+#BrowserPolicies .bp-extras button { margin: 0; padding: 0.3rem 0.8rem; font-size: 0.78rem; }
+.bp-fields { display: flex; flex-direction: column; gap: 0.55rem; padding-left: 0.8rem; border-left: 2px solid var(--border-color); }
+.bp-field { display: grid; grid-template-columns: minmax(140px, 220px) minmax(0, 1fr); gap: 0.3rem 0.9rem; align-items: start; }
+.bp-field-name { display: flex; flex-direction: column; gap: 0.15rem; padding-top: 0.45rem; }
+.bp-field-name small { color: var(--text-muted); font-size: 0.72rem; }
+.bp-json-view .bk-field { max-width: 900px; }
+@media (max-width: 720px) {
+  .bp-field { grid-template-columns: 1fr; }
+  .bp-row-body { margin-left: 0; }
+}
