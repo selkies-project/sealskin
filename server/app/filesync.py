@@ -24,10 +24,12 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import stat as stat_module
 import threading
 from typing import Any
 
 from . import cluster, filecrypt, persistence, store
+from .fsutil import open_within
 from .settings import settings
 
 logger = logging.getLogger(__name__)
@@ -82,19 +84,56 @@ def _place(root: str, name: str) -> str | None:
     return target
 
 
-def _write(target: str, data: bytes, tag: str) -> dict[str, Any]:
-    """Write a file whole beside its place and move it there, and return its manifest entry."""
+def _write(root: str, target: str, data: bytes, tag: str, keep_as: str = "") -> dict[str, Any]:
+    """Write a file whole beside its place and move it there, and return its manifest entry.
+
+    The directory is opened and checked inside `root` (`open_within`), and
+    everything after happens within that descriptor: a link a session swaps
+    in for a directory on the way, after `_place` looked, takes nothing out
+    of the user's files.
+
+    Args:
+        root: The user's shared files directory.
+        target: Where `_place` put the file.
+        data: Its content.
+        tag: The entity tag of the object it came from.
+        keep_as: A name suffix to keep the file this one replaces under.
+
+    Raises:
+        ValueError: When the file's directory turned out to lie outside `root`.
+    """
     os.makedirs(os.path.dirname(target), exist_ok=True)
-    partial = f"{target}.partial-{cluster.NODE_ID}"
-    if os.path.islink(partial):
-        os.remove(partial)
-    # O_NOFOLLOW: a link made here since the check is refused, not written through.
-    fd = os.open(partial, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o644)
-    with os.fdopen(fd, "wb") as handle:
-        handle.write(data)
-    os.replace(partial, target)
-    stat = os.stat(target)
+    name = os.path.basename(target)
+    partial = f"{name}.partial-{cluster.NODE_ID}"
+    dir_fd = open_within(os.path.realpath(root), os.path.dirname(target), os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        if keep_as:
+            os.replace(name, name + keep_as, src_dir_fd=dir_fd, dst_dir_fd=dir_fd)
+        try:
+            os.unlink(partial, dir_fd=dir_fd)
+        except FileNotFoundError:
+            pass
+        fd = os.open(partial, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o644, dir_fd=dir_fd)
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(data)
+        os.replace(partial, name, src_dir_fd=dir_fd, dst_dir_fd=dir_fd)
+        stat = os.stat(name, dir_fd=dir_fd, follow_symlinks=False)
+    finally:
+        os.close(dir_fd)
     return {"etag": tag, "size": stat.st_size, "mtime": int(stat.st_mtime)}
+
+
+def _read(root: str, name: str) -> bytes | None:
+    """Return the content of the shared file `name`, or `None` when it is no regular file inside `root` any more or too large."""
+    try:
+        fd = open_within(os.path.realpath(root), os.path.join(root, *name.split("/")))
+    except (OSError, ValueError):
+        return None
+    with os.fdopen(fd, "rb") as handle:
+        status = os.fstat(handle.fileno())
+        if not stat_module.S_ISREG(status.st_mode) or status.st_size > MAX_BYTES:
+            return None
+        return handle.read(MAX_BYTES + 1)[:MAX_BYTES]
 
 
 def _pull_file(username: str, root: str, name: str) -> bool:
@@ -122,7 +161,7 @@ def _pull_file(username: str, root: str, name: str) -> bool:
         except filecrypt.Unreadable as exc:
             logger.warning("Shared file '%s' of '%s' is not readable on this node: %s", name, username, exc)
             return os.path.isfile(target)
-        manifest[name] = _write(target, content, found[1])
+        manifest[name] = _write(root, target, content, found[1])
         os.makedirs(os.path.dirname(_manifest_path(username)), exist_ok=True, mode=0o700)
         persistence.write_yaml_sync(_manifest_path(username), manifest)
         return True
@@ -170,9 +209,12 @@ def _sync(username: str, root: str, send: bool) -> None:
             except filecrypt.Unreadable as exc:
                 logger.warning("Shared file '%s' of '%s' is not readable on this node: %s", name, username, exc)
                 continue
-            if changed_here(name):
-                os.replace(target, f"{target}.conflict-{cluster.NODE_ID}")
-            manifest[name] = _write(target, content, found[1])
+            try:
+                manifest[name] = _write(
+                    root, target, content, found[1], keep_as=f".conflict-{cluster.NODE_ID}" if changed_here(name) else ""
+                )
+            except ValueError:
+                refused.append(name)
 
         for name in [n for n in manifest if n not in remote]:
             target = _place(root, name)
@@ -197,8 +239,10 @@ def _sync(username: str, root: str, send: bool) -> None:
                 if size > MAX_BYTES:
                     logger.warning("Shared file '%s' of '%s' is too large to sync; it stays on this node.", name, username)
                     continue
-                with open(os.path.join(root, *name.split("/")), "rb") as handle:
-                    tag = store.put(prefix + name, filecrypt.seal(username, handle.read()))
+                content = _read(root, name)
+                if content is None:
+                    continue
+                tag = store.put(prefix + name, filecrypt.seal(username, content))
                 manifest[name] = {"etag": tag, "size": size, "mtime": mtime}
 
         os.makedirs(os.path.dirname(_manifest_path(username)), exist_ok=True, mode=0o700)

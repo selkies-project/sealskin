@@ -390,14 +390,24 @@ def write_autostart(app: InstalledApp, host_mount_path: str, wayland_mode: bool,
         if wayland_mode
         else os.path.join(".config", "openbox", "autostart")
     )
-    autostart_file = os.path.join(host_mount_path, subpath)
+    # The home is a tree its user's sessions wrote: a link left in it must not take the script elsewhere.
     try:
-        os.makedirs(os.path.dirname(autostart_file), exist_ok=True, mode=0o755)
-        with open(autostart_file, "w", encoding="utf-8") as handle:
-            handle.write(content)
-        os.chmod(autostart_file, 0o755)
+        directory = safe_join(host_mount_path, os.path.dirname(subpath))
+        os.makedirs(directory, exist_ok=True, mode=0o755)
+        dir_fd = open_within(host_mount_path, directory, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            try:
+                os.unlink("autostart", dir_fd=dir_fd)
+            except FileNotFoundError:
+                pass
+            fd = os.open("autostart", os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 0o755, dir_fd=dir_fd)
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                handle.write(content)
+                os.fchmod(handle.fileno(), 0o755)
+        finally:
+            os.close(dir_fd)
         logger.info("[%s] Wrote autostart script to session storage.", session_id)
-    except OSError as exc:
+    except (OSError, ValueError) as exc:
         logger.error("[%s] Failed to write autostart script: %s", session_id, exc)
 
 
@@ -567,7 +577,11 @@ def build_launch_spec(
     if shared_files_path:
         os.makedirs(shared_files_path, exist_ok=True, mode=0o755)
         if host_mount_path:
-            os.makedirs(os.path.join(host_mount_path, "Desktop", "files"), exist_ok=True, mode=0o755)
+            try:
+                os.makedirs(safe_join(host_mount_path, "Desktop", "files"), exist_ok=True, mode=0o755)
+            except ValueError:
+                # A link in the home leads out of it; the mount makes its own mount point.
+                pass
         volumes[shared_files_path] = {
             "bind": os.path.join(settings.container_config_path, "Desktop", "files"),
             "mode": "rw",

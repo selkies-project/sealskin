@@ -52,7 +52,7 @@ def open_within(base: str, path: str, flags: int = os.O_RDONLY, mode: int = 0o64
     Args:
         base: Trusted directory the opened object must lie inside.
         path: The path, usually one `resolve_within` returned.
-        flags: `os.open` flags; `O_NOFOLLOW` and `O_CLOEXEC` are added.
+        flags: `os.open` flags; `O_NOFOLLOW`, `O_CLOEXEC`, and `O_NONBLOCK` are added.
         mode: Mode of a file `flags` creates.
 
     Returns:
@@ -62,7 +62,8 @@ def open_within(base: str, path: str, flags: int = os.O_RDONLY, mode: int = 0o64
         ValueError: If the opened object lies outside `base`.
         OSError: If the open fails, a symlink in the last place included.
     """
-    fd = os.open(path, flags | os.O_NOFOLLOW | os.O_CLOEXEC, mode)
+    # O_NONBLOCK: a FIFO swapped in for the file would hold the thread until someone wrote to it.
+    fd = os.open(path, flags | os.O_NOFOLLOW | os.O_CLOEXEC | os.O_NONBLOCK, mode)
     try:
         resolve_within(base, os.readlink(f"/proc/self/fd/{fd}"))
     except (OSError, ValueError) as exc:

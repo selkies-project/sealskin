@@ -259,19 +259,19 @@ async def list_files(
             raise HTTPException(status_code=500, detail=f"Error reading directory: {exc}") from exc
         try:
             with os.scandir(dir_fd) as listing:
-                entries = sorted(listing, key=lambda e: (not e.is_dir(), e.name.lower()))
+                entries = sorted(listing, key=lambda e: (not e.is_dir(follow_symlinks=False), e.name.lower()))
             start = (page - 1) * per_page
             items = []
             for entry in entries[start : start + per_page]:
                 try:
-                    info = entry.stat()
+                    info = entry.stat(follow_symlinks=False)
                 except OSError:
                     continue
                 items.append(
                     {
                         "name": entry.name,
                         "path": f"{prefix}/{entry.name}",
-                        "is_dir": entry.is_dir(),
+                        "is_dir": entry.is_dir(follow_symlinks=False),
                         "size": info.st_size,
                         "mtime": info.st_mtime,
                     }
