@@ -17,6 +17,7 @@ import { confirmDialog } from '../lib/modal.js';
 import { apiError } from '../lib/api-error.js';
 import { qrSvg } from '../lib/qr.js';
 import { openBakery, editBaked } from './bakery.js';
+import { openBrowserPolicies } from './browser-policies.js';
 import {
   announce, escapeHtml, formatBytes, formatDate, timeAgo, formatLogoSrc, hydrateLogos, showToast, tOr,
   addMobileSafeArea, addMobileBackButton, downloadBlob, currentLocale, apiUrl,
@@ -113,6 +114,7 @@ let adminData = {
   gpus: [],
   prootCatalogs: [],
   proot_catalogs: [],
+  browser_policies: [],
   proot_remote: 'linuxserver/proot-apps',
   vpnProfiles: [],
 };
@@ -2578,6 +2580,8 @@ const tableRenderConfig = {
       let kindIcon = '';
       if (item.baked) kindIcon = `<span class="pill tree-kind baked"><i class="fas fa-bread-slice"></i> ${escapeHtml(t('options.installedApps.isBaked'))}</span>`;
       else if (item.is_meta_app) kindIcon = `<span class="pill tree-kind lab" title="${escapeHtml(t('options.installedApps.isLaboratory'))}"><i class="fas fa-flask"></i> ${escapeHtml(t('options.installedApps.kindLab'))}</span>`;
+      const policy = item.browser_policy && (adminData.browser_policies || []).find((entry) => entry.id === item.browser_policy);
+      if (policy) kindIcon += `<span class="pill tree-kind" title="${escapeHtml(t('options.modals.browserPolicyLabel'))}"><i class="fas fa-globe"></i> ${escapeHtml(policy.name)}</span>`;
       // An application with others built on it opens to show them under it.
       const toggle = kids
         ? `<button type="button" class="tree-toggle${open ? ' open' : ''}" data-tree="${escapeHtml(item.id)}" aria-expanded="${open}" title="${escapeHtml(t('options.installedApps.builtOnTitle'))}"><i class="fas fa-chevron-right"></i></button>`
@@ -4054,6 +4058,12 @@ function showInstallModal(appData, existingInstall = null, isManual = false) {
   }
   templateSelect.disabled = adminData.appTemplates.length === 0;
 
+  const policySelect = document.getElementById('install-browser-policy');
+  policySelect.innerHTML = '';
+  policySelect.add(new Option(t('options.modals.browserPolicyNone'), ''));
+  (adminData.browser_policies || []).forEach((policy) => policySelect.add(new Option(policy.name, policy.id)));
+  policySelect.value = (isEditing && existingInstall.browser_policy) || '';
+
   if (isEditing) {
     templateSelect.value = existingInstall.app_template || (adminData.appTemplates.length > 0 ? adminData.appTemplates[0].name : '');
   } else if (adminData.appTemplates.length > 0) {
@@ -4223,6 +4233,8 @@ async function openTab(tabName) {
     initializeAppLaboratoryTab();
   } else if (tabName === 'WebLaboratory') {
     await openWebLab();
+  } else if (tabName === 'BrowserPolicies') {
+    await openBrowserPolicies({ t, locale: info.locale, setPolicies: (policies) => { adminData.browser_policies = policies; } });
   } else if (tabName === 'Bakery') {
     await openBakery({ t, apps: () => adminData.installedApps, refreshApps: refreshAppData });
   } else if (tabName === 'Cluster' || tabName === 'SignIn') {
@@ -4947,6 +4959,7 @@ function bindEvents() {
       home_directories: document.getElementById('install-home-support').checked,
       auto_update: document.getElementById('install-auto-update').checked,
       app_template: document.getElementById('install-app-template').value,
+      browser_policy: document.getElementById('install-browser-policy').value || null,
       logo: sourceApp?.logo || '',
       url: sourceApp?.url || '',
       provider: sourceApp?.provider || 'docker',

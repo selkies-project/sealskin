@@ -27,6 +27,7 @@ from fastapi import HTTPException
 from . import (
     audit,
     bakery,
+    browser_policies,
     cluster,
     config_store,
     filesync,
@@ -495,7 +496,11 @@ def build_launch_spec(
             (`bakery.image_for`), run in place of the application's own, or `None`.
 
     Returns:
-        A `LaunchSpec`.
+        A `LaunchSpec`, its volumes holding the files of the application's browser policy
+        (`browser_policies.mounts_for`).
+
+    Raises:
+        HTTPException: 409 when the application names a browser policy this node lacks.
     """
     env: dict[str, str] = dict(base_env)
     if wayland_mode:
@@ -574,6 +579,14 @@ def build_launch_spec(
         repo = prootapps.default_repo()
         if repo:
             env["PA_DEFAULT_REPO"] = repo
+    try:
+        volumes.update(browser_policies.mounts_for(app.browser_policy))
+    except browser_policies.MissingPolicy as exc:
+        # Launching without the policy would open the browser unrestricted.
+        raise HTTPException(
+            status_code=409,
+            detail=f"The browser policy of '{app.name}' is not on this node; assign the application one that exists.",
+        ) from exc
 
     return LaunchSpec(
         env=env,
@@ -836,21 +849,25 @@ async def launch_application(
     except HTTPException as exc:
         progress.finish(error=str(exc.detail))
         raise
-    spec = build_launch_spec(
-        app,
-        session_id,
-        base_env=session_base_env(session_id, custom_user, password, master_token, timezone),
-        extra_env=env_vars,
-        language=language,
-        wayland_mode=wayland_mode,
-        gpu_config=gpu_config,
-        host_mount_path=host_mount_path,
-        shared_files_path=shared_files_path,
-        collaboration=collaboration,
-        forced_env=hardening_env(effective_settings),
-        proot_catalog_path=prootapps.mount_path_for(effective_settings),
-        image=image,
-    )
+    try:
+        spec = build_launch_spec(
+            app,
+            session_id,
+            base_env=session_base_env(session_id, custom_user, password, master_token, timezone),
+            extra_env=env_vars,
+            language=language,
+            wayland_mode=wayland_mode,
+            gpu_config=gpu_config,
+            host_mount_path=host_mount_path,
+            shared_files_path=shared_files_path,
+            collaboration=collaboration,
+            forced_env=hardening_env(effective_settings),
+            proot_catalog_path=prootapps.mount_path_for(effective_settings),
+            image=image,
+        )
+    except HTTPException as exc:
+        progress.finish(error=str(exc.detail))
+        raise
 
     quota.cap_resources(spec.app_config["provider_config"]["docker_overrides"], effective_settings)
     if vpn_choice and spec.app_config["provider_config"]["docker_overrides"].get("network_mode"):

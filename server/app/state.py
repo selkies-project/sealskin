@@ -17,6 +17,7 @@ from .models import (
     AppStore,
     BakeRecipe,
     Branding,
+    BrowserPolicy,
     InstalledApp,
     InstalledAppRecord,
     ProotCatalog,
@@ -61,6 +62,7 @@ class RuntimeState:
         pull_status: Images currently being pulled keyed by image name.
         proot_catalogs: PRoot Apps catalogs keyed by id, as shared.
         proot_status: This node's sync state of each catalog keyed by id.
+        browser_policies: Browser policies keyed by id, as shared (`app.browser_policies`).
         vpn_profiles: VPN profiles keyed by id, as shared (`app.vpn`).
         bake_recipes: Bakery recipes keyed by application id, as shared (`app.bakery`).
         bake_status: This node's state of each recipe's image keyed by application id.
@@ -98,6 +100,7 @@ class RuntimeState:
     pull_status: dict[str, str] = field(default_factory=dict)
     proot_catalogs: dict[str, ProotCatalog] = field(default_factory=dict)
     proot_status: dict[str, dict[str, Any]] = field(default_factory=dict)
+    browser_policies: dict[str, BrowserPolicy] = field(default_factory=dict)
     vpn_profiles: dict[str, dict[str, Any]] = field(default_factory=dict)
     bake_recipes: dict[str, BakeRecipe] = field(default_factory=dict)
     bake_status: dict[str, dict[str, Any]] = field(default_factory=dict)

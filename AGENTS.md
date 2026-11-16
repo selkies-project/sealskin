@@ -28,6 +28,10 @@ Everything is written in American English. The prose under `docs/content` follow
 
 - Settings are declared once, in `SETTING_DEFINITIONS`; a new setting is an entry there and a
   regenerated `docs/content/settings.md` (`npm run generate:settings` in `docs/`), which CI checks.
+- The browser policy catalogs under `server/app/browser_policy_catalog` are written by
+  `server/scripts/ingest_browser_policies.py` from the engines' definitions at the revisions it pins,
+  never by hand; their translations are fetched by the same script when the server is packaged and
+  are not committed.
 - All backend access goes through the provider `get_provider` returns (Docker's also through
   `docker_utils`), all YAML through `persistence`, and every launch through `build_launch_spec`.
 - What the nodes of a cluster share is an object of `store.MOUNTS`, read and written through

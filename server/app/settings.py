@@ -113,6 +113,21 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "help": "Path to cache app store YAML files.",
     },
     {
+        "name": "browser_policies_path",
+        "type": "str",
+        "default": "/config/.config/sealskin/browser_policies.yml",
+        "help": "Path to the YAML file of the browser policies, shared by the nodes of a cluster.",
+    },
+    {
+        "name": "browser_policy_files_path",
+        "type": "str",
+        "default": "/storage/sealskin_browser_policies",
+        "help": (
+            "Directory this node writes the policy files of every browser policy in, one folder "
+            "per policy, mounted read-only into the sessions of the applications assigned to it."
+        ),
+    },
+    {
         "name": "proot_catalogs_path",
         "type": "str",
         "default": "/config/.config/sealskin/proot_catalogs.yml",

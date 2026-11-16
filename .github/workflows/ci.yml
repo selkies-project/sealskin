@@ -106,6 +106,11 @@ jobs:
           cp -r client/dist/ui server/app/ui
           cp VERSION server/app/VERSION
 
+      - name: Fetch the browser policy translations
+        run: |
+          pip install PyYAML
+          python server/scripts/ingest_browser_policies.py --translations
+
       - name: Build wheel
         run: |
           pip install build

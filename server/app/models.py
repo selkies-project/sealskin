@@ -505,6 +505,7 @@ class InstalledApp(BaseModel):
     provider_config: InstalledAppProviderConfig
     auto_update: bool = True
     app_template: str
+    browser_policy: str | None = None
     is_meta_app: bool = False
     base_app_id: str | None = None
     home_template_name: str | None = None
@@ -518,6 +519,7 @@ RECORD_FIELDS: tuple[str, ...] = (
     "source",
     "source_app_id",
     "app_template",
+    "browser_policy",
     "users",
     "groups",
     "auto_update",
@@ -543,6 +545,7 @@ class InstalledAppRecord(BaseModel):
     source: str
     source_app_id: str
     app_template: str = "Default"
+    browser_policy: str | None = None
     users: list[str] = Field(default_factory=list)
     groups: list[str] = Field(default_factory=list)
     auto_update: bool = True
@@ -1095,6 +1098,31 @@ class ProotCatalog(BaseModel):
     revision: int = 1
 
 
+class BrowserPolicy(BaseModel):
+    """A browser policy: the settings an application's sessions start their browsers under.
+
+    Attributes:
+        id: Generated identifier; what an installed application names the policy by.
+        name: Name shown in the dashboard.
+        chromium: Policies a Chromium-family browser enforces, by policy name.
+        chromium_recommended: Policies a Chromium-family browser takes as defaults the user may change.
+        firefox: Policies a Firefox-family browser enforces, by policy name.
+    """
+
+    id: str = Field(..., pattern=r"^[A-Za-z0-9_-]{1,64}$")
+    name: str = Field(..., min_length=1, max_length=80)
+    chromium: dict[str, Any] = Field(default_factory=dict)
+    chromium_recommended: dict[str, Any] = Field(default_factory=dict)
+    firefox: dict[str, Any] = Field(default_factory=dict)
+
+
+class BrowserPolicyName(BaseModel):
+    """What an installed application picks a browser policy by."""
+
+    id: str
+    name: str
+
+
 class ProotCatalogName(BaseModel):
     """What a user or group setting picks a catalog by."""
 
@@ -1188,6 +1216,7 @@ class ManagementDataResponse(BaseModel):
     gpus: list[GPUInfo] = []
     proot_catalogs: list[ProotCatalogName] = []
     proot_remote: str = ""
+    browser_policies: list[BrowserPolicyName] = []
 
 
 class CreateUserRequest(BaseModel):

@@ -34,7 +34,7 @@ sealskin-server = "app.main:main"
 include = ["app*"]
 
 [tool.setuptools.package-data]
-app = ["ui/**", "VERSION", "template_schema.yml", "Caddyfile.tpl", "static/**"]
+app = ["ui/**", "VERSION", "template_schema.yml", "Caddyfile.tpl", "static/**", "browser_policy_catalog/*.json", "browser_policy_catalog/l10n/*.json"]
 
 [tool.ruff]
 line-length = 100

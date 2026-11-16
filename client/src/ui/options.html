@@ -55,6 +55,10 @@
                     <i class="fas fa-file-code fa-fw"></i>
                     <span data-i18n="options.sidebar.appTemplates">App Templates</span>
                 </button>
+                <button class="nav-link admin-nav-link" style="display:none;" data-tabname="BrowserPolicies">
+                    <i class="fas fa-globe fa-fw"></i>
+                    <span data-i18n="options.sidebar.browserPolicies">Browser Policies</span>
+                </button>
                 <button class="nav-link admin-nav-link" style="display:none;" data-tabname="InstalledApps">
                     <i class="fas fa-download fa-fw"></i>
                     <span data-i18n="options.sidebar.installedApps">Installed Apps</span>
@@ -1036,6 +1040,48 @@
                 </form>
             </div>
 
+            <div id="BrowserPolicies" class="tab-content">
+                <div class="card" id="bp-list">
+                    <div class="card-header">
+                        <h3 data-i18n="options.browserPolicies.title">Browser Policies</h3>
+                        <div class="button-group">
+                            <button id="bp-new" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.browserPolicies.newPolicy">New Policy</span></button>
+                        </div>
+                    </div>
+                    <p class="description" data-i18n="options.browserPolicies.help">A browser policy is a set of browser settings an application's sessions start under: a home page, bookmarks, allowed and blocked sites, extensions, and anything else Chromium or Firefox reads from an administrator. Assign one to an application in Installed Apps. Its files are mounted read-only into every session of the application, and a change applies to sessions started after it.</p>
+                    <div class="table-container">
+                        <table id="bp-table">
+                            <thead><tr><th data-i18n="common.name">Name</th><th data-i18n="options.browserPolicies.chromium">Chromium family</th><th data-i18n="options.browserPolicies.firefox">Firefox family</th><th data-i18n="options.browserPolicies.usedBy">Used by</th><th class="actions-cell" data-i18n="common.actions">Actions</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card" id="bp-editor" style="display: none;">
+                    <div class="card-header">
+                        <h3 id="bp-editor-title"></h3>
+                        <div class="button-group">
+                            <button type="button" id="bp-cancel" class="secondary" data-i18n="common.cancel">Cancel</button>
+                            <button type="button" id="bp-save" class="primary"><i class="fas fa-save"></i> <span data-i18n="common.save">Save</span></button>
+                        </div>
+                    </div>
+                    <label class="bk-field bp-name"><span><span data-i18n="common.name">Name</span> <em class="bk-required">*</em></span><input type="text" id="bp-name" maxlength="80" required></label>
+                    <div class="bp-engines" id="bp-engines">
+                        <button type="button" data-engine="chromium"><i class="fab fa-chrome"></i> <span data-i18n="options.browserPolicies.chromium">Chromium family</span> <span class="bp-tab-count"></span></button>
+                        <button type="button" data-engine="firefox"><i class="fab fa-firefox-browser"></i> <span data-i18n="options.browserPolicies.firefox">Firefox family</span> <span class="bp-tab-count"></span></button>
+                    </div>
+                    <details id="bp-paths" class="bp-paths"></details>
+                    <div class="bp-toolbar">
+                        <input type="search" id="bp-search">
+                        <select id="bp-group"></select>
+                        <label class="bk-check"><input type="checkbox" id="bp-only-set"> <span data-i18n="options.browserPolicies.onlySet">Only what is set</span></label>
+                        <label class="bk-check"><input type="checkbox" id="bp-deprecated"> <span data-i18n="options.browserPolicies.showDeprecated">Show deprecated</span></label>
+                        <button type="button" id="bp-json" class="secondary"><i class="fas fa-code"></i> JSON</button>
+                    </div>
+                    <p class="description bp-upstream" data-i18n="options.browserPolicies.upstreamText">Policy names and descriptions are the browser projects' own, in your language where the project publishes a translation and in English otherwise.</p>
+                    <div id="bp-body"></div>
+                </div>
+            </div>
+
             <div id="Bakery" class="tab-content">
                 <div class="card" id="bk-list">
                     <div class="card-header">
@@ -1522,6 +1568,10 @@
                     <div class="field">
                             <div class="field-text"><label for="install-app-template" data-i18n="options.modals.appTemplateLabel">Application Template</label><p class="description" data-i18n="options.modals.appTemplateDescription">Select a pre-configured template for advanced container launch settings.</p></div>
                             <div class="field-control"><select id="install-app-template" required></select></div>
+                        </div>
+                    <div class="field">
+                            <div class="field-text"><label for="install-browser-policy" data-i18n="options.modals.browserPolicyLabel">Browser Policy</label><p class="description" data-i18n="options.modals.browserPolicyDescription">Start every session of this application with a browser policy in force.</p></div>
+                            <div class="field-control"><select id="install-browser-policy"></select></div>
                         </div>
                     <div class="field wide">
                             <div class="field-text"><label for="install-autostart-script" data-i18n="options.modals.customAutostartScriptLabel">Custom Autostart Script</label><p class="description" data-i18n="options.modals.customAutostartScriptDescription">Customize autostart logic, leave blank to use default from application provider.</p></div>

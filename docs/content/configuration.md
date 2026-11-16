@@ -39,6 +39,7 @@ watcher only fires for edits made by someone else.
                                    pictures it names, served to the pages by this node
     installed_apps.yml             installed applications (references + overrides)
     proot_catalogs.yml             PRoot Apps catalogs: the apps each one holds
+    browser_policies.yml           browser policies: the settings of each, per engine
     bakery/recipes.yml             the Bakery's recipes, one per baked application
     bakery/files/<sha256>          the files recipes copy into their images
     app_templates/*.yml            application templates
@@ -78,6 +79,8 @@ watcher only fires for edits made by someone else.
   sealskin_app_icons/              icons uploaded for meta-apps
   sealskin_proot_apps/<id>/        this node's copy of each PRoot Apps catalog, mounted
                                    read-only at /mnt/proot-apps in the sessions assigned to it
+  sealskin_browser_policies/<id>/  the policy files of each browser policy, mounted read-only
+                                   where the browsers of a session read them
   sealskin_shared_store/<user>/    the users' shared files, on the node that holds the
                                    records of a cluster without a bucket
 ```

@@ -724,7 +724,7 @@ def _records_for_disk() -> list[dict[str, Any]]:
         data = record.model_dump()
         if not data.get("overrides"):
             data.pop("overrides", None)
-        for key in ("base_app_id", "home_template_name"):
+        for key in ("base_app_id", "home_template_name", "browser_policy"):
             if data.get(key) is None:
                 data.pop(key, None)
         output.append(data)

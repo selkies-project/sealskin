@@ -3,7 +3,10 @@
 !app/providers
 !app/routers
 !app/static
+!app/browser_policy_catalog
 !app/static/collaboration
 !tests/
+!scripts/
+app/browser_policy_catalog/l10n/
 __pycache__/
 *.pyc
