@@ -21,6 +21,7 @@ from pydantic import ValidationError
 
 from .. import (
     application_keys,
+    bakery,
     cluster,
     config_store,
     filesync,
@@ -405,6 +406,8 @@ def _with_status(app: InstalledApp) -> InstalledAppWithStatus:
         **app.model_dump(),
         image_sha=metadata.get("sha"),
         last_checked_at=metadata.get("last_checked_at"),
+        baked=app.id in state.bake_recipes,
+        held_by=bakery.held_by(app.id),
         pull_status=state.pull_status.get(app.provider_config.image),
     )
 
@@ -504,10 +507,17 @@ async def patch_installed_app(
 
 @router.delete("/apps/installed/{app_id}", status_code=204)
 async def delete_installed_app(app_id: str) -> Response:
-    """Uninstall an app (and purge a meta-app's icon and home template)."""
+    """Uninstall an app with its Bakery recipe (and purge a meta-app's icon and home template).
+
+    Raises:
+        HTTPException: 409 while a baked application, or a meta-app of a baked one, is built on it.
+    """
     record = state.installed_records.get(app_id)
     if not record:
         raise HTTPException(status_code=404, detail="Installed app not found.")
+    held_by = bakery.held_by(app_id)
+    if held_by:
+        raise HTTPException(status_code=409, detail=f"{', '.join(held_by)} are built on this application. Delete them first.")
 
     if record.is_meta_app:
         try:
@@ -534,6 +544,7 @@ async def delete_installed_app(app_id: str) -> Response:
 
     config_store.remove_record(app_id)
     await config_store.save_installed_apps()
+    await bakery.forget(app_id)
     return Response(status_code=204)
 
 
@@ -561,7 +572,7 @@ async def check_app_update(app_id: str) -> ImageUpdateCheckResponse:
 
 @router.post("/apps/installed/{app_id}/pull_latest", response_model=ImagePullResponse)
 async def pull_latest_app_image(app_id: str) -> ImagePullResponse:
-    """Pull the latest image of an app and refresh its autostart cache."""
+    """Pull the latest image of an app, refresh its autostart cache, and bake the recipes built on it."""
     app = state.installed_apps.get(app_id)
     if not app:
         raise HTTPException(status_code=404, detail="Installed app not found.")
@@ -571,6 +582,7 @@ async def pull_latest_app_image(app_id: str) -> ImagePullResponse:
         await config_store.refresh_autostart_for_app(app)
         await get_and_cache_image_metadata(image_name, force_refresh=True)
         await webclient.export_quietly(image_name)
+        await bakery.base_pulled(image_name)
         return ImagePullResponse(
             status="success", new_sha=state.image_metadata.get(image_name, {}).get("sha")
         )
@@ -581,7 +593,10 @@ async def pull_latest_app_image(app_id: str) -> ImagePullResponse:
 
 @router.post("/apps/meta", response_model=InstalledApp, status_code=201)
 async def create_meta_app(decrypted_body: dict[str, Any] = Depends(get_decrypted_request_body)) -> InstalledApp:
-    """Create a meta-app: a copy of an installed app with its own home template."""
+    """Create a meta-app: a copy of an installed app, or of a baked one, with its own home template.
+
+    One made from a baked application runs that application's baked image (`bakery.recipe_for`).
+    """
     try:
         req = CreateMetaAppRequest(**decrypted_body)
     except ValidationError as exc:
@@ -591,6 +606,10 @@ async def create_meta_app(decrypted_body: dict[str, Any] = Depends(get_decrypted
     if not base_record or not base_app:
         raise HTTPException(
             status_code=404, detail=f"Base application with ID '{req.base_app_id}' not found."
+        )
+    if base_record.is_meta_app and req.base_app_id not in state.bake_recipes:
+        raise HTTPException(
+            status_code=400, detail="A meta-app is made from an installed application or a baked one, not from another meta-app."
         )
 
     new_app_id = str(uuid.uuid4())

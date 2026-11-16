@@ -26,6 +26,7 @@ from fastapi import HTTPException
 
 from . import (
     audit,
+    bakery,
     cluster,
     config_store,
     filesync,
@@ -471,6 +472,7 @@ def build_launch_spec(
     collaboration: dict[str, Any] | None = None,
     forced_env: dict[str, str] | None = None,
     proot_catalog_path: str | None = None,
+    image: str | None = None,
 ) -> LaunchSpec:
     """Assemble the environment, volumes, and Docker options for a launch.
 
@@ -489,6 +491,8 @@ def build_launch_spec(
             own overrides; the user-level hardening from `hardening_env`.
         proot_catalog_path: This node's folder of the user's PRoot Apps catalog,
             mounted read-only at `prootapps.MOUNT_PATH`, or `None`.
+        image: The image the Bakery built for the application on this node
+            (`bakery.image_for`), run in place of the application's own, or `None`.
 
     Returns:
         A `LaunchSpec`.
@@ -514,6 +518,8 @@ def build_launch_spec(
 
     app_config = app.model_dump()
     provider_config = app_config.setdefault("provider_config", {})
+    if image:
+        provider_config["image"] = image
     provider_config["docker_overrides"] = merge_docker_overrides(
         provider_config.get("docker_overrides"), extract_docker_overrides(template_settings)
     )
@@ -665,6 +671,8 @@ async def _resolve_storage(
             template_path = safe_join(settings.home_templates_path, app.home_template_name or "")
         except ValueError:
             template_path = ""
+        if template_path and not os.path.isdir(template_path):
+            bakery.ensure_template(app)
         if not app.home_template_name or not template_path or not os.path.isdir(template_path):
             raise HTTPException(
                 status_code=500,
@@ -739,6 +747,7 @@ async def launch_application(
     auth_user: dict[str, Any] | None = None,
     vpn_id: str | None = None,
     vpn_endpoint: str | None = None,
+    baked_image: str | None = None,
 ) -> dict[str, str]:
     """Start a new session for a user on this node.
 
@@ -765,6 +774,8 @@ async def launch_application(
             limit applies.
         vpn_id: The VPN profile the session's traffic leaves through, or `None`.
         vpn_endpoint: The profile's endpoint to use, or `None` for the first offered.
+        baked_image: An image the Bakery built on this node to run in place
+            of the one sessions of the application run: a trial of a draft.
 
     Returns:
         `{"session_url": str, "session_id": str}`.
@@ -820,6 +831,11 @@ async def launch_application(
             "initial_tokens": {controller_token: {"role": "controller", "slot": None}},
         }
 
+    try:
+        image = baked_image or await bakery.image_for(app)
+    except HTTPException as exc:
+        progress.finish(error=str(exc.detail))
+        raise
     spec = build_launch_spec(
         app,
         session_id,
@@ -833,6 +849,7 @@ async def launch_application(
         collaboration=collaboration,
         forced_env=hardening_env(effective_settings),
         proot_catalog_path=prootapps.mount_path_for(effective_settings),
+        image=image,
     )
 
     quota.cap_resources(spec.app_config["provider_config"]["docker_overrides"], effective_settings)
@@ -878,7 +895,7 @@ async def launch_application(
         progress.step("client")
         try:
             web_root = await webclient.root_for_session(
-                app.provider_config.image, spec.env, required=native and not settings.session_isolation
+                image or app.provider_config.image, spec.env, required=native and not settings.session_isolation
             )
         except HTTPException:
             await provider.stop(instance["instance_id"])
@@ -1069,6 +1086,7 @@ async def ensure_container_for_session(
         collaboration=collaboration,
         forced_env=hardening_env(user_settings),
         proot_catalog_path=prootapps.mount_path_for(user_settings),
+        image=await bakery.image_for(app),
     )
 
     quota.cap_resources(spec.app_config["provider_config"]["docker_overrides"], user_settings)

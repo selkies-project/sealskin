@@ -39,6 +39,8 @@ watcher only fires for edits made by someone else.
                                    pictures it names, served to the pages by this node
     installed_apps.yml             installed applications (references + overrides)
     proot_catalogs.yml             PRoot Apps catalogs: the apps each one holds
+    bakery/recipes.yml             the Bakery's recipes, one per baked application
+    bakery/files/<sha256>          the files recipes copy into their images
     app_templates/*.yml            application templates
     autostart_cache/               cached autostart scripts per app
     keys/admins/<name>             administrator public keys

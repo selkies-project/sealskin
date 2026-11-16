@@ -89,9 +89,11 @@ class BaseProvider(ABC):
     Attributes:
         orphan_grace: Seconds an unreferenced instance may belong to a launch
             still in progress before `managed_instances` callers remove it.
+        bakes: Whether the backend builds images on its node (`build_image`), as the Bakery needs.
     """
 
     orphan_grace: float = READY_TIMEOUT * 2
+    bakes: bool = False
 
     def __init__(self, app_config: dict[str, Any] | None = None) -> None:
         """Bind the provider to an application.
@@ -176,6 +178,57 @@ class BaseProvider(ABC):
     @abstractmethod
     async def prune_images(self) -> None:
         """Remove images no session can use any more."""
+
+    async def build_image(
+        self,
+        context: bytes,
+        tag: str,
+        buildargs: dict[str, str],
+        labels: dict[str, str],
+        log: Callable[[str], None],
+        fresh: bool = False,
+        idle: int = 900,
+    ) -> str:
+        """Build an image on this node from a tar build context holding a `Dockerfile`.
+
+        The build pulls nothing it finds on the node and is handed no
+        registry credential.
+
+        Args:
+            context: The build context, a tar archive.
+            tag: The reference the image is tagged with.
+            buildargs: The build arguments.
+            labels: Labels of the image.
+            log: Takes each line the builder prints; called from another thread.
+            fresh: Use no layer of an earlier build.
+            idle: Seconds the builder may print nothing before the build is given up.
+
+        Returns:
+            The id of the image.
+
+        Raises:
+            RuntimeError: When the backend builds no images, or the build fails.
+        """
+        raise RuntimeError("This server's backend builds no images.")
+
+    async def built_images(self, labels: dict[str, str]) -> list[str]:
+        """Return the tags of the node's images that carry every one of `labels`."""
+        return []
+
+    async def remove_image(self, reference: str) -> bool:
+        """Remove an image no container uses; `False` when it stays."""
+        return False
+
+    async def run_once(self, image: str, script: str, timeout: int) -> tuple[int, str]:
+        """Run a shell script in a throwaway instance of an image and return its exit code and output.
+
+        The instance has the network a session has, nothing mounted, and is
+        gone when this returns.
+
+        Raises:
+            RuntimeError: When the backend cannot, or the script outlives `timeout`.
+        """
+        raise RuntimeError("This server's backend runs no throwaway instances.")
 
     async def open_url(self, instance_id: str, url: str) -> bool:
         """Hand a running instance an address to open in the application it shows (see `OPEN_URL_SCRIPT`).

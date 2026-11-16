@@ -361,8 +361,9 @@ the default templates directory cannot be deleted from the UI.
 
 The laboratory builds a **meta-app**: a variant of an installed app with its
 own name, icon, autostart script, and, most usefully, a pre-populated home
-directory. Choose the base app, name the new one, upload an icon, optionally
-paste an autostart script (the Wayland and X11 variants are separate), and
+directory. The base is an installed app or one the [Bakery](#bakery) baked,
+whose baked image the meta-app then runs. Choose the base app, name the new
+one, upload an icon, optionally paste an autostart script (the Wayland and X11 variants are separate), and
 pick who may use it, then **Save & Launch Customization Session**.
 
 That session runs the base app with the meta-app's **home template** mounted
@@ -383,6 +384,101 @@ For users, a meta-app behaves like any other app, except that the first
 launch copies the template into their `auto-<name>` home directory, and a
 cleanroom launch copies it into the ephemeral one. Deleting a meta-app
 removes its icon and template.
+
+## Bakery
+
+The Bakery bakes a new application on top of one you installed: packages
+the image does not ship, files, certificates, fonts, anything a Dockerfile can
+do, under a name and an icon of its own. Bake as many as you need from the
+same application: three Chromiums with three sets of packages are three
+recipes built on Chromium. Where the App Laboratory prepares a home
+directory, the Bakery changes the image under it, and the two stack: the
+laboratory offers every baked application as a base, and a meta-app made
+from one runs its baked image with the home template the laboratory kept.
+A session mounts its home directory at `/config`, over whatever the image
+holds there, so a recipe puts its files anywhere else and the laboratory
+keeps what belongs in the home.
+
+**New Recipe** opens the bench. **Build on** lists the applications
+installed from a store; an application the laboratory or the Bakery made is
+not one to build on. Give the baked application its **Name** and, if you
+like, an **Icon**. The image's distribution is read from the image itself
+and shown beside its reference; **Distribution** overrides it for an image
+that does not say. **Clear recipe** empties the steps, the Dockerfile, and
+the uploaded files, and leaves the application, its name, and its icon.
+
+In **Guided** mode the left pane is a list of steps and the right pane the
+Dockerfile they render to, which follows every change; pointing at a step
+lights its lines and clicking a line opens its step. The first line, `FROM`
+the application's image, is not yours to change. The steps:
+
+| Step | What it renders |
+| --- | --- |
+| Install packages | One `RUN` that installs with the image's package manager (`apk`, `pacman`, `apt-get`, `dnf`) and removes the caches the install left, the way the linuxserver images do. The search box lists the packages the image itself can install. |
+| Copy files | `COPY` of files you upload to a path in the image, made executable or unpacked from a tar archive if you ask. |
+| Trust certificates | Your certificates in the distribution's trust store, and the command that takes them up. |
+| Environment | `ENV` lines. |
+
+Anything else, a download, a font, a command of your own, is written in
+developer mode.
+
+A step can be left out of the build with the eye, without deleting it.
+
+**Developer** mode is the Dockerfile itself, built exactly as written; it
+starts from what the steps rendered. The application's image is the build
+argument `BASE_IMAGE`: declare it with `ARG BASE_IMAGE` before the first
+`FROM`, write build stages wherever you need them, and end on a stage that
+starts `FROM ${BASE_IMAGE}`. The left pane holds the recipe's files, each
+under `files/` in the build context, and snippets that are rendered and put
+at the cursor: the guided steps, a download checked against a SHA-256, and
+fonts. Under the text the page says what a session
+would not survive (a last stage that is not the application's image, a
+`USER` other than root, a replaced `ENTRYPOINT`, files under `/config`) and
+what the node's builder does not read: builds use Docker's classic builder,
+so BuildKit's `RUN --mount`, `COPY --chmod`, and here-documents are refused.
+These are warnings, and the build is yours to run.
+
+**Build a trial** builds the draft on the node the page is served from and
+shows the builder's output as it comes. It changes nothing users run. When
+it has built, **Open a trial session** launches the application on that
+image with an empty home directory. **Save & bake** is the last step: it
+keeps the recipe, adds the application, and returns to the list, where the
+build's output runs under the table until it says the application is baked.
+Every other node of a cluster builds it too when it sees the record. New
+sessions run the new image once it has built; sessions already running keep
+theirs. The terminal button of a row shows that recipe's build again, live
+while one runs.
+
+A baked image is rebuilt whenever its application's image is pulled again,
+by the auto-update job or **Pull Latest**, and the rotate button in the list
+bakes from scratch to take the distribution's current packages. When a build
+fails, sessions keep running the last image that built and the list shows
+**Failed** with the builder's output one click away; an application whose
+recipe has never built on a node waits for the build at its first launch
+there and fails with it.
+
+A baked application and its recipe are one thing. Deleting it, here or
+under **Installed Apps**, removes both. An application cannot be deleted
+while something is built on it: an installed app while a baked application
+is built on it, a baked application while a laboratory meta-app is built on
+it. **Installed Apps** lists every application under the one it is built
+on: a row that says **2 built on this** opens to show its baked
+applications, and a baked one opens to show its laboratory meta-apps. The
+row's **Delete** carries a lock and names what holds it; delete those
+first. **Edit** on a baked application opens its recipe here. The
+laboratory offers a baked application as a base only, never as a meta-app
+to customize.
+
+The recipes are `bakery/recipes.yml` and their uploaded files under
+[`SEALSKIN_BAKERY_PATH`](settings.md), shared by the nodes of a cluster; the
+images are each node's own, tagged `sealskin.local/bake/<application
+id>:<key>`. In a cluster every node builds a recipe when it sees the record,
+or at the first launch there when it has not pulled the application's image
+yet, and the list shows the state of the image on each node under this
+node's. A baked application's icon, like any uploaded icon, stays on the
+node it was uploaded to. A build is given no registry credential: it starts from the
+image the node already pulled. The Bakery needs the Docker provider; on
+Kubernetes the tab says so and recipes cannot be saved.
 
 ## Sessions
 

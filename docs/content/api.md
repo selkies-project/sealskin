@@ -112,7 +112,7 @@ proxy's: a key, or a key-file client, cannot manage keys.
 | `POST /api/launch/url` | encrypted, user | As above plus `url`; the container receives `SEALSKIN_URL`. |
 | `POST /api/launch/file` | encrypted, user | As above plus `filename`, `upload_id`, `total_chunks`, `open_file_on_launch?`; the uploaded file is placed in `Desktop/files` and, if requested, `SEALSKIN_FILE` points at it. |
 | `POST /api/launch/file_path` | encrypted, user, persistent storage | Launch with a file already in the caller's shared files (`filename`). |
-| `GET /api/launch/progress/{launch_id}` | encrypted, user | Where a launch is. Any launch request may carry `launch_id`, a UUID the client makes up; this answers `stage` (`placing`, `forwarding`, `storage`, `files`, `image`, `starting`, `waiting`, `ready`, or `failed`), `detail` (`node`, `image`), `elapsed`, and, at the end, `session_url` and `session_id` or `error`. |
+| `GET /api/launch/progress/{launch_id}` | encrypted, user | Where a launch is. Any launch request may carry `launch_id`, a UUID the client makes up; this answers `stage` (`placing`, `forwarding`, `storage`, `files`, `baking`, `image`, `starting`, `waiting`, `ready`, or `failed`), `detail` (`node`, `image`), `elapsed`, and, at the end, `session_url` and `session_id` or `error`. |
 
 A launch returns `{"session_url", "session_id"}`; `session_url` is relative
 to the session port and contains the one-time access token.
@@ -205,10 +205,10 @@ All *encrypted, admin*.
 | `POST /api/admin/apps/installed` | Install from a store entry. |
 | `PUT /api/admin/apps/installed/{app_id}` | Replace with a full definition. |
 | `PATCH /api/admin/apps/installed/{app_id}` | Partial update: record fields (`users`, `groups`, `app_template`, `auto_update`) apply directly, anything else becomes an override. |
-| `DELETE /api/admin/apps/installed/{app_id}` | Uninstall (purges a meta-app's icon and template). |
+| `DELETE /api/admin/apps/installed/{app_id}` | Uninstall (purges a meta-app's icon and template, and a baked application's recipe); `409` while a baked application, or a meta-app of a baked one, is built on it. |
 | `POST /api/admin/apps/installed/{app_id}/check_update` | Compare the local image digest with the registry. |
 | `POST /api/admin/apps/installed/{app_id}/pull_latest` | Pull the newest image. |
-| `POST /api/admin/apps/meta` | Create a meta-app (`name`, `base_app_id`, `logo`, autostart scripts, `users`, `groups`). |
+| `POST /api/admin/apps/meta` | Create a meta-app (`name`, `base_app_id`, `logo`, autostart scripts, `users`, `groups`) of an installed application or a baked one. |
 | `POST /api/admin/launch/meta_customize` | Launch a meta-app with its template mounted read-write; `409` while the caller has one open. |
 | `GET`/`POST /api/admin/apps/templates`, `DELETE /api/admin/apps/templates/{name}` | Templates; also open to a user allowed to edit app templates, short of their `DOCKER_*` and `KUBERNETES_*` settings. |
 | `GET /api/admin/sessions` | Every session grouped by user. |
@@ -218,6 +218,16 @@ All *encrypted, admin*.
 | `DELETE /api/admin/branding` | Back to the defaults: the record and the pictures are removed. |
 | `POST`/`DELETE /api/admin/branding/{logo\|wallpaper}` | With `?brand=<id>` for a variant's own picture. Body `{data}`, a base64 PNG, JPEG, or WebP (1 MB for the logo, 8 MB for the wallpaper): keep or remove a picture. |
 | `GET /api/admin/proot/catalogs`, `POST /api/admin/proot/catalogs`, `PUT`/`DELETE /api/admin/proot/catalogs/{id}`, `POST /api/admin/proot/catalogs/{id}/update` | PRoot Apps catalogs: list them with the state of this node's copy, create, replace, delete, or fetch one again on every node. |
+| `GET /api/admin/bakery` | The Bakery's recipes, each with the state of this node's image (`pending`, `building`, `ready`, `error`), whether this node builds images (`available`), and the distribution `families`. |
+| `GET /api/admin/bakery/base/{app_id}` | What a recipe of the application builds on: `image`, `image_id`, and the `family`, `manager`, and `distribution` read from the image's `os-release`. |
+| `POST /api/admin/bakery/preview/{app_id}` | Render a draft recipe (`mode`, `family`, `steps`, `dockerfile`, `files`, `enabled`) without keeping it: `dockerfile`, the lines of each step in `blocks`, and `problems`. |
+| `POST /api/admin/bakery/files` | Keep a finished chunked upload (`upload_id`, `total_chunks`, `filename`, up to 64 MiB) as a file recipes copy into images; answers its `name`, `hash`, and `size`. |
+| `GET /api/admin/bakery/packages/{app_id}?q=` | Search the packages the application's image can install; `state` is `indexing` while the list is read from the image the first time. |
+| `POST /api/admin/bakery/apps` | Make a baked application: the recipe with a `name`, the `base_app_id` of an installed application, and a `logo`. The application and its recipe are kept together or not at all; `409` for a name in use. |
+| `PUT`/`DELETE /api/admin/bakery/recipes/{app_id}` | Replace a baked application's recipe and bake it on this node, or delete the baked application with its recipe; `409` while a meta-app is built on it. |
+| `POST /api/admin/bakery/recipes/{app_id}/build`, `GET /api/admin/bakery/recipes/{app_id}/log` | Bake a saved recipe now, with `?fresh=true` from scratch; the output of its last build on this node. |
+| `POST /api/admin/bakery/builds/{app_id}`, `GET /api/admin/bakery/builds/{build_id}?after=` | Build a draft recipe without keeping it; a build's `state` (`queued`, `building`, `ready`, `failed`) and the lines of its output past `after`. |
+| `POST /api/admin/bakery/try` | Launch a session of a build's application on the image the build made (`build_id`, `launch_id`, `timezone`, `selected_gpu`, `wayland_mode`), with an empty home directory. |
 | `GET /api/admin/proot/remote?repo=` | The apps a PRoot Apps remote (a GitHub `owner/repo`) publishes. |
 | `GET /api/admin/vpn`, `POST /api/admin/vpn/import` | VPN profiles with their gateways; make profiles of an uploaded WireGuard or OpenVPN file or archive (multipart `file`, `kind`, credentials). |
 | `PUT`/`DELETE /api/admin/vpn/{id}`, `POST /api/admin/vpn/{id}/endpoints` | Change a profile's name, published endpoints, cap, access, or credentials; delete it, its gateways staying up until their sessions end; add the endpoints of another file. |

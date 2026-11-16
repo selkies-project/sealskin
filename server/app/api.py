@@ -20,6 +20,7 @@ from fastapi.responses import JSONResponse
 
 from . import (
     application_keys,
+    bakery,
     branding,
     cluster,
     collaboration,
@@ -57,6 +58,7 @@ from .routers import (
     uploads,
 )
 from .routers import application_keys as key_routes
+from .routers import bakery as bakery_routes
 from .routers import branding as branding_routes
 from .routers import dashboards as dashboard_routes
 from .routers import sso as sso_routes
@@ -105,6 +107,13 @@ async def background_update_job() -> None:
         await prootapps.auto_update()
 
 
+async def background_bakery_job() -> None:
+    """Periodically remove the baked images, build records, and recipe files nothing uses."""
+    while True:
+        await asyncio.sleep(bakery.PRUNE_SECONDS)
+        await bakery.prune()
+
+
 async def background_share_cleanup_job() -> None:
     """Periodically delete expired public shares."""
     while True:
@@ -130,6 +139,13 @@ async def _reload_templates(_path: str) -> None:
     """Watcher callback: reload templates after an external edit."""
     logger.info("App templates changed on disk; reloading.")
     await asyncio.to_thread(config_store.load_app_templates)
+
+
+async def _reload_bakery(_path: str) -> None:
+    """Watcher callback: reload the Bakery's recipes and bake what this node has not built."""
+    logger.info("The Bakery's recipes changed; reloading.")
+    await asyncio.to_thread(bakery.load)
+    bakery.reconcile()
 
 
 async def _reload_proot_catalogs(_path: str) -> None:
@@ -176,6 +192,7 @@ def _catch_up() -> None:
     config_store.load_app_templates()
     config_store.load_installed_apps()
     prootapps.load_catalogs()
+    bakery.load()
     vpn.load()
 
 
@@ -241,6 +258,7 @@ def _watch_targets() -> dict[str, persistence.ReloadCallback]:
         settings.app_templates_path: _reload_templates,
         settings.proot_catalogs_path: _reload_proot_catalogs,
         settings.vpn_profiles_path: _reload_vpn,
+        settings.bakery_path: _reload_bakery,
         os.path.join(settings.keys_base_path, "users"): _reload_users,
         os.path.join(settings.keys_base_path, "admins"): _reload_users,
         settings.groups_base_path: _reload_users,
@@ -344,12 +362,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     config_store.load_installed_apps()
     prootapps.load_catalogs()
     prootapps.reconcile()
+    bakery.load()
     vpn.load()
 
     logger.info("Populating initial image metadata cache...")
     for image_name in {app.provider_config.image for app in state.installed_apps.values()}:
         await get_and_cache_image_metadata(image_name)
     logger.info("Image metadata cache populated.")
+    bakery.reconcile()
 
     tasks: list[asyncio.Task] = []
     stop_event = asyncio.Event()
@@ -359,6 +379,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     tasks.append(asyncio.create_task(background_reconcile_job()))
     tasks.append(asyncio.create_task(background_peer_job()))
     tasks.append(asyncio.create_task(background_usage_job()))
+    tasks.append(asyncio.create_task(background_bakery_job()))
     if not store.is_local():
         tasks.append(
             asyncio.create_task(
@@ -378,6 +399,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
         await prootapps.wait_for_syncs()
+        await bakery.stop()
         quota.tick()
         await quota.flush()
         logger.info("Background tasks stopped.")
@@ -431,6 +453,7 @@ def create_app() -> FastAPI:
     app.include_router(dashboard_routes.user_router)
     app.include_router(dashboard_routes.admin_router)
     app.include_router(vpn_routes.admin_router)
+    app.include_router(bakery_routes.admin_router)
     app.include_router(peer.router)
     app.include_router(cluster_admin.router)
     app.include_router(cluster_admin.user_router)

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 import uuid
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -554,10 +554,12 @@ class InstalledAppRecord(BaseModel):
 
 
 class InstalledAppWithStatus(InstalledApp):
-    """Installed app plus image status for the admin UI."""
+    """Installed app plus image status for the admin UI; `baked` says the app has a Bakery recipe, `held_by` names the apps built on it that keep it from being deleted."""
 
     image_sha: str | None = None
     last_checked_at: float | None = None
+    baked: bool = False
+    held_by: list[str] = []
     pull_status: str | None = None
 
 
@@ -944,6 +946,98 @@ class VpnProfileUpdate(BaseModel):
     endpoints: list[VpnEndpointEdit] | None = None
     username: str | None = None
     password: str | None = None
+
+
+class BakeFile(BaseModel):
+    """A file a Bakery recipe copies into its image.
+
+    Attributes:
+        name: The name it has in the build context, under `files/`.
+        hash: SHA-256 of its content, which names the shared object that holds it.
+        size: Its size in bytes.
+    """
+
+    name: str
+    hash: str
+    size: int = 0
+
+
+class BakeEnv(BaseModel):
+    """One environment variable an `env` step sets in the image."""
+
+    name: str
+    value: str = ""
+
+
+class BakeStep(BaseModel):
+    """One step of a guided Bakery recipe; `app.bakery` renders each kind to Dockerfile lines.
+
+    Attributes:
+        id: What the editor and the rendered blocks name the step by.
+        kind: `packages` installs with the distribution's package manager; `files` copies
+            uploaded files to `dest`; `download` fetches `url`; `certificates` trusts
+            uploaded certificates; `fonts` installs uploaded fonts; `env` sets variables;
+            `run` runs shell commands; `raw` is Dockerfile text as written.
+        note: The step's title in the build log.
+        enabled: Whether the step is rendered.
+        packages: Package names of a `packages` step.
+        files: Names of the recipe's files a `files`, `certificates`, or `fonts` step takes.
+        dest: Where a `files` step copies to, or a `download` step saves or unpacks to.
+        executable: Make the copied or downloaded file executable.
+        extract: Unpack the tar archives of a `files` step at `dest`.
+        url: The address a `download` step fetches.
+        sha256: The checksum the download must have, or empty.
+        action: What a `download` step does with the file: `save` it at `dest`,
+            `extract` it there, or `install` it as a package.
+        env: The variables of an `env` step.
+        script: The shell commands of a `run` step, one per line.
+        text: The instructions of a `raw` step.
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    id: str = Field(default_factory=lambda: uuid.uuid4().hex[:8])
+    kind: Literal["packages", "files", "download", "certificates", "fonts", "env", "run", "raw"]
+    note: str = Field(default="", max_length=120)
+    enabled: bool = True
+    packages: list[str] = []
+    files: list[str] = []
+    dest: str = ""
+    executable: bool = False
+    extract: bool = False
+    url: str = ""
+    sha256: str = ""
+    action: Literal["save", "extract", "install"] = "save"
+    env: list[BakeEnv] = []
+    script: str = ""
+    text: str = ""
+
+
+class BakeRecipe(BaseModel):
+    """A Bakery recipe: the layer an administrator builds on one application's image.
+
+    Attributes:
+        app_id: The installed application whose image the recipe builds on, and whose sessions run the result.
+        mode: `guided` renders `steps`; `dockerfile` builds `dockerfile` as written.
+        family: The distribution family the steps render for, overriding the image's own
+            (`alpine`, `arch`, `debian`, `fedora`), or empty.
+        steps: The steps of a guided recipe, in order.
+        dockerfile: The text of a `dockerfile` recipe; the application's image is its `BASE_IMAGE` build argument.
+        files: The files the build context holds under `files/`.
+        enabled: Whether sessions run the baked image; off, they run the application's own.
+        revision: Counts the saves.
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    app_id: str
+    mode: Literal["guided", "dockerfile"] = "guided"
+    family: str = ""
+    steps: list[BakeStep] = Field(default_factory=list, max_length=200)
+    dockerfile: str = ""
+    files: list[BakeFile] = []
+    enabled: bool = True
+    revision: int = 0
 
 
 class ProotCatalogApp(BaseModel):

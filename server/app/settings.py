@@ -141,6 +141,21 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         ),
     },
     {
+        "name": "bakery_path",
+        "type": "str",
+        "default": "/config/.config/sealskin/bakery",
+        "help": (
+            "Directory of the Bakery's recipes (`recipes.yml`) and the files they copy into "
+            "images, shared by the nodes of a cluster."
+        ),
+    },
+    {
+        "name": "bakery_build_idle_seconds",
+        "type": "int",
+        "default": 900,
+        "help": "Seconds a Bakery build may print nothing before the node gives it up.",
+    },
+    {
         "name": "vpn_profiles_path",
         "type": "str",
         "default": "/config/.config/sealskin/vpn_profiles.yml",
