@@ -308,6 +308,7 @@ only grants one thing is written.
 | `session_limit` | Sessions at once, counted on every node. |
 | `session_cpus`, `session_memory_mb` | Cap on each session's container, below what the app or its template asks. |
 | `session_hours` | A session this old is stopped. |
+| `session_idle_minutes` | A session nobody has had open for this many minutes is stopped. A session left open in a tab counts as open, and so does one whose image does not report its connections. |
 | `allowance_hours`, `allowance_period` | Session hours per day, week, or month (UTC), weighted by the [pool's cost](cluster.md#pools). A user out of allowance starts nothing new. |
 | `storage_limit` | Gigabytes in the user's directories on a node; at the limit, uploads and persistent launches are refused. |
 

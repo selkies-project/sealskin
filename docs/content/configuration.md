@@ -186,6 +186,7 @@ session_limit: -1
 session_cpus: -1
 session_memory_mb: -1
 session_hours: -1
+session_idle_minutes: -1
 allowance_hours: -1
 allowance_period: month
 pools: []

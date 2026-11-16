@@ -31,6 +31,7 @@ from . import (
     cluster,
     config_store,
     filesync,
+    presence,
     progress,
     prootapps,
     quota,
@@ -1220,6 +1221,7 @@ async def reconcile_sessions() -> None:
     referenced: set[str] = set()
     changed = False
     quota.tick()
+    await presence.watch(quota.watched())
     for session_id, reason in quota.overdue():
         logger.info("[%s] Ending the session: %s.", session_id, reason)
         await stop_session(session_id)

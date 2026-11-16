@@ -6,6 +6,8 @@
 * **Session size.** `session_cpus` and `session_memory_mb` cap each session's
   container, below whatever the app or its template asks for.
 * **Session length.** `session_hours` ends a session that old.
+* **Time alone.** `session_idle_minutes` ends a session no page has been
+  connected to for that long, as `presence` tells it.
 * **Allowance.** `allowance_hours` per `allowance_period` (`day`, `week`, or
   `month`, in UTC) is spent by session time, weighted by the `cost` of the
   pool the session runs in (`gpu_cost` for a GPU session), so an hour on a
@@ -32,7 +34,7 @@ from typing import Any
 
 from fastapi import HTTPException
 
-from . import cluster, persistence
+from . import cluster, persistence, presence
 from .settings import settings
 from .state import state
 
@@ -253,31 +255,54 @@ async def check_storage(user: dict[str, Any]) -> None:
         )
 
 
-def overdue() -> list[tuple[str, str]]:
-    """Return the sessions on this node to end now, each with the reason.
-
-    That is a session older than its user's `session_hours`, and, in a pool
-    with `stop_when_spent`, one whose user is out of allowance.
-    """
+def _bound() -> list[tuple[str, dict[str, Any], dict[str, Any]]]:
+    """Return this node's sessions whose user is under limits, each with its record and the user's settings."""
     from . import user_manager
 
-    ending: list[tuple[str, str]] = []
-    pool = cluster.pool_record(cluster.pool_of(cluster.NODE_ID))
-    now = time.time()
+    bound = []
     for session_id, data in state.sessions.items():
         username = data.get("username") or ""
         record = user_manager.get_user(username)
         if not record or record.get("is_admin"):
             continue
         effective = user_manager.get_effective_settings(username, data.get("provider_groups") or ())
-        if effective.get("admin"):
-            continue
-        hours = effective.get("session_hours", -1)
-        if hours is not None and hours >= 0 and now - float(data.get("created_at") or now) >= hours * 3600:
+        if not effective.get("admin"):
+            bound.append((session_id, data, effective))
+    return bound
+
+
+def _limit(effective: dict[str, Any], name: str) -> float | None:
+    """Return a limit of a user's settings, or `None` where it sets none."""
+    value = effective.get(name, -1)
+    return value if value is not None and value >= 0 else None
+
+
+def watched() -> list[str]:
+    """Return the sessions on this node whose user has a `session_idle_minutes`, for `presence.watch`."""
+    return [session_id for session_id, _data, effective in _bound() if _limit(effective, "session_idle_minutes") is not None]
+
+
+def overdue() -> list[tuple[str, str]]:
+    """Return the sessions on this node to end now, each with the reason.
+
+    That is a session older than its user's `session_hours`, one no page has
+    been connected to for its user's `session_idle_minutes`, and, in a pool
+    with `stop_when_spent`, one whose user is out of allowance.
+    """
+    ending: list[tuple[str, str]] = []
+    pool = cluster.pool_record(cluster.pool_of(cluster.NODE_ID))
+    now = time.time()
+    for session_id, data, effective in _bound():
+        hours = _limit(effective, "session_hours")
+        if hours is not None and now - float(data.get("created_at") or now) >= hours * 3600:
             ending.append((session_id, f"it reached the session length of {hours} hour(s)"))
             continue
+        minutes = _limit(effective, "session_idle_minutes")
+        if minutes is not None and presence.alone_seconds(session_id) >= minutes * 60:
+            ending.append((session_id, f"nobody was connected to it for {minutes} minute(s)"))
+            continue
         if pool.get("stop_when_spent"):
-            spent = allowance({"username": username, "effective_settings": effective})
+            spent = allowance({"username": data.get("username") or "", "effective_settings": effective})
             if spent and spent["used"] >= spent["hours"]:
                 ending.append((session_id, "its user's allowance is spent"))
     return ending

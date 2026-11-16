@@ -660,6 +660,7 @@ class UserSettings(BaseModel):
         session_cpus: CPUs per session; negative for no limit.
         session_memory_mb: Megabytes of memory per session; negative for no limit.
         session_hours: Hours a session may run; negative for no limit.
+        session_idle_minutes: Minutes a session may run with no page connected to it; negative for no limit.
         allowance_hours: Weighted session hours per `allowance_period`; negative for no limit.
         allowance_period: `day`, `week`, or `month`.
         pools: Restricted pools open to the user.
@@ -695,6 +696,7 @@ class UserSettings(BaseModel):
     session_cpus: float = -1
     session_memory_mb: int = -1
     session_hours: float = -1
+    session_idle_minutes: float = -1
     allowance_hours: float = -1
     allowance_period: str = Field(default="month", pattern=r"^(day|week|month)$")
     pools: list[str] = []
@@ -739,6 +741,7 @@ class GroupSettings(BaseModel):
     session_cpus: float | None = None
     session_memory_mb: int | None = None
     session_hours: float | None = None
+    session_idle_minutes: float | None = None
     allowance_hours: float | None = None
     allowance_period: str | None = Field(default=None, pattern=r"^(day|week|month)$")
     pools: list[str] = []

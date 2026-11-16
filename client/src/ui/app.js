@@ -248,6 +248,7 @@ function renderProfile(status) {
       [t('web.profile.cpus'), esc(limitOf(settings.session_cpus, (n) => String(n)))],
       [t('web.profile.memory'), esc(limitOf(settings.session_memory_mb, (n) => formatBytes(n * 1024 * 1024, t, 0)))],
       [t('web.profile.hours'), esc(limitOf(settings.session_hours, (n) => t('web.profile.hoursValue', { hours: n })))],
+      [t('web.profile.alone'), esc(limitOf(settings.session_idle_minutes, (n) => t('web.profile.aloneValue', { minutes: n })))],
       settings.persistent_storage ? [
         t('web.profile.storage'),
         esc(formatBytes(status.storage_used || 0, t, 1) + (storage > 0 ? ` / ${storage} ${t('common.gb')}` : '')) + meter(status.storage_used || 0, storage * 1024 ** 3),

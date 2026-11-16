@@ -51,7 +51,7 @@ _CACHE: dict[str, tuple[float, dict[str, Any] | None]] = {}
 _INFLIGHT: dict[str, asyncio.Future[dict[str, Any] | None]] = {}
 
 
-def _credentials(session: dict[str, Any]) -> tuple[dict[str, str], dict[str, str]]:
+def credentials(session: dict[str, Any]) -> tuple[dict[str, str], dict[str, str]]:
     """Return the headers and query that let this server into a session's container API."""
     headers: dict[str, str] = {}
     query: dict[str, str] = {}
@@ -84,7 +84,7 @@ def _shrink(png: bytes) -> dict[str, Any]:
 async def _capture(session_id: str, session: dict[str, Any]) -> dict[str, Any] | None:
     """Ask the session's container for a screenshot and shrink it, or return `None` when it gives none."""
     url = f"http://{host_port(session['ip'], session['port'])}/{session_id}/api/screenshot"
-    headers, query = _credentials(session)
+    headers, query = credentials(session)
     try:
         async with httpx.AsyncClient(timeout=TIMEOUT) as client:
             answer = await client.get(url, headers=headers, params=query)

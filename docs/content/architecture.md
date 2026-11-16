@@ -377,6 +377,7 @@ server/app/store.py           the object store: files, S3, another node's files,
 server/app/cluster.py         node identity, registry, peer calls, live state, placement, joining
 server/app/routing.py         dependencies that forward a request to the node it concerns
 server/app/quota.py           session, storage, and time limits; usage records
+server/app/presence.py        whether anyone has a session open, as its Selkies reports
 server/app/progress.py        the stage a launch is at, for the page that waits on it
 server/app/homes.py           moving a home directory between nodes
 server/app/filesync.py        the users' shared files kept in the store
