@@ -24,7 +24,11 @@ Every node runs the same image. What a node does is its roles, set with
 | `runtime` | Runs sessions, in Docker or Kubernetes. |
 
 The default is both. A node with only `runtime` needs no public name and no
-published session port: browsers never reach it, the frontends do.
+published session port: browsers never reach it, the frontends do. A node
+that joined a file store's cluster to run sessions alone keeps the roles,
+pool, and approval it was admitted with, whatever it is started with later:
+to make it a frontend, remove it in the dashboard and join it again with a
+new code.
 
 A node is its name: `SEALSKIN_NODE_NAME`, else the name of its container in
 Docker, else the host name. Give every node one of its own. The other nodes

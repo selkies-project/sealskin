@@ -11,6 +11,7 @@ import os
 import re
 from typing import Any
 
+import yaml
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel
 
@@ -90,6 +91,40 @@ def _shared(key: str) -> str:
     return key
 
 
+#: What a node's record says of its standing in the cluster, which the node itself never changes.
+STANDING = ("roles", "approved", "pool", "joined_at")
+
+
+def _own_record(keeper: store.FileStore, key: str, content: bytes, node: dict[str, Any]) -> bytes:
+    """Return a node's rewrite of its own record with its standing as the record held it.
+
+    A node that only runs sessions was admitted as that: more roles, another
+    pool, or an approval are an administrator's to give, or a new join's.
+
+    Raises:
+        HTTPException: 400 for a record that does not parse, 403 where the node has no record to keep.
+    """
+    held = keeper.get(key)
+    try:
+        written = yaml.safe_load(content)
+        kept = yaml.safe_load(held[0]) if held else None
+    except yaml.YAMLError as exc:
+        raise HTTPException(status_code=400, detail="Not a node record.") from exc
+    if not isinstance(written, dict) or not isinstance(kept, dict):
+        raise HTTPException(status_code=403, detail="This node may not write that object.")
+    if sorted(written.get("roles") or []) != sorted(kept.get("roles") or []):
+        logger.warning(
+            "Node '%s' asked for the roles %s and keeps %s: a node joins again to change its roles.",
+            node["id"], written.get("roles"), kept.get("roles"),
+        )  # fmt: skip
+    for field in STANDING:
+        if field in kept:
+            written[field] = kept[field]
+        else:
+            written.pop(field, None)
+    return yaml.safe_dump(written, sort_keys=False).encode()
+
+
 @router.get("/store/{key:path}")
 async def store_get(key: str, request: Request, _node: dict[str, Any] = Depends(peer)) -> Response:
     """Return a shared object, or the entity tags under a prefix when `X-SealSkin-List` names one."""
@@ -111,10 +146,13 @@ async def store_put(key: str, request: Request, node: dict[str, Any] = Depends(p
     keeper = _keeper()
     if not cluster.may_write(node, _shared(key)):
         raise HTTPException(status_code=403, detail="This node may not write that object.")
+    content = await request.body()
+    if key == f"cluster/nodes/{node['id']}.yml" and "frontend" not in (node.get("roles") or []):
+        content = _own_record(keeper, key, content, node)
     try:
         tag = keeper.put(
             key,
-            await request.body(),
+            content,
             if_match=request.headers.get("if-match"),
             if_absent=request.headers.get("if-none-match") == "*",
         )

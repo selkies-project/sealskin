@@ -5,6 +5,7 @@ import time
 
 import httpx
 import pytest
+import yaml
 from cryptography.hazmat.primitives import serialization
 from fastapi import HTTPException, Request
 from fastapi.testclient import TestClient
@@ -190,8 +191,15 @@ def test_the_keeper_serves_shared_objects_to_peers_within_what_each_may_write(no
     assert f"cluster/nodes/{cluster.NODE_ID}.yml" in send("GET", "/peer/store/", headers={"x-sealskin-list": "cluster/"}).json()
     assert send("PUT", "/peer/store/keys/users/mallory", b"x").status_code == 403
     own = f"/peer/store/cluster/nodes/{node_id}.yml"
-    assert send("PUT", own, b"id: x\n", {"if-none-match": "*"}).status_code == 200
+    # A node with no record has no standing to keep.
+    assert send("PUT", own, b"id: x\n", {"if-none-match": "*"}).status_code == 403
+    persistence.write_yaml_sync(cluster.node_file(node_id), dict(cluster.NODES[node_id]))
     assert send("PUT", own, b"id: y\n", {"if-none-match": "*"}).status_code == 412
+    # It rewrites its own record, and keeps the roles, approval, and pool it was admitted with.
+    asked = yaml.safe_dump({**cluster.NODES[node_id], "name": "bravo2", "roles": ["frontend", "runtime"], "pool": "gpu"}).encode()
+    assert send("PUT", own, asked).status_code == 200
+    kept = persistence.read_yaml(cluster.node_file(node_id), None)
+    assert (kept["name"], kept["roles"], kept["pool"], kept["approved"]) == ("bravo2", ["runtime"], "default", True)
 
 
 def _user(username="alice", **effective):
