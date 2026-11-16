@@ -1931,12 +1931,36 @@
         "sha256": "SHA-256 checksum",
         "value": "halaga",
         "script": "Mga Command",
-        "text": "Dockerfile"
+        "text": "Dockerfile",
+        "app": "Aplikasyon",
+        "menu": "Ilista ito sa right-click menu",
+        "default": "Buksan ang mga web link gamit ito",
+        "ppas": "Mga Archive",
+        "packages": "Mga Package",
+        "name": "Pangalan sa mga menu",
+        "command": "Command",
+        "icon": "Icon",
+        "category": "Kategorya sa menu",
+        "sandbox": "Aplikasyong Chromium o Electron: simulan ito gamit ang --no-sandbox",
+        "terminal": "Tumatakbo sa terminal",
+        "packs": "Mga set ng font",
+        "fontFiles": "Sarili mong mga font file",
+        "eula": "Tinatanggap ko ang lisensya ng mga pangunahing font ng Microsoft",
+        "proxy": "Address ng proxy",
+        "no_proxy": "Hindi dumadaan sa proxy",
+        "pip": "Python package index",
+        "npm": "npm registry",
+        "version": "Bersyon",
+        "kit": "Wika",
+        "placement": "Puwesto",
+        "mode": "Pagtakbo",
+        "scriptName": "Pangalan ng file"
       },
       "actions": {
         "save": "I-save ang file",
         "extract": "I-unpack ang archive",
-        "install": "I-install ito bilang package"
+        "install": "I-install ito bilang package",
+        "appimage": "I-unpack ang AppImage"
       },
       "kinds": {
         "packages": {
@@ -1951,8 +1975,8 @@
         },
         "download": {
           "title": "Mag-download",
-          "short": "Kumuha ng file, archive, o package",
-          "help": "Kinukuha ang isang address habang bini-build ang imahe: itago ang file, i-unpack ang archive, o mag-install ng .deb, .rpm, o .apk."
+          "short": "Isang file, archive, AppImage, o package",
+          "help": "Kinukuha ang isang address habang bini-build ang imahe: itago ang file, i-unpack ang archive o AppImage, o mag-install ng .deb, .rpm, o .apk."
         },
         "certificates": {
           "title": "Pagkatiwalaan ang mga certificate",
@@ -1961,8 +1985,8 @@
         },
         "fonts": {
           "title": "Magdagdag ng mga font",
-          "short": "Mag-install ng mga font file",
-          "help": "Ini-install ang mga font file na ina-upload mo para sa bawat aplikasyon sa imahe."
+          "short": "Mga set ng font at sarili mong mga file",
+          "help": "Ini-install ang mga set ng font na pina-package ng distribusyon at ang mga font file na ina-upload mo, para sa bawat aplikasyon sa imahe."
         },
         "env": {
           "title": "Kapaligiran",
@@ -1978,6 +2002,46 @@
           "title": "Mga linya ng Dockerfile",
           "short": "Anumang instruksyon, ayon sa pagkakasulat",
           "help": "Mga instruksyong inilalagay sa Dockerfile nang eksakto ayon sa pagkakasulat mo."
+        },
+        "app": {
+          "title": "Magdagdag ng aplikasyon",
+          "short": "Isang browser o editor, handa nang simulan",
+          "help": "Ini-install ang aplikasyon mula sa distribusyon, o mula sa repository ng vendor nito sa Debian at Ubuntu, at inililista ito sa mga menu ng sesyon. Nagsisimula ang mga aplikasyong nakabatay sa Chromium gamit ang --no-sandbox, na kailangan ng container."
+        },
+        "ppa": {
+          "title": "Ubuntu PPA",
+          "short": "Mga package mula sa isang Launchpad archive",
+          "help": "Nagdaragdag ng mga personal package archive ng Launchpad sa imahe at nag-i-install ng mga package mula sa mga ito."
+        },
+        "devkit": {
+          "title": "Development kit",
+          "short": "Python, Node.js, Rust, Go, Java",
+          "help": "Ini-install ang toolchain ng isang wika mula sa distribusyon, at ang sariling mga package ng wika na inililista mo."
+        },
+        "docker": {
+          "title": "I-install ang Docker",
+          "short": "Ang pinakabagong Docker, Compose, at Buildx",
+          "help": "Inilalagay ang mga static binary ng Docker kung saan makikita ng Docker service ng imahe. Nagsisimula lamang ang serbisyo sa isang privileged na sesyon."
+        },
+        "desktop": {
+          "title": "Desktop entry",
+          "short": "Ilista ang isang program sa mga menu",
+          "help": "Sumusulat ng desktop entry para sa isang program na nasa imahe, tulad ng in-unpack mula sa AppImage o archive, upang ilista ito ng mga menu ng sesyon."
+        },
+        "launch": {
+          "title": "Launch command",
+          "short": "Ang sinisimulan ng sesyon",
+          "help": "Isinusulat ang mga command na ginagamit ng sesyon upang simulan ang aplikasyon nito."
+        },
+        "proxy": {
+          "title": "Proxy at mga mirror",
+          "short": "Para sa build at para sa mga sesyon",
+          "help": "Itinatakda ang mga variable ng proxy at ang mga mirror ng pip at npm para sa mga hakbang sa ibaba nito at para sa bawat sesyon."
+        },
+        "startup": {
+          "title": "Patakbuhin sa pagsisimula",
+          "short": "Isang script o serbisyo ng container",
+          "help": "Nagdaragdag ng script na pinapatakbo ng container habang nagsisimula ito, o ng serbisyong pinapanatili nitong tumatakbo."
         }
       },
       "toGuidedConfirm": "Mag-build mula sa mga hakbang",
@@ -1995,7 +2059,72 @@
       "listBuilding": "Bine-bake ang {name} ({seconds} s)",
       "listBaked": "Na-bake na ang {name}. Pinapatakbo ng mga bagong sesyon ang imaheng ito.",
       "listFailed": "Nabigo ang build ng {name}. Pinapanatili ng mga sesyon ang huling imaheng na-build.",
-      "confirmDeleteApp": "Burahin ang '{name}'? Aalisin ang na-bake na aplikasyon kasama ang resipe nito. Mananatili ang mga home directory na ginawa ng mga user gamit ito."
+      "confirmDeleteApp": "Burahin ang '{name}'? Aalisin ang na-bake na aplikasyon kasama ang resipe nito. Mananatili ang mga home directory na ginawa ng mga user gamit ito.",
+      "latest": "pinakabago",
+      "pickApp": "-- Pumili ng aplikasyon --",
+      "pickKit": "-- Pumili ng wika --",
+      "menuHelp": "Kinokopya ng home directory ang right-click menu sa unang pagsisimula nito at pinapanatili ang kopya nito pagkatapos.",
+      "appimageHelp": "Ina-unpack ang AppImage sa destinasyon, kung saan ito sinisimulan ng AppRun. Magdagdag ng desktop entry upang ilista ito sa mga menu.",
+      "iconPlaceholder": "o pangalan o path ng isang icon sa imahe",
+      "noProxyHelp": "Mga host na naaabot nang walang proxy, pinaghihiwalay ng mga kuwit. Laging kasama sa mga ito ang localhost.",
+      "versionHelp": "Kapag walang laman, ini-install ang pinakabagong release sa bawat build.",
+      "devkitPlaceholder": "Mag-type ng pangalan ng package...",
+      "devkitHelp": "Naka-install sa labas ng home directory, para sa bawat sesyon.",
+      "launchHelp": "Isang command bawat linya, pinapatakbo ng sh bilang user ng sesyon. Kinokopya ng home directory ang mga command sa unang pagsisimula nito at pinapanatili ang kopya nito pagkatapos.",
+      "startHelp": {
+        "once": "Tumatakbo bilang root tuwing nagsisimula ang container, bago ang sesyon.",
+        "service": "Sinisimulan bilang root kasabay ng container at sinisimulang muli tuwing humihinto ito; magtapos sa program na patuloy na tumatakbo."
+      },
+      "groups": {
+        "software": "Software",
+        "desktop": "Desktop",
+        "system": "System"
+      },
+      "bundles": {
+        "label": "Mabilisang pagpili",
+        "companions": "Mga kasama sa desktop",
+        "shell": "Mga tool sa shell",
+        "build": "Mga tool sa build",
+        "archives": "Mga tool sa archive"
+      },
+      "fontPacks": {
+        "office": "Tugma sa Office (Liberation, Carlito, Caladea)",
+        "cjk": "Chinese, Japanese, at Korean, bawat kapal",
+        "noto": "Noto para sa mga panulat ng mundo",
+        "microsoft": "Mga pangunahing font ng Microsoft (Arial, Times New Roman, Verdana)"
+      },
+      "devkits": {
+        "python": "Python",
+        "node": "Node.js",
+        "rust": "Rust",
+        "go": "Go",
+        "java": "Java"
+      },
+      "devkitPackages": {
+        "python": "Mga pip package",
+        "node": "Mga npm package, naka-install nang global",
+        "rust": "Mga crate, na-build at na-install",
+        "go": "Mga Go module, na-build at na-install"
+      },
+      "categories": {
+        "Utility": "Mga Accessory",
+        "Development": "Development",
+        "Graphics": "Graphics",
+        "Network": "Internet",
+        "Office": "Opisina",
+        "AudioVideo": "Multimedia",
+        "Game": "Mga Laro",
+        "Education": "Edukasyon",
+        "System": "System"
+      },
+      "placements": {
+        "replace": "Palitan ang start command ng aplikasyon",
+        "before": "Patakbuhin bago ang start command ng aplikasyon"
+      },
+      "startModes": {
+        "once": "Patakbuhin nang isang beses sa bawat pagsisimula",
+        "service": "Panatilihing tumatakbo bilang serbisyo"
+      }
     }
   },
   "popup": {

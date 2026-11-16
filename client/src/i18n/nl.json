@@ -1931,12 +1931,36 @@
         "sha256": "SHA-256-controlesom",
         "value": "waarde",
         "script": "Opdrachten",
-        "text": "Dockerfile"
+        "text": "Dockerfile",
+        "app": "Applicatie",
+        "menu": "In het rechtsklikmenu tonen",
+        "default": "Weblinks ermee openen",
+        "ppas": "Archieven",
+        "packages": "Pakketten",
+        "name": "Naam in de menu's",
+        "command": "Opdracht",
+        "icon": "Pictogram",
+        "category": "Menucategorie",
+        "sandbox": "Chromium- of Electron-applicatie: starten met --no-sandbox",
+        "terminal": "Draait in een terminal",
+        "packs": "Lettertypesets",
+        "fontFiles": "Uw eigen lettertypebestanden",
+        "eula": "Ik accepteer de licentie van de Microsoft-kernlettertypen",
+        "proxy": "Proxyadres",
+        "no_proxy": "Niet via de proxy",
+        "pip": "Python-pakketindex",
+        "npm": "npm-register",
+        "version": "Versie",
+        "kit": "Taal",
+        "placement": "Plaatsing",
+        "mode": "Uitvoering",
+        "scriptName": "Bestandsnaam"
       },
       "actions": {
         "save": "Het bestand opslaan",
         "extract": "Het archief uitpakken",
-        "install": "Als pakket installeren"
+        "install": "Als pakket installeren",
+        "appimage": "De AppImage uitpakken"
       },
       "kinds": {
         "packages": {
@@ -1951,8 +1975,8 @@
         },
         "download": {
           "title": "Downloaden",
-          "short": "Een bestand, archief of pakket ophalen",
-          "help": "Haalt een adres op terwijl de image wordt gebouwd: bewaar het bestand, pak een archief uit of installeer een .deb, .rpm of .apk."
+          "short": "Een bestand, archief, AppImage of pakket",
+          "help": "Haalt een adres op terwijl de image wordt gebouwd: bewaar het bestand, pak een archief of een AppImage uit, of installeer een .deb, .rpm of .apk."
         },
         "certificates": {
           "title": "Certificaten vertrouwen",
@@ -1961,8 +1985,8 @@
         },
         "fonts": {
           "title": "Lettertypen toevoegen",
-          "short": "Lettertypebestanden installeren",
-          "help": "Installeert de lettertypebestanden die u uploadt voor elke applicatie in de image."
+          "short": "Lettertypesets en uw eigen bestanden",
+          "help": "Installeert lettertypesets die de distributie als pakket aanbiedt en lettertypebestanden die u uploadt, voor elke applicatie in de image."
         },
         "env": {
           "title": "Omgeving",
@@ -1978,6 +2002,46 @@
           "title": "Dockerfile-regels",
           "short": "Elke instructie, zoals geschreven",
           "help": "Instructies die in de Dockerfile worden gezet precies zoals u ze schrijft."
+        },
+        "app": {
+          "title": "Applicatie toevoegen",
+          "short": "Een browser of editor, klaar om te starten",
+          "help": "Installeert de applicatie uit de distributie, of uit de repository van de leverancier op Debian en Ubuntu, en toont haar in de menu's van de sessie. Op Chromium gebaseerde applicaties starten met --no-sandbox, wat een container nodig heeft."
+        },
+        "ppa": {
+          "title": "Ubuntu PPA",
+          "short": "Pakketten uit een Launchpad-archief",
+          "help": "Voegt persoonlijke pakketarchieven van Launchpad toe aan de image en installeert er pakketten uit."
+        },
+        "devkit": {
+          "title": "Ontwikkelkit",
+          "short": "Python, Node.js, Rust, Go, Java",
+          "help": "Installeert de toolchain van een taal uit de distributie, en de eigen pakketten van de taal die u opgeeft."
+        },
+        "docker": {
+          "title": "Docker installeren",
+          "short": "De nieuwste Docker, Compose en Buildx",
+          "help": "Plaatst de statische binaries van Docker waar de Docker-service van de image ze vindt. De service start alleen in een sessie met privileges."
+        },
+        "desktop": {
+          "title": "Bureaubladitem",
+          "short": "Een programma in de menu's tonen",
+          "help": "Schrijft een bureaubladitem voor een programma dat in de image staat, bijvoorbeeld een dat uit een AppImage of een archief is uitgepakt, zodat de menu's van de sessie het tonen."
+        },
+        "launch": {
+          "title": "Startopdracht",
+          "short": "Waarmee de sessie start",
+          "help": "Schrijft de opdrachten waarmee een sessie haar applicatie start."
+        },
+        "proxy": {
+          "title": "Proxy en mirrors",
+          "short": "Voor de build en voor sessies",
+          "help": "Stelt de proxyvariabelen en de pip- en npm-mirrors in voor de stappen onder deze en voor elke sessie."
+        },
+        "startup": {
+          "title": "Uitvoeren bij de start",
+          "short": "Een script of service van de container",
+          "help": "Voegt een script toe dat de container bij het starten uitvoert, of een service die hij laat draaien."
         }
       },
       "toGuidedConfirm": "Bouwen vanuit de stappen",
@@ -1995,7 +2059,72 @@
       "listBuilding": "{name} wordt gebakken ({seconds} s)",
       "listBaked": "{name} is gebakken. Nieuwe sessies draaien deze image.",
       "listFailed": "De build van {name} is mislukt. Sessies houden de laatst gebouwde image.",
-      "confirmDeleteApp": "'{name}' verwijderen? De gebakken applicatie wordt met haar recept verwijderd. Home directories die gebruikers ermee hebben gemaakt blijven bestaan."
+      "confirmDeleteApp": "'{name}' verwijderen? De gebakken applicatie wordt met haar recept verwijderd. Home directories die gebruikers ermee hebben gemaakt blijven bestaan.",
+      "latest": "nieuwste",
+      "pickApp": "-- Kies een applicatie --",
+      "pickKit": "-- Kies een taal --",
+      "menuHelp": "Een home directory kopieert het rechtsklikmenu bij de eerste start en houdt daarna de eigen kopie.",
+      "appimageHelp": "Pakt de AppImage uit in de bestemming, waar AppRun deze start. Voeg een bureaubladitem toe om de applicatie in de menu's te tonen.",
+      "iconPlaceholder": "of de naam of het pad van een pictogram in de image",
+      "noProxyHelp": "Hosts die zonder de proxy worden bereikt, gescheiden door komma's. localhost hoort er altijd bij.",
+      "versionHelp": "Leeg installeert bij elke build de nieuwste release.",
+      "devkitPlaceholder": "Typ een pakketnaam...",
+      "devkitHelp": "Geïnstalleerd buiten de home directory, voor elke sessie.",
+      "launchHelp": "Eén opdracht per regel, uitgevoerd door sh als de gebruiker van de sessie. Een home directory kopieert de opdrachten bij de eerste start en houdt daarna de eigen kopie.",
+      "startHelp": {
+        "once": "Wordt als root uitgevoerd bij elke start van de container, vóór de sessie.",
+        "service": "Wordt als root met de container gestart en opnieuw gestart wanneer het stopt; eindig met het programma dat blijft draaien."
+      },
+      "groups": {
+        "software": "Software",
+        "desktop": "Bureaublad",
+        "system": "Systeem"
+      },
+      "bundles": {
+        "label": "Snelle keuzes",
+        "companions": "Bureaubladhulpjes",
+        "shell": "Shell-hulpmiddelen",
+        "build": "Bouwhulpmiddelen",
+        "archives": "Archiefhulpmiddelen"
+      },
+      "fontPacks": {
+        "office": "Office-compatibel (Liberation, Carlito, Caladea)",
+        "cjk": "Chinees, Japans en Koreaans, elk gewicht",
+        "noto": "Noto voor de schriften van de wereld",
+        "microsoft": "Microsoft-kernlettertypen (Arial, Times New Roman, Verdana)"
+      },
+      "devkits": {
+        "python": "Python",
+        "node": "Node.js",
+        "rust": "Rust",
+        "go": "Go",
+        "java": "Java"
+      },
+      "devkitPackages": {
+        "python": "pip-pakketten",
+        "node": "npm-pakketten, globaal geïnstalleerd",
+        "rust": "Crates, gebouwd en geïnstalleerd",
+        "go": "Go-modules, gebouwd en geïnstalleerd"
+      },
+      "categories": {
+        "Utility": "Hulpmiddelen",
+        "Development": "Ontwikkeling",
+        "Graphics": "Grafisch",
+        "Network": "Internet",
+        "Office": "Kantoor",
+        "AudioVideo": "Multimedia",
+        "Game": "Spellen",
+        "Education": "Onderwijs",
+        "System": "Systeem"
+      },
+      "placements": {
+        "replace": "De startopdracht van de applicatie vervangen",
+        "before": "Uitvoeren vóór de startopdracht van de applicatie"
+      },
+      "startModes": {
+        "once": "Eén keer uitvoeren bij elke start",
+        "service": "Als service laten draaien"
+      }
     }
   },
   "popup": {

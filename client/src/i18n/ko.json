@@ -1931,12 +1931,36 @@
         "sha256": "SHA-256 체크섬",
         "value": "값",
         "script": "명령",
-        "text": "Dockerfile"
+        "text": "Dockerfile",
+        "app": "애플리케이션",
+        "menu": "오른쪽 클릭 메뉴에 표시",
+        "default": "웹 링크를 이것으로 열기",
+        "ppas": "아카이브",
+        "packages": "패키지",
+        "name": "메뉴에 표시할 이름",
+        "command": "명령",
+        "icon": "아이콘",
+        "category": "메뉴 범주",
+        "sandbox": "Chromium 또는 Electron 애플리케이션: --no-sandbox로 시작",
+        "terminal": "터미널에서 실행",
+        "packs": "글꼴 세트",
+        "fontFiles": "직접 올리는 글꼴 파일",
+        "eula": "Microsoft 핵심 글꼴의 라이선스에 동의합니다",
+        "proxy": "프록시 주소",
+        "no_proxy": "프록시를 거치지 않음",
+        "pip": "Python 패키지 인덱스",
+        "npm": "npm 레지스트리",
+        "version": "버전",
+        "kit": "언어",
+        "placement": "배치",
+        "mode": "실행 방식",
+        "scriptName": "파일 이름"
       },
       "actions": {
         "save": "파일 저장",
         "extract": "아카이브 풀기",
-        "install": "패키지로 설치"
+        "install": "패키지로 설치",
+        "appimage": "AppImage 풀기"
       },
       "kinds": {
         "packages": {
@@ -1951,8 +1975,8 @@
         },
         "download": {
           "title": "다운로드",
-          "short": "파일, 아카이브 또는 패키지 가져오기",
-          "help": "이미지를 빌드하는 동안 주소에서 가져옵니다. 파일을 보관하거나, 아카이브를 풀거나, .deb, .rpm 또는 .apk를 설치합니다."
+          "short": "파일, 아카이브, AppImage 또는 패키지",
+          "help": "이미지를 빌드하는 동안 주소에서 가져옵니다. 파일을 보관하거나, 아카이브나 AppImage를 풀거나, .deb, .rpm 또는 .apk를 설치합니다."
         },
         "certificates": {
           "title": "인증서 신뢰",
@@ -1961,8 +1985,8 @@
         },
         "fonts": {
           "title": "글꼴 추가",
-          "short": "글꼴 파일 설치",
-          "help": "업로드한 글꼴 파일을 이미지의 모든 애플리케이션용으로 설치합니다."
+          "short": "글꼴 세트와 직접 올리는 파일",
+          "help": "배포판이 패키지로 제공하는 글꼴 세트와 업로드한 글꼴 파일을 이미지의 모든 애플리케이션용으로 설치합니다."
         },
         "env": {
           "title": "환경",
@@ -1978,6 +2002,46 @@
           "title": "Dockerfile 줄",
           "short": "모든 명령어를 작성한 그대로",
           "help": "작성한 그대로 Dockerfile에 들어가는 명령어입니다."
+        },
+        "app": {
+          "title": "애플리케이션 추가",
+          "short": "바로 시작할 수 있는 브라우저나 편집기",
+          "help": "애플리케이션을 배포판에서, Debian과 Ubuntu에서는 공급업체 저장소에서 설치하고 세션의 메뉴에 표시합니다. Chromium 기반 애플리케이션은 컨테이너에 필요한 --no-sandbox로 시작합니다."
+        },
+        "ppa": {
+          "title": "Ubuntu PPA",
+          "short": "Launchpad 아카이브의 패키지",
+          "help": "Launchpad 개인 패키지 아카이브를 이미지에 추가하고 거기서 패키지를 설치합니다."
+        },
+        "devkit": {
+          "title": "개발 키트",
+          "short": "Python, Node.js, Rust, Go, Java",
+          "help": "언어의 툴체인을 배포판에서 설치하고, 나열한 해당 언어의 패키지도 설치합니다."
+        },
+        "docker": {
+          "title": "Docker 설치",
+          "short": "최신 Docker, Compose, Buildx",
+          "help": "Docker의 정적 바이너리를 이미지의 Docker 서비스가 찾는 위치에 둡니다. 서비스는 권한 있는 세션에서만 시작됩니다."
+        },
+        "desktop": {
+          "title": "데스크톱 항목",
+          "short": "프로그램을 메뉴에 표시",
+          "help": "AppImage나 아카이브에서 푼 것처럼 이미지에 있는 프로그램의 데스크톱 항목을 작성하여 세션의 메뉴에 표시합니다."
+        },
+        "launch": {
+          "title": "시작 명령",
+          "short": "세션이 시작할 때 실행하는 것",
+          "help": "세션이 애플리케이션을 시작하는 명령을 작성합니다."
+        },
+        "proxy": {
+          "title": "프록시 및 미러",
+          "short": "빌드와 세션용",
+          "help": "이 단계 아래의 단계와 모든 세션에 프록시 변수와 pip 및 npm 미러를 설정합니다."
+        },
+        "startup": {
+          "title": "시작 시 실행",
+          "short": "컨테이너의 스크립트 또는 서비스",
+          "help": "컨테이너가 시작할 때 실행하는 스크립트나 계속 실행하는 서비스를 추가합니다."
         }
       },
       "toGuidedConfirm": "단계로 빌드",
@@ -1995,7 +2059,72 @@
       "listBuilding": "{name} 굽는 중 ({seconds}초)",
       "listBaked": "{name}이(가) 구워졌습니다. 새 세션은 이 이미지를 실행합니다.",
       "listFailed": "{name}의 빌드에 실패했습니다. 세션은 마지막으로 빌드된 이미지를 유지합니다.",
-      "confirmDeleteApp": "'{name}'을(를) 삭제하시겠습니까? 구운 애플리케이션이 레시피와 함께 제거됩니다. 사용자가 이 앱으로 만든 홈 디렉터리는 유지됩니다."
+      "confirmDeleteApp": "'{name}'을(를) 삭제하시겠습니까? 구운 애플리케이션이 레시피와 함께 제거됩니다. 사용자가 이 앱으로 만든 홈 디렉터리는 유지됩니다.",
+      "latest": "최신",
+      "pickApp": "-- 애플리케이션 선택 --",
+      "pickKit": "-- 언어 선택 --",
+      "menuHelp": "홈 디렉터리는 처음 시작할 때 오른쪽 클릭 메뉴를 복사하고 이후에는 그 사본을 유지합니다.",
+      "appimageHelp": "AppImage를 대상 위치에 풀고, 그곳에서 AppRun이 실행합니다. 메뉴에 표시하려면 데스크톱 항목을 추가하세요.",
+      "iconPlaceholder": "또는 이미지에 있는 아이콘의 이름이나 경로",
+      "noProxyHelp": "프록시 없이 연결하는 호스트를 쉼표로 구분합니다. localhost는 항상 포함됩니다.",
+      "versionHelp": "비워 두면 빌드할 때마다 최신 릴리스를 설치합니다.",
+      "devkitPlaceholder": "패키지 이름 입력...",
+      "devkitHelp": "홈 디렉터리 밖에, 모든 세션용으로 설치됩니다.",
+      "launchHelp": "한 줄에 명령 하나이며, 세션 사용자로 sh가 실행합니다. 홈 디렉터리는 처음 시작할 때 명령을 복사하고 이후에는 그 사본을 유지합니다.",
+      "startHelp": {
+        "once": "컨테이너가 시작될 때마다 세션보다 먼저 root로 실행됩니다.",
+        "service": "컨테이너와 함께 root로 시작되고 종료될 때마다 다시 시작됩니다. 계속 실행되는 프로그램으로 끝내세요."
+      },
+      "groups": {
+        "software": "소프트웨어",
+        "desktop": "데스크톱",
+        "system": "시스템"
+      },
+      "bundles": {
+        "label": "빠른 선택",
+        "companions": "데스크톱 보조 도구",
+        "shell": "셸 도구",
+        "build": "빌드 도구",
+        "archives": "아카이브 도구"
+      },
+      "fontPacks": {
+        "office": "Office 호환 (Liberation, Carlito, Caladea)",
+        "cjk": "중국어, 일본어, 한국어, 모든 굵기",
+        "noto": "세계 문자를 위한 Noto",
+        "microsoft": "Microsoft 핵심 글꼴 (Arial, Times New Roman, Verdana)"
+      },
+      "devkits": {
+        "python": "Python",
+        "node": "Node.js",
+        "rust": "Rust",
+        "go": "Go",
+        "java": "Java"
+      },
+      "devkitPackages": {
+        "python": "pip 패키지",
+        "node": "npm 패키지, 전역 설치",
+        "rust": "크레이트, 빌드 후 설치",
+        "go": "Go 모듈, 빌드 후 설치"
+      },
+      "categories": {
+        "Utility": "보조 프로그램",
+        "Development": "개발",
+        "Graphics": "그래픽",
+        "Network": "인터넷",
+        "Office": "오피스",
+        "AudioVideo": "멀티미디어",
+        "Game": "게임",
+        "Education": "교육",
+        "System": "시스템"
+      },
+      "placements": {
+        "replace": "애플리케이션의 시작 명령을 대체",
+        "before": "애플리케이션의 시작 명령보다 먼저 실행"
+      },
+      "startModes": {
+        "once": "시작할 때마다 한 번 실행",
+        "service": "서비스로 계속 실행"
+      }
     }
   },
   "popup": {

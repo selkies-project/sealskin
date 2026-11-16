@@ -1931,12 +1931,36 @@
         "sha256": "Suma de comprobación SHA-256",
         "value": "valor",
         "script": "Comandos",
-        "text": "Dockerfile"
+        "text": "Dockerfile",
+        "app": "Aplicación",
+        "menu": "Mostrarla en el menú del clic derecho",
+        "default": "Abrir los enlaces web con ella",
+        "ppas": "Archivos de paquetes",
+        "packages": "Paquetes",
+        "name": "Nombre en los menús",
+        "command": "Comando",
+        "icon": "Icono",
+        "category": "Categoría del menú",
+        "sandbox": "Aplicación Chromium o Electron: iniciarla con --no-sandbox",
+        "terminal": "Se ejecuta en un terminal",
+        "packs": "Conjuntos de fuentes",
+        "fontFiles": "Sus propios archivos de fuentes",
+        "eula": "Acepto la licencia de las fuentes básicas de Microsoft",
+        "proxy": "Dirección del proxy",
+        "no_proxy": "Sin pasar por el proxy",
+        "pip": "Índice de paquetes de Python",
+        "npm": "Registro de npm",
+        "version": "Versión",
+        "kit": "Lenguaje",
+        "placement": "Ubicación",
+        "mode": "Ejecución",
+        "scriptName": "Nombre del archivo"
       },
       "actions": {
         "save": "Guardar el archivo",
         "extract": "Descomprimir el archivo",
-        "install": "Instalarlo como paquete"
+        "install": "Instalarlo como paquete",
+        "appimage": "Descomprimir la AppImage"
       },
       "kinds": {
         "packages": {
@@ -1951,8 +1975,8 @@
         },
         "download": {
           "title": "Descargar",
-          "short": "Obtener un archivo, un archivo comprimido o un paquete",
-          "help": "Obtiene una dirección mientras se construye la imagen: conserve el archivo, descomprima un archivo comprimido o instale un .deb, .rpm o .apk."
+          "short": "Un archivo, un archivo comprimido, una AppImage o un paquete",
+          "help": "Obtiene una dirección mientras se construye la imagen: conserve el archivo, descomprima un archivo comprimido o una AppImage, o instale un .deb, .rpm o .apk."
         },
         "certificates": {
           "title": "Confiar en certificados",
@@ -1961,8 +1985,8 @@
         },
         "fonts": {
           "title": "Añadir fuentes",
-          "short": "Instalar archivos de fuentes",
-          "help": "Instala los archivos de fuentes que suba para todas las aplicaciones de la imagen."
+          "short": "Conjuntos de fuentes y sus propios archivos",
+          "help": "Instala los conjuntos de fuentes que empaqueta la distribución y los archivos de fuentes que suba, para todas las aplicaciones de la imagen."
         },
         "env": {
           "title": "Entorno",
@@ -1978,6 +2002,46 @@
           "title": "Líneas de Dockerfile",
           "short": "Cualquier instrucción, tal como está escrita",
           "help": "Instrucciones que se ponen en el Dockerfile exactamente como las escriba."
+        },
+        "app": {
+          "title": "Añadir una aplicación",
+          "short": "Un navegador o editor, listo para iniciar",
+          "help": "Instala la aplicación desde la distribución, o desde el repositorio de su proveedor en Debian y Ubuntu, y la muestra en los menús de la sesión. Las aplicaciones basadas en Chromium se inician con --no-sandbox, que un contenedor necesita."
+        },
+        "ppa": {
+          "title": "PPA de Ubuntu",
+          "short": "Paquetes de un archivo de Launchpad",
+          "help": "Añade archivos de paquetes personales de Launchpad a la imagen e instala paquetes de ellos."
+        },
+        "devkit": {
+          "title": "Kit de desarrollo",
+          "short": "Python, Node.js, Rust, Go, Java",
+          "help": "Instala la cadena de herramientas de un lenguaje desde la distribución, y los paquetes propios del lenguaje que usted indique."
+        },
+        "docker": {
+          "title": "Instalar Docker",
+          "short": "Los últimos Docker, Compose y Buildx",
+          "help": "Coloca los binarios estáticos de Docker donde los encuentra el servicio Docker de la imagen. El servicio solo se inicia en una sesión privilegiada."
+        },
+        "desktop": {
+          "title": "Entrada de escritorio",
+          "short": "Mostrar un programa en los menús",
+          "help": "Escribe una entrada de escritorio para un programa que contiene la imagen, como uno descomprimido de una AppImage o de un archivo comprimido, para que los menús de la sesión lo muestren."
+        },
+        "launch": {
+          "title": "Comando de inicio",
+          "short": "Con qué se inicia la sesión",
+          "help": "Escribe los comandos con los que una sesión inicia su aplicación."
+        },
+        "proxy": {
+          "title": "Proxy y réplicas",
+          "short": "Para la construcción y para las sesiones",
+          "help": "Define las variables del proxy y las réplicas de pip y npm para los pasos situados debajo de este y para todas las sesiones."
+        },
+        "startup": {
+          "title": "Ejecutar al inicio",
+          "short": "Un script o servicio del contenedor",
+          "help": "Añade un script que el contenedor ejecuta al iniciarse, o un servicio que mantiene en ejecución."
         }
       },
       "toGuidedConfirm": "Construir a partir de los pasos",
@@ -1995,7 +2059,72 @@
       "listBuilding": "Horneando {name} ({seconds} s)",
       "listBaked": "{name} está horneada. Las sesiones nuevas usan esta imagen.",
       "listFailed": "La construcción de {name} falló. Las sesiones conservan la última imagen construida.",
-      "confirmDeleteApp": "¿Eliminar '{name}'? La aplicación horneada se elimina junto con su receta. Los directorios personales que los usuarios crearon con ella se conservan."
+      "confirmDeleteApp": "¿Eliminar '{name}'? La aplicación horneada se elimina junto con su receta. Los directorios personales que los usuarios crearon con ella se conservan.",
+      "latest": "última",
+      "pickApp": "-- Elija una aplicación --",
+      "pickKit": "-- Elija un lenguaje --",
+      "menuHelp": "Un directorio personal copia el menú del clic derecho en su primer inicio y conserva su copia después.",
+      "appimageHelp": "Descomprime la AppImage en el destino, donde AppRun la inicia. Añada una entrada de escritorio para que aparezca en los menús.",
+      "iconPlaceholder": "o el nombre o la ruta de un icono en la imagen",
+      "noProxyHelp": "Hosts a los que se llega sin el proxy, separados por comas. localhost siempre está entre ellos.",
+      "versionHelp": "Vacío instala la última versión en cada construcción.",
+      "devkitPlaceholder": "Escriba un nombre de paquete...",
+      "devkitHelp": "Se instalan fuera del directorio personal, para todas las sesiones.",
+      "launchHelp": "Un comando por línea, ejecutado por sh como el usuario de la sesión. Un directorio personal copia los comandos en su primer inicio y conserva su copia después.",
+      "startHelp": {
+        "once": "Se ejecuta como root cada vez que se inicia el contenedor, antes de la sesión.",
+        "service": "Se inicia como root con el contenedor y se vuelve a iniciar cada vez que termina; acabe con el programa que sigue en ejecución."
+      },
+      "groups": {
+        "software": "Software",
+        "desktop": "Escritorio",
+        "system": "Sistema"
+      },
+      "bundles": {
+        "label": "Selecciones rápidas",
+        "companions": "Complementos del escritorio",
+        "shell": "Herramientas de shell",
+        "build": "Herramientas de compilación",
+        "archives": "Herramientas de archivos comprimidos"
+      },
+      "fontPacks": {
+        "office": "Compatibles con Office (Liberation, Carlito, Caladea)",
+        "cjk": "Chino, japonés y coreano, todos los grosores",
+        "noto": "Noto para las escrituras del mundo",
+        "microsoft": "Fuentes básicas de Microsoft (Arial, Times New Roman, Verdana)"
+      },
+      "devkits": {
+        "python": "Python",
+        "node": "Node.js",
+        "rust": "Rust",
+        "go": "Go",
+        "java": "Java"
+      },
+      "devkitPackages": {
+        "python": "Paquetes de pip",
+        "node": "Paquetes de npm, instalados globalmente",
+        "rust": "Crates, compilados e instalados",
+        "go": "Módulos de Go, compilados e instalados"
+      },
+      "categories": {
+        "Utility": "Accesorios",
+        "Development": "Desarrollo",
+        "Graphics": "Gráficos",
+        "Network": "Internet",
+        "Office": "Oficina",
+        "AudioVideo": "Multimedia",
+        "Game": "Juegos",
+        "Education": "Educación",
+        "System": "Sistema"
+      },
+      "placements": {
+        "replace": "Sustituir el comando de inicio de la aplicación",
+        "before": "Ejecutar antes del comando de inicio de la aplicación"
+      },
+      "startModes": {
+        "once": "Ejecutar una vez en cada inicio",
+        "service": "Mantener en ejecución como servicio"
+      }
     }
   },
   "popup": {

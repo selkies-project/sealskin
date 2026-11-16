@@ -1931,12 +1931,36 @@
         "sha256": "Mã kiểm tra SHA-256",
         "value": "giá trị",
         "script": "Lệnh",
-        "text": "Dockerfile"
+        "text": "Dockerfile",
+        "app": "Ứng dụng",
+        "menu": "Liệt kê trong menu chuột phải",
+        "default": "Mở liên kết web bằng ứng dụng này",
+        "ppas": "Kho lưu trữ",
+        "packages": "Gói",
+        "name": "Tên trong các menu",
+        "command": "Lệnh",
+        "icon": "Biểu tượng",
+        "category": "Danh mục menu",
+        "sandbox": "Ứng dụng Chromium hoặc Electron: khởi động với --no-sandbox",
+        "terminal": "Chạy trong terminal",
+        "packs": "Bộ phông chữ",
+        "fontFiles": "Tệp phông chữ của riêng bạn",
+        "eula": "Tôi chấp nhận giấy phép của phông chữ cốt lõi của Microsoft",
+        "proxy": "Địa chỉ proxy",
+        "no_proxy": "Không qua proxy",
+        "pip": "Chỉ mục gói Python",
+        "npm": "Registry npm",
+        "version": "Phiên bản",
+        "kit": "Ngôn ngữ",
+        "placement": "Vị trí",
+        "mode": "Cách chạy",
+        "scriptName": "Tên tệp"
       },
       "actions": {
         "save": "Lưu tệp",
         "extract": "Giải nén tệp nén",
-        "install": "Cài đặt như một gói"
+        "install": "Cài đặt như một gói",
+        "appimage": "Giải nén AppImage"
       },
       "kinds": {
         "packages": {
@@ -1951,8 +1975,8 @@
         },
         "download": {
           "title": "Tải xuống",
-          "short": "Lấy một tệp, tệp nén hoặc gói",
-          "help": "Lấy một địa chỉ trong khi image được dựng: giữ tệp, giải nén tệp nén, hoặc cài đặt một .deb, .rpm hoặc .apk."
+          "short": "Một tệp, tệp nén, AppImage hoặc gói",
+          "help": "Lấy một địa chỉ trong khi image được dựng: giữ tệp, giải nén tệp nén hoặc AppImage, hoặc cài đặt một .deb, .rpm hoặc .apk."
         },
         "certificates": {
           "title": "Tin cậy chứng chỉ",
@@ -1961,8 +1985,8 @@
         },
         "fonts": {
           "title": "Thêm phông chữ",
-          "short": "Cài đặt tệp phông chữ",
-          "help": "Cài đặt các tệp phông chữ bạn tải lên cho mọi ứng dụng trong image."
+          "short": "Bộ phông chữ và tệp của riêng bạn",
+          "help": "Cài đặt các bộ phông chữ mà bản phân phối đóng gói và các tệp phông chữ bạn tải lên, cho mọi ứng dụng trong image."
         },
         "env": {
           "title": "Môi trường",
@@ -1978,6 +2002,46 @@
           "title": "Dòng Dockerfile",
           "short": "Bất kỳ chỉ thị nào, đúng như đã viết",
           "help": "Các chỉ thị được đưa vào Dockerfile đúng như bạn viết."
+        },
+        "app": {
+          "title": "Thêm ứng dụng",
+          "short": "Một trình duyệt hoặc trình soạn thảo, sẵn sàng khởi động",
+          "help": "Cài đặt ứng dụng từ bản phân phối, hoặc từ kho của nhà cung cấp trên Debian và Ubuntu, và liệt kê nó trong các menu của phiên. Các ứng dụng dựa trên Chromium khởi động với --no-sandbox, điều mà container cần."
+        },
+        "ppa": {
+          "title": "Ubuntu PPA",
+          "short": "Các gói từ một kho lưu trữ Launchpad",
+          "help": "Thêm các kho lưu trữ gói cá nhân của Launchpad vào image và cài đặt các gói từ đó."
+        },
+        "devkit": {
+          "title": "Bộ công cụ phát triển",
+          "short": "Python, Node.js, Rust, Go, Java",
+          "help": "Cài đặt bộ công cụ của một ngôn ngữ từ bản phân phối, và các gói riêng của ngôn ngữ đó mà bạn liệt kê."
+        },
+        "docker": {
+          "title": "Cài đặt Docker",
+          "short": "Docker, Compose và Buildx mới nhất",
+          "help": "Đặt các tệp nhị phân tĩnh của Docker vào nơi dịch vụ Docker của image tìm thấy chúng. Dịch vụ chỉ khởi động trong một phiên đặc quyền."
+        },
+        "desktop": {
+          "title": "Mục màn hình",
+          "short": "Liệt kê một chương trình trong các menu",
+          "help": "Ghi một mục màn hình cho một chương trình có trong image, chẳng hạn chương trình được giải nén từ một AppImage hoặc tệp nén, để các menu của phiên liệt kê nó."
+        },
+        "launch": {
+          "title": "Lệnh khởi chạy",
+          "short": "Thứ mà phiên khởi động cùng",
+          "help": "Ghi các lệnh mà phiên dùng để khởi động ứng dụng của nó."
+        },
+        "proxy": {
+          "title": "Proxy và máy chủ nhân bản",
+          "short": "Cho bản dựng và cho các phiên",
+          "help": "Đặt các biến proxy và các máy chủ nhân bản của pip và npm cho các bước bên dưới bước này và cho mọi phiên."
+        },
+        "startup": {
+          "title": "Chạy khi khởi động",
+          "short": "Một tập lệnh hoặc dịch vụ của container",
+          "help": "Thêm một tập lệnh mà container chạy khi khởi động, hoặc một dịch vụ mà nó giữ chạy."
         }
       },
       "toGuidedConfirm": "Dựng từ các bước",
@@ -1995,7 +2059,72 @@
       "listBuilding": "Đang nướng {name} ({seconds} giây)",
       "listBaked": "{name} đã nướng xong. Các phiên mới chạy image này.",
       "listFailed": "Bản dựng của {name} thất bại. Các phiên giữ image dựng thành công gần nhất.",
-      "confirmDeleteApp": "Xóa '{name}'? Ứng dụng đã nướng bị gỡ cùng công thức của nó. Các thư mục chính người dùng đã tạo với nó vẫn được giữ."
+      "confirmDeleteApp": "Xóa '{name}'? Ứng dụng đã nướng bị gỡ cùng công thức của nó. Các thư mục chính người dùng đã tạo với nó vẫn được giữ.",
+      "latest": "mới nhất",
+      "pickApp": "-- Chọn một ứng dụng --",
+      "pickKit": "-- Chọn một ngôn ngữ --",
+      "menuHelp": "Thư mục chính sao chép menu chuột phải ở lần khởi động đầu tiên và giữ bản sao của nó về sau.",
+      "appimageHelp": "Giải nén AppImage vào đích, nơi AppRun khởi động nó. Thêm một mục màn hình để liệt kê nó trong các menu.",
+      "iconPlaceholder": "hoặc tên hay đường dẫn của biểu tượng trong image",
+      "noProxyHelp": "Các máy chủ được truy cập không qua proxy, phân tách bằng dấu phẩy. localhost luôn nằm trong số đó.",
+      "versionHelp": "Để trống sẽ cài đặt bản phát hành mới nhất ở mỗi lần dựng.",
+      "devkitPlaceholder": "Nhập tên gói...",
+      "devkitHelp": "Được cài đặt bên ngoài thư mục chính, cho mọi phiên.",
+      "launchHelp": "Mỗi dòng một lệnh, do sh chạy với tư cách người dùng của phiên. Thư mục chính sao chép các lệnh ở lần khởi động đầu tiên và giữ bản sao của nó về sau.",
+      "startHelp": {
+        "once": "Chạy với quyền root mỗi khi container khởi động, trước phiên.",
+        "service": "Được khởi động với quyền root cùng container và khởi động lại mỗi khi nó thoát; kết thúc bằng chương trình tiếp tục chạy."
+      },
+      "groups": {
+        "software": "Phần mềm",
+        "desktop": "Màn hình",
+        "system": "Hệ thống"
+      },
+      "bundles": {
+        "label": "Chọn nhanh",
+        "companions": "Tiện ích đi kèm màn hình",
+        "shell": "Công cụ shell",
+        "build": "Công cụ dựng",
+        "archives": "Công cụ nén"
+      },
+      "fontPacks": {
+        "office": "Tương thích văn phòng (Liberation, Carlito, Caladea)",
+        "cjk": "Tiếng Trung, Nhật và Hàn, mọi độ đậm",
+        "noto": "Noto cho các hệ chữ viết trên thế giới",
+        "microsoft": "Phông chữ cốt lõi của Microsoft (Arial, Times New Roman, Verdana)"
+      },
+      "devkits": {
+        "python": "Python",
+        "node": "Node.js",
+        "rust": "Rust",
+        "go": "Go",
+        "java": "Java"
+      },
+      "devkitPackages": {
+        "python": "Gói pip",
+        "node": "Gói npm, cài đặt toàn cục",
+        "rust": "Crate, được dựng và cài đặt",
+        "go": "Module Go, được dựng và cài đặt"
+      },
+      "categories": {
+        "Utility": "Tiện ích",
+        "Development": "Phát triển",
+        "Graphics": "Đồ họa",
+        "Network": "Internet",
+        "Office": "Văn phòng",
+        "AudioVideo": "Đa phương tiện",
+        "Game": "Trò chơi",
+        "Education": "Giáo dục",
+        "System": "Hệ thống"
+      },
+      "placements": {
+        "replace": "Thay thế lệnh khởi động của ứng dụng",
+        "before": "Chạy trước lệnh khởi động của ứng dụng"
+      },
+      "startModes": {
+        "once": "Chạy một lần ở mỗi lần khởi động",
+        "service": "Giữ chạy như một dịch vụ"
+      }
     }
   },
   "popup": {

@@ -1931,12 +1931,36 @@
         "sha256": "Soma de verificação SHA-256",
         "value": "valor",
         "script": "Comandos",
-        "text": "Dockerfile"
+        "text": "Dockerfile",
+        "app": "Aplicativo",
+        "menu": "Listar no menu do botão direito",
+        "default": "Abrir links da web com ele",
+        "ppas": "Repositórios",
+        "packages": "Pacotes",
+        "name": "Nome nos menus",
+        "command": "Comando",
+        "icon": "Ícone",
+        "category": "Categoria do menu",
+        "sandbox": "Aplicativo Chromium ou Electron: iniciar com --no-sandbox",
+        "terminal": "Executa em um terminal",
+        "packs": "Conjuntos de fontes",
+        "fontFiles": "Seus próprios arquivos de fonte",
+        "eula": "Aceito a licença das fontes essenciais da Microsoft",
+        "proxy": "Endereço do proxy",
+        "no_proxy": "Sem passar pelo proxy",
+        "pip": "Índice de pacotes Python",
+        "npm": "Registro npm",
+        "version": "Versão",
+        "kit": "Linguagem",
+        "placement": "Posição",
+        "mode": "Execução",
+        "scriptName": "Nome do arquivo"
       },
       "actions": {
         "save": "Salvar o arquivo",
         "extract": "Descompactar o arquivo",
-        "install": "Instalar como pacote"
+        "install": "Instalar como pacote",
+        "appimage": "Descompactar o AppImage"
       },
       "kinds": {
         "packages": {
@@ -1951,8 +1975,8 @@
         },
         "download": {
           "title": "Baixar",
-          "short": "Obter um arquivo, arquivo compactado ou pacote",
-          "help": "Obtém um endereço enquanto a imagem é construída: mantenha o arquivo, descompacte um arquivo compactado ou instale um .deb, .rpm ou .apk."
+          "short": "Um arquivo, arquivo compactado, AppImage ou pacote",
+          "help": "Obtém um endereço enquanto a imagem é construída: mantenha o arquivo, descompacte um arquivo compactado ou um AppImage, ou instale um .deb, .rpm ou .apk."
         },
         "certificates": {
           "title": "Confiar em certificados",
@@ -1961,8 +1985,8 @@
         },
         "fonts": {
           "title": "Adicionar fontes",
-          "short": "Instalar arquivos de fonte",
-          "help": "Instala os arquivos de fonte que você carrega para todos os aplicativos da imagem."
+          "short": "Conjuntos de fontes e seus próprios arquivos",
+          "help": "Instala conjuntos de fontes que a distribuição empacota e arquivos de fonte que você carrega, para todos os aplicativos da imagem."
         },
         "env": {
           "title": "Ambiente",
@@ -1978,6 +2002,46 @@
           "title": "Linhas de Dockerfile",
           "short": "Qualquer instrução, como escrita",
           "help": "Instruções colocadas no Dockerfile exatamente como você as escreve."
+        },
+        "app": {
+          "title": "Adicionar um aplicativo",
+          "short": "Um navegador ou editor, pronto para iniciar",
+          "help": "Instala o aplicativo a partir da distribuição, ou do repositório do fornecedor no Debian e no Ubuntu, e o lista nos menus da sessão. Aplicativos baseados em Chromium iniciam com --no-sandbox, que um contêiner exige."
+        },
+        "ppa": {
+          "title": "PPA do Ubuntu",
+          "short": "Pacotes de um repositório do Launchpad",
+          "help": "Adiciona repositórios de pacotes pessoais do Launchpad à imagem e instala pacotes deles."
+        },
+        "devkit": {
+          "title": "Kit de desenvolvimento",
+          "short": "Python, Node.js, Rust, Go, Java",
+          "help": "Instala a cadeia de ferramentas de uma linguagem a partir da distribuição, e os pacotes da própria linguagem que você listar."
+        },
+        "docker": {
+          "title": "Instalar o Docker",
+          "short": "As versões mais recentes do Docker, Compose e Buildx",
+          "help": "Coloca os binários estáticos do Docker onde o serviço Docker da imagem os encontra. O serviço inicia somente em uma sessão privilegiada."
+        },
+        "desktop": {
+          "title": "Entrada de área de trabalho",
+          "short": "Listar um programa nos menus",
+          "help": "Grava uma entrada de área de trabalho para um programa que a imagem contém, como um descompactado de um AppImage ou de um arquivo compactado, para que os menus da sessão o listem."
+        },
+        "launch": {
+          "title": "Comando de início",
+          "short": "Com o que a sessão inicia",
+          "help": "Grava os comandos com os quais uma sessão inicia seu aplicativo."
+        },
+        "proxy": {
+          "title": "Proxy e espelhos",
+          "short": "Para a construção e para as sessões",
+          "help": "Define as variáveis de proxy e os espelhos de pip e npm para as etapas abaixo desta e para todas as sessões."
+        },
+        "startup": {
+          "title": "Executar no início",
+          "short": "Um script ou serviço do contêiner",
+          "help": "Adiciona um script que o contêiner executa ao iniciar, ou um serviço que ele mantém em execução."
         }
       },
       "toGuidedConfirm": "Construir a partir das etapas",
@@ -1995,7 +2059,72 @@
       "listBuilding": "Assando {name} ({seconds} s)",
       "listBaked": "{name} está assado. Novas sessões executam esta imagem.",
       "listFailed": "A construção de {name} falhou. As sessões mantêm a última imagem construída.",
-      "confirmDeleteApp": "Excluir '{name}'? O aplicativo assado é removido com sua receita. Os diretórios home que os usuários criaram com ele permanecem."
+      "confirmDeleteApp": "Excluir '{name}'? O aplicativo assado é removido com sua receita. Os diretórios home que os usuários criaram com ele permanecem.",
+      "latest": "mais recente",
+      "pickApp": "-- Escolha um aplicativo --",
+      "pickKit": "-- Escolha uma linguagem --",
+      "menuHelp": "Um diretório home copia o menu do botão direito na primeira inicialização e depois mantém sua cópia.",
+      "appimageHelp": "Descompacta o AppImage no destino, onde o AppRun o inicia. Adicione uma entrada de área de trabalho para listá-lo nos menus.",
+      "iconPlaceholder": "ou o nome ou caminho de um ícone na imagem",
+      "noProxyHelp": "Hosts acessados sem o proxy, separados por vírgulas. localhost está sempre entre eles.",
+      "versionHelp": "Vazio instala a versão mais recente a cada construção.",
+      "devkitPlaceholder": "Digite o nome de um pacote...",
+      "devkitHelp": "Instalados fora do diretório home, para todas as sessões.",
+      "launchHelp": "Um comando por linha, executado pelo sh como o usuário da sessão. Um diretório home copia os comandos na primeira inicialização e depois mantém sua cópia.",
+      "startHelp": {
+        "once": "Executado como root toda vez que o contêiner inicia, antes da sessão.",
+        "service": "Iniciado como root com o contêiner e iniciado de novo sempre que termina; finalize com o programa que continua em execução."
+      },
+      "groups": {
+        "software": "Software",
+        "desktop": "Área de trabalho",
+        "system": "Sistema"
+      },
+      "bundles": {
+        "label": "Escolhas rápidas",
+        "companions": "Acessórios da área de trabalho",
+        "shell": "Ferramentas de shell",
+        "build": "Ferramentas de compilação",
+        "archives": "Ferramentas de compactação"
+      },
+      "fontPacks": {
+        "office": "Compatíveis com o Office (Liberation, Carlito, Caladea)",
+        "cjk": "Chinês, japonês e coreano, todos os pesos",
+        "noto": "Noto para as escritas do mundo",
+        "microsoft": "Fontes essenciais da Microsoft (Arial, Times New Roman, Verdana)"
+      },
+      "devkits": {
+        "python": "Python",
+        "node": "Node.js",
+        "rust": "Rust",
+        "go": "Go",
+        "java": "Java"
+      },
+      "devkitPackages": {
+        "python": "Pacotes pip",
+        "node": "Pacotes npm, instalados globalmente",
+        "rust": "Crates, compilados e instalados",
+        "go": "Módulos Go, compilados e instalados"
+      },
+      "categories": {
+        "Utility": "Acessórios",
+        "Development": "Desenvolvimento",
+        "Graphics": "Gráficos",
+        "Network": "Internet",
+        "Office": "Escritório",
+        "AudioVideo": "Multimídia",
+        "Game": "Jogos",
+        "Education": "Educação",
+        "System": "Sistema"
+      },
+      "placements": {
+        "replace": "Substituir o comando de início do aplicativo",
+        "before": "Executar antes do comando de início do aplicativo"
+      },
+      "startModes": {
+        "once": "Executar uma vez a cada início",
+        "service": "Manter em execução como serviço"
+      }
     }
   },
   "popup": {

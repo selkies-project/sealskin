@@ -1931,12 +1931,36 @@
         "sha256": "Checksum SHA-256",
         "value": "valore",
         "script": "Comandi",
-        "text": "Dockerfile"
+        "text": "Dockerfile",
+        "app": "Applicazione",
+        "menu": "Elencala nel menu del clic destro",
+        "default": "Apri con essa i collegamenti web",
+        "ppas": "Archivi",
+        "packages": "Pacchetti",
+        "name": "Nome nei menu",
+        "command": "Comando",
+        "icon": "Icona",
+        "category": "Categoria del menu",
+        "sandbox": "Applicazione Chromium o Electron: avviala con --no-sandbox",
+        "terminal": "Si esegue in un terminale",
+        "packs": "Raccolte di font",
+        "fontFiles": "I tuoi file di font",
+        "eula": "Accetto la licenza dei font di base Microsoft",
+        "proxy": "Indirizzo del proxy",
+        "no_proxy": "Senza passare dal proxy",
+        "pip": "Indice dei pacchetti Python",
+        "npm": "Registro npm",
+        "version": "Versione",
+        "kit": "Linguaggio",
+        "placement": "Posizione",
+        "mode": "Esecuzione",
+        "scriptName": "Nome del file"
       },
       "actions": {
         "save": "Salva il file",
         "extract": "Estrai l'archivio",
-        "install": "Installalo come pacchetto"
+        "install": "Installalo come pacchetto",
+        "appimage": "Estrai l'AppImage"
       },
       "kinds": {
         "packages": {
@@ -1951,8 +1975,8 @@
         },
         "download": {
           "title": "Scarica",
-          "short": "Recupera un file, un archivio o un pacchetto",
-          "help": "Recupera un indirizzo durante la build dell'immagine: conserva il file, estrai un archivio o installa un .deb, .rpm o .apk."
+          "short": "Un file, un archivio, un'AppImage o un pacchetto",
+          "help": "Recupera un indirizzo durante la build dell'immagine: conserva il file, estrai un archivio o un'AppImage, oppure installa un .deb, .rpm o .apk."
         },
         "certificates": {
           "title": "Considera attendibili i certificati",
@@ -1961,8 +1985,8 @@
         },
         "fonts": {
           "title": "Aggiungi font",
-          "short": "Installa file di font",
-          "help": "Installa i file di font che carichi per tutte le applicazioni dell'immagine."
+          "short": "Raccolte di font e i tuoi file",
+          "help": "Installa le raccolte di font pacchettizzate dalla distribuzione e i file di font che carichi, per tutte le applicazioni dell'immagine."
         },
         "env": {
           "title": "Ambiente",
@@ -1978,6 +2002,46 @@
           "title": "Righe di Dockerfile",
           "short": "Qualsiasi istruzione, come scritta",
           "help": "Istruzioni inserite nel Dockerfile esattamente come le scrivi."
+        },
+        "app": {
+          "title": "Aggiungi un'applicazione",
+          "short": "Un browser o un editor, pronto all'avvio",
+          "help": "Installa l'applicazione dalla distribuzione, oppure dal repository del suo produttore su Debian e Ubuntu, e la elenca nei menu della sessione. Le applicazioni basate su Chromium si avviano con --no-sandbox, necessario in un container."
+        },
+        "ppa": {
+          "title": "PPA di Ubuntu",
+          "short": "Pacchetti da un archivio Launchpad",
+          "help": "Aggiunge all'immagine archivi di pacchetti personali di Launchpad e ne installa i pacchetti."
+        },
+        "devkit": {
+          "title": "Kit di sviluppo",
+          "short": "Python, Node.js, Rust, Go, Java",
+          "help": "Installa la toolchain di un linguaggio dalla distribuzione e i pacchetti propri del linguaggio che elenchi."
+        },
+        "docker": {
+          "title": "Installa Docker",
+          "short": "Le ultime versioni di Docker, Compose e Buildx",
+          "help": "Mette i binari statici di Docker dove il servizio Docker dell'immagine li trova. Il servizio si avvia solo in una sessione privilegiata."
+        },
+        "desktop": {
+          "title": "Voce desktop",
+          "short": "Elenca un programma nei menu",
+          "help": "Scrive una voce desktop per un programma presente nell'immagine, ad esempio uno estratto da un'AppImage o da un archivio, così che i menu della sessione lo elenchino."
+        },
+        "launch": {
+          "title": "Comando di avvio",
+          "short": "Ciò con cui si avvia la sessione",
+          "help": "Scrive i comandi con cui una sessione avvia la sua applicazione."
+        },
+        "proxy": {
+          "title": "Proxy e mirror",
+          "short": "Per la build e per le sessioni",
+          "help": "Imposta le variabili del proxy e i mirror di pip e npm per i passaggi sotto questo e per tutte le sessioni."
+        },
+        "startup": {
+          "title": "Esegui all'avvio",
+          "short": "Uno script o un servizio del container",
+          "help": "Aggiunge uno script che il container esegue all'avvio, oppure un servizio che mantiene in esecuzione."
         }
       },
       "toGuidedConfirm": "Costruisci dai passaggi",
@@ -1995,7 +2059,72 @@
       "listBuilding": "{name} in forno ({seconds} s)",
       "listBaked": "{name} è sfornata. Le nuove sessioni usano questa immagine.",
       "listFailed": "La build di {name} non è riuscita. Le sessioni mantengono l'ultima immagine costruita.",
-      "confirmDeleteApp": "Eliminare '{name}'? L'applicazione sfornata viene rimossa con la sua ricetta. Le cartelle home create dagli utenti con essa restano."
+      "confirmDeleteApp": "Eliminare '{name}'? L'applicazione sfornata viene rimossa con la sua ricetta. Le cartelle home create dagli utenti con essa restano.",
+      "latest": "più recente",
+      "pickApp": "-- Scegli un'applicazione --",
+      "pickKit": "-- Scegli un linguaggio --",
+      "menuHelp": "Una cartella home copia il menu del clic destro al primo avvio e poi mantiene la propria copia.",
+      "appimageHelp": "Estrae l'AppImage nella destinazione, dove AppRun la avvia. Aggiungi una voce desktop per elencarla nei menu.",
+      "iconPlaceholder": "oppure il nome o il percorso di un'icona nell'immagine",
+      "noProxyHelp": "Host raggiunti senza il proxy, separati da virgole. localhost è sempre tra questi.",
+      "versionHelp": "Se vuoto, installa l'ultima versione a ogni build.",
+      "devkitPlaceholder": "Digita il nome di un pacchetto...",
+      "devkitHelp": "Installati fuori dalla cartella home, per tutte le sessioni.",
+      "launchHelp": "Un comando per riga, eseguito da sh come utente della sessione. Una cartella home copia i comandi al primo avvio e poi mantiene la propria copia.",
+      "startHelp": {
+        "once": "Viene eseguito come root a ogni avvio del container, prima della sessione.",
+        "service": "Viene avviato come root con il container e riavviato ogni volta che termina; concludi con il programma che resta in esecuzione."
+      },
+      "groups": {
+        "software": "Software",
+        "desktop": "Desktop",
+        "system": "Sistema"
+      },
+      "bundles": {
+        "label": "Scelte rapide",
+        "companions": "Accessori per il desktop",
+        "shell": "Strumenti per la shell",
+        "build": "Strumenti di compilazione",
+        "archives": "Strumenti per archivi"
+      },
+      "fontPacks": {
+        "office": "Compatibili con Office (Liberation, Carlito, Caladea)",
+        "cjk": "Cinese, giapponese e coreano, tutti i pesi",
+        "noto": "Noto per le scritture del mondo",
+        "microsoft": "Font di base Microsoft (Arial, Times New Roman, Verdana)"
+      },
+      "devkits": {
+        "python": "Python",
+        "node": "Node.js",
+        "rust": "Rust",
+        "go": "Go",
+        "java": "Java"
+      },
+      "devkitPackages": {
+        "python": "Pacchetti pip",
+        "node": "Pacchetti npm, installati globalmente",
+        "rust": "Crate, compilati e installati",
+        "go": "Moduli Go, compilati e installati"
+      },
+      "categories": {
+        "Utility": "Accessori",
+        "Development": "Sviluppo",
+        "Graphics": "Grafica",
+        "Network": "Internet",
+        "Office": "Ufficio",
+        "AudioVideo": "Multimedia",
+        "Game": "Giochi",
+        "Education": "Istruzione",
+        "System": "Sistema"
+      },
+      "placements": {
+        "replace": "Sostituisci il comando di avvio dell'applicazione",
+        "before": "Esegui prima del comando di avvio dell'applicazione"
+      },
+      "startModes": {
+        "once": "Esegui una volta a ogni avvio",
+        "service": "Mantieni in esecuzione come servizio"
+      }
     }
   },
   "popup": {

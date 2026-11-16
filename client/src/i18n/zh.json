@@ -1931,12 +1931,36 @@
         "sha256": "SHA-256 校验和",
         "value": "值",
         "script": "命令",
-        "text": "Dockerfile"
+        "text": "Dockerfile",
+        "app": "应用",
+        "menu": "列入右键菜单",
+        "default": "用它打开网页链接",
+        "ppas": "归档",
+        "packages": "软件包",
+        "name": "菜单中的名称",
+        "command": "命令",
+        "icon": "图标",
+        "category": "菜单类别",
+        "sandbox": "Chromium 或 Electron 应用：使用 --no-sandbox 启动",
+        "terminal": "在终端中运行",
+        "packs": "字体集",
+        "fontFiles": "您自己的字体文件",
+        "eula": "我接受 Microsoft 核心字体的许可",
+        "proxy": "代理地址",
+        "no_proxy": "不经过代理",
+        "pip": "Python 软件包索引",
+        "npm": "npm 注册表",
+        "version": "版本",
+        "kit": "语言",
+        "placement": "位置",
+        "mode": "运行方式",
+        "scriptName": "文件名"
       },
       "actions": {
         "save": "保存文件",
         "extract": "解压归档",
-        "install": "作为软件包安装"
+        "install": "作为软件包安装",
+        "appimage": "解包 AppImage"
       },
       "kinds": {
         "packages": {
@@ -1951,8 +1975,8 @@
         },
         "download": {
           "title": "下载",
-          "short": "获取文件、归档或软件包",
-          "help": "在镜像构建时获取某个地址：保留文件、解压归档，或安装 .deb、.rpm 或 .apk。"
+          "short": "文件、归档、AppImage 或软件包",
+          "help": "在镜像构建时获取某个地址：保留文件、解压归档或解包 AppImage，或安装 .deb、.rpm 或 .apk。"
         },
         "certificates": {
           "title": "信任证书",
@@ -1961,8 +1985,8 @@
         },
         "fonts": {
           "title": "添加字体",
-          "short": "安装字体文件",
-          "help": "为镜像中的所有应用安装您上传的字体文件。"
+          "short": "字体集和您自己的文件",
+          "help": "为镜像中的所有应用安装发行版打包的字体集和您上传的字体文件。"
         },
         "env": {
           "title": "环境",
@@ -1978,6 +2002,46 @@
           "title": "Dockerfile 行",
           "short": "任意指令，按原样写入",
           "help": "完全按您所写内容放入 Dockerfile 的指令。"
+        },
+        "app": {
+          "title": "添加应用",
+          "short": "浏览器或编辑器，随时可启动",
+          "help": "从发行版安装应用，在 Debian 和 Ubuntu 上则可从其供应商的软件仓库安装，并将其列入会话的菜单。基于 Chromium 的应用使用 --no-sandbox 启动，这是容器所必需的。"
+        },
+        "ppa": {
+          "title": "Ubuntu PPA",
+          "short": "来自 Launchpad 归档的软件包",
+          "help": "将 Launchpad 个人软件包归档添加到镜像，并从中安装软件包。"
+        },
+        "devkit": {
+          "title": "开发套件",
+          "short": "Python、Node.js、Rust、Go、Java",
+          "help": "从发行版安装某种语言的工具链，以及您列出的该语言自身的软件包。"
+        },
+        "docker": {
+          "title": "安装 Docker",
+          "short": "最新的 Docker、Compose 和 Buildx",
+          "help": "将 Docker 的静态二进制文件放到镜像的 Docker 服务能找到的位置。该服务仅在特权会话中启动。"
+        },
+        "desktop": {
+          "title": "桌面条目",
+          "short": "将程序列入菜单",
+          "help": "为镜像中已有的程序（例如从 AppImage 或归档解包出的程序）写入桌面条目，使会话的菜单列出它。"
+        },
+        "launch": {
+          "title": "启动命令",
+          "short": "会话启动时运行的内容",
+          "help": "写入会话用来启动其应用的命令。"
+        },
+        "proxy": {
+          "title": "代理和镜像源",
+          "short": "用于构建和会话",
+          "help": "为此步骤之后的步骤和每个会话设置代理变量以及 pip 和 npm 镜像源。"
+        },
+        "startup": {
+          "title": "启动时运行",
+          "short": "容器的脚本或服务",
+          "help": "添加容器启动时运行的脚本，或由容器保持运行的服务。"
         }
       },
       "toGuidedConfirm": "按步骤构建",
@@ -1995,7 +2059,72 @@
       "listBuilding": "正在烘焙 {name}（{seconds} 秒）",
       "listBaked": "{name} 已烘焙。新会话将运行此镜像。",
       "listFailed": "{name} 构建失败。会话保留上一个构建成功的镜像。",
-      "confirmDeleteApp": "要删除“{name}”吗？烘焙应用将连同其配方一并移除。用户用它创建的主目录会保留。"
+      "confirmDeleteApp": "要删除“{name}”吗？烘焙应用将连同其配方一并移除。用户用它创建的主目录会保留。",
+      "latest": "最新",
+      "pickApp": "-- 选择一个应用 --",
+      "pickKit": "-- 选择一种语言 --",
+      "menuHelp": "主目录在首次启动时复制右键菜单，此后保留自己的副本。",
+      "appimageHelp": "将 AppImage 解包到目标位置，由其中的 AppRun 启动。添加桌面条目可将其列入菜单。",
+      "iconPlaceholder": "或镜像中图标的名称或路径",
+      "noProxyHelp": "不经过代理访问的主机，以逗号分隔。localhost 始终包含在内。",
+      "versionHelp": "留空则每次构建时安装最新版本。",
+      "devkitPlaceholder": "输入软件包名称...",
+      "devkitHelp": "安装在主目录之外，供每个会话使用。",
+      "launchHelp": "每行一条命令，由 sh 以会话用户身份运行。主目录在首次启动时复制这些命令，此后保留自己的副本。",
+      "startHelp": {
+        "once": "每次容器启动时以 root 身份运行，先于会话。",
+        "service": "随容器以 root 身份启动，并在每次退出后重新启动；请以持续运行的程序结尾。"
+      },
+      "groups": {
+        "software": "软件",
+        "desktop": "桌面",
+        "system": "系统"
+      },
+      "bundles": {
+        "label": "快速选择",
+        "companions": "桌面配套工具",
+        "shell": "Shell 工具",
+        "build": "构建工具",
+        "archives": "归档工具"
+      },
+      "fontPacks": {
+        "office": "办公兼容（Liberation、Carlito、Caladea）",
+        "cjk": "中文、日文和韩文，所有字重",
+        "noto": "适用于世界各种文字的 Noto",
+        "microsoft": "Microsoft 核心字体（Arial、Times New Roman、Verdana）"
+      },
+      "devkits": {
+        "python": "Python",
+        "node": "Node.js",
+        "rust": "Rust",
+        "go": "Go",
+        "java": "Java"
+      },
+      "devkitPackages": {
+        "python": "pip 软件包",
+        "node": "npm 软件包，全局安装",
+        "rust": "Crate，构建并安装",
+        "go": "Go 模块，构建并安装"
+      },
+      "categories": {
+        "Utility": "附件",
+        "Development": "开发",
+        "Graphics": "图形",
+        "Network": "互联网",
+        "Office": "办公",
+        "AudioVideo": "多媒体",
+        "Game": "游戏",
+        "Education": "教育",
+        "System": "系统"
+      },
+      "placements": {
+        "replace": "替换应用的启动命令",
+        "before": "在应用的启动命令之前运行"
+      },
+      "startModes": {
+        "once": "每次启动时运行一次",
+        "service": "作为服务持续运行"
+      }
     }
   },
   "popup": {

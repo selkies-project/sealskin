@@ -1931,12 +1931,36 @@
         "sha256": "SHA-256 sağlama toplamı",
         "value": "değer",
         "script": "Komutlar",
-        "text": "Dockerfile"
+        "text": "Dockerfile",
+        "app": "Uygulama",
+        "menu": "Sağ tık menüsünde listele",
+        "default": "Web bağlantılarını bununla aç",
+        "ppas": "Arşivler",
+        "packages": "Paketler",
+        "name": "Menülerdeki ad",
+        "command": "Komut",
+        "icon": "Simge",
+        "category": "Menü kategorisi",
+        "sandbox": "Chromium veya Electron uygulaması: --no-sandbox ile başlat",
+        "terminal": "Terminalde çalışır",
+        "packs": "Yazı tipi setleri",
+        "fontFiles": "Kendi yazı tipi dosyalarınız",
+        "eula": "Microsoft temel yazı tiplerinin lisansını kabul ediyorum",
+        "proxy": "Vekil sunucu adresi",
+        "no_proxy": "Vekil sunucu dışında",
+        "pip": "Python paket dizini",
+        "npm": "npm kayıt defteri",
+        "version": "Sürüm",
+        "kit": "Dil",
+        "placement": "Yerleşim",
+        "mode": "Çalışma biçimi",
+        "scriptName": "Dosya adı"
       },
       "actions": {
         "save": "Dosyayı kaydet",
         "extract": "Arşivi aç",
-        "install": "Paket olarak kur"
+        "install": "Paket olarak kur",
+        "appimage": "AppImage'ı aç"
       },
       "kinds": {
         "packages": {
@@ -1951,8 +1975,8 @@
         },
         "download": {
           "title": "İndir",
-          "short": "Dosya, arşiv veya paket getir",
-          "help": "İmaj derlenirken bir adresten getirir: dosyayı saklayın, bir arşivi açın veya bir .deb, .rpm ya da .apk kurun."
+          "short": "Dosya, arşiv, AppImage veya paket",
+          "help": "İmaj derlenirken bir adresten getirir: dosyayı saklayın, bir arşivi veya bir AppImage'ı açın ya da bir .deb, .rpm veya .apk kurun."
         },
         "certificates": {
           "title": "Sertifikalara güven",
@@ -1961,8 +1985,8 @@
         },
         "fonts": {
           "title": "Yazı tipi ekle",
-          "short": "Yazı tipi dosyaları kur",
-          "help": "Yüklediğiniz yazı tipi dosyalarını imajdaki her uygulama için kurar."
+          "short": "Yazı tipi setleri ve kendi dosyalarınız",
+          "help": "Dağıtımın paketlediği yazı tipi setlerini ve yüklediğiniz yazı tipi dosyalarını imajdaki her uygulama için kurar."
         },
         "env": {
           "title": "Ortam",
@@ -1978,6 +2002,46 @@
           "title": "Dockerfile satırları",
           "short": "Herhangi bir yönerge, yazıldığı gibi",
           "help": "Dockerfile'a tam olarak yazdığınız gibi konulan yönergeler."
+        },
+        "app": {
+          "title": "Uygulama ekle",
+          "short": "Başlamaya hazır bir tarayıcı veya düzenleyici",
+          "help": "Uygulamayı dağıtımdan veya Debian ve Ubuntu'da satıcısının deposundan kurar ve oturumun menülerinde listeler. Chromium tabanlı uygulamalar, bir kapsayıcının gerektirdiği --no-sandbox ile başlar."
+        },
+        "ppa": {
+          "title": "Ubuntu PPA",
+          "short": "Bir Launchpad arşivinden paketler",
+          "help": "İmaja Launchpad kişisel paket arşivleri ekler ve onlardan paket kurar."
+        },
+        "devkit": {
+          "title": "Geliştirme seti",
+          "short": "Python, Node.js, Rust, Go, Java",
+          "help": "Bir dilin araç zincirini dağıtımdan ve dilin listelediğiniz kendi paketlerini kurar."
+        },
+        "docker": {
+          "title": "Docker kur",
+          "short": "En son Docker, Compose ve Buildx",
+          "help": "Docker'ın statik ikili dosyalarını imajın Docker hizmetinin bulduğu yere koyar. Hizmet yalnızca ayrıcalıklı bir oturumda başlar."
+        },
+        "desktop": {
+          "title": "Masaüstü girdisi",
+          "short": "Bir programı menülerde listele",
+          "help": "İmajda bulunan bir program için, örneğin bir AppImage'dan veya arşivden açılmış olan için, oturumun menülerinde listelenmesini sağlayan bir masaüstü girdisi yazar."
+        },
+        "launch": {
+          "title": "Başlatma komutu",
+          "short": "Oturumun neyle başladığı",
+          "help": "Bir oturumun uygulamasını başlattığı komutları yazar."
+        },
+        "proxy": {
+          "title": "Vekil sunucu ve yansılar",
+          "short": "Derleme ve oturumlar için",
+          "help": "Vekil sunucu değişkenlerini ve pip ile npm yansılarını bunun altındaki adımlar ve her oturum için ayarlar."
+        },
+        "startup": {
+          "title": "Başlangıçta çalıştır",
+          "short": "Kapsayıcının bir betiği veya hizmeti",
+          "help": "Kapsayıcının başlarken çalıştırdığı bir betik veya çalışır durumda tuttuğu bir hizmet ekler."
         }
       },
       "toGuidedConfirm": "Adımlardan derle",
@@ -1995,7 +2059,72 @@
       "listBuilding": "{name} pişiriliyor ({seconds} sn)",
       "listBaked": "{name} pişirildi. Yeni oturumlar bu imajı çalıştırır.",
       "listFailed": "{name} derlemesi başarısız oldu. Oturumlar derlenen son imajı korur.",
-      "confirmDeleteApp": "'{name}' silinsin mi? Pişirilmiş uygulama tarifiyle birlikte kaldırılır. Kullanıcıların onunla oluşturduğu ana dizinler kalır."
+      "confirmDeleteApp": "'{name}' silinsin mi? Pişirilmiş uygulama tarifiyle birlikte kaldırılır. Kullanıcıların onunla oluşturduğu ana dizinler kalır.",
+      "latest": "en son",
+      "pickApp": "-- Bir uygulama seçin --",
+      "pickKit": "-- Bir dil seçin --",
+      "menuHelp": "Bir ana dizin sağ tık menüsünü ilk başlatılışında kopyalar ve sonrasında kendi kopyasını korur.",
+      "appimageHelp": "AppImage'ı hedefe açar; AppRun onu orada başlatır. Menülerde listelemek için bir masaüstü girdisi ekleyin.",
+      "iconPlaceholder": "veya imajdaki bir simgenin adı ya da yolu",
+      "noProxyHelp": "Vekil sunucu olmadan erişilen ana makineler, virgülle ayrılmış. localhost her zaman bunların arasındadır.",
+      "versionHelp": "Boş bırakılırsa her derlemede en son sürüm kurulur.",
+      "devkitPlaceholder": "Bir paket adı yazın...",
+      "devkitHelp": "Ana dizinin dışına, her oturum için kurulur.",
+      "launchHelp": "Satır başına bir komut, oturumun kullanıcısı olarak sh tarafından çalıştırılır. Bir ana dizin komutları ilk başlatılışında kopyalar ve sonrasında kendi kopyasını korur.",
+      "startHelp": {
+        "once": "Kapsayıcı her başladığında, oturumdan önce root olarak çalışır.",
+        "service": "Kapsayıcıyla birlikte root olarak başlatılır ve her çıktığında yeniden başlatılır; çalışmayı sürdüren programla bitirin."
+      },
+      "groups": {
+        "software": "Yazılım",
+        "desktop": "Masaüstü",
+        "system": "Sistem"
+      },
+      "bundles": {
+        "label": "Hızlı seçimler",
+        "companions": "Masaüstü yardımcıları",
+        "shell": "Kabuk araçları",
+        "build": "Derleme araçları",
+        "archives": "Arşiv araçları"
+      },
+      "fontPacks": {
+        "office": "Ofis uyumlu (Liberation, Carlito, Caladea)",
+        "cjk": "Çince, Japonca ve Korece, her kalınlık",
+        "noto": "Dünyanın yazı sistemleri için Noto",
+        "microsoft": "Microsoft temel yazı tipleri (Arial, Times New Roman, Verdana)"
+      },
+      "devkits": {
+        "python": "Python",
+        "node": "Node.js",
+        "rust": "Rust",
+        "go": "Go",
+        "java": "Java"
+      },
+      "devkitPackages": {
+        "python": "pip paketleri",
+        "node": "npm paketleri, genel olarak kurulur",
+        "rust": "Crate'ler, derlenip kurulur",
+        "go": "Go modülleri, derlenip kurulur"
+      },
+      "categories": {
+        "Utility": "Donatılar",
+        "Development": "Geliştirme",
+        "Graphics": "Grafik",
+        "Network": "İnternet",
+        "Office": "Ofis",
+        "AudioVideo": "Çoklu ortam",
+        "Game": "Oyunlar",
+        "Education": "Eğitim",
+        "System": "Sistem"
+      },
+      "placements": {
+        "replace": "Uygulamanın başlatma komutunun yerine geç",
+        "before": "Uygulamanın başlatma komutundan önce çalıştır"
+      },
+      "startModes": {
+        "once": "Her başlangıçta bir kez çalıştır",
+        "service": "Hizmet olarak çalışır durumda tut"
+      }
     }
   },
   "popup": {
