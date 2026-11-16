@@ -174,7 +174,7 @@ async def prefetch() -> None:
 
 async def serve(name: str, request: Request) -> Response:
     """Answer a client's request for a picture by name, 404 for one this server never handed out."""
-    if not _NAME.match(name):
+    if not _NAME.fullmatch(name):
         return Response(status_code=404)
     picture = await fetch(name)
     if not picture:

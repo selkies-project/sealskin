@@ -379,6 +379,7 @@ HELD_SETTINGS = {
     "home_migration": False,
     "session_limit": 0,
     "pools": [],
+    "vpn": False,
 }
 #: The one route a held user may call, which tells the web app to show the holding page.
 STATUS_PATH = "/api/admin/status"
@@ -533,7 +534,7 @@ def _key_user(req: Request) -> dict[str, Any]:
     except jwt.PyJWTError as exc:
         raise HTTPException(status_code=401, detail="Invalid token format.") from exc
     username = unverified_claims.get("sub")
-    if not username:
+    if not username or not isinstance(username, str):
         raise HTTPException(status_code=401, detail="Token missing username claim.")
     user = user_manager.get_user(username)
     if not user or not user.get("public_key"):

@@ -194,5 +194,6 @@ def netrc_auth() -> httpx.Auth | None:
     try:
         return httpx.NetRCAuth(path)
     except (OSError, netrc.NetrcParseError) as exc:
-        logger.warning("HTTP credentials not read from %s: %s", path, exc)
+        # The parser's message quotes the file, a secret maybe; its kind says enough.
+        logger.warning("HTTP credentials not read from %s: %s", path, type(exc).__name__)
         return None
