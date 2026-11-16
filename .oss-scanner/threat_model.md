@@ -62,7 +62,10 @@
   (`config_store.STORE_ENV_DENIED`); an OpenVPN profile's options are read by the names OpenVPN gives them
   (quotes and leading dashes removed, `setenv opt` unwrapped) before the ones that run a program are dropped;
   a room message carries a participant's alias, never their token; a proxy's mark counts only on a request
-  that came through this node's proxy; the server publishes no OpenAPI description.
+  that came through this node's proxy; the server publishes no OpenAPI description; a session's container
+  sets no cookie on the origin it is served from, and a session whose container serves its own page on the
+  web app's origin (a key-file client's, of an image with no client to export) answers no request that
+  carries a web sign-in.
 
 ## Components that matter most / least
 - Most: anything that lets a lower principal reach a higher one: an anonymous client reaching the API, a session

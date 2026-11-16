@@ -8,6 +8,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from app import sso
 from app.routers import internal, sessions
 from app.settings import settings
 from app.state import state
@@ -82,6 +83,25 @@ def test_a_web_sign_in_session_needs_the_exported_client_on_the_shared_origin(ap
     assert state.sessions[SID]["own_origin"] is False
     resolved = resolve(app_client(SHARED))
     assert resolved.status_code == 200 and resolved.headers["X-Web-Root"] == str(client_dir)
+
+
+def test_a_container_served_session_does_not_open_for_a_web_sign_in_on_the_shared_origin(app_client, monkeypatch):
+    # A key-file client's session without an exported client: its container serves the page.
+    assert resolve(app_client(SHARED)).status_code == 200
+    signed_in = app_client(SHARED)
+    signed_in.cookies.set(sso.SESSION_COOKIE, "anything")
+    assert resolve(signed_in).status_code == 403
+    monkeypatch.setattr(settings, "proxy_auth_user_header", "Remote-User")
+    named = app_client(SHARED).get(f"/internal/resolve_session/{SID}", headers={**INTERNAL, "Remote-User": "bob"})
+    assert named.status_code == 403
+    # On its own origin no web sign-in travels with the request, and none is looked for.
+    state.sessions[SID]["own_origin"] = True
+    own = app_client(OWN)
+    own.cookies.set(sso.SESSION_COOKIE, "anything")
+    assert resolve(own).status_code == 200
+    # A web sign-in's session whose exported client went missing is not handed to its container either.
+    state.sessions[SID].update(native=True, own_origin=False, web_root="/nowhere")
+    assert resolve(app_client(SHARED)).status_code == 403
 
 
 def test_with_isolation_a_web_sign_in_session_stays_off_the_shared_origin(app_client, monkeypatch):

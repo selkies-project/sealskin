@@ -18,9 +18,9 @@ import os
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse
 
-from .. import cluster
+from .. import cluster, sso
 from ..providers.base_provider import host_port
-from ..security import on_session_origin, token_matches
+from ..security import WEB_CLIENT_NEEDED, on_session_origin, token_matches
 from ..settings import settings
 from ..state import state
 
@@ -41,6 +41,19 @@ async def through_proxy(request: Request) -> None:
 
 
 router = APIRouter(prefix="/internal", include_in_schema=False, dependencies=[Depends(through_proxy)])
+
+#: What a session its container serves on the web app's origin answers a browser that is signed in there.
+SIGNED_IN_VISITOR = (
+    "This session's page is served by its own container, so it does not open in a browser signed in to this "
+    "server on the web: open it in a private window or another browser profile."
+)
+
+
+def _web_signed_in(request: Request) -> bool:
+    """Whether a request carries a web sign-in: its cookie, or the header a reverse proxy signs users in with."""
+    header = settings.proxy_auth_user_header.strip()
+    return bool(request.cookies.get(sso.SESSION_COOKIE) or (header and request.headers.get(header, "").strip()))
+
 
 STOPPED_PAGE = '<!doctype html><meta charset="utf-8"><title>SealSkin</title><p>{}</p><script>close()</script>'
 
@@ -152,6 +165,12 @@ async def resolve_session(session_id: str, request: Request) -> Response:
     web_root = session.get("web_root")
     if web_root and os.path.isfile(os.path.join(web_root, "index.html")):
         headers["X-Web-Root"] = web_root
+    elif not on_session_origin(request, session_id):
+        # The container would serve its own pages on the web app's origin, where a web sign-in is ambient.
+        if session.get("native"):
+            raise HTTPException(status_code=403, detail=WEB_CLIENT_NEEDED)
+        if _web_signed_in(request):
+            raise HTTPException(status_code=403, detail=SIGNED_IN_VISITOR)
     if "custom_user" in session and "password" in session:
         auth_b64 = base64.b64encode(f"{session['custom_user']}:{session['password']}".encode()).decode()
         headers["X-Upstream-Auth"] = f"Basic {auth_b64}"

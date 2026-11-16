@@ -136,7 +136,10 @@ domain). The web app probes a random name under each, and under
 session of a web sign-in is then served on its own origin or not at all. A
 key-file client's session, a collaboration room of one, and the extension's
 App Laboratory frame are served from the shared origin either way, as they
-always have been.
+always have been. Where the server could not take the web client out of such
+a session's image, its container serves the page itself, and that page does
+not open in a browser signed in to the server on the web: code of an image
+never runs beside a web sign-in.
 
 ## admin.json
 
