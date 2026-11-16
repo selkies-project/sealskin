@@ -3523,12 +3523,39 @@ function renderAppStoreSelect() {
   }
 }
 
-async function fetchAndRenderAvailableApps(storeUrl) {
+// How long the page shows a store's app list from its own copy before asking the server again.
+const AVAILABLE_APPS_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+const availableAppsKey = (storeName) => `sealskin.availableApps.${storeName}`;
+
+function cachedAvailableApps(storeName, storeUrl) {
   try {
-    displayStatus(t('options.status.fetchingApps'));
+    const kept = JSON.parse(localStorage.getItem(availableAppsKey(storeName)) || 'null');
+    if (kept && kept.url === storeUrl && Array.isArray(kept.apps) && Date.now() - kept.at < AVAILABLE_APPS_MAX_AGE_MS) return kept.apps;
+  } catch (error) { /* no storage, or not ours: ask the server */ }
+  return null;
+}
+
+function keepAvailableApps(storeName, storeUrl, apps) {
+  try {
+    localStorage.setItem(availableAppsKey(storeName), JSON.stringify({ url: storeUrl, at: Date.now(), apps }));
+  } catch (error) { /* the list is asked for again next time */ }
+}
+
+/**
+ * Shows a store's apps: from the page's copy while it is fresh, else from the server's.
+ * @param {string} storeUrl The selected store's address.
+ * @param {boolean} [refresh] Have the server fetch the store again, as the refresh button asks.
+ */
+async function fetchAndRenderAvailableApps(storeUrl, refresh = false) {
+  try {
     const selectedStoreName = appStoreSelect.options[appStoreSelect.selectedIndex].text;
-    const apiUrl = `/api/admin/apps/available?url=${encodeURIComponent(storeUrl)}&store_name=${encodeURIComponent(selectedStoreName)}`;
-    const apps = await secureFetch(apiUrl, { method: 'GET' });
+    let apps = refresh ? null : cachedAvailableApps(selectedStoreName, storeUrl);
+    if (!apps) {
+      displayStatus(t('options.status.fetchingApps'));
+      const apiUrl = `/api/admin/apps/available?url=${encodeURIComponent(storeUrl)}&store_name=${encodeURIComponent(selectedStoreName)}${refresh ? '&refresh=true' : ''}`;
+      apps = await secureFetch(apiUrl, { method: 'GET' });
+      keepAvailableApps(selectedStoreName, storeUrl, apps);
+    }
     adminData.availableApps = apps;
     document.getElementById('available-apps-title').textContent = t('options.appStore.availableFrom', { storeName: selectedStoreName });
     renderAvailableAppsGrid();
@@ -4767,7 +4794,7 @@ function bindEvents() {
 
   refreshAppStoreBtn.addEventListener('click', () => {
     const selectedStoreUrl = appStoreSelect.value;
-    if (selectedStoreUrl) fetchAndRenderAvailableApps(selectedStoreUrl);
+    if (selectedStoreUrl) fetchAndRenderAvailableApps(selectedStoreUrl, true);
     else displayStatus('Please select an app store to refresh.', true);
   });
 
