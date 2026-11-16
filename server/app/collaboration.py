@@ -73,6 +73,9 @@ def _as_viewer_sees(session_id: str, payload: dict[str, Any], own: str) -> dict[
         }
     if payload.get("type") == "resolution_update":
         return {**payload, "token": seen(payload.get("token"))}
+    if payload.get("type") == "control":
+        inner = payload.get("payload") or {}
+        return {**payload, "payload": {**inner, "sender_token": seen(inner.get("sender_token"))}}
     return payload
 
 
@@ -430,9 +433,9 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
         await websocket.close(code=1008)
         return
 
-    is_controller = token == session_data.get("controller_token")
+    is_controller = token_matches(token, session_data.get("controller_token"))
     viewer_data_ref = next(
-        (v for v in session_data.get("viewers", []) if v["token"] == token), None
+        (v for v in session_data.get("viewers", []) if token_matches(token, v["token"])), None
     )
     is_viewer = viewer_data_ref is not None
 
@@ -596,9 +599,7 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
                     session_data["designated_speaker"] = speaker_token
                     state.sessions[session_id_str] = session_data
                     await config_store.save_sessions()
-                    logger.info(
-                        f"[{session_id_str}] Designated speaker set to: {speaker_token}"
-                    )
+                    logger.info("[%s] Designated speaker changed.", session_id_str)
                     await broadcast_state(session_id_str)
                 elif action == "set_username" and is_viewer:
                     now = time.time()
@@ -649,9 +650,11 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
                         await broadcast_to_room(session_id_str, chat_payload)
 
                 elif action in ["video_state", "audio_state", "force_cursor_render"]:
-                    await broadcast_to_room(
-                        session_id_str, {"type": "control", "payload": data}
-                    )
+                    # Only the fields the room page reads go on, never whatever else the sender wrote.
+                    # The cursor switch is 1 or 0 on Selkies' input channel; the other two are flags.
+                    on = bool(data.get("state"))
+                    relayed = {"action": action, "state": int(on) if action == "force_cursor_render" else on, "sender_token": token}
+                    await broadcast_to_room(session_id_str, {"type": "control", "payload": relayed})
 
                 elif action == "get_apps" and is_controller:
                     await send_app_list()
