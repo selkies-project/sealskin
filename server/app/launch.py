@@ -737,6 +737,8 @@ async def _resolve_storage(
     if not use_persistent:
         home_name = "cleanroom"
     if home_name and home_name.lower() != "cleanroom":
+        if not user_manager.is_home_name(home_name):
+            raise HTTPException(status_code=404, detail=f"Home directory '{home_name}' not found.")
         try:
             # The caller's own storage is the base, so a name cannot step into a sibling's.
             user_storage = safe_join(settings.storage_path, username)

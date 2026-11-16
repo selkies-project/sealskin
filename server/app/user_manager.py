@@ -829,6 +829,15 @@ def delete_group(group_name: str) -> None:
     logger.info("Deleted group '%s'.", group_name)
 
 
+#: The directory beside a user's homes that holds the files every session of theirs shares.
+SHARED_FILES_DIR = "_sealskin_shared_files"
+
+
+def is_home_name(home_name: str) -> bool:
+    """Whether `home_name` can name a home directory: a plain name, and not the shared files' own."""
+    return bool(_NAME_RE.fullmatch(home_name or "")) and home_name != SHARED_FILES_DIR
+
+
 def get_home_dirs(username: str) -> list[str]:
     """List a user's home directories (sub-directories of their storage)."""
     try:

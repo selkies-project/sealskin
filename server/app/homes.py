@@ -18,7 +18,7 @@ from collections.abc import AsyncIterator
 import httpx
 from fastapi import HTTPException
 
-from . import cluster
+from . import cluster, user_manager
 from .fsutil import safe_join
 from .settings import settings
 from .state import state
@@ -58,6 +58,7 @@ async def _archive(username: str, home_name: str, failed: list[str]) -> AsyncIte
         os.path.dirname(home_path(username, home_name)),
         "-cf",
         "-",
+        "--",
         home_name,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
@@ -83,6 +84,9 @@ async def migrate(username: str, home_name: str, target: str) -> dict[str, str]:
             use or already moving, 400 for a target that cannot take it, 502
             when the transfer fails, in which case nothing changed.
     """
+    # A plain name alone: `.` would be the user's whole storage, and the move ends by removing what it sent.
+    if not user_manager.is_home_name(home_name):
+        raise HTTPException(status_code=400, detail="Invalid home directory name.")
     path = home_path(username, home_name)
     if not os.path.isdir(path):
         raise HTTPException(status_code=404, detail=f"Home directory '{home_name}' is not on this node.")
