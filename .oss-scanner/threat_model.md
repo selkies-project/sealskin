@@ -36,6 +36,11 @@
   read by a fixed command in a throwaway container of it and searched on the server, the query never reaching
   a shell; a recipe is an administrator's alone to write, and the only word a user's launch has in it is which
   application it starts),
+  browser policies (`browser_policies.py`, `routers/browser_policies.py`: an administrator's map of policy names
+  to JSON values per browser engine, held to the catalogs under `browser_policy_catalog/` and kept in the shared
+  record; `build_launch_spec` writes it as files under the node's `browser_policy_files_path` and mounts each
+  read-only at the fixed paths the browsers read, never at a path a request names; a user's launch has no word
+  in which policy applies or in its content, and an application naming a policy the node lacks does not launch),
   Caddy's `forward_auth` to the loopback-only `/internal/resolve_session`, the address a user hands one of
   their own running sessions (`POST /api/sessions/<id>/open_url`: a web address by pattern, passed to a fixed
   script inside the session's container as an argument, run as the session's own user), the brand a page request
@@ -87,6 +92,13 @@
 - An admin controls the host's Docker, or the namespace on Kubernetes, by design. A Bakery recipe runs the
   administrator's commands as root in a build on the node, with the network a session has: that is the
   authority an administrator already has by installing an image of their choosing.
+- A browser policy configures the browsers an image holds and is no containment of the session: root in the
+  container (a session whose user keeps `sudo`, or a privileged template) can move a policy directory aside,
+  and a browser the user brings that reads another path is outside it. A user without root changing or
+  removing the mounted policy files is a finding. The shared record holds no credential, so a policy that
+  carries one (`CloudManagementEnrollmentToken`) is refused. The translations of the catalogs are fetched
+  from the browser projects when the server is packaged, at pinned revisions, and reach an administrator's
+  page as text alone.
 - An admin's widget may fetch any address the node reaches, and an admin's frame widget may run any script
   inside its sandbox, by design. The dashboard lock and the `dashboard_*` user settings shape the page a user
   sees alone and are no boundary; the server's checks on widget data and on a user's own widgets are.

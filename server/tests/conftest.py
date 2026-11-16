@@ -33,6 +33,8 @@ PATH_SETTINGS = [
     "app_store_cache_path",
     "proot_catalogs_path",
     "proot_apps_path",
+    "browser_policies_path",
+    "browser_policy_files_path",
     "vpn_profiles_path",
     "bakery_path",
     "keys_base_path",
@@ -68,6 +70,8 @@ def isolated_settings(tmp_path, monkeypatch):
         "app_store_cache_path": base / "app_stores_cache",
         "proot_catalogs_path": base / "proot_catalogs.yml",
         "proot_apps_path": tmp_path / "storage" / "proot_apps",
+        "browser_policies_path": base / "browser_policies.yml",
+        "browser_policy_files_path": tmp_path / "storage" / "browser_policies",
         "vpn_profiles_path": base / "vpn_profiles.yml",
         "bakery_path": base / "bakery",
         "keys_base_path": base / "keys",
@@ -108,6 +112,7 @@ def isolated_settings(tmp_path, monkeypatch):
     state.app_stores.clear()
     state.store_entries.clear()
     state.app_templates.clear()
+    state.browser_policies.clear()
     state.template_files.clear()
     state.sessions.clear()
     state.vpn_profiles.clear()

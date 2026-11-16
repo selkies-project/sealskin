@@ -52,6 +52,7 @@ from ..models import (
     AppStore,
     AppTemplate,
     AvailableApp,
+    BrowserPolicyName,
     CreateAdminRequest,
     CreateGroupRequest,
     CreateMetaAppRequest,
@@ -169,6 +170,10 @@ async def get_management_data() -> dict[str, Any]:
             key=lambda c: c.name.lower(),
         ),
         "proot_remote": settings.proot_apps_remote,
+        "browser_policies": sorted(
+            (BrowserPolicyName(id=p.id, name=p.name) for p in state.browser_policies.values()),
+            key=lambda p: p.name.lower(),
+        ),
     }
 
 
@@ -399,6 +404,19 @@ def _normalise_scripts(provider_config: dict[str, Any]) -> None:
             provider_config[key] = None
 
 
+def _known_browser_policy(policy_id: Any) -> str | None:
+    """Return the browser policy an application is to name, `None` for none.
+
+    Raises:
+        HTTPException: 400 for a policy that does not exist.
+    """
+    if not policy_id:
+        return None
+    if policy_id not in state.browser_policies:
+        raise HTTPException(status_code=400, detail="The browser policy named for this application does not exist.")
+    return str(policy_id)
+
+
 def _with_status(app: InstalledApp) -> InstalledAppWithStatus:
     """Attach image metadata to an installed app."""
     metadata = state.image_metadata.get(app.provider_config.image, {})
@@ -428,6 +446,7 @@ async def install_app(decrypted_body: dict[str, Any] = Depends(get_decrypted_req
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     if app.id in state.installed_records:
         raise HTTPException(status_code=409, detail="App with this ID already exists.")
+    app.browser_policy = _known_browser_policy(app.browser_policy)
     app.logo = _save_logo(app.id, app.logo) or app.logo
     record = config_store.record_from_app(app)
     resolved = config_store.set_record(record)
@@ -452,6 +471,7 @@ async def update_installed_app(
     if app_id != app_update.id:
         raise HTTPException(status_code=400, detail="App ID in path does not match body.")
 
+    app_update.browser_policy = _known_browser_policy(app_update.browser_policy)
     app_update.logo = _save_logo(app_id, app_update.logo) or app_update.logo
     provider_config = app_update.provider_config
     if provider_config.custom_autostart_script_b64 == "":
@@ -477,8 +497,8 @@ async def patch_installed_app(
 ) -> InstalledApp:
     """Partially update an installed app.
 
-    Record fields (`users`, `groups`, `app_template`, `auto_update`,
-    `home_directories`) are applied directly; any other `InstalledApp`
+    Record fields (`users`, `groups`, `app_template`, `browser_policy`,
+    `auto_update`, `home_directories`) are applied directly; any other `InstalledApp`
     field is merged into the record's overrides.
     """
     record = state.installed_records.get(app_id)
@@ -492,6 +512,8 @@ async def patch_installed_app(
         patch["logo"] = _save_logo(app_id, patch["logo"])
     if isinstance(patch.get("provider_config"), dict):
         _normalise_scripts(patch["provider_config"])
+    if "browser_policy" in patch:
+        patch["browser_policy"] = _known_browser_policy(patch["browser_policy"])
 
     old_app = state.installed_apps.get(app_id)
     old_image = old_app.provider_config.image if old_app else None
@@ -638,6 +660,7 @@ async def create_meta_app(decrypted_body: dict[str, Any] = Depends(get_decrypted
             source=base_record.source,
             source_app_id=base_record.source_app_id,
             app_template=base_record.app_template,
+            browser_policy=base_record.browser_policy,
             users=req.users,
             groups=req.groups,
             auto_update=False,
