@@ -55,6 +55,7 @@ import io
 import logging
 import os
 import re
+import warnings
 from typing import Any
 from urllib.parse import quote, urljoin
 
@@ -111,6 +112,8 @@ ICON_ROUTE = "/api/dashboard/icons/"
 ICON_BYTES = 1_000_000
 ICON_EDGE = 192
 ICON_FORMATS = ("PNG", "JPEG", "WEBP", "GIF", "ICO", "BMP")
+#: Pixels a picture may decode to, for every picture this process opens: Pillow warns past it and refuses past twice it.
+Image.MAX_IMAGE_PIXELS = 4096 * 4096
 COLUMNS = 12
 MAX_ROWS = 8
 MAX_TILES = 300
@@ -434,7 +437,9 @@ def load() -> None:
 def _png(data: bytes) -> bytes:
     """Return a picture as a PNG no larger than `ICON_EDGE`, or raise `ValueError` for anything but a picture."""
     try:
-        with Image.open(io.BytesIO(data)) as picture:
+        # An ICO states its size apart from the picture it wraps, so the decoder's own count is held to as well.
+        with warnings.catch_warnings(), Image.open(io.BytesIO(data), formats=ICON_FORMATS) as picture:
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
             if picture.format not in ICON_FORMATS or max(picture.size) > 4096:
                 raise ValueError("An icon is a PNG, JPEG, WebP, GIF, or ICO picture, at most 4096 pixels wide.")
             picture = picture.convert("RGBA")
@@ -442,7 +447,7 @@ def _png(data: bytes) -> bytes:
             out = io.BytesIO()
             picture.save(out, format="PNG")
             return out.getvalue()
-    except (UnidentifiedImageError, OSError, SyntaxError) as exc:
+    except (UnidentifiedImageError, OSError, SyntaxError, Image.DecompressionBombError, Image.DecompressionBombWarning) as exc:
         raise ValueError("An icon is a PNG, JPEG, WebP, GIF, or ICO picture.") from exc
 
 

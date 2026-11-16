@@ -54,6 +54,9 @@ class Fetched:
     seconds: float
 
 
+_EMBEDDED_IPV4 = tuple(ipaddress.ip_network(n) for n in ("64:ff9b::/96", "::/96"))
+
+
 def is_public(address: str) -> bool:
     """Tell whether an IP address is one of the public internet."""
     try:
@@ -61,7 +64,12 @@ def is_public(address: str) -> bool:
     except ValueError:
         return False
     if isinstance(ip, ipaddress.IPv6Address):
+        if ip.is_site_local:
+            return False
         mapped = ip.ipv4_mapped or ip.sixtofour or (ip.teredo[1] if ip.teredo else None)
+        # NAT64 (RFC 6052) and the IPv4-compatible range carry an IPv4 address in their last 32 bits.
+        if mapped is None and any(ip in network for network in _EMBEDDED_IPV4):
+            mapped = ipaddress.IPv4Address(int(ip) & 0xFFFFFFFF)
         if mapped is not None:
             ip = mapped
     return ip.is_global and not ip.is_multicast
@@ -98,9 +106,14 @@ async def _pinned(url: str) -> tuple[str, dict[str, str], dict[str, str]]:
         Refused: When the host has an address that is not public.
     """
     scheme, host, port = split(url)
-    addresses = await _resolve(host, port)
+    # One answer for a name that does not resolve and one that resolves inside: a user learns no internal name.
+    refused = Refused(f"{host} does not resolve to an address of the public internet.")
+    try:
+        addresses = await _resolve(host, port)
+    except Refused as exc:
+        raise refused from exc
     if not addresses or not all(is_public(address) for address in addresses):
-        raise Refused(f"{host} is not an address of the public internet.")
+        raise refused
     parts = urlsplit(url)
     literal = f"[{addresses[0]}]" if ":" in addresses[0] else addresses[0]
     default = 443 if scheme == "https" else 80
@@ -136,7 +149,9 @@ async def fetch(
     """
     loop = asyncio.get_running_loop()
     started = loop.time()
-    sent = {"User-Agent": USER_AGENT, "Accept": "*/*", **(headers or {})}
+    # No compressed answer: a small one could inflate past `max_bytes` in a single read.
+    sent = {"User-Agent": USER_AGENT, "Accept": "*/*", "Accept-Encoding": "identity", **(headers or {})}
+    first_host = split(url)[1]
     try:
         async with asyncio.timeout(timeout):
             async with httpx.AsyncClient(timeout=timeout, follow_redirects=False, transport=_transport) as client:
@@ -154,7 +169,13 @@ async def fetch(
                             url = urljoin(url, response.headers["location"])
                             if response.status_code == 303:
                                 method, body = "GET", None
+                            if split(url)[1] != first_host:
+                                # What the caller sent, a secret among it, was for the first host alone.
+                                sent = {"User-Agent": USER_AGENT, "Accept": "*/*", "Accept-Encoding": "identity"}
+                                method, body = "GET", None
                             continue
+                        if response.headers.get("content-encoding", "identity").strip().lower() not in ("", "identity"):
+                            raise Refused("The answer is compressed, which was not asked for.")
                         data = bytearray()
                         async for chunk in response.aiter_bytes():
                             data.extend(chunk)

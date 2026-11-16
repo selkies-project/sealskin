@@ -45,6 +45,9 @@ RETRY_SECONDS = 20.0
 #: JPEG quality of a thumbnail.
 QUALITY = 72
 TIMEOUT = httpx.Timeout(6.0, connect=2.0)
+#: Seconds the whole answer may take, and the bytes of it read at most.
+TOTAL_SECONDS = 15
+MAX_BYTES = 64 * 1024 * 1024
 
 # Session id to (taken at, thumbnail or None for a refusal).
 _CACHE: dict[str, tuple[float, dict[str, Any] | None]] = {}
@@ -69,7 +72,7 @@ def credentials(session: dict[str, Any]) -> tuple[dict[str, str], dict[str, str]
 
 def _shrink(png: bytes) -> dict[str, Any]:
     """Scale a PNG to `WIDTH` across and return it as a JPEG data URI with its size."""
-    with Image.open(io.BytesIO(png)) as image:
+    with Image.open(io.BytesIO(png), formats=["PNG"]) as image:
         image.thumbnail((WIDTH, WIDTH * 4), Image.Resampling.LANCZOS)
         out = io.BytesIO()
         image.convert("RGB").save(out, "JPEG", quality=QUALITY, optimize=True)
@@ -86,17 +89,27 @@ async def _capture(session_id: str, session: dict[str, Any]) -> dict[str, Any] |
     url = f"http://{host_port(session['ip'], session['port'])}/{session_id}/api/screenshot"
     headers, query = credentials(session)
     try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            answer = await client.get(url, headers=headers, params=query)
-    except httpx.HTTPError as exc:
+        # The container is its user's: what it answers is read up to a bound, within a bound.
+        async with asyncio.timeout(TOTAL_SECONDS), httpx.AsyncClient(timeout=TIMEOUT) as client:
+            sent = {**headers, "Accept-Encoding": "identity"}
+            async with client.stream("GET", url, headers=sent, params=query) as answer:
+                picture = bytearray()
+                if answer.headers.get("content-encoding", "identity").strip().lower() not in ("", "identity"):
+                    return None
+                async for chunk in answer.aiter_bytes():
+                    picture.extend(chunk)
+                    if len(picture) > MAX_BYTES:
+                        logger.debug("[%s] No screenshot: the answer is too long.", session_id)
+                        return None
+    except (httpx.HTTPError, TimeoutError) as exc:
         logger.debug("[%s] No screenshot: %s", session_id, exc)
         return None
-    if answer.status_code != 200 or not answer.content:
-        logger.debug("[%s] No screenshot: %s %s", session_id, answer.status_code, answer.text[:80])
+    if answer.status_code != 200 or not picture:
+        logger.debug("[%s] No screenshot: %s", session_id, answer.status_code)
         return None
     try:
-        thumbnail = await asyncio.to_thread(_shrink, answer.content)
-    except (OSError, ValueError) as exc:
+        thumbnail = await asyncio.to_thread(_shrink, bytes(picture))
+    except (OSError, ValueError, SyntaxError, Image.DecompressionBombError) as exc:
         logger.warning("[%s] Screenshot could not be read: %s", session_id, exc)
         return None
     thumbnail["taken_at"] = time.time()
