@@ -237,6 +237,88 @@ def test_placement_follows_the_home_then_pool_access_then_room_and_load(node):
         cluster.choose_node(_user(groups=["render"]), wants_gpu=True)
 
 
+NVIDIA = {"device": "/dev/dri/renderD129", "driver": "nvidia", "type": "nvidia"}
+IGPU = {"device": "/dev/dri/renderD128", "driver": "i915", "type": "dri3"}
+
+
+def test_a_node_tells_the_others_the_kind_of_each_gpu_and_the_device_of_each_session(node):
+    state.available_gpus[:] = [{**IGPU}, {**NVIDIA, "index": 0}]
+    state.sessions["s1"] = {"username": "alice", "gpu_config": {**NVIDIA, "index": 0}}
+    status = cluster.local_status()
+    assert [(g["device"], g["type"], g["driver"]) for g in status["gpus"]] == [
+        (IGPU["device"], "dri3", "i915"),
+        (NVIDIA["device"], "nvidia", "nvidia"),
+    ]
+    assert status["sessions"][0]["gpu_device"] == NVIDIA["device"]
+
+
+def test_a_gpu_session_of_a_kind_goes_to_a_node_with_a_free_gpu_of_that_kind(node):
+    bravo, _ = _other_node("bravo")
+    state.available_gpus[:] = [IGPU]
+    _status(bravo, gpus=[IGPU, NVIDIA])
+    # The node signed in at wins a tie, unless the kind asked for is not there.
+    assert cluster.choose_node(_user(), wants_gpu=True) == cluster.NODE_ID
+    assert cluster.choose_node(_user(), wants_gpu=True, gpu_kinds={"dri3"}) == cluster.NODE_ID
+    assert cluster.choose_node(_user(), wants_gpu=True, gpu_kinds={"nvidia"}) == bravo
+    cluster.PEERS[bravo]["status"]["sessions"] = [
+        {"session_id": "g", "username": "y", "gpu": True, "gpu_device": NVIDIA["device"], "gpu_exclusive": True}
+    ]
+    with pytest.raises(HTTPException) as taken:
+        cluster.choose_node(_user(), wants_gpu=True, gpu_kinds={"nvidia"})
+    assert taken.value.status_code == 503 and "NVIDIA" in taken.value.detail
+    # A GPU in shared use takes another shared session, but not one that wants it alone.
+    cluster.PEERS[bravo]["status"]["sessions"] = [
+        {"session_id": "g", "username": "y", "gpu": True, "gpu_device": NVIDIA["device"], "gpu_exclusive": False}
+    ]
+    assert cluster.choose_node(_user(), wants_gpu=True, gpu_kinds={"nvidia"}) == bravo
+    with pytest.raises(HTTPException):
+        cluster.choose_node(_user(gpu_share=False), wants_gpu=True, gpu_kinds={"nvidia"})
+    assert cluster.choose_node(_user(gpu_share=False), wants_gpu=True, gpu_kinds={"dri3"}) == cluster.NODE_ID
+
+
+async def test_a_forwarded_launch_keeps_the_kind_or_the_device_of_the_gpu_it_asks_for(node, monkeypatch):
+    from app import routing
+    from tests.test_launch import make_app
+
+    bravo, _ = _other_node("bravo")
+    state.available_gpus[:] = [IGPU]
+    _status(bravo, gpus=[IGPU, NVIDIA])
+    app = make_app(provider_config={**make_app().provider_config.model_dump(), "nvidia_support": True})
+    state.installed_apps[app.id] = app
+    sent: list[tuple[str, dict]] = []
+
+    async def send(_request, node_id, _user, body=None):
+        sent.append((node_id, body))
+
+    async def no_limits(_user):
+        return None
+
+    monkeypatch.setattr(routing, "_send", send)
+    monkeypatch.setattr(quota, "check_launch", no_limits)
+
+    async def place(**body):
+        sent.clear()
+        await routing._place(None, {"application_id": app.id, **body}, _user())
+        return sent[0] if sent else None
+
+    assert await place(selected_gpu="auto:nvidia") == (bravo, {"application_id": app.id, "selected_gpu": "auto:nvidia"})
+    assert await place(selected_gpu="auto:dri3") is None
+    # A device of the node named stays that device; one of this node, sent elsewhere, becomes its kind.
+    assert (await place(selected_gpu=NVIDIA["device"], node=bravo))[1]["selected_gpu"] == NVIDIA["device"]
+    assert (await place(selected_gpu=IGPU["device"], node=bravo))[1]["selected_gpu"] == IGPU["device"]
+    # This node's NVIDIA GPU, held alone here, sends the launch on for an NVIDIA GPU there.
+    local = {"device": "/dev/dri/renderD130", "driver": "nvidia", "type": "nvidia", "index": 0}
+    state.available_gpus[:] = [local]
+    assert await place(selected_gpu=local["device"]) is None
+    state.sessions["held"] = {"username": "y", "gpu_config": local, "gpu_exclusive": True}
+    assert (await place(selected_gpu=local["device"]))[1]["selected_gpu"] == "auto:nvidia"
+    # An app without NVIDIA support asks for no NVIDIA GPU at all.
+    state.installed_apps[app.id] = make_app()
+    assert routing._gpu_kinds({"application_id": app.id, "selected_gpu": "auto:nvidia"}, _user()) == (set(), None)
+    assert routing._gpu_kinds({"application_id": app.id, "selected_gpu": "auto"}, _user()) == ({"dri3"}, None)
+    assert routing._gpu_kinds({"application_id": app.id, "selected_gpu": "auto"}, _user(gpu=False)) == (set(), None)
+
+
 async def test_limits_count_sessions_on_every_node_and_spend_the_allowance(node):
     bravo, _ = _other_node("bravo")
     _status(bravo, sessions=[{"session_id": "1", "username": "alice", "gpu": False}])

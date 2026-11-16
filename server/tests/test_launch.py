@@ -205,6 +205,29 @@ def test_validate_gpu_rejects_unsupported():
     assert launch.gpu_for_app({"type": "nvidia"}, app) is None
 
 
+def test_auto_takes_a_gpu_of_the_kind_asked_for():
+    igpu = {"device": "/dev/dri/renderD128", "driver": "i915", "type": "dri3"}
+    nvidia = {"device": "/dev/dri/renderD129", "driver": "nvidia", "type": "nvidia", "index": 0}
+    state.available_gpus[:] = [igpu, nvidia]
+    both = make_app(provider_config={**make_app().provider_config.model_dump(), "nvidia_support": True})
+    assert launch.validate_gpu("auto", {"gpu": True}, both) == igpu
+    assert launch.validate_gpu("auto:nvidia", {"gpu": True}, both) == nvidia
+    assert launch.validate_gpu("auto:dri3", {"gpu": True}, both) == igpu
+    state.sessions["held"] = {"gpu_config": nvidia, "gpu_exclusive": True}
+    with pytest.raises(HTTPException) as taken:
+        launch.validate_gpu("auto:nvidia", {"gpu": True}, both)
+    assert taken.value.status_code == 503
+    with pytest.raises(HTTPException) as unsupported:
+        launch.validate_gpu("auto:nvidia", {"gpu": True}, make_app())
+    assert unsupported.value.status_code == 400
+    with pytest.raises(HTTPException):
+        launch.validate_gpu("auto:quantum", {"gpu": True}, both)
+    state.available_gpus[:] = [igpu]
+    with pytest.raises(HTTPException) as missing:
+        launch.validate_gpu("auto:nvidia", {"gpu": True}, both)
+    assert missing.value.status_code == 400 and "NVIDIA" in missing.value.detail
+
+
 def test_collaboration_initial_tokens():
     tokens = launch.collaboration_initial_tokens(
         {

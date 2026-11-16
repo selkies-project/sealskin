@@ -50,7 +50,8 @@ import re
 import secrets
 import ssl
 import time
-from collections.abc import AsyncIterator
+from collections import Counter
+from collections.abc import AsyncIterator, Collection
 from typing import Any
 
 import httpx
@@ -78,6 +79,8 @@ JOIN_CODE_SECONDS = 3600
 #: Polls a node may miss before it counts as away.
 MISSED_POLLS = 3
 DEFAULT_POOL = "default"
+#: How the kinds of GPU a session can ask for by `auto:<kind>` are named to people.
+GPU_KINDS = {"nvidia": "NVIDIA", "dri3": "DRI3"}
 #: Seconds a lease outlives the node that took it and did not give it back.
 LEASE_SECONDS = 120
 _NODE_ID_CHARS = re.compile(r"[^a-z0-9_-]+")
@@ -755,6 +758,7 @@ def local_status() -> dict[str, Any]:
             "app_name": data.get("app_name"),
             "created_at": data.get("created_at"),
             "gpu": bool(data.get("gpu_config")),
+            "gpu_device": (data.get("gpu_config") or {}).get("device"),
             "gpu_exclusive": bool(data.get("gpu_exclusive")),
             "is_collaboration": bool(data.get("is_collaboration")),
             "lab": bool(data.get("lab")),
@@ -769,7 +773,10 @@ def local_status() -> dict[str, Any]:
         "roles": sorted(roles()),
         "cpus": os.cpu_count() or 1,
         "load": os.getloadavg()[0] if hasattr(os, "getloadavg") else 0.0,
-        "gpus": [{"device": g.get("device"), "name": g.get("name") or g.get("model")} for g in state.available_gpus],
+        "gpus": [
+            {"device": g.get("device"), "name": g.get("name") or g.get("model"), "driver": g.get("driver"), "type": g.get("type")}
+            for g in state.available_gpus
+        ],
         "max_sessions": settings.node_max_sessions,
         "gpu_slots": settings.node_gpu_slots,
         "store_reachable": store.is_reachable(),
@@ -977,19 +984,28 @@ def adopt_local_homes() -> None:
 # --- Placement -----------------------------------------------------------------
 
 
-def _gpu_room(status: dict[str, Any], exclusive: bool) -> bool:
-    """Whether a node can take one more GPU session, alone on a GPU when `exclusive`."""
-    gpus = status.get("gpus") or []
+def _gpu_room(status: dict[str, Any], exclusive: bool, kinds: Collection[str] | None = None) -> bool:
+    """Whether a node can take one more GPU session on a GPU of one of `kinds`, any when `None`.
+
+    A GPU has room when no session holds it alone and, for an `exclusive`
+    session, when no session uses it at all, as `launch.validate_gpu` decides
+    on the node itself. A status that leaves out the kind of its GPUs or the
+    devices of its sessions, as a node of an earlier version sends, has its
+    GPUs taken as of any kind and its GPU sessions counted against all of them.
+    """
+    gpus = [g for g in status.get("gpus") or [] if kinds is None or g.get("type") in kinds or not g.get("type")]
     if not gpus:
         return False
     running = [s for s in status.get("sessions") or [] if s.get("gpu")]
     slots = status.get("gpu_slots") or 0
     if slots and len(running) >= slots:
         return False
-    held_alone = sum(1 for s in running if s.get("gpu_exclusive"))
-    if exclusive:
-        return len(running) < len(gpus)
-    return held_alone < len(gpus)
+    if any(not s.get("gpu_device") for s in running):
+        held_alone = sum(1 for s in running if s.get("gpu_exclusive"))
+        return len(running) < len(gpus) if exclusive else held_alone < len(gpus)
+    using = Counter(s["gpu_device"] for s in running)
+    alone = {s["gpu_device"] for s in running if s.get("gpu_exclusive")}
+    return any(g.get("device") not in alone and not (exclusive and using[g.get("device")]) for g in gpus)
 
 
 def choose_node(
@@ -998,6 +1014,7 @@ def choose_node(
     home_name: str | None = None,
     pool: str | None = None,
     node: str | None = None,
+    gpu_kinds: Collection[str] | None = None,
 ) -> str:
     """Pick the node a new session of `user` starts on.
 
@@ -1010,6 +1027,8 @@ def choose_node(
     Args:
         user: The user record `security.verify_token` returned.
         wants_gpu: The session asks for a GPU.
+        gpu_kinds: The kinds of GPU (`nvidia`, `dri3`) the session can use,
+            any when `None`; only nodes with room on one of them qualify.
         home_name: Home directory the session mounts, if a persistent one.
         pool: Only consider nodes of this pool.
         node: Only consider this node.
@@ -1035,6 +1054,7 @@ def choose_node(
         raise HTTPException(status_code=403, detail=f"Pool '{pool}' is not open to this account.")
     exclusive = not (user.get("effective_settings") or {}).get("gpu_share", True)
     candidates: list[tuple[float, int, str]] = []
+    short_of_gpu = False
     for node_id in members(role="runtime"):
         if (node and node != node_id) or (pool and pool_of(node_id) != pool):
             continue
@@ -1044,10 +1064,14 @@ def choose_node(
         running = status.get("sessions") or []
         if status.get("max_sessions") and len(running) >= status["max_sessions"]:
             continue
-        if wants_gpu and not _gpu_room(status, exclusive):
+        if wants_gpu and not _gpu_room(status, exclusive, gpu_kinds):
+            short_of_gpu = True
             continue
         candidates.append((len(running) / max(status.get("cpus") or 1, 1), 0 if node_id == NODE_ID else 1, node_id))
     if not candidates:
+        if short_of_gpu:
+            named = " or ".join(GPU_KINDS.get(kind, kind) for kind in sorted(gpu_kinds or ()))
+            raise HTTPException(status_code=503, detail=f"No node open to this account has a free {named + ' ' if named else ''}GPU.")
         raise HTTPException(status_code=503, detail="No node open to this account has room for the session.")
     return min(candidates)[2]
 

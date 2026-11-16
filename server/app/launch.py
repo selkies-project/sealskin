@@ -265,12 +265,14 @@ def validate_gpu(
     """Validate a GPU selection for a launch.
 
     Args:
-        selected_gpu: Device path chosen by the user, or `None`.
+        selected_gpu: A device of this node, `auto`, `auto:<kind>` (`nvidia`
+            or `dri3`), or `None`.
         effective_settings: The user's effective settings.
         app: Application being launched.
 
     `auto` takes the GPU of this node the app supports with the fewest
-    sessions on it, as a launch another node forwarded asks. A user without
+    sessions on it; `auto:<kind>` takes one of that kind the same way. A forwarded launch
+    asks for one of these, since devices are named per node. A user without
     `gpu_share` gets a GPU no session uses and keeps it alone; any other
     user gets one no session holds alone. `node_gpu_slots` caps the GPU
     sessions of the node.
@@ -299,14 +301,16 @@ def validate_gpu(
     def free(gpu: dict[str, Any]) -> bool:
         return gpu["device"] not in alone and not (exclusive and using.get(gpu["device"]))
 
-    if selected_gpu == "auto":
-        supported = [
-            g
-            for g in state.available_gpus
-            if (g["type"] == "nvidia" and app.provider_config.nvidia_support)
-            or (g["type"] == "dri3" and app.provider_config.dri3_support)
-        ]
+    if selected_gpu == "auto" or selected_gpu.startswith("auto:"):
+        kind = selected_gpu.removeprefix("auto").removeprefix(":")
+        if kind and kind not in cluster.GPU_KINDS:
+            raise HTTPException(status_code=400, detail=f"Unknown kind of GPU '{kind}'.")
+        if kind and not supports_gpu(app, kind):
+            raise HTTPException(status_code=400, detail=f"App '{app.name}' does not support {cluster.GPU_KINDS[kind]} GPUs.")
+        supported = [g for g in state.available_gpus if (g["type"] == kind if kind else supports_gpu(app, g["type"]))]
         if not supported:
+            if kind:
+                raise HTTPException(status_code=400, detail=f"This node has no {cluster.GPU_KINDS[kind]} GPU.")
             return None
         candidates = sorted((g for g in supported if free(g)), key=lambda g: using.get(g["device"], 0))
         if not candidates:
@@ -317,11 +321,14 @@ def validate_gpu(
         raise HTTPException(status_code=400, detail=f"Selected GPU '{selected_gpu}' is not available.")
     if not free(gpu_info):
         raise HTTPException(status_code=503, detail="That GPU is taken; pick another or try later.")
-    if gpu_info["type"] == "nvidia" and not app.provider_config.nvidia_support:
-        raise HTTPException(status_code=400, detail=f"App '{app.name}' does not support Nvidia GPUs.")
-    if gpu_info["type"] == "dri3" and not app.provider_config.dri3_support:
-        raise HTTPException(status_code=400, detail=f"App '{app.name}' does not support DRI3 GPUs.")
+    if not supports_gpu(app, gpu_info["type"]):
+        raise HTTPException(status_code=400, detail=f"App '{app.name}' does not support {cluster.GPU_KINDS[gpu_info['type']]} GPUs.")
     return gpu_info
+
+
+def supports_gpu(app: InstalledApp, kind: str) -> bool:
+    """Whether `app` can render on a GPU of `kind`."""
+    return (kind == "nvidia" and app.provider_config.nvidia_support) or (kind == "dri3" and app.provider_config.dri3_support)
 
 
 def gpu_for_app(gpu_config: dict[str, Any] | None, app: InstalledApp) -> dict[str, Any] | None:
@@ -330,11 +337,7 @@ def gpu_for_app(gpu_config: dict[str, Any] | None, app: InstalledApp) -> dict[st
     Used when a collaboration room swaps applications and the session's GPU
     may not be usable by the new app.
     """
-    if not gpu_config:
-        return None
-    if gpu_config["type"] == "nvidia" and not app.provider_config.nvidia_support:
-        return None
-    if gpu_config["type"] == "dri3" and not app.provider_config.dri3_support:
+    if not gpu_config or not supports_gpu(app, gpu_config["type"]):
         return None
     return gpu_config
 

@@ -163,7 +163,7 @@ A launch goes to one node:
    choose another, to start elsewhere.
 2. Otherwise the candidates are the answering `runtime` nodes in pools open
    to the user, under their session cap (`SEALSKIN_NODE_MAX_SESSIONS`), and,
-   for a GPU session, with a GPU free.
+   for a GPU session, with a GPU free of a kind the session can use.
 3. The one with the fewest sessions per CPU wins, the node the user is signed
    in at on a tie. The launcher can name a pool or a node instead.
 
@@ -181,6 +181,9 @@ another's. What it controls is who gets one:
   sessions a GPU no other session is on, and keeps others off it.
 * `SEALSKIN_NODE_GPU_SLOTS` caps the GPU sessions of a node.
 * A restricted pool keeps GPU nodes for the groups that should have them.
+* A launch asks only for kinds of GPU, NVIDIA or DRI3, the application
+  supports, and a launch forwarded to another node gets a GPU there of the
+  kind it asked for.
 
 ## Home directories
 
