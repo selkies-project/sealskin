@@ -77,7 +77,8 @@ def session_info(session_id: str, data: dict[str, Any], for_owner: bool = True) 
         node=cluster.node_name(),
         home=_home_of(data),
         gpu=bool(data.get("gpu_config")),
-        gpu_device=str(data.get("selected_gpu") or ""),
+        # The device the session got, which `auto` and `auto:<kind>` leave to the node.
+        gpu_device=str((data.get("gpu_config") or {}).get("device") or data.get("selected_gpu") or ""),
         vpn=str((data.get("vpn") or {}).get("name") or ""),
         language=str(data.get("language") or ""),
         wayland_mode=bool(data.get("wayland_mode", True)),
