@@ -4,10 +4,9 @@ description: How requests are wrapped and authenticated, and every endpoint the 
 ---
 
 The API is what the served UI and the shells speak; it is documented here for
-people writing their own client or automation. FastAPI also publishes an
-OpenAPI description at `/openapi.json` and an interactive explorer at
-`/docs` on the API port, but neither can be used directly because of the
-encryption envelope described first.
+people writing their own client or automation. The server publishes no
+OpenAPI description or interactive explorer: nothing answers a client that
+has not signed in but the routes listed as public here.
 
 ## Conventions
 

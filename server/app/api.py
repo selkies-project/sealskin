@@ -433,7 +433,10 @@ def create_app() -> FastAPI:
     Returns:
         The configured `FastAPI` instance.
     """
-    app = FastAPI(title="SealSkin API", version=__version__, lifespan=lifespan)
+    # No OpenAPI description or explorer: they would answer anyone, and the explorer loads a CDN's script on this origin.
+    app = FastAPI(
+        title="SealSkin API", version=__version__, lifespan=lifespan, openapi_url=None, docs_url=None, redoc_url=None
+    )
 
     app.include_router(handshake.router)
     app.include_router(applications.router)
