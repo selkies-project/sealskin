@@ -98,7 +98,23 @@ _OVPN_SCRIPTS = (
     "dns-updown",
     "management",
     "management-client",
+    "iproute",
+    "config",
+    "cd",
+    "chroot",
+    "log",
+    "log-append",
+    "status",
+    "writepid",
+    "echo",
 )
+#: The inline blocks OpenVPN reads; any other tag is refused, since what follows it would be kept unread.
+_OVPN_INLINE = frozenset(
+    ("ca", "cert", "key", "extra-certs", "dh", "secret", "tls-auth", "tls-crypt", "tls-crypt-v2", "crl-verify")
+    + ("connection", "peer-fingerprint", "verify-hash", "auth-user-pass", "http-proxy-user-pass")
+)
+#: Variables a `setenv` line may set for the gateway's own script: a provider's markers, never the loader's or shell's.
+_OVPN_SETENV = re.compile(r"(?!LD_|BASH_|PATH$|ENV$|IFS$|HOME$|SHELL$)[A-Z][A-Z0-9_]*")
 #: OpenVPN options that name a file, and the inline block that carries it instead.
 _OVPN_FILES = {"ca": "ca", "cert": "cert", "key": "key", "tls-auth": "tls-auth", "tls-crypt": "tls-crypt", "tls-crypt-v2": "tls-crypt-v2", "crl-verify": "crl-verify"}
 _OVPN_BINARY = ("pkcs12",)
@@ -302,6 +318,18 @@ def _find_file(files: dict[str, bytes], name: str, near: str) -> bytes | None:
     return matches[0] if len(matches) == 1 else None
 
 
+def _option_name(path: str, token: str) -> str:
+    """Return an option's name as OpenVPN reads it: without the quotes and the leading dashes it allows.
+
+    Raises:
+        ValueError: For a name written with an escape, which OpenVPN would read as another one.
+    """
+    name = token.strip("\"'").removeprefix("--")
+    if not re.fullmatch(r"[a-z0-9-]+", name):
+        raise ValueError(f"'{path}' has an option the gateway cannot read: '{token[:40]}'.")
+    return name
+
+
 def _parse_openvpn(path: str, text: str, files: dict[str, bytes]) -> Parsed:
     """Reduce one OpenVPN config to a template and its remotes.
 
@@ -319,9 +347,12 @@ def _parse_openvpn(path: str, text: str, files: dict[str, bytes]) -> Parsed:
     for raw in lines:
         line = raw.rstrip()
         if inline:
-            kept.append(line)
-            if line.strip() == f"</{inline}>":
+            # OpenVPN ends a block at a line that starts with the closing tag, whatever follows it.
+            if line.strip().startswith("</"):
+                if line.strip() != f"</{inline}>":
+                    raise ValueError(f"'{path}' has a malformed end of its <{inline}> block.")
                 inline = None
+            kept.append(line.strip() if inline is None else line)
             continue
         stripped = line.strip()
         if not stripped or stripped[0] in "#;":
@@ -329,10 +360,19 @@ def _parse_openvpn(path: str, text: str, files: dict[str, bytes]) -> Parsed:
         opened = re.fullmatch(r"<([a-z0-9-]+)>", stripped)
         if opened:
             inline = opened.group(1)
+            if inline not in _OVPN_INLINE:
+                raise ValueError(f"'{path}' has a <{inline}> block, which the gateway does not read.")
             kept.append(stripped)
             continue
         parts = stripped.split()
+        parts[0] = _option_name(path, parts[0])
+        # `setenv opt <option>` is the option itself, made optional.
+        while parts[:2] == ["setenv", "opt"] and len(parts) > 2:
+            parts = [_option_name(path, parts[2]), *parts[3:]]
         option, args = parts[0], parts[1:]
+        if option == "setenv" and not (args and _OVPN_SETENV.fullmatch(args[0])):
+            dropped.append(option)
+            continue
         if option == "remote":
             if not args:
                 raise ValueError(f"'{path}' has a 'remote' line without a host.")
@@ -366,6 +406,8 @@ def _parse_openvpn(path: str, text: str, files: dict[str, bytes]) -> Parsed:
                 body = content.decode("utf-8").strip()
             except UnicodeDecodeError as exc:
                 raise ValueError(f"'{_unquote(args[0])}' is not a text file.") from exc
+            if any(entry.strip().startswith("<") for entry in body.splitlines()):
+                raise ValueError(f"'{_unquote(args[0])}' is not a certificate or key file.")
             kept.append(f"<{tag}>")
             kept.extend(body.splitlines())
             kept.append(f"</{tag}>")
