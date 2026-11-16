@@ -90,7 +90,8 @@
       "audit": "Audit Log",
       "branding": "Branding",
       "keys": "Application Keys",
-      "vpn": "VPN Profiles"
+      "vpn": "VPN Profiles",
+      "bakery": "Bakery"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -324,7 +325,12 @@
       "notLocal": "Image not found locally",
       "isLaboratory": "This is a Laboratory app, built from a base image with custom settings.",
       "confirmDelete": "Are you sure you want to delete the installed app '{appName}'?",
-      "deleteTitle": "Delete installed app"
+      "deleteTitle": "Delete installed app",
+      "heldBy": "Built on by {names}. Delete those first.",
+      "isBaked": "Baked",
+      "builtOnCount": "{count} built on this",
+      "builtOnTitle": "Show the applications built on this one",
+      "kindLab": "Laboratory"
     },
     "appStore": {
       "title": "App Stores",
@@ -1195,7 +1201,7 @@
       "selectApp": "Select App",
       "createNew": "Create New App",
       "baseApp": "Base Application",
-      "baseAppDescription": "The installed application that your new custom app will be based on.",
+      "baseAppDescription": "The installed or baked application that your new custom app will be based on.",
       "selectBase": "Select a Base App",
       "appName": "App Name",
       "appIcon": "App Icon",
@@ -1849,6 +1855,276 @@
       "removeEndpoint": "Remove endpoint",
       "endpointIncomplete": "The endpoint '{label}' needs a host, a port, and for WireGuard the server's public key.",
       "endpointsAdded": "Added {count, plural, one {1 endpoint} other {{count} endpoints}}."
+    },
+    "bakery": {
+      "title": "The Bakery",
+      "help": "A recipe bakes a new application on top of one you installed: packages, files, certificates, anything a Dockerfile can do, under a name and icon of its own. Bake as many as you need from the same application. Every node builds on the image it already pulled, and builds again whenever that image is updated from upstream. Sessions run the baked image once it has built, and keep the last good one when a build fails.",
+      "unavailable": "This server runs sessions on Kubernetes, where the Bakery cannot build images yet.",
+      "newRecipe": "New Recipe",
+      "application": "Application",
+      "recipe": "Recipe",
+      "none": "No recipes yet. A recipe adds packages, files, or anything else to an application's image.",
+      "listSteps": "{count} step(s)",
+      "listDockerfile": "Dockerfile",
+      "statePaused": "Paused",
+      "stateBuilding": "Baking",
+      "stateError": "Failed",
+      "stateErrorKept": "sessions run the last image that built",
+      "stateReady": "Baked",
+      "statePending": "Not baked on this node",
+      "rebuildTitle": "Bake again from scratch, taking the distribution's current packages",
+      "deleteTitle": "Delete",
+      "confirmDelete": "Delete the recipe of '{name}'? Its sessions run the application's own image again.",
+      "newAppInvalid": "Choose the application to build on and give the baked one a name.",
+      "pickBase": "-- Choose an application --",
+      "family": "Distribution",
+      "familyAuto": "As the image says",
+      "builtOn": "Built on",
+      "baseNone": "Choose an application to see its image.",
+      "baseReading": "Reading the image...",
+      "baseUnknown": "Unknown distribution",
+      "modeGuided": "Guided",
+      "modeDeveloper": "Developer",
+      "tryBuild": "Build a trial",
+      "saveAndBake": "Save & bake",
+      "steps": "Steps",
+      "addStep": "Add a step",
+      "noSteps": "No steps yet. Pick one below: the Dockerfile on the right follows what you add.",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "skipStep": "Leave this step out of the build",
+      "useStep": "Put this step back in the build",
+      "developerHelp": "The Dockerfile is built as you write it. The application's image is the build argument BASE_IMAGE: declare it with ARG before the first FROM, write other stages wherever you need them, and end on a stage that starts FROM ${BASE_IMAGE}.",
+      "toGuidedTitle": "Back to guided steps",
+      "toGuided": "The steps are as you left them, and the build follows them again. The Dockerfile you wrote is kept with the recipe but not built.",
+      "files": "Files",
+      "upload": "Upload",
+      "uploadFailed": "Could not upload {name}: {error}",
+      "noFiles": "No files yet.",
+      "pickFile": "Add an uploaded file...",
+      "snippets": "Insert a snippet",
+      "insert": "Insert at the cursor",
+      "snippetEmpty": "The step renders nothing yet.",
+      "packagePlaceholder": "Search or type a package name...",
+      "indexing": "Reading the package list from the image. The first search of an image takes a minute.",
+      "noIndex": "No package list for this image; type the names.",
+      "noPackages": "No package matches '{query}'. Press Enter to add it as typed.",
+      "destHelp": "A path ending in / is a folder the files are put in.",
+      "sha256Help": "Optional. The build stops when the download does not match.",
+      "scriptHelp": "One command per line. They run as root in one layer, and the build stops at the first that fails.",
+      "rawHelp": "Dockerfile instructions, built exactly as written.",
+      "addVariable": "Add a variable",
+      "line": "Line {line}:",
+      "copied": "Dockerfile copied.",
+      "buildQueued": "Waiting for another build to finish",
+      "buildRunning": "Building ({seconds} s)",
+      "buildReady": "The trial built in {seconds} s. Sessions are unchanged until you save.",
+      "buildFailed": "The build failed. Sessions keep the last image that built.",
+      "openTrial": "Open a trial session",
+      "fields": {
+        "note": "Title in the build log",
+        "dest": "Destination in the image",
+        "executable": "Make executable",
+        "extract": "Unpack archives there",
+        "url": "Address",
+        "action": "Then",
+        "sha256": "SHA-256 checksum",
+        "value": "value",
+        "script": "Commands",
+        "text": "Dockerfile",
+        "app": "Application",
+        "menu": "List it in the right-click menu",
+        "default": "Open web links with it",
+        "ppas": "Archives",
+        "packages": "Packages",
+        "name": "Name in the menus",
+        "command": "Command",
+        "icon": "Icon",
+        "category": "Menu category",
+        "sandbox": "Chromium or Electron application: start it with --no-sandbox",
+        "terminal": "Runs in a terminal",
+        "packs": "Font sets",
+        "fontFiles": "Your own font files",
+        "eula": "I accept the license of the Microsoft core fonts",
+        "proxy": "Proxy address",
+        "no_proxy": "Not through the proxy",
+        "pip": "Python package index",
+        "npm": "npm registry",
+        "version": "Version",
+        "kit": "Language",
+        "placement": "Placement",
+        "mode": "Runs",
+        "scriptName": "File name"
+      },
+      "actions": {
+        "save": "Save the file",
+        "extract": "Unpack the archive",
+        "install": "Install it as a package",
+        "appimage": "Unpack the AppImage"
+      },
+      "kinds": {
+        "packages": {
+          "title": "Install packages",
+          "short": "From the distribution's repositories",
+          "help": "Installs with the image's own package manager and removes the caches afterwards."
+        },
+        "files": {
+          "title": "Copy files",
+          "short": "Upload files into the image",
+          "help": "Copies files you upload to a path in the image. A session mounts its home directory over /config, so put files anywhere else."
+        },
+        "download": {
+          "title": "Download",
+          "short": "A file, archive, AppImage, or package",
+          "help": "Fetches an address while the image builds: keep the file, unpack an archive or an AppImage, or install a .deb, .rpm, or .apk."
+        },
+        "certificates": {
+          "title": "Trust certificates",
+          "short": "Add your own certificate authorities",
+          "help": "Adds the certificates you upload to the image's trusted authorities."
+        },
+        "fonts": {
+          "title": "Add fonts",
+          "short": "Font sets and your own files",
+          "help": "Installs font sets the distribution packages and font files you upload, for every application in the image."
+        },
+        "env": {
+          "title": "Environment",
+          "short": "Set environment variables",
+          "help": "Sets variables for everything that runs in the image."
+        },
+        "run": {
+          "title": "Run commands",
+          "short": "Shell commands, as root",
+          "help": "Runs shell commands while the image builds."
+        },
+        "raw": {
+          "title": "Dockerfile lines",
+          "short": "Any instruction, as written",
+          "help": "Instructions put into the Dockerfile exactly as you write them."
+        },
+        "app": {
+          "title": "Add an application",
+          "short": "A browser or editor, ready to start",
+          "help": "Installs the application from the distribution, or from its vendor's repository on Debian and Ubuntu, and lists it in the session's menus. Chromium-based applications start with --no-sandbox, which a container needs."
+        },
+        "ppa": {
+          "title": "Ubuntu PPA",
+          "short": "Packages from a Launchpad archive",
+          "help": "Adds Launchpad personal package archives to the image and installs packages from them."
+        },
+        "devkit": {
+          "title": "Development kit",
+          "short": "Python, Node.js, Rust, Go, Java",
+          "help": "Installs a language's toolchain from the distribution, and the language's own packages you list."
+        },
+        "docker": {
+          "title": "Install Docker",
+          "short": "The latest Docker, Compose, and Buildx",
+          "help": "Puts Docker's static binaries where the image's Docker service finds them. The service starts in a privileged session only."
+        },
+        "desktop": {
+          "title": "Desktop entry",
+          "short": "List a program in the menus",
+          "help": "Writes a desktop entry for a program the image holds, such as one unpacked from an AppImage or an archive, so the session's menus list it."
+        },
+        "launch": {
+          "title": "Launch command",
+          "short": "What the session starts with",
+          "help": "Writes the commands a session starts its application with."
+        },
+        "proxy": {
+          "title": "Proxy and mirrors",
+          "short": "For the build and for sessions",
+          "help": "Sets the proxy variables and the pip and npm mirrors for the steps below this one and for every session."
+        },
+        "startup": {
+          "title": "Run at start",
+          "short": "A script or service of the container",
+          "help": "Adds a script the container runs as it starts, or a service it keeps running."
+        }
+      },
+      "toGuidedConfirm": "Build from the steps",
+      "baseApp": "Build on",
+      "name": "Name",
+      "listBuiltOn": "built on {name} · {image}",
+      "icon": "Icon",
+      "clear": "Clear recipe",
+      "clearTitle": "Clear the recipe",
+      "confirmClear": "Remove every step, the Dockerfile, and the uploaded files of this recipe? The application, its name, and its icon stay as they are, and nothing changes for users until you save.",
+      "done": "Done",
+      "logTitle": "Build output",
+      "rebakeHelp": "Save & bake builds this recipe now and builds it again, on its own, every time the application's image is updated from upstream.",
+      "rebakeNote": "This recipe is built again on top of {image} every time that image is updated from upstream.",
+      "listBuilding": "Baking {name} ({seconds} s)",
+      "listBaked": "{name} is baked. New sessions run this image.",
+      "listFailed": "The build of {name} failed. Sessions keep the last image that built.",
+      "confirmDeleteApp": "Delete '{name}'? The baked application is removed with its recipe. Home directories users made with it stay.",
+      "latest": "latest",
+      "pickApp": "-- Choose an application --",
+      "pickKit": "-- Choose a language --",
+      "menuHelp": "A home directory copies the right-click menu on its first start and keeps its copy afterwards.",
+      "appimageHelp": "Unpacks the AppImage into the destination, where AppRun starts it. Add a desktop entry to list it in the menus.",
+      "iconPlaceholder": "or an icon's name or path in the image",
+      "noProxyHelp": "Hosts reached without the proxy, separated by commas. localhost is always among them.",
+      "versionHelp": "Empty installs the latest release at each build.",
+      "devkitPlaceholder": "Type a package name...",
+      "devkitHelp": "Installed outside the home directory, for every session.",
+      "launchHelp": "One command per line, run by sh as the session's user. A home directory copies the commands on its first start and keeps its copy afterwards.",
+      "startHelp": {
+        "once": "Runs as root every time the container starts, before the session.",
+        "service": "Started as root with the container and started again whenever it exits; end on the program that keeps running."
+      },
+      "groups": {
+        "software": "Software",
+        "desktop": "Desktop",
+        "system": "System"
+      },
+      "bundles": {
+        "label": "Quick picks",
+        "companions": "Desktop companions",
+        "shell": "Shell tools",
+        "build": "Build tools",
+        "archives": "Archive tools"
+      },
+      "fontPacks": {
+        "office": "Office-compatible (Liberation, Carlito, Caladea)",
+        "cjk": "Chinese, Japanese, and Korean, every weight",
+        "noto": "Noto for the world's scripts",
+        "microsoft": "Microsoft core fonts (Arial, Times New Roman, Verdana)"
+      },
+      "devkits": {
+        "python": "Python",
+        "node": "Node.js",
+        "rust": "Rust",
+        "go": "Go",
+        "java": "Java"
+      },
+      "devkitPackages": {
+        "python": "pip packages",
+        "node": "npm packages, installed globally",
+        "rust": "Crates, built and installed",
+        "go": "Go modules, built and installed"
+      },
+      "categories": {
+        "Utility": "Accessories",
+        "Development": "Development",
+        "Graphics": "Graphics",
+        "Network": "Internet",
+        "Office": "Office",
+        "AudioVideo": "Multimedia",
+        "Game": "Games",
+        "Education": "Education",
+        "System": "System"
+      },
+      "placements": {
+        "replace": "Replace the application's start command",
+        "before": "Run before the application's start command"
+      },
+      "startModes": {
+        "once": "Run once at every start",
+        "service": "Keep running as a service"
+      }
     }
   },
   "popup": {
@@ -2210,7 +2486,8 @@
         "waiting": "Waiting for the desktop to respond",
         "ready": "Opening the session",
         "client": "Preparing the application's web client",
-        "vpn": "Bringing up the VPN gateway"
+        "vpn": "Bringing up the VPN gateway",
+        "baking": "Baking the application's image"
       },
       "uploading": "Uploading the file ({done} of {total})",
       "imageHint": "The first launch of an application on a node downloads it, which can take minutes. Later launches are fast.",

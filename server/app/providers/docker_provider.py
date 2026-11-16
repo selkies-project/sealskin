@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+import io
 import logging
 import secrets
+from collections.abc import Callable
 from typing import Any
 
 from docker.errors import APIError, DockerException, ImageNotFound, NotFound
@@ -49,6 +51,8 @@ def _bind_volumes(bind_mounts: Any) -> dict[str, dict[str, str]]:
 
 class DockerProvider(BaseProvider):
     """Launches applications as Docker containers on the local daemon."""
+
+    bakes = True
 
     @property
     def client(self) -> Any:
@@ -176,6 +180,107 @@ class DockerProvider(BaseProvider):
             raise RuntimeError(f"'{path}' is not in image '{image}': {exc.explanation or exc}") from exc
         except (APIError, DockerException) as exc:
             raise RuntimeError(f"Docker could not export '{path}' from '{image}': {exc}") from exc
+
+    async def build_image(
+        self,
+        context: bytes,
+        tag: str,
+        buildargs: dict[str, str],
+        labels: dict[str, str],
+        log: Callable[[str], None],
+        fresh: bool = False,
+        idle: int = 900,
+    ) -> str:
+        """Build an image with the daemon's classic builder (see `BaseProvider`).
+
+        The builder takes the Engine API's build request as it is, so the
+        Dockerfile is held to what that builder reads: no BuildKit mounts,
+        here-documents, or `COPY --chmod`.
+        """
+
+        def build() -> str:
+            image_id = ""
+            last = ""
+            stream = self.client.api.build(
+                fileobj=io.BytesIO(context),
+                custom_context=True,
+                tag=tag,
+                buildargs=buildargs,
+                labels=labels,
+                rm=True,
+                forcerm=True,
+                pull=False,
+                nocache=fresh,
+                decode=True,
+                timeout=idle,
+            )
+            for chunk in stream:
+                if chunk.get("error"):
+                    raise RuntimeError(str(chunk["error"]).strip())
+                if chunk.get("aux"):
+                    image_id = str(chunk["aux"].get("ID") or image_id)
+                text = chunk.get("stream")
+                if text is None and chunk.get("status") and "progress" not in chunk:
+                    # A pull of another stage's image: one line per state of a layer.
+                    text = " ".join(filter(None, [str(chunk.get("id") or ""), str(chunk["status"])]))
+                    if text == last:
+                        continue
+                    last = text
+                for line in (text or "").splitlines():
+                    if line.strip():
+                        log(line.rstrip())
+            return image_id
+
+        try:
+            return await asyncio.to_thread(build)
+        except (APIError, DockerException) as exc:
+            raise RuntimeError(f"Docker could not build the image: {getattr(exc, 'explanation', None) or exc}") from exc
+        except OSError as exc:
+            raise RuntimeError(f"The build stopped: {exc}") from exc
+
+    async def built_images(self, labels: dict[str, str]) -> list[str]:
+        """Return the tags of the local images carrying `labels`."""
+        images = await asyncio.to_thread(
+            self.client.images.list, filters={"label": [f"{key}={value}" for key, value in labels.items()]}
+        )
+        return [tag for image in images for tag in image.tags]
+
+    async def remove_image(self, reference: str) -> bool:
+        """Untag an image, which removes it once no other tag or container holds it."""
+        try:
+            await asyncio.to_thread(self.client.images.remove, reference)
+        except ImageNotFound:
+            return True
+        except APIError as exc:
+            logger.info("The image %s stays: %s", reference, exc.explanation or exc)
+            return False
+        return True
+
+    async def run_once(self, image: str, script: str, timeout: int) -> tuple[int, str]:
+        """Run a script with `/bin/sh` in a container of the image (see `BaseProvider`)."""
+
+        def run() -> tuple[int, str]:
+            container = self.client.containers.run(
+                registries.mirror(image),
+                entrypoint=["/bin/sh", "-c"],
+                command=[script],
+                detach=True,
+                network=state.discovered_network,
+                labels={MANAGED_BY_LABEL: "sealskin-bakery"},
+            )
+            try:
+                code = int(container.wait(timeout=timeout).get("StatusCode", 1))
+                return code, container.logs(stdout=True, stderr=False).decode("utf-8", "replace")
+            finally:
+                try:
+                    container.remove(force=True)
+                except (APIError, DockerException) as exc:
+                    logger.warning("Could not remove the throwaway container of '%s': %s", image, exc)
+
+        try:
+            return await asyncio.to_thread(run)
+        except (APIError, DockerException, OSError) as exc:
+            raise RuntimeError(f"Docker could not run '{image}': {exc}") from exc
 
     async def launch(
         self,

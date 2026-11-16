@@ -90,7 +90,8 @@
       "audit": "Revisionslog",
       "branding": "Branding",
       "keys": "Applikationsnøgler",
-      "vpn": "VPN-profiler"
+      "vpn": "VPN-profiler",
+      "bakery": "Bageri"
     },
     "dashboard": {
       "title": "Kontrolpanel",
@@ -324,7 +325,12 @@
       "notLocal": "Image ikke fundet lokalt",
       "isLaboratory": "Dette er en laboratorie-app, bygget fra et basis-image med tilpassede indstillinger.",
       "confirmDelete": "Er du sikker på, at du vil slette den installerede app '{appName}'?",
-      "deleteTitle": "Slet installeret app"
+      "deleteTitle": "Slet installeret app",
+      "heldBy": "Bygget på af {names}. Slet dem først.",
+      "isBaked": "Bagt",
+      "builtOnCount": "{count} bygget på denne",
+      "builtOnTitle": "Vis de applikationer, der er bygget på denne",
+      "kindLab": "Laboratorium"
     },
     "appStore": {
       "title": "App Stores",
@@ -1195,7 +1201,7 @@
       "selectApp": "Vælg App",
       "createNew": "Opret Ny App",
       "baseApp": "Basisapplikation",
-      "baseAppDescription": "Den installerede applikation, som din nye brugerdefinerede app vil være baseret på.",
+      "baseAppDescription": "Den installerede eller bagte applikation, som din nye brugerdefinerede app baseres på.",
       "selectBase": "Vælg en Basis-app",
       "appName": "App-navn",
       "appIcon": "App-ikon",
@@ -1849,6 +1855,276 @@
       "removeEndpoint": "Fjern endepunkt",
       "endpointIncomplete": "Endepunktet '{label}' kræver vært, port og for WireGuard serverens offentlige nøgle.",
       "endpointsAdded": "{count, plural, one {1 endepunkt} other {{count} endepunkter}} tilføjet."
+    },
+    "bakery": {
+      "title": "Bageriet",
+      "help": "En opskrift bager en ny applikation oven på en, du har installeret: pakker, filer, certifikater, alt hvad en Dockerfile kan, under eget navn og ikon. Bag så mange, du har brug for, fra den samme applikation. Hver knude bygger på det image, den allerede har hentet, og bygger igen, hver gang det image opdateres fra upstream. Sessioner kører det bagte image, når det er bygget, og beholder det sidste gode, når et build mislykkes.",
+      "unavailable": "Denne server kører sessioner på Kubernetes, hvor Bageriet endnu ikke kan bygge images.",
+      "newRecipe": "Ny opskrift",
+      "application": "Applikation",
+      "recipe": "Opskrift",
+      "none": "Ingen opskrifter endnu. En opskrift føjer pakker, filer eller andet til en applikations image.",
+      "listSteps": "{count} trin",
+      "listDockerfile": "Dockerfile",
+      "statePaused": "Sat på pause",
+      "stateBuilding": "Bager",
+      "stateError": "Mislykkedes",
+      "stateErrorKept": "sessioner kører det sidste image, der blev bygget",
+      "stateReady": "Bagt",
+      "statePending": "Ikke bagt på denne knude",
+      "rebuildTitle": "Bag forfra med distributionens aktuelle pakker",
+      "deleteTitle": "Slet",
+      "confirmDelete": "Slet opskriften for '{name}'? Dens sessioner kører applikationens eget image igen.",
+      "newAppInvalid": "Vælg den applikation, der skal bygges på, og giv den bagte et navn.",
+      "pickBase": "-- Vælg en applikation --",
+      "family": "Distribution",
+      "familyAuto": "Som imaget angiver",
+      "builtOn": "Bygget på",
+      "baseNone": "Vælg en applikation for at se dens image.",
+      "baseReading": "Læser imaget...",
+      "baseUnknown": "Ukendt distribution",
+      "modeGuided": "Guidet",
+      "modeDeveloper": "Udvikler",
+      "tryBuild": "Byg en prøve",
+      "saveAndBake": "Gem & bag",
+      "steps": "Trin",
+      "addStep": "Tilføj et trin",
+      "noSteps": "Ingen trin endnu. Vælg et nedenfor: Dockerfilen til højre følger det, du tilføjer.",
+      "moveUp": "Flyt op",
+      "moveDown": "Flyt ned",
+      "skipStep": "Udelad dette trin fra buildet",
+      "useStep": "Tag dette trin med i buildet igen",
+      "developerHelp": "Dockerfilen bygges, som du skriver den. Applikationens image er build-argumentet BASE_IMAGE: erklær det med ARG før den første FROM, skriv andre stages, hvor du har brug for dem, og slut med en stage, der starter FROM ${BASE_IMAGE}.",
+      "toGuidedTitle": "Tilbage til guidede trin",
+      "toGuided": "Trinnene er, som du forlod dem, og buildet følger dem igen. Den Dockerfile, du skrev, gemmes med opskriften, men bygges ikke.",
+      "files": "Filer",
+      "upload": "Upload",
+      "uploadFailed": "Kunne ikke uploade {name}: {error}",
+      "noFiles": "Ingen filer endnu.",
+      "pickFile": "Tilføj en uploadet fil...",
+      "snippets": "Indsæt et kodestykke",
+      "insert": "Indsæt ved markøren",
+      "snippetEmpty": "Trinnet giver intet endnu.",
+      "packagePlaceholder": "Søg eller skriv et pakkenavn...",
+      "indexing": "Læser pakkelisten fra imaget. Den første søgning i et image tager et minut.",
+      "noIndex": "Ingen pakkeliste for dette image; skriv navnene.",
+      "noPackages": "Ingen pakke matcher '{query}'. Tryk på Enter for at tilføje den som skrevet.",
+      "destHelp": "En sti, der slutter på /, er en mappe, som filerne lægges i.",
+      "sha256Help": "Valgfri. Buildet stopper, når downloadet ikke stemmer.",
+      "scriptHelp": "En kommando pr. linje. De kører som root i ét lag, og buildet stopper ved den første, der fejler.",
+      "rawHelp": "Dockerfile-instruktioner, bygget præcis som skrevet.",
+      "addVariable": "Tilføj en variabel",
+      "line": "Linje {line}:",
+      "copied": "Dockerfile kopieret.",
+      "buildQueued": "Venter på, at et andet build bliver færdigt",
+      "buildRunning": "Bygger ({seconds} s)",
+      "buildReady": "Prøven blev bygget på {seconds} s. Sessioner er uændrede, indtil du gemmer.",
+      "buildFailed": "Buildet mislykkedes. Sessioner beholder det sidste image, der blev bygget.",
+      "openTrial": "Åbn en prøvesession",
+      "fields": {
+        "note": "Titel i build-loggen",
+        "dest": "Destination i imaget",
+        "executable": "Gør eksekverbar",
+        "extract": "Udpak arkiver der",
+        "url": "Adresse",
+        "action": "Derefter",
+        "sha256": "SHA-256-kontrolsum",
+        "value": "værdi",
+        "script": "Kommandoer",
+        "text": "Dockerfile",
+        "app": "Applikation",
+        "menu": "Vis den i højreklikmenuen",
+        "default": "Åbn weblinks med den",
+        "ppas": "Arkiver",
+        "packages": "Pakker",
+        "name": "Navn i menuerne",
+        "command": "Kommando",
+        "icon": "Ikon",
+        "category": "Menukategori",
+        "sandbox": "Chromium- eller Electron-applikation: start den med --no-sandbox",
+        "terminal": "Kører i en terminal",
+        "packs": "Skrifttypesæt",
+        "fontFiles": "Dine egne skrifttypefiler",
+        "eula": "Jeg accepterer licensen til Microsofts kerneskrifttyper",
+        "proxy": "Proxyadresse",
+        "no_proxy": "Ikke gennem proxyen",
+        "pip": "Python-pakkeindeks",
+        "npm": "npm-registreringsdatabase",
+        "version": "Version",
+        "kit": "Sprog",
+        "placement": "Placering",
+        "mode": "Kørsel",
+        "scriptName": "Filnavn"
+      },
+      "actions": {
+        "save": "Gem filen",
+        "extract": "Udpak arkivet",
+        "install": "Installer den som en pakke",
+        "appimage": "Udpak AppImage-filen"
+      },
+      "kinds": {
+        "packages": {
+          "title": "Installer pakker",
+          "short": "Fra distributionens pakkearkiver",
+          "help": "Installerer med imagets egen pakkehåndtering og fjerner cachen bagefter."
+        },
+        "files": {
+          "title": "Kopier filer",
+          "short": "Upload filer til imaget",
+          "help": "Kopierer filer, du uploader, til en sti i imaget. En session monterer sin hjemmemappe over /config, så læg filerne et andet sted."
+        },
+        "download": {
+          "title": "Download",
+          "short": "En fil, et arkiv, en AppImage eller en pakke",
+          "help": "Henter en adresse, mens imaget bygges: behold filen, udpak et arkiv eller en AppImage, eller installer en .deb, .rpm eller .apk."
+        },
+        "certificates": {
+          "title": "Hav tillid til certifikater",
+          "short": "Tilføj dine egne certifikatmyndigheder",
+          "help": "Føjer de certifikater, du uploader, til imagets betroede myndigheder."
+        },
+        "fonts": {
+          "title": "Tilføj skrifttyper",
+          "short": "Skrifttypesæt og dine egne filer",
+          "help": "Installerer skrifttypesæt, som distributionen pakker, og skrifttypefiler, du uploader, for alle applikationer i imaget."
+        },
+        "env": {
+          "title": "Miljø",
+          "short": "Angiv miljøvariabler",
+          "help": "Angiver variabler for alt, der kører i imaget."
+        },
+        "run": {
+          "title": "Kør kommandoer",
+          "short": "Shell-kommandoer, som root",
+          "help": "Kører shell-kommandoer, mens imaget bygges."
+        },
+        "raw": {
+          "title": "Dockerfile-linjer",
+          "short": "Enhver instruktion, som skrevet",
+          "help": "Instruktioner, der sættes ind i Dockerfilen, præcis som du skriver dem."
+        },
+        "app": {
+          "title": "Tilføj en applikation",
+          "short": "En browser eller editor, klar til start",
+          "help": "Installerer applikationen fra distributionen, eller fra leverandørens pakkearkiv på Debian og Ubuntu, og viser den i sessionens menuer. Chromium-baserede applikationer starter med --no-sandbox, som en container kræver."
+        },
+        "ppa": {
+          "title": "Ubuntu PPA",
+          "short": "Pakker fra et Launchpad-arkiv",
+          "help": "Føjer personlige pakkearkiver fra Launchpad til imaget og installerer pakker fra dem."
+        },
+        "devkit": {
+          "title": "Udviklingssæt",
+          "short": "Python, Node.js, Rust, Go, Java",
+          "help": "Installerer et sprogs værktøjskæde fra distributionen og de af sprogets egne pakker, du angiver."
+        },
+        "docker": {
+          "title": "Installer Docker",
+          "short": "Nyeste Docker, Compose og Buildx",
+          "help": "Lægger Dockers statiske binære filer, hvor imagets Docker-tjeneste finder dem. Tjenesten starter kun i en privilegeret session."
+        },
+        "desktop": {
+          "title": "Skrivebordspost",
+          "short": "Vis et program i menuerne",
+          "help": "Skriver en skrivebordspost for et program, der ligger i imaget, for eksempel et, der er udpakket fra en AppImage eller et arkiv, så sessionens menuer viser det."
+        },
+        "launch": {
+          "title": "Startkommando",
+          "short": "Det, sessionen starter med",
+          "help": "Skriver de kommandoer, en session starter sin applikation med."
+        },
+        "proxy": {
+          "title": "Proxy og spejle",
+          "short": "Til buildet og til sessioner",
+          "help": "Angiver proxyvariablerne og pip- og npm-spejlene for trinnene under dette og for alle sessioner."
+        },
+        "startup": {
+          "title": "Kør ved start",
+          "short": "Et script eller en tjeneste i containeren",
+          "help": "Tilføjer et script, som containeren kører, når den starter, eller en tjeneste, som den holder kørende."
+        }
+      },
+      "toGuidedConfirm": "Byg fra trinnene",
+      "baseApp": "Byg på",
+      "name": "Navn",
+      "listBuiltOn": "bygget på {name} · {image}",
+      "icon": "Ikon",
+      "clear": "Ryd opskrift",
+      "clearTitle": "Ryd opskriften",
+      "confirmClear": "Fjern alle trin, Dockerfilen og de uploadede filer i denne opskrift? Applikationen, dens navn og dens ikon forbliver, som de er, og intet ændres for brugerne, før du gemmer.",
+      "done": "Færdig",
+      "logTitle": "Build-output",
+      "rebakeHelp": "Gem & bag bygger denne opskrift nu og bygger den igen, af sig selv, hver gang applikationens image opdateres fra upstream.",
+      "rebakeNote": "Denne opskrift bygges igen oven på {image}, hver gang det image opdateres fra upstream.",
+      "listBuilding": "Bager {name} ({seconds} s)",
+      "listBaked": "{name} er bagt. Nye sessioner kører dette image.",
+      "listFailed": "Buildet af {name} mislykkedes. Sessioner beholder det sidste image, der blev bygget.",
+      "confirmDeleteApp": "Slet '{name}'? Den bagte applikation fjernes sammen med sin opskrift. Hjemmemapper, som brugere har oprettet med den, bliver.",
+      "latest": "nyeste",
+      "pickApp": "-- Vælg en applikation --",
+      "pickKit": "-- Vælg et sprog --",
+      "menuHelp": "En hjemmemappe kopierer højreklikmenuen ved sin første start og beholder sin kopi bagefter.",
+      "appimageHelp": "Udpakker AppImage-filen i destinationen, hvor AppRun starter den. Tilføj en skrivebordspost for at vise den i menuerne.",
+      "iconPlaceholder": "eller et ikons navn eller sti i imaget",
+      "noProxyHelp": "Værter, der nås uden proxyen, adskilt af kommaer. localhost er altid blandt dem.",
+      "versionHelp": "Tom installerer den nyeste udgivelse ved hvert build.",
+      "devkitPlaceholder": "Skriv et pakkenavn...",
+      "devkitHelp": "Installeret uden for hjemmemappen, for alle sessioner.",
+      "launchHelp": "En kommando pr. linje, kørt af sh som sessionens bruger. En hjemmemappe kopierer kommandoerne ved sin første start og beholder sin kopi bagefter.",
+      "startHelp": {
+        "once": "Kører som root, hver gang containeren starter, før sessionen.",
+        "service": "Startes som root med containeren og startes igen, hver gang den afslutter; slut med det program, der bliver ved med at køre."
+      },
+      "groups": {
+        "software": "Software",
+        "desktop": "Skrivebord",
+        "system": "System"
+      },
+      "bundles": {
+        "label": "Hurtige valg",
+        "companions": "Skrivebordsledsagere",
+        "shell": "Shell-værktøjer",
+        "build": "Build-værktøjer",
+        "archives": "Arkivværktøjer"
+      },
+      "fontPacks": {
+        "office": "Office-kompatible (Liberation, Carlito, Caladea)",
+        "cjk": "Kinesisk, japansk og koreansk, alle vægte",
+        "noto": "Noto til verdens skriftsystemer",
+        "microsoft": "Microsofts kerneskrifttyper (Arial, Times New Roman, Verdana)"
+      },
+      "devkits": {
+        "python": "Python",
+        "node": "Node.js",
+        "rust": "Rust",
+        "go": "Go",
+        "java": "Java"
+      },
+      "devkitPackages": {
+        "python": "pip-pakker",
+        "node": "npm-pakker, installeret globalt",
+        "rust": "Crates, bygget og installeret",
+        "go": "Go-moduler, bygget og installeret"
+      },
+      "categories": {
+        "Utility": "Tilbehør",
+        "Development": "Udvikling",
+        "Graphics": "Grafik",
+        "Network": "Internet",
+        "Office": "Kontor",
+        "AudioVideo": "Multimedie",
+        "Game": "Spil",
+        "Education": "Uddannelse",
+        "System": "System"
+      },
+      "placements": {
+        "replace": "Erstat applikationens startkommando",
+        "before": "Kør før applikationens startkommando"
+      },
+      "startModes": {
+        "once": "Kør én gang ved hver start",
+        "service": "Hold kørende som en tjeneste"
+      }
     }
   },
   "popup": {
@@ -2210,7 +2486,8 @@
         "waiting": "Venter på, at skrivebordet svarer",
         "ready": "Åbner sessionen",
         "client": "Forbereder applikationens webklient",
-        "vpn": "VPN-gatewayen startes"
+        "vpn": "VPN-gatewayen startes",
+        "baking": "Bager applikationens image"
       },
       "uploading": "Uploader filen ({done} af {total})",
       "imageHint": "Første start af en applikation på en knude downloader den, hvilket kan tage minutter. Senere starter er hurtige.",

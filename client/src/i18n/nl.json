@@ -90,7 +90,8 @@
       "audit": "Auditlog",
       "branding": "Huisstijl",
       "keys": "Toepassingssleutels",
-      "vpn": "VPN-profielen"
+      "vpn": "VPN-profielen",
+      "bakery": "Bakkerij"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -324,7 +325,12 @@
       "notLocal": "Image niet lokaal gevonden",
       "isLaboratory": "Dit is een Laboratorium-app, gebouwd op basis van een basisimage met aangepaste instellingen.",
       "confirmDelete": "Weet u zeker dat u de geïnstalleerde app '{appName}' wilt verwijderen?",
-      "deleteTitle": "Geïnstalleerde app verwijderen"
+      "deleteTitle": "Geïnstalleerde app verwijderen",
+      "heldBy": "Basis van {names}. Verwijder die eerst.",
+      "isBaked": "Gebakken",
+      "builtOnCount": "{count} hierop gebouwd",
+      "builtOnTitle": "Toon de applicaties die op deze zijn gebouwd",
+      "kindLab": "Laboratorium"
     },
     "appStore": {
       "title": "App Stores",
@@ -1195,7 +1201,7 @@
       "selectApp": "Selecteer App",
       "createNew": "Nieuwe App Maken",
       "baseApp": "Basis Applicatie",
-      "baseAppDescription": "De geïnstalleerde applicatie waarop uw nieuwe aangepaste app gebaseerd zal zijn.",
+      "baseAppDescription": "De geïnstalleerde of gebakken applicatie waarop uw nieuwe aangepaste app gebaseerd zal zijn.",
       "selectBase": "Selecteer een Basis App",
       "appName": "App Naam",
       "appIcon": "App Icoon",
@@ -1849,6 +1855,276 @@
       "removeEndpoint": "Eindpunt verwijderen",
       "endpointIncomplete": "Eindpunt '{label}' heeft een host, een poort en voor WireGuard de publieke sleutel van de server nodig.",
       "endpointsAdded": "{count, plural, one {1 eindpunt} other {{count} eindpunten}} toegevoegd."
+    },
+    "bakery": {
+      "title": "De Bakkerij",
+      "help": "Een recept bakt een nieuwe applicatie bovenop een applicatie die u hebt geïnstalleerd: pakketten, bestanden, certificaten, alles wat een Dockerfile kan, onder een eigen naam en icoon. Bak er zoveel als u nodig hebt van dezelfde applicatie. Elke node bouwt op de image die hij al heeft gedownload en bouwt opnieuw wanneer die image upstream wordt bijgewerkt. Sessies draaien de gebakken image zodra die is gebouwd en houden de laatste goede wanneer een build mislukt.",
+      "unavailable": "Deze server draait sessies op Kubernetes, waar de Bakkerij nog geen images kan bouwen.",
+      "newRecipe": "Nieuw recept",
+      "application": "Applicatie",
+      "recipe": "Recept",
+      "none": "Nog geen recepten. Een recept voegt pakketten, bestanden of iets anders toe aan de image van een applicatie.",
+      "listSteps": "{count} stap(pen)",
+      "listDockerfile": "Dockerfile",
+      "statePaused": "Gepauzeerd",
+      "stateBuilding": "Bakken",
+      "stateError": "Mislukt",
+      "stateErrorKept": "sessies draaien de laatst gebouwde image",
+      "stateReady": "Gebakken",
+      "statePending": "Niet gebakken op deze node",
+      "rebuildTitle": "Opnieuw bakken vanaf nul, met de huidige pakketten van de distributie",
+      "deleteTitle": "Verwijderen",
+      "confirmDelete": "Het recept van '{name}' verwijderen? De sessies draaien weer de eigen image van de applicatie.",
+      "newAppInvalid": "Kies de applicatie waarop u wilt bouwen en geef de gebakken applicatie een naam.",
+      "pickBase": "-- Kies een applicatie --",
+      "family": "Distributie",
+      "familyAuto": "Zoals de image aangeeft",
+      "builtOn": "Gebouwd op",
+      "baseNone": "Kies een applicatie om de image te zien.",
+      "baseReading": "Image wordt gelezen...",
+      "baseUnknown": "Onbekende distributie",
+      "modeGuided": "Begeleid",
+      "modeDeveloper": "Ontwikkelaar",
+      "tryBuild": "Proefbuild maken",
+      "saveAndBake": "Opslaan & bakken",
+      "steps": "Stappen",
+      "addStep": "Stap toevoegen",
+      "noSteps": "Nog geen stappen. Kies er hieronder een: de Dockerfile rechts volgt wat u toevoegt.",
+      "moveUp": "Omhoog",
+      "moveDown": "Omlaag",
+      "skipStep": "Deze stap uit de build laten",
+      "useStep": "Deze stap weer in de build opnemen",
+      "developerHelp": "De Dockerfile wordt gebouwd zoals u hem schrijft. De image van de applicatie is het build-argument BASE_IMAGE: declareer het met ARG vóór de eerste FROM, schrijf andere stages waar u ze nodig hebt en eindig met een stage die begint met FROM ${BASE_IMAGE}.",
+      "toGuidedTitle": "Terug naar begeleide stappen",
+      "toGuided": "De stappen zijn zoals u ze hebt achtergelaten en de build volgt ze weer. De Dockerfile die u hebt geschreven blijft bij het recept bewaard, maar wordt niet gebouwd.",
+      "files": "Bestanden",
+      "upload": "Uploaden",
+      "uploadFailed": "Kon {name} niet uploaden: {error}",
+      "noFiles": "Nog geen bestanden.",
+      "pickFile": "Geüpload bestand toevoegen...",
+      "snippets": "Fragment invoegen",
+      "insert": "Invoegen bij de cursor",
+      "snippetEmpty": "De stap levert nog niets op.",
+      "packagePlaceholder": "Zoek of typ een pakketnaam...",
+      "indexing": "De pakketlijst wordt uit de image gelezen. De eerste zoekopdracht in een image duurt een minuut.",
+      "noIndex": "Geen pakketlijst voor deze image; typ de namen.",
+      "noPackages": "Geen pakket komt overeen met '{query}'. Druk op Enter om het toe te voegen zoals getypt.",
+      "destHelp": "Een pad dat eindigt op / is een map waarin de bestanden worden geplaatst.",
+      "sha256Help": "Optioneel. De build stopt wanneer de download niet overeenkomt.",
+      "scriptHelp": "Eén opdracht per regel. Ze worden als root in één laag uitgevoerd en de build stopt bij de eerste die mislukt.",
+      "rawHelp": "Dockerfile-instructies, gebouwd precies zoals geschreven.",
+      "addVariable": "Variabele toevoegen",
+      "line": "Regel {line}:",
+      "copied": "Dockerfile gekopieerd.",
+      "buildQueued": "Wachten tot een andere build klaar is",
+      "buildRunning": "Bouwen ({seconds} s)",
+      "buildReady": "De proefbuild is in {seconds} s gebouwd. Sessies blijven ongewijzigd totdat u opslaat.",
+      "buildFailed": "De build is mislukt. Sessies houden de laatst gebouwde image.",
+      "openTrial": "Proefsessie openen",
+      "fields": {
+        "note": "Titel in het buildlog",
+        "dest": "Bestemming in de image",
+        "executable": "Uitvoerbaar maken",
+        "extract": "Archieven daar uitpakken",
+        "url": "Adres",
+        "action": "Daarna",
+        "sha256": "SHA-256-controlesom",
+        "value": "waarde",
+        "script": "Opdrachten",
+        "text": "Dockerfile",
+        "app": "Applicatie",
+        "menu": "In het rechtsklikmenu tonen",
+        "default": "Weblinks ermee openen",
+        "ppas": "Archieven",
+        "packages": "Pakketten",
+        "name": "Naam in de menu's",
+        "command": "Opdracht",
+        "icon": "Pictogram",
+        "category": "Menucategorie",
+        "sandbox": "Chromium- of Electron-applicatie: starten met --no-sandbox",
+        "terminal": "Draait in een terminal",
+        "packs": "Lettertypesets",
+        "fontFiles": "Uw eigen lettertypebestanden",
+        "eula": "Ik accepteer de licentie van de Microsoft-kernlettertypen",
+        "proxy": "Proxyadres",
+        "no_proxy": "Niet via de proxy",
+        "pip": "Python-pakketindex",
+        "npm": "npm-register",
+        "version": "Versie",
+        "kit": "Taal",
+        "placement": "Plaatsing",
+        "mode": "Uitvoering",
+        "scriptName": "Bestandsnaam"
+      },
+      "actions": {
+        "save": "Het bestand opslaan",
+        "extract": "Het archief uitpakken",
+        "install": "Als pakket installeren",
+        "appimage": "De AppImage uitpakken"
+      },
+      "kinds": {
+        "packages": {
+          "title": "Pakketten installeren",
+          "short": "Uit de repository's van de distributie",
+          "help": "Installeert met de pakketbeheerder van de image en verwijdert daarna de caches."
+        },
+        "files": {
+          "title": "Bestanden kopiëren",
+          "short": "Bestanden uploaden naar de image",
+          "help": "Kopieert bestanden die u uploadt naar een pad in de image. Een sessie koppelt haar home directory over /config, dus plaats bestanden ergens anders."
+        },
+        "download": {
+          "title": "Downloaden",
+          "short": "Een bestand, archief, AppImage of pakket",
+          "help": "Haalt een adres op terwijl de image wordt gebouwd: bewaar het bestand, pak een archief of een AppImage uit, of installeer een .deb, .rpm of .apk."
+        },
+        "certificates": {
+          "title": "Certificaten vertrouwen",
+          "short": "Uw eigen certificeringsinstanties toevoegen",
+          "help": "Voegt de certificaten die u uploadt toe aan de vertrouwde instanties van de image."
+        },
+        "fonts": {
+          "title": "Lettertypen toevoegen",
+          "short": "Lettertypesets en uw eigen bestanden",
+          "help": "Installeert lettertypesets die de distributie als pakket aanbiedt en lettertypebestanden die u uploadt, voor elke applicatie in de image."
+        },
+        "env": {
+          "title": "Omgeving",
+          "short": "Omgevingsvariabelen instellen",
+          "help": "Stelt variabelen in voor alles wat in de image draait."
+        },
+        "run": {
+          "title": "Opdrachten uitvoeren",
+          "short": "Shell-opdrachten, als root",
+          "help": "Voert shell-opdrachten uit terwijl de image wordt gebouwd."
+        },
+        "raw": {
+          "title": "Dockerfile-regels",
+          "short": "Elke instructie, zoals geschreven",
+          "help": "Instructies die in de Dockerfile worden gezet precies zoals u ze schrijft."
+        },
+        "app": {
+          "title": "Applicatie toevoegen",
+          "short": "Een browser of editor, klaar om te starten",
+          "help": "Installeert de applicatie uit de distributie, of uit de repository van de leverancier op Debian en Ubuntu, en toont haar in de menu's van de sessie. Op Chromium gebaseerde applicaties starten met --no-sandbox, wat een container nodig heeft."
+        },
+        "ppa": {
+          "title": "Ubuntu PPA",
+          "short": "Pakketten uit een Launchpad-archief",
+          "help": "Voegt persoonlijke pakketarchieven van Launchpad toe aan de image en installeert er pakketten uit."
+        },
+        "devkit": {
+          "title": "Ontwikkelkit",
+          "short": "Python, Node.js, Rust, Go, Java",
+          "help": "Installeert de toolchain van een taal uit de distributie, en de eigen pakketten van de taal die u opgeeft."
+        },
+        "docker": {
+          "title": "Docker installeren",
+          "short": "De nieuwste Docker, Compose en Buildx",
+          "help": "Plaatst de statische binaries van Docker waar de Docker-service van de image ze vindt. De service start alleen in een sessie met privileges."
+        },
+        "desktop": {
+          "title": "Bureaubladitem",
+          "short": "Een programma in de menu's tonen",
+          "help": "Schrijft een bureaubladitem voor een programma dat in de image staat, bijvoorbeeld een dat uit een AppImage of een archief is uitgepakt, zodat de menu's van de sessie het tonen."
+        },
+        "launch": {
+          "title": "Startopdracht",
+          "short": "Waarmee de sessie start",
+          "help": "Schrijft de opdrachten waarmee een sessie haar applicatie start."
+        },
+        "proxy": {
+          "title": "Proxy en mirrors",
+          "short": "Voor de build en voor sessies",
+          "help": "Stelt de proxyvariabelen en de pip- en npm-mirrors in voor de stappen onder deze en voor elke sessie."
+        },
+        "startup": {
+          "title": "Uitvoeren bij de start",
+          "short": "Een script of service van de container",
+          "help": "Voegt een script toe dat de container bij het starten uitvoert, of een service die hij laat draaien."
+        }
+      },
+      "toGuidedConfirm": "Bouwen vanuit de stappen",
+      "baseApp": "Bouwen op",
+      "name": "Naam",
+      "listBuiltOn": "gebouwd op {name} · {image}",
+      "icon": "Icoon",
+      "clear": "Recept wissen",
+      "clearTitle": "Het recept wissen",
+      "confirmClear": "Alle stappen, de Dockerfile en de geüploade bestanden van dit recept verwijderen? De applicatie, haar naam en haar icoon blijven zoals ze zijn, en voor gebruikers verandert er niets totdat u opslaat.",
+      "done": "Klaar",
+      "logTitle": "Build-uitvoer",
+      "rebakeHelp": "Opslaan & bakken bouwt dit recept nu en bouwt het vanzelf opnieuw telkens wanneer de image van de applicatie upstream wordt bijgewerkt.",
+      "rebakeNote": "Dit recept wordt opnieuw gebouwd bovenop {image} telkens wanneer die image upstream wordt bijgewerkt.",
+      "listBuilding": "{name} wordt gebakken ({seconds} s)",
+      "listBaked": "{name} is gebakken. Nieuwe sessies draaien deze image.",
+      "listFailed": "De build van {name} is mislukt. Sessies houden de laatst gebouwde image.",
+      "confirmDeleteApp": "'{name}' verwijderen? De gebakken applicatie wordt met haar recept verwijderd. Home directories die gebruikers ermee hebben gemaakt blijven bestaan.",
+      "latest": "nieuwste",
+      "pickApp": "-- Kies een applicatie --",
+      "pickKit": "-- Kies een taal --",
+      "menuHelp": "Een home directory kopieert het rechtsklikmenu bij de eerste start en houdt daarna de eigen kopie.",
+      "appimageHelp": "Pakt de AppImage uit in de bestemming, waar AppRun deze start. Voeg een bureaubladitem toe om de applicatie in de menu's te tonen.",
+      "iconPlaceholder": "of de naam of het pad van een pictogram in de image",
+      "noProxyHelp": "Hosts die zonder de proxy worden bereikt, gescheiden door komma's. localhost hoort er altijd bij.",
+      "versionHelp": "Leeg installeert bij elke build de nieuwste release.",
+      "devkitPlaceholder": "Typ een pakketnaam...",
+      "devkitHelp": "Geïnstalleerd buiten de home directory, voor elke sessie.",
+      "launchHelp": "Eén opdracht per regel, uitgevoerd door sh als de gebruiker van de sessie. Een home directory kopieert de opdrachten bij de eerste start en houdt daarna de eigen kopie.",
+      "startHelp": {
+        "once": "Wordt als root uitgevoerd bij elke start van de container, vóór de sessie.",
+        "service": "Wordt als root met de container gestart en opnieuw gestart wanneer het stopt; eindig met het programma dat blijft draaien."
+      },
+      "groups": {
+        "software": "Software",
+        "desktop": "Bureaublad",
+        "system": "Systeem"
+      },
+      "bundles": {
+        "label": "Snelle keuzes",
+        "companions": "Bureaubladhulpjes",
+        "shell": "Shell-hulpmiddelen",
+        "build": "Bouwhulpmiddelen",
+        "archives": "Archiefhulpmiddelen"
+      },
+      "fontPacks": {
+        "office": "Office-compatibel (Liberation, Carlito, Caladea)",
+        "cjk": "Chinees, Japans en Koreaans, elk gewicht",
+        "noto": "Noto voor de schriften van de wereld",
+        "microsoft": "Microsoft-kernlettertypen (Arial, Times New Roman, Verdana)"
+      },
+      "devkits": {
+        "python": "Python",
+        "node": "Node.js",
+        "rust": "Rust",
+        "go": "Go",
+        "java": "Java"
+      },
+      "devkitPackages": {
+        "python": "pip-pakketten",
+        "node": "npm-pakketten, globaal geïnstalleerd",
+        "rust": "Crates, gebouwd en geïnstalleerd",
+        "go": "Go-modules, gebouwd en geïnstalleerd"
+      },
+      "categories": {
+        "Utility": "Hulpmiddelen",
+        "Development": "Ontwikkeling",
+        "Graphics": "Grafisch",
+        "Network": "Internet",
+        "Office": "Kantoor",
+        "AudioVideo": "Multimedia",
+        "Game": "Spellen",
+        "Education": "Onderwijs",
+        "System": "Systeem"
+      },
+      "placements": {
+        "replace": "De startopdracht van de applicatie vervangen",
+        "before": "Uitvoeren vóór de startopdracht van de applicatie"
+      },
+      "startModes": {
+        "once": "Eén keer uitvoeren bij elke start",
+        "service": "Als service laten draaien"
+      }
     }
   },
   "popup": {
@@ -2210,7 +2486,8 @@
         "waiting": "Wachten tot de desktop reageert",
         "ready": "Sessie openen",
         "client": "De webclient van de applicatie wordt voorbereid",
-        "vpn": "VPN-gateway wordt gestart"
+        "vpn": "VPN-gateway wordt gestart",
+        "baking": "De image van de applicatie bakken"
       },
       "uploading": "Bestand uploaden ({done} van {total})",
       "imageHint": "Bij de eerste start van een applicatie op een node wordt deze gedownload, wat minuten kan duren. Latere starts zijn snel.",

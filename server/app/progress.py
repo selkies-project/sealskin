@@ -10,6 +10,7 @@ the request runs. The launch reports each stage it reaches with `step`:
 | `forwarding` | handing the launch to another node |
 | `storage` | preparing the home directory |
 | `files` | bringing the shared files up to date |
+| `baking` | building the application's baked image, the first time on this node |
 | `image` | pulling the application image |
 | `starting` | creating the container |
 | `waiting` | waiting for the desktop to answer |

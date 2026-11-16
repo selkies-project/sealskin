@@ -30,6 +30,12 @@
   `vpn/entrypoint.sh`), the web client exported from an image (`webclient.py`), the credential files a node
   reads and the pull secrets it reads on Kubernetes (`registries.py`: a Docker `config.json` and a netrc under
   `/config`, sent to the registries and hosts they name and nowhere else, never to the store or a client),
+  the Bakery (`bakery.py`, `bakekits.py`, `routers/bakery.py`: an administrator's recipe, steps or a Dockerfile of their own,
+  built by the node's Docker daemon on an image it already pulled, with the files the administrator uploaded
+  as its whole build context, no mount of the node, and no registry credential; the package list of an image,
+  read by a fixed command in a throwaway container of it and searched on the server, the query never reaching
+  a shell; a recipe is an administrator's alone to write, and the only word a user's launch has in it is which
+  application it starts),
   Caddy's `forward_auth` to the loopback-only `/internal/resolve_session`, the address a user hands one of
   their own running sessions (`POST /api/sessions/<id>/open_url`: a web address by pattern, passed to a fixed
   script inside the session's container as an argument, run as the session's own user), the brand a page request
@@ -78,7 +84,9 @@
 - Low: hardening without a demonstrated crossing.
 
 ## Anything to leave alone
-- An admin controls the host's Docker, or the namespace on Kubernetes, by design.
+- An admin controls the host's Docker, or the namespace on Kubernetes, by design. A Bakery recipe runs the
+  administrator's commands as root in a build on the node, with the network a session has: that is the
+  authority an administrator already has by installing an image of their choosing.
 - An admin's widget may fetch any address the node reaches, and an admin's frame widget may run any script
   inside its sandbox, by design. The dashboard lock and the `dashboard_*` user settings shape the page a user
   sees alone and are no boundary; the server's checks on widget data and on a user's own widgets are.

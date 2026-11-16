@@ -205,11 +205,14 @@ def prune(keep: set[str]) -> None:
 
 
 def digests_in_use() -> set[str]:
-    """Return the digests of the installed applications' images and the running sessions' bundles."""
+    """Return the digests of the installed applications' images, the baked ones, and the running sessions' bundles."""
     digests = {
         str(entry.get("id") or entry.get("pinned") or "")
         for entry in state.image_metadata.values()
     }
+    from . import bakery
+
+    digests |= bakery.image_ids()
     for session in state.sessions.values():
         root = str(session.get("web_root") or "")
         if root.startswith(bundles_root() + os.sep):

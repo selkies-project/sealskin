@@ -34,6 +34,7 @@ PATH_SETTINGS = [
     "proot_catalogs_path",
     "proot_apps_path",
     "vpn_profiles_path",
+    "bakery_path",
     "keys_base_path",
     "groups_base_path",
     "storage_path",
@@ -68,6 +69,7 @@ def isolated_settings(tmp_path, monkeypatch):
         "proot_catalogs_path": base / "proot_catalogs.yml",
         "proot_apps_path": tmp_path / "storage" / "proot_apps",
         "vpn_profiles_path": base / "vpn_profiles.yml",
+        "bakery_path": base / "bakery",
         "keys_base_path": base / "keys",
         "groups_base_path": base / "groups",
         "storage_path": tmp_path / "storage",
@@ -109,7 +111,8 @@ def isolated_settings(tmp_path, monkeypatch):
     state.template_files.clear()
     state.sessions.clear()
     state.vpn_profiles.clear()
-    state.vpn_profiles.clear()
+    state.bake_recipes.clear()
+    state.bake_status.clear()
     state.available_gpus.clear()
     state.path_prefix_map.clear()
     yield

@@ -362,7 +362,7 @@ async def get_and_cache_image_metadata(image_name: str, force_refresh: bool = Fa
 
 
 async def pull_and_cache_image(image_name: str) -> None:
-    """Pull an image in the background and refresh its cached digest.
+    """Pull an image in the background, refresh its cached digest, and bake the recipes built on it.
 
     Args:
         image_name: Image reference to pull.
@@ -380,9 +380,10 @@ async def pull_and_cache_image(image_name: str) -> None:
         await get_and_cache_image_metadata(image_name, force_refresh=True)
         state.image_metadata.setdefault(image_name, {})["last_checked_at"] = time.time()
         logger.info("Background pull for '%s' completed successfully.", image_name)
-        from . import webclient
+        from . import bakery, webclient
 
         await webclient.export_quietly(image_name)
+        await bakery.base_pulled(image_name)
     except Exception as exc:  # noqa: BLE001
         logger.error("Background pull for image '%s' failed: %s", image_name, exc)
     finally:

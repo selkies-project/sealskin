@@ -15,6 +15,7 @@ from typing import Any
 
 from .models import (
     AppStore,
+    BakeRecipe,
     Branding,
     InstalledApp,
     InstalledAppRecord,
@@ -61,6 +62,8 @@ class RuntimeState:
         proot_catalogs: PRoot Apps catalogs keyed by id, as shared.
         proot_status: This node's sync state of each catalog keyed by id.
         vpn_profiles: VPN profiles keyed by id, as shared (`app.vpn`).
+        bake_recipes: Bakery recipes keyed by application id, as shared (`app.bakery`).
+        bake_status: This node's state of each recipe's image keyed by application id.
         system_stats_cache: Cached CPU and disk statistics.
         cpu_model: CPU model string read from `/proc/cpuinfo`.
         path_prefix_map: Container mount path to host path mapping.
@@ -96,6 +99,8 @@ class RuntimeState:
     proot_catalogs: dict[str, ProotCatalog] = field(default_factory=dict)
     proot_status: dict[str, dict[str, Any]] = field(default_factory=dict)
     vpn_profiles: dict[str, dict[str, Any]] = field(default_factory=dict)
+    bake_recipes: dict[str, BakeRecipe] = field(default_factory=dict)
+    bake_status: dict[str, dict[str, Any]] = field(default_factory=dict)
     system_stats_cache: dict[str, Any] = field(
         default_factory=lambda: {"data": None, "timestamp": 0.0}
     )

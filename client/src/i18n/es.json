@@ -90,7 +90,8 @@
       "audit": "Registro de Auditoría",
       "branding": "Marca",
       "keys": "Claves de Aplicación",
-      "vpn": "Perfiles VPN"
+      "vpn": "Perfiles VPN",
+      "bakery": "Panadería"
     },
     "dashboard": {
       "title": "Panel de Control",
@@ -324,7 +325,12 @@
       "notLocal": "Imagen no encontrada localmente",
       "isLaboratory": "Esta es una aplicación de Laboratorio, creada a partir de una imagen base con configuraciones personalizadas.",
       "confirmDelete": "¿Está seguro de que quiere eliminar la app instalada '{appName}'?",
-      "deleteTitle": "Eliminar aplicación instalada"
+      "deleteTitle": "Eliminar aplicación instalada",
+      "heldBy": "{names} se basan en ella. Elimínelas primero.",
+      "isBaked": "Horneada",
+      "builtOnCount": "{count} basadas en esta",
+      "builtOnTitle": "Mostrar las aplicaciones basadas en esta",
+      "kindLab": "Laboratorio"
     },
     "appStore": {
       "title": "Tiendas de Apps",
@@ -1195,7 +1201,7 @@
       "selectApp": "Seleccionar App",
       "createNew": "Crear Nueva App",
       "baseApp": "Aplicación Base",
-      "baseAppDescription": "La aplicación instalada en la que se basará su nueva aplicación personalizada.",
+      "baseAppDescription": "La aplicación instalada u horneada en la que se basará su nueva aplicación personalizada.",
       "selectBase": "Seleccionar una App Base",
       "appName": "Nombre de la App",
       "appIcon": "Icono de la App",
@@ -1849,6 +1855,276 @@
       "removeEndpoint": "Quitar punto de conexión",
       "endpointIncomplete": "El punto de conexión «{label}» necesita host, puerto y, para WireGuard, la clave pública del servidor.",
       "endpointsAdded": "{count, plural, one {1 punto de conexión añadido} other {{count} puntos de conexión añadidos}}."
+    },
+    "bakery": {
+      "title": "La Panadería",
+      "help": "Una receta hornea una aplicación nueva sobre una que usted instaló: paquetes, archivos, certificados, todo lo que puede hacer un Dockerfile, con nombre e icono propios. Hornee tantas como necesite a partir de la misma aplicación. Cada nodo construye sobre la imagen que ya descargó, y vuelve a construir cada vez que esa imagen se actualiza en su origen. Las sesiones usan la imagen horneada una vez construida, y conservan la última válida cuando una construcción falla.",
+      "unavailable": "Este servidor ejecuta las sesiones en Kubernetes, donde la Panadería aún no puede construir imágenes.",
+      "newRecipe": "Nueva Receta",
+      "application": "Aplicación",
+      "recipe": "Receta",
+      "none": "Aún no hay recetas. Una receta añade paquetes, archivos o cualquier otra cosa a la imagen de una aplicación.",
+      "listSteps": "{count} paso(s)",
+      "listDockerfile": "Dockerfile",
+      "statePaused": "En pausa",
+      "stateBuilding": "Horneando",
+      "stateError": "Fallida",
+      "stateErrorKept": "las sesiones usan la última imagen construida",
+      "stateReady": "Horneada",
+      "statePending": "Sin hornear en este nodo",
+      "rebuildTitle": "Hornear de nuevo desde cero, con los paquetes actuales de la distribución",
+      "deleteTitle": "Eliminar",
+      "confirmDelete": "¿Eliminar la receta de '{name}'? Sus sesiones volverán a usar la imagen propia de la aplicación.",
+      "newAppInvalid": "Elija la aplicación base y dé un nombre a la horneada.",
+      "pickBase": "-- Elija una aplicación --",
+      "family": "Distribución",
+      "familyAuto": "La que indica la imagen",
+      "builtOn": "Basada en",
+      "baseNone": "Elija una aplicación para ver su imagen.",
+      "baseReading": "Leyendo la imagen...",
+      "baseUnknown": "Distribución desconocida",
+      "modeGuided": "Guiado",
+      "modeDeveloper": "Desarrollador",
+      "tryBuild": "Construir una prueba",
+      "saveAndBake": "Guardar y hornear",
+      "steps": "Pasos",
+      "addStep": "Añadir un paso",
+      "noSteps": "Aún no hay pasos. Elija uno abajo: el Dockerfile de la derecha sigue lo que añada.",
+      "moveUp": "Subir",
+      "moveDown": "Bajar",
+      "skipStep": "Dejar este paso fuera de la construcción",
+      "useStep": "Volver a incluir este paso en la construcción",
+      "developerHelp": "El Dockerfile se construye tal como lo escriba. La imagen de la aplicación es el argumento de construcción BASE_IMAGE: declárelo con ARG antes del primer FROM, escriba otras etapas donde las necesite y termine con una etapa que empiece por FROM ${BASE_IMAGE}.",
+      "toGuidedTitle": "Volver a los pasos guiados",
+      "toGuided": "Los pasos están como los dejó, y la construcción vuelve a seguirlos. El Dockerfile que escribió se conserva con la receta, pero no se construye.",
+      "files": "Archivos",
+      "upload": "Subir",
+      "uploadFailed": "No se pudo subir {name}: {error}",
+      "noFiles": "Aún no hay archivos.",
+      "pickFile": "Añadir un archivo subido...",
+      "snippets": "Insertar un fragmento",
+      "insert": "Insertar en el cursor",
+      "snippetEmpty": "El paso aún no genera nada.",
+      "packagePlaceholder": "Busque o escriba un nombre de paquete...",
+      "indexing": "Leyendo la lista de paquetes de la imagen. La primera búsqueda en una imagen tarda un minuto.",
+      "noIndex": "No hay lista de paquetes para esta imagen; escriba los nombres.",
+      "noPackages": "Ningún paquete coincide con '{query}'. Pulse Intro para añadirlo tal como está escrito.",
+      "destHelp": "Una ruta que termina en / es una carpeta donde se colocan los archivos.",
+      "sha256Help": "Opcional. La construcción se detiene si la descarga no coincide.",
+      "scriptHelp": "Un comando por línea. Se ejecutan como root en una sola capa, y la construcción se detiene en el primero que falle.",
+      "rawHelp": "Instrucciones de Dockerfile, construidas exactamente como están escritas.",
+      "addVariable": "Añadir una variable",
+      "line": "Línea {line}:",
+      "copied": "Dockerfile copiado.",
+      "buildQueued": "Esperando a que termine otra construcción",
+      "buildRunning": "Construyendo ({seconds} s)",
+      "buildReady": "La prueba se construyó en {seconds} s. Las sesiones no cambian hasta que guarde.",
+      "buildFailed": "La construcción falló. Las sesiones conservan la última imagen construida.",
+      "openTrial": "Abrir una sesión de prueba",
+      "fields": {
+        "note": "Título en el registro de construcción",
+        "dest": "Destino en la imagen",
+        "executable": "Hacer ejecutable",
+        "extract": "Descomprimir los archivos comprimidos allí",
+        "url": "Dirección",
+        "action": "Después",
+        "sha256": "Suma de comprobación SHA-256",
+        "value": "valor",
+        "script": "Comandos",
+        "text": "Dockerfile",
+        "app": "Aplicación",
+        "menu": "Mostrarla en el menú del clic derecho",
+        "default": "Abrir los enlaces web con ella",
+        "ppas": "Archivos de paquetes",
+        "packages": "Paquetes",
+        "name": "Nombre en los menús",
+        "command": "Comando",
+        "icon": "Icono",
+        "category": "Categoría del menú",
+        "sandbox": "Aplicación Chromium o Electron: iniciarla con --no-sandbox",
+        "terminal": "Se ejecuta en un terminal",
+        "packs": "Conjuntos de fuentes",
+        "fontFiles": "Sus propios archivos de fuentes",
+        "eula": "Acepto la licencia de las fuentes básicas de Microsoft",
+        "proxy": "Dirección del proxy",
+        "no_proxy": "Sin pasar por el proxy",
+        "pip": "Índice de paquetes de Python",
+        "npm": "Registro de npm",
+        "version": "Versión",
+        "kit": "Lenguaje",
+        "placement": "Ubicación",
+        "mode": "Ejecución",
+        "scriptName": "Nombre del archivo"
+      },
+      "actions": {
+        "save": "Guardar el archivo",
+        "extract": "Descomprimir el archivo",
+        "install": "Instalarlo como paquete",
+        "appimage": "Descomprimir la AppImage"
+      },
+      "kinds": {
+        "packages": {
+          "title": "Instalar paquetes",
+          "short": "De los repositorios de la distribución",
+          "help": "Instala con el gestor de paquetes propio de la imagen y elimina las cachés después."
+        },
+        "files": {
+          "title": "Copiar archivos",
+          "short": "Subir archivos a la imagen",
+          "help": "Copia los archivos que suba a una ruta de la imagen. Una sesión monta su directorio personal sobre /config, así que coloque los archivos en cualquier otro lugar."
+        },
+        "download": {
+          "title": "Descargar",
+          "short": "Un archivo, un archivo comprimido, una AppImage o un paquete",
+          "help": "Obtiene una dirección mientras se construye la imagen: conserve el archivo, descomprima un archivo comprimido o una AppImage, o instale un .deb, .rpm o .apk."
+        },
+        "certificates": {
+          "title": "Confiar en certificados",
+          "short": "Añadir sus propias autoridades de certificación",
+          "help": "Añade los certificados que suba a las autoridades de confianza de la imagen."
+        },
+        "fonts": {
+          "title": "Añadir fuentes",
+          "short": "Conjuntos de fuentes y sus propios archivos",
+          "help": "Instala los conjuntos de fuentes que empaqueta la distribución y los archivos de fuentes que suba, para todas las aplicaciones de la imagen."
+        },
+        "env": {
+          "title": "Entorno",
+          "short": "Definir variables de entorno",
+          "help": "Define variables para todo lo que se ejecuta en la imagen."
+        },
+        "run": {
+          "title": "Ejecutar comandos",
+          "short": "Comandos de shell, como root",
+          "help": "Ejecuta comandos de shell mientras se construye la imagen."
+        },
+        "raw": {
+          "title": "Líneas de Dockerfile",
+          "short": "Cualquier instrucción, tal como está escrita",
+          "help": "Instrucciones que se ponen en el Dockerfile exactamente como las escriba."
+        },
+        "app": {
+          "title": "Añadir una aplicación",
+          "short": "Un navegador o editor, listo para iniciar",
+          "help": "Instala la aplicación desde la distribución, o desde el repositorio de su proveedor en Debian y Ubuntu, y la muestra en los menús de la sesión. Las aplicaciones basadas en Chromium se inician con --no-sandbox, que un contenedor necesita."
+        },
+        "ppa": {
+          "title": "PPA de Ubuntu",
+          "short": "Paquetes de un archivo de Launchpad",
+          "help": "Añade archivos de paquetes personales de Launchpad a la imagen e instala paquetes de ellos."
+        },
+        "devkit": {
+          "title": "Kit de desarrollo",
+          "short": "Python, Node.js, Rust, Go, Java",
+          "help": "Instala la cadena de herramientas de un lenguaje desde la distribución, y los paquetes propios del lenguaje que usted indique."
+        },
+        "docker": {
+          "title": "Instalar Docker",
+          "short": "Los últimos Docker, Compose y Buildx",
+          "help": "Coloca los binarios estáticos de Docker donde los encuentra el servicio Docker de la imagen. El servicio solo se inicia en una sesión privilegiada."
+        },
+        "desktop": {
+          "title": "Entrada de escritorio",
+          "short": "Mostrar un programa en los menús",
+          "help": "Escribe una entrada de escritorio para un programa que contiene la imagen, como uno descomprimido de una AppImage o de un archivo comprimido, para que los menús de la sesión lo muestren."
+        },
+        "launch": {
+          "title": "Comando de inicio",
+          "short": "Con qué se inicia la sesión",
+          "help": "Escribe los comandos con los que una sesión inicia su aplicación."
+        },
+        "proxy": {
+          "title": "Proxy y réplicas",
+          "short": "Para la construcción y para las sesiones",
+          "help": "Define las variables del proxy y las réplicas de pip y npm para los pasos situados debajo de este y para todas las sesiones."
+        },
+        "startup": {
+          "title": "Ejecutar al inicio",
+          "short": "Un script o servicio del contenedor",
+          "help": "Añade un script que el contenedor ejecuta al iniciarse, o un servicio que mantiene en ejecución."
+        }
+      },
+      "toGuidedConfirm": "Construir a partir de los pasos",
+      "baseApp": "Basar en",
+      "name": "Nombre",
+      "listBuiltOn": "basada en {name} · {image}",
+      "icon": "Icono",
+      "clear": "Vaciar receta",
+      "clearTitle": "Vaciar la receta",
+      "confirmClear": "¿Quitar todos los pasos, el Dockerfile y los archivos subidos de esta receta? La aplicación, su nombre y su icono quedan como están, y nada cambia para los usuarios hasta que guarde.",
+      "done": "Listo",
+      "logTitle": "Salida de la construcción",
+      "rebakeHelp": "Guardar y hornear construye esta receta ahora y la vuelve a construir, por sí sola, cada vez que la imagen de la aplicación se actualiza en su origen.",
+      "rebakeNote": "Esta receta se vuelve a construir sobre {image} cada vez que esa imagen se actualiza en su origen.",
+      "listBuilding": "Horneando {name} ({seconds} s)",
+      "listBaked": "{name} está horneada. Las sesiones nuevas usan esta imagen.",
+      "listFailed": "La construcción de {name} falló. Las sesiones conservan la última imagen construida.",
+      "confirmDeleteApp": "¿Eliminar '{name}'? La aplicación horneada se elimina junto con su receta. Los directorios personales que los usuarios crearon con ella se conservan.",
+      "latest": "última",
+      "pickApp": "-- Elija una aplicación --",
+      "pickKit": "-- Elija un lenguaje --",
+      "menuHelp": "Un directorio personal copia el menú del clic derecho en su primer inicio y conserva su copia después.",
+      "appimageHelp": "Descomprime la AppImage en el destino, donde AppRun la inicia. Añada una entrada de escritorio para que aparezca en los menús.",
+      "iconPlaceholder": "o el nombre o la ruta de un icono en la imagen",
+      "noProxyHelp": "Hosts a los que se llega sin el proxy, separados por comas. localhost siempre está entre ellos.",
+      "versionHelp": "Vacío instala la última versión en cada construcción.",
+      "devkitPlaceholder": "Escriba un nombre de paquete...",
+      "devkitHelp": "Se instalan fuera del directorio personal, para todas las sesiones.",
+      "launchHelp": "Un comando por línea, ejecutado por sh como el usuario de la sesión. Un directorio personal copia los comandos en su primer inicio y conserva su copia después.",
+      "startHelp": {
+        "once": "Se ejecuta como root cada vez que se inicia el contenedor, antes de la sesión.",
+        "service": "Se inicia como root con el contenedor y se vuelve a iniciar cada vez que termina; acabe con el programa que sigue en ejecución."
+      },
+      "groups": {
+        "software": "Software",
+        "desktop": "Escritorio",
+        "system": "Sistema"
+      },
+      "bundles": {
+        "label": "Selecciones rápidas",
+        "companions": "Complementos del escritorio",
+        "shell": "Herramientas de shell",
+        "build": "Herramientas de compilación",
+        "archives": "Herramientas de archivos comprimidos"
+      },
+      "fontPacks": {
+        "office": "Compatibles con Office (Liberation, Carlito, Caladea)",
+        "cjk": "Chino, japonés y coreano, todos los grosores",
+        "noto": "Noto para las escrituras del mundo",
+        "microsoft": "Fuentes básicas de Microsoft (Arial, Times New Roman, Verdana)"
+      },
+      "devkits": {
+        "python": "Python",
+        "node": "Node.js",
+        "rust": "Rust",
+        "go": "Go",
+        "java": "Java"
+      },
+      "devkitPackages": {
+        "python": "Paquetes de pip",
+        "node": "Paquetes de npm, instalados globalmente",
+        "rust": "Crates, compilados e instalados",
+        "go": "Módulos de Go, compilados e instalados"
+      },
+      "categories": {
+        "Utility": "Accesorios",
+        "Development": "Desarrollo",
+        "Graphics": "Gráficos",
+        "Network": "Internet",
+        "Office": "Oficina",
+        "AudioVideo": "Multimedia",
+        "Game": "Juegos",
+        "Education": "Educación",
+        "System": "Sistema"
+      },
+      "placements": {
+        "replace": "Sustituir el comando de inicio de la aplicación",
+        "before": "Ejecutar antes del comando de inicio de la aplicación"
+      },
+      "startModes": {
+        "once": "Ejecutar una vez en cada inicio",
+        "service": "Mantener en ejecución como servicio"
+      }
     }
   },
   "popup": {
@@ -2210,7 +2486,8 @@
         "waiting": "Esperando a que el escritorio responda",
         "ready": "Abriendo la sesión",
         "client": "Preparando el cliente web de la aplicación",
-        "vpn": "Iniciando la puerta de enlace VPN"
+        "vpn": "Iniciando la puerta de enlace VPN",
+        "baking": "Horneando la imagen de la aplicación"
       },
       "uploading": "Subiendo el archivo ({done} de {total})",
       "imageHint": "El primer lanzamiento de una aplicación en un nodo la descarga, lo que puede tardar minutos. Los siguientes lanzamientos son rápidos.",

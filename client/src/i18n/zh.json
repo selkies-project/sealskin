@@ -90,7 +90,8 @@
       "audit": "审计日志",
       "branding": "品牌定制",
       "keys": "应用密钥",
-      "vpn": "VPN 配置"
+      "vpn": "VPN 配置",
+      "bakery": "烘焙坊"
     },
     "dashboard": {
       "title": "仪表盘",
@@ -324,7 +325,12 @@
       "notLocal": "本地未找到镜像",
       "isLaboratory": "这是一个实验室应用，基于基础镜像并使用自定义设置构建。",
       "confirmDelete": "您确定要删除已安装的应用“{appName}”吗？",
-      "deleteTitle": "删除已安装的应用"
+      "deleteTitle": "删除已安装的应用",
+      "heldBy": "{names} 基于此应用构建。请先删除它们。",
+      "isBaked": "已烘焙",
+      "builtOnCount": "{count} 个应用基于此构建",
+      "builtOnTitle": "显示基于此应用构建的应用",
+      "kindLab": "实验室"
     },
     "appStore": {
       "title": "应用商店",
@@ -1195,7 +1201,7 @@
       "selectApp": "选择应用",
       "createNew": "创建新应用",
       "baseApp": "基础应用",
-      "baseAppDescription": "您的新自定义应用将基于此已安装的应用程序。",
+      "baseAppDescription": "您的新自定义应用所基于的已安装应用或烘焙应用。",
       "selectBase": "选择一个基础应用",
       "appName": "应用名称",
       "appIcon": "应用图标",
@@ -1849,6 +1855,276 @@
       "removeEndpoint": "删除端点",
       "endpointIncomplete": "端点“{label}”需要主机、端口，WireGuard 还需要服务器公钥。",
       "endpointsAdded": "已添加 {count, plural, other {{count} 个端点}}。"
+    },
+    "bakery": {
+      "title": "烘焙坊",
+      "help": "配方在您已安装的应用之上烘焙出一个新应用：软件包、文件、证书，Dockerfile 能做的一切，并拥有自己的名称和图标。同一个应用可以按需烘焙任意多个。每个节点都基于它已拉取的镜像构建，并在该镜像从上游更新时重新构建。烘焙镜像构建完成后，会话即运行该镜像；构建失败时保留上一个可用的镜像。",
+      "unavailable": "此服务器在 Kubernetes 上运行会话，烘焙坊暂时无法在其上构建镜像。",
+      "newRecipe": "新建配方",
+      "application": "应用",
+      "recipe": "配方",
+      "none": "尚无配方。配方可向应用的镜像添加软件包、文件或其他任何内容。",
+      "listSteps": "{count} 个步骤",
+      "listDockerfile": "Dockerfile",
+      "statePaused": "已暂停",
+      "stateBuilding": "烘焙中",
+      "stateError": "失败",
+      "stateErrorKept": "会话运行上一个构建成功的镜像",
+      "stateReady": "已烘焙",
+      "statePending": "尚未在此节点上烘焙",
+      "rebuildTitle": "从头重新烘焙，使用发行版当前的软件包",
+      "deleteTitle": "删除",
+      "confirmDelete": "要删除“{name}”的配方吗？其会话将重新运行应用自身的镜像。",
+      "newAppInvalid": "请选择要基于其构建的应用，并为烘焙应用命名。",
+      "pickBase": "-- 选择一个应用 --",
+      "family": "发行版",
+      "familyAuto": "以镜像为准",
+      "builtOn": "基于",
+      "baseNone": "选择一个应用以查看其镜像。",
+      "baseReading": "正在读取镜像...",
+      "baseUnknown": "未知发行版",
+      "modeGuided": "引导",
+      "modeDeveloper": "开发者",
+      "tryBuild": "试构建",
+      "saveAndBake": "保存并烘焙",
+      "steps": "步骤",
+      "addStep": "添加步骤",
+      "noSteps": "尚无步骤。在下方选择一个：右侧的 Dockerfile 会随您添加的内容变化。",
+      "moveUp": "上移",
+      "moveDown": "下移",
+      "skipStep": "在构建中跳过此步骤",
+      "useStep": "将此步骤放回构建",
+      "developerHelp": "Dockerfile 按您编写的内容构建。应用的镜像是构建参数 BASE_IMAGE：在第一个 FROM 之前用 ARG 声明它，在需要的位置编写其他阶段，并以一个以 FROM ${BASE_IMAGE} 开头的阶段结束。",
+      "toGuidedTitle": "返回引导步骤",
+      "toGuided": "步骤保持您离开时的状态，构建将重新按步骤进行。您编写的 Dockerfile 随配方保留，但不会被构建。",
+      "files": "文件",
+      "upload": "上传",
+      "uploadFailed": "无法上传 {name}: {error}",
+      "noFiles": "尚无文件。",
+      "pickFile": "添加已上传的文件...",
+      "snippets": "插入代码片段",
+      "insert": "在光标处插入",
+      "snippetEmpty": "此步骤尚未生成任何内容。",
+      "packagePlaceholder": "搜索或输入软件包名称...",
+      "indexing": "正在从镜像读取软件包列表。首次搜索某个镜像需要一分钟。",
+      "noIndex": "此镜像没有软件包列表；请直接输入名称。",
+      "noPackages": "没有与“{query}”匹配的软件包。按 Enter 按输入内容添加。",
+      "destHelp": "以 / 结尾的路径是存放文件的文件夹。",
+      "sha256Help": "可选。下载内容不匹配时构建将停止。",
+      "scriptHelp": "每行一条命令。它们以 root 身份在同一层中运行，构建在第一条失败的命令处停止。",
+      "rawHelp": "Dockerfile 指令，完全按所写内容构建。",
+      "addVariable": "添加变量",
+      "line": "第 {line} 行:",
+      "copied": "Dockerfile 已复制。",
+      "buildQueued": "正在等待另一个构建完成",
+      "buildRunning": "正在构建（{seconds} 秒）",
+      "buildReady": "试构建在 {seconds} 秒内完成。在您保存之前，会话保持不变。",
+      "buildFailed": "构建失败。会话保留上一个构建成功的镜像。",
+      "openTrial": "打开试用会话",
+      "fields": {
+        "note": "构建日志中的标题",
+        "dest": "镜像中的目标位置",
+        "executable": "设为可执行",
+        "extract": "在该处解压归档",
+        "url": "地址",
+        "action": "然后",
+        "sha256": "SHA-256 校验和",
+        "value": "值",
+        "script": "命令",
+        "text": "Dockerfile",
+        "app": "应用",
+        "menu": "列入右键菜单",
+        "default": "用它打开网页链接",
+        "ppas": "归档",
+        "packages": "软件包",
+        "name": "菜单中的名称",
+        "command": "命令",
+        "icon": "图标",
+        "category": "菜单类别",
+        "sandbox": "Chromium 或 Electron 应用：使用 --no-sandbox 启动",
+        "terminal": "在终端中运行",
+        "packs": "字体集",
+        "fontFiles": "您自己的字体文件",
+        "eula": "我接受 Microsoft 核心字体的许可",
+        "proxy": "代理地址",
+        "no_proxy": "不经过代理",
+        "pip": "Python 软件包索引",
+        "npm": "npm 注册表",
+        "version": "版本",
+        "kit": "语言",
+        "placement": "位置",
+        "mode": "运行方式",
+        "scriptName": "文件名"
+      },
+      "actions": {
+        "save": "保存文件",
+        "extract": "解压归档",
+        "install": "作为软件包安装",
+        "appimage": "解包 AppImage"
+      },
+      "kinds": {
+        "packages": {
+          "title": "安装软件包",
+          "short": "来自发行版的软件仓库",
+          "help": "使用镜像自带的包管理器安装，并在之后清除缓存。"
+        },
+        "files": {
+          "title": "复制文件",
+          "short": "将文件上传到镜像中",
+          "help": "将您上传的文件复制到镜像中的某个路径。会话会将其主目录挂载到 /config 上，因此请将文件放在其他位置。"
+        },
+        "download": {
+          "title": "下载",
+          "short": "文件、归档、AppImage 或软件包",
+          "help": "在镜像构建时获取某个地址：保留文件、解压归档或解包 AppImage，或安装 .deb、.rpm 或 .apk。"
+        },
+        "certificates": {
+          "title": "信任证书",
+          "short": "添加您自己的证书颁发机构",
+          "help": "将您上传的证书添加到镜像的受信任颁发机构中。"
+        },
+        "fonts": {
+          "title": "添加字体",
+          "short": "字体集和您自己的文件",
+          "help": "为镜像中的所有应用安装发行版打包的字体集和您上传的字体文件。"
+        },
+        "env": {
+          "title": "环境",
+          "short": "设置环境变量",
+          "help": "为镜像中运行的所有程序设置变量。"
+        },
+        "run": {
+          "title": "运行命令",
+          "short": "Shell 命令，以 root 身份",
+          "help": "在镜像构建时运行 Shell 命令。"
+        },
+        "raw": {
+          "title": "Dockerfile 行",
+          "short": "任意指令，按原样写入",
+          "help": "完全按您所写内容放入 Dockerfile 的指令。"
+        },
+        "app": {
+          "title": "添加应用",
+          "short": "浏览器或编辑器，随时可启动",
+          "help": "从发行版安装应用，在 Debian 和 Ubuntu 上则可从其供应商的软件仓库安装，并将其列入会话的菜单。基于 Chromium 的应用使用 --no-sandbox 启动，这是容器所必需的。"
+        },
+        "ppa": {
+          "title": "Ubuntu PPA",
+          "short": "来自 Launchpad 归档的软件包",
+          "help": "将 Launchpad 个人软件包归档添加到镜像，并从中安装软件包。"
+        },
+        "devkit": {
+          "title": "开发套件",
+          "short": "Python、Node.js、Rust、Go、Java",
+          "help": "从发行版安装某种语言的工具链，以及您列出的该语言自身的软件包。"
+        },
+        "docker": {
+          "title": "安装 Docker",
+          "short": "最新的 Docker、Compose 和 Buildx",
+          "help": "将 Docker 的静态二进制文件放到镜像的 Docker 服务能找到的位置。该服务仅在特权会话中启动。"
+        },
+        "desktop": {
+          "title": "桌面条目",
+          "short": "将程序列入菜单",
+          "help": "为镜像中已有的程序（例如从 AppImage 或归档解包出的程序）写入桌面条目，使会话的菜单列出它。"
+        },
+        "launch": {
+          "title": "启动命令",
+          "short": "会话启动时运行的内容",
+          "help": "写入会话用来启动其应用的命令。"
+        },
+        "proxy": {
+          "title": "代理和镜像源",
+          "short": "用于构建和会话",
+          "help": "为此步骤之后的步骤和每个会话设置代理变量以及 pip 和 npm 镜像源。"
+        },
+        "startup": {
+          "title": "启动时运行",
+          "short": "容器的脚本或服务",
+          "help": "添加容器启动时运行的脚本，或由容器保持运行的服务。"
+        }
+      },
+      "toGuidedConfirm": "按步骤构建",
+      "baseApp": "基于",
+      "name": "名称",
+      "listBuiltOn": "基于 {name} · {image}",
+      "icon": "图标",
+      "clear": "清空配方",
+      "clearTitle": "清空配方",
+      "confirmClear": "要移除此配方的所有步骤、Dockerfile 和已上传的文件吗？应用及其名称和图标保持不变，在您保存之前用户不受任何影响。",
+      "done": "完成",
+      "logTitle": "构建输出",
+      "rebakeHelp": "“保存并烘焙”会立即构建此配方，并在应用的镜像每次从上游更新时自动重新构建。",
+      "rebakeNote": "每当 {image} 从上游更新时，此配方都会在该镜像之上重新构建。",
+      "listBuilding": "正在烘焙 {name}（{seconds} 秒）",
+      "listBaked": "{name} 已烘焙。新会话将运行此镜像。",
+      "listFailed": "{name} 构建失败。会话保留上一个构建成功的镜像。",
+      "confirmDeleteApp": "要删除“{name}”吗？烘焙应用将连同其配方一并移除。用户用它创建的主目录会保留。",
+      "latest": "最新",
+      "pickApp": "-- 选择一个应用 --",
+      "pickKit": "-- 选择一种语言 --",
+      "menuHelp": "主目录在首次启动时复制右键菜单，此后保留自己的副本。",
+      "appimageHelp": "将 AppImage 解包到目标位置，由其中的 AppRun 启动。添加桌面条目可将其列入菜单。",
+      "iconPlaceholder": "或镜像中图标的名称或路径",
+      "noProxyHelp": "不经过代理访问的主机，以逗号分隔。localhost 始终包含在内。",
+      "versionHelp": "留空则每次构建时安装最新版本。",
+      "devkitPlaceholder": "输入软件包名称...",
+      "devkitHelp": "安装在主目录之外，供每个会话使用。",
+      "launchHelp": "每行一条命令，由 sh 以会话用户身份运行。主目录在首次启动时复制这些命令，此后保留自己的副本。",
+      "startHelp": {
+        "once": "每次容器启动时以 root 身份运行，先于会话。",
+        "service": "随容器以 root 身份启动，并在每次退出后重新启动；请以持续运行的程序结尾。"
+      },
+      "groups": {
+        "software": "软件",
+        "desktop": "桌面",
+        "system": "系统"
+      },
+      "bundles": {
+        "label": "快速选择",
+        "companions": "桌面配套工具",
+        "shell": "Shell 工具",
+        "build": "构建工具",
+        "archives": "归档工具"
+      },
+      "fontPacks": {
+        "office": "办公兼容（Liberation、Carlito、Caladea）",
+        "cjk": "中文、日文和韩文，所有字重",
+        "noto": "适用于世界各种文字的 Noto",
+        "microsoft": "Microsoft 核心字体（Arial、Times New Roman、Verdana）"
+      },
+      "devkits": {
+        "python": "Python",
+        "node": "Node.js",
+        "rust": "Rust",
+        "go": "Go",
+        "java": "Java"
+      },
+      "devkitPackages": {
+        "python": "pip 软件包",
+        "node": "npm 软件包，全局安装",
+        "rust": "Crate，构建并安装",
+        "go": "Go 模块，构建并安装"
+      },
+      "categories": {
+        "Utility": "附件",
+        "Development": "开发",
+        "Graphics": "图形",
+        "Network": "互联网",
+        "Office": "办公",
+        "AudioVideo": "多媒体",
+        "Game": "游戏",
+        "Education": "教育",
+        "System": "系统"
+      },
+      "placements": {
+        "replace": "替换应用的启动命令",
+        "before": "在应用的启动命令之前运行"
+      },
+      "startModes": {
+        "once": "每次启动时运行一次",
+        "service": "作为服务持续运行"
+      }
     }
   },
   "popup": {
@@ -2210,7 +2486,8 @@
         "waiting": "正在等待桌面响应",
         "ready": "正在打开会话",
         "client": "正在准备应用程序的 Web 客户端",
-        "vpn": "正在启动 VPN 网关"
+        "vpn": "正在启动 VPN 网关",
+        "baking": "正在烘焙应用的镜像"
       },
       "uploading": "正在上传文件（{done} / {total}）",
       "imageHint": "应用程序在某个节点上首次启动时需要下载，可能要花几分钟。之后的启动会很快。",
