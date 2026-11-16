@@ -318,6 +318,15 @@ def test_template_editors_keep_docker_settings_to_administrators(role_clients):
     same = {"TITLE": "Again", "DOCKER_DEVICES": devices}
     assert editor.call("POST", templates, {"name": "Hosted", "settings": same})[0] == 201
 
+    # Nor what the container would run as it starts, under any of its names.
+    for name in ("S6_STAGE2_HOOK", "LD_PRELOAD", "BASH_ENV", "PATH", "FILE__PASSWORD"):
+        assert editor.call("POST", templates, {"name": "Team", "settings": {name: "/tmp/x"}})[0] == 403, name
+    assert boss.call("POST", templates, {"name": "Hooked", "settings": {"S6_STAGE2_HOOK": "/x"}})[0] == 201
+    status, saved = editor.call("POST", templates, {"name": "Hooked", "settings": {"TITLE": "Kept"}})
+    assert status == 201 and saved["settings"] == {"TITLE": "Kept", "S6_STAGE2_HOOK": "/x"}
+    assert editor.call("DELETE", f"{templates}/Hooked")[0] == 403
+    assert boss.call("DELETE", f"{templates}/Hooked")[0] == 204
+
     assert editor.call("DELETE", f"{templates}/Hosted")[0] == 403
     for twin in ("hosted", "HOSTED"):
         assert editor.call("POST", templates, {"name": twin, "settings": {"TITLE": "Twin"}})[0] == 409

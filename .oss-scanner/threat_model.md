@@ -66,7 +66,9 @@
   sets no cookie on the origin it is served from, and a session whose container serves its own page on the
   web app's origin (a key-file client's, of an image with no client to export) answers no request that
   carries a web sign-in; a node that only runs sessions rewrites its own record but not its roles, pool, or
-  approval in it (`routers/peer.py`), so it never makes itself a frontend, which acts for users.
+  approval in it (`routers/peer.py`), so it never makes itself a frontend, which acts for users; a template
+  editor sets none of the variables a store may not (`S6_*`, `LD_*`, `FILE__*`, `BASH_ENV`, `ENV`, `PATH`,
+  `HOME`, `IFS`), nor deletes a template that holds one.
 
 ## Components that matter most / least
 - Most: anything that lets a lower principal reach a higher one: an anonymous client reaching the API, a session

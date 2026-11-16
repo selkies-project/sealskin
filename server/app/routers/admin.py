@@ -811,15 +811,29 @@ def _identity_settings(template_settings: dict[str, Any]) -> dict[str, str]:
     return {key: str(value) for key, value in template_settings.items() if key in RESERVED_ENV}
 
 
+def _init_settings(template_settings: dict[str, Any]) -> dict[str, str]:
+    """A template's variables that the image's init, the loader, or a shell runs or reads code from, as text.
+
+    They are the ones a store may not set either (`config_store.store_env_allowed`):
+    code as root in every session of the template.
+    """
+    return {
+        key: str(value)
+        for key, value in template_settings.items()
+        if not config_store.store_env_allowed(key) and key not in RESERVED_ENV and not key.startswith(RUN_OPTION_PREFIXES)
+    }
+
+
 def editor_settings(stored: dict[str, Any], submitted: dict[str, Any]) -> dict[str, Any]:
     """Return the settings a template editor who is not an administrator may save.
 
-    The stored template's `DOCKER_*` and `KUBERNETES_*` run options and identity
-    variables stay as they are: one left out keeps its value, and one added or
-    changed is refused.
+    The stored template's `DOCKER_*` and `KUBERNETES_*` run options, identity
+    variables, and the variables that run code as the container starts
+    (`_init_settings`) stay as they are: one left out keeps its value, and
+    one added or changed is refused.
 
     Raises:
-        HTTPException: 403 for a changed run option or identity setting.
+        HTTPException: 403 for a changed run option, identity setting, or such a variable.
     """
     kept = _run_option_settings(stored)
     if any(kept.get(key) != value for key, value in _run_option_settings(submitted).items()):
@@ -832,7 +846,14 @@ def editor_settings(stored: dict[str, Any], submitted: dict[str, Any]) -> dict[s
             status_code=403,
             detail="Only an administrator can set a session's user, password, or Selkies tokens in a template.",
         )
-    return {**submitted, **kept, **identity}
+    init = _init_settings(stored)
+    refused = sorted(key for key, value in _init_settings(submitted).items() if init.get(key) != value)
+    if refused:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Only an administrator can set {', '.join(refused)} in a template: the container runs it as it starts.",
+        )
+    return {**submitted, **kept, **identity, **init}
 
 
 @template_router.get("/apps/templates", response_model=list[AppTemplate])
@@ -883,13 +904,12 @@ async def save_app_template(
 async def delete_app_template(
     template_name: str, user: dict[str, Any] = Depends(verify_template_editor)
 ) -> Response:
-    """Delete a user template; one with `DOCKER_*` or `KUBERNETES_*` settings only as an administrator."""
+    """Delete a user template; one with settings an editor may not change only as an administrator."""
     _require_safe_name(template_name, "template")
-    if not user.get("is_admin") and _run_option_settings(
-        state.app_templates.get(template_name, {}).get("settings", {})
-    ):
+    stored = state.app_templates.get(template_name, {}).get("settings", {})
+    if not user.get("is_admin") and (_run_option_settings(stored) or _identity_settings(stored) or _init_settings(stored)):
         raise HTTPException(
-            status_code=403, detail="Only an administrator can delete a template with Docker or Kubernetes settings."
+            status_code=403, detail="Only an administrator can delete a template with settings only an administrator sets."
         )
     try:
         config_store.delete_app_template(template_name)
