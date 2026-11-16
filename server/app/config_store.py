@@ -222,6 +222,20 @@ STORE_DOCKER_KEYS = frozenset(
 STORE_SECURITY_OPTS = frozenset({"seccomp=unconfined", "apparmor=unconfined"})
 
 
+#: Environment a store never sets: who the session runs as and how it is reached (`launch.RESERVED_ENV`),
+#: and what the image's init or the loader would run as root.
+STORE_ENV_DENIED = frozenset(
+    {"SUBFOLDER", "PUID", "PGID", "CUSTOM_USER", "PASSWORD", "SELKIES_MASTER_TOKEN", "SELKIES_ALLOWED_ORIGINS"}
+    | {"DOCKER_MODS", "BASH_ENV", "ENV", "PATH", "HOME", "IFS"}
+)
+STORE_ENV_DENIED_PREFIXES = ("S6_", "LD_", "FILE__")
+
+
+def store_env_allowed(name: Any) -> bool:
+    """Whether a store's app may set the environment variable `name` (see `STORE_ENV_DENIED`)."""
+    return isinstance(name, str) and name not in STORE_ENV_DENIED and not name.startswith(STORE_ENV_DENIED_PREFIXES)
+
+
 def store_docker_overrides(overrides: Any, app_id: Any) -> dict[str, Any]:
     """The part of a store app's `docker_overrides` a store may set (`STORE_DOCKER_KEYS`)."""
     if not isinstance(overrides, dict):
@@ -230,9 +244,15 @@ def store_docker_overrides(overrides: Any, app_id: Any) -> dict[str, Any]:
     for key, value in overrides.items():
         if key == "security_opt":
             value = [o for o in value or [] if o in STORE_SECURITY_OPTS] if isinstance(value, list) else []
+        if key == "environment":
+            value = {k: v for k, v in value.items() if store_env_allowed(k)} if isinstance(value, dict) else {}
         if key in STORE_DOCKER_KEYS and value:
             kept[key] = value
     dropped = {k: v for k, v in overrides.items() if k not in kept}
+    if isinstance(overrides.get("environment"), dict):
+        denied = sorted(str(k) for k in overrides["environment"] if not store_env_allowed(k))
+        if denied:
+            dropped["environment"] = denied
     if "security_opt" in kept and kept["security_opt"] != overrides["security_opt"]:
         dropped["security_opt"] = [o for o in overrides["security_opt"] if o not in kept["security_opt"]]
     if dropped:
@@ -286,6 +306,11 @@ def process_store_content(content: str, store_name: str) -> list[dict[str, Any]]
             provider_config["docker_overrides"] = store_docker_overrides(
                 provider_config["docker_overrides"], app.get("id")
             )
+        if provider_config.get("env"):
+            listed = provider_config["env"] if isinstance(provider_config["env"], list) else []
+            provider_config["env"] = [
+                entry for entry in listed if isinstance(entry, dict) and store_env_allowed(entry.get("name"))
+            ]
         if provider_config.get("autostart") and app.get("id"):
             provider_config["custom_autostart_script_b64"] = _read_cached_script_b64(
                 store_name, app["id"]
