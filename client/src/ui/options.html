@@ -47,6 +47,10 @@
                     <i class="fas fa-flask fa-fw"></i>
                     <span data-i18n="options.sidebar.appLaboratory">App Laboratory</span>
                 </button>
+                <button class="nav-link admin-nav-link" style="display:none;" data-tabname="Bakery">
+                    <i class="fas fa-bread-slice fa-fw"></i>
+                    <span data-i18n="options.sidebar.bakery">Bakery</span>
+                </button>
                 <button class="nav-link admin-nav-link" style="display:none;" data-tabname="AppTemplates">
                     <i class="fas fa-file-code fa-fw"></i>
                     <span data-i18n="options.sidebar.appTemplates">App Templates</span>
@@ -1032,6 +1036,103 @@
                 </form>
             </div>
 
+            <div id="Bakery" class="tab-content">
+                <div class="card" id="bk-list">
+                    <div class="card-header">
+                        <h3 data-i18n="options.bakery.title">The Bakery</h3>
+                        <div class="button-group">
+                            <button id="bk-new" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.bakery.newRecipe">New Recipe</span></button>
+                        </div>
+                    </div>
+                    <p class="description" data-i18n="options.bakery.help">A recipe bakes a new application on top of one you installed: packages, files, certificates, anything a Dockerfile can do, under a name and icon of its own. Bake as many as you need from the same application. Every node builds on the image it already pulled, and builds again whenever that image is updated from upstream. Sessions run the baked image once it has built, and keep the last good one when a build fails.</p>
+                    <p id="bk-unavailable" class="description bk-note" style="display: none;" data-i18n="options.bakery.unavailable">This server runs sessions on Kubernetes, where the Bakery cannot build images yet.</p>
+                    <div class="table-container">
+                        <table id="bk-table">
+                            <thead><tr><th data-i18n="options.bakery.application">Application</th><th data-i18n="options.bakery.recipe">Recipe</th><th data-i18n="options.prootApps.onThisNode">On this node</th><th class="actions-cell" data-i18n="common.actions">Actions</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div id="bk-panel" class="bk-build bk-panel" style="display: none;">
+                        <div class="bk-build-head">
+                            <span id="bk-panel-spinner" class="spinner-small"></span>
+                            <strong id="bk-panel-state"></strong>
+                            <button type="button" id="bk-panel-done" class="primary" style="display: none;"><i class="fas fa-check"></i> <span data-i18n="options.bakery.done">Done</span></button>
+                            <button type="button" id="bk-panel-close" class="secondary" data-i18n-title="common.close" title="Close">&times;</button>
+                        </div>
+                        <p id="bk-panel-note" class="bk-sub bk-rebake"></p>
+                        <pre id="bk-panel-log" class="bk-log"></pre>
+                    </div>
+                </div>
+                <div id="bk-editor" style="display: none;">
+                    <div class="card bk-bar">
+                        <div class="bk-bar-row">
+                            <label class="bk-field"><span data-i18n="options.bakery.baseApp">Build on</span><select id="bk-base-app"></select></label>
+                            <label class="bk-field"><span><span data-i18n="options.bakery.name">Name</span> <em class="bk-required">*</em></span><input type="text" id="bk-name" maxlength="80" required></label>
+                            <div class="bk-field" id="bk-icon-field"><span data-i18n="options.bakery.icon">Icon</span>
+                                <div class="bk-icon"><img id="bk-icon-preview" src="icons/icon128.png" alt=""><label class="button secondary"><i class="fas fa-upload"></i> <span data-i18n="options.appLaboratory.uploadIcon">Upload</span><input type="file" id="bk-icon-upload" accept="image/png,image/jpeg,image/webp,image/gif,image/x-icon" hidden></label></div>
+                            </div>
+                            <label class="bk-field"><span data-i18n="options.bakery.family">Distribution</span><select id="bk-family"></select></label>
+                            <div class="bk-field bk-grow"><span data-i18n="options.bakery.builtOn">Built on</span><code id="bk-base" class="bk-base"></code></div>
+                        </div>
+                        <div class="bk-bar-row">
+                            <div id="bk-mode" class="bk-mode" role="group">
+                                <button type="button" data-mode="guided"><i class="fas fa-list-check"></i> <span data-i18n="options.bakery.modeGuided">Guided</span></button>
+                                <button type="button" data-mode="dockerfile"><i class="fas fa-code"></i> <span data-i18n="options.bakery.modeDeveloper">Developer</span></button>
+                            </div>
+                            <div class="button-group bk-actions">
+                                <button type="button" id="bk-close" class="secondary" data-i18n="common.close">Close</button>
+                                <button type="button" id="bk-clear" class="secondary"><i class="fas fa-eraser"></i> <span data-i18n="options.bakery.clear">Clear recipe</span></button>
+                                <button type="button" id="bk-try" class="secondary"><i class="fas fa-hammer"></i> <span data-i18n="options.bakery.tryBuild">Build a trial</span></button>
+                                <button type="button" id="bk-save" class="primary"><i class="fas fa-save"></i> <span data-i18n="options.bakery.saveAndBake">Save &amp; bake</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="bk-rebake bk-rebake-bar"><i class="fas fa-rotate"></i> <span data-i18n="options.bakery.rebakeHelp">Save &amp; bake builds this recipe now and builds it again, on its own, every time the application's image is updated from upstream.</span></p>
+                    <div class="bk-bench">
+                        <section class="card bk-left">
+                            <div id="bk-guided">
+                                <h4 data-i18n="options.bakery.steps">Steps</h4>
+                                <div id="bk-steps"></div>
+                                <h4 data-i18n="options.bakery.addStep">Add a step</h4>
+                                <div id="bk-add" class="bk-menu"></div>
+                            </div>
+                            <div id="bk-dev" style="display: none;">
+                                <p class="description" data-i18n="options.bakery.developerHelp">The Dockerfile is built as you write it. The application's image is the build argument BASE_IMAGE: declare it with ARG before the first FROM, write other stages wherever you need them, and end on a stage that starts FROM ${BASE_IMAGE}.</p>
+                                <div class="card-header"><h4 data-i18n="options.bakery.files">Files</h4><label class="button secondary"><i class="fas fa-upload"></i> <span data-i18n="options.bakery.upload">Upload</span><input type="file" id="bk-dev-upload" multiple hidden></label></div>
+                                <div id="bk-files"></div>
+                                <h4 data-i18n="options.bakery.snippets">Insert a snippet</h4>
+                                <div id="bk-snippets" class="bk-menu"></div>
+                                <div id="bk-snippet" class="bk-step open" style="display: none;">
+                                    <div class="bk-step-head"><div class="bk-step-title"><strong id="bk-snippet-title"></strong></div></div>
+                                    <div id="bk-snippet-form" class="bk-step-body"></div>
+                                    <div class="button-group">
+                                        <button type="button" id="bk-snippet-cancel" class="secondary" data-i18n="common.cancel">Cancel</button>
+                                        <button type="button" id="bk-snippet-insert" class="primary"><i class="fas fa-arrow-right-to-bracket"></i> <span data-i18n="options.bakery.insert">Insert at the cursor</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <section class="card bk-right">
+                            <div class="card-header"><h4>Dockerfile</h4><button type="button" id="bk-copy" class="secondary" data-i18n-title="common.copy" title="Copy"><i class="fas fa-copy"></i></button></div>
+                            <div id="bk-code" class="bk-code"></div>
+                            <div id="bk-edit" class="bk-edit" style="display: none;">
+                                <pre id="bk-gutter" class="bk-gutter" aria-hidden="true"></pre>
+                                <textarea id="bk-text" class="bk-text" spellcheck="false" autocomplete="off" autocapitalize="off" wrap="off"></textarea>
+                            </div>
+                            <ul id="bk-problems" class="bk-problems"></ul>
+                            <div id="bk-build" class="bk-build" style="display: none;">
+                                <div class="bk-build-head">
+                                    <span id="bk-build-spinner" class="spinner-small"></span>
+                                    <strong id="bk-build-state"></strong>
+                                    <button type="button" id="bk-trial" class="primary" style="display: none;"><i class="fas fa-play"></i> <span data-i18n="options.bakery.openTrial">Open a trial session</span></button>
+                                </div>
+                                <pre id="bk-log" class="bk-log"></pre>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+
             <div id="AppLaboratory" class="tab-content">
                 <div class="lab-container">
                     <aside class="lab-sidebar">
@@ -1047,7 +1148,7 @@
                             <div class="form-group">
                                 <label for="lab-base-app-select" data-i18n="options.appLaboratory.baseApp">Base Application</label>
                                 <select id="lab-base-app-select" required></select>
-                                <p class="description" data-i18n="options.appLaboratory.baseAppDescription">The new app will inherit the image and provider settings from this app.</p>
+                                <p class="description" data-i18n="options.appLaboratory.baseAppDescription">The installed or baked application that your new custom app will be based on.</p>
                             </div>
                             <div class="form-group">
                                 <label for="lab-app-name" data-i18n="options.appLaboratory.appName">App Name</label>
@@ -1140,7 +1241,7 @@
                             <div class="field-control"><select id="wlab-app-select"><option value="new" data-i18n="options.appLaboratory.createNew">-- Create New --</option></select></div>
                         </div>
                         <div class="field">
-                            <div class="field-text"><label for="wlab-base-app-select" data-i18n="options.appLaboratory.baseApp">Base Application</label><p class="description" data-i18n="options.appLaboratory.baseAppDescription">The new app will inherit the image and provider settings from this app.</p></div>
+                            <div class="field-text"><label for="wlab-base-app-select" data-i18n="options.appLaboratory.baseApp">Base Application</label><p class="description" data-i18n="options.appLaboratory.baseAppDescription">The installed or baked application that your new custom app will be based on.</p></div>
                             <div class="field-control"><select id="wlab-base-app-select" required></select></div>
                         </div>
                         <div class="field">

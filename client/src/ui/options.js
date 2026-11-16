@@ -16,6 +16,7 @@ import { reachableSessionOrigin } from '../lib/session-origin.js';
 import { confirmDialog } from '../lib/modal.js';
 import { apiError } from '../lib/api-error.js';
 import { qrSvg } from '../lib/qr.js';
+import { openBakery, editBaked } from './bakery.js';
 import {
   announce, escapeHtml, formatBytes, formatDate, timeAgo, formatLogoSrc, hydrateLogos, showToast, tOr,
   addMobileSafeArea, addMobileBackButton, downloadBlob, currentLocale, apiUrl,
@@ -853,7 +854,7 @@ function populateLabDropdowns() {
 
   const currentLabApp = labAppSelect.value;
   labAppSelect.innerHTML = `<option value="new">${t('options.appLaboratory.createNew')}</option>`;
-  adminData.installedApps.filter((app) => app.is_meta_app).forEach((app) => {
+  adminData.installedApps.filter((app) => app.is_meta_app && !app.baked).forEach((app) => {
     labAppSelect.add(new Option(app.name, app.id));
   });
   if ([...labAppSelect.options].some((o) => o.value === currentLabApp)) {
@@ -865,7 +866,7 @@ function populateLabDropdowns() {
 
   const currentBaseApp = baseAppSelect.value;
   baseAppSelect.innerHTML = `<option value="">${t('options.appLaboratory.selectBase')}</option>`;
-  adminData.installedApps.filter((app) => !app.is_meta_app).forEach((app) => {
+  adminData.installedApps.filter((app) => !app.is_meta_app || app.baked).forEach((app) => {
     baseAppSelect.add(new Option(app.name, app.id));
   });
   if ([...baseAppSelect.options].some((o) => o.value === currentBaseApp)) {
@@ -917,8 +918,10 @@ async function loadLabApp(app) {
 }
 
 function populateWebLab() {
-  const metas = adminData.installedApps.filter((app) => app.is_meta_app);
-  const bases = adminData.installedApps.filter((app) => !app.is_meta_app);
+  // A baked application is a base here, never one to customize: its image is the Bakery's.
+  const metas = adminData.installedApps.filter((app) => app.is_meta_app && !app.baked);
+  // A home template is built on an application as installed, or on one the Bakery baked.
+  const bases = adminData.installedApps.filter((app) => !app.is_meta_app || app.baked);
   const names = new Map(adminData.installedApps.map((app) => [app.id, app.name]));
   wlab('app-select').innerHTML = `<option value="new">${escapeHtml(t('options.appLaboratory.createNew'))}</option>`
     + metas.map((app) => `<option value="${escapeHtml(app.id)}">${escapeHtml(app.name)}</option>`).join('');
@@ -2545,7 +2548,7 @@ const tableRenderConfig = {
   installedApps: {
     tbody: installedAppsTbody,
     filter: (item, term) => item.name.toLowerCase().includes(term) || item.provider_config.image.toLowerCase().includes(term),
-    row: (item) => {
+    row: (item, depth = 0, kids = 0, open = false) => {
       const sha = item.image_sha ? item.image_sha.substring(0, 12) : t('common.none');
       let versionInfoHtml = '';
 
@@ -2572,23 +2575,35 @@ const tableRenderConfig = {
                 `;
       }
 
-      const labIcon = item.is_meta_app ? `<i class="fas fa-flask" style="color: var(--color-warning-text);" title="${t('options.installedApps.isLaboratory')}"></i>` : '';
+      let kindIcon = '';
+      if (item.baked) kindIcon = `<span class="pill tree-kind baked"><i class="fas fa-bread-slice"></i> ${escapeHtml(t('options.installedApps.isBaked'))}</span>`;
+      else if (item.is_meta_app) kindIcon = `<span class="pill tree-kind lab" title="${escapeHtml(t('options.installedApps.isLaboratory'))}"><i class="fas fa-flask"></i> ${escapeHtml(t('options.installedApps.kindLab'))}</span>`;
+      // An application with others built on it opens to show them under it.
+      const toggle = kids
+        ? `<button type="button" class="tree-toggle${open ? ' open' : ''}" data-tree="${escapeHtml(item.id)}" aria-expanded="${open}" title="${escapeHtml(t('options.installedApps.builtOnTitle'))}"><i class="fas fa-chevron-right"></i></button>`
+        : '<span class="tree-toggle spacer"></span>';
+      const count = kids
+        ? `<button type="button" class="tree-count" data-tree="${escapeHtml(item.id)}"><i class="fas fa-layer-group"></i> ${escapeHtml(t('options.installedApps.builtOnCount', { count: kids }))}</button>`
+        : '';
 
       return `
-            <tr>
-                <td><div style="display: flex; align-items: center; gap: 0.5rem;"><span>${escapeHtml(item.name)}</span>${labIcon}</div></td>
+            <tr class="${depth ? 'tree-child' : ''}${kids && open ? ' tree-open' : ''}">
+                <td><div class="tree-name" style="--depth: ${depth};">${depth ? '<span class="tree-branch"></span>' : ''}${toggle}<span>${escapeHtml(item.name)}</span>${kindIcon}${count}</div></td>
                 <td>${escapeHtml(item.source)}</td>
                 <td class="image-version-cell" title="${escapeHtml(item.provider_config.image)}">
                     ${versionInfoHtml}
                 </td>
                 <td class="actions-cell">
                     <button class="warning" data-appid="${item.id}">${t('common.edit')}</button>
-                    <button class="danger" data-appid="${item.id}">${t('common.delete')}</button>
+                    <button class="danger" data-appid="${item.id}" ${(item.held_by || []).length ? `disabled title="${escapeHtml(t('options.installedApps.heldBy', { names: item.held_by.join(', ') }))}"` : ''}>${(item.held_by || []).length ? '<i class="fas fa-lock"></i> ' : ''}${t('common.delete')}</button>
                 </td>
             </tr>`;
     },
   },
 };
+
+// The installed apps whose rows are open to show what is built on them.
+const expandedApps = new Set();
 
 function renderTable(dataType) {
   const state = tableStates[dataType];
@@ -2597,7 +2612,19 @@ function renderTable(dataType) {
 
   const searchTerm = state.searchTerm.toLowerCase();
   const sourceData = adminData[dataType] || [];
-  const filteredData = searchTerm ? sourceData.filter((item) => cfg.filter(item, searchTerm)) : sourceData;
+  // Installed apps are a tree: a baked or laboratory app is listed under the app it is built on, and pages count the roots.
+  const tree = dataType === 'installedApps';
+  const known = new Set(sourceData.map((item) => item.id));
+  const parentOf = (item) => (tree && item.base_app_id && known.has(item.base_app_id) ? item.base_app_id : '');
+  const kidsOf = (item) => sourceData.filter((other) => parentOf(other) === item.id);
+  const matches = (item) => cfg.filter(item, searchTerm) || kidsOf(item).some(matches);
+  const roots = tree ? sourceData.filter((item) => !parentOf(item)) : sourceData;
+  const filteredData = searchTerm ? roots.filter(tree ? matches : (item) => cfg.filter(item, searchTerm)) : roots;
+  const rows = (item, depth) => {
+    const kids = searchTerm ? kidsOf(item).filter(matches) : kidsOf(item);
+    const open = kids.length > 0 && (Boolean(searchTerm) || expandedApps.has(item.id));
+    return cfg.row(item, depth, kids.length, open) + (open ? kids.map((kid) => rows(kid, depth + 1)).join('') : '');
+  };
 
   const itemsPerPage = dataType === 'installedApps' ? 10 : 5;
   const totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
@@ -2607,7 +2634,7 @@ function renderTable(dataType) {
   const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
   if (paginatedData.length > 0) {
-    cfg.tbody.innerHTML = paginatedData.map(cfg.row).join('');
+    cfg.tbody.innerHTML = paginatedData.map((item) => (tree ? rows(item, 0) : cfg.row(item))).join('');
   } else {
     const colspan = cfg.tbody.closest('table').querySelectorAll('thead th').length;
     const placeholderKey = `options.placeholders.no${dataType.charAt(0).toUpperCase() + dataType.slice(1)}`;
@@ -4196,6 +4223,8 @@ async function openTab(tabName) {
     initializeAppLaboratoryTab();
   } else if (tabName === 'WebLaboratory') {
     await openWebLab();
+  } else if (tabName === 'Bakery') {
+    await openBakery({ t, apps: () => adminData.installedApps, refreshApps: refreshAppData });
   } else if (tabName === 'Cluster' || tabName === 'SignIn') {
     await refreshCluster();
   } else if (tabName === 'Branding') {
@@ -4965,6 +4994,12 @@ function bindEvents() {
   });
 
   installedAppsTbody.addEventListener('click', async (e) => {
+    const branch = e.target.closest('button[data-tree]');
+    if (branch) {
+      if (!expandedApps.delete(branch.dataset.tree)) expandedApps.add(branch.dataset.tree);
+      renderTable('installedApps');
+      return;
+    }
     const button = e.target.closest('button[data-appid]');
     if (!button) return;
     const appId = button.dataset.appid;
@@ -4988,7 +5023,10 @@ function bindEvents() {
         }
       }
     } else if (button.classList.contains('warning')) {
-      if (app.is_meta_app) {
+      if (app.baked) {
+        await openTab('Bakery');
+        await editBaked(app.id);
+      } else if (app.is_meta_app) {
         if (info.shell === 'web') {
           await openTab('WebLaboratory');
           if (!labSession) await loadLabApp(app);
