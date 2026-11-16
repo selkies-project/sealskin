@@ -90,7 +90,8 @@
       "audit": "Journal d'Audit",
       "branding": "Image de marque",
       "keys": "Clés d'application",
-      "vpn": "Profils VPN"
+      "vpn": "Profils VPN",
+      "bakery": "Boulangerie"
     },
     "dashboard": {
       "title": "Tableau de Bord",
@@ -324,7 +325,12 @@
       "notLocal": "Image non trouvée localement",
       "isLaboratory": "Ceci est une application de Laboratoire, construite à partir d'une image de base avec des paramètres personnalisés.",
       "confirmDelete": "Êtes-vous sûr de vouloir supprimer l'application installée '{appName}' ?",
-      "deleteTitle": "Supprimer l'application installée"
+      "deleteTitle": "Supprimer l'application installée",
+      "heldBy": "Sert de base à {names}. Supprimez-les d'abord.",
+      "isBaked": "Cuite",
+      "builtOnCount": "{count} basées sur celle-ci",
+      "builtOnTitle": "Afficher les applications basées sur celle-ci",
+      "kindLab": "Laboratoire"
     },
     "appStore": {
       "title": "Magasins d'Applications",
@@ -1195,7 +1201,7 @@
       "selectApp": "Sélectionner une application",
       "createNew": "Créer une nouvelle application",
       "baseApp": "Application de base",
-      "baseAppDescription": "L'application installée sur laquelle votre nouvelle application personnalisée sera basée.",
+      "baseAppDescription": "L'application installée ou cuite sur laquelle votre nouvelle application personnalisée sera basée.",
       "selectBase": "Sélectionner une application de base",
       "appName": "Nom de l'application",
       "appIcon": "Icône de l'application",
@@ -1849,6 +1855,147 @@
       "removeEndpoint": "Retirer le point de terminaison",
       "endpointIncomplete": "Le point de terminaison « {label} » a besoin d'un hôte, d'un port et, pour WireGuard, de la clé publique du serveur.",
       "endpointsAdded": "{count, plural, one {1 point de terminaison ajouté} other {{count} points de terminaison ajoutés}}."
+    },
+    "bakery": {
+      "title": "La Boulangerie",
+      "help": "Une recette cuit une nouvelle application par-dessus une application que vous avez installée : paquets, fichiers, certificats, tout ce qu'un Dockerfile peut faire, sous un nom et une icône qui lui sont propres. Cuisez-en autant que nécessaire à partir de la même application. Chaque nœud construit sur l'image qu'il a déjà téléchargée, et reconstruit chaque fois que cette image est mise à jour en amont. Les sessions utilisent l'image cuite une fois construite, et conservent la dernière valide lorsqu'une construction échoue.",
+      "unavailable": "Ce serveur exécute les sessions sur Kubernetes, où la Boulangerie ne peut pas encore construire d'images.",
+      "newRecipe": "Nouvelle Recette",
+      "application": "Application",
+      "recipe": "Recette",
+      "none": "Aucune recette pour l'instant. Une recette ajoute des paquets, des fichiers ou tout autre élément à l'image d'une application.",
+      "listSteps": "{count} étape(s)",
+      "listDockerfile": "Dockerfile",
+      "statePaused": "En pause",
+      "stateBuilding": "Cuisson",
+      "stateError": "Échec",
+      "stateErrorKept": "les sessions utilisent la dernière image construite",
+      "stateReady": "Cuite",
+      "statePending": "Non cuite sur ce nœud",
+      "rebuildTitle": "Cuire à nouveau depuis zéro, avec les paquets actuels de la distribution",
+      "deleteTitle": "Supprimer",
+      "confirmDelete": "Supprimer la recette de '{name}' ? Ses sessions utiliseront à nouveau l'image propre à l'application.",
+      "newAppInvalid": "Choisissez l'application de base et donnez un nom à l'application cuite.",
+      "pickBase": "-- Choisir une application --",
+      "family": "Distribution",
+      "familyAuto": "Celle indiquée par l'image",
+      "builtOn": "Basée sur",
+      "baseNone": "Choisissez une application pour voir son image.",
+      "baseReading": "Lecture de l'image...",
+      "baseUnknown": "Distribution inconnue",
+      "modeGuided": "Guidé",
+      "modeDeveloper": "Développeur",
+      "tryBuild": "Construire un essai",
+      "saveAndBake": "Enregistrer et cuire",
+      "steps": "Étapes",
+      "addStep": "Ajouter une étape",
+      "noSteps": "Aucune étape pour l'instant. Choisissez-en une ci-dessous : le Dockerfile à droite suit ce que vous ajoutez.",
+      "moveUp": "Monter",
+      "moveDown": "Descendre",
+      "skipStep": "Exclure cette étape de la construction",
+      "useStep": "Remettre cette étape dans la construction",
+      "developerHelp": "Le Dockerfile est construit tel que vous l'écrivez. L'image de l'application est l'argument de construction BASE_IMAGE : déclarez-le avec ARG avant le premier FROM, écrivez d'autres étapes de construction là où vous en avez besoin, et terminez par une étape de construction qui commence par FROM ${BASE_IMAGE}.",
+      "toGuidedTitle": "Revenir aux étapes guidées",
+      "toGuided": "Les étapes sont telles que vous les avez laissées, et la construction les suit à nouveau. Le Dockerfile que vous avez écrit est conservé avec la recette, mais n'est pas construit.",
+      "files": "Fichiers",
+      "upload": "Téléverser",
+      "uploadFailed": "Impossible de téléverser {name} : {error}",
+      "noFiles": "Aucun fichier pour l'instant.",
+      "pickFile": "Ajouter un fichier téléversé...",
+      "snippets": "Insérer un extrait",
+      "insert": "Insérer au curseur",
+      "snippetEmpty": "L'étape ne produit encore rien.",
+      "packagePlaceholder": "Recherchez ou saisissez un nom de paquet...",
+      "indexing": "Lecture de la liste des paquets de l'image. La première recherche dans une image prend une minute.",
+      "noIndex": "Pas de liste de paquets pour cette image ; saisissez les noms.",
+      "noPackages": "Aucun paquet ne correspond à '{query}'. Appuyez sur Entrée pour l'ajouter tel que saisi.",
+      "destHelp": "Un chemin se terminant par / est un dossier où les fichiers sont placés.",
+      "sha256Help": "Optionnel. La construction s'arrête si le téléchargement ne correspond pas.",
+      "scriptHelp": "Une commande par ligne. Elles s'exécutent en tant que root dans une seule couche, et la construction s'arrête à la première qui échoue.",
+      "rawHelp": "Instructions Dockerfile, construites exactement telles qu'elles sont écrites.",
+      "addVariable": "Ajouter une variable",
+      "line": "Ligne {line} :",
+      "copied": "Dockerfile copié.",
+      "buildQueued": "En attente de la fin d'une autre construction",
+      "buildRunning": "Construction ({seconds} s)",
+      "buildReady": "L'essai a été construit en {seconds} s. Les sessions restent inchangées jusqu'à l'enregistrement.",
+      "buildFailed": "La construction a échoué. Les sessions conservent la dernière image construite.",
+      "openTrial": "Ouvrir une session d'essai",
+      "fields": {
+        "note": "Titre dans le journal de construction",
+        "dest": "Destination dans l'image",
+        "executable": "Rendre exécutable",
+        "extract": "Y décompresser les archives",
+        "url": "Adresse",
+        "action": "Ensuite",
+        "sha256": "Somme de contrôle SHA-256",
+        "value": "valeur",
+        "script": "Commandes",
+        "text": "Dockerfile"
+      },
+      "actions": {
+        "save": "Enregistrer le fichier",
+        "extract": "Décompresser l'archive",
+        "install": "L'installer comme paquet"
+      },
+      "kinds": {
+        "packages": {
+          "title": "Installer des paquets",
+          "short": "Depuis les dépôts de la distribution",
+          "help": "Installe avec le gestionnaire de paquets propre à l'image et supprime ensuite les caches."
+        },
+        "files": {
+          "title": "Copier des fichiers",
+          "short": "Téléverser des fichiers dans l'image",
+          "help": "Copie les fichiers que vous téléversez vers un chemin de l'image. Une session monte son dossier personnel sur /config, placez donc les fichiers ailleurs."
+        },
+        "download": {
+          "title": "Télécharger",
+          "short": "Récupérer un fichier, une archive ou un paquet",
+          "help": "Récupère une adresse pendant la construction de l'image : conservez le fichier, décompressez une archive ou installez un .deb, .rpm ou .apk."
+        },
+        "certificates": {
+          "title": "Approuver des certificats",
+          "short": "Ajouter vos propres autorités de certification",
+          "help": "Ajoute les certificats que vous téléversez aux autorités de confiance de l'image."
+        },
+        "fonts": {
+          "title": "Ajouter des polices",
+          "short": "Installer des fichiers de police",
+          "help": "Installe les fichiers de police que vous téléversez pour toutes les applications de l'image."
+        },
+        "env": {
+          "title": "Environnement",
+          "short": "Définir des variables d'environnement",
+          "help": "Définit des variables pour tout ce qui s'exécute dans l'image."
+        },
+        "run": {
+          "title": "Exécuter des commandes",
+          "short": "Commandes shell, en tant que root",
+          "help": "Exécute des commandes shell pendant la construction de l'image."
+        },
+        "raw": {
+          "title": "Lignes de Dockerfile",
+          "short": "Toute instruction, telle qu'écrite",
+          "help": "Instructions placées dans le Dockerfile exactement telles que vous les écrivez."
+        }
+      },
+      "toGuidedConfirm": "Construire à partir des étapes",
+      "baseApp": "Baser sur",
+      "name": "Nom",
+      "listBuiltOn": "basée sur {name} · {image}",
+      "icon": "Icône",
+      "clear": "Vider la recette",
+      "clearTitle": "Vider la recette",
+      "confirmClear": "Retirer toutes les étapes, le Dockerfile et les fichiers téléversés de cette recette ? L'application, son nom et son icône restent tels quels, et rien ne change pour les utilisateurs jusqu'à l'enregistrement.",
+      "done": "Terminé",
+      "logTitle": "Sortie de la construction",
+      "rebakeHelp": "Enregistrer et cuire construit cette recette maintenant et la reconstruit, automatiquement, chaque fois que l'image de l'application est mise à jour en amont.",
+      "rebakeNote": "Cette recette est reconstruite sur {image} chaque fois que cette image est mise à jour en amont.",
+      "listBuilding": "Cuisson de {name} ({seconds} s)",
+      "listBaked": "{name} est cuite. Les nouvelles sessions utilisent cette image.",
+      "listFailed": "La construction de {name} a échoué. Les sessions conservent la dernière image construite.",
+      "confirmDeleteApp": "Supprimer '{name}' ? L'application cuite est supprimée avec sa recette. Les dossiers personnels que les utilisateurs ont créés avec elle sont conservés."
     }
   },
   "popup": {
@@ -2210,7 +2357,8 @@
         "waiting": "En attente de la réponse du bureau",
         "ready": "Ouverture de la session",
         "client": "Préparation du client web de l'application",
-        "vpn": "Démarrage de la passerelle VPN"
+        "vpn": "Démarrage de la passerelle VPN",
+        "baking": "Cuisson de l'image de l'application"
       },
       "uploading": "Téléversement du fichier ({done} sur {total})",
       "imageHint": "Le premier lancement d'une application sur un nœud la télécharge, ce qui peut prendre plusieurs minutes. Les lancements suivants sont rapides.",

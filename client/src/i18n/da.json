@@ -90,7 +90,8 @@
       "audit": "Revisionslog",
       "branding": "Branding",
       "keys": "Applikationsnøgler",
-      "vpn": "VPN-profiler"
+      "vpn": "VPN-profiler",
+      "bakery": "Bageri"
     },
     "dashboard": {
       "title": "Kontrolpanel",
@@ -324,7 +325,12 @@
       "notLocal": "Image ikke fundet lokalt",
       "isLaboratory": "Dette er en laboratorie-app, bygget fra et basis-image med tilpassede indstillinger.",
       "confirmDelete": "Er du sikker på, at du vil slette den installerede app '{appName}'?",
-      "deleteTitle": "Slet installeret app"
+      "deleteTitle": "Slet installeret app",
+      "heldBy": "Bygget på af {names}. Slet dem først.",
+      "isBaked": "Bagt",
+      "builtOnCount": "{count} bygget på denne",
+      "builtOnTitle": "Vis de applikationer, der er bygget på denne",
+      "kindLab": "Laboratorium"
     },
     "appStore": {
       "title": "App Stores",
@@ -1195,7 +1201,7 @@
       "selectApp": "Vælg App",
       "createNew": "Opret Ny App",
       "baseApp": "Basisapplikation",
-      "baseAppDescription": "Den installerede applikation, som din nye brugerdefinerede app vil være baseret på.",
+      "baseAppDescription": "Den installerede eller bagte applikation, som din nye brugerdefinerede app baseres på.",
       "selectBase": "Vælg en Basis-app",
       "appName": "App-navn",
       "appIcon": "App-ikon",
@@ -1849,6 +1855,147 @@
       "removeEndpoint": "Fjern endepunkt",
       "endpointIncomplete": "Endepunktet '{label}' kræver vært, port og for WireGuard serverens offentlige nøgle.",
       "endpointsAdded": "{count, plural, one {1 endepunkt} other {{count} endepunkter}} tilføjet."
+    },
+    "bakery": {
+      "title": "Bageriet",
+      "help": "En opskrift bager en ny applikation oven på en, du har installeret: pakker, filer, certifikater, alt hvad en Dockerfile kan, under eget navn og ikon. Bag så mange, du har brug for, fra den samme applikation. Hver knude bygger på det image, den allerede har hentet, og bygger igen, hver gang det image opdateres fra upstream. Sessioner kører det bagte image, når det er bygget, og beholder det sidste gode, når et build mislykkes.",
+      "unavailable": "Denne server kører sessioner på Kubernetes, hvor Bageriet endnu ikke kan bygge images.",
+      "newRecipe": "Ny opskrift",
+      "application": "Applikation",
+      "recipe": "Opskrift",
+      "none": "Ingen opskrifter endnu. En opskrift føjer pakker, filer eller andet til en applikations image.",
+      "listSteps": "{count} trin",
+      "listDockerfile": "Dockerfile",
+      "statePaused": "Sat på pause",
+      "stateBuilding": "Bager",
+      "stateError": "Mislykkedes",
+      "stateErrorKept": "sessioner kører det sidste image, der blev bygget",
+      "stateReady": "Bagt",
+      "statePending": "Ikke bagt på denne knude",
+      "rebuildTitle": "Bag forfra med distributionens aktuelle pakker",
+      "deleteTitle": "Slet",
+      "confirmDelete": "Slet opskriften for '{name}'? Dens sessioner kører applikationens eget image igen.",
+      "newAppInvalid": "Vælg den applikation, der skal bygges på, og giv den bagte et navn.",
+      "pickBase": "-- Vælg en applikation --",
+      "family": "Distribution",
+      "familyAuto": "Som imaget angiver",
+      "builtOn": "Bygget på",
+      "baseNone": "Vælg en applikation for at se dens image.",
+      "baseReading": "Læser imaget...",
+      "baseUnknown": "Ukendt distribution",
+      "modeGuided": "Guidet",
+      "modeDeveloper": "Udvikler",
+      "tryBuild": "Byg en prøve",
+      "saveAndBake": "Gem & bag",
+      "steps": "Trin",
+      "addStep": "Tilføj et trin",
+      "noSteps": "Ingen trin endnu. Vælg et nedenfor: Dockerfilen til højre følger det, du tilføjer.",
+      "moveUp": "Flyt op",
+      "moveDown": "Flyt ned",
+      "skipStep": "Udelad dette trin fra buildet",
+      "useStep": "Tag dette trin med i buildet igen",
+      "developerHelp": "Dockerfilen bygges, som du skriver den. Applikationens image er build-argumentet BASE_IMAGE: erklær det med ARG før den første FROM, skriv andre stages, hvor du har brug for dem, og slut med en stage, der starter FROM ${BASE_IMAGE}.",
+      "toGuidedTitle": "Tilbage til guidede trin",
+      "toGuided": "Trinnene er, som du forlod dem, og buildet følger dem igen. Den Dockerfile, du skrev, gemmes med opskriften, men bygges ikke.",
+      "files": "Filer",
+      "upload": "Upload",
+      "uploadFailed": "Kunne ikke uploade {name}: {error}",
+      "noFiles": "Ingen filer endnu.",
+      "pickFile": "Tilføj en uploadet fil...",
+      "snippets": "Indsæt et kodestykke",
+      "insert": "Indsæt ved markøren",
+      "snippetEmpty": "Trinnet giver intet endnu.",
+      "packagePlaceholder": "Søg eller skriv et pakkenavn...",
+      "indexing": "Læser pakkelisten fra imaget. Den første søgning i et image tager et minut.",
+      "noIndex": "Ingen pakkeliste for dette image; skriv navnene.",
+      "noPackages": "Ingen pakke matcher '{query}'. Tryk på Enter for at tilføje den som skrevet.",
+      "destHelp": "En sti, der slutter på /, er en mappe, som filerne lægges i.",
+      "sha256Help": "Valgfri. Buildet stopper, når downloadet ikke stemmer.",
+      "scriptHelp": "En kommando pr. linje. De kører som root i ét lag, og buildet stopper ved den første, der fejler.",
+      "rawHelp": "Dockerfile-instruktioner, bygget præcis som skrevet.",
+      "addVariable": "Tilføj en variabel",
+      "line": "Linje {line}:",
+      "copied": "Dockerfile kopieret.",
+      "buildQueued": "Venter på, at et andet build bliver færdigt",
+      "buildRunning": "Bygger ({seconds} s)",
+      "buildReady": "Prøven blev bygget på {seconds} s. Sessioner er uændrede, indtil du gemmer.",
+      "buildFailed": "Buildet mislykkedes. Sessioner beholder det sidste image, der blev bygget.",
+      "openTrial": "Åbn en prøvesession",
+      "fields": {
+        "note": "Titel i build-loggen",
+        "dest": "Destination i imaget",
+        "executable": "Gør eksekverbar",
+        "extract": "Udpak arkiver der",
+        "url": "Adresse",
+        "action": "Derefter",
+        "sha256": "SHA-256-kontrolsum",
+        "value": "værdi",
+        "script": "Kommandoer",
+        "text": "Dockerfile"
+      },
+      "actions": {
+        "save": "Gem filen",
+        "extract": "Udpak arkivet",
+        "install": "Installer den som en pakke"
+      },
+      "kinds": {
+        "packages": {
+          "title": "Installer pakker",
+          "short": "Fra distributionens pakkearkiver",
+          "help": "Installerer med imagets egen pakkehåndtering og fjerner cachen bagefter."
+        },
+        "files": {
+          "title": "Kopier filer",
+          "short": "Upload filer til imaget",
+          "help": "Kopierer filer, du uploader, til en sti i imaget. En session monterer sin hjemmemappe over /config, så læg filerne et andet sted."
+        },
+        "download": {
+          "title": "Download",
+          "short": "Hent en fil, et arkiv eller en pakke",
+          "help": "Henter en adresse, mens imaget bygges: behold filen, udpak et arkiv, eller installer en .deb, .rpm eller .apk."
+        },
+        "certificates": {
+          "title": "Hav tillid til certifikater",
+          "short": "Tilføj dine egne certifikatmyndigheder",
+          "help": "Føjer de certifikater, du uploader, til imagets betroede myndigheder."
+        },
+        "fonts": {
+          "title": "Tilføj skrifttyper",
+          "short": "Installer skrifttypefiler",
+          "help": "Installerer de skrifttypefiler, du uploader, for alle applikationer i imaget."
+        },
+        "env": {
+          "title": "Miljø",
+          "short": "Angiv miljøvariabler",
+          "help": "Angiver variabler for alt, der kører i imaget."
+        },
+        "run": {
+          "title": "Kør kommandoer",
+          "short": "Shell-kommandoer, som root",
+          "help": "Kører shell-kommandoer, mens imaget bygges."
+        },
+        "raw": {
+          "title": "Dockerfile-linjer",
+          "short": "Enhver instruktion, som skrevet",
+          "help": "Instruktioner, der sættes ind i Dockerfilen, præcis som du skriver dem."
+        }
+      },
+      "toGuidedConfirm": "Byg fra trinnene",
+      "baseApp": "Byg på",
+      "name": "Navn",
+      "listBuiltOn": "bygget på {name} · {image}",
+      "icon": "Ikon",
+      "clear": "Ryd opskrift",
+      "clearTitle": "Ryd opskriften",
+      "confirmClear": "Fjern alle trin, Dockerfilen og de uploadede filer i denne opskrift? Applikationen, dens navn og dens ikon forbliver, som de er, og intet ændres for brugerne, før du gemmer.",
+      "done": "Færdig",
+      "logTitle": "Build-output",
+      "rebakeHelp": "Gem & bag bygger denne opskrift nu og bygger den igen, af sig selv, hver gang applikationens image opdateres fra upstream.",
+      "rebakeNote": "Denne opskrift bygges igen oven på {image}, hver gang det image opdateres fra upstream.",
+      "listBuilding": "Bager {name} ({seconds} s)",
+      "listBaked": "{name} er bagt. Nye sessioner kører dette image.",
+      "listFailed": "Buildet af {name} mislykkedes. Sessioner beholder det sidste image, der blev bygget.",
+      "confirmDeleteApp": "Slet '{name}'? Den bagte applikation fjernes sammen med sin opskrift. Hjemmemapper, som brugere har oprettet med den, bliver."
     }
   },
   "popup": {
@@ -2210,7 +2357,8 @@
         "waiting": "Venter på, at skrivebordet svarer",
         "ready": "Åbner sessionen",
         "client": "Forbereder applikationens webklient",
-        "vpn": "VPN-gatewayen startes"
+        "vpn": "VPN-gatewayen startes",
+        "baking": "Bager applikationens image"
       },
       "uploading": "Uploader filen ({done} af {total})",
       "imageHint": "Første start af en applikation på en knude downloader den, hvilket kan tage minutter. Senere starter er hurtige.",

@@ -90,7 +90,8 @@
       "audit": "Audit-Protokoll",
       "branding": "Branding",
       "keys": "Anwendungsschlüssel",
-      "vpn": "VPN-Profile"
+      "vpn": "VPN-Profile",
+      "bakery": "Bäckerei"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -324,7 +325,12 @@
       "notLocal": "Image lokal nicht gefunden",
       "isLaboratory": "Dies ist eine Labor-App, erstellt aus einem Basis-Image mit eigenen Einstellungen.",
       "confirmDelete": "Sind Sie sicher, dass Sie die installierte App '{appName}' löschen möchten?",
-      "deleteTitle": "Installierte App löschen"
+      "deleteTitle": "Installierte App löschen",
+      "heldBy": "Grundlage von {names}. Löschen Sie diese zuerst.",
+      "isBaked": "Gebacken",
+      "builtOnCount": "{count} bauen hierauf auf",
+      "builtOnTitle": "Die Anwendungen anzeigen, die auf dieser aufbauen",
+      "kindLab": "Labor"
     },
     "appStore": {
       "title": "App Stores",
@@ -1195,7 +1201,7 @@
       "selectApp": "App auswählen",
       "createNew": "Neue App erstellen",
       "baseApp": "Basisanwendung",
-      "baseAppDescription": "Die installierte Anwendung, auf der Ihre neue benutzerdefinierte App basieren wird.",
+      "baseAppDescription": "Die installierte oder gebackene Anwendung, auf der Ihre neue benutzerdefinierte App basiert.",
       "selectBase": "Basis-App auswählen",
       "appName": "App-Name",
       "appIcon": "App-Symbol",
@@ -1849,6 +1855,147 @@
       "removeEndpoint": "Endpunkt entfernen",
       "endpointIncomplete": "Der Endpunkt „{label}“ braucht Host, Port und bei WireGuard den öffentlichen Schlüssel des Servers.",
       "endpointsAdded": "{count, plural, one {1 Endpunkt} other {{count} Endpunkte}} hinzugefügt."
+    },
+    "bakery": {
+      "title": "Die Bäckerei",
+      "help": "Ein Rezept backt eine neue Anwendung auf einer, die Sie installiert haben: Pakete, Dateien, Zertifikate, alles, was ein Dockerfile kann, unter eigenem Namen und Symbol. Backen Sie aus derselben Anwendung so viele, wie Sie brauchen. Jeder Knoten baut auf dem Image auf, das er bereits heruntergeladen hat, und baut erneut, sobald dieses Image vom Upstream aktualisiert wird. Sitzungen nutzen das gebackene Image, sobald es gebaut ist, und behalten das letzte funktionierende, wenn ein Build fehlschlägt.",
+      "unavailable": "Dieser Server führt Sitzungen auf Kubernetes aus, wo die Bäckerei noch keine Images bauen kann.",
+      "newRecipe": "Neues Rezept",
+      "application": "Anwendung",
+      "recipe": "Rezept",
+      "none": "Noch keine Rezepte. Ein Rezept fügt dem Image einer Anwendung Pakete, Dateien oder anderes hinzu.",
+      "listSteps": "{count} Schritt(e)",
+      "listDockerfile": "Dockerfile",
+      "statePaused": "Pausiert",
+      "stateBuilding": "Wird gebacken",
+      "stateError": "Fehlgeschlagen",
+      "stateErrorKept": "Sitzungen nutzen das letzte gebaute Image",
+      "stateReady": "Gebacken",
+      "statePending": "Auf diesem Knoten nicht gebacken",
+      "rebuildTitle": "Von Grund auf neu backen, mit den aktuellen Paketen der Distribution",
+      "deleteTitle": "Löschen",
+      "confirmDelete": "Das Rezept von '{name}' löschen? Seine Sitzungen nutzen wieder das eigene Image der Anwendung.",
+      "newAppInvalid": "Wählen Sie die Anwendung, auf der aufgebaut wird, und geben Sie der gebackenen einen Namen.",
+      "pickBase": "-- Anwendung auswählen --",
+      "family": "Distribution",
+      "familyAuto": "Wie im Image angegeben",
+      "builtOn": "Baut auf",
+      "baseNone": "Wählen Sie eine Anwendung, um ihr Image zu sehen.",
+      "baseReading": "Image wird gelesen...",
+      "baseUnknown": "Unbekannte Distribution",
+      "modeGuided": "Geführt",
+      "modeDeveloper": "Entwickler",
+      "tryBuild": "Probe-Build",
+      "saveAndBake": "Speichern & backen",
+      "steps": "Schritte",
+      "addStep": "Schritt hinzufügen",
+      "noSteps": "Noch keine Schritte. Wählen Sie unten einen aus: Das Dockerfile rechts folgt dem, was Sie hinzufügen.",
+      "moveUp": "Nach oben",
+      "moveDown": "Nach unten",
+      "skipStep": "Diesen Schritt aus dem Build auslassen",
+      "useStep": "Diesen Schritt wieder in den Build aufnehmen",
+      "developerHelp": "Das Dockerfile wird so gebaut, wie Sie es schreiben. Das Image der Anwendung ist das Build-Argument BASE_IMAGE: Deklarieren Sie es mit ARG vor dem ersten FROM, schreiben Sie weitere Stages, wo Sie sie brauchen, und enden Sie mit einer Stage, die mit FROM ${BASE_IMAGE} beginnt.",
+      "toGuidedTitle": "Zurück zu den geführten Schritten",
+      "toGuided": "Die Schritte sind so, wie Sie sie verlassen haben, und der Build folgt ihnen wieder. Das von Ihnen geschriebene Dockerfile bleibt beim Rezept, wird aber nicht gebaut.",
+      "files": "Dateien",
+      "upload": "Hochladen",
+      "uploadFailed": "{name} konnte nicht hochgeladen werden: {error}",
+      "noFiles": "Noch keine Dateien.",
+      "pickFile": "Hochgeladene Datei hinzufügen...",
+      "snippets": "Baustein einfügen",
+      "insert": "An der Cursorposition einfügen",
+      "snippetEmpty": "Der Schritt erzeugt noch nichts.",
+      "packagePlaceholder": "Paketnamen suchen oder eingeben...",
+      "indexing": "Paketliste wird aus dem Image gelesen. Die erste Suche in einem Image dauert eine Minute.",
+      "noIndex": "Keine Paketliste für dieses Image; geben Sie die Namen ein.",
+      "noPackages": "Kein Paket passt zu '{query}'. Drücken Sie die Eingabetaste, um es wie eingegeben hinzuzufügen.",
+      "destHelp": "Ein Pfad, der auf / endet, ist ein Ordner, in den die Dateien gelegt werden.",
+      "sha256Help": "Optional. Der Build stoppt, wenn der Download nicht übereinstimmt.",
+      "scriptHelp": "Ein Befehl pro Zeile. Sie laufen als root in einem Layer, und der Build stoppt beim ersten, der fehlschlägt.",
+      "rawHelp": "Dockerfile-Anweisungen, genau wie geschrieben gebaut.",
+      "addVariable": "Variable hinzufügen",
+      "line": "Zeile {line}:",
+      "copied": "Dockerfile kopiert.",
+      "buildQueued": "Warten auf das Ende eines anderen Builds",
+      "buildRunning": "Build läuft ({seconds} s)",
+      "buildReady": "Der Probe-Build war in {seconds} s fertig. Sitzungen bleiben unverändert, bis Sie speichern.",
+      "buildFailed": "Der Build ist fehlgeschlagen. Sitzungen behalten das letzte gebaute Image.",
+      "openTrial": "Probesitzung öffnen",
+      "fields": {
+        "note": "Titel im Build-Protokoll",
+        "dest": "Ziel im Image",
+        "executable": "Ausführbar machen",
+        "extract": "Archive dort entpacken",
+        "url": "Adresse",
+        "action": "Danach",
+        "sha256": "SHA-256-Prüfsumme",
+        "value": "Wert",
+        "script": "Befehle",
+        "text": "Dockerfile"
+      },
+      "actions": {
+        "save": "Datei speichern",
+        "extract": "Archiv entpacken",
+        "install": "Als Paket installieren"
+      },
+      "kinds": {
+        "packages": {
+          "title": "Pakete installieren",
+          "short": "Aus den Repositorys der Distribution",
+          "help": "Installiert mit dem Paketmanager des Images und entfernt danach die Caches."
+        },
+        "files": {
+          "title": "Dateien kopieren",
+          "short": "Dateien in das Image hochladen",
+          "help": "Kopiert hochgeladene Dateien an einen Pfad im Image. Eine Sitzung hängt ihr Home-Verzeichnis über /config ein, legen Sie Dateien also woanders ab."
+        },
+        "download": {
+          "title": "Herunterladen",
+          "short": "Datei, Archiv oder Paket holen",
+          "help": "Ruft eine Adresse ab, während das Image gebaut wird: die Datei behalten, ein Archiv entpacken oder ein .deb, .rpm oder .apk installieren."
+        },
+        "certificates": {
+          "title": "Zertifikaten vertrauen",
+          "short": "Eigene Zertifizierungsstellen hinzufügen",
+          "help": "Fügt die hochgeladenen Zertifikate den vertrauenswürdigen Zertifizierungsstellen des Images hinzu."
+        },
+        "fonts": {
+          "title": "Schriftarten hinzufügen",
+          "short": "Schriftdateien installieren",
+          "help": "Installiert die hochgeladenen Schriftdateien für jede Anwendung im Image."
+        },
+        "env": {
+          "title": "Umgebung",
+          "short": "Umgebungsvariablen setzen",
+          "help": "Setzt Variablen für alles, was im Image läuft."
+        },
+        "run": {
+          "title": "Befehle ausführen",
+          "short": "Shell-Befehle, als root",
+          "help": "Führt Shell-Befehle aus, während das Image gebaut wird."
+        },
+        "raw": {
+          "title": "Dockerfile-Zeilen",
+          "short": "Beliebige Anweisung, wie geschrieben",
+          "help": "Anweisungen, die genau so in das Dockerfile übernommen werden, wie Sie sie schreiben."
+        }
+      },
+      "toGuidedConfirm": "Aus den Schritten bauen",
+      "baseApp": "Aufbauen auf",
+      "name": "Name",
+      "listBuiltOn": "baut auf {name} · {image}",
+      "icon": "Symbol",
+      "clear": "Rezept leeren",
+      "clearTitle": "Das Rezept leeren",
+      "confirmClear": "Alle Schritte, das Dockerfile und die hochgeladenen Dateien dieses Rezepts entfernen? Die Anwendung, ihr Name und ihr Symbol bleiben, wie sie sind, und für Benutzer ändert sich nichts, bis Sie speichern.",
+      "done": "Fertig",
+      "logTitle": "Build-Ausgabe",
+      "rebakeHelp": "Speichern & backen baut dieses Rezept jetzt und baut es selbstständig erneut, jedes Mal, wenn das Image der Anwendung vom Upstream aktualisiert wird.",
+      "rebakeNote": "Dieses Rezept wird jedes Mal erneut auf {image} gebaut, wenn dieses Image vom Upstream aktualisiert wird.",
+      "listBuilding": "{name} wird gebacken ({seconds} s)",
+      "listBaked": "{name} ist gebacken. Neue Sitzungen nutzen dieses Image.",
+      "listFailed": "Der Build von {name} ist fehlgeschlagen. Sitzungen behalten das letzte gebaute Image.",
+      "confirmDeleteApp": "'{name}' löschen? Die gebackene Anwendung wird mit ihrem Rezept entfernt. Home-Verzeichnisse, die Benutzer damit angelegt haben, bleiben."
     }
   },
   "popup": {
@@ -2210,7 +2357,8 @@
         "waiting": "Warten auf Antwort des Desktops",
         "ready": "Sitzung wird geöffnet",
         "client": "Web-Client der Anwendung wird vorbereitet",
-        "vpn": "VPN-Gateway wird gestartet"
+        "vpn": "VPN-Gateway wird gestartet",
+        "baking": "Image der Anwendung wird gebacken"
       },
       "uploading": "Datei wird hochgeladen ({done} von {total})",
       "imageHint": "Beim ersten Start einer Anwendung auf einem Knoten wird sie heruntergeladen, was Minuten dauern kann. Spätere Starts sind schnell.",

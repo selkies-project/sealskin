@@ -90,7 +90,8 @@
       "audit": "Log de Auditoria",
       "branding": "Marca",
       "keys": "Chaves de Aplicação",
-      "vpn": "Perfis VPN"
+      "vpn": "Perfis VPN",
+      "bakery": "Padaria"
     },
     "dashboard": {
       "title": "Painel",
@@ -324,7 +325,12 @@
       "notLocal": "Imagem não encontrada localmente",
       "isLaboratory": "Este é um aplicativo de Laboratório, construído a partir de uma imagem base com configurações personalizadas.",
       "confirmDelete": "Tem certeza de que deseja excluir o aplicativo instalado '{appName}'?",
-      "deleteTitle": "Excluir aplicativo instalado"
+      "deleteTitle": "Excluir aplicativo instalado",
+      "heldBy": "Serve de base para {names}. Exclua esses primeiro.",
+      "isBaked": "Assado",
+      "builtOnCount": "{count} construído(s) sobre este",
+      "builtOnTitle": "Mostrar os aplicativos construídos sobre este",
+      "kindLab": "Laboratório"
     },
     "appStore": {
       "title": "Lojas de Aplicativos",
@@ -1195,7 +1201,7 @@
       "selectApp": "Selecionar Aplicativo",
       "createNew": "Criar Novo Aplicativo",
       "baseApp": "Aplicativo Base",
-      "baseAppDescription": "O aplicativo instalado no qual seu novo aplicativo personalizado será baseado.",
+      "baseAppDescription": "O aplicativo instalado ou assado no qual seu novo aplicativo personalizado será baseado.",
       "selectBase": "Selecione um Aplicativo Base",
       "appName": "Nome do Aplicativo",
       "appIcon": "Ícone do Aplicativo",
@@ -1849,6 +1855,147 @@
       "removeEndpoint": "Remover ponto de acesso",
       "endpointIncomplete": "O ponto de acesso «{label}» precisa de host, porta e, para WireGuard, da chave pública do servidor.",
       "endpointsAdded": "{count, plural, one {1 ponto de acesso adicionado} other {{count} pontos de acesso adicionados}}."
+    },
+    "bakery": {
+      "title": "A Padaria",
+      "help": "Uma receita assa um novo aplicativo sobre um que você instalou: pacotes, arquivos, certificados, tudo o que um Dockerfile pode fazer, com nome e ícone próprios. Asse quantos precisar a partir do mesmo aplicativo. Cada nó constrói sobre a imagem que já puxou e constrói de novo sempre que essa imagem é atualizada no upstream. As sessões executam a imagem assada assim que ela é construída e mantêm a última boa quando uma construção falha.",
+      "unavailable": "Este servidor executa sessões no Kubernetes, onde a Padaria ainda não pode construir imagens.",
+      "newRecipe": "Nova Receita",
+      "application": "Aplicativo",
+      "recipe": "Receita",
+      "none": "Nenhuma receita ainda. Uma receita adiciona pacotes, arquivos ou qualquer outra coisa à imagem de um aplicativo.",
+      "listSteps": "{count} etapa(s)",
+      "listDockerfile": "Dockerfile",
+      "statePaused": "Pausada",
+      "stateBuilding": "Assando",
+      "stateError": "Falhou",
+      "stateErrorKept": "as sessões executam a última imagem construída",
+      "stateReady": "Assado",
+      "statePending": "Não assado neste nó",
+      "rebuildTitle": "Assar de novo do zero, com os pacotes atuais da distribuição",
+      "deleteTitle": "Excluir",
+      "confirmDelete": "Excluir a receita de '{name}'? Suas sessões voltam a executar a imagem do próprio aplicativo.",
+      "newAppInvalid": "Escolha o aplicativo que servirá de base e dê um nome ao aplicativo assado.",
+      "pickBase": "-- Escolha um aplicativo --",
+      "family": "Distribuição",
+      "familyAuto": "Conforme a imagem",
+      "builtOn": "Construído sobre",
+      "baseNone": "Escolha um aplicativo para ver sua imagem.",
+      "baseReading": "Lendo a imagem...",
+      "baseUnknown": "Distribuição desconhecida",
+      "modeGuided": "Guiado",
+      "modeDeveloper": "Desenvolvedor",
+      "tryBuild": "Construir um teste",
+      "saveAndBake": "Salvar e assar",
+      "steps": "Etapas",
+      "addStep": "Adicionar uma etapa",
+      "noSteps": "Nenhuma etapa ainda. Escolha uma abaixo: o Dockerfile à direita acompanha o que você adiciona.",
+      "moveUp": "Mover para cima",
+      "moveDown": "Mover para baixo",
+      "skipStep": "Deixar esta etapa fora da construção",
+      "useStep": "Recolocar esta etapa na construção",
+      "developerHelp": "O Dockerfile é construído como você o escreve. A imagem do aplicativo é o argumento de construção BASE_IMAGE: declare-o com ARG antes do primeiro FROM, escreva outros estágios onde precisar e termine em um estágio que comece com FROM ${BASE_IMAGE}.",
+      "toGuidedTitle": "Voltar às etapas guiadas",
+      "toGuided": "As etapas estão como você as deixou, e a construção volta a segui-las. O Dockerfile que você escreveu é mantido com a receita, mas não é construído.",
+      "files": "Arquivos",
+      "upload": "Carregar",
+      "uploadFailed": "Não foi possível carregar {name}: {error}",
+      "noFiles": "Nenhum arquivo ainda.",
+      "pickFile": "Adicionar um arquivo carregado...",
+      "snippets": "Inserir um trecho",
+      "insert": "Inserir no cursor",
+      "snippetEmpty": "A etapa ainda não gera nada.",
+      "packagePlaceholder": "Pesquise ou digite o nome de um pacote...",
+      "indexing": "Lendo a lista de pacotes da imagem. A primeira pesquisa em uma imagem leva um minuto.",
+      "noIndex": "Não há lista de pacotes para esta imagem; digite os nomes.",
+      "noPackages": "Nenhum pacote corresponde a '{query}'. Pressione Enter para adicioná-lo como digitado.",
+      "destHelp": "Um caminho terminado em / é uma pasta onde os arquivos são colocados.",
+      "sha256Help": "Opcional. A construção para quando o download não corresponde.",
+      "scriptHelp": "Um comando por linha. Eles são executados como root em uma única camada, e a construção para no primeiro que falhar.",
+      "rawHelp": "Instruções de Dockerfile, construídas exatamente como escritas.",
+      "addVariable": "Adicionar uma variável",
+      "line": "Linha {line}:",
+      "copied": "Dockerfile copiado.",
+      "buildQueued": "Aguardando outra construção terminar",
+      "buildRunning": "Construindo ({seconds} s)",
+      "buildReady": "O teste foi construído em {seconds} s. As sessões não mudam até você salvar.",
+      "buildFailed": "A construção falhou. As sessões mantêm a última imagem construída.",
+      "openTrial": "Abrir uma sessão de teste",
+      "fields": {
+        "note": "Título no log de construção",
+        "dest": "Destino na imagem",
+        "executable": "Tornar executável",
+        "extract": "Descompactar arquivos compactados ali",
+        "url": "Endereço",
+        "action": "Depois",
+        "sha256": "Soma de verificação SHA-256",
+        "value": "valor",
+        "script": "Comandos",
+        "text": "Dockerfile"
+      },
+      "actions": {
+        "save": "Salvar o arquivo",
+        "extract": "Descompactar o arquivo",
+        "install": "Instalar como pacote"
+      },
+      "kinds": {
+        "packages": {
+          "title": "Instalar pacotes",
+          "short": "Dos repositórios da distribuição",
+          "help": "Instala com o gerenciador de pacotes da própria imagem e remove os caches em seguida."
+        },
+        "files": {
+          "title": "Copiar arquivos",
+          "short": "Carregar arquivos para a imagem",
+          "help": "Copia os arquivos que você carrega para um caminho na imagem. Uma sessão monta seu diretório home sobre /config, então coloque os arquivos em qualquer outro lugar."
+        },
+        "download": {
+          "title": "Baixar",
+          "short": "Obter um arquivo, arquivo compactado ou pacote",
+          "help": "Obtém um endereço enquanto a imagem é construída: mantenha o arquivo, descompacte um arquivo compactado ou instale um .deb, .rpm ou .apk."
+        },
+        "certificates": {
+          "title": "Confiar em certificados",
+          "short": "Adicionar suas próprias autoridades certificadoras",
+          "help": "Adiciona os certificados que você carrega às autoridades confiáveis da imagem."
+        },
+        "fonts": {
+          "title": "Adicionar fontes",
+          "short": "Instalar arquivos de fonte",
+          "help": "Instala os arquivos de fonte que você carrega para todos os aplicativos da imagem."
+        },
+        "env": {
+          "title": "Ambiente",
+          "short": "Definir variáveis de ambiente",
+          "help": "Define variáveis para tudo o que é executado na imagem."
+        },
+        "run": {
+          "title": "Executar comandos",
+          "short": "Comandos de shell, como root",
+          "help": "Executa comandos de shell enquanto a imagem é construída."
+        },
+        "raw": {
+          "title": "Linhas de Dockerfile",
+          "short": "Qualquer instrução, como escrita",
+          "help": "Instruções colocadas no Dockerfile exatamente como você as escreve."
+        }
+      },
+      "toGuidedConfirm": "Construir a partir das etapas",
+      "baseApp": "Construir sobre",
+      "name": "Nome",
+      "listBuiltOn": "construído sobre {name} · {image}",
+      "icon": "Ícone",
+      "clear": "Limpar receita",
+      "clearTitle": "Limpar a receita",
+      "confirmClear": "Remover todas as etapas, o Dockerfile e os arquivos carregados desta receita? O aplicativo, seu nome e seu ícone permanecem como estão, e nada muda para os usuários até você salvar.",
+      "done": "Concluído",
+      "logTitle": "Saída da construção",
+      "rebakeHelp": "Salvar e assar constrói esta receita agora e a constrói de novo, sozinha, sempre que a imagem do aplicativo é atualizada no upstream.",
+      "rebakeNote": "Esta receita é construída de novo sobre {image} sempre que essa imagem é atualizada no upstream.",
+      "listBuilding": "Assando {name} ({seconds} s)",
+      "listBaked": "{name} está assado. Novas sessões executam esta imagem.",
+      "listFailed": "A construção de {name} falhou. As sessões mantêm a última imagem construída.",
+      "confirmDeleteApp": "Excluir '{name}'? O aplicativo assado é removido com sua receita. Os diretórios home que os usuários criaram com ele permanecem."
     }
   },
   "popup": {
@@ -2210,7 +2357,8 @@
         "waiting": "Aguardando a área de trabalho responder",
         "ready": "Abrindo a sessão",
         "client": "Preparando o cliente web do aplicativo",
-        "vpn": "Iniciando o gateway VPN"
+        "vpn": "Iniciando o gateway VPN",
+        "baking": "Assando a imagem do aplicativo"
       },
       "uploading": "Enviando o arquivo ({done} de {total})",
       "imageHint": "A primeira inicialização de um aplicativo em um nó faz o download dele, o que pode levar minutos. As seguintes são rápidas.",

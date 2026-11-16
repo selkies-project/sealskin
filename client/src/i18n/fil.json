@@ -90,7 +90,8 @@
       "audit": "Audit Log",
       "branding": "Branding",
       "keys": "Mga Application Key",
-      "vpn": "Mga VPN Profile"
+      "vpn": "Mga VPN Profile",
+      "bakery": "Panaderya"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -324,7 +325,12 @@
       "notLocal": "Hindi nahanap ang imahe nang lokal",
       "isLaboratory": "Ito ay isang app ng Laboratoryo, na binuo mula sa isang base na imahe na may mga pasadyang setting.",
       "confirmDelete": "Sigurado ka bang gusto mong burahin ang naka-install na app na '{appName}'?",
-      "deleteTitle": "Burahin ang naka-install na app"
+      "deleteTitle": "Burahin ang naka-install na app",
+      "heldBy": "Pinagbatayan ng {names}. Burahin muna ang mga iyon.",
+      "isBaked": "Na-bake",
+      "builtOnCount": "{count} ang nakabatay rito",
+      "builtOnTitle": "Ipakita ang mga aplikasyong nakabatay rito",
+      "kindLab": "Laboratoryo"
     },
     "appStore": {
       "title": "Mga Tindahan ng App",
@@ -1195,7 +1201,7 @@
       "selectApp": "Pumili ng App",
       "createNew": "Gumawa ng Bagong App",
       "baseApp": "Base na Aplikasyon",
-      "baseAppDescription": "Ang naka-install na aplikasyon kung saan ibabatay ang iyong bagong pasadyang app.",
+      "baseAppDescription": "Ang naka-install o na-bake na aplikasyon kung saan ibabatay ang iyong bagong pasadyang app.",
       "selectBase": "Pumili ng Base App",
       "appName": "Pangalan ng App",
       "appIcon": "Icon ng App",
@@ -1849,6 +1855,147 @@
       "removeEndpoint": "Alisin ang endpoint",
       "endpointIncomplete": "Kailangan ng endpoint na '{label}' ng host, port, at para sa WireGuard ang public key ng server.",
       "endpointsAdded": "Nadagdag ang {count, plural, one {1 endpoint} other {{count} endpoint}}."
+    },
+    "bakery": {
+      "title": "Ang Panaderya",
+      "help": "Ang resipe ay nagbe-bake ng bagong aplikasyon sa ibabaw ng isang in-install mo: mga package, file, certificate, anumang kayang gawin ng Dockerfile, na may sariling pangalan at icon. Mag-bake ng kahit ilan mula sa iisang aplikasyon. Bawat node ay nagbi-build sa imaheng nahila na nito, at nagbi-build muli tuwing ina-update ang imaheng iyon mula sa upstream. Pinapatakbo ng mga sesyon ang na-bake na imahe kapag na-build na ito, at pinapanatili ang huling maayos kapag nabigo ang isang build.",
+      "unavailable": "Pinapatakbo ng server na ito ang mga sesyon sa Kubernetes, kung saan hindi pa kayang mag-build ng mga imahe ang Panaderya.",
+      "newRecipe": "Bagong Resipe",
+      "application": "Aplikasyon",
+      "recipe": "Resipe",
+      "none": "Wala pang resipe. Ang resipe ay nagdaragdag ng mga package, file, o anupaman sa imahe ng isang aplikasyon.",
+      "listSteps": "{count} hakbang",
+      "listDockerfile": "Dockerfile",
+      "statePaused": "Naka-pause",
+      "stateBuilding": "Bine-bake",
+      "stateError": "Nabigo",
+      "stateErrorKept": "pinapatakbo ng mga sesyon ang huling imaheng na-build",
+      "stateReady": "Na-bake",
+      "statePending": "Hindi pa na-bake sa node na ito",
+      "rebuildTitle": "I-bake muli mula sa simula, gamit ang kasalukuyang mga package ng distribusyon",
+      "deleteTitle": "Burahin",
+      "confirmDelete": "Burahin ang resipe ng '{name}'? Patatakbuhin muli ng mga sesyon nito ang sariling imahe ng aplikasyon.",
+      "newAppInvalid": "Piliin ang aplikasyong pagbabatayan at bigyan ng pangalan ang na-bake.",
+      "pickBase": "-- Pumili ng aplikasyon --",
+      "family": "Distribusyon",
+      "familyAuto": "Ayon sa imahe",
+      "builtOn": "Nakabatay sa",
+      "baseNone": "Pumili ng aplikasyon upang makita ang imahe nito.",
+      "baseReading": "Binabasa ang imahe...",
+      "baseUnknown": "Hindi kilalang distribusyon",
+      "modeGuided": "May Gabay",
+      "modeDeveloper": "Developer",
+      "tryBuild": "Mag-build ng pagsubok",
+      "saveAndBake": "I-save at i-bake",
+      "steps": "Mga Hakbang",
+      "addStep": "Magdagdag ng hakbang",
+      "noSteps": "Wala pang hakbang. Pumili ng isa sa ibaba: sinusundan ng Dockerfile sa kanan ang idinaragdag mo.",
+      "moveUp": "Iakyat",
+      "moveDown": "Ibaba",
+      "skipStep": "Huwag isama ang hakbang na ito sa build",
+      "useStep": "Ibalik ang hakbang na ito sa build",
+      "developerHelp": "Bini-build ang Dockerfile ayon sa pagkakasulat mo. Ang imahe ng aplikasyon ay ang build argument na BASE_IMAGE: ideklara ito gamit ang ARG bago ang unang FROM, sumulat ng iba pang stage saanman kailangan, at magtapos sa stage na nagsisimula sa FROM ${BASE_IMAGE}.",
+      "toGuidedTitle": "Bumalik sa mga hakbang na may gabay",
+      "toGuided": "Ang mga hakbang ay tulad ng iniwan mo, at muli silang sinusundan ng build. Ang Dockerfile na isinulat mo ay nananatili sa resipe ngunit hindi bini-build.",
+      "files": "Mga File",
+      "upload": "Mag-upload",
+      "uploadFailed": "Hindi ma-upload ang {name}: {error}",
+      "noFiles": "Wala pang file.",
+      "pickFile": "Magdagdag ng na-upload na file...",
+      "snippets": "Magsingit ng snippet",
+      "insert": "Isingit sa cursor",
+      "snippetEmpty": "Wala pang inilalabas ang hakbang.",
+      "packagePlaceholder": "Maghanap o mag-type ng pangalan ng package...",
+      "indexing": "Binabasa ang listahan ng package mula sa imahe. Inaabot ng isang minuto ang unang paghahanap sa isang imahe.",
+      "noIndex": "Walang listahan ng package para sa imaheng ito; i-type ang mga pangalan.",
+      "noPackages": "Walang package na tumutugma sa '{query}'. Pindutin ang Enter upang idagdag ito ayon sa na-type.",
+      "destHelp": "Ang path na nagtatapos sa / ay folder na paglalagyan ng mga file.",
+      "sha256Help": "Opsyonal. Hihinto ang build kapag hindi tumugma ang download.",
+      "scriptHelp": "Isang command bawat linya. Tumatakbo ang mga ito bilang root sa iisang layer, at hihinto ang build sa unang mabigo.",
+      "rawHelp": "Mga instruksyon ng Dockerfile, bini-build nang eksakto ayon sa pagkakasulat.",
+      "addVariable": "Magdagdag ng variable",
+      "line": "Linya {line}:",
+      "copied": "Nakopya ang Dockerfile.",
+      "buildQueued": "Naghihintay na matapos ang isa pang build",
+      "buildRunning": "Bini-build ({seconds} s)",
+      "buildReady": "Na-build ang pagsubok sa loob ng {seconds} s. Walang pagbabago sa mga sesyon hangga't hindi ka nagse-save.",
+      "buildFailed": "Nabigo ang build. Pinapanatili ng mga sesyon ang huling imaheng na-build.",
+      "openTrial": "Magbukas ng sesyon ng pagsubok",
+      "fields": {
+        "note": "Pamagat sa build log",
+        "dest": "Destinasyon sa imahe",
+        "executable": "Gawing executable",
+        "extract": "I-unpack doon ang mga archive",
+        "url": "Address",
+        "action": "Pagkatapos",
+        "sha256": "SHA-256 checksum",
+        "value": "halaga",
+        "script": "Mga Command",
+        "text": "Dockerfile"
+      },
+      "actions": {
+        "save": "I-save ang file",
+        "extract": "I-unpack ang archive",
+        "install": "I-install ito bilang package"
+      },
+      "kinds": {
+        "packages": {
+          "title": "Mag-install ng mga package",
+          "short": "Mula sa mga repository ng distribusyon",
+          "help": "Nag-i-install gamit ang sariling package manager ng imahe at inaalis ang mga cache pagkatapos."
+        },
+        "files": {
+          "title": "Kumopya ng mga file",
+          "short": "Mag-upload ng mga file sa imahe",
+          "help": "Kinokopya ang mga file na ina-upload mo sa isang path sa imahe. Mina-mount ng sesyon ang home directory nito sa ibabaw ng /config, kaya ilagay ang mga file saanman maliban doon."
+        },
+        "download": {
+          "title": "Mag-download",
+          "short": "Kumuha ng file, archive, o package",
+          "help": "Kinukuha ang isang address habang bini-build ang imahe: itago ang file, i-unpack ang archive, o mag-install ng .deb, .rpm, o .apk."
+        },
+        "certificates": {
+          "title": "Pagkatiwalaan ang mga certificate",
+          "short": "Idagdag ang sarili mong mga certificate authority",
+          "help": "Idinaragdag ang mga certificate na ina-upload mo sa mga pinagkakatiwalaang authority ng imahe."
+        },
+        "fonts": {
+          "title": "Magdagdag ng mga font",
+          "short": "Mag-install ng mga font file",
+          "help": "Ini-install ang mga font file na ina-upload mo para sa bawat aplikasyon sa imahe."
+        },
+        "env": {
+          "title": "Kapaligiran",
+          "short": "Magtakda ng mga variable ng kapaligiran",
+          "help": "Nagtatakda ng mga variable para sa lahat ng tumatakbo sa imahe."
+        },
+        "run": {
+          "title": "Magpatakbo ng mga command",
+          "short": "Mga shell command, bilang root",
+          "help": "Nagpapatakbo ng mga shell command habang bini-build ang imahe."
+        },
+        "raw": {
+          "title": "Mga linya ng Dockerfile",
+          "short": "Anumang instruksyon, ayon sa pagkakasulat",
+          "help": "Mga instruksyong inilalagay sa Dockerfile nang eksakto ayon sa pagkakasulat mo."
+        }
+      },
+      "toGuidedConfirm": "Mag-build mula sa mga hakbang",
+      "baseApp": "Ibatay sa",
+      "name": "Pangalan",
+      "listBuiltOn": "nakabatay sa {name} · {image}",
+      "icon": "Icon",
+      "clear": "Linisin ang resipe",
+      "clearTitle": "Linisin ang resipe",
+      "confirmClear": "Alisin ang bawat hakbang, ang Dockerfile, at ang mga na-upload na file ng resiping ito? Mananatili ang aplikasyon, ang pangalan nito, at ang icon nito, at walang magbabago para sa mga user hangga't hindi ka nagse-save.",
+      "done": "Tapos",
+      "logTitle": "Output ng build",
+      "rebakeHelp": "Bini-build ng I-save at i-bake ang resiping ito ngayon at bini-build itong muli, nang kusa, tuwing ina-update ang imahe ng aplikasyon mula sa upstream.",
+      "rebakeNote": "Bini-build muli ang resiping ito sa ibabaw ng {image} tuwing ina-update ang imaheng iyon mula sa upstream.",
+      "listBuilding": "Bine-bake ang {name} ({seconds} s)",
+      "listBaked": "Na-bake na ang {name}. Pinapatakbo ng mga bagong sesyon ang imaheng ito.",
+      "listFailed": "Nabigo ang build ng {name}. Pinapanatili ng mga sesyon ang huling imaheng na-build.",
+      "confirmDeleteApp": "Burahin ang '{name}'? Aalisin ang na-bake na aplikasyon kasama ang resipe nito. Mananatili ang mga home directory na ginawa ng mga user gamit ito."
     }
   },
   "popup": {
@@ -2210,7 +2357,8 @@
         "waiting": "Hinihintay na tumugon ang desktop",
         "ready": "Binubuksan ang sesyon",
         "client": "Inihahanda ang web client ng aplikasyon",
-        "vpn": "Sinisimulan ang VPN gateway"
+        "vpn": "Sinisimulan ang VPN gateway",
+        "baking": "Bine-bake ang imahe ng aplikasyon"
       },
       "uploading": "Ina-upload ang file ({done} sa {total})",
       "imageHint": "Ang unang paglunsad ng isang aplikasyon sa isang node ay nagda-download nito, na maaaring abutin ng ilang minuto. Mabilis na ang mga susunod na paglunsad.",

@@ -90,7 +90,8 @@
       "audit": "Nhật ký kiểm toán",
       "branding": "Thương hiệu",
       "keys": "Khóa ứng dụng",
-      "vpn": "Hồ sơ VPN"
+      "vpn": "Hồ sơ VPN",
+      "bakery": "Lò bánh"
     },
     "dashboard": {
       "title": "Bảng điều khiển",
@@ -324,7 +325,12 @@
       "notLocal": "Không tìm thấy image cục bộ",
       "isLaboratory": "Đây là ứng dụng Phòng thí nghiệm, được dựng từ một image cơ sở với các cài đặt tùy chỉnh.",
       "confirmDelete": "Bạn có chắc chắn muốn xóa ứng dụng đã cài đặt '{appName}' không?",
-      "deleteTitle": "Xóa ứng dụng đã cài"
+      "deleteTitle": "Xóa ứng dụng đã cài",
+      "heldBy": "{names} được dựng trên ứng dụng này. Hãy xóa chúng trước.",
+      "isBaked": "Đã nướng",
+      "builtOnCount": "{count} ứng dụng dựng trên ứng dụng này",
+      "builtOnTitle": "Hiển thị các ứng dụng dựng trên ứng dụng này",
+      "kindLab": "Phòng thí nghiệm"
     },
     "appStore": {
       "title": "Cửa hàng ứng dụng",
@@ -1195,7 +1201,7 @@
       "selectApp": "Chọn ứng dụng",
       "createNew": "Tạo ứng dụng mới",
       "baseApp": "Ứng dụng cơ sở",
-      "baseAppDescription": "Ứng dụng đã cài đặt mà ứng dụng tùy chỉnh mới của bạn sẽ dựa trên.",
+      "baseAppDescription": "Ứng dụng đã cài đặt hoặc đã nướng mà ứng dụng tùy chỉnh mới của bạn sẽ dựa trên.",
       "selectBase": "Chọn một ứng dụng cơ sở",
       "appName": "Tên ứng dụng",
       "appIcon": "Biểu tượng ứng dụng",
@@ -1849,6 +1855,147 @@
       "removeEndpoint": "Xóa điểm cuối",
       "endpointIncomplete": "Điểm cuối '{label}' cần máy chủ, cổng và với WireGuard là khóa công khai của máy chủ.",
       "endpointsAdded": "Đã thêm {count, plural, other {{count} điểm cuối}}."
+    },
+    "bakery": {
+      "title": "Lò bánh",
+      "help": "Một công thức nướng ra ứng dụng mới trên nền ứng dụng bạn đã cài đặt: gói, tệp, chứng chỉ, bất cứ điều gì Dockerfile làm được, với tên và biểu tượng riêng. Nướng bao nhiêu tùy ý từ cùng một ứng dụng. Mỗi nút dựng trên image nó đã kéo về, và dựng lại mỗi khi image đó được cập nhật từ nguồn. Các phiên chạy image đã nướng sau khi dựng xong, và giữ image tốt gần nhất khi một lần dựng thất bại.",
+      "unavailable": "Máy chủ này chạy các phiên trên Kubernetes, nơi Lò bánh chưa dựng được image.",
+      "newRecipe": "Công thức mới",
+      "application": "Ứng dụng",
+      "recipe": "Công thức",
+      "none": "Chưa có công thức nào. Một công thức thêm gói, tệp hoặc bất cứ thứ gì khác vào image của ứng dụng.",
+      "listSteps": "{count} bước",
+      "listDockerfile": "Dockerfile",
+      "statePaused": "Tạm dừng",
+      "stateBuilding": "Đang nướng",
+      "stateError": "Thất bại",
+      "stateErrorKept": "các phiên chạy image dựng thành công gần nhất",
+      "stateReady": "Đã nướng",
+      "statePending": "Chưa nướng trên nút này",
+      "rebuildTitle": "Nướng lại từ đầu, lấy các gói hiện tại của bản phân phối",
+      "deleteTitle": "Xóa",
+      "confirmDelete": "Xóa công thức của '{name}'? Các phiên của nó sẽ chạy lại image gốc của ứng dụng.",
+      "newAppInvalid": "Chọn ứng dụng để dựng trên đó và đặt tên cho ứng dụng đã nướng.",
+      "pickBase": "-- Chọn một ứng dụng --",
+      "family": "Bản phân phối",
+      "familyAuto": "Theo image",
+      "builtOn": "Dựng trên",
+      "baseNone": "Chọn một ứng dụng để xem image của nó.",
+      "baseReading": "Đang đọc image...",
+      "baseUnknown": "Bản phân phối không xác định",
+      "modeGuided": "Hướng dẫn",
+      "modeDeveloper": "Nhà phát triển",
+      "tryBuild": "Dựng thử",
+      "saveAndBake": "Lưu & nướng",
+      "steps": "Các bước",
+      "addStep": "Thêm bước",
+      "noSteps": "Chưa có bước nào. Chọn một bước bên dưới: Dockerfile bên phải thay đổi theo những gì bạn thêm.",
+      "moveUp": "Chuyển lên",
+      "moveDown": "Chuyển xuống",
+      "skipStep": "Bỏ bước này khỏi bản dựng",
+      "useStep": "Đưa bước này trở lại bản dựng",
+      "developerHelp": "Dockerfile được dựng đúng như bạn viết. Image của ứng dụng là đối số dựng BASE_IMAGE: khai báo nó bằng ARG trước FROM đầu tiên, viết các giai đoạn khác ở bất cứ đâu bạn cần, và kết thúc bằng một giai đoạn bắt đầu với FROM ${BASE_IMAGE}.",
+      "toGuidedTitle": "Quay lại các bước hướng dẫn",
+      "toGuided": "Các bước vẫn như bạn để lại, và bản dựng lại theo chúng. Dockerfile bạn đã viết được giữ cùng công thức nhưng không được dựng.",
+      "files": "Tệp",
+      "upload": "Tải lên",
+      "uploadFailed": "Không thể tải lên {name}: {error}",
+      "noFiles": "Chưa có tệp nào.",
+      "pickFile": "Thêm một tệp đã tải lên...",
+      "snippets": "Chèn đoạn mẫu",
+      "insert": "Chèn tại con trỏ",
+      "snippetEmpty": "Bước này chưa tạo ra nội dung nào.",
+      "packagePlaceholder": "Tìm kiếm hoặc nhập tên gói...",
+      "indexing": "Đang đọc danh sách gói từ image. Lần tìm kiếm đầu tiên trên một image mất khoảng một phút.",
+      "noIndex": "Không có danh sách gói cho image này; hãy nhập tên.",
+      "noPackages": "Không có gói nào khớp với '{query}'. Nhấn Enter để thêm đúng như đã nhập.",
+      "destHelp": "Đường dẫn kết thúc bằng / là thư mục chứa các tệp.",
+      "sha256Help": "Tùy chọn. Bản dựng dừng lại khi tệp tải về không khớp.",
+      "scriptHelp": "Mỗi dòng một lệnh. Chúng chạy với quyền root trong một lớp, và bản dựng dừng ở lệnh đầu tiên thất bại.",
+      "rawHelp": "Các chỉ thị Dockerfile, được dựng đúng như đã viết.",
+      "addVariable": "Thêm biến",
+      "line": "Dòng {line}:",
+      "copied": "Đã sao chép Dockerfile.",
+      "buildQueued": "Đang chờ một bản dựng khác hoàn tất",
+      "buildRunning": "Đang dựng ({seconds} giây)",
+      "buildReady": "Bản thử đã dựng xong trong {seconds} giây. Các phiên không thay đổi cho đến khi bạn lưu.",
+      "buildFailed": "Bản dựng thất bại. Các phiên giữ image dựng thành công gần nhất.",
+      "openTrial": "Mở phiên thử",
+      "fields": {
+        "note": "Tiêu đề trong nhật ký dựng",
+        "dest": "Đích trong image",
+        "executable": "Cho phép thực thi",
+        "extract": "Giải nén các tệp nén tại đó",
+        "url": "Địa chỉ",
+        "action": "Sau đó",
+        "sha256": "Mã kiểm tra SHA-256",
+        "value": "giá trị",
+        "script": "Lệnh",
+        "text": "Dockerfile"
+      },
+      "actions": {
+        "save": "Lưu tệp",
+        "extract": "Giải nén tệp nén",
+        "install": "Cài đặt như một gói"
+      },
+      "kinds": {
+        "packages": {
+          "title": "Cài đặt gói",
+          "short": "Từ kho của bản phân phối",
+          "help": "Cài đặt bằng trình quản lý gói của chính image và xóa bộ nhớ đệm sau đó."
+        },
+        "files": {
+          "title": "Sao chép tệp",
+          "short": "Tải tệp lên vào image",
+          "help": "Sao chép các tệp bạn tải lên vào một đường dẫn trong image. Phiên gắn thư mục chính của nó lên /config, vì vậy hãy đặt tệp ở nơi khác."
+        },
+        "download": {
+          "title": "Tải xuống",
+          "short": "Lấy một tệp, tệp nén hoặc gói",
+          "help": "Lấy một địa chỉ trong khi image được dựng: giữ tệp, giải nén tệp nén, hoặc cài đặt một .deb, .rpm hoặc .apk."
+        },
+        "certificates": {
+          "title": "Tin cậy chứng chỉ",
+          "short": "Thêm các nhà cung cấp chứng chỉ của riêng bạn",
+          "help": "Thêm các chứng chỉ bạn tải lên vào các nhà cung cấp chứng chỉ được image tin cậy."
+        },
+        "fonts": {
+          "title": "Thêm phông chữ",
+          "short": "Cài đặt tệp phông chữ",
+          "help": "Cài đặt các tệp phông chữ bạn tải lên cho mọi ứng dụng trong image."
+        },
+        "env": {
+          "title": "Môi trường",
+          "short": "Đặt biến môi trường",
+          "help": "Đặt biến cho mọi thứ chạy trong image."
+        },
+        "run": {
+          "title": "Chạy lệnh",
+          "short": "Lệnh shell, với quyền root",
+          "help": "Chạy các lệnh shell trong khi image được dựng."
+        },
+        "raw": {
+          "title": "Dòng Dockerfile",
+          "short": "Bất kỳ chỉ thị nào, đúng như đã viết",
+          "help": "Các chỉ thị được đưa vào Dockerfile đúng như bạn viết."
+        }
+      },
+      "toGuidedConfirm": "Dựng từ các bước",
+      "baseApp": "Dựng trên",
+      "name": "Tên",
+      "listBuiltOn": "dựng trên {name} · {image}",
+      "icon": "Biểu tượng",
+      "clear": "Xóa trắng công thức",
+      "clearTitle": "Xóa trắng công thức",
+      "confirmClear": "Gỡ mọi bước, Dockerfile và các tệp đã tải lên của công thức này? Ứng dụng, tên và biểu tượng của nó vẫn giữ nguyên, và không có gì thay đổi với người dùng cho đến khi bạn lưu.",
+      "done": "Xong",
+      "logTitle": "Đầu ra bản dựng",
+      "rebakeHelp": "Lưu & nướng dựng công thức này ngay bây giờ và tự dựng lại mỗi khi image của ứng dụng được cập nhật từ nguồn.",
+      "rebakeNote": "Công thức này được dựng lại trên {image} mỗi khi image đó được cập nhật từ nguồn.",
+      "listBuilding": "Đang nướng {name} ({seconds} giây)",
+      "listBaked": "{name} đã nướng xong. Các phiên mới chạy image này.",
+      "listFailed": "Bản dựng của {name} thất bại. Các phiên giữ image dựng thành công gần nhất.",
+      "confirmDeleteApp": "Xóa '{name}'? Ứng dụng đã nướng bị gỡ cùng công thức của nó. Các thư mục chính người dùng đã tạo với nó vẫn được giữ."
     }
   },
   "popup": {
@@ -2210,7 +2357,8 @@
         "waiting": "Đang chờ màn hình làm việc phản hồi",
         "ready": "Đang mở phiên",
         "client": "Đang chuẩn bị máy khách web của ứng dụng",
-        "vpn": "Đang khởi động cổng VPN"
+        "vpn": "Đang khởi động cổng VPN",
+        "baking": "Đang nướng image của ứng dụng"
       },
       "uploading": "Đang tải lên tệp ({done} trên {total})",
       "imageHint": "Lần khởi chạy đầu tiên của một ứng dụng trên một nút sẽ tải ứng dụng về, có thể mất vài phút. Các lần khởi chạy sau sẽ nhanh.",

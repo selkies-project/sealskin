@@ -90,7 +90,8 @@
       "audit": "Denetim Günlüğü",
       "branding": "Markalama",
       "keys": "Uygulama Anahtarları",
-      "vpn": "VPN Profilleri"
+      "vpn": "VPN Profilleri",
+      "bakery": "Fırın"
     },
     "dashboard": {
       "title": "Kontrol Paneli",
@@ -324,7 +325,12 @@
       "notLocal": "İmaj yerel olarak bulunamadı",
       "isLaboratory": "Bu, özel ayarlarla bir temel imajdan oluşturulmuş bir Laboratuvar uygulamasıdır.",
       "confirmDelete": "'{appName}' yüklü uygulamasını silmek istediğinizden emin misiniz?",
-      "deleteTitle": "Yüklü uygulamayı sil"
+      "deleteTitle": "Yüklü uygulamayı sil",
+      "heldBy": "{names} bunun üzerine kurulu. Önce onları silin.",
+      "isBaked": "Pişirilmiş",
+      "builtOnCount": "{count} uygulama bunun üzerine kurulu",
+      "builtOnTitle": "Bunun üzerine kurulu uygulamaları göster",
+      "kindLab": "Laboratuvar"
     },
     "appStore": {
       "title": "Uygulama Mağazaları",
@@ -1195,7 +1201,7 @@
       "selectApp": "Uygulama Seç",
       "createNew": "Yeni Uygulama Oluştur",
       "baseApp": "Temel Uygulama",
-      "baseAppDescription": "Yeni özel uygulamanızın temel alacağı yüklü uygulama.",
+      "baseAppDescription": "Yeni özel uygulamanızın temel alacağı yüklü veya pişirilmiş uygulama.",
       "selectBase": "Bir Temel Uygulama Seçin",
       "appName": "Uygulama Adı",
       "appIcon": "Uygulama Simgesi",
@@ -1849,6 +1855,147 @@
       "removeEndpoint": "Uç noktayı kaldır",
       "endpointIncomplete": "'{label}' uç noktası için sunucu, port ve WireGuard'da sunucunun genel anahtarı gerekir.",
       "endpointsAdded": "{count, plural, one {1 uç nokta} other {{count} uç nokta}} eklendi."
+    },
+    "bakery": {
+      "title": "Fırın",
+      "help": "Bir tarif, yüklediğiniz bir uygulamanın üzerine yeni bir uygulama pişirir: paketler, dosyalar, sertifikalar, bir Dockerfile'ın yapabildiği her şey, kendi adı ve simgesiyle. Aynı uygulamadan istediğiniz kadar pişirin. Her düğüm zaten çektiği imajın üzerine derler ve bu imaj kaynağından her güncellendiğinde yeniden derler. Oturumlar, derlendikten sonra pişirilmiş imajı çalıştırır ve bir derleme başarısız olduğunda son başarılı imajı korur.",
+      "unavailable": "Bu sunucu oturumları Kubernetes üzerinde çalıştırıyor; Fırın orada henüz imaj derleyemiyor.",
+      "newRecipe": "Yeni Tarif",
+      "application": "Uygulama",
+      "recipe": "Tarif",
+      "none": "Henüz tarif yok. Bir tarif, bir uygulamanın imajına paketler, dosyalar veya başka her şeyi ekler.",
+      "listSteps": "{count} adım",
+      "listDockerfile": "Dockerfile",
+      "statePaused": "Duraklatıldı",
+      "stateBuilding": "Pişiriliyor",
+      "stateError": "Başarısız",
+      "stateErrorKept": "oturumlar derlenen son imajı çalıştırıyor",
+      "stateReady": "Pişirildi",
+      "statePending": "Bu düğümde pişirilmedi",
+      "rebuildTitle": "Dağıtımın güncel paketlerini alarak sıfırdan yeniden pişir",
+      "deleteTitle": "Sil",
+      "confirmDelete": "'{name}' tarifi silinsin mi? Oturumları yeniden uygulamanın kendi imajını çalıştırır.",
+      "newAppInvalid": "Temel alınacak uygulamayı seçin ve pişirilecek olana bir ad verin.",
+      "pickBase": "-- Bir uygulama seçin --",
+      "family": "Dağıtım",
+      "familyAuto": "İmajın belirttiği gibi",
+      "builtOn": "Temel alınan",
+      "baseNone": "İmajını görmek için bir uygulama seçin.",
+      "baseReading": "İmaj okunuyor...",
+      "baseUnknown": "Bilinmeyen dağıtım",
+      "modeGuided": "Rehberli",
+      "modeDeveloper": "Geliştirici",
+      "tryBuild": "Deneme derle",
+      "saveAndBake": "Kaydet ve pişir",
+      "steps": "Adımlar",
+      "addStep": "Adım ekle",
+      "noSteps": "Henüz adım yok. Aşağıdan birini seçin: sağdaki Dockerfile eklediklerinizi izler.",
+      "moveUp": "Yukarı taşı",
+      "moveDown": "Aşağı taşı",
+      "skipStep": "Bu adımı derlemenin dışında bırak",
+      "useStep": "Bu adımı derlemeye geri koy",
+      "developerHelp": "Dockerfile yazdığınız gibi derlenir. Uygulamanın imajı BASE_IMAGE derleme argümanıdır: ilk FROM'dan önce ARG ile bildirin, gereken yerlere başka aşamalar yazın ve FROM ${BASE_IMAGE} ile başlayan bir aşamayla bitirin.",
+      "toGuidedTitle": "Rehberli adımlara dön",
+      "toGuided": "Adımlar bıraktığınız gibi duruyor ve derleme yeniden onları izliyor. Yazdığınız Dockerfile tarifle birlikte saklanır ama derlenmez.",
+      "files": "Dosyalar",
+      "upload": "Yükle",
+      "uploadFailed": "{name} yüklenemedi: {error}",
+      "noFiles": "Henüz dosya yok.",
+      "pickFile": "Yüklenmiş bir dosya ekle...",
+      "snippets": "Kod parçası ekle",
+      "insert": "İmlecin olduğu yere ekle",
+      "snippetEmpty": "Adım henüz bir şey üretmiyor.",
+      "packagePlaceholder": "Paket adı arayın veya yazın...",
+      "indexing": "Paket listesi imajdan okunuyor. Bir imajın ilk araması bir dakika sürer.",
+      "noIndex": "Bu imaj için paket listesi yok; adları yazın.",
+      "noPackages": "'{query}' ile eşleşen paket yok. Yazıldığı gibi eklemek için Enter'a basın.",
+      "destHelp": "/ ile biten bir yol, dosyaların konulduğu bir klasördür.",
+      "sha256Help": "İsteğe bağlı. İndirilen dosya eşleşmezse derleme durur.",
+      "scriptHelp": "Satır başına bir komut. Tek bir katmanda root olarak çalışırlar ve derleme başarısız olan ilk komutta durur.",
+      "rawHelp": "Tam olarak yazıldığı gibi derlenen Dockerfile yönergeleri.",
+      "addVariable": "Değişken ekle",
+      "line": "Satır {line}:",
+      "copied": "Dockerfile kopyalandı.",
+      "buildQueued": "Başka bir derlemenin bitmesi bekleniyor",
+      "buildRunning": "Derleniyor ({seconds} sn)",
+      "buildReady": "Deneme {seconds} sn içinde derlendi. Siz kaydedene kadar oturumlar değişmez.",
+      "buildFailed": "Derleme başarısız oldu. Oturumlar derlenen son imajı korur.",
+      "openTrial": "Deneme oturumu aç",
+      "fields": {
+        "note": "Derleme günlüğündeki başlık",
+        "dest": "İmajdaki hedef",
+        "executable": "Çalıştırılabilir yap",
+        "extract": "Arşivleri oraya aç",
+        "url": "Adres",
+        "action": "Ardından",
+        "sha256": "SHA-256 sağlama toplamı",
+        "value": "değer",
+        "script": "Komutlar",
+        "text": "Dockerfile"
+      },
+      "actions": {
+        "save": "Dosyayı kaydet",
+        "extract": "Arşivi aç",
+        "install": "Paket olarak kur"
+      },
+      "kinds": {
+        "packages": {
+          "title": "Paket kur",
+          "short": "Dağıtımın depolarından",
+          "help": "İmajın kendi paket yöneticisiyle kurar ve ardından önbellekleri kaldırır."
+        },
+        "files": {
+          "title": "Dosya kopyala",
+          "short": "İmaja dosya yükle",
+          "help": "Yüklediğiniz dosyaları imajdaki bir yola kopyalar. Oturum ana dizinini /config üzerine bağlar, bu yüzden dosyaları başka bir yere koyun."
+        },
+        "download": {
+          "title": "İndir",
+          "short": "Dosya, arşiv veya paket getir",
+          "help": "İmaj derlenirken bir adresten getirir: dosyayı saklayın, bir arşivi açın veya bir .deb, .rpm ya da .apk kurun."
+        },
+        "certificates": {
+          "title": "Sertifikalara güven",
+          "short": "Kendi sertifika yetkililerinizi ekleyin",
+          "help": "Yüklediğiniz sertifikaları imajın güvenilen yetkililerine ekler."
+        },
+        "fonts": {
+          "title": "Yazı tipi ekle",
+          "short": "Yazı tipi dosyaları kur",
+          "help": "Yüklediğiniz yazı tipi dosyalarını imajdaki her uygulama için kurar."
+        },
+        "env": {
+          "title": "Ortam",
+          "short": "Ortam değişkenlerini ayarla",
+          "help": "İmajda çalışan her şey için değişkenleri ayarlar."
+        },
+        "run": {
+          "title": "Komut çalıştır",
+          "short": "Kabuk komutları, root olarak",
+          "help": "İmaj derlenirken kabuk komutları çalıştırır."
+        },
+        "raw": {
+          "title": "Dockerfile satırları",
+          "short": "Herhangi bir yönerge, yazıldığı gibi",
+          "help": "Dockerfile'a tam olarak yazdığınız gibi konulan yönergeler."
+        }
+      },
+      "toGuidedConfirm": "Adımlardan derle",
+      "baseApp": "Temel uygulama",
+      "name": "Ad",
+      "listBuiltOn": "{name} üzerine kurulu · {image}",
+      "icon": "Simge",
+      "clear": "Tarifi temizle",
+      "clearTitle": "Tarifi temizle",
+      "confirmClear": "Bu tarifin tüm adımları, Dockerfile'ı ve yüklenen dosyaları kaldırılsın mı? Uygulama, adı ve simgesi olduğu gibi kalır ve siz kaydedene kadar kullanıcılar için hiçbir şey değişmez.",
+      "done": "Bitti",
+      "logTitle": "Derleme çıktısı",
+      "rebakeHelp": "Kaydet ve pişir bu tarifi şimdi derler ve uygulamanın imajı kaynağından her güncellendiğinde kendiliğinden yeniden derler.",
+      "rebakeNote": "Bu tarif, {image} kaynağından her güncellendiğinde o imajın üzerine yeniden derlenir.",
+      "listBuilding": "{name} pişiriliyor ({seconds} sn)",
+      "listBaked": "{name} pişirildi. Yeni oturumlar bu imajı çalıştırır.",
+      "listFailed": "{name} derlemesi başarısız oldu. Oturumlar derlenen son imajı korur.",
+      "confirmDeleteApp": "'{name}' silinsin mi? Pişirilmiş uygulama tarifiyle birlikte kaldırılır. Kullanıcıların onunla oluşturduğu ana dizinler kalır."
     }
   },
   "popup": {
@@ -2210,7 +2357,8 @@
         "waiting": "Masaüstünün yanıt vermesi bekleniyor",
         "ready": "Oturum açılıyor",
         "client": "Uygulamanın web istemcisi hazırlanıyor",
-        "vpn": "VPN ağ geçidi başlatılıyor"
+        "vpn": "VPN ağ geçidi başlatılıyor",
+        "baking": "Uygulamanın imajı pişiriliyor"
       },
       "uploading": "Dosya yükleniyor ({done} / {total})",
       "imageHint": "Bir uygulamanın bir düğümdeki ilk başlatması onu indirir; bu dakikalar sürebilir. Sonraki başlatmalar hızlıdır.",

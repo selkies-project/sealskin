@@ -90,7 +90,8 @@
       "audit": "Registro di Audit",
       "branding": "Branding",
       "keys": "Chiavi Applicazione",
-      "vpn": "Profili VPN"
+      "vpn": "Profili VPN",
+      "bakery": "Forno"
     },
     "dashboard": {
       "title": "Pannello di Controllo",
@@ -324,7 +325,12 @@
       "notLocal": "Immagine non trovata localmente",
       "isLaboratory": "Questa è un'app di Laboratorio, costruita da un'immagine di base con impostazioni personalizzate.",
       "confirmDelete": "Sei sicuro di voler eliminare l'app installata '{appName}'?",
-      "deleteTitle": "Elimina app installata"
+      "deleteTitle": "Elimina app installata",
+      "heldBy": "Fa da base a {names}. Elimina prima quelle.",
+      "isBaked": "Sfornata",
+      "builtOnCount": "{count} costruite su questa",
+      "builtOnTitle": "Mostra le applicazioni costruite su questa",
+      "kindLab": "Laboratorio"
     },
     "appStore": {
       "title": "App Store",
@@ -1195,7 +1201,7 @@
       "selectApp": "Seleziona App",
       "createNew": "Crea Nuova App",
       "baseApp": "Applicazione di Base",
-      "baseAppDescription": "L'applicazione installata su cui si baserà la tua nuova app personalizzata.",
+      "baseAppDescription": "L'applicazione installata o sfornata su cui si baserà la tua nuova app personalizzata.",
       "selectBase": "Seleziona un'App di Base",
       "appName": "Nome App",
       "appIcon": "Icona App",
@@ -1849,6 +1855,147 @@
       "removeEndpoint": "Rimuovi endpoint",
       "endpointIncomplete": "L'endpoint «{label}» richiede host, porta e, per WireGuard, la chiave pubblica del server.",
       "endpointsAdded": "{count, plural, one {1 endpoint aggiunto} other {{count} endpoint aggiunti}}."
+    },
+    "bakery": {
+      "title": "Il Forno",
+      "help": "Una ricetta sforna una nuova applicazione sopra una che hai installato: pacchetti, file, certificati, tutto ciò che un Dockerfile può fare, con un nome e un'icona propri. Sfornane quante ne servono dalla stessa applicazione. Ogni nodo costruisce sull'immagine che ha già scaricato e ricostruisce ogni volta che quell'immagine viene aggiornata dall'upstream. Le sessioni usano l'immagine sfornata appena è costruita e mantengono l'ultima valida quando una build non riesce.",
+      "unavailable": "Questo server esegue le sessioni su Kubernetes, dove il Forno non può ancora costruire immagini.",
+      "newRecipe": "Nuova Ricetta",
+      "application": "Applicazione",
+      "recipe": "Ricetta",
+      "none": "Ancora nessuna ricetta. Una ricetta aggiunge pacchetti, file o qualsiasi altra cosa all'immagine di un'applicazione.",
+      "listSteps": "{count} passaggi",
+      "listDockerfile": "Dockerfile",
+      "statePaused": "In pausa",
+      "stateBuilding": "In forno",
+      "stateError": "Non riuscita",
+      "stateErrorKept": "le sessioni usano l'ultima immagine costruita",
+      "stateReady": "Sfornata",
+      "statePending": "Non sfornata su questo nodo",
+      "rebuildTitle": "Sforna di nuovo da zero, con i pacchetti attuali della distribuzione",
+      "deleteTitle": "Elimina",
+      "confirmDelete": "Eliminare la ricetta di '{name}'? Le sue sessioni tornano a usare l'immagine propria dell'applicazione.",
+      "newAppInvalid": "Scegli l'applicazione su cui costruire e dai un nome a quella sfornata.",
+      "pickBase": "-- Scegli un'applicazione --",
+      "family": "Distribuzione",
+      "familyAuto": "Come indica l'immagine",
+      "builtOn": "Costruita su",
+      "baseNone": "Scegli un'applicazione per vederne l'immagine.",
+      "baseReading": "Lettura dell'immagine...",
+      "baseUnknown": "Distribuzione sconosciuta",
+      "modeGuided": "Guidata",
+      "modeDeveloper": "Sviluppatore",
+      "tryBuild": "Build di prova",
+      "saveAndBake": "Salva e sforna",
+      "steps": "Passaggi",
+      "addStep": "Aggiungi un passaggio",
+      "noSteps": "Ancora nessun passaggio. Scegline uno qui sotto: il Dockerfile a destra segue ciò che aggiungi.",
+      "moveUp": "Sposta su",
+      "moveDown": "Sposta giù",
+      "skipStep": "Escludi questo passaggio dalla build",
+      "useStep": "Rimetti questo passaggio nella build",
+      "developerHelp": "Il Dockerfile viene costruito così come lo scrivi. L'immagine dell'applicazione è l'argomento di build BASE_IMAGE: dichiaralo con ARG prima del primo FROM, scrivi altri stadi dove ti servono e termina con uno stadio che inizia con FROM ${BASE_IMAGE}.",
+      "toGuidedTitle": "Torna ai passaggi guidati",
+      "toGuided": "I passaggi sono come li hai lasciati e la build torna a seguirli. Il Dockerfile che hai scritto resta con la ricetta ma non viene costruito.",
+      "files": "File",
+      "upload": "Carica",
+      "uploadFailed": "Impossibile caricare {name}: {error}",
+      "noFiles": "Ancora nessun file.",
+      "pickFile": "Aggiungi un file caricato...",
+      "snippets": "Inserisci uno snippet",
+      "insert": "Inserisci al cursore",
+      "snippetEmpty": "Il passaggio non produce ancora nulla.",
+      "packagePlaceholder": "Cerca o digita il nome di un pacchetto...",
+      "indexing": "Lettura dell'elenco dei pacchetti dall'immagine. La prima ricerca in un'immagine richiede un minuto.",
+      "noIndex": "Nessun elenco di pacchetti per questa immagine; digita i nomi.",
+      "noPackages": "Nessun pacchetto corrisponde a '{query}'. Premi Invio per aggiungerlo come digitato.",
+      "destHelp": "Un percorso che termina con / è una cartella in cui vengono messi i file.",
+      "sha256Help": "Facoltativo. La build si ferma se il download non corrisponde.",
+      "scriptHelp": "Un comando per riga. Vengono eseguiti come root in un unico layer e la build si ferma al primo che fallisce.",
+      "rawHelp": "Istruzioni Dockerfile, costruite esattamente come scritte.",
+      "addVariable": "Aggiungi una variabile",
+      "line": "Riga {line}:",
+      "copied": "Dockerfile copiato.",
+      "buildQueued": "In attesa che termini un'altra build",
+      "buildRunning": "Build in corso ({seconds} s)",
+      "buildReady": "Build di prova completata in {seconds} s. Le sessioni restano invariate finché non salvi.",
+      "buildFailed": "La build non è riuscita. Le sessioni mantengono l'ultima immagine costruita.",
+      "openTrial": "Apri una sessione di prova",
+      "fields": {
+        "note": "Titolo nel log di build",
+        "dest": "Destinazione nell'immagine",
+        "executable": "Rendi eseguibile",
+        "extract": "Estrai lì gli archivi",
+        "url": "Indirizzo",
+        "action": "Poi",
+        "sha256": "Checksum SHA-256",
+        "value": "valore",
+        "script": "Comandi",
+        "text": "Dockerfile"
+      },
+      "actions": {
+        "save": "Salva il file",
+        "extract": "Estrai l'archivio",
+        "install": "Installalo come pacchetto"
+      },
+      "kinds": {
+        "packages": {
+          "title": "Installa pacchetti",
+          "short": "Dai repository della distribuzione",
+          "help": "Installa con il gestore di pacchetti dell'immagine e poi rimuove le cache."
+        },
+        "files": {
+          "title": "Copia file",
+          "short": "Carica file nell'immagine",
+          "help": "Copia i file che carichi in un percorso dell'immagine. Una sessione monta la propria cartella home su /config, quindi metti i file altrove."
+        },
+        "download": {
+          "title": "Scarica",
+          "short": "Recupera un file, un archivio o un pacchetto",
+          "help": "Recupera un indirizzo durante la build dell'immagine: conserva il file, estrai un archivio o installa un .deb, .rpm o .apk."
+        },
+        "certificates": {
+          "title": "Considera attendibili i certificati",
+          "short": "Aggiungi le tue autorità di certificazione",
+          "help": "Aggiunge i certificati che carichi alle autorità attendibili dell'immagine."
+        },
+        "fonts": {
+          "title": "Aggiungi font",
+          "short": "Installa file di font",
+          "help": "Installa i file di font che carichi per tutte le applicazioni dell'immagine."
+        },
+        "env": {
+          "title": "Ambiente",
+          "short": "Imposta variabili d'ambiente",
+          "help": "Imposta variabili per tutto ciò che viene eseguito nell'immagine."
+        },
+        "run": {
+          "title": "Esegui comandi",
+          "short": "Comandi shell, come root",
+          "help": "Esegue comandi shell durante la build dell'immagine."
+        },
+        "raw": {
+          "title": "Righe di Dockerfile",
+          "short": "Qualsiasi istruzione, come scritta",
+          "help": "Istruzioni inserite nel Dockerfile esattamente come le scrivi."
+        }
+      },
+      "toGuidedConfirm": "Costruisci dai passaggi",
+      "baseApp": "Costruisci su",
+      "name": "Nome",
+      "listBuiltOn": "costruita su {name} · {image}",
+      "icon": "Icona",
+      "clear": "Svuota ricetta",
+      "clearTitle": "Svuota la ricetta",
+      "confirmClear": "Rimuovere tutti i passaggi, il Dockerfile e i file caricati di questa ricetta? L'applicazione, il suo nome e la sua icona restano come sono e nulla cambia per gli utenti finché non salvi.",
+      "done": "Fatto",
+      "logTitle": "Output della build",
+      "rebakeHelp": "Salva e sforna costruisce questa ricetta ora e la ricostruisce, da sola, ogni volta che l'immagine dell'applicazione viene aggiornata dall'upstream.",
+      "rebakeNote": "Questa ricetta viene ricostruita sopra {image} ogni volta che quell'immagine viene aggiornata dall'upstream.",
+      "listBuilding": "{name} in forno ({seconds} s)",
+      "listBaked": "{name} è sfornata. Le nuove sessioni usano questa immagine.",
+      "listFailed": "La build di {name} non è riuscita. Le sessioni mantengono l'ultima immagine costruita.",
+      "confirmDeleteApp": "Eliminare '{name}'? L'applicazione sfornata viene rimossa con la sua ricetta. Le cartelle home create dagli utenti con essa restano."
     }
   },
   "popup": {
@@ -2210,7 +2357,8 @@
         "waiting": "In attesa della risposta del desktop",
         "ready": "Apertura della sessione",
         "client": "Preparazione del client web dell'applicazione",
-        "vpn": "Avvio del gateway VPN"
+        "vpn": "Avvio del gateway VPN",
+        "baking": "Immagine dell'applicazione in forno"
       },
       "uploading": "Caricamento del file ({done} di {total})",
       "imageHint": "Il primo avvio di un'applicazione su un nodo la scarica, e può richiedere alcuni minuti. Gli avvii successivi sono rapidi.",
