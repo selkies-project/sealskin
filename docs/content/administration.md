@@ -586,6 +586,10 @@ At start-up the server detects GPUs on the host:
 * **DRI3** devices (Intel, AMD, and others) through `/dev/dri`. The render
   node is passed into the container and exported as `DRI_NODE`.
 
+`SEALSKIN_NODE_GPUS` limits the GPUs offered to the devices it lists, and
+`SEALSKIN_NODE_GPU_PREFER` names the kind a launch for any GPU gets first;
+[Cluster](cluster.md#gpus) describes both.
+
 A launch may use a GPU when the user's settings allow it and the app declares
 support for that GPU type. On Wayland, NVIDIA sessions also receive the DRI
 node so the compositor can use the card directly. On Kubernetes the GPUs are

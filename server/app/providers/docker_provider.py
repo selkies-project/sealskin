@@ -28,6 +28,7 @@ from .base_provider import (
     BaseProvider,
     epoch,
     instance_labels,
+    offered_gpus,
     open_url_command,
 )
 
@@ -68,8 +69,8 @@ class DockerProvider(BaseProvider):
         await inspect_self_container()
 
     async def detect_gpus(self) -> None:
-        """Offer the host's render nodes; NVIDIA ones carry their device index."""
-        state.available_gpus[:] = scan_render_nodes()
+        """Offer the host's render nodes `node_gpus` allows; NVIDIA ones carry their device index."""
+        state.available_gpus[:] = offered_gpus(scan_render_nodes())
         logger.info("Detected %d GPU(s): %s", len(state.available_gpus), state.available_gpus)
 
     async def refresh_gpus(self) -> None:

@@ -205,7 +205,7 @@ def test_validate_gpu_rejects_unsupported():
     assert launch.gpu_for_app({"type": "nvidia"}, app) is None
 
 
-def test_auto_takes_a_gpu_of_the_kind_asked_for():
+def test_auto_takes_a_gpu_of_the_kind_asked_for_and_the_kind_the_node_prefers(monkeypatch):
     igpu = {"device": "/dev/dri/renderD128", "driver": "i915", "type": "dri3"}
     nvidia = {"device": "/dev/dri/renderD129", "driver": "nvidia", "type": "nvidia", "index": 0}
     state.available_gpus[:] = [igpu, nvidia]
@@ -213,7 +213,11 @@ def test_auto_takes_a_gpu_of_the_kind_asked_for():
     assert launch.validate_gpu("auto", {"gpu": True}, both) == igpu
     assert launch.validate_gpu("auto:nvidia", {"gpu": True}, both) == nvidia
     assert launch.validate_gpu("auto:dri3", {"gpu": True}, both) == igpu
+    monkeypatch.setattr(settings, "node_gpu_prefer", "nvidia")
+    assert launch.validate_gpu("auto", {"gpu": True}, both) == nvidia
+    # The preferred kind gives way while a GPU of it is held alone.
     state.sessions["held"] = {"gpu_config": nvidia, "gpu_exclusive": True}
+    assert launch.validate_gpu("auto", {"gpu": True}, both) == igpu
     with pytest.raises(HTTPException) as taken:
         launch.validate_gpu("auto:nvidia", {"gpu": True}, both)
     assert taken.value.status_code == 503
@@ -226,6 +230,15 @@ def test_auto_takes_a_gpu_of_the_kind_asked_for():
     with pytest.raises(HTTPException) as missing:
         launch.validate_gpu("auto:nvidia", {"gpu": True}, both)
     assert missing.value.status_code == 400 and "NVIDIA" in missing.value.detail
+
+
+def test_a_node_offers_only_the_gpus_node_gpus_names(monkeypatch):
+    from app.providers.base_provider import offered_gpus
+
+    found = [{"device": "/dev/dri/renderD128"}, {"device": "/dev/dri/renderD129"}]
+    assert offered_gpus(found) == found
+    monkeypatch.setattr(settings, "node_gpus", " /dev/dri/renderD129 ,")
+    assert offered_gpus(found) == [{"device": "/dev/dri/renderD129"}]
 
 
 def test_collaboration_initial_tokens():

@@ -271,7 +271,8 @@ def validate_gpu(
         app: Application being launched.
 
     `auto` takes the GPU of this node the app supports with the fewest
-    sessions on it; `auto:<kind>` takes one of that kind the same way. A forwarded launch
+    sessions on it, those of the kind `node_gpu_prefer` names first;
+    `auto:<kind>` takes one of that kind the same way. A forwarded launch
     asks for one of these, since devices are named per node. A user without
     `gpu_share` gets a GPU no session uses and keeps it alone; any other
     user gets one no session holds alone. `node_gpu_slots` caps the GPU
@@ -312,7 +313,10 @@ def validate_gpu(
             if kind:
                 raise HTTPException(status_code=400, detail=f"This node has no {cluster.GPU_KINDS[kind]} GPU.")
             return None
-        candidates = sorted((g for g in supported if free(g)), key=lambda g: using.get(g["device"], 0))
+        candidates = sorted(
+            (g for g in supported if free(g)),
+            key=lambda g: (g["type"] != settings.node_gpu_prefer, using.get(g["device"], 0)),
+        )
         if not candidates:
             raise HTTPException(status_code=503, detail="Every GPU of this node is taken.")
         return candidates[0]

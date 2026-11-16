@@ -16,6 +16,7 @@ import httpx
 from fastapi import HTTPException
 
 from .. import progress
+from ..settings import settings
 from ..state import state
 
 logger = logging.getLogger(__name__)
@@ -26,6 +27,12 @@ READY_TIMEOUT = 60
 MANAGED_BY_LABEL = "app.kubernetes.io/managed-by"
 INSTANCE_LABEL = "app.kubernetes.io/instance"
 SESSION_LABEL = "sealskin.app/session"
+
+
+def offered_gpus(found: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return the GPUs of `found` this node offers sessions, those `node_gpus` names when it names any."""
+    named = {name.strip() for name in settings.node_gpus.split(",") if name.strip()}
+    return [gpu for gpu in found if not named or gpu["device"] in named]
 
 
 def host_port(ip: str, port: int | str) -> str:

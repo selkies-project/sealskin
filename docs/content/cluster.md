@@ -190,6 +190,14 @@ lists the GPUs of every answering node open to the user: **Any NVIDIA GPU**
 or **Any DRI3 GPU** starts the session on whichever node has a free GPU of
 that kind, and a GPU named with its node starts it on that node.
 
+Two settings shape what a node offers:
+
+* `SEALSKIN_NODE_GPUS` lists the devices the node offers sessions, such as
+  `/dev/dri/renderD129`; the others stay for the host.
+* `SEALSKIN_NODE_GPU_PREFER`, `nvidia` or `dri3`, is the kind a launch that
+  asks for any GPU gets on the node while one of that kind is free, such as
+  a discrete card ahead of the processor's.
+
 ## Home directories
 
 A home directory lives on one node. The cluster records which

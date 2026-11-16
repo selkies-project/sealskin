@@ -48,6 +48,7 @@ from .base_provider import (
     epoch,
     host_port,
     instance_labels,
+    offered_gpus,
     open_url_command,
 )
 
@@ -601,6 +602,7 @@ class KubernetesProvider(BaseProvider):
                 {"device": name, "driver": driver, "type": "nvidia" if driver == "nvidia" else "dri3", "template": name}
                 for name, driver in named
             ]
+            offered = offered_gpus(offered)
             if offered != state.available_gpus:
                 logger.info("Offering %d GPU option(s) from PodTemplates: %s", len(named), [name for name, _ in named])
             state.available_gpus[:] = offered
@@ -608,7 +610,7 @@ class KubernetesProvider(BaseProvider):
         if _scanned is None:
             _scanned = await self._scan_gpus()
             logger.info("Detected %d GPU type(s): %s", len(_scanned), [gpu["device"] for gpu in _scanned])
-        state.available_gpus[:] = _scanned
+        state.available_gpus[:] = offered_gpus(_scanned)
 
     async def _scan_gpus(self) -> list[dict[str, Any]]:
         """Return the GPUs the cluster's nodes and device classes, the quota, or this node offer."""
