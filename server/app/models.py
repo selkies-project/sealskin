@@ -974,30 +974,52 @@ class BakeStep(BaseModel):
 
     Attributes:
         id: What the editor and the rendered blocks name the step by.
-        kind: `packages` installs with the distribution's package manager; `files` copies
-            uploaded files to `dest`; `download` fetches `url`; `certificates` trusts
-            uploaded certificates; `fonts` installs uploaded fonts; `env` sets variables;
-            `run` runs shell commands; `raw` is Dockerfile text as written.
+        kind: `packages` installs with the distribution's package manager; `app` installs an
+            application of the Bakery's catalog; `ppa` installs from a personal package archive;
+            `download` fetches `url`; `desktop` writes a desktop entry; `files` copies uploaded
+            files to `dest`; `fonts` installs font packs and uploaded fonts; `certificates`
+            trusts uploaded certificates; `env` sets variables; `proxy` sets the proxy and
+            mirror variables; `docker` installs Docker; `devkit` installs a language's
+            toolchain; `launch` writes the session's start command; `startup` adds a script the container runs as it starts; `run`
+            runs shell commands; `raw` is Dockerfile text as written.
         note: The step's title in the build log.
         enabled: Whether the step is rendered.
-        packages: Package names of a `packages` step.
-        files: Names of the recipe's files a `files`, `certificates`, or `fonts` step takes.
+        packages: Package names of a `packages` or `ppa` step, or of a `devkit` step in its language's own form.
+        files: Names of the recipe's files a `files`, `certificates`, or `fonts` step takes, or the icon of a `desktop` step.
         dest: Where a `files` step copies to, or a `download` step saves or unpacks to.
         executable: Make the copied or downloaded file executable.
         extract: Unpack the tar archives of a `files` step at `dest`.
         url: The address a `download` step fetches.
         sha256: The checksum the download must have, or empty.
         action: What a `download` step does with the file: `save` it at `dest`,
-            `extract` it there, or `install` it as a package.
+            `extract` it there, `install` it as a package, or unpack it as an `appimage` at `dest`.
         env: The variables of an `env` step.
-        script: The shell commands of a `run` step, one per line.
+        script: The shell commands of a `run`, `launch`, or `startup` step, one per line.
         text: The instructions of a `raw` step.
+        options: What the other kinds are set by, as `app.bakery` reads them for each.
     """
 
     model_config = ConfigDict(extra="ignore")
 
     id: str = Field(default_factory=lambda: uuid.uuid4().hex[:8])
-    kind: Literal["packages", "files", "download", "certificates", "fonts", "env", "run", "raw"]
+    kind: Literal[
+        "packages",
+        "app",
+        "ppa",
+        "download",
+        "desktop",
+        "files",
+        "fonts",
+        "certificates",
+        "env",
+        "proxy",
+        "docker",
+        "devkit",
+        "launch",
+        "startup",
+        "run",
+        "raw",
+    ]
     note: str = Field(default="", max_length=120)
     enabled: bool = True
     packages: list[str] = []
@@ -1007,10 +1029,11 @@ class BakeStep(BaseModel):
     extract: bool = False
     url: str = ""
     sha256: str = ""
-    action: Literal["save", "extract", "install"] = "save"
+    action: Literal["save", "extract", "install", "appimage"] = "save"
     env: list[BakeEnv] = []
     script: str = ""
     text: str = ""
+    options: dict[str, bool | str | list[str]] = Field(default_factory=dict, max_length=32)
 
 
 class BakeRecipe(BaseModel):

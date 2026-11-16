@@ -8,7 +8,7 @@ import tarfile
 import pytest
 from fastapi import HTTPException
 
-from app import bakery, launch
+from app import bakekits, bakery, launch
 from app.models import BakeRecipe, InstalledApp
 from app.settings import settings
 from app.state import state
@@ -126,6 +126,90 @@ def test_a_step_that_cannot_render_is_a_problem_of_that_step_alone():
     assert [problem["step"] for problem in rendered.problems] == ["a", "b", "c"]
     assert 'ENV A="\\$HOME"' in rendered.dockerfile and "scratch" not in rendered.dockerfile
     assert rendered.blocks == [{"step": "d", "start": 3, "end": 3}]
+
+
+def _one(kind, family="debian", distro="debian", **fields):
+    recipe = BakeRecipe(app_id="firefox", steps=[{"id": "a", "kind": kind, **fields}])
+    return bakery.render(recipe, IMAGE, family, distro=distro)
+
+
+def test_an_application_comes_from_where_its_distribution_gets_it():
+    debian = _one("app", options={"app": "chromium"}).dockerfile
+    assert "add-apt-repository" not in debian and "grep -lE '^Exec=[^ ]*chromium'" in debian and "--no-sandbox|" in debian
+    assert "> /etc/xdg/mimeapps.list" in debian and "<command>chromium --no-sandbox</command>" in debian
+    assert "add-apt-repository -y ppa:xtradeb/apps" in _one("app", distro="ubuntu", options={"app": "chromium"}).dockerfile
+    fedora = _one("app", family="fedora", distro="fedora", options={"app": "chromium", "menu": False, "default": False}).dockerfile
+    assert "Exec=[^ ]*chromium-browser" in fedora and "mimeapps" not in fedora and "menu.xml" not in fedora
+    chrome = _one("app", distro="ubuntu", options={"app": "chrome"}).dockerfile
+    assert "signed-by=/etc/apt/keyrings/google-chrome.asc" in chrome and chrome.index("sources.list.d") < chrome.index("apt-get update")
+    assert "Pin: origin packages.mozilla.org" in _one("app", options={"app": "firefox"}).dockerfile
+    assert _one("app", family="alpine", distro="alpine", options={"app": "chrome"}).problems
+    assert "chrome" not in bakekits.offers("alpine", "alpine")["apps"] and "firefox" in bakekits.offers("alpine", "alpine")["apps"]
+
+
+def test_a_personal_package_archive_is_an_ubuntu_step():
+    step = {"options": {"ppas": ["ppa:libretro/stable"]}, "packages": ["retroarch"]}
+    assert "add-apt-repository -y ppa:libretro/stable" in _one("ppa", distro="ubuntu", **step).dockerfile
+    assert _one("ppa", **step).problems and _one("ppa", distro="ubuntu", options={"ppas": ["x; id"]}, packages=["a"]).problems
+    assert bakekits.offers("debian", "debian")["hidden"] == ["ppa"] and bakekits.offers("debian", "ubuntu")["hidden"] == []
+
+
+def test_a_desktop_entry_is_written_from_what_the_administrator_names():
+    rendered = _one("desktop", options={"name": "My Tool & Co", "command": "/opt/tool/AppRun", "sandbox": True, "category": "Office"})
+    text = rendered.dockerfile
+    assert "'Name=My Tool & Co'" in text and "'Exec=/opt/tool/AppRun --no-sandbox'" in text and "'Categories=Office;'" in text
+    assert "> /usr/share/applications/sealskin-my-tool-co.desktop" in text and 'label="My Tool &amp; Co"' in text
+    assert _one("desktop", options={"name": "x"}).problems and _one("desktop", options={"name": "x", "command": "y", "category": "z"}).problems
+
+
+def test_an_appimage_is_unpacked_into_a_folder_of_its_own():
+    text = _one("download", url="https://example.com/App.AppImage", action="appimage", dest="/opt/app").dockerfile
+    assert "/tmp/app.AppImage --appimage-extract" in text and "mv squashfs-root /opt/app" in text
+    assert _one("download", url="https://example.com/App.AppImage", action="appimage", dest="/opt").problems
+
+
+def test_docker_is_put_where_the_image_looks_for_it():
+    latest = _one("docker", family="").dockerfile
+    assert "tar -xzf - -C /usr/local/bin --strip-components=1" in latest and "sort -uV" in latest
+    assert "cli-plugins/docker-buildx" in latest and "cli-plugins/docker-compose" in latest
+    pinned = _one("docker", options={"version": "28.5.1", "compose": False, "buildx": False}).dockerfile
+    assert "DOCKER_RELEASE=28.5.1 &&" in pinned and "cli-plugins" not in pinned
+    assert _one("docker", options={"version": "latest; id"}).problems
+
+
+def test_fonts_install_the_sets_of_the_distribution_and_the_uploaded_files():
+    cjk = _one("fonts", options={"packs": ["cjk", "office"]}).dockerfile
+    assert "rm -f /etc/dpkg/dpkg.cfg.d/selkies-fonts" in cjk and "--reinstall \\\n    fonts-crosextra-caladea" in cjk
+    assert "--reinstall" not in _one("fonts", family="arch", options={"packs": ["cjk"]}).dockerfile
+    assert _one("fonts", options={"packs": ["microsoft"]}).problems
+    assert "debconf-set-selections" in _one("fonts", options={"packs": ["microsoft"], "eula": True}).dockerfile
+    assert _one("fonts", family="fedora", options={"packs": ["microsoft"], "eula": True}).problems and _one("fonts").problems
+
+
+def test_a_development_kit_installs_its_packages_outside_the_home_directory():
+    python = _one("devkit", options={"kit": "python"}, packages=["requests>=2"]).dockerfile
+    assert "/opt/venv/bin/pip install --no-cache-dir \\\n    'requests>=2'" in python and 'ENV PATH="${PATH}:/opt/venv/bin"' in python
+    assert "ENV" not in _one("devkit", options={"kit": "python"}).dockerfile
+    assert "nodejs && \\\n  if ! command -v npm >/dev/null; then" in _one("devkit", options={"kit": "node"}, packages=["typescript"]).dockerfile
+    assert "github.com/junegunn/fzf@latest" in _one("devkit", options={"kit": "go"}, packages=["github.com/junegunn/fzf"]).dockerfile
+    assert _one("devkit", options={"kit": "java"}, packages=["x"]).problems and _one("devkit", options={"kit": "python"}, packages=["a; id"]).problems
+
+
+def test_the_start_of_a_session_and_of_its_container_are_files_of_the_image():
+    replaced = _one("launch", script="app --flag\n").dockerfile
+    assert "'app --flag'" in replaced and 'do cp /tmp/autostart "$file"; done' in replaced
+    assert 'cat /tmp/autostart "$file" > /tmp/autostart.new' in _one("launch", options={"placement": "before"}, script="xterm &").dockerfile
+    once = _one("startup", options={"name": "Fix Perms"}, script="chown abc /data").dockerfile
+    assert "'#!/usr/bin/with-contenv bash'" in once and "chmod 755 /custom-cont-init.d/fix-perms" in once
+    assert "/custom-services.d/a" not in once and "/custom-services.d/sealskin-a" in _one("startup", options={"mode": "service"}, script="#!/bin/sh\nexec sleep 1").dockerfile
+    assert _one("launch").problems and _one("startup", script="  \n").problems
+
+
+def test_a_proxy_keeps_the_loopback_out_of_it():
+    text = _one("proxy", options={"proxy": "http://proxy.lan:3128", "no_proxy": "lan, 10.0.0.0/8", "npm": "https://npm.lan"}).dockerfile
+    assert 'no_proxy="localhost,127.0.0.1,lan,10.0.0.0/8"' in text and 'HTTPS_PROXY="http://proxy.lan:3128"' in text
+    assert 'NPM_CONFIG_REGISTRY="https://npm.lan"' in text
+    assert _one("proxy").problems and _one("proxy", options={"proxy": "proxy.lan"}).problems
 
 
 def test_a_script_becomes_one_run_whatever_its_shell_blocks():

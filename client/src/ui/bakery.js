@@ -6,7 +6,9 @@
  * editor is a bench of two panes: on the left the steps of a guided recipe,
  * each a small form, and on the right the Dockerfile the server renders from
  * them as they change (`POST /api/admin/bakery/preview/<app>`), each step's
- * lines lit while the step is open or pointed at. Developer mode swaps the
+ * lines lit while the step is open or pointed at. The same answer says what
+ * the steps offer on the image (`offers`): the applications, font sets,
+ * toolchains, and package sets of its distribution, and the kinds it hides. Developer mode swaps the
  * right pane for the text itself, and the left for the recipe's files and a
  * snippet builder that renders one step and puts it at the cursor.
  *
@@ -25,19 +27,38 @@ import { escapeHtml, formatBytes, formatLogoSrc, timeAgo, showToast } from '../l
 const $ = (id) => document.getElementById(id);
 const copy = (value) => JSON.parse(JSON.stringify(value));
 const newId = () => crypto.randomUUID().replace(/-/g, '').slice(0, 8);
-// Every kind of step a recipe may hold. The guided menu offers the `guided` ones; a developer's snippets add
-// the ones that write an idiom worth not retyping, and the rest are a developer's own lines.
+// Every kind of step a recipe may hold. The menus offer the ones in a group; the rest are a developer's own lines.
 const KINDS = [
-  { kind: 'packages', icon: 'fa-cubes', guided: true, snippet: true },
-  { kind: 'files', icon: 'fa-file-import', guided: true, snippet: true },
-  { kind: 'certificates', icon: 'fa-certificate', guided: true, snippet: true },
-  { kind: 'env', icon: 'fa-sliders', guided: true, snippet: true },
-  { kind: 'download', icon: 'fa-cloud-arrow-down', snippet: true },
-  { kind: 'fonts', icon: 'fa-font', snippet: true },
+  { kind: 'packages', icon: 'fa-cubes', group: 'software' },
+  { kind: 'app', icon: 'fa-store', group: 'software' },
+  { kind: 'ppa', icon: 'fa-box-archive', group: 'software' },
+  { kind: 'download', icon: 'fa-cloud-arrow-down', group: 'software' },
+  { kind: 'devkit', icon: 'fa-laptop-code', group: 'software' },
+  { kind: 'docker', icon: 'fa-layer-group', group: 'software' },
+  { kind: 'desktop', icon: 'fa-table-cells-large', group: 'desktop' },
+  { kind: 'launch', icon: 'fa-play', group: 'desktop' },
+  { kind: 'fonts', icon: 'fa-font', group: 'desktop' },
+  { kind: 'files', icon: 'fa-file-import', group: 'system' },
+  { kind: 'certificates', icon: 'fa-certificate', group: 'system' },
+  { kind: 'env', icon: 'fa-sliders', group: 'system' },
+  { kind: 'proxy', icon: 'fa-network-wired', group: 'system' },
+  { kind: 'startup', icon: 'fa-power-off', group: 'system' },
   { kind: 'run', icon: 'fa-terminal' },
   { kind: 'raw', icon: 'fa-code' },
 ];
-const FILE_KINDS = ['files', 'certificates', 'fonts'];
+const GROUPS = ['software', 'desktop', 'system'];
+// What a new step of each kind starts with, beside the fields every step has.
+const OPTIONS = {
+  app: { app: '', menu: true, default: true },
+  ppa: { ppas: [] },
+  desktop: { name: '', command: '', icon: '', category: 'Utility', sandbox: false, terminal: false, menu: true },
+  fonts: { packs: [], eula: false },
+  proxy: { proxy: '', no_proxy: '', pip: '', npm: '' },
+  docker: { version: '', compose: true, buildx: true },
+  devkit: { kit: '' },
+  launch: { placement: 'replace' },
+  startup: { mode: 'once', name: '' },
+};
 const INSTRUCTION = /^(\s*)(FROM|RUN|COPY|ADD|ENV|ARG|LABEL|USER|WORKDIR|EXPOSE|VOLUME|ENTRYPOINT|CMD|SHELL|HEALTHCHECK|STOPSIGNAL|ONBUILD)\b/i;
 
 let t;
@@ -49,6 +70,7 @@ let data = { available: true, recipes: [], families: {} };
 let draft = null;
 let base = null;
 let preview = null;
+let offers = null;
 let openStep = null;
 // The step a developer fills in to insert, and the build the panel follows.
 let snippet = null;
@@ -69,6 +91,7 @@ function blankStep(kind) {
   return {
     id: newId(), kind, note: '', enabled: true, packages: [], files: [], dest: kind === 'files' ? '/usr/local/bin/' : '',
     executable: false, extract: false, url: '', sha256: '', action: 'save', env: kind === 'env' ? [{ name: '', value: '' }] : [], script: '', text: '',
+    options: copy(OPTIONS[kind] || {}),
   };
 }
 
@@ -240,54 +263,108 @@ async function loadBase() {
 
 // --- The editor: steps -------------------------------------------------------------
 
+const opt = (step, name, fallback = '') => (step.options || {})[name] ?? fallback;
+/** The list a row of chips edits: the step's packages, or a list among its options. */
+function listOf(step, list) {
+  if (list === 'packages') return step.packages;
+  step.options = step.options || {};
+  if (!Array.isArray(step.options[list])) step.options[list] = [];
+  return step.options[list];
+}
+const firstLine = (value) => value.split('\n').find((line) => line.trim()) || '';
+
 function summary(step) {
+  const also = (...parts) => parts.flat().filter(Boolean).join(', ');
   switch (step.kind) {
     case 'packages': return step.packages.join(', ');
+    case 'app': return ((offers && offers.apps[opt(step, 'app')]) || {}).name || opt(step, 'app');
+    case 'ppa': return also(listOf(step, 'ppas'), step.packages);
     case 'files': return step.files.length ? `${step.files.join(', ')} → ${step.dest}` : '';
     case 'download': return step.url;
-    case 'certificates': case 'fonts': return step.files.join(', ');
+    case 'desktop': return opt(step, 'name') && opt(step, 'command') ? `${opt(step, 'name')} → ${opt(step, 'command')}` : '';
+    case 'certificates': return step.files.join(', ');
+    case 'fonts': return also(listOf(step, 'packs').map((name) => tk(`fontPacks.${name}`)), step.files);
     case 'env': return step.env.filter((item) => item.name).map((item) => `${item.name}=${item.value}`).join(', ');
-    case 'run': return step.script.split('\n').find((line) => line.trim()) || '';
-    default: return step.text.split('\n').find((line) => line.trim()) || '';
+    case 'proxy': return also(opt(step, 'proxy'), opt(step, 'pip'), opt(step, 'npm'));
+    case 'docker': return opt(step, 'version') || tk('latest');
+    case 'devkit': return opt(step, 'kit') ? also(tk(`devkits.${opt(step, 'kit')}`), step.packages) : '';
+    case 'launch': case 'startup': case 'run': return firstLine(step.script);
+    default: return firstLine(step.text);
   }
 }
 
 const field = (label, control, help = '') => `<label class="bk-field"><span>${escapeHtml(label)}</span>${control}${help ? `<small>${escapeHtml(help)}</small>` : ''}</label>`;
+// A field whose control is more than one input, which a label would tie to the first.
+const block = (label, control, help = '') => `<div class="bk-field"><span>${escapeHtml(label)}</span>${control}${help ? `<small>${escapeHtml(help)}</small>` : ''}</div>`;
 const check = (name, label, value) => `<label class="bk-check"><input type="checkbox" data-field="${name}" ${value ? 'checked' : ''}> ${escapeHtml(label)}</label>`;
 const text = (name, value, placeholder = '') => `<input type="text" data-field="${name}" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" spellcheck="false">`;
 const chip = (label, attr) => `<span class="chip">${escapeHtml(label)}<button type="button" ${attr} title="${escapeHtml(t('common.remove'))}">&times;</button></span>`;
+const optText = (step, name, placeholder = '') => `<input type="text" data-opt="${name}" value="${escapeHtml(opt(step, name))}" placeholder="${escapeHtml(placeholder)}" spellcheck="false">`;
+const optCheck = (step, name, label, fallback = false) => `<label class="bk-check"><input type="checkbox" data-opt="${name}" ${opt(step, name, fallback) ? 'checked' : ''}> ${escapeHtml(label)}</label>`;
+const optSelect = (step, name, choices, blank = '') => `<select data-opt="${name}" data-redraw>${blank ? `<option value="">${escapeHtml(blank)}</option>` : ''}${choices.map(([value, label]) => `<option value="${escapeHtml(value)}" ${opt(step, name) === value ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('')}</select>`;
+const scriptArea = (step, placeholder) => `<textarea data-field="script" rows="6" spellcheck="false" placeholder="${escapeHtml(placeholder)}">${escapeHtml(step.script)}</textarea>`;
 
-function filesForm(step) {
+/** A list edited as chips; `search` looks what is typed up among the image's packages. */
+function chips(step, list, placeholder, search = false) {
+  const items = listOf(step, list).map((name) => chip(name, `data-drop-chip="${list}" data-value="${escapeHtml(name)}"`)).join('');
+  return `
+    <div class="bk-chips">${items}
+      <input type="text" class="bk-package-input" data-chip-input="${list}" ${search ? 'data-search' : ''} placeholder="${escapeHtml(placeholder)}" spellcheck="false" autocomplete="off"></div>
+    ${search ? '<div class="bk-results" data-results></div>' : ''}`;
+}
+
+function filesForm(step, single = false) {
   const spare = draft.files.filter((file) => !step.files.includes(file.name));
   return `
     <div class="bk-chips">${step.files.map((name) => chip(name, `data-drop-file="${escapeHtml(name)}"`)).join('') || `<span class="bk-sub">${escapeHtml(tk('noFiles'))}</span>`}</div>
     <div class="bk-row">
-      <label class="button secondary"><i class="fas fa-upload"></i> ${escapeHtml(tk('upload'))}<input type="file" multiple data-upload hidden></label>
+      <label class="button secondary"><i class="fas fa-upload"></i> ${escapeHtml(tk('upload'))}<input type="file" ${single ? '' : 'multiple'} data-upload hidden></label>
       ${spare.length ? `<select data-pick-file><option value="">${escapeHtml(tk('pickFile'))}</option>${spare.map((file) => `<option>${escapeHtml(file.name)}</option>`).join('')}</select>` : ''}
     </div>`;
 }
 
 function stepForm(step) {
   const k = (name) => tk(`fields.${name}`);
+  const offered = offers || { bundles: {}, fonts: {}, devkits: {}, apps: {}, categories: [] };
   let body = '';
   if (step.kind === 'packages') {
-    body = `
-      <div class="bk-chips">${step.packages.map((name) => chip(name, `data-drop-package="${escapeHtml(name)}"`)).join('')}
-        <input type="text" class="bk-package-input" data-package-input placeholder="${escapeHtml(tk('packagePlaceholder'))}" spellcheck="false" autocomplete="off"></div>
-      <div class="bk-results" data-results></div>`;
+    const bundles = Object.keys(offered.bundles).map((name) => `<button type="button" class="secondary" data-bundle="${name}">${escapeHtml(tk(`bundles.${name}`))}</button>`).join('');
+    body = chips(step, 'packages', tk('packagePlaceholder'), true)
+      + (bundles ? `<div class="bk-row bk-bundles"><span class="bk-sub">${escapeHtml(tk('bundles.label'))}</span>${bundles}</div>` : '');
+  } else if (step.kind === 'app') {
+    const chosen = offered.apps[opt(step, 'app')];
+    body = field(k('app'), optSelect(step, 'app', Object.entries(offered.apps).map(([id, app]) => [id, app.name]), tk('pickApp')))
+      + `<div class="bk-row">${optCheck(step, 'menu', k('menu'), true)}${chosen && chosen.browser ? optCheck(step, 'default', k('default'), true) : ''}</div>`
+      + `<small class="bk-sub">${escapeHtml(tk('menuHelp'))}</small>`;
+  } else if (step.kind === 'ppa') {
+    body = block(k('ppas'), chips(step, 'ppas', 'owner/name'))
+      + block(k('packages'), chips(step, 'packages', tk('packagePlaceholder'), true));
   } else if (step.kind === 'files') {
     body = filesForm(step)
       + field(k('dest'), text('dest', step.dest, '/usr/local/bin/'), tk('destHelp'))
       + `<div class="bk-row">${check('executable', k('executable'), step.executable)}${check('extract', k('extract'), step.extract)}</div>`;
   } else if (step.kind === 'download') {
-    const actions = ['save', 'extract', 'install'].map((action) => `<option value="${action}" ${step.action === action ? 'selected' : ''}>${escapeHtml(tk(`actions.${action}`))}</option>`).join('');
+    const actions = ['save', 'extract', 'appimage', 'install'].map((action) => `<option value="${action}" ${step.action === action ? 'selected' : ''}>${escapeHtml(tk(`actions.${action}`))}</option>`).join('');
+    const place = { save: '/usr/local/bin/tool', extract: '/opt/tool/', appimage: '/opt/application' }[step.action];
     body = field(k('url'), text('url', step.url, 'https://'))
-      + field(k('action'), `<select data-field="action" data-redraw>${actions}</select>`)
-      + (step.action === 'install' ? '' : field(k('dest'), text('dest', step.dest, step.action === 'extract' ? '/opt/tool/' : '/usr/local/bin/tool')))
+      + field(k('action'), `<select data-field="action" data-redraw>${actions}</select>`, step.action === 'appimage' ? tk('appimageHelp') : '')
+      + (step.action === 'install' ? '' : field(k('dest'), text('dest', step.dest, place)))
       + field(k('sha256'), text('sha256', step.sha256), tk('sha256Help'))
       + (step.action === 'save' ? check('executable', k('executable'), step.executable) : '');
-  } else if (step.kind === 'certificates' || step.kind === 'fonts') {
+  } else if (step.kind === 'desktop') {
+    body = field(k('name'), optText(step, 'name'))
+      + field(k('command'), optText(step, 'command', '/opt/application/AppRun'))
+      + block(k('icon'), filesForm(step, true) + (step.files.length ? '' : optText(step, 'icon', tk('iconPlaceholder'))))
+      + field(k('category'), optSelect(step, 'category', offered.categories.map((name) => [name, tk(`categories.${name}`)])))
+      + `<div class="bk-checks">${optCheck(step, 'sandbox', k('sandbox'))}${optCheck(step, 'terminal', k('terminal'))}${optCheck(step, 'menu', k('menu'), true)}</div>`
+      + `<small class="bk-sub">${escapeHtml(tk('menuHelp'))}</small>`;
+  } else if (step.kind === 'certificates') {
     body = filesForm(step);
+  } else if (step.kind === 'fonts') {
+    const chosen = listOf(step, 'packs');
+    const packs = Object.keys(offered.fonts).map((name) => `<label class="bk-check"><input type="checkbox" data-member="packs" value="${name}" ${chosen.includes(name) ? 'checked' : ''}> ${escapeHtml(tk(`fontPacks.${name}`))}</label>`).join('');
+    const license = chosen.some((name) => offered.fonts[name]) ? optCheck(step, 'eula', k('eula')) : '';
+    body = (packs ? block(k('packs'), `<div class="bk-checks">${packs}${license}</div>`) : '') + block(k('fontFiles'), filesForm(step));
   } else if (step.kind === 'env') {
     body = step.env.map((item, index) => `
       <div class="bk-row bk-env" data-env="${index}">
@@ -295,8 +372,27 @@ function stepForm(step) {
         <input type="text" data-env-field="value" value="${escapeHtml(item.value)}" placeholder="${escapeHtml(k('value'))}" spellcheck="false">
         <button type="button" class="secondary" data-drop-env="${index}" title="${escapeHtml(t('common.remove'))}">&times;</button>
       </div>`).join('') + `<button type="button" class="secondary" data-add-env><i class="fas fa-plus"></i> ${escapeHtml(tk('addVariable'))}</button>`;
+  } else if (step.kind === 'proxy') {
+    body = field(k('proxy'), optText(step, 'proxy', 'http://proxy.example.com:3128'))
+      + field(k('no_proxy'), optText(step, 'no_proxy', 'intranet.example.com, 10.0.0.0/8'), tk('noProxyHelp'))
+      + field(k('pip'), optText(step, 'pip', 'https://'))
+      + field(k('npm'), optText(step, 'npm', 'https://'));
+  } else if (step.kind === 'docker') {
+    body = field(k('version'), optText(step, 'version', tk('latest')), tk('versionHelp'))
+      + `<div class="bk-row">${optCheck(step, 'compose', 'Compose', true)}${optCheck(step, 'buildx', 'Buildx', true)}</div>`;
+  } else if (step.kind === 'devkit') {
+    const kit = opt(step, 'kit');
+    body = field(k('kit'), optSelect(step, 'kit', Object.keys(offered.devkits).map((name) => [name, tk(`devkits.${name}`)]), tk('pickKit')))
+      + (offered.devkits[kit] ? block(tk(`devkitPackages.${kit}`), chips(step, 'packages', tk('devkitPlaceholder')), tk('devkitHelp')) : '');
+  } else if (step.kind === 'launch') {
+    body = field(k('placement'), optSelect(step, 'placement', ['replace', 'before'].map((name) => [name, tk(`placements.${name}`)])))
+      + field(k('script'), scriptArea(step, 'application --flag'), tk('launchHelp'));
+  } else if (step.kind === 'startup') {
+    body = field(k('mode'), optSelect(step, 'mode', ['once', 'service'].map((name) => [name, tk(`startModes.${name}`)])))
+      + field(k('scriptName'), optText(step, 'name', 'prepare'))
+      + field(k('script'), scriptArea(step, 'mkdir -p /data/cache'), tk(`startHelp.${opt(step, 'mode', 'once')}`));
   } else if (step.kind === 'run') {
-    body = field(k('script'), `<textarea data-field="script" rows="6" spellcheck="false" placeholder="sed -i 's/old/new/' /etc/example.conf">${escapeHtml(step.script)}</textarea>`, tk('scriptHelp'));
+    body = field(k('script'), scriptArea(step, "sed -i 's/old/new/' /etc/example.conf"), tk('scriptHelp'));
   } else {
     body = field(k('text'), `<textarea data-field="text" rows="6" spellcheck="false" placeholder="LABEL maintainer=&quot;me&quot;">${escapeHtml(step.text)}</textarea>`, tk('rawHelp'));
   }
@@ -337,12 +433,13 @@ function renderSteps() {
 }
 
 function renderMenus() {
-  const menu = (kinds) => kinds.map(({ kind, icon }) => `
+  const hidden = (offers && offers.hidden) || [];
+  const menu = GROUPS.map((group) => `<h5 class="bk-group">${escapeHtml(tk(`groups.${group}`))}</h5>${KINDS.filter((item) => item.group === group && !hidden.includes(item.kind)).map(({ kind, icon }) => `
     <button type="button" class="bk-kind" data-kind="${kind}">
       <i class="fas ${icon} fa-fw"></i><strong>${escapeHtml(tk(`kinds.${kind}.title`))}</strong><span>${escapeHtml(tk(`kinds.${kind}.short`))}</span>
-    </button>`).join('');
-  $('bk-add').innerHTML = menu(KINDS.filter((item) => item.guided));
-  $('bk-snippets').innerHTML = menu(KINDS.filter((item) => item.snippet));
+    </button>`).join('')}`).join('');
+  $('bk-add').innerHTML = menu;
+  $('bk-snippets').innerHTML = menu;
 }
 
 /** The step a control of the left pane belongs to: a card's, or the snippet being filled in. */
@@ -365,9 +462,18 @@ function onStepInput(event) {
   if (control.dataset.field) {
     step[control.dataset.field] = control.type === 'checkbox' ? control.checked : control.value;
     if ('redraw' in control.dataset) return redraw(step);
+  } else if (control.dataset.opt) {
+    step.options = step.options || {};
+    step.options[control.dataset.opt] = control.type === 'checkbox' ? control.checked : control.value;
+    if ('redraw' in control.dataset) return redraw(step);
+  } else if (control.dataset.member) {
+    const list = listOf(step, control.dataset.member);
+    if (control.checked) list.push(control.value);
+    else list.splice(list.indexOf(control.value), 1);
+    return redraw(step);
   } else if (control.dataset.envField) {
     step.env[Number(control.closest('[data-env]').dataset.env)][control.dataset.envField] = control.value;
-  } else if ('packageInput' in control.dataset) {
+  } else if ('search' in control.dataset) {
     return searchPackages(step, control);
   } else {
     return undefined;
@@ -380,24 +486,25 @@ function onStepInput(event) {
   return schedulePreview();
 }
 
-function addPackages(step, value) {
-  const names = value.split(/[\s,]+/).map((name) => name.trim()).filter(Boolean);
-  names.forEach((name) => { if (!step.packages.includes(name)) step.packages.push(name); });
+function addChips(step, list, value) {
+  const items = listOf(step, list);
+  value.split(/[\s,]+/).map((name) => name.trim()).filter(Boolean).forEach((name) => { if (!items.includes(name)) items.push(name); });
   redraw(step);
   const scope = step === snippet ? $('bk-snippet') : document.querySelector(`.bk-step[data-id="${step.id}"]`);
-  const input = scope && scope.querySelector('[data-package-input]');
+  const input = scope && scope.querySelector(`[data-chip-input="${list}"]`);
   if (input) input.focus();
 }
 
 function onStepKey(event) {
-  if (!('packageInput' in event.target.dataset)) return;
+  const list = event.target.dataset.chipInput;
+  if (!list) return;
   const step = stepOf(event.target);
   if (['Enter', ',', ' '].includes(event.key) && event.target.value.trim()) {
     event.preventDefault();
-    addPackages(step, event.target.value);
-  } else if (event.key === 'Backspace' && !event.target.value && step.packages.length) {
-    step.packages.pop();
-    addPackages(step, '');
+    addChips(step, list, event.target.value);
+  } else if (event.key === 'Backspace' && !event.target.value && listOf(step, list).length) {
+    listOf(step, list).pop();
+    addChips(step, list, '');
   }
 }
 
@@ -425,7 +532,7 @@ function searchPackages(step, control) {
     }
     if (found.state !== 'ready') return showResults(control, `<p class="bk-sub">${escapeHtml(found.error || tk('noIndex'))}</p>`);
     const rows = found.results.filter((item) => !step.packages.includes(item.name)).map((item) => `
-      <button type="button" data-add-package="${escapeHtml(item.name)}"><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml(item.description)}</span></button>`).join('');
+      <button type="button" data-add-chip="${escapeHtml(item.name)}"><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml(item.description)}</span></button>`).join('');
     return showResults(control, rows || `<p class="bk-sub">${escapeHtml(tk('noPackages', { query }))}</p>`);
   }, 250);
   return undefined;
@@ -439,7 +546,9 @@ async function uploadFiles(step, files) {
         method: 'POST', body: JSON.stringify({ upload_id: uploadId, total_chunks: totalChunks, filename: file.name }),
       });
       draft.files = draft.files.filter((item) => item.name !== kept.name).concat(kept);
-      if (step && !step.files.includes(kept.name)) step.files.push(kept.name);
+      // A desktop entry has one icon.
+      if (step && step.kind === 'desktop') step.files = [kept.name];
+      else if (step && !step.files.includes(kept.name)) step.files.push(kept.name);
     } catch (error) {
       showToast(tk('uploadFailed', { name: file.name, error: error.message }), true);
     }
@@ -455,6 +564,7 @@ async function onStepChange(event) {
   if ('upload' in control.dataset && control.files.length) {
     await uploadFiles(step, [...control.files]);
   } else if (step && 'pickFile' in control.dataset && control.value) {
+    if (step.kind === 'desktop') step.files = [];
     step.files.push(control.value);
     redraw(step);
   }
@@ -473,10 +583,13 @@ function onStepClick(event) {
     step.enabled = !step.enabled;
   } else if ('remove' in target.dataset) {
     draft.steps.splice(index, 1);
-  } else if (target.dataset.dropPackage) {
-    step.packages = step.packages.filter((name) => name !== target.dataset.dropPackage);
-  } else if (target.dataset.addPackage) {
-    return addPackages(step, target.dataset.addPackage);
+  } else if (target.dataset.dropChip) {
+    const list = listOf(step, target.dataset.dropChip);
+    list.splice(list.indexOf(target.dataset.value), 1);
+  } else if (target.dataset.addChip) {
+    return addChips(step, 'packages', target.dataset.addChip);
+  } else if (target.dataset.bundle) {
+    return addChips(step, 'packages', ((offers && offers.bundles[target.dataset.bundle]) || []).join(' '));
   } else if (target.dataset.dropFile) {
     step.files = step.files.filter((name) => name !== target.dataset.dropFile);
   } else if (target.dataset.dropEnv) {
@@ -634,6 +747,15 @@ async function runPreview() {
   }
   if (run !== previewRun || !draft) return;
   preview = rendered;
+  // The image, or the family chosen for it, decides what the steps offer.
+  if (JSON.stringify(rendered.offers) !== JSON.stringify(offers)) {
+    offers = rendered.offers;
+    renderMenus();
+    if (!document.activeElement || !document.activeElement.closest('#bk-steps, #bk-snippet-form')) {
+      renderSteps();
+      renderSnippet();
+    }
+  }
   if (draft.mode === 'guided') paintCode();
   paintProblems();
 }

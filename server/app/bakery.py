@@ -6,7 +6,9 @@ objects `bakery/files/<sha256>`, named by their content. A `guided` recipe is
 an ordered list of steps (`BakeStep`), each rendered to the Dockerfile lines a
 linuxserver image is built with: one `RUN` per step that installs with the
 distribution's package manager and removes what the install left behind
-(`FAMILIES`). The distribution is read from the image's own `os-release`. The
+(`FAMILIES`). The applications, font sets, toolchains, and package sets a
+step offers by name are the tables of `bakekits`, each per family. The
+distribution is read from the image's own `os-release`. The
 `FROM` line of a guided recipe is the application's image and nothing else. A
 `dockerfile` recipe is the administrator's own text, built as written: the
 application's image reaches it as the build argument `BASE_IMAGE`, so stages
@@ -57,12 +59,14 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Any
 from urllib.parse import urlsplit
+from xml.sax.saxutils import escape as xml_escape
+from xml.sax.saxutils import quoteattr
 
 import yaml
 from fastapi import HTTPException
 from pydantic import ValidationError
 
-from . import persistence, progress, registries
+from . import bakekits, persistence, progress, registries
 from .fsutil import safe_join
 from .models import BakeFile, BakeRecipe, BakeStep, InstalledApp
 from .settings import settings
@@ -103,6 +107,7 @@ _ENV_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _ANSI = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
 _PLAIN_PATH = re.compile(r"^[A-Za-z0-9._/+@%:,=-]+$")
+_PPA = re.compile(r"^[a-z0-9][a-z0-9.+-]*/[a-z0-9][a-z0-9.+-]*$")
 #: Line endings after which a shell command goes on, so no `&&` joins the next line to it.
 _OPEN_ENDINGS = ("&&", "||", "|", ";", "then", "do", "else", "{", "(")
 _CLOSERS = ("fi", "done", "esac", "}", "else", "elif", ")")
@@ -505,25 +510,22 @@ def _cleanup(family: Family, extra: tuple[str, ...] = ()) -> list[str]:
     return [_banner("cleanup"), *family.cleanup, _remove([*extra, *family.leftovers])]
 
 
-def _render_packages(step: BakeStep, family: str, recipe: BakeRecipe) -> list[str]:
-    packages = [name.strip() for name in step.packages if name.strip()]
+def _render_packages(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
+    packages = _packages_of(step)
     if not packages:
         raise StepError("Add at least one package.")
-    for name in packages:
-        if not _PACKAGE.fullmatch(name):
-            raise StepError(f"'{name}' is not a package name.")
     found = _family(family, "a package install")
     return _run(
         [
             _banner(step.note or "install packages"),
             *found.refresh,
-            _install(found, found.install, sorted(set(packages))),
+            _install(found, found.install, packages),
             *_cleanup(found),
         ]
     )
 
 
-def _render_files(step: BakeStep, family: str, recipe: BakeRecipe) -> list[str]:
+def _render_files(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
     sources = _context_files(step, recipe)
     several = len(sources) > 1 or step.extract
     dest = _dest(step, folder=several)
@@ -537,7 +539,7 @@ def _render_files(step: BakeStep, family: str, recipe: BakeRecipe) -> list[str]:
     return lines
 
 
-def _render_download(step: BakeStep, family: str, recipe: BakeRecipe) -> list[str]:
+def _render_download(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
     url = step.url.strip()
     parts = urlsplit(url)
     if parts.scheme not in ("http", "https") or not parts.netloc or any(c.isspace() for c in url):
@@ -553,12 +555,17 @@ def _render_download(step: BakeStep, family: str, recipe: BakeRecipe) -> list[st
         if target.endswith("/"):
             target += name
         folder = os.path.dirname(target) or "/"
+    elif step.action == "appimage":
+        target = "/tmp/app.AppImage"
+        folder = _dest(step).rstrip("/")
+        if folder in ("", "/config") or folder.count("/") < 2:
+            raise StepError("An AppImage is unpacked into a folder of its own, such as /opt/application.")
     else:
         target = f"/tmp/{name}"
         folder = _dest(step, folder=True) if step.action == "extract" else ""
     quoted = shlex.quote(target)
     commands = [_banner(step.note or f"download {name}")]
-    if folder:
+    if folder and step.action != "appimage":
         commands.append(f"mkdir -p {shlex.quote(folder)}")
     commands.append(_listed("curl -fsSL -o", [quoted, shlex.quote(url)]))
     if checksum:
@@ -566,6 +573,20 @@ def _render_download(step: BakeStep, family: str, recipe: BakeRecipe) -> list[st
     if step.action == "extract":
         commands.append(_listed("tar xf", [quoted, f"-C {shlex.quote(folder)}"]))
         commands.append(_remove(["/tmp/*"]))
+    elif step.action == "appimage":
+        place = shlex.quote(folder)
+        commands.extend(
+            [
+                f"chmod +x {quoted}",
+                "cd /tmp",
+                f"{quoted} --appimage-extract >/dev/null",
+                f"mkdir -p {shlex.quote(os.path.dirname(folder))}",
+                f"rm -rf {place}",
+                f"mv squashfs-root {place}",
+                f"chmod -R a+rX {place}",
+                _remove(["/tmp/*"]),
+            ]
+        )
     elif step.action == "install":
         found = _family(family, "a package file install")
         commands.extend([*found.refresh, _install(found, found.install_file, [quoted]), *_cleanup(found)])
@@ -574,7 +595,7 @@ def _render_download(step: BakeStep, family: str, recipe: BakeRecipe) -> list[st
     return _run(commands)
 
 
-def _render_certificates(step: BakeStep, family: str, recipe: BakeRecipe) -> list[str]:
+def _render_certificates(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
     sources = _context_files(step, recipe)
     found = _family(family, "trusting a certificate")
     lines = [f"# {step.note}"] if step.note else []
@@ -583,26 +604,404 @@ def _render_certificates(step: BakeStep, family: str, recipe: BakeRecipe) -> lis
     return lines + _run([_banner("trust certificates"), found.cert_command])
 
 
-def _render_fonts(step: BakeStep, family: str, recipe: BakeRecipe) -> list[str]:
-    sources = _context_files(step, recipe)
+def _option(step: BakeStep, name: str, limit: int = 512) -> str:
+    """Return a text option of a step, trimmed.
+
+    Raises:
+        StepError: For text of several lines, or longer than `limit`.
+    """
+    value = step.options.get(name, "")
+    value = value.strip() if isinstance(value, str) else ""
+    if len(value) > limit or any(char in value for char in "\n\r\x00"):
+        raise StepError("A field is one line of text.")
+    return value
+
+
+def _flag(step: BakeStep, name: str, default: bool = False) -> bool:
+    value = step.options.get(name, default)
+    return value if isinstance(value, bool) else default
+
+
+def _items(step: BakeStep, name: str) -> list[str]:
+    """Return a list option of a step, its entries trimmed, the empty and the repeated ones dropped."""
+    value = step.options.get(name, [])
+    found: list[str] = []
+    for item in value if isinstance(value, list) else []:
+        item = item.strip()
+        if any(char in item for char in "\n\r\x00"):
+            raise StepError("A list entry is one line of text.")
+        if item and item not in found:
+            found.append(item)
+    return found
+
+
+def _web_address(value: str, what: str) -> str:
+    """Return an `http` or `https` address as given.
+
+    Raises:
+        StepError: For anything else.
+    """
+    parts = urlsplit(value)
+    if parts.scheme not in ("http", "https") or not parts.netloc or any(char.isspace() for char in value):
+        raise StepError(f"{what} is an http or https URL.")
+    return value
+
+
+def _slug(text: str, fallback: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")[:48] or fallback
+
+
+def _write(lines: list[str], path: str) -> str:
+    """Return the command that writes lines of text to a file of the image."""
+    return _listed("printf '%s\\n'", [shlex.quote(line) for line in lines]) + f" \\\n    > {shlex.quote(path)}"
+
+
+def _script_lines(step: BakeStep) -> list[str]:
+    """Return a step's script as the lines of a file.
+
+    Raises:
+        StepError: For an empty script.
+    """
+    lines = step.script.replace("\r\n", "\n").strip("\n").split("\n")
+    if not any(line.strip() for line in lines):
+        raise StepError("Write at least one command.")
+    return [line.rstrip() for line in lines]
+
+
+def _env_lines(pairs: list[tuple[str, str]]) -> str:
+    """Return one `ENV` instruction of variables, their values quoted."""
+    quoted = []
+    for name, value in pairs:
+        value = value.replace("\\", "\\\\").replace('"', '\\"').replace("$", "\\$")
+        quoted.append(f'{name}="{value}"')
+    return " \\\n    ".join([f"ENV {quoted[0]}", *quoted[1:]])
+
+
+def _menu_item(label: str, command: str, icon: str = "") -> str:
+    """Return the command that lists a program in the right-click menu the image's sessions start with."""
+    attributes = f"label={quoteattr(label)}" + (f" icon={quoteattr(icon)}" if icon else "")
+    item = f'<item {attributes}><action name="Execute"><command>{xml_escape(command)}</command></action></item>'
+    script = "/<\\/menu>/i " + item.replace("\\", "\\\\")
+    return (
+        'for menu in /defaults/menu.xml /defaults/menu_wayland.xml; do '
+        f'if [ -f "$menu" ]; then sed -i {shlex.quote(script)} "$menu"; fi; done'
+    )
+
+
+def _packages_of(step: BakeStep) -> list[str]:
+    """Return a step's package names, sorted.
+
+    Raises:
+        StepError: For a name no package manager takes.
+    """
+    packages = sorted({name.strip() for name in step.packages if name.strip()})
+    for name in packages:
+        if not _PACKAGE.fullmatch(name):
+            raise StepError(f"'{name}' is not a package name.")
+    return packages
+
+
+def _render_fonts(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
+    chosen = _items(step, "packs")
+    if not chosen and not step.files:
+        raise StepError("Choose a set of fonts, or upload font files.")
     lines = [f"# {step.note}"] if step.note else []
-    lines.append(_copy("COPY", sources, "/usr/share/fonts/sealskin/"))
-    return lines + _run([_banner("index fonts"), "if command -v fc-cache >/dev/null; then fc-cache -f; fi"])
+    if step.files:
+        lines.append(_copy("COPY", _context_files(step, recipe), "/usr/share/fonts/sealskin/"))
+    commands = [_banner(step.note or "install fonts")]
+    if chosen:
+        found = _family(family, "a font install")
+        packages: list[str] = []
+        before: list[str] = []
+        after: list[str] = []
+        reinstall = False
+        for name in chosen:
+            pack = bakekits.FONT_PACKS.get(name)
+            if pack is None or family not in pack.packages:
+                raise StepError(f"The fonts '{name}' are not packaged for this distribution.")
+            if pack.eula and not _flag(step, "eula"):
+                raise StepError("These fonts come under a license of their own; accept it in the step to install them.")
+            packages.extend(pack.packages[family])
+            before.extend(pack.before.get(family, ()))
+            after.extend(pack.after.get(family, ()))
+            reinstall = reinstall or pack.reinstall
+        install = found.install
+        if reinstall and family == "debian":
+            install = (*install[:-1], install[-1] + " --reinstall")
+        commands.extend([*before, *found.refresh, _install(found, install, sorted(set(packages))), *after])
+    commands.append("if command -v fc-cache >/dev/null; then fc-cache -f; fi")
+    if chosen:
+        commands.extend(_cleanup(FAMILIES[family]))
+    return lines + _run(commands)
 
 
-def _render_env(step: BakeStep, family: str, recipe: BakeRecipe) -> list[str]:
+def _render_env(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
     if not step.env:
         raise StepError("Add at least one variable.")
-    pairs = []
     for item in step.env:
         if not _ENV_NAME.fullmatch(item.name):
             raise StepError(f"'{item.name}' is not a variable name.")
         if "\n" in item.value:
             raise StepError(f"The value of {item.name} is one line.")
-        value = item.value.replace("\\", "\\\\").replace('"', '\\"').replace("$", "\\$")
-        pairs.append(f'{item.name}="{value}"')
     lines = [f"# {step.note}"] if step.note else []
-    return lines + [" \\\n    ".join([f"ENV {pairs[0]}", *pairs[1:]])]
+    return lines + [_env_lines([(item.name, item.value) for item in step.env])]
+
+
+def _render_proxy(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
+    proxy = _option(step, "proxy")
+    pairs: list[tuple[str, str]] = []
+    if proxy:
+        _web_address(proxy, "The proxy")
+        # Selkies and the session's own services answer on the loopback, which no proxy reaches.
+        skipped = ",".join(dict.fromkeys(["localhost", "127.0.0.1", *re.split(r"[\s,]+", _option(step, "no_proxy"))]))
+        skipped = skipped.strip(",")
+        for name in ("http_proxy", "https_proxy"):
+            pairs.extend([(name, proxy), (name.upper(), proxy)])
+        pairs.extend([("no_proxy", skipped), ("NO_PROXY", skipped)])
+    for option, name, what in (("pip", "PIP_INDEX_URL", "The Python index"), ("npm", "NPM_CONFIG_REGISTRY", "The npm registry")):
+        value = _option(step, option)
+        if value:
+            pairs.append((name, _web_address(value, what)))
+    if not pairs:
+        raise StepError("Give the proxy's address, or a mirror's.")
+    lines = [f"# {step.note}"] if step.note else []
+    return lines + [_env_lines(pairs)]
+
+
+def _repository(repository: bakekits.Repository, name: str) -> list[str]:
+    """Return the commands that add a vendor's APT repository under a name."""
+    commands = [
+        f"mkdir -p {os.path.dirname(repository.key_file)}",
+        _listed("curl -fsSL -o", [repository.key_file, shlex.quote(repository.key_url)]),
+        f"echo {shlex.quote(repository.source.format(key=repository.key_file))} > /etc/apt/sources.list.d/{name}.list",
+    ]
+    if repository.pin:
+        commands.append(
+            _write(["Package: *", f"Pin: origin {repository.pin}", "Pin-Priority: 1000"], f"/etc/apt/preferences.d/{name}")
+        )
+    return commands
+
+
+def _archives(found: Family, archives: list[str]) -> list[str]:
+    """Return the commands that add personal package archives to an Ubuntu image."""
+    return [
+        *found.refresh,
+        _install(found, found.install, ["software-properties-common"]),
+        *[f"add-apt-repository -y ppa:{archive}" for archive in archives],
+    ]
+
+
+def _render_ppa(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
+    if distro not in bakekits.PPA_DISTROS:
+        raise StepError("A personal package archive installs on an Ubuntu image only.")
+    archives = [item.removeprefix("ppa:") for item in _items(step, "ppas")]
+    if not archives:
+        raise StepError("Name at least one archive, as owner/name.")
+    for archive in archives:
+        if not _PPA.fullmatch(archive):
+            raise StepError(f"'{archive}' is not an archive: write it as owner/name.")
+    packages = _packages_of(step)
+    if not packages:
+        raise StepError("Add at least one package to install from the archive.")
+    found = FAMILIES["debian"]
+    return _run(
+        [
+            _banner(step.note or "install from a package archive"),
+            *_archives(found, archives),
+            *found.refresh,
+            _install(found, found.install, packages),
+            *_cleanup(found),
+        ]
+    )
+
+
+def _render_app(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
+    app = bakekits.APPS.get(_option(step, "app"))
+    if app is None:
+        raise StepError("Choose an application.")
+    found = _family(family, "an application install")
+    if not app.offered(family, distro):
+        raise StepError(f"{app.name} is not offered on this distribution.")
+    commands = [_banner(step.note or f"install {app.name}")]
+    if family == "debian" and distro in app.repository:
+        commands.extend(_repository(app.repository[distro], _slug(app.name, "vendor")))
+    elif family == "debian" and distro in app.ppa:
+        commands.extend(_archives(found, [app.ppa[distro]]))
+    # The entries the install adds are found by what was there before it, whatever the vendor names them.
+    commands.append("ls /usr/share/applications > /tmp/entries 2>/dev/null || true")
+    commands.extend([*found.refresh, _install(found, found.install, list(app.packages[family]))])
+    command = app.commands.get(family, app.command)
+    default = app.browser and _flag(step, "default", True)
+    if app.sandbox or default:
+        commands.append(
+            'ENTRIES=$(cd /usr/share/applications && for entry in *.desktop; do grep -qxF "${entry}" /tmp/entries || '
+            f"grep -lE '^Exec=[^ ]*{command}' \"${{entry}}\"; done || true)"
+        )
+    if app.sandbox:
+        # A browser engine's own sandbox needs what a container's seccomp profile withholds.
+        commands.append(
+            'for entry in ${ENTRIES}; do sed -i -E \'s|^(Exec=[^ ]+)|\\1 --no-sandbox|\' "/usr/share/applications/${entry}"; done'
+        )
+        command += " --no-sandbox"
+    if default:
+        commands.extend(
+            [
+                "mkdir -p /etc/xdg",
+                'if [ -n "${ENTRIES}" ]; then '
+                "printf '[Default Applications]\\nx-scheme-handler/http=%s\\nx-scheme-handler/https=%s\\ntext/html=%s\\n' "
+                "$(for kind in 1 2 3; do echo ${ENTRIES} | cut -d' ' -f1; done) > /etc/xdg/mimeapps.list; fi",
+            ]
+        )
+    if _flag(step, "menu", True):
+        commands.append(_menu_item(app.name, command))
+    return _run([*commands, *_cleanup(found)])
+
+
+def _render_desktop(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
+    name = _option(step, "name", 80)
+    command = _option(step, "command")
+    if not name or not command:
+        raise StepError("A desktop entry has a name and the command it starts.")
+    category = _option(step, "category") or bakekits.DESKTOP_CATEGORIES[0]
+    if category not in bakekits.DESKTOP_CATEGORIES:
+        raise StepError(f"'{category}' is not a menu category.")
+    slug = _slug(name, step.id)
+    lines = [f"# {step.note}"] if step.note else []
+    icon = _option(step, "icon")
+    if step.files:
+        source = _context_files(step, recipe)[0]
+        icon = f"/usr/share/pixmaps/sealskin-{slug}{os.path.splitext(step.files[0])[1].lower()}"
+        lines.append(_copy("COPY", [source], icon))
+    if _flag(step, "sandbox"):
+        command += " --no-sandbox"
+    entry = ["[Desktop Entry]", "Type=Application", f"Name={name}", f"Exec={command}"]
+    if icon:
+        entry.append(f"Icon={icon}")
+    entry.extend([f"Categories={category};", f"Terminal={'true' if _flag(step, 'terminal') else 'false'}"])
+    commands = [
+        _banner(step.note or f"desktop entry for {name}"),
+        "mkdir -p /usr/share/applications",
+        _write(entry, f"/usr/share/applications/sealskin-{slug}.desktop"),
+    ]
+    if _flag(step, "menu", True):
+        commands.append(_menu_item(name, command, icon if icon.startswith("/") else ""))
+    return lines + _run(commands)
+
+
+def _render_docker(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
+    version = _option(step, "version")
+    if version and not re.fullmatch(r"\d+\.\d+\.\d+", version):
+        raise StepError("A Docker version is three numbers, such as 28.5.1; leave it empty for the latest.")
+    static = "https://download.docker.com/linux/static/stable/${ARCH}"
+    latest = (
+        f'$(curl -fsSL "{static}/" | grep -oE \'docker-[0-9]+\\.[0-9]+\\.[0-9]+\\.tgz\' '
+        "| sort -uV | tail -n1 | sed 's/^docker-//; s/\\.tgz$//')"
+    )
+    plugins = "/usr/local/lib/docker/cli-plugins"
+    commands = [
+        _banner(step.note or "install docker"),
+        "ARCH=$(uname -m)",
+        f"DOCKER_RELEASE={version or latest}",
+        'echo "docker ${DOCKER_RELEASE}"',
+        f'curl -fsSL --retry 5 "{static}/docker-${{DOCKER_RELEASE}}.tgz" \\\n    | tar -xzf - -C /usr/local/bin --strip-components=1',
+    ]
+    wanted = [name for name in ("buildx", "compose") if _flag(step, name, True)]
+    if wanted:
+        commands.append(f"mkdir -p {plugins}")
+    if "buildx" in wanted:
+        commands.extend(
+            [
+                'case "${ARCH}" in aarch64) GOARCH=arm64 ;; *) GOARCH=amd64 ;; esac',
+                "BUILDX_RELEASE=$(curl -fsSLI -o /dev/null -w '%{url_effective}' https://github.com/docker/buildx/releases/latest | sed 's|.*/||')",
+                _listed(
+                    "curl -fsSL --retry 5 -o",
+                    [
+                        f"{plugins}/docker-buildx",
+                        '"https://github.com/docker/buildx/releases/download/${BUILDX_RELEASE}/buildx-${BUILDX_RELEASE}.linux-${GOARCH}"',
+                    ],
+                ),
+            ]
+        )
+    if "compose" in wanted:
+        commands.append(
+            _listed(
+                "curl -fsSL --retry 5 -o",
+                [
+                    f"{plugins}/docker-compose",
+                    '"https://github.com/docker/compose/releases/latest/download/docker-compose-linux-${ARCH}"',
+                ],
+            )
+        )
+    if wanted:
+        commands.append(f"chmod 755 {plugins}/*")
+    commands.extend(["(getent group docker >/dev/null || groupadd docker)", "usermod -aG docker abc"])
+    return _run(commands)
+
+
+def _render_devkit(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
+    name = _option(step, "kit")
+    kit = bakekits.DEV_KITS.get(name)
+    if kit is None:
+        raise StepError("Choose a language.")
+    found = _family(family, "a toolchain install")
+    if family not in kit.packages:
+        raise StepError("This toolchain is not packaged for the distribution.")
+    wanted = [item.strip() for item in step.packages if item.strip()]
+    if wanted and not kit.install:
+        raise StepError("This toolchain installs no packages of its own.")
+    for item in wanted:
+        if not re.fullmatch(kit.pattern, item):
+            raise StepError(f"'{item}' is not a package name.")
+    if name == "go":
+        wanted = [item if "@" in item else f"{item}@latest" for item in wanted]
+    toolchain = [*found.refresh, _install(found, found.install, list(kit.packages[family]))]
+    if family in kit.completes:
+        program, extra = kit.completes[family]
+        toolchain.append(f"if ! command -v {program} >/dev/null; then \\\n  " + _install(found, found.install, list(extra)) + "; \\\n  fi")
+    commands = [_banner(step.note or f"install {name}"), *toolchain]
+    if wanted:
+        commands.extend([*kit.before, _listed(kit.install, [shlex.quote(item) for item in wanted])])
+    commands.extend(_cleanup(found, kit.leftovers if wanted else ()))
+    lines = _run(commands)
+    if wanted and kit.env:
+        lines.append(" \\\n    ".join([f'ENV {kit.env[0][0]}="{kit.env[0][1]}"', *[f'{key}="{value}"' for key, value in kit.env[1:]]]))
+    return lines
+
+
+#: The files a session's start command is copied from on the first start of a home directory, per display server.
+AUTOSTART_FILES = ("/defaults/autostart", "/defaults/autostart_wayland")
+
+
+def _render_launch(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
+    lines = _script_lines(step)
+    files = " ".join(AUTOSTART_FILES)
+    commands = [_banner(step.note or "launch command"), "mkdir -p /defaults", _write(lines, "/tmp/autostart")]
+    if _option(step, "placement") == "before":
+        commands.append(
+            f'for file in {files}; do if [ -f "$file" ]; then cat /tmp/autostart "$file" > /tmp/autostart.new && '
+            'cat /tmp/autostart.new > "$file"; else cp /tmp/autostart "$file"; fi; done'
+        )
+    else:
+        commands.append(f'for file in {files}; do cp /tmp/autostart "$file"; done')
+    commands.append("rm -f /tmp/autostart /tmp/autostart.new")
+    return _run(commands)
+
+
+def _render_startup(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
+    lines = _script_lines(step)
+    if not lines[0].startswith("#!"):
+        lines.insert(0, "#!/usr/bin/with-contenv bash")
+    service = _option(step, "mode") == "service"
+    folder = "/custom-services.d" if service else "/custom-cont-init.d"
+    path = f"{folder}/{_slug(_option(step, 'name', 48) or step.note, f'sealskin-{step.id}')}"
+    return _run(
+        [
+            _banner(step.note or ("service" if service else "startup script")),
+            f"mkdir -p {folder}",
+            _write(lines, path),
+            f"chmod 755 {path}",
+        ]
+    )
 
 
 def join_script(script: str) -> list[str]:
@@ -634,14 +1033,14 @@ def join_script(script: str) -> list[str]:
     return commands
 
 
-def _render_run(step: BakeStep, family: str, recipe: BakeRecipe) -> list[str]:
+def _render_run(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
     commands = join_script(step.script)
     if not commands:
         raise StepError("Write at least one command.")
     return _run([_banner(step.note or "run commands"), *commands])
 
 
-def _render_raw(step: BakeStep, family: str, recipe: BakeRecipe) -> list[str]:
+def _render_raw(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
     text = step.text.replace("\r\n", "\n").strip("\n")
     if not text.strip():
         raise StepError("Write at least one instruction.")
@@ -652,11 +1051,19 @@ def _render_raw(step: BakeStep, family: str, recipe: BakeRecipe) -> list[str]:
 
 _RENDERERS = {
     "packages": _render_packages,
-    "files": _render_files,
+    "app": _render_app,
+    "ppa": _render_ppa,
     "download": _render_download,
-    "certificates": _render_certificates,
+    "desktop": _render_desktop,
+    "files": _render_files,
     "fonts": _render_fonts,
+    "certificates": _render_certificates,
     "env": _render_env,
+    "proxy": _render_proxy,
+    "docker": _render_docker,
+    "devkit": _render_devkit,
+    "launch": _render_launch,
+    "startup": _render_startup,
     "run": _render_run,
     "raw": _render_raw,
 }
@@ -783,7 +1190,7 @@ class Rendered:
         return [problem["message"] for problem in self.problems if problem["level"] == "error"]
 
 
-def render(recipe: BakeRecipe, image: str, family: str, portable: bool = False) -> Rendered:
+def render(recipe: BakeRecipe, image: str, family: str, portable: bool = False, distro: str = "") -> Rendered:
     """Return the Dockerfile of a recipe for one base image.
 
     Args:
@@ -791,6 +1198,7 @@ def render(recipe: BakeRecipe, image: str, family: str, portable: bool = False) 
         image: The reference of the application's image on this node.
         family: The image's distribution family, or `""`.
         portable: Write a guided recipe's `FROM` through `BASE_IMAGE`, as developer mode starts from.
+        distro: The `ID` of the image's `os-release`, which the steps of one distribution alone ask for.
     """
     if recipe.mode == "dockerfile":
         text = recipe.dockerfile.replace("\r\n", "\n")
@@ -803,7 +1211,7 @@ def render(recipe: BakeRecipe, image: str, family: str, portable: bool = False) 
         if not step.enabled:
             continue
         try:
-            block = "\n".join(_RENDERERS[step.kind](step, recipe.family or family, recipe)).split("\n")
+            block = "\n".join(_RENDERERS[step.kind](step, recipe.family or family, recipe, distro)).split("\n")
         except StepError as exc:
             result.problems.append(_problem("error", str(exc), step=step.id))
             continue
@@ -857,8 +1265,9 @@ async def base_of(app: InstalledApp, pull: bool = True) -> dict[str, Any]:
 
     Returns:
         `image` (the reference on this node), `image_id`, `family`, `manager`,
-        and `distribution` (the image's own name for itself); `image_id` is
-        empty when the image is not on this node and `pull` is off.
+        `distribution` (the image's own name for itself), and `distro` (the
+        `ID` of its `os-release`); `image_id` is empty when the image is not
+        on this node and `pull` is off.
 
     Raises:
         RecipeError: When the image cannot be pulled.
@@ -872,7 +1281,7 @@ async def base_of(app: InstalledApp, pull: bool = True) -> dict[str, Any]:
         except Exception as exc:  # noqa: BLE001 - the answer carries the reason
             raise RecipeError(f"The image '{name}' could not be pulled: {exc}") from exc
         info = await provider.get_local_image_info(name)
-    answer = {"image": registries.mirror(name), "image_id": info["id"] if info else "", "family": "", "manager": "", "distribution": ""}
+    answer = {"image": registries.mirror(name), "image_id": info["id"] if info else "", "family": "", "manager": "", "distribution": "", "distro": ""}
     if not info:
         return answer
     if info["id"] not in _releases:
@@ -887,6 +1296,7 @@ async def base_of(app: InstalledApp, pull: bool = True) -> dict[str, Any]:
         family=family,
         manager=FAMILIES[family].manager if family else "",
         distribution=release.get("PRETTY_NAME") or release.get("NAME") or "",
+        distro=release.get("ID", "").lower(),
     )
     return answer
 
@@ -934,7 +1344,7 @@ async def plan_for(recipe: BakeRecipe, pull: bool = True) -> Plan:
     base = await base_of(app, pull)
     if not base["image_id"]:
         raise RecipeError(f"The image '{base['image']}' is not on this node.")
-    rendered = render(recipe, base["image"], base["family"])
+    rendered = render(recipe, base["image"], base["family"], distro=base["distro"])
     key = _key(base["image_id"], rendered, recipe.files)
     return Plan(recipe=recipe, base=base, rendered=rendered, key=key, tag=f"{IMAGE_PREFIX}/{recipe.app_id}:{key}")
 

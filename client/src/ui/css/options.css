@@ -1973,6 +1973,12 @@ body:has(.popup-container)::before { display: none; }
 .bk-kind-help { margin: 0.6rem 0 0.8rem; color: var(--text-muted); font-size: 0.8rem; }
 
 .bk-menu { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0.5rem; }
+.bk-menu .bk-group { grid-column: 1 / -1; margin: 0.5rem 0 0; color: var(--text-muted); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.bk-menu .bk-group:first-child { margin-top: 0; }
+.bk-checks { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 0.75rem; }
+.bk-field .bk-checks, .bk-field .bk-chips, .bk-field .bk-row { margin-bottom: 0.25rem; }
+#Bakery .bk-bundles button { padding: 0.2rem 0.6rem; border-radius: var(--radius-pill); font-size: 0.76rem; font-weight: 400; }
+.bk-step-body > small.bk-sub { display: block; margin: -0.4rem 0 0.75rem; }
 #Bakery .bk-kind { display: grid; grid-template-columns: auto 1fr; gap: 0.1rem 0.6rem; align-items: center; margin: 0; padding: 0.6rem 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background-color: var(--glass); color: var(--text-primary); text-align: left; cursor: pointer; transition: border-color var(--dur) var(--ease-out), transform var(--dur) var(--ease-out); }
 #Bakery .bk-kind:hover { border-color: var(--accent-border); transform: translateY(-1px); }
 .bk-kind i { grid-row: span 2; color: var(--accent-text); font-size: 1.1rem; }

@@ -9,7 +9,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, ValidationError
 
-from .. import bakery, cluster, routing
+from .. import bakekits, bakery, cluster, routing
 from ..launch import launch_application
 from ..models import BakeRecipe, LaunchResponse
 from ..security import EncryptedRoute, get_decrypted_request_body, verify_admin
@@ -113,8 +113,9 @@ async def preview(app_id: str, body: dict[str, Any] = Depends(get_decrypted_requ
     """Render a draft of a recipe without keeping it.
 
     Returns:
-        `dockerfile`; `blocks`, the lines of each step; `problems`; and for a
-        guided draft `portable`, the same text with its `FROM` written
+        `dockerfile`; `blocks`, the lines of each step; `problems`; `offers`,
+        what the guided steps offer on the image (`bakekits.offers`); and for
+        a guided draft `portable`, the same text with its `FROM` written
         through `BASE_IMAGE`, which developer mode starts from.
     """
     _available()
@@ -123,10 +124,16 @@ async def preview(app_id: str, body: dict[str, Any] = Depends(get_decrypted_requ
         base = await bakery.base_of(_app(app_id))
     except bakery.RecipeError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
-    rendered = bakery.render(recipe, base["image"], base["family"])
-    answer: dict[str, Any] = {"dockerfile": rendered.dockerfile, "blocks": rendered.blocks, "problems": rendered.problems, "base": base}
+    rendered = bakery.render(recipe, base["image"], base["family"], distro=base["distro"])
+    answer: dict[str, Any] = {
+        "dockerfile": rendered.dockerfile,
+        "blocks": rendered.blocks,
+        "problems": rendered.problems,
+        "base": base,
+        "offers": bakekits.offers(recipe.family or base["family"], base["distro"]),
+    }
     if recipe.mode == "guided":
-        answer["portable"] = bakery.render(recipe, base["image"], base["family"], portable=True).dockerfile
+        answer["portable"] = bakery.render(recipe, base["image"], base["family"], portable=True, distro=base["distro"]).dockerfile
     return answer
 
 

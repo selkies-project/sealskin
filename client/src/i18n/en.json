@@ -1931,12 +1931,36 @@
         "sha256": "SHA-256 checksum",
         "value": "value",
         "script": "Commands",
-        "text": "Dockerfile"
+        "text": "Dockerfile",
+        "app": "Application",
+        "menu": "List it in the right-click menu",
+        "default": "Open web links with it",
+        "ppas": "Archives",
+        "packages": "Packages",
+        "name": "Name in the menus",
+        "command": "Command",
+        "icon": "Icon",
+        "category": "Menu category",
+        "sandbox": "Chromium or Electron application: start it with --no-sandbox",
+        "terminal": "Runs in a terminal",
+        "packs": "Font sets",
+        "fontFiles": "Your own font files",
+        "eula": "I accept the license of the Microsoft core fonts",
+        "proxy": "Proxy address",
+        "no_proxy": "Not through the proxy",
+        "pip": "Python package index",
+        "npm": "npm registry",
+        "version": "Version",
+        "kit": "Language",
+        "placement": "Placement",
+        "mode": "Runs",
+        "scriptName": "File name"
       },
       "actions": {
         "save": "Save the file",
         "extract": "Unpack the archive",
-        "install": "Install it as a package"
+        "install": "Install it as a package",
+        "appimage": "Unpack the AppImage"
       },
       "kinds": {
         "packages": {
@@ -1951,8 +1975,8 @@
         },
         "download": {
           "title": "Download",
-          "short": "Fetch a file, archive, or package",
-          "help": "Fetches an address while the image builds: keep the file, unpack an archive, or install a .deb, .rpm, or .apk."
+          "short": "A file, archive, AppImage, or package",
+          "help": "Fetches an address while the image builds: keep the file, unpack an archive or an AppImage, or install a .deb, .rpm, or .apk."
         },
         "certificates": {
           "title": "Trust certificates",
@@ -1961,8 +1985,8 @@
         },
         "fonts": {
           "title": "Add fonts",
-          "short": "Install font files",
-          "help": "Installs the font files you upload for every application in the image."
+          "short": "Font sets and your own files",
+          "help": "Installs font sets the distribution packages and font files you upload, for every application in the image."
         },
         "env": {
           "title": "Environment",
@@ -1978,6 +2002,46 @@
           "title": "Dockerfile lines",
           "short": "Any instruction, as written",
           "help": "Instructions put into the Dockerfile exactly as you write them."
+        },
+        "app": {
+          "title": "Add an application",
+          "short": "A browser or editor, ready to start",
+          "help": "Installs the application from the distribution, or from its vendor's repository on Debian and Ubuntu, and lists it in the session's menus. Chromium-based applications start with --no-sandbox, which a container needs."
+        },
+        "ppa": {
+          "title": "Ubuntu PPA",
+          "short": "Packages from a Launchpad archive",
+          "help": "Adds Launchpad personal package archives to the image and installs packages from them."
+        },
+        "devkit": {
+          "title": "Development kit",
+          "short": "Python, Node.js, Rust, Go, Java",
+          "help": "Installs a language's toolchain from the distribution, and the language's own packages you list."
+        },
+        "docker": {
+          "title": "Install Docker",
+          "short": "The latest Docker, Compose, and Buildx",
+          "help": "Puts Docker's static binaries where the image's Docker service finds them. The service starts in a privileged session only."
+        },
+        "desktop": {
+          "title": "Desktop entry",
+          "short": "List a program in the menus",
+          "help": "Writes a desktop entry for a program the image holds, such as one unpacked from an AppImage or an archive, so the session's menus list it."
+        },
+        "launch": {
+          "title": "Launch command",
+          "short": "What the session starts with",
+          "help": "Writes the commands a session starts its application with."
+        },
+        "proxy": {
+          "title": "Proxy and mirrors",
+          "short": "For the build and for sessions",
+          "help": "Sets the proxy variables and the pip and npm mirrors for the steps below this one and for every session."
+        },
+        "startup": {
+          "title": "Run at start",
+          "short": "A script or service of the container",
+          "help": "Adds a script the container runs as it starts, or a service it keeps running."
         }
       },
       "toGuidedConfirm": "Build from the steps",
@@ -1995,7 +2059,72 @@
       "listBuilding": "Baking {name} ({seconds} s)",
       "listBaked": "{name} is baked. New sessions run this image.",
       "listFailed": "The build of {name} failed. Sessions keep the last image that built.",
-      "confirmDeleteApp": "Delete '{name}'? The baked application is removed with its recipe. Home directories users made with it stay."
+      "confirmDeleteApp": "Delete '{name}'? The baked application is removed with its recipe. Home directories users made with it stay.",
+      "latest": "latest",
+      "pickApp": "-- Choose an application --",
+      "pickKit": "-- Choose a language --",
+      "menuHelp": "A home directory copies the right-click menu on its first start and keeps its copy afterwards.",
+      "appimageHelp": "Unpacks the AppImage into the destination, where AppRun starts it. Add a desktop entry to list it in the menus.",
+      "iconPlaceholder": "or an icon's name or path in the image",
+      "noProxyHelp": "Hosts reached without the proxy, separated by commas. localhost is always among them.",
+      "versionHelp": "Empty installs the latest release at each build.",
+      "devkitPlaceholder": "Type a package name...",
+      "devkitHelp": "Installed outside the home directory, for every session.",
+      "launchHelp": "One command per line, run by sh as the session's user. A home directory copies the commands on its first start and keeps its copy afterwards.",
+      "startHelp": {
+        "once": "Runs as root every time the container starts, before the session.",
+        "service": "Started as root with the container and started again whenever it exits; end on the program that keeps running."
+      },
+      "groups": {
+        "software": "Software",
+        "desktop": "Desktop",
+        "system": "System"
+      },
+      "bundles": {
+        "label": "Quick picks",
+        "companions": "Desktop companions",
+        "shell": "Shell tools",
+        "build": "Build tools",
+        "archives": "Archive tools"
+      },
+      "fontPacks": {
+        "office": "Office-compatible (Liberation, Carlito, Caladea)",
+        "cjk": "Chinese, Japanese, and Korean, every weight",
+        "noto": "Noto for the world's scripts",
+        "microsoft": "Microsoft core fonts (Arial, Times New Roman, Verdana)"
+      },
+      "devkits": {
+        "python": "Python",
+        "node": "Node.js",
+        "rust": "Rust",
+        "go": "Go",
+        "java": "Java"
+      },
+      "devkitPackages": {
+        "python": "pip packages",
+        "node": "npm packages, installed globally",
+        "rust": "Crates, built and installed",
+        "go": "Go modules, built and installed"
+      },
+      "categories": {
+        "Utility": "Accessories",
+        "Development": "Development",
+        "Graphics": "Graphics",
+        "Network": "Internet",
+        "Office": "Office",
+        "AudioVideo": "Multimedia",
+        "Game": "Games",
+        "Education": "Education",
+        "System": "System"
+      },
+      "placements": {
+        "replace": "Replace the application's start command",
+        "before": "Run before the application's start command"
+      },
+      "startModes": {
+        "once": "Run once at every start",
+        "service": "Keep running as a service"
+      }
     }
   },
   "popup": {

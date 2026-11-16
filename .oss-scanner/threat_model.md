@@ -30,7 +30,7 @@
   `vpn/entrypoint.sh`), the web client exported from an image (`webclient.py`), the credential files a node
   reads and the pull secrets it reads on Kubernetes (`registries.py`: a Docker `config.json` and a netrc under
   `/config`, sent to the registries and hosts they name and nowhere else, never to the store or a client),
-  the Bakery (`bakery.py`, `routers/bakery.py`: an administrator's recipe, steps or a Dockerfile of their own,
+  the Bakery (`bakery.py`, `bakekits.py`, `routers/bakery.py`: an administrator's recipe, steps or a Dockerfile of their own,
   built by the node's Docker daemon on an image it already pulled, with the files the administrator uploaded
   as its whole build context, no mount of the node, and no registry credential; the package list of an image,
   read by a fixed command in a throwaway container of it and searched on the server, the query never reaching

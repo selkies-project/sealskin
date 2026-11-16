@@ -414,13 +414,27 @@ the application's image, is not yours to change. The steps:
 
 | Step | What it renders |
 | --- | --- |
-| Install packages | One `RUN` that installs with the image's package manager (`apk`, `pacman`, `apt-get`, `dnf`) and removes the caches the install left, the way the linuxserver images do. The search box lists the packages the image itself can install. |
+| Install packages | One `RUN` that installs with the image's package manager (`apk`, `pacman`, `apt-get`, `dnf`) and removes the caches the install left, the way the linuxserver images do. The search box lists the packages the image itself can install, and the quick picks add a named set: desktop companions, shell tools, build tools, archive tools. |
+| Add an application | Chromium, Firefox, Google Chrome, Brave, or Visual Studio Code, from the distribution or, on Debian and Ubuntu, from its vendor's repository with the vendor's key. The Chromium-based ones start with `--no-sandbox`, a browser can be made the one that opens web links, and the application joins the right-click menu. An application a distribution cannot install is not offered on it. |
+| Ubuntu PPA | `add-apt-repository` for the Launchpad archives you name, and the packages to install from them. Offered on Ubuntu images only. |
+| Download | A file fetched while the image builds, checked against a SHA-256 if you give one: kept, unpacked as an archive, unpacked as an AppImage into a folder of its own, or installed as a package. |
+| Development kit | The toolchain of Python, Node.js, Rust, Go, or Java from the distribution, and the language's own packages you list: pip packages in a virtual environment at `/opt/venv`, npm packages and built crates and Go modules under `/usr/local`. |
+| Install Docker | Docker's static binaries in `/usr/local/bin` and the Compose and Buildx plugins in `/usr/local/lib/docker/cli-plugins`, the latest release at each build or the version you pin. The image's Docker service starts them in a privileged session. |
+| Desktop entry | A `.desktop` file under `/usr/share/applications` for a program the image holds, with the name, command, icon, and menu category you give, and an item in the right-click menu. An AppImage you unpacked is started by its `AppRun`. |
+| Launch command | The commands a session starts its application with, in place of the image's or before them (`/defaults/autostart` and `/defaults/autostart_wayland`). |
+| Add fonts | Font sets the distribution packages (office-compatible, every weight of Chinese, Japanese, and Korean, Noto, the Microsoft core fonts under their license) and font files you upload. |
 | Copy files | `COPY` of files you upload to a path in the image, made executable or unpacked from a tar archive if you ask. |
 | Trust certificates | Your certificates in the distribution's trust store, and the command that takes them up. |
 | Environment | `ENV` lines. |
+| Proxy and mirrors | The proxy variables in both cases, with the loopback kept out of the proxy, and the index pip and the registry npm install from. They hold for the steps below and for every session. |
+| Run at start | A script in `/custom-cont-init.d`, run as root each time the container starts, or a service in `/custom-services.d`. |
 
-Anything else, a download, a font, a command of your own, is written in
-developer mode.
+A session copies the launch command and the right-click menu into a home
+directory on its first start there and keeps that copy, so a home directory
+that already started keeps the ones it has.
+
+Anything else, a command of your own or a Dockerfile instruction, is written
+in developer mode.
 
 A step can be left out of the build with the eye, without deleting it.
 
@@ -429,9 +443,8 @@ starts from what the steps rendered. The application's image is the build
 argument `BASE_IMAGE`: declare it with `ARG BASE_IMAGE` before the first
 `FROM`, write build stages wherever you need them, and end on a stage that
 starts `FROM ${BASE_IMAGE}`. The left pane holds the recipe's files, each
-under `files/` in the build context, and snippets that are rendered and put
-at the cursor: the guided steps, a download checked against a SHA-256, and
-fonts. Under the text the page says what a session
+under `files/` in the build context, and the guided steps as snippets that
+are rendered and put at the cursor. Under the text the page says what a session
 would not survive (a last stage that is not the application's image, a
 `USER` other than root, a replaced `ENTRYPOINT`, files under `/config`) and
 what the node's builder does not read: builds use Docker's classic builder,
