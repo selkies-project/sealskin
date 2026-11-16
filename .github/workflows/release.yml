@@ -149,7 +149,8 @@ jobs:
         run: |
           cp -r client/dist/ui server/app/ui
           cp VERSION server/app/VERSION
-          pip install build
+          pip install build PyYAML
+          python server/scripts/ingest_browser_policies.py --translations
           python -m build --wheel server/
           VERSION=$(cat VERSION)
           mv "server/dist/sealskin_server-${VERSION}-py3-none-any.whl" "sealskin_server-${VERSION}-py3-none-any.whl"
