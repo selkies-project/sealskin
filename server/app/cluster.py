@@ -577,7 +577,15 @@ def session_address(address: str) -> bool:
     whole, as on Kubernetes where the ingress controller's address is any of
     the pod network's. Nothing a session says about a request is believed.
     """
-    return bool(address) and any(session.get("ip") == address for session in state.sessions.values())
+    if not address:
+        return False
+    for session in state.sessions.values():
+        if session.get("ip") == address:
+            return True
+        # A room keeps the containers of the applications it showed before.
+        if any(entry.get("ip") == address for entry in (session.get("container_registry") or {}).values()):
+            return True
+    return False
 
 
 def client_address(request: Request) -> str:

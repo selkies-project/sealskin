@@ -100,7 +100,9 @@ def answer(request: Request) -> dict[str, Any]:
         request on.
     """
     names = headers()
-    trusted = cluster.trusted_proxy(request.headers.get("x-sealskin-remote", ""))
+    remote = request.headers.get("x-sealskin-remote", "")
+    # The mark is the proxy's alone to set: on the API port, or from a session, a stranger writes it.
+    trusted = cluster.via_proxy(request) and cluster.trusted_proxy(remote) and not cluster.session_address(remote)
     forged = [name for name in names if FORGED in request.headers.get(name, "")]
     if trusted and forged:
         if not _recent():

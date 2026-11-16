@@ -26,6 +26,8 @@ from tests.conftest import PROXY_SECRET, WEB
 from tests.test_api_smoke import _pem_pair
 
 PEER = {"X-SealSkin-Secret": PROXY_SECRET, "X-SealSkin-Listener": "peer"}
+#: What marks a request as having come through this node's proxy.
+VIA = {"X-SealSkin-Secret": PROXY_SECRET}
 
 
 @pytest.fixture
@@ -403,24 +405,29 @@ def test_the_http_listener_opens_only_for_trusted_proxies(monkeypatch):
 
 def test_the_check_path_says_what_arrived(node, monkeypatch):
     _entrance(monkeypatch, _signs_in)
-    seen = node.get("/api/auth/proxy", headers={"Remote-User": "mallory", "X-SealSkin-Remote": "10.1.2.3"}).json()
+    seen = node.get("/api/auth/proxy", headers={**VIA, "Remote-User": "mallory", "X-SealSkin-Remote": "10.1.2.3"}).json()
     assert seen == {
         "sealskin": "proxy-check", "headers": ["Remote-User", "Remote-Groups"], "user": "mallory", "groups": "",
         "forged": [], "trusted": True,
     }  # fmt: skip
-    assert node.get("/api/auth/proxy", headers={"X-SealSkin-Remote": "203.0.113.9"}).json()["trusted"] is False
+    assert node.get("/api/auth/proxy", headers={**VIA, "X-SealSkin-Remote": "203.0.113.9"}).json()["trusted"] is False
+    # On the API port the mark is anyone's to write, so it says nothing.
+    assert node.get("/api/auth/proxy", headers={"X-SealSkin-Remote": "10.1.2.3"}).json()["trusted"] is False
 
 
 def test_a_groups_header_the_proxy_leaves_to_the_browser_ends_header_sign_ins(node, monkeypatch):
     _entrance(monkeypatch, _signs_in)
     assert node.post("/api/admin/status", json={}, headers=NAMED).status_code == 200
     # The web app's request from a signed-in browser: the proxy set the user and passed the groups on.
-    forged = {"Remote-User": "alice", "Remote-Groups": proxy_auth.FORGED, "X-SealSkin-Remote": "10.1.2.3"}
+    forged = {**VIA, "Remote-User": "alice", "Remote-Groups": proxy_auth.FORGED, "X-SealSkin-Remote": "10.1.2.3"}
     assert node.get("/api/auth/proxy", headers=forged).json()["forged"] == ["Remote-Groups"]
     assert node.post("/api/admin/status", json={}, headers=NAMED).status_code == 401
     # The same from anywhere but a trusted proxy says nothing about the proxy.
     proxy_auth._forged.clear()
     node.get("/api/auth/proxy", headers={**forged, "X-SealSkin-Remote": "203.0.113.9"})
+    assert node.post("/api/admin/status", json={}, headers=NAMED).status_code == 200
+    # Nor does a request that did not come through this node's proxy, whatever address it claims.
+    node.get("/api/auth/proxy", headers={k: v for k, v in forged.items() if k not in VIA})
     assert node.post("/api/admin/status", json={}, headers=NAMED).status_code == 200
 
 
