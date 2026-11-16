@@ -522,13 +522,15 @@ async def delete_installed_app(app_id: str) -> Response:
     if record.is_meta_app:
         try:
             icon_path = safe_join(settings.app_icons_path, f"{app_id}.png")
-            template_dir = (
-                safe_join(settings.home_templates_path, record.home_template_name)
-                if record.home_template_name
-                else None
-            )
         except ValueError as exc:
             raise HTTPException(status_code=400, detail="Invalid application id.") from exc
+        template_dir = None
+        if record.home_template_name:
+            # Resolved and held under the templates' folder here, beside the removal it guards.
+            templates_root = os.path.realpath(settings.home_templates_path)
+            template_dir = os.path.realpath(os.path.join(templates_root, record.home_template_name))
+            if not template_dir.startswith(templates_root + os.sep):
+                raise HTTPException(status_code=400, detail="Invalid home template.")
         if os.path.exists(icon_path):
             try:
                 os.remove(icon_path)

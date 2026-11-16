@@ -250,7 +250,7 @@ async def delete_recipe(app_id: str) -> Response:
         raise HTTPException(status_code=404, detail="No such baked application.")
     app = state.installed_apps.get(app_id)
     if app is not None and app.is_meta_app:
-        return await admin.delete_installed_app(app_id)
+        return await admin.delete_installed_app(app.id)
     await bakery.forget(app_id)
     return Response(status_code=204)
 
