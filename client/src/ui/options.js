@@ -4058,7 +4058,8 @@ function showInstallModal(appData, existingInstall = null, isManual = false) {
 
   document.getElementById('install-app-id').value = isEditing ? existingInstall.id : '';
   document.getElementById('install-source-app-id').value = isEditing ? existingInstall.source_app_id : appData.id;
-  document.getElementById('install-source-name').value = isManual ? 'manual' : appStoreSelect.options[appStoreSelect.selectedIndex].text;
+  document.getElementById('install-source-name').value = isEditing ? existingInstall.source
+    : (isManual ? 'manual' : appStoreSelect.options[appStoreSelect.selectedIndex].text);
   document.getElementById('install-app-name').value = isEditing ? existingInstall.name : appData.name;
   document.getElementById('install-app-image').value = isEditing ? existingInstall.provider_config.image : appData.provider_config.image;
 
