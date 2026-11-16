@@ -246,12 +246,14 @@ async def delete_recipe(app_id: str) -> Response:
     Raises:
         HTTPException: 409 while a meta-app is built on the baked application.
     """
-    if app_id not in state.bake_recipes:
+    # The id acted on is the record's own key, found by comparing, never the one the request spelled.
+    known = next((key for key in state.bake_recipes if key == app_id), None)
+    if known is None:
         raise HTTPException(status_code=404, detail="No such baked application.")
-    app = state.installed_apps.get(app_id)
+    app = state.installed_apps.get(known)
     if app is not None and app.is_meta_app:
-        return await admin.delete_installed_app(app.id)
-    await bakery.forget(app_id)
+        return await admin.delete_installed_app(known)
+    await bakery.forget(known)
     return Response(status_code=204)
 
 
