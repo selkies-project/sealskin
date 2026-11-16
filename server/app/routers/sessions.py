@@ -46,7 +46,7 @@ proxy_router = APIRouter()
 def _home_of(data: dict[str, Any]) -> str:
     """Return the name of the persistent home directory a session mounts, or nothing for a cleanroom."""
     path = data.get("host_mount_path") or ""
-    return "" if not path or path.startswith(ephemeral_base()) else os.path.basename(path)
+    return "" if not path or path.startswith(ephemeral_base() + os.sep) else os.path.basename(path)
 
 
 def session_info(session_id: str, data: dict[str, Any], for_owner: bool = True) -> ActiveSessionInfo:
@@ -171,7 +171,7 @@ async def send_file_to_session(
 
     reassembled_path = await reassemble_file(user["username"], req.upload_id, req.total_chunks)
     safe_filename = os.path.basename(req.filename)
-    is_persistent = not host_mount_path.startswith(ephemeral_base())
+    is_persistent = not host_mount_path.startswith(ephemeral_base() + os.sep)
     try:
         if is_persistent:
             dest_dir = safe_join(settings.storage_path, user["username"], "_sealskin_shared_files")

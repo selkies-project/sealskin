@@ -235,7 +235,7 @@ async def background_usage_job() -> None:
             for data in state.sessions.values()
             if data.get("username")
             and data.get("shared_files_path")
-            and not data["shared_files_path"].startswith(os.path.join(settings.storage_path, "sealskin_ephemeral"))
+            and not data["shared_files_path"].startswith(os.path.join(settings.storage_path, "sealskin_ephemeral") + os.sep)
         }
         for username, path in shared:
             await filesync.sync(username, path)

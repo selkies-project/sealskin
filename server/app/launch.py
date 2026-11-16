@@ -830,7 +830,7 @@ async def launch_application(
     if selected_gpu:
         await get_provider().refresh_gpus()
     gpu_config = validate_gpu(selected_gpu, effective_settings, app)
-    persistent = bool(host_mount_path) and not host_mount_path.startswith(ephemeral_base()) and not forced_rw_mount
+    persistent = bool(host_mount_path) and not host_mount_path.startswith(ephemeral_base() + os.sep) and not forced_rw_mount
     if persistent and auth_user:
         await quota.check_storage(auth_user)
     # The session starts over the node's copy; the store's newer files arrive under it as it comes up.
@@ -1000,7 +1000,7 @@ async def launch_application(
         }
     except Exception as exc:
         for path in (host_mount_path, shared_files_path):
-            if path and path.startswith(ephemeral_base()):
+            if path and path.startswith(ephemeral_base() + os.sep):
                 shutil.rmtree(path, ignore_errors=True)
         vpn.launched(holding)
         holding = None
@@ -1056,7 +1056,7 @@ async def ensure_container_for_session(
 
     wayland_mode = session.get("wayland_mode", True)
     current_home = session.get("host_mount_path")
-    if current_home and current_home.startswith(ephemeral_base()):
+    if current_home and current_home.startswith(ephemeral_base() + os.sep):
         new_home: str | None = new_ephemeral_dir()
     else:
         username = session.get("username")
@@ -1197,11 +1197,11 @@ async def stop_session(session_id: str) -> None:
     if session.get("vpn"):
         await vpn.release(session["vpn"])
     shared = session.get("shared_files_path")
-    if shared and not shared.startswith(ephemeral_base()) and session.get("username"):
+    if shared and not shared.startswith(ephemeral_base() + os.sep) and session.get("username"):
         filesync.push_later(session["username"], shared)
     for key in ("host_mount_path", "shared_files_path"):
         path = session.get(key)
-        if path and path.startswith(ephemeral_base()):
+        if path and path.startswith(ephemeral_base() + os.sep):
             # Deleting a cleanroom home on network storage takes long; nobody waits for it.
             task = asyncio.create_task(asyncio.to_thread(shutil.rmtree, path, ignore_errors=True))
             _removals.add(task)

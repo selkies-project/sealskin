@@ -143,6 +143,9 @@ EXTERNAL_API_PORT: int = getattr(settings, "api_port", 8000)
 EXTERNAL_SESSION_PORT: int = getattr(settings, "session_port", 8443)
 
 _NAME_RE = re.compile(r"^[a-zA-Z0-9_-]+$")
+#: The server's own directories under `storage_path` start with this, so no user's storage may.
+RESERVED_NAME_PREFIX = "sealskin_"
+MAX_NAME_LENGTH = 128
 
 
 def set_server_public_key(key: str) -> None:
@@ -663,10 +666,17 @@ def get_all_groups() -> list[dict[str, Any]]:
     return [default_group(), *GROUP_DATA.values()]
 
 
+def reserved_name(username: str) -> bool:
+    """Whether a name is one of the server's own directories beside the users' under `storage_path`."""
+    return (username or "").lower().startswith(RESERVED_NAME_PREFIX)
+
+
 def validate_name(username: str) -> None:
-    """Raise `ValueError` for names that are not filesystem safe."""
-    if not _NAME_RE.fullmatch(username or ""):
+    """Raise `ValueError` for names that are not filesystem safe or that the server keeps for itself."""
+    if not _NAME_RE.fullmatch(username or "") or len(username) > MAX_NAME_LENGTH:
         raise ValueError("Invalid username. Use only letters, numbers, underscore, or hyphen.")
+    if reserved_name(username):
+        raise ValueError(f"Usernames starting with '{RESERVED_NAME_PREFIX}' are reserved.")
 
 
 def create_admin(username: str, public_key: str | None) -> tuple[dict[str, Any], str | None]:
@@ -825,7 +835,7 @@ def get_home_dirs(username: str) -> list[str]:
         user_storage_path = safe_join(settings.storage_path, username)
     except ValueError:
         return []
-    if not username or not os.path.isdir(user_storage_path):
+    if not username or reserved_name(username) or not os.path.isdir(user_storage_path):
         return []
     try:
         return sorted(
