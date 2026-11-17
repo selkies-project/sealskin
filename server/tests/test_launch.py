@@ -217,10 +217,14 @@ async def test_an_nvidia_session_asks_podman_for_its_gpu_as_a_cdi_device(monkeyp
     def unresolvable(**_kwargs):
         raise APIError("500 Server Error", explanation="setting up CDI devices: unresolvable CDI devices nvidia.com/gpu=1")
 
+    removed = []
     client.containers.run = unresolvable
+    client.containers.get = lambda name: SimpleNamespace(remove=lambda force: removed.append((name, force)))
     with pytest.raises(HTTPException) as missing:
         await provider.launch("0123abcd-4567-89ef-0123-456789abcdef", {}, gpu_config=gpu)
     assert "nvidia-ctk cdi generate" in missing.value.detail
+    # The container was created before its start failed, and goes with the launch.
+    assert len(removed) == 1 and removed[0][0].startswith("sealskin-0123abcd-") and removed[0][1] is True
 
 
 def test_the_engine_is_podman_when_its_version_names_a_podman_component(monkeypatch):

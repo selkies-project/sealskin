@@ -398,6 +398,7 @@ class DockerProvider(BaseProvider):
             ) from exc
         except APIError as exc:
             logger.error("[%s] Docker API error on launch: %s", session_id, exc)
+            await self._remove_unstarted(run_kwargs["name"])
             if "unresolvable cdi devices" in str(exc).lower():
                 raise HTTPException(
                     status_code=500,
@@ -445,6 +446,16 @@ class DockerProvider(BaseProvider):
             await self.stop(container.id)
             raise
         return {"instance_id": container.id, "ip": ip_address, "port": config["port"]}
+
+    async def _remove_unstarted(self, name: str) -> None:
+        """Remove the container a launch created and could not start, which `remove` does not reach."""
+        try:
+            container = await asyncio.to_thread(self.client.containers.get, name)
+            await asyncio.to_thread(container.remove, force=True)
+        except NotFound:
+            return
+        except (APIError, DockerException) as exc:
+            logger.warning("Could not remove the unstarted container '%s': %s", name, exc)
 
     async def _route_through(self, session_id: str, container_id: str, gateway_ip: str) -> None:
         """Point a container's default route at its VPN gateway.
