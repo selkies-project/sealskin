@@ -294,11 +294,83 @@ def get_system_stats() -> dict[str, Any]:
         return {"cpu_model": state.cpu_model, "disk_total": None, "disk_used": None}
 
 
+PCI_IDS_PATHS = ("/usr/share/hwdata/pci.ids", "/usr/share/misc/pci.ids", "/usr/share/pci.ids")
+"""Where distributions keep the PCI ID database that names a GPU by its vendor and device numbers."""
+
+NVIDIA_GPUS_DIR = "/proc/driver/nvidia/gpus"
+"""The NVIDIA driver's directory of its GPUs, one per PCI address, each naming its model."""
+
+VENDOR_NAMES = {"8086": "Intel", "1002": "AMD", "10de": "NVIDIA"}
+"""The short names of the vendors whose GPUs are common, where the database gives a company's full name."""
+
+
+def _pci_name(vendor: str, device: str) -> str | None:
+    """Return the vendor and model the PCI ID database gives a device, such as `Intel HD Graphics 630`."""
+    path = next((p for p in PCI_IDS_PATHS if os.path.isfile(p)), None)
+    if not path:
+        return None
+    vendor_name = None
+    try:
+        with open(path, encoding="utf-8", errors="replace") as ids:
+            for line in ids:
+                # Comments sit inside a vendor's block as well as between blocks.
+                if line.startswith("#") or not line.strip():
+                    continue
+                if vendor_name is None:
+                    if line[:4].lower() == vendor and line[4:6] == "  ":
+                        vendor_name = VENDOR_NAMES.get(vendor) or line[6:].strip()
+                    continue
+                if not line.startswith("\t"):
+                    break
+                if line[1:5].lower() == device and line[5:7] == "  ":
+                    model = line[7:].strip()
+                    # A bracket holds the product name beside the chip's codename, as in `GM206GLM [Quadro M2200]`.
+                    bracket = re.search(r"\[([^\]]+)\]", model)
+                    return f"{vendor_name} {bracket.group(1) if bracket else model}"
+    except OSError:
+        return None
+    return None
+
+
+def gpu_model(device_dir: str, driver: str) -> str | None:
+    """Return the model of the GPU behind a DRM device, or `None` when nothing on the node names it.
+
+    The NVIDIA driver names its GPUs itself; every other GPU is looked up by
+    its PCI vendor and device numbers in the PCI ID database, when the node
+    has one.
+
+    Args:
+        device_dir: The device's sysfs directory, such as `/sys/class/drm/renderD128/device`.
+        driver: The kernel driver bound to it.
+    """
+    if driver == "nvidia":
+        information = os.path.join(NVIDIA_GPUS_DIR, os.path.basename(os.path.realpath(device_dir)), "information")
+        try:
+            with open(information, encoding="utf-8") as info:
+                model = next((line.split(":", 1)[1].strip() for line in info if line.startswith("Model:")), "")
+        except OSError:
+            model = ""
+        if model:
+            return model if model.upper().startswith("NVIDIA") else f"NVIDIA {model}"
+    try:
+        vendor, device = (_pci_number(os.path.join(device_dir, name)) for name in ("vendor", "device"))
+    except OSError:
+        return None
+    return _pci_name(vendor, device)
+
+
+def _pci_number(path: str) -> str:
+    """Return a sysfs PCI number such as `0x8086` the way the PCI ID database writes it, `8086`."""
+    with open(path, encoding="utf-8") as number:
+        return number.read().strip().lower().removeprefix("0x")
+
+
 def scan_render_nodes() -> list[dict[str, Any]]:
     """Return the render nodes under `/sys/class/drm` as GPU descriptors.
 
     NVIDIA nodes are typed `nvidia` and numbered in order for the runtime's
-    device request; every other driver is `dri3`.
+    device request; every other driver is `dri3`. Each carries its `model`
+    when `gpu_model` finds one.
     """
     drm_root = "/sys/class/drm"
     try:
@@ -324,6 +396,9 @@ def scan_render_nodes() -> list[dict[str, Any]]:
         if not driver or not os.path.exists(driver_link):
             continue
         gpu_info: dict[str, Any] = {"device": f"/dev/dri/{device_name}", "driver": driver}
+        model = gpu_model(os.path.join(drm_root, device_name, "device"), driver)
+        if model:
+            gpu_info["model"] = model
         if driver == "nvidia":
             gpu_info["type"] = "nvidia"
             gpu_info["index"] = nvidia_index

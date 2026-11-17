@@ -186,9 +186,11 @@ another's. What it controls is who gets one:
   kind it asked for.
 
 Each node tells the others the kind of each of its GPUs, so the launcher
-lists the GPUs of every answering node open to the user: **Any NVIDIA GPU**
-or **Any DRI3 GPU** starts the session on whichever node has a free GPU of
-that kind, and a GPU named with its node starts it on that node.
+lists the GPUs of every answering node open to the user, each by its model
+where its node can name it: **Any NVIDIA GPU** or **Any DRI3 GPU**
+starts the session on whichever node has a free GPU of that kind, and a GPU
+named with its node starts it on that node. Two GPUs of one kind can differ
+widely in speed, so a session that needs a fast one names it.
 
 Two settings shape what a node offers:
 

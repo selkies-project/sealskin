@@ -586,6 +586,11 @@ At start-up the server detects GPUs on the host:
 * **DRI3** devices (Intel, AMD, and others) through `/dev/dri`. The render
   node is passed into the container and exported as `DRI_NODE`.
 
+Each GPU is shown by its model where the node can name it: the NVIDIA driver
+names its own cards, and other GPUs are looked up in the PCI ID database
+(`pci.ids`, from the `hwdata` package) when the server's image has one. A GPU
+the node cannot name is shown by its render node and driver.
+
 `SEALSKIN_NODE_GPUS` limits the GPUs offered to the devices it lists, and
 `SEALSKIN_NODE_GPU_PREFER` names the kind a launch for any GPU gets first;
 [Cluster](cluster.md#gpus) describes both.

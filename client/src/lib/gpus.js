@@ -11,7 +11,19 @@ const KIND_NAMES = { nvidia: 'NVIDIA', dri3: 'DRI3' };
 
 const kindOf = (gpu) => gpu.type || (gpu.driver === 'nvidia' ? 'nvidia' : 'dri3');
 const supports = (app, kind) => (kind === 'nvidia' ? app.nvidia_support : app.dri3_support);
-const deviceLabel = (gpu) => `${gpu.device.split('/').pop()}${gpu.driver ? ` (${gpu.driver})` : ''}`;
+/**
+ * How a GPU is named to people: its model and render node, or its render node and driver.
+ *
+ * @param {{device: string, driver?: string, name?: string, model?: string}} gpu
+ * @returns {string}
+ */
+export const gpuLabel = (gpu) => {
+  const node = gpu.device.split('/').pop();
+  const model = gpu.name || gpu.model;
+  // The render node stays in the label, which tells two GPUs of one model apart.
+  if (model) return `${model} (${node})`;
+  return `${node}${gpu.driver ? ` (${gpu.driver})` : ''}`;
+};
 
 /**
  * The GPU choices for a launch of `app`, as `[value, label]` pairs, without the choice of none.
@@ -24,7 +36,7 @@ const deviceLabel = (gpu) => `${gpu.device.split('/').pop()}${gpu.driver ? ` (${
  * @returns {Array<[string, string]>}
  */
 export function gpuChoices(t, app, gpus, cluster, nodes = null) {
-  if (!cluster) return gpus.filter((gpu) => supports(app, kindOf(gpu))).map((gpu) => [gpu.device, deviceLabel(gpu)]);
+  if (!cluster) return gpus.filter((gpu) => supports(app, kindOf(gpu))).map((gpu) => [gpu.device, gpuLabel(gpu)]);
   const held = [];
   cluster.nodes
     .filter((node) => node.alive && (!nodes || nodes.has(node.id)))
@@ -37,7 +49,7 @@ export function gpuChoices(t, app, gpus, cluster, nodes = null) {
     ...kinds.map((kind) => [`auto:${kind}`, t('popup.launchView.anyGpu', { kind: KIND_NAMES[kind] })]),
     ...held.map(({ node, gpu }) => [
       `${gpu.device}@${node.id}`,
-      t('popup.launchView.gpuOnNode', { gpu: deviceLabel(gpu), node: node.name || node.id }),
+      t('popup.launchView.gpuOnNode', { gpu: gpuLabel(gpu), node: node.name || node.id }),
     ]),
   ];
 }

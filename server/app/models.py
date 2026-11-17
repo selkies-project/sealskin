@@ -10,10 +10,11 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class GPUInfo(BaseModel):
-    """A GPU exposed to sessions."""
+    """A GPU exposed to sessions, with its model when the node can name it."""
 
     device: str
     driver: str
+    model: str | None = None
 
 
 class Application(BaseModel):

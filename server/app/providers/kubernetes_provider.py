@@ -38,7 +38,7 @@ import websockets
 from fastapi import HTTPException
 
 from .. import progress, registries
-from ..docker_utils import scan_render_nodes
+from ..docker_utils import NVIDIA_GPUS_DIR, scan_render_nodes
 from ..settings import settings
 from ..state import state
 from .base_provider import (
@@ -92,8 +92,6 @@ PRODUCT_LABELS = {
 }
 #: Node label the NVIDIA GPU Operator sets when a node's GPUs serve virtual machines.
 NVIDIA_WORKLOAD_LABEL = "nvidia.com/gpu.workload.config"
-#: One entry per NVIDIA GPU the node's driver manages, render node or not.
-NVIDIA_GPUS_DIR = "/proc/driver/nvidia/gpus"
 #: Device plugin resource of each render node driver, for the server's own node.
 DRIVER_RESOURCES = {
     "nvidia": "nvidia.com/gpu",

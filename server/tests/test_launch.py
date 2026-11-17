@@ -241,6 +241,42 @@ def test_a_node_offers_only_the_gpus_node_gpus_names(monkeypatch):
     assert offered_gpus(found) == [{"device": "/dev/dri/renderD129"}]
 
 
+def test_a_gpu_is_named_by_its_model_where_the_node_can_name_it(monkeypatch, tmp_path):
+    from app import docker_utils
+
+    def device(name, vendor, number, address):
+        target = tmp_path / "devices" / address
+        (target / "driver").mkdir(parents=True)
+        (target / "vendor").write_text(f"0x{vendor}\n")
+        (target / "device").write_text(f"0x{number}\n")
+        (tmp_path / "drm" / name).mkdir(parents=True)
+        (tmp_path / "drm" / name / "device").symlink_to(target)
+        return str(tmp_path / "drm" / name / "device")
+
+    ids = tmp_path / "pci.ids"
+    ids.write_text(
+        "# comment\n1002  Advanced Micro Devices, Inc. [AMD/ATI]\n\t7480  Navi 33 [Radeon RX 7600/7600 XT/7600M XT/7600S/7700S / PRO W7600]\n"
+        "\t7481  Navi 33 [Radeon Graphics]\n10de  NVIDIA Corporation\n\t1436  GM206GLM [Quadro M2200 Mobile]\n"
+        "8086  Intel Corporation\n\t0001  Other\n# Kaby Lake\n\n\t591b  HD Graphics 630\n\t\t17aa 224d  ThinkPad P51\n"
+        "1ae0  Google, Inc.\n\t0001  Virtual GPU\n"
+    )
+    nvidia = tmp_path / "nvidia"
+    (nvidia / "0000:01:00.0").mkdir(parents=True)
+    (nvidia / "0000:01:00.0" / "information").write_text("Model: \t\t Quadro M2200\nIRQ: 150\n")
+    monkeypatch.setattr(docker_utils, "PCI_IDS_PATHS", (str(tmp_path / "missing"), str(ids)))
+    monkeypatch.setattr(docker_utils, "NVIDIA_GPUS_DIR", str(nvidia))
+
+    assert docker_utils.gpu_model(device("renderD128", "10de", "1436", "0000:01:00.0"), "nvidia") == "NVIDIA Quadro M2200"
+    assert docker_utils.gpu_model(device("renderD129", "8086", "591b", "0000:00:02.0"), "i915") == "Intel HD Graphics 630"
+    assert docker_utils.gpu_model(device("renderD130", "1ae0", "0001", "0000:00:03.0"), "virtio") == "Google, Inc. Virtual GPU"
+    assert docker_utils.gpu_model(device("renderD133", "1002", "7481", "0000:03:00.0"), "amdgpu") == "AMD Radeon Graphics"
+    # The database names the NVIDIA card too when its driver does not.
+    assert docker_utils.gpu_model(device("renderD131", "10de", "1436", "0000:02:00.0"), "nvidia") == "NVIDIA Quadro M2200 Mobile"
+    assert docker_utils.gpu_model(device("renderD132", "8086", "ffff", "0000:00:04.0"), "i915") is None
+    monkeypatch.setattr(docker_utils, "PCI_IDS_PATHS", ())
+    assert docker_utils.gpu_model(str(tmp_path / "drm" / "renderD129" / "device"), "i915") is None
+
+
 def test_collaboration_initial_tokens():
     tokens = launch.collaboration_initial_tokens(
         {
