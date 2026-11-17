@@ -105,6 +105,32 @@ async def test_a_server_takes_only_the_container_with_its_own_host_name_for_itse
     assert state.instance_name == "sealskin" and state.path_prefix_map == {"/config": "/host"}
 
 
+async def test_a_server_on_no_network_says_its_sessions_will_be_out_of_reach(monkeypatch, caplog):
+    import os
+    from types import SimpleNamespace
+
+    from app import docker_utils
+
+    here = os.uname()[1]
+
+    def container(networks):
+        attrs = {"Config": {"Hostname": here}, "HostConfig": {"NetworkMode": "pasta"}, "NetworkSettings": {"Networks": networks}}
+        return SimpleNamespace(name="sealskin", id="f" * 64, status="running", attrs=attrs)
+
+    monkeypatch.setattr(os.path, "exists", lambda path: True)
+    monkeypatch.setattr(docker_utils, "_own_id", lambda: "f" * 64)
+    monkeypatch.setattr(state, "discovered_network", None)
+    for networks in ({"sealskin": {"IPAddress": "10.89.0.2"}}, None):
+        found = container(networks)
+        client = SimpleNamespace(containers=SimpleNamespace(get=lambda name, found=found: found))
+        monkeypatch.setattr(docker_utils, "get_docker_client", lambda client=client: client)
+        caplog.clear()
+        await docker_utils.inspect_self_container()
+        out_of_reach = [r for r in caplog.records if "on no network" in r.getMessage()]
+        assert bool(out_of_reach) == (networks is None)
+    assert "'pasta'" in out_of_reach[0].getMessage()
+
+
 def test_a_server_finds_its_container_id_in_docker_and_podman_mounts(monkeypatch, tmp_path):
     from app import docker_utils
 

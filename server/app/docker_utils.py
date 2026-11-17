@@ -232,6 +232,14 @@ async def inspect_self_container() -> None:
     if networks:
         state.discovered_network = list(networks.keys())[0]
         logger.info("Discovered self-container network: %s", state.discovered_network)
+    else:
+        # Rootless Podman's default, `pasta`, gives a container no network another container can join.
+        logger.error(
+            "This server's container is on no network (network mode '%s'), so it cannot reach the sessions it "
+            "starts. Run it on a network of its own, such as one made with `podman network create sealskin` "
+            "and joined with `--network sealskin`.",
+            container.attrs.get("HostConfig", {}).get("NetworkMode", ""),
+        )
 
     ports = network_settings.get("Ports", {}) or {}
     if not ports:
