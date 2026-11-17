@@ -181,13 +181,13 @@ another's. What it controls is who gets one:
   sessions a GPU no other session is on, and keeps others off it.
 * `SEALSKIN_NODE_GPU_SLOTS` caps the GPU sessions of a node.
 * A restricted pool keeps GPU nodes for the groups that should have them.
-* A launch asks only for kinds of GPU, NVIDIA or DRI3, the application
-  supports, and a launch forwarded to another node gets a GPU there of the
+* A launch asks only for kinds of GPU, NVIDIA or Intel/AMD (DRI3), the
+  application supports, and a launch forwarded to another node gets a GPU there of the
   kind it asked for.
 
 Each node tells the others the kind of each of its GPUs, so the launcher
 lists the GPUs of every answering node open to the user, each by its model
-where its node can name it: **Any NVIDIA GPU** or **Any DRI3 GPU**
+where its node can name it: **Any NVIDIA GPU** or **Any Intel/AMD GPU**
 starts the session on whichever node has a free GPU of that kind, and a GPU
 named with its node starts it on that node. Two GPUs of one kind can differ
 widely in speed, so a session that needs a fast one names it.

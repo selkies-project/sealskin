@@ -80,7 +80,7 @@ JOIN_CODE_SECONDS = 3600
 MISSED_POLLS = 3
 DEFAULT_POOL = "default"
 #: How the kinds of GPU a session can ask for by `auto:<kind>` are named to people.
-GPU_KINDS = {"nvidia": "NVIDIA", "dri3": "DRI3"}
+GPU_KINDS = {"nvidia": "NVIDIA", "dri3": "Intel/AMD"}
 #: Seconds a lease outlives the node that took it and did not give it back.
 LEASE_SECONDS = 120
 _NODE_ID_CHARS = re.compile(r"[^a-z0-9_-]+")

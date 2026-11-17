@@ -7,7 +7,8 @@
  */
 
 /** How each kind of GPU is named. */
-const KIND_NAMES = { nvidia: 'NVIDIA', dri3: 'DRI3' };
+// DRI3 serves Intel's and AMD's GPUs, and the other Mesa drivers, the same way.
+const KIND_NAMES = { nvidia: 'NVIDIA', dri3: 'Intel/AMD' };
 
 const kindOf = (gpu) => gpu.type || (gpu.driver === 'nvidia' ? 'nvidia' : 'dri3');
 const supports = (app, kind) => (kind === 'nvidia' ? app.nvidia_support : app.dri3_support);
