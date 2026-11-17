@@ -15,6 +15,7 @@ from fastapi import HTTPException
 
 from .. import progress, registries
 from ..docker_utils import (
+    engine_is_podman,
     get_docker_client,
     inspect_self_container,
     prune_dangling_images,
@@ -34,6 +35,8 @@ from .base_provider import (
 logger = logging.getLogger(__name__)
 
 ENDED_STATES = ("exited", "dead", "removing")
+#: The CDI kind of the NVIDIA GPUs that `nvidia-ctk cdi generate` describes, numbered as the driver numbers them.
+CDI_NVIDIA_GPU = "nvidia.com/gpu"
 
 
 def _bind_volumes(bind_mounts: Any) -> dict[str, dict[str, str]]:
@@ -340,7 +343,18 @@ class DockerProvider(BaseProvider):
             run_kwargs["volumes"][vpn["resolv_conf"]] = {"bind": "/etc/resolv.conf", "mode": "ro"}
 
         if gpu_config:
-            if gpu_config["type"] == "nvidia":
+            if gpu_config["type"] == "nvidia" and engine_is_podman():
+                # Podman takes the runtime and an index request without a word and gives no GPU; its GPUs are CDI
+                # devices, whose spec brings `/dev/nvidia-modeset` along.
+                run_kwargs["device_requests"] = [
+                    DeviceRequest(driver="cdi", device_ids=[f"{CDI_NVIDIA_GPU}={gpu_config['index']}"])
+                ]
+                logger.info(
+                    "[%s] Configuring container with Nvidia GPU index %s through CDI",
+                    session_id,
+                    gpu_config["index"],
+                )
+            elif gpu_config["type"] == "nvidia":
                 run_kwargs["runtime"] = "nvidia"
                 run_kwargs["device_requests"] = [
                     DeviceRequest(
@@ -384,6 +398,14 @@ class DockerProvider(BaseProvider):
             ) from exc
         except APIError as exc:
             logger.error("[%s] Docker API error on launch: %s", session_id, exc)
+            if "unresolvable cdi devices" in str(exc).lower():
+                raise HTTPException(
+                    status_code=500,
+                    detail=(
+                        "No CDI spec on this host names the NVIDIA GPU. Generate one with "
+                        "`nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml`."
+                    ),
+                ) from exc
             if "could not select device driver" in str(exc) or "nvidia-container-runtime" in str(
                 exc
             ):

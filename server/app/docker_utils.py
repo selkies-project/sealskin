@@ -24,6 +24,7 @@ from .state import state
 logger = logging.getLogger(__name__)
 
 _CLIENT: docker.DockerClient | None = None
+_PODMAN: bool | None = None
 
 
 def get_docker_client() -> docker.DockerClient:
@@ -76,6 +77,22 @@ async def prune_dangling_images() -> None:
 
 class NameTaken(RuntimeError):
     """Docker runs another container under the name this server would go by."""
+
+
+def engine_is_podman() -> bool:
+    """Return whether the engine behind the socket is Podman, which serves Docker's API with its own GPU devices.
+
+    The answer is read once from the engine's version; an engine that does not
+    answer counts as Docker.
+    """
+    global _PODMAN
+    if _PODMAN is None:
+        try:
+            components = get_docker_client().version().get("Components") or []
+        except Exception:  # noqa: BLE001 - an engine that cannot be asked keeps Docker's behavior
+            return False
+        _PODMAN = any("podman" in str(component.get("Name", "")).lower() for component in components)
+    return _PODMAN
 
 
 MOUNTINFO = "/proc/self/mountinfo"

@@ -176,6 +176,77 @@ async def test_docker_session_containers_are_named_after_the_session(monkeypatch
     assert names[0] != names[1]
 
 
+async def test_an_nvidia_session_asks_podman_for_its_gpu_as_a_cdi_device(monkeypatch):
+    """Podman ignores Docker's `nvidia` runtime and an index request; it gives a GPU only as a CDI device."""
+    from types import SimpleNamespace
+
+    from docker.errors import APIError
+    from fastapi import HTTPException
+
+    from app.providers import docker_provider
+
+    runs = []
+
+    def run(**kwargs):
+        runs.append(kwargs)
+        return SimpleNamespace(id="c1", short_id="c1", attrs={}, reload=lambda: None)
+
+    client = SimpleNamespace(images=SimpleNamespace(get=lambda _image: None), containers=SimpleNamespace(run=run))
+    monkeypatch.setattr(docker_provider, "get_docker_client", lambda: client)
+
+    async def ready(self, *_args, **_kwargs):
+        return "10.0.0.2"
+
+    monkeypatch.setattr(docker_provider.DockerProvider, "_wait_until_ready", ready)
+    provider = docker_provider.DockerProvider({"provider_config": {"image": "img:latest", "port": 3000}})
+    gpu = {"type": "nvidia", "index": 1, "device": "/dev/dri/renderD129"}
+
+    monkeypatch.setattr(docker_provider, "engine_is_podman", lambda: False)
+    await provider.launch("0123abcd-4567-89ef-0123-456789abcdef", {}, gpu_config=gpu)
+    docker_run = runs.pop()
+    assert docker_run["runtime"] == "nvidia" and docker_run["device_requests"][0]["DeviceIDs"] == ["1"]
+    assert "/dev/nvidia-modeset:/dev/nvidia-modeset" in docker_run["devices"]
+
+    monkeypatch.setattr(docker_provider, "engine_is_podman", lambda: True)
+    await provider.launch("0123abcd-4567-89ef-0123-456789abcdef", {}, gpu_config=gpu)
+    podman_run = runs.pop()
+    assert "runtime" not in podman_run and podman_run["devices"] == []
+    assert podman_run["device_requests"][0]["Driver"] == "cdi"
+    assert podman_run["device_requests"][0]["DeviceIDs"] == ["nvidia.com/gpu=1"]
+
+    def unresolvable(**_kwargs):
+        raise APIError("500 Server Error", explanation="setting up CDI devices: unresolvable CDI devices nvidia.com/gpu=1")
+
+    client.containers.run = unresolvable
+    with pytest.raises(HTTPException) as missing:
+        await provider.launch("0123abcd-4567-89ef-0123-456789abcdef", {}, gpu_config=gpu)
+    assert "nvidia-ctk cdi generate" in missing.value.detail
+
+
+def test_the_engine_is_podman_when_its_version_names_a_podman_component(monkeypatch):
+    from types import SimpleNamespace
+
+    from app import docker_utils
+
+    def engine(*names):
+        version = {"Components": [{"Name": name} for name in names]}
+        return SimpleNamespace(version=lambda: version)
+
+    monkeypatch.setattr(docker_utils, "_PODMAN", None)
+    monkeypatch.setattr(docker_utils, "get_docker_client", lambda: engine("Engine", "containerd", "runc"))
+    assert docker_utils.engine_is_podman() is False
+    monkeypatch.setattr(docker_utils, "_PODMAN", None)
+    monkeypatch.setattr(docker_utils, "get_docker_client", lambda: engine("Podman Engine", "Conmon", "OCI Runtime (crun)"))
+    assert docker_utils.engine_is_podman() is True
+
+    def unreachable():
+        raise RuntimeError("Failed to connect to Docker daemon.")
+
+    monkeypatch.setattr(docker_utils, "_PODMAN", None)
+    monkeypatch.setattr(docker_utils, "get_docker_client", unreachable)
+    assert docker_utils.engine_is_podman() is False and docker_utils._PODMAN is None
+
+
 def test_extract_docker_overrides_parsing():
     result = launch.extract_docker_overrides(
         {
