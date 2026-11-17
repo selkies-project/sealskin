@@ -504,13 +504,23 @@
             "animated": "Hoạt ảnh"
           }
         },
-        "DASHBOARD": {
-          "label": "Kiểu bảng điều khiển",
-          "description": "Cho phép người dùng thiết lập bảng điều khiển của họ.",
+        "SELKIES_UI_LAYOUT": {
+          "label": "Bố cục bảng điều khiển",
+          "description": "Cách bảng điều khiển Selkies sắp xếp các bảng: thanh bên, thanh công cụ Wish ở trên cùng, hoặc nút Edge gắn vào một cạnh cửa sổ. Người dùng vẫn có thể chuyển đổi giữa chúng.",
           "options": {
-            "default": "Mặc định",
-            "selkiesDefault": "Selkies (Mặc định)",
-            "wish": "Wish"
+            "default": "Thanh bên",
+            "wish": "Thanh công cụ (Wish)",
+            "edge": "Nút Edge"
+          }
+        },
+        "SELKIES_COLOR_SCHEME": {
+          "label": "Bảng màu màn hình nền",
+          "description": "Bảng màu sáng hoặc tối mà màn hình nền theo dưới trình quản lý cửa sổ của Selkies. Mặc định theo trình duyệt; chọn ở đây sẽ khóa lại.",
+          "options": {
+            "auto": "Theo trình duyệt",
+            "dark": "Tối",
+            "light": "Sáng",
+            "off": "Của riêng màn hình nền"
           }
         },
         "SELKIES_AUDIO_ENABLED": {
@@ -938,6 +948,10 @@
           "label": "Tệp báo ứng dụng sẵn sàng",
           "description": "Tệp mà sidecar tạo khi ứng dụng đã khởi tạo xong."
         },
+        "SELKIES_APP_LOGS": {
+          "label": "Nhật ký ứng dụng",
+          "description": "Giữ đầu ra lỗi của các ứng dụng trong phiên trong nhật ký container thay vì loại bỏ."
+        },
         "SELKIES_AUDIT_WEBHOOK_URL": {
           "label": "URL webhook kiểm toán",
           "description": "Nhận một JSON POST cho mỗi lần truyền bảng nhớ tạm, tải lên hoặc tải xuống tệp, tài liệu được in, kết nối trang và bản ghi, chỉ gồm siêu dữ liệu và không bao giờ có nội dung. Để trống sẽ không gửi gì."
@@ -970,6 +984,10 @@
           "label": "Bật gỡ lỗi Selkies",
           "description": "Bật ghi nhật ký gỡ lỗi cho các thành phần truyền phát."
         },
+        "PELORUS": {
+          "label": "Pelorus",
+          "description": "Cung cấp Pelorus, công cụ mô tả màn hình nền dưới dạng văn bản và thao tác trên đó cho một tác tử hoặc tập lệnh."
+        },
         "SELKIES_MODE": {
           "label": "Chế độ truyền phát",
           "description": "Phương thức truyền tải được dùng theo mặc định. Tự động chọn WebRTC khi có bất kỳ giá trị TURN/STUN nào được đặt, nếu không thì WebSockets.",
@@ -994,7 +1012,7 @@
         },
         "SELKIES_CONGESTION_CONTROL": {
           "label": "Kiểm soát tắc nghẽn",
-          "description": "Điều chỉnh bitrate video theo ước tính băng thông từ phản hồi của bên nhận WebRTC. Có hiệu lực ở chế độ CBR."
+          "description": "Điều chỉnh tốc độ video của màn hình theo khả năng của đường mạng, trên cả WebSockets và WebRTC."
         },
         "SELKIES_WEBRTC_ICE_LITE": {
           "label": "ICE-Lite",

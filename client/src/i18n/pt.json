@@ -504,13 +504,23 @@
             "animated": "Animado"
           }
         },
-        "DASHBOARD": {
-          "label": "Estilo do Painel",
-          "description": "Permite ao usuário definir seu painel.",
+        "SELKIES_UI_LAYOUT": {
+          "label": "Layout do Painel",
+          "description": "Como o painel do Selkies organiza suas seções: a barra lateral, a barra de ferramentas Wish no topo ou o botão Edge ancorado em uma borda da janela. Os usuários ainda podem alternar entre eles.",
           "options": {
-            "default": "Padrão",
-            "selkiesDefault": "Selkies (Padrão)",
-            "wish": "Wish"
+            "default": "Barra Lateral",
+            "wish": "Barra de Ferramentas (Wish)",
+            "edge": "Botão Edge"
+          }
+        },
+        "SELKIES_COLOR_SCHEME": {
+          "label": "Esquema de Cores da Área de Trabalho",
+          "description": "O esquema claro ou escuro que a área de trabalho segue sob o gerenciador de janelas do Selkies. Segue o navegador por padrão; uma escolha aqui o fixa.",
+          "options": {
+            "auto": "Seguir o Navegador",
+            "dark": "Escuro",
+            "light": "Claro",
+            "off": "O da Própria Área de Trabalho"
           }
         },
         "SELKIES_AUDIO_ENABLED": {
@@ -938,6 +948,10 @@
           "label": "Arquivo de aplicativo pronto",
           "description": "Arquivo que o sidecar cria quando o aplicativo está inicializado."
         },
+        "SELKIES_APP_LOGS": {
+          "label": "Logs de Aplicativos",
+          "description": "Manter a saída de erros dos aplicativos da sessão no log do contêiner em vez de descartá-la."
+        },
         "SELKIES_AUDIT_WEBHOOK_URL": {
           "label": "URL do webhook de auditoria",
           "description": "Recebe um POST JSON por transferência de área de transferência, envio ou download de arquivo, documento impresso, conexão de página e gravação, só com metadados e nunca com o conteúdo. Vazio não envia nada."
@@ -970,6 +984,10 @@
           "label": "Habilitar Depuração Selkies",
           "description": "Habilitar registro de depuração para componentes de streaming."
         },
+        "PELORUS": {
+          "label": "Pelorus",
+          "description": "Servir o Pelorus, que descreve a área de trabalho como texto e age sobre ela para um agente ou script."
+        },
         "SELKIES_MODE": {
           "label": "Modo de Streaming",
           "description": "Transporte usado por padrão. Auto escolhe WebRTC quando qualquer valor de TURN/STUN está definido; caso contrário, WebSockets.",
@@ -994,7 +1012,7 @@
         },
         "SELKIES_CONGESTION_CONTROL": {
           "label": "Controle de Congestionamento",
-          "description": "Adaptar a taxa de bits de vídeo à estimativa de largura de banda do feedback do receptor WebRTC. Eficaz no modo CBR."
+          "description": "Adaptar a taxa de vídeo de uma tela ao que seu caminho de rede suporta, tanto em WebSockets quanto em WebRTC."
         },
         "SELKIES_WEBRTC_ICE_LITE": {
           "label": "ICE-Lite",

@@ -72,6 +72,12 @@ async def test_a_copy_of_the_directory_itself_is_taken_as_its_contents(provider)
     assert webclient.dashboard_dir(bundle, {}) == os.path.join(bundle, "selkies-dashboard")
 
 
+async def test_the_single_client_is_found_beside_other_directories(provider):
+    provider.data = archive({"selkies/web/index.html": "<html>", "selkies/aaa/index.html": "<other>"}, mode="w")
+    bundle = await webclient.ensure("img:latest")
+    assert webclient.dashboard_dir(bundle, {}) == os.path.join(bundle, "web")
+
+
 async def test_an_image_without_a_digest_is_pulled_first(provider):
     provider.digest = None
     await webclient.ensure("img:latest")

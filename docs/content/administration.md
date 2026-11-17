@@ -381,9 +381,10 @@ variables as collapsible cards, each with a count of the values that differ
 from the default; a box above filters them by name, and **Changed only**
 leaves just the values a template sets. The cards:
 
-* **Appearance**: the page title, logo, sidebar title, and dashboard style,
-  then whether the Selkies sidebar shows and which of its sections and
-  buttons it offers, with a preview that follows the toggles.
+* **Appearance**: the page title, logo, sidebar title, dashboard layout, and
+  the desktop's color scheme, then whether the Selkies sidebar shows and
+  which of its sections and buttons it offers, with a preview that follows
+  the toggles.
 * **Display**: manual resolution, dynamic resize, aligned resolution,
   scaling and DPI, second screen, fullscreen, window decorations, and the
   Wayland backend.
@@ -392,8 +393,8 @@ leaves just the values a template sets. The cards:
 * **Audio** and **Webcam**: enabling each, what starts at connect, and the
   encoding of each.
 * **Performance**: encoders, frame rate, CRF and bitrate ranges, rate
-  control, keyframes, JPEG and paint-over quality, backpressure, and the
-  watermark on the stream.
+  control, keyframes, JPEG and paint-over quality, backpressure, congestion
+  control, and the watermark on the stream.
 * **GPU**: GPU selection, render nodes, DRI3, and CPU encoding.
 * **Clipboard and Files**: clipboard policy and seamless sync, file
   transfers and their directory, printing, and the command websocket.
@@ -401,16 +402,15 @@ leaves just the values a template sets. The cards:
 * **Hardening**: the presets behind the user-level hardening switches and
   their individual components.
 * **Lifecycle**: connect and disconnect hooks, the application ready file,
-  Docker-in-Docker, the Steam shim, and IPv6.
+  application logs, Docker-in-Docker, the Steam shim, and IPv6.
 * **Integrations**: the audit webhook, the Computer-Use server, recording,
-  metrics, and debugging.
+  metrics, debugging, and Pelorus.
 * **WebRTC**: a block of its own, since its values are one decision: the
   base image streams over WebSockets until the mode says WebRTC or a STUN,
   TURN, Cloudflare, or public IP value is set, and then streams over WebRTC
   with dual mode on. The card's badge names which the template amounts to.
-  Inside it: mode and dual mode, transport (pacing, congestion control,
-  ICE-lite, ports), STUN, TURN credentials, the TURN REST API, Cloudflare
-  TURN, and diagnostics.
+  Inside it: mode and dual mode, transport (pacing, ICE-lite, ports), STUN,
+  TURN credentials, the TURN REST API, Cloudflare TURN, and diagnostics.
 * **Container**: `DOCKER_*` settings that become container run options rather
   than environment variables: privileged mode, capabilities, devices, extra
   bind mounts, memory and CPU limits, network, IPC and PID modes, DNS,
@@ -428,7 +428,16 @@ Templates written before the Selkies variables were renamed keep working:
 `SELKIES_H264_*` keys, `SELKIES_IS_MANUAL_RESOLUTION_MODE`, the three
 `SELKIES_CLIPBOARD_*` booleans, and the `x264enc` encoder spellings are
 translated to their current names when the template is loaded, and saving the
-template from the editor writes the current names.
+template from the editor writes the current names. `DASHBOARD` set to the Wish
+dashboard becomes `SELKIES_UI_LAYOUT` with the toolbar first, any other
+`DASHBOARD` is dropped, and the CPU-striped H.264 encoder Selkies 2.3.0 no
+longer has becomes `h264enc`.
+
+The variables work with the LinuxServer.io Selkies base images on Selkies
+2.2.1 and on 2.3.0, whose init still reads the base image names (`TITLE`,
+`NO_DECOR`, `RESTART_APP`, the `HARDEN_*` presets, `PIXELFLUX_WAYLAND`, and
+the rest). An image on 2.2.1 ignores the variables 2.3.0 added (the desktop's
+color scheme and application logs) and the `edge` layout.
 
 A blank **Default** template is created on first start. Templates shipped in
 the default templates directory cannot be deleted from the UI.

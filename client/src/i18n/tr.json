@@ -504,13 +504,23 @@
             "animated": "Animasyonlu"
           }
         },
-        "DASHBOARD": {
-          "label": "Kontrol Paneli Stili",
-          "description": "Kullanıcının kontrol panelini ayarlamasına izin verir.",
+        "SELKIES_UI_LAYOUT": {
+          "label": "Kontrol Paneli Düzeni",
+          "description": "Selkies kontrol panelinin bölümlerini nasıl düzenlediği: kenar çubuğu, üstteki Wish araç çubuğu veya pencere kenarına sabitlenen Edge düğmesi. Kullanıcılar yine de aralarında geçiş yapabilir.",
           "options": {
-            "default": "Varsayılan",
-            "selkiesDefault": "Selkies (Varsayılan)",
-            "wish": "Wish"
+            "default": "Kenar Çubuğu",
+            "wish": "Araç Çubuğu (Wish)",
+            "edge": "Edge Düğmesi"
+          }
+        },
+        "SELKIES_COLOR_SCHEME": {
+          "label": "Masaüstü Renk Şeması",
+          "description": "Masaüstünün Selkies pencere yöneticisi altında izlediği açık veya koyu şema. Varsayılan olarak tarayıcıyı izler; buradaki bir seçim onu sabitler.",
+          "options": {
+            "auto": "Tarayıcıyı İzle",
+            "dark": "Koyu",
+            "light": "Açık",
+            "off": "Masaüstünün Kendi Şeması"
           }
         },
         "SELKIES_AUDIO_ENABLED": {
@@ -938,6 +948,10 @@
           "label": "Uygulama Hazır Dosyası",
           "description": "Yan konteynerin, uygulama başlatıldığında oluşturduğu dosya."
         },
+        "SELKIES_APP_LOGS": {
+          "label": "Uygulama Günlükleri",
+          "description": "Oturum uygulamalarının hata çıktısını atmak yerine konteyner günlüğünde tut."
+        },
         "SELKIES_AUDIT_WEBHOOK_URL": {
           "label": "Denetim Web Kancası URL'si",
           "description": "Her pano aktarımı, dosya yükleme veya indirme, yazdırılan belge, sayfa bağlantısı ve kayıt için yalnızca meta verileri içeren, asla içerik içermeyen bir JSON POST alır. Boş bırakılırsa hiçbir şey gönderilmez."
@@ -970,6 +984,10 @@
           "label": "Selkies Hata Ayıklamayı Etkinleştir",
           "description": "Akış bileşenleri için hata ayıklama günlüğünü etkinleştir."
         },
+        "PELORUS": {
+          "label": "Pelorus",
+          "description": "Masaüstünü metin olarak tanımlayan ve bir ajan veya betik için üzerinde işlem yapan Pelorus'u sun."
+        },
         "SELKIES_MODE": {
           "label": "Akış Modu",
           "description": "Varsayılan olarak kullanılan aktarım. Otomatik, herhangi bir TURN/STUN değeri ayarlandığında WebRTC'yi, aksi halde WebSockets'i seçer.",
@@ -994,7 +1012,7 @@
         },
         "SELKIES_CONGESTION_CONTROL": {
           "label": "Tıkanıklık Kontrolü",
-          "description": "Video bit hızını WebRTC alıcı geri bildiriminden gelen bant genişliği tahminine uyarla. CBR modunda etkilidir."
+          "description": "Bir ekranın video hızını ağ yolunun taşıyabildiğine uyarla; hem WebSockets hem WebRTC üzerinde."
         },
         "SELKIES_WEBRTC_ICE_LITE": {
           "label": "ICE-Lite",

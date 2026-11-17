@@ -504,13 +504,23 @@
             "animated": "Animé"
           }
         },
-        "DASHBOARD": {
-          "label": "Style du Tableau de Bord",
-          "description": "Permet à l'utilisateur de définir son tableau de bord.",
+        "SELKIES_UI_LAYOUT": {
+          "label": "Disposition du Tableau de Bord",
+          "description": "Comment le tableau de bord de Selkies dispose ses panneaux : la barre latérale, la barre d'outils Wish en haut, ou le bouton Edge ancré sur un bord de la fenêtre. Les utilisateurs peuvent toujours passer de l'un à l'autre.",
           "options": {
-            "default": "Défaut",
-            "selkiesDefault": "Selkies (Défaut)",
-            "wish": "Wish"
+            "default": "Barre Latérale",
+            "wish": "Barre d'Outils (Wish)",
+            "edge": "Bouton Edge"
+          }
+        },
+        "SELKIES_COLOR_SCHEME": {
+          "label": "Jeu de Couleurs du Bureau",
+          "description": "Le jeu de couleurs clair ou sombre que suit le bureau sous le gestionnaire de fenêtres de Selkies. Suit le navigateur par défaut ; un choix ici le verrouille.",
+          "options": {
+            "auto": "Suivre le Navigateur",
+            "dark": "Sombre",
+            "light": "Clair",
+            "off": "Celui du Bureau"
           }
         },
         "SELKIES_AUDIO_ENABLED": {
@@ -938,6 +948,10 @@
           "label": "Fichier de disponibilité de l'application",
           "description": "Fichier que le sidecar crée lorsque l'application est initialisée."
         },
+        "SELKIES_APP_LOGS": {
+          "label": "Journaux des Applications",
+          "description": "Conserver la sortie d'erreur des applications de la session dans le journal du conteneur au lieu de la supprimer."
+        },
         "SELKIES_AUDIT_WEBHOOK_URL": {
           "label": "URL du webhook d'audit",
           "description": "Reçoit un POST JSON par transfert de presse-papiers, téléversement ou téléchargement, document imprimé, connexion de page et enregistrement, avec des métadonnées seulement et jamais le contenu. Vide n'envoie rien."
@@ -970,6 +984,10 @@
           "label": "Activer le Débogage Selkies",
           "description": "Activer la journalisation de débogage pour les composants de streaming."
         },
+        "PELORUS": {
+          "label": "Pelorus",
+          "description": "Servir Pelorus, qui décrit le bureau sous forme de texte et agit dessus pour un agent ou un script."
+        },
         "SELKIES_MODE": {
           "label": "Mode de Streaming",
           "description": "Transport utilisé par défaut. Auto choisit WebRTC lorsqu'une valeur TURN/STUN est définie, sinon WebSockets.",
@@ -994,7 +1012,7 @@
         },
         "SELKIES_CONGESTION_CONTROL": {
           "label": "Contrôle de Congestion",
-          "description": "Adapter le débit vidéo à l'estimation de bande passante issue du retour du récepteur WebRTC. Effectif en mode CBR."
+          "description": "Adapter le débit vidéo d'un affichage à ce que son chemin réseau supporte, sur WebSockets comme sur WebRTC."
         },
         "SELKIES_WEBRTC_ICE_LITE": {
           "label": "ICE-Lite",

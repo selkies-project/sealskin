@@ -504,13 +504,23 @@
             "animated": "Animado"
           }
         },
-        "DASHBOARD": {
-          "label": "Estilo ng Dashboard",
-          "description": "Pinapayagan ang user na itakda ang kanilang dashboard.",
+        "SELKIES_UI_LAYOUT": {
+          "label": "Layout ng Dashboard",
+          "description": "Kung paano inaayos ng Selkies dashboard ang mga panel nito: ang sidebar, ang Wish toolbar sa itaas, o ang Edge button na nakadikit sa gilid ng window. Maaari pa ring magpalipat-lipat ang mga user sa mga ito.",
           "options": {
-            "default": "Default",
-            "selkiesDefault": "Selkies (Default)",
-            "wish": "Wish"
+            "default": "Sidebar",
+            "wish": "Toolbar (Wish)",
+            "edge": "Edge Button"
+          }
+        },
+        "SELKIES_COLOR_SCHEME": {
+          "label": "Color Scheme ng Desktop",
+          "description": "Ang maliwanag o madilim na scheme na sinusunod ng desktop sa ilalim ng window manager ng Selkies. Sinusunod ang browser bilang default; ang pagpili rito ay nagla-lock nito.",
+          "options": {
+            "auto": "Sundan ang Browser",
+            "dark": "Madilim",
+            "light": "Maliwanag",
+            "off": "Sariling Scheme ng Desktop"
           }
         },
         "SELKIES_AUDIO_ENABLED": {
@@ -938,6 +948,10 @@
           "label": "App Ready File",
           "description": "File na nililikha ng sidecar kapag na-initialize na ang application."
         },
+        "SELKIES_APP_LOGS": {
+          "label": "Mga Log ng Application",
+          "description": "Itago ang error output ng mga application ng session sa log ng container sa halip na itapon ito."
+        },
         "SELKIES_AUDIT_WEBHOOK_URL": {
           "label": "URL ng Audit Webhook",
           "description": "Tumatanggap ng isang JSON POST bawat paglilipat ng clipboard, pag-upload o pag-download ng file, na-print na dokumento, koneksyon ng page, at pagrerekord, na may metadata lamang at hindi kailanman ang nilalaman. Kung blangko, walang ipinapadala."
@@ -970,6 +984,10 @@
           "label": "Paganahin ang Selkies Debugging",
           "description": "Paganahin ang debug logging para sa mga streaming component."
         },
+        "PELORUS": {
+          "label": "Pelorus",
+          "description": "Patakbuhin ang Pelorus, na naglalarawan sa desktop bilang teksto at kumikilos dito para sa isang agent o script."
+        },
         "SELKIES_MODE": {
           "label": "Mode ng Streaming",
           "description": "Transport na ginagamit bilang default. Pinipili ng Auto ang WebRTC kapag may nakatakdang halaga ng TURN/STUN, kung hindi ay WebSockets.",
@@ -994,7 +1012,7 @@
         },
         "SELKIES_CONGESTION_CONTROL": {
           "label": "Congestion Control",
-          "description": "I-adapt ang bitrate ng video sa pagtantya ng bandwidth mula sa feedback ng WebRTC receiver. Epektibo sa CBR mode."
+          "description": "I-adapt ang video rate ng isang display sa kayang dalhin ng network path nito, sa WebSockets at WebRTC."
         },
         "SELKIES_WEBRTC_ICE_LITE": {
           "label": "ICE-Lite",

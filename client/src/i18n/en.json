@@ -504,13 +504,23 @@
             "animated": "Animated"
           }
         },
-        "DASHBOARD": {
-          "label": "Dashboard Style",
-          "description": "Allows the user to set their dashboard.",
+        "SELKIES_UI_LAYOUT": {
+          "label": "Dashboard Layout",
+          "description": "How the Selkies dashboard arranges its panels: the sidebar, the Wish toolbar along the top, or the Edge button docked on a window edge. Users can still switch between them.",
           "options": {
-            "default": "Default",
-            "selkiesDefault": "Selkies (Default)",
-            "wish": "Wish"
+            "default": "Sidebar",
+            "wish": "Toolbar (Wish)",
+            "edge": "Edge Button"
+          }
+        },
+        "SELKIES_COLOR_SCHEME": {
+          "label": "Desktop Color Scheme",
+          "description": "The light or dark scheme the desktop follows under the Selkies window manager. Follows the browser by default; a choice here locks it.",
+          "options": {
+            "auto": "Follow the Browser",
+            "dark": "Dark",
+            "light": "Light",
+            "off": "The Desktop's Own"
           }
         },
         "SELKIES_AUDIO_ENABLED": {
@@ -938,6 +948,10 @@
           "label": "App Ready File",
           "description": "File the sidecar creates when the application is initialized."
         },
+        "SELKIES_APP_LOGS": {
+          "label": "Application Logs",
+          "description": "Keep the error output of the session's applications in the container log instead of discarding it."
+        },
         "SELKIES_AUDIT_WEBHOOK_URL": {
           "label": "Audit Webhook URL",
           "description": "Receives one JSON POST per clipboard transfer, file upload or download, printed document, page connection, and recording, with metadata only and never content. Empty sends nothing."
@@ -970,6 +984,10 @@
           "label": "Enable Selkies Debugging",
           "description": "Enable debug logging for streaming components."
         },
+        "PELORUS": {
+          "label": "Pelorus",
+          "description": "Serve Pelorus, which describes the desktop as text and acts on it for an agent or a script."
+        },
         "SELKIES_MODE": {
           "label": "Streaming Mode",
           "description": "Transport used by default. Auto picks WebRTC when any TURN/STUN value is set, otherwise WebSockets.",
@@ -994,7 +1012,7 @@
         },
         "SELKIES_CONGESTION_CONTROL": {
           "label": "Congestion Control",
-          "description": "Adapt the video bitrate to the bandwidth estimate from WebRTC receiver feedback. Effective in CBR mode."
+          "description": "Adapt a display's video rate to what its network path carries, over WebSockets and WebRTC alike."
         },
         "SELKIES_WEBRTC_ICE_LITE": {
           "label": "ICE-Lite",

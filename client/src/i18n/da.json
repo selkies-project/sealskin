@@ -504,13 +504,23 @@
             "animated": "Animeret"
           }
         },
-        "DASHBOARD": {
-          "label": "Dashboard Stil",
-          "description": "Tillader brugeren at indstille sit dashboard.",
+        "SELKIES_UI_LAYOUT": {
+          "label": "Dashboard-layout",
+          "description": "Hvordan Selkies-dashboardet arrangerer sine paneler: sidebjælken, Wish-værktøjslinjen øverst eller Edge-knappen forankret ved en vindueskant. Brugerne kan stadig skifte mellem dem.",
           "options": {
-            "default": "Standard",
-            "selkiesDefault": "Selkies (Standard)",
-            "wish": "Wish"
+            "default": "Sidebjælke",
+            "wish": "Værktøjslinje (Wish)",
+            "edge": "Edge-knap"
+          }
+        },
+        "SELKIES_COLOR_SCHEME": {
+          "label": "Skrivebordets farveskema",
+          "description": "Det lyse eller mørke skema, skrivebordet følger under Selkies' vindueshåndtering. Følger browseren som standard; et valg her låser det.",
+          "options": {
+            "auto": "Følg browseren",
+            "dark": "Mørk",
+            "light": "Lys",
+            "off": "Skrivebordets eget"
           }
         },
         "SELKIES_AUDIO_ENABLED": {
@@ -938,6 +948,10 @@
           "label": "App-klar-fil",
           "description": "Fil, som sidecaren opretter, når programmet er initialiseret."
         },
+        "SELKIES_APP_LOGS": {
+          "label": "Programlogfiler",
+          "description": "Behold fejloutputtet fra sessionens programmer i containerloggen i stedet for at kassere det."
+        },
         "SELKIES_AUDIT_WEBHOOK_URL": {
           "label": "URL til revisions-webhook",
           "description": "Modtager ét JSON-POST pr. udklipsholderoverførsel, filupload eller -download, udskrevet dokument, sideforbindelse og optagelse, kun med metadata og aldrig indhold. Tom sender intet."
@@ -970,6 +984,10 @@
           "label": "Aktiver Selkies Debugging",
           "description": "Aktiver debug-logning for streamingkomponenter."
         },
+        "PELORUS": {
+          "label": "Pelorus",
+          "description": "Kør Pelorus, som beskriver skrivebordet som tekst og handler på det for en agent eller et script."
+        },
         "SELKIES_MODE": {
           "label": "Streamingtilstand",
           "description": "Transport, der bruges som standard. Auto vælger WebRTC, når en TURN/STUN-værdi er angivet, ellers WebSockets.",
@@ -994,7 +1012,7 @@
         },
         "SELKIES_CONGESTION_CONTROL": {
           "label": "Overbelastningsstyring",
-          "description": "Tilpas video-bitraten til båndbreddeestimatet fra WebRTC-modtagerfeedback. Virker i CBR-tilstand."
+          "description": "Tilpas en skærms videohastighed til det, netværksstien kan bære, over både WebSockets og WebRTC."
         },
         "SELKIES_WEBRTC_ICE_LITE": {
           "label": "ICE-Lite",
