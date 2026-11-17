@@ -105,6 +105,23 @@ async def test_a_server_takes_only_the_container_with_its_own_host_name_for_itse
     assert state.instance_name == "sealskin" and state.path_prefix_map == {"/config": "/host"}
 
 
+def test_a_server_finds_its_container_id_in_docker_and_podman_mounts(monkeypatch, tmp_path):
+    from app import docker_utils
+
+    mounts = tmp_path / "mountinfo"
+    monkeypatch.setattr(docker_utils, "MOUNTINFO", str(mounts))
+    docker_id, podman_id = "d" * 64, "e" * 64
+    mounts.write_text(f"1 2 0:1 /var/lib/docker/containers/{docker_id}/hostname /etc/hostname rw - ext4 /dev/sda rw\n")
+    assert docker_utils._own_id() == docker_id
+    mounts.write_text(
+        "1 2 0:1 / / rw - overlay overlay rw,lowerdir=/home/deck/.local/share/containers/storage/overlay/l/X\n"
+        f"3 2 0:2 /containers/overlay-containers/{podman_id}/userdata/hostname /etc/hostname rw - tmpfs tmpfs rw\n"
+    )
+    assert docker_utils._own_id() == podman_id
+    mounts.write_text("1 2 0:1 / / rw - ext4 /dev/sda rw\n")
+    assert docker_utils._own_id() == ""
+
+
 async def test_a_server_does_not_start_under_a_name_another_container_runs_under(monkeypatch):
     import os
 
@@ -140,6 +157,10 @@ async def test_a_server_does_not_start_under_a_name_another_container_runs_under
     monkeypatch.setattr(docker_utils, "get_docker_client", lambda: Client({"sealskin": Container("sealskin", here, "a" * 64)}))
     await docker_utils.inspect_self_container()
     assert state.instance_name == "sealskin"
+    # In a Podman container whose mounts do not show its id, and which has no `/.dockerenv`.
+    monkeypatch.setattr(docker_utils, "_own_id", lambda: "")
+    monkeypatch.setattr(os.path, "exists", lambda path: path != "/.dockerenv" and (path in ("/var/run/docker.sock", "/run/.containerenv") or exists(path)))
+    await docker_utils.inspect_self_container()
     # On a host whose name a running container carries.
     monkeypatch.setattr(docker_utils, "_own_id", lambda: "")
     monkeypatch.setattr(os.path, "exists", lambda path: path != "/.dockerenv" and (path == "/var/run/docker.sock" or exists(path)))

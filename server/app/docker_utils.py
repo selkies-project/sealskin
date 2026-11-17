@@ -78,11 +78,22 @@ class NameTaken(RuntimeError):
     """Docker runs another container under the name this server would go by."""
 
 
+MOUNTINFO = "/proc/self/mountinfo"
+"""The mounts of this process, among them the files its container runtime gave it."""
+
+CONTAINER_MARKERS = ("/.dockerenv", "/run/.containerenv")
+"""The files Docker and Podman place at a container's root, which a host has none of."""
+
+
 def _own_id() -> str:
-    """Return the id of the container this process runs in, as its mounts show it, or `""` on a host."""
+    """Return the id of the container this process runs in, as its mounts show it, or `""` on a host.
+
+    Docker keeps a container's files under `containers/<id>/`, and Podman
+    under `overlay-containers/<id>/userdata/`.
+    """
     try:
-        with open("/proc/self/mountinfo", encoding="utf-8") as handle:
-            found = re.search(r"/containers/([0-9a-f]{64})/", handle.read())
+        with open(MOUNTINFO, encoding="utf-8") as handle:
+            found = re.search(r"/(?:overlay-)?containers/([0-9a-f]{64})/", handle.read())
     except OSError:
         return ""
     return found.group(1) if found else ""
@@ -117,7 +128,7 @@ def _own_container(client: docker.DockerClient) -> Any | None:
             continue
         if found.attrs.get("Config", {}).get("Hostname") == hostname or found.id.startswith(hostname):
             running = getattr(found, "status", "running") == "running"
-            if (own and found.id != own) or (not own and not os.path.exists("/.dockerenv") and running):
+            if (own and found.id != own) or (not own and not any(map(os.path.exists, CONTAINER_MARKERS)) and running):
                 raise _taken(found)
             return found
     if settings.node_name:
