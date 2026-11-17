@@ -267,11 +267,20 @@ def test_session_base_env_timezone(monkeypatch):
 def test_hardening_env_from_user_settings():
     assert launch.hardening_env(None) == {}
     assert launch.hardening_env({"harden_container": False, "harden_openbox": False}) == {}
-    assert launch.hardening_env({"harden_container": True}) == {"HARDEN_DESKTOP": "true"}
-    assert launch.hardening_env({"harden_container": True, "harden_openbox": True}) == {
-        "HARDEN_DESKTOP": "true",
-        "HARDEN_OPENBOX": "true",
-    }
+    assert launch.hardening_env({"harden_container": True}) == launch.HARDENING_ENV["harden_container"]
+    both = launch.hardening_env({"harden_container": True, "harden_openbox": True})
+    assert both["HARDEN_DESKTOP"] == "true"
+    assert both["HARDEN_OPENBOX"] == "true"
+    assert both["SELKIES_FILE_TRANSFERS"] == ""
+    assert both["SELKIES_WM_KEYBINDS"] == "false"
+
+
+def test_hardened_window_buttons_drop_close_only():
+    assert launch.hardened_window_buttons({}) == "minimize,maximize"
+    assert launch.hardened_window_buttons({"SELKIES_WM_BUTTONS": "close,maximize"}) == "maximize"
+    assert launch.hardened_window_buttons({"SELKIES_WM_BUTTONS": "close"}) == "none"
+    assert launch.hardened_window_buttons({"SELKIES_WM_BUTTONS": "none"}) == "none"
+    assert launch.hardened_window_buttons({"DISABLE_WINDOW_BUTTONS": "true"}) == "none"
 
 
 def test_build_launch_spec_forced_env_wins_and_legacy_keys_migrate(tmp_path):
@@ -279,6 +288,9 @@ def test_build_launch_spec_forced_env_wins_and_legacy_keys_migrate(tmp_path):
         "name": "Default",
         "settings": {
             "HARDEN_DESKTOP": "false",
+            "SELKIES_FILE_TRANSFERS": "upload,download",
+            "SELKIES_WM_KEYBINDS": "true",
+            "SELKIES_WM_BUTTONS": "minimize,close",
             "SELKIES_H264_CRF": "10-40",
             "SELKIES_CLIPBOARD_IN_ENABLED": "false",
         },
@@ -309,6 +321,9 @@ def test_build_launch_spec_forced_env_wins_and_legacy_keys_migrate(tmp_path):
     )
     assert spec.env["HARDEN_DESKTOP"] == "true"
     assert spec.env["HARDEN_OPENBOX"] == "true"
+    assert spec.env["SELKIES_FILE_TRANSFERS"] == ""
+    assert spec.env["SELKIES_WM_KEYBINDS"] == "false"
+    assert spec.env["SELKIES_WM_BUTTONS"] == "minimize"
     assert spec.env["SELKIES_VIDEO_CRF"] == "10-40"
     assert "SELKIES_H264_CRF" not in spec.env
     assert spec.env["SELKIES_ENABLE_CLIPBOARD"] == "out"

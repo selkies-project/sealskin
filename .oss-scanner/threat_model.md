@@ -68,7 +68,9 @@
   carries a web sign-in; a node that only runs sessions rewrites its own record but not its roles, pool, or
   approval in it (`routers/peer.py`), so it never makes itself a frontend, which acts for users; a template
   editor sets none of the variables a store may not (`S6_*`, `LD_*`, `FILE__*`, `BASH_ENV`, `ENV`, `PATH`,
-  `HOME`, `IFS`), nor deletes a template that holds one.
+  `HOME`, `IFS`), nor deletes a template that holds one; a user's hardening switches are applied after the
+  template and the application's environment, the Selkies values their base image presets derive included
+  (`launch.HARDENING_ENV`), so neither turns back on what the switch turned off.
 
 ## Components that matter most / least
 - Most: anything that lets a lower principal reach a higher one: an anonymous client reaching the API, a session
