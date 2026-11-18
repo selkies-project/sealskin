@@ -1447,6 +1447,24 @@ document.addEventListener('DOMContentLoaded', () => {
         localAudioContext = null;
     };
 
+    // WebKit refuses audio capture under any other session type, and the
+    // Selkies client in the frame sets 'playback' for its stream but leaves
+    // 'play-and-record' alone.
+    const claimRecordingAudioSession = () => {
+        let frameNavigator = null;
+        try {
+            const iframe = document.getElementById('session-frame');
+            frameNavigator = iframe && iframe.contentWindow ? iframe.contentWindow.navigator : null;
+        } catch (err) {}
+        [navigator, frameNavigator].forEach((nav) => {
+            try {
+                if (nav && nav.audioSession && nav.audioSession.type !== 'play-and-record') {
+                    nav.audioSession.type = 'play-and-record';
+                }
+            } catch (err) {}
+        });
+    };
+
     const startMedia = async () => {
         if (COLLAB_DATA.userPermission === 'readonly') {
             return false;
@@ -1454,6 +1472,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mediaInitialized) {
             stopMedia();
         }
+
+        claimRecordingAudioSession();
 
         try {
             const audioConstraints = {
