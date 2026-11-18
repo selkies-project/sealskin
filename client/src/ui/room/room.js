@@ -331,6 +331,9 @@ const createWorkerTrackProcessor = async (track) => {
     let clone;
     try {
         clone = track.clone();
+        // The original's enabled toggle never reaches a clone, and the page
+        // already drops frames while the camera is off.
+        clone.enabled = true;
     } catch (err) {
         console.warn('[Media] track clone failed:', err);
         return null;
