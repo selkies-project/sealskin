@@ -1232,6 +1232,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let isResolutionLocked = false;
     let currentMkOwner = null;
 
+    const frameResolution = (frame) => {
+        const scale = window.devicePixelRatio || 1;
+        return {
+            width: Math.round(frame.clientWidth * scale),
+            height: Math.round(frame.clientHeight * scale),
+            scale,
+        };
+    };
+
+    const scaleDpi = (scale) => Math.min(288, Math.max(96, Math.round(scale * 4) * 24));
+
+    const resizeFrameTo = (iframe, res) => {
+        const origin = window.location.origin;
+        iframe.contentWindow.postMessage({ type: 'setManualResolution', width: res.width, height: res.height }, origin);
+        iframe.contentWindow.postMessage({ type: 'settings', settings: { scaling_dpi: scaleDpi(res.scale || 1) } }, origin);
+    };
+
     const applyAutoResolution = () => {
         if (COLLAB_DATA.userRole !== 'controller') return;
         const targetToken = currentMkOwner || COLLAB_DATA.userToken;
@@ -1247,7 +1264,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = clientResolutions[targetToken];
             if (res) {
                 console.log(`[Controller] Auto-syncing resolution to MK owner (${targetToken}): ${res.width}x${res.height}`);
-                iframe.contentWindow.postMessage({ type: 'setManualResolution', width: res.width, height: res.height }, window.location.origin);
+                resizeFrameTo(iframe, res);
             }
         }
     };
@@ -2319,9 +2336,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 const iframe = document.getElementById('session-frame')
                 if (iframe) {
-                    ws.send(JSON.stringify({ action: 'client_resolution', width: iframe.clientWidth, height: iframe.clientHeight }));
+                    const res = frameResolution(iframe);
+                    ws.send(JSON.stringify({ action: 'client_resolution', ...res }));
                     if (COLLAB_DATA.userRole === 'controller') {
-                        clientResolutions[COLLAB_DATA.userToken] = { width: iframe.clientWidth, height: iframe.clientHeight };
+                        clientResolutions[COLLAB_DATA.userToken] = res;
                     }
                 }
             };
@@ -2354,12 +2372,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     case 'request_resolutions': {
                         const reqIframe = document.getElementById('session-frame');
                         if (reqIframe && ws && ws.readyState === WebSocket.OPEN) {
-                            ws.send(JSON.stringify({ action: 'client_resolution', width: reqIframe.clientWidth, height: reqIframe.clientHeight }));
+                            ws.send(JSON.stringify({ action: 'client_resolution', ...frameResolution(reqIframe) }));
                         }
                         break;
                     }
                     case 'resolution_update':
-                        clientResolutions[data.token] = { width: data.width, height: data.height };
+                        clientResolutions[data.token] = { width: data.width, height: data.height, scale: data.scale };
                         if (COLLAB_DATA.userRole === 'controller' && !isResolutionLocked && currentMkOwner === data.token) {
                             applyAutoResolution();
                         }
@@ -3417,7 +3435,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(`[Controller] Manually resizing to client ${token}: ${res.width}x${res.height}`);
             const iframe = document.getElementById('session-frame');
             if (iframe && iframe.contentWindow) {
-                iframe.contentWindow.postMessage({ type: 'setManualResolution', width: res.width, height: res.height }, window.location.origin);
+                resizeFrameTo(iframe, res);
             }
         } else if (btn.classList.contains('toggle-resolution-lock')) {
             isResolutionLocked = !isResolutionLocked;
@@ -3454,22 +3472,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const reportResolution = () => {
             resizeTimer = null;
             if (ws && ws.readyState === WebSocket.OPEN) {
-                const width = iframeEl.clientWidth;
-                const height = iframeEl.clientHeight;
-                ws.send(JSON.stringify({ action: 'client_resolution', width, height }));
+                const res = frameResolution(iframeEl);
+                ws.send(JSON.stringify({ action: 'client_resolution', ...res }));
                 if (COLLAB_DATA.userRole === 'controller') {
-                    clientResolutions[COLLAB_DATA.userToken] = { width, height };
+                    clientResolutions[COLLAB_DATA.userToken] = res;
                     if (!isResolutionLocked && currentMkOwner === COLLAB_DATA.userToken) {
                         applyAutoResolution();
                     }
                 }
             }
         };
-        const resizeObserver = new ResizeObserver(() => {
+        const scheduleReport = () => {
             if (resizeTimer) clearTimeout(resizeTimer);
             resizeTimer = setTimeout(reportResolution, RESIZE_SETTLE_MS);
-        });
+        };
+        const resizeObserver = new ResizeObserver(scheduleReport);
         resizeObserver.observe(iframeEl);
+        // A scale change keeps the CSS size, so the observer misses it.
+        const watchScale = () => {
+            window.matchMedia(`(resolution: ${window.devicePixelRatio || 1}dppx)`)
+                .addEventListener('change', () => {
+                    scheduleReport();
+                    watchScale();
+                }, { once: true });
+        };
+        watchScale();
         iframeEl.addEventListener('load', sendVolumeToIframe);
     }
 
