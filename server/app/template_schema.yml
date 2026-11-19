@@ -5,9 +5,10 @@
 # a new variable ships with the server image instead of a client release.
 #
 # The variables mirror what the linuxserver/docker-baseimage-selkies init
-# scripts and the upstream Selkies server (src/selkies/settings.py) read. The
-# editor only stores values that differ from `default`, so `default` must be
-# the value the container effectively runs with when the variable is unset.
+# scripts and the upstream Selkies server (crates/selkies/src/settings/table.rs)
+# read. The editor only stores values that differ from `default`, so `default`
+# must be the value the container effectively runs with when the variable is
+# unset: the base image's where it sets one, else Selkies' own.
 #
 # Fields:
 #   name      Environment variable name passed to the session container.
@@ -86,7 +87,9 @@ settings:
     type: text
     default: "Selkies"
     docker: false
-  - name: DASHBOARD
+  # The first layout of a list is the one a session opens with; the others stay
+  # in the user's menu. Selkies before 2.3.0 drops `edge`.
+  - name: SELKIES_UI_LAYOUT
     category: ui
     section: appearance
     type: select
@@ -95,10 +98,26 @@ settings:
     options:
       - value: ""
         label_key: default
-      - value: "selkies-dashboard"
-        label_key: selkiesDefault
-      - value: "selkies-dashboard-wish"
+      - value: "wish,default,edge"
         label_key: wish
+      - value: "edge,default,wish"
+        label_key: edge
+  # A single scheme locks it; unset, the desktop follows the browser.
+  - name: SELKIES_COLOR_SCHEME
+    category: ui
+    section: appearance
+    type: select
+    default: ""
+    docker: false
+    options:
+      - value: ""
+        label_key: auto
+      - value: "dark"
+        label_key: dark
+      - value: "light"
+        label_key: light
+      - value: "off"
+        label_key: "off"
   - name: SELKIES_UI_SHOW_SIDEBAR
     category: ui
     section: appearance
@@ -697,6 +716,12 @@ settings:
     type: text
     default: "120"
     docker: false
+  - name: SELKIES_CONGESTION_CONTROL
+    category: app
+    section: performance
+    type: boolean
+    default: "true"
+    docker: false
   - name: WATERMARK_PNG
     category: ui
     section: performance
@@ -958,6 +983,12 @@ settings:
     type: text
     default: "/tmp/selkies-appready"
     docker: false
+  - name: SELKIES_APP_LOGS
+    category: general
+    section: lifecycle
+    type: boolean
+    default: "false"
+    docker: false
   - name: START_DOCKER
     category: general
     section: lifecycle
@@ -1027,6 +1058,12 @@ settings:
     type: boolean
     default: "false"
     docker: false
+  - name: PELORUS
+    category: general
+    section: integrations
+    type: boolean
+    default: "false"
+    docker: false
   # ---------------------------------------------------------------------------
   # WebRTC. The base image switches the container to WebRTC (with dual mode on)
   # as soon as any STUN/TURN/Cloudflare/public-IP variable below is non-empty,
@@ -1066,13 +1103,6 @@ settings:
     group: transport
     type: boolean
     default: "true"
-    docker: false
-  - name: SELKIES_CONGESTION_CONTROL
-    category: webrtc
-    section: webrtc
-    group: transport
-    type: boolean
-    default: "false"
     docker: false
   - name: SELKIES_WEBRTC_ICE_LITE
     category: webrtc

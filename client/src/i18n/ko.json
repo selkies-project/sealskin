@@ -504,13 +504,23 @@
             "animated": "애니메이션"
           }
         },
-        "DASHBOARD": {
-          "label": "대시보드 스타일",
-          "description": "사용자가 자신의 대시보드를 설정할 수 있습니다.",
+        "SELKIES_UI_LAYOUT": {
+          "label": "대시보드 레이아웃",
+          "description": "Selkies 대시보드가 패널을 배치하는 방식: 사이드바, 상단의 Wish 도구 모음 또는 창 가장자리에 고정되는 Edge 버튼. 사용자는 계속 전환할 수 있습니다.",
           "options": {
-            "default": "기본값",
-            "selkiesDefault": "Selkies (기본값)",
-            "wish": "Wish"
+            "default": "사이드바",
+            "wish": "도구 모음 (Wish)",
+            "edge": "Edge 버튼"
+          }
+        },
+        "SELKIES_COLOR_SCHEME": {
+          "label": "데스크톱 색 구성표",
+          "description": "Selkies 창 관리자에서 데스크톱이 따르는 밝은 또는 어두운 구성표입니다. 기본적으로 브라우저를 따르며, 여기서 선택하면 고정됩니다.",
+          "options": {
+            "auto": "브라우저 따르기",
+            "dark": "어둡게",
+            "light": "밝게",
+            "off": "데스크톱 자체 구성표"
           }
         },
         "SELKIES_AUDIO_ENABLED": {
@@ -938,6 +948,10 @@
           "label": "앱 준비 파일",
           "description": "애플리케이션이 초기화되면 사이드카가 만드는 파일입니다."
         },
+        "SELKIES_APP_LOGS": {
+          "label": "애플리케이션 로그",
+          "description": "세션 애플리케이션의 오류 출력을 버리지 않고 컨테이너 로그에 남깁니다."
+        },
         "SELKIES_AUDIT_WEBHOOK_URL": {
           "label": "감사 웹훅 URL",
           "description": "클립보드 전송, 파일 업로드나 다운로드, 인쇄된 문서, 페이지 연결, 녹화마다 JSON POST 하나를 받습니다. 내용은 포함하지 않고 메타데이터만 보냅니다. 비워 두면 아무것도 보내지 않습니다."
@@ -970,6 +984,10 @@
           "label": "Selkies 디버깅 활성화",
           "description": "스트리밍 구성 요소에 대한 디버그 로깅을 활성화합니다."
         },
+        "PELORUS": {
+          "label": "Pelorus",
+          "description": "데스크톱을 텍스트로 설명하고 에이전트나 스크립트를 위해 조작하는 Pelorus를 제공합니다."
+        },
         "SELKIES_MODE": {
           "label": "스트리밍 모드",
           "description": "기본적으로 사용할 전송 방식입니다. 자동은 TURN/STUN 값이 하나라도 설정되어 있으면 WebRTC를, 그렇지 않으면 WebSockets를 선택합니다.",
@@ -994,7 +1012,7 @@
         },
         "SELKIES_CONGESTION_CONTROL": {
           "label": "혼잡 제어",
-          "description": "WebRTC 수신 측 피드백의 대역폭 추정치에 맞춰 비디오 비트레이트를 조정합니다. CBR 모드에서 효과가 있습니다."
+          "description": "디스플레이의 비디오 속도를 네트워크 경로가 감당하는 만큼 조정합니다. WebSockets와 WebRTC 모두에 적용됩니다."
         },
         "SELKIES_WEBRTC_ICE_LITE": {
           "label": "ICE-Lite",

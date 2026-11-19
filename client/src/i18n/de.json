@@ -504,13 +504,23 @@
             "animated": "Animiert"
           }
         },
-        "DASHBOARD": {
-          "label": "Dashboard-Stil",
-          "description": "Ermöglicht dem Benutzer, sein Dashboard festzulegen.",
+        "SELKIES_UI_LAYOUT": {
+          "label": "Dashboard-Layout",
+          "description": "Wie das Selkies-Dashboard seine Bereiche anordnet: die Seitenleiste, die Wish-Werkzeugleiste am oberen Rand oder die an einer Fensterkante angedockte Edge-Schaltfläche. Benutzer können weiterhin zwischen ihnen wechseln.",
           "options": {
-            "default": "Standard",
-            "selkiesDefault": "Selkies (Standard)",
-            "wish": "Wish"
+            "default": "Seitenleiste",
+            "wish": "Werkzeugleiste (Wish)",
+            "edge": "Edge-Schaltfläche"
+          }
+        },
+        "SELKIES_COLOR_SCHEME": {
+          "label": "Farbschema des Desktops",
+          "description": "Das helle oder dunkle Schema, dem der Desktop unter dem Selkies-Fenstermanager folgt. Folgt standardmäßig dem Browser; eine Auswahl hier legt es fest.",
+          "options": {
+            "auto": "Dem Browser folgen",
+            "dark": "Dunkel",
+            "light": "Hell",
+            "off": "Eigenes Schema des Desktops"
           }
         },
         "SELKIES_AUDIO_ENABLED": {
@@ -938,6 +948,10 @@
           "label": "App-Bereitschaftsdatei",
           "description": "Datei, die der Sidecar anlegt, wenn die Anwendung initialisiert ist."
         },
+        "SELKIES_APP_LOGS": {
+          "label": "Anwendungsprotokolle",
+          "description": "Die Fehlerausgabe der Anwendungen der Sitzung im Container-Protokoll behalten, statt sie zu verwerfen."
+        },
         "SELKIES_AUDIT_WEBHOOK_URL": {
           "label": "Audit-Webhook-URL",
           "description": "Empfängt einen JSON-POST pro Zwischenablage-Übertragung, Datei-Upload oder -Download, gedrucktem Dokument, Seitenverbindung und Aufzeichnung, nur mit Metadaten und niemals mit Inhalt. Leer sendet nichts."
@@ -970,6 +984,10 @@
           "label": "Selkies-Debugging aktivieren",
           "description": "Debug-Logging für Streaming-Komponenten aktivieren."
         },
+        "PELORUS": {
+          "label": "Pelorus",
+          "description": "Pelorus bereitstellen, das den Desktop als Text beschreibt und für einen Agenten oder ein Skript darauf handelt."
+        },
         "SELKIES_MODE": {
           "label": "Streaming-Modus",
           "description": "Standardmäßig verwendeter Transport. Auto wählt WebRTC, wenn ein TURN/STUN-Wert gesetzt ist, andernfalls WebSockets.",
@@ -994,7 +1012,7 @@
         },
         "SELKIES_CONGESTION_CONTROL": {
           "label": "Überlastkontrolle",
-          "description": "Die Video-Bitrate an die Bandbreitenschätzung aus dem WebRTC-Empfänger-Feedback anpassen. Wirksam im CBR-Modus."
+          "description": "Die Videorate einer Anzeige an das anpassen, was ihr Netzwerkpfad trägt, über WebSockets wie über WebRTC."
         },
         "SELKIES_WEBRTC_ICE_LITE": {
           "label": "ICE-Lite",

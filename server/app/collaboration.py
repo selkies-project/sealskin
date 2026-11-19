@@ -689,13 +689,12 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
                 elif action == "client_resolution":
                     width = data.get("width")
                     height = data.get("height")
+                    scale = data.get("scale")
                     if width and height:
-                        await broadcast_to_room(session_id_str, {
-                            "type": "resolution_update",
-                            "token": token,
-                            "width": width,
-                            "height": height
-                        })
+                        update = {"type": "resolution_update", "token": token, "width": width, "height": height}
+                        if isinstance(scale, (int, float)) and not isinstance(scale, bool) and 0 < scale <= 8:
+                            update["scale"] = scale
+                        await broadcast_to_room(session_id_str, update)
 
             elif "bytes" in message:
                 binary_data = message["bytes"]

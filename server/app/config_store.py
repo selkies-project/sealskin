@@ -823,7 +823,12 @@ LEGACY_CLIPBOARD_KEYS = (
     "SELKIES_CLIPBOARD_IN_ENABLED",
     "SELKIES_CLIPBOARD_OUT_ENABLED",
 )
-LEGACY_ENCODER_NAMES = {"x264enc": "h264enc", "x264enc-striped": "h264enc-striped"}
+# Selkies 2.3.0 drops the CPU-striped H.264 encoder; `h264enc` encodes on the CPU
+# where no GPU carries H.264.
+LEGACY_ENCODER_NAMES = {"x264enc": "h264enc", "x264enc-striped": "h264enc", "h264enc-striped": "h264enc"}
+# The base image's dashboard picker, which Selkies' one client replaced with a layout.
+LEGACY_DASHBOARD_KEY = "DASHBOARD"
+LEGACY_DASHBOARD_LAYOUTS = {"selkies-dashboard-wish": "wish,default,edge"}
 
 
 def _is_true(value: Any) -> bool:
@@ -835,13 +840,15 @@ def migrate_legacy_template_settings(template_settings: dict[str, Any]) -> dict[
 
     Renamed keys move to their current name unless the current name is
     already present. The three clipboard booleans collapse into the
-    `SELKIES_ENABLE_CLIPBOARD` policy (`true`, `in`, `out`, or `false`), and
-    encoder spellings the current Selkies no longer lists are mapped onto
-    the encoders that serve them. Unknown keys pass through untouched.
+    `SELKIES_ENABLE_CLIPBOARD` policy (`true`, `in`, `out`, or `false`), the
+    `DASHBOARD` that picked the Wish dashboard becomes its
+    `SELKIES_UI_LAYOUT`, and encoder spellings the current Selkies no longer
+    lists are mapped onto the encoders that serve them. Unknown keys pass
+    through untouched.
     """
     migrated: dict[str, Any] = {}
     for key, value in template_settings.items():
-        if key in LEGACY_CLIPBOARD_KEYS:
+        if key in LEGACY_CLIPBOARD_KEYS or key == LEGACY_DASHBOARD_KEY:
             continue
         migrated[LEGACY_TEMPLATE_KEYS.get(key, key)] = value
     for legacy, current in LEGACY_TEMPLATE_KEYS.items():
@@ -863,6 +870,10 @@ def migrate_legacy_template_settings(template_settings: dict[str, Any]) -> dict[
         else:
             policy = "false"
         migrated["SELKIES_ENABLE_CLIPBOARD"] = policy
+
+    layout = LEGACY_DASHBOARD_LAYOUTS.get(str(template_settings.get(LEGACY_DASHBOARD_KEY) or "").strip())
+    if layout and "SELKIES_UI_LAYOUT" not in template_settings:
+        migrated["SELKIES_UI_LAYOUT"] = layout
 
     encoder = migrated.get("SELKIES_ENCODER")
     if isinstance(encoder, str) and encoder.strip():

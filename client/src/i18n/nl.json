@@ -504,13 +504,23 @@
             "animated": "Geanimeerd"
           }
         },
-        "DASHBOARD": {
-          "label": "Dashboard Stijl",
-          "description": "Hiermee kan de gebruiker zijn dashboard instellen.",
+        "SELKIES_UI_LAYOUT": {
+          "label": "Dashboard-indeling",
+          "description": "Hoe het Selkies-dashboard zijn panelen indeelt: de zijbalk, de Wish-werkbalk bovenaan of de Edge-knop die aan een vensterrand vastzit. Gebruikers kunnen er nog steeds tussen wisselen.",
           "options": {
-            "default": "Standaard",
-            "selkiesDefault": "Selkies (Standaard)",
-            "wish": "Wish"
+            "default": "Zijbalk",
+            "wish": "Werkbalk (Wish)",
+            "edge": "Edge-knop"
+          }
+        },
+        "SELKIES_COLOR_SCHEME": {
+          "label": "Kleurenschema van het Bureaublad",
+          "description": "Het lichte of donkere schema dat het bureaublad volgt onder de vensterbeheerder van Selkies. Volgt standaard de browser; een keuze hier zet het vast.",
+          "options": {
+            "auto": "Browser Volgen",
+            "dark": "Donker",
+            "light": "Licht",
+            "off": "Eigen Schema van het Bureaublad"
           }
         },
         "SELKIES_AUDIO_ENABLED": {
@@ -938,6 +948,10 @@
           "label": "App-gereedbestand",
           "description": "Bestand dat de sidecar aanmaakt wanneer de toepassing is geïnitialiseerd."
         },
+        "SELKIES_APP_LOGS": {
+          "label": "Applicatielogboeken",
+          "description": "Bewaar de foutuitvoer van de applicaties van de sessie in het containerlogboek in plaats van deze weg te gooien."
+        },
         "SELKIES_AUDIT_WEBHOOK_URL": {
           "label": "URL van audit-webhook",
           "description": "Ontvangt één JSON-POST per klembordoverdracht, bestandsupload of -download, afgedrukt document, paginaverbinding en opname, met alleen metadata en nooit inhoud. Leeg verstuurt niets."
@@ -970,6 +984,10 @@
           "label": "Selkies Debugging Inschakelen",
           "description": "Schakel debug-logging in voor streamingcomponenten."
         },
+        "PELORUS": {
+          "label": "Pelorus",
+          "description": "Bied Pelorus aan, dat het bureaublad als tekst beschrijft en erop handelt voor een agent of een script."
+        },
         "SELKIES_MODE": {
           "label": "Streamingmodus",
           "description": "Standaard gebruikt transport. Auto kiest WebRTC wanneer een TURN/STUN-waarde is ingesteld, anders WebSockets.",
@@ -994,7 +1012,7 @@
         },
         "SELKIES_CONGESTION_CONTROL": {
           "label": "Congestiebeheer",
-          "description": "Pas de videobitrate aan aan de bandbreedteschatting uit WebRTC-ontvangerfeedback. Effectief in CBR-modus."
+          "description": "Pas de videosnelheid van een scherm aan aan wat het netwerkpad aankan, via zowel WebSockets als WebRTC."
         },
         "SELKIES_WEBRTC_ICE_LITE": {
           "label": "ICE-Lite",

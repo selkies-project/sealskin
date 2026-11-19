@@ -176,6 +176,109 @@ async def test_docker_session_containers_are_named_after_the_session(monkeypatch
     assert names[0] != names[1]
 
 
+async def test_an_nvidia_session_asks_podman_for_its_gpu_as_a_cdi_device(monkeypatch):
+    """Podman ignores Docker's `nvidia` runtime and an index request; it gives a GPU only as a CDI device."""
+    import threading
+    from types import SimpleNamespace
+
+    from docker.errors import APIError
+    from fastapi import HTTPException
+
+    from app.providers import docker_provider
+
+    runs = []
+
+    def run(**kwargs):
+        runs.append(kwargs)
+        return SimpleNamespace(id="c1", short_id="c1", attrs={}, reload=lambda: None)
+
+    client = SimpleNamespace(images=SimpleNamespace(get=lambda _image: None), containers=SimpleNamespace(run=run))
+    monkeypatch.setattr(docker_provider, "get_docker_client", lambda: client)
+
+    async def ready(self, *_args, **_kwargs):
+        return "10.0.0.2"
+
+    monkeypatch.setattr(docker_provider.DockerProvider, "_wait_until_ready", ready)
+    provider = docker_provider.DockerProvider({"provider_config": {"image": "img:latest", "port": 3000}})
+    gpu = {"type": "nvidia", "index": 1, "device": "/dev/dri/renderD129"}
+
+    monkeypatch.setattr(docker_provider, "engine_is_podman", lambda: False)
+    await provider.launch("0123abcd-4567-89ef-0123-456789abcdef", {}, gpu_config=gpu)
+    docker_run = runs.pop()
+    assert docker_run["runtime"] == "nvidia" and docker_run["device_requests"][0]["DeviceIDs"] == ["1"]
+    assert "/dev/nvidia-modeset:/dev/nvidia-modeset" in docker_run["devices"]
+
+    asked_in = []
+
+    def podman():
+        asked_in.append(threading.current_thread())
+        return True
+
+    monkeypatch.setattr(docker_provider, "engine_is_podman", podman)
+    await provider.launch("0123abcd-4567-89ef-0123-456789abcdef", {}, gpu_config=gpu)
+    # The engine is asked off the event loop.
+    assert asked_in and threading.main_thread() not in asked_in
+    podman_run = runs.pop()
+    assert "runtime" not in podman_run and podman_run["devices"] == []
+    assert podman_run["device_requests"][0]["Driver"] == "cdi"
+    assert podman_run["device_requests"][0]["DeviceIDs"] == ["nvidia.com/gpu=1"]
+
+    def unresolvable(**_kwargs):
+        raise APIError("500 Server Error", explanation="setting up CDI devices: unresolvable CDI devices nvidia.com/gpu=1")
+
+    removed = []
+    client.containers.run = unresolvable
+    unstarted = {"status": "created", "session": "0123abcd-4567-89ef-0123-456789abcdef"}
+
+    def get(name):
+        labels = {docker_provider.SESSION_LABEL: unstarted["session"]}
+        return SimpleNamespace(status=unstarted["status"], labels=labels, remove=lambda: removed.append(name))
+
+    client.containers.get = get
+    with pytest.raises(HTTPException) as missing:
+        await provider.launch("0123abcd-4567-89ef-0123-456789abcdef", {}, gpu_config=gpu)
+    assert "nvidia-ctk cdi generate" in missing.value.detail
+    # Podman leaves the container it created before the start failed, and it goes with the launch.
+    assert len(removed) == 1 and removed[0].startswith("sealskin-0123abcd-")
+
+    # A launch that fails on a name `docker_overrides` fixed finds another session's container under it, which stays,
+    # running or not.
+    removed.clear()
+    for status in ("running", "created"):
+        unstarted.update(status=status, session="fedcba98-7654-3210-fedc-ba9876543210")
+        with pytest.raises(HTTPException):
+            await provider.launch("0123abcd-4567-89ef-0123-456789abcdef", {}, gpu_config=gpu)
+    # Nor does a container of this session that started after all.
+    unstarted.update(status="running", session="0123abcd-4567-89ef-0123-456789abcdef")
+    with pytest.raises(HTTPException):
+        await provider.launch("0123abcd-4567-89ef-0123-456789abcdef", {}, gpu_config=gpu)
+    assert removed == []
+
+
+def test_the_engine_is_podman_when_its_version_names_a_podman_component(monkeypatch):
+    from types import SimpleNamespace
+
+    from app import docker_utils
+
+    def engine(*names):
+        version = {"Components": [{"Name": name} for name in names]}
+        return SimpleNamespace(version=lambda: version)
+
+    monkeypatch.setattr(docker_utils, "_PODMAN", None)
+    monkeypatch.setattr(docker_utils, "get_docker_client", lambda: engine("Engine", "containerd", "runc"))
+    assert docker_utils.engine_is_podman() is False
+    monkeypatch.setattr(docker_utils, "_PODMAN", None)
+    monkeypatch.setattr(docker_utils, "get_docker_client", lambda: engine("Podman Engine", "Conmon", "OCI Runtime (crun)"))
+    assert docker_utils.engine_is_podman() is True
+
+    def unreachable():
+        raise RuntimeError("Failed to connect to Docker daemon.")
+
+    monkeypatch.setattr(docker_utils, "_PODMAN", None)
+    monkeypatch.setattr(docker_utils, "get_docker_client", unreachable)
+    assert docker_utils.engine_is_podman() is False and docker_utils._PODMAN is None
+
+
 def test_extract_docker_overrides_parsing():
     result = launch.extract_docker_overrides(
         {
@@ -370,11 +473,20 @@ def test_session_base_env_timezone(monkeypatch):
 def test_hardening_env_from_user_settings():
     assert launch.hardening_env(None) == {}
     assert launch.hardening_env({"harden_container": False, "harden_openbox": False}) == {}
-    assert launch.hardening_env({"harden_container": True}) == {"HARDEN_DESKTOP": "true"}
-    assert launch.hardening_env({"harden_container": True, "harden_openbox": True}) == {
-        "HARDEN_DESKTOP": "true",
-        "HARDEN_OPENBOX": "true",
-    }
+    assert launch.hardening_env({"harden_container": True}) == launch.HARDENING_ENV["harden_container"]
+    both = launch.hardening_env({"harden_container": True, "harden_openbox": True})
+    assert both["HARDEN_DESKTOP"] == "true"
+    assert both["HARDEN_OPENBOX"] == "true"
+    assert both["SELKIES_FILE_TRANSFERS"] == ""
+    assert both["SELKIES_WM_KEYBINDS"] == "false"
+
+
+def test_hardened_window_buttons_drop_close_only():
+    assert launch.hardened_window_buttons({}) == "minimize,maximize"
+    assert launch.hardened_window_buttons({"SELKIES_WM_BUTTONS": "close,maximize"}) == "maximize"
+    assert launch.hardened_window_buttons({"SELKIES_WM_BUTTONS": "close"}) == "none"
+    assert launch.hardened_window_buttons({"SELKIES_WM_BUTTONS": "none"}) == "none"
+    assert launch.hardened_window_buttons({"DISABLE_WINDOW_BUTTONS": "true"}) == "none"
 
 
 def test_build_launch_spec_forced_env_wins_and_legacy_keys_migrate(tmp_path):
@@ -382,6 +494,9 @@ def test_build_launch_spec_forced_env_wins_and_legacy_keys_migrate(tmp_path):
         "name": "Default",
         "settings": {
             "HARDEN_DESKTOP": "false",
+            "SELKIES_FILE_TRANSFERS": "upload,download",
+            "SELKIES_WM_KEYBINDS": "true",
+            "SELKIES_WM_BUTTONS": "minimize,close",
             "SELKIES_H264_CRF": "10-40",
             "SELKIES_CLIPBOARD_IN_ENABLED": "false",
         },
@@ -412,6 +527,9 @@ def test_build_launch_spec_forced_env_wins_and_legacy_keys_migrate(tmp_path):
     )
     assert spec.env["HARDEN_DESKTOP"] == "true"
     assert spec.env["HARDEN_OPENBOX"] == "true"
+    assert spec.env["SELKIES_FILE_TRANSFERS"] == ""
+    assert spec.env["SELKIES_WM_KEYBINDS"] == "false"
+    assert spec.env["SELKIES_WM_BUTTONS"] == "minimize"
     assert spec.env["SELKIES_VIDEO_CRF"] == "10-40"
     assert "SELKIES_H264_CRF" not in spec.env
     assert spec.env["SELKIES_ENABLE_CLIPBOARD"] == "out"

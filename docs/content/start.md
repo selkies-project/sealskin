@@ -12,9 +12,9 @@ session.
 ## What you need
 
 * A Linux host with [Docker](https://docs.docker.com/engine/install/) and a
-  user in the `docker` group. Sessions are ordinary containers on that host,
-  so give it the CPU, memory, and disk you would give the applications
-  themselves.
+  user in the `docker` group, or with [Podman](podman.md). Sessions are
+  ordinary containers on that host, so give it the CPU, memory, and disk you
+  would give the applications themselves.
 * A hostname and a **trusted TLS certificate** if you want to use Firefox,
   the mobile apps, or the web app. The extension in Chrome and other Chromium
   browsers also works with the self-signed certificate the container
@@ -120,7 +120,9 @@ files.
 
 On Kubernetes, one manifest runs the server in any namespace you administer
 and starts every session as a pod beside it; [Kubernetes](kubernetes.md)
-covers it.
+covers it. On Podman, rootful or rootless, and on SteamOS, which ships Podman
+and no Docker, the server runs from the same image; [Podman](podman.md) covers
+what differs.
 
 The server is also published as a Python wheel on every release. It needs
 Python 3.11 or newer, Caddy on the `PATH`, access to a Docker daemon, and the

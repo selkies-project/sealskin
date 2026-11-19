@@ -9,8 +9,9 @@ stream (`BaseProvider.export_web_client`), and serves it at `/<session id>/`
 itself; the container answers its `api/` alone. The export runs after every
 pull and, failing that, at the first launch of the image on this node.
 
-Bundles live under `<node_state_path>/web/<digest>/`, one subdirectory per
-dashboard as the image keeps them; `dashboard_dir` picks the one a session's
+Bundles live under `<node_state_path>/web/<digest>/` as the image keeps them:
+the one client of Selkies 2.3.0 and later in `web/`, or one subdirectory per
+dashboard in older images, where `dashboard_dir` picks the one a session's
 `DASHBOARD` names. `prune` removes the bundles of images no installed
 application runs any more.
 """
@@ -34,6 +35,8 @@ from .state import state
 logger = logging.getLogger(__name__)
 
 DEFAULT_DASHBOARD = "selkies-dashboard"
+#: Where the base image keeps the one client of Selkies 2.3.0 and later.
+SINGLE_CLIENT = "web"
 #: Bytes an export may be at most, unpacked: a dashboard is a few megabytes.
 MAX_BUNDLE_BYTES = 256 * 1024 * 1024
 #: Seconds an export of one image may take, the throwaway instance's start included.
@@ -61,11 +64,12 @@ def dashboard_dir(bundle: str, env: dict[str, Any] | None) -> str | None:
 
     Returns:
         The directory holding `index.html`: the named dashboard, the default
-        one, any other, or the bundle itself for an image that keeps one
-        client at `web_client_path`; `None` when the bundle holds no client.
+        one, the single client, any other, or the bundle itself for an image
+        that keeps one client at `web_client_path`; `None` when the bundle
+        holds no client.
     """
     wanted = str((env or {}).get("DASHBOARD") or "").strip() or DEFAULT_DASHBOARD
-    candidates = [wanted, DEFAULT_DASHBOARD]
+    candidates = [wanted, DEFAULT_DASHBOARD, SINGLE_CLIENT]
     try:
         candidates += sorted(name for name in os.listdir(bundle) if name not in candidates)
     except OSError:

@@ -504,13 +504,23 @@
             "animated": "动画"
           }
         },
-        "DASHBOARD": {
-          "label": "仪表盘样式",
-          "description": "允许用户设置他们的仪表盘。",
+        "SELKIES_UI_LAYOUT": {
+          "label": "仪表盘布局",
+          "description": "Selkies 仪表盘如何排列其面板：侧边栏、顶部的 Wish 工具栏，或停靠在窗口边缘的 Edge 按钮。用户仍可在它们之间切换。",
           "options": {
-            "default": "默认",
-            "selkiesDefault": "Selkies (默认)",
-            "wish": "Wish"
+            "default": "侧边栏",
+            "wish": "工具栏 (Wish)",
+            "edge": "Edge 按钮"
+          }
+        },
+        "SELKIES_COLOR_SCHEME": {
+          "label": "桌面配色方案",
+          "description": "桌面在 Selkies 窗口管理器下遵循的浅色或深色方案。默认跟随浏览器；在此选择会将其锁定。",
+          "options": {
+            "auto": "跟随浏览器",
+            "dark": "深色",
+            "light": "浅色",
+            "off": "桌面自身的方案"
           }
         },
         "SELKIES_AUDIO_ENABLED": {
@@ -938,6 +948,10 @@
           "label": "应用就绪文件",
           "description": "应用初始化完成时由 sidecar 创建的文件。"
         },
+        "SELKIES_APP_LOGS": {
+          "label": "应用程序日志",
+          "description": "将会话中应用程序的错误输出保留在容器日志中，而不是丢弃。"
+        },
         "SELKIES_AUDIT_WEBHOOK_URL": {
           "label": "审计 Webhook URL",
           "description": "每次剪贴板传输、文件上传或下载、打印文档、页面连接和录制都会收到一个 JSON POST，仅含元数据，绝不含内容。留空则不发送。"
@@ -970,6 +984,10 @@
           "label": "启用Selkies调试",
           "description": "为流媒体组件启用调试日志记录。"
         },
+        "PELORUS": {
+          "label": "Pelorus",
+          "description": "提供 Pelorus，它以文本描述桌面，并为代理或脚本在桌面上执行操作。"
+        },
         "SELKIES_MODE": {
           "label": "流媒体模式",
           "description": "默认使用的传输方式。自动会在设置了任意 TURN/STUN 值时选择 WebRTC，否则选择 WebSockets。",
@@ -994,7 +1012,7 @@
         },
         "SELKIES_CONGESTION_CONTROL": {
           "label": "拥塞控制",
-          "description": "根据 WebRTC 接收端反馈的带宽估计调整视频比特率。在 CBR 模式下生效。"
+          "description": "根据网络路径的承载能力调整显示器的视频速率，适用于 WebSockets 和 WebRTC。"
         },
         "SELKIES_WEBRTC_ICE_LITE": {
           "label": "ICE-Lite",

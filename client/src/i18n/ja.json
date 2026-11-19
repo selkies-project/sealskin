@@ -504,13 +504,23 @@
             "animated": "アニメーション"
           }
         },
-        "DASHBOARD": {
-          "label": "ダッシュボードスタイル",
-          "description": "ユーザーがダッシュボードを設定できます。",
+        "SELKIES_UI_LAYOUT": {
+          "label": "ダッシュボードのレイアウト",
+          "description": "Selkies ダッシュボードのパネルの配置：サイドバー、上部の Wish ツールバー、またはウィンドウの端に固定される Edge ボタン。ユーザーは引き続き切り替えられます。",
           "options": {
-            "default": "デフォルト",
-            "selkiesDefault": "Selkies（デフォルト）",
-            "wish": "Wish"
+            "default": "サイドバー",
+            "wish": "ツールバー（Wish）",
+            "edge": "Edge ボタン"
+          }
+        },
+        "SELKIES_COLOR_SCHEME": {
+          "label": "デスクトップのカラースキーム",
+          "description": "Selkies ウィンドウマネージャーのもとでデスクトップが従うライトまたはダークのスキーム。既定ではブラウザに従い、ここで選ぶと固定されます。",
+          "options": {
+            "auto": "ブラウザに従う",
+            "dark": "ダーク",
+            "light": "ライト",
+            "off": "デスクトップ独自"
           }
         },
         "SELKIES_AUDIO_ENABLED": {
@@ -938,6 +948,10 @@
           "label": "アプリ準備完了ファイル",
           "description": "アプリケーションの初期化が終わったときにサイドカーが作成するファイルです。"
         },
+        "SELKIES_APP_LOGS": {
+          "label": "アプリケーションログ",
+          "description": "セッションのアプリケーションのエラー出力を破棄せず、コンテナのログに残します。"
+        },
         "SELKIES_AUDIT_WEBHOOK_URL": {
           "label": "監査 Webhook の URL",
           "description": "クリップボード転送、ファイルのアップロードやダウンロード、印刷された文書、ページ接続、録画ごとに JSON の POST を 1 件受け取ります。内容は含まずメタデータのみです。空欄なら何も送信しません。"
@@ -970,6 +984,10 @@
           "label": "Selkiesデバッグを有効化",
           "description": "ストリーミングコンポーネントのデバッグロギングを有効にします。"
         },
+        "PELORUS": {
+          "label": "Pelorus",
+          "description": "デスクトップをテキストとして記述し、エージェントやスクリプトのために操作する Pelorus を提供します。"
+        },
         "SELKIES_MODE": {
           "label": "ストリーミングモード",
           "description": "デフォルトで使用するトランスポート。自動ではTURN/STUNのいずれかの値が設定されている場合にWebRTCを、それ以外の場合はWebSocketsを選択します。",
@@ -994,7 +1012,7 @@
         },
         "SELKIES_CONGESTION_CONTROL": {
           "label": "輻輳制御",
-          "description": "WebRTC受信側フィードバックによる帯域幅推定に合わせてビデオビットレートを調整します。CBRモードで有効です。"
+          "description": "画面のビデオレートをネットワーク経路が運べる量に合わせて調整します。WebSockets と WebRTC のどちらでも有効です。"
         },
         "SELKIES_WEBRTC_ICE_LITE": {
           "label": "ICE-Lite",

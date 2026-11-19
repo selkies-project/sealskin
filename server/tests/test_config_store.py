@@ -180,10 +180,15 @@ def test_migrate_legacy_template_settings():
         "SELKIES_ENABLE_CLIPBOARD": "in"
     }
 
-    assert migrate({"SELKIES_ENCODER": "x264enc,x264enc-striped,jpeg"}) == {
-        "SELKIES_ENCODER": "h264enc,h264enc-striped,jpeg"
-    }
+    assert migrate({"SELKIES_ENCODER": "x264enc,x264enc-striped,jpeg"}) == {"SELKIES_ENCODER": "h264enc,jpeg"}
+    assert migrate({"SELKIES_ENCODER": "h264enc-striped,vp9enc"}) == {"SELKIES_ENCODER": "h264enc,vp9enc"}
     assert migrate({"SELKIES_ENCODER": "x264enc,h264enc"}) == {"SELKIES_ENCODER": "h264enc"}
+
+    assert migrate({"DASHBOARD": "selkies-dashboard-wish"}) == {"SELKIES_UI_LAYOUT": "wish,default,edge"}
+    assert migrate({"DASHBOARD": "selkies-dashboard"}) == {}
+    assert migrate({"DASHBOARD": "selkies-dashboard-wish", "SELKIES_UI_LAYOUT": "edge"}) == {
+        "SELKIES_UI_LAYOUT": "edge"
+    }
 
 
 def test_load_app_templates_migrates_legacy_keys(tmp_path):

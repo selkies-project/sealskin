@@ -112,6 +112,16 @@ def test_a_package_step_installs_and_cleans_up_the_way_of_its_distribution():
     assert "dnf clean all" in bakery.render(recipe, IMAGE, "fedora").dockerfile
 
 
+def test_every_step_problem_is_a_sentence_of_the_table():
+    import inspect
+    import re
+
+    raised = set(re.findall(r'raise StepError\("([a-z_]+)"', inspect.getsource(bakery)))
+    assert raised and raised <= set(bakery.STEP_PROBLEMS)
+    assert str(bakery.StepError("package_name", "a b")) == "'a b' is not a package name."
+    assert all(set(re.findall(r"{(\w*)}", sentence)) <= {"subject"} for sentence in bakery.STEP_PROBLEMS.values())
+
+
 def test_a_step_that_cannot_render_is_a_problem_of_that_step_alone():
     recipe = BakeRecipe(
         app_id="firefox",
@@ -124,6 +134,12 @@ def test_a_step_that_cannot_render_is_a_problem_of_that_step_alone():
     )
     rendered = bakery.render(recipe, IMAGE, "")
     assert [problem["step"] for problem in rendered.problems] == ["a", "b", "c"]
+    # Each says what is wrong in a sentence of the table, naming the step's own value where it has one.
+    assert [problem["message"] for problem in rendered.problems] == [
+        "'vim; rm -rf /' is not a package name.",
+        bakery.STEP_PROBLEMS["guided_from"],
+        "The file 'missing' is not among the recipe's files.",
+    ]
     assert 'ENV A="\\$HOME"' in rendered.dockerfile and "scratch" not in rendered.dockerfile
     assert rendered.blocks == [{"step": "d", "start": 3, "end": 3}]
 

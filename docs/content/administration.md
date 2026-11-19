@@ -52,7 +52,7 @@ Each user carries these settings, editable later:
 | **Share GPUs** | Off gives each of the user's GPU sessions a GPU no other session is on. |
 | **Move Home Directories** | The user may move their own home directories between the nodes of a [cluster](cluster.md), from the launcher. On by default: a user who has home directories can take them where they launch. |
 | **Allow Editing App Templates** | Opens the [App Templates](#app-templates) editor to a user who is not an administrator. They create, change, and delete templates, except for the `DOCKER_*` and `KUBERNETES_*` settings, which grant authority over the Docker host or the namespace: those keep the values an administrator gave them, and only an administrator deletes a template that carries any. The same holds for the session's user, password, and Selkies tokens, and for the variables a container runs or loads code from as it starts (`S6_*`, `LD_*`, `FILE__*`, `BASH_ENV`, `ENV`, `PATH`, `HOME`, `IFS`). |
-| **Harden Container**, **Harden Window Manager** | Force the base image presets `HARDEN_DESKTOP` and `HARDEN_OPENBOX` on every session the user starts, including apps a collaboration room swaps to. They are applied after the [app template](#app-templates) and the app's own environment overrides, so neither can switch them back off. Leave them off to let the template decide. |
+| **Harden Container**, **Harden Window Manager** | Force the base image presets `HARDEN_DESKTOP` and `HARDEN_OPENBOX` on every session the user starts, including apps a collaboration room swaps to, together with the Selkies values each preset sets: no file transfers, printing, command messages, or files and apps panels for the first; no window manager menus, key binds, or close button for the second; and no switch between the desktop and the application alone for either. They are applied after the [app template](#app-templates) and the app's own environment overrides, so neither can switch them back off. Leave them off to let the template decide. |
 | **Allow Customizing the Home Page**, **Allow Own Links**, **Allow Own Feeds and Calendars** | What the user may do with their [dashboard](dashboards.md): rearrange it and add to it at all, add links of their own, and add feeds and calendars by address, which the server fetches from the public internet. All on by default. |
 | **Limits** | Sessions at once, storage, CPUs and memory per session, session length, and a time allowance per day, week, or month; see [the limits](signin.md#groups-switches-and-limits). Blank or negative is no limit. |
 | **Application keys** | Whether the user may sign the extension and the mobile app in with [application keys](signin.md#application-keys), which apps may use them, how long a key lives, and the dormancy rules that send the user back to the web to sign in. These bind administrators too. |
@@ -381,9 +381,10 @@ variables as collapsible cards, each with a count of the values that differ
 from the default; a box above filters them by name, and **Changed only**
 leaves just the values a template sets. The cards:
 
-* **Appearance**: the page title, logo, sidebar title, and dashboard style,
-  then whether the Selkies sidebar shows and which of its sections and
-  buttons it offers, with a preview that follows the toggles.
+* **Appearance**: the page title, logo, sidebar title, dashboard layout, and
+  the desktop's color scheme, then whether the Selkies sidebar shows and
+  which of its sections and buttons it offers, with a preview that follows
+  the toggles.
 * **Display**: manual resolution, dynamic resize, aligned resolution,
   scaling and DPI, second screen, fullscreen, window decorations, and the
   Wayland backend.
@@ -392,8 +393,8 @@ leaves just the values a template sets. The cards:
 * **Audio** and **Webcam**: enabling each, what starts at connect, and the
   encoding of each.
 * **Performance**: encoders, frame rate, CRF and bitrate ranges, rate
-  control, keyframes, JPEG and paint-over quality, backpressure, and the
-  watermark on the stream.
+  control, keyframes, JPEG and paint-over quality, backpressure, congestion
+  control, and the watermark on the stream.
 * **GPU**: GPU selection, render nodes, DRI3, and CPU encoding.
 * **Clipboard and Files**: clipboard policy and seamless sync, file
   transfers and their directory, printing, and the command websocket.
@@ -401,16 +402,15 @@ leaves just the values a template sets. The cards:
 * **Hardening**: the presets behind the user-level hardening switches and
   their individual components.
 * **Lifecycle**: connect and disconnect hooks, the application ready file,
-  Docker-in-Docker, the Steam shim, and IPv6.
+  application logs, Docker-in-Docker, the Steam shim, and IPv6.
 * **Integrations**: the audit webhook, the Computer-Use server, recording,
-  metrics, and debugging.
+  metrics, debugging, and Pelorus.
 * **WebRTC**: a block of its own, since its values are one decision: the
   base image streams over WebSockets until the mode says WebRTC or a STUN,
   TURN, Cloudflare, or public IP value is set, and then streams over WebRTC
   with dual mode on. The card's badge names which the template amounts to.
-  Inside it: mode and dual mode, transport (pacing, congestion control,
-  ICE-lite, ports), STUN, TURN credentials, the TURN REST API, Cloudflare
-  TURN, and diagnostics.
+  Inside it: mode and dual mode, transport (pacing, ICE-lite, ports), STUN,
+  TURN credentials, the TURN REST API, Cloudflare TURN, and diagnostics.
 * **Container**: `DOCKER_*` settings that become container run options rather
   than environment variables: privileged mode, capabilities, devices, extra
   bind mounts, memory and CPU limits, network, IPC and PID modes, DNS,
@@ -428,7 +428,16 @@ Templates written before the Selkies variables were renamed keep working:
 `SELKIES_H264_*` keys, `SELKIES_IS_MANUAL_RESOLUTION_MODE`, the three
 `SELKIES_CLIPBOARD_*` booleans, and the `x264enc` encoder spellings are
 translated to their current names when the template is loaded, and saving the
-template from the editor writes the current names.
+template from the editor writes the current names. `DASHBOARD` set to the Wish
+dashboard becomes `SELKIES_UI_LAYOUT` with the toolbar first, any other
+`DASHBOARD` is dropped, and the CPU-striped H.264 encoder Selkies 2.3.0 no
+longer has becomes `h264enc`.
+
+The variables work with the LinuxServer.io Selkies base images on Selkies
+2.2.1 and on 2.3.0, whose init still reads the base image names (`TITLE`,
+`NO_DECOR`, `RESTART_APP`, the `HARDEN_*` presets, `PIXELFLUX_WAYLAND`, and
+the rest). An image on 2.2.1 ignores the variables 2.3.0 added (the desktop's
+color scheme and application logs) and the `edge` layout.
 
 A blank **Default** template is created on first start. Templates shipped in
 the default templates directory cannot be deleted from the UI.
@@ -582,7 +591,9 @@ At start-up the server detects GPUs on the host:
   container runtime with all capabilities and, when it exists,
   `/dev/nvidia-modeset`. This needs the proprietary driver 580 or newer, the
   `nvidia-container-toolkit` v1.20.1 or higher, whose refresh service creates
-  that node at boot, and the kernel parameter `nvidia-drm.modeset=1`.
+  that node at boot, and the kernel parameter `nvidia-drm.modeset=1`. Under
+  Podman a session gets the GPU as a CDI device instead, which needs a CDI
+  spec on the host ([Podman](podman.md)).
 * **DRI3** devices (Intel, AMD, and others) through `/dev/dri`. The render
   node is passed into the container and exported as `DRI_NODE`.
 

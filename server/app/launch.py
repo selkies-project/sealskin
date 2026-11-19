@@ -52,13 +52,31 @@ DOCKER_LIST_KEYS = ("devices", "volumes")
 #: Ephemeral directories being deleted, referenced until their task ends.
 _removals: set[asyncio.Task] = set()
 
-# User-level hardening switches (see `UserSettings`) and the base image preset
-# each one forces on. Applied after the template and the per-app environment so
-# a restriction placed on the account cannot be undone by either.
-HARDENING_ENV = {
-    "harden_container": "HARDEN_DESKTOP",
-    "harden_openbox": "HARDEN_OPENBOX",
+# User-level hardening switches (see `UserSettings`), each with the base image
+# preset it forces on and the Selkies values that preset derives. The image
+# derives those only where the environment leaves them unset, so they are forced
+# too. Applied after the template and the per-app environment so a restriction
+# placed on the account cannot be undone by either.
+HARDENING_ENV: dict[str, dict[str, str]] = {
+    "harden_container": {
+        "HARDEN_DESKTOP": "true",
+        "SELKIES_FILE_TRANSFERS": "",
+        "SELKIES_COMMAND_ENABLED": "false",
+        "SELKIES_PRINTING_ENABLED": "false",
+        "SELKIES_UI_SIDEBAR_SHOW_FILES": "false",
+        "SELKIES_UI_SIDEBAR_SHOW_APPS": "false",
+        "SELKIES_SESSION_SWITCH": "false",
+    },
+    "harden_openbox": {
+        "HARDEN_OPENBOX": "true",
+        "SELKIES_WM_MENUS": "false",
+        "SELKIES_WM_KEYBINDS": "false",
+        "SELKIES_SESSION_SWITCH": "false",
+    },
 }
+#: The title bar buttons the Selkies window manager knows; `close` is what the
+#: window manager hardening takes away.
+WM_BUTTONS = ("minimize", "maximize", "close")
 
 
 def valid_pod_template_name(name: str) -> bool:
@@ -73,12 +91,35 @@ def hardening_env(effective_settings: dict[str, Any] | None) -> dict[str, str]:
         effective_settings: The user's effective settings (group applied).
 
     Returns:
-        `HARDEN_DESKTOP` / `HARDEN_OPENBOX` set to `"true"` for each enabled
-        switch; an empty dict when none is enabled.
+        The variables of `HARDENING_ENV` for each enabled switch; an empty
+        dict when none is enabled.
     """
-    if not effective_settings:
-        return {}
-    return {var: "true" for key, var in HARDENING_ENV.items() if effective_settings.get(key)}
+    forced: dict[str, str] = {}
+    for key, variables in HARDENING_ENV.items():
+        if effective_settings and effective_settings.get(key):
+            forced.update(variables)
+    return forced
+
+
+def hardened_window_buttons(env: dict[str, str]) -> str:
+    """Return the title bar buttons a session keeps under window manager hardening.
+
+    Args:
+        env: The session's environment before the hardening is applied.
+
+    Returns:
+        The buttons `env` gives the window manager without `close`, `none` when
+        that leaves none: `DISABLE_WINDOW_BUTTONS` and a shorter
+        `SELKIES_WM_BUTTONS` stay as strict as they were.
+    """
+    if env.get("DISABLE_WINDOW_BUTTONS", "").strip().lower() == "true":
+        return "none"
+    configured = env.get("SELKIES_WM_BUTTONS", ",".join(WM_BUTTONS))
+    names = [name.strip().lower() for name in configured.split(",")]
+    kept = [name for name in WM_BUTTONS if name in names and name != "close"]
+    return ",".join(kept) or "none"
+
+
 DOCKER_DICT_KEYS = ("environment",)
 #: Template settings that configure the session's container or pod rather than its
 #: environment; only an administrator may set them.
@@ -593,6 +634,8 @@ def build_launch_spec(
     for override in app.provider_config.env or []:
         env[override.name] = override.value
     if forced_env:
+        if forced_env.get("HARDEN_OPENBOX") == "true":
+            env["SELKIES_WM_BUTTONS"] = hardened_window_buttons(env)
         env.update(forced_env)
 
     # A Kubernetes GPU is a resource the device plugin mounts wherever it likes.
