@@ -178,6 +178,7 @@ async def test_docker_session_containers_are_named_after_the_session(monkeypatch
 
 async def test_an_nvidia_session_asks_podman_for_its_gpu_as_a_cdi_device(monkeypatch):
     """Podman ignores Docker's `nvidia` runtime and an index request; it gives a GPU only as a CDI device."""
+    import threading
     from types import SimpleNamespace
 
     from docker.errors import APIError
@@ -207,8 +208,16 @@ async def test_an_nvidia_session_asks_podman_for_its_gpu_as_a_cdi_device(monkeyp
     assert docker_run["runtime"] == "nvidia" and docker_run["device_requests"][0]["DeviceIDs"] == ["1"]
     assert "/dev/nvidia-modeset:/dev/nvidia-modeset" in docker_run["devices"]
 
-    monkeypatch.setattr(docker_provider, "engine_is_podman", lambda: True)
+    asked_in = []
+
+    def podman():
+        asked_in.append(threading.current_thread())
+        return True
+
+    monkeypatch.setattr(docker_provider, "engine_is_podman", podman)
     await provider.launch("0123abcd-4567-89ef-0123-456789abcdef", {}, gpu_config=gpu)
+    # The engine is asked off the event loop.
+    assert asked_in and threading.main_thread() not in asked_in
     podman_run = runs.pop()
     assert "runtime" not in podman_run and podman_run["devices"] == []
     assert podman_run["device_requests"][0]["Driver"] == "cdi"

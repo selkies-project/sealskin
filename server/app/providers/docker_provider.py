@@ -344,7 +344,9 @@ class DockerProvider(BaseProvider):
             run_kwargs["volumes"][vpn["resolv_conf"]] = {"bind": "/etc/resolv.conf", "mode": "ro"}
 
         if gpu_config:
-            if gpu_config["type"] == "nvidia" and engine_is_podman():
+            # The engine is asked once, and off the event loop.
+            podman = gpu_config["type"] == "nvidia" and await asyncio.to_thread(engine_is_podman)
+            if podman:
                 # Podman takes the runtime and an index request without a word and gives no GPU; its GPUs are CDI
                 # devices, whose spec brings `/dev/nvidia-modeset` along.
                 run_kwargs["device_requests"] = [
