@@ -10,6 +10,9 @@
 // DRI3 serves Intel's and AMD's GPUs, and the other Mesa drivers, the same way.
 const KIND_NAMES = { nvidia: 'NVIDIA', dri3: 'Intel/AMD' };
 
+/** A choice of a kind of GPU, `auto` or `auto:<kind>`, apart from a device whose name starts the same. */
+const BY_KIND = /^auto(:|$)/;
+
 const kindOf = (gpu) => gpu.type || (gpu.driver === 'nvidia' ? 'nvidia' : 'dri3');
 const supports = (app, kind) => (kind === 'nvidia' ? app.nvidia_support : app.dri3_support);
 /**
@@ -64,6 +67,6 @@ export function gpuChoices(t, app, gpus, cluster, nodes = null) {
 export function gpuRequest(choice) {
   if (!choice) return { selected_gpu: null };
   const at = choice.lastIndexOf('@');
-  if (at < 0 || choice.startsWith('auto')) return { selected_gpu: choice };
+  if (at < 0 || BY_KIND.test(choice)) return { selected_gpu: choice };
   return { selected_gpu: choice.slice(0, at), node: choice.slice(at + 1) };
 }
