@@ -182,8 +182,8 @@ async function launch(app, status, home) {
   };
   const [whereKind, whereName] = (params.get('where') || '').split(/:(.*)/);
   if ((whereKind === 'pool' || whereKind === 'node') && whereName) payload[whereKind] = whereName;
-  // In a cluster the node that holds the GPU checks it; on one node it is one of this node's.
-  const known = status.clustered ? /^auto(:|$)|@/.test(gpu) : (status.gpus || []).some((item) => item.device === gpu);
+  // A plain device is one of this node's, in a cluster as on one node; the node that holds any other GPU checks it.
+  const known = (status.gpus || []).some((item) => item.device === gpu) || (status.clustered && /^auto(:|$)|@/.test(gpu));
   Object.assign(payload, gpuRequest(known ? gpu : null));
 
   remember(key, id);

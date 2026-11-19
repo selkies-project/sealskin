@@ -11,7 +11,7 @@ import { browserTimezone } from '../lib/timezone.js';
 import { announce, escapeHtml, formatLogoSrc, hydrateLogos, timeAgo, currentLocale } from '../lib/dom.js';
 import { confirmDialog } from '../lib/modal.js';
 import { autoHomeName, bestHome, homeAllowed, nodesFor } from '../lib/homes.js';
-import { gpuChoices, gpuRequest } from '../lib/gpus.js';
+import { gpuChoices, gpuRequest, savedGpu } from '../lib/gpus.js';
 
 let t;
 let info;
@@ -928,9 +928,10 @@ async function init() {
       updateMoveHome();
       const savedApp = availableApps.find((app) => app.id === selectedAppId);
       if (savedApp) populateGpuDropdown(savedApp);
-      if (savedProfile.gpu) {
+      const gpu = savedGpu(savedProfile.gpu, cluster);
+      if (gpu) {
         setTimeout(() => {
-          if ([...gpuSelect.options].some((o) => o.value === savedProfile.gpu)) gpuSelect.value = savedProfile.gpu;
+          if ([...gpuSelect.options].some((o) => o.value === gpu)) gpuSelect.value = gpu;
         }, 50);
       }
       if (savedProfile.vpn && [...vpnSelect.options].some((o) => o.value === savedProfile.vpn)) {

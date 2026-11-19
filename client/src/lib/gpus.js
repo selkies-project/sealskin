@@ -59,6 +59,19 @@ export function gpuChoices(t, app, gpus, cluster, nodes = null) {
 }
 
 /**
+ * A saved GPU choice in the form `gpuChoices` gives it: a device saved before the launchers listed a
+ * cluster's GPUs is one of this node's, `<device>@<node id>` in a cluster.
+ *
+ * @param {string|null} saved The saved choice.
+ * @param {object|null} cluster The `/api/cluster` answer, null outside a cluster.
+ * @returns {string|null}
+ */
+export function savedGpu(saved, cluster) {
+  if (!saved || !cluster || BY_KIND.test(saved) || saved.includes('@')) return saved;
+  return `${saved}@${cluster.node_id}`;
+}
+
+/**
  * What a GPU choice adds to a launch request: `selected_gpu`, and the `node` a device of a cluster node fixes.
  *
  * @param {string|null} choice A value of `gpuChoices`, or null for none.

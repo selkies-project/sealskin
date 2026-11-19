@@ -50,7 +50,7 @@ import { announce, escapeHtml, formatLogoSrc, hydrateLogos, timeAgo, currentLoca
 import { noticeDialog } from '../lib/modal.js';
 import { createLaunchView } from '../lib/launch-view.js';
 import { autoHomeName, bestHome, homeAllowed, nodesFor } from '../lib/homes.js';
-import { gpuChoices, gpuRequest } from '../lib/gpus.js';
+import { gpuChoices, gpuRequest, savedGpu } from '../lib/gpus.js';
 import { readLayout } from '../lib/board-model.js';
 import { createBoard } from './board.js';
 import { attachAdmin } from './board-admin.js';
@@ -247,9 +247,10 @@ function optionsFor(app) {
   const homeDir = ['auto', 'cleanroom', ...homes].includes(saved.homeDir) ? saved.homeDir : 'auto';
   const vpn = (status.vpns || []).find((v) => v.id === saved.vpn) || null;
   const where = whereChoices().includes(saved.where) ? saved.where : '';
+  const gpu = savedGpu(saved.gpu, cluster);
   return {
     homeDir: hasStorage(app) ? homeDir : 'cleanroom',
-    gpu: gpusFor(app, where).some(([value]) => value === saved.gpu) ? saved.gpu : null,
+    gpu: gpusFor(app, where).some(([value]) => value === gpu) ? gpu : null,
     vpn: vpn ? vpn.id : null,
     vpnEndpoint: vpn && vpn.endpoints.some((e) => e.id === saved.vpnEndpoint) ? saved.vpnEndpoint : null,
     where,
