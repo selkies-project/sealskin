@@ -71,6 +71,12 @@ FIREFOX_FILES: tuple[tuple[str, str], ...] = (
 LANGUAGES = frozenset(
     {"ar", "da", "de", "es", "fil", "fr", "hi", "it", "ja", "ko", "nl", "pt", "ru", "th", "tr", "vi", "zh"}
 )
+#: The file of each engine's catalog under `CATALOG_PATH`; a path is looked up here, never built from a request.
+CATALOG_FILES: dict[str, str] = {engine: f"{engine}.json" for engine in ENGINES}
+#: The file of each engine's translation into each of `LANGUAGES` under `CATALOG_PATH/l10n`, by engine and language.
+TRANSLATION_FILES: dict[tuple[str, str], str] = {
+    (engine, code): f"{engine}.{code}.json" for engine in ENGINES for code in LANGUAGES
+}
 #: Policies that carry a credential, which the shared record does not hold.
 REFUSED: dict[str, frozenset[str]] = {
     "chromium": frozenset({"CloudManagementEnrollmentToken"}),
@@ -96,9 +102,7 @@ def catalog(engine: str) -> dict[str, Any]:
     Raises:
         KeyError: For an engine other than those of `ENGINES`.
     """
-    if engine not in ENGINES:
-        raise KeyError(engine)
-    with open(os.path.join(CATALOG_PATH, f"{engine}.json"), encoding="utf-8") as handle:
+    with open(os.path.join(CATALOG_PATH, CATALOG_FILES[engine]), encoding="utf-8") as handle:
         return json.load(handle)
 
 
@@ -119,10 +123,11 @@ def localized(engine: str, language: str) -> dict[str, Any]:
     """
     english = catalog(engine)
     code = language.replace("_", "-").split("-")[0].lower()
-    if code not in LANGUAGES:
+    name = TRANSLATION_FILES.get((engine, code))
+    if name is None:
         return english
     try:
-        with open(os.path.join(CATALOG_PATH, "l10n", f"{engine}.{code}.json"), encoding="utf-8") as handle:
+        with open(os.path.join(CATALOG_PATH, "l10n", name), encoding="utf-8") as handle:
             translation = json.load(handle)
     except (OSError, ValueError):
         return english
