@@ -117,8 +117,61 @@ class RecipeError(ValueError):
     """A recipe that cannot be rendered or built as it stands."""
 
 
+#: What each kind of `StepError` tells the person editing the recipe, with `{subject}` the value of the step it names.
+STEP_PROBLEMS: dict[str, str] = {
+    "destination": "The destination is an absolute path inside the image, such as /usr/local/bin/.",
+    "no_files": "Add at least one file.",
+    "file_missing": "The file '{subject}' is not among the recipe's files.",
+    "unknown_family": (
+        "The distribution of the base image is not known, so {subject} has no command to render. "
+        "Choose the distribution family, or write the commands in a Run step."
+    ),
+    "no_packages": "Add at least one package.",
+    "download_address": "The address is an http or https URL.",
+    "checksum": "The checksum is a SHA-256: 64 hexadecimal characters.",
+    "appimage_folder": "An AppImage is unpacked into a folder of its own, such as /opt/application.",
+    "field_lines": "A field is one line of text.",
+    "entry_lines": "A list entry is one line of text.",
+    "web_address": "{subject} is an http or https URL.",
+    "no_commands": "Write at least one command.",
+    "package_name": "'{subject}' is not a package name.",
+    "no_fonts": "Choose a set of fonts, or upload font files.",
+    "fonts_unpackaged": "The fonts '{subject}' are not packaged for this distribution.",
+    "fonts_license": "These fonts come under a license of their own; accept it in the step to install them.",
+    "no_variables": "Add at least one variable.",
+    "variable_name": "'{subject}' is not a variable name.",
+    "variable_lines": "The value of {subject} is one line.",
+    "no_proxy": "Give the proxy's address, or a mirror's.",
+    "ppa_ubuntu": "A personal package archive installs on an Ubuntu image only.",
+    "no_archives": "Name at least one archive, as owner/name.",
+    "archive_name": "'{subject}' is not an archive: write it as owner/name.",
+    "no_archive_packages": "Add at least one package to install from the archive.",
+    "no_app": "Choose an application.",
+    "app_unoffered": "{subject} is not offered on this distribution.",
+    "desktop_entry": "A desktop entry has a name and the command it starts.",
+    "menu_category": "'{subject}' is not a menu category.",
+    "docker_version": "A Docker version is three numbers, such as 28.5.1; leave it empty for the latest.",
+    "no_language": "Choose a language.",
+    "toolchain_unpackaged": "This toolchain is not packaged for the distribution.",
+    "toolchain_packages": "This toolchain installs no packages of its own.",
+    "no_instructions": "Write at least one instruction.",
+    "guided_from": "A guided recipe has one FROM line, the application's image. Stages are written in developer mode.",
+}
+
+
 class StepError(ValueError):
-    """A step whose fields do not make an instruction."""
+    """A step whose fields do not make an instruction.
+
+    Attributes:
+        kind: The key of the sentence in `STEP_PROBLEMS` that says what is wrong.
+        subject: The value of the step the sentence names, or `""`.
+    """
+
+    def __init__(self, kind: str, subject: str = "") -> None:
+        """Name the problem by its kind in `STEP_PROBLEMS` and the step's value it is about."""
+        super().__init__(kind)
+        self.kind = kind
+        self.subject = subject
 
 
 @dataclass(frozen=True)
@@ -465,7 +518,7 @@ def _dest(step: BakeStep, folder: bool = False) -> str:
     """
     dest = step.dest.strip()
     if not dest.startswith("/") or "\n" in dest or "\x00" in dest:
-        raise StepError("The destination is an absolute path inside the image, such as /usr/local/bin/.")
+        raise StepError("destination")
     if folder and not dest.endswith("/"):
         dest += "/"
     return dest
@@ -479,10 +532,10 @@ def _context_files(step: BakeStep, recipe: BakeRecipe) -> list[str]:
     """
     known = {item.name for item in recipe.files}
     if not step.files:
-        raise StepError("Add at least one file.")
+        raise StepError("no_files")
     for name in step.files:
         if name not in known:
-            raise StepError(f"The file '{name}' is not among the recipe's files.")
+            raise StepError("file_missing", name)
     return [f"{CONTEXT_FILES}/{name}" for name in step.files]
 
 
@@ -494,10 +547,7 @@ def _family(family: str, what: str) -> Family:
     """
     found = FAMILIES.get(family)
     if found is None:
-        raise StepError(
-            f"The distribution of the base image is not known, so {what} has no command to render. "
-            "Choose the distribution family, or write the commands in a Run step."
-        )
+        raise StepError("unknown_family", what)
     return found
 
 
@@ -513,7 +563,7 @@ def _cleanup(family: Family, extra: tuple[str, ...] = ()) -> list[str]:
 def _render_packages(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
     packages = _packages_of(step)
     if not packages:
-        raise StepError("Add at least one package.")
+        raise StepError("no_packages")
     found = _family(family, "a package install")
     return _run(
         [
@@ -543,10 +593,10 @@ def _render_download(step: BakeStep, family: str, recipe: BakeRecipe, distro: st
     url = step.url.strip()
     parts = urlsplit(url)
     if parts.scheme not in ("http", "https") or not parts.netloc or any(c.isspace() for c in url):
-        raise StepError("The address is an http or https URL.")
+        raise StepError("download_address")
     checksum = step.sha256.strip().lower()
     if checksum and not _SHA256.fullmatch(checksum):
-        raise StepError("The checksum is a SHA-256: 64 hexadecimal characters.")
+        raise StepError("checksum")
     name = os.path.basename(parts.path) or "download"
     if not _PLAIN_PATH.fullmatch(name):
         name = "download"
@@ -559,7 +609,7 @@ def _render_download(step: BakeStep, family: str, recipe: BakeRecipe, distro: st
         target = "/tmp/app.AppImage"
         folder = _dest(step).rstrip("/")
         if folder in ("", "/config") or folder.count("/") < 2:
-            raise StepError("An AppImage is unpacked into a folder of its own, such as /opt/application.")
+            raise StepError("appimage_folder")
     else:
         target = f"/tmp/{name}"
         folder = _dest(step, folder=True) if step.action == "extract" else ""
@@ -613,7 +663,7 @@ def _option(step: BakeStep, name: str, limit: int = 512) -> str:
     value = step.options.get(name, "")
     value = value.strip() if isinstance(value, str) else ""
     if len(value) > limit or any(char in value for char in "\n\r\x00"):
-        raise StepError("A field is one line of text.")
+        raise StepError("field_lines")
     return value
 
 
@@ -629,7 +679,7 @@ def _items(step: BakeStep, name: str) -> list[str]:
     for item in value if isinstance(value, list) else []:
         item = item.strip()
         if any(char in item for char in "\n\r\x00"):
-            raise StepError("A list entry is one line of text.")
+            raise StepError("entry_lines")
         if item and item not in found:
             found.append(item)
     return found
@@ -643,7 +693,7 @@ def _web_address(value: str, what: str) -> str:
     """
     parts = urlsplit(value)
     if parts.scheme not in ("http", "https") or not parts.netloc or any(char.isspace() for char in value):
-        raise StepError(f"{what} is an http or https URL.")
+        raise StepError("web_address", what)
     return value
 
 
@@ -664,7 +714,7 @@ def _script_lines(step: BakeStep) -> list[str]:
     """
     lines = step.script.replace("\r\n", "\n").strip("\n").split("\n")
     if not any(line.strip() for line in lines):
-        raise StepError("Write at least one command.")
+        raise StepError("no_commands")
     return [line.rstrip() for line in lines]
 
 
@@ -697,14 +747,14 @@ def _packages_of(step: BakeStep) -> list[str]:
     packages = sorted({name.strip() for name in step.packages if name.strip()})
     for name in packages:
         if not _PACKAGE.fullmatch(name):
-            raise StepError(f"'{name}' is not a package name.")
+            raise StepError("package_name", name)
     return packages
 
 
 def _render_fonts(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
     chosen = _items(step, "packs")
     if not chosen and not step.files:
-        raise StepError("Choose a set of fonts, or upload font files.")
+        raise StepError("no_fonts")
     lines = [f"# {step.note}"] if step.note else []
     if step.files:
         lines.append(_copy("COPY", _context_files(step, recipe), "/usr/share/fonts/sealskin/"))
@@ -718,9 +768,9 @@ def _render_fonts(step: BakeStep, family: str, recipe: BakeRecipe, distro: str =
         for name in chosen:
             pack = bakekits.FONT_PACKS.get(name)
             if pack is None or family not in pack.packages:
-                raise StepError(f"The fonts '{name}' are not packaged for this distribution.")
+                raise StepError("fonts_unpackaged", name)
             if pack.eula and not _flag(step, "eula"):
-                raise StepError("These fonts come under a license of their own; accept it in the step to install them.")
+                raise StepError("fonts_license")
             packages.extend(pack.packages[family])
             before.extend(pack.before.get(family, ()))
             after.extend(pack.after.get(family, ()))
@@ -737,12 +787,12 @@ def _render_fonts(step: BakeStep, family: str, recipe: BakeRecipe, distro: str =
 
 def _render_env(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
     if not step.env:
-        raise StepError("Add at least one variable.")
+        raise StepError("no_variables")
     for item in step.env:
         if not _ENV_NAME.fullmatch(item.name):
-            raise StepError(f"'{item.name}' is not a variable name.")
+            raise StepError("variable_name", item.name)
         if "\n" in item.value:
-            raise StepError(f"The value of {item.name} is one line.")
+            raise StepError("variable_lines", item.name)
     lines = [f"# {step.note}"] if step.note else []
     return lines + [_env_lines([(item.name, item.value) for item in step.env])]
 
@@ -763,7 +813,7 @@ def _render_proxy(step: BakeStep, family: str, recipe: BakeRecipe, distro: str =
         if value:
             pairs.append((name, _web_address(value, what)))
     if not pairs:
-        raise StepError("Give the proxy's address, or a mirror's.")
+        raise StepError("no_proxy")
     lines = [f"# {step.note}"] if step.note else []
     return lines + [_env_lines(pairs)]
 
@@ -793,16 +843,16 @@ def _archives(found: Family, archives: list[str]) -> list[str]:
 
 def _render_ppa(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
     if distro not in bakekits.PPA_DISTROS:
-        raise StepError("A personal package archive installs on an Ubuntu image only.")
+        raise StepError("ppa_ubuntu")
     archives = [item.removeprefix("ppa:") for item in _items(step, "ppas")]
     if not archives:
-        raise StepError("Name at least one archive, as owner/name.")
+        raise StepError("no_archives")
     for archive in archives:
         if not _PPA.fullmatch(archive):
-            raise StepError(f"'{archive}' is not an archive: write it as owner/name.")
+            raise StepError("archive_name", archive)
     packages = _packages_of(step)
     if not packages:
-        raise StepError("Add at least one package to install from the archive.")
+        raise StepError("no_archive_packages")
     found = FAMILIES["debian"]
     return _run(
         [
@@ -818,10 +868,10 @@ def _render_ppa(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "
 def _render_app(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
     app = bakekits.APPS.get(_option(step, "app"))
     if app is None:
-        raise StepError("Choose an application.")
+        raise StepError("no_app")
     found = _family(family, "an application install")
     if not app.offered(family, distro):
-        raise StepError(f"{app.name} is not offered on this distribution.")
+        raise StepError("app_unoffered", app.name)
     commands = [_banner(step.note or f"install {app.name}")]
     if family == "debian" and distro in app.repository:
         commands.extend(_repository(app.repository[distro], _slug(app.name, "vendor")))
@@ -861,10 +911,10 @@ def _render_desktop(step: BakeStep, family: str, recipe: BakeRecipe, distro: str
     name = _option(step, "name", 80)
     command = _option(step, "command")
     if not name or not command:
-        raise StepError("A desktop entry has a name and the command it starts.")
+        raise StepError("desktop_entry")
     category = _option(step, "category") or bakekits.DESKTOP_CATEGORIES[0]
     if category not in bakekits.DESKTOP_CATEGORIES:
-        raise StepError(f"'{category}' is not a menu category.")
+        raise StepError("menu_category", category)
     slug = _slug(name, step.id)
     lines = [f"# {step.note}"] if step.note else []
     icon = _option(step, "icon")
@@ -891,7 +941,7 @@ def _render_desktop(step: BakeStep, family: str, recipe: BakeRecipe, distro: str
 def _render_docker(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
     version = _option(step, "version")
     if version and not re.fullmatch(r"\d+\.\d+\.\d+", version):
-        raise StepError("A Docker version is three numbers, such as 28.5.1; leave it empty for the latest.")
+        raise StepError("docker_version")
     static = "https://download.docker.com/linux/static/stable/${ARCH}"
     latest = (
         f'$(curl -fsSL "{static}/" | grep -oE \'docker-[0-9]+\\.[0-9]+\\.[0-9]+\\.tgz\' '
@@ -942,16 +992,16 @@ def _render_devkit(step: BakeStep, family: str, recipe: BakeRecipe, distro: str 
     name = _option(step, "kit")
     kit = bakekits.DEV_KITS.get(name)
     if kit is None:
-        raise StepError("Choose a language.")
+        raise StepError("no_language")
     found = _family(family, "a toolchain install")
     if family not in kit.packages:
-        raise StepError("This toolchain is not packaged for the distribution.")
+        raise StepError("toolchain_unpackaged")
     wanted = [item.strip() for item in step.packages if item.strip()]
     if wanted and not kit.install:
-        raise StepError("This toolchain installs no packages of its own.")
+        raise StepError("toolchain_packages")
     for item in wanted:
         if not re.fullmatch(kit.pattern, item):
-            raise StepError(f"'{item}' is not a package name.")
+            raise StepError("package_name", item)
     if name == "go":
         wanted = [item if "@" in item else f"{item}@latest" for item in wanted]
     toolchain = [*found.refresh, _install(found, found.install, list(kit.packages[family]))]
@@ -1036,16 +1086,16 @@ def join_script(script: str) -> list[str]:
 def _render_run(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
     commands = join_script(step.script)
     if not commands:
-        raise StepError("Write at least one command.")
+        raise StepError("no_commands")
     return _run([_banner(step.note or "run commands"), *commands])
 
 
 def _render_raw(step: BakeStep, family: str, recipe: BakeRecipe, distro: str = "") -> list[str]:
     text = step.text.replace("\r\n", "\n").strip("\n")
     if not text.strip():
-        raise StepError("Write at least one instruction.")
+        raise StepError("no_instructions")
     if any(keyword == "FROM" for _line, keyword, _args in instructions(text)):
-        raise StepError("A guided recipe has one FROM line, the application's image. Stages are written in developer mode.")
+        raise StepError("guided_from")
     return text.split("\n")
 
 
@@ -1213,7 +1263,8 @@ def render(recipe: BakeRecipe, image: str, family: str, portable: bool = False, 
         try:
             block = "\n".join(_RENDERERS[step.kind](step, recipe.family or family, recipe, distro)).split("\n")
         except StepError as exc:
-            result.problems.append(_problem("error", str(exc), step=step.id))
+            # The answer is a sentence of `STEP_PROBLEMS`, never the exception's own text.
+            result.problems.append(_problem("error", STEP_PROBLEMS[exc.kind].format(subject=exc.subject), step=step.id))
             continue
         lines.append("")
         result.blocks.append({"step": step.id, "start": len(lines) + 1, "end": len(lines) + len(block)})
