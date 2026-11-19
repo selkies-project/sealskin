@@ -37,6 +37,8 @@ import json
 import re
 import sys
 import tarfile
+import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -164,11 +166,37 @@ _TRANSLATED_PLACEHOLDER = re.compile(r'<ph name="([^"]*)"\s*/>')
 _FTL_ENTRY = re.compile(r"^policy-([A-Za-z0-9]+) = (.*(?:\n[ \t]+.*)*)", re.M)
 
 
+#: Attempts at a URL before its error is raised, and the wait before the second.
+FETCH_ATTEMPTS = 6
+FETCH_FIRST_WAIT_S = 2.0
+
+
 def fetch(url: str) -> bytes:
-    """Return what `url` serves."""
+    """Return what `url` serves.
+
+    A rate limit or server error (429, 5xx) and a dropped connection are tried again after
+    a wait that doubles each time, or the wait a `Retry-After` header asks for: the
+    sources throttle a burst of requests from a shared runner address.
+    """
     request = urllib.request.Request(url, headers={"User-Agent": "policy-catalog-ingest"})
-    with urllib.request.urlopen(request, timeout=120) as response:
-        return response.read()
+    wait = FETCH_FIRST_WAIT_S
+    for attempt in range(1, FETCH_ATTEMPTS + 1):
+        try:
+            with urllib.request.urlopen(request, timeout=120) as response:
+                return response.read()
+        except urllib.error.HTTPError as error:
+            if attempt == FETCH_ATTEMPTS or (error.code != 429 and error.code < 500):
+                raise
+            asked = error.headers.get("Retry-After", "") if error.headers else ""
+            delay = float(asked) if asked.isdigit() else wait
+        except (urllib.error.URLError, TimeoutError, ConnectionError):
+            if attempt == FETCH_ATTEMPTS:
+                raise
+            delay = wait
+        print(f"{url}: attempt {attempt} failed, trying again in {delay:.0f} s", file=sys.stderr)
+        time.sleep(delay)
+        wait *= 2
+    raise AssertionError("unreachable")
 
 
 def plain(text: str | None) -> str:
