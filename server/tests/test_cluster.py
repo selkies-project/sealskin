@@ -350,6 +350,10 @@ async def test_a_launch_forwarded_to_a_node_of_the_earlier_version_asks_it_for_a
     assert await place(selected_gpu="auto:nvidia") == (bravo, {"application_id": app.id, "selected_gpu": "auto"})
     assert (await place(selected_gpu=local["device"]))[1]["selected_gpu"] == "auto"
     assert (await place(selected_gpu="/dev/dri/renderD128", node=bravo))[1]["selected_gpu"] == "/dev/dri/renderD128"
+    # A node without GPUs keeps the kind asked for, which it refuses rather than start the session with no GPU.
+    _status(bravo, gpus=[])
+    state.installed_apps[app.id] = make_app()
+    assert (await place(selected_gpu="auto:nvidia", node=bravo))[1]["selected_gpu"] == "auto:nvidia"
 
 
 async def test_limits_count_sessions_on_every_node_and_spend_the_allowance(node):

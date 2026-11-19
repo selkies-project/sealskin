@@ -266,16 +266,21 @@ async def _place(request: Request, body: dict[str, Any], user: dict[str, Any]) -
     sent = dict(body)
     if device_kind is not None and node_id != body.get("node"):
         sent["selected_gpu"] = f"auto:{device_kind}" if device_kind else "auto"
-    if str(sent.get("selected_gpu") or "").startswith("auto:") and not _tells_gpu_kinds(node_id):
+    if str(sent.get("selected_gpu") or "").startswith("auto:") and _of_earlier_version(node_id):
         # A node of an earlier version refuses `auto:<kind>` for a device it does not have.
         sent["selected_gpu"] = "auto"
     progress.forwarded(node_id, cluster.NODES[node_id].get("name", node_id))
     await _send(request, node_id, user, sent)
 
 
-def _tells_gpu_kinds(node_id: str) -> bool:
-    """Whether a node's status gives the kind of its GPUs, as a node that takes `auto:<kind>` does."""
-    return any(gpu.get("type") for gpu in (cluster.status_of(node_id) or {}).get("gpus") or [])
+def _of_earlier_version(node_id: str) -> bool:
+    """Whether a node lists GPUs and gives the kind of none, as a node that knows no `auto:<kind>` does.
+
+    A node without GPUs tells nothing either way, and keeps the kind asked
+    for, so that it refuses the launch instead of starting it with no GPU.
+    """
+    gpus = (cluster.status_of(node_id) or {}).get("gpus") or []
+    return bool(gpus) and not any(gpu.get("type") for gpu in gpus)
 
 
 def _gpu_kinds(body: dict[str, Any], user: dict[str, Any]) -> tuple[set[str], str | None]:
