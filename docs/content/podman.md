@@ -130,10 +130,11 @@ with running rootless:
 ## SteamOS
 
 SteamOS ships Podman and no Docker. The rootless setup above is the one that
-has run there. Its root filesystem is read-only and replaced on each update,
-while `/etc` and `/home` are kept, so the rootful setup keeps everything that
-lasts in those two places. It follows the layout of a running SteamOS node
-but has not been tried there, nor has the `rootless_storage_path` line below:
+has run there. SteamOS's root filesystem is read-only and replaced on each
+update, while `/etc` and `/home` are kept, so the rootful setup keeps
+everything that lasts in those two places. It follows the layout of a running
+SteamOS node but has not been tried there, nor has the `rootless_storage_path`
+line below:
 
 * The Quadlet files and the socket's enablement live in `/etc`.
 * Podman keeps its images and containers under `/var` by default, which an
