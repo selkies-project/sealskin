@@ -96,6 +96,12 @@ sudo podman run -d --name sealskin --hostname sealskin --network sealskin \
   -p 8443:8443 -p 8000:8000 lscr.io/linuxserver/sealskin:latest
 ```
 
+On a host that enforces SELinux, such as Fedora or RHEL, the label Podman
+gives a container is expected to keep it from the socket mounted into it,
+which `--security-opt label=disable` on the server's container, or
+`SecurityLabelDisable=true` in its Quadlet file, lifts. Neither setup on this
+page has been tried on such a host.
+
 ## Rootless
 
 A user's own Podman works too, with its socket and a network of its own:
@@ -104,7 +110,7 @@ A user's own Podman works too, with its socket and a network of its own:
 systemctl --user enable --now podman.socket
 podman network create sealskin
 podman run -d --name sealskin --hostname sealskin --network sealskin \
-  -e PUID=1000 -e PGID=1000 -e TZ=Etc/UTC \
+  -e PUID=1000 -e PGID=1000 -e TZ=Etc/UTC -e HOST_URL=sealskin.example.com \
   -v ~/sealskin/config:/config -v ~/sealskin/storage:/storage \
   -v /run/user/$(id -u)/podman/podman.sock:/var/run/docker.sock \
   -p 8443:8443 -p 8000:8000 lscr.io/linuxserver/sealskin:latest
@@ -123,9 +129,11 @@ with running rootless:
 
 ## SteamOS
 
-SteamOS ships Podman and no Docker. Its root filesystem is read-only and
-replaced on each update, while `/etc` and `/home` are kept, so a SteamOS host
-runs the rootful setup above with everything that lasts in those two places:
+SteamOS ships Podman and no Docker. The rootless setup above is the one that
+has run there. Its root filesystem is read-only and replaced on each update,
+while `/etc` and `/home` are kept, so the rootful setup keeps everything that
+lasts in those two places. It follows the layout of a running SteamOS node
+but has not been tried there, nor has the `rootless_storage_path` line below:
 
 * The Quadlet files and the socket's enablement live in `/etc`.
 * Podman keeps its images and containers under `/var` by default, which an
