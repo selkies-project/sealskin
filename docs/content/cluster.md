@@ -182,8 +182,9 @@ another's. What it controls is who gets one:
 * `SEALSKIN_NODE_GPU_SLOTS` caps the GPU sessions of a node.
 * A restricted pool keeps GPU nodes for the groups that should have them.
 * A launch asks only for kinds of GPU, NVIDIA or Intel/AMD (DRI3), the
-  application supports, and a launch forwarded to another node gets a GPU there of the
-  kind it asked for.
+  application supports, and a launch forwarded to another node gets a GPU
+  there of the kind it asked for. A node of an earlier version does not tell
+  the kinds of its GPUs, so a launch forwarded to it asks for any GPU it has.
 
 Each node tells the others the kind of each of its GPUs, so the launcher
 lists the GPUs of every answering node open to the user, each by its model
@@ -199,6 +200,9 @@ Two settings shape what a node offers:
 * `SEALSKIN_NODE_GPU_PREFER`, `nvidia` or `dri3`, is the kind a launch that
   asks for any GPU gets on the node while one of that kind is free, such as
   a discrete card ahead of the processor's.
+
+The server warns at startup of a kind it does not know and of a device in
+`SEALSKIN_NODE_GPUS` that none of its GPUs is.
 
 ## Home directories
 
