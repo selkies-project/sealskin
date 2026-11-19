@@ -849,7 +849,6 @@ function bindCustomize() {
   $('customize-reset').addEventListener('click', () => setBackground({ ...DEFAULT_BACKGROUND }));
 }
 
-/** Offer the endpoints the chosen VPN publishes; the field shows when there is a choice to make. */
 /** Offer the GPUs a launch of `app` can use where the Where field sends it, keeping `chosen` where it still can. */
 function fillGpus(app, chosen) {
   const gpus = gpusFor(app, whereSelect.value);
@@ -857,6 +856,7 @@ function fillGpus(app, chosen) {
   $('gpu-form-group').hidden = gpus.length === 0;
 }
 
+/** Offer the endpoints the chosen VPN publishes; the field shows when there is a choice to make. */
 function fillVpnEndpoints(chosen = null) {
   const vpn = (status.vpns || []).find((v) => v.id === vpnSelect.value);
   const endpoints = vpn ? vpn.endpoints : [];
