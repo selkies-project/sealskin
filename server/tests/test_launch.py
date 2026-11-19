@@ -232,6 +232,37 @@ def test_auto_takes_a_gpu_of_the_kind_asked_for_and_the_kind_the_node_prefers(mo
     assert missing.value.status_code == 400 and "NVIDIA" in missing.value.detail
 
 
+def test_a_preferred_kind_of_gpu_is_read_in_any_case_and_a_typo_is_reported(monkeypatch, caplog):
+    nvidia = {"device": "/dev/dri/renderD129", "driver": "nvidia", "type": "nvidia", "index": 0}
+    igpu = {"device": "/dev/dri/renderD128", "driver": "i915", "type": "dri3"}
+    state.available_gpus[:] = [igpu, nvidia]
+    for written in ("NVIDIA", " nvidia "):
+        monkeypatch.setattr(settings, "node_gpu_prefer", written)
+        assert launch.preferred_gpu_kind() == "nvidia"
+    monkeypatch.setattr(settings, "node_gpus", "")
+    caplog.clear()
+    launch.check_gpu_settings()
+    assert not caplog.records
+    monkeypatch.setattr(settings, "node_gpu_prefer", "nvdia")
+    assert launch.preferred_gpu_kind() == ""
+    launch.check_gpu_settings()
+    assert any("SEALSKIN_NODE_GPU_PREFER is 'nvdia'" in r.getMessage() for r in caplog.records)
+
+
+def test_a_device_node_gpus_names_and_no_gpu_is_is_reported(monkeypatch, caplog):
+    monkeypatch.setattr(settings, "node_gpu_prefer", "")
+    monkeypatch.setattr(settings, "node_gpus", "/dev/dri/renderD128, renderD129")
+    state.available_gpus[:] = [{"device": "/dev/dri/renderD128", "driver": "i915", "type": "dri3"}]
+    caplog.clear()
+    launch.check_gpu_settings()
+    warned = [r.getMessage() for r in caplog.records if "SEALSKIN_NODE_GPUS" in r.getMessage()]
+    assert len(warned) == 1 and "names renderD129," in warned[0] and "offers /dev/dri/renderD128" in warned[0]
+    monkeypatch.setattr(settings, "node_gpus", "/dev/dri/renderD128")
+    caplog.clear()
+    launch.check_gpu_settings()
+    assert not caplog.records
+
+
 def test_a_node_offers_only_the_gpus_node_gpus_names(monkeypatch):
     from app.providers.base_provider import offered_gpus
 

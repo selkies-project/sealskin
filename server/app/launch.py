@@ -42,6 +42,7 @@ from . import (
 from .fsutil import create_exclusive, open_within, safe_copytree, safe_join, sanitize_for_filename
 from .models import InstalledApp
 from .providers import get_provider
+from .providers.base_provider import named_gpus
 from .settings import settings
 from .state import state
 
@@ -315,7 +316,7 @@ def validate_gpu(
             return None
         candidates = sorted(
             (g for g in supported if free(g)),
-            key=lambda g: (g["type"] != settings.node_gpu_prefer, using.get(g["device"], 0)),
+            key=lambda g: (g["type"] != preferred_gpu_kind(), using.get(g["device"], 0)),
         )
         if not candidates:
             raise HTTPException(status_code=503, detail="Every GPU of this node is taken.")
@@ -328,6 +329,37 @@ def validate_gpu(
     if not supports_gpu(app, gpu_info["type"]):
         raise HTTPException(status_code=400, detail=f"App '{app.name}' does not support {cluster.GPU_KINDS[gpu_info['type']]} GPUs.")
     return gpu_info
+
+
+def preferred_gpu_kind() -> str:
+    """Return the kind of GPU `node_gpu_prefer` names, in any case and spacing, or `""` when it names none."""
+    kind = settings.node_gpu_prefer.strip().lower()
+    return kind if kind in cluster.GPU_KINDS else ""
+
+
+def check_gpu_settings() -> None:
+    """Warn of GPU settings that leave the node offering other GPUs than they mean to.
+
+    A `node_gpu_prefer` that names no kind of GPU prefers none, and a device
+    in `node_gpus` that no GPU of this node is offers nothing, so a typo in
+    either would otherwise go unnoticed. Called once the node's GPUs are
+    detected.
+    """
+    if settings.node_gpu_prefer.strip() and not preferred_gpu_kind():
+        logger.warning(
+            "SEALSKIN_NODE_GPU_PREFER is '%s', which is not a kind of GPU (%s): no kind is preferred.",
+            settings.node_gpu_prefer,
+            " or ".join(cluster.GPU_KINDS),
+        )
+    offered = {gpu["device"] for gpu in state.available_gpus}
+    unknown = sorted(named_gpus() - offered)
+    if unknown:
+        logger.warning(
+            "SEALSKIN_NODE_GPUS names %s, which no GPU of this node is; it offers %s. A device is named by its path, "
+            "such as `/dev/dri/renderD128`, or on Kubernetes by its option's name.",
+            ", ".join(unknown),
+            ", ".join(sorted(offered)) or "no GPU",
+        )
 
 
 def supports_gpu(app: InstalledApp, kind: str) -> bool:
