@@ -219,12 +219,31 @@ async def test_an_nvidia_session_asks_podman_for_its_gpu_as_a_cdi_device(monkeyp
 
     removed = []
     client.containers.run = unresolvable
-    client.containers.get = lambda name: SimpleNamespace(remove=lambda force: removed.append((name, force)))
+    unstarted = {"status": "created", "session": "0123abcd-4567-89ef-0123-456789abcdef"}
+
+    def get(name):
+        labels = {docker_provider.SESSION_LABEL: unstarted["session"]}
+        return SimpleNamespace(status=unstarted["status"], labels=labels, remove=lambda: removed.append(name))
+
+    client.containers.get = get
     with pytest.raises(HTTPException) as missing:
         await provider.launch("0123abcd-4567-89ef-0123-456789abcdef", {}, gpu_config=gpu)
     assert "nvidia-ctk cdi generate" in missing.value.detail
-    # The container was created before its start failed, and goes with the launch.
-    assert len(removed) == 1 and removed[0][0].startswith("sealskin-0123abcd-") and removed[0][1] is True
+    # Podman leaves the container it created before the start failed, and it goes with the launch.
+    assert len(removed) == 1 and removed[0].startswith("sealskin-0123abcd-")
+
+    # A launch that fails on a name `docker_overrides` fixed finds another session's container under it, which stays,
+    # running or not.
+    removed.clear()
+    for status in ("running", "created"):
+        unstarted.update(status=status, session="fedcba98-7654-3210-fedc-ba9876543210")
+        with pytest.raises(HTTPException):
+            await provider.launch("0123abcd-4567-89ef-0123-456789abcdef", {}, gpu_config=gpu)
+    # Nor does a container of this session that started after all.
+    unstarted.update(status="running", session="0123abcd-4567-89ef-0123-456789abcdef")
+    with pytest.raises(HTTPException):
+        await provider.launch("0123abcd-4567-89ef-0123-456789abcdef", {}, gpu_config=gpu)
+    assert removed == []
 
 
 def test_the_engine_is_podman_when_its_version_names_a_podman_component(monkeypatch):

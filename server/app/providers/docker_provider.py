@@ -26,6 +26,7 @@ from ..state import state
 from .base_provider import (
     INSTANCE_LABEL,
     MANAGED_BY_LABEL,
+    SESSION_LABEL,
     BaseProvider,
     epoch,
     instance_labels,
@@ -398,7 +399,7 @@ class DockerProvider(BaseProvider):
             ) from exc
         except APIError as exc:
             logger.error("[%s] Docker API error on launch: %s", session_id, exc)
-            await self._remove_unstarted(run_kwargs["name"])
+            await self._remove_unstarted(run_kwargs["name"], session_id)
             if "unresolvable cdi devices" in str(exc).lower():
                 raise HTTPException(
                     status_code=500,
@@ -447,11 +448,20 @@ class DockerProvider(BaseProvider):
             raise
         return {"instance_id": container.id, "ip": ip_address, "port": config["port"]}
 
-    async def _remove_unstarted(self, name: str) -> None:
-        """Remove the container a launch created and could not start, which `remove` does not reach."""
+    async def _remove_unstarted(self, name: str, session_id: str) -> None:
+        """Remove the container a launch of `session_id` created under `name` and could not start.
+
+        Docker removes such a container itself, as `remove` asks it to, while
+        Podman leaves it `created`. Only a container that never started and
+        carries the session's label goes: a launch can also fail on a name
+        that `docker_overrides` fixed and another session's running container
+        holds, and the engine's error does not tell the two apart.
+        """
         try:
             container = await asyncio.to_thread(self.client.containers.get, name)
-            await asyncio.to_thread(container.remove, force=True)
+            if container.status != "created" or (container.labels or {}).get(SESSION_LABEL) != session_id:
+                return
+            await asyncio.to_thread(container.remove)
         except NotFound:
             return
         except (APIError, DockerException) as exc:
