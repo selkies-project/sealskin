@@ -591,7 +591,9 @@ At start-up the server detects GPUs on the host:
   container runtime with all capabilities and, when it exists,
   `/dev/nvidia-modeset`. This needs the proprietary driver 580 or newer, the
   `nvidia-container-toolkit` v1.20.1 or higher, whose refresh service creates
-  that node at boot, and the kernel parameter `nvidia-drm.modeset=1`.
+  that node at boot, and the kernel parameter `nvidia-drm.modeset=1`. Under
+  Podman a session gets the GPU as a CDI device instead, which needs a CDI
+  spec on the host ([Podman](podman.md)).
 * **DRI3** devices (Intel, AMD, and others) through `/dev/dri`. The render
   node is passed into the container and exported as `DRI_NODE`.
 

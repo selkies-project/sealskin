@@ -24,6 +24,7 @@ from .state import state
 logger = logging.getLogger(__name__)
 
 _CLIENT: docker.DockerClient | None = None
+_PODMAN: bool | None = None
 
 
 def get_docker_client() -> docker.DockerClient:
@@ -78,11 +79,38 @@ class NameTaken(RuntimeError):
     """Docker runs another container under the name this server would go by."""
 
 
+def engine_is_podman() -> bool:
+    """Return whether the engine behind the socket is Podman, which serves Docker's API with its own GPU devices.
+
+    The answer is read once from the engine's version; an engine that does not
+    answer counts as Docker.
+    """
+    global _PODMAN
+    if _PODMAN is None:
+        try:
+            components = get_docker_client().version().get("Components") or []
+        except Exception:  # noqa: BLE001 - an engine that cannot be asked keeps Docker's behavior
+            return False
+        _PODMAN = any("podman" in str(component.get("Name", "")).lower() for component in components)
+    return _PODMAN
+
+
+MOUNTINFO = "/proc/self/mountinfo"
+"""The mounts of this process, among them the files its container runtime gave it."""
+
+CONTAINER_MARKERS = ("/.dockerenv", "/run/.containerenv")
+"""The files Docker and Podman place at a container's root, which a host has none of."""
+
+
 def _own_id() -> str:
-    """Return the id of the container this process runs in, as its mounts show it, or `""` on a host."""
+    """Return the id of the container this process runs in, as its mounts show it, or `""` on a host.
+
+    Docker keeps a container's files under `containers/<id>/`, and Podman
+    under `overlay-containers/<id>/userdata/`.
+    """
     try:
-        with open("/proc/self/mountinfo", encoding="utf-8") as handle:
-            found = re.search(r"/containers/([0-9a-f]{64})/", handle.read())
+        with open(MOUNTINFO, encoding="utf-8") as handle:
+            found = re.search(r"/(?:overlay-)?containers/([0-9a-f]{64})/", handle.read())
     except OSError:
         return ""
     return found.group(1) if found else ""
@@ -117,7 +145,7 @@ def _own_container(client: docker.DockerClient) -> Any | None:
             continue
         if found.attrs.get("Config", {}).get("Hostname") == hostname or found.id.startswith(hostname):
             running = getattr(found, "status", "running") == "running"
-            if (own and found.id != own) or (not own and not os.path.exists("/.dockerenv") and running):
+            if (own and found.id != own) or (not own and not any(map(os.path.exists, CONTAINER_MARKERS)) and running):
                 raise _taken(found)
             return found
     if settings.node_name:
@@ -204,6 +232,14 @@ async def inspect_self_container() -> None:
     if networks:
         state.discovered_network = list(networks.keys())[0]
         logger.info("Discovered self-container network: %s", state.discovered_network)
+    else:
+        # Rootless Podman's default, `pasta`, gives a container no network another container can join.
+        logger.error(
+            "This server's container is on no network (network mode '%s'), so it cannot reach the sessions it "
+            "starts. Run it on a network of its own, such as one made with `podman network create sealskin` "
+            "and joined with `--network sealskin`.",
+            container.attrs.get("HostConfig", {}).get("NetworkMode", ""),
+        )
 
     ports = network_settings.get("Ports", {}) or {}
     if not ports:

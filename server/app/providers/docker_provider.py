@@ -15,6 +15,7 @@ from fastapi import HTTPException
 
 from .. import progress, registries
 from ..docker_utils import (
+    engine_is_podman,
     get_docker_client,
     inspect_self_container,
     prune_dangling_images,
@@ -25,6 +26,7 @@ from ..state import state
 from .base_provider import (
     INSTANCE_LABEL,
     MANAGED_BY_LABEL,
+    SESSION_LABEL,
     BaseProvider,
     epoch,
     instance_labels,
@@ -34,6 +36,8 @@ from .base_provider import (
 logger = logging.getLogger(__name__)
 
 ENDED_STATES = ("exited", "dead", "removing")
+#: The CDI kind of the NVIDIA GPUs that `nvidia-ctk cdi generate` describes, numbered as the driver numbers them.
+CDI_NVIDIA_GPU = "nvidia.com/gpu"
 
 
 def _bind_volumes(bind_mounts: Any) -> dict[str, dict[str, str]]:
@@ -340,7 +344,20 @@ class DockerProvider(BaseProvider):
             run_kwargs["volumes"][vpn["resolv_conf"]] = {"bind": "/etc/resolv.conf", "mode": "ro"}
 
         if gpu_config:
-            if gpu_config["type"] == "nvidia":
+            # The engine is asked once, and off the event loop.
+            podman = gpu_config["type"] == "nvidia" and await asyncio.to_thread(engine_is_podman)
+            if podman:
+                # Podman takes the runtime and an index request without a word and gives no GPU; its GPUs are CDI
+                # devices, whose spec brings `/dev/nvidia-modeset` along.
+                run_kwargs["device_requests"] = [
+                    DeviceRequest(driver="cdi", device_ids=[f"{CDI_NVIDIA_GPU}={gpu_config['index']}"])
+                ]
+                logger.info(
+                    "[%s] Configuring container with Nvidia GPU index %s through CDI",
+                    session_id,
+                    gpu_config["index"],
+                )
+            elif gpu_config["type"] == "nvidia":
                 run_kwargs["runtime"] = "nvidia"
                 run_kwargs["device_requests"] = [
                     DeviceRequest(
@@ -384,6 +401,15 @@ class DockerProvider(BaseProvider):
             ) from exc
         except APIError as exc:
             logger.error("[%s] Docker API error on launch: %s", session_id, exc)
+            await self._remove_unstarted(run_kwargs["name"], session_id)
+            if "unresolvable cdi devices" in str(exc).lower():
+                raise HTTPException(
+                    status_code=500,
+                    detail=(
+                        "No CDI spec on this host names the NVIDIA GPU. Generate one with "
+                        "`nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml`."
+                    ),
+                ) from exc
             if "could not select device driver" in str(exc) or "nvidia-container-runtime" in str(
                 exc
             ):
@@ -423,6 +449,25 @@ class DockerProvider(BaseProvider):
             await self.stop(container.id)
             raise
         return {"instance_id": container.id, "ip": ip_address, "port": config["port"]}
+
+    async def _remove_unstarted(self, name: str, session_id: str) -> None:
+        """Remove the container a launch of `session_id` created under `name` and could not start.
+
+        Docker removes such a container itself, as `remove` asks it to, while
+        Podman leaves it `created`. Only a container that never started and
+        carries the session's label goes: a launch can also fail on a name
+        that `docker_overrides` fixed and another session's running container
+        holds, and the engine's error does not tell the two apart.
+        """
+        try:
+            container = await asyncio.to_thread(self.client.containers.get, name)
+            if container.status != "created" or (container.labels or {}).get(SESSION_LABEL) != session_id:
+                return
+            await asyncio.to_thread(container.remove)
+        except NotFound:
+            return
+        except (APIError, DockerException) as exc:
+            logger.warning("Could not remove the unstarted container '%s': %s", name, exc)
 
     async def _route_through(self, session_id: str, container_id: str, gateway_ip: str) -> None:
         """Point a container's default route at its VPN gateway.
