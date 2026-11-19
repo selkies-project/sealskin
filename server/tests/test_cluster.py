@@ -319,6 +319,39 @@ async def test_a_forwarded_launch_keeps_the_kind_or_the_device_of_the_gpu_it_ask
     assert routing._gpu_kinds({"application_id": app.id, "selected_gpu": "auto"}, _user(gpu=False)) == (set(), None)
 
 
+async def test_a_launch_forwarded_to_a_node_of_the_earlier_version_asks_it_for_any_gpu(node, monkeypatch):
+    from app import routing
+    from tests.test_launch import make_app
+
+    bravo, _ = _other_node("bravo")
+    local = {"device": "/dev/dri/renderD130", "driver": "nvidia", "type": "nvidia", "index": 0}
+    state.available_gpus[:] = [local]
+    state.sessions["held"] = {"username": "y", "gpu_config": local, "gpu_exclusive": True}
+    # A node of the earlier version names its GPUs without their kind, and takes `auto` or a device of its own.
+    _status(bravo, gpus=[{"device": "/dev/dri/renderD128", "name": "renderD128"}])
+    app = make_app(provider_config={**make_app().provider_config.model_dump(), "nvidia_support": True})
+    state.installed_apps[app.id] = app
+    sent: list[tuple[str, dict]] = []
+
+    async def send(_request, node_id, _user, body=None):
+        sent.append((node_id, body))
+
+    async def no_limits(_user):
+        return None
+
+    monkeypatch.setattr(routing, "_send", send)
+    monkeypatch.setattr(quota, "check_launch", no_limits)
+
+    async def place(**body):
+        sent.clear()
+        await routing._place(None, {"application_id": app.id, **body}, _user())
+        return sent[0]
+
+    assert await place(selected_gpu="auto:nvidia") == (bravo, {"application_id": app.id, "selected_gpu": "auto"})
+    assert (await place(selected_gpu=local["device"]))[1]["selected_gpu"] == "auto"
+    assert (await place(selected_gpu="/dev/dri/renderD128", node=bravo))[1]["selected_gpu"] == "/dev/dri/renderD128"
+
+
 async def test_limits_count_sessions_on_every_node_and_spend_the_allowance(node):
     bravo, _ = _other_node("bravo")
     _status(bravo, sessions=[{"session_id": "1", "username": "alice", "gpu": False}])

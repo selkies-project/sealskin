@@ -188,8 +188,10 @@ async def place_launch(
     A launch with a GPU starts on a node with a free GPU of a kind it can use
     (`_gpu_kinds`). A device the request names belongs to the `node` it names,
     else to this node; forwarded anywhere else, it becomes `auto:<kind>`, a
-    GPU of the same kind there, since devices are named per node. The request
-    may name a `pool` or a `node` to start on.
+    GPU of the same kind there, since devices are named per node. A node of an
+    earlier version, whose status gives no kinds and which knows no
+    `auto:<kind>`, is asked for `auto` instead. The request may name a `pool`
+    or a `node` to start on.
 
     Raises:
         HTTPException: 403 past a limit, 503 when no node can take the session.
@@ -264,8 +266,16 @@ async def _place(request: Request, body: dict[str, Any], user: dict[str, Any]) -
     sent = dict(body)
     if device_kind is not None and node_id != body.get("node"):
         sent["selected_gpu"] = f"auto:{device_kind}" if device_kind else "auto"
+    if str(sent.get("selected_gpu") or "").startswith("auto:") and not _tells_gpu_kinds(node_id):
+        # A node of an earlier version refuses `auto:<kind>` for a device it does not have.
+        sent["selected_gpu"] = "auto"
     progress.forwarded(node_id, cluster.NODES[node_id].get("name", node_id))
     await _send(request, node_id, user, sent)
+
+
+def _tells_gpu_kinds(node_id: str) -> bool:
+    """Whether a node's status gives the kind of its GPUs, as a node that takes `auto:<kind>` does."""
+    return any(gpu.get("type") for gpu in (cluster.status_of(node_id) or {}).get("gpus") or [])
 
 
 def _gpu_kinds(body: dict[str, Any], user: dict[str, Any]) -> tuple[set[str], str | None]:
