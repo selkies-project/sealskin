@@ -169,7 +169,7 @@ class StepError(ValueError):
 
     def __init__(self, kind: str, subject: str = "") -> None:
         """Name the problem by its kind in `STEP_PROBLEMS` and the step's value it is about."""
-        super().__init__(kind)
+        super().__init__(STEP_PROBLEMS[kind].format(subject=subject))
         self.kind = kind
         self.subject = subject
 

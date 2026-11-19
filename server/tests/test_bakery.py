@@ -118,6 +118,7 @@ def test_every_step_problem_is_a_sentence_of_the_table():
 
     raised = set(re.findall(r'raise StepError\("([a-z_]+)"', inspect.getsource(bakery)))
     assert raised and raised <= set(bakery.STEP_PROBLEMS)
+    assert str(bakery.StepError("package_name", "a b")) == "'a b' is not a package name."
     assert all(set(re.findall(r"{(\w*)}", sentence)) <= {"subject"} for sentence in bakery.STEP_PROBLEMS.values())
 
 
