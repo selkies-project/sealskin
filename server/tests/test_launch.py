@@ -308,6 +308,109 @@ def test_validate_gpu_rejects_unsupported():
     assert launch.gpu_for_app({"type": "nvidia"}, app) is None
 
 
+def test_auto_takes_a_gpu_of_the_kind_asked_for_and_the_kind_the_node_prefers(monkeypatch):
+    igpu = {"device": "/dev/dri/renderD128", "driver": "i915", "type": "dri3"}
+    nvidia = {"device": "/dev/dri/renderD129", "driver": "nvidia", "type": "nvidia", "index": 0}
+    state.available_gpus[:] = [igpu, nvidia]
+    both = make_app(provider_config={**make_app().provider_config.model_dump(), "nvidia_support": True})
+    assert launch.validate_gpu("auto", {"gpu": True}, both) == igpu
+    assert launch.validate_gpu("auto:nvidia", {"gpu": True}, both) == nvidia
+    assert launch.validate_gpu("auto:dri3", {"gpu": True}, both) == igpu
+    monkeypatch.setattr(settings, "node_gpu_prefer", "nvidia")
+    assert launch.validate_gpu("auto", {"gpu": True}, both) == nvidia
+    # The preferred kind gives way while a GPU of it is held alone.
+    state.sessions["held"] = {"gpu_config": nvidia, "gpu_exclusive": True}
+    assert launch.validate_gpu("auto", {"gpu": True}, both) == igpu
+    with pytest.raises(HTTPException) as taken:
+        launch.validate_gpu("auto:nvidia", {"gpu": True}, both)
+    assert taken.value.status_code == 503
+    with pytest.raises(HTTPException) as unsupported:
+        launch.validate_gpu("auto:nvidia", {"gpu": True}, make_app())
+    assert unsupported.value.status_code == 400
+    with pytest.raises(HTTPException):
+        launch.validate_gpu("auto:quantum", {"gpu": True}, both)
+    state.available_gpus[:] = [igpu]
+    with pytest.raises(HTTPException) as missing:
+        launch.validate_gpu("auto:nvidia", {"gpu": True}, both)
+    assert missing.value.status_code == 400 and "NVIDIA" in missing.value.detail
+
+
+def test_a_preferred_kind_of_gpu_is_read_in_any_case_and_a_typo_is_reported(monkeypatch, caplog):
+    nvidia = {"device": "/dev/dri/renderD129", "driver": "nvidia", "type": "nvidia", "index": 0}
+    igpu = {"device": "/dev/dri/renderD128", "driver": "i915", "type": "dri3"}
+    state.available_gpus[:] = [igpu, nvidia]
+    for written in ("NVIDIA", " nvidia "):
+        monkeypatch.setattr(settings, "node_gpu_prefer", written)
+        assert launch.preferred_gpu_kind() == "nvidia"
+    monkeypatch.setattr(settings, "node_gpus", "")
+    caplog.clear()
+    launch.check_gpu_settings()
+    assert not caplog.records
+    monkeypatch.setattr(settings, "node_gpu_prefer", "nvdia")
+    assert launch.preferred_gpu_kind() == ""
+    launch.check_gpu_settings()
+    assert any("SEALSKIN_NODE_GPU_PREFER is 'nvdia'" in r.getMessage() for r in caplog.records)
+
+
+def test_a_device_node_gpus_names_and_no_gpu_is_is_reported(monkeypatch, caplog):
+    monkeypatch.setattr(settings, "node_gpu_prefer", "")
+    monkeypatch.setattr(settings, "node_gpus", "/dev/dri/renderD128, renderD129")
+    state.available_gpus[:] = [{"device": "/dev/dri/renderD128", "driver": "i915", "type": "dri3"}]
+    caplog.clear()
+    launch.check_gpu_settings()
+    warned = [r.getMessage() for r in caplog.records if "SEALSKIN_NODE_GPUS" in r.getMessage()]
+    assert len(warned) == 1 and "names renderD129," in warned[0] and "offers /dev/dri/renderD128" in warned[0]
+    monkeypatch.setattr(settings, "node_gpus", "/dev/dri/renderD128")
+    caplog.clear()
+    launch.check_gpu_settings()
+    assert not caplog.records
+
+
+def test_a_node_offers_only_the_gpus_node_gpus_names(monkeypatch):
+    from app.providers.base_provider import offered_gpus
+
+    found = [{"device": "/dev/dri/renderD128"}, {"device": "/dev/dri/renderD129"}]
+    assert offered_gpus(found) == found
+    monkeypatch.setattr(settings, "node_gpus", " /dev/dri/renderD129 ,")
+    assert offered_gpus(found) == [{"device": "/dev/dri/renderD129"}]
+
+
+def test_a_gpu_is_named_by_its_model_where_the_node_can_name_it(monkeypatch, tmp_path):
+    from app import docker_utils
+
+    def device(name, vendor, number, address):
+        target = tmp_path / "devices" / address
+        (target / "driver").mkdir(parents=True)
+        (target / "vendor").write_text(f"0x{vendor}\n")
+        (target / "device").write_text(f"0x{number}\n")
+        (tmp_path / "drm" / name).mkdir(parents=True)
+        (tmp_path / "drm" / name / "device").symlink_to(target)
+        return str(tmp_path / "drm" / name / "device")
+
+    ids = tmp_path / "pci.ids"
+    ids.write_text(
+        "# comment\n1002  Advanced Micro Devices, Inc. [AMD/ATI]\n\t7480  Navi 33 [Radeon RX 7600/7600 XT/7600M XT/7600S/7700S / PRO W7600]\n"
+        "\t7481  Navi 33 [Radeon Graphics]\n10de  NVIDIA Corporation\n\t1436  GM206GLM [Quadro M2200 Mobile]\n"
+        "8086  Intel Corporation\n\t0001  Other\n# Kaby Lake\n\n\t591b  HD Graphics 630\n\t\t17aa 224d  ThinkPad P51\n"
+        "1ae0  Google, Inc.\n\t0001  Virtual GPU\n"
+    )
+    nvidia = tmp_path / "nvidia"
+    (nvidia / "0000:01:00.0").mkdir(parents=True)
+    (nvidia / "0000:01:00.0" / "information").write_text("Model: \t\t Quadro M2200\nIRQ: 150\n")
+    monkeypatch.setattr(docker_utils, "PCI_IDS_PATHS", (str(tmp_path / "missing"), str(ids)))
+    monkeypatch.setattr(docker_utils, "NVIDIA_GPUS_DIR", str(nvidia))
+
+    assert docker_utils.gpu_model(device("renderD128", "10de", "1436", "0000:01:00.0"), "nvidia") == "NVIDIA Quadro M2200"
+    assert docker_utils.gpu_model(device("renderD129", "8086", "591b", "0000:00:02.0"), "i915") == "Intel HD Graphics 630"
+    assert docker_utils.gpu_model(device("renderD130", "1ae0", "0001", "0000:00:03.0"), "virtio") == "Google, Inc. Virtual GPU"
+    assert docker_utils.gpu_model(device("renderD133", "1002", "7481", "0000:03:00.0"), "amdgpu") == "AMD Radeon Graphics"
+    # The database names the NVIDIA card too when its driver does not.
+    assert docker_utils.gpu_model(device("renderD131", "10de", "1436", "0000:02:00.0"), "nvidia") == "NVIDIA Quadro M2200 Mobile"
+    assert docker_utils.gpu_model(device("renderD132", "8086", "ffff", "0000:00:04.0"), "i915") is None
+    monkeypatch.setattr(docker_utils, "PCI_IDS_PATHS", ())
+    assert docker_utils.gpu_model(str(tmp_path / "drm" / "renderD129" / "device"), "i915") is None
+
+
 def test_collaboration_initial_tokens():
     tokens = launch.collaboration_initial_tokens(
         {

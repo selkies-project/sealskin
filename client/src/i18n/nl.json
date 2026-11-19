@@ -2228,6 +2228,8 @@
       "uploadingFile": "Bestand uploaden...",
       "cleanroom": "Cleanroom (Tijdelijk)",
       "noGpu": "Geen",
+      "anyGpu": "Willekeurige {kind}-GPU",
+      "gpuOnNode": "{gpu} op {node}",
       "saveOptions": "Deze startopties opslaan",
       "saveOptionsForUrl": "Opties opslaan voor alle URL's",
       "saveOptionsForFile": "Opties opslaan voor .{extension} bestanden",

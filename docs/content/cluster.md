@@ -163,7 +163,7 @@ A launch goes to one node:
    choose another, to start elsewhere.
 2. Otherwise the candidates are the answering `runtime` nodes in pools open
    to the user, under their session cap (`SEALSKIN_NODE_MAX_SESSIONS`), and,
-   for a GPU session, with a GPU free.
+   for a GPU session, with a GPU free of a kind the session can use.
 3. The one with the fewest sessions per CPU wins, the node the user is signed
    in at on a tie. The launcher can name a pool or a node instead.
 
@@ -181,6 +181,28 @@ another's. What it controls is who gets one:
   sessions a GPU no other session is on, and keeps others off it.
 * `SEALSKIN_NODE_GPU_SLOTS` caps the GPU sessions of a node.
 * A restricted pool keeps GPU nodes for the groups that should have them.
+* A launch asks only for kinds of GPU, NVIDIA or Intel/AMD (DRI3), the
+  application supports, and a launch forwarded to another node gets a GPU
+  there of the kind it asked for. A node of an earlier version does not tell
+  the kinds of its GPUs, so a launch forwarded to it asks for any GPU it has.
+
+Each node tells the others the kind of each of its GPUs, so the launcher
+lists the GPUs of every answering node open to the user, each by its model
+where its node can name it: **Any NVIDIA GPU** or **Any Intel/AMD GPU**
+starts the session on whichever node has a free GPU of that kind, and a GPU
+named with its node starts it on that node. Two GPUs of one kind can differ
+widely in speed, so a session that needs a fast one names it.
+
+Two settings shape what a node offers:
+
+* `SEALSKIN_NODE_GPUS` lists the devices the node offers sessions, such as
+  `/dev/dri/renderD129`; the others stay for the host.
+* `SEALSKIN_NODE_GPU_PREFER`, `nvidia` or `dri3`, is the kind a launch that
+  asks for any GPU gets on the node while one of that kind is free, such as
+  a discrete card ahead of the processor's.
+
+The server warns at startup of a kind it does not know and of a device in
+`SEALSKIN_NODE_GPUS` that none of its GPUs is.
 
 ## Home directories
 

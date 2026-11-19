@@ -2228,6 +2228,8 @@
       "uploadingFile": "ファイルをアップロード中...",
       "cleanroom": "クリーンルーム（一時的）",
       "noGpu": "なし",
+      "anyGpu": "任意の {kind} GPU",
+      "gpuOnNode": "{node} の {gpu}",
       "saveOptions": "これらの起動オプションを保存",
       "saveOptionsForUrl": "すべてのURLのオプションを保存",
       "saveOptionsForFile": ".{extension} ファイルのオプションを保存",

@@ -605,6 +605,24 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "help": "Most GPU sessions this node runs at once; 0 sets no limit.",
     },
     {
+        "name": "node_gpus",
+        "type": "str",
+        "default": "",
+        "help": (
+            "Comma-separated GPUs this node offers sessions, by device (`/dev/dri/renderD129`, or "
+            "on Kubernetes the option's name); empty offers every GPU it finds."
+        ),
+    },
+    {
+        "name": "node_gpu_prefer",
+        "type": "str",
+        "default": "",
+        "help": (
+            "Kind of GPU, `nvidia` or `dri3`, that a session asking for any GPU of this node gets "
+            "while one is free; empty takes the GPU with the fewest sessions of either kind."
+        ),
+    },
+    {
         "name": "peer_port",
         "type": "int",
         "default": 8444,

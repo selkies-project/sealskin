@@ -38,7 +38,7 @@ import websockets
 from fastapi import HTTPException
 
 from .. import progress, registries
-from ..docker_utils import scan_render_nodes
+from ..docker_utils import NVIDIA_GPUS_DIR, scan_render_nodes
 from ..settings import settings
 from ..state import state
 from .base_provider import (
@@ -48,6 +48,7 @@ from .base_provider import (
     epoch,
     host_port,
     instance_labels,
+    offered_gpus,
     open_url_command,
 )
 
@@ -91,8 +92,6 @@ PRODUCT_LABELS = {
 }
 #: Node label the NVIDIA GPU Operator sets when a node's GPUs serve virtual machines.
 NVIDIA_WORKLOAD_LABEL = "nvidia.com/gpu.workload.config"
-#: One entry per NVIDIA GPU the node's driver manages, render node or not.
-NVIDIA_GPUS_DIR = "/proc/driver/nvidia/gpus"
 #: Device plugin resource of each render node driver, for the server's own node.
 DRIVER_RESOURCES = {
     "nvidia": "nvidia.com/gpu",
@@ -601,6 +600,7 @@ class KubernetesProvider(BaseProvider):
                 {"device": name, "driver": driver, "type": "nvidia" if driver == "nvidia" else "dri3", "template": name}
                 for name, driver in named
             ]
+            offered = offered_gpus(offered)
             if offered != state.available_gpus:
                 logger.info("Offering %d GPU option(s) from PodTemplates: %s", len(named), [name for name, _ in named])
             state.available_gpus[:] = offered
@@ -608,7 +608,7 @@ class KubernetesProvider(BaseProvider):
         if _scanned is None:
             _scanned = await self._scan_gpus()
             logger.info("Detected %d GPU type(s): %s", len(_scanned), [gpu["device"] for gpu in _scanned])
-        state.available_gpus[:] = _scanned
+        state.available_gpus[:] = offered_gpus(_scanned)
 
     async def _scan_gpus(self) -> list[dict[str, Any]]:
         """Return the GPUs the cluster's nodes and device classes, the quota, or this node offer."""

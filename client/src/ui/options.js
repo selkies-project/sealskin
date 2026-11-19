@@ -16,6 +16,7 @@ import { reachableSessionOrigin } from '../lib/session-origin.js';
 import { confirmDialog } from '../lib/modal.js';
 import { apiError } from '../lib/api-error.js';
 import { qrSvg } from '../lib/qr.js';
+import { gpuLabel } from '../lib/gpus.js';
 import { openBakery, editBaked } from './bakery.js';
 import { openBrowserPolicies } from './browser-policies.js';
 import {
@@ -893,7 +894,7 @@ function renderLabGpus() {
   const gpus = labGpus();
   const current = wlab('gpu').value;
   wlab('gpu').innerHTML = `<option value="">${escapeHtml(t('popup.launchView.noGpu'))}</option>`
-    + gpus.map((gpu) => `<option value="${escapeHtml(gpu.device)}">${escapeHtml(`${gpu.device.split('/').pop()} (${gpu.driver})`)}</option>`).join('');
+    + gpus.map((gpu) => `<option value="${escapeHtml(gpu.device)}">${escapeHtml(gpuLabel(gpu))}</option>`).join('');
   if (gpus.some((gpu) => gpu.device === current)) wlab('gpu').value = current;
   wlab('gpu-group').style.display = gpus.length ? '' : 'none';
 }
@@ -3139,7 +3140,7 @@ function renderGpuInfo(gpus) {
   const gpuList = document.getElementById('dashboard-gpu-list');
 
   if (gpus && gpus.length > 0) {
-    gpuList.innerHTML = gpus.map((gpu) => `<li>${escapeHtml(gpu.device.split('/').pop())} (${escapeHtml(gpu.driver)})</li>`).join('');
+    gpuList.innerHTML = gpus.map((gpu) => `<li>${escapeHtml(gpuLabel(gpu))}</li>`).join('');
     gpuInfoContainer.style.display = 'block';
   } else {
     gpuInfoContainer.style.display = 'none';

@@ -102,6 +102,8 @@ paths refer to.
 | `SEALSKIN_NODE_ADDRESS` | `str` | _(empty)_ | `host:port` other nodes reach this node's peer listener on; empty takes the host of `HOST_URL` and `peer_port`. |
 | `SEALSKIN_NODE_MAX_SESSIONS` | `int` | `0` | Most sessions this node runs at once; 0 sets no limit. |
 | `SEALSKIN_NODE_GPU_SLOTS` | `int` | `0` | Most GPU sessions this node runs at once; 0 sets no limit. |
+| `SEALSKIN_NODE_GPUS` | `str` | _(empty)_ | Comma-separated GPUs this node offers sessions, by device (`/dev/dri/renderD129`, or on Kubernetes the option's name); empty offers every GPU it finds. |
+| `SEALSKIN_NODE_GPU_PREFER` | `str` | _(empty)_ | Kind of GPU, `nvidia` or `dri3`, that a session asking for any GPU of this node gets while one is free; empty takes the GPU with the fewest sessions of either kind. |
 | `SEALSKIN_PEER_PORT` | `int` | `8444` | Port of the listener other nodes of the cluster reach this one on. |
 | `SEALSKIN_PEER_POLL_SECONDS` | `int` | `10` | How often a node asks every other node for its sessions and load. |
 | `SEALSKIN_JOIN_URL` | `str` | _(empty)_ | `host:port` of the peer listener of a node of the cluster to join; with `join_code`, the node asks to join at start and keeps the cluster's records on that node. |

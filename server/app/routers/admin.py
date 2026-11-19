@@ -109,7 +109,7 @@ template_router = APIRouter(
 async def _gpu_list() -> list[GPUInfo]:
     """Return the GPUs sessions can request now, as API models."""
     await get_provider().refresh_gpus()
-    return [GPUInfo(device=gpu["device"], driver=gpu["driver"]) for gpu in state.available_gpus]
+    return [GPUInfo(device=gpu["device"], driver=gpu["driver"], model=gpu.get("model")) for gpu in state.available_gpus]
 
 
 @status_router.post("/api/admin/status", response_model=AdminStatusResponse)

@@ -2228,6 +2228,8 @@
       "uploadingFile": "फ़ाइल अपलोड हो रही है...",
       "cleanroom": "क्लीनरूम (अस्थायी)",
       "noGpu": "कोई नहीं",
+      "anyGpu": "कोई भी {kind} GPU",
+      "gpuOnNode": "{node} पर {gpu}",
       "saveOptions": "इन लॉन्च विकल्पों को सहेजें",
       "saveOptionsForUrl": "सभी URL के लिए विकल्प सहेजें",
       "saveOptionsForFile": ".{extension} फ़ाइलों के लिए विकल्प सहेजें",

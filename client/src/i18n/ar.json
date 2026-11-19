@@ -2228,6 +2228,8 @@
       "uploadingFile": "جاري تحميل الملف...",
       "cleanroom": "غرفة نظيفة (مؤقتة)",
       "noGpu": "لا يوجد",
+      "anyGpu": "أي GPU من نوع {kind}",
+      "gpuOnNode": "{gpu} على {node}",
       "saveOptions": "حفظ خيارات التشغيل هذه",
       "saveOptionsForUrl": "حفظ الخيارات لجميع عناوين URL",
       "saveOptionsForFile": "حفظ الخيارات لملفات .{extension}",

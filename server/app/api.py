@@ -40,7 +40,7 @@ from . import (
     webclient,
 )
 from .docker_utils import get_and_cache_image_metadata, pull_and_cache_image, read_cpu_model
-from .launch import reconcile_sessions
+from .launch import check_gpu_settings, reconcile_sessions
 from .providers import get_provider
 from .routers import (
     admin,
@@ -364,6 +364,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     config_store.load_app_stores()
     config_store.load_app_templates()
     await provider.detect_gpus()
+    check_gpu_settings()
 
     logger.info("Populating app store cache...")
     await config_store.refresh_store_caches()

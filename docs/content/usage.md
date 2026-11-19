@@ -30,7 +30,7 @@ Selecting an application reveals the launch options it supports:
 
 | Option | Meaning |
 | --- | --- |
-| **GPU** | One of the GPUs the server detected, if your account may use them and the app supports that GPU type. |
+| **GPU** | One of the GPUs the server detected, if your account may use them and the app supports that GPU type. In a [cluster](cluster.md#gpus) it lists every node's GPUs, each with its node, which starts the session there, and **Any NVIDIA GPU** or **Any Intel/AMD GPU** for whichever node has one free. |
 | **VPN** | A [VPN profile](vpn.md) the session's traffic leaves through, when an administrator set one up for you. A profile that publishes several endpoints adds an **endpoint** field to pick the server. |
 | **Storage** | **Auto (per-app persistence)** mounts a home directory named `auto-<app>` that is created on first use. **Cleanroom (Ephemeral)** mounts a fresh directory that is deleted when the session stops. Any home directory you created is listed by name. Apps without home directory support, and accounts without persistent storage, always run in a cleanroom. |
 | **Language** | The locale exported to the container (`LC_ALL`). The default is your browser's language. |

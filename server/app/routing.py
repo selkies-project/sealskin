@@ -23,7 +23,7 @@ from typing import Any
 import httpx
 from fastapi import Depends, HTTPException, Request, Response
 
-from . import audit, cluster, filesync, progress, quota, user_manager
+from . import audit, cluster, filesync, launch, progress, quota, user_manager
 from .fsutil import sanitize_for_filename
 from .security import get_decrypted_request_body, verify_token
 from .settings import settings
@@ -185,9 +185,13 @@ async def place_launch(
     A user with limits holds their launch lease throughout, so two launches
     of theirs, on any nodes, are checked one after the other.
 
-    A forwarded launch asks the other node for any of its GPUs when the user
-    picked one here, since devices are named per node. The request may name
-    a `pool` or a `node` to start on.
+    A launch with a GPU starts on a node with a free GPU of a kind it can use
+    (`_gpu_kinds`). A device the request names belongs to the `node` it names,
+    else to this node; forwarded anywhere else, it becomes `auto:<kind>`, a
+    GPU of the same kind there, since devices are named per node. A node of an
+    earlier version, whose status gives no kinds and which knows no
+    `auto:<kind>`, is asked for `auto` instead. The request may name a `pool`
+    or a `node` to start on.
 
     Raises:
         HTTPException: 403 past a limit, 503 when no node can take the session.
@@ -248,20 +252,60 @@ async def _place(request: Request, body: dict[str, Any], user: dict[str, Any]) -
         if "runtime" not in cluster.roles():
             raise HTTPException(status_code=503, detail="This node runs no sessions.")
         return
+    kinds, device_kind = _gpu_kinds(body, user)
     node_id = cluster.choose_node(
         user,
-        wants_gpu=bool(body.get("selected_gpu")) and bool(user["effective_settings"].get("gpu")),
+        wants_gpu=bool(kinds),
         home_name=_launch_home(body, user),
         pool=body.get("pool") or None,
         node=body.get("node") or None,
+        gpu_kinds=kinds,
     )
     if node_id == cluster.NODE_ID:
         return
     sent = dict(body)
-    if sent.get("selected_gpu"):
+    if device_kind is not None and node_id != body.get("node"):
+        sent["selected_gpu"] = f"auto:{device_kind}" if device_kind else "auto"
+    if str(sent.get("selected_gpu") or "").startswith("auto:") and _of_earlier_version(node_id):
+        # A node of an earlier version refuses `auto:<kind>` for a device it does not have.
         sent["selected_gpu"] = "auto"
     progress.forwarded(node_id, cluster.NODES[node_id].get("name", node_id))
     await _send(request, node_id, user, sent)
+
+
+def _of_earlier_version(node_id: str) -> bool:
+    """Whether a node lists GPUs and gives the kind of none, as a node that knows no `auto:<kind>` does.
+
+    A node without GPUs tells nothing either way, and keeps the kind asked
+    for, so that it refuses the launch instead of starting it with no GPU.
+    """
+    gpus = (cluster.status_of(node_id) or {}).get("gpus") or []
+    return bool(gpus) and not any(gpu.get("type") for gpu in gpus)
+
+
+def _gpu_kinds(body: dict[str, Any], user: dict[str, Any]) -> tuple[set[str], str | None]:
+    """Return the kinds of GPU a launch can use, and the kind of the device it names.
+
+    The kinds are none when the launch asks for no GPU, the user may not
+    have one, or the application supports none of those asked for: `auto`
+    asks for any kind the application supports, `auto:<kind>` for that one,
+    and a device for the kind the node it belongs to reports for it. The
+    second value is `None` unless the launch names a device, and empty when
+    that device's kind is not known here.
+    """
+    selected = str(body.get("selected_gpu") or "")
+    if not selected or not user["effective_settings"].get("gpu"):
+        return set(), None
+    app = state.installed_apps.get(str(body.get("application_id") or ""))
+    supported = {kind for kind in cluster.GPU_KINDS if not app or launch.supports_gpu(app, kind)}
+    if selected == "auto":
+        return supported, None
+    if selected.startswith("auto:"):
+        return {selected.removeprefix("auto:")} & supported, None
+    holder = str(body.get("node") or cluster.NODE_ID)
+    gpus = (cluster.status_of(holder) or {}).get("gpus") or []
+    kind = next((str(g.get("type") or "") for g in gpus if g.get("device") == selected), "")
+    return ({kind} & supported if kind else supported), kind
 
 
 async def storage_room(user: dict[str, Any] = Depends(verify_token)) -> None:

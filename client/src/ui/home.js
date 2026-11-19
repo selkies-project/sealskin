@@ -50,6 +50,7 @@ import { announce, escapeHtml, formatLogoSrc, hydrateLogos, timeAgo, currentLoca
 import { noticeDialog } from '../lib/modal.js';
 import { createLaunchView } from '../lib/launch-view.js';
 import { autoHomeName, bestHome, homeAllowed, nodesFor } from '../lib/homes.js';
+import { gpuChoices, gpuRequest, savedGpu } from '../lib/gpus.js';
 import { readLayout } from '../lib/board-model.js';
 import { createBoard } from './board.js';
 import { attachAdmin } from './board-admin.js';
@@ -228,10 +229,10 @@ const nodeName = (id) => {
 const hasStorage = (app) => Boolean(status.settings.persistent_storage && app.home_directories);
 const namedHomes = () => homeDirs.filter((dir) => dir !== '_sealskin_shared_files' && !dir.startsWith('auto-'));
 
-/** The GPUs an application can use, none when the user may not. */
-function gpusFor(app) {
+/** The GPU choices of a launch of `app` where `where` sends it, none when the user may not have one. */
+function gpusFor(app, where = '') {
   if (!status.settings.gpu) return [];
-  return (status.gpus || []).filter((gpu) => (gpu.driver === 'nvidia' ? app.nvidia_support : app.dri3_support));
+  return gpuChoices(t, app, status.gpus || [], cluster, nodesFor(cluster, where));
 }
 
 function whereChoices() {
@@ -245,12 +246,14 @@ function optionsFor(app) {
   const homes = app.is_meta_app ? [] : namedHomes();
   const homeDir = ['auto', 'cleanroom', ...homes].includes(saved.homeDir) ? saved.homeDir : 'auto';
   const vpn = (status.vpns || []).find((v) => v.id === saved.vpn) || null;
+  const where = whereChoices().includes(saved.where) ? saved.where : '';
+  const gpu = savedGpu(saved.gpu, cluster);
   return {
     homeDir: hasStorage(app) ? homeDir : 'cleanroom',
-    gpu: gpusFor(app).some((gpu) => gpu.device === saved.gpu) ? saved.gpu : null,
+    gpu: gpusFor(app, where).some(([value]) => value === gpu) ? gpu : null,
     vpn: vpn ? vpn.id : null,
     vpnEndpoint: vpn && vpn.endpoints.some((e) => e.id === saved.vpnEndpoint) ? saved.vpnEndpoint : null,
-    where: whereChoices().includes(saved.where) ? saved.where : '',
+    where,
     language: Object.values(supportedLangs).includes(saved.language) ? saved.language : defaultLanguage(),
     waylandMode: saved.waylandMode !== false,
     room: Boolean(saved.room),
@@ -601,12 +604,7 @@ function openDrawer(app, anchor = null) {
   fillHomes(app, options.homeDir);
   $('homedir-form-group').hidden = !hasStorage(app);
 
-  const gpus = gpusFor(app);
-  fillSelect(gpuSelect, [
-    ['', t('popup.launchView.noGpu')],
-    ...gpus.map((gpu) => [gpu.device, `${gpu.device.split('/').pop()} (${gpu.driver})`]),
-  ], options.gpu || '');
-  $('gpu-form-group').hidden = gpus.length === 0;
+  fillGpus(app, options.gpu || '');
 
   const vpns = status.vpns || [];
   fillSelect(vpnSelect, [['', t('web.home.noVpn')], ...vpns.map((vpn) => [vpn.id, vpn.name])], options.vpn || '');
@@ -851,6 +849,13 @@ function bindCustomize() {
   $('customize-reset').addEventListener('click', () => setBackground({ ...DEFAULT_BACKGROUND }));
 }
 
+/** Offer the GPUs a launch of `app` can use where the Where field sends it, keeping `chosen` where it still can. */
+function fillGpus(app, chosen) {
+  const gpus = gpusFor(app, whereSelect.value);
+  fillSelect(gpuSelect, [['', t('popup.launchView.noGpu')], ...gpus], gpus.some(([value]) => value === chosen) ? chosen : '');
+  $('gpu-form-group').hidden = gpus.length === 0;
+}
+
 /** Offer the endpoints the chosen VPN publishes; the field shows when there is a choice to make. */
 function fillVpnEndpoints(chosen = null) {
   const vpn = (status.vpns || []).find((v) => v.id === vpnSelect.value);
@@ -940,7 +945,6 @@ async function launch(app, options) {
       home_name: homeName,
       language: options.language,
       timezone: browserTimezone(),
-      selected_gpu: options.gpu,
       launch_in_room_mode: options.room,
       wayland_mode: options.waylandMode,
       vpn: options.vpn,
@@ -949,6 +953,8 @@ async function launch(app, options) {
     // Left out, the server picks where the session starts.
     const [whereKind, whereName] = options.where.split(/:(.*)/);
     if (whereKind) payload[whereKind] = whereName;
+    // A GPU of a cluster node names that node too.
+    Object.assign(payload, gpuRequest(options.gpu));
 
     let endpoint = '/api/launch/simple';
     if (opening && opening.action === 'url') {
@@ -1181,7 +1187,11 @@ function takeFile(file) {
 
 function bindEvents() {
   // Another destination changes which homes can start there; the chosen one is kept where it still can.
-  whereSelect.addEventListener('change', () => { if (drawerApp) fillHomes(drawerApp, homeDirSelect.value); });
+  whereSelect.addEventListener('change', () => {
+    if (!drawerApp) return;
+    fillHomes(drawerApp, homeDirSelect.value);
+    fillGpus(drawerApp, gpuSelect.value);
+  });
   vpnSelect.addEventListener('change', () => fillVpnEndpoints());
   heroInput.addEventListener('input', () => {
     const typed = typedContext(false);
