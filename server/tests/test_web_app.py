@@ -16,9 +16,10 @@ pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def http(tmp_path, monkeypatch):
     dist = tmp_path / "ui"
     dist.mkdir()
-    for name in ("receive.html", "popup.html", "sw.js", "app.ABC123.js"):
+    for name in ("receive.html", "popup.html", "sw.js", "app.ABCD2345.js", "i18n/en.0A1B2C3D.json", "icons/icon128.png", "vendor/fa.0A1B2C3D/css/all.css"):
+        (dist / name).parent.mkdir(parents=True, exist_ok=True)
         (dist / name).write_text(name)
-    (dist / "index.html").write_text('<link rel="manifest" href="manifest.webmanifest"><script src="app.ABC123.js"></script>')
+    (dist / "index.html").write_text('<link rel="manifest" href="manifest.webmanifest"><script src="app.ABCD2345.js"></script>')
     monkeypatch.setattr(settings, "ui_path", str(dist))
     app = FastAPI()
     app.include_router(ui.router)
@@ -28,7 +29,7 @@ def http(tmp_path, monkeypatch):
 
 def test_the_web_app_lives_at_the_root_and_its_old_address_leads_there(http):
     page = http.get("/")
-    assert page.status_code == 200 and 'src="/ui/app.ABC123.js"' in page.text and 'href="/ui/manifest.webmanifest"' in page.text
+    assert page.status_code == 200 and 'src="/ui/app.ABCD2345.js"' in page.text and 'href="/ui/manifest.webmanifest"' in page.text
     assert page.headers["Cross-Origin-Opener-Policy"] == "same-origin-allow-popups"
     assert page.headers["Content-Security-Policy"].startswith("frame-ancestors 'none'; script-src 'self'")
     moved = http.get("/ui/?q=terms", follow_redirects=False)
@@ -53,7 +54,10 @@ def test_only_the_app_page_is_isolated(http):
     assert "Cross-Origin-Opener-Policy" not in receive.headers
     assert receive.headers["Content-Security-Policy"].startswith("frame-ancestors 'none'; script-src 'self'")
     assert http.get("/ui/sw.js").headers["Cache-Control"] == "no-cache"
-    assert "immutable" in http.get("/ui/app.ABC123.js").headers["Cache-Control"]
+    # Only a name that carries the build's content hash outlives a new build in the browser.
+    for hashed in ("app.ABCD2345.js", "i18n/en.0A1B2C3D.json", "vendor/fa.0A1B2C3D/css/all.css"):
+        assert "immutable" in http.get(f"/ui/{hashed}").headers["Cache-Control"]
+    assert http.get("/ui/icons/icon128.png").headers["Cache-Control"] == "no-cache"
 
 
 def test_every_page_runs_its_own_scripts_alone_and_a_widget_frame_is_sandboxed(tmp_path, monkeypatch):

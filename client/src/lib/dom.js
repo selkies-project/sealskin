@@ -71,6 +71,8 @@ export const FALLBACK_LOGO = (() => {
   }
 })();
 
+const iconFlights = new Map();
+
 /**
  * Resolve an app logo reference to an `img` src. Every picture comes from the
  * server: a store's or a remote's through `/api/logos/`, the brand's through
@@ -84,14 +86,24 @@ export async function formatLogoSrc(logoData) {
   if (!logoData) return FALLBACK_LOGO;
   if (logoData.startsWith('/api/logos/') || logoData.startsWith('/api/branding/')) return apiUrl(logoData);
   if (logoData.startsWith('/api/app_icon/')) {
-    try {
-      const response = await secureFetch(logoData, { method: 'GET' });
-      if (response && response.icon_data_b64) {
-        return `data:image/png;base64,${response.icon_data_b64}`;
-      }
-    } catch (error) {
-      console.error(`Failed to fetch secure icon for ${logoData}:`, error);
+    // One request per icon in flight; the browser queues copies of the same request one behind another.
+    if (!iconFlights.has(logoData)) {
+      iconFlights.set(logoData, fetchIcon(logoData).finally(() => iconFlights.delete(logoData)));
     }
+    return iconFlights.get(logoData);
+  }
+  return FALLBACK_LOGO;
+}
+
+/** Fetch an uploaded icon as a data URL, the fallback standing in for one the server does not answer with. */
+async function fetchIcon(logoData) {
+  try {
+    const response = await secureFetch(logoData, { method: 'GET' });
+    if (response && response.icon_data_b64) {
+      return `data:image/png;base64,${response.icon_data_b64}`;
+    }
+  } catch (error) {
+    console.error(`Failed to fetch secure icon for ${logoData}:`, error);
   }
   return FALLBACK_LOGO;
 }

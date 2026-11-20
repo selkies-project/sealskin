@@ -137,6 +137,13 @@ const shellError = (error) => ({
 // --- Data ---------------------------------------------------------------------
 
 async function loadAll() {
+  // Started beside the status when the settings the shell saved say they will be wanted; the status has the last word.
+  const known = info.config || {};
+  const get = (url) => secureFetch(url, { method: 'GET' }).catch(() => null);
+  const early = {
+    cluster: known.clustered ? get('/api/cluster') : null,
+    homes: known.userSettings && known.userSettings.persistent_storage ? get('/api/homedirs') : null,
+  };
   const [statusData, appsData, sessionsData] = await Promise.all([
     secureFetch('/api/admin/status', { method: 'POST', body: '{}' }),
     secureFetch('/api/applications', { method: 'POST', body: '{}' }),
@@ -146,8 +153,8 @@ async function loadAll() {
   apps = appsData || [];
   sessions = sessionsData || [];
   const [mine, homes] = await Promise.all([
-    status.clustered ? secureFetch('/api/cluster', { method: 'GET' }).catch(() => null) : null,
-    status.settings.persistent_storage ? secureFetch('/api/homedirs', { method: 'GET' }).catch(() => null) : null,
+    status.clustered ? early.cluster || get('/api/cluster') : null,
+    status.settings.persistent_storage ? early.homes || get('/api/homedirs') : null,
   ]);
   cluster = mine && mine.clustered ? mine : null;
   homeDirs = (homes && homes.home_dirs) || [];
@@ -1342,9 +1349,20 @@ function bindEvents() {
 
 async function init() {
   info = await announce();
+  const signedIn = Boolean(info.config && info.config.username);
+  // The page's data loads while its translations do; a failure is held until there are words to show it in.
+  const loading = signedIn
+    ? Promise.all([
+      bridge.getContext(),
+      bridge.storageGet(['simple_launch_profile', LAYOUT_KEY]),
+      loadAll(),
+      secureFetch('/api/branding', { method: 'GET' }).catch(() => null),
+      secureFetch('/api/dashboard', { method: 'GET' }).catch(() => null),
+    ]).then((value) => ({ value }), (error) => ({ error }))
+    : null;
   t = await loadTranslator(info.locale);
   applyTranslations(document.body, t);
-  if (!info.config || !info.config.username) {
+  if (!signedIn) {
     bridge.openPage('connect');
     return;
   }
@@ -1383,13 +1401,9 @@ async function init() {
   bindEvents();
 
   try {
-    const [pending, stored, , brandData, dashboard] = await Promise.all([
-      bridge.getContext(),
-      bridge.storageGet(['simple_launch_profile', LAYOUT_KEY]),
-      loadAll(),
-      secureFetch('/api/branding', { method: 'GET' }).catch(() => null),
-      secureFetch('/api/dashboard', { method: 'GET' }).catch(() => null),
-    ]);
+    const { value, error } = await loading;
+    if (error) throw error;
+    const [pending, stored, , brandData, dashboard] = value;
     brandInfo = brandData;
     // The page's own gradients start from the brand's accent; a forced wallpaper takes the customize button away.
     if (brandInfo && brandInfo.accent) DEFAULT_BACKGROUND.color = brandInfo.accent;

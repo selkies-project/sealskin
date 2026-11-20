@@ -38,7 +38,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 BRIDGE_VERSION = 1
-NO_CACHE_SUFFIXES = (".html", ".json", "/sw.js")
+#: A name the client build gives a file or a vendored package from its content, in esbuild's base32 or the
+#: build's own hex: `app.ABCD2345.js`, `en.0A1B2C3D.json`, `fontawesome.0A1B2C3D/`.
+CONTENT_HASHED = re.compile(r"\.(?:[A-Z2-7]{8}|[0-9A-F]{8})(?:\.[0-9a-z]+$|/)")
 #: The web app runs only its own scripts, is never framed, and sets its own `<base>` alone.
 WEB_APP_CSP = "frame-ancestors 'none'; script-src 'self'; object-src 'none'; base-uri 'self'"
 #: The pages the web app and the shells frame run only their own scripts too.
@@ -106,9 +108,11 @@ def built_page(name: str, base: str = "/ui/", brand: str = "") -> str:
 class UiStaticFiles(StaticFiles):
     """Static files with cache headers suited to content-hashed builds.
 
-    HTML entry points, JSON manifests, and the service worker are served with
-    `no-cache` so a new build is picked up immediately; every other asset
-    carries a content hash in its name and is cached for a year. A page is
+    A file whose path carries the build's content hash, in its own name or in
+    its vendored package's directory, is cached for a year: a new build that
+    changes it changes the name, and the pages that name it are never cached.
+    Everything else, pages, the service worker, the manifest, and the icons,
+    is served with `no-cache`, so the browser asks again on every load. A page is
     read and served wearing the brand (`branding.brand_page`). The web app's
     page holds the unlocked private key, so it runs only its own scripts, is
     never framed, and gives a page that opens it, such as a session's, no
@@ -118,8 +122,9 @@ class UiStaticFiles(StaticFiles):
     """
 
     async def get_response(self, path: str, scope: Any) -> Response:
-        """Note the brand the request wears before the file is answered with."""
+        """Note the brand the request wears and the path asked for before the file is answered with."""
         scope["sealskin.brand"] = await brand_of(Request(scope))
+        scope["sealskin.asset"] = path.replace(os.sep, "/")
         return await super().get_response(path, scope)
 
     def file_response(self, full_path: Any, stat_result: os.stat_result, scope: Any, status_code: int = 200) -> Response:
@@ -129,10 +134,10 @@ class UiStaticFiles(StaticFiles):
                 response: Response = HTMLResponse(branding.brand_page(handle.read(), scope.get("sealskin.brand", "")), status_code=status_code)
         else:
             response = super().file_response(full_path, stat_result, scope, status_code)
-        if str(full_path).endswith(NO_CACHE_SUFFIXES):
-            response.headers["Cache-Control"] = "no-cache"
-        else:
+        if CONTENT_HASHED.search(scope.get("sealskin.asset", "")):
             response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        else:
+            response.headers["Cache-Control"] = "no-cache"
         name = os.path.basename(str(full_path))
         if name in ("index.html", "receive.html", "launching.html"):
             response.headers["Content-Security-Policy"] = WEB_APP_CSP

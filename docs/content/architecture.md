@@ -193,9 +193,10 @@ needs no store at all.
 
 Updating the server image therefore updates the UI everywhere; a store
 release is needed only when the manifest, the native plugins, or the bridge
-protocol change. HTML entry points are served with `Cache-Control: no-cache`
-and every other asset has a content hash in its name and is cached for a
-year, so browsers pick up a new UI on the next load.
+protocol change. A file whose name, or whose vendored package's directory,
+carries the build's content hash is cached for a year; everything else, the
+pages that name those files included, is served with `Cache-Control: no-cache`,
+so browsers pick up a new UI on the next load.
 
 ### Host states
 

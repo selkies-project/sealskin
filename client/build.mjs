@@ -26,6 +26,8 @@ const REPO_DIR = path.resolve(CLIENT_DIR, '..');
 const SRC = path.join(CLIENT_DIR, 'src');
 const DIST = path.join(CLIENT_DIR, 'dist');
 const VENDOR = path.join(CLIENT_DIR, 'vendor');
+// The parts of a vendored package a page can reach: its stylesheets and the fonts they name.
+const VENDOR_PARTS = ['css', 'webfonts'];
 const ICONS_SRC = path.join(REPO_DIR, 'browser_extension', 'icons');
 const MANIFEST_DIR = path.join(REPO_DIR, 'browser_extension');
 const MOBILE_NODE_MODULES = path.join(REPO_DIR, 'mobile', 'node_modules');
@@ -67,6 +69,21 @@ function rel(p) { return path.relative(REPO_DIR, p); }
 
 function hashOf(content) {
   return createHash('sha256').update(content).digest('hex').slice(0, 8).toUpperCase();
+}
+
+/** Hash of every file under the named subdirectories of `root`, names included, so a package's directory can carry it. */
+function hashOfDir(root, parts) {
+  const hash = createHash('sha256');
+  for (const part of parts) {
+    const base = path.join(root, part);
+    if (!fs.existsSync(base)) continue;
+    for (const file of fs.readdirSync(base, { recursive: true }).map(String).sort()) {
+      const abs = path.join(base, file);
+      if (!fs.statSync(abs).isFile()) continue;
+      hash.update(`${part}/${file.split(path.sep).join('/')}\0`).update(fs.readFileSync(abs));
+    }
+  }
+  return hash.digest('hex').slice(0, 8).toUpperCase();
 }
 
 function isLocalRef(ref) {
@@ -323,6 +340,11 @@ async function buildTarget(name, { pages, outdir, outbase, hashed, minify, shell
   // Partition references into: esbuild entries by format, vendor copies.
   const byFormat = { esm: new Set(), iife: new Set(), css: new Set() };
   const vendorRefs = new Map(); // abs -> out abs
+  const vendorDirs = new Map(); // package -> out directory name
+  const vendorDir = (pkg) => {
+    if (!vendorDirs.has(pkg)) vendorDirs.set(pkg, hashed ? `${pkg}.${hashOfDir(path.join(VENDOR, pkg), VENDOR_PARTS)}` : pkg);
+    return vendorDirs.get(pkg);
+  };
   for (const d of discovered) {
     for (const r of d.refs) {
       const vendorIdx = r.ref.replace(/\\/g, '/').indexOf('vendor/');
@@ -331,7 +353,8 @@ async function buildTarget(name, { pages, outdir, outbase, hashed, minify, shell
         const srcAbs = path.join(VENDOR, inside);
         if (!fs.existsSync(srcAbs)) { warn(`${rel(d.page)} references missing vendored file ${rel(srcAbs)}`); strictFailures++; continue; }
         r.abs = srcAbs;
-        vendorRefs.set(srcAbs, path.join(outdir, 'vendor', inside));
+        const [pkg, ...rest] = inside.split('/');
+        vendorRefs.set(srcAbs, path.join(outdir, 'vendor', vendorDir(pkg), ...rest));
         continue;
       }
       if (!fs.existsSync(r.abs)) { warn(`${rel(d.page)} references missing ${rel(r.abs)}, skipping`); strictFailures++; continue; }
@@ -355,10 +378,8 @@ async function buildTarget(name, { pages, outdir, outbase, hashed, minify, shell
   }
 
   // Vendor: copy the whole vendored package directories that were referenced.
-  const vendorPkgs = new Set([...vendorRefs.keys()].map((abs) => path.relative(VENDOR, abs).split(path.sep)[0]));
-  for (const pkg of vendorPkgs) {
-    copyDir(path.join(VENDOR, pkg, 'css'), path.join(outdir, 'vendor', pkg, 'css'));
-    copyDir(path.join(VENDOR, pkg, 'webfonts'), path.join(outdir, 'vendor', pkg, 'webfonts'));
+  for (const [pkg, dir] of vendorDirs) {
+    for (const part of VENDOR_PARTS) copyDir(path.join(VENDOR, pkg, part), path.join(outdir, 'vendor', dir, part));
   }
   for (const [abs, out] of vendorRefs) outMap.set(abs, out);
 

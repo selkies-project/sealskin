@@ -479,6 +479,7 @@ async function remember(status) {
       username: status.username,
       signIn: status.via,
       userSettings: { ...status.settings, is_admin: status.is_admin },
+      clustered: Boolean(status.clustered),
     });
   }
   await callBackground(pageTransport, 'saveConfig', { config });
@@ -851,13 +852,15 @@ async function start() {
       if (hostApi) hostApi.openPage('home');
     });
   }
-  t = await loadTranslator(navigator.language).catch(() => t);
-  bindShell();
+  // The translations load while the server is asked who is signed in, each a round trip of its own.
+  const translated = loadTranslator(navigator.language).catch(() => t);
   await takeLaunchContext();
   takeWakeRequest();
-  await takeSignIn();
+  const asked = takeSignIn().then(whoAmI).catch(() => null);
+  t = await translated;
+  bindShell();
   // The host frames a page for a stored user and asks `connect` otherwise, as `#root` has it do.
-  const status = await whoAmI().catch(() => null);
+  const status = await asked;
   if (status && status.held) {
     await heldPanel(status);
     return;

@@ -99,6 +99,7 @@ export function createHost(options) {
           username: config.username,
           searchEngineUrl: config.searchEngineUrl,
           userSettings: config.userSettings,
+          clustered: config.clustered,
         } : null,
       };
       if (!helloSeen) {
