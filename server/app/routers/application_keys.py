@@ -15,7 +15,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 
-from .. import application_keys, cluster, routing, user_manager
+from .. import application_keys, cluster, routing, sso, user_manager
 from ..models import (
     ApplicationKey,
     ApplicationKeyCreated,
@@ -69,6 +69,7 @@ async def revoke_key(key_id: str, user: dict[str, Any] = Depends(web_user)) -> R
     """Take one of the caller's keys back."""
     if not await asyncio.to_thread(application_keys.revoke, key_id, user["username"]):
         raise HTTPException(status_code=404, detail="No such key.")
+    await sso.end_sign_ins_with_key(key_id)
     return Response(status_code=204)
 
 
@@ -97,6 +98,7 @@ async def revoke_user_key(username: str, key_id: str, admin: dict[str, Any] = De
     """Take one of a user's keys back."""
     if not await asyncio.to_thread(application_keys.revoke, key_id, username, admin["username"]):
         raise HTTPException(status_code=404, detail="No such key.")
+    await sso.end_sign_ins_with_key(key_id)
     return Response(status_code=204)
 
 
@@ -106,4 +108,7 @@ async def revoke_user_keys(username: str) -> Response:
     if not user_manager.get_user(username):
         raise HTTPException(status_code=404, detail=f"User '{username}' not found.")
     await asyncio.to_thread(application_keys.revoke_all, username)
+    # The built-in administrator's web sign-ins are made with their keys alone.
+    if username == user_manager.ADMIN:
+        await sso.end_sign_ins_of(username)
     return Response(status_code=204)

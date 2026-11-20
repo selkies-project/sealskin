@@ -35,9 +35,33 @@ def _base(request: Request) -> str:
     return settings.public_url.rstrip("/") or str(request.base_url).rstrip("/")
 
 
+def set_session_cookie(response: Response, token: str, via: str) -> None:
+    """Hand the browser the cookie of a sign-in; a root sign-in's outlives the browser, the others' end with it."""
+    max_age = sso.ROOT_COOKIE_SECONDS if via == "root" else None
+    response.set_cookie(sso.SESSION_COOKIE, token, max_age=max_age, path="/", httponly=True, secure=True, samesite="lax")
+
+
+async def renew_root_cookie(request: Request, response: Response) -> None:
+    """Hand a page's browser the cookie of its root sign-in again, so a browser that keeps coming back never loses it.
+
+    The page is then kept out of shared caches, since it carries the cookie.
+    """
+    token = request.cookies.get(sso.SESSION_COOKIE)
+    if not token or not cluster.via_proxy(request) or not same_origin(request):
+        return
+    try:
+        signed_in = await sso.current(sso.session_id(token))
+    except OSError as exc:
+        logger.warning("Could not renew a root sign-in's cookie: %s", exc)
+        return
+    if signed_in and signed_in["via"] == "root":
+        set_session_cookie(response, token, "root")
+        response.headers["Cache-Control"] = "private, no-store"
+
+
 def _start_session(response: Response, started: dict[str, Any]) -> dict[str, Any]:
     """Hand the browser the cookie of a started sign-in."""
-    response.set_cookie(sso.SESSION_COOKIE, started["token"], path="/", httponly=True, secure=True, samesite="lax")
+    set_session_cookie(response, started["token"], started["via"])
     return started
 
 

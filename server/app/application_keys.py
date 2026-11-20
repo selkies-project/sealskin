@@ -498,5 +498,32 @@ def web_sign_in(key: str, address: str = "") -> dict[str, Any]:
         "groups": [],
         "subject": "root",
         "via": "root",
-        "expires": now + settings.web_session_seconds,
+        "expires": None,
+        "key": record["id"],
+        "key_hash": record["hash"],
     }
+
+
+def signs_in_web(key_id: str, key_hash: str) -> bool:
+    """Whether the key a root sign-in was made with is still the administrator's, unchanged and unexpired.
+
+    Args:
+        key_id: The key's id, as `web_sign_in` returned it.
+        key_hash: The key's hash then, which a `SEALSKIN_ROOT_KEY` replaced under the same id no longer matches.
+
+    The record is read apart from the keys `load` keeps, which other threads change.
+
+    Raises:
+        store.StoreUnavailable: When the shared record cannot be read.
+        OSError: When the shared record cannot be read.
+        yaml.YAMLError: When the shared record is not YAML.
+    """
+    keys = (persistence.read_yaml(_path(), {}) or {}).get("keys") or {}
+    record = keys.get(key_id) if key_id else None
+    if not isinstance(record, dict):
+        return False
+    if record.get("user") != user_manager.ADMIN or not key_hash:
+        return False
+    if not secrets.compare_digest(key_hash, str(record.get("hash") or "")):
+        return False
+    return not (record.get("expires") and float(record["expires"]) <= time.time())

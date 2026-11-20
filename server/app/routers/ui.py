@@ -32,6 +32,7 @@ from ..models import (
 from ..settings import settings
 from ..state import state
 from ..version import __version__
+from .sso import renew_root_cookie
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -281,8 +282,12 @@ async def get_ui_version() -> dict[str, Any]:
 
 @router.get("/", response_class=HTMLResponse, include_in_schema=False)
 async def web_app(request: Request) -> HTMLResponse:
-    """Serve the web app's page, with the isolation its built copy under `/ui/` carries."""
-    return HTMLResponse(
+    """Serve the web app's page, with the isolation its built copy under `/ui/` carries.
+
+    A root sign-in's cookie is handed out again, so a browser that keeps
+    opening the web app never reaches the end browsers put on a cookie.
+    """
+    response = HTMLResponse(
         built_page("index.html", brand=await brand_of(request)),
         headers={
             "Cache-Control": "no-cache",
@@ -290,6 +295,8 @@ async def web_app(request: Request) -> HTMLResponse:
             "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
         },
     )
+    await renew_root_cookie(request, response)
+    return response
 
 
 @router.get("/ui/", include_in_schema=False)

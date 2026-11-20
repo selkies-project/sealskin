@@ -424,11 +424,11 @@ class ApplicationKeyCreated(BaseModel):
 
 
 class SignInRegistration(BaseModel):
-    """A started web sign-in."""
+    """A started web sign-in; `expires` is empty for a root sign-in, which has no end of its own."""
 
     username: str
     via: str
-    expires: float
+    expires: float | None = None
 
 
 class EncryptedPayload(BaseModel):

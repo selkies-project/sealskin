@@ -777,7 +777,7 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "name": "web_session_seconds",
         "type": "int",
         "default": 43200,
-        "help": "Longest a web sign-in with the root key, or a reverse proxy's sign-in, lasts unused.",
+        "help": "Longest a reverse proxy's sign-in lasts unused; a sign-in with the root key lasts until it is signed out.",
     },
     {
         "name": "root_sign_in",

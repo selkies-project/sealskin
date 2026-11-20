@@ -27,6 +27,7 @@ from ..security import verify_token
 from ..settings import settings
 from ..state import state
 from .applications import user_can_access
+from .sso import renew_root_cookie
 from .ui import WEB_APP_CSP, brand_of, built_page
 
 logger = logging.getLogger(__name__)
@@ -117,12 +118,17 @@ async def app_address_slash(app_id: str, request: Request) -> RedirectResponse:
 
 @router.get("/app/{app_id}/", response_class=HTMLResponse)
 async def app_address(app_id: str, request: Request) -> HTMLResponse:
-    """Serve the page that opens the application; it tells the visitor itself when the application is not theirs."""
+    """Serve the page that opens the application; it tells the visitor itself when the application is not theirs.
+
+    An installed application may be all a root sign-in opens, so its cookie is handed out again here too.
+    """
     _app(app_id)
-    return HTMLResponse(
+    response = HTMLResponse(
         built_page("open.html", brand=await brand_of(request)),
         headers={"Cache-Control": "no-cache", "Content-Security-Policy": WEB_APP_CSP},
     )
+    await renew_root_cookie(request, response)
+    return response
 
 
 @router.get("/app/{app_id}/manifest.json")

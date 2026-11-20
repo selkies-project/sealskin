@@ -107,6 +107,44 @@ def test_the_first_start_writes_root_a_key_the_web_takes_and_the_store_keeps_has
     assert _as_app(http, key).status_code == 200
 
 
+def test_a_root_sign_in_lasts_until_its_key_goes_or_the_node_turns_root_sign_in_off(http, monkeypatch, tmp_path):
+    key = open(settings.root_key_path, encoding="utf-8").read().strip()
+    (tmp_path / "ui").mkdir()
+    (tmp_path / "ui" / "index.html").write_text("<html></html>")
+    monkeypatch.setattr(settings, "ui_path", str(tmp_path / "ui"))
+
+    def sign_in():
+        signed_in = http.post("/api/auth/key", json={"key": key}, headers=WEB)
+        assert signed_in.status_code == 200 and signed_in.json()["expires"] is None
+        assert f"Max-Age={sso.ROOT_COOKIE_SECONDS}" in signed_in.headers["set-cookie"]
+        cookie = {"Cookie": signed_in.headers["set-cookie"].split(";", 1)[0]}
+        return cookie, sso.session_id(cookie["Cookie"].split("=", 1)[1])
+
+    def status(cookie):
+        return http.post("/api/admin/status", json={}, headers={**WEB, **cookie}).status_code
+
+    cookie, kid = sign_in()
+    assert sso._KEYS[kid]["expires"] is None
+    # Long unused, the sign-in still stands once the shared record says its key does.
+    sso._KEYS[kid]["checked"] = time.time() - 30 * 86400
+    assert status(cookie) == 200
+    page = http.get("/", headers={**WEB, **cookie})
+    assert page.status_code == 200 and f"Max-Age={sso.ROOT_COOKIE_SECONDS}" in page.headers.get("set-cookie", "")
+    monkeypatch.setattr(settings, "root_sign_in", False)
+    assert status(cookie) == 401
+    monkeypatch.setattr(settings, "root_sign_in", True)
+    cross_site = http.get("/", headers={**WEB, **cookie, "Sec-Fetch-Site": "cross-site"})
+    assert cross_site.status_code == 200 and "set-cookie" not in cross_site.headers
+    # Revoked through the dashboard, the key ends its sign-ins on this node at once.
+    cookie, kid = sign_in()
+    other, _ = sign_in()
+    assert http.delete(f"/api/keys/{application_keys.parse(key)[0]}", headers={**WEB, **other}).status_code == 204
+    assert kid not in sso._KEYS and status(cookie) == 401
+    # A root sign-in unused as long as a browser keeps its cookie is dropped.
+    stale = {"via": "root", "expires": None, "checked": time.time() - sso.ROOT_COOKIE_SECONDS - 1}
+    assert sso._lapsed(stale, time.time())
+
+
 def test_wrong_keys_are_counted_per_address_and_the_environment_key_is_matched_whole(http, monkeypatch):
     for _ in range(5):
         refused = http.post("/api/auth/key", json={"key": "ssk_nope_nothing"}, headers={**WEB, "X-SealSkin-Client": "10.0.0.9"})

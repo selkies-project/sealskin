@@ -72,7 +72,10 @@ as from a secret manager; it is kept as the key of `admin` named
 `environment`, replaced there when the value changes and dropped when the
 variable goes. Five wrong keys from one address within a minute close the
 form to that address until the oldest ages out. A sign-in with the root key
-ends after `SEALSKIN_WEB_SESSION_SECONDS` unused. Signed in, `admin` can make
+has no time limit, so a server with one administrator asks for it once per
+browser: it lasts until it is signed out, the key it was made with is revoked,
+replaced, or expires, or the node's root sign-in is switched off, and the
+browser keeps its cookie across restarts. Signed in, `admin` can make
 further keys under **Application Keys** in Settings like any user, and those
 sign in both the web app and the companion apps.
 

@@ -30,9 +30,12 @@ the provider named, and when it ends. `security.verify_token` asks
   since administrators come from `sso_admin_group` alone.
 * The built-in administrator `admin` signs in with one of their application keys
   (`app.application_keys.web_sign_in`), which starts a sign-in here like a
-  provider's; it ends after `web_session_seconds` unused. A user a reverse
-  proxy names has no sign-in here: the proxy's header is read on each request
-  (`app.proxy_auth`).
+  provider's with no end of its own: it lasts until it is signed out, the key
+  it was made with is revoked, replaced, or expires, the node's
+  `root_sign_in` is off, or it goes unused as long as a browser keeps its
+  cookie, so a server with one administrator asks for the key once per
+  browser. A user a reverse proxy names has no sign-in here: the
+  proxy's header is read on each request (`app.proxy_auth`).
 * Each sign-in through a provider is stamped on the user's record
   (`user_manager.note_web_sign_in`), and a logout the provider announces ends
   the stamp, which is what the application keys' dormancy rules read.
@@ -60,6 +63,7 @@ from xml.sax.saxutils import escape, quoteattr
 
 import httpx
 import jwt
+import yaml
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature as CryptoInvalidSignature
 from cryptography.hazmat.primitives import hashes
@@ -68,7 +72,7 @@ from lxml import etree
 from signxml import SignatureConfiguration, XMLVerifier
 from signxml.exceptions import SignXMLException
 
-from . import audit, persistence, user_manager
+from . import application_keys, audit, persistence, store, user_manager
 from .settings import settings
 
 logger = logging.getLogger(__name__)
@@ -82,6 +86,8 @@ MAX_PENDING = 10000
 COOKIE = "sealskin_sso"
 #: Cookie holding a web sign-in; the `__Host-` prefix keeps a session's origin from setting it.
 SESSION_COOKIE = "__Host-sealskin"
+#: How long a browser keeps the cookie of a root sign-in, the most browsers allow; the web app's page hands it out again.
+ROOT_COOKIE_SECONDS = 400 * 86400
 BACKCHANNEL_LOGOUT_EVENT = "http://schemas.openid.net/event/backchannel-logout"
 ASYMMETRIC_ALGORITHMS = {"RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512", "EdDSA"}
 
@@ -150,7 +156,7 @@ def load() -> None:
     _KEYS.clear()
     _KEYS.update(data.get("keys") or {})
     now = time.time()
-    for kid in [k for k, reg in _KEYS.items() if reg.get("expires", 0) <= now]:
+    for kid in [k for k, reg in _KEYS.items() if _lapsed(reg, now)]:
         del _KEYS[kid]
     if _KEYS:
         logger.info("Loaded %d web sign-in(s).", len(_KEYS))
@@ -165,6 +171,14 @@ async def _save() -> None:
         pass
 
 
+def _lapsed(reg: dict[str, Any], now: float) -> bool:
+    """Whether a sign-in's end has passed; a root sign-in, with `expires` empty, ends once its cookie would have."""
+    expires = reg.get("expires", 0)
+    if expires is None:
+        return now - float(reg.get("checked") or 0) > ROOT_COOKIE_SECONDS
+    return float(expires) <= now
+
+
 def session_id(token: str) -> str:
     """Return the id a sign-in is kept under: the hash of its token."""
     return hashlib.sha256(token.encode()).hexdigest()
@@ -174,7 +188,7 @@ async def open_session(identity: dict[str, Any]) -> str:
     """Start a sign-in for `identity` and return the token the browser keeps."""
     token = secrets.token_urlsafe(32)
     now = time.time()
-    for stale in [k for k, reg in _KEYS.items() if reg["expires"] <= now]:
+    for stale in [k for k, reg in _KEYS.items() if _lapsed(reg, now)]:
         del _KEYS[stale]
     _KEYS[session_id(token)] = {**identity, "created": now, "checked": now}
     await _save()
@@ -337,6 +351,15 @@ async def revoke(kid: str) -> None:
         await _save()
 
 
+async def end_sign_ins_with_key(key_id: str) -> None:
+    """End this node's root sign-ins made with an application key, as when it is revoked."""
+    ended = [kid for kid, reg in _KEYS.items() if reg["via"] == "root" and reg.get("key") == key_id]
+    for kid in ended:
+        _KEYS.pop(kid, None)
+    if ended:
+        await _save()
+
+
 async def end_sign_ins_of(username: str) -> None:
     """End every sign-in of a user on this node, as when the account is removed."""
     ended = [kid for kid, reg in _KEYS.items() if reg["username"] == username]
@@ -351,18 +374,28 @@ async def current(kid: str) -> dict[str, Any] | None:
 
     An OpenID Connect sign-in is refreshed when the last check is older than
     `CHECK_SECONDS`; a refusal ends it, an unreachable provider does not. A
-    root or proxy sign-in is pushed out by `web_session_seconds` each time it
-    is used.
+    root sign-in ends while the node's `root_sign_in` is off, and is checked
+    against the shared record of application keys as often: a key revoked,
+    replaced, or expired ends it, a record that cannot be read does not. The
+    check is the time a root sign-in was last used, which `_lapsed` reads.
     """
     reg = _KEYS.get(kid)
-    if not reg or reg["expires"] <= time.time():
+    if not reg or _lapsed(reg, time.time()) or (reg["via"] == "root" and not settings.root_sign_in):
         await revoke(kid)
         return None
     if reg["via"] == "root":
-        if time.time() - reg["checked"] >= CHECK_SECONDS:
-            reg["checked"] = time.time()
-            reg["expires"] = reg["checked"] + settings.web_session_seconds
-            await _save()
+        if time.time() - reg["checked"] < CHECK_SECONDS:
+            return reg
+        reg["checked"] = time.time()
+        try:
+            held = await asyncio.to_thread(application_keys.signs_in_web, reg.get("key", ""), reg.get("key_hash", ""))
+        except (store.StoreUnavailable, OSError, yaml.YAMLError) as exc:
+            logger.warning("Could not check the key of a root sign-in: %s", exc)
+            return reg
+        if not held:
+            await revoke(kid)
+            return None
+        await _save()
         return reg
     if reg["via"] != "oidc" or not reg.get("refresh_token") or time.time() - reg["checked"] < CHECK_SECONDS:
         return reg

@@ -121,7 +121,7 @@ paths refer to.
 | `SEALSKIN_HTTP_PORT` | `int` | `0` | Port of a plain HTTP listener for a reverse proxy that terminates TLS, serving what the session port does; 0 opens none. It answers the addresses in `trusted_proxies` alone, and only requests they say arrived over HTTPS. |
 | `SEALSKIN_ROOT_KEY` | `str` | _(empty)_ | Application key the built-in administrator `admin` signs in to the web app with, kept as their key named `environment`; empty generates one at first start and writes it to `root_key_path`. |
 | `SEALSKIN_ROOT_KEY_PATH` | `str` | `/config/root_key` | File the generated root application key is written to, for the administrator to copy and delete. |
-| `SEALSKIN_WEB_SESSION_SECONDS` | `int` | `43200` | Longest a web sign-in with the root key, or a reverse proxy's sign-in, lasts unused. |
+| `SEALSKIN_WEB_SESSION_SECONDS` | `int` | `43200` | Longest a reverse proxy's sign-in lasts unused; a sign-in with the root key lasts until it is signed out. |
 | `SEALSKIN_ROOT_SIGN_IN` | `bool` | `true` | Accept the root key, the built-in administrator's, on this node's web sign-in. Turn it off once administrators sign in through an identity provider; a node restarted with it on takes the key again. |
 | `SEALSKIN_AUTO_SIGN_IN` | `str` | _(empty)_ | Identity provider, `oidc` or `saml`, the web app sends a signed-out browser to at once instead of showing its sign-in page; `#root` on the web app's address shows the page anyway. |
 | `SEALSKIN_SSO_FORCE_LOGIN` | `bool` | `false` | Make the identity provider ask for credentials at every sign-in instead of reusing its session. |
