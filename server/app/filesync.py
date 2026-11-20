@@ -28,7 +28,7 @@ import stat as stat_module
 import threading
 from typing import Any
 
-from . import cluster, filecrypt, persistence, store
+from . import cluster, filecrypt, persistence, storage_usage, store
 from .fsutil import open_within
 from .settings import settings
 
@@ -136,44 +136,51 @@ def _read(root: str, name: str) -> bytes | None:
         return handle.read(MAX_BYTES + 1)[:MAX_BYTES]
 
 
-def _pull_file(username: str, root: str, name: str) -> bool:
-    """Fetch one of a user's shared files from the store unless this node's copy is current; return whether it is here."""
+def _pull_file(username: str, root: str, name: str) -> tuple[bool, int]:
+    """Fetch one of a user's shared files from the store unless this node's copy is current.
+
+    Returns:
+        Whether the file is here, and the bytes this call placed.
+    """
     prefix = f"files/{username}/"
     target = _place(root, name)
     if target is None:
         logger.warning("Shared file '%s' of '%s' is not placed: its path leaves the directory or crosses a link.", name, username)
-        return False
+        return False, 0
     lock = _locks.setdefault(username, threading.Lock())
     with lock:
         manifest: dict[str, dict[str, Any]] = persistence.read_yaml(_manifest_path(username), {}) or {}
         tags = store.list_keys(prefix + name)
         tag = tags.get(prefix + name)
         if tag is None:
-            return os.path.isfile(target)
+            return os.path.isfile(target), 0
         known = manifest.get(name)
         if known and known["etag"] == tag and os.path.isfile(target):
-            return True
+            return True, 0
         found = store.get(prefix + name)
         if found is None:
-            return os.path.isfile(target)
+            return os.path.isfile(target), 0
         try:
             content = filecrypt.unseal(username, found[0])
         except filecrypt.Unreadable as exc:
             logger.warning("Shared file '%s' of '%s' is not readable on this node: %s", name, username, exc)
-            return os.path.isfile(target)
+            return os.path.isfile(target), 0
         manifest[name] = _write(root, target, content, found[1])
         os.makedirs(os.path.dirname(_manifest_path(username)), exist_ok=True, mode=0o700)
         persistence.write_yaml_sync(_manifest_path(username), manifest)
-        return True
+        return True, len(content)
 
 
-def _sync(username: str, root: str, send: bool) -> None:
+def _sync(username: str, root: str, send: bool) -> bool:
     """Bring `root` and the store's copy of a user's shared files together.
 
     Args:
         username: Owner of the files.
         root: The user's shared files directory on this node.
         send: Also send what changed here; a pull before a launch sends nothing.
+
+    Returns:
+        Whether a file was placed in or removed from `root`.
     """
     prefix = f"files/{username}/"
     lock = _locks.setdefault(username, threading.Lock())
@@ -183,6 +190,7 @@ def _sync(username: str, root: str, send: bool) -> None:
         os.makedirs(root, exist_ok=True)
         local = _local_files(root)
         refused: list[str] = []
+        touched = False
 
         def changed_here(name: str) -> bool:
             known = manifest.get(name)
@@ -213,6 +221,7 @@ def _sync(username: str, root: str, send: bool) -> None:
                 manifest[name] = _write(
                     root, target, content, found[1], keep_as=f".conflict-{cluster.NODE_ID}" if changed_here(name) else ""
                 )
+                touched = True
             except ValueError:
                 refused.append(name)
 
@@ -221,6 +230,7 @@ def _sync(username: str, root: str, send: bool) -> None:
             if name in local and target and not changed_here(name):
                 os.remove(target)
                 manifest.pop(name)
+                touched = True
             elif name not in local:
                 manifest.pop(name)
         if refused:
@@ -247,6 +257,7 @@ def _sync(username: str, root: str, send: bool) -> None:
 
         os.makedirs(os.path.dirname(_manifest_path(username)), exist_ok=True, mode=0o700)
         persistence.write_yaml_sync(_manifest_path(username), manifest)
+    return touched
 
 
 async def _run(username: str, root: str, send: bool) -> None:
@@ -254,9 +265,12 @@ async def _run(username: str, root: str, send: bool) -> None:
     if not enabled():
         return
     try:
-        await asyncio.to_thread(_sync, username, root, send)
+        touched = await asyncio.to_thread(_sync, username, root, send)
     except Exception as exc:  # noqa: BLE001 - a sync failure never fails a launch or a stop
         logger.warning("Could not sync the shared files of '%s': %s", username, exc)
+        touched = True
+    if touched:
+        storage_usage.changed(root)
 
 
 async def pull(username: str, root: str) -> None:
@@ -282,10 +296,12 @@ async def pull_file(username: str, root: str, name: str) -> bool:
     if not enabled():
         return os.path.isfile(os.path.join(root, *name.split("/")))
     try:
-        return await asyncio.to_thread(_pull_file, username, root, name)
+        here, placed = await asyncio.to_thread(_pull_file, username, root, name)
     except Exception as exc:  # noqa: BLE001 - the launch goes on with what the node has
         logger.warning("Could not fetch the shared file '%s' of '%s': %s", name, username, exc)
         return os.path.isfile(os.path.join(root, *name.split("/")))
+    storage_usage.stored(root, placed)
+    return here
 
 
 def forget(username: str) -> None:

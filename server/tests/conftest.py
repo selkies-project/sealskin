@@ -9,7 +9,7 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app import branding, cluster, dashboards, docker_utils, quota, store, vpn  # noqa: E402
+from app import branding, cluster, dashboards, docker_utils, quota, storage_usage, store, vpn  # noqa: E402
 from app.providers import provider_class  # noqa: E402
 from app.settings import settings  # noqa: E402
 from app.state import state  # noqa: E402
@@ -98,9 +98,10 @@ def isolated_settings(tmp_path, monkeypatch):
     provider_class.cache_clear()
     store.reset()
     store.use_peer(None)
-    for table in (cluster.NODES, cluster.POOLS, cluster.PEERS, cluster.HOMES, quota.USAGE, quota._own, vpn._in_flight):
+    for table in (cluster.NODES, cluster.POOLS, cluster.PEERS, cluster.HOMES, quota.USAGE, quota._own, storage_usage._measures, storage_usage._walks, vpn._in_flight):
         table.clear()
     quota._dirty.clear()
+    monkeypatch.setattr(storage_usage, "_loaded", False)
     monkeypatch.setattr(state, "proxy_secret", PROXY_SECRET)
     branding.load()
     dashboards.load()

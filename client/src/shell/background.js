@@ -499,7 +499,7 @@ async function takePendingContext() {
 const handlers = {
   async secureFetch({ url, options }) {
     const data = await secureFetchInBackground(url, options);
-    if (url === '/api/admin/status') {
+    if (url.split('?')[0] === '/api/admin/status') {
       await noteSessionDomain(data);
       // Probed while the user picks an application, the session origin is known by the launch.
       if (WEB && webSessionIsolation) getConfig().then(sessionOriginSuffix).catch(() => {});

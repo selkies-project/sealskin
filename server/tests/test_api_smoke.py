@@ -155,7 +155,9 @@ def test_a_key_token_is_taken_only_with_the_session_it_names(api_client):
 def test_status_install_patch_flow(api_client, store_with_firefox):
     status, data = api_client.call("POST", "/api/admin/status", {})
     assert status == 200 and data["is_admin"] is True and data["username"] == "tester"
-    assert data["expires"] is None and data["provider_groups"] == [] and data["storage_used"] == 0
+    # Storage is measured only for a caller that asks, the profile, never for a page landing.
+    assert data["expires"] is None and data["provider_groups"] == [] and data["storage_used"] is None
+    assert api_client.call("POST", "/api/admin/status?storage=1", {})[1]["storage_used"] == 0
 
     status, available = api_client.call(
         "GET", "/api/admin/apps/available?url=https://example.invalid/apps.yml&store_name=Test%20Store"

@@ -14,7 +14,8 @@
   GPU node can cost more than an hour of office work. A user out of allowance
   starts nothing new; a pool with `stop_when_spent` also ends what runs.
 * **Storage.** `storage_limit`, in gigabytes, stops new uploads and persistent
-  launches once the user's directories on the node hold that much.
+  launches once the user's directories on the node hold that much, by a
+  measure `storage_usage` took no longer ago than its `MEASURE_SECONDS`.
 
 Each node adds up the time of its own sessions and writes it to
 `cluster/usage/<day>/<node id>.yml` every `usage_flush_seconds`, an object no
@@ -34,7 +35,7 @@ from typing import Any
 
 from fastapi import HTTPException
 
-from . import cluster, persistence, presence
+from . import cluster, persistence, presence, storage_usage
 from .settings import settings
 from .state import state
 
@@ -45,7 +46,6 @@ USAGE: dict[str, dict[str, dict[str, float]]] = {}
 _own: dict[str, dict[str, float]] = {}
 _dirty: set[str] = set()
 _last_tick = 0.0
-_storage_cache: dict[str, tuple[float, int]] = {}
 
 _SIZE = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*([kmgt]?)b?\s*$", re.IGNORECASE)
 
@@ -222,22 +222,6 @@ def cap_resources(overrides: dict[str, Any], effective_settings: dict[str, Any] 
         overrides["mem_limit"] = min(asked, cap) if asked else cap
 
 
-def storage_used(username: str) -> int:
-    """Return the bytes under a user's storage directory on this node, measured at most once a minute."""
-    cached = _storage_cache.get(username)
-    if cached and time.time() - cached[0] < 60:
-        return cached[1]
-    total = 0
-    for directory, _subdirs, files in os.walk(os.path.join(settings.storage_path, username)):
-        for name in files:
-            try:
-                total += os.lstat(os.path.join(directory, name)).st_size
-            except OSError:
-                continue
-    _storage_cache[username] = (time.time(), total)
-    return total
-
-
 async def check_storage(user: dict[str, Any]) -> None:
     """Refuse to add to the storage of a user who is at their `storage_limit`.
 
@@ -247,7 +231,7 @@ async def check_storage(user: dict[str, Any]) -> None:
     limit = (user.get("effective_settings") or {}).get("storage_limit", -1)
     if user.get("is_admin") or limit is None or limit < 0:
         return
-    used = await asyncio.to_thread(storage_used, user["username"])
+    used = await storage_usage.used(user["username"], current=True)
     if used >= limit * 1024**3:
         raise HTTPException(
             status_code=403,

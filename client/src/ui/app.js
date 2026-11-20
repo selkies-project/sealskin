@@ -214,8 +214,9 @@ const meter = (used, limit) => (limit > 0 ? `<progress class="profile-meter" max
  * behind their settings, and what those settings let them do.
  *
  * @param {object} status The status response.
+ * @param {{measuring?: boolean}} [options] Whether the storage the user holds is still being measured.
  */
-function renderProfile(status) {
+function renderProfile(status, { measuring = false } = {}) {
   const { settings } = status;
   const sections = [];
   const signIn = [
@@ -251,7 +252,9 @@ function renderProfile(status) {
       [t('web.profile.alone'), esc(limitOf(settings.session_idle_minutes, (n) => t('web.profile.aloneValue', { minutes: n })))],
       settings.persistent_storage ? [
         t('web.profile.storage'),
-        esc(formatBytes(status.storage_used || 0, t, 1) + (storage > 0 ? ` / ${storage} ${t('common.gb')}` : '')) + meter(status.storage_used || 0, storage * 1024 ** 3),
+        typeof status.storage_used === 'number'
+          ? esc(formatBytes(status.storage_used, t, 1) + (storage > 0 ? ` / ${storage} ${t('common.gb')}` : '')) + meter(status.storage_used, storage * 1024 ** 3)
+          : (measuring ? '…' : '—'),
       ] : null,
       allowance ? [
         t('web.home.allowance'),
@@ -281,19 +284,27 @@ function appLinks(className) {
 /** Open the profile and count the sessions running against their limit. */
 async function openProfile() {
   if (!lastStatus) return;
-  renderProfile(lastStatus);
+  const measuring = !lastStatus.is_admin && Boolean(lastStatus.settings.persistent_storage);
+  renderProfile(lastStatus, { measuring });
   $('#profile').hidden = false;
   $('#profile-close').focus();
   if (lastStatus.is_admin) return;
-  try {
-    const sessions = await api('/api/sessions', { method: 'GET' });
-    const count = $('#profile-sessions');
-    if (!count) return;
-    const limit = lastStatus.settings.session_limit;
-    count.textContent = typeof limit === 'number' && limit >= 0
-      ? t('web.profile.sessionsRunningOf', { running: sessions.length, limit })
-      : t('web.profile.sessionsRunning', { running: sessions.length });
-  } catch (e) { /* the limit alone is shown */ }
+  // The storage a user holds is measured only here, since it walks every file they keep.
+  const [measured, sessions] = await Promise.all([
+    measuring ? post('/api/admin/status?storage=1', {}).catch(() => null) : null,
+    api('/api/sessions', { method: 'GET' }).catch(() => null),
+  ]);
+  if ($('#profile').hidden) return;
+  if (measured) lastStatus = measured;
+  // A measure that did not come is shown as unknown rather than still coming.
+  if (measuring) renderProfile(lastStatus);
+  const count = $('#profile-sessions');
+  // Without the list, the limit alone is shown.
+  if (!count || !sessions) return;
+  const limit = lastStatus.settings.session_limit;
+  count.textContent = typeof limit === 'number' && limit >= 0
+    ? t('web.profile.sessionsRunningOf', { running: sessions.length, limit })
+    : t('web.profile.sessionsRunning', { running: sessions.length });
 }
 
 function closeProfile() {

@@ -23,7 +23,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import ValidationError
 
-from .. import routing, user_manager
+from .. import routing, storage_usage, user_manager
 from ..fsutil import place_file, safe_join
 from ..models import (
     UploadChunkRequest,
@@ -253,6 +253,7 @@ async def upload_to_storage(
     if safe_filename in ("", ".", ".."):
         os.remove(reassembled_path)
         raise HTTPException(status_code=400, detail="Invalid file name.")
+    size = os.path.getsize(reassembled_path)
     try:
         actual_filename = await asyncio.to_thread(place_file, reassembled_path, dest_dir, dest_dir, safe_filename)
     except Exception as exc:  # noqa: BLE001
@@ -260,6 +261,7 @@ async def upload_to_storage(
             os.remove(reassembled_path)
         logger.error("Failed to move reassembled file to storage for user '%s': %s", username, exc)
         raise HTTPException(status_code=500, detail="Could not place file in session storage.") from exc
+    storage_usage.stored(dest_dir, size)
 
     logger.info(
         "User '%s' uploaded file '%s' (as '%s') to shared storage.", username, actual_filename, safe_filename

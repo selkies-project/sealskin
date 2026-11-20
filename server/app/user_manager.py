@@ -36,7 +36,7 @@ import yaml
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-from . import audit, persistence, store
+from . import audit, persistence, storage_usage, store
 from .fsutil import safe_join
 from .models import APP_KEY_CLIENTS, GroupSettings
 from .settings import settings
@@ -711,7 +711,10 @@ def delete_storage(username: str) -> None:
     """Remove the storage this node holds for `username`, home directories included."""
     path = safe_join(settings.storage_path, username)
     if os.path.isdir(path):
-        shutil.rmtree(path)
+        try:
+            shutil.rmtree(path)
+        finally:
+            storage_usage.changed(path)
         logger.info("Deleted storage for '%s'.", username)
 
 
@@ -894,3 +897,5 @@ def delete_home_dir(username: str, home_name: str) -> None:
     except OSError as exc:
         logger.error("Failed to delete home directory for %s: %s", username, exc)
         raise
+    finally:
+        storage_usage.changed(home_path)

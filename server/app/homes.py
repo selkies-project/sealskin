@@ -18,7 +18,7 @@ from collections.abc import AsyncIterator
 import httpx
 from fastapi import HTTPException
 
-from . import cluster, user_manager
+from . import cluster, storage_usage, user_manager
 from .fsutil import safe_join
 from .settings import settings
 from .state import state
@@ -118,6 +118,7 @@ async def migrate(username: str, home_name: str, target: str) -> dict[str, str]:
             raise HTTPException(status_code=502, detail=f"The transfer failed: {reason}")
         await asyncio.to_thread(cluster.record_home, username, home_name, target)
         await asyncio.to_thread(shutil.rmtree, path, True)
+        storage_usage.changed(path)
         await cluster.announce()
         logger.info("Moved home directory '%s' of '%s' to node %s.", home_name, username, target)
         return {"status": "success", "node": target}
@@ -151,6 +152,7 @@ async def receive(username: str, home_name: str, chunks: AsyncIterator[bytes]) -
         if await process.wait() != 0 or not os.path.isdir(unpacked):
             raise HTTPException(status_code=500, detail=f"The archive did not unpack: {problem[-300:]}")
         os.replace(unpacked, path)
+        storage_usage.changed(path)
     except (BrokenPipeError, ConnectionResetError) as exc:
         raise HTTPException(status_code=500, detail="The archive did not unpack.") from exc
     finally:
@@ -162,3 +164,4 @@ async def receive(username: str, home_name: str, chunks: AsyncIterator[bytes]) -
 def discard(username: str, home_name: str) -> None:
     """Remove a home directory this node received in a move that then failed."""
     shutil.rmtree(home_path(username, home_name), ignore_errors=True)
+    storage_usage.changed(home_path(username, home_name))

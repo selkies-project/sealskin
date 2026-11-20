@@ -35,6 +35,7 @@ from . import (
     progress,
     prootapps,
     quota,
+    storage_usage,
     user_manager,
     vpn,
     webclient,
@@ -805,6 +806,7 @@ async def _resolve_storage(
                     username,
                 )
                 await asyncio.to_thread(safe_copytree, template_path, host_mount_path, True)
+                storage_usage.changed(host_mount_path)
             return host_mount_path, shared
         host_mount_path = os.path.join(ephemeral_base(), str(uuid.uuid4()))
         logger.info(
@@ -985,6 +987,7 @@ async def launch_application(
                 os.fchmod(handle.fileno(), 0o644)
         finally:
             os.close(dir_fd)
+        storage_usage.stored(shared_files_path, len(file_bytes))
         if open_file_on_launch:
             spec.env["SEALSKIN_FILE"] = os.path.join(
                 settings.container_config_path, "Desktop", "files", actual_filename

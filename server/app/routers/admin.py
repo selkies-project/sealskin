@@ -27,6 +27,7 @@ from .. import (
     quota,
     routing,
     sso,
+    storage_usage,
     user_manager,
     vpn,
     webclient,
@@ -113,13 +114,14 @@ async def _gpu_list() -> list[GPUInfo]:
 
 
 @status_router.post("/api/admin/status", response_model=AdminStatusResponse)
-async def admin_status(user: dict[str, Any] = Depends(verify_token)) -> dict[str, Any]:
+async def admin_status(storage: bool = False, user: dict[str, Any] = Depends(verify_token)) -> dict[str, Any]:
     """Return the caller's role, settings, and host statistics.
 
     `provider_groups` are the groups the identity provider or proxy named,
     `expires` is when a web sign-in ends by the server's own clock, and
     `storage_used` the bytes under the user's storage on this node, for a user
-    with persistent storage.
+    with persistent storage who asks with `storage=1`, as `storage_usage` last
+    measured it; a page landing does not ask.
     """
     response: dict[str, Any] = {
         "is_admin": user.get("is_admin", False),
@@ -145,8 +147,8 @@ async def admin_status(user: dict[str, Any] = Depends(verify_token)) -> dict[str
     if effective.get("gpu", False):
         response["gpus"] = await _gpu_list()
     response["vpns"] = vpn.choices_for(user)
-    if effective.get("persistent_storage", False):
-        response["storage_used"] = await asyncio.to_thread(quota.storage_used, user["username"])
+    if storage and effective.get("persistent_storage", False):
+        response["storage_used"] = await storage_usage.used(user["username"])
     return response
 
 

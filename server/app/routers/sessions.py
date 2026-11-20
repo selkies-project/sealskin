@@ -12,7 +12,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import ValidationError
 
-from .. import audit, cluster, config_store, logos, routing, screenshots
+from .. import audit, cluster, config_store, logos, routing, screenshots, storage_usage
 from ..fsutil import place_file, resolve_within, safe_join
 from ..launch import ephemeral_base, stop_session
 from ..models import ActiveSessionInfo, OpenUrlRequest, SendFileToSessionRequest
@@ -189,6 +189,7 @@ async def send_file_to_session(
     if safe_filename in ("", ".", ".."):
         os.remove(reassembled_path)
         raise HTTPException(status_code=400, detail="Invalid file name.")
+    size = os.path.getsize(reassembled_path)
     try:
         actual_filename = await asyncio.to_thread(place_file, reassembled_path, dest_dir, dest_dir, safe_filename)
     except Exception as exc:  # noqa: BLE001
@@ -196,6 +197,7 @@ async def send_file_to_session(
             os.remove(reassembled_path)
         logger.error("[%s] Failed to move reassembled file to session storage: %s", session_id, exc)
         raise HTTPException(status_code=500, detail="Could not place file in session storage.") from exc
+    storage_usage.stored(dest_dir, size)
 
     logger.info(
         "[%s] User '%s' wrote file '%s' (as '%s') to session.",

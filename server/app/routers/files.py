@@ -15,7 +15,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import ValidationError
 
-from .. import routing, user_manager
+from .. import routing, storage_usage, user_manager
 from ..fsutil import open_parent_within, open_within, place_file, safe_join, safe_rmtree
 from ..models import (
     CreateFolderRequest,
@@ -111,6 +111,8 @@ async def _perform_deletion(task_id: str, username: str, home_dir: str, paths: l
     task = state.deletion_tasks[task_id]
     task["status"] = "processing"
     deleted = 0
+    # Outside the try, so that a home that cannot be named is not looked up again where nothing catches it.
+    storage = safe_join(settings.storage_path, username)
     try:
         base = home_base(username, home_dir)
         for path in paths:
@@ -138,6 +140,8 @@ async def _perform_deletion(task_id: str, username: str, home_dir: str, paths: l
     except Exception as exc:  # noqa: BLE001
         logger.error("Deletion task %s failed: %s", task_id, exc)
         task.update({"status": "error", "message": "An error occurred during deletion."})
+    finally:
+        storage_usage.changed(storage)
 
 
 @router.get("/download/chunk/{home_dir}", response_model=FileChunkResponse)
@@ -308,6 +312,8 @@ async def finalize_upload_to_dir(
         os.remove(reassembled_path)
         raise HTTPException(status_code=400, detail="Invalid file name.")
 
+    size = os.path.getsize(reassembled_path)
+
     def place() -> str:
         # The directory is opened and checked after the reassembly the client paced.
         return place_file(reassembled_path, base, str(dest_dir), safe_filename)
@@ -323,6 +329,7 @@ async def finalize_upload_to_dir(
             os.remove(reassembled_path)
         logger.error("Failed to move finalized upload for user '%s': %s", user["username"], exc)
         raise HTTPException(status_code=500, detail="Could not place file in destination.") from exc
+    storage_usage.stored(str(dest_dir), size)
     logger.info("User '%s' uploaded '%s' to '%s%s'", user["username"], actual_filename, home_dir, req.path)
     return {"message": "File uploaded successfully."}
 
