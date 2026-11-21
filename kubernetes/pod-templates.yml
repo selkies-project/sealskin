@@ -1,0 +1,60 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# The PodTemplates sessions start from, beside sealskin.yml:
+#   kubectl apply -n <namespace> -f pod-templates.yml
+# Kubernetes' own namespace roles (`admin`, `edit`, `view`) grant no access to
+# PodTemplates, so applying this takes someone who holds it, such as a cluster
+# administrator. Without it the server starts sessions from its own fields alone.
+# https://docs.sealskin.app/kubernetes#the-session-template describes the rest.
+
+# The session template, the templates applications name, and the GPU options
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: sealskin-pod-templates
+rules:
+- apiGroups: [""]
+  resources: ["podtemplates"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: sealskin-pod-templates
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: sealskin-pod-templates
+subjects:
+- kind: ServiceAccount
+  name: sealskin
+---
+# What every session pod starts from: SealSkin sets the image, environment,
+# storage, and GPU on top. Node placement, a sandboxed runtime class, a
+# priority class, and the resources where the namespace imposes small
+# defaults belong here.
+apiVersion: v1
+kind: PodTemplate
+metadata:
+  name: sealskin-session
+template:
+  spec:
+#    runtimeClassName: gvisor
+#    nodeSelector:
+#      node-pool: desktops
+#    tolerations:
+#    - key: desktops
+#      operator: Exists
+    containers:
+    - name: app
+      # Replaced by the application's image
+      image: sealskin-session
+#      resources:
+#        requests:
+#          cpu: "1"
+#          memory: 2Gi
+#        limits:
+#          cpu: "8"
+#          memory: 8Gi

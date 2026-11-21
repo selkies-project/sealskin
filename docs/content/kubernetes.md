@@ -10,7 +10,11 @@ administrator can install it on any cluster, managed or not.
 
 ## What you need
 
-* A namespace in which you can create Roles, RoleBindings, and pods.
+* A namespace you administer: Kubernetes' own `admin` role there grants all
+  that `sealskin.yml` asks for. The [PodTemplates](#the-session-template)
+  that shape session pods take access to `podtemplates` as well, which
+  Kubernetes' namespace roles leave out, so someone who holds it, such as a
+  cluster administrator, adds them ([Install](#install)).
 * A PersistentVolumeClaim for the storage (home directories and shared
   files), which every session mounts. The manifest asks for `ReadWriteOnce`,
   which any default storage class provides, and every session then runs on
@@ -49,10 +53,26 @@ kubectl -n <namespace> exec deployment/sealskin -- rm /config/admin.json
 
 The file creates a ServiceAccount, the Role and RoleBinding, the two claims,
 the Deployment of the [linuxserver/sealskin](https://github.com/linuxserver/docker-sealskin)
-image, its Service, the session [PodTemplate](#the-session-template), and a
-NetworkPolicy that lets only the server reach session pods where the network
-plugin enforces policies. Import `admin.json` into a client as described in
-[Getting Started](start.md#connect).
+image, its Service, and a NetworkPolicy that lets only the server reach
+session pods where the network plugin enforces policies. Import `admin.json`
+into a client as described in [Getting Started](start.md#connect).
+
+[`kubernetes/pod-templates.yml`](https://github.com/selkies-project/sealskin/blob/main/kubernetes/pod-templates.yml)
+adds the [session template](#the-session-template) and a second Role, bound
+to the same service account, that lets the server read PodTemplates.
+Kubernetes' namespace roles (`admin`, `edit`, `view`) grant nothing on
+PodTemplates, and a Role grants only what its author holds, so it is applied
+by someone who holds that access, such as a cluster administrator:
+
+```bash
+kubectl apply -n <namespace> -f pod-templates.yml
+```
+
+Without it the server finds no templates and builds each session pod from
+its own fields: the resources are the namespace's LimitRange defaults unless
+the app template's `DOCKER_MEM_LIMIT`, `DOCKER_NANO_CPUS`, and
+`DOCKER_CPU_SHARES` set them ([Run options on a pod](#run-options-on-a-pod)),
+and GPUs are [detected](#detected-gpus).
 
 For the web app, the server writes the root key, the same administrator's
 application key, at its first start; read it, sign in at `https://<host>/`,
@@ -67,9 +87,9 @@ The web app needs a certificate browsers trust, and with session isolation
 a name for every session, which on a cluster means an ingress or a gateway:
 [Exposing the server](#exposing-the-server).
 
-The Role grants pods (get, list, create, delete) and their logs (get), pod
-templates and events (get, list), claims and resource quotas (get, list),
-and ReplicaSets (get).
+The Role grants pods (get, list, create, delete) and their logs (get),
+events, claims, and resource quotas (get, list), and ReplicaSets (get); the
+Role in `pod-templates.yml` grants pod templates (get, list).
 Deleting the Deployment removes every session pod with it, since the
 Deployment owns them; `kubectl delete -n <namespace> -f sealskin.yml` also
 deletes the claims and the data on them.
@@ -111,7 +131,8 @@ with the reason the scheduler, the kubelet, or the pod's last warning gave.
 
 Placement and runtime policy belong to the cluster, not to SealSkin, so every
 session pod starts from the PodTemplate `<deployment>-session`
-(`sealskin-session` in the manifest) when the namespace has one. SealSkin lays
+(`sealskin-session` in `pod-templates.yml`) when the namespace has one and
+the server may read it, which the Role in that file grants. SealSkin lays
 its own fields over it: maps are merged, lists are joined, and its values win.
 The template's container named `app` (or its first container) is the base of
 the session container, and any other container is kept as a sidecar.
@@ -190,7 +211,8 @@ user picked, each laid over the last as SealSkin lays its own fields, which
 come last: a GPU choice wins over the application's defaults, and SealSkin's
 labels, volumes, and the session container's image, ports, and environment
 win over all three. The template is read at every launch, and a launch whose
-template the namespace lacks fails with that reason. Only an administrator
+template the namespace lacks, or the server may not read, fails with that
+reason. Only an administrator
 sets it, as with the `DOCKER_*` settings; the Docker backend ignores it, and
 the pods that export a web client and the VPN gateways start from the session
 template alone.
@@ -239,8 +261,9 @@ a render node as on Docker: the image uses the GPU it is handed, whose
 
 ### GPU options you define
 
-When the namespace has PodTemplates labelled `sealskin.app/gpu`, they are the
-GPU options, one per template. The label's value is the GPU's kernel driver
+When the namespace has PodTemplates labelled `sealskin.app/gpu` and the
+server may read them ([Install](#install)), they are the GPU options, one per
+template. The label's value is the GPU's kernel driver
 (`nvidia`, `amdgpu`, `i915`, `xe`, and so on), which decides the apps that
 may use it, and the template holds what a session needs for that GPU; it is
 laid over the [session template](#the-session-template) the same way. This
