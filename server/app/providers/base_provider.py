@@ -23,6 +23,9 @@ logger = logging.getLogger(__name__)
 
 #: Seconds an instance's web endpoint gets to answer once it runs.
 READY_TIMEOUT = 60
+#: Seconds the stream route may still answer 404 once the page answers: Selkies' server takes the route a few
+#: seconds after its web server serves the page, and an image without the route is let through after them.
+STREAM_GRACE = 15
 
 MANAGED_BY_LABEL = "app.kubernetes.io/managed-by"
 INSTANCE_LABEL = "app.kubernetes.io/instance"
@@ -270,6 +273,30 @@ class BaseProvider(ABC):
             RuntimeError: When the image cannot be run or holds no such directory.
         """
 
+    async def _wait_for_stream(self, session_id: str, base_url: str, auth_header: dict[str, str] | None) -> None:
+        """Wait until the session's stream route answers, as its page already does.
+
+        A plain request to `api/websockets` is answered 404 until Selkies' server
+        has the route, then 204, or 409 where the stream runs over WebRTC; any
+        answer but 404 is taken. A client opening the session before that is
+        answered 404 too.
+
+        Args:
+            session_id: Session id for log prefixes.
+            base_url: The session's page, its subfolder included.
+            auth_header: The basic-auth header the page took, if any.
+        """
+        deadline = time.monotonic() + STREAM_GRACE
+        async with httpx.AsyncClient(timeout=2.0, headers=auth_header) as client:
+            while time.monotonic() < deadline:
+                try:
+                    if (await client.get(f"{base_url.rstrip('/')}/api/websockets")).status_code != 404:
+                        return
+                except httpx.HTTPError:
+                    pass
+                await asyncio.sleep(0.5)
+        logger.warning("[%s] The stream route still answers 404; opening the session as it is.", session_id)
+
     async def _wait_until_ready(
         self,
         session_id: str,
@@ -326,6 +353,7 @@ class BaseProvider(ABC):
                         )
                         health_check_passed = True
                         if not is_collaboration:
+                            await self._wait_for_stream(session_id, f"http://{address}{subfolder}", auth_header)
                             return ip_address
                     else:
                         await asyncio.sleep(2)

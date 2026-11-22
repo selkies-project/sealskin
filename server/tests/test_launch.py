@@ -675,3 +675,48 @@ async def test_a_running_session_takes_an_address_only_from_its_owner_and_only_a
     # The address travels as an argument of its own, never inside the script's text.
     command = open_url_command('http://x/";touch /tmp/p;"')
     assert command[:2] == ["bash", "-c"] and command[-1] == 'http://x/";touch /tmp/p;"' and "touch" not in command[2]
+
+
+async def test_a_session_is_ready_once_its_stream_route_answers(monkeypatch):
+    """The page answers a few seconds before Selkies' server takes the stream route, which answers 404 till then."""
+    import httpx
+
+    from app.providers import base_provider
+    from app.providers.docker_provider import DockerProvider
+
+    asked = []
+    real = httpx.AsyncClient
+
+    def container(answers):
+        def handler(request):
+            asked.append(request.url.path)
+            if request.url.path == "/sess/":
+                return httpx.Response(200, text="<html>")
+            return httpx.Response(answers.pop(0) if len(answers) > 1 else answers[0])
+
+        transport = httpx.MockTransport(handler)
+        monkeypatch.setattr(base_provider.httpx, "AsyncClient", lambda **kwargs: real(transport=transport, **kwargs))
+
+    clock = [0.0]
+
+    async def tick(seconds):
+        clock[0] += seconds
+
+    monkeypatch.setattr(base_provider.asyncio, "sleep", tick)
+    monkeypatch.setattr(base_provider.time, "monotonic", lambda: clock[0])
+    provider = DockerProvider({"provider_config": {"image": "x", "port": 3000}})
+
+    async def ip():
+        return "10.0.0.5"
+
+    for answers, stream_asks in (([404, 404, 204], 3), ([404, 409], 2)):
+        asked.clear()
+        container(answers)
+        assert await provider._wait_until_ready("s", ip, {"SUBFOLDER": "/sess/"}) == "10.0.0.5"
+        assert asked.count("/sess/api/websockets") == stream_asks, answers
+    # An image that never takes the route still opens, after the grace.
+    asked.clear()
+    clock[0] = 0.0
+    container([404])
+    assert await provider._wait_until_ready("s", ip, {"SUBFOLDER": "/sess/"}) == "10.0.0.5"
+    assert base_provider.STREAM_GRACE <= clock[0] < base_provider.STREAM_GRACE + 1
