@@ -13,15 +13,17 @@ export function currentLocale() {
 }
 
 /**
- * Translate a key, returning `fallback` when the key is missing.
+ * Translate a key, returning `fallback` when the key is missing; `{name}` takes its value from `variables` in either.
  *
  * @param {function} t Translator.
  * @param {string} key
  * @param {string} fallback
+ * @param {object} [variables] Values of the placeholders.
  */
-export function tOr(t, key, fallback) {
-  const value = t(key);
-  return value === key ? fallback : value;
+export function tOr(t, key, fallback, variables = {}) {
+  const value = t(key, variables);
+  if (value !== key) return value;
+  return Object.entries(variables).reduce((text, [name, given]) => text.split(`{${name}}`).join(String(given)), fallback);
 }
 
 /**
