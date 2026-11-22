@@ -268,11 +268,11 @@ deriving the accent palette.
 | --- | --- | --- |
 | `GET /api/cluster` | user | The pools and nodes open to the caller, where their home directories are, and their limits. |
 | `POST /api/cluster/homedirs/{home}/move` | user | Body `{node}`: move one of the caller's home directories, where their settings allow. |
-| `GET /api/admin/cluster` | admin | Nodes with their load, pools, the store, the cluster's sign-in settings, the state of the reverse proxy check, and how this request reached the node (`signin.arrival`). |
+| `GET /api/admin/cluster` | admin | Nodes with their load, pools, the store, the cluster's shared settings (sign-in, file sync, the Kubernetes pod overlays and GPU options), whether this node runs sessions on Kubernetes (`kubernetes`), the state of the reverse proxy check, and how this request reached the node (`signin.arrival`). |
 | `POST /api/admin/cluster/join_codes` | admin | Body `{pool?}`: a code one node joins with. |
 | `PUT`/`DELETE /api/admin/cluster/nodes/{id}` | admin | Approve or suspend a node (`approved`), move it (`pool`), or remove its record. |
 | `PUT`/`DELETE /api/admin/cluster/pools/{name}` | admin | Create, replace, or delete a pool. |
-| `PUT /api/admin/cluster/settings` | admin | Write sign-in settings for the whole cluster; an empty value hands one back to each node's environment. |
+| `PUT /api/admin/cluster/settings` | admin | Write shared settings for the whole cluster; an empty value hands one back to each node's environment, and a pod overlay or GPU option list the nodes would refuse answers `400` with nothing written. |
 | `GET /api/admin/cluster/usage?period=` | admin | Weighted hours per user this `day`, `week`, or `month`. |
 | `GET /api/admin/cluster/audit?day=&since=&q=&offset=&limit=` | admin | Audit events from every answering node, newest first: one `day`, or every day `since` one, containing every word of `q`; answers `total`, the page of `events`, and the `days` that have a log. |
 | `POST /api/admin/cluster/signin/test` | admin | Body `{kind}`: for `oidc` or `saml`, fetch the configured provider's metadata and answer `ok` with what it published, or the `error`; for `proxy`, run the check of the reverse proxy again and answer its `state` and `detail`. |

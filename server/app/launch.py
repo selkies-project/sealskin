@@ -127,6 +127,8 @@ DOCKER_DICT_KEYS = ("environment",)
 RUN_OPTION_PREFIXES = ("DOCKER_", "KUBERNETES_")
 #: Template setting naming a PodTemplate laid over the session template on Kubernetes.
 POD_TEMPLATE_SETTING = "KUBERNETES_POD_TEMPLATE"
+#: Template setting holding the pod overlay (`app.pod_overlays`) laid over that PodTemplate.
+POD_OVERLAY_SETTING = "KUBERNETES_POD_OVERLAY"
 
 
 @dataclass
@@ -624,6 +626,9 @@ def build_launch_spec(
     pod_template = str(template_settings.get(POD_TEMPLATE_SETTING) or "").strip()
     if pod_template:
         provider_config["pod_template"] = pod_template
+    pod_overlay = str(template_settings.get(POD_OVERLAY_SETTING) or "")
+    if pod_overlay.strip():
+        provider_config["pod_overlay"] = pod_overlay
 
     launch_context: dict[str, Any] | None = None
     if extra_env:

@@ -31,3 +31,8 @@ def provider_class() -> type[BaseProvider]:
 def get_provider(app_config: dict[str, Any] | None = None) -> BaseProvider:
     """Return the active backend, bound to `app_config` when a launch needs it."""
     return provider_class()(app_config)
+
+
+def on_kubernetes() -> bool:
+    """Return whether this node runs its sessions as pods."""
+    return provider_class().__name__ == "KubernetesProvider"

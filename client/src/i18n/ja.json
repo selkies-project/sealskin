@@ -1213,6 +1213,10 @@
         "KUBERNETES_POD_TEMPLATE": {
           "label": "Kubernetes Pod テンプレート",
           "description": "Kubernetes では、このテンプレートのアプリのセッションテンプレートに重ねる、名前空間内の PodTemplate の名前（ラベル、アノテーション、ノードセレクター、トレレーション、リソース）。Docker では無視されます。"
+        },
+        "KUBERNETES_POD_OVERLAY": {
+          "label": "Kubernetes Pod オーバーレイ",
+          "description": "Kubernetes では、上の PodTemplate の後にこのテンプレートのセッションに重ねる Pod オーバーレイ（metadata と spec）の YAML（ノード配置、トレレーション、ランタイムクラスと優先度クラス、app コンテナーのリソースとセキュリティコンテキスト）。ボリューム、環境変数、サービスアカウント、ほかのコンテナーは拒否されます。Docker では無視されます。"
         }
       }
     },
@@ -1544,7 +1548,9 @@
         "web_session_seconds": "ルートサインインが未使用のまま有効な最長時間（時間）",
         "files_sync": "共有ファイルをオブジェクトストレージに保持する",
         "auto_sign_in": "サインアウト状態のブラウザーの転送先",
-        "legacy_auth": "キーファイルのクライアントを受け入れる"
+        "legacy_auth": "キーファイルのクライアントを受け入れる",
+        "kubernetes_session_overlay": "Kubernetes セッションオーバーレイ（YAML）",
+        "kubernetes_gpu_options": "Kubernetes GPU オプション（YAML）"
       },
       "usageTitle": "使用状況",
       "usageHours": "加重時間",

@@ -24,7 +24,9 @@
   `/api` route behind `verify_token` (`security.py`, which decides the lane: web cookie, application key, proxy
   header, key file, or peer), the admin and template routes (`admin.py`), app stores and PRoot Apps catalogs
   fetched from configured URLs and parsed as YAML (`config_store.py`, `prootapps.py`), session launch
-  (`launch.py`, `providers/`), the file manager, uploads, and public shares, the object store a cluster shares
+  (`launch.py`, `providers/`), the pod overlays an administrator keeps in SealSkin for session pods on
+  Kubernetes (`pod_overlays.py`: `KUBERNETES_POD_OVERLAY` in a template, `kubernetes_session_overlay` and
+  `kubernetes_gpu_options` in the cluster's settings), the file manager, uploads, and public shares, the object store a cluster shares
   (`store.py`, S3 or a file emulation, with users' files under `filesync.py`/`filecrypt.py`), the peer routes
   (`routers/peer.py`, `cluster.py`), VPN profiles an administrator uploads (`vpn.py`, `vpn_kube.py`,
   `vpn/entrypoint.sh`), the web client exported from an image (`webclient.py`), the credential files a node
@@ -70,7 +72,12 @@
   editor sets none of the variables a store may not (`S6_*`, `LD_*`, `FILE__*`, `BASH_ENV`, `ENV`, `PATH`,
   `HOME`, `IFS`), nor deletes a template that holds one; a user's hardening switches are applied after the
   template and the application's environment, the Selkies values their base image presets derive included
-  (`launch.HARDENING_ENV`), so neither turns back on what the switch turned off.
+  (`launch.HARDENING_ENV`), so neither turns back on what the switch turned off; a pod overlay kept in SealSkin
+  takes only the fields `pod_overlays` lists, in the shapes it lists, checked where it is saved and again at
+  launch, so its spec names no Secret, ConfigMap, claim, service account, volume, or other container for a
+  session to read or run (labels and annotations pass as they are, and what a cluster's admission webhooks
+  do on them is the cluster's), while a PodTemplate, which only the cluster's RBAC lets someone write, is held
+  to no list.
 
 ## Components that matter most / least
 - Most: anything that lets a lower principal reach a higher one: an anonymous client reaching the API, a session
@@ -105,7 +112,10 @@
 - Low: hardening without a demonstrated crossing.
 
 ## Anything to leave alone
-- An admin controls the host's Docker, or the namespace on Kubernetes, by design. A Bakery recipe runs the
+- An admin controls the host's Docker by design, and on Kubernetes the session pods within what the namespace
+  admits, the run options of templates and the pod overlays included. An overlay whose spec names an object of
+  the namespace for a session to read (outside the list in `pod_overlays`) is a finding; an admission webhook
+  of the cluster acting on an overlay's labels or annotations is not. A Bakery recipe runs the
   administrator's commands as root in a build on the node, with the network a session has: that is the
   authority an administrator already has by installing an image of their choosing.
 - A browser policy configures the browsers an image holds and is no containment of the session: root in the

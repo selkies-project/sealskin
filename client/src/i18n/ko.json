@@ -1213,6 +1213,10 @@
         "KUBERNETES_POD_TEMPLATE": {
           "label": "Kubernetes 파드 템플릿",
           "description": "Kubernetes에서 이 템플릿의 앱에 대해 세션 템플릿 위에 덧씌우는 네임스페이스의 PodTemplate 이름입니다: 레이블, 어노테이션, 노드 셀렉터, 톨러레이션, 리소스. Docker에서는 무시됩니다."
+        },
+        "KUBERNETES_POD_OVERLAY": {
+          "label": "Kubernetes 파드 오버레이",
+          "description": "Kubernetes에서 위의 PodTemplate 다음으로 이 템플릿의 세션 위에 덧씌우는 파드 오버레이(metadata와 spec)의 YAML입니다: 노드 배치, 톨러레이션, 런타임 및 우선순위 클래스, app 컨테이너의 리소스와 보안 컨텍스트. 볼륨, 환경 변수, 서비스 어카운트, 다른 컨테이너는 거부됩니다. Docker에서는 무시됩니다."
         }
       }
     },
@@ -1544,7 +1548,9 @@
         "web_session_seconds": "루트 로그인이 사용되지 않은 채 유지되는 최대 시간 (시간)",
         "files_sync": "공유 파일을 오브젝트 스토리지에 보관",
         "auto_sign_in": "로그아웃된 브라우저를 바로 보낼 곳",
-        "legacy_auth": "키 파일 클라이언트 허용"
+        "legacy_auth": "키 파일 클라이언트 허용",
+        "kubernetes_session_overlay": "Kubernetes 세션 오버레이 (YAML)",
+        "kubernetes_gpu_options": "Kubernetes GPU 옵션 (YAML)"
       },
       "usageTitle": "사용량",
       "usageHours": "가중 시간",

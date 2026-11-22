@@ -1213,6 +1213,10 @@
         "KUBERNETES_POD_TEMPLATE": {
           "label": "Kubernetes Pod Template",
           "description": "On Kubernetes, the name of a PodTemplate in the namespace laid over the session template for this template's apps: labels, annotations, node selectors, tolerations, resources. Ignored on Docker."
+        },
+        "KUBERNETES_POD_OVERLAY": {
+          "label": "Kubernetes Pod Overlay",
+          "description": "On Kubernetes, YAML of a pod overlay (metadata and spec) laid over this template's sessions after the PodTemplate above: node placement, tolerations, runtime and priority class, and the app container's resources and security context. Volumes, environment, service accounts, and other containers are refused. Ignored on Docker."
         }
       }
     },
@@ -1544,7 +1548,9 @@
         "web_session_seconds": "Longest a root sign-in lasts unused (hours)",
         "files_sync": "Keep shared files in the object store",
         "auto_sign_in": "Send a signed-out browser straight to",
-        "legacy_auth": "Accept key-file clients"
+        "legacy_auth": "Accept key-file clients",
+        "kubernetes_session_overlay": "Kubernetes session overlay (YAML)",
+        "kubernetes_gpu_options": "Kubernetes GPU options (YAML)"
       },
       "usageTitle": "Usage",
       "usageHours": "Weighted hours",

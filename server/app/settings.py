@@ -171,6 +171,27 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         "help": "Seconds a Bakery build may print nothing before the node gives it up.",
     },
     {
+        "name": "kubernetes_session_overlay",
+        "type": "str",
+        "default": "",
+        "help": (
+            "On Kubernetes, YAML of the pod overlay (`metadata` and `spec`) under every session pod, laid over "
+            "the namespace's `<deployment>-session` PodTemplate: node placement, runtime and priority class, "
+            "and the `app` container's resources and security context. The Kubernetes page lists the fields "
+            "an overlay takes."
+        ),
+    },
+    {
+        "name": "kubernetes_gpu_options",
+        "type": "str",
+        "default": "",
+        "help": (
+            "On Kubernetes, YAML list of the GPU options sessions may pick, each a `name`, the GPU's kernel "
+            "`driver` (`nvidia`, `amdgpu`, `i915`, `xe`, ...), and a `template`, the pod overlay that gives the "
+            "session that GPU; offered beside the PodTemplates labelled `sealskin.app/gpu`."
+        ),
+    },
+    {
         "name": "vpn_profiles_path",
         "type": "str",
         "default": "/config/.config/sealskin/vpn_profiles.yml",
@@ -951,6 +972,8 @@ CLUSTER_SETTINGS = (
     "auto_sign_in",
     "files_sync",
     "legacy_auth",
+    "kubernetes_session_overlay",
+    "kubernetes_gpu_options",
 )
 
 settings = AppSettings()

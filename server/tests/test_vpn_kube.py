@@ -254,6 +254,15 @@ async def test_the_hub_pod_takes_its_placement_from_the_session_template(hub_api
     assert "runtimeClassName" not in pod["spec"] and [c["name"] for c in pod["spec"]["containers"]] == ["gateway"]
 
 
+async def test_the_hub_pod_takes_the_session_overlays_placement_too(hub_api, monkeypatch):
+    monkeypatch.setattr(settings, "kubernetes_session_overlay", "spec: {nodeSelector: {egress: 'true'}, tolerations: [{key: vpn, operator: Exists}]}")
+    record, endpoint = _wg_profile()
+    await vpn.acquire(record, endpoint, "session-a")
+    pod = hub_api.pods[vpn_kube._name(vpn.key_for(record["id"], endpoint["id"]))]
+    assert pod["spec"]["nodeSelector"] == {"egress": "true"}
+    assert pod["spec"]["tolerations"] == [{"key": "vpn", "operator": "Exists"}]
+
+
 def test_the_session_pod_gets_the_spoke_sidecar_and_resolves_at_the_hub(api):
     spoke = {"SPOKE_PRIVATE_KEY": "k", "SPOKE_ADDRESS": "10.231.4.5/32", "HUB_PUBLIC_KEY": "h", "HUB_ENDPOINT": "10.96.0.50:51820", "HUB_ADDRESS": "10.231.0.1", "LOCAL_CIDRS": "10.0.0.0/8"}
     manifest = _provider()._pod_manifest("sess", {}, {}, None, None, {"key": "k", "spoke": spoke})

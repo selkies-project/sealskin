@@ -11,10 +11,8 @@ administrator can install it on any cluster, managed or not.
 ## What you need
 
 * A namespace you administer: Kubernetes' own `admin` role there grants all
-  that `sealskin.yml` asks for. The [PodTemplates](#the-session-template)
-  that shape session pods take access to `podtemplates` as well, which
-  Kubernetes' namespace roles leave out, so someone who holds it, such as a
-  cluster administrator, adds them ([Install](#install)).
+  that `sealskin.yml` asks for, and what shapes session pods is set in
+  SealSkin itself ([The session template](#the-session-template)).
 * A PersistentVolumeClaim for the storage (home directories and shared
   files), which every session mounts. The manifest asks for `ReadWriteOnce`,
   which any default storage class provides, and every session then runs on
@@ -57,22 +55,21 @@ image, its Service, and a NetworkPolicy that lets only the server reach
 session pods where the network plugin enforces policies. Import `admin.json`
 into a client as described in [Getting Started](start.md#connect).
 
+Node placement, runtime class, resources, and GPU options of the session
+pods are set in SealSkin by an administrator, as [pod
+overlays](#the-session-template) kept in its own store, with nothing written
+to the namespace. A cluster administrator may also keep PodTemplates beneath
+them:
 [`kubernetes/pod-templates.yml`](https://github.com/selkies-project/sealskin/blob/main/kubernetes/pod-templates.yml)
-adds the [session template](#the-session-template) and a second Role, bound
-to the same service account, that lets the server read PodTemplates.
-Kubernetes' namespace roles (`admin`, `edit`, `view`) grant nothing on
-PodTemplates, and a Role grants only what its author holds, so it is applied
-by someone who holds that access, such as a cluster administrator:
+adds a session PodTemplate and a second Role, bound to the same service
+account, that lets the server read PodTemplates. Kubernetes' namespace roles
+(`admin`, `edit`, `view`) grant nothing on PodTemplates, and a Role grants
+only what its author holds, so it is applied by someone who holds that
+access:
 
 ```bash
 kubectl apply -n <namespace> -f pod-templates.yml
 ```
-
-Without it the server finds no templates and builds each session pod from
-its own fields: the resources are the namespace's LimitRange defaults unless
-the app template's `DOCKER_MEM_LIMIT`, `DOCKER_NANO_CPUS`, and
-`DOCKER_CPU_SHARES` set them ([Run options on a pod](#run-options-on-a-pod)),
-and GPUs are [detected](#detected-gpus).
 
 For the web app, the server writes the root key, the same administrator's
 application key, at its first start; read it, sign in at `https://<host>/`,
@@ -129,13 +126,48 @@ with the reason the scheduler, the kubelet, or the pod's last warning gave.
 
 ## The session template
 
-Placement and runtime policy belong to the cluster, not to SealSkin, so every
-session pod starts from the PodTemplate `<deployment>-session`
-(`sealskin-session` in `pod-templates.yml`) when the namespace has one and
-the server may read it, which the Role in that file grants. SealSkin lays
-its own fields over it: maps are merged, lists are joined, and its values win.
-The template's container named `app` (or its first container) is the base of
-the session container, and any other container is kept as a sidecar.
+Placement, runtime policy, and resources are set for every session pod by
+the **session overlay**, `kubernetes_session_overlay`: YAML of a pod
+template, a `metadata` and a `spec`, which an administrator writes in the
+dashboard, under **Kubernetes session overlay (YAML)** in the Cluster
+section, or in the nodes' `SEALSKIN_KUBERNETES_SESSION_OVERLAY`. It is kept
+in SealSkin's shared store and written to nothing in the namespace. SealSkin
+lays its own fields over it: maps are merged, lists are joined, and its
+values win; its container `app` is the base of the session container.
+
+```yaml
+spec:
+  runtimeClassName: gvisor
+  priorityClassName: desktops
+  nodeSelector:
+    node-pool: desktops
+  tolerations:
+  - key: desktops
+    operator: Exists
+  containers:
+  - name: app
+    resources:
+      requests:
+        cpu: "1"
+        memory: 2Gi
+      limits:
+        cpu: "8"
+        memory: 8Gi
+```
+
+Resources belong here on clusters that impose small default limits or require
+them: a pod without its own requests and limits gets whatever the namespace's
+LimitRange or admission policy sets, which can be too little for a desktop.
+The overlay is read at every launch, so a change applies to the next session,
+and a value the nodes would refuse is not saved ([What a pod overlay
+takes](#what-a-pod-overlay-takes)).
+
+A cluster administrator may lay a PodTemplate beneath it,
+`<deployment>-session` (`sealskin-session` in `pod-templates.yml`), which the
+server reads when the namespace has one and the Role in that file lets it. A
+PodTemplate takes any field; its container named `app` (or its first
+container) is the base of the session container, and any other container is
+kept as a sidecar.
 
 ```yaml
 apiVersion: v1
@@ -145,77 +177,95 @@ metadata:
 template:
   spec:
     runtimeClassName: gvisor
-    priorityClassName: desktops
-    nodeSelector:
-      node-pool: desktops
-    tolerations:
-    - key: desktops
-      operator: Exists
     containers:
     - name: app
       image: sealskin-session   # replaced by the application's image
-      resources:
-        requests:
-          cpu: "1"
-          memory: 2Gi
-        limits:
-          cpu: "8"
-          memory: 8Gi
 ```
-
-Resources belong here on clusters that impose small default limits or require
-them: a pod without its own requests and limits gets whatever the namespace's
-LimitRange or admission policy sets, which can be too little for a desktop.
-The template is read at every launch, so `kubectl edit podtemplate
-sealskin-session` applies to the next session.
 
 ## Pod templates per application
 
-The session template applies to every application. What differs between
+The session overlay applies to every application. What differs between
 them, such as the labels and annotations an admission controller or policy
-keys on, node selectors and tolerations, or resources, goes into a PodTemplate
-of its own, named by the **Kubernetes Pod Template** setting
-(`KUBERNETES_POD_TEMPLATE`) in the Container card of the
-[app template](administration.md#app-templates) those applications use:
+keys on, node selectors and tolerations, or resources, goes into the
+**Kubernetes Pod Overlay** setting (`KUBERNETES_POD_OVERLAY`) in the
+Container card of the [app template](administration.md#app-templates) those
+applications use:
 
 ```yaml
-apiVersion: v1
-kind: PodTemplate
 metadata:
-  name: cad-workstation
-template:
-  metadata:
-    labels:
-      example.com/profile: cad
-    annotations:
-      example.com/policy: workstation
-  spec:
-    nodeSelector:
-      workload-type: cad
-    tolerations:
-    - key: workload-type
-      operator: Equal
-      value: cad
-      effect: NoSchedule
-    containers:
-    - name: app
-      image: sealskin-session   # the API requires one; the application's image replaces it
-      resources:
-        limits:
-          memory: 16Gi
+  labels:
+    example.com/profile: cad
+  annotations:
+    example.com/policy: workstation
+spec:
+  nodeSelector:
+    workload-type: cad
+  tolerations:
+  - key: workload-type
+    operator: Equal
+    value: cad
+    effect: NoSchedule
+  containers:
+  - name: app
+    resources:
+      limits:
+        memory: 16Gi
 ```
 
-A session pod is built from the session template, then the application's
-template, then the template of the [GPU option](#gpu-options-you-define) the
-user picked, each laid over the last as SealSkin lays its own fields, which
-come last: a GPU choice wins over the application's defaults, and SealSkin's
-labels, volumes, and the session container's image, ports, and environment
-win over all three. The template is read at every launch, and a launch whose
-template the namespace lacks, or the server may not read, fails with that
-reason. Only an administrator
-sets it, as with the `DOCKER_*` settings; the Docker backend ignores it, and
-the pods that export a web client and the VPN gateways start from the session
-template alone.
+The template's **Kubernetes Pod Template** setting
+(`KUBERNETES_POD_TEMPLATE`) names a PodTemplate of the namespace, for a
+cluster administrator's templates; the template's overlay is laid over it.
+A session pod is built from these layers, each laid over the last as
+SealSkin lays its own fields:
+
+1. the session PodTemplate, `<deployment>-session`;
+2. the session overlay;
+3. the PodTemplate the app template names;
+4. the app template's overlay;
+5. the [GPU option](#gpu-options-you-define) the user picked;
+6. SealSkin's own fields: its labels, the volumes, and the session
+   container's image, ports, and environment.
+
+A GPU choice wins over the application's defaults, and SealSkin's fields win
+over all. Every layer is read at every launch, and a launch whose overlay the
+node refuses, or whose named PodTemplate the namespace lacks or the server may
+not read, fails with that reason. Only an administrator sets the two template
+settings, as with the `DOCKER_*` settings; the Docker backend ignores them,
+and the pods that export a web client and the VPN gateways start from the
+first two layers alone.
+
+## What a pod overlay takes
+
+An overlay kept in SealSkin, the session overlay, an app template's, or a
+[GPU option](#gpu-options-you-define)'s template, takes:
+
+| Part | Fields |
+| --- | --- |
+| `metadata` | `labels`, `annotations` |
+| `spec` | `affinity`, `nodeSelector`, `tolerations`, `topologySpreadConstraints`, `runtimeClassName`, `priorityClassName`, `schedulerName`, `securityContext`, `dnsPolicy`, `dnsConfig`, `hostAliases`, `imagePullSecrets`, `resourceClaims`, `containers` |
+| `containers` | The session container `app` alone, with `resources` and `securityContext` |
+
+Any other field is refused by name, and a field of the wrong shape is
+refused too, where the overlay is saved and again at launch: volumes,
+environment, service accounts, init and sidecar containers, and the node's
+namespaces among them. An overlay's spec names nothing of the namespace for a
+session to read, so an administrator of SealSkin reaches no Secret,
+ConfigMap, claim, or service account token through it; what needs those
+belongs in a PodTemplate, which only someone the cluster's RBAC lets write it
+can. Labels and annotations are passed as they are: where the cluster's
+admission webhooks act on them, injecting a sidecar or a secret, they act on
+an overlay's too. The environment comes from the app template, and its
+`DOCKER_*` settings map the run options onto the pod ([Run options on a
+pod](#run-options-on-a-pod)).
+
+Two fields name objects of the namespace without letting the session read
+them. `imagePullSecrets` hands the kubelet a Secret to pull the image with;
+the server reads the session layers' pull secrets too, to pin images
+([Images](#images)), and sends them only to the registries they name.
+`resourceClaims` gives the session a device of a ResourceClaim or a
+ResourceClaimTemplate. GPU resources and claims belong in GPU options, which
+honor each user's GPU switch; in a session or app overlay they apply to every
+session it shapes.
 
 ## Run options on a pod
 
@@ -261,59 +311,53 @@ a render node as on Docker: the image uses the GPU it is handed, whose
 
 ### GPU options you define
 
-When the namespace has PodTemplates labelled `sealskin.app/gpu` and the
-server may read them ([Install](#install)), they are the GPU options, one per
-template. The label's value is the GPU's kernel driver
-(`nvidia`, `amdgpu`, `i915`, `xe`, and so on), which decides the apps that
-may use it, and the template holds what a session needs for that GPU; it is
-laid over the [session template](#the-session-template) the same way. This
-serves any vendor's device plugin, Dynamic Resource Allocation, and
+The GPU options are defined in SealSkin, in `kubernetes_gpu_options`, under
+**Kubernetes GPU options (YAML)** in the Cluster section of the dashboard or
+in the nodes' `SEALSKIN_KUBERNETES_GPU_OPTIONS`: a list, each entry a `name`
+the launcher shows, the GPU's kernel `driver` (`nvidia`, `amdgpu`, `i915`,
+`xe`, and so on), which decides the apps that may use it, and a `template`,
+the [pod overlay](#what-a-pod-overlay-takes) that gives a session that GPU.
+This serves any vendor's device plugin, Dynamic Resource Allocation, and
 namespaces where the server can detect nothing:
 
 ```yaml
-apiVersion: v1
-kind: PodTemplate
-metadata:
-  name: gpu-l40s
-  labels:
-    sealskin.app/gpu: nvidia
-template:
-  spec:
-    nodeSelector:
-      nvidia.com/gpu.product: NVIDIA-L40S
-    containers:
-    - name: app
-      image: sealskin-session
-      resources:
-        limits:
-          nvidia.com/gpu: 1
----
-apiVersion: v1
-kind: PodTemplate
-metadata:
-  name: gpu-radeon
-  labels:
-    sealskin.app/gpu: amdgpu
-template:
-  spec:
-    resourceClaims:
-    - name: gpu
-      resourceClaimTemplateName: radeon   # a ResourceClaimTemplate in the namespace
-    containers:
-    - name: app
-      image: sealskin-session
-      resources:
-        claims:
-        - name: gpu
+- name: gpu-l40s
+  driver: nvidia
+  template:
+    spec:
+      nodeSelector:
+        nvidia.com/gpu.product: NVIDIA-L40S
+      containers:
+      - name: app
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+- name: gpu-radeon
+  driver: amdgpu
+  template:
+    spec:
+      resourceClaims:
+      - name: gpu
+        resourceClaimTemplateName: radeon   # a ResourceClaimTemplate in the namespace
+      containers:
+      - name: app
+        resources:
+          claims:
+          - name: gpu
 ```
 
-The templates are read again whenever the launcher lists the options and
-when a session starts, so adding, changing, or removing one needs no restart.
+A name is lowercase letters, digits, `-`, and `.`, and `auto` is the
+launcher's own. PodTemplates labelled `sealskin.app/gpu`, valued with the
+GPU's kernel driver, are GPU options too, offered beside the setting's when
+the server may read them ([Install](#install)); an option of the setting
+takes the place of a PodTemplate of its name. Both are read again whenever
+the launcher lists the options and when a session starts, so adding,
+changing, or removing one needs no restart.
 
 ### Detected GPUs
 
-Without such templates, the server finds the GPUs itself, once, the first
-time it needs them: at startup, or when the last template is removed. Restart
+Without GPU options of either kind, the server finds the GPUs itself, once,
+the first time it needs them: at startup, or when the last option is removed. Restart
 it to offer GPUs the cluster gained since.
 
 * When it may list nodes, every whole GPU a schedulable node advertises to
@@ -344,8 +388,9 @@ kubectl create clusterrolebinding sealskin-gpus-<namespace> \
 A session on a detected GPU requests one unit of its resource and tolerates
 taints keyed by it and, for NVIDIA, by `nvidia.com/gpu`, which GPU node pools
 commonly carry. NVIDIA sessions also get `NVIDIA_DRIVER_CAPABILITIES=all` and
-the `nvidia` RuntimeClass where the cluster defines one, unless the templates
-set their own; where the cluster has none, the default runtime is used.
+the `nvidia` RuntimeClass where the cluster defines one, unless the layers
+of the pod set their own; where the cluster has none, the default runtime is
+used.
 
 ## Images
 
@@ -355,8 +400,8 @@ session runs exactly that image; each node pulls it the first time it runs
 it and reuses it after. With auto-update on, the digests are re-pinned every update interval. An
 image that was never pinned since the server started runs by its tag under
 the cluster's pull policy, which for `:latest` is to pull on every start.
-The registry is asked with the pull secrets the [session
-template](#the-session-template) names, which the server reads through its
+The registry is asked with the pull secrets the [session overlay and
+PodTemplate](#the-session-template) name, which the server reads through its
 Role, and with the node's own credential file
 ([Registries and proxies](registries.md#credentials)); a private image
 covered by neither is not pinned and runs by its tag. Images are pulled

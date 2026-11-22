@@ -1213,6 +1213,10 @@
         "KUBERNETES_POD_TEMPLATE": {
           "label": "Kubernetes-podsjabloon",
           "description": "Op Kubernetes de naam van een PodTemplate in de namespace die voor de apps van dit sjabloon over het sessiesjabloon wordt gelegd: labels, annotaties, nodeselectors, tolerations, resources. Genegeerd op Docker."
+        },
+        "KUBERNETES_POD_OVERLAY": {
+          "label": "Kubernetes-podoverlay",
+          "description": "Op Kubernetes de YAML van een podoverlay (metadata en spec) die na de PodTemplate hierboven over de sessies van deze sjabloon wordt gelegd: plaatsing op nodes, tolerations, runtime- en prioriteitsklasse, en de resources en securitycontext van de container app. Volumes, omgevingsvariabelen, serviceaccounts en andere containers worden geweigerd. Genegeerd op Docker."
         }
       }
     },
@@ -1544,7 +1548,9 @@
         "web_session_seconds": "Maximale duur van een ongebruikte root-aanmelding (uren)",
         "files_sync": "Gedeelde bestanden in de objectopslag bewaren",
         "auto_sign_in": "Een afgemelde browser direct doorsturen naar",
-        "legacy_auth": "Clients met een sleutelbestand accepteren"
+        "legacy_auth": "Clients met een sleutelbestand accepteren",
+        "kubernetes_session_overlay": "Kubernetes-sessieoverlay (YAML)",
+        "kubernetes_gpu_options": "Kubernetes-GPU-opties (YAML)"
       },
       "usageTitle": "Gebruik",
       "usageHours": "Gewogen uren",

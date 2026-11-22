@@ -7,9 +7,10 @@ session the way the server sees it: each server path is mounted from the
 volume that backs it, with a `subPath`; a volume only one node can mount (a
 `ReadWriteOnce` claim, a `hostPath`) pins sessions to the server's node.
 A session pod starts from the PodTemplate `<owner>-session` when the namespace
-has one, which is where node placement, runtime classes, and default resources
-belong; an application's template may name another PodTemplate, laid over it for
-that application's sessions. Session pods are labelled with the server's owner (its Deployment or
+has one, with the administrator's session overlay (`app.pod_overlays`) laid over
+it, which is where node placement, runtime classes, and default resources
+belong; an application's template may name another PodTemplate and hold an
+overlay of its own, laid over those for that application's sessions. Session pods are labelled with the server's owner (its Deployment or
 StatefulSet) and owned by it, so uninstalling removes them too. Images are
 pulled by the kubelet, so `pull_image` pins the registry's current digest and
 sessions run that exact image.
@@ -37,7 +38,7 @@ import httpx
 import websockets
 from fastapi import HTTPException
 
-from .. import progress, registries
+from .. import pod_overlays, progress, registries
 from ..docker_utils import NVIDIA_GPUS_DIR, scan_render_nodes
 from ..settings import settings
 from ..state import state
@@ -248,8 +249,10 @@ class KubeClient:
 
 
 _client: KubeClient | None = None
-#: The GPUs the cluster scan found, which stand while the namespace has no GPU PodTemplates.
+#: The GPUs the cluster scan found, which stand while there are no GPU options, of the setting or PodTemplates.
 _scanned: list[dict[str, Any]] | None = None
+#: The `kubernetes_gpu_options` last refused, so it is logged once.
+_refused_gpu_options = ""
 
 
 def kube() -> KubeClient:
@@ -258,6 +261,59 @@ def kube() -> KubeClient:
     if _client is None:
         _client = KubeClient.in_cluster()
     return _client
+
+
+async def read_pod_template(name: str) -> dict[str, Any] | None:
+    """Return the pod template of the namespace's PodTemplate `name`, `None` without one or the Role to read it."""
+    api = kube()
+    try:
+        found = await api.request("GET", api.path("podtemplates", name))
+    except KubeError as exc:
+        if exc.status in (403, 404):
+            return None
+        raise
+    return found.get("template") or {}
+
+
+def session_overlay(strict: bool = True) -> dict[str, Any]:
+    """Return `kubernetes_session_overlay`, the pod overlay under every session pod.
+
+    Args:
+        strict: Raise for a setting `pod_overlays` refuses, as a launch does; otherwise log it and lay nothing.
+
+    Raises:
+        HTTPException: 500 for a refused setting, when `strict`.
+    """
+    try:
+        return pod_overlays.parse_overlay(settings.kubernetes_session_overlay, "kubernetes_session_overlay")
+    except ValueError as exc:
+        if strict:
+            raise HTTPException(status_code=500, detail=f"The session overlay is refused: {exc}") from exc
+        logger.error("Laying no session overlay: %s", exc)
+        return {}
+
+
+async def session_template(strict: bool = True) -> dict[str, Any]:
+    """Return what every session pod starts from: the PodTemplate `<owner>-session` with the session overlay over it.
+
+    Args:
+        strict: As for `session_overlay`.
+    """
+    found = await read_pod_template(f"{state.instance_name}-session") or {}
+    overlay = session_overlay(strict)
+    return _overlay(found, overlay) if overlay else found
+
+
+def gpu_options() -> list[dict[str, Any]]:
+    """Return the GPU options of `kubernetes_gpu_options` as they are now, none while the setting is refused."""
+    global _refused_gpu_options
+    try:
+        return pod_overlays.parse_gpu_options(settings.kubernetes_gpu_options)
+    except ValueError as exc:
+        if settings.kubernetes_gpu_options != _refused_gpu_options:
+            logger.error("Offering no GPU option of kubernetes_gpu_options: %s", exc)
+            _refused_gpu_options = settings.kubernetes_gpu_options
+        return []
 
 
 def _docker_quantity(value: Any) -> str:
@@ -552,10 +608,11 @@ class KubernetesProvider(BaseProvider):
     async def detect_gpus(self) -> None:
         """Offer the GPUs sessions can request.
 
-        PodTemplates labelled `sealskin.app/gpu` are the options when the
-        namespace has any, each carrying what its GPU needs (a device plugin
-        resource or a DRA claim, node placement); `refresh_gpus` reads them
-        again whenever the options are offered or used. Otherwise, as nodes are
+        The options of `kubernetes_gpu_options` and the PodTemplates labelled
+        `sealskin.app/gpu` are the options when there are any, each carrying
+        what its GPU needs (a device plugin resource or a DRA claim, node
+        placement); `refresh_gpus` reads them again whenever the options are
+        offered or used. Otherwise, as nodes are
         cluster-scoped: the GPU resources schedulable nodes advertise or DRA
         device classes map, when the server may list them; else those the
         namespace's quota grants; else the GPUs of the server's own node.
@@ -569,7 +626,9 @@ class KubernetesProvider(BaseProvider):
         await self.refresh_gpus()
 
     async def refresh_gpus(self) -> None:
-        """Offer the namespace's GPU PodTemplates as they are now, else the scanned GPUs.
+        """Offer the GPU options of `kubernetes_gpu_options` and the namespace's GPU PodTemplates, else the scanned GPUs.
+
+        An option of the setting takes the place of a PodTemplate of its name.
 
         The options offered stand when the templates cannot be listed for any reason but the
         Role withholding them, so an API server that is slow or restarting neither holds up
@@ -594,15 +653,17 @@ class KubernetesProvider(BaseProvider):
                 )
                 return
             options = []
-        if options:
-            named = sorted((o["metadata"]["name"], o["metadata"]["labels"][GPU_TEMPLATE_LABEL] or "gpu") for o in options)
-            offered = [
-                {"device": name, "driver": driver, "type": "nvidia" if driver == "nvidia" else "dri3", "template": name}
-                for name, driver in named
-            ]
-            offered = offered_gpus(offered)
+        own = gpu_options()
+        found = [{"device": o["name"], "driver": o["driver"], "option": o["name"]} for o in own] + [
+            {"device": name, "driver": o["metadata"]["labels"][GPU_TEMPLATE_LABEL] or "gpu", "template": name}
+            for o in options
+            if (name := o["metadata"]["name"]) not in {option["name"] for option in own}
+        ]
+        if found:
+            found.sort(key=lambda gpu: (gpu["device"], gpu["driver"]))
+            offered = offered_gpus([{**gpu, "type": "nvidia" if gpu["driver"] == "nvidia" else "dri3"} for gpu in found])
             if offered != state.available_gpus:
-                logger.info("Offering %d GPU option(s) from PodTemplates: %s", len(named), [name for name, _ in named])
+                logger.info("Offering %d GPU option(s): %s", len(found), [gpu["device"] for gpu in found])
             state.available_gpus[:] = offered
             return
         if _scanned is None:
@@ -613,7 +674,7 @@ class KubernetesProvider(BaseProvider):
     async def _scan_gpus(self) -> list[dict[str, Any]]:
         """Return the GPUs the cluster's nodes and device classes, the quota, or this node offer."""
         api = kube()
-        session = (await self._pod_template() or {}).get("spec") or {}
+        session = (await session_template(strict=False)).get("spec") or {}
         try:
             quotas = (await api.request("GET", api.path("resourcequotas")))["items"]
         except KubeError:
@@ -711,7 +772,7 @@ class KubernetesProvider(BaseProvider):
             return _pull_secrets[1]
         api = kube()
         auths: dict[str, tuple[str, str]] = {}
-        template = (await self._pod_template() or {}).get("spec") or {}
+        template = (await session_template(strict=False)).get("spec") or {}
         for index, entry in enumerate(template.get("imagePullSecrets") or [], 1):
             name = (entry or {}).get("name")
             if not name:
@@ -733,7 +794,7 @@ class KubernetesProvider(BaseProvider):
         the session template's placement and pull secrets, nothing else.
         """
         api = kube()
-        template = (await self._pod_template() or {}).get("spec") or {}
+        template = (await session_template(strict=False)).get("spec") or {}
         reference = _session_image(image)
         tag = "@" if "@" in reference else reference.rsplit("/", 1)[-1].partition(":")[2]
         spec: dict[str, Any] = {
@@ -808,10 +869,10 @@ class KubernetesProvider(BaseProvider):
         template: dict[str, Any] | None = None,
         vpn: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """Build the session pod over the namespace's session template.
+        """Build the session pod over `template`, the layers `launch` laid together.
 
         The app's and its template's Docker run options are mapped onto the
-        pod; the PodTemplate's container named `app`, or its first, is the
+        pod; the template's container named `app`, or its first, is the
         base of the session container. What NVIDIA sessions get by default,
         the `nvidia` RuntimeClass and every driver capability, yields to the
         templates' own choice. With `vpn`, a native sidecar from the gateway
@@ -944,7 +1005,7 @@ class KubernetesProvider(BaseProvider):
                 logger.info("[%s] Run option '%s' has no pod equivalent.", session_id, key)
 
         if gpu_config:
-            # A GPU option from a PodTemplate brings its own resource or claim.
+            # A GPU option of the setting or a PodTemplate brings its own resource or claim.
             if "resource" in gpu_config:
                 resource = gpu_config["resource"]
                 resources["limits"][resource] = "1"
@@ -1025,16 +1086,9 @@ class KubernetesProvider(BaseProvider):
             "spec": _merge(base, spec),
         }
 
-    async def _pod_template(self, name: str = "") -> dict[str, Any] | None:
-        """Return the pod template of a PodTemplate, `<owner>-session` by default, or `None` without one."""
-        api = kube()
-        try:
-            found = await api.request("GET", api.path("podtemplates", name or f"{state.instance_name}-session"))
-        except KubeError as exc:
-            if exc.status in (403, 404):
-                return None
-            raise
-        return found.get("template") or {}
+    async def _pod_template(self, name: str) -> dict[str, Any] | None:
+        """Return the pod template of the PodTemplate `name`, or `None` without one."""
+        return await read_pod_template(name)
 
     async def _create(self, session_id: str, manifest: dict[str, Any]) -> dict[str, Any]:
         """Create the pod, dropping the `nvidia` RuntimeClass where the cluster has none."""
@@ -1119,16 +1173,17 @@ class KubernetesProvider(BaseProvider):
     ) -> dict[str, Any]:
         """Create the session pod and wait until its web endpoint answers.
 
-        The pod is built over the session template, the PodTemplate the app's
-        template names, and the GPU option's PodTemplate, laid over one another in
-        that order, so the GPU a user picked wins over the application's defaults.
+        The pod is built over the session template (`session_template`), the
+        PodTemplate the app's template names, the overlay it holds, and the GPU
+        option's PodTemplate or overlay, laid over one another in that order, so
+        the GPU a user picked wins over the application's defaults.
         See `BaseProvider.launch` for the arguments; `network` has no meaning here.
 
         Raises:
             HTTPException: When the pod is refused, fails, or never becomes ready.
         """
         try:
-            template = await self._pod_template() or {}
+            template = await session_template()
             app_template = self.app_config["provider_config"].get("pod_template") or ""
             if app_template:
                 if len(app_template) > 253 or not re.fullmatch(r"[a-z0-9]([-a-z0-9.]*[a-z0-9])?", app_template):
@@ -1139,6 +1194,18 @@ class KubernetesProvider(BaseProvider):
                         status_code=400, detail=f"The application's PodTemplate '{app_template}' is not in the namespace."
                     )
                 template = _overlay(template, found)
+            app_overlay = self.app_config["provider_config"].get("pod_overlay") or ""
+            if app_overlay:
+                try:
+                    overlay = pod_overlays.parse_overlay(app_overlay, "KUBERNETES_POD_OVERLAY")
+                except ValueError as exc:
+                    raise HTTPException(status_code=400, detail=f"The app template's pod overlay is refused: {exc}") from exc
+                template = _overlay(template, overlay)
+            if gpu_config and "option" in gpu_config:
+                option = next((o for o in gpu_options() if o["name"] == gpu_config["option"]), None)
+                if option is None:
+                    raise HTTPException(status_code=400, detail=f"The GPU option '{gpu_config['device']}' is gone.")
+                template = _overlay(template, option["template"])
             if gpu_config and "template" in gpu_config:
                 gpu_template = await self._pod_template(gpu_config["template"])
                 if gpu_template is None:

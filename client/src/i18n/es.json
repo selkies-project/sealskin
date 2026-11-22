@@ -1213,6 +1213,10 @@
         "KUBERNETES_POD_TEMPLATE": {
           "label": "Plantilla de pod de Kubernetes",
           "description": "En Kubernetes, el nombre de una PodTemplate del espacio de nombres que se superpone a la plantilla de sesión para las aplicaciones de esta plantilla: etiquetas, anotaciones, selectores de nodo, tolerancias, recursos. Se ignora en Docker."
+        },
+        "KUBERNETES_POD_OVERLAY": {
+          "label": "Superposición de pod de Kubernetes",
+          "description": "En Kubernetes, el YAML de una superposición de pod (metadata y spec) que se aplica a las sesiones de esta plantilla después del PodTemplate anterior: ubicación en nodos, tolerations, clases de runtime y de prioridad, y los recursos y el contexto de seguridad del contenedor app. Se rechazan volúmenes, variables de entorno, cuentas de servicio y otros contenedores. Se ignora en Docker."
         }
       }
     },
@@ -1544,7 +1548,9 @@
         "web_session_seconds": "Tiempo máximo sin uso de un inicio de sesión root (horas)",
         "files_sync": "Guardar los archivos compartidos en el almacenamiento de objetos",
         "auto_sign_in": "Enviar un navegador sin sesión directamente a",
-        "legacy_auth": "Aceptar clientes con archivo de clave"
+        "legacy_auth": "Aceptar clientes con archivo de clave",
+        "kubernetes_session_overlay": "Superposición de sesión de Kubernetes (YAML)",
+        "kubernetes_gpu_options": "Opciones de GPU de Kubernetes (YAML)"
       },
       "usageTitle": "Uso",
       "usageHours": "Horas ponderadas",

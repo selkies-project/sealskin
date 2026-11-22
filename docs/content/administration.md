@@ -415,8 +415,9 @@ leaves just the values a template sets. The cards:
   than environment variables: privileged mode, capabilities, devices, extra
   bind mounts, memory and CPU limits, network, IPC and PID modes, DNS,
   sysctls, ulimits, tmpfs, and extra groups; and on Kubernetes
-  `KUBERNETES_POD_TEMPLATE`, a [PodTemplate](kubernetes.md#pod-templates-per-application)
-  laid over the session pod. Only an administrator edits these.
+  `KUBERNETES_POD_OVERLAY`, the [pod overlay](kubernetes.md#pod-templates-per-application)
+  laid over the session pod, and `KUBERNETES_POD_TEMPLATE`, a PodTemplate of
+  the namespace beneath it. Only an administrator edits these.
 
 The list of variables comes from `template_schema.yml` on the server, so a
 new image option is a server change and never needs a client update. The
@@ -609,8 +610,8 @@ the node cannot name is shown by its render node and driver.
 A launch may use a GPU when the user's settings allow it and the app declares
 support for that GPU type. On Wayland, NVIDIA sessions also receive the DRI
 node so the compositor can use the card directly. On Kubernetes the GPUs are
-the requests sessions can make, detected or defined as PodTemplates, as
-[Kubernetes](kubernetes.md#gpus) describes.
+the requests sessions can make, defined in SealSkin's settings or as
+PodTemplates, or detected, as [Kubernetes](kubernetes.md#gpus) describes.
 
 ## Keys and certificates
 

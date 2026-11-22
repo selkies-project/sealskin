@@ -1213,6 +1213,10 @@
         "KUBERNETES_POD_TEMPLATE": {
           "label": "Mẫu pod Kubernetes",
           "description": "Trên Kubernetes, tên của một PodTemplate trong namespace được áp lên mẫu phiên cho các ứng dụng của mẫu này: nhãn, chú thích, bộ chọn nút, tolerations, tài nguyên. Bị bỏ qua trên Docker."
+        },
+        "KUBERNETES_POD_OVERLAY": {
+          "label": "Lớp phủ pod Kubernetes",
+          "description": "Trên Kubernetes, YAML của một lớp phủ pod (metadata và spec) áp lên các phiên của mẫu này sau PodTemplate ở trên: vị trí trên node, tolerations, lớp runtime và lớp ưu tiên, cùng tài nguyên và ngữ cảnh bảo mật của container app. Volume, biến môi trường, tài khoản dịch vụ và các container khác bị từ chối. Bị bỏ qua trên Docker."
         }
       }
     },
@@ -1544,7 +1548,9 @@
         "web_session_seconds": "Thời gian tối đa một lần đăng nhập root được giữ khi không dùng (giờ)",
         "files_sync": "Lưu các tệp đã chia sẻ trong kho đối tượng",
         "auto_sign_in": "Đưa trình duyệt chưa đăng nhập thẳng đến",
-        "legacy_auth": "Chấp nhận máy khách dùng tệp khóa"
+        "legacy_auth": "Chấp nhận máy khách dùng tệp khóa",
+        "kubernetes_session_overlay": "Lớp phủ phiên Kubernetes (YAML)",
+        "kubernetes_gpu_options": "Tùy chọn GPU Kubernetes (YAML)"
       },
       "usageTitle": "Mức sử dụng",
       "usageHours": "Giờ có trọng số",

@@ -19,11 +19,11 @@
 #             translation options.appTemplates.sections.<section>.
 #   group     For the webrtc section alone, the heading inside its block, with
 #             the label at options.appTemplates.groups.<group>.
-#   type      text | boolean | select.
+#   type      text | boolean | select | yaml (text of several lines, kept whole).
 #   default   Default value shown in the editor (always a string).
-#   docker    true when the variable becomes a Docker run option or names the
-#             session's PodTemplate instead of being passed to the container
-#             environment.
+#   docker    true when the variable becomes a Docker run option, or names or
+#             holds what the session's pod is built over, instead of being passed
+#             to the container environment.
 #   options   For select types: list of {value, label_key} or {value, label}.
 #             label_key resolves to the translation key
 #             options.appTemplates.settings.<NAME>.options.<label_key>.
@@ -1434,5 +1434,11 @@ settings:
     category: docker
     section: container
     type: text
+    default: ""
+    docker: true
+  - name: KUBERNETES_POD_OVERLAY
+    category: docker
+    section: container
+    type: yaml
     default: ""
     docker: true

@@ -798,6 +798,35 @@ def test_a_peer_signature_binds_the_path_as_it_goes_on_the_wire(node):
     assert cluster.wire_path("/peer/status?q=a b") == "/peer/status?q=a%20b"
 
 
+def test_a_pod_overlay_setting_is_written_only_as_the_nodes_take_it(node):
+    path = cluster.os.path.join(settings.cluster_path, "settings.yml")
+    signed_in = node.post("/api/auth/key", json={"key": "a-root-key-for-the-tests"}, headers=WEB)
+    cookie = {**WEB, "Cookie": signed_in.headers["set-cookie"].split(";", 1)[0]}
+    overlay = "spec:\n  runtimeClassName: gvisor\n"
+    options = "- name: l40s\n  driver: nvidia\n"
+    for name, value, named in (
+        ("kubernetes_session_overlay", "spec: {serviceAccountName: sealskin}", "serviceAccountName"),
+        ("kubernetes_gpu_options", "- {name: auto, driver: nvidia}", "'auto'"),
+        ("kubernetes_session_overlay", "spec: [", "not YAML"),
+    ):
+        refused = node.put("/api/admin/cluster/settings", json={name: value, "files_sync": "on"}, headers=cookie)
+        assert refused.status_code == 400 and named in refused.json()["detail"], name
+    assert "files_sync" not in (persistence.read_yaml(path, {}) or {})
+    written = node.put(
+        "/api/admin/cluster/settings", json={"kubernetes_session_overlay": overlay, "kubernetes_gpu_options": options}, headers=cookie
+    )
+    assert written.status_code == 200 and written.json()["written_settings"] == ["kubernetes_gpu_options", "kubernetes_session_overlay"]
+    # Writing another setting leaves the overlays as they were written, newlines and all.
+    node.put("/api/admin/cluster/settings", json={"files_sync": "on"}, headers=cookie)
+    record = persistence.read_yaml(path)
+    assert record["kubernetes_session_overlay"] == overlay and record["kubernetes_gpu_options"] == options
+    cluster.load_registry()
+    assert settings.kubernetes_session_overlay == overlay
+    node.put("/api/admin/cluster/settings", json={"kubernetes_session_overlay": "", "kubernetes_gpu_options": ""}, headers=cookie)
+    cluster.load_registry()
+    assert settings.kubernetes_session_overlay == ""
+
+
 def test_a_secret_cluster_setting_is_sealed_under_the_store_key(node, monkeypatch):
     from app import filecrypt
 

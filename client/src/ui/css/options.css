@@ -1184,6 +1184,7 @@ span.close-button:hover { transform: rotate(90deg); }
 .field.wide, .field-list.single .field.wide { grid-template-columns: 1fr; gap: 0.4rem; }
 .field.wide .field-control { flex-direction: column; align-items: stretch; }
 .field-control textarea { width: 100%; font-size: 0.9rem; }
+.field-control textarea.code { font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.5; tab-size: 2; white-space: pre; overflow-x: auto; }
 .field-control select[multiple] { height: auto; padding: 0.3rem; }
 .field-control select[multiple] option { padding: 0.15rem 0.4rem; }
 .field-control .description { margin: 0.35rem 0 0; font-size: 0.8rem; }

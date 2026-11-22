@@ -13,7 +13,19 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from lxml import etree
 from pydantic import BaseModel, Field, ValidationError
 
-from .. import audit, cluster, homes, persistence, proxy_auth, quota, routing, sso, store
+from .. import (
+    audit,
+    cluster,
+    homes,
+    persistence,
+    pod_overlays,
+    proxy_auth,
+    quota,
+    routing,
+    sso,
+    store,
+)
+from ..providers import on_kubernetes
 from ..security import EncryptedRoute, get_decrypted_request_body, verify_admin, verify_token
 from ..settings import CLUSTER_SETTINGS, SECRET_SETTINGS, settings
 
@@ -27,6 +39,11 @@ router = APIRouter(
 user_router = APIRouter(prefix="/api/cluster", route_class=EncryptedRoute)
 
 _NAME = re.compile(r"[a-zA-Z0-9_-]+")
+#: Cluster settings that hold YAML, with what reads each, so a value the nodes would refuse is never written.
+_YAML_SETTINGS = {
+    "kubernetes_session_overlay": pod_overlays.parse_overlay,
+    "kubernetes_gpu_options": pod_overlays.parse_gpu_options,
+}
 
 
 class NodeUpdate(BaseModel):
@@ -155,6 +172,7 @@ async def overview(request: Request) -> dict[str, Any]:
         "written_settings": sorted(written),
         "secret_set": {name: bool(getattr(settings, name)) for name in SECRET_SETTINGS},
         "public_url": cluster.public_url(),
+        "kubernetes": on_kubernetes(),
         "session_domain": settings.session_domain,
         "session_isolation": settings.session_isolation,
         "signin": {
@@ -252,7 +270,13 @@ async def write_settings(body: dict[str, Any] = Depends(get_decrypted_request_bo
             raise HTTPException(status_code=400, detail=f"'{name}' is not a cluster setting.")
         if value is None or value == "":
             current.pop(name, None)
-        elif name in SECRET_SETTINGS:
+            continue
+        if name in _YAML_SETTINGS:
+            try:
+                _YAML_SETTINGS[name](str(value))
+            except ValueError as exc:
+                raise HTTPException(status_code=400, detail=f"{name}: {exc}") from exc
+        if name in SECRET_SETTINGS:
             current[name] = cluster.seal_setting(str(value))
         else:
             current[name] = value

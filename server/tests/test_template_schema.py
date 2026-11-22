@@ -15,7 +15,7 @@ from app.routers.ui import load_template_schema
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 I18N = os.path.join(REPO, "client", "src", "i18n")
 CATEGORIES = {"ui", "app", "hardening", "general", "webrtc", "docker"}
-TYPES = {"text", "boolean", "select"}
+TYPES = {"text", "boolean", "select", "yaml"}
 WEBRTC_GROUPS = {"mode", "transport", "stun", "turn", "turnRest", "cloudflare", "extra"}
 
 

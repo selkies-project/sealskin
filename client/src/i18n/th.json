@@ -1213,6 +1213,10 @@
         "KUBERNETES_POD_TEMPLATE": {
           "label": "เทมเพลตพ็อดของ Kubernetes",
           "description": "บน Kubernetes ชื่อของ PodTemplate ในเนมสเปซที่ซ้อนทับเทมเพลตเซสชันสำหรับแอปของเทมเพลตนี้: ป้ายกำกับ คำอธิบายประกอบ ตัวเลือกโหนด tolerations และทรัพยากร ไม่มีผลบน Docker"
+        },
+        "KUBERNETES_POD_OVERLAY": {
+          "label": "โอเวอร์เลย์พ็อด Kubernetes",
+          "description": "บน Kubernetes คือ YAML ของโอเวอร์เลย์พ็อด (metadata และ spec) ที่ซ้อนทับเซสชันของเทมเพลตนี้ต่อจาก PodTemplate ด้านบน: การจัดวางบนโหนด, tolerations, คลาสรันไทม์และคลาสลำดับความสำคัญ รวมถึงทรัพยากรและบริบทความปลอดภัยของคอนเทนเนอร์ app ระบบจะปฏิเสธวอลุ่ม ตัวแปรสภาพแวดล้อม บัญชีบริการ และคอนเทนเนอร์อื่น ไม่มีผลบน Docker"
         }
       }
     },
@@ -1544,7 +1548,9 @@
         "web_session_seconds": "ระยะเวลาสูงสุดที่การลงชื่อเข้าใช้แบบ root คงอยู่เมื่อไม่ได้ใช้งาน (ชั่วโมง)",
         "files_sync": "เก็บไฟล์ที่แชร์ไว้ในออบเจกต์สโตร์",
         "auto_sign_in": "ส่งเบราว์เซอร์ที่ยังไม่ได้ลงชื่อเข้าใช้ไปที่",
-        "legacy_auth": "ยอมรับไคลเอ็นต์แบบไฟล์คีย์"
+        "legacy_auth": "ยอมรับไคลเอ็นต์แบบไฟล์คีย์",
+        "kubernetes_session_overlay": "โอเวอร์เลย์เซสชัน Kubernetes (YAML)",
+        "kubernetes_gpu_options": "ตัวเลือก GPU ของ Kubernetes (YAML)"
       },
       "usageTitle": "การใช้งาน",
       "usageHours": "ชั่วโมงแบบถ่วงน้ำหนัก",

@@ -311,6 +311,23 @@ def test_template_editors_keep_docker_settings_to_administrators(role_clients):
     assert editor.call("DELETE", f"{templates}/Placed")[0] == 403
     assert boss.call("DELETE", f"{templates}/Placed")[0] == 204
 
+    # A pod overlay is an administrator's, held to the fields SealSkin takes; an editor saves it as it is.
+    overlay = "spec:\n  runtimeClassName: gvisor\n  containers:\n  - name: app\n    resources: {limits: {memory: 4Gi}}\n"
+    refused = {"KUBERNETES_POD_OVERLAY": "spec: {volumes: [{name: s, secret: {secretName: tls}}]}"}
+    status, body = boss.call("POST", templates, {"name": "Overlaid", "settings": refused})
+    assert status == 422 and "spec.volumes" in body["detail"]
+    assert boss.call("POST", templates, {"name": "Overlaid", "settings": {"KUBERNETES_POD_OVERLAY": "spec: ["}})[0] == 422
+    assert editor.call("POST", templates, {"name": "Team", "settings": {"KUBERNETES_POD_OVERLAY": overlay}})[0] == 403
+    assert boss.call("POST", templates, {"name": "Overlaid", "settings": {"KUBERNETES_POD_OVERLAY": overlay}})[0] == 201
+    status, saved = editor.call("POST", templates, {"name": "Overlaid", "settings": {"TITLE": "Kept"}})
+    assert status == 201 and saved["settings"] == {"TITLE": "Kept", "KUBERNETES_POD_OVERLAY": overlay}
+    same = {"TITLE": "Again", "KUBERNETES_POD_OVERLAY": overlay}
+    assert editor.call("POST", templates, {"name": "Overlaid", "settings": same})[0] == 201
+    flattened = {"TITLE": "Again", "KUBERNETES_POD_OVERLAY": overlay.replace("\n", " ")}
+    assert editor.call("POST", templates, {"name": "Overlaid", "settings": flattened})[0] == 403
+    assert boss.call("POST", templates, {"name": "Overlaid", "settings": flattened})[0] == 422
+    assert boss.call("DELETE", f"{templates}/Overlaid")[0] == 204
+
     devices = "/dev/dri/renderD128"
     assert boss.call("POST", templates, {"name": "Hosted", "settings": {"DOCKER_DEVICES": devices}})[0] == 201
     status, saved = editor.call("POST", templates, {"name": "Hosted", "settings": {"TITLE": "Kept"}})

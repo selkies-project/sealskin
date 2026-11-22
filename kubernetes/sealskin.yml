@@ -6,9 +6,9 @@
 #   kubectl apply -n <namespace> -f sealskin.yml
 # The server launches every session as a pod in its own namespace through the
 # Role below, which asks for nothing beyond Kubernetes' own namespace `admin`
-# role, so a namespace administrator can grant it. Session templates are
-# PodTemplates, which that role leaves out: pod-templates.yml adds them where
-# someone may. https://docs.sealskin.app/kubernetes describes the rest.
+# role, so a namespace administrator can grant it. What shapes session pods is
+# set in SealSkin; pod-templates.yml adds PodTemplates beneath it where someone
+# may. https://docs.sealskin.app/kubernetes describes the rest.
 
 apiVersion: v1
 kind: ServiceAccount

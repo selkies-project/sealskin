@@ -1213,6 +1213,10 @@
         "KUBERNETES_POD_TEMPLATE": {
           "label": "Modelo de pod do Kubernetes",
           "description": "No Kubernetes, o nome de um PodTemplate do namespace aplicado sobre o modelo de sessão para os aplicativos deste modelo: rótulos, anotações, seletores de nó, tolerâncias, recursos. Ignorado no Docker."
+        },
+        "KUBERNETES_POD_OVERLAY": {
+          "label": "Sobreposição de pod do Kubernetes",
+          "description": "No Kubernetes, o YAML de uma sobreposição de pod (metadata e spec) aplicada às sessões deste modelo depois do PodTemplate acima: posicionamento nos nós, tolerations, classes de runtime e de prioridade, e os recursos e o contexto de segurança do contêiner app. Volumes, ambiente, contas de serviço e outros contêineres são recusados. Ignorado no Docker."
         }
       }
     },
@@ -1544,7 +1548,9 @@
         "web_session_seconds": "Tempo máximo que um login root dura sem uso (horas)",
         "files_sync": "Manter os arquivos compartilhados no armazenamento de objetos",
         "auto_sign_in": "Enviar um navegador sem login diretamente para",
-        "legacy_auth": "Aceitar clientes com arquivo de chave"
+        "legacy_auth": "Aceitar clientes com arquivo de chave",
+        "kubernetes_session_overlay": "Sobreposição de sessão do Kubernetes (YAML)",
+        "kubernetes_gpu_options": "Opções de GPU do Kubernetes (YAML)"
       },
       "usageTitle": "Uso",
       "usageHours": "Horas ponderadas",

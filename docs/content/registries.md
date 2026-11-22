@@ -67,8 +67,8 @@ whose tokens are short-lived (ECR, ACR) want a job on the host that rewrites
 the file, or Kubernetes, where the kubelet signs in by the node's identity.
 
 Write the file into the config volume on Docker. On Kubernetes, the pull
-secrets the [session template](kubernetes.md#the-session-template) names in
-`imagePullSecrets` serve too: the kubelet pulls with them, and the server
+secrets the [session overlay or PodTemplate](kubernetes.md#the-session-template)
+names in `imagePullSecrets` serve too: the kubelet pulls with them, and the server
 reads them through its Role to pin digests and fetch catalogs, so one secret
 does for both. A file mounted at the path from a Secret adds to them and
 takes precedence.

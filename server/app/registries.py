@@ -8,8 +8,8 @@ gateway image, the digest checks and pins, and the packages of PRoot Apps
 catalogs. `netrc_path` is a netrc whose machines serve plain HTTP hosts: app
 stores and their autostart scripts, logos, and the metadata and icons of
 catalogs. Both are read at every use, so a rotated credential needs no
-restart. On Kubernetes the pull secrets the session PodTemplate names add
-to the registry file (`registry_auths`).
+restart. On Kubernetes the pull secrets the session template names, in its
+PodTemplate or the session overlay, add to the registry file (`registry_auths`).
 
 `image_mirrors` names a mirror per upstream registry,
 `lscr.io=registry.example/lscr,docker.io=registry.example/hub`, the way a

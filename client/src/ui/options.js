@@ -221,6 +221,10 @@ function templateFieldHtml(setting) {
       control = `<select id="${inputId}" data-name="${setting.name}">${Object.entries(setting.options).map(([value, name]) =>
         `<option value="${escapeHtml(value)}" ${value === setting.default ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')}</select>`;
       break;
+    case 'yaml':
+      // An input drops line breaks, which carry YAML's structure; the parser drops the newline after the tag, hence one.
+      control = `<textarea id="${inputId}" data-name="${setting.name}" class="code" rows="8" spellcheck="false" autocapitalize="off">\n${def}</textarea>`;
+      break;
     default:
       control = `<input type="text" id="${inputId}" data-name="${setting.name}" value="${def}" placeholder="${def}">`;
   }
@@ -229,7 +233,7 @@ function templateFieldHtml(setting) {
     label: setting.label,
     description: setting.description,
     control,
-    kind: setting.type === 'boolean' ? 'switch' : '',
+    kind: setting.type === 'boolean' ? 'switch' : setting.type === 'yaml' ? 'wide' : '',
     text: `${setting.label} ${setting.name} ${setting.description}`,
   });
 }
@@ -1499,7 +1503,15 @@ const CLUSTER_SETTINGS = {
   auto_sign_in: 'provider',
   files_sync: 'sync',
   legacy_auth: 'bool',
+  kubernetes_session_overlay: 'yaml',
+  kubernetes_gpu_options: 'yaml',
 };
+// The YAML a setting's empty box shows: what the setting holds, not a value of its own.
+const YAML_EXAMPLES = {
+  kubernetes_session_overlay: 'spec:\n  runtimeClassName: gvisor\n  nodeSelector:\n    pool: desktops\n  containers:\n  - name: app\n    resources:\n      requests: {cpu: "1", memory: 2Gi}\n      limits: {cpu: "2", memory: 4Gi}',
+  kubernetes_gpu_options: '- name: l40s\n  driver: nvidia\n  template:\n    spec:\n      nodeSelector:\n        nvidia.com/gpu.product: NVIDIA-L40S\n      containers:\n      - name: app\n        resources:\n          limits: {nvidia.com/gpu: 1}',
+};
+const KUBERNETES_SETTINGS = Object.keys(CLUSTER_SETTINGS).filter((name) => name.startsWith('kubernetes_'));
 // What the web app's Sign In section shows, card by card; the other shells keep one form in the Cluster section.
 const SIGNIN_CARDS = {
   oidc: ['oidc_issuer', 'oidc_client_id', 'oidc_client_secret', 'oidc_scopes'],
@@ -1556,10 +1568,14 @@ function settingField(name) {
     const set = clusterData.secret_set[name];
     control = `<input type="text" id="${id}" class="masked" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${escapeHtml(t(set ? 'options.cluster.secretSet' : 'options.cluster.secretUnset'))}">
             ${written ? `<label class="field-aside"><input type="checkbox" id="${id}-clear"> <span>${escapeHtml(t('options.cluster.secretClear'))}</span></label>` : ''}`;
+  } else if (kind === 'yaml') {
+    // The HTML parser drops a newline right after the tag, so one is put there and a value's own first newline stays.
+    control = `<textarea id="${id}" class="code" rows="10" spellcheck="false" autocapitalize="off" placeholder="${escapeHtml(YAML_EXAMPLES[name] || '')}">\n${escapeHtml(shownSetting(name))}</textarea>`;
   } else {
     control = `<input type="${kind === 'hours' ? 'number' : 'text'}"${kind === 'hours' ? ' min="0" step="any"' : ''} id="${id}" value="${escapeHtml(shownSetting(name))}">`;
   }
-  return fieldHtml({ id, label: t(`options.cluster.settings.${name}`), description: hint, control, kind: written ? 'setting-written' : '' });
+  const rowKind = [kind === 'yaml' ? 'wide' : '', written ? 'setting-written' : ''].filter(Boolean).join(' ');
+  return fieldHtml({ id, label: t(`options.cluster.settings.${name}`), description: hint, control, kind: rowKind });
 }
 
 /** @returns {object} What the controls of `names` change; an empty string hands a setting back to the nodes. */
@@ -1570,7 +1586,8 @@ function changedSettings(names) {
     const kind = CLUSTER_SETTINGS[name];
     const input = document.getElementById(`cluster-setting-${name}`);
     if (!input) return;
-    const value = input.value.trim();
+    // YAML is compared and written as typed: trimming would rewrite a value whose last line ends in a newline.
+    const value = kind === 'yaml' ? input.value : input.value.trim();
     if (kind === 'secret') {
       const clear = document.getElementById(`cluster-setting-${name}-clear`);
       if (value) body[name] = value;
@@ -1587,7 +1604,8 @@ function changedSettings(names) {
 
 function renderClusterSettings() {
   // The web app has a section for signing in; elsewhere every setting stays here.
-  const names = info.shell === 'web' ? ['files_sync'] : Object.keys(CLUSTER_SETTINGS);
+  const names = (info.shell === 'web' ? ['files_sync', ...KUBERNETES_SETTINGS] : Object.keys(CLUSTER_SETTINGS))
+    .filter((name) => clusterData.kubernetes || !KUBERNETES_SETTINGS.includes(name));
   document.getElementById('cluster-settings-form').dataset.settings = names.join(',');
   document.getElementById('cluster-settings-fields').innerHTML = names.map(settingField).join('');
   markClampedDescriptions(document.getElementById('cluster-settings-fields'));

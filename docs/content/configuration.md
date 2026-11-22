@@ -347,9 +347,10 @@ settings:
 Values are strings. Keys that are neither `DOCKER_*` nor `KUBERNETES_*`
 become environment variables of the session container; `DOCKER_*` keys are
 translated into Docker run options (memory and CPU limits, capabilities,
-devices, bind mounts, network mode, and so on), and `KUBERNETES_POD_TEMPLATE`
-names the [PodTemplate](kubernetes.md#pod-templates-per-application) laid over
-a session pod on Kubernetes. The file name is derived from the name
+devices, bind mounts, network mode, and so on); on Kubernetes,
+`KUBERNETES_POD_OVERLAY` holds the [pod
+overlay](kubernetes.md#pod-templates-per-application) laid over a session pod
+and `KUBERNETES_POD_TEMPLATE` names a PodTemplate beneath it. The file name is derived from the name
 (`kiosk.yml`); renaming the `name` key renames the file. The set of
 variables the editor offers is `template_schema.yml` in the server package,
 served to clients as data, and a template may contain keys the editor does

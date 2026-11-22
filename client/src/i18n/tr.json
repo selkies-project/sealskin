@@ -1213,6 +1213,10 @@
         "KUBERNETES_POD_TEMPLATE": {
           "label": "Kubernetes Pod Şablonu",
           "description": "Kubernetes'te, bu şablonun uygulamaları için oturum şablonunun üzerine uygulanan, ad alanındaki bir PodTemplate'in adı: etiketler, açıklamalar, düğüm seçiciler, toleranslar, kaynaklar. Docker'da yok sayılır."
+        },
+        "KUBERNETES_POD_OVERLAY": {
+          "label": "Kubernetes Pod Katmanı",
+          "description": "Kubernetes'te, yukarıdaki PodTemplate'ten sonra bu şablonun oturumlarına uygulanan pod katmanının (metadata ve spec) YAML'ı: düğüm yerleşimi, tolerations, çalışma zamanı ve öncelik sınıfı ile app konteynerinin kaynakları ve güvenlik bağlamı. Birimler, ortam değişkenleri, hizmet hesapları ve diğer konteynerler reddedilir. Docker'da yok sayılır."
         }
       }
     },
@@ -1544,7 +1548,9 @@
         "web_session_seconds": "Root oturum açmasının kullanılmadan en uzun süresi (saat)",
         "files_sync": "Paylaşılan dosyaları nesne deposunda tut",
         "auto_sign_in": "Oturumu kapalı tarayıcıyı doğrudan şuraya gönder",
-        "legacy_auth": "Anahtar dosyası kullanan istemcileri kabul et"
+        "legacy_auth": "Anahtar dosyası kullanan istemcileri kabul et",
+        "kubernetes_session_overlay": "Kubernetes oturum katmanı (YAML)",
+        "kubernetes_gpu_options": "Kubernetes GPU seçenekleri (YAML)"
       },
       "usageTitle": "Kullanım",
       "usageHours": "Ağırlıklı saat",

@@ -153,6 +153,21 @@ def read_yaml(path: str, default: Any = None) -> Any:
     return default if data is None else data
 
 
+def parse_yaml(text: str) -> Any:
+    """Parse YAML an administrator typed into a setting, the way every SealSkin file is read.
+
+    Args:
+        text: The YAML document.
+
+    Returns:
+        The parsed document, `None` for an empty one.
+
+    Raises:
+        yaml.YAMLError: If the text is not valid YAML.
+    """
+    return yaml.safe_load(text)
+
+
 def dump_yaml(data: Any) -> str:
     """Serialise `data` the way every SealSkin file is written.
 

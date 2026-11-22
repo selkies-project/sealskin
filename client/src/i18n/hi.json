@@ -1213,6 +1213,10 @@
         "KUBERNETES_POD_TEMPLATE": {
           "label": "Kubernetes पॉड टेम्पलेट",
           "description": "Kubernetes पर, नेमस्पेस में किसी PodTemplate का नाम जो इस टेम्पलेट के ऐप्स के लिए सत्र टेम्पलेट के ऊपर लगाया जाता है: लेबल, एनोटेशन, नोड सेलेक्टर, टॉलरेशन, संसाधन। Docker पर अनदेखा किया जाता है।"
+        },
+        "KUBERNETES_POD_OVERLAY": {
+          "label": "Kubernetes पॉड ओवरले",
+          "description": "Kubernetes पर, ऊपर के PodTemplate के बाद इस टेम्पलेट के सत्रों पर लगाया जाने वाला पॉड ओवरले (metadata और spec) का YAML: नोड पर स्थान, tolerations, रनटाइम और प्राथमिकता क्लास, और app कंटेनर के संसाधन और सुरक्षा संदर्भ। वॉल्यूम, एनवायरनमेंट वेरिएबल, सर्विस अकाउंट और अन्य कंटेनर अस्वीकार किए जाते हैं। Docker पर अनदेखा किया जाता है।"
         }
       }
     },
@@ -1544,7 +1548,9 @@
         "web_session_seconds": "बिना उपयोग के रूट साइन-इन की अधिकतम अवधि (घंटे)",
         "files_sync": "साझा फ़ाइलें ऑब्जेक्ट स्टोर में रखें",
         "auto_sign_in": "साइन-आउट ब्राउज़र को सीधे यहाँ भेजें",
-        "legacy_auth": "कुंजी-फ़ाइल क्लाइंट स्वीकार करें"
+        "legacy_auth": "कुंजी-फ़ाइल क्लाइंट स्वीकार करें",
+        "kubernetes_session_overlay": "Kubernetes सत्र ओवरले (YAML)",
+        "kubernetes_gpu_options": "Kubernetes GPU विकल्प (YAML)"
       },
       "usageTitle": "उपयोग",
       "usageHours": "भारित घंटे",

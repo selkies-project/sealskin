@@ -2,11 +2,11 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-# The PodTemplates sessions start from, beside sealskin.yml:
+# PodTemplates beneath the pod overlays set in SealSkin, beside sealskin.yml:
 #   kubectl apply -n <namespace> -f pod-templates.yml
 # Kubernetes' own namespace roles (`admin`, `edit`, `view`) grant no access to
 # PodTemplates, so applying this takes someone who holds it, such as a cluster
-# administrator. Without it the server starts sessions from its own fields alone.
+# administrator. Without it sessions start from SealSkin's overlays alone.
 # https://docs.sealskin.app/kubernetes#the-session-template describes the rest.
 
 # The session template, the templates applications name, and the GPU options

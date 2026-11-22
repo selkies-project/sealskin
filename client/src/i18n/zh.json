@@ -1213,6 +1213,10 @@
         "KUBERNETES_POD_TEMPLATE": {
           "label": "Kubernetes Pod 模板",
           "description": "在 Kubernetes 上，命名空间中一个 PodTemplate 的名称，会叠加在此模板应用的会话模板之上：标签、注解、节点选择器、容忍度、资源。在 Docker 上忽略。"
+        },
+        "KUBERNETES_POD_OVERLAY": {
+          "label": "Kubernetes Pod 覆盖层",
+          "description": "在 Kubernetes 上，在上方的 PodTemplate 之后叠加到此模板会话上的 Pod 覆盖层（metadata 和 spec）的 YAML：节点调度、容忍度、运行时类和优先级类，以及 app 容器的资源和安全上下文。卷、环境变量、服务账号和其他容器会被拒绝。在 Docker 上忽略。"
         }
       }
     },
@@ -1544,7 +1548,9 @@
         "web_session_seconds": "根登录在未使用状态下的最长有效时间（小时）",
         "files_sync": "将共享文件保存在对象存储中",
         "auto_sign_in": "将未登录的浏览器直接转到",
-        "legacy_auth": "接受密钥文件客户端"
+        "legacy_auth": "接受密钥文件客户端",
+        "kubernetes_session_overlay": "Kubernetes 会话覆盖层（YAML）",
+        "kubernetes_gpu_options": "Kubernetes GPU 选项（YAML）"
       },
       "usageTitle": "用量",
       "usageHours": "加权小时数",

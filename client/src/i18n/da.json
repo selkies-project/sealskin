@@ -1213,6 +1213,10 @@
         "KUBERNETES_POD_TEMPLATE": {
           "label": "Kubernetes-podskabelon",
           "description": "På Kubernetes navnet på en PodTemplate i navnerummet, der lægges over sessionsskabelonen for denne skabelons apps: labels, annotationer, nodeselektorer, tolerations, ressourcer. Ignoreres på Docker."
+        },
+        "KUBERNETES_POD_OVERLAY": {
+          "label": "Kubernetes-pod-overlay",
+          "description": "På Kubernetes YAML for et pod-overlay (metadata og spec), der lægges over denne skabelons sessioner efter PodTemplate ovenfor: placering på noder, tolerations, runtime- og prioritetsklasse samt ressourcer og sikkerhedskontekst for containeren app. Volumener, miljøvariabler, tjenestekonti og andre containere afvises. Ignoreres på Docker."
         }
       }
     },
@@ -1544,7 +1548,9 @@
         "web_session_seconds": "Længste tid et root-login varer ubrugt (timer)",
         "files_sync": "Opbevar delte filer i objektlageret",
         "auto_sign_in": "Send en ikke-indlogget browser direkte til",
-        "legacy_auth": "Accepter nøglefil-klienter"
+        "legacy_auth": "Accepter nøglefil-klienter",
+        "kubernetes_session_overlay": "Kubernetes-session-overlay (YAML)",
+        "kubernetes_gpu_options": "Kubernetes-GPU-indstillinger (YAML)"
       },
       "usageTitle": "Forbrug",
       "usageHours": "Vægtede timer",

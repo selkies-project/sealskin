@@ -108,6 +108,39 @@ def test_a_template_names_the_session_pod_template_outside_the_environment(tmp_p
         )
         assert spec.env["TITLE"] == "Hi" and "KUBERNETES_POD_TEMPLATE" not in spec.env
         assert spec.app_config["provider_config"].get("pod_template") == expected
+    overlay = "spec:\n  runtimeClassName: gvisor\n"
+    for value, expected in ((overlay, overlay), (" \n", None)):
+        state.app_templates["Default"] = {"name": "Default", "settings": {"KUBERNETES_POD_OVERLAY": value}}
+        spec = launch.build_launch_spec(
+            make_app(),
+            "sess",
+            base_env=launch.session_base_env("sess", "u", "p", None),
+            extra_env=None,
+            language=None,
+            wayland_mode=False,
+            gpu_config=None,
+            host_mount_path=str(tmp_path),
+            shared_files_path=None,
+        )
+        assert "KUBERNETES_POD_OVERLAY" not in spec.env
+        assert spec.app_config["provider_config"].get("pod_overlay") == expected
+    # Nor does a store entry carry one in: only the template's setting reaches the provider.
+    state.app_templates["Default"] = {"name": "Default", "settings": {}}
+    entry = make_app().model_dump()
+    entry["provider_config"]["pod_overlay"] = "spec: {serviceAccountName: sealskin}"
+    entry["provider_config"]["pod_template"] = "sealskin-session"
+    spec = launch.build_launch_spec(
+        InstalledApp(**entry),
+        "sess",
+        base_env=launch.session_base_env("sess", "u", "p", None),
+        extra_env=None,
+        language=None,
+        wayland_mode=False,
+        gpu_config=None,
+        host_mount_path=str(tmp_path),
+        shared_files_path=None,
+    )
+    assert "pod_overlay" not in spec.app_config["provider_config"] and "pod_template" not in spec.app_config["provider_config"]
     assert launch.valid_pod_template_name("cad-workstation") and launch.valid_pod_template_name("a.b-1")
     for name in ("../secrets/x", "Cad", "-cad", "cad-", "a" * 254, "cad/x", "cad?x"):
         assert not launch.valid_pod_template_name(name), name

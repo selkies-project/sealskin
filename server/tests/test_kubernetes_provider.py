@@ -777,3 +777,131 @@ async def test_pending_timeout_reports_the_last_warning(api, monkeypatch):
 
 async def _ready(self, session_id, current_ip, env_vars, **kwargs):
     return await current_ip()
+
+
+SESSION_OVERLAY = """
+metadata: {labels: {tier: desktop}}
+spec:
+  runtimeClassName: gvisor
+  tolerations: [{key: sealskin, operator: Exists}]
+  imagePullSecrets: [{name: regcred}]
+  containers:
+  - name: app
+    resources:
+      requests: {cpu: "1", ephemeral-storage: 4Gi}
+      limits: {cpu: 1200m, ephemeral-storage: 4800Mi}
+"""
+
+
+async def test_sealskin_overlays_lie_over_the_pod_templates_of_their_layer(api, monkeypatch):
+    await kp.KubernetesProvider().inspect_self()
+    api.pod_templates["sealskin-session"] = {
+        "template": {
+            "metadata": {"labels": {"team": "a"}},
+            "spec": {
+                "runtimeClassName": "kata",
+                "nodeSelector": {"pool": "desktops"},
+                "containers": [{"name": "app", "image": "x", "resources": {"requests": {"cpu": "2", "memory": "1Gi"}}}],
+            },
+        }
+    }
+    api.pod_templates["cad-workstation"] = {
+        "template": {"spec": {"nodeSelector": {"workload-type": "cad"}, "containers": [{"name": "app", "image": "x"}]}}
+    }
+    monkeypatch.setattr(settings, "kubernetes_session_overlay", SESSION_OVERLAY)
+    monkeypatch.setattr(
+        settings,
+        "kubernetes_gpu_options",
+        "- name: l40s\n  driver: nvidia\n  template:\n    spec:\n      nodeSelector: {gpu: l40s}\n"
+        "      containers: [{name: app, resources: {limits: {nvidia.com/gpu: 1}}}]\n",
+    )
+    await kp.KubernetesProvider().detect_gpus()
+    assert [(g["device"], g["driver"], g["type"]) for g in state.available_gpus] == [("l40s", "nvidia", "nvidia")]
+    monkeypatch.setattr(kp.KubernetesProvider, "_wait_until_ready", _ready)
+    provider = _provider()
+    provider.app_config["provider_config"]["pod_template"] = "cad-workstation"
+    provider.app_config["provider_config"]["pod_overlay"] = (
+        "spec:\n  nodeSelector: {workload-type: cad-gpu}\n  containers: [{name: app, resources: {limits: {memory: 8Gi}}}]\n"
+    )
+    await provider.launch("s" * 36, {}, {}, state.available_gpus[0])
+    pod = api.posted[0]
+    spec, app = pod["spec"], pod["spec"]["containers"][0]
+    # The session overlay over the session PodTemplate, then the app's PodTemplate and overlay, then the GPU option.
+    assert pod["metadata"]["labels"]["team"] == "a" and pod["metadata"]["labels"]["tier"] == "desktop"
+    assert spec["runtimeClassName"] == "gvisor"
+    assert spec["nodeSelector"] == {"pool": "desktops", "workload-type": "cad-gpu", "gpu": "l40s", "kubernetes.io/os": "linux"}
+    assert spec["tolerations"] == [{"key": "sealskin", "operator": "Exists"}]
+    assert app["resources"] == {
+        "requests": {"cpu": "1", "memory": "1Gi", "ephemeral-storage": "4Gi"},
+        "limits": {"cpu": "1200m", "ephemeral-storage": "4800Mi", "memory": "8Gi", "nvidia.com/gpu": 1},
+    }
+    assert app["image"] == "lscr.io/linuxserver/firefox:latest" and {"name": "NVIDIA_DRIVER_CAPABILITIES", "value": "all"} in app["env"]
+    assert spec["automountServiceAccountToken"] is False and "serviceAccountName" not in spec
+
+    # An option taken out of the setting is gone at once.
+    monkeypatch.setattr(settings, "kubernetes_gpu_options", "")
+    with pytest.raises(HTTPException) as gone:
+        await provider.launch("t" * 36, {}, {}, state.available_gpus[0])
+    assert gone.value.status_code == 400 and "'l40s'" in gone.value.detail
+
+
+async def test_a_refused_overlay_stops_the_launch_and_nothing_else(api, monkeypatch):
+    await kp.KubernetesProvider().inspect_self()
+    monkeypatch.setattr(kp.KubernetesProvider, "_wait_until_ready", _ready)
+    provider = _provider()
+    provider.app_config["provider_config"]["pod_overlay"] = "spec: {volumes: [{name: s, secret: {secretName: tls}}]}"
+    with pytest.raises(HTTPException) as app_refused:
+        await provider.launch("s" * 36, {}, {}, None)
+    assert app_refused.value.status_code == 400 and "spec.volumes" in app_refused.value.detail
+    # A session overlay from the environment that a node refuses stops launches, not the GPU scan or the exports.
+    monkeypatch.setattr(settings, "kubernetes_session_overlay", "spec: {serviceAccountName: sealskin}")
+    with pytest.raises(HTTPException) as session_refused:
+        await _provider().launch("t" * 36, {}, {}, None)
+    assert session_refused.value.status_code == 500 and "serviceAccountName" in session_refused.value.detail
+    assert api.posted == []
+    api.nodes = [{"metadata": {"labels": {}}, "status": {"allocatable": {"nvidia.com/gpu": "1"}}}]
+    await kp.KubernetesProvider().detect_gpus()
+    assert [g["device"] for g in state.available_gpus] == ["nvidia.com/gpu"]
+    api.pod_status = {"phase": "Succeeded"}
+    api.log = base64.b64encode(b"tar bytes").decode()
+    assert await _provider().export_web_client("lscr.io/linuxserver/firefox:latest", "/usr/share/selkies") == b"tar bytes"
+
+
+async def test_gpu_options_of_the_setting_join_the_pod_templates(api, monkeypatch):
+    await kp.KubernetesProvider().inspect_self()
+    api.nodes = [{"metadata": {"labels": {}}, "status": {"allocatable": {"nvidia.com/gpu": "4"}}}]
+    api.pod_templates["radeon"] = {"metadata": {"labels": {"sealskin.app/gpu": "amdgpu"}}, "template": {"spec": {}}}
+    api.pod_templates["l40s"] = {"metadata": {"labels": {"sealskin.app/gpu": "xe"}}, "template": {"spec": {}}}
+    monkeypatch.setattr(settings, "kubernetes_gpu_options", "- {name: l40s, driver: nvidia}\n- {name: arc, driver: xe}")
+    await kp.KubernetesProvider().detect_gpus()
+    # An option of the setting takes the place of a PodTemplate of its name.
+    assert [(g["device"], g["driver"], "option" in g) for g in state.available_gpus] == [
+        ("arc", "xe", True),
+        ("l40s", "nvidia", True),
+        ("radeon", "amdgpu", False),
+    ]
+    # Options stand while the templates cannot be listed, and the setting alone is offered when the Role withholds them.
+    api.pod_templates_failure = 503
+    monkeypatch.setattr(settings, "kubernetes_gpu_options", "")
+    await kp.KubernetesProvider().refresh_gpus()
+    assert [g["device"] for g in state.available_gpus] == ["arc", "l40s", "radeon"]
+    api.pod_templates_failure = 403
+    monkeypatch.setattr(settings, "kubernetes_gpu_options", "- {name: arc, driver: xe}")
+    await kp.KubernetesProvider().refresh_gpus()
+    assert [g["device"] for g in state.available_gpus] == ["arc"]
+    # A refused setting offers none of its options; with neither source, the cluster is scanned.
+    monkeypatch.setattr(settings, "kubernetes_gpu_options", "- {name: auto, driver: nvidia}")
+    await kp.KubernetesProvider().refresh_gpus()
+    assert [g["device"] for g in state.available_gpus] == ["nvidia.com/gpu"]
+
+
+async def test_the_session_overlays_pull_secrets_serve_the_registry(api, monkeypatch):
+    await kp.KubernetesProvider().inspect_self()
+    monkeypatch.setattr(kp, "_pull_secrets", (-math.inf, {}))
+    monkeypatch.setattr(settings, "kubernetes_session_overlay", "spec: {imagePullSecrets: [{name: regcred}]}")
+    document = {"auths": {"registry.example": {"auth": base64.b64encode(b"u:p").decode()}}}
+    api.secrets["regcred"] = {
+        "type": "kubernetes.io/dockerconfigjson",
+        "data": {".dockerconfigjson": base64.b64encode(json.dumps(document).encode()).decode()},
+    }
+    assert await kp.KubernetesProvider().registry_credentials() == {"registry.example": ("u", "p")}

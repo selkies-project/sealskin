@@ -1213,6 +1213,10 @@
         "KUBERNETES_POD_TEMPLATE": {
           "label": "Kubernetes Pod Template",
           "description": "Sa Kubernetes, ang pangalan ng isang PodTemplate sa namespace na ipinapatong sa session template para sa mga app ng template na ito: labels, annotations, node selectors, tolerations, resources. Hindi pinapansin sa Docker."
+        },
+        "KUBERNETES_POD_OVERLAY": {
+          "label": "Kubernetes Pod Overlay",
+          "description": "Sa Kubernetes, ang YAML ng isang pod overlay (metadata at spec) na ipinapatong sa mga session ng template na ito pagkatapos ng PodTemplate sa itaas: paglalagay sa node, tolerations, runtime at priority class, at ang resources at security context ng container na app. Tinatanggihan ang mga volume, environment, service account, at iba pang container. Hindi pinapansin sa Docker."
         }
       }
     },
@@ -1544,7 +1548,9 @@
         "web_session_seconds": "Pinakamatagal na itatagal ng root sign-in nang hindi ginagamit (oras)",
         "files_sync": "Panatilihin ang mga ibinahaging file sa object store",
         "auto_sign_in": "Dalhin nang direkta ang naka-sign out na browser sa",
-        "legacy_auth": "Tanggapin ang mga client na gumagamit ng key file"
+        "legacy_auth": "Tanggapin ang mga client na gumagamit ng key file",
+        "kubernetes_session_overlay": "Kubernetes session overlay (YAML)",
+        "kubernetes_gpu_options": "Mga opsyon ng GPU sa Kubernetes (YAML)"
       },
       "usageTitle": "Paggamit",
       "usageHours": "Weighted na oras",

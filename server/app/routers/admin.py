@@ -22,6 +22,7 @@ from .. import (
     cluster,
     config_store,
     filesync,
+    pod_overlays,
     progress,
     prootapps,
     quota,
@@ -35,6 +36,7 @@ from .. import (
 from ..docker_utils import get_and_cache_image_metadata, get_system_stats, pull_and_cache_image
 from ..fsutil import safe_rmtree
 from ..launch import (
+    POD_OVERLAY_SETTING,
     POD_TEMPLATE_SETTING,
     RESERVED_ENV,
     RUN_OPTION_PREFIXES,
@@ -842,6 +844,12 @@ async def save_app_template(
         )
     if not user.get("is_admin"):
         template.settings = editor_settings(state.app_templates.get(template.name, {}).get("settings", {}), template.settings)
+    overlay = str(template.settings.get(POD_OVERLAY_SETTING) or "")
+    if overlay != str(state.app_templates.get(template.name, {}).get("settings", {}).get(POD_OVERLAY_SETTING) or ""):
+        try:
+            pod_overlays.parse_overlay(overlay, POD_OVERLAY_SETTING)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=f"The Kubernetes pod overlay is refused: {exc}") from exc
     try:
         await config_store.save_app_template(template)
     except FileExistsError as exc:

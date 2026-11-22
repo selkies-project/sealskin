@@ -166,8 +166,8 @@ def hub_manifests(
         record: The profile.
         endpoint: Its endpoint.
         files: The rendered files the Secret carries.
-        template: The session PodTemplate's spec, whose pull secrets, tolerations, and node
-            selector the hub pod takes, as session and export pods do.
+        template: The spec session pods start from (`kubernetes_provider.session_template`), whose pull
+            secrets, tolerations, and node selector the hub pod takes, as session and export pods do.
     """
     api = _kube()
     name = _name(key)
@@ -277,15 +277,10 @@ async def _remove_pod(key: str) -> None:
 
 
 async def _session_template() -> dict[str, Any]:
-    """Return the spec of the namespace's session PodTemplate, or `{}` without one."""
-    api = _kube()
-    try:
-        found = await api.request("GET", api.path("podtemplates", f"{state.instance_name}-session"))
-    except _errors()[0] as exc:
-        if getattr(exc, "status", None) in (403, 404):
-            return {}
-        raise
-    return ((found or {}).get("template") or {}).get("spec") or {}
+    """Return the spec session pods start from (the session PodTemplate under the session overlay), or `{}`."""
+    from .providers.kubernetes_provider import session_template
+
+    return (await session_template(strict=False)).get("spec") or {}
 
 
 async def _wait_ready(key: str, record: dict[str, Any], endpoint: dict[str, Any]) -> dict[str, Any]:
