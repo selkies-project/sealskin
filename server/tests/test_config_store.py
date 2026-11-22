@@ -241,6 +241,50 @@ async def test_autostart_cache_never_leaves_its_directory(store_with_firefox, tm
     assert config_store.autostart_cache_path(record).endswith("/Test Store/firefox")
 
 
+async def test_the_autostart_refresh_fetches_a_few_at_a_time_over_one_client(tmp_path, monkeypatch, caplog):
+    import asyncio
+
+    from app.models import AppStore
+
+    apps = [{"id": f"app{n}", "name": f"App {n}", "provider_config": {"image": "x", "autostart": True}} for n in range(30)]
+    state.app_stores.append(AppStore(name="Big Store", url="https://example.invalid/apps.yml"))
+    config_store.ensure_config_dir()
+    with open(config_store.store_cache_file("Big Store"), "w", encoding="utf-8") as handle:
+        yaml.safe_dump({"apps": apps}, handle)
+    config_store.load_store_entries()
+    clients, running, most = [], 0, 0
+
+    class Store:
+        """Answers every script after a moment, and times out on one."""
+
+        def __init__(self, **_):
+            clients.append(self)
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_):
+            return False
+
+        async def get(self, url, **_):
+            nonlocal running, most
+            running += 1
+            most = max(most, running)
+            await asyncio.sleep(0.01)
+            running -= 1
+            if url.endswith("/app7-wayland"):
+                raise config_store.httpx.ConnectTimeout("")
+            return config_store.httpx.Response(200, text="#!/bin/sh\n", request=config_store.httpx.Request("GET", url))
+
+    monkeypatch.setattr(config_store.httpx, "AsyncClient", Store)
+    try:
+        await config_store.refresh_autostart_caches()
+    finally:
+        state.app_stores[:] = [s for s in state.app_stores if s.name != "Big Store"]
+    assert len(clients) == 1 and 1 < most <= config_store.AUTOSTART_FETCHES
+    assert "Failed to fetch autostart script for 'app7-wayland': ConnectTimeout" in caplog.text
+
+
 def test_a_store_sets_only_the_docker_overrides_that_stay_in_the_container(store_with_firefox):
     entry = copy.deepcopy(store_with_firefox)
     entry["provider_config"]["docker_overrides"] = {

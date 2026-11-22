@@ -462,10 +462,15 @@ def autostart_cache_path(app: InstalledApp | InstalledAppRecord, suffix: str = "
         return None
 
 
+#: Autostart scripts fetched at once while every store's are refreshed: a store has a few hundred, which
+#: fetched together time out on an ordinary uplink.
+AUTOSTART_FETCHES = 8
+
+
 async def _fetch_and_cache_single_script(
-    store_name: str, base_url: str, app_id: str, suffix: str = ""
+    store_name: str, base_url: str, app_id: str, suffix: str = "", client: httpx.AsyncClient | None = None
 ) -> None:
-    """Fetch one autostart script into the cache using ETag conditional requests."""
+    """Fetch one autostart script into the cache using ETag conditional requests, over `client` when given."""
     try:
         cache_dir = safe_join(settings.autostart_cache_path, store_name)
         cache_path = safe_join(cache_dir, f"{app_id}{suffix}")
@@ -486,7 +491,10 @@ async def _fetch_and_cache_single_script(
 
     autostart_url = f"{base_url}/autostart/{app_id}{suffix}"
     try:
-        async with httpx.AsyncClient(follow_redirects=True, auth=registries.netrc_auth()) as client:
+        if client is None:
+            async with httpx.AsyncClient(follow_redirects=True, auth=registries.netrc_auth()) as own:
+                response = await own.get(autostart_url, timeout=10, headers=headers)
+        else:
             response = await client.get(autostart_url, timeout=10, headers=headers)
         if response.status_code == 304:
             logger.debug("Autostart script for '%s%s' in '%s' is up to date.", app_id, suffix, store_name)
@@ -510,7 +518,8 @@ async def _fetch_and_cache_single_script(
         await asyncio.to_thread(write_cache_and_meta)
         logger.info("Cached autostart script for '%s%s' from store '%s'.", app_id, suffix, store_name)
     except httpx.RequestError as exc:
-        logger.warning("Failed to fetch autostart script for '%s%s': %s", app_id, suffix, exc)
+        # A timeout says nothing of itself, so its kind is the message.
+        logger.warning("Failed to fetch autostart script for '%s%s': %s", app_id, suffix, str(exc) or type(exc).__name__)
     except Exception as exc:  # noqa: BLE001
         logger.error("Unexpected error updating autostart script for '%s%s': %s", app_id, suffix, exc)
 
@@ -518,7 +527,7 @@ async def _fetch_and_cache_single_script(
 async def refresh_autostart_caches() -> None:
     """Fetch autostart scripts for every store app that declares one."""
     logger.info("Starting autostart script cache refresh for all app stores...")
-    tasks = []
+    jobs: list[tuple[str, str, str, str]] = []
     for store in state.app_stores:
         base_url = store.url.rsplit("/", 1)[0]
         apps = state.store_entries.get(store.name)
@@ -534,10 +543,17 @@ async def refresh_autostart_caches() -> None:
                 continue
         for app_id, app in apps.items():
             if app.get("provider_config", {}).get("autostart"):
-                tasks.append(_fetch_and_cache_single_script(store.name, base_url, app_id, ""))
-                tasks.append(_fetch_and_cache_single_script(store.name, base_url, app_id, "-wayland"))
-    if tasks:
-        await asyncio.gather(*tasks)
+                jobs.append((store.name, base_url, app_id, ""))
+                jobs.append((store.name, base_url, app_id, "-wayland"))
+    if jobs:
+        limit = asyncio.Semaphore(AUTOSTART_FETCHES)
+        async with httpx.AsyncClient(follow_redirects=True, auth=registries.netrc_auth()) as client:
+
+            async def fetch(job: tuple[str, str, str, str]) -> None:
+                async with limit:
+                    await _fetch_and_cache_single_script(*job, client=client)
+
+            await asyncio.gather(*(fetch(job) for job in jobs))
     load_store_entries()
     logger.info("Autostart script cache refresh complete.")
 
