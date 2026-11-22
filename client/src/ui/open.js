@@ -27,6 +27,7 @@ import { createLaunchView } from '../lib/launch-view.js';
 import { defaultLanguage, supportedLangs } from '../lib/languages.js';
 import { browserTimezone } from '../lib/timezone.js';
 import { gpuRequest } from '../lib/gpus.js';
+import { GATEWAY_STATUSES } from '../lib/api-error.js';
 
 const POLL_MS = 600;
 const POLL_SLOW_MS = 1500;
@@ -189,9 +190,9 @@ async function launch(app, status, home) {
   remember(key, id);
   view.show('requesting');
   const following = follow(id);
-  // A request the network dropped for good is not the launch: the server may well have it.
+  // A request the network dropped for good, or a proxy gave up on, is not the launch: the server may well have it.
   const request = api('/api/launch/simple', { method: 'POST', body: JSON.stringify(payload) }, id).catch((error) => {
-    if (error.status) throw error;
+    if (error.status && !GATEWAY_STATUSES.has(error.status)) throw error;
     return follow(id, true);
   });
   try {

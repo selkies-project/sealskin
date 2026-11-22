@@ -43,6 +43,7 @@
 
 import { bridge, request } from '../lib/bridge.js';
 import { secureFetch, getContextBlob, uploadInChunks, openPage } from '../lib/api.js';
+import { postLaunch } from '../lib/launch-answer.js';
 import { loadTranslator, applyTranslations } from '../lib/i18n.js';
 import { defaultLanguage as nearestLanguage, supportedLangs } from '../lib/languages.js';
 import { browserTimezone } from '../lib/timezone.js';
@@ -990,7 +991,7 @@ async function launch(app, options) {
     posted = true;
     tell({ posted: true });
     // The server answers once the session runs, which a first image pull can delay for minutes.
-    const data = await secureFetch(endpoint, { method: 'POST', body: JSON.stringify(payload) }, { timeout: 0 });
+    const data = await postLaunch(endpoint, payload);
     flight.view.finish();
     memory.apps[app.id] = options;
     memory.recent = [app.id, ...memory.recent.filter((recent) => recent !== app.id)].slice(0, RECENT_MAX);

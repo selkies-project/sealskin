@@ -5,6 +5,7 @@
 
 import { bridge } from '../lib/bridge.js';
 import { secureFetch, getContextBlob, uploadInChunks } from '../lib/api.js';
+import { postLaunch } from '../lib/launch-answer.js';
 import { loadTranslator, applyTranslations } from '../lib/i18n.js';
 import { supportedLangs } from '../lib/languages.js';
 import { browserTimezone } from '../lib/timezone.js';
@@ -691,6 +692,7 @@ async function handleLaunch() {
 
     let endpoint;
     const payload = {
+      launch_id: crypto.randomUUID(),
       application_id: selectedAppId,
       home_name: finalHomeName,
       language: languageSelect.value,
@@ -741,7 +743,7 @@ async function handleLaunch() {
     }
 
     // The server answers once the session runs, which a first image pull can delay for minutes.
-    const data = await secureFetch(endpoint, { method: 'POST', body: JSON.stringify(payload) }, { timeout: 0 });
+    const data = await postLaunch(endpoint, payload);
 
     await bridge.openSession(data.session_id, data.session_url);
 

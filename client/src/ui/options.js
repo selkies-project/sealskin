@@ -8,6 +8,7 @@
 
 import { bridge, request } from '../lib/bridge.js';
 import { secureFetch, fetchSchema, openPage } from '../lib/api.js';
+import { postLaunch } from '../lib/launch-answer.js';
 import { loadTranslator, applyTranslations } from '../lib/i18n.js';
 import { browserTimezone } from '../lib/timezone.js';
 import { supportedLangs } from '../lib/languages.js';
@@ -1041,17 +1042,14 @@ async function launchLab() {
   try {
     const app = await saveLabApp();
     tell({ posted: true });
-    const data = await secureFetch('/api/admin/launch/meta_customize', {
-      method: 'POST',
-      body: JSON.stringify({
-        launch_id: id,
-        application_id: app.id,
-        language: wlab('language').value,
-        timezone: browserTimezone(),
-        selected_gpu: wlab('gpu').value || null,
-        wayland_mode: wlab('launch-wayland').checked,
-      }),
-    }, { timeout: 0 });
+    const data = await postLaunch('/api/admin/launch/meta_customize', {
+      launch_id: id,
+      application_id: app.id,
+      language: wlab('language').value,
+      timezone: browserTimezone(),
+      selected_gpu: wlab('gpu').value || null,
+      wayland_mode: wlab('launch-wayland').checked,
+    });
     await request('openSession', { sessionId: data.session_id, sessionUrl: data.session_url, launchId: id });
     channel.close();
   } catch (error) {

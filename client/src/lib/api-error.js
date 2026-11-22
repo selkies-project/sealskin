@@ -16,3 +16,6 @@ export function apiError(error) {
   } catch (e) { /* not JSON: keep the body */ }
   return { status: Number(match[1]), detail };
 }
+
+/** What a reverse proxy in front answers when it gave up on the server, which is no answer of the server's. */
+export const GATEWAY_STATUSES = new Set([502, 503, 504]);

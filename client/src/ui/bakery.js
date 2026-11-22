@@ -20,6 +20,7 @@
 
 import { request } from '../lib/bridge.js';
 import { secureFetch, uploadInChunks } from '../lib/api.js';
+import { postLaunch } from '../lib/launch-answer.js';
 import { confirmDialog } from '../lib/modal.js';
 import { browserTimezone } from '../lib/timezone.js';
 import { escapeHtml, formatBytes, formatLogoSrc, timeAgo, showToast } from '../lib/dom.js';
@@ -899,9 +900,7 @@ async function launchTrial() {
   $('bk-trial').disabled = true;
   try {
     tell({ posted: true });
-    const session = await secureFetch('/api/admin/bakery/try', {
-      method: 'POST', body: JSON.stringify({ launch_id: id, build_id: build.id, timezone: browserTimezone(), wayland_mode: true }),
-    }, { timeout: 0 });
+    const session = await postLaunch('/api/admin/bakery/try', { launch_id: id, build_id: build.id, timezone: browserTimezone(), wayland_mode: true });
     await request('openSession', { sessionId: session.session_id, sessionUrl: session.session_url, launchId: id });
     channel.close();
   } catch (error) {

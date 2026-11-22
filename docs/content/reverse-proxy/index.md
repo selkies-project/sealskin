@@ -73,6 +73,10 @@ terminates TLS, and not through one that asks for a sign-in of its own.
   served under a path of another site (`example.com/sealskin/`).
 * **Pass WebSockets.** A session is one long-lived WebSocket, and a
   collaboration room is another.
+* **Let a launch wait, or not.** A launch request is answered once its
+  session runs, which a first image pull can take minutes for. A proxy that
+  ends it sooner with 502, 503, or 504 does no harm: the clients follow the
+  launch's progress to its session instead.
 * **Leave bodies alone.** No limit on the request size (uploads go up in
   chunks, and files are sent to sessions), and no response buffering.
 
