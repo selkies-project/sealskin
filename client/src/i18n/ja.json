@@ -1636,7 +1636,7 @@
         },
         "authentik": {
           "name": "Authentik",
-          "hint": "Issuer はアプリケーションのアドレス https://<host>/application/o/<slug>/ で、末尾のスラッシュも含みます。OAuth2/OpenID プロバイダーと、それを使用するアプリケーションを作成してください。"
+          "hint": "Issuer はアプリケーションのアドレス https://<host>/application/o/<slug>/ で、末尾のスラッシュも含みます。OAuth2/OpenID プロバイダーと、それを使用するアプリケーションを作成してください。プロバイダーに offline_access スコープを与え、ここでも要求してください。そうしないとサインインは 5 分のトークンとともに終わります。"
         },
         "entra": {
           "name": "Microsoft Entra ID",
@@ -1686,6 +1686,13 @@
       "resultBackchannel": "バックチャネルログアウトのサポート:",
       "resultScopes": "提供されるスコープ:",
       "resultGroupsClaim": "グループクレーム:",
+      "resultRefresh": "リフレッシュトークン:",
+      "refresh": {
+        "asked": "offline_access で要求済み",
+        "offered": "offline_access は提供されていますが要求されていません",
+        "absent": "offline_access は提供されているスコープにありません"
+      },
+      "refreshHint": "スコープに offline_access を追加して保存してください。リフレッシュトークンがないと、サインインは ID トークンの期限で終わり、プロバイダーによっては数分しか発行しません。",
       "claimListed": "'{claim}' はプロバイダーが公開しているクレームに含まれています",
       "claimNotListed": "'{claim}' はプロバイダーが公開しているクレームに含まれていません",
       "resultEntity": "エンティティID:",

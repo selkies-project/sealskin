@@ -1636,7 +1636,7 @@
         },
         "authentik": {
           "name": "Authentik",
-          "hint": "Der Issuer ist die Adresse der Anwendung, https://<host>/application/o/<slug>/, mit dem abschließenden Schrägstrich. Erstellen Sie einen OAuth2/OpenID-Provider und eine Anwendung, die ihn verwendet."
+          "hint": "Der Issuer ist die Adresse der Anwendung, https://<host>/application/o/<slug>/, mit dem abschließenden Schrägstrich. Erstellen Sie einen OAuth2/OpenID-Provider und eine Anwendung, die ihn verwendet. Geben Sie dem Provider den Scope offline_access und fordern Sie ihn auch hier an, sonst enden Anmeldungen mit seinen Fünf-Minuten-Tokens."
         },
         "entra": {
           "name": "Microsoft Entra ID",
@@ -1686,6 +1686,13 @@
       "resultBackchannel": "Back-Channel-Logout unterstützt:",
       "resultScopes": "Angebotene Scopes:",
       "resultGroupsClaim": "Gruppen-Claim:",
+      "resultRefresh": "Refresh-Tokens:",
+      "refresh": {
+        "asked": "mit offline_access angefordert",
+        "offered": "offline_access wird angeboten, aber nicht angefordert",
+        "absent": "offline_access ist nicht unter den angebotenen Scopes"
+      },
+      "refreshHint": "Fügen Sie offline_access zu den Scopes hinzu und speichern Sie: Ohne Refresh-Token endet eine Anmeldung mit ihrem ID-Token, das manche Anbieter nur für Minuten ausstellen.",
       "claimListed": "'{claim}' ist unter den Claims, die der Anbieter auflistet",
       "claimNotListed": "'{claim}' ist nicht unter den Claims, die der Anbieter auflistet",
       "resultEntity": "Entity-ID:",

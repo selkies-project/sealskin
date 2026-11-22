@@ -1636,7 +1636,7 @@
         },
         "authentik": {
           "name": "Authentik",
-          "hint": "Issuer एप्लिकेशन का पता है, https://<host>/application/o/<slug>/, अंत के स्लैश सहित। एक OAuth2/OpenID प्रदाता और उसका उपयोग करने वाला एक एप्लिकेशन बनाएं।"
+          "hint": "Issuer एप्लिकेशन का पता है, https://<host>/application/o/<slug>/, अंत के स्लैश सहित। एक OAuth2/OpenID प्रदाता और उसका उपयोग करने वाला एक एप्लिकेशन बनाएं। प्रदाता को offline_access स्कोप दें और यहाँ भी उसे माँगें, वरना साइन-इन उसके पाँच मिनट के टोकन के साथ समाप्त होंगे।"
         },
         "entra": {
           "name": "Microsoft Entra ID",
@@ -1686,6 +1686,13 @@
       "resultBackchannel": "बैक-चैनल लॉगआउट समर्थित:",
       "resultScopes": "उपलब्ध स्कोप:",
       "resultGroupsClaim": "समूह claim:",
+      "resultRefresh": "रीफ़्रेश टोकन:",
+      "refresh": {
+        "asked": "offline_access से माँगे गए",
+        "offered": "offline_access उपलब्ध है, पर माँगा नहीं गया",
+        "absent": "offline_access उपलब्ध स्कोप में नहीं है"
+      },
+      "refreshHint": "स्कोप में offline_access जोड़ें और सहेजें: रीफ़्रेश टोकन के बिना साइन-इन अपने ID टोकन के साथ समाप्त होता है, जिसे कुछ प्रदाता केवल कुछ मिनटों के लिए जारी करते हैं।",
       "claimListed": "'{claim}' प्रदाता द्वारा सूचीबद्ध claims में है",
       "claimNotListed": "'{claim}' प्रदाता द्वारा सूचीबद्ध claims में नहीं है",
       "resultEntity": "Entity ID:",

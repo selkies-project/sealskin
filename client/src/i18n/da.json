@@ -1636,7 +1636,7 @@
         },
         "authentik": {
           "name": "Authentik",
-          "hint": "Issueren er applikationens adresse, https://<host>/application/o/<slug>/, med den afsluttende skråstreg. Opret en OAuth2/OpenID-udbyder og en applikation, der bruger den."
+          "hint": "Issueren er applikationens adresse, https://<host>/application/o/<slug>/, med den afsluttende skråstreg. Opret en OAuth2/OpenID-udbyder og en applikation, der bruger den. Giv udbyderen scopet offline_access, og anmod også om det her, ellers slutter logins med dens tokens på fem minutter."
         },
         "entra": {
           "name": "Microsoft Entra ID",
@@ -1686,6 +1686,13 @@
       "resultBackchannel": "Back-channel-logout understøttet:",
       "resultScopes": "Tilbudte scopes:",
       "resultGroupsClaim": "Gruppe-claim:",
+      "resultRefresh": "Opdateringstokens:",
+      "refresh": {
+        "asked": "anmodet om med offline_access",
+        "offered": "offline_access tilbydes, men der anmodes ikke om det",
+        "absent": "offline_access er ikke blandt de tilbudte scopes"
+      },
+      "refreshHint": "Føj offline_access til scopes, og gem: uden et opdateringstoken slutter et login med dets ID-token, som nogle udbydere kun udsteder for få minutter.",
       "claimListed": "'{claim}' er blandt de claims, udbyderen oplister",
       "claimNotListed": "'{claim}' er ikke blandt de claims, udbyderen oplister",
       "resultEntity": "Entity-ID:",

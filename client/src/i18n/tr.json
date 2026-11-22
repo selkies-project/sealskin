@@ -1636,7 +1636,7 @@
         },
         "authentik": {
           "name": "Authentik",
-          "hint": "Issuer, uygulamanın adresidir: https://<host>/application/o/<slug>/ (sondaki eğik çizgiyle birlikte). Bir OAuth2/OpenID sağlayıcısı ve onu kullanan bir uygulama oluşturun."
+          "hint": "Issuer, uygulamanın adresidir: https://<host>/application/o/<slug>/ (sondaki eğik çizgiyle birlikte). Bir OAuth2/OpenID sağlayıcısı ve onu kullanan bir uygulama oluşturun. Sağlayıcıya offline_access kapsamını verin ve burada da isteyin; aksi halde oturumlar beş dakikalık belirteçleriyle sona erer."
         },
         "entra": {
           "name": "Microsoft Entra ID",
@@ -1686,6 +1686,13 @@
       "resultBackchannel": "Back-channel oturum kapatma destekleniyor:",
       "resultScopes": "Sunulan kapsamlar:",
       "resultGroupsClaim": "Gruplar claim'i:",
+      "resultRefresh": "Yenileme belirteçleri:",
+      "refresh": {
+        "asked": "offline_access ile isteniyor",
+        "offered": "offline_access sunuluyor ama istenmiyor",
+        "absent": "offline_access sunulan kapsamlar arasında değil"
+      },
+      "refreshHint": "Kapsamlara offline_access ekleyip kaydedin: yenileme belirteci olmadan bir oturum, bazı sağlayıcıların yalnızca dakikalarca verdiği kimlik belirteciyle birlikte sona erer.",
       "claimListed": "'{claim}', sağlayıcının listelediği claim'ler arasında",
       "claimNotListed": "'{claim}', sağlayıcının listelediği claim'ler arasında değil",
       "resultEntity": "Entity ID:",

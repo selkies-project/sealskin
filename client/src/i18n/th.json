@@ -1636,7 +1636,7 @@
         },
         "authentik": {
           "name": "Authentik",
-          "hint": "Issuer คือที่อยู่ของแอปพลิเคชัน https://<host>/application/o/<slug>/ รวมเครื่องหมายทับท้ายด้วย สร้างผู้ให้บริการ OAuth2/OpenID และแอปพลิเคชันที่ใช้ผู้ให้บริการนั้น"
+          "hint": "Issuer คือที่อยู่ของแอปพลิเคชัน https://<host>/application/o/<slug>/ รวมเครื่องหมายทับท้ายด้วย สร้างผู้ให้บริการ OAuth2/OpenID และแอปพลิเคชันที่ใช้ผู้ให้บริการนั้นให้ขอบเขต offline_access แก่ผู้ให้บริการและขอที่นี่ด้วย มิฉะนั้นการลงชื่อเข้าใช้จะสิ้นสุดพร้อมโทเค็นห้านาทีของผู้ให้บริการ"
         },
         "entra": {
           "name": "Microsoft Entra ID",
@@ -1686,6 +1686,13 @@
       "resultBackchannel": "รองรับการออกจากระบบแบบ back-channel:",
       "resultScopes": "สโคปที่มีให้:",
       "resultGroupsClaim": "Claim กลุ่ม:",
+      "resultRefresh": "โทเค็นรีเฟรช:",
+      "refresh": {
+        "asked": "ขอด้วย offline_access แล้ว",
+        "offered": "มี offline_access ให้ แต่ไม่ได้ขอ",
+        "absent": "offline_access ไม่อยู่ในขอบเขตที่มีให้"
+      },
+      "refreshHint": "เพิ่ม offline_access ในขอบเขตแล้วบันทึก: หากไม่มีโทเค็นรีเฟรช การลงชื่อเข้าใช้จะสิ้นสุดพร้อมโทเค็น ID ซึ่งผู้ให้บริการบางรายออกให้เพียงไม่กี่นาที",
       "claimListed": "'{claim}' อยู่ในรายการ claim ที่ผู้ให้บริการแสดง",
       "claimNotListed": "'{claim}' ไม่อยู่ในรายการ claim ที่ผู้ให้บริการแสดง",
       "resultEntity": "Entity ID:",

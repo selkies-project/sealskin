@@ -753,3 +753,40 @@ def test_the_sp_metadata_names_the_endpoints_the_browser_reaches(http):
     assert metadata.get("entityID") == SP_ENTITY
     md = "{urn:oasis:names:tc:SAML:2.0:metadata}"
     assert metadata.find(f"{md}SPSSODescriptor/{md}AssertionConsumerService").get("Location") == ACS
+
+
+def test_a_sign_in_short_for_want_of_a_refresh_token_is_logged_with_the_remedy(http, provider, monkeypatch, caplog):
+    monkeypatch.setattr(sso, "_short_sign_in_logged", None)
+    _sign_in_oidc(http, provider, {"sub": "short-1", "preferred_username": "shorty"}, refresh_token=None)
+    assert "since the provider gave no refresh token" in caplog.text and "offline_access" in caplog.text
+    caplog.clear()
+    # Said once an hour, and never for a sign-in that refreshes.
+    _sign_in_oidc(http, provider, {"sub": "short-2", "preferred_username": "shorty2"}, refresh_token=None)
+    monkeypatch.setattr(sso, "_short_sign_in_logged", None)
+    _sign_in_oidc(http, provider, {"sub": "long-1", "preferred_username": "longy"})
+    assert "no refresh token" not in caplog.text
+
+
+def test_the_oidc_test_says_whether_refresh_tokens_are_asked_for(http, provider, monkeypatch):
+    import asyncio
+
+    from app.routers import cluster_admin
+
+    discovery = provider.handle
+
+    def with_scopes(request):
+        response = discovery(request)
+        if str(request.url).endswith("/.well-known/openid-configuration"):
+            return httpx.Response(200, json={**response.json(), "scopes_supported": ["openid", "offline_access"]})
+        return response
+
+    monkeypatch.setattr(sso, "_transport", httpx.MockTransport(with_scopes))
+    for scopes, expected in (("openid profile email", "offered"), ("openid profile offline_access", "asked")):
+        monkeypatch.setattr(settings, "oidc_scopes", scopes)
+        sso._CACHE.clear()
+        answer = asyncio.run(cluster_admin.test_sign_in(None, {"kind": "oidc"}))
+        assert answer["ok"] and answer["offline_access"] == expected, scopes
+    monkeypatch.setattr(sso, "_transport", httpx.MockTransport(discovery))
+    monkeypatch.setattr(settings, "oidc_scopes", "openid profile email")
+    sso._CACHE.clear()
+    assert asyncio.run(cluster_admin.test_sign_in(None, {"kind": "oidc"}))["offline_access"] == "absent"

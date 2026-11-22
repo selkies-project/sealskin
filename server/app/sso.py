@@ -116,6 +116,9 @@ _GRANTS: dict[str, dict[str, Any]] = {}
 _REPLAYS: dict[str, float] = {}
 _CACHE: dict[str, tuple[float, Any]] = {}
 _REFRESH_LOCKS: dict[str, asyncio.Lock] = {}
+#: An OpenID Connect sign-in this short for want of a refresh token is logged with the remedy, at most once an hour.
+SHORT_SIGN_IN_SECONDS = 3600
+_short_sign_in_logged: float | None = None
 _transport: httpx.AsyncBaseTransport | None = None
 
 
@@ -544,6 +547,21 @@ async def _with_userinfo(claims: dict[str, Any], tokens: dict[str, Any], doc: di
     return claims | {name: info[name] for name in missing if name in info}
 
 
+def _note_short_sign_in(seconds: float) -> None:
+    """Log, at most once an hour, that a sign-in ends with a short-lived ID token, since no refresh token came."""
+    global _short_sign_in_logged
+    now = time.monotonic()
+    if seconds >= SHORT_SIGN_IN_SECONDS or (_short_sign_in_logged is not None and now - _short_sign_in_logged < 3600):
+        return
+    _short_sign_in_logged = now
+    logger.warning(
+        "OpenID Connect sign-ins end with their ID token, %d seconds from now, since the provider gave no refresh "
+        "token: give the provider the offline_access scope and add it to oidc_scopes (Sign In shows whether it is "
+        "offered).",
+        max(0, int(seconds)),
+    )
+
+
 def _oidc_expiry(tokens: dict[str, Any], claims: dict[str, Any]) -> float:
     """Return when an OpenID Connect sign-in ends by the provider's own account of it."""
     if tokens.get("refresh_expires_in"):
@@ -610,6 +628,8 @@ async def oidc_finish(state_token: str, code: str, binding: str) -> dict[str, An
         claims = await _with_userinfo(claims, tokens, doc)
     except (httpx.HTTPError, ValueError) as exc:
         raise SignInError("failed", f"the UserInfo request failed: {exc}") from exc
+    if not tokens.get("refresh_token"):
+        _note_short_sign_in(float(claims["exp"]) - time.time())
     return _identity(
         claims.get(settings.sso_username_claim or "preferred_username"),
         claims.get(settings.sso_groups_claim) if settings.sso_groups_claim else [],

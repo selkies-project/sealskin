@@ -1857,14 +1857,18 @@ async function testSignIn(kind) {
     ['options.signin.resultBackchannel', yesNo(answer.backchannel_logout)],
     ['options.signin.resultScopes', (answer.scopes || []).join(' ')],
     ['options.signin.resultGroupsClaim', t((answer.claims || []).includes(groupsClaim) ? 'options.signin.claimListed' : 'options.signin.claimNotListed', { claim: groupsClaim })],
+    ['options.signin.resultRefresh', t(`options.signin.refresh.${answer.offline_access || 'absent'}`)],
   ] : [
     ['options.signin.resultEntity', answer.entity_id],
     ['options.signin.resultSso', answer.sso_url],
     ['options.signin.resultSlo', yesNo(answer.single_logout)],
     ['options.signin.resultCertificates', Array.isArray(answer.certificates) ? answer.certificates.length : answer.certificates],
   ];
+  // Without a refresh token a sign-in ends with its ID token, which some providers issue for minutes.
+  const refreshHint = kind === 'oidc' && answer.offline_access === 'offered'
+    ? `<p class="status-message error">${escapeHtml(t('options.signin.refreshHint'))}</p>` : '';
   result().innerHTML = `<div class="signin-ok"><p><i class="fas fa-check-circle"></i> ${escapeHtml(t('options.signin.testOk'))}</p>${lines
-    .map(([label, value]) => `<p><span>${escapeHtml(t(label))}</span> <strong>${escapeHtml(value ?? '')}</strong></p>`).join('')}</div>`;
+    .map(([label, value]) => `<p><span>${escapeHtml(t(label))}</span> <strong>${escapeHtml(value ?? '')}</strong></p>`).join('')}</div>${refreshHint}`;
 }
 
 function bindSignInEvents() {

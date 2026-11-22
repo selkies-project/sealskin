@@ -157,7 +157,10 @@ then set `SEALSKIN_OIDC_ISSUER`, `SEALSKIN_OIDC_CLIENT_ID`, and
 refresh tokens (the `offline_access` scope on some providers, set in
 `SEALSKIN_OIDC_SCOPES`), SealSkin checks the sign-in with it every minute
 while it is in use and takes the user's groups as the provider names them then;
-otherwise the sign-in ends when its ID token expires. Register
+otherwise the sign-in ends when its ID token expires, which some providers
+issue for minutes (Authentik's last five). **Test** under **Sign In** says
+whether the provider offers `offline_access` and the scopes ask for it, and
+the server logs a warning when a sign-in comes back that short. Register
 `/api/auth/oidc/backchannel-logout` as the back-channel logout URL, or
 `/api/auth/oidc/frontchannel-logout` as the front-channel one, for a logout at
 the provider to end the sign-in at once.

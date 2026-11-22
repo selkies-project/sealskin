@@ -1636,7 +1636,7 @@
         },
         "authentik": {
           "name": "Authentik",
-          "hint": "L'issuer è l'indirizzo dell'applicazione, https://<host>/application/o/<slug>/, con la barra finale. Crea un provider OAuth2/OpenID e un'applicazione che lo usi."
+          "hint": "L'issuer è l'indirizzo dell'applicazione, https://<host>/application/o/<slug>/, con la barra finale. Crea un provider OAuth2/OpenID e un'applicazione che lo usi. Assegna al provider lo scope offline_access e richiedilo anche qui, altrimenti gli accessi terminano con i suoi token da cinque minuti."
         },
         "entra": {
           "name": "Microsoft Entra ID",
@@ -1686,6 +1686,13 @@
       "resultBackchannel": "Logout back-channel supportato:",
       "resultScopes": "Scope offerti:",
       "resultGroupsClaim": "Claim dei gruppi:",
+      "resultRefresh": "Token di aggiornamento:",
+      "refresh": {
+        "asked": "richiesti con offline_access",
+        "offered": "offline_access è offerto ma non richiesto",
+        "absent": "offline_access non è tra gli scope offerti"
+      },
+      "refreshHint": "Aggiungi offline_access agli scope e salva: senza un token di aggiornamento un accesso termina con il suo token ID, che alcuni provider emettono solo per pochi minuti.",
       "claimListed": "'{claim}' è tra i claim elencati dal provider",
       "claimNotListed": "'{claim}' non è tra i claim elencati dal provider",
       "resultEntity": "Entity ID:",

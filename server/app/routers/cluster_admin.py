@@ -341,7 +341,10 @@ async def test_sign_in(request: Request, body: dict[str, Any] = Depends(get_decr
     """Ask the configured identity provider for its metadata and say what came back.
 
     Body `{"kind": "oidc" | "saml" | "proxy"}`. Answers `ok`, and either what
-    the provider published or the `error` reaching or reading it gave. For
+    the provider published or the `error` reaching or reading it gave; for
+    `oidc`, `offline_access` says whether the scopes ask for refresh tokens
+    (`asked`), or the provider offers them by that scope (`offered`) or not
+    (`absent`). For
     `proxy` it runs the check of the reverse proxy again (`proxy_auth.check`)
     and answers with its `state` and `detail`.
     """
@@ -351,8 +354,15 @@ async def test_sign_in(request: Request, body: dict[str, Any] = Depends(get_decr
             if not (settings.oidc_issuer and settings.oidc_client_id):
                 return {"ok": False, "error": "Set the issuer and the client ID first."}
             doc = await sso._discovery(fresh=True)
+            offered = doc.get("scopes_supported") or []
             return {
                 "ok": True,
+                # Without a refresh token a sign-in ends with its ID token, which providers issue for minutes.
+                "offline_access": "asked"
+                if "offline_access" in settings.oidc_scopes.split()
+                else "offered"
+                if "offline_access" in offered
+                else "absent",
                 "issuer": doc.get("issuer"),
                 "authorization_endpoint": doc.get("authorization_endpoint"),
                 "backchannel_logout": bool(doc.get("backchannel_logout_supported")),

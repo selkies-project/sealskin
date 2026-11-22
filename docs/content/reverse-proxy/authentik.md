@@ -32,6 +32,10 @@ SEALSKIN_SSO_GROUPS_CLAIM=groups
 SEALSKIN_SSO_ADMIN_GROUP=admins
 ```
 
+`offline_access`, on both sides, gets SealSkin a refresh token: without it a
+sign-in ends with its ID token, five minutes after it starts as the
+provider's **Access token validity** is by default.
+
 The issuer ends in a slash. The user is `preferred_username`, the Authentik
 user name, and `groups` comes with the `profile` scope. The groups are
 Authentik's, however Authentik fills them: a user it signs in through a

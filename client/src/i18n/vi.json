@@ -1636,7 +1636,7 @@
         },
         "authentik": {
           "name": "Authentik",
-          "hint": "Issuer là địa chỉ của ứng dụng, https://<host>/application/o/<slug>/, có cả dấu gạch chéo ở cuối. Tạo một nhà cung cấp OAuth2/OpenID và một ứng dụng sử dụng nó."
+          "hint": "Issuer là địa chỉ của ứng dụng, https://<host>/application/o/<slug>/, có cả dấu gạch chéo ở cuối. Tạo một nhà cung cấp OAuth2/OpenID và một ứng dụng sử dụng nó. Cấp scope offline_access cho nhà cung cấp và cũng yêu cầu nó ở đây, nếu không phiên đăng nhập sẽ kết thúc theo mã năm phút của nó."
         },
         "entra": {
           "name": "Microsoft Entra ID",
@@ -1686,6 +1686,13 @@
       "resultBackchannel": "Hỗ trợ đăng xuất back-channel:",
       "resultScopes": "Scope được cung cấp:",
       "resultGroupsClaim": "Claim nhóm:",
+      "resultRefresh": "Mã làm mới:",
+      "refresh": {
+        "asked": "đã yêu cầu bằng offline_access",
+        "offered": "offline_access được cung cấp nhưng chưa được yêu cầu",
+        "absent": "offline_access không nằm trong các scope được cung cấp"
+      },
+      "refreshHint": "Thêm offline_access vào các scope rồi lưu: không có mã làm mới, phiên đăng nhập kết thúc khi mã ID hết hạn, mà một số nhà cung cấp chỉ cấp trong vài phút.",
       "claimListed": "'{claim}' có trong các claim mà nhà cung cấp liệt kê",
       "claimNotListed": "'{claim}' không có trong các claim mà nhà cung cấp liệt kê",
       "resultEntity": "Entity ID:",

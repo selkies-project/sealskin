@@ -1636,7 +1636,7 @@
         },
         "authentik": {
           "name": "Authentik",
-          "hint": "발급자는 애플리케이션의 주소 https://<host>/application/o/<slug>/ 이며, 끝의 슬래시까지 포함합니다. OAuth2/OpenID 공급자와 이를 사용하는 애플리케이션을 만드세요."
+          "hint": "발급자는 애플리케이션의 주소 https://<host>/application/o/<slug>/ 이며, 끝의 슬래시까지 포함합니다. OAuth2/OpenID 공급자와 이를 사용하는 애플리케이션을 만드세요. 공급자에 offline_access 스코프를 주고 여기에서도 요청하세요. 그렇지 않으면 로그인이 5분짜리 토큰과 함께 끝납니다."
         },
         "entra": {
           "name": "Microsoft Entra ID",
@@ -1686,6 +1686,13 @@
       "resultBackchannel": "백채널 로그아웃 지원:",
       "resultScopes": "제공되는 스코프:",
       "resultGroupsClaim": "그룹 클레임:",
+      "resultRefresh": "리프레시 토큰:",
+      "refresh": {
+        "asked": "offline_access로 요청함",
+        "offered": "offline_access가 제공되지만 요청하지 않음",
+        "absent": "제공되는 스코프에 offline_access가 없음"
+      },
+      "refreshHint": "스코프에 offline_access를 추가하고 저장하세요. 리프레시 토큰이 없으면 로그인은 ID 토큰이 만료될 때 끝나며, 일부 공급자는 ID 토큰을 몇 분짜리로만 발급합니다.",
       "claimListed": "'{claim}'은(는) 공급자가 나열한 클레임에 포함되어 있습니다",
       "claimNotListed": "'{claim}'은(는) 공급자가 나열한 클레임에 포함되어 있지 않습니다",
       "resultEntity": "엔터티 ID:",

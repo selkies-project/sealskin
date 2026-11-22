@@ -1636,7 +1636,7 @@
         },
         "authentik": {
           "name": "Authentik",
-          "hint": "El emisor es la dirección de la aplicación, https://<host>/application/o/<slug>/, con su barra final. Cree un proveedor OAuth2/OpenID y una aplicación que lo use."
+          "hint": "El emisor es la dirección de la aplicación, https://<host>/application/o/<slug>/, con su barra final. Cree un proveedor OAuth2/OpenID y una aplicación que lo use. Dé al proveedor el ámbito offline_access y solicítelo también aquí, o los inicios de sesión terminarán con sus tokens de cinco minutos."
         },
         "entra": {
           "name": "Microsoft Entra ID",
@@ -1686,6 +1686,13 @@
       "resultBackchannel": "Cierre de sesión back-channel admitido:",
       "resultScopes": "Scopes ofrecidos:",
       "resultGroupsClaim": "Claim de grupos:",
+      "resultRefresh": "Tokens de actualización:",
+      "refresh": {
+        "asked": "solicitados con offline_access",
+        "offered": "offline_access se ofrece, pero no se solicita",
+        "absent": "offline_access no está entre los ámbitos ofrecidos"
+      },
+      "refreshHint": "Añada offline_access a los ámbitos y guarde: sin un token de actualización, un inicio de sesión termina con su token de ID, que algunos proveedores emiten solo por minutos.",
       "claimListed": "'{claim}' está entre los claims que lista el proveedor",
       "claimNotListed": "'{claim}' no está entre los claims que lista el proveedor",
       "resultEntity": "ID de entidad:",

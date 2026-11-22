@@ -1636,7 +1636,7 @@
         },
         "authentik": {
           "name": "Authentik",
-          "hint": "L'émetteur est l'adresse de l'application, https://<host>/application/o/<slug>/, avec sa barre oblique finale. Créez un fournisseur OAuth2/OpenID et une application qui l'utilise."
+          "hint": "L'émetteur est l'adresse de l'application, https://<host>/application/o/<slug>/, avec sa barre oblique finale. Créez un fournisseur OAuth2/OpenID et une application qui l'utilise. Donnez au fournisseur le scope offline_access et demandez-le aussi ici, sinon les connexions prennent fin avec ses jetons de cinq minutes."
         },
         "entra": {
           "name": "Microsoft Entra ID",
@@ -1686,6 +1686,13 @@
       "resultBackchannel": "Déconnexion back-channel prise en charge :",
       "resultScopes": "Scopes proposés :",
       "resultGroupsClaim": "Claim de groupes :",
+      "resultRefresh": "Jetons d'actualisation :",
+      "refresh": {
+        "asked": "demandés avec offline_access",
+        "offered": "offline_access est proposé mais pas demandé",
+        "absent": "offline_access ne fait pas partie des scopes proposés"
+      },
+      "refreshHint": "Ajoutez offline_access aux scopes et enregistrez : sans jeton d'actualisation, une connexion prend fin avec son jeton d'identité, que certains fournisseurs n'émettent que pour quelques minutes.",
       "claimListed": "'{claim}' figure parmi les claims que liste le fournisseur",
       "claimNotListed": "'{claim}' ne figure pas parmi les claims que liste le fournisseur",
       "resultEntity": "ID d'entité :",

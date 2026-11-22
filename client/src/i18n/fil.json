@@ -1636,7 +1636,7 @@
         },
         "authentik": {
           "name": "Authentik",
-          "hint": "Ang issuer ay ang address ng application, https://<host>/application/o/<slug>/, kasama ang trailing slash nito. Gumawa ng OAuth2/OpenID provider at ng application na gumagamit nito."
+          "hint": "Ang issuer ay ang address ng application, https://<host>/application/o/<slug>/, kasama ang trailing slash nito. Gumawa ng OAuth2/OpenID provider at ng application na gumagamit nito. Ibigay sa provider ang scope na offline_access at hingin din ito rito, o matatapos ang mga sign-in kasabay ng limang-minutong token nito."
         },
         "entra": {
           "name": "Microsoft Entra ID",
@@ -1686,6 +1686,13 @@
       "resultBackchannel": "Sinusuportahan ang back-channel logout:",
       "resultScopes": "Mga scope na inaalok:",
       "resultGroupsClaim": "Groups claim:",
+      "resultRefresh": "Mga refresh token:",
+      "refresh": {
+        "asked": "hinihingi gamit ang offline_access",
+        "offered": "inaalok ang offline_access pero hindi hinihingi",
+        "absent": "wala ang offline_access sa mga inaalok na scope"
+      },
+      "refreshHint": "Idagdag ang offline_access sa mga scope at i-save: kung walang refresh token, natatapos ang sign-in kasabay ng ID token nito, na ilang minuto lang ibinibigay ng ilang provider.",
       "claimListed": "Ang '{claim}' ay kabilang sa mga claim na inililista ng provider",
       "claimNotListed": "Ang '{claim}' ay hindi kabilang sa mga claim na inililista ng provider",
       "resultEntity": "Entity ID:",

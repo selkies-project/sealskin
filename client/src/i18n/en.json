@@ -1636,7 +1636,7 @@
         },
         "authentik": {
           "name": "Authentik",
-          "hint": "The issuer is the application's address, https://<host>/application/o/<slug>/, with its trailing slash. Create an OAuth2/OpenID provider and an application that uses it."
+          "hint": "The issuer is the application's address, https://<host>/application/o/<slug>/, with its trailing slash. Create an OAuth2/OpenID provider and an application that uses it. Give the provider the offline_access scope and ask for it here too, or sign-ins end with its five-minute tokens."
         },
         "entra": {
           "name": "Microsoft Entra ID",
@@ -1686,6 +1686,13 @@
       "resultBackchannel": "Back-channel logout supported:",
       "resultScopes": "Scopes offered:",
       "resultGroupsClaim": "Groups claim:",
+      "resultRefresh": "Refresh tokens:",
+      "refresh": {
+        "asked": "asked for with offline_access",
+        "offered": "offline_access is offered but not asked for",
+        "absent": "offline_access is not among the scopes offered"
+      },
+      "refreshHint": "Add offline_access to the scopes and save: without a refresh token a sign-in ends when its ID token does, which some providers issue for only minutes.",
       "claimListed": "'{claim}' is among the claims the provider lists",
       "claimNotListed": "'{claim}' is not among the claims the provider lists",
       "resultEntity": "Entity ID:",

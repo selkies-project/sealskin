@@ -1636,7 +1636,7 @@
         },
         "authentik": {
           "name": "Authentik",
-          "hint": "颁发者为应用程序的地址 https://<host>/application/o/<slug>/ ，需包含末尾的斜杠。创建一个 OAuth2/OpenID 提供程序以及一个使用它的应用程序。"
+          "hint": "颁发者为应用程序的地址 https://<host>/application/o/<slug>/ ，需包含末尾的斜杠。创建一个 OAuth2/OpenID 提供程序以及一个使用它的应用程序。为提供程序添加 offline_access 作用域并在此处也请求它，否则登录会随其五分钟的令牌结束。"
         },
         "entra": {
           "name": "Microsoft Entra ID",
@@ -1686,6 +1686,13 @@
       "resultBackchannel": "支持后端通道注销:",
       "resultScopes": "提供的作用域:",
       "resultGroupsClaim": "群组声明:",
+      "resultRefresh": "刷新令牌：",
+      "refresh": {
+        "asked": "已通过 offline_access 请求",
+        "offered": "提供了 offline_access，但未请求",
+        "absent": "提供的作用域中没有 offline_access"
+      },
+      "refreshHint": "将 offline_access 添加到作用域并保存：没有刷新令牌时，登录会在 ID 令牌到期时结束，而有些提供程序签发的 ID 令牌只有几分钟。",
       "claimListed": "“{claim}”在提供方列出的声明之中",
       "claimNotListed": "“{claim}”不在提供方列出的声明之中",
       "resultEntity": "实体 ID:",

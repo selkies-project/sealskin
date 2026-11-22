@@ -1636,7 +1636,7 @@
         },
         "authentik": {
           "name": "Authentik",
-          "hint": "جهة الإصدار هي عنوان التطبيق، https://<host>/application/o/<slug>/، مع الشرطة المائلة في آخره. أنشئ موفر OAuth2/OpenID وتطبيقًا يستخدمه."
+          "hint": "جهة الإصدار هي عنوان التطبيق، https://<host>/application/o/<slug>/، مع الشرطة المائلة في آخره. أنشئ موفر OAuth2/OpenID وتطبيقًا يستخدمه. امنح المزوّد النطاق offline_access واطلبه هنا أيضًا، وإلا تنتهي عمليات تسجيل الدخول مع رموزه ذات الدقائق الخمس."
         },
         "entra": {
           "name": "Microsoft Entra ID",
@@ -1686,6 +1686,13 @@
       "resultBackchannel": "دعم تسجيل الخروج عبر القناة الخلفية:",
       "resultScopes": "نطاقات الصلاحيات المعروضة:",
       "resultGroupsClaim": "مطالبة المجموعات:",
+      "resultRefresh": "رموز التحديث:",
+      "refresh": {
+        "asked": "مطلوبة عبر offline_access",
+        "offered": "النطاق offline_access متاح لكنه غير مطلوب",
+        "absent": "النطاق offline_access ليس بين النطاقات المتاحة"
+      },
+      "refreshHint": "أضف offline_access إلى النطاقات واحفظ: من دون رمز تحديث ينتهي تسجيل الدخول مع رمز الهوية الخاص به، الذي يصدره بعض المزوّدين لدقائق فقط.",
       "claimListed": "'{claim}' ضمن المطالبات التي يسردها الموفر",
       "claimNotListed": "'{claim}' ليست ضمن المطالبات التي يسردها الموفر",
       "resultEntity": "معرّف الكيان:",

@@ -1636,7 +1636,7 @@
         },
         "authentik": {
           "name": "Authentik",
-          "hint": "Издатель — адрес приложения, https://<host>/application/o/<slug>/, с завершающей косой чертой. Создайте провайдер OAuth2/OpenID и приложение, которое его использует."
+          "hint": "Издатель — адрес приложения, https://<host>/application/o/<slug>/, с завершающей косой чертой. Создайте провайдер OAuth2/OpenID и приложение, которое его использует. Добавьте поставщику область offline_access и запросите её и здесь, иначе входы будут заканчиваться вместе с его пятиминутными токенами."
         },
         "entra": {
           "name": "Microsoft Entra ID",
@@ -1686,6 +1686,13 @@
       "resultBackchannel": "Выход по back-channel поддерживается:",
       "resultScopes": "Предлагаемые scopes:",
       "resultGroupsClaim": "Claim групп:",
+      "resultRefresh": "Токены обновления:",
+      "refresh": {
+        "asked": "запрашиваются через offline_access",
+        "offered": "offline_access предлагается, но не запрашивается",
+        "absent": "offline_access нет среди предлагаемых областей"
+      },
+      "refreshHint": "Добавьте offline_access в области и сохраните: без токена обновления вход заканчивается вместе с его ID-токеном, который некоторые поставщики выдают всего на несколько минут.",
       "claimListed": "'{claim}' есть среди claims, которые перечисляет поставщик",
       "claimNotListed": "'{claim}' нет среди claims, которые перечисляет поставщик",
       "resultEntity": "Entity ID:",

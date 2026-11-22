@@ -1636,7 +1636,7 @@
         },
         "authentik": {
           "name": "Authentik",
-          "hint": "De issuer is het adres van de applicatie, https://<host>/application/o/<slug>/, inclusief de afsluitende slash. Maak een OAuth2/OpenID-provider aan en een applicatie die deze gebruikt."
+          "hint": "De issuer is het adres van de applicatie, https://<host>/application/o/<slug>/, inclusief de afsluitende slash. Maak een OAuth2/OpenID-provider aan en een applicatie die deze gebruikt. Geef de provider de scope offline_access en vraag die hier ook aan, anders eindigen aanmeldingen met zijn tokens van vijf minuten."
         },
         "entra": {
           "name": "Microsoft Entra ID",
@@ -1686,6 +1686,13 @@
       "resultBackchannel": "Back-channel-afmelding ondersteund:",
       "resultScopes": "Aangeboden scopes:",
       "resultGroupsClaim": "Groepen-claim:",
+      "resultRefresh": "Vernieuwingstokens:",
+      "refresh": {
+        "asked": "aangevraagd met offline_access",
+        "offered": "offline_access wordt aangeboden maar niet aangevraagd",
+        "absent": "offline_access staat niet tussen de aangeboden scopes"
+      },
+      "refreshHint": "Voeg offline_access toe aan de scopes en sla op: zonder vernieuwingstoken eindigt een aanmelding met haar ID-token, dat sommige providers maar enkele minuten uitgeven.",
       "claimListed": "'{claim}' staat tussen de claims die de provider opsomt",
       "claimNotListed": "'{claim}' staat niet tussen de claims die de provider opsomt",
       "resultEntity": "Entity-ID:",
