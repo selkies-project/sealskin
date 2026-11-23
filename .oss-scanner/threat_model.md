@@ -133,7 +133,10 @@
 - A web sign-in with the root key has no time limit by design, for a server with one administrator, and its
   cookie outlives the browser. It ends at its sign-out, while the node's `root_sign_in` is off, and when the key
   it was made with is revoked, replaced, or expires: at once on the node that revoked it, within a minute on the
-  others while they can read the shared record. A root sign-in that outlives any of those is a finding.
+  others while they can read the shared record. A root sign-in that outlives any of those is a finding. The
+  cookie handed out again carries a token the server minted, at most once a day, never the value a request
+  sent; the token it replaces answers until the new one is first used and a minute after, and signing out
+  with either ends both.
 - A node with the bucket's credentials is a member of the cluster by design ("the bucket keys are the master
   key"); a file-store cluster approves nodes by hand.
 - Reports should name the file and line, give a reproducer (a pytest test against the TestClient is ideal), and

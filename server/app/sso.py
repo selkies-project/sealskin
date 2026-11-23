@@ -88,6 +88,10 @@ COOKIE = "sealskin_sso"
 SESSION_COOKIE = "__Host-sealskin"
 #: How long a browser keeps the cookie of a root sign-in, the most browsers allow; the web app's page hands it out again.
 ROOT_COOKIE_SECONDS = 400 * 86400
+#: How often the cookie a root sign-in's browser is handed again carries a new token (see `renew_root`).
+ROOT_RENEW_SECONDS = 86400
+#: How long a root sign-in's replaced token still answers once the new one is used, for requests already on their way.
+RENEWED_GRACE_SECONDS = 60
 BACKCHANNEL_LOGOUT_EVENT = "http://schemas.openid.net/event/backchannel-logout"
 ASYMMETRIC_ALGORITHMS = {"RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512", "EdDSA"}
 
@@ -175,9 +179,17 @@ async def _save() -> None:
 
 
 def _lapsed(reg: dict[str, Any], now: float) -> bool:
-    """Whether a sign-in's end has passed; a root sign-in, with `expires` empty, ends once its cookie would have."""
+    """Whether a sign-in's end has passed.
+
+    A root sign-in, with `expires` empty, ends once its cookie would have, or
+    when its token was replaced and the grace after the new one's first use
+    (`retires`) is over.
+    """
     expires = reg.get("expires", 0)
     if expires is None:
+        retires = reg.get("retires")
+        if retires is not None and float(retires) <= now:
+            return True
         return now - float(reg.get("checked") or 0) > ROOT_COOKIE_SECONDS
     return float(expires) <= now
 
@@ -199,6 +211,36 @@ async def open_session(identity: dict[str, Any]) -> str:
     logger.info(
         "'%s' signed in through %s%s.", identity["username"], identity["via"], " as an administrator" if identity["admin"] else ""
     )
+    return token
+
+
+async def renew_root(kid: str) -> str | None:
+    """Give the root sign-in kept under `kid` a new token when one is due, and return it.
+
+    A browser that keeps opening the web app is handed its cookie again
+    before the end browsers put on one, and that cookie carries a token
+    minted here, never the value the browser sent. A token is replaced at
+    most once per `ROOT_RENEW_SECONDS`: the sign-in is copied under the new
+    token, whose record names the one it `replaces`, and the old record names
+    its `successor`. The old token keeps answering until the new one is first
+    used and `RENEWED_GRACE_SECONDS` after (see `current`), so a cookie the
+    browser never kept loses nothing; a successor never used is dropped when
+    the token is replaced again. `end_sign_in` ends both. Returns `None` when
+    no new token is due.
+    """
+    reg = _KEYS.get(kid)
+    now = time.time()
+    if not reg or reg["via"] != "root" or reg.get("retires") is not None:
+        return None
+    if now - float(reg.get("renewed") or reg.get("created") or 0) < ROOT_RENEW_SECONDS:
+        return None
+    _KEYS.pop(reg.get("successor") or "", None)
+    token = secrets.token_urlsafe(32)
+    successor = session_id(token)
+    kept = {k: v for k, v in reg.items() if k not in ("replaces", "successor")}
+    _KEYS[successor] = {**kept, "renewed": now, "replaces": kid}
+    reg["renewed"], reg["successor"] = now, successor
+    await _save()
     return token
 
 
@@ -354,6 +396,14 @@ async def revoke(kid: str) -> None:
         await _save()
 
 
+async def end_sign_in(kid: str) -> None:
+    """End the sign-in kept under `kid` as its user signs out, with the token a renewal linked to it (`renew_root`)."""
+    reg = _KEYS.get(kid) or {}
+    for linked in (reg.get("replaces"), reg.get("successor")):
+        _KEYS.pop(linked or "", None)
+    await revoke(kid)
+
+
 async def end_sign_ins_with_key(key_id: str) -> None:
     """End this node's root sign-ins made with an application key, as when it is revoked."""
     ended = [kid for kid, reg in _KEYS.items() if reg["via"] == "root" and reg.get("key") == key_id]
@@ -381,12 +431,18 @@ async def current(kid: str) -> dict[str, Any] | None:
     against the shared record of application keys as often: a key revoked,
     replaced, or expired ends it, a record that cannot be read does not. The
     check is the time a root sign-in was last used, which `_lapsed` reads.
+    The first use of a root sign-in's new token starts the grace that ends the
+    token it replaced (`renew_root`).
     """
     reg = _KEYS.get(kid)
     if not reg or _lapsed(reg, time.time()) or (reg["via"] == "root" and not settings.root_sign_in):
         await revoke(kid)
         return None
     if reg["via"] == "root":
+        replaced = _KEYS.get(reg.get("replaces") or "")
+        if replaced is not None and replaced.get("successor") == kid and replaced.get("retires") is None:
+            replaced["retires"] = time.time() + RENEWED_GRACE_SECONDS
+            await _save()
         if time.time() - reg["checked"] < CHECK_SECONDS:
             return reg
         reg["checked"] = time.time()

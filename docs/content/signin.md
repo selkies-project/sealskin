@@ -75,7 +75,9 @@ form to that address until the oldest ages out. A sign-in with the root key
 has no time limit, so a server with one administrator asks for it once per
 browser: it lasts until it is signed out, the key it was made with is revoked,
 replaced, or expires, or the node's root sign-in is switched off, and the
-browser keeps its cookie across restarts. Signed in, `admin` can make
+browser keeps its cookie across restarts. Opening the web app hands the
+browser a cookie with a new token at most once a day, which keeps it from
+reaching the end browsers put on a cookie. Signed in, `admin` can make
 further keys under **Application Keys** in Settings like any user, and those
 sign in both the web app and the companion apps.
 

@@ -127,9 +127,12 @@ def test_a_root_sign_in_lasts_until_its_key_goes_or_the_node_turns_root_sign_in_
     assert sso._KEYS[kid]["expires"] is None
     # Long unused, the sign-in still stands once the shared record says its key does.
     sso._KEYS[kid]["checked"] = time.time() - 30 * 86400
+    sso._KEYS[kid]["created"] = time.time() - 30 * 86400
     assert status(cookie) == 200
     page = http.get("/", headers={**WEB, **cookie})
     assert page.status_code == 200 and f"Max-Age={sso.ROOT_COOKIE_SECONDS}" in page.headers.get("set-cookie", "")
+    renewed = {"Cookie": page.headers["set-cookie"].split(";", 1)[0]}
+    assert renewed != cookie and status(renewed) == 200
     monkeypatch.setattr(settings, "root_sign_in", False)
     assert status(cookie) == 401
     monkeypatch.setattr(settings, "root_sign_in", True)
@@ -143,6 +146,66 @@ def test_a_root_sign_in_lasts_until_its_key_goes_or_the_node_turns_root_sign_in_
     # A root sign-in unused as long as a browser keeps its cookie is dropped.
     stale = {"via": "root", "expires": None, "checked": time.time() - sso.ROOT_COOKIE_SECONDS - 1}
     assert sso._lapsed(stale, time.time())
+
+
+def test_a_root_sign_in_s_cookie_comes_back_with_a_new_token_once_a_day_and_both_end_together(http, monkeypatch, tmp_path):
+    key = open(settings.root_key_path, encoding="utf-8").read().strip()
+    (tmp_path / "ui").mkdir()
+    (tmp_path / "ui" / "index.html").write_text("<html></html>")
+    monkeypatch.setattr(settings, "ui_path", str(tmp_path / "ui"))
+
+    def sign_in():
+        signed_in = http.post("/api/auth/key", json={"key": key}, headers=WEB)
+        cookie = {"Cookie": signed_in.headers["set-cookie"].split(";", 1)[0]}
+        return cookie, sso.session_id(cookie["Cookie"].split("=", 1)[1])
+
+    def page(cookie):
+        answer = http.get("/", headers={**WEB, **cookie})
+        assert answer.status_code == 200
+        handed = answer.headers.get("set-cookie", "")
+        return {"Cookie": handed.split(";", 1)[0]} if handed else None
+
+    def status(cookie):
+        return http.post("/api/admin/status", json={}, headers={**WEB, **cookie}).status_code
+
+    def due(kid):
+        sso._KEYS[kid]["created"] = sso._KEYS[kid]["renewed"] = time.time() - sso.ROOT_RENEW_SECONDS - 1
+
+    cookie, kid = sign_in()
+    # A fresh sign-in's cookie is not handed out again until a new token is due.
+    assert page(cookie) is None
+    due(kid)
+    first = page(cookie)
+    assert first and first != cookie and page(cookie) is None
+    # A cookie the browser never kept loses nothing: the old token answers, and the next one due replaces the unused.
+    assert status(cookie) == 200
+    due(kid)
+    second = page(cookie)
+    assert second and second != first and status(first) == 401
+    # The new token's first use leaves the old one a grace, then ends it.
+    assert status(second) == 200 and status(cookie) == 200
+    assert page(cookie) is None
+    sso._KEYS[kid]["retires"] = time.time() - 1
+    assert status(cookie) == 401 and status(second) == 200
+    # Signing out with either token ends both.
+    cookie, kid = sign_in()
+    due(kid)
+    renewed = page(cookie)
+    assert http.post("/api/auth/signout", json={}, headers={**WEB, **cookie}).status_code == 204
+    assert status(cookie) == 401 and status(renewed) == 401
+    cookie, kid = sign_in()
+    due(kid)
+    renewed = page(cookie)
+    assert status(renewed) == 200
+    assert http.post("/api/auth/signout", json={}, headers={**WEB, **renewed}).status_code == 204
+    assert status(cookie) == 401 and status(renewed) == 401
+    # Revoking the key ends the old token and the new one alike.
+    cookie, kid = sign_in()
+    due(kid)
+    renewed = page(cookie)
+    other, _ = sign_in()
+    assert http.delete(f"/api/keys/{application_keys.parse(key)[0]}", headers={**WEB, **other}).status_code == 204
+    assert status(cookie) == 401 and status(renewed) == 401
 
 
 def test_wrong_keys_are_counted_per_address_and_the_environment_key_is_matched_whole(http, monkeypatch):

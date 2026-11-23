@@ -44,18 +44,21 @@ def set_session_cookie(response: Response, token: str, via: str) -> None:
 async def renew_root_cookie(request: Request, response: Response) -> None:
     """Hand a page's browser the cookie of its root sign-in again, so a browser that keeps coming back never loses it.
 
-    The page is then kept out of shared caches, since it carries the cookie.
+    The cookie carries the new token `sso.renew_root` mints once a day, and
+    the page is then kept out of shared caches, since it carries the cookie.
     """
     token = request.cookies.get(sso.SESSION_COOKIE)
     if not token or not cluster.via_proxy(request) or not same_origin(request):
         return
+    kid = sso.session_id(token)
     try:
-        signed_in = await sso.current(sso.session_id(token))
+        signed_in = await sso.current(kid)
+        renewed = await sso.renew_root(kid) if signed_in and signed_in["via"] == "root" else None
     except OSError as exc:
         logger.warning("Could not renew a root sign-in's cookie: %s", exc)
         return
-    if signed_in and signed_in["via"] == "root":
-        set_session_cookie(response, token, "root")
+    if renewed:
+        set_session_cookie(response, renewed, "root")
         response.headers["Cache-Control"] = "private, no-store"
 
 
@@ -246,6 +249,6 @@ async def sign_out(request: Request) -> Response:
     if token and cluster.via_proxy(request):
         if not same_origin(request):
             raise HTTPException(status_code=403, detail="Requests from other origins are refused.")
-        await sso.revoke(sso.session_id(token))
+        await sso.end_sign_in(sso.session_id(token))
         response.delete_cookie(sso.SESSION_COOKIE, path="/", secure=True, httponly=True)
     return response
