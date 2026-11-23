@@ -84,6 +84,7 @@ DEFAULT_USER_SETTINGS: dict[str, Any] = {
     "pools": [],
     "pools_denied": [],
     "proot_catalog": None,
+    "collaboration_profile": None,
     "vpn": True,
     "application_keys": True,
     "application_key_clients": list(APP_KEY_CLIENTS),
@@ -465,9 +466,11 @@ def get_effective_settings(username: str, provider_groups: Any = None) -> dict[s
     the smallest any group sets, the pools are those any group allows less
     those any denies, and the application keys' clients are those every
     group that names any allows. A setting no group sets stays the user's own.
-    Administrators always get the defaults, short of the PRoot Apps catalog,
-    which is the user's own or the first of their groups' to name one, and
-    the application key settings (`APP_KEY_SETTINGS`), which bind them too.
+    The collaboration profiles (`collaboration_profiles`) are those the
+    groups name, else the user's own. Administrators always get the
+    defaults, short of the PRoot Apps catalog, which is the user's own or the
+    first of their groups' to name one, the collaboration profiles, and the
+    application key settings (`APP_KEY_SETTINGS`), which bind them too.
 
     Args:
         username: The user.
@@ -482,7 +485,16 @@ def get_effective_settings(username: str, provider_groups: Any = None) -> dict[s
     members = [GROUP_DATA[name]["settings"] for name in names]
     # A catalog is a choice, not a limit: the user's own, else the first group's that makes one.
     catalog = base.get("proot_catalog") or next((g["proot_catalog"] for g in members if g.get("proot_catalog")), None)
-    effective = dict(base, groups=names or [DEFAULT_GROUP], group=names[0] if names else DEFAULT_GROUP, proot_catalog=catalog)
+    # Profiles bind like switches: the groups' together where any names one, else the user's own.
+    named = [g["collaboration_profile"] for g in members if g.get("collaboration_profile")]
+    profiles = named or ([base["collaboration_profile"]] if base.get("collaboration_profile") else [])
+    effective = dict(
+        base,
+        groups=names or [DEFAULT_GROUP],
+        group=names[0] if names else DEFAULT_GROUP,
+        proot_catalog=catalog,
+        collaboration_profiles=profiles,
+    )
     for key, restricting in SWITCHES.items():
         chosen = [bool(g[key]) for g in members if g.get(key) is not None]
         if chosen:
@@ -502,7 +514,13 @@ def get_effective_settings(username: str, provider_groups: Any = None) -> dict[s
     effective["application_key_clients"] = sorted(clients)
     if user.get("is_admin"):
         # An administrator's keys are bound like anyone's: the rules guard a lost device, not a quota.
-        return dict(DEFAULT_USER_SETTINGS, admin=True, proot_catalog=catalog, **{k: effective[k] for k in APP_KEY_SETTINGS})
+        return dict(
+            DEFAULT_USER_SETTINGS,
+            admin=True,
+            proot_catalog=catalog,
+            collaboration_profiles=profiles,
+            **{k: effective[k] for k in APP_KEY_SETTINGS},
+        )
     allowed = {str(p) for g in members for p in g.get("pools") or []}
     effective["pools"] = sorted(allowed | {str(p) for p in base.get("pools") or []})
     effective["pools_denied"] = sorted(

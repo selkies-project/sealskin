@@ -161,6 +161,16 @@ the **controller**. The room page wraps the streamed application with:
   session's storage, and the room switches between them; apps can be stopped
   or restarted individually.
 
+* **People**: the bar's people button lists everyone in the room, viewers
+  included, with whether their microphone and camera are on and what input
+  they hold; the controller hands a collaborator the mouse and keyboard from
+  it too. A participant whose camera is off keeps a tile, with their initial
+  in place of the picture.
+
+An administrator's [collaboration profile](administration.md#collaboration-profiles)
+may turn any of these off for the rooms you start, fix the stream at your
+resolution, or cap how many people may join.
+
 Under the hood the room's WebSocket relays chat and control messages, and the
 server pushes the current token table (who is controller, who holds which
 slots, who has the mouse and keyboard) into every container of the session.

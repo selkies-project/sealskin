@@ -77,6 +77,29 @@ const en = {
         activeVisible: 'Active (Visible)',
         runningBackground: 'Running (Background)',
     },
+    people: {
+        title: 'People',
+        controller: 'Controller',
+        you: '(you)',
+        away: 'Away',
+        roles: {
+            controller: 'Runs the session',
+            participant: 'Collaborator',
+            readonly: 'Viewer',
+        },
+        micOn: 'Microphone on',
+        micOff: 'Microphone off',
+        cameraOn: 'Camera on',
+        cameraOff: 'Camera off',
+        hasInput: 'Has mouse and keyboard',
+        giveInput: 'Give mouse and keyboard',
+        takeInput: 'Take back mouse and keyboard',
+        gamepad: 'Gamepad {number}',
+    },
+    roomFull: {
+        title: 'Room Full',
+        message: 'This room already has as many people as it allows.',
+    },
 };
 
 // Spanish
@@ -158,6 +181,29 @@ const es = {
         loading: 'Cargando...',
         activeVisible: 'Activo (Visible)',
         runningBackground: 'Ejecutando (Segundo plano)',
+    },
+    people: {
+        title: 'Personas',
+        controller: 'Controlador',
+        you: '(tú)',
+        away: 'Ausente',
+        roles: {
+            controller: 'Dirige la sesión',
+            participant: 'Colaborador',
+            readonly: 'Espectador',
+        },
+        micOn: 'Micrófono activado',
+        micOff: 'Micrófono desactivado',
+        cameraOn: 'Cámara activada',
+        cameraOff: 'Cámara desactivada',
+        hasInput: 'Tiene el ratón y el teclado',
+        giveInput: 'Ceder ratón y teclado',
+        takeInput: 'Recuperar ratón y teclado',
+        gamepad: 'Gamepad {number}',
+    },
+    roomFull: {
+        title: 'Sala llena',
+        message: 'Esta sala ya tiene tantas personas como permite.',
     },
 };
 
@@ -241,6 +287,29 @@ const zh = {
         activeVisible: '活动 (可见)',
         runningBackground: '运行中 (后台)',
     },
+    people: {
+        title: '人员',
+        controller: '控制者',
+        you: '(您)',
+        away: '已离开',
+        roles: {
+            controller: '主持会话',
+            participant: '协作者',
+            readonly: '观众',
+        },
+        micOn: '麦克风已开启',
+        micOff: '麦克风已关闭',
+        cameraOn: '摄像头已开启',
+        cameraOff: '摄像头已关闭',
+        hasInput: '持有鼠标和键盘',
+        giveInput: '移交鼠标和键盘',
+        takeInput: '收回鼠标和键盘',
+        gamepad: '游戏手柄 {number}',
+    },
+    roomFull: {
+        title: '房间已满',
+        message: '此房间的人数已达上限。',
+    },
 };
 
 // Hindi
@@ -322,6 +391,29 @@ const hi = {
         loading: 'लोड हो रहा है...',
         activeVisible: 'सक्रिय (दृश्यमान)',
         runningBackground: 'चल रहा है (पृष्ठभूमि)',
+    },
+    people: {
+        title: 'लोग',
+        controller: 'नियंत्रक',
+        you: '(आप)',
+        away: 'अनुपस्थित',
+        roles: {
+            controller: 'सत्र चलाता है',
+            participant: 'सहयोगी',
+            readonly: 'दर्शक',
+        },
+        micOn: 'माइक्रोफ़ोन चालू',
+        micOff: 'माइक्रोफ़ोन बंद',
+        cameraOn: 'कैमरा चालू',
+        cameraOff: 'कैमरा बंद',
+        hasInput: 'माउस और कीबोर्ड इनके पास',
+        giveInput: 'माउस और कीबोर्ड दें',
+        takeInput: 'माउस और कीबोर्ड वापस लें',
+        gamepad: 'गेमपैड {number}',
+    },
+    roomFull: {
+        title: 'कमरा भरा हुआ',
+        message: 'इस कमरे में पहले से ही जितने लोग अनुमत हैं, उतने हैं।',
     },
 };
 
@@ -405,6 +497,29 @@ const pt = {
         activeVisible: 'Ativo (Visível)',
         runningBackground: 'Executando (Segundo Plano)',
     },
+    people: {
+        title: 'Pessoas',
+        controller: 'Controlador',
+        you: '(você)',
+        away: 'Ausente',
+        roles: {
+            controller: 'Conduz a sessão',
+            participant: 'Colaborador',
+            readonly: 'Espectador',
+        },
+        micOn: 'Microfone ligado',
+        micOff: 'Microfone desligado',
+        cameraOn: 'Câmera ligada',
+        cameraOff: 'Câmera desligada',
+        hasInput: 'Está com mouse e teclado',
+        giveInput: 'Passar mouse e teclado',
+        takeInput: 'Retomar mouse e teclado',
+        gamepad: 'Gamepad {number}',
+    },
+    roomFull: {
+        title: 'Sala cheia',
+        message: 'Esta sala já tem todas as pessoas que permite.',
+    },
 };
 
 // French
@@ -486,6 +601,29 @@ const fr = {
         loading: 'Chargement...',
         activeVisible: 'Actif (Visible)',
         runningBackground: 'En cours (Arrière-plan)',
+    },
+    people: {
+        title: 'Personnes',
+        controller: 'Contrôleur',
+        you: '(vous)',
+        away: 'Absent',
+        roles: {
+            controller: 'Pilote la session',
+            participant: 'Collaborateur',
+            readonly: 'Spectateur',
+        },
+        micOn: 'Microphone activé',
+        micOff: 'Microphone désactivé',
+        cameraOn: 'Caméra activée',
+        cameraOff: 'Caméra désactivée',
+        hasInput: 'A la souris et le clavier',
+        giveInput: 'Donner la souris et le clavier',
+        takeInput: 'Reprendre la souris et le clavier',
+        gamepad: 'Manette {number}',
+    },
+    roomFull: {
+        title: 'Salle pleine',
+        message: 'Cette salle accueille déjà autant de personnes qu\'elle le permet.',
     },
 };
 
@@ -569,6 +707,29 @@ const ru = {
         activeVisible: 'Активно (Видимо)',
         runningBackground: 'Работает (Фон)',
     },
+    people: {
+        title: 'Люди',
+        controller: 'Контроллер',
+        you: '(вы)',
+        away: 'Отошел',
+        roles: {
+            controller: 'Управляет сеансом',
+            participant: 'Участник',
+            readonly: 'Зритель',
+        },
+        micOn: 'Микрофон включен',
+        micOff: 'Микрофон выключен',
+        cameraOn: 'Камера включена',
+        cameraOff: 'Камера выключена',
+        hasInput: 'Управляет мышью и клавиатурой',
+        giveInput: 'Передать мышь и клавиатуру',
+        takeInput: 'Вернуть мышь и клавиатуру',
+        gamepad: 'Геймпад {number}',
+    },
+    roomFull: {
+        title: 'Комната заполнена',
+        message: 'В этой комнате уже столько людей, сколько она допускает.',
+    },
 };
 
 // German
@@ -650,6 +811,29 @@ const de = {
         loading: 'Laden...',
         activeVisible: 'Aktiv (Sichtbar)',
         runningBackground: 'Läuft (Hintergrund)',
+    },
+    people: {
+        title: 'Personen',
+        controller: 'Controller',
+        you: '(Sie)',
+        away: 'Abwesend',
+        roles: {
+            controller: 'Steuert die Sitzung',
+            participant: 'Mitwirkender',
+            readonly: 'Zuschauer',
+        },
+        micOn: 'Mikrofon an',
+        micOff: 'Mikrofon aus',
+        cameraOn: 'Kamera an',
+        cameraOff: 'Kamera aus',
+        hasInput: 'Hat Maus und Tastatur',
+        giveInput: 'Maus und Tastatur übergeben',
+        takeInput: 'Maus und Tastatur zurücknehmen',
+        gamepad: 'Gamepad {number}',
+    },
+    roomFull: {
+        title: 'Raum voll',
+        message: 'Dieser Raum hat bereits so viele Personen, wie er zulässt.',
     },
 };
 
@@ -733,6 +917,29 @@ const tr = {
         activeVisible: 'Aktif (Görünür)',
         runningBackground: 'Çalışıyor (Arka Plan)',
     },
+    people: {
+        title: 'Kişiler',
+        controller: 'Kontrolcü',
+        you: '(siz)',
+        away: 'Uzakta',
+        roles: {
+            controller: 'Oturumu yönetir',
+            participant: 'İşbirlikçi',
+            readonly: 'İzleyici',
+        },
+        micOn: 'Mikrofon açık',
+        micOff: 'Mikrofon kapalı',
+        cameraOn: 'Kamera açık',
+        cameraOff: 'Kamera kapalı',
+        hasInput: 'Fare ve klavye onda',
+        giveInput: 'Fare ve klavyeyi ver',
+        takeInput: 'Fare ve klavyeyi geri al',
+        gamepad: 'Oyun Kumandası {number}',
+    },
+    roomFull: {
+        title: 'Oda Dolu',
+        message: 'Bu oda izin verdiği kadar kişiyle zaten dolu.',
+    },
 };
 
 // Italian
@@ -814,6 +1021,29 @@ const it = {
         loading: 'Caricamento...',
         activeVisible: 'Attivo (Visibile)',
         runningBackground: 'In esecuzione (Background)',
+    },
+    people: {
+        title: 'Persone',
+        controller: 'Controllore',
+        you: '(tu)',
+        away: 'Assente',
+        roles: {
+            controller: 'Guida la sessione',
+            participant: 'Collaboratore',
+            readonly: 'Spettatore',
+        },
+        micOn: 'Microfono attivo',
+        micOff: 'Microfono disattivato',
+        cameraOn: 'Videocamera attiva',
+        cameraOff: 'Videocamera disattivata',
+        hasInput: 'Ha mouse e tastiera',
+        giveInput: 'Cedi mouse e tastiera',
+        takeInput: 'Riprendi mouse e tastiera',
+        gamepad: 'Gamepad {number}',
+    },
+    roomFull: {
+        title: 'Stanza piena',
+        message: 'Questa stanza ha già tutte le persone che consente.',
     },
 };
 
@@ -897,6 +1127,29 @@ const nl = {
         activeVisible: 'Actief (Zichtbaar)',
         runningBackground: 'Draait (Achtergrond)',
     },
+    people: {
+        title: 'Personen',
+        controller: 'Controller',
+        you: '(jij)',
+        away: 'Afwezig',
+        roles: {
+            controller: 'Bestuurt de sessie',
+            participant: 'Deelnemer',
+            readonly: 'Kijker',
+        },
+        micOn: 'Microfoon aan',
+        micOff: 'Microfoon uit',
+        cameraOn: 'Camera aan',
+        cameraOff: 'Camera uit',
+        hasInput: 'Heeft muis en toetsenbord',
+        giveInput: 'Muis en toetsenbord geven',
+        takeInput: 'Muis en toetsenbord terugnemen',
+        gamepad: 'Gamepad {number}',
+    },
+    roomFull: {
+        title: 'Kamer vol',
+        message: 'Deze kamer heeft al zoveel personen als ze toestaat.',
+    },
 };
 
 // Arabic
@@ -978,6 +1231,29 @@ const ar = {
         loading: 'جاري التحميل...',
         activeVisible: 'نشط (مرئي)',
         runningBackground: 'قيد التشغيل (في الخلفية)',
+    },
+    people: {
+        title: 'الأشخاص',
+        controller: 'المتحكم',
+        you: '(أنت)',
+        away: 'غائب',
+        roles: {
+            controller: 'يدير الجلسة',
+            participant: 'متعاون',
+            readonly: 'مشاهد',
+        },
+        micOn: 'الميكروفون مفعّل',
+        micOff: 'الميكروفون متوقف',
+        cameraOn: 'الكاميرا مفعّلة',
+        cameraOff: 'الكاميرا متوقفة',
+        hasInput: 'لديه الفأرة ولوحة المفاتيح',
+        giveInput: 'تسليم الفأرة ولوحة المفاتيح',
+        takeInput: 'استعادة الفأرة ولوحة المفاتيح',
+        gamepad: 'جهاز التحكم {number}',
+    },
+    roomFull: {
+        title: 'الغرفة ممتلئة',
+        message: 'بلغت هذه الغرفة الحد الأقصى المسموح به من الأشخاص.',
     },
 };
 
@@ -1061,6 +1337,29 @@ const ko = {
         activeVisible: '활성 (표시됨)',
         runningBackground: '실행 중 (백그라운드)',
     },
+    people: {
+        title: '참여자',
+        controller: '컨트롤러',
+        you: '(나)',
+        away: '부재 중',
+        roles: {
+            controller: '세션 진행',
+            participant: '협업자',
+            readonly: '관전자',
+        },
+        micOn: '마이크 켜짐',
+        micOff: '마이크 꺼짐',
+        cameraOn: '카메라 켜짐',
+        cameraOff: '카메라 꺼짐',
+        hasInput: '마우스와 키보드 사용 중',
+        giveInput: '마우스와 키보드 넘겨주기',
+        takeInput: '마우스와 키보드 되찾기',
+        gamepad: '게임패드 {number}',
+    },
+    roomFull: {
+        title: '방이 가득 참',
+        message: '이 방은 이미 허용된 인원이 모두 찼습니다.',
+    },
 };
 
 // Japanese
@@ -1142,6 +1441,29 @@ const ja = {
         loading: '読み込み中...',
         activeVisible: 'アクティブ (表示)',
         runningBackground: '実行中 (バックグラウンド)',
+    },
+    people: {
+        title: 'メンバー',
+        controller: 'コントローラー',
+        you: '(あなた)',
+        away: '離席中',
+        roles: {
+            controller: 'セッションを操作',
+            participant: 'コラボレーター',
+            readonly: '観戦者',
+        },
+        micOn: 'マイク オン',
+        micOff: 'マイク オフ',
+        cameraOn: 'カメラ オン',
+        cameraOff: 'カメラ オフ',
+        hasInput: 'マウスとキーボードを操作中',
+        giveInput: 'マウスとキーボードを渡す',
+        takeInput: 'マウスとキーボードを取り戻す',
+        gamepad: 'ゲームパッド {number}',
+    },
+    roomFull: {
+        title: 'ルーム満員',
+        message: 'このルームは参加できる人数の上限に達しています。',
     },
 };
 
@@ -1225,6 +1547,29 @@ const vi = {
         activeVisible: 'Đang hoạt động (Hiển thị)',
         runningBackground: 'Đang chạy (Nền)',
     },
+    people: {
+        title: 'Mọi người',
+        controller: 'Người điều khiển',
+        you: '(bạn)',
+        away: 'Vắng mặt',
+        roles: {
+            controller: 'Vận hành phiên',
+            participant: 'Cộng tác viên',
+            readonly: 'Người xem',
+        },
+        micOn: 'Micrô đang bật',
+        micOff: 'Micrô đang tắt',
+        cameraOn: 'Camera đang bật',
+        cameraOff: 'Camera đang tắt',
+        hasInput: 'Đang giữ chuột và bàn phím',
+        giveInput: 'Giao chuột và bàn phím',
+        takeInput: 'Lấy lại chuột và bàn phím',
+        gamepad: 'Gamepad {number}',
+    },
+    roomFull: {
+        title: 'Phòng đã đầy',
+        message: 'Phòng này đã có số người tối đa cho phép.',
+    },
 };
 
 // Thai
@@ -1306,6 +1651,29 @@ const th = {
         loading: 'กำลังโหลด...',
         activeVisible: 'ใช้งานอยู่ (มองเห็น)',
         runningBackground: 'กำลังทำงาน (พื้นหลัง)',
+    },
+    people: {
+        title: 'ผู้คน',
+        controller: 'ผู้ควบคุม',
+        you: '(คุณ)',
+        away: 'ไม่อยู่',
+        roles: {
+            controller: 'ควบคุมเซสชัน',
+            participant: 'ผู้ร่วมงาน',
+            readonly: 'ผู้ชม',
+        },
+        micOn: 'ไมโครโฟนเปิดอยู่',
+        micOff: 'ไมโครโฟนปิดอยู่',
+        cameraOn: 'กล้องเปิดอยู่',
+        cameraOff: 'กล้องปิดอยู่',
+        hasInput: 'ถือเมาส์และคีย์บอร์ดอยู่',
+        giveInput: 'ส่งต่อเมาส์และคีย์บอร์ด',
+        takeInput: 'เอาเมาส์และคีย์บอร์ดคืน',
+        gamepad: 'เกมแพด {number}',
+    },
+    roomFull: {
+        title: 'ห้องเต็ม',
+        message: 'ห้องนี้มีคนครบตามจำนวนที่อนุญาตแล้ว',
     },
 };
 
@@ -1389,6 +1757,29 @@ const fil = {
         activeVisible: 'Aktibo (Nakikita)',
         runningBackground: 'Tumatakbo (Background)',
     },
+    people: {
+        title: 'Mga Tao',
+        controller: 'Controller',
+        you: '(ikaw)',
+        away: 'Wala',
+        roles: {
+            controller: 'Nagpapatakbo ng session',
+            participant: 'Katuwang',
+            readonly: 'Manonood',
+        },
+        micOn: 'Naka-on ang mikropono',
+        micOff: 'Naka-off ang mikropono',
+        cameraOn: 'Naka-on ang camera',
+        cameraOff: 'Naka-off ang camera',
+        hasInput: 'Hawak ang mouse at keyboard',
+        giveInput: 'Ibigay ang mouse at keyboard',
+        takeInput: 'Bawiin ang mouse at keyboard',
+        gamepad: 'Gamepad {number}',
+    },
+    roomFull: {
+        title: 'Puno ang Room',
+        message: 'Nasa pinakamaraming taong pinapayagan na ang room na ito.',
+    },
 };
 
 // Danish
@@ -1470,6 +1861,29 @@ const da = {
         loading: 'Indlæser...',
         activeVisible: 'Aktiv (Synlig)',
         runningBackground: 'Kører (Baggrund)',
+    },
+    people: {
+        title: 'Personer',
+        controller: 'Controller',
+        you: '(dig)',
+        away: 'Væk',
+        roles: {
+            controller: 'Styrer sessionen',
+            participant: 'Samarbejdspartner',
+            readonly: 'Tilskuer',
+        },
+        micOn: 'Mikrofon til',
+        micOff: 'Mikrofon fra',
+        cameraOn: 'Kamera til',
+        cameraOff: 'Kamera fra',
+        hasInput: 'Har mus og tastatur',
+        giveInput: 'Giv mus og tastatur',
+        takeInput: 'Tag mus og tastatur tilbage',
+        gamepad: 'Gamepad {number}',
+    },
+    roomFull: {
+        title: 'Rummet er fuldt',
+        message: 'Dette rum har allerede så mange personer, som det tillader.',
     },
 };
 

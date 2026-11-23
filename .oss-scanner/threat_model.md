@@ -43,6 +43,10 @@
   record; `build_launch_spec` writes it as files under the node's `browser_policy_files_path` and mounts each
   read-only at the fixed paths the browsers read, never at a path a request names; a user's launch has no word
   in which policy applies or in its content, and an application naming a policy the node lacks does not launch),
+  collaboration profiles (`collaboration_profiles.py`, `routers/collaboration_profiles.py`: an administrator's
+  switches over a room's features, kept in the shared record and copied into a room's session record from its
+  owner's effective settings at launch; neither the owner nor a guest has a word in which profile applies or
+  in what it allows),
   Caddy's `forward_auth` to the loopback-only `/internal/resolve_session`, the address a user hands one of
   their own running sessions (`POST /api/sessions/<id>/open_url`: a web address by pattern, passed to a fixed
   script inside the session's container as an argument, run as the session's own user), the brand a page request
@@ -63,7 +67,12 @@
   there; a store's YAML sets no variable of the session's identity nor one the image's init or loader runs
   (`config_store.STORE_ENV_DENIED`); an OpenVPN profile's options are read by the names OpenVPN gives them
   (quotes and leading dashes removed, `setenv opt` unwrapped) before the ones that run a program are dropped;
-  a room message carries a participant's alias, never their token; a proxy's mark counts only on a request
+  a room message carries a participant's alias, never their token; a room does only what the rules its session
+  record keeps allow (`collaboration.GATED_ACTIONS`, the media packets, the invites, the limit of people), refused
+  by the room's routes whatever a guest's page or the controller's sends, a viewer of a room with a limit of
+  people holds a token in the session's table only while the room admits them, a room media packet names its
+  own sender, a room is not started under a profile no longer kept, and a read-only viewer is never handed
+  mouse, keyboard, a gamepad slot, or the cursor switch; a proxy's mark counts only on a request
   that came through this node's proxy; the server publishes no OpenAPI description; a session's container
   sets no cookie on the origin it is served from, and a session whose container serves its own page on the
   web app's origin (a key-file client's, of an image with no client to export) answers no request that
@@ -108,7 +117,7 @@
   or host credential reaching a client, the store, another node, or a host the file does not name; a widget
   secret reaching a client or the store; script from a dashboard link, a widget's data, or a widget frame
   running on the web app's origin; a user's widget fetching an address that is not of the public internet.
-- Medium: denial of service by an authenticated user; cross-origin reads of non-secret data; secrets in logs.
+- Medium: a room doing what its collaboration profile turns off; denial of service by an authenticated user; cross-origin reads of non-secret data; secrets in logs.
 - Low: hardening without a demonstrated crossing.
 
 ## Anything to leave alone

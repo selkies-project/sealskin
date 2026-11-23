@@ -52,6 +52,7 @@ MOUNTS: dict[str, str] = {
     "app_stores.yml": "app_stores_path",
     "proot_catalogs.yml": "proot_catalogs_path",
     "browser_policies.yml": "browser_policies_path",
+    "collaboration_profiles.yml": "collaboration_profiles_path",
     "vpn_profiles.yml": "vpn_profiles_path",
     "bakery/": "bakery_path",
     "app_templates/": "app_templates_path",

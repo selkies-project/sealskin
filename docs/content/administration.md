@@ -58,6 +58,7 @@ Each user carries these settings, editable later:
 | **Application keys** | Whether the user may sign the extension and the mobile app in with [application keys](signin.md#application-keys), which apps may use them, how long a key lives, and the dormancy rules that send the user back to the web to sign in. These bind administrators too. |
 | **Pools** | Restricted [pools](cluster.md#pools) open to the user, and pools closed to them. |
 | **PRoot Apps catalog** | The [catalog](#proot-apps) the user's sessions install PRoot Apps from. Left at **None**, the first of the user's groups to choose one decides. |
+| **Collaboration profile** | The [profile](#collaboration-profiles) the user's collaboration rooms run under. A group that names one decides instead, as for a switch. Left at **None** with no group naming one, rooms have every feature. |
 
 Deleting a user also deletes their storage on the node the dashboard is
 served from. A user with no key shows **Single sign-on only** in place of a
@@ -77,7 +78,10 @@ everything the group sets. A user in several gets, for each setting, the
 restricting value if any of the groups gives it, and the smallest limit; the
 edit dialog shows the result as **Effective Settings**. The **PRoot Apps
 catalog** is a choice rather than a limit: a member's own choice wins, then
-the first of their groups that makes one. **Identity provider
+the first of their groups that makes one. A **Collaboration profile** binds
+like a switch: a member's rooms run under every profile their groups name,
+each feature at its most restrictive, and under the member's own only where
+no group names one. **Identity provider
 groups** names the provider's groups whose members are in this group without
 being listed. Groups are also a permission target for applications, VPN
 profiles, and pools. Deleting a group leaves its members with what their other
@@ -300,6 +304,40 @@ picked them, and the application image needs nothing for it. Import a
 profile, publish the endpoints users may pick, cap the connections it may
 spend, and say who may use it; [VPN profiles](vpn.md) describes the import,
 what the providers hand out, and how the routing works.
+
+## Collaboration Profiles
+
+A collaboration profile decides what the [collaboration rooms](usage.md#collaboration-rooms)
+of the users and groups it is assigned to may do. It is optional: a user under
+none gets every feature. Each feature is on or off:
+
+| Feature | Off |
+| --- | --- |
+| **Chat** | The room has no chat. |
+| **Cameras** | No one shows a camera. |
+| **Microphones** | No one speaks, and there is no designated speaker. |
+| **Application switcher** | The controller cannot start, stop, or switch the session's applications. |
+| **Mouse and keyboard handoff** | Only the controller drives the session. |
+| **Gamepads** | No gamepad slots are handed out, and the room has no gaming mode. |
+| **Collaborator invites**, **Viewer invites** | The controller gets no link for that kind of guest, and an older link of that kind admits no one. One of the two stays on. |
+| **Collaborators share viewer invites** | Only the controller gets the viewer link. |
+
+**Stream resolution** follows whoever holds the mouse and keyboard, with the
+controller free to lock it, or is always the controller's, with no lock or
+resize buttons. **People at once** caps the collaborators and viewers in a
+room beside the controller; blank is no limit. Under a limit, a guest gets the
+stream only while the room lets them in, so one turned away cannot watch
+from the stream's address either.
+
+The form shows a mock of the room's bar as the controller, a collaborator, or
+a viewer sees it, and leaves out what each switch turns off. The server
+refuses what a profile turns off, whatever a guest's page sends, and a room
+keeps the rules it started under: a change applies to rooms started after it.
+Where a user's groups name several profiles, each feature takes the most
+restrictive of them, and where they together turn both kinds of invite off,
+viewer invites stay on. A profile a user or group names cannot be deleted, and a room is not started
+under one that no longer exists.
+The profiles are the shared record `collaboration_profiles.yml`.
 
 ## Browser Policies
 

@@ -25,6 +25,7 @@ from . import (
     browser_policies,
     cluster,
     collaboration,
+    collaboration_profiles,
     config_store,
     dashboards,
     filecrypt,
@@ -62,6 +63,7 @@ from .routers import application_keys as key_routes
 from .routers import bakery as bakery_routes
 from .routers import branding as branding_routes
 from .routers import browser_policies as browser_policy_routes
+from .routers import collaboration_profiles as collaboration_profile_routes
 from .routers import dashboards as dashboard_routes
 from .routers import sso as sso_routes
 from .routers import vpn as vpn_routes
@@ -149,6 +151,12 @@ async def _reload_browser_policies(_path: str) -> None:
     await asyncio.to_thread(browser_policies.load)
 
 
+async def _reload_collaboration_profiles(_path: str) -> None:
+    """Watcher callback: reload the collaboration profiles."""
+    logger.info("Collaboration profiles changed; reloading.")
+    await asyncio.to_thread(collaboration_profiles.load)
+
+
 async def _reload_bakery(_path: str) -> None:
     """Watcher callback: reload the Bakery's recipes and bake what this node has not built."""
     logger.info("The Bakery's recipes changed; reloading.")
@@ -201,6 +209,7 @@ def _catch_up() -> None:
     config_store.load_installed_apps()
     prootapps.load_catalogs()
     browser_policies.load()
+    collaboration_profiles.load()
     bakery.load()
     vpn.load()
 
@@ -267,6 +276,7 @@ def _watch_targets() -> dict[str, persistence.ReloadCallback]:
         settings.app_templates_path: _reload_templates,
         settings.proot_catalogs_path: _reload_proot_catalogs,
         settings.browser_policies_path: _reload_browser_policies,
+        settings.collaboration_profiles_path: _reload_collaboration_profiles,
         settings.vpn_profiles_path: _reload_vpn,
         settings.bakery_path: _reload_bakery,
         os.path.join(settings.keys_base_path, "users"): _reload_users,
@@ -373,6 +383,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     config_store.load_installed_apps()
     prootapps.load_catalogs()
     browser_policies.load()
+    collaboration_profiles.load()
     prootapps.reconcile()
     bakery.load()
     vpn.load()
@@ -470,6 +481,7 @@ def create_app() -> FastAPI:
     app.include_router(vpn_routes.admin_router)
     app.include_router(bakery_routes.admin_router)
     app.include_router(browser_policy_routes.admin_router)
+    app.include_router(collaboration_profile_routes.admin_router)
     app.include_router(peer.router)
     app.include_router(cluster_admin.router)
     app.include_router(cluster_admin.user_router)

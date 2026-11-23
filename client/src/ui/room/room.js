@@ -1126,6 +1126,30 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // The room's rules (collaboration profiles): what is off is left out here and refused by the server.
+    const RULES = {
+        chat: true, webcams: true, microphones: true, app_switcher: true, gamepads: true,
+        input_handoff: true, participants_share: true, resolution: 'follow', max_viewers: -1,
+        ...(COLLAB_DATA.rules || {}),
+    };
+    const FIXED_RESOLUTION = RULES.resolution === 'controller';
+    const hideById = (id) => document.getElementById(id)?.classList.add('hidden');
+    if (!RULES.chat) document.body.classList.add('no-chat');
+    if (!RULES.app_switcher) hideById('start-menu-btn');
+    if (!RULES.gamepads) {
+        hideById('gamepad-source-box');
+        hideById('gaming-mode-btn');
+    }
+    if (!RULES.webcams) {
+        hideById('toggle-video-btn');
+        document.getElementById('video-input-select')?.closest('.settings-group')?.classList.add('hidden');
+    }
+    if (!RULES.microphones) {
+        hideById('toggle-mic-btn');
+        document.getElementById('audio-input-select')?.closest('.settings-group')?.classList.add('hidden');
+    }
+    if (!RULES.webcams && !RULES.microphones) hideById('settings-btn');
+
     if (COLLAB_DATA.userPermission === 'readonly') {
         const localContainer = document.getElementById('local-user-container');
         if (localContainer) {
@@ -1232,7 +1256,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let pendingActions = new Set();
     const textEncoder = new TextEncoder();
     let clientResolutions = {};
-    let isResolutionLocked = false;
+    let isResolutionLocked = FIXED_RESOLUTION;
     let currentMkOwner = null;
 
     const frameResolution = (frame) => {
@@ -1307,7 +1331,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const inviteBtn = document.getElementById('invite-btn');
 
     localContainer.dataset.userToken = COLLAB_DATA.userToken;
-    if (COLLAB_DATA.userRole !== 'controller') gamingModeBtn.classList.remove('hidden');
+    if (COLLAB_DATA.userRole !== 'controller' && RULES.gamepads) gamingModeBtn.classList.remove('hidden');
 
     const initNotificationAudio = () => {
         if (notificationAudioCtx) return;
@@ -1465,8 +1489,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const startMedia = async () => {
-        if (COLLAB_DATA.userPermission === 'readonly') {
+    // `quiet` skips the error when the one device the rules allow is missing, as on joining.
+    const startMedia = async (quiet = false) => {
+        if (COLLAB_DATA.userPermission === 'readonly' || (!RULES.webcams && !RULES.microphones)) {
             return false;
         }
         if (mediaInitialized) {
@@ -1492,17 +1517,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 frameRate: 30
             };
 
+            const audio = RULES.microphones ? audioConstraints : false;
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({
-                    audio: audioConstraints,
-                    video: videoConstraints
+                    audio,
+                    video: RULES.webcams ? videoConstraints : false
                 });
             } catch (err) {
-                localStream = await navigator.mediaDevices.getUserMedia({
-                    audio: audioConstraints,
-                    video: false
-                });
+                if (!audio && quiet) {
+                    console.warn('[Media] no camera to join with:', err);
+                    return false;
+                }
+                if (!audio || !RULES.webcams) throw err;
+                localStream = await navigator.mediaDevices.getUserMedia({ audio, video: false });
             }
+            const hasAudio = localStream.getAudioTracks().length > 0;
 
             if (localStream.getVideoTracks().length > 0) {
                 localVideo.srcObject = localStream;
@@ -1512,17 +1541,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             closeLocalAudioContext();
-            localAudioContext = new AudioContext();
-            const source = localAudioContext.createMediaStreamSource(localStream);
-            localAudioAnalyser = localAudioContext.createAnalyser();
-            localAudioAnalyser.fftSize = 512;
             localSpeakingData = null;
-            source.connect(localAudioAnalyser);
+            if (hasAudio) {
+                localAudioContext = new AudioContext();
+                const source = localAudioContext.createMediaStreamSource(localStream);
+                localAudioAnalyser = localAudioContext.createAnalyser();
+                localAudioAnalyser.fftSize = 512;
+                source.connect(localAudioAnalyser);
+            }
 
             localStream.getAudioTracks().forEach(t => t.enabled = isMicOn);
             localStream.getVideoTracks().forEach(t => t.enabled = isWebcamOn);
 
-            await setupAudioEncoder();
+            if (hasAudio) await setupAudioEncoder();
 
             if (localStream.getVideoTracks().length > 0) {
                 await setupVideoEncoder();
@@ -1545,6 +1576,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (COLLAB_DATA.userPermission === 'readonly') return;
+        if ((type === 'mic' && !RULES.microphones) || (type === 'video' && !RULES.webcams)) return;
         unlockAllAudio();
 
         if (!mediaInitialized) {
@@ -2001,26 +2033,34 @@ document.addEventListener('DOMContentLoaded', () => {
         video.disableRemotePlayback = true;
         video.style.display = 'none';
 
-        let controllerControls = '';
-        if (COLLAB_DATA.userRole === 'controller') {
-            controllerControls = `
-                <button class="remote-control-btn resize-to-client" data-token="${token}" title="${t('tooltips.resizeClient')}"><i class="fas fa-desktop"></i></button>
-                <button class="remote-control-btn designate-speaker" data-token="${token}" title="${t('tooltips.designateSpeaker')}"><i class="fas fa-star"></i></button>
-            `;
+        let controls = '';
+        if (COLLAB_DATA.userRole === 'controller' && !FIXED_RESOLUTION) {
+            controls += `<button class="remote-control-btn resize-to-client" data-token="${token}" title="${t('tooltips.resizeClient')}"><i class="fas fa-desktop"></i></button>`;
+        }
+        if (COLLAB_DATA.userRole === 'controller' && RULES.microphones) {
+            controls += `<button class="remote-control-btn designate-speaker" data-token="${token}" title="${t('tooltips.designateSpeaker')}"><i class="fas fa-star"></i></button>`;
+        }
+        if (RULES.microphones) {
+            controls += `<button class="remote-control-btn mute-audio" data-token="${token}" title="${t('tooltips.toggleRemoteAudio')}"><i class="fas fa-microphone"></i></button>`;
+        }
+        if (RULES.webcams) {
+            controls += `<button class="remote-control-btn mute-video" data-token="${token}" title="${t('tooltips.toggleRemoteVideo')}"><i class="fas fa-video"></i></button>`;
         }
         const overlay = document.createElement('div');
         overlay.className = 'video-overlay';
         overlay.innerHTML = `
             <span class="username">${escapeHTML(username)}</span>
-            <div class="remote-controls">
-                ${controllerControls}
-                <button class="remote-control-btn mute-audio" data-token="${token}" title="${t('tooltips.toggleRemoteAudio')}"><i class="fas fa-microphone"></i></button>
-                <button class="remote-control-btn mute-video" data-token="${token}" title="${t('tooltips.toggleRemoteVideo')}"><i class="fas fa-video"></i></button>
-            </div>
+            <div class="remote-controls">${controls}</div>
         `;
+        // Stands in for the camera while it is off, so the participant stays in view.
+        const avatar = document.createElement('div');
+        avatar.className = 'tile-avatar';
+        avatar.innerHTML = `<span>${escapeHTML(initialOf(username))}</span>`;
+        container.classList.add('camera-off');
 
         container.appendChild(canvas);
         container.appendChild(video);
+        container.appendChild(avatar);
         container.appendChild(overlay);
         videoGridContent.insertBefore(container, inviteTile);
 
@@ -2392,6 +2432,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     case 'session_ended':
                         handleControllerDisconnect();
                         break;
+                    case 'room_full':
+                        document.getElementById('disconnection-title').textContent = t('roomFull.title');
+                        document.getElementById('disconnection-text').textContent = t('roomFull.message');
+                        break;
                     case 'request_resolutions': {
                         const reqIframe = document.getElementById('session-frame');
                         if (reqIframe && ws && ws.readyState === WebSocket.OPEN) {
@@ -2463,7 +2507,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         const iHaveMk = (mkOwnerUser && mkOwnerUser.token === COLLAB_DATA.userToken)
                             || (!mkOwnerUser && COLLAB_DATA.userRole === 'controller');
-                        gamingModeBtn.classList.toggle('hidden', COLLAB_DATA.userRole === 'controller' && !iHaveMk);
+                        gamingModeBtn.classList.toggle('hidden', !RULES.gamepads || (COLLAB_DATA.userRole === 'controller' && !iHaveMk));
 
                         if (COLLAB_DATA.userRole === 'controller' && currentMkOwner !== newMkOwner) {
                             currentMkOwner = newMkOwner;
@@ -2496,8 +2540,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 if (usernameEl) {
                                     usernameEl.textContent = user.username;
                                 }
+                                stream.container.querySelector('.tile-avatar span').textContent = initialOf(user.username);
                             }
+                            remoteStreams[user.token]?.container.classList.toggle('camera-off', !(RULES.webcams && user.camera));
                         }
+
+                        renderPeople();
 
                         updateGamepadIcons(data.viewers);
                         break;
@@ -2620,7 +2668,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!stream) return;
 
         if (action === 'video_state') {
-            stream.container.style.display = state ? 'flex' : 'none';
+            stream.container.classList.toggle('camera-off', !(RULES.webcams && state));
         }
     };
 
@@ -2655,15 +2703,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let localControls = '';
         if (isController) {
-            localControls = `
+            if (!FIXED_RESOLUTION) {
+                localControls += `
                 <button class="remote-control-btn toggle-resolution-lock" title="${t('tooltips.lockResolution')}"><i class="fas fa-lock-open"></i></button>
-                <button class="remote-control-btn resize-to-client" data-token="${COLLAB_DATA.userToken}" title="${t('tooltips.resizeClient')}"><i class="fas fa-desktop"></i></button>
-                <button class="remote-control-btn designate-speaker" data-token="${COLLAB_DATA.userToken}" title="${t('tooltips.designateSpeaker')}"><i class="fas fa-star"></i></button>
-            `;
+                <button class="remote-control-btn resize-to-client" data-token="${COLLAB_DATA.userToken}" title="${t('tooltips.resizeClient')}"><i class="fas fa-desktop"></i></button>`;
+            }
+            if (RULES.microphones) {
+                localControls += `
+                <button class="remote-control-btn designate-speaker" data-token="${COLLAB_DATA.userToken}" title="${t('tooltips.designateSpeaker')}"><i class="fas fa-star"></i></button>`;
+            }
         }
+        const localName = isController ? t('people.controller') : (username || t('localUsername'));
         localContainer.querySelector('.video-overlay').innerHTML = `
-            <span class="username">${escapeHTML(isController ? 'Controller' : (username || t('localUsername')))}</span>
+            <span class="username">${escapeHTML(localName)}</span>
             <div class="remote-controls">${localControls}</div>`;
+        localContainer.querySelector('.tile-avatar span').textContent = initialOf(localName);
 
         if (isController || isParticipant) {
             initGamepadControls();
@@ -2755,7 +2809,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('username-form').addEventListener('submit', handleUsernameSubmit);
 
         initInviteControls();
-        if (COLLAB_DATA.userRole === 'controller') initStartMenu();
+        if (COLLAB_DATA.userRole === 'controller' && RULES.app_switcher) initStartMenu();
 
         reloadStreamBtn.addEventListener('click', () => {
             const iframe = document.getElementById('session-frame');
@@ -2800,6 +2854,81 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const escapeHTML = (str) => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    const initialOf = (name) => (String(name || '').trim()[0] || '?').toUpperCase();
+
+    // Everyone in the room, read-only viewers and those with their camera off included.
+    const peopleBtn = document.getElementById('people-btn');
+    const peoplePanel = document.getElementById('people-panel');
+    const peopleList = document.getElementById('people-list');
+    const ROLE_ORDER = { controller: 0, participant: 1, readonly: 2 };
+    const roleOf = (user) => (user.permission === 'controller' || user.permission === 'readonly' ? user.permission : 'participant');
+
+    const personHTML = (user) => {
+        const role = roleOf(user);
+        const isSelf = user.token === COLLAB_DATA.userToken;
+        const name = role === 'controller' ? t('people.controller') : user.username;
+        const status = [];
+        if (role !== 'readonly' && RULES.microphones) {
+            status.push(`<i class="fas fa-microphone${user.mic ? '' : '-slash off'}" title="${t(user.mic ? 'people.micOn' : 'people.micOff')}"></i>`);
+        }
+        if (role !== 'readonly' && RULES.webcams) {
+            status.push(`<i class="fas fa-video${user.camera ? '' : '-slash off'}" title="${t(user.camera ? 'people.cameraOn' : 'people.cameraOff')}"></i>`);
+        }
+        if (RULES.input_handoff && user.has_mk) {
+            status.push(`<i class="fas fa-keyboard held" title="${t('people.hasInput')}"></i>`);
+        }
+        if (RULES.gamepads) {
+            const slots = Array.isArray(user.slot) ? user.slot : (user.slot ? [user.slot] : []);
+            slots.forEach(slot => status.push(`<span class="people-slot" title="${t('people.gamepad', { number: slot })}"><i class="fas fa-gamepad"></i>${slot}</span>`));
+        }
+        let action = '';
+        if (COLLAB_DATA.userRole === 'controller' && RULES.input_handoff && role === 'participant' && user.online) {
+            const target = user.has_mk ? COLLAB_DATA.userToken : user.token;
+            action = `<button type="button" class="people-action${user.has_mk ? ' active' : ''}" data-token="${escapeHTML(target)}" title="${t(user.has_mk ? 'people.takeInput' : 'people.giveInput')}"><i class="fas fa-keyboard"></i></button>`;
+        }
+        const roleText = role === 'controller' && !user.online ? t('people.away') : t(`people.roles.${role}`);
+        return `
+            <div class="people-row${user.online ? '' : ' offline'}">
+                <span class="people-avatar">${escapeHTML(initialOf(name))}</span>
+                <div class="people-info">
+                    <span class="people-name">${escapeHTML(name)}${isSelf ? ` <em>${t('people.you')}</em>` : ''}</span>
+                    <span class="people-role">${escapeHTML(roleText)}</span>
+                </div>
+                <div class="people-status">${status.join('')}</div>
+                ${action}
+            </div>`;
+    };
+
+    const renderPeople = () => {
+        const present = currentUserState
+            .filter(u => u.online || u.permission === 'controller')
+            .sort((a, b) => ROLE_ORDER[roleOf(a)] - ROLE_ORDER[roleOf(b)]);
+        const online = String(present.filter(u => u.online).length);
+        document.getElementById('people-count').textContent = online;
+        document.getElementById('people-panel-count').textContent = online;
+        peopleList.innerHTML = present.map(personHTML).join('');
+    };
+
+    const togglePeople = (open = peoplePanel.classList.contains('hidden')) => {
+        peoplePanel.classList.toggle('hidden', !open);
+        peopleBtn.classList.toggle('open', open);
+    };
+    peopleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        togglePeople();
+    });
+    document.addEventListener('click', (e) => {
+        if (!peoplePanel.contains(e.target) && !peopleBtn.contains(e.target)) togglePeople(false);
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') togglePeople(false);
+    });
+    peopleList.addEventListener('click', (e) => {
+        const button = e.target.closest('.people-action');
+        if (button && ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ action: 'assign_mk', token: button.dataset.token }));
+        }
+    });
 
     const linkify = (text) => {
         const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
@@ -2849,7 +2978,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const appendChatMessage = (data, type) => {
         const messagesContainer = document.getElementById('chat-messages');
-        if (!messagesContainer) return;
+        if (!messagesContainer || !RULES.chat) return;
 
         const isScrolledToBottom = chatScroll.scrollHeight - chatScroll.clientHeight <= chatScroll.scrollTop + 50;
 
@@ -2902,19 +3031,21 @@ document.addEventListener('DOMContentLoaded', () => {
             renderRoom();
 
             if (!mediaInitialized) {
-                await startMedia();
+                await startMedia(true);
             }
 
-            isMicOn = true;
-            if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = true);
-            if (ws && ws.setMicActive) ws.setMicActive(true);
-            sendControlMessage('audio_state', true);
-            updateMediaButtonUI();
+            if (!localStream) return;
+            if (localStream.getAudioTracks().length > 0) {
+                isMicOn = true;
+                localStream.getAudioTracks().forEach(t => t.enabled = true);
+                if (ws && ws.setMicActive) ws.setMicActive(true);
+                sendControlMessage('audio_state', true);
+                updateMediaButtonUI();
+                await new Promise(r => setTimeout(r, 1000));
+            }
 
-            await new Promise(r => setTimeout(r, 1000));
-
-            isWebcamOn = true;
             if (localStream && localStream.getVideoTracks().length > 0) {
+                isWebcamOn = true;
                 localStream.getVideoTracks().forEach(t => t.enabled = true);
                 localContainer.style.display = 'flex';
                 sendControlMessage('video_state', true);
@@ -2989,6 +3120,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         toggleVideoBtn.classList.toggle('inactive', !isWebcamOn);
         toggleVideoBtn.querySelector('i').className = isWebcamOn ? 'fas fa-video' : 'fas fa-video-slash';
+        localContainer.classList.toggle('camera-off', !isWebcamOn);
     };
 
     const playNotificationSound = () => {
@@ -3167,21 +3299,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         sourceBox.innerHTML = '';
         gamepadIcons = {};
+        mkIcon = null;
 
-        mkIcon = document.createElement('div');
-        mkIcon.id = 'mk-icon';
-        mkIcon.className = 'gamepad-icon mk-icon';
-        if (COLLAB_DATA.userRole === 'controller') {
-            mkIcon.classList.add('draggable');
-        }
-        mkIcon.innerHTML = `<i class="fas fa-keyboard"></i><i class="fas fa-mouse" style="margin-left: 3px; font-size: 0.8em;"></i>`;
-
-        if (COLLAB_DATA.userRole === 'controller') {
-            localContainer.appendChild(mkIcon);
-        } else {
-            sourceBox.appendChild(mkIcon);
+        if (RULES.input_handoff) {
+            mkIcon = document.createElement('div');
+            mkIcon.id = 'mk-icon';
+            mkIcon.className = 'gamepad-icon mk-icon';
+            if (COLLAB_DATA.userRole === 'controller') {
+                mkIcon.classList.add('draggable');
+            }
+            mkIcon.innerHTML = `<i class="fas fa-keyboard"></i><i class="fas fa-mouse" style="margin-left: 3px; font-size: 0.8em;"></i>`;
+            (COLLAB_DATA.userRole === 'controller' ? localContainer : sourceBox).appendChild(mkIcon);
         }
 
+        if (!RULES.gamepads) return;
         for (let i = 1; i <= GAMEPAD_COUNT; i++) {
             const icon = document.createElement('div');
             icon.id = `gamepad-icon-${i}`;
@@ -3198,7 +3329,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const updateGamepadIcons = (users) => {
         const sourceBox = document.getElementById('gamepad-source-box');
-        if (!sourceBox || Object.keys(gamepadIcons).length === 0) return;
+        if (!sourceBox || (!mkIcon && Object.keys(gamepadIcons).length === 0)) return;
 
         const assignedGamepadIds = new Set();
         let mkAssigned = false;
@@ -3496,7 +3627,7 @@ document.addEventListener('DOMContentLoaded', () => {
             resizeTimer = null;
             if (ws && ws.readyState === WebSocket.OPEN) {
                 const res = frameResolution(iframeEl);
-                ws.send(JSON.stringify({ action: 'client_resolution', ...res }));
+                if (!FIXED_RESOLUTION) ws.send(JSON.stringify({ action: 'client_resolution', ...res }));
                 if (COLLAB_DATA.userRole === 'controller') {
                     clientResolutions[COLLAB_DATA.userToken] = res;
                     if (!isResolutionLocked && currentMkOwner === COLLAB_DATA.userToken) {

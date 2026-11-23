@@ -128,6 +128,12 @@ SETTING_DEFINITIONS: list[dict[str, Any]] = [
         ),
     },
     {
+        "name": "collaboration_profiles_path",
+        "type": "str",
+        "default": "/config/.config/sealskin/collaboration_profiles.yml",
+        "help": "Path to the YAML file of the collaboration profiles, shared by the nodes of a cluster.",
+    },
+    {
         "name": "proot_catalogs_path",
         "type": "str",
         "default": "/config/.config/sealskin/proot_catalogs.yml",

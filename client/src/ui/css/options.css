@@ -2105,3 +2105,29 @@ tr.tree-open:not(.tree-child) td { border-bottom-color: transparent; }
   .bp-field { grid-template-columns: 1fr; }
   .bp-row-body { margin-left: 0; }
 }
+
+/* --- Collaboration: the profile form beside a mock of the room's bar, as one of its roles sees it. --- */
+.cp-views { display: inline-grid; grid-auto-flow: column; margin-bottom: 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); overflow: hidden; }
+#CollaborationProfiles .cp-views button { margin: 0; padding: 0.45rem 0.9rem; border: none; border-radius: 0; background: none; color: var(--text-muted); font-weight: 600; cursor: pointer; }
+#CollaborationProfiles .cp-views button:hover:not(.active) { color: var(--text-primary); }
+#CollaborationProfiles .cp-views button.active { background: var(--accent-primary); color: #fff; }
+.cp-window { max-width: none; aspect-ratio: 16 / 10; font-size: 0.62rem; }
+#cp-mock [hidden] { display: none !important; }
+.cp-stream { position: relative; flex: 1; display: grid; place-items: center; min-height: 0; background: linear-gradient(135deg, var(--bg-2), var(--bg-0)); color: var(--text-muted); font-size: 2.2rem; }
+.cp-stream-note { position: absolute; top: 0.6rem; left: 0.6rem; padding: 0.15rem 0.5rem; border: 1px solid var(--accent-border); border-radius: var(--radius-pill); background-color: var(--accent-soft); color: var(--accent-text-strong); font-size: 0.6rem; font-weight: 600; }
+.cp-bar { display: flex; align-items: stretch; gap: 0.35rem; height: 26%; min-height: 60px; padding: 0.4rem; border-top: 1px solid var(--border-color); background-color: var(--bg-1); }
+.cp-tile { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.2rem; aspect-ratio: 4 / 3; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background-color: var(--bg-0); color: var(--text-secondary); overflow: hidden; }
+.cp-narrow { aspect-ratio: 1 / 2; background-color: var(--bg-2); color: var(--accent-text-strong); font-size: 0.8rem; }
+.cp-count { padding: 0 0.35rem; border-radius: var(--radius-pill); background-color: var(--accent-soft); font-size: 0.55rem; }
+.cp-column { display: flex; flex-direction: column; justify-content: center; gap: 0.4rem; padding: 0 0.15rem; color: var(--text-muted); font-size: 0.7rem; }
+.cp-pads { display: grid; grid-template-columns: 1fr 1fr; place-items: center; aspect-ratio: 1 / 1; padding: 0.2rem; color: var(--accent-text-strong); font-size: 0.7rem; }
+.cp-avatar { display: grid; place-items: center; width: 1.8rem; height: 1.8rem; margin-bottom: 0.7rem; border: 1px solid var(--accent-border); border-radius: 50%; background-color: var(--accent-soft); color: var(--accent-text-strong); font-weight: 700; font-size: 0.75rem; }
+.cp-self { position: absolute; top: 0.25rem; left: 0.25rem; display: flex; gap: 0.25rem; color: var(--text-muted); }
+.cp-caption { position: absolute; inset: auto 0 0 0; display: flex; align-items: center; justify-content: space-between; gap: 0.25rem; padding: 0.15rem 0.3rem; background-color: rgba(0, 0, 0, 0.55); color: var(--text-primary); font-size: 0.55rem; white-space: nowrap; }
+.cp-icons { display: flex; gap: 0.25rem; color: var(--text-muted); }
+.cp-held { color: var(--accent-text-strong); }
+.cp-invite { gap: 0.3rem; padding: 0.3rem; border-style: dashed; background: none; }
+.cp-link { width: 100%; padding: 0.2rem 0.3rem; border-radius: 4px; background-color: var(--accent-primary); color: #fff; font-size: 0.5rem; font-weight: 600; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cp-chat { display: flex; flex-direction: column; gap: 0.3rem; flex: 0 0 22%; margin-left: auto; padding: 0.35rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background-color: var(--bg-2); color: var(--accent-text-strong); }
+.cp-line { height: 0.35rem; border-radius: var(--radius-pill); background-color: var(--bg-0); }
+.cp-line.short { width: 60%; }

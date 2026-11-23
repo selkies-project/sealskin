@@ -405,6 +405,7 @@ def _signed_in(username: str, via: str, provider_groups: Any = (), admin: bool =
             admin=True,
             groups=effective.get("groups") or [],
             proot_catalog=effective.get("proot_catalog"),
+            collaboration_profiles=effective.get("collaboration_profiles") or [],
             **{k: effective[k] for k in user_manager.APP_KEY_SETTINGS if k in effective},
         )
     elif not effective.get("active", False):

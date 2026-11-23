@@ -5,6 +5,10 @@ control plane that accepts a table of tokens (controller, viewers, gamepad
 slots, mouse/keyboard owner). This module serves the room page, relays chat
 and control messages between participants over a WebSocket, and pushes token
 changes down to every container of the session.
+
+A room runs under the rules its session record keeps (`collaboration_profiles`):
+a feature a rule turns off is left out of the page and refused here, whatever
+a participant sends.
 """
 
 from __future__ import annotations
@@ -28,7 +32,7 @@ from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
-from . import app_icons, config_store, launch
+from . import app_icons, collaboration_profiles, config_store, launch
 from .providers.base_provider import host_port
 from .routers.applications import user_can_access
 from .security import OWN_ORIGIN_NEEDED, canonical_uuid, on_session_origin, relative, token_matches
@@ -44,6 +48,52 @@ ROOM_CONNECTIONS: dict[str, dict[str, Any]] = {}
 ROOM_ALIAS_KEYS: dict[str, bytes] = {}
 #: Control-plane URL that last accepted a token push, keyed by container IP.
 TOKEN_ENDPOINT_CACHE: dict[str, str] = {}
+#: The type byte of a room media packet (after the sender's public id), by what it carries.
+VIDEO_PACKETS = frozenset({0x01, 0x03})
+AUDIO_PACKETS = frozenset({0x02, 0x04})
+#: The actions each feature of a room's rules gates.
+GATED_ACTIONS = {
+    "send_chat_message": "chat",
+    "video_state": "webcams",
+    "audio_state": "microphones",
+    "set_designated_speaker": "microphones",
+    "get_apps": "app_switcher",
+    "stop_app": "app_switcher",
+    "restart_app": "app_switcher",
+    "swap_app": "app_switcher",
+    "assign_slot": "gamepads",
+    "release_slot": "gamepads",
+    "assign_mk": "input_handoff",
+}
+
+
+def _room_full(session_id: str, rules: dict[str, Any], token: str | None = None) -> bool:
+    """Whether the room has as many viewers connected as its rules allow, not counting `token`."""
+    limit = rules.get("max_viewers", -1)
+    if limit < 0:
+        return False
+    connected = (ROOM_CONNECTIONS.get(session_id) or {}).get("viewers", {})
+    return sum(1 for other in connected if other != token) >= limit
+
+
+async def _admit(session_id: str, session_data: dict[str, Any], viewer: dict[str, Any], admitted: bool) -> None:
+    """Give a viewer of a room with a limit of people the session's stream, or take it back."""
+    if viewer.get("admitted", True) == admitted:
+        return
+    viewer["admitted"] = admitted
+    state.sessions[session_id] = session_data
+    await config_store.save_sessions()
+    await broadcast_token_state(session_id, session_data)
+
+
+def _action_allowed(rules: dict[str, Any], action: Any) -> bool:
+    """Whether a room's rules let a participant's message `action` through."""
+    feature = GATED_ACTIONS.get(action)
+    if feature and not rules.get(feature, True):
+        return False
+    if action in ("client_resolution", "request_resolutions"):
+        return rules.get("resolution") != "controller"
+    return True
 
 
 def _alias(session_id: str, token: str) -> str:
@@ -158,10 +208,11 @@ async def collaborative_room(
     is_viewer_by_collab = any(
         token_matches(collab_token, v["token"]) for v in session_data.get("viewers", [])
     )
-    is_new_participant_by_collab = token_matches(
+    rules = collaboration_profiles.rules_of(session_data)
+    is_new_participant_by_collab = rules["participant_invites"] and token_matches(
         collab_token, session_data.get("participant_invite_token")
     )
-    is_new_readonly_by_collab = token_matches(
+    is_new_readonly_by_collab = rules["readonly_invites"] and token_matches(
         collab_token, session_data.get("readonly_invite_token")
     )
 
@@ -203,6 +254,8 @@ async def collaborative_room(
             user_token = viewer_data["token"]
             user_permission = viewer_data.get("permission", "participant")
     elif is_new_participant_by_collab or is_new_readonly_by_collab:
+        if _room_full(session_id_str, rules):
+            return HTMLResponse(content="<h1>This collaboration room is full.</h1>", status_code=403)
         permission = "participant" if is_new_participant_by_collab else "readonly"
         new_viewer_token = secrets.token_urlsafe(16)
         session_data.setdefault("viewers", []).append(
@@ -212,6 +265,7 @@ async def collaborative_room(
                 "mk_control": False,
                 "username": f"User-{random.randint(100, 999)}",
                 "permission": permission,
+                "admitted": rules["max_viewers"] < 0,
             }
         )
 
@@ -244,16 +298,17 @@ async def collaborative_room(
         "userRole": user_role,
         "userToken": user_token,
         "userPermission": user_permission,
+        "rules": rules,
     }
 
-    if user_role == "controller":
+    is_participant = user_role == "viewer" and user_permission == "participant"
+    if user_role == "controller" and rules["participant_invites"]:
         client_data["participantJoinUrl"] = _join_url(
             session_id_str, session_data["participant_invite_token"]
         )
-        client_data["readonlyJoinUrl"] = _join_url(
-            session_id_str, session_data["readonly_invite_token"]
-        )
-    elif user_role == "viewer" and user_permission == "participant":
+    if rules["readonly_invites"] and (
+        user_role == "controller" or (is_participant and rules["participants_share"])
+    ):
         client_data["readonlyJoinUrl"] = _join_url(
             session_id_str, session_data["readonly_invite_token"]
         )
@@ -445,6 +500,16 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
 
     await websocket.accept()
 
+    rules = collaboration_profiles.rules_of(session_data)
+    limited = is_viewer and rules["max_viewers"] >= 0
+    if limited:
+        full = _room_full(session_id_str, rules, token)
+        await _admit(session_id_str, session_data, viewer_data_ref, not full)
+        if full:
+            await websocket.send_json({"type": "room_full"})
+            await websocket.close(code=1008)
+            return
+
     if session_id_str not in ROOM_CONNECTIONS:
         ROOM_CONNECTIONS[session_id_str] = {"controller": None, "viewers": {}}
 
@@ -459,6 +524,8 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
         "token": token,
         "public_id": public_id,
         "has_joined": False,
+        "camera": False,
+        "mic": False,
     }
     if is_controller:
         previous = ROOM_CONNECTIONS[session_id_str].get("controller")
@@ -581,6 +648,13 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
 
                 data["sender_token"] = token
 
+                if not _action_allowed(rules, action):
+                    continue
+                # A read-only viewer sends no media and has no input, so reports and asks for neither.
+                readonly = is_viewer and viewer_data_ref.get("permission") == "readonly"
+                if readonly and action in ("video_state", "audio_state", "force_cursor_render"):
+                    continue
+
                 if action == "assign_slot" and is_controller:
                     viewer_token = data.get("viewer_token")
                     slot = data.get("slot")
@@ -649,8 +723,12 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
                     # Only the fields the room page reads go on, never whatever else the sender wrote.
                     # The cursor switch is 1 or 0 on Selkies' input channel; the other two are flags.
                     on = bool(data.get("state"))
+                    if action != "force_cursor_render":
+                        connection_info["camera" if action == "video_state" else "mic"] = on
                     relayed = {"action": action, "state": int(on) if action == "force_cursor_render" else on, "sender_token": token}
                     await broadcast_to_room(session_id_str, {"type": "control", "payload": relayed})
+                    if action != "force_cursor_render":
+                        await broadcast_state(session_id_str)
 
                 elif action == "get_apps" and is_controller:
                     await send_app_list()
@@ -710,8 +788,18 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
                     )
                     continue
 
+                # The first 8 bytes name the sender to the other pages, so they are the sender's own.
+                if binary_data[:8] != public_id.encode():
+                    continue
+
+                kind = binary_data[8] if len(binary_data) > 8 else None
+                if (kind in VIDEO_PACKETS and not rules["webcams"]) or (
+                    kind in AUDIO_PACKETS and not rules["microphones"]
+                ):
+                    continue
+
                 designated_speaker = session_data.get("designated_speaker")
-                is_audio_packet = (len(binary_data) > 8 and binary_data[8] == 0x02)
+                is_audio_packet = kind in AUDIO_PACKETS
                 if (
                     designated_speaker
                     and is_audio_packet
@@ -797,6 +885,11 @@ async def room_websocket(websocket: WebSocket, session_id: UUID) -> None:
                             },
                         )
 
+                if limited and disconnected_viewer and disconnected_viewer.get("admitted", True):
+                    disconnected_viewer["admitted"] = False
+                    state_changed = True
+                    input_released = True
+
                 if state_changed:
                     state.sessions[session_id_str] = session_data
                     await config_store.save_sessions()
@@ -851,6 +944,8 @@ async def broadcast_state(session_id: str) -> None:
         "publicId": connections["controller"]["public_id"]
         if connections.get("controller")
         else None,
+        "camera": bool(connections.get("controller") and connections["controller"].get("camera")),
+        "mic": bool(connections.get("controller") and connections["controller"].get("mic")),
     }
 
     online_viewer_tokens = set(connections.get("viewers", {}).keys())
@@ -860,10 +955,13 @@ async def broadcast_state(session_id: str) -> None:
         is_online = v["token"] in online_viewer_tokens
         viewer_info["has_mk"] = session_data.get("mk_owner_token") == v["token"]
         viewer_info["online"] = is_online
+        viewer_info["camera"] = viewer_info["mic"] = False
         if is_online:
             viewer_conn = connections["viewers"].get(v["token"])
             if viewer_conn:
                 viewer_info["publicId"] = viewer_conn.get("public_id")
+                viewer_info["camera"] = bool(viewer_conn.get("camera"))
+                viewer_info["mic"] = bool(viewer_conn.get("mic"))
         users_with_status.append(viewer_info)
 
     state_payload = {
@@ -967,6 +1065,9 @@ async def handle_assign_slot(session_id: str, viewer_token: str, slot: int | Non
         )
         return
     record, key, name, _ = target
+    if record.get("permission") == "readonly":
+        logger.warning(f"[{session_id}] Ignored a gamepad slot for a read-only viewer.")
+        return
     held = launch.held_slots(record.get(key))
 
     notices = []
@@ -1002,6 +1103,12 @@ async def handle_assign_mk(session_id: str, target_token: str | None) -> None:
 
     current_owner = session_data.get("mk_owner_token")
     if current_owner == target_token:
+        return
+    if target_token and not any(
+        v["token"] == target_token and v.get("permission", "participant") == "participant"
+        for v in session_data.get("viewers", [])
+    ):
+        logger.warning(f"[{session_id}] Ignored mouse and keyboard for a token that is no participant.")
         return
 
     session_data["mk_owner_token"] = target_token

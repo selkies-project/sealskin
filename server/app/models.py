@@ -6,7 +6,7 @@ import re
 import uuid
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class GPUInfo(BaseModel):
@@ -667,6 +667,7 @@ class UserSettings(BaseModel):
         pools: Restricted pools open to the user.
         pools_denied: Pools closed to the user.
         proot_catalog: Id of the PRoot Apps catalog the user's sessions install from, or `None`.
+        collaboration_profile: Id of the collaboration profile the user's rooms run under, or `None`.
         vpn: Sessions may leave through a VPN profile open to the user.
         application_keys: The user may make and use application keys for the companion apps.
         application_key_clients: The companion apps that may use them (see `APP_KEY_CLIENTS`).
@@ -703,6 +704,7 @@ class UserSettings(BaseModel):
     pools: list[str] = []
     pools_denied: list[str] = []
     proot_catalog: str | None = None
+    collaboration_profile: str | None = None
     vpn: bool = True
     application_keys: bool = True
     application_key_clients: list[str] = list(APP_KEY_CLIENTS)
@@ -724,6 +726,7 @@ class GroupSettings(BaseModel):
 
     Attributes:
         proot_catalog: Id of the PRoot Apps catalog the members' sessions install from.
+        collaboration_profile: Id of the collaboration profile the members' rooms run under.
         sso_groups: Identity provider groups whose members are in this group.
     """
 
@@ -748,6 +751,7 @@ class GroupSettings(BaseModel):
     pools: list[str] = []
     pools_denied: list[str] = []
     proot_catalog: str | None = None
+    collaboration_profile: str | None = None
     vpn: bool | None = None
     application_keys: bool | None = None
     application_key_clients: list[str] | None = None
@@ -1120,6 +1124,54 @@ class BrowserPolicy(BaseModel):
     firefox: dict[str, Any] = Field(default_factory=dict)
 
 
+class CollaborationProfile(BaseModel):
+    """A collaboration profile: the features of the rooms its users and groups start.
+
+    Attributes:
+        id: Generated identifier; what a user or group names the profile by.
+        name: Name shown in the dashboard.
+        chat: The room has its chat.
+        webcams: Participants may show their cameras.
+        microphones: Participants may speak.
+        app_switcher: The controller may start, stop, and switch the session's applications.
+        gamepads: The controller may hand gamepad slots to participants.
+        input_handoff: The controller may hand mouse and keyboard to a participant.
+        participant_invites: The controller may invite participants, who join with camera and microphone.
+        readonly_invites: Read-only viewers may be invited, who watch and listen.
+        participants_share: Participants may pass the read-only invite on.
+        resolution: `follow` sizes the stream to whoever holds mouse and keyboard; `controller`
+            keeps it at the controller's.
+        max_viewers: Most people in the room at once beside the controller; negative for no limit.
+    """
+
+    id: str = Field(..., pattern=r"^[A-Za-z0-9_-]{1,64}$")
+    name: str = Field(..., min_length=1, max_length=80)
+    chat: bool = True
+    webcams: bool = True
+    microphones: bool = True
+    app_switcher: bool = True
+    gamepads: bool = True
+    input_handoff: bool = True
+    participant_invites: bool = True
+    readonly_invites: bool = True
+    participants_share: bool = True
+    resolution: Literal["follow", "controller"] = "follow"
+    max_viewers: int = Field(default=-1, ge=-1, le=1000)
+
+    @model_validator(mode="after")
+    def _invitable(self) -> CollaborationProfile:
+        if not (self.participant_invites or self.readonly_invites):
+            raise ValueError("A collaboration profile keeps participant or read-only invites on.")
+        return self
+
+
+class CollaborationProfileName(BaseModel):
+    """What a user or group setting picks a collaboration profile by."""
+
+    id: str
+    name: str
+
+
 class BrowserPolicyName(BaseModel):
     """What an installed application picks a browser policy by."""
 
@@ -1221,6 +1273,7 @@ class ManagementDataResponse(BaseModel):
     proot_catalogs: list[ProotCatalogName] = []
     proot_remote: str = ""
     browser_policies: list[BrowserPolicyName] = []
+    collaboration_profiles: list[CollaborationProfileName] = []
 
 
 class CreateUserRequest(BaseModel):

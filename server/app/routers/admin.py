@@ -52,6 +52,7 @@ from ..models import (
     AppTemplate,
     AvailableApp,
     BrowserPolicyName,
+    CollaborationProfileName,
     CreateAdminRequest,
     CreateGroupRequest,
     CreateMetaAppRequest,
@@ -172,6 +173,10 @@ async def get_management_data() -> dict[str, Any]:
         "proot_remote": settings.proot_apps_remote,
         "browser_policies": sorted(
             (BrowserPolicyName(id=p.id, name=p.name) for p in state.browser_policies.values()),
+            key=lambda p: p.name.lower(),
+        ),
+        "collaboration_profiles": sorted(
+            (CollaborationProfileName(id=p.id, name=p.name) for p in state.collaboration_profiles.values()),
             key=lambda p: p.name.lower(),
         ),
     }
@@ -380,6 +385,16 @@ def _known_browser_policy(policy_id: Any) -> str | None:
     if policy_id not in state.browser_policies:
         raise HTTPException(status_code=400, detail="The browser policy named for this application does not exist.")
     return str(policy_id)
+
+
+def _require_collaboration_profile(profile_id: str | None) -> None:
+    """Refuse settings that name a collaboration profile no longer kept.
+
+    Raises:
+        HTTPException: 400 for a profile that does not exist.
+    """
+    if profile_id and profile_id not in state.collaboration_profiles:
+        raise HTTPException(status_code=400, detail="The collaboration profile named does not exist.")
 
 
 def _with_status(app: InstalledApp) -> InstalledAppWithStatus:
@@ -962,6 +977,7 @@ async def create_user(decrypted_body: dict[str, Any] = Depends(get_decrypted_req
     """Create a user; with key files off, a sign-in-only user, whatever key the request carries."""
     try:
         req = CreateUserRequest(**decrypted_body)
+        _require_collaboration_profile(req.settings.collaboration_profile)
         user, private_key = user_manager.create_user(
             req.username, req.public_key if settings.legacy_auth else "", req.settings.model_dump()
         )
@@ -979,6 +995,7 @@ async def update_user(
     """Replace a user's settings."""
     try:
         req = UpdateUserRequest(**decrypted_body)
+        _require_collaboration_profile(req.settings.collaboration_profile)
         user_manager.update_user_settings(username, req.settings.model_dump())
         return user_manager.get_user(username)
     except ValueError as exc:
@@ -1123,6 +1140,7 @@ async def create_group(decrypted_body: dict[str, Any] = Depends(get_decrypted_re
         raise HTTPException(status_code=422, detail=f"Invalid request body: {exc}") from exc
     if req.name in user_manager.GROUP_DATA:
         raise HTTPException(status_code=409, detail=f"Group '{req.name}' already exists.")
+    _require_collaboration_profile(req.settings.collaboration_profile)
     try:
         user_manager.write_group_file(req.name, req.settings.model_dump())
     except ValueError as exc:
@@ -1143,6 +1161,7 @@ async def update_group(
         raise HTTPException(status_code=409, detail=f"'{group_name}' is built in.")
     if group_name not in user_manager.GROUP_DATA:
         raise HTTPException(status_code=404, detail=f"Group '{group_name}' not found.")
+    _require_collaboration_profile(req.settings.collaboration_profile)
     user_manager.write_group_file(group_name, req.settings.model_dump())
     return user_manager.GROUP_DATA.get(group_name)
 

@@ -71,6 +71,10 @@
                     <i class="fas fa-shield-alt fa-fw"></i>
                     <span data-i18n="options.sidebar.vpn">VPN Profiles</span>
                 </button>
+                <button class="nav-link admin-nav-link" style="display:none;" data-tabname="CollaborationProfiles">
+                    <i class="fas fa-people-arrows fa-fw"></i>
+                    <span data-i18n="options.sidebar.collaboration">Collaboration</span>
+                </button>
                 <button class="nav-link admin-nav-link" style="display:none;" data-tabname="Users">
                     <i class="fas fa-users fa-fw"></i>
                     <span data-i18n="options.sidebar.users">Users</span>
@@ -855,6 +859,163 @@
                         </div>
                     </form>
                     <div id="proot-remote-grid" class="proot-grid"></div>
+                </div>
+            </div>
+
+            <div id="CollaborationProfiles" class="tab-content">
+                <div class="card" id="cp-list">
+                    <div class="card-header">
+                        <h3 data-i18n="options.collaboration.title">Collaboration Profiles</h3>
+                        <div class="button-group">
+                            <button id="cp-new" class="primary"><i class="fas fa-plus"></i> <span data-i18n="options.collaboration.newProfile">New Profile</span></button>
+                        </div>
+                    </div>
+                    <p class="description" data-i18n="options.collaboration.help"></p>
+                    <div class="table-container">
+                        <table id="cp-table">
+                            <thead><tr><th data-i18n="common.name">Name</th><th data-i18n="options.collaboration.turnedOff">Turned off</th><th data-i18n="options.collaboration.usedBy">Used by</th><th class="actions-cell" data-i18n="common.actions">Actions</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card" id="cp-editor" style="display: none;">
+                    <div class="card-header">
+                        <h3 id="cp-editor-title"></h3>
+                        <div class="button-group">
+                            <button type="button" id="cp-cancel" class="secondary" data-i18n="common.cancel">Cancel</button>
+                            <button type="button" id="cp-save" class="primary"><i class="fas fa-save"></i> <span data-i18n="common.save">Save</span></button>
+                        </div>
+                    </div>
+                    <div class="branding-layout">
+                        <form id="cp-form" class="branding-form" autocomplete="off">
+                            <div class="field-list single">
+                                <div class="field">
+                                    <div class="field-text"><label for="cp-name"><span data-i18n="common.name">Name</span> <em class="bk-required">*</em></label></div>
+                                    <div class="field-control"><input type="text" id="cp-name" maxlength="80" required></div>
+                                </div>
+                            </div>
+                            <h5 class="field-group" data-i18n="options.collaboration.talking">Talking</h5>
+                            <div class="field-list single">
+                                <div class="field switch">
+                                    <div class="field-text"><label for="cp-chat" data-i18n="options.collaboration.chat"></label><p class="description" data-i18n="options.collaboration.chatHelp"></p></div>
+                                    <div class="field-control"><input type="checkbox" id="cp-chat" data-rule="chat"></div>
+                                </div>
+                                <div class="field switch">
+                                    <div class="field-text"><label for="cp-webcams" data-i18n="options.collaboration.webcams"></label><p class="description" data-i18n="options.collaboration.webcamsHelp"></p></div>
+                                    <div class="field-control"><input type="checkbox" id="cp-webcams" data-rule="webcams"></div>
+                                </div>
+                                <div class="field switch">
+                                    <div class="field-text"><label for="cp-microphones" data-i18n="options.collaboration.microphones"></label><p class="description" data-i18n="options.collaboration.microphonesHelp"></p></div>
+                                    <div class="field-control"><input type="checkbox" id="cp-microphones" data-rule="microphones"></div>
+                                </div>
+                            </div>
+                            <h5 class="field-group" data-i18n="options.collaboration.control">Control</h5>
+                            <div class="field-list single">
+                                <div class="field switch">
+                                    <div class="field-text"><label for="cp-app_switcher" data-i18n="options.collaboration.appSwitcher"></label><p class="description" data-i18n="options.collaboration.appSwitcherHelp"></p></div>
+                                    <div class="field-control"><input type="checkbox" id="cp-app_switcher" data-rule="app_switcher"></div>
+                                </div>
+                                <div class="field switch">
+                                    <div class="field-text"><label for="cp-input_handoff" data-i18n="options.collaboration.inputHandoff"></label><p class="description" data-i18n="options.collaboration.inputHandoffHelp"></p></div>
+                                    <div class="field-control"><input type="checkbox" id="cp-input_handoff" data-rule="input_handoff"></div>
+                                </div>
+                                <div class="field switch">
+                                    <div class="field-text"><label for="cp-gamepads" data-i18n="options.collaboration.gamepads"></label><p class="description" data-i18n="options.collaboration.gamepadsHelp"></p></div>
+                                    <div class="field-control"><input type="checkbox" id="cp-gamepads" data-rule="gamepads"></div>
+                                </div>
+                                <div class="field">
+                                    <div class="field-text"><label for="cp-resolution" data-i18n="options.collaboration.resolution"></label><p class="description" data-i18n="options.collaboration.resolutionHelp"></p></div>
+                                    <div class="field-control"><select id="cp-resolution" data-rule="resolution">
+                                        <option value="follow" data-i18n="options.collaboration.resolutionFollow"></option>
+                                        <option value="controller" data-i18n="options.collaboration.resolutionController"></option>
+                                    </select></div>
+                                </div>
+                            </div>
+                            <h5 class="field-group" data-i18n="options.collaboration.invites">Invites</h5>
+                            <p class="description" data-i18n="options.collaboration.invitesHelp"></p>
+                            <div class="field-list single">
+                                <div class="field switch">
+                                    <div class="field-text"><label for="cp-participant_invites" data-i18n="options.collaboration.participantInvites"></label><p class="description" data-i18n="options.collaboration.participantInvitesHelp"></p></div>
+                                    <div class="field-control"><input type="checkbox" id="cp-participant_invites" data-rule="participant_invites"></div>
+                                </div>
+                                <div class="field switch">
+                                    <div class="field-text"><label for="cp-readonly_invites" data-i18n="options.collaboration.readonlyInvites"></label><p class="description" data-i18n="options.collaboration.readonlyInvitesHelp"></p></div>
+                                    <div class="field-control"><input type="checkbox" id="cp-readonly_invites" data-rule="readonly_invites"></div>
+                                </div>
+                                <div class="field switch">
+                                    <div class="field-text"><label for="cp-participants_share" data-i18n="options.collaboration.participantsShare"></label><p class="description" data-i18n="options.collaboration.participantsShareHelp"></p></div>
+                                    <div class="field-control"><input type="checkbox" id="cp-participants_share" data-rule="participants_share"></div>
+                                </div>
+                                <div class="field">
+                                    <div class="field-text"><label for="cp-max_viewers" data-i18n="options.collaboration.maxViewers"></label><p class="description" data-i18n="options.collaboration.maxViewersHelp"></p></div>
+                                    <div class="field-control"><input type="number" id="cp-max_viewers" data-rule="max_viewers" min="0" max="1000" step="1" data-i18n-placeholder="options.collaboration.noLimit"></div>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="branding-preview">
+                            <h5 class="field-group" data-i18n="options.collaboration.preview">Preview</h5>
+                            <div class="cp-views" id="cp-views" role="tablist">
+                                <button type="button" class="active" data-view="controller" data-i18n="options.collaboration.asController">Controller</button>
+                                <button type="button" data-view="participant" data-i18n="options.collaboration.asParticipant">Collaborator</button>
+                                <button type="button" data-view="readonly" data-i18n="options.collaboration.asViewer">Viewer</button>
+                            </div>
+                            <div class="preview-browser-window cp-window" id="cp-mock">
+                                <div class="preview-browser-header">
+                                    <span class="preview-browser-dots"></span>
+                                    <div class="preview-browser-address-bar" data-i18n="options.collaboration.previewAddress">Collaboration room</div>
+                                </div>
+                                <div class="cp-stream">
+                                    <i class="fas fa-desktop"></i>
+                                    <span class="cp-stream-note" data-show-when="controller-resolution" data-i18n="options.collaboration.previewFixed">Sized to the controller</span>
+                                </div>
+                                <div class="cp-bar">
+                                    <span class="cp-tile cp-narrow" data-needs="app_switcher" data-roles="controller"><i class="fas fa-th"></i></span>
+                                    <span class="cp-tile cp-narrow"><i class="fas fa-users"></i><b class="cp-count">3</b></span>
+                                    <span class="cp-column">
+                                        <i class="fas fa-volume-up"></i>
+                                        <i class="fas fa-crosshairs" data-needs="gamepads"></i>
+                                    </span>
+                                    <span class="cp-tile cp-pads" data-needs="gamepads" data-roles="controller">
+                                        <i class="fas fa-gamepad"></i><i class="fas fa-gamepad"></i><i class="fas fa-gamepad"></i><i class="fas fa-gamepad"></i>
+                                    </span>
+                                    <span class="cp-tile cp-person" data-roles="controller participant">
+                                        <span class="cp-avatar">Y</span>
+                                        <span class="cp-self">
+                                            <i class="fas fa-microphone" data-needs="microphones"></i>
+                                            <i class="fas fa-video" data-needs="webcams"></i>
+                                        </span>
+                                        <span class="cp-caption">
+                                            <span data-i18n="options.collaboration.previewYou">You</span>
+                                            <span class="cp-icons" data-roles="controller">
+                                                <i class="fas fa-lock-open" data-needs="follow"></i>
+                                                <i class="fas fa-desktop" data-needs="follow"></i>
+                                                <i class="fas fa-star" data-needs="microphones"></i>
+                                                <i class="fas fa-keyboard cp-held" data-needs="input_handoff"></i>
+                                            </span>
+                                        </span>
+                                    </span>
+                                    <span class="cp-tile cp-person">
+                                        <span class="cp-avatar">A</span>
+                                        <span class="cp-caption">
+                                            <span>Alex</span>
+                                            <span class="cp-icons">
+                                                <i class="fas fa-desktop" data-needs="follow" data-roles="controller"></i>
+                                                <i class="fas fa-star" data-needs="microphones" data-roles="controller"></i>
+                                                <i class="fas fa-microphone" data-needs="microphones"></i>
+                                                <i class="fas fa-video" data-needs="webcams"></i>
+                                            </span>
+                                        </span>
+                                    </span>
+                                    <span class="cp-tile cp-invite" id="cp-mock-invite">
+                                        <span class="cp-link" id="cp-mock-participant-link" data-i18n="options.collaboration.previewParticipantLink">Collaborator link</span>
+                                        <span class="cp-link" id="cp-mock-readonly-link" data-i18n="options.collaboration.previewViewerLink">Viewer link</span>
+                                    </span>
+                                    <span class="cp-chat" data-needs="chat"><i class="fas fa-comment"></i><span class="cp-line"></span><span class="cp-line short"></span></span>
+                                </div>
+                            </div>
+                            <p class="description" id="cp-mock-limit"></p>
+                        </div>
+                    </div>
                 </div>
             </div>
 

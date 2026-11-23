@@ -29,6 +29,7 @@ from . import (
     bakery,
     browser_policies,
     cluster,
+    collaboration_profiles,
     config_store,
     filesync,
     presence,
@@ -545,6 +546,9 @@ def collaboration_initial_tokens(session: dict[str, Any]) -> dict[str, Any]:
         }
     }
     for viewer in session.get("viewers", []):
+        # A viewer a room with a limit of people has not let in holds no token.
+        if viewer.get("admitted") is False:
+            continue
         tokens[viewer["token"]] = {
             "role": "viewer",
             "slot": slot_value(held_slots(viewer.get("slot"))),
@@ -916,7 +920,12 @@ async def launch_application(
     session_id = str(uuid.uuid4())
     access_token = secrets.token_urlsafe(32)
     master_token = controller_token = viewer_token = None
+    collaboration_rules = None
     if launch_in_room_mode:
+        try:
+            collaboration_rules = collaboration_profiles.rules_for(effective_settings)
+        except collaboration_profiles.ProfileError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
         master_token = secrets.token_urlsafe(32)
         controller_token = secrets.token_urlsafe(16)
         viewer_token = secrets.token_urlsafe(16)
@@ -1072,6 +1081,7 @@ async def launch_application(
                     "controller_token": controller_token,
                     "viewer_token": viewer_token,
                     "viewers": [],
+                    "collaboration_rules": collaboration_rules,
                 }
             )
         async with state.sessions_lock:

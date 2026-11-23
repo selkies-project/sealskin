@@ -20,6 +20,7 @@ import { qrSvg } from '../lib/qr.js';
 import { gpuLabel } from '../lib/gpus.js';
 import { openBakery, editBaked } from './bakery.js';
 import { openBrowserPolicies } from './browser-policies.js';
+import { openCollaborationProfiles } from './collaboration-profiles.js';
 import {
   announce, escapeHtml, formatBytes, formatDate, timeAgo, formatLogoSrc, hydrateLogos, showToast, tOr,
   addMobileSafeArea, addMobileBackButton, downloadBlob, currentLocale, apiUrl,
@@ -117,6 +118,7 @@ let adminData = {
   prootCatalogs: [],
   proot_catalogs: [],
   browser_policies: [],
+  collaboration_profiles: [],
   proot_remote: 'linuxserver/proot-apps',
   vpnProfiles: [],
 };
@@ -2714,6 +2716,7 @@ const USER_DEFAULTS = {
   session_limit: -1, storage_limit: -1, session_cpus: -1, session_memory_mb: -1, session_hours: -1,
   session_idle_minutes: -1,
   allowance_hours: -1, allowance_period: 'month', groups: [], pools: [], pools_denied: [], proot_catalog: null,
+  collaboration_profile: null,
   application_keys: true, application_key_clients: [...APP_KEY_CLIENTS], application_key_days: -1,
   application_key_dormant_hours: -1, application_key_follow_sign_in: false,
   dashboard_customize: true, dashboard_links: true, dashboard_feeds: true,
@@ -2758,6 +2761,9 @@ function buildSettingsForm(prefix, kind) {
   const catalog = row('proot_catalog', 'options.users.prootCatalog',
     `<select id="${id('proot_catalog')}"><option value="">${isGroup ? notSet : escapeHtml(t('options.users.prootCatalogNone'))}</option></select>`,
     { description: t('options.users.prootCatalogHelp') });
+  const profile = row('collaboration_profile', 'options.users.collaborationProfile',
+    `<select id="${id('collaboration_profile')}"><option value="">${isGroup ? notSet : escapeHtml(t('options.users.collaborationProfileNone'))}</option></select>`,
+    { description: t(isGroup ? 'options.groups.collaborationProfileHelp' : 'options.users.collaborationProfileHelp') });
   const switches = SETTING_SWITCHES.map(([name, label, restricting]) => (isGroup
     ? row(name, label, `<select id="${id(name)}">
                 <option value="" selected>${notSet}</option>
@@ -2783,7 +2789,7 @@ function buildSettingsForm(prefix, kind) {
     <h5 class="field-group">${escapeHtml(t(isGroup ? 'options.groups.overrideTitle' : 'options.users.settingsTitle'))}</h5>
     <p class="description">${escapeHtml(t(isGroup ? 'options.groups.overrideHelp' : 'options.users.limitsHelp'))}</p>
     ${groups}
-    <div class="field-list">${limits}${period}${lists}${catalog}</div>
+    <div class="field-list">${limits}${period}${lists}${catalog}${profile}</div>
     <h5 class="field-group">${escapeHtml(t(isGroup ? 'options.groups.permissionsTitle' : 'options.users.permissionsTitle'))}</h5>
     <div class="field-list">${switches}</div>
     <div class="field-list single">${clients}</div>`;
@@ -2812,6 +2818,7 @@ function readUserSettings(prefix) {
   settings.pools = splitList(field(prefix, 'pools').value);
   settings.pools_denied = splitList(field(prefix, 'pools_denied').value);
   settings.proot_catalog = field(prefix, 'proot_catalog').value || null;
+  settings.collaboration_profile = field(prefix, 'collaboration_profile').value || null;
   settings.application_key_clients = readClients(prefix);
   return settings;
 }
@@ -2827,6 +2834,7 @@ function fillUserSettings(prefix, stored) {
   field(prefix, 'pools').value = (settings.pools || []).join(', ');
   field(prefix, 'pools_denied').value = (settings.pools_denied || []).join(', ');
   field(prefix, 'proot_catalog').value = settings.proot_catalog || '';
+  field(prefix, 'collaboration_profile').value = settings.collaboration_profile || '';
   const provided = field(prefix, 'provider_groups');
   const named = settings.provider_groups || [];
   provided.textContent = t('options.users.providerGroups', { groups: named.join(', ') });
@@ -2847,6 +2855,7 @@ function readGroupSettings(prefix) {
   settings.allowance_period = field(prefix, 'allowance_period').value || null;
   SETTING_LISTS.forEach(([name]) => { settings[name] = splitList(field(prefix, name).value); });
   settings.proot_catalog = field(prefix, 'proot_catalog').value || null;
+  settings.collaboration_profile = field(prefix, 'collaboration_profile').value || null;
   settings.application_key_clients = field(prefix, 'application_key_clients').value ? readClients(prefix) : null;
   return settings;
 }
@@ -2857,6 +2866,7 @@ function fillGroupSettings(prefix, settings) {
   field(prefix, 'allowance_period').value = settings.allowance_period || '';
   SETTING_LISTS.forEach(([name]) => { field(prefix, name).value = (settings[name] || []).join(', '); });
   field(prefix, 'proot_catalog').value = settings.proot_catalog || '';
+  field(prefix, 'collaboration_profile').value = settings.collaboration_profile || '';
   const named = Array.isArray(settings.application_key_clients);
   field(prefix, 'application_key_clients').value = named ? 'set' : '';
   clientBoxesOf(prefix).forEach((box) => { box.disabled = !named; });
@@ -2900,19 +2910,28 @@ function calculateEffectiveSettings(user) {
     .sort();
   // A catalog is a choice: the user's own, else the first group's that makes one.
   effective.proot_catalog = base.proot_catalog || (members.find((g) => g.proot_catalog) || {}).proot_catalog || null;
+  // Profiles bind like switches: every group's that names one, else the user's own.
+  const profiles = members.map((g) => g.collaboration_profile).filter(Boolean);
+  effective.collaboration_profiles = profiles.length ? profiles : (base.collaboration_profile ? [base.collaboration_profile] : []);
   return effective;
 }
 
-function populateCatalogDropdowns() {
-  document.querySelectorAll('#newUser-proot_catalog, #editUser-proot_catalog, #newGroup-proot_catalog, #editGroup-proot_catalog').forEach((select) => {
+/** Refill the pickers of a named record on the user and group forms, keeping each one's choice. */
+function populateNamedDropdowns(setting, records) {
+  document.querySelectorAll(['newUser', 'editUser', 'newGroup', 'editGroup'].map((prefix) => `#${prefix}-${setting}`).join(', ')).forEach((select) => {
     const chosen = select.value;
     const first = select.options[0];
     select.innerHTML = '';
     select.add(first);
-    (adminData.proot_catalogs || []).forEach((catalog) => select.add(new Option(catalog.name, catalog.id)));
+    (records || []).forEach((record) => select.add(new Option(record.name, record.id)));
     select.value = chosen;
     if (select.value !== chosen) select.value = '';
   });
+}
+
+function populateCatalogDropdowns() {
+  populateNamedDropdowns('proot_catalog', adminData.proot_catalogs);
+  populateNamedDropdowns('collaboration_profile', adminData.collaboration_profiles);
 }
 
 function populateGroupDropdowns() {
@@ -4312,6 +4331,14 @@ async function openTab(tabName) {
     initializeAppLaboratoryTab();
   } else if (tabName === 'WebLaboratory') {
     await openWebLab();
+  } else if (tabName === 'CollaborationProfiles') {
+    await openCollaborationProfiles({
+      t,
+      setProfiles: (profiles) => {
+        adminData.collaboration_profiles = profiles;
+        populateCatalogDropdowns();
+      },
+    });
   } else if (tabName === 'BrowserPolicies') {
     await openBrowserPolicies({ t, locale: info.locale, setPolicies: (policies) => { adminData.browser_policies = policies; } });
   } else if (tabName === 'Bakery') {

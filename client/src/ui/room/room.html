@@ -14,8 +14,8 @@
 <body>
     <div id="disconnection-overlay" class="hidden">
         <div class="disconnection-message">
-            <h2 data-i18n="disconnect.title">Session Ended</h2>
-            <p data-i18n="disconnect.message">The session has been terminated by the host.</p>
+            <h2 id="disconnection-title" data-i18n="disconnect.title">Session Ended</h2>
+            <p id="disconnection-text" data-i18n="disconnect.message">The session has been terminated by the host.</p>
         </div>
     </div>
 
@@ -44,6 +44,14 @@
         <div id="sm-view-active" class="sm-view"><div id="sm-active-list"></div></div>
     </div>
 
+    <div id="people-panel" class="hidden" role="dialog" aria-labelledby="people-panel-title">
+        <div class="people-header">
+            <span id="people-panel-title" data-i18n="people.title"></span>
+            <span id="people-panel-count" class="people-count"></span>
+        </div>
+        <div id="people-list"></div>
+    </div>
+
     <div id="video-grid">
         <div id="video-strip">
             <div id="video-grid-content">
@@ -53,6 +61,10 @@
                         <span data-i18n="startMenu.appsButton"></span>
                     </div>
                 </div>
+                <button type="button" id="people-btn" class="video-container pinned" data-i18n-title="people.title">
+                    <i class="fas fa-users"></i>
+                    <span id="people-count" class="people-count">1</span>
+                </button>
                 <div id="stream-volume">
                     <input type="range" id="stream-volume-slider" min="0" max="1" step="0.01" value="1" data-i18n-title="tooltips.sessionVolume">
                     <div id="stream-buttons">
@@ -69,6 +81,7 @@
                 <div id="gamepad-source-box" class="video-container pinned"></div>
                 <div id="local-user-container" class="video-container pinned">
                     <video id="local-video" autoplay muted playsinline></video>
+                    <div class="tile-avatar"><span></span></div>
                     <div class="self-controls">
                         <button id="toggle-mic-btn" class="control-btn" data-i18n-title="tooltips.toggleLocalMic"><i class="fas fa-microphone"></i></button>
                         <button id="toggle-video-btn" class="control-btn" data-i18n-title="tooltips.toggleLocalWebcam"><i class="fas fa-video"></i></button>
