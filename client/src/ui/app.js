@@ -866,6 +866,7 @@ async function start() {
   // The translations load while the server is asked who is signed in, each a round trip of its own.
   const translated = loadTranslator(navigator.language).catch(() => t);
   await takeLaunchContext();
+  nextAddress();
   takeWakeRequest();
   const asked = takeSignIn().then(whoAmI).catch(() => null);
   t = await translated;
